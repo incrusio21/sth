@@ -1,0 +1,241 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 14:51:56.691429",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_kqlq",
+  "naming_series",
+  "tgl_trk",
+  "divisi",
+  "blok",
+  "amended_from",
+  "column_break_kkgv",
+  "kdr",
+  "jk",
+  "mdr",
+  "bbm",
+  "jmlh_bbm",
+  "detail_pekerjaan_section",
+  "kgt",
+  "uom",
+  "ket_dp",
+  "column_break_miyb",
+  "jml_rit",
+  "prestasi",
+  "kmhm_awal",
+  "kmhm_akhir",
+  "do",
+  "nk",
+  "jbtn",
+  "column_break_nplu",
+  "uph",
+  "premi",
+  "ket"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_kqlq",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transaksi Traksi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "fieldname": "column_break_kkgv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kdr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kdr.kategori_alat",
+   "fieldname": "jk",
+   "fieldtype": "Link",
+   "label": "Jenis Kendaraan",
+   "options": "Alat Berat Dan Kendaraan"
+  },
+  {
+   "fieldname": "bbm",
+   "fieldtype": "Select",
+   "label": "Jenis BBM",
+   "options": "\nSolar\nBensin",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jmlh_bbm",
+   "fieldtype": "Float",
+   "label": "Jumlah Penggunaan BBM",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "detail_pekerjaan_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Pekerjaan"
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_miyb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mdr",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "jml_rit",
+   "fieldtype": "Int",
+   "label": "Jumlah Rit"
+  },
+  {
+   "fieldname": "prestasi",
+   "fieldtype": "Int",
+   "label": "Prestasi"
+  },
+  {
+   "fetch_from": "kdr.kmhm_akhir",
+   "fieldname": "kmhm_awal",
+   "fieldtype": "Link",
+   "label": "KM/HM Awal",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kdr.kmhm_akhir",
+   "fieldname": "kmhm_akhir",
+   "fieldtype": "Int",
+   "label": "KM/HM Akhir",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "do",
+   "fieldtype": "Section Break",
+   "label": "Detail Operator"
+  },
+  {
+   "fieldname": "nk",
+   "fieldtype": "Link",
+   "label": "Nama Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "nk.designation",
+   "fieldname": "jbtn",
+   "fieldtype": "Link",
+   "label": "Jabatan",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "column_break_nplu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uph",
+   "fieldtype": "Currency",
+   "label": "Upah"
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "label": "Premi"
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "ket_dp",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 15:13:58.429212",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Transaksi Traksi",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

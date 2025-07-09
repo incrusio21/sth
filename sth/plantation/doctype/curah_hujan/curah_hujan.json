@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-06-23 15:43:35.527763",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_eunb",
+  "naming_series",
+  "tgl_trk",
+  "divisi",
+  "employee",
+  "designation",
+  "column_break_fnlg",
+  "pagi__mm_",
+  "sore__mm_",
+  "amended_from",
+  "is_rainy"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_eunb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Curah Hujan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Document No"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_fnlg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pagi__mm_",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Pagi ( mm )",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sore__mm_",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sore ( mm )",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nama Checker",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Read Only",
+   "label": "Jabatan"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_rainy",
+   "fieldtype": "Check",
+   "label": "Is it Raining ?"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 13:13:38.356772",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Curah Hujan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

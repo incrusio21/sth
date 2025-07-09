@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-08 13:02:38.111268",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tipe_bibit",
+  "column_break_jwdl"
+ ],
+ "fields": [
+  {
+   "fieldname": "tipe_bibit",
+   "fieldtype": "Data",
+   "label": "Tipe Bibit"
+  },
+  {
+   "fieldname": "column_break_jwdl",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-08 13:03:28.356648",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Tipe Bibit",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

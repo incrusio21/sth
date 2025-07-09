@@ -1,0 +1,150 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 11:32:40.649941",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_oqec",
+  "naming_series",
+  "tgl_trk",
+  "tgl_tnm",
+  "gdg",
+  "amended_from",
+  "prec",
+  "column_break_ykgo",
+  "divisi",
+  "blok",
+  "item_code",
+  "jb",
+  "batch",
+  "ssi",
+  "jml_tnm"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_oqec",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Data Penyemaian Bibit",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tgl_tnm",
+   "fieldtype": "Date",
+   "label": "Tanggal Tanam"
+  },
+  {
+   "fieldname": "gdg",
+   "fieldtype": "Link",
+   "label": "Gudang",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "prec",
+   "fieldtype": "Link",
+   "label": "No Doocument Purchase Receipt",
+   "options": "Purchase Receipt"
+  },
+  {
+   "fieldname": "column_break_ykgo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "jb",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jenis Bibit",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.batch_number_series",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Item"
+  },
+  {
+   "fieldname": "ssi",
+   "fieldtype": "Link",
+   "label": "Stock Saat Ini",
+   "options": "Stock Ledger Entry"
+  },
+  {
+   "fieldname": "jml_tnm",
+   "fieldtype": "Int",
+   "label": "Jumlah Tanam"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal Transakasi"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:07:13.554672",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Data Penyemaian Bibit",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

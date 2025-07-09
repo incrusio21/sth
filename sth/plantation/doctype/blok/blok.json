@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:blok",
+ "creation": "2025-06-24 10:58:20.394446",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_zd5t",
+  "blok",
+  "divisi",
+  "status_blok",
+  "cost_center",
+  "amended_from",
+  "column_break_yfnz",
+  "luas_areal",
+  "tahun_tanam",
+  "sph__satuan_pokok_per_hektare_",
+  "jumlah_pokok"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zd5t",
+   "fieldtype": "Section Break",
+   "label": "Data Blok"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Blok",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_yfnz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "luas_areal",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Luas Areal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tahun Tanam",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sph__satuan_pokok_per_hektare_",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SPH ( Stand Per Hectare )",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jumlah_pokok",
+   "fieldtype": "Data",
+   "label": "Jumlah Pokok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status_blok",
+   "fieldtype": "Select",
+   "label": "Status Blok",
+   "options": "\nAktif\nNonaktif",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Blok",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 09:33:45.483841",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Blok",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

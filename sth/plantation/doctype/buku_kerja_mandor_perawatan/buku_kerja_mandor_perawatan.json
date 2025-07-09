@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 14:08:50.503557",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_2wm0",
+  "naming_series",
+  "tgl_trk",
+  "amended_from",
+  "column_break_souy",
+  "blok",
+  "mdr",
+  "mdr1",
+  "krdvs",
+  "tabel_prestasi_section",
+  "table_kjhb",
+  "tabel_kegiatan_dan_absensi_pekerja_section",
+  "table_qibi",
+  "tabel_material_section",
+  "table_fzvt",
+  "tabel_penggunaan_alat_section",
+  "table_njra"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_2wm0",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "BKM Perawatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_souy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mdr",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mdr1",
+   "fieldtype": "Link",
+   "label": "Mandor 1",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "krdvs",
+   "fieldtype": "Link",
+   "label": "Kerani Divisi",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tabel_prestasi_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Prestasi"
+  },
+  {
+   "fieldname": "table_kjhb",
+   "fieldtype": "Table",
+   "options": "Detail BKM Tabel Prestasi Perawatan"
+  },
+  {
+   "fieldname": "tabel_kegiatan_dan_absensi_pekerja_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Kegiatan dan Absensi Pekerja"
+  },
+  {
+   "fieldname": "table_qibi",
+   "fieldtype": "Table",
+   "options": "Detail BKM Tabel Kegiatan dan Absensi Pekerja"
+  },
+  {
+   "fieldname": "tabel_material_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Material"
+  },
+  {
+   "fieldname": "table_fzvt",
+   "fieldtype": "Table",
+   "options": "Detail BKM Tabel Material"
+  },
+  {
+   "fieldname": "tabel_penggunaan_alat_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Penggunaan Alat"
+  },
+  {
+   "fieldname": "table_njra",
+   "fieldtype": "Table",
+   "options": "Detail BKM Tabel Penggunaan Alat"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:38:53.491353",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Buku Kerja Mandor Perawatan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

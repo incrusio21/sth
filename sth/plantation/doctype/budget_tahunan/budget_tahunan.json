@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-04 13:29:54.324644",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_x5zn",
+  "naming_series",
+  "periode_budget",
+  "company",
+  "amended_from",
+  "column_break_wums",
+  "tgl_trk",
+  "status_budget",
+  "keterangan",
+  "section_break_yxro",
+  "abk",
+  "alokasi_budget_material_tahunan"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_x5zn",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "periode_budget",
+   "fieldtype": "Link",
+   "label": "Periode",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wums",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_budget",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nAktif\nNon Aktif"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Long Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "section_break_yxro",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "abk",
+   "fieldtype": "Table",
+   "label": "Alokasi Budget Kegiatan Tahunan",
+   "options": "Detail Budget Kegiatan Tahunan",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "alokasi_budget_material_tahunan",
+   "fieldtype": "Table",
+   "label": "Alokasi Budget Material Tahunan",
+   "options": "Detail Budget Material Tahunan",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:05:47.567132",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budget Tahunan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

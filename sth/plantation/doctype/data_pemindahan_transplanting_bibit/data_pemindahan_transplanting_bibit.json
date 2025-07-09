@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 13:20:43.519398",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_zzrf",
+  "naming_series",
+  "tgl_trk",
+  "divisi",
+  "blok",
+  "ket",
+  "amended_from",
+  "column_break_onba",
+  "item_code",
+  "batch",
+  "stk_bibit",
+  "gdg_asl",
+  "gdg_tj",
+  "jmlh_bbt"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zzrf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Data Pemindahan Transplanting Bibit",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_onba",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.batch_number_series",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Item"
+  },
+  {
+   "fieldname": "stk_bibit",
+   "fieldtype": "Float",
+   "label": "Stok Bibit"
+  },
+  {
+   "fieldname": "gdg_asl",
+   "fieldtype": "Link",
+   "label": "Gudang Asal",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gdg_tj",
+   "fieldtype": "Link",
+   "label": "Gudang Tujuan",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "jmlh_bbt",
+   "fieldtype": "Float",
+   "label": "Jumlah yang dipindah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:05:37.026136",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Data Pemindahan Transplanting Bibit",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

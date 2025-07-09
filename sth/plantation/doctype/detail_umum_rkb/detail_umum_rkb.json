@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-07 15:25:23.715638",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kegiatan",
+  "jabatan",
+  "es_jmlh_hk",
+  "column_break_rnkj",
+  "es_uph_pr_hk",
+  "estimasi_premi__rp_",
+  "es_ttl_rp_bgt",
+  "bpkt",
+  "gtb"
+ ],
+ "fields": [
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rnkj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jabatan",
+   "fieldtype": "Link",
+   "label": "Jabatan",
+   "options": "Designation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "es_jmlh_hk",
+   "fieldtype": "Int",
+   "label": "Estimasi Jumlah Hari Kerja",
+   "options": "Designation",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.ump_kt",
+   "fieldname": "es_uph_pr_hk",
+   "fieldtype": "Currency",
+   "label": "Estimasi Upah Per HK"
+  },
+  {
+   "fieldname": "estimasi_premi__rp_",
+   "fieldtype": "Currency",
+   "label": "Estimasi Premi ( Rp )"
+  },
+  {
+   "bold": 1,
+   "fieldname": "es_ttl_rp_bgt",
+   "fieldtype": "Currency",
+   "label": "Estimasi Total Rupiah Budget",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "bpkt",
+   "fieldtype": "Currency",
+   "label": "Budget Pengajuan Kegiatan Tambahan",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "gtb",
+   "fieldtype": "Currency",
+   "label": "Grand Total Budget",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-08 10:29:50.999006",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Umum RKB",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

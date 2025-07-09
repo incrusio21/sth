@@ -1,0 +1,164 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-04 13:16:49.680103",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_yebq",
+  "kode_alat",
+  "nama_alat",
+  "satuan_alat",
+  "kmhm_akhir",
+  "jns_alt",
+  "kategori_alat",
+  "tipe_alat",
+  "kap_kg",
+  "amended_from",
+  "column_break_vypn",
+  "divisi",
+  "operator",
+  "basis_rpkg",
+  "basis_meter",
+  "coa_alat",
+  "coa_bbm"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_yebq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Alat Berat Dan Kendaraan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "kode_alat",
+   "fieldtype": "Data",
+   "label": "Kode Alat / Kendaraan"
+  },
+  {
+   "fieldname": "nama_alat",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Alat / Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "satuan_alat",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "kategori_alat",
+   "fieldtype": "Link",
+   "label": "Kategori Alat",
+   "options": "Kategori Alat"
+  },
+  {
+   "fieldname": "tipe_alat",
+   "fieldtype": "Link",
+   "label": "Tipe Alat",
+   "options": "Tipe Alat"
+  },
+  {
+   "fieldname": "column_break_vypn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "basis_rpkg",
+   "fieldtype": "Currency",
+   "label": "Basis Rp/Kg"
+  },
+  {
+   "fieldname": "basis_meter",
+   "fieldtype": "Currency",
+   "label": "Basis Rp/KM/HM"
+  },
+  {
+   "fieldname": "coa_alat",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COA Biaya Alat",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operator/Supir",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "coa_bbm",
+   "fieldtype": "Link",
+   "label": "COA BBM",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kap_kg",
+   "fieldtype": "Float",
+   "label": "Kap Kg",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kmhm_akhir",
+   "fieldtype": "Int",
+   "label": "KM/HM Akhir",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jns_alt",
+   "fieldtype": "Link",
+   "label": "Jenis Alat",
+   "options": "Jenis Alat",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 15:41:56.676108",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Alat Berat Dan Kendaraan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

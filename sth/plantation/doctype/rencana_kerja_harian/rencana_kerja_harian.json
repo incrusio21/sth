@@ -1,0 +1,248 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-06-30 10:33:14.406832",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_df5v",
+  "naming_series",
+  "rkb_id",
+  "tgl_trk",
+  "divisi",
+  "blok",
+  "column_break_exgg",
+  "mndr_pnn",
+  "mandor_1",
+  "kerani_divisi",
+  "is_it_kontanan",
+  "data_blok_section",
+  "luas",
+  "sph",
+  "amended_from",
+  "column_break_suha",
+  "thn_tnm",
+  "jp",
+  "rts",
+  "data_kegiatan_section",
+  "kegiatan",
+  "estimasi_volume",
+  "column_break_cjta",
+  "estimasi_jumlah_hari_kerja",
+  "es_kbthn_tk",
+  "tabel_estimasi_alat_berat_dan_kendaraan_section",
+  "table_jyli",
+  "tabel_estimasi_material_section",
+  "table_rczd"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_df5v",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Harian",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_exgg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mndr_pnn",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mandor_1",
+   "fieldtype": "Link",
+   "label": "Mandor 1",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kerani_divisi",
+   "fieldtype": "Link",
+   "label": "Kerani Divisi",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "data_blok_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Data Blok"
+  },
+  {
+   "fetch_from": "blok.luas_areal",
+   "fieldname": "luas",
+   "fieldtype": "Link",
+   "label": "Luas Blok",
+   "options": "Blok"
+  },
+  {
+   "fetch_from": "blok.sph__satuan_pokok_per_hektare_",
+   "fieldname": "sph",
+   "fieldtype": "Link",
+   "label": "SPH",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "column_break_suha",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "blok.tahun_tanam",
+   "fieldname": "thn_tnm",
+   "fieldtype": "Link",
+   "label": "Tahun Tanam",
+   "options": "Blok"
+  },
+  {
+   "fetch_from": "blok.jumlah_pokok",
+   "fieldname": "jp",
+   "fieldtype": "Link",
+   "label": "Jumlah Pokok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "rts",
+   "fieldtype": "Float",
+   "label": "Rotasi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rkb_id",
+   "fieldtype": "Link",
+   "label": "ID RKB",
+   "options": "Rencana Kerja Bulanan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_it_kontanan",
+   "fieldtype": "Check",
+   "label": "Is It Kontanan"
+  },
+  {
+   "fieldname": "data_kegiatan_section",
+   "fieldtype": "Section Break",
+   "label": "Data Kegiatan"
+  },
+  {
+   "fieldname": "estimasi_volume",
+   "fieldtype": "Float",
+   "label": "Estimasi Volume"
+  },
+  {
+   "fieldname": "column_break_cjta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "estimasi_jumlah_hari_kerja",
+   "fieldtype": "Int",
+   "label": "Estimasi Jumlah Hari Kerja"
+  },
+  {
+   "bold": 1,
+   "fieldname": "es_kbthn_tk",
+   "fieldtype": "Int",
+   "label": "Jumlah Estimasi Kebutuhan Tenaga Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tabel_estimasi_alat_berat_dan_kendaraan_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Estimasi Alat Berat dan Kendaraan"
+  },
+  {
+   "fieldname": "tabel_estimasi_material_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Estimasi Material"
+  },
+  {
+   "fieldname": "table_jyli",
+   "fieldtype": "Table",
+   "options": "Detail Estimasi Alat Berat dan Kendaraan RKH"
+  },
+  {
+   "fieldname": "table_rczd",
+   "fieldtype": "Table",
+   "options": "Detail Estimasi Material RKH"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Kode Transaksi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:05:58.006356",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rencana Kerja Harian",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

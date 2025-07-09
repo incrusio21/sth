@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-07 15:24:21.615642",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kegiatan",
+  "item_group",
+  "column_break_rnkj",
+  "qty_mat_rkt",
+  "es_ttl_rp_bgt_mat",
+  "bpkt",
+  "grand_total_budget"
+ ],
+ "fields": [
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rnkj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Grup item",
+   "options": "Item Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty_mat_rkt",
+   "fieldtype": "Int",
+   "label": "Qty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "es_ttl_rp_bgt_mat",
+   "fieldtype": "Currency",
+   "label": "Estimasi Total Rupiah Budget"
+  },
+  {
+   "fieldname": "bpkt",
+   "fieldtype": "Currency",
+   "label": "Budget Pengajuan Kegiatan Tambahan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_budget",
+   "fieldtype": "Currency",
+   "label": "Grand Total Budget",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-08 10:26:52.021957",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Material Perawatan RKB",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

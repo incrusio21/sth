@@ -1,0 +1,217 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-07 15:25:06.809076",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kegiatan",
+  "rts",
+  "akp",
+  "es_bjr",
+  "column_break_rnkj",
+  "es_jjg",
+  "flt",
+  "es_brlnd",
+  "out_pnn",
+  "estimasi_biaya_pemanen_section",
+  "jkt",
+  "jktt",
+  "ttl_jk",
+  "column_break_njpt",
+  "ttl_uph",
+  "es_premi",
+  "estimasi_biaya_supervisi_section",
+  "uph_mndr_pnn",
+  "uph_mndr_1",
+  "uph_kerani",
+  "premi_spv",
+  "column_break_wmgh",
+  "section_break_xtev",
+  "ttl_uph_spv",
+  "total_biaya_upah_supervisi",
+  "ttl_prm_spv",
+  "column_break_diqr",
+  "ttl_es_pmnn",
+  "ttl_bgt_pnn",
+  "bpkt",
+  "gtb"
+ ],
+ "fields": [
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rnkj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rts",
+   "fieldtype": "Data",
+   "label": "Rotasi"
+  },
+  {
+   "fieldname": "akp",
+   "fieldtype": "Percent",
+   "label": "Jumlah AKP ( % )"
+  },
+  {
+   "fieldname": "es_bjr",
+   "fieldtype": "Float",
+   "label": "Estimasi BJR"
+  },
+  {
+   "fieldname": "es_jjg",
+   "fieldtype": "Int",
+   "label": "Estimasi Janjang"
+  },
+  {
+   "fieldname": "flt",
+   "fieldtype": "Float",
+   "label": "Estimasi Tonase ( Kg )"
+  },
+  {
+   "fieldname": "es_brlnd",
+   "fieldtype": "Percent",
+   "label": "Estimasi Persentase Brondolan"
+  },
+  {
+   "fieldname": "out_pnn",
+   "fieldtype": "Percent",
+   "label": "Ouput Panen"
+  },
+  {
+   "fieldname": "estimasi_biaya_pemanen_section",
+   "fieldtype": "Section Break",
+   "label": "Estimasi Biaya Pemanen"
+  },
+  {
+   "fieldname": "jkt",
+   "fieldtype": "Int",
+   "label": "Jumlah Karyawan Tetap"
+  },
+  {
+   "fieldname": "jktt",
+   "fieldtype": "Int",
+   "label": "Jumlah Karyawan Tidak Tetap"
+  },
+  {
+   "fieldname": "ttl_jk",
+   "fieldtype": "Int",
+   "label": "Total Jumlah Karyawan"
+  },
+  {
+   "fieldname": "column_break_njpt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ttl_uph",
+   "fieldtype": "Currency",
+   "label": "Total Upah / Kg"
+  },
+  {
+   "fieldname": "es_premi",
+   "fieldtype": "Currency",
+   "label": "Premi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "estimasi_biaya_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Estimasi Biaya Supervisi"
+  },
+  {
+   "fieldname": "uph_mndr_pnn",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor Panen"
+  },
+  {
+   "fieldname": "uph_mndr_1",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor 1"
+  },
+  {
+   "fieldname": "uph_kerani",
+   "fieldtype": "Currency",
+   "label": "Upah Kerani Panen"
+  },
+  {
+   "fieldname": "premi_spv",
+   "fieldtype": "Currency",
+   "label": "Premi"
+  },
+  {
+   "fieldname": "column_break_wmgh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xtev",
+   "fieldtype": "Section Break",
+   "label": "Grand Total Upah Panen"
+  },
+  {
+   "fieldname": "ttl_uph_spv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_biaya_upah_supervisi",
+   "fieldtype": "Currency",
+   "label": "Total biaya Upah Supervisi"
+  },
+  {
+   "fieldname": "ttl_prm_spv",
+   "fieldtype": "Currency",
+   "label": "Total biaya Premi Supervisi"
+  },
+  {
+   "fieldname": "column_break_diqr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ttl_es_pmnn",
+   "fieldtype": "Currency",
+   "label": "Total Estimasi Biaya Pemanen",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "ttl_bgt_pnn",
+   "fieldtype": "Currency",
+   "label": "Total Rupiah Budget Panen RKT"
+  },
+  {
+   "bold": 1,
+   "fieldname": "bpkt",
+   "fieldtype": "Currency",
+   "label": "Budget Pengajuan Kegiatan Tambahan",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "gtb",
+   "fieldtype": "Currency",
+   "label": "Grand Total Budget",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-08 10:28:34.478785",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Panen RKB",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

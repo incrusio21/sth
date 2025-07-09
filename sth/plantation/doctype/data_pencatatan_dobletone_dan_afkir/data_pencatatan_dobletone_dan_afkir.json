@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 11:47:37.973174",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "doubletone_tab",
+  "section_break_c2zr",
+  "naming_series",
+  "tanggal_transaksi",
+  "tp_bbt",
+  "gdg",
+  "amended_from",
+  "keterangan",
+  "column_break_nxva",
+  "divisi",
+  "blok",
+  "item_code",
+  "batch",
+  "jmlh_bbt",
+  "tab_2_tab"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_c2zr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Data Pencatatan Dobletone Dan Afkir",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Afkir"
+  },
+  {
+   "fieldname": "doubletone_tab",
+   "fieldtype": "Tab Break",
+   "label": "Doubletone"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_transaksi",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "fieldname": "column_break_nxva",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.batch_number_series",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Item"
+  },
+  {
+   "fieldname": "tp_bbt",
+   "fieldtype": "Link",
+   "label": "Tipe Bibit",
+   "options": "Tipe Bibit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gdg",
+   "fieldtype": "Link",
+   "label": "Gudang",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "jmlh_bbt",
+   "fieldtype": "Float",
+   "label": "Jumlah Bibit"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:07:23.845189",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Data Pencatatan Dobletone Dan Afkir",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

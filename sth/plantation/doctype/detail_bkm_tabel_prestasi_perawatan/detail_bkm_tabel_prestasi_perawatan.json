@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-08 14:15:26.289059",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kgt",
+  "thk",
+  "uom",
+  "column_break_wtse",
+  "uph_hk",
+  "premi",
+  "ttl_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "thk",
+   "fieldtype": "Float",
+   "label": "Total Hasil Kerja",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_wtse",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ttl_by",
+   "fieldtype": "Currency",
+   "label": "Total Biaya"
+  },
+  {
+   "fieldname": "uph_hk",
+   "fieldtype": "Currency",
+   "label": "Upah HK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "label": "Premi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-08 14:22:59.309205",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail BKM Tabel Prestasi Perawatan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

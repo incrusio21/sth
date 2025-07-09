@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 14:51:06.768715",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rf7u",
+  "naming_series",
+  "tgl_trk",
+  "opr_spr",
+  "ket",
+  "amended_from",
+  "column_break_spta",
+  "blok",
+  "kgt",
+  "kd_kndr",
+  "estimasi_rit",
+  "es_vlm",
+  "estimasi_kmhm"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_rf7u",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Harian Traksi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal"
+  },
+  {
+   "fetch_from": "kd_kndr.operator",
+   "fieldname": "opr_spr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operator / Supir",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "column_break_spta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kd_kndr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Kendaran",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "estimasi_rit",
+   "fieldtype": "Int",
+   "label": "Estimasi Rit"
+  },
+  {
+   "fieldname": "es_vlm",
+   "fieldtype": "Int",
+   "label": "Estimasi Volume"
+  },
+  {
+   "fieldname": "estimasi_kmhm",
+   "fieldtype": "Int",
+   "label": "Estimasi KM/HM"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-08 15:22:22.329719",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rencana Kerja Harian Traksi",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

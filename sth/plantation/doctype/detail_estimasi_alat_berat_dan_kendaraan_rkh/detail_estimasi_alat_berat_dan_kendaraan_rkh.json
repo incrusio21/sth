@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-08 09:06:04.826689",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kd_alat",
+  "uom",
+  "column_break_tvao",
+  "vlm",
+  "rp",
+  "ttl_rp"
+ ],
+ "fields": [
+  {
+   "fieldname": "kd_alat",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Alat / Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kd_alat.satuan_alat",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Satuan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_tvao",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vlm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rp",
+   "fieldtype": "Currency",
+   "label": "Rp/Satuan"
+  },
+  {
+   "fieldname": "ttl_rp",
+   "fieldtype": "Currency",
+   "label": "Total Rp"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-08 09:08:42.987475",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Estimasi Alat Berat dan Kendaraan RKH",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
