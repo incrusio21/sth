@@ -77,7 +77,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan",
+   "options": "Kegiatan Before",
    "reqd": 1
   },
   {
@@ -108,7 +108,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 15:22:22.329719",
+ "modified": "2025-07-11 13:57:43.314751",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian Traksi",

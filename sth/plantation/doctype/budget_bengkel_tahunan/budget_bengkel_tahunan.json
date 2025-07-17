@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-17 10:08:17.340065",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_fbzl",
+  "thn_bgt",
+  "unit",
+  "stt",
+  "column_break_lcoo",
+  "kd_bkl",
+  "jm_thn",
+  "amended_from",
+  "biaya_mekanik_section",
+  "table_pdrm",
+  "matrerial_section",
+  "table_mwcl",
+  "biaya_lain_section",
+  "table_hxay",
+  "section_break_gtpa",
+  "column_break_ybqu",
+  "column_break_ckyy",
+  "grn_ttl",
+  "rp_kmhm",
+  "pmbg"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_fbzl",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Bengkel Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "thn_bgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tahun Budget",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_lcoo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kd_bkl",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kode Bengkel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jm_thn",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Jam Per Tahun",
+   "reqd": 1
+  },
+  {
+   "fieldname": "biaya_mekanik_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Mekanik"
+  },
+  {
+   "fieldname": "table_pdrm",
+   "fieldtype": "Table",
+   "options": "Detail Upah Operator Driver Mekanik"
+  },
+  {
+   "fieldname": "matrerial_section",
+   "fieldtype": "Section Break",
+   "label": "Matrerial"
+  },
+  {
+   "fieldname": "table_mwcl",
+   "fieldtype": "Table",
+   "options": "Detail Budget Item Tahunan"
+  },
+  {
+   "fieldname": "biaya_lain_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Lain"
+  },
+  {
+   "fieldname": "table_hxay",
+   "fieldtype": "Table",
+   "options": "Detail Budget Item Tahunan"
+  },
+  {
+   "fieldname": "section_break_gtpa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ybqu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ckyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grn_ttl",
+   "fieldtype": "Currency",
+   "label": "Grandtotal"
+  },
+  {
+   "fieldname": "rp_kmhm",
+   "fieldtype": "Currency",
+   "label": "Rp per KM/HM"
+  },
+  {
+   "fieldname": "pmbg",
+   "fieldtype": "Data",
+   "label": "Pembagian Budget Ke Kategori"
+  },
+  {
+   "fieldname": "stt",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Aktif\nNonaktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-17 11:13:25.045933",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budget Bengkel Tahunan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

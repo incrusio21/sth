@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-16 14:07:06.882849",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "fiscal_year",
+  "unit",
+  "kgt",
+  "column_break_asmq",
+  "coa_kgt",
+  "volume_pekerjaan",
+  "satuan",
+  "rotasi",
+  "agr_thn",
+  "table_dosx",
+  "bgt_mat",
+  "table_mqgi",
+  "budget_peralatan_section",
+  "table_rhcm",
+  "agr_tng_thn",
+  "table_brbm",
+  "bgt_kndr",
+  "table_gbyt",
+  "budget_upah_supervisi_section",
+  "table_mlsz"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_asmq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kgt.account",
+   "fieldname": "coa_kgt",
+   "fieldtype": "Data",
+   "label": "Coa Kegiatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "volume_pekerjaan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Volume Pekerjaan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "satuan",
+   "fieldtype": "Data",
+   "label": "Satuan"
+  },
+  {
+   "fieldname": "rotasi",
+   "fieldtype": "Int",
+   "label": "Rotasi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agr_thn",
+   "fieldtype": "Section Break",
+   "label": "Anggaran upah premi2 dll"
+  },
+  {
+   "fieldname": "table_dosx",
+   "fieldtype": "Table",
+   "options": "Detail Anggaran Tahunan"
+  },
+  {
+   "fieldname": "bgt_mat",
+   "fieldtype": "Section Break",
+   "label": "Budget Material"
+  },
+  {
+   "fieldname": "table_mqgi",
+   "fieldtype": "Table",
+   "options": "Detail Anggaran Tahunan"
+  },
+  {
+   "fieldname": "budget_peralatan_section",
+   "fieldtype": "Section Break",
+   "label": "Budget Peralatan"
+  },
+  {
+   "fieldname": "table_rhcm",
+   "fieldtype": "Table",
+   "options": "Detail Anggaran Tahunan"
+  },
+  {
+   "fieldname": "agr_tng_thn",
+   "fieldtype": "Section Break",
+   "label": "Anggaran Tenaga/Pekerjaan Kontrak"
+  },
+  {
+   "fieldname": "table_brbm",
+   "fieldtype": "Table",
+   "options": "Detail Anggaran Tahunan"
+  },
+  {
+   "fieldname": "bgt_kndr",
+   "fieldtype": "Section Break",
+   "label": "Budget Kendaraan"
+  },
+  {
+   "fieldname": "table_gbyt",
+   "fieldtype": "Table",
+   "options": "Detail Anggaran Tahunan Kendaraan"
+  },
+  {
+   "fieldname": "budget_upah_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Budget Upah Supervisi"
+  },
+  {
+   "fieldname": "table_mlsz",
+   "fieldtype": "Table",
+   "options": "Detail Anggaran Tahunan Supervisi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-16 14:47:15.895262",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budget Perawatan Tahunan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-17 09:08:18.344448",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tahun_budget",
+  "kd_kndr",
+  "column_break_kcwf",
+  "total_estimasi_kmhm",
+  "jml_jam",
+  "budget_upah_operatorsupir_section",
+  "table_ohke",
+  "budget_sparepart_section",
+  "table_bmry",
+  "budget_bengkel_section",
+  "table_dcui",
+  "budget_biaya_lain_section",
+  "table_oavr",
+  "section_break_kzyz",
+  "column_break_roda",
+  "column_break_kuyl",
+  "gr_ttl",
+  "rp_kmhm",
+  "pmbg"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Kode Transkasi"
+  },
+  {
+   "fieldname": "kd_kndr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_estimasi_kmhm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Estimasi KM/HM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_jam",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Jumlah Jam Setahun",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_kcwf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tahun_budget",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tahun Budget",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "budget_upah_operatorsupir_section",
+   "fieldtype": "Section Break",
+   "label": "Budget Upah Operator/Supir"
+  },
+  {
+   "fieldname": "table_ohke",
+   "fieldtype": "Table",
+   "options": "Detail Upah Operator Driver Mekanik"
+  },
+  {
+   "fieldname": "budget_sparepart_section",
+   "fieldtype": "Section Break",
+   "label": "Budget Sparepart"
+  },
+  {
+   "fieldname": "table_bmry",
+   "fieldtype": "Table",
+   "options": "Detail Budget Item Tahunan"
+  },
+  {
+   "fieldname": "budget_bengkel_section",
+   "fieldtype": "Section Break",
+   "label": "Budget Bengkel"
+  },
+  {
+   "fieldname": "table_dcui",
+   "fieldtype": "Table",
+   "options": "Detail Budget Bengkel Tahunan"
+  },
+  {
+   "fieldname": "budget_biaya_lain_section",
+   "fieldtype": "Section Break",
+   "label": "Budget Biaya Lain"
+  },
+  {
+   "fieldname": "table_oavr",
+   "fieldtype": "Table",
+   "options": "Detail Budget Item Tahunan"
+  },
+  {
+   "fieldname": "section_break_kzyz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_roda",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_kuyl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gr_ttl",
+   "fieldtype": "Currency",
+   "label": "Grand Total Biaya"
+  },
+  {
+   "fieldname": "rp_kmhm",
+   "fieldtype": "Currency",
+   "label": "Rp KM/HM"
+  },
+  {
+   "fieldname": "pmbg",
+   "fieldtype": "Data",
+   "label": "Pembagian Budget Ke Kategori",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-17 10:18:01.164693",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budget Kendaraan Tahunan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

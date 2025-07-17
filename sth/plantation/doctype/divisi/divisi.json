@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "autoname": "field:divisi",
  "creation": "2025-06-23 14:48:34.625031",
  "doctype": "DocType",
@@ -64,7 +65,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 09:33:11.042480",
+ "modified": "2025-07-14 13:00:54.882948",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Divisi",
@@ -88,5 +89,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

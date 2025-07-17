@@ -19,7 +19,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan",
+   "options": "Kegiatan Before",
    "reqd": 1
   },
   {
@@ -53,7 +53,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-08 15:59:00.036602",
+ "modified": "2025-07-11 13:57:43.761500",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Perawatan RKT",

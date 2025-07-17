@@ -1,7 +1,7 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Budget Tahunan", {
+// frappe.ui.form.on("Tipe Detail Kegiatan", {
 // 	refresh(frm) {
 
 // 	},

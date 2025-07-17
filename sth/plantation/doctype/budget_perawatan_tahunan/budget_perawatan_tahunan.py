@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class BudgetTahunan(Document):
+class BudgetPerawatanTahunan(Document):
 	pass

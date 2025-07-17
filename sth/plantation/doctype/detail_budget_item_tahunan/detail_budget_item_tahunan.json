@@ -3,13 +3,15 @@
  "allow_rename": 1,
  "creation": "2025-07-04 16:52:32.951182",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item_group",
-  "total_budget_thn",
+  "header_section",
+  "item_code",
+  "qty",
+  "uom",
   "column_break_yvxf",
-  "keterangan",
+  "hrg",
+  "total_budget_thn",
   "section_break_nmsn",
   "per_jan",
   "per_feb",
@@ -35,7 +37,8 @@
   "rup_sep",
   "rup_okt",
   "rup_nov",
-  "rup_des"
+  "rup_des",
+  "amended_from"
  ],
  "fields": [
   {
@@ -182,11 +185,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "keterangan",
-   "fieldtype": "Small Text",
-   "label": "Keterangan"
-  },
-  {
    "fieldname": "section_break_nmsn",
    "fieldtype": "Section Break",
    "label": "Allokasi Persentase Budget"
@@ -196,22 +194,55 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "item_group",
+   "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kode Grup Material",
-   "options": "Item Group",
+   "label": "Kode Item",
+   "options": "Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "label": "Qty"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Satuan"
+  },
+  {
+   "fetch_from": "item_code.valuation_rate",
+   "fieldname": "hrg",
+   "fieldtype": "Currency",
+   "label": "Harga",
+   "reqd": 1
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Detail Budget Item Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-07 11:18:44.135016",
+ "modified": "2025-07-17 10:58:57.150560",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Detail Budget Material Tahunan",
+ "name": "Detail Budget Item Tahunan",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

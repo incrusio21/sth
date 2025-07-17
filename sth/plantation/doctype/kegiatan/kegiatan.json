@@ -1,28 +1,33 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-06-25 14:38:20.861698",
+ "creation": "2025-07-11 13:58:44.981208",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_adqe",
   "kode_kegiatan",
   "nama_kegiatan",
-  "kategori_kegiatan",
   "uom",
-  "amended_from",
+  "kategori_kegiatan",
+  "tipe_kegiatan",
+  "jns_kgt_trk",
   "column_break_exsm",
   "company",
   "kode_perusahaan",
-  "tipe_kegiatan",
-  "account",
   "divisi",
+  "account",
   "column_break_lrzd",
   "v_basis",
   "rp_basis",
   "p_manual",
+  "is_group",
+  "parent_kegiatan",
   "setting_denda_panen_section",
-  "set_denda_panen"
+  "lft",
+  "rgt",
+  "old_parent",
+  "amended_from"
  ],
  "fields": [
   {
@@ -30,20 +35,16 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Master Kegiatan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "kode_kegiatan",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Kode Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nama_kegiatan",
+   "fieldtype": "Data",
+   "label": "Nama Kegiatan",
    "reqd": 1
   },
   {
@@ -63,6 +64,16 @@
    "reqd": 1
   },
   {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Kegiatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "column_break_exsm",
    "fieldtype": "Column Break"
   },
@@ -77,34 +88,9 @@
   {
    "fetch_from": "company.abbr",
    "fieldname": "kode_perusahaan",
-   "fieldtype": "Read Only",
-   "label": "Kode Perusahaan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "label": "COA",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "nama_kegiatan",
    "fieldtype": "Data",
-   "label": "Nama Kegiatan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "setting_denda_panen_section",
-   "fieldtype": "Section Break",
-   "label": "Setting Denda Panen"
-  },
-  {
-   "fieldname": "set_denda_panen",
-   "fieldtype": "Table",
-   "label": "List Denda",
-   "options": "Denda Panen",
-   "reqd": 1
+   "label": "Kode Perusahaan",
+   "read_only": 1
   },
   {
    "fieldname": "tipe_kegiatan",
@@ -112,6 +98,13 @@
    "in_list_view": 1,
    "label": "Tipe Kegiatan",
    "options": "Tipe Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "COA",
+   "options": "Account",
    "reqd": 1
   },
   {
@@ -128,30 +121,87 @@
   {
    "fieldname": "v_basis",
    "fieldtype": "Data",
-   "label": "Volume Basis ",
-   "reqd": 1
+   "label": "Volume Basis "
   },
   {
    "fieldname": "rp_basis",
    "fieldtype": "Data",
-   "label": "Rupiah/Satuan Basis",
-   "reqd": 1
+   "label": "Rupiah/Satuan Basis"
   },
   {
    "default": "0",
    "fieldname": "p_manual",
    "fieldtype": "Check",
    "label": "Panen Manual ?"
+  },
+  {
+   "fieldname": "setting_denda_panen_section",
+   "fieldtype": "Section Break",
+   "label": "Setting Denda Panen"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Kegiatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "parent_kegiatan",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Kegiatan",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "jns_kgt_trk",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jenis Kegatan Traksi",
+   "options": "Jenis Kegiatan Traksi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2025-07-04 16:06:56.397224",
+ "modified": "2025-07-15 15:26:40.120529",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",
+ "nsm_parent_field": "parent_kegiatan",
  "owner": "Administrator",
  "permissions": [
   {
@@ -168,6 +218,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-04 13:29:54.324644",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_x5zn",
+  "naming_series",
+  "periode_budget",
+  "company",
+  "amended_from",
+  "column_break_wums",
+  "unit",
+  "status_budget",
+  "uph_hr"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_x5zn",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Kebun Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "periode_budget",
+   "fieldtype": "Link",
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wums",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_budget",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Aktif\nNon Aktif",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uph_hr",
+   "fieldtype": "Currency",
+   "label": "Upah Harian",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-16 14:05:19.285330",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budget Kebun Tahunan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

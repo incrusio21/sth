@@ -156,7 +156,7 @@
    "fieldname": "kgt",
    "fieldtype": "Link",
    "label": "Kegiatan",
-   "options": "Kegiatan",
+   "options": "Kegiatan Before",
    "reqd": 1
   },
   {
@@ -176,7 +176,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:03:54.660709",
+ "modified": "2025-07-11 13:57:38.022794",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penanaman Bibit",

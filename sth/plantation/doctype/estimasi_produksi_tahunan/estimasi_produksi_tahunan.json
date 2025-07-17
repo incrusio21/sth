@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-16 13:48:21.033841",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_fffr",
+  "periode",
+  "amended_from",
+  "column_break_ecki",
+  "unit",
+  "informasi_blok_section",
+  "table_ojmd",
+  "section_break_jtej",
+  "bjr",
+  "ttl_jjg",
+  "ttl_kg",
+  "column_break_efbf",
+  "ttl_luas",
+  "ttl_jp"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_fffr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Estimasi Produksi Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "periode",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ecki",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "informasi_blok_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Blok"
+  },
+  {
+   "fieldname": "table_ojmd",
+   "fieldtype": "Table",
+   "options": "Informasi blok"
+  },
+  {
+   "fieldname": "section_break_jtej",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Data",
+   "label": "BJR"
+  },
+  {
+   "fieldname": "ttl_jjg",
+   "fieldtype": "Int",
+   "label": "Total Janjang "
+  },
+  {
+   "fieldname": "ttl_kg",
+   "fieldtype": "Float",
+   "label": "Total Kilogram"
+  },
+  {
+   "fieldname": "column_break_efbf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ttl_luas",
+   "fieldtype": "Float",
+   "label": "Total Luas Blok"
+  },
+  {
+   "fieldname": "ttl_jp",
+   "fieldtype": "Int",
+   "label": "Total Jumlah  Pokok"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-16 14:04:38.643368",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Estimasi Produksi Tahunan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

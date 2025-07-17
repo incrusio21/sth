@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-17 09:17:43.715256",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "jml_pr",
+  "uom",
+  "column_break_cqpp",
+  "hke",
+  "uph_hk",
+  "ttl_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "hke",
+   "fieldtype": "Int",
+   "label": "HKE",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uph_hk",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upah HK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ttl_by",
+   "fieldtype": "Currency",
+   "label": "Total Biaya"
+  },
+  {
+   "fieldname": "column_break_cqpp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Kode Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_pr",
+   "fieldtype": "Int",
+   "label": "Jumlah Personel",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Satuan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-17 10:19:54.139338",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Upah Operator Driver Mekanik",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

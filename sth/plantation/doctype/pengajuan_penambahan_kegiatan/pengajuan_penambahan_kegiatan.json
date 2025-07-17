@@ -50,7 +50,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan",
+   "options": "Kegiatan Before",
    "reqd": 1
   },
   {
@@ -92,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:06:35.205605",
+ "modified": "2025-07-11 13:57:39.639090",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Penambahan Kegiatan",

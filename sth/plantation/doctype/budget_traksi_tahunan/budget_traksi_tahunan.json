@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-07-04 13:29:54.324644",
+ "creation": "2025-07-17 09:01:30.546371",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -10,14 +10,11 @@
   "naming_series",
   "periode_budget",
   "company",
-  "amended_from",
   "column_break_wums",
-  "tgl_trk",
+  "unit",
   "status_budget",
-  "keterangan",
-  "section_break_yxro",
-  "abk",
-  "alokasi_budget_material_tahunan"
+  "uph_hr",
+  "amended_from"
  ],
  "fields": [
   {
@@ -26,20 +23,16 @@
    "label": "Header"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Budget Tahunan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series"
   },
   {
    "fieldname": "periode_budget",
    "fieldtype": "Link",
    "label": "Periode",
-   "options": "Fiscal Year"
+   "options": "Fiscal Year",
+   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -50,60 +43,59 @@
    "reqd": 1
   },
   {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Kebun Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "column_break_wums",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
   },
   {
    "fieldname": "status_budget",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nAktif\nNon Aktif"
-  },
-  {
-   "fieldname": "keterangan",
-   "fieldtype": "Long Text",
-   "label": "Keterangan"
-  },
-  {
-   "fieldname": "section_break_yxro",
-   "fieldtype": "Section Break"
-  },
-  {
-   "columns": 1,
-   "fieldname": "abk",
-   "fieldtype": "Table",
-   "label": "Alokasi Budget Kegiatan Tahunan",
-   "options": "Detail Budget Kegiatan Tahunan",
+   "options": "Aktif\nNon Aktif",
    "reqd": 1
   },
   {
-   "columns": 1,
-   "fieldname": "alokasi_budget_material_tahunan",
-   "fieldtype": "Table",
-   "label": "Alokasi Budget Material Tahunan",
-   "options": "Detail Budget Material Tahunan",
+   "fieldname": "uph_hr",
+   "fieldtype": "Currency",
+   "label": "Upah Harian",
    "reqd": 1
   },
   {
-   "default": "Today",
-   "fieldname": "tgl_trk",
-   "fieldtype": "Date",
-   "label": "Tanggal"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Kebun Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:05:47.567132",
+ "modified": "2025-07-17 09:42:22.309381",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Budget Tahunan",
+ "name": "Budget Traksi Tahunan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

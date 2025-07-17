@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestBudgetTahunan(FrappeTestCase):
+class TestBudgetSupervisiTahunan(FrappeTestCase):
 	pass
