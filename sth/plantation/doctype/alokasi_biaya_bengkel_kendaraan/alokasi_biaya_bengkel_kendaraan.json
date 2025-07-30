@@ -15,9 +15,10 @@
  "fields": [
   {
    "fieldname": "kd_bkl",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kode Bengkel",
+   "options": "Data Bengkel",
    "reqd": 1
   },
   {
@@ -59,7 +60,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-17 10:29:59.715869",
+ "modified": "2025-07-22 11:18:11.501657",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alokasi Biaya Bengkel Kendaraan",

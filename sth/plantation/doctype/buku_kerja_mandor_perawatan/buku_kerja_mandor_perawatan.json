@@ -9,6 +9,7 @@
   "section_break_2wm0",
   "naming_series",
   "tgl_trk",
+  "cost_center",
   "amended_from",
   "column_break_souy",
   "blok",
@@ -34,7 +35,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "BKM Perawatan",
+   "options": "Buku Kerja Mandor Perawatan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -103,7 +104,7 @@
   {
    "fieldname": "table_qibi",
    "fieldtype": "Table",
-   "options": "Detail BKM Tabel Kegiatan dan Absensi Pekerja"
+   "options": "Detail BKM Tabel Kegiatan dan Absensi Pekerja Perawatan"
   },
   {
    "fieldname": "tabel_material_section",
@@ -124,13 +125,19 @@
    "fieldname": "table_njra",
    "fieldtype": "Table",
    "options": "Detail BKM Tabel Penggunaan Alat"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:38:53.491353",
+ "modified": "2025-07-21 13:11:54.367129",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

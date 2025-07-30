@@ -1,0 +1,361 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-25 14:21:01.209736",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_myy9",
+  "naming_series",
+  "fiscal_year",
+  "divisi",
+  "amended_from",
+  "column_break_ixrj",
+  "rts",
+  "bjr",
+  "jml_jjg",
+  "tns",
+  "per_bron",
+  "o_pnn",
+  "informasi_blok_section",
+  "table_ticn",
+  "section_break_xgkx",
+  "column_break_exnc",
+  "gr_ttl_uph_spv",
+  "gr_ttl_prm_spv",
+  "column_break_fsda",
+  "gr_ttl_rkt_pnn",
+  "estimasi_biaya_pemanen_tab",
+  "table_slib",
+  "jumlah_personil_tab",
+  "nm_itm",
+  "jml",
+  "column_break_rynr",
+  "rpbm",
+  "prm",
+  "sbt_bm",
+  "biaya_mandor_1_tab",
+  "nm_itm_m1",
+  "jml_m1",
+  "column_break_gwth",
+  "rp_m1",
+  "prm_m1",
+  "sbtm1",
+  "biaya_kerani_divisi_tab",
+  "nm_itm_k",
+  "jml_k",
+  "column_break_tunt",
+  "rp_k",
+  "prm_k",
+  "sbt_k"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_myy9",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Tahunan Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "No Document"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_ixrj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rts",
+   "fieldtype": "Int",
+   "label": "Rotasi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "BJR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jml_jjg",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah Janjang",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tns",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Tonase",
+   "read_only": 1
+  },
+  {
+   "fieldname": "per_bron",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Persentase Brondolan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "o_pnn",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Ouput Panen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "estimasi_biaya_pemanen_tab",
+   "fieldtype": "Tab Break",
+   "label": "Estimasi Biaya Pemanen"
+  },
+  {
+   "fieldname": "table_slib",
+   "fieldtype": "Table",
+   "options": "Detail Biaya Pemanen RKT RKB"
+  },
+  {
+   "fieldname": "jumlah_personil_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Mandor"
+  },
+  {
+   "fieldname": "nm_itm",
+   "fieldtype": "Link",
+   "label": "Kode Item",
+   "options": "Tipe Item Budget",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Jumlah Personil",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rynr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "nm_itm.rpsat",
+   "fieldname": "rpbm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Rupiah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbt_bm",
+   "fieldtype": "Currency",
+   "label": "Subtotal"
+  },
+  {
+   "fieldname": "biaya_mandor_1_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Mandor 1"
+  },
+  {
+   "fieldname": "nm_itm_m1",
+   "fieldtype": "Link",
+   "label": "Kode Item",
+   "options": "Tipe Item Budget",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_m1",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Jumlah Personil",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gwth",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "nm_itm_m1.rpsat",
+   "fieldname": "rp_m1",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Rupiah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbtm1",
+   "fieldtype": "Currency",
+   "label": "Subtotal"
+  },
+  {
+   "fieldname": "biaya_kerani_divisi_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Kerani Divisi"
+  },
+  {
+   "fieldname": "nm_itm_k",
+   "fieldtype": "Link",
+   "label": "Kode Item",
+   "options": "Tipe Item Budget",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_k",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Jumlah Personil",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_tunt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "nm_itm_k.rpsat",
+   "fieldname": "rp_k",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Rupiah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbt_k",
+   "fieldtype": "Currency",
+   "label": "Subtotal"
+  },
+  {
+   "fetch_from": "nm_itm.prm",
+   "fieldname": "prm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "fetch_from": "nm_itm_m1.prm",
+   "fieldname": "prm_m1",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "fetch_from": "nm_itm_k.prm",
+   "fieldname": "prm_k",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "bold": 1,
+   "fieldname": "section_break_xgkx",
+   "fieldtype": "Section Break",
+   "label": "Grandtotal"
+  },
+  {
+   "fieldname": "column_break_exnc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fsda",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gr_ttl_uph_spv",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal Upah Supervisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gr_ttl_prm_spv",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal Premi Supervisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gr_ttl_rkt_pnn",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal RKT Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "informasi_blok_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Blok"
+  },
+  {
+   "fieldname": "table_ticn",
+   "fieldtype": "Table",
+   "options": "Informasi Blok"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-29 09:19:24.889724",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rencana Kerja Tahunan Panen",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

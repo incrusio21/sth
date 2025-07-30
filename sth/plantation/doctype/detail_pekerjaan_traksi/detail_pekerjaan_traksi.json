@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-21 11:23:52.296313",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "divisi",
+  "blok",
+  "keterangan",
+  "column_break_vriy",
+  "kgt",
+  "hk",
+  "uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "column_break_vriy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hk",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hasil Kerja",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Satuan",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-21 11:39:04.030169",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Pekerjaan Traksi",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

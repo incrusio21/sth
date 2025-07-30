@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:kode_alat",
  "creation": "2025-07-04 13:16:49.680103",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -17,16 +18,19 @@
   "amended_from",
   "column_break_vypn",
   "divisi",
+  "no_pol",
   "operator",
+  "jns_bbm",
   "basis_rpkg",
-  "basis_meter",
-  "coa_alat",
-  "coa_bbm"
+  "per_prm",
+  "rp_prm",
+  "asset"
  ],
  "fields": [
   {
    "fieldname": "section_break_yebq",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "amended_from",
@@ -41,7 +45,9 @@
   {
    "fieldname": "kode_alat",
    "fieldtype": "Data",
-   "label": "Kode Alat / Kendaraan"
+   "label": "Kode Alat / Kendaraan",
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "nama_alat",
@@ -83,20 +89,7 @@
   {
    "fieldname": "basis_rpkg",
    "fieldtype": "Currency",
-   "label": "Basis Rp/Kg"
-  },
-  {
-   "fieldname": "basis_meter",
-   "fieldtype": "Currency",
-   "label": "Basis Rp/KM/HM"
-  },
-  {
-   "fieldname": "coa_alat",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "COA Biaya Alat",
-   "options": "Account",
-   "reqd": 1
+   "label": "Basis Rp/Satuan"
   },
   {
    "fieldname": "operator",
@@ -104,13 +97,6 @@
    "in_list_view": 1,
    "label": "Operator/Supir",
    "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "coa_bbm",
-   "fieldtype": "Link",
-   "label": "COA BBM",
-   "options": "Account",
    "reqd": 1
   },
   {
@@ -129,18 +115,48 @@
    "fieldname": "jns_alt",
    "fieldtype": "Link",
    "label": "Jenis Alat",
-   "options": "Jenis Alat",
+   "options": "Jenis Alat Dan Kendaraan",
    "reqd": 1
+  },
+  {
+   "fieldname": "no_pol",
+   "fieldtype": "Data",
+   "label": "No Polisi"
+  },
+  {
+   "fieldname": "jns_bbm",
+   "fieldtype": "Select",
+   "label": "Jenis BBM",
+   "options": "Solar\nPertalite\nPertamax\nShell",
+   "reqd": 1
+  },
+  {
+   "fieldname": "per_prm",
+   "fieldtype": "Percent",
+   "label": "Persentase Premi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rp_prm",
+   "fieldtype": "Currency",
+   "label": "Rupiah Premi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "label": "Link Asset",
+   "options": "Asset"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 15:41:56.676108",
+ "modified": "2025-07-25 15:38:47.466984",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -153,7 +169,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

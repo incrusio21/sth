@@ -1,0 +1,174 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-25 14:13:21.714380",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_x1i5",
+  "naming_series",
+  "fiscal_year",
+  "divisi",
+  "amended_from",
+  "column_break_dbwg",
+  "kd_kgt",
+  "vlm",
+  "uom",
+  "jumlah_tenaga_kerja",
+  "prm",
+  "sbttl",
+  "informasi_blok_section",
+  "table_gxaw",
+  "detai_material_tab",
+  "detail_material_section",
+  "table_dabo",
+  "gr_ttl"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_x1i5",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Tahunan Perawatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_dbwg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kd_kgt",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Kode Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vlm",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Volume",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kd_kgt.uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Satuan"
+  },
+  {
+   "fieldname": "jumlah_tenaga_kerja",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Jumlah Tenaga Kerja",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kd_kgt.rp_prm",
+   "fieldname": "prm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "fieldname": "sbttl",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail_material_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Material"
+  },
+  {
+   "fieldname": "table_dabo",
+   "fieldtype": "Table",
+   "options": "Detail Material Perawatan RKB RKT"
+  },
+  {
+   "fieldname": "gr_ttl",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "informasi_blok_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Blok"
+  },
+  {
+   "fieldname": "table_gxaw",
+   "fieldtype": "Table",
+   "options": "Informasi Blok"
+  },
+  {
+   "fieldname": "detai_material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Detai Material"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-29 09:22:24.182095",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rencana Kerja Tahunan Perawatan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

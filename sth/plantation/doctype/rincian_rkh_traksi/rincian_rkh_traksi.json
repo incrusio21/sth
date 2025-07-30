@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-21 10:58:50.908009",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rf7u",
+  "kgt",
+  "satuan",
+  "es_vlm",
+  "column_break_spta",
+  "kd_kndr",
+  "opr_spr",
+  "ket",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_rf7u",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fetch_from": "kd_kndr.operator",
+   "fieldname": "opr_spr",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Operator / Supir",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rincian RKH Traksi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_spta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kd_kndr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "es_vlm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Estimasi Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rincian RKH Traksi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "satuan",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Satuan",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 16:28:47.356672",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rincian RKH Traksi",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-25 15:52:05.707898",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "jbt",
+  "jml_hk",
+  "vlm",
+  "column_break_czlq",
+  "uph_hk",
+  "prm",
+  "sbttl"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "jbt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jabatan",
+   "options": "Designation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_hk",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah Tenaga HK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vlm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_czlq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uph_hk",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Upah HK"
+  },
+  {
+   "fieldname": "prm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "fieldname": "sbttl",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 15:54:07.536840",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail RKT RKB Umum",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

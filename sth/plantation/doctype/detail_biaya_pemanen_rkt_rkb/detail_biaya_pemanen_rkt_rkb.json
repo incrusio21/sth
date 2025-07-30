@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-25 14:27:56.068665",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "ttl_jml_tk",
+  "ttl_uph",
+  "premi",
+  "sbttl",
+  "column_break_wnjm"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "ttl_jml_tk",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Jumlah Tenaga Kerja",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ttl_uph",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Upah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Premi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbttl",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wnjm",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 14:29:50.450295",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Biaya Pemanen RKT RKB",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,221 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-22 11:26:52.450429",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_kqlq",
+  "naming_series",
+  "tgl_trk",
+  "bkl",
+  "divisi",
+  "tp_bkl",
+  "mdr",
+  "tgl_msk",
+  "tgl_klr",
+  "column_break_kkgv",
+  "kd_kndr",
+  "jk",
+  "kmhm_awal",
+  "kmhm_akhir",
+  "wkt_prb",
+  "keterangan",
+  "detail_pekerjaan_section",
+  "table_kryn",
+  "tabel_daftar_pemakaian_barang__spare_part__section",
+  "table_lxkk",
+  "sp",
+  "table_xnpy",
+  "section_break_rrqk",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_kqlq",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "fieldname": "mdr",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transaksi Bengkel",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_kkgv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "kdr.jns_alt",
+   "fieldname": "jk",
+   "fieldtype": "Link",
+   "label": "Jenis Kendaraan",
+   "options": "Alat Berat Dan Kendaraan"
+  },
+  {
+   "fieldname": "detail_pekerjaan_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Karyawan"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transaksi Bengkel",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "bkl",
+   "fieldtype": "Link",
+   "label": "Bengkel",
+   "options": "Data Bengkel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kd_kndr",
+   "fieldtype": "Link",
+   "label": "Kode Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_msk",
+   "fieldtype": "Date",
+   "label": "Tanggal Masuk",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_klr",
+   "fieldtype": "Date",
+   "label": "Tanggal Keluar",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "bkl.tp_bkl",
+   "fieldname": "tp_bkl",
+   "fieldtype": "Select",
+   "label": "Tipe Bengkel",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kd_kndr.kmhm_akhir",
+   "fieldname": "kmhm_awal",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "KM/HM Awal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kmhm_akhir",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "KM/HM Akhir",
+   "reqd": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "wkt_prb",
+   "fieldtype": "Time",
+   "label": "Waktu Perbaikan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "table_kryn",
+   "fieldtype": "Table",
+   "options": "Detail Transaksi Employee"
+  },
+  {
+   "fieldname": "tabel_daftar_pemakaian_barang__spare_part__section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Daftar Pemakaian Barang ( Spare Part )"
+  },
+  {
+   "fieldname": "table_lxkk",
+   "fieldtype": "Table",
+   "options": "Detail Tabel Item"
+  },
+  {
+   "fieldname": "sp",
+   "fieldtype": "Section Break",
+   "label": "Tabel Daftar Pengembalian Barang Bekas"
+  },
+  {
+   "fieldname": "table_xnpy",
+   "fieldtype": "Table",
+   "options": "Detail Tabel Item"
+  },
+  {
+   "fieldname": "section_break_rrqk",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-22 11:38:45.513643",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Transaksi Bengkel",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

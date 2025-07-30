@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-22 13:02:41.327920",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "no_spb",
+  "tgl_spb",
+  "column_break_aupe",
+  "bjr",
+  "jml_jjg",
+  "ttl_kg",
+  "no_pol"
+ ],
+ "fields": [
+  {
+   "fieldname": "no_spb",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No SPB",
+   "options": "Surat Pengantar Buah",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "no_spb.tanggal_transaksi",
+   "fieldname": "tgl_spb",
+   "fieldtype": "Date",
+   "label": "Tanggal SPB"
+  },
+  {
+   "fieldname": "column_break_aupe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "no_spb.naming_series",
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR"
+  },
+  {
+   "fetch_from": "no_spb.naming_series",
+   "fieldname": "jml_jjg",
+   "fieldtype": "Int",
+   "label": "Jumlah Janjang"
+  },
+  {
+   "fetch_from": "no_spb.naming_series",
+   "fieldname": "ttl_kg",
+   "fieldtype": "Int",
+   "label": "Total Berat ( Kg )"
+  },
+  {
+   "fetch_from": "no_spb.naming_series",
+   "fieldname": "no_pol",
+   "fieldtype": "Data",
+   "label": "No Polisi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 09:23:39.984307",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Ambil KG Tmbangan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

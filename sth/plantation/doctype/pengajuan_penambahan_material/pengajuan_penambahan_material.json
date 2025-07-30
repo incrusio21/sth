@@ -9,18 +9,23 @@
   "section_break_a7jr",
   "naming_series",
   "tgl_trk",
-  "amended_from",
+  "kgt",
   "column_break_rsld",
   "divisi",
   "blok",
-  "kgt",
+  "amended_from",
   "list_penambahan_material_section",
-  "table_mkoe"
+  "table_mkoe",
+  "section_break_fvjb",
+  "column_break_qxqe",
+  "column_break_rtmt",
+  "grn_ttl"
  ],
  "fields": [
   {
    "fieldname": "section_break_a7jr",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "amended_from",
@@ -58,7 +63,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan Before",
+   "options": "Kegiatan",
    "reqd": 1
   },
   {
@@ -69,7 +74,7 @@
   {
    "fieldname": "table_mkoe",
    "fieldtype": "Table",
-   "options": "Detail Pengajuan Penambahan Material"
+   "options": "Detail Item"
   },
   {
    "default": "Today",
@@ -81,16 +86,35 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "No Document"
+  },
+  {
+   "fieldname": "section_break_fvjb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qxqe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rtmt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grn_ttl",
+   "fieldtype": "Currency",
+   "label": "Grandtotal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-11 13:57:40.441620",
+ "modified": "2025-07-24 10:29:46.097474",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Penambahan Material",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

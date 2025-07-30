@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-17 09:17:43.715256",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "item_code",
+  "jml_pr",
+  "uom",
+  "column_break_cqpp",
+  "uph_hk",
+  "ttl_by",
+  "sebaran_rp_section",
+  "rp_jan",
+  "rp_feb",
+  "rp_mar",
+  "rp_mei",
+  "mei",
+  "rp_jun",
+  "column_break_ghia",
+  "rp_jul",
+  "rp_agu",
+  "rp_sep",
+  "rp_okt",
+  "rp_nov",
+  "rp_des"
+ ],
+ "fields": [
+  {
+   "fetch_from": "item_code.rpsat",
+   "fieldname": "uph_hk",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upah HK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ttl_by",
+   "fieldtype": "Currency",
+   "label": "Total Biaya"
+  },
+  {
+   "fieldname": "column_break_cqpp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Kode Item",
+   "options": "Tipe Item Budget",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_pr",
+   "fieldtype": "Int",
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Satuan"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "sebaran_rp_section",
+   "fieldtype": "Section Break",
+   "label": "Sebaran Rp"
+  },
+  {
+   "fieldname": "rp_jan",
+   "fieldtype": "Currency",
+   "label": "Januari",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_feb",
+   "fieldtype": "Currency",
+   "label": "Februari",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_mar",
+   "fieldtype": "Currency",
+   "label": "Maret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_mei",
+   "fieldtype": "Currency",
+   "label": "April",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mei",
+   "fieldtype": "Currency",
+   "label": "Mei",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_jun",
+   "fieldtype": "Currency",
+   "label": "Juni",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ghia",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rp_jul",
+   "fieldtype": "Currency",
+   "label": "Juli",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_agu",
+   "fieldtype": "Currency",
+   "label": "Agustus",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_sep",
+   "fieldtype": "Currency",
+   "label": "September",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_okt",
+   "fieldtype": "Currency",
+   "label": "Oktober",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_nov",
+   "fieldtype": "Currency",
+   "label": "November",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_des",
+   "fieldtype": "Currency",
+   "label": "Desember",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-24 11:25:32.449869",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Upah",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

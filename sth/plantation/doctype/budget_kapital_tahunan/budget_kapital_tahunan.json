@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-24 15:39:36.838187",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1ayj",
+  "company",
+  "unit",
+  "fiscal_year",
+  "column_break_jntt",
+  "amended_from",
+  "detail",
+  "table_irmg"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1ayj",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Kapital Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_jntt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "table_irmg",
+   "fieldtype": "Table",
+   "options": "Detail Budget Kapital"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-24 15:47:30.498267",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budget Kapital Tahunan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

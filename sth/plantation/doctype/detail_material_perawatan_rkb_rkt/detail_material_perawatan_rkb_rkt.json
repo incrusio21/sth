@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-07 15:24:21.615642",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "item_group",
+  "jml",
+  "uom",
+  "column_break_rnkj",
+  "hrg",
+  "gr_ttl"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_rnkj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kode Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "jml",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_group.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Satuan"
+  },
+  {
+   "fetch_from": "item_group.valuation_rate",
+   "fieldname": "hrg",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Harga",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gr_ttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-29 09:21:09.666076",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Material Perawatan RKB RKT",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

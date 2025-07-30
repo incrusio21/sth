@@ -10,8 +10,9 @@
   "uom",
   "column_break_wtse",
   "uph_hk",
+  "ttl_by",
   "premi",
-  "ttl_by"
+  "grn_ttl"
  ],
  "fields": [
   {
@@ -19,7 +20,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan Before",
+   "options": "Kegiatan",
    "reqd": 1
   },
   {
@@ -42,7 +43,7 @@
   {
    "fieldname": "ttl_by",
    "fieldtype": "Currency",
-   "label": "Total Biaya"
+   "label": "Total Upah"
   },
   {
    "fieldname": "uph_hk",
@@ -54,13 +55,18 @@
    "fieldname": "premi",
    "fieldtype": "Currency",
    "label": "Premi"
+  },
+  {
+   "fieldname": "grn_ttl",
+   "fieldtype": "Currency",
+   "label": "Grandtotal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-11 13:57:41.242447",
+ "modified": "2025-07-21 09:45:20.834336",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Tabel Prestasi Perawatan",

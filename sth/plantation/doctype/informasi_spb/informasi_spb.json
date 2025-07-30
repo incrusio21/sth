@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-21 10:42:36.944601",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "no_spb",
+  "bjr",
+  "no_pol",
+  "column_break_bffh",
+  "jml_jjg",
+  "jml_brond",
+  "total_berat_kg"
+ ],
+ "fields": [
+  {
+   "fieldname": "no_spb",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "No SPB",
+   "options": "Surat Pengantar Buah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "BJR",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_pol",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No Polisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bffh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jml_jjg",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah Janjang",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_brond",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah Brondolan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_berat_kg",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Berat Kg",
+   "reqd": 1
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-29 09:20:08.578437",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Informasi SPB",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

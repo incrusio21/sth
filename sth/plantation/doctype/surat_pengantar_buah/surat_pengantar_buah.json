@@ -1,17 +1,30 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-07-08 14:49:30.296827",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_5orq",
-  "amended_from"
+  "naming_series",
+  "tanggal_transaksi",
+  "divisi",
+  "column_break_bvfg",
+  "cost_center",
+  "ekst",
+  "nm_pabrik",
+  "amended_from",
+  "data_timbangan_internal_section",
+  "table_kydr",
+  "data_timbangan_eksternal_section",
+  "table_ogdb"
  ],
  "fields": [
   {
    "fieldname": "section_break_5orq",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "amended_from",
@@ -22,16 +35,80 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "label": "No SPB"
+  },
+  {
+   "fieldname": "tanggal_transaksi",
+   "fieldtype": "Data",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bvfg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ekst",
+   "fieldtype": "Check",
+   "label": "Eksternal"
+  },
+  {
+   "fieldname": "nm_pabrik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Pabrik",
+   "reqd": 1
+  },
+  {
+   "fieldname": "data_timbangan_internal_section",
+   "fieldtype": "Section Break",
+   "label": "Data Timbangan Internal"
+  },
+  {
+   "fieldname": "table_kydr",
+   "fieldtype": "Table",
+   "options": "Data Timbangan Internal"
+  },
+  {
+   "fieldname": "data_timbangan_eksternal_section",
+   "fieldtype": "Section Break",
+   "label": "Data Timbangan Eksternal"
+  },
+  {
+   "fieldname": "table_ogdb",
+   "fieldtype": "Table",
+   "options": "Data Timbangan Eksternal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:49:30.296827",
+ "modified": "2025-07-24 10:25:12.380758",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

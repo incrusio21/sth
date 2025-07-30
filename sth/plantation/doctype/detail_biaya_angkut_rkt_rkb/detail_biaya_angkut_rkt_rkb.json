@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-25 15:26:41.560667",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "kd_kgt",
+  "vlm",
+  "column_break_olun",
+  "es_hk",
+  "uph_hk",
+  "prm",
+  "sbttl"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "kd_kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kode Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vlm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_olun",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "es_hk",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Estimasi Jumlah HK "
+  },
+  {
+   "fieldname": "uph_hk",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Estimasi Upah HK"
+  },
+  {
+   "fieldname": "sbttl",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kd_kgt.rp_prm",
+   "fieldname": "prm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 15:37:43.564530",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Biaya Angkut RKT RKB",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

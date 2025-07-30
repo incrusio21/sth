@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-08 14:23:53.086523",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kgt",
+  "kry",
+  "sk",
+  "thk",
+  "uom",
+  "column_break_wtse",
+  "uph",
+  "premi",
+  "ttl_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "thk",
+   "fieldtype": "Float",
+   "label": "Hasil Kerja",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_wtse",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "kgt.rp_prm",
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "label": "Premi"
+  },
+  {
+   "fieldname": "ttl_by",
+   "fieldtype": "Currency",
+   "label": "Total Biaya"
+  },
+  {
+   "fieldname": "kry",
+   "fieldtype": "Link",
+   "label": "Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sk",
+   "fieldtype": "Select",
+   "label": "Status Kehadiran",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
+  },
+  {
+   "fetch_from": "kgt.rp_basis",
+   "fieldname": "uph",
+   "fieldtype": "Currency",
+   "label": "Upah",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 09:24:10.490496",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail BKM Tabel Kegiatan dan Absensi Pekerja Perawatan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

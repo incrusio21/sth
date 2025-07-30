@@ -9,21 +9,19 @@
   "section_break_rf7u",
   "naming_series",
   "tgl_trk",
-  "opr_spr",
-  "ket",
   "amended_from",
   "column_break_spta",
+  "divisi",
   "blok",
-  "kgt",
-  "kd_kndr",
-  "estimasi_rit",
-  "es_vlm",
-  "estimasi_kmhm"
+  "ket",
+  "rincian_tab",
+  "table_nmoq"
  ],
  "fields": [
   {
    "fieldname": "section_break_rf7u",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "amended_from",
@@ -47,15 +45,6 @@
    "label": "Tanggal"
   },
   {
-   "fetch_from": "kd_kndr.operator",
-   "fieldname": "opr_spr",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Operator / Supir",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
    "fieldname": "ket",
    "fieldtype": "Small Text",
    "label": "Keterangan"
@@ -73,42 +62,30 @@
    "reqd": 1
   },
   {
-   "fieldname": "kgt",
+   "fieldname": "table_nmoq",
+   "fieldtype": "Table",
+   "options": "Rincian RKH Traksi"
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kegiatan",
-   "options": "Kegiatan Before",
+   "label": "Divisi",
+   "options": "Divisi",
    "reqd": 1
   },
   {
-   "fieldname": "kd_kndr",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kode Kendaran",
-   "options": "Alat Berat Dan Kendaraan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "estimasi_rit",
-   "fieldtype": "Int",
-   "label": "Estimasi Rit"
-  },
-  {
-   "fieldname": "es_vlm",
-   "fieldtype": "Int",
-   "label": "Estimasi Volume"
-  },
-  {
-   "fieldname": "estimasi_kmhm",
-   "fieldtype": "Int",
-   "label": "Estimasi KM/HM"
+   "fieldname": "rincian_tab",
+   "fieldtype": "Tab Break",
+   "label": "Rincian"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-11 13:57:43.314751",
+ "modified": "2025-07-25 16:27:35.100883",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian Traksi",

@@ -9,29 +9,23 @@
   "section_break_amz9",
   "naming_series",
   "tgl_trk",
-  "kht",
-  "ktt",
-  "amended_from",
+  "employee",
+  "jns_kry",
   "column_break_xevj",
   "blok",
   "kgt",
+  "vlm",
+  "jml_hk",
+  "ttl_uph",
   "premi",
-  "ttl_pnmbhn"
+  "ttl_pnmbhn",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "section_break_amz9",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Pengajuan Penambahan Kegiatan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "column_break_xevj",
@@ -50,18 +44,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan Before",
+   "options": "Kegiatan",
    "reqd": 1
-  },
-  {
-   "fieldname": "kht",
-   "fieldtype": "Int",
-   "label": "Jumlah Karyawan Harian Tetap"
-  },
-  {
-   "fieldname": "ktt",
-   "fieldtype": "Int",
-   "label": "Jumlah Karyawan Harian Tidak Tetap"
   },
   {
    "fieldname": "premi",
@@ -86,13 +70,55 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "No Document"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nama Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employment_type",
+   "fieldname": "jns_kry",
+   "fieldtype": "Data",
+   "label": "Tipe Karyawan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "vlm",
+   "fieldtype": "Float",
+   "label": "Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jml_hk",
+   "fieldtype": "Int",
+   "label": "Jumlah Hari Kerja",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ttl_uph",
+   "fieldtype": "Currency",
+   "label": "Total Upah"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pengajuan Penambahan Kegiatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-11 13:57:39.639090",
+ "modified": "2025-07-24 10:25:48.010611",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Penambahan Kegiatan",

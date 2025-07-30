@@ -1,20 +1,18 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "format:{unit}-{periode_budget}",
  "creation": "2025-07-04 13:29:54.324644",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_x5zn",
-  "naming_series",
   "periode_budget",
   "company",
-  "amended_from",
   "column_break_wums",
   "unit",
-  "status_budget",
-  "uph_hr"
+  "uph_hr",
+  "amended_from"
  ],
  "fields": [
   {
@@ -52,18 +50,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status_budget",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Aktif\nNon Aktif",
-   "reqd": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series"
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit/Kebun",
@@ -73,19 +59,18 @@
   {
    "fieldname": "uph_hr",
    "fieldtype": "Currency",
-   "label": "Upah Harian",
-   "reqd": 1
+   "label": "Upah Harian"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-16 14:05:19.285330",
+ "modified": "2025-07-30 14:24:00.166317",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Kebun Tahunan",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
   "blok",
   "sph",
   "column_break_tzon",
@@ -17,6 +18,9 @@
   {
    "fieldname": "blok",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
    "label": "Blok",
    "options": "Blok"
   },
@@ -24,6 +28,7 @@
    "fetch_from": "blok.sph__satuan_pokok_per_hektare_",
    "fieldname": "sph",
    "fieldtype": "Read Only",
+   "in_list_view": 1,
    "label": "SPH"
   },
   {
@@ -34,6 +39,7 @@
    "fetch_from": "blok.luas_areal",
    "fieldname": "ls_area",
    "fieldtype": "Read Only",
+   "in_list_view": 1,
    "label": "Luas Areal",
    "read_only": 1
   },
@@ -41,6 +47,7 @@
    "fetch_from": "blok.tahun_tanam",
    "fieldname": "thn_tnm",
    "fieldtype": "Read Only",
+   "in_list_view": 1,
    "label": "Tahum Tanam",
    "read_only": 1
   },
@@ -48,17 +55,23 @@
    "fetch_from": "blok.jumlah_pokok",
    "fieldname": "jml_pkk",
    "fieldtype": "Read Only",
+   "in_list_view": 1,
    "label": "Jumlah Pokok"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-16 14:01:47.182301",
+ "modified": "2025-07-29 09:19:09.506268",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Informasi blok",
+ "name": "Informasi Blok",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

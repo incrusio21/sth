@@ -1,79 +1,248 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2025-07-17 09:01:30.546371",
+ "creation": "2025-07-24 11:45:27.913738",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_x5zn",
-  "naming_series",
-  "periode_budget",
+  "header_tab",
+  "section_break_fbzl",
+  "thn_bgt",
   "company",
-  "column_break_wums",
   "unit",
-  "status_budget",
-  "uph_hr",
-  "amended_from"
+  "stt",
+  "column_break_lcoo",
+  "kd_kndr",
+  "jns_kndr",
+  "ttl_kmhm",
+  "amended_from",
+  "sebaran__section",
+  "januari",
+  "feb",
+  "mar",
+  "apr",
+  "mei",
+  "jun",
+  "column_break_dzod",
+  "jul",
+  "agu",
+  "sep",
+  "okt",
+  "nov",
+  "des",
+  "section_break_gtpa",
+  "column_break_ybqu",
+  "column_break_ckyy",
+  "grn_ttl",
+  "rp_kmhm",
+  "tab_2_tab",
+  "biaya_mekanik_section",
+  "upah_detail",
+  "bahan_bakar_tab",
+  "detail_section",
+  "bb_detail",
+  "material_tab",
+  "matrerial_section",
+  "sc_detail",
+  "biaya_umum_lain_tab",
+  "biaya_lain_section",
+  "bs_detail",
+  "by_um",
+  "bu_detail"
  ],
  "fields": [
   {
-   "fieldname": "section_break_x5zn",
+   "fieldname": "header_tab",
+   "fieldtype": "Tab Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "section_break_fbzl",
    "fieldtype": "Section Break",
    "label": "Header"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series"
-  },
-  {
-   "fieldname": "periode_budget",
+   "fieldname": "thn_bgt",
    "fieldtype": "Link",
-   "label": "Periode",
+   "in_list_view": 1,
+   "label": "Tahun Budget",
    "options": "Fiscal Year",
    "reqd": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Perusahaan",
    "options": "Company",
    "reqd": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Budget Kebun Tahunan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "column_break_wums",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Unit/Kebun",
    "options": "Unit",
    "reqd": 1
   },
   {
-   "fieldname": "status_budget",
+   "fieldname": "stt",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Aktif\nNon Aktif",
+   "options": "Aktif\nNonaktif"
+  },
+  {
+   "fieldname": "column_break_lcoo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sebaran__section",
+   "fieldtype": "Section Break",
+   "label": "Sebaran % "
+  },
+  {
+   "fieldname": "januari",
+   "fieldtype": "Percent",
+   "label": "Januari"
+  },
+  {
+   "fieldname": "feb",
+   "fieldtype": "Percent",
+   "label": "Februari"
+  },
+  {
+   "fieldname": "mar",
+   "fieldtype": "Percent",
+   "label": "Maret"
+  },
+  {
+   "fieldname": "apr",
+   "fieldtype": "Percent",
+   "label": "April"
+  },
+  {
+   "fieldname": "mei",
+   "fieldtype": "Percent",
+   "label": "Mei"
+  },
+  {
+   "fieldname": "jun",
+   "fieldtype": "Percent",
+   "label": "Juni"
+  },
+  {
+   "fieldname": "column_break_dzod",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jul",
+   "fieldtype": "Percent",
+   "label": "Juli"
+  },
+  {
+   "fieldname": "agu",
+   "fieldtype": "Percent",
+   "label": "Agustus"
+  },
+  {
+   "fieldname": "sep",
+   "fieldtype": "Percent",
+   "label": "September"
+  },
+  {
+   "fieldname": "okt",
+   "fieldtype": "Percent",
+   "label": "Oktober"
+  },
+  {
+   "fieldname": "nov",
+   "fieldtype": "Percent",
+   "label": "November"
+  },
+  {
+   "fieldname": "des",
+   "fieldtype": "Percent",
+   "label": "Desember"
+  },
+  {
+   "fieldname": "section_break_gtpa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ybqu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ckyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "grn_ttl",
+   "fieldtype": "Currency",
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_kmhm",
+   "fieldtype": "Currency",
+   "label": "Rp per KMHM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Estimasi Upah"
+  },
+  {
+   "fieldname": "biaya_mekanik_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bahan_bakar_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bahan Bakar"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Suku Cadang"
+  },
+  {
+   "fieldname": "matrerial_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "biaya_umum_lain_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Servis"
+  },
+  {
+   "fieldname": "biaya_lain_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kd_kndr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
    "reqd": 1
   },
   {
-   "fieldname": "uph_hr",
-   "fieldtype": "Currency",
-   "label": "Upah Harian",
+   "fetch_from": "kd_kndr.jns_alt",
+   "fieldname": "jns_kndr",
+   "fieldtype": "Data",
+   "label": "Jenis Kendaraan"
+  },
+  {
+   "fieldname": "ttl_kmhm",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total KM/HM",
    "reqd": 1
   },
   {
@@ -81,21 +250,55 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Budget Kebun Tahunan",
+   "options": "Budget Traksi Tahunan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "by_um",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Umum Lain"
+  },
+  {
+   "fieldname": "upah_detail",
+   "fieldtype": "Table",
+   "label": "Detail Ubah",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "bb_detail",
+   "fieldtype": "Table",
+   "label": "Detail Bahan Bakar",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "sc_detail",
+   "fieldtype": "Table",
+   "label": "Detail Suku Cadang ",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "bs_detail",
+   "fieldtype": "Table",
+   "label": "Detail Biaya Servis",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "bu_detail",
+   "fieldtype": "Table",
+   "label": "Detail Biaya Umum",
+   "options": "Detail item Budget"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-17 09:42:22.309381",
+ "modified": "2025-07-30 14:01:27.463244",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Traksi Tahunan",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

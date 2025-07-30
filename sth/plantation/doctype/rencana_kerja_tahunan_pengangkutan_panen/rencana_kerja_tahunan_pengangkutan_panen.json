@@ -1,0 +1,201 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-25 15:18:35.557633",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_myy9",
+  "naming_series",
+  "fiscal_year",
+  "divisi",
+  "column_break_ixrj",
+  "jrk_p",
+  "tns_pnn",
+  "amended_from",
+  "informasi_blok_section",
+  "table_ticn",
+  "grandtotal_section",
+  "column_break_sybb",
+  "column_break_pbgs",
+  "gr_ttl_pngktn",
+  "estimasi_biaya_pemanen_tab",
+  "table_slib",
+  "gr_ken",
+  "jumlah_personil_tab",
+  "table_izhj",
+  "gr_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_myy9",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "bold": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "No Document"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Tahunan Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_ixrj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "informasi_blok_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Blok"
+  },
+  {
+   "fieldname": "table_ticn",
+   "fieldtype": "Table",
+   "options": "Informasi Blok"
+  },
+  {
+   "fieldname": "estimasi_biaya_pemanen_tab",
+   "fieldtype": "Tab Break",
+   "label": "Detail Kendaraan"
+  },
+  {
+   "fieldname": "table_slib",
+   "fieldtype": "Table",
+   "options": "Detail Kendaraan RKT RKB"
+  },
+  {
+   "fieldname": "jumlah_personil_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Angkut"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Tahunan Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "tns_pnn",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Tonase Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jrk_p",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Jarak Ke Pabrik",
+   "reqd": 1
+  },
+  {
+   "fieldname": "table_izhj",
+   "fieldtype": "Table",
+   "options": "Detail Biaya Angkut RKT RKB"
+  },
+  {
+   "fieldname": "gr_ken",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gr_by",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grandtotal_section",
+   "fieldtype": "Section Break",
+   "label": "Grandtotal"
+  },
+  {
+   "fieldname": "column_break_sybb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pbgs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gr_ttl_pngktn",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-29 09:19:26.706106",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rencana Kerja Tahunan Pengangkutan Panen",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

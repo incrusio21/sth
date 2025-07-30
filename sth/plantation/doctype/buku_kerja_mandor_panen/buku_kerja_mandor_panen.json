@@ -1,24 +1,142 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-07-08 14:47:05.098681",
+ "autoname": "naming_series:",
+ "creation": "2025-07-21 09:54:46.556436",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_i3sj",
+  "section_break_2wm0",
+  "naming_series",
+  "tgl_trk",
+  "divisi",
+  "blok",
+  "cost_center",
+  "column_break_souy",
+  "kgt",
+  "stts_nrml",
+  "chk_kontan",
+  "mdr",
+  "mdr1",
+  "krdvs",
+  "tabel_prestasi_section",
+  "table_kjhb",
+  "tabel_kegiatan_dan_absensi_pekerja_section",
+  "table_qibi",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "section_break_i3sj",
-   "fieldtype": "Section Break"
+   "fieldname": "section_break_2wm0",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_souy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mdr",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mdr1",
+   "fieldtype": "Link",
+   "label": "Mandor 1",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "krdvs",
+   "fieldtype": "Link",
+   "label": "Kerani Divisi",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tabel_prestasi_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Absensi Pekerjaan Panen"
+  },
+  {
+   "fieldname": "table_kjhb",
+   "fieldtype": "Table",
+   "options": "Detail BKM Absensi Pekerjaan Panen"
+  },
+  {
+   "fieldname": "tabel_kegiatan_dan_absensi_pekerja_section",
+   "fieldtype": "Section Break",
+   "label": "Tabel Denda Panen"
+  },
+  {
+   "fieldname": "table_qibi",
+   "fieldtype": "Table",
+   "options": "Denda Panen"
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "stts_nrml",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Normal\nBanjir",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "chk_kontan",
+   "fieldtype": "Check",
+   "label": "Is it Kontanan"
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "BKM Panen",
+   "options": "Buku Kerja Mandor Panen",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -28,10 +146,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:47:05.098681",
+ "modified": "2025-07-25 16:15:13.796145",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

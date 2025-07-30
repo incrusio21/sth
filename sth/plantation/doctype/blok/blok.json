@@ -9,6 +9,7 @@
   "section_break_zd5t",
   "blok",
   "divisi",
+  "unit",
   "status_blok",
   "cost_center",
   "amended_from",
@@ -61,7 +62,7 @@
   },
   {
    "fieldname": "jumlah_pokok",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Jumlah Pokok",
    "reqd": 1
   },
@@ -94,13 +95,21 @@
    "label": "Nama Blok",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fetch_from": "divisi.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-15 15:15:25.772932",
+ "modified": "2025-07-17 14:58:33.357243",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

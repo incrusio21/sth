@@ -1,36 +1,95 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-07-17 10:08:17.340065",
+ "creation": "2025-07-24 13:32:21.552866",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_tab",
   "section_break_fbzl",
   "thn_bgt",
+  "company",
   "unit",
   "stt",
   "column_break_lcoo",
   "kd_bkl",
-  "jm_thn",
+  "jm_pr_thn",
   "amended_from",
-  "biaya_mekanik_section",
-  "table_pdrm",
-  "matrerial_section",
-  "table_mwcl",
-  "biaya_lain_section",
-  "table_hxay",
+  "sebaran__section",
+  "januari",
+  "feb",
+  "mar",
+  "apr",
+  "mei",
+  "jun",
+  "column_break_dzod",
+  "jul",
+  "agu",
+  "sep",
+  "okt",
+  "nov",
+  "des",
   "section_break_gtpa",
   "column_break_ybqu",
   "column_break_ckyy",
   "grn_ttl",
   "rp_kmhm",
-  "pmbg"
+  "tab_2_tab",
+  "biaya_mekanik_section",
+  "upah_detail",
+  "bahan_bakar_tab",
+  "detail_section",
+  "bb_detail",
+  "material_tab",
+  "matrerial_section",
+  "material_detail",
+  "biaya_umum_lain_tab",
+  "biaya_lain_section",
+  "bu_detail"
  ],
  "fields": [
+  {
+   "fieldname": "header_tab",
+   "fieldtype": "Tab Break",
+   "label": "Header"
+  },
   {
    "fieldname": "section_break_fbzl",
    "fieldtype": "Section Break",
    "label": "Header"
+  },
+  {
+   "fieldname": "thn_bgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tahun Budget",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "stt",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Aktif\nNonaktif"
+  },
+  {
+   "fieldname": "column_break_lcoo",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -43,68 +102,73 @@
    "search_index": 1
   },
   {
-   "fieldname": "thn_bgt",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Tahun Budget",
-   "options": "Fiscal Year",
-   "reqd": 1
+   "fieldname": "sebaran__section",
+   "fieldtype": "Section Break",
+   "label": "Sebaran % "
   },
   {
-   "fieldname": "unit",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Unit/Kebun",
-   "options": "Unit",
-   "reqd": 1
+   "fieldname": "januari",
+   "fieldtype": "Percent",
+   "label": "Januari"
   },
   {
-   "fieldname": "column_break_lcoo",
+   "fieldname": "feb",
+   "fieldtype": "Percent",
+   "label": "Februari"
+  },
+  {
+   "fieldname": "mar",
+   "fieldtype": "Percent",
+   "label": "Maret"
+  },
+  {
+   "fieldname": "apr",
+   "fieldtype": "Percent",
+   "label": "April"
+  },
+  {
+   "fieldname": "mei",
+   "fieldtype": "Percent",
+   "label": "Mei"
+  },
+  {
+   "fieldname": "jun",
+   "fieldtype": "Percent",
+   "label": "Juni"
+  },
+  {
+   "fieldname": "column_break_dzod",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "kd_bkl",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Kode Bengkel",
-   "reqd": 1
+   "fieldname": "jul",
+   "fieldtype": "Percent",
+   "label": "Juli"
   },
   {
-   "fieldname": "jm_thn",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Total Jam Per Tahun",
-   "reqd": 1
+   "fieldname": "agu",
+   "fieldtype": "Percent",
+   "label": "Agustus"
   },
   {
-   "fieldname": "biaya_mekanik_section",
-   "fieldtype": "Section Break",
-   "label": "Biaya Mekanik"
+   "fieldname": "sep",
+   "fieldtype": "Percent",
+   "label": "September"
   },
   {
-   "fieldname": "table_pdrm",
-   "fieldtype": "Table",
-   "options": "Detail Upah Operator Driver Mekanik"
+   "fieldname": "okt",
+   "fieldtype": "Percent",
+   "label": "Oktober"
   },
   {
-   "fieldname": "matrerial_section",
-   "fieldtype": "Section Break",
-   "label": "Matrerial"
+   "fieldname": "nov",
+   "fieldtype": "Percent",
+   "label": "November"
   },
   {
-   "fieldname": "table_mwcl",
-   "fieldtype": "Table",
-   "options": "Detail Budget Item Tahunan"
-  },
-  {
-   "fieldname": "biaya_lain_section",
-   "fieldtype": "Section Break",
-   "label": "Biaya Lain"
-  },
-  {
-   "fieldname": "table_hxay",
-   "fieldtype": "Table",
-   "options": "Detail Budget Item Tahunan"
+   "fieldname": "des",
+   "fieldtype": "Percent",
+   "label": "Desember"
   },
   {
    "fieldname": "section_break_gtpa",
@@ -119,32 +183,107 @@
    "fieldtype": "Column Break"
   },
   {
+   "bold": 1,
    "fieldname": "grn_ttl",
    "fieldtype": "Currency",
-   "label": "Grandtotal"
+   "label": "Grandtotal",
+   "read_only": 1
   },
   {
    "fieldname": "rp_kmhm",
    "fieldtype": "Currency",
-   "label": "Rp per KM/HM"
+   "label": "Rp per KMHM",
+   "read_only": 1
   },
   {
-   "fieldname": "pmbg",
-   "fieldtype": "Data",
-   "label": "Pembagian Budget Ke Kategori"
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Estimasi Upah"
   },
   {
-   "fieldname": "stt",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Aktif\nNonaktif"
+   "fieldname": "biaya_mekanik_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bahan_bakar_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bahan Bakar"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Material"
+  },
+  {
+   "fieldname": "matrerial_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "biaya_umum_lain_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Umum Lain"
+  },
+  {
+   "fieldname": "biaya_lain_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Bengkel Tahunan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "kd_bkl",
+   "fieldtype": "Link",
+   "label": "Kode Bengkel",
+   "options": "Data Bengkel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jm_pr_thn",
+   "fieldtype": "Int",
+   "label": "Jam Pertahun",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upah_detail",
+   "fieldtype": "Table",
+   "label": "Detail Upah",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "bb_detail",
+   "fieldtype": "Table",
+   "label": "Detail Bahan Bakar",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "material_detail",
+   "fieldtype": "Table",
+   "label": "Detail Material",
+   "options": "Detail item Budget"
+  },
+  {
+   "fieldname": "bu_detail",
+   "fieldtype": "Table",
+   "label": "Detail Biaya Umum",
+   "options": "Detail item Budget"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-17 11:13:25.045933",
+ "modified": "2025-07-28 17:11:44.397038",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Bengkel Tahunan",

@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-16 14:37:58.696071",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "jns_kndr",
+  "jml",
+  "column_break_cnxf",
+  "uom",
+  "rp",
+  "sbttl",
+  "sebaran__per_bulan_section",
+  "rp_jan",
+  "rp_feb",
+  "rp_mar",
+  "rp_apr",
+  "rp_mei",
+  "rp_jun",
+  "column_break_foqs",
+  "rp_jul",
+  "rp_agu",
+  "rp_sep",
+  "rp_okt",
+  "rp_nov",
+  "rp_des"
+ ],
+ "fields": [
+  {
+   "fieldname": "jml",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_cnxf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "jns_kndr.uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Satuan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sebaran__per_bulan_section",
+   "fieldtype": "Section Break",
+   "label": "Sebaran Rupiah"
+  },
+  {
+   "fieldname": "rp_jan",
+   "fieldtype": "Currency",
+   "label": "Januari",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_feb",
+   "fieldtype": "Currency",
+   "label": "Februari",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_mar",
+   "fieldtype": "Currency",
+   "label": "Maret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_apr",
+   "fieldtype": "Currency",
+   "label": "April",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_mei",
+   "fieldtype": "Currency",
+   "label": "Mei",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_jun",
+   "fieldtype": "Currency",
+   "label": "Juni",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_jul",
+   "fieldtype": "Currency",
+   "label": "Juli",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_agu",
+   "fieldtype": "Currency",
+   "label": "Agustus",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_sep",
+   "fieldtype": "Currency",
+   "label": "September",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_okt",
+   "fieldtype": "Currency",
+   "label": "Oktober",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_nov",
+   "fieldtype": "Currency",
+   "label": "November",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp_des",
+   "fieldtype": "Currency",
+   "label": "Desember",
+   "read_only": 1
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "jns_kndr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jenis Kendaraan",
+   "options": "Jenis Alat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "jns_kndr.rp_sat",
+   "fieldname": "rp",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rupiah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_foqs",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-28 16:35:14.698023",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Budget Transpotasi",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

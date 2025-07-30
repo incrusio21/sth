@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:kd_item_bgt",
+ "creation": "2025-07-24 10:11:58.327438",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "kd_item_bgt",
+  "nm_itm_bgt",
+  "uom",
+  "column_break_ncvv",
+  "ktg_kgt",
+  "tipe",
+  "rpsat",
+  "prm"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Satuan",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ncvv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ktg_kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kategori",
+   "options": "Kategori Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Link",
+   "label": "Tipe",
+   "options": "Tipe Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nm_itm_bgt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Item Budget",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rpsat",
+   "fieldtype": "Currency",
+   "label": "Rp/Satuan"
+  },
+  {
+   "fieldname": "kd_item_bgt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kode Item Budget",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "prm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-25 14:34:48.805704",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Tipe Item Budget",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

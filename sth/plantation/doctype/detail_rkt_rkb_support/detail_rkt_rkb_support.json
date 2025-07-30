@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-25 15:58:52.241367",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "dprt",
+  "jbt",
+  "column_break_wdlq",
+  "jml_tk",
+  "es_gj",
+  "es_uph_hk",
+  "sbttl_uph_hk",
+  "sbttl_rp"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "dprt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Departement",
+   "options": "Department",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jbt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jabatan",
+   "options": "Department",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wdlq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jml_tk",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah Tenaga Kerja",
+   "reqd": 1
+  },
+  {
+   "fieldname": "es_gj",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Estimasi Gaji",
+   "reqd": 1
+  },
+  {
+   "fieldname": "es_uph_hk",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Estimasi Upah HK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbttl_uph_hk",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Subtotal Upah HK",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sbttl_rp",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Subtotal Rupiah",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 16:02:42.562082",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail RKT RKB Support",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

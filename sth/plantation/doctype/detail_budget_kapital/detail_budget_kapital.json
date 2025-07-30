@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-24 15:37:03.985847",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "nm_kpt",
+  "jns_kap",
+  "jumlah",
+  "harga",
+  "subttl",
+  "column_break_vbrk"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "nm_kpt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Kapital",
+   "options": "Data Kapital",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "nm_kpt.jns_kap",
+   "fieldname": "jns_kap",
+   "fieldtype": "Data",
+   "label": "Jenis Kapital"
+  },
+  {
+   "fieldname": "column_break_vbrk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jumlah",
+   "fieldtype": "Int",
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "nm_kpt.hargasatuan",
+   "fieldname": "harga",
+   "fieldtype": "Currency",
+   "label": "Harga"
+  },
+  {
+   "fieldname": "subttl",
+   "fieldtype": "Currency",
+   "label": "Subtotal"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-25 09:22:54.060196",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Budget Kapital",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

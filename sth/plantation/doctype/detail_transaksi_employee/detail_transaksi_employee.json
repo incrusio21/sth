@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-22 11:23:24.027335",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "employee",
+  "column_break_ncfn",
+  "jbtn"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ncfn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "jbtn",
+   "fieldtype": "Data",
+   "label": "Jabatan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-22 11:25:25.848496",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Transaksi Employee",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

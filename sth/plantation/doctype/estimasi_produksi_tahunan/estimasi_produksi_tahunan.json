@@ -6,12 +6,13 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_fffr",
-  "periode",
-  "amended_from",
+  "budget_kebun",
   "column_break_ecki",
   "unit",
+  "periode",
+  "amended_from",
   "informasi_blok_section",
-  "table_ojmd",
+  "informasi_blok",
   "section_break_jtej",
   "bjr",
   "ttl_jjg",
@@ -36,34 +37,29 @@
    "search_index": 1
   },
   {
+   "fetch_from": "budget_kebun.periode_budget",
    "fieldname": "periode",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Periode",
-   "options": "Fiscal Year",
-   "reqd": 1
+   "options": "Fiscal Year"
   },
   {
    "fieldname": "column_break_ecki",
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "budget_kebun.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Unit/Kebun",
-   "options": "Unit",
-   "reqd": 1
+   "options": "Unit"
   },
   {
    "fieldname": "informasi_blok_section",
    "fieldtype": "Section Break",
    "label": "Informasi Blok"
-  },
-  {
-   "fieldname": "table_ojmd",
-   "fieldtype": "Table",
-   "options": "Informasi blok"
   },
   {
    "fieldname": "section_break_jtej",
@@ -97,13 +93,27 @@
    "fieldname": "ttl_jp",
    "fieldtype": "Int",
    "label": "Total Jumlah  Pokok"
+  },
+  {
+   "fieldname": "budget_kebun",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Budget Kebun",
+   "options": "Budget Kebun Tahunan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "informasi_blok",
+   "fieldtype": "Table",
+   "label": "Informasi Blok",
+   "options": "Informasi Blok"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-16 14:04:38.643368",
+ "modified": "2025-07-29 09:19:24.059208",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Estimasi Produksi Tahunan",

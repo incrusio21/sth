@@ -1,51 +1,47 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "field:kd_kgt",
  "creation": "2025-07-11 13:58:44.981208",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_adqe",
-  "kode_kegiatan",
-  "nama_kegiatan",
+  "parent_kegiatan",
+  "is_group",
+  "kd_kgt",
+  "nm_kgt",
   "uom",
   "kategori_kegiatan",
   "tipe_kegiatan",
-  "jns_kgt_trk",
   "column_break_exsm",
   "company",
   "kode_perusahaan",
   "divisi",
+  "blok",
   "account",
+  "tp_bbt",
+  "tp_pnn",
+  "old_parent",
+  "lft",
   "column_break_lrzd",
   "v_basis",
   "rp_basis",
-  "p_manual",
-  "is_group",
-  "parent_kegiatan",
-  "setting_denda_panen_section",
-  "lft",
-  "rgt",
-  "old_parent",
-  "amended_from"
+  "pr_prm",
+  "rp_prm",
+  "uph",
+  "upah_brondolan",
+  "rp_prm_mndr",
+  "rp_prm_mndr_1",
+  "rp_prm_krn",
+  "rgt"
  ],
  "fields": [
   {
    "fieldname": "section_break_adqe",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "kode_kegiatan",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Kode Kegiatan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "nama_kegiatan",
-   "fieldtype": "Data",
-   "label": "Nama Kegiatan",
-   "reqd": 1
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "kategori_kegiatan",
@@ -62,16 +58,6 @@
    "label": "Satuan",
    "options": "UOM",
    "reqd": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Kegiatan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "column_break_exsm",
@@ -108,11 +94,11 @@
    "reqd": 1
   },
   {
+   "fetch_from": "blok.divisi",
    "fieldname": "divisi",
    "fieldtype": "Link",
    "label": "Divisi",
-   "options": "Divisi",
-   "reqd": 1
+   "options": "Divisi"
   },
   {
    "fieldname": "column_break_lrzd",
@@ -120,34 +106,15 @@
   },
   {
    "fieldname": "v_basis",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Volume Basis "
   },
   {
    "fieldname": "rp_basis",
-   "fieldtype": "Data",
+   "fieldtype": "Currency",
+   "in_preview": 1,
    "label": "Rupiah/Satuan Basis"
-  },
-  {
-   "default": "0",
-   "fieldname": "p_manual",
-   "fieldtype": "Check",
-   "label": "Panen Manual ?"
-  },
-  {
-   "fieldname": "setting_denda_panen_section",
-   "fieldtype": "Section Break",
-   "label": "Setting Denda Panen"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Kegiatan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "lft",
@@ -175,7 +142,8 @@
    "fieldname": "old_parent",
    "fieldtype": "Link",
    "label": "Old Parent",
-   "options": "Kegiatan"
+   "options": "Kegiatan",
+   "read_only": 1
   },
   {
    "fieldname": "parent_kegiatan",
@@ -185,22 +153,89 @@
    "options": "Kegiatan"
   },
   {
-   "fieldname": "jns_kgt_trk",
+   "fieldname": "nm_kgt",
+   "fieldtype": "Data",
+   "label": "Nama Kegiatan",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "rp_prm",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Rupiah Premi"
+  },
+  {
+   "fieldname": "rp_prm_mndr",
+   "fieldtype": "Currency",
+   "label": "Rupiah Premi Mandor"
+  },
+  {
+   "fieldname": "rp_prm_mndr_1",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Rupiah Premi Mandor 1"
+  },
+  {
+   "fieldname": "pr_prm",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Persentase Premi"
+  },
+  {
+   "fieldname": "tp_bbt",
    "fieldtype": "Link",
+   "label": "Tipe Bibitan",
+   "options": "Tipe Bibitan"
+  },
+  {
+   "fieldname": "tp_pnn",
+   "fieldtype": "Select",
+   "label": "Tipe Panen",
+   "options": "Mekanis\nManual"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "kd_kgt",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Jenis Kegatan Traksi",
-   "options": "Jenis Kegiatan Traksi"
+   "label": "Kode Kegiatan",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "uph",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Upah"
+  },
+  {
+   "fieldname": "rp_prm_krn",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Rupiah Premi Kerani"
+  },
+  {
+   "fieldname": "upah_brondolan",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Upah Brondolan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-07-15 15:26:40.120529",
+ "modified": "2025-07-25 16:49:17.702983",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_kegiatan",
  "owner": "Administrator",
  "permissions": [
@@ -214,12 +249,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
+ "search_fields": "nm_kgt",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

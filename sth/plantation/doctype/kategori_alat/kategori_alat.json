@@ -1,18 +1,20 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:nm_ktg",
  "creation": "2025-07-04 13:27:04.067417",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_1gui",
-  "nama_kategori",
+  "nm_ktg",
   "amended_from"
  ],
  "fields": [
   {
    "fieldname": "section_break_1gui",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "amended_from",
@@ -25,21 +27,22 @@
    "search_index": 1
   },
   {
-   "fieldname": "nama_kategori",
+   "fieldname": "nm_ktg",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Nama Kategori",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-07-04 13:27:44.152344",
+ "modified": "2025-07-24 10:24:14.892256",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kategori Alat",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -52,7 +55,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

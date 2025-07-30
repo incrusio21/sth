@@ -1,34 +1,64 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-07-08 14:49:03.285814",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_tz8v",
-  "amended_from"
+  "naming_series",
+  "no_document_panen",
+  "get_data",
+  "column_break_qfjb",
+  "tanggal_document",
+  "cost_center"
  ],
  "fields": [
   {
    "fieldname": "section_break_tz8v",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
-   "fieldname": "amended_from",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "fieldname": "no_document_panen",
    "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Pengajuan Panen Kontanan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "label": "No Document Panen",
+   "options": "Buku Kerja Mandor Panen"
+  },
+  {
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
+  },
+  {
+   "fieldname": "column_break_qfjb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_document",
+   "fieldtype": "Date",
+   "label": "Tanggal Document"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:49:03.285814",
+ "modified": "2025-07-22 13:21:44.127306",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",
@@ -44,7 +74,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

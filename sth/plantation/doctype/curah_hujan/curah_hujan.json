@@ -15,23 +15,14 @@
   "column_break_fnlg",
   "pagi__mm_",
   "sore__mm_",
-  "amended_from",
-  "is_rainy"
+  "is_rainy",
+  "ket"
  ],
  "fields": [
   {
    "fieldname": "section_break_eunb",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Curah Hujan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "naming_series",
@@ -89,13 +80,17 @@
    "fieldtype": "Date",
    "label": "Tanggal",
    "reqd": 1
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 13:13:38.356772",
+ "modified": "2025-07-24 10:20:06.895679",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Curah Hujan",
@@ -112,7 +107,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

@@ -9,24 +9,16 @@
   "section_break_kqlq",
   "naming_series",
   "tgl_trk",
-  "divisi",
-  "blok",
+  "mdr",
+  "kgt",
   "amended_from",
   "column_break_kkgv",
   "kdr",
   "jk",
-  "mdr",
   "bbm",
   "jmlh_bbm",
   "detail_pekerjaan_section",
-  "kgt",
-  "uom",
-  "ket_dp",
-  "column_break_miyb",
-  "jml_rit",
-  "prestasi",
-  "kmhm_awal",
-  "kmhm_akhir",
+  "table_rsjd",
   "do",
   "nk",
   "jbtn",
@@ -75,13 +67,14 @@
    "reqd": 1
   },
   {
-   "fetch_from": "kdr.kategori_alat",
+   "fetch_from": "kdr.jns_alt",
    "fieldname": "jk",
    "fieldtype": "Link",
    "label": "Jenis Kendaraan",
    "options": "Alat Berat Dan Kendaraan"
   },
   {
+   "fetch_from": "kdr.jns_bbm",
    "fieldname": "bbm",
    "fieldtype": "Select",
    "label": "Jenis BBM",
@@ -95,35 +88,9 @@
    "reqd": 1
   },
   {
-   "fetch_from": "blok.divisi",
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "label": "Divisi",
-   "options": "Divisi",
-   "reqd": 1
-  },
-  {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "options": "Blok",
-   "reqd": 1
-  },
-  {
    "fieldname": "detail_pekerjaan_section",
    "fieldtype": "Section Break",
    "label": "Detail Pekerjaan"
-  },
-  {
-   "fieldname": "kgt",
-   "fieldtype": "Link",
-   "label": "Kegiatan",
-   "options": "Kegiatan Before",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_miyb",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "mdr",
@@ -133,67 +100,36 @@
    "reqd": 1
   },
   {
-   "fetch_from": "kgt.uom",
-   "fieldname": "uom",
-   "fieldtype": "Link",
-   "label": "Satuan",
-   "options": "UOM"
-  },
-  {
-   "fieldname": "jml_rit",
-   "fieldtype": "Int",
-   "label": "Jumlah Rit"
-  },
-  {
-   "fieldname": "prestasi",
-   "fieldtype": "Int",
-   "label": "Prestasi"
-  },
-  {
-   "fetch_from": "kdr.kmhm_akhir",
-   "fieldname": "kmhm_awal",
-   "fieldtype": "Link",
-   "label": "KM/HM Awal",
-   "options": "Alat Berat Dan Kendaraan",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "kdr.kmhm_akhir",
-   "fieldname": "kmhm_akhir",
-   "fieldtype": "Int",
-   "label": "KM/HM Akhir",
-   "options": "Alat Berat Dan Kendaraan",
-   "reqd": 1
-  },
-  {
    "fieldname": "do",
    "fieldtype": "Section Break",
-   "label": "Detail Operator"
+   "label": "Detail Operator/Supir"
   },
   {
+   "fetch_from": "kdr.operator",
    "fieldname": "nk",
-   "fieldtype": "Link",
-   "label": "Nama Karyawan",
-   "options": "Employee",
+   "fieldtype": "Data",
+   "label": "Nama Operator/Supir",
    "reqd": 1
   },
   {
-   "fetch_from": "nk.designation",
+   "fetch_from": "mdr.designation",
    "fieldname": "jbtn",
-   "fieldtype": "Link",
-   "label": "Jabatan",
-   "options": "Employee"
+   "fieldtype": "Data",
+   "label": "Jabatan"
   },
   {
    "fieldname": "column_break_nplu",
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "kgt.upah_traksi",
    "fieldname": "uph",
    "fieldtype": "Currency",
-   "label": "Upah"
+   "label": "Upah",
+   "reqd": 1
   },
   {
+   "fetch_from": "kgt.rp_prm",
    "fieldname": "premi",
    "fieldtype": "Currency",
    "label": "Premi"
@@ -204,16 +140,23 @@
    "label": "Keterangan"
   },
   {
-   "fieldname": "ket_dp",
-   "fieldtype": "Small Text",
-   "label": "Keterangan"
+   "fieldname": "table_rsjd",
+   "fieldtype": "Table",
+   "options": "Detail Pekerjaan Traksi"
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "label": "Kegaiatan",
+   "options": "Kegiatan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-11 13:57:42.593572",
+ "modified": "2025-07-22 11:51:15.434149",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Transaksi Traksi",
