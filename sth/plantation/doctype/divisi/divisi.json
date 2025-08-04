@@ -11,24 +11,13 @@
   "divisi",
   "unit",
   "column_break_zvjq",
-  "cost_center",
-  "amended_from"
+  "cost_center"
  ],
  "fields": [
   {
    "fieldname": "section_break_bugr",
    "fieldtype": "Section Break",
    "label": "Data Divisi"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Divisi",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "column_break_yjct",
@@ -39,8 +28,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Cost Center",
-   "options": "Cost Center",
-   "reqd": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "column_break_zvjq",
@@ -63,9 +51,8 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-07-14 13:00:54.882948",
+ "modified": "2025-07-31 11:35:50.797382",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Divisi",
@@ -82,7 +69,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

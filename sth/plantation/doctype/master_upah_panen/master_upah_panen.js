@@ -1,7 +1,7 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Jenis Alat Dan Kendaraan", {
+// frappe.ui.form.on("Master Upah Panen", {
 // 	refresh(frm) {
 
 // 	},

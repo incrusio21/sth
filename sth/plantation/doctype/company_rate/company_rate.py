@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class DetailItem(Document):
+class CompanyRate(Document):
 	pass

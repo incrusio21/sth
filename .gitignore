@@ -3,5 +3,7 @@
 *.egg-info
 *.swp
 tags
+*patch*.py
+dist
 node_modules
 __pycache__

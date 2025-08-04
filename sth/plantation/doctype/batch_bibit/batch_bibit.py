@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class DetailBudgetTranspotasi(Document):
+class BatchBibit(Document):
 	pass

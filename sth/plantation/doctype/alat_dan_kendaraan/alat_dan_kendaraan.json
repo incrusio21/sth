@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2025-08-01 14:52:35.193966",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_gc4p",
+  "tipe",
+  "uom",
+  "column_break_bkps",
+  "section_break_aody",
+  "company_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_gc4p",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_bkps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "label": "Tipe",
+   "options": "Alat\nKendaraan"
+  },
+  {
+   "fieldname": "section_break_aody",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company_rate",
+   "fieldtype": "Table",
+   "label": "Rupiah per Company",
+   "options": "Company Rate"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-04 14:11:50.726827",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Alat dan Kendaraan",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

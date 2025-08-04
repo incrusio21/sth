@@ -7,16 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_zd5t",
+  "disabled",
   "blok",
   "divisi",
   "unit",
-  "status_blok",
   "cost_center",
-  "amended_from",
   "column_break_yfnz",
   "luas_areal",
   "tahun_tanam",
-  "sph__satuan_pokok_per_hektare_",
+  "sph",
   "jumlah_pokok"
  ],
  "fields": [
@@ -24,16 +23,6 @@
    "fieldname": "section_break_zd5t",
    "fieldtype": "Section Break",
    "label": "Data Blok"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Blok",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "column_break_yfnz",
@@ -54,13 +43,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "sph__satuan_pokok_per_hektare_",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "SPH ( Stand Per Hectare )",
-   "reqd": 1
-  },
-  {
    "fieldname": "jumlah_pokok",
    "fieldtype": "Float",
    "label": "Jumlah Pokok",
@@ -77,16 +59,7 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center",
-   "reqd": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "status_blok",
-   "fieldtype": "Select",
-   "label": "Status Blok",
-   "options": "\nAktif\nNonaktif",
-   "reqd": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "blok",
@@ -103,13 +76,25 @@
    "label": "Unit/Kebun",
    "options": "Unit",
    "read_only": 1
+  },
+  {
+   "fieldname": "sph",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SPH ( Stand Per Hectare )",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-07-17 14:58:33.357243",
+ "modified": "2025-07-31 15:57:13.610692",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",
@@ -126,7 +111,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class JenisAlatDanKendaraan(Document):
+class AlatdanKendaraan(Document):
 	pass
