@@ -70,6 +70,8 @@ app_include_js = "sth.bundle.js"
 # before_install = "sth.install.before_install"
 # after_install = "sth.install.after_install"
 
+boot_session = "sth.startup.boot.boot_session"
+
 # Uninstallation
 # ------------
 
