@@ -8,9 +8,9 @@
  "field_order": [
   "section_break_x5zn",
   "periode_budget",
-  "company",
-  "column_break_wums",
   "unit",
+  "column_break_wums",
+  "company",
   "uph_hr",
   "amended_from"
  ],
@@ -66,7 +66,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-30 14:24:00.166317",
+ "modified": "2025-07-31 11:50:20.754767",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Kebun Tahunan",

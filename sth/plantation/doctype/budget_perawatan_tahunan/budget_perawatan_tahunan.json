@@ -8,61 +8,60 @@
   "header_tab",
   "section_break_fbzl",
   "budget_kebun_tahunan",
-  "divisi",
-  "ktg_kgt",
-  "is_bibitan",
-  "kgt",
-  "column_break_lcoo",
-  "company",
   "unit",
   "thn_bgt",
+  "kategori_kegiatan",
+  "is_bibitan",
+  "kegiatan",
+  "uom",
+  "column_break_lcoo",
+  "company",
+  "divisi",
   "stt",
   "amended_from",
   "sebaran__section",
-  "januari",
-  "feb",
-  "mar",
-  "apr",
-  "mei",
-  "jun",
+  "per_januari",
+  "per_februari",
+  "per_maret",
+  "per_april",
+  "per_mei",
+  "per_juni",
   "column_break_dzod",
-  "jul",
-  "agu",
-  "sep",
-  "okt",
-  "nov",
-  "des",
+  "per_juli",
+  "per_agustus",
+  "per_september",
+  "per_oktober",
+  "per_november",
+  "per_desember",
+  "rekap_section",
+  "upah_perawatan_total",
+  "upah_bibitan_",
+  "material_total",
+  "peralatan_total",
+  "column_break_xaen",
+  "transport_total",
+  "supervisi_total",
+  "grand_total",
+  "ha_per_tahun",
+  "tab_2_tab",
+  "section_break_yovz",
+  "upah_perawatan",
+  "upah_bibitan",
   "section_break_gtpa",
   "column_break_ybqu",
-  "ttl_vlm",
-  "rt_rotasi",
+  "volume_total",
   "column_break_ckyy",
-  "rt_rp_sat",
-  "rekap_section",
-  "ttl_upah",
-  "ttl_mat",
-  "ttl_peralatan",
-  "column_break_xaen",
-  "total_transport",
-  "total_supervisi",
-  "grn_ttl_rkp",
-  "rp_ha_thn",
-  "tab_2_tab",
-  "biaya_mekanik_section",
-  "perawatan_detail",
-  "section_break_bmci",
-  "pembibitan_detail",
+  "mean_rotasi",
   "bahan_bakar_tab",
   "detail_section",
-  "material_detail",
+  "material",
   "material_tab",
   "matrerial_section",
-  "peralatan_detail",
+  "peralatan",
   "biaya_umum_lain_tab",
-  "biaya_lain_section",
-  "transport_detail",
+  "transport",
   "by_um",
-  "supervisi_detail"
+  "supervisi"
  ],
  "fields": [
   {
@@ -76,19 +75,20 @@
    "label": "Header"
   },
   {
+   "fetch_from": "budget_kebun_tahunan.periode_budget",
    "fieldname": "thn_bgt",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Tahun Budget",
-   "options": "Fiscal Year"
+   "options": "Fiscal Year",
+   "read_only": 1
   },
   {
-   "fetch_from": "budget_kebun_tahunan.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Perusahaan",
    "options": "Company",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fetch_from": "budget_kebun_tahunan.unit",
@@ -122,73 +122,14 @@
    "search_index": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "sebaran__section",
    "fieldtype": "Section Break",
    "label": "Sebaran % "
   },
   {
-   "fieldname": "januari",
-   "fieldtype": "Percent",
-   "label": "Januari"
-  },
-  {
-   "fieldname": "feb",
-   "fieldtype": "Percent",
-   "label": "Februari"
-  },
-  {
-   "fieldname": "mar",
-   "fieldtype": "Percent",
-   "label": "Maret"
-  },
-  {
-   "fieldname": "apr",
-   "fieldtype": "Percent",
-   "label": "April"
-  },
-  {
-   "fieldname": "mei",
-   "fieldtype": "Percent",
-   "label": "Mei"
-  },
-  {
-   "fieldname": "jun",
-   "fieldtype": "Percent",
-   "label": "Juni"
-  },
-  {
    "fieldname": "column_break_dzod",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "jul",
-   "fieldtype": "Percent",
-   "label": "Juli"
-  },
-  {
-   "fieldname": "agu",
-   "fieldtype": "Percent",
-   "label": "Agustus"
-  },
-  {
-   "fieldname": "sep",
-   "fieldtype": "Percent",
-   "label": "September"
-  },
-  {
-   "fieldname": "okt",
-   "fieldtype": "Percent",
-   "label": "Oktober"
-  },
-  {
-   "fieldname": "nov",
-   "fieldtype": "Percent",
-   "label": "November"
-  },
-  {
-   "fieldname": "des",
-   "fieldtype": "Percent",
-   "label": "Desember"
   },
   {
    "fieldname": "section_break_gtpa",
@@ -206,12 +147,6 @@
    "fieldname": "tab_2_tab",
    "fieldtype": "Tab Break",
    "label": "Estimasi Upah"
-  },
-  {
-   "depends_on": "eval:!doc.is_bibitan",
-   "fieldname": "biaya_mekanik_section",
-   "fieldtype": "Section Break",
-   "label": "Perawatan"
   },
   {
    "fieldname": "bahan_bakar_tab",
@@ -237,10 +172,6 @@
    "label": "Transport"
   },
   {
-   "fieldname": "biaya_lain_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "by_um",
    "fieldtype": "Tab Break",
    "label": "Supervisi"
@@ -264,88 +195,8 @@
    "reqd": 1
   },
   {
-   "fieldname": "ktg_kgt",
-   "fieldtype": "Link",
-   "label": "Kategori Kegiatan",
-   "options": "Kategori Kegiatan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "kgt",
-   "fieldtype": "Link",
-   "label": "Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.is_bibitan",
-   "fieldname": "section_break_bmci",
-   "fieldtype": "Section Break",
-   "label": "Pembibitan"
-  },
-  {
-   "fieldname": "ttl_vlm",
-   "fieldtype": "Currency",
-   "label": "Total Volume",
-   "read_only": 1
-  },
-  {
-   "fieldname": "rt_rotasi",
-   "fieldtype": "Currency",
-   "label": "Rata2 Rotasi",
-   "read_only": 1
-  },
-  {
-   "fieldname": "rt_rp_sat",
-   "fieldtype": "Currency",
-   "label": "Rata2 Rupiah Satuan",
-   "read_only": 1
-  },
-  {
-   "fieldname": "ttl_upah",
-   "fieldtype": "Currency",
-   "label": "Total Upah",
-   "read_only": 1
-  },
-  {
-   "fieldname": "ttl_mat",
-   "fieldtype": "Currency",
-   "label": "Total Material",
-   "read_only": 1
-  },
-  {
-   "fieldname": "ttl_peralatan",
-   "fieldtype": "Currency",
-   "label": "Total Peralatan",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_xaen",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "total_transport",
-   "fieldtype": "Currency",
-   "label": "Total Transport",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_supervisi",
-   "fieldtype": "Currency",
-   "label": "Total Supervisi",
-   "read_only": 1
-  },
-  {
-   "fieldname": "grn_ttl_rkp",
-   "fieldtype": "Currency",
-   "label": "Grandtotal",
-   "read_only": 1
-  },
-  {
-   "fieldname": "rp_ha_thn",
-   "fieldtype": "Currency",
-   "label": "Rp/HA/Tahun",
-   "read_only": 1
   },
   {
    "fieldname": "budget_kebun_tahunan",
@@ -355,20 +206,8 @@
    "reqd": 1
   },
   {
-   "fieldname": "perawatan_detail",
-   "fieldtype": "Table",
-   "label": "Detail Perawatan",
-   "options": "Detail Budget Upah Perawatan"
-  },
-  {
-   "fieldname": "pembibitan_detail",
-   "fieldtype": "Table",
-   "label": "Detail Pembibitan",
-   "options": "Detail Budget Upah Pembibitan"
-  },
-  {
    "default": "0",
-   "fetch_from": "ktg_kgt.is_bibitan",
+   "fetch_from": "kategori_kegiatan.is_bibitan",
    "fieldname": "is_bibitan",
    "fieldtype": "Check",
    "hidden": 1,
@@ -376,43 +215,203 @@
    "read_only": 1
   },
   {
-   "description": "Based on Item",
-   "fieldname": "material_detail",
-   "fieldtype": "Table",
-   "label": "Detail Material",
-   "options": "Detail item Budget"
-  },
-  {
-   "description": "Based on Item",
-   "fieldname": "peralatan_detail",
-   "fieldtype": "Table",
-   "label": "Detail Peralatan",
-   "options": "Detail item Budget"
-  },
-  {
-   "fieldname": "transport_detail",
-   "fieldtype": "Table",
-   "label": "Detail Transport",
-   "options": "Detail Budget Transpotasi"
-  },
-  {
-   "description": "Based on Item Budget",
-   "fieldname": "supervisi_detail",
-   "fieldtype": "Table",
-   "label": "Detail Supervisi",
-   "options": "Detail item Budget"
-  },
-  {
    "fieldname": "rekap_section",
    "fieldtype": "Section Break",
    "label": "Rekap"
+  },
+  {
+   "fetch_from": "kegiatan.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "section_break_yovz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "upah_perawatan",
+   "fieldtype": "Table",
+   "label": "Detail Perawatan",
+   "options": "Detail Budget Upah Perawatan"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "upah_bibitan",
+   "fieldtype": "Table",
+   "label": "Detail Bibitan",
+   "options": "Detail Budget Upah Pembibitan"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kategori_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kategori Kegiatan",
+   "options": "Kategori Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "per_januari",
+   "fieldtype": "Percent",
+   "label": "Januari"
+  },
+  {
+   "fieldname": "per_februari",
+   "fieldtype": "Percent",
+   "label": "Februari"
+  },
+  {
+   "fieldname": "per_maret",
+   "fieldtype": "Percent",
+   "label": "Maret"
+  },
+  {
+   "fieldname": "per_april",
+   "fieldtype": "Percent",
+   "label": "April"
+  },
+  {
+   "fieldname": "per_mei",
+   "fieldtype": "Percent",
+   "label": "Mei"
+  },
+  {
+   "fieldname": "per_juni",
+   "fieldtype": "Percent",
+   "label": "Juni"
+  },
+  {
+   "fieldname": "per_juli",
+   "fieldtype": "Percent",
+   "label": "Juli"
+  },
+  {
+   "fieldname": "per_agustus",
+   "fieldtype": "Percent",
+   "label": "Agustus"
+  },
+  {
+   "fieldname": "per_september",
+   "fieldtype": "Percent",
+   "label": "September"
+  },
+  {
+   "fieldname": "per_oktober",
+   "fieldtype": "Percent",
+   "label": "Oktober"
+  },
+  {
+   "fieldname": "per_november",
+   "fieldtype": "Percent",
+   "label": "November"
+  },
+  {
+   "fieldname": "per_desember",
+   "fieldtype": "Percent",
+   "label": "Desember"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Detail Material",
+   "options": "Detail Budget Material"
+  },
+  {
+   "fieldname": "peralatan",
+   "fieldtype": "Table",
+   "label": "Detail Peralatan",
+   "options": "Detail Budget Peralatan"
+  },
+  {
+   "fieldname": "transport",
+   "fieldtype": "Table",
+   "label": "Detail Transport",
+   "options": "Detail Budget Transportasi"
+  },
+  {
+   "fieldname": "supervisi",
+   "fieldtype": "Table",
+   "label": "Detail Supervisi",
+   "options": "Detail Budget Supervisi"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ha_per_tahun",
+   "fieldtype": "Currency",
+   "label": "Rp/HA/Tahun",
+   "read_only": 1
+  },
+  {
+   "fieldname": "volume_total",
+   "fieldtype": "Float",
+   "label": "Total Volume",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "upah_perawatan_total",
+   "fieldtype": "Currency",
+   "label": "Total Upah Perawatan",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "upah_bibitan_",
+   "fieldtype": "Currency",
+   "label": "Total Upah Bibitan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_total",
+   "fieldtype": "Currency",
+   "label": "Total Material",
+   "read_only": 1
+  },
+  {
+   "fieldname": "peralatan_total",
+   "fieldtype": "Currency",
+   "label": "Total Peralatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transport_total",
+   "fieldtype": "Currency",
+   "label": "Total Transport",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supervisi_total",
+   "fieldtype": "Currency",
+   "label": "Total Supervisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mean_rotasi",
+   "fieldtype": "Float",
+   "label": "Rata2 Rotasi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-28 16:25:17.978471",
+ "modified": "2025-08-04 11:49:52.068792",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Perawatan Tahunan",
