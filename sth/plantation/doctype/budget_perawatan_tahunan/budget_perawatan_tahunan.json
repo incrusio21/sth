@@ -122,7 +122,6 @@
    "search_index": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "sebaran__section",
    "fieldtype": "Section Break",
    "label": "Sebaran % "
@@ -228,7 +227,6 @@
    "options": "UOM"
   },
   {
-   "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "section_break_yovz",
    "fieldtype": "Section Break"
   },
@@ -261,61 +259,73 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "per_januari",
    "fieldtype": "Percent",
    "label": "Januari"
   },
   {
+   "default": "0",
    "fieldname": "per_februari",
    "fieldtype": "Percent",
    "label": "Februari"
   },
   {
+   "default": "0",
    "fieldname": "per_maret",
    "fieldtype": "Percent",
    "label": "Maret"
   },
   {
+   "default": "0",
    "fieldname": "per_april",
    "fieldtype": "Percent",
    "label": "April"
   },
   {
+   "default": "0",
    "fieldname": "per_mei",
    "fieldtype": "Percent",
    "label": "Mei"
   },
   {
+   "default": "0",
    "fieldname": "per_juni",
    "fieldtype": "Percent",
    "label": "Juni"
   },
   {
+   "default": "0",
    "fieldname": "per_juli",
    "fieldtype": "Percent",
    "label": "Juli"
   },
   {
+   "default": "0",
    "fieldname": "per_agustus",
    "fieldtype": "Percent",
    "label": "Agustus"
   },
   {
+   "default": "0",
    "fieldname": "per_september",
    "fieldtype": "Percent",
    "label": "September"
   },
   {
+   "default": "0",
    "fieldname": "per_oktober",
    "fieldtype": "Percent",
    "label": "Oktober"
   },
   {
+   "default": "0",
    "fieldname": "per_november",
    "fieldtype": "Percent",
    "label": "November"
   },
   {
+   "default": "0",
    "fieldname": "per_desember",
    "fieldtype": "Percent",
    "label": "Desember"
@@ -411,7 +421,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 11:49:52.068792",
+ "modified": "2025-08-05 10:03:53.454525",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Perawatan Tahunan",

@@ -19,12 +19,14 @@ class BudgetPerawatanTahunan(BudgetController):
 
 	def set_volume_total(self):
 		table_field = self.get("upah_bibitan" if self.is_bibitan else "upah_perawatan")
-		
+		self.volume_total = self.mean_rotasi = self.ha_per_tahun = 0.0
 		volume_total = mean_rotasi = 0.0
+		
 		for item in table_field:
 			volume_total += item.qty
 			mean_rotasi += item.rotasi
 
-		self.volume_total = flt(volume_total)
-		self.mean_rotasi = flt(mean_rotasi/len(table_field))
-		self.ha_per_tahun = flt(self.grand_total / self.volume_total)
+		if table_field:
+			self.volume_total = flt(volume_total)
+			self.mean_rotasi = flt(mean_rotasi/len(table_field))
+			self.ha_per_tahun = flt(self.grand_total / self.volume_total)
