@@ -104,24 +104,11 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
     kategori_kegiatan(){
         this.frm.set_value("kegiatan", "")
         this.frm.set_value("divisi", "")
-        this.clear_table()
-    }
-
-    rotasi(_, cdt, cdn){
-        let items = frappe.get_doc(cdt, cdn)
-        
-        let table_name = this.frm.doc[items.parentfield] || []
-        let mean_rotasi = 0.0
-        
-        for (const item of table_name) {
-           mean_rotasi += item.rotasi
-        }
-
-        this.frm.set_value("mean_rotasi", flt(mean_rotasi/table_name.length, precision("mean_rotasi", this.frm.doc)))
+        this.clear_table(["upah_perawatan", "upah_bibitan"])
     }
 
     divisi(doc){
-        this.clear_table()
+        this.clear_table(["upah_perawatan", "upah_bibitan"])
 
         // jika kegiatan bibitan skip popup
         if(doc.is_bibitan || !doc.divisi) return
@@ -133,20 +120,12 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
     }
 
     after_calculate_grand_total(){
-        // tambah volume total dari table upah bibitan/perawatan
-        let table_field = this.frm.doc.is_bibitan ? "upah_bibitan" : "upah_perawatan"
-        let table_name = this.frm.doc[table_field] || []
-		let volume_total = 0.0
-        let mean_rotasi = 0.0
-
-        for (const item of table_name) {
-           volume_total += item.qty
-           mean_rotasi += item.rotasi
-        }
-
-		this.frm.doc.volume_total = volume_total
-		this.frm.doc.mean_rotasi = flt(mean_rotasi / table_name.length, precision("mean_rotasi", this.frm.doc))
-        this.frm.doc.ha_per_tahun = flt(this.frm.doc.grand_total / this.frm.doc.volume_total, precision("ha_per_tahun", this.frm.doc));
+        // biaya per tahun = grand total / qty table bibitan atau perawatan
+        let table_name = this.frm.doc.is_bibitan ? "upah_bibitan" : "upah_perawatan"
+        this.frm.doc.ha_per_tahun = flt(
+            this.frm.doc.grand_total / this.frm.doc[`${table_name}_qty`], 
+            precision("ha_per_tahun", this.frm.doc)
+        );
     }
 }
 

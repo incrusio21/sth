@@ -51,6 +51,10 @@ sth.plantation = {
                 this.calculate_total(cdt, cdn)
             }
             
+            rotasi(_, cdt, cdn){
+                this.calculate_total(cdt, cdn)
+            }
+
             // mempersingkat structur koding
             doctype_ref(dict){
                 return sth.plantation.doctype_ref[this.frm.doc.doctype][dict]
@@ -67,15 +71,24 @@ sth.plantation = {
 
             calculate_item_values(table_name){
                 let total_amount = 0.0;
+                let mean_rotasi = 0.0
+                let volume_total = 0.0
+                let data_table = this.frm.doc[table_name] || []
 
-                for (const item of this.frm.doc[table_name] || []) {
-                    item.amount = flt(item.rate * item.qty, precision("amount", item));
+                // menghitung amount, rotasi, qty
+                for (const item of data_table) {
                     total_amount += item.amount;
+                    mean_rotasi += item.rotasi || 0
+                    volume_total += item.qty
+                    // rate * qty * rotasi jika ada
+                    item.amount = flt(item.rate * item.qty * (item.rotasi || 1), precision("amount", item));
 
                     this.calculate_sebaran_values(item)
                 }
                 
                 this.frm.doc[`${table_name}_total`] = total_amount;
+                this.frm.doc[`${table_name}_qty`] = volume_total;
+                this.frm.doc[`${table_name}_rotasi`] = mean_rotasi / data_table.length;
             }
 
             calculate_sebaran_values(item){
@@ -215,10 +228,10 @@ sth.plantation = {
                 })
             }
 
-            clear_table(){
-                for (const field_table of this.doctype_ref("table_fieldname")) {
+            clear_table(list_table=[]){
+                for (const field_table of list_table || this.doctype_ref("table_fieldname")) {
                     this.frm.clear_table(field_table)
-                    this.frm.doc[`total_${field_table}`] = 0;
+                    this.calculate_item_values(field_table)
                 }
 
                 this.calculate_grand_total();

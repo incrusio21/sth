@@ -33,8 +33,9 @@ class BudgetController(Document):
     def calculate_sebaran_values(self, item):
         total_sebaran = 0.0
         for month in MONTHS:
+            per_month = flt(self.get(f"per_{month}"))
             item.set(f"rp_{month}", 
-                flt(item.amount * (self.get(f"per_{month}") / 100))
+                flt(item.amount * (per_month / 100))
             )
 
             total_sebaran += item.get(f"rp_{month}")
