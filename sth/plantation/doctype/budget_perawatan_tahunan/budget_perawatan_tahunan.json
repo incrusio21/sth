@@ -46,12 +46,17 @@
   "tab_2_tab",
   "section_break_yovz",
   "upah_perawatan",
-  "upah_bibitan",
   "section_break_gtpa",
   "column_break_ybqu",
-  "volume_total",
+  "upah_perawatan_qty",
   "column_break_ckyy",
-  "mean_rotasi",
+  "upah_perawatan_rotasi",
+  "section_break_niam",
+  "upah_bibitan",
+  "section_break_ysau",
+  "upah_bibitan_qty",
+  "column_break_nxuv",
+  "upah_bibitan_rotasi",
   "bahan_bakar_tab",
   "detail_section",
   "material",
@@ -131,6 +136,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "section_break_gtpa",
    "fieldtype": "Section Break"
   },
@@ -227,18 +233,17 @@
    "options": "UOM"
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "section_break_yovz",
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "upah_perawatan",
    "fieldtype": "Table",
    "label": "Detail Perawatan",
    "options": "Detail Budget Upah Perawatan"
   },
   {
-   "depends_on": "eval:doc.is_bibitan",
    "fieldname": "upah_bibitan",
    "fieldtype": "Table",
    "label": "Detail Bibitan",
@@ -367,12 +372,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "volume_total",
-   "fieldtype": "Float",
-   "label": "Total Volume",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "upah_perawatan_total",
    "fieldtype": "Currency",
@@ -411,7 +410,39 @@
    "read_only": 1
   },
   {
-   "fieldname": "mean_rotasi",
+   "fieldname": "upah_perawatan_qty",
+   "fieldtype": "Float",
+   "label": "Total Volume",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upah_perawatan_rotasi",
+   "fieldtype": "Float",
+   "label": "Rata2 Rotasi",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "section_break_niam",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "section_break_ysau",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "upah_bibitan_qty",
+   "fieldtype": "Float",
+   "label": "Total Volume",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nxuv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upah_bibitan_rotasi",
    "fieldtype": "Float",
    "label": "Rata2 Rotasi",
    "read_only": 1
@@ -421,7 +452,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-05 10:03:53.454525",
+ "modified": "2025-08-05 10:49:28.160422",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Perawatan Tahunan",
