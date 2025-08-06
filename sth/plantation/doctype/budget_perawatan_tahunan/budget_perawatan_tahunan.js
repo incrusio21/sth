@@ -69,6 +69,18 @@ frappe.ui.form.on("Budget Perawatan Tahunan", {
                 }
 		    }
 		})
+    },
+
+    divisi(frm){
+        frm.cscript.clear_table(["upah_perawatan", "upah_bibitan"])
+
+        // jika kegiatan bibitan skip popup
+        if(frm.doc.is_bibitan || !frm.doc.divisi) return
+
+        frm.cscript.add_blok_in_table("upah_perawatan",
+            { divisi: frm.doc.divisi }, 
+            { "uom": frm.doc.uom }
+        )
     }
 });
 
@@ -105,18 +117,6 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
         this.frm.set_value("kegiatan", "")
         this.frm.set_value("divisi", "")
         this.clear_table(["upah_perawatan", "upah_bibitan"])
-    }
-
-    divisi(doc){
-        this.clear_table(["upah_perawatan", "upah_bibitan"])
-
-        // jika kegiatan bibitan skip popup
-        if(doc.is_bibitan || !doc.divisi) return
-
-        this.add_blok_in_table({ divisi: doc.divisi }, 
-            "upah_perawatan", 
-            { "uom": doc.uom }
-        )
     }
 
     after_calculate_grand_total(){

@@ -34,13 +34,13 @@
   "per_november",
   "per_desember",
   "rekap_section",
-  "upah_perawatan_total",
-  "upah_bibitan_",
-  "material_total",
-  "peralatan_total",
+  "upah_perawatan_amount",
+  "upah_bibitan_amount",
+  "material_amount",
+  "peralatan_amount",
   "column_break_xaen",
-  "transport_total",
-  "supervisi_total",
+  "transport_amount",
+  "supervisi_amount",
   "grand_total",
   "ha_per_tahun",
   "tab_2_tab",
@@ -372,44 +372,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.is_bibitan",
-   "fieldname": "upah_perawatan_total",
-   "fieldtype": "Currency",
-   "label": "Total Upah Perawatan",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.is_bibitan",
-   "fieldname": "upah_bibitan_",
-   "fieldtype": "Currency",
-   "label": "Total Upah Bibitan",
-   "read_only": 1
-  },
-  {
-   "fieldname": "material_total",
-   "fieldtype": "Currency",
-   "label": "Total Material",
-   "read_only": 1
-  },
-  {
-   "fieldname": "peralatan_total",
-   "fieldtype": "Currency",
-   "label": "Total Peralatan",
-   "read_only": 1
-  },
-  {
-   "fieldname": "transport_total",
-   "fieldtype": "Currency",
-   "label": "Total Transport",
-   "read_only": 1
-  },
-  {
-   "fieldname": "supervisi_total",
-   "fieldtype": "Currency",
-   "label": "Total Supervisi",
-   "read_only": 1
-  },
-  {
    "fieldname": "upah_perawatan_qty",
    "fieldtype": "Float",
    "label": "Total Volume",
@@ -446,13 +408,51 @@
    "fieldtype": "Float",
    "label": "Rata2 Rotasi",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "upah_perawatan_amount",
+   "fieldtype": "Currency",
+   "label": "Total Upah Perawatan",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "upah_bibitan_amount",
+   "fieldtype": "Currency",
+   "label": "Total Upah Bibitan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_amount",
+   "fieldtype": "Currency",
+   "label": "Total Material",
+   "read_only": 1
+  },
+  {
+   "fieldname": "peralatan_amount",
+   "fieldtype": "Currency",
+   "label": "Total Peralatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transport_amount",
+   "fieldtype": "Currency",
+   "label": "Total Transport",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supervisi_amount",
+   "fieldtype": "Currency",
+   "label": "Total Supervisi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-05 10:49:28.160422",
+ "modified": "2025-08-06 14:42:40.055035",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Perawatan Tahunan",
