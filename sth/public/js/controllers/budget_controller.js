@@ -5,6 +5,7 @@ sth.plantation = {
         sth.plantation.BudgetController = class BudgetController extends frappe.ui.form.Controller {
             setup(doc) {
                 let doctype = doc.doctype
+                this.skip_table_amount = []
                 // check daftar fieldname dengan total didalamny untuk d gabungkan ke grand_total
                 if(!sth.plantation.doctype_ref[doctype]){
                     sth.plantation.setup_doctype_ref(doctype)
@@ -70,25 +71,30 @@ sth.plantation = {
             }
 
             calculate_item_values(table_name){
-                let total_amount = 0.0;
-                let mean_rotasi = 0.0
-                let volume_total = 0.0
+                let total = {"amount": 0, "qty": 0, "rotasi": 0}
+                let total_rotasi = 0.0
                 let data_table = this.frm.doc[table_name] || []
-
+                
                 // menghitung amount, rotasi, qty
                 for (const item of data_table) {
-                    total_amount += item.amount;
-                    mean_rotasi += item.rotasi || 0
-                    volume_total += item.qty
-                    // rate * qty * rotasi jika ada
+                    // rate * qty * (rotasi jika ada)
                     item.amount = flt(item.rate * item.qty * (item.rotasi || 1), precision("amount", item));
+
+                    total["amount"] += item.amount;
+                    total["qty"] += item.qty
+                    total_rotasi += item.rotasi || 0
 
                     this.calculate_sebaran_values(item)
                 }
                 
-                this.frm.doc[`${table_name}_total`] = total_amount;
-                this.frm.doc[`${table_name}_qty`] = volume_total;
-                this.frm.doc[`${table_name}_rotasi`] = mean_rotasi / data_table.length;
+                total["rotasi"] = total_rotasi / data_table.length;
+                
+                for (const total_field of ["amount", "qty", "rotasi"]) {
+                    let fieldname = `${table_name}_${total_field}`
+                    if (!this.frm.fields_dict[fieldname]) continue;
+
+                    this.frm.doc[fieldname] = total[total_field];
+                }
             }
 
             calculate_sebaran_values(item){
@@ -96,7 +102,7 @@ sth.plantation = {
                 let total_sebaran = 0.0
                 for (const month of sth.plantation.month) {
                     const percentField = `per_${month}`;
-                    const amountField = `rp_${month}`;  // rp_jan, rp_feb, dst
+                    const amountField = `rp_${month}`;
                     
                     item[amountField] = flt(
                         item.amount * (this.frm.doc[percentField] / 100),
@@ -113,7 +119,9 @@ sth.plantation = {
             calculate_grand_total(){
                 let grand_total = 0.0
                 for (const field of this.doctype_ref("table_fieldname")) {
-                    grand_total += this.frm.doc[`${field}_total`] || 0;
+                    if(in_list(this.skip_table_amount, field)) continue;
+                    
+                    grand_total += this.frm.doc[`${field}_amount`] || 0;
                 }
 
                 this.frm.doc.grand_total = grand_total
@@ -146,13 +154,30 @@ sth.plantation = {
                     },
                     {
                         fieldtype: "Int",
-                        fieldname: "vlm",
+                        fieldname: "luas_areal",
                         in_list_view: 1,
                         read_only: 1,
                         disabled: 0,
                         label: __("Luas Areal")
                     },
                 ]
+
+                fields.push(
+                    {
+                        fieldtype: "Int",
+                        fieldname: "sph",
+                        in_list_view: 1,
+                        read_only: 1,
+                        label: __("SPH")
+                    },
+                    {
+                        fieldtype: "Int",
+                        fieldname: "jumlah_pokok",
+                        in_list_view: 1,
+                        read_only: 1,
+                        label: __("Jumlah Pokok")
+                    },
+                )
 
                 frappe.call({
                     method: "sth.plantation.utils.get_blok",
@@ -197,7 +222,9 @@ sth.plantation = {
                 })
             }
 
-            add_blok_in_table(args, blok_table, default_field={}){
+            add_blok_in_table(blok_table, args, default_field={}){
+                let me = this
+
                 this.get_blok_list(args, (data) => {
                     let cur_grid = this.frm.fields_dict[blok_table].grid;
                     data.forEach(blok => {
@@ -225,6 +252,7 @@ sth.plantation = {
                     });
 
                     refresh_field(blok_table);
+                    me.frm.get_field(blok_table).tab.set_active();
                 })
             }
 
