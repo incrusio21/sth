@@ -6,7 +6,7 @@ import frappe
 @frappe.whitelist()
 def get_blok(divisi):
     filters = { "divisi": divisi }
-    fields = ["name as item", "tahun_tanam", "luas_areal as vlm"]
+    fields = ["name as item", "tahun_tanam", "luas_areal", "sph", "jumlah_pokok"]
 
     return frappe.get_all("Blok", filters=filters, fields=fields)
 
