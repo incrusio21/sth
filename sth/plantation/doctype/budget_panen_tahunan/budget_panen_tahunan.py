@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 # import frappe
-from frappe.model.document import Document
+from sth.controllers.budget_controller import BudgetController
 
-
-class BudgetPanenTahunan(Document):
-	pass
+class BudgetPanenTahunan(BudgetController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.skip_table_amount = ["tonase"]
