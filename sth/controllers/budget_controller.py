@@ -22,13 +22,18 @@ class BudgetController(Document):
 
     def calculate_item_values(self):
         for df in self._get_table_fields():
-            amount_total = 0.0
-            for d in self.get(df.fieldname):
-                d.amount = flt(d.rate * d.qty)
+            amount_total = volume_total = rotasi_total = 0.0
+            table_item = self.get(df.fieldname)
+            for d in table_item:
+                d.amount = flt(d.rate * d.qty * (d.get("rotasi") or 1))
                 self.calculate_sebaran_values(d)
                 amount_total += d.amount
+                volume_total += d.qty
+                rotasi_total += d.get("rotasi") or 0
 
             self.set(f"{df.fieldname}_total", amount_total)
+            self.set(f"{df.fieldname}_qty", volume_total)
+            self.set(f"{df.fieldname}_rotasi", (rotasi_total / len(table_item) if table_item else 0) )
             
     def calculate_sebaran_values(self, item):
         total_sebaran = 0.0
