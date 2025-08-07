@@ -19,4 +19,4 @@ class BudgetPerawatanTahunan(BudgetController):
 
 	def set_ha_per_tahun(self):
 		table_field = "upah_bibitan" if self.is_bibitan else "upah_perawatan"
-		self.ha_per_tahun = flt(self.grand_total / self.get(f"{table_field}_qty"))
+		self.ha_per_tahun = flt(self.grand_total / self.get(f"{table_field}_qty"), self.precision("ha_per_tahun"))
