@@ -72,6 +72,7 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -171,7 +172,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-04 13:23:11.762840",
+ "modified": "2025-08-04 17:19:42.396149",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Budget Upah Perawatan",

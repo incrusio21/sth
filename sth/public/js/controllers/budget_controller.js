@@ -44,6 +44,24 @@ sth.plantation = {
                 this.frm.set_value("budget_kebun_tahunan", "")
             }
 
+            item(doc, cdt, cdn){
+                let data = frappe.get_doc(cdt, cdn)
+                let doctype = this.frm.fields_dict[data.parentfield].grid.fields_map.item.options;
+
+                frappe.call({
+                    method: "sth.plantation.utils.get_rate_item",
+                    args: {
+                        item: data.item,
+                        doctype: doctype,
+                        company: doc.company
+                    },
+                    freeze: true,
+                    callback: function (data) {
+                        frappe.model.set_value(cdt, cdn, "rate", data.message.rate)
+                    }
+                })
+            }
+            
             qty(_, cdt, cdn){
                 this.calculate_total(cdt, cdn)
             }
