@@ -12,7 +12,7 @@
   "thn_bgt",
   "column_break_lcoo",
   "company",
-  "kd_bkl",
+  "kode_bengkel",
   "jam_per_tahun",
   "stt",
   "amended_from",
@@ -182,13 +182,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "kd_bkl",
-   "fieldtype": "Link",
-   "label": "Kode Bengkel",
-   "options": "Data Bengkel",
-   "reqd": 1
-  },
-  {
    "fieldname": "budget_kebun_tahunan",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -328,13 +321,20 @@
    "fieldtype": "Currency",
    "label": "Biaya Umum Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "kode_bengkel",
+   "fieldtype": "Link",
+   "label": "Kode Bengkel",
+   "options": "Data Bengkel",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-07 15:20:12.411528",
+ "modified": "2025-08-11 10:00:12.730789",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Bengkel Tahunan",
