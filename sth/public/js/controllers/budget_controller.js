@@ -16,8 +16,15 @@ sth.plantation = {
                     frappe.ui.form.on(doctype, `per_${month}`, function() {
                         // update sebaran di semua table
                         me.doctype_ref("table_fieldname").forEach(table_ref => {
+                            let per_month_table = Object.keys(
+                                me.frm.fields_dict[table_ref].grid.fields_map
+                            ).filter(key => key.includes("rp_"));
+                            // jika tidak ada fieldname degan kata per_ skip sebaran
+
+                            if(per_month_table.length == 0) return
+                            
                             for (const item of me.frm.doc[table_ref] || []) {
-                                me.calculate_sebaran_values(item)
+                                me.calculate_sebaran_values(item, per_month_table)
                             }
                         });
 
@@ -89,9 +96,14 @@ sth.plantation = {
             }
 
             calculate_item_values(table_name){
+                let me = this
                 let total = {"amount": 0, "qty": 0, "rotasi": 0}
                 let total_rotasi = 0.0
-                let data_table = this.frm.doc[table_name] || []
+                let data_table = me.frm.doc[table_name] || []
+                
+                let per_month_table = Object.keys(
+                    me.frm.fields_dict[table_name].grid.fields_map
+                ).filter(key => key.includes("rp_"));
                 
                 // menghitung amount, rotasi, qty
                 for (const item of data_table) {
@@ -102,7 +114,10 @@ sth.plantation = {
                     total["qty"] += item.qty
                     total_rotasi += item.rotasi || 0
 
-                    this.calculate_sebaran_values(item)
+                    // jika tidak ada fieldname degan kata per_ skip sebaran
+                    if(per_month_table.length > 0){
+                        this.calculate_sebaran_values(item, per_month_table)
+                    }
                 }
                 
                 total["rotasi"] = total_rotasi / data_table.length;
@@ -115,22 +130,15 @@ sth.plantation = {
                 }
             }
 
-            calculate_sebaran_values(item){
+            calculate_sebaran_values(item, months=[]){
                 // set nilai sebaran
-                let total_sebaran = 0.0
-                for (const month of sth.plantation.month) {
-                    const percentField = `per_${month}`;
-                    const amountField = `rp_${month}`;
+                for (const month of months) {
+                    let per_month = month.replace(/^rp_/, "per_")
                     
-                    item[amountField] = flt(
-                        item.amount * (this.frm.doc[percentField] / 100),
-                        precision(amountField, item)
+                    item[month] = flt(
+                        item.amount * (this.frm.doc[per_month] / 100),
+                        precision(month, item)
                     );
-                    total_sebaran += item[amountField]
-                }
-
-                if(total_sebaran > item.amount){
-                    frappe.throw("Distribution exceeds 100%. Please recheck your input.")
                 }
             }
 

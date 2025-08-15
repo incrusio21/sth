@@ -28,9 +28,13 @@ class BudgetController(Document):
             table_item = self.get(df.fieldname)
             # set precision setiap table agar pembulatan selalu sama
             precision = frappe.get_precision(df.options, "amount")
+
+            # cari fieldname dengan kata rp pada table
+            per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(df.options).get_valid_columns()))
             for d in table_item:
                 d.amount = flt(d.rate * d.qty * (d.get("rotasi") or 1), precision)
-                self.calculate_sebaran_values(d)
+                if per_month_table:
+                    self.calculate_sebaran_values(d, per_month_table)
 
                 total["amount"] += d.amount
                 total["qty"] += d.qty
@@ -44,24 +48,16 @@ class BudgetController(Document):
                 
                 self.set(fieldname, flt(total[total_field], self.precision(fieldname)))
             
-    def calculate_sebaran_values(self, item):
-        total_sebaran = 0.0
+    def calculate_sebaran_values(self, item, sebaran_list=[]):
         # hitung nilai sebaran selama 12 bulan
-        for month in MONTHS:
-            per_field = f"per_{month}"
-            amount_field = f"rp_{month}"
+        for sbr in sebaran_list:
+            per_field = sbr.replace("rp_", "per_")
 
             # default 0 frappe selalu berbentuk string
             per_month = flt(self.get(per_field))
-            item.set(amount_field, 
-                flt(item.amount * (per_month / 100), item.precision(amount_field))
+            item.set(sbr, 
+                flt(item.amount * (per_month / 100), item.precision(sbr))
             )
-            
-            # pembanding dengan nilai amount jika melebihi 100%
-            total_sebaran += item.get(amount_field)
-
-        if total_sebaran > item.amount:
-            frappe.throw(_("Distribution exceeds 100%. Please recheck your input."))
 
     def calculate_grand_total(self):
         grand_total = 0.0

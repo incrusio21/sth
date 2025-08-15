@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 # import frappe
-from sth.controllers.budget_controller import BudgetController
+from frappe.model.document import Document
 
-class BudgetSupervisiTahunan(BudgetController):
+
+class DetailBudgetDistribusi(Document):
 	pass
