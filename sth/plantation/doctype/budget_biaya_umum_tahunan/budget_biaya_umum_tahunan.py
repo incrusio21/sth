@@ -2,8 +2,7 @@
 # For license information, please see license.txt
 
 # import frappe
-from frappe.model.document import Document
+from sth.controllers.budget_controller import BudgetController
 
-
-class BudgetBiayaUmumTahunan(Document):
+class BudgetBiayaUmumTahunan(BudgetController):
 	pass

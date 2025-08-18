@@ -14,9 +14,12 @@ def get_blok(divisi):
 def get_rate_item(item, company, doctype="Item"):
     rate = 0
 
-    if doctype == "Item":
-        rate = frappe.get_value("Item Price", {"item_code": item}, "price_list_rate")
-    else:
-        rate = frappe.get_value("Company Rate", {"parent": item, "company": company, "parenttype": doctype}, "rate") or 0
+    match doctype:
+        case "Item":
+            rate = frappe.get_value("Item Price", {"item_code": item}, "price_list_rate")
+        case "Data Kapital":
+            rate = frappe.get_value("Data Kapital", item, "rate")
+        case _:
+            rate = frappe.get_value("Company Rate", {"parent": item, "company": company, "parenttype": doctype}, "rate") or 0
 
     return { "rate": rate }

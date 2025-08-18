@@ -1,33 +1,36 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:jenis_kapital",
  "creation": "2025-07-17 11:18:00.709365",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "nm_jn_kpt",
+  "jenis_kapital",
   "column_break_xllz"
  ],
  "fields": [
   {
-   "fieldname": "nm_jn_kpt",
+   "fieldname": "column_break_xllz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jenis_kapital",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Nama Jenis Kapital",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_xllz",
-   "fieldtype": "Column Break"
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-17 11:18:48.219300",
+ "modified": "2025-08-18 11:49:32.071249",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Jenis Kapital",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

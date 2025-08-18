@@ -7,12 +7,14 @@
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "nm_kpt",
+  "item",
+  "column_break_vbrk",
   "jns_kap",
-  "jumlah",
-  "harga",
-  "subttl",
-  "column_break_vbrk"
+  "section_break_rfio",
+  "qty",
+  "rate",
+  "column_break_gkjr",
+  "amount"
  ],
  "fields": [
   {
@@ -21,17 +23,10 @@
    "label": "Header"
   },
   {
-   "fieldname": "nm_kpt",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Nama Kapital",
-   "options": "Data Kapital",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "nm_kpt.jns_kap",
+   "fetch_from": "item.jns_kap",
    "fieldname": "jns_kap",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Jenis Kapital"
   },
   {
@@ -39,28 +34,47 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "jumlah",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Kapital",
+   "options": "Data Kapital",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_rfio",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "qty",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Jumlah",
    "reqd": 1
   },
   {
-   "fetch_from": "nm_kpt.hargasatuan",
-   "fieldname": "harga",
+   "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Harga"
   },
   {
-   "fieldname": "subttl",
+   "fieldname": "column_break_gkjr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
    "fieldtype": "Currency",
-   "label": "Subtotal"
+   "in_list_view": 1,
+   "label": "Subtotal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-25 09:22:54.060196",
+ "modified": "2025-08-18 11:45:15.704177",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Budget Kapital",

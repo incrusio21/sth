@@ -11,7 +11,7 @@
   "jns_kap",
   "column_break_wjjw",
   "uom",
-  "hargasatuan",
+  "rate",
   "asset"
  ],
  "fields": [
@@ -49,23 +49,23 @@
    "reqd": 1
   },
   {
-   "fieldname": "hargasatuan",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Harga/Satuan",
-   "reqd": 1
-  },
-  {
    "fieldname": "asset",
    "fieldtype": "Link",
    "label": "Link Asset",
    "options": "Asset"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Harga/Satuan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-24 10:10:59.490393",
+ "modified": "2025-08-18 11:59:09.942061",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Kapital",

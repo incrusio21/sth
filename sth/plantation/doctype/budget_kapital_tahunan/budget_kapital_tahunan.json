@@ -6,13 +6,18 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_1ayj",
-  "company",
+  "budget_kebun_tahunan",
   "unit",
   "fiscal_year",
   "column_break_jntt",
+  "company",
   "amended_from",
   "detail",
-  "table_irmg"
+  "kapital",
+  "section_break_wdwf",
+  "kapital_amount",
+  "column_break_qcel",
+  "grand_total"
  ],
  "fields": [
   {
@@ -35,7 +40,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "unit.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -44,19 +48,21 @@
    "reqd": 1
   },
   {
+   "fetch_from": "budget_kebun_tahunan.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Unit/Kebun",
    "options": "Unit",
-   "reqd": 1
+   "read_only": 1
   },
   {
+   "fetch_from": "budget_kebun_tahunan.periode_budget",
    "fieldname": "fiscal_year",
    "fieldtype": "Link",
    "label": "Periode",
    "options": "Fiscal Year",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "detail",
@@ -64,16 +70,45 @@
    "label": "Detail"
   },
   {
-   "fieldname": "table_irmg",
+   "fieldname": "budget_kebun_tahunan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Budget Kebun Tahunan",
+   "options": "Budget Kebun Tahunan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kapital",
    "fieldtype": "Table",
+   "label": "Detail Kapital",
    "options": "Detail Budget Kapital"
+  },
+  {
+   "fieldname": "section_break_wdwf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kapital_amount",
+   "fieldtype": "Currency",
+   "label": "Kapital Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qcel",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-24 15:47:30.498267",
+ "modified": "2025-08-18 11:46:41.726120",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Kapital Tahunan",
