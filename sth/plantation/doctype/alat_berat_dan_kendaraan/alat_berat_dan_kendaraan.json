@@ -1,30 +1,33 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:kode_alat",
+ "autoname": "field:kode_item",
  "creation": "2025-07-04 13:16:49.680103",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_yebq",
-  "kode_alat",
-  "nama_alat",
-  "satuan_alat",
+  "tipe_master",
+  "kode_item",
+  "nama_item",
+  "uom",
   "kmhm_akhir",
-  "jns_alt",
   "kategori_alat",
   "tipe_alat",
+  "jns_alt",
   "kap_kg",
-  "amended_from",
   "column_break_vypn",
   "divisi",
   "no_pol",
   "operator",
   "jns_bbm",
+  "asset",
+  "amended_from",
+  "section_break_nzwb",
   "basis_rpkg",
+  "column_break_lphp",
   "per_prm",
-  "rp_prm",
-  "asset"
+  "rp_prm"
  ],
  "fields": [
   {
@@ -43,32 +46,14 @@
    "search_index": 1
   },
   {
-   "fieldname": "kode_alat",
-   "fieldtype": "Data",
-   "label": "Kode Alat / Kendaraan",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "nama_alat",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Nama Alat / Kendaraan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "satuan_alat",
-   "fieldtype": "Link",
-   "label": "Satuan",
-   "options": "UOM"
-  },
-  {
+   "description": "Ex : Angkutan Sendiri,Angkutan Kontrak,Langsir Traktor,Langsir Pickup etc",
    "fieldname": "kategori_alat",
    "fieldtype": "Link",
    "label": "Kategori Alat",
    "options": "Kategori Alat"
   },
   {
+   "description": "Ex : Pengangkutan Langsung , Pengangkutan tidak langsung etc ",
    "fieldname": "tipe_alat",
    "fieldtype": "Link",
    "label": "Tipe Alat",
@@ -112,13 +97,7 @@
    "read_only": 1
   },
   {
-   "fieldname": "jns_alt",
-   "fieldtype": "Link",
-   "label": "Jenis Alat",
-   "options": "Jenis Alat Dan Kendaraan",
-   "reqd": 1
-  },
-  {
+   "depends_on": "eval:doc.tipe_master == \"Kendaraan\"",
    "fieldname": "no_pol",
    "fieldtype": "Data",
    "label": "No Polisi"
@@ -147,12 +126,56 @@
    "fieldtype": "Link",
    "label": "Link Asset",
    "options": "Asset"
+  },
+  {
+   "depends_on": "eval:doc.tipe_master == \"Alat Berat\"",
+   "description": "Ex : Dump Truk , Mobil Kecil , Alat Berat etc",
+   "fieldname": "jns_alt",
+   "fieldtype": "Link",
+   "label": "Jenis Alat",
+   "mandatory_depends_on": "eval:doc.tipe_master == \"Alat Berat\"",
+   "options": "Jenis Alat"
+  },
+  {
+   "fieldname": "tipe_master",
+   "fieldtype": "Select",
+   "label": "Tipe Master",
+   "options": "Alat Berat\nKendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kode_item",
+   "fieldtype": "Data",
+   "label": "Kode Item",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "nama_item",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "section_break_nzwb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lphp",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-25 15:38:47.466984",
+ "modified": "2025-08-20 13:59:50.137617",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",
