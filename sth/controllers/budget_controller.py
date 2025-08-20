@@ -18,36 +18,41 @@ class BudgetController(Document):
         self.skip_table_amount = []
 
     def validate(self):
-        self.calculate_item_values()
+        self.calculate_item_table_values()
         self.calculate_grand_total()
 
-    def calculate_item_values(self):
+    def calculate_item_table_values(self):
         for df in self._get_table_fields():
-            total = {"amount": 0, "qty": 0, "rotasi": 0}
-            rotasi_total = 0
-            table_item = self.get(df.fieldname)
-            # set precision setiap table agar pembulatan selalu sama
-            precision = frappe.get_precision(df.options, "amount")
-
-            # cari fieldname dengan kata rp pada table
-            per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(df.options).get_valid_columns()))
-            for d in table_item:
-                d.amount = flt(d.rate * d.qty * (d.get("rotasi") or 1), precision)
-                if per_month_table:
-                    self.calculate_sebaran_values(d, per_month_table)
-
-                total["amount"] += d.amount
-                total["qty"] += d.qty
-                rotasi_total += d.get("rotasi") or 0
-
-            total["rotasi"] = (rotasi_total / len(table_item) if table_item else 0)
-            for total_field in ["amount", "qty", "rotasi"]:
-                fieldname = f"{df.fieldname}_{total_field}"
-                if not self.meta.has_field(fieldname):
-                    continue
-                
-                self.set(fieldname, flt(total[total_field], self.precision(fieldname)))
             
+            self.calculate_item_values(df.options, df.fieldname)
+
+    def calculate_item_values(self, options, table_fieldname):
+        total = {"amount": 0, "qty": 0, "rotasi": 0}
+        rotasi_total = 0
+        table_item = self.get(table_fieldname)
+        
+        # set precision setiap table agar pembulatan untuk menghidari selesih grand total akibat floating-point precision
+        precision = frappe.get_precision(options, "amount")
+
+        # cari fieldname dengan kata rp pada table
+        per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(options).get_valid_columns()))
+        for d in table_item:
+            d.amount = flt(d.rate * d.qty * (d.get("rotasi") or 1), precision)
+            if per_month_table:
+                self.calculate_sebaran_values(d, per_month_table)
+
+            total["amount"] += d.amount
+            total["qty"] += d.qty
+            rotasi_total += d.get("rotasi") or 0
+
+        total["rotasi"] = (rotasi_total / len(table_item) if table_item else 0)
+        for total_field in ["amount", "qty", "rotasi"]:
+            fieldname = f"{table_fieldname}_{total_field}"
+            if not self.meta.has_field(fieldname):
+                continue
+            
+            self.set(fieldname, flt(total[total_field], self.precision(fieldname)))
+
     def calculate_sebaran_values(self, item, sebaran_list=[]):
         # hitung nilai sebaran selama 12 bulan
         for sbr in sebaran_list:
