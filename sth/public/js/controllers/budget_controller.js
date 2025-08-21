@@ -33,7 +33,11 @@ sth.plantation = {
                 }
             }
 
-            refresh(doc) {
+            refresh() {
+                this.set_query_field()
+            }
+
+            set_query_field(){
                 this.frm.set_query("budget_kebun_tahunan", function(doc){
                     if(!doc.company){
                         frappe.throw("Please Select Company First")
@@ -42,6 +46,14 @@ sth.plantation = {
                     return{
                         filters: {
                             company: doc.company
+                        }
+                    }
+                })
+
+                this.frm.set_query("divisi", function(doc){
+                    return{
+                        filters: {
+                            unit: doc.unit
                         }
                     }
                 })

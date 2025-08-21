@@ -55,7 +55,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -154,14 +153,14 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kendaraan",
-   "options": "Alat dan Kendaraan"
+   "options": "Alat Berat Dan Kendaraan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-04 17:19:29.379029",
+ "modified": "2025-08-20 13:27:43.937941",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Budget Transportasi",

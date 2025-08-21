@@ -4,73 +4,6 @@
 sth.plantation.setup_budget_controller()
 
 frappe.ui.form.on("Budget Perawatan Tahunan", {
-	refresh(frm) {
-        frm.trigger("set_query_field");
-	},
-    set_query_field(frm){
-        frm.set_query("kategori_kegiatan", function(){
-		    return{
-		        filters: {
-                    is_perawatan: 1
-                }
-		    }
-		})
-
-        frm.set_query("divisi", function(doc){
-            if(!doc.kategori_kegiatan){
-                frappe.throw("Please Select Kategori Kegiatan First")
-            }
-
-            return{
-		        filters: {
-                    unit: doc.unit
-                }
-		    }
-		})
-
-        frm.set_query("kegiatan", function(doc){
-            if(!doc.kategori_kegiatan){
-                frappe.throw("Please Select Kategori Kegiatan First")
-            }
-
-		    return{
-		        filters: {
-                    is_group: 0,
-                    kategori_kegiatan: doc.kategori_kegiatan
-                }
-		    }
-		})
-
-        frm.set_query("item", "upah_perawatan", function(doc){
-            if(!(doc.kegiatan && doc.divisi)){
-                frappe.throw("Please Select Kegiatan and Divisi First")
-            }
-
-		    return{
-		        filters: {
-                    divisi: doc.divisi,
-                    disabled: 0
-                }
-		    }
-		})
-
-        frm.set_query("item", "peralatan", function(doc){
-		    return{
-		        filters: {
-                    tipe: "Alat"
-                }
-		    }
-		})
-
-        frm.set_query("item", "transport", function(doc){
-		    return{
-		        filters: {
-                    tipe: "Kendaraan"
-                }
-		    }
-		})
-    },
-
     divisi(frm){
         frm.cscript.clear_table(["upah_perawatan", "upah_bibitan"])
 
@@ -91,10 +24,71 @@ frappe.ui.form.on("Detail Budget Upah Perawatan", {
 });
 
 sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth.plantation.BudgetController {
-    refresh(doc) {
-        super.refresh(doc)
-	}
+    set_query_field(){
+        super.set_query_field()
 
+        this.frm.set_query("kategori_kegiatan", function(){
+		    return{
+		        filters: {
+                    is_perawatan: 1
+                }
+		    }
+		})
+
+        this.frm.set_query("divisi", function(doc){
+            if(!doc.kategori_kegiatan){
+                frappe.throw("Please Select Kategori Kegiatan First")
+            }
+
+            return{
+		        filters: {
+                    unit: doc.unit
+                }
+		    }
+		})
+
+        this.frm.set_query("kegiatan", function(doc){
+            if(!doc.kategori_kegiatan){
+                frappe.throw("Please Select Kategori Kegiatan First")
+            }
+
+		    return{
+		        filters: {
+                    is_group: 0,
+                    kategori_kegiatan: doc.kategori_kegiatan
+                }
+		    }
+		})
+
+        this.frm.set_query("item", "upah_perawatan", function(doc){
+            if(!(doc.kegiatan && doc.divisi)){
+                frappe.throw("Please Select Kegiatan and Divisi First")
+            }
+
+		    return{
+		        filters: {
+                    divisi: doc.divisi,
+                    disabled: 0
+                }
+		    }
+		})
+
+        // frm.set_query("item", "peralatan", function(doc){
+
+		// })
+
+        this.frm.set_query("item", "transport", function(doc){
+            if(!doc.divisi){
+                frappe.throw("Please Select Divisi First")
+            }
+		    return{
+		        filters: {
+                    divisi: doc.divisi
+                }
+		    }
+		})
+    }
+    
     kategori_kegiatan(){
         this.frm.set_value("kegiatan", "")
         this.frm.set_value("divisi", "")

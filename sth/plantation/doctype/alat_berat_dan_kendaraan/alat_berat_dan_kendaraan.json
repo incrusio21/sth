@@ -93,8 +93,7 @@
   {
    "fieldname": "kmhm_akhir",
    "fieldtype": "Int",
-   "label": "KM/HM Akhir",
-   "read_only": 1
+   "label": "KM/HM Akhir"
   },
   {
    "depends_on": "eval:doc.tipe_master == \"Kendaraan\"",
@@ -175,7 +174,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-20 13:59:50.137617",
+ "modified": "2025-08-20 16:55:11.970173",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

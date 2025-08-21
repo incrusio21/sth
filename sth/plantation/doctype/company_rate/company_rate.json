@@ -8,7 +8,11 @@
  "field_order": [
   "company",
   "column_break_seui",
-  "rate"
+  "rate",
+  "section_break_tovl",
+  "per_premi",
+  "column_break_vgws",
+  "rate_premi"
  ],
  "fields": [
   {
@@ -28,13 +32,33 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate"
+  },
+  {
+   "fieldname": "section_break_tovl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "per_premi",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Premi"
+  },
+  {
+   "fieldname": "column_break_vgws",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate_premi",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate Premi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-04 11:41:33.668200",
+ "modified": "2025-08-20 13:26:31.904815",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Company Rate",

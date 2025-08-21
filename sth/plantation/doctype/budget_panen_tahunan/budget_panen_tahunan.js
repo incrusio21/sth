@@ -4,9 +4,6 @@
 sth.plantation.setup_budget_controller()
 
 frappe.ui.form.on("Budget Panen Tahunan", {
-	refresh(frm) {
-
-	},
     divisi(frm){
         frm.cscript.clear_table(["tonase"])
 
@@ -21,6 +18,23 @@ sth.plantation.BudgetPanenTahunan = class BudgetPanenTahunan extends sth.plantat
     refresh(doc) {
         super.refresh(doc)
         this.skip_table_amount.push("tonase")
+    }
+
+    set_query_field(){
+        super.set_query_field()
+        
+        this.frm.set_query("item", "peralatan", function(doc){
+            if(!doc.divisi){
+                frappe.throw("Please Select Divisi First")
+            }
+
+		    return{
+		        filters: {
+                    divisi: doc.divisi,
+                    tipe_master: "Alat Berat"
+                }
+		    }
+		})
     }
 }
 
