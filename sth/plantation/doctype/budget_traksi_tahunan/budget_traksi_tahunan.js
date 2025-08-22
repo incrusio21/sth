@@ -4,17 +4,35 @@
 sth.plantation.setup_budget_controller()
 
 frappe.ui.form.on("Budget Traksi Tahunan", {
-	refresh(frm) {
-
-	},
     total_km_hm(frm){
-        frm.set_value("rp_kmhm", flt(frm.doc.grand_total / frm.doc.total_km_hm, precision("rp_kmhm", frm.doc)))
+        cur_frm.cscript.after_calculate_grand_total()
+
+        frm.refresh_fields()
+    },
+    kode_kendaraan(frm){
+        frappe.call({
+            
+        })
     }
 });
 
 sth.plantation.BudgetTraksiTahunan = class BudgetTraksiTahunan extends sth.plantation.BudgetController {
     refresh(doc) {
         super.refresh(doc)
+    }
+
+    set_query_field(frm){
+        this.frm.set_query("kode_kendaraan", function(doc){
+            if(!doc.divisi){
+                frappe.throw("Please Select Divisi First")
+            }
+
+		    return{
+		        filters: {
+                    divisi: doc.divisi
+                }
+		    }
+		})
     }
 
     after_calculate_grand_total(){

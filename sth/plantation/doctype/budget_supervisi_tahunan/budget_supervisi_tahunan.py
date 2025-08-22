@@ -9,6 +9,9 @@ class BudgetSupervisiTahunan(BudgetController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.skip_table_amount = ["distribusi"]
+		self.duplicate_param.extend([
+			"divisi"
+		])
 
 	def validate(self):
 		super().validate()

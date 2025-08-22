@@ -8,6 +8,12 @@ from sth.controllers.budget_controller import BudgetController
 
 
 class BudgetPerawatanTahunan(BudgetController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.duplicate_param.extend([
+			"divisi", "kegiatan"
+		])
+
 	def validate(self):
 		super().validate()
 		self.set_uom_upah_perawatan()

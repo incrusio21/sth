@@ -6,6 +6,13 @@ from frappe.utils import flt
 from sth.controllers.budget_controller import BudgetController
 
 class BudgetBengkelTahunan(BudgetController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.skip_table_amount = ["distribusi"]
+		self.duplicate_param.extend([
+			"kode_bengkel"
+		])
+
 	def validate(self):
 		super().validate()
 		self.set_rp_per_jam()

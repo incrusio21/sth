@@ -5,4 +5,8 @@
 from sth.controllers.budget_controller import BudgetController
 
 class BudgetBiayaUmumTahunan(BudgetController):
-	pass
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.duplicate_param.extend([
+			"kategori_kegiatan"
+		])

@@ -8,3 +8,6 @@ class BudgetPanenTahunan(BudgetController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.skip_table_amount = ["tonase"]
+		self.duplicate_param.extend([
+			"divisi"
+		])
