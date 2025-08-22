@@ -10,8 +10,28 @@ frappe.ui.form.on("Budget Traksi Tahunan", {
         frm.refresh_fields()
     },
     kode_kendaraan(frm){
+        frm.clear_table("bengkel")
+        if(!frm.doc.kode_kendaraan) return
+
         frappe.call({
-            
+            method: "sth.plantation.doctype.budget_traksi_tahunan.budget_traksi_tahunan.get_biaya_bengkel",
+            args: {
+                tahun_budget: frm.doc.budget_kebun_tahunan,
+                divisi: frm.doc.divisi,
+                kendaraan: frm.doc.kode_kendaraan,
+            },
+            freeze: true,
+            callback: function (data) {
+                if (data.message) {
+                    data.message.forEach(value => {
+                        var row = frm.add_child("bengkel");
+                        for (let key in value) {
+                            row[key] = value[key];
+                        }
+                    });
+                    cur_frm.cscript.calculate_total(null, null, "bengkel")
+                }
+            }
         })
     }
 });

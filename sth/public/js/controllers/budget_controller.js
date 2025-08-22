@@ -98,10 +98,12 @@ sth.plantation = {
                 return sth.plantation.doctype_ref[this.frm.doc.doctype][dict]
             }
 
-            calculate_total(cdt, cdn){
-                let items = frappe.get_doc(cdt, cdn)
+            calculate_total(cdt, cdn, parentfield=null){
+                if(!parentfield){
+                    parentfield = frappe.get_doc(cdt, cdn).parentfield
+                }
                 
-                this.calculate_item_values(items.parentfield);
+                this.calculate_item_values(parentfield);
                 this.calculate_grand_total();
 
                 this.frm.refresh_fields();

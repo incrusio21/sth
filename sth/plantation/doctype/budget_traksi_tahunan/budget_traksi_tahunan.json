@@ -10,6 +10,7 @@
   "budget_kebun_tahunan",
   "unit",
   "thn_bgt",
+  "divisi",
   "column_break_lcoo",
   "company",
   "kode_kendaraan",
@@ -35,6 +36,7 @@
   "upah_amount",
   "bahan_bakar_amount",
   "suku_cadang_amount",
+  "bengkel_amount",
   "column_break_ckyy",
   "biaya_servis_amount",
   "biaya_umum_amount",
@@ -53,7 +55,9 @@
   "biaya_lain_section",
   "biaya_servis",
   "by_um",
-  "biaya_umum"
+  "biaya_umum",
+  "bengkel_tab",
+  "bengkel"
  ],
  "fields": [
   {
@@ -192,7 +196,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kode Kendaraan",
-   "options": "Alat dan Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
    "reqd": 1
   },
   {
@@ -340,13 +344,37 @@
    "in_list_view": 1,
    "label": "Total KM/HM",
    "reqd": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "bengkel_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bengkel"
+  },
+  {
+   "fieldname": "bengkel",
+   "fieldtype": "Table",
+   "label": "Detail Bengkel",
+   "options": "Detail Budget Bengkel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bengkel_amount",
+   "fieldtype": "Currency",
+   "label": "Total Biaya Bengkel",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-11 10:18:14.753548",
+ "modified": "2025-08-20 16:59:46.819136",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Traksi Tahunan",

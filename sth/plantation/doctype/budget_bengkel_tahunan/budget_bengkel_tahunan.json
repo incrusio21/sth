@@ -10,6 +10,7 @@
   "budget_kebun_tahunan",
   "unit",
   "thn_bgt",
+  "divisi",
   "column_break_lcoo",
   "company",
   "kode_bengkel",
@@ -39,6 +40,7 @@
   "biaya_umum_amount",
   "grand_total",
   "rp_kmhm",
+  "distribusi_amount",
   "tab_2_tab",
   "biaya_mekanik_section",
   "upah",
@@ -50,7 +52,9 @@
   "material",
   "biaya_umum_lain_tab",
   "biaya_lain_section",
-  "biaya_umum"
+  "biaya_umum",
+  "distribusi_tab",
+  "distribusi"
  ],
  "fields": [
   {
@@ -328,13 +332,36 @@
    "label": "Kode Bengkel",
    "options": "Data Bengkel",
    "reqd": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "distribusi_tab",
+   "fieldtype": "Tab Break",
+   "label": "Distribusi"
+  },
+  {
+   "fieldname": "distribusi",
+   "fieldtype": "Table",
+   "label": "Distribusi",
+   "options": "Detail Budget Distribusi Traksi"
+  },
+  {
+   "fieldname": "distribusi_amount",
+   "fieldtype": "Currency",
+   "label": "Distribusi Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-11 10:00:12.730789",
+ "modified": "2025-08-22 09:35:04.728074",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Bengkel Tahunan",
