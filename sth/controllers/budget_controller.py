@@ -5,34 +5,18 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_link_to_form
 
-from frappe.model.document import Document
+from sth.controllers.plantation_controller import PlantationController
 
-
-class BudgetController(Document):
+class BudgetController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.skip_table_amount = []
         self.duplicate_param = ["budget_kebun_tahunan"]
 
     def validate(self):
         self.check_duplicate_data()
+        self.check_total_sebaran()
         self.calculate_item_table_values()
         self.calculate_grand_total()
-
-    def calculate_item_table_values(self):
-        for df in self._get_table_fields():
-            self.calculate_item_values(df.options, df.fieldname)
-
-    def calculate_grand_total(self):
-        grand_total = 0.0
-        for df in self._get_table_fields():
-            # skip perhitungan total untuk table tertentu
-            if df.fieldname in self.skip_table_amount:
-                continue
-
-            grand_total += self.get(f"{df.fieldname}_amount")
-
-        self.grand_total = grand_total
 
     def check_duplicate_data(self):
         if not self.duplicate_param:
@@ -44,6 +28,20 @@ class BudgetController(Document):
 
         if doc := frappe.db.get_value(self.doctype, filters):
             frappe.throw("{} is already use in <b>{}</b>".format(self.doctype, get_link_to_form(self.doctype, doc)))
+
+    def check_total_sebaran(self):
+        per_month_field = list(filter(lambda key: key.startswith("per_"), self.meta.get_valid_columns()))
+        total_sebaran = 0.0
+
+        for month in per_month_field:
+            total_sebaran += self.get(month)
+
+        if total_sebaran != 100:
+            frappe.throw(_(f"Total distribution is {'below' if total_sebaran < 100 else 'over'} 100%."))
+
+    def calculate_item_table_values(self):
+        for df in self._get_table_fields():
+            self.calculate_item_values(df.options, df.fieldname)
 
     def calculate_item_values(self, options, table_fieldname):
         total = {"amount": 0, "qty": 0, "rotasi": 0}

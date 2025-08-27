@@ -55,7 +55,8 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
 		    return{
 		        filters: {
                     is_group: 0,
-                    kategori_kegiatan: doc.kategori_kegiatan
+                    kategori_kegiatan: doc.kategori_kegiatan,
+                    company: doc.company
                 }
 		    }
 		})
