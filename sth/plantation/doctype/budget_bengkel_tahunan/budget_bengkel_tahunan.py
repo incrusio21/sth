@@ -18,10 +18,16 @@ class BudgetBengkelTahunan(BudgetController):
 		self.set_rp_per_jam()
 		self.validate_kendaraan_distribusi_rate()
 
+	def on_submit(self):
+		self.update_budget_traksi()
+	
 	def set_rp_per_jam(self):
 		self.rp_kmhm = self.grand_total / self.jam_per_tahun
 		
 	def validate_kendaraan_distribusi_rate(self):
+		if not self.distribusi:
+			return
+		
 		total_jam = 0
 		all_kendaraan = []
 		bbt = frappe.qb.DocType("Budget Bengkel Tahunan")
@@ -59,3 +65,23 @@ class BudgetBengkelTahunan(BudgetController):
 
 		if total_jam > self.jam_per_tahun:
 			frappe.throw("Total distribution exceeds annual workshop hours.")
+
+	def update_budget_traksi(self):
+		if not self.distribusi:
+			return
+
+		# get all traksi sudah ada
+		all_vehicle = frappe.get_all("Budget Traksi Tahunan", filters={
+			"budget_kebun_tahunan": self.budget_kebun_tahunan, "divisi": self.divisi,
+			"docstatus": 1,
+			"kode_kendaraan": ["in", [x.item for x in self.distribusi]]
+		}, pluck="name")
+
+		# lakukan validasi ulang untuk traksi
+		for traksi in all_vehicle:
+			doc = frappe.get_doc("Budget Traksi Tahunan", traksi)
+			doc.validate()
+
+			doc.db_update()
+			doc.update_children()
+
