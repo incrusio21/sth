@@ -1,47 +1,49 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "autoname": "naming_series:",
  "creation": "2025-07-25 14:20:10.042372",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_x1i5",
-  "naming_series",
-  "fiscal_year",
+  "rencana_kerja_bulanan",
+  "unit",
   "divisi",
-  "amended_from",
+  "blok",
+  "luas_blok",
+  "tahun_tanam",
+  "sph",
+  "jumlah_pokok",
   "column_break_dbwg",
-  "kd_kgt",
-  "vlm",
+  "company",
+  "kode_kegiatan",
   "uom",
+  "qty_basis",
+  "qty",
   "jumlah_tenaga_kerja",
-  "prm",
-  "sbttl",
-  "informasi_blok_section",
-  "table_hkud",
+  "upah_per_basis",
+  "premi",
+  "amended_from",
+  "details_rkb_section",
+  "from_date",
+  "column_break_saba",
+  "to_date",
+  "section_break_srdl",
+  "budget_tambahan_amount",
+  "amount",
+  "column_break_bijc",
+  "material_amount",
+  "grand_total",
   "detail_material_tab",
   "detail_material_section",
-  "table_dabo",
-  "gr_ttl"
+  "material"
  ],
  "fields": [
   {
    "fieldname": "section_break_x1i5",
    "fieldtype": "Section Break",
    "label": "Header"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
-  },
-  {
-   "fieldname": "fiscal_year",
-   "fieldtype": "Link",
-   "label": "Periode",
-   "options": "Fiscal Year",
-   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -58,59 +60,23 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "kd_kgt",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Kode Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "vlm",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Volume",
-   "reqd": 1
-  },
-  {
    "fetch_from": "kd_kgt.uom",
    "fieldname": "uom",
    "fieldtype": "Data",
-   "label": "Satuan"
+   "label": "Satuan",
+   "read_only": 1
   },
   {
    "fieldname": "jumlah_tenaga_kerja",
    "fieldtype": "Int",
    "in_preview": 1,
    "label": "Jumlah Tenaga Kerja",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fetch_from": "kd_kgt.rp_prm",
-   "fieldname": "prm",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Premi"
-  },
-  {
-   "fieldname": "sbttl",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Subtotal",
-   "read_only": 1
-  },
-  {
    "fieldname": "detail_material_section",
-   "fieldtype": "Section Break",
-   "label": "Detail Material"
-  },
-  {
-   "fieldname": "table_dabo",
-   "fieldtype": "Table",
-   "options": "Detail Material Perawatan RKB RKT"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "amended_from",
@@ -123,13 +89,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "gr_ttl",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Grandtotal",
-   "read_only": 1
-  },
-  {
    "fieldname": "divisi",
    "fieldtype": "Link",
    "label": "Divisi",
@@ -137,30 +96,182 @@
    "reqd": 1
   },
   {
-   "fieldname": "informasi_blok_section",
-   "fieldtype": "Section Break",
-   "label": "Informasi Blok"
-  },
-  {
-   "fieldname": "table_hkud",
-   "fieldtype": "Table",
-   "options": "Informasi Blok"
-  },
-  {
    "fieldname": "detail_material_tab",
    "fieldtype": "Tab Break",
    "label": "Detail Material"
+  },
+  {
+   "fieldname": "rencana_kerja_bulanan",
+   "fieldtype": "Link",
+   "label": "Rencana Kerja Bulanan",
+   "options": "Rencana Kerja Bulanan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "rencana_kerja_bulanan.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "details_rkb_section",
+   "fieldtype": "Section Break",
+   "label": "Details RKB"
+  },
+  {
+   "fetch_from": "rencana_kerja_bulanan.from_date",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_saba",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rencana_kerja_bulanan.to_date",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_srdl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_bijc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Detail Material",
+   "options": "Detail Material RK"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fetch_from": "blok.luas_areal",
+   "fieldname": "luas_blok",
+   "fieldtype": "Data",
+   "label": "Luas Blok",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.tahun_tanam",
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Data",
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.sph",
+   "fieldname": "sph",
+   "fieldtype": "Data",
+   "label": "SPH",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.jumlah_pokok",
+   "fieldname": "jumlah_pokok",
+   "fieldtype": "Data",
+   "label": "Jumlah Pokok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kode_kegiatan",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Kode Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Volume",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kd_kgt.rp_prm",
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "fieldname": "material_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Material Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "budget_tambahan_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Budget Tambahan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.rp_basis",
+   "fieldname": "upah_per_basis",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Upah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.v_basis",
+   "fieldname": "qty_basis",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Volume Basis",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-29 09:23:08.716009",
+ "modified": "2025-08-27 16:16:00.807364",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
