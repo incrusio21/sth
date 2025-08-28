@@ -127,11 +127,11 @@ sth.plantation.setup_budget_controller = function() {
         }
 
         after_calculate_item_values(table_name){
-            let data_table = me.frm.doc[table_name] || []
+            let data_table = this.frm.doc[table_name] || []
 
             // set on child class if 
             let per_month_table = Object.keys(
-                me.frm.fields_dict[table_name].grid.fields_map
+                this.frm.fields_dict[table_name].grid.fields_map
             ).filter(key => key.includes("rp_"));
 
             if(per_month_table.length == 0) return
