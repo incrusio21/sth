@@ -28,15 +28,10 @@ class PlantationController(Document):
         # set precision setiap table agar pembulatan untuk menghidari selesih grand total akibat floating-point precision
         precision = frappe.get_precision(options, "amount")
 
-        # cari fieldname dengan kata rp pada table
-        per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(options).get_valid_columns()))
         for d in table_item:
             d.amount = flt(d.rate * flt(d.qty) * (d.get("rotasi") or 1), precision)
             for fieldname in field_tambahan:
                 d.amount += d.get(fieldname) or 0
-
-            if per_month_table:
-                self.calculate_sebaran_values(d, per_month_table)
 
             total["amount"] += d.amount
             total["qty"] += flt(d.qty)
@@ -49,17 +44,6 @@ class PlantationController(Document):
                 continue
             
             self.set(fieldname, flt(total[total_field], self.precision(fieldname)))
-
-    def calculate_sebaran_values(self, item, sebaran_list=[]):
-        # hitung nilai sebaran selama 12 bulan
-        for sbr in sebaran_list:
-            per_field = sbr.replace("rp_", "per_")
-
-            # default 0 frappe selalu berbentuk string
-            per_month = flt(self.get(per_field))
-            item.set(sbr, 
-                flt(item.amount * (per_month / 100), item.precision(sbr))
-            )
 
     def calculate_grand_total(self):
         grand_total = 0.0

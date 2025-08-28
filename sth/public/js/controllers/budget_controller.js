@@ -14,21 +14,7 @@ sth.plantation.setup_budget_controller = function() {
             let me = this
             for (const month of sth.plantation.month) {
                 frappe.ui.form.on(doc.doctype, `per_${month}`, function() {
-                    // update sebaran di semua table
-                    me.doctype_ref("table_fieldname").forEach(table_ref => {
-                        let per_month_table = Object.keys(
-                            me.frm.fields_dict[table_ref].grid.fields_map
-                        ).filter(key => key.includes("rp_"));
-                        // jika tidak ada fieldname degan kata per_ skip sebaran
-
-                        if(per_month_table.length == 0) return
-                        
-                        for (const item of me.frm.doc[table_ref] || []) {
-                            me.calculate_sebaran_values(item, per_month_table)
-                        }
-                    });
-
-                    me.frm.refresh_fields();
+                    me.calculate_total_sebaran()
                 });
             }
         }
@@ -54,8 +40,56 @@ sth.plantation.setup_budget_controller = function() {
             this.frm.set_value("budget_kebun_tahunan", "")
         }
 
-        rotasi(_, cdt, cdn){
-            this.calculate_total(cdt, cdn)
+        is_distibute(doc){
+            if(doc.is_distibute){
+
+                for (const month of sth.plantation.month) {
+                    this.frm.doc[`per_${month}`] = 100 / 12
+                }
+                
+                this.calculate_total_sebaran()
+            }
+        }
+        
+        calculate_total_sebaran(){
+            let me = this
+            let total_sebaran = 0.0
+            
+            // update sebaran di semua table
+            me.doctype_ref("table_fieldname").forEach(table_ref => {
+                let per_month_table = Object.keys(
+                    me.frm.fields_dict[table_ref].grid.fields_map
+                ).filter(key => key.includes("rp_"));
+                // jika tidak ada fieldname degan kata per_ skip sebaran
+
+                if(per_month_table.length == 0) return
+
+                for (const item of me.frm.doc[table_ref] || []) {
+                    me.calculate_sebaran_values(item, per_month_table)
+                }
+            });
+
+            
+            // set nilai sebaran
+            for (const month of sth.plantation.month) {
+                total_sebaran += flt(this.frm.doc[`per_${month}`] || 0)
+            }
+
+            this.frm.doc.total_sebaran = total_sebaran
+            
+            me.frm.refresh_fields();
+        }
+
+        calculate_sebaran_values(item, months=[]){
+            // set nilai sebaran
+            for (const month of months) {
+                let per_month = month.replace(/^rp_/, "per_")
+                
+                item[month] = flt(
+                    item.amount * (this.frm.doc[per_month] / 100),
+                    precision(month, item)
+                );
+            }
         }
 
         add_blok_in_table(blok_table, args, default_field={}){
@@ -90,6 +124,23 @@ sth.plantation.setup_budget_controller = function() {
                 refresh_field(blok_table);
                 me.frm.get_field(blok_table).tab.set_active();
             })
+        }
+
+        after_calculate_item_values(table_name){
+            let data_table = me.frm.doc[table_name] || []
+
+            // set on child class if 
+            let per_month_table = Object.keys(
+                me.frm.fields_dict[table_name].grid.fields_map
+            ).filter(key => key.includes("rp_"));
+
+            if(per_month_table.length == 0) return
+            
+            // menghitung amount, rotasi, qty
+            for (const item of data_table) {
+                // jika tidak ada fieldname degan kata per_ skip sebaran                
+                this.calculate_sebaran_values(item, per_month_table)
+            }
         }
 
         clear_table(list_table=[]){

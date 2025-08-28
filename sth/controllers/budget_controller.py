@@ -14,8 +14,10 @@ class BudgetController(PlantationController):
 
     def validate(self):
         self.check_duplicate_data()
-        self.check_total_sebaran()
         super().validate()
+
+        self.check_total_sebaran()
+        self.calculate_item_sebaran()
 
     def check_duplicate_data(self):
         if not self.duplicate_param:
@@ -28,6 +30,25 @@ class BudgetController(PlantationController):
         if doc := frappe.db.get_value(self.doctype, filters):
             frappe.throw("{} is already use in <b>{}</b>".format(self.doctype, get_link_to_form(self.doctype, doc)))
 
+    def calculate_item_sebaran(self):
+        for df in self._get_table_fields():
+            # cari fieldname dengan kata rp pada table
+            per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(df.options).get_valid_columns()))
+            for d in self.get(df.fieldname):
+                if per_month_table:
+                    self.calculate_sebaran_values(d, per_month_table)
+
+    def calculate_sebaran_values(self, item, sebaran_list=[]):
+        # hitung nilai sebaran selama 12 bulan
+        for sbr in sebaran_list:
+            per_field = sbr.replace("rp_", "per_")
+
+            # default 0 frappe selalu berbentuk string
+            per_month = flt(self.get(per_field))
+            item.set(sbr, 
+                flt(item.amount * (per_month / 100), item.precision(sbr))
+            )
+
     def check_total_sebaran(self):
         total_sebaran = 0.0
         per_month_field = list(filter(lambda key: key.startswith("per_"), self.meta.get_valid_columns()))
@@ -35,9 +56,13 @@ class BudgetController(PlantationController):
             return 
             
         for month in per_month_field:
-            total_sebaran += flt(self.get(month))
+            if self.is_distibute:
+                self.set(month, 100 / 12)
 
-        if total_sebaran != 100:
-            frappe.throw(_(f"Total distribution is {'below' if total_sebaran < 100 else 'over'} 100%."))
+            total_sebaran += self.get(month)
+
+        self.total_sebaran = flt(total_sebaran, self.precision("total_sebaran"))
+        if self.total_sebaran != 100:
+            frappe.throw(_(f"Total distribution is {'below' if self.total_sebaran < 100 else 'over'} 100%."))
 
     

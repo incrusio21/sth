@@ -18,6 +18,7 @@
   "stt",
   "amended_from",
   "sebaran__section",
+  "total_sebaran",
   "per_januari",
   "per_februari",
   "per_maret",
@@ -25,6 +26,7 @@
   "per_mei",
   "per_juni",
   "column_break_dzod",
+  "is_distibute",
   "per_juli",
   "per_agustus",
   "per_september",
@@ -208,72 +210,84 @@
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_januari",
    "fieldtype": "Percent",
    "label": "Januari"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_februari",
    "fieldtype": "Percent",
    "label": "Februari"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_maret",
    "fieldtype": "Percent",
    "label": "Maret"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_april",
    "fieldtype": "Percent",
    "label": "April"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_mei",
    "fieldtype": "Percent",
    "label": "Mei"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_juni",
    "fieldtype": "Percent",
    "label": "Juni"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_juli",
    "fieldtype": "Percent",
    "label": "Juli"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_agustus",
    "fieldtype": "Percent",
    "label": "Agustus"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_september",
    "fieldtype": "Percent",
    "label": "September"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_oktober",
    "fieldtype": "Percent",
    "label": "Oktober"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_november",
    "fieldtype": "Percent",
    "label": "November"
   },
   {
    "default": "0",
+   "read_only_depends_on": "eval:doc.is_distibute",
    "fieldname": "per_desember",
    "fieldtype": "Percent",
    "label": "Desember"
@@ -368,6 +382,19 @@
    "fieldtype": "Currency",
    "label": "Total Biaya Bengkel",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_sebaran",
+   "fieldtype": "Percent",
+   "label": "Total Sebaran",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_distibute",
+   "fieldtype": "Check",
+   "label": "Distribute equally across 12 months"
   }
  ],
  "grid_page_length": 50,

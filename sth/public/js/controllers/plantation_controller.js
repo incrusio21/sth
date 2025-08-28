@@ -44,6 +44,10 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.calculate_total(cdt, cdn)
     }
     
+    rotasi(_, cdt, cdn){
+        this.calculate_total(cdt, cdn)
+    }
+
     // mempersingkat structur koding
     doctype_ref(dict){
         return sth.plantation.doctype_ref[this.frm.doc.doctype][dict]
@@ -76,10 +80,6 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         let total_rotasi = 0.0
         let data_table = me.frm.doc[table_name] || []
         
-        let per_month_table = Object.keys(
-            me.frm.fields_dict[table_name].grid.fields_map
-        ).filter(key => key.includes("rp_"));
-        
         // menghitung amount, rotasi, qty
         for (const item of data_table) {
             // rate * qty * (rotasi jika ada)
@@ -91,11 +91,6 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             total["amount"] += item.amount;
             total["qty"] += item.qty
             total_rotasi += item.rotasi || 0
-
-            // jika tidak ada fieldname degan kata per_ skip sebaran
-            if(per_month_table.length > 0){
-                this.calculate_sebaran_values(item, per_month_table)
-            }
         }
         
         total["rotasi"] = total_rotasi / data_table.length;
@@ -106,18 +101,8 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
             this.frm.doc[fieldname] = total[total_field];
         }
-    }
 
-    calculate_sebaran_values(item, months=[]){
-        // set nilai sebaran
-        for (const month of months) {
-            let per_month = month.replace(/^rp_/, "per_")
-            
-            item[month] = flt(
-                item.amount * (this.frm.doc[per_month] / 100),
-                precision(month, item)
-            );
-        }
+        this.after_calculate_item_values(table_name)
     }
 
     calculate_grand_total(){
@@ -138,6 +123,9 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         // set on child class if needed
     }
 
+    after_calculate_grand_total(){
+        // set on child class if needed
+    }
     
     get_blok_list(opts, callback){
         const fields = [
