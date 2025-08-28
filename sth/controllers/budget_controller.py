@@ -29,11 +29,13 @@ class BudgetController(PlantationController):
             frappe.throw("{} is already use in <b>{}</b>".format(self.doctype, get_link_to_form(self.doctype, doc)))
 
     def check_total_sebaran(self):
-        per_month_field = list(filter(lambda key: key.startswith("per_"), self.meta.get_valid_columns()))
         total_sebaran = 0.0
-
+        per_month_field = list(filter(lambda key: key.startswith("per_"), self.meta.get_valid_columns()))
+        if not per_month_field:
+            return 
+            
         for month in per_month_field:
-            total_sebaran += self.get(month)
+            total_sebaran += flt(self.get(month))
 
         if total_sebaran != 100:
             frappe.throw(_(f"Total distribution is {'below' if total_sebaran < 100 else 'over'} 100%."))
