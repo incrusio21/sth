@@ -6,10 +6,8 @@ from frappe.utils import flt
 from sth.controllers.rencana_kerja_controller import RencanaKerjaController
 
 class RencanaKerjaBulananPerawatan(RencanaKerjaController):
-	
 	def calculate_item_table_values(self):
-		for df in self._get_table_fields():
-			self.calculate_item_values(df.options, df.fieldname, ["budget_tambahan"])
-
+		super().calculate_item_table_values()
+		
 		self.jumlah_tenaga_kerja = flt(self.qty / self.qty_basis) if self.qty_basis else 0
-		self.amount = flt(self.jumlah_tenaga_kerja * self.upah_per_basis) + flt(self.premi)
+		self.tenaga_kerja_amount = flt(self.jumlah_tenaga_kerja * self.upah_per_basis) + flt(self.premi)

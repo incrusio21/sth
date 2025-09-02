@@ -29,11 +29,23 @@
   "from_date",
   "column_break_saba",
   "to_date",
+  "biaya_supervisi_section",
+  "upah_mandor",
+  "premi_mandor",
+  "column_break_mljk",
+  "upah_kerani",
+  "premi_kerani",
+  "column_break_rvqb",
+  "upah_mandor1",
+  "premi_mandor1",
   "section_break_srdl",
-  "budget_tambahan_amount",
-  "amount",
+  "mandor_amount",
+  "kerani_amount",
+  "mandor1_amount",
+  "tenaga_kerja_amount",
   "column_break_bijc",
   "material_amount",
+  "budget_tambahan_amount",
   "grand_total",
   "detail_material_tab",
   "detail_material_section",
@@ -171,7 +183,8 @@
    "fieldname": "blok",
    "fieldtype": "Link",
    "label": "Blok",
-   "options": "Blok"
+   "options": "Blok",
+   "reqd": 1
   },
   {
    "fetch_from": "blok.luas_areal",
@@ -197,7 +210,7 @@
   {
    "fetch_from": "blok.jumlah_pokok",
    "fieldname": "jumlah_pokok",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Jumlah Pokok",
    "read_only": 1
   },
@@ -241,16 +254,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Subtotal",
-   "read_only": 1
-  },
-  {
    "fetch_from": "kode_kegiatan.rp_basis",
    "fieldname": "upah_per_basis",
-   "fieldtype": "Int",
+   "fieldtype": "Currency",
    "in_preview": 1,
    "label": "Upah/Satuan Basis",
    "read_only": 1
@@ -262,13 +268,84 @@
    "in_preview": 1,
    "label": "Volume Basis",
    "read_only": 1
+  },
+  {
+   "fieldname": "biaya_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Supervisi"
+  },
+  {
+   "fieldname": "upah_mandor",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor"
+  },
+  {
+   "fieldname": "premi_mandor",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor"
+  },
+  {
+   "fieldname": "column_break_mljk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upah_kerani",
+   "fieldtype": "Currency",
+   "label": "Upah Kerani"
+  },
+  {
+   "fieldname": "premi_kerani",
+   "fieldtype": "Currency",
+   "label": "Premi Kerani"
+  },
+  {
+   "fieldname": "column_break_rvqb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mandor_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Mandor Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kerani_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Kerani Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mandor1_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Mandor 1 Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upah_mandor1",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor 1"
+  },
+  {
+   "fieldname": "premi_mandor1",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor 1"
+  },
+  {
+   "fieldname": "tenaga_kerja_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Tenaga Kerja Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-27 16:16:00.807364",
+ "modified": "2025-09-01 16:42:12.410495",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",
