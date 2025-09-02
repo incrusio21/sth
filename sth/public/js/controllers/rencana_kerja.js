@@ -13,7 +13,6 @@ sth.plantation.setup_rencana_kerja_controller = function() {
                     "premi_kerani", "upah_mandor1", "premi_mandor1"
                 ]) {
                 frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
-                    console.log("tes")
                     me.calculate_total(cdt, cdn)
                 });
             }
@@ -45,6 +44,10 @@ sth.plantation.setup_rencana_kerja_controller = function() {
                 }
             })
 
+        }
+
+        update_value_after_amount(item){
+           item.amount = flt(item.amount + (item.budget_tambahan || 0), precision("amount", item));
         }
 
         calculate_non_table_values(){

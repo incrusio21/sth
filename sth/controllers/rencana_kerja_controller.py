@@ -15,16 +15,18 @@ class RencanaKerjaController(PlantationController):
         super().__init__(*args, **kwargs)
 
     def validate(self):
+        self.calculate_supervisi_amount()
         super().validate()
 
     
-    def calculate_item_table_values(self):
-        for df in self._get_table_fields():
-            self.calculate_item_values(df.options, df.fieldname, ["budget_tambahan"])
-
+    def calculate_supervisi_amount(self):
         self.mandor_amount = flt(self.upah_mandor) + flt(self.premi_mandor)
         self.kerani_amount = flt(self.upah_kerani) + flt(self.premi_kerani)
         self.mandor1_amount = flt(self.upah_mandor1) + flt(self.premi_mandor1)
+
+    def update_value_after_amount(self, item, precision):
+        # set on child class if needed
+        item.amount = flt(item.amount + (item.get("budget_tambahan") or 0), precision)
 
 @frappe.whitelist()
 def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=None):

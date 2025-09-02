@@ -8,7 +8,6 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         let doctype = doc.doctype
         this.skip_table_amount = []
         this.skip_fieldname_amount = []
-        this.field_tambahan = []
         
         // check daftar fieldname dengan total didalamny untuk d gabungkan ke grand_total
         if(!sth.plantation.doctype_ref[doctype]){
@@ -89,10 +88,11 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         // menghitung amount, rotasi, qty
         for (const item of data_table) {
             // rate * qty * (rotasi jika ada)
-            item.amount = flt(item.rate * item.qty * (item.rotasi || 1), precision("amount", item));
-            for (const fieldname of this.field_tambahan){
-                item.amount += item[fieldname] || 0
-            }
+            this.update_rate_or_qty_value(item)
+
+            item.amount = flt(item.rate * item.qty, precision("amount", item));
+
+            this.update_value_after_amount(item)
 
             total["amount"] += item.amount;
             total["qty"] += item.qty
@@ -110,6 +110,15 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
         this.after_calculate_item_values(table_name)
     }
+
+    update_rate_or_qty_value(){
+        // set on child class if needed
+    }
+
+    update_value_after_amount(){
+        // set on child class if needed
+    }
+
 
     calculate_non_table_values(){
         // set on child class if needed

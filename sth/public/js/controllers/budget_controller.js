@@ -80,6 +80,10 @@ sth.plantation.setup_budget_controller = function() {
             me.frm.refresh_fields();
         }
 
+        update_value_after_amount(item){
+           item.amount = flt(item.amount * (item.rotasi || 1), precision("amount", item));
+        }
+        
         calculate_sebaran_values(item, months=[]){
             // set nilai sebaran
             for (const month of months) {

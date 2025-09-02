@@ -30,6 +30,10 @@ class BudgetController(PlantationController):
         if doc := frappe.db.get_value(self.doctype, filters):
             frappe.throw("{} is already use in <b>{}</b>".format(self.doctype, get_link_to_form(self.doctype, doc)))
 
+    def update_value_after_amount(self, item, precision):
+        # set on child class if needed
+        item.amount = flt(item.amount * (item.get("rotasi") or 1), precision)
+
     def calculate_item_sebaran(self):
         for df in self._get_table_fields():
             # cari fieldname dengan kata rp pada table

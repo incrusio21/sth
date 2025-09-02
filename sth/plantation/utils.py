@@ -23,6 +23,10 @@ def get_rate_item(item, company, doctype="Item"):
             rate = frappe.get_value("Item Price", {"item_code": item}, "price_list_rate") 
         case "Data Kapital":
             rate = frappe.get_value("Data Kapital", item, "rate")
+        case "Alat Berat Dan Kendaraan":
+            rate = frappe.get_value("Alat Berat Dan Kendaraan", item, "basis_rpkg")
+        case "Kegiatan":
+            rate = frappe.get_value("Kegiatan", item, "rp_basis")
         case _:
             rate = frappe.get_value("Company Rate", {"parent": item, "company": company, "parenttype": doctype}, "rate")
 

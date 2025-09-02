@@ -20,7 +20,7 @@ class PlantationController(Document):
         for df in self._get_table_fields():
             self.calculate_item_values(df.options, df.fieldname)
 
-    def calculate_item_values(self, options, table_fieldname, field_tambahan=[]):
+    def calculate_item_values(self, options, table_fieldname):
         total = {"amount": 0, "qty": 0, "rotasi": 0}
         rotasi_total = 0
         table_item = self.get(table_fieldname)
@@ -29,9 +29,13 @@ class PlantationController(Document):
         precision = frappe.get_precision(options, "amount")
 
         for d in table_item:
-            d.amount = flt(d.rate * flt(d.qty) * (d.get("rotasi") or 1), precision)
-            for fieldname in field_tambahan:
-                d.amount += d.get(fieldname) or 0
+            # update nilai rate atau qty sebelum perhitungan
+            self.update_rate_or_qty_value(d, precision)
+
+            d.amount = flt(d.rate * flt(d.qty), precision)
+
+            # update nilai setelah menghitung amount
+            self.update_value_after_amount(d, precision)
 
             total["amount"] += d.amount
             total["qty"] += flt(d.qty)
@@ -44,6 +48,14 @@ class PlantationController(Document):
                 continue
             
             self.set(fieldname, flt(total[total_field], self.precision(fieldname)))
+
+    def update_rate_or_qty_value(self, item, precision):
+        # set on child class if needed
+        pass
+
+    def update_value_after_amount(self, item, precision):
+        # set on child class if needed
+        pass
 
     def calculate_grand_total(self):
         grand_total = 0.0
