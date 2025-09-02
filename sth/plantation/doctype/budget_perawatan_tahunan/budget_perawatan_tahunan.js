@@ -84,7 +84,7 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
             }
 		    return{
 		        filters: {
-                    divisi: doc.divisi
+                    unit: doc.unit
                 }
 		    }
 		})
