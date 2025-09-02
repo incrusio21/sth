@@ -16,7 +16,9 @@
   "luas_areal",
   "tahun_tanam",
   "sph",
-  "jumlah_pokok"
+  "jumlah_pokok",
+  "section_break_xxdp",
+  "last_bjr"
  ],
  "fields": [
   {
@@ -89,12 +91,21 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "section_break_xxdp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "last_bjr",
+   "fieldtype": "Float",
+   "label": "Last BJR"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-31 15:57:13.610692",
+ "modified": "2025-09-01 10:59:39.006026",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",
@@ -117,5 +128,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

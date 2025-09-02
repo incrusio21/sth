@@ -18,6 +18,7 @@
   "kap_kg",
   "column_break_vypn",
   "divisi",
+  "unit",
   "no_pol",
   "operator",
   "jns_bbm",
@@ -169,12 +170,21 @@
   {
    "fieldname": "column_break_lphp",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "divisi.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-20 16:55:11.970173",
+ "modified": "2025-09-01 15:18:32.249663",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",
