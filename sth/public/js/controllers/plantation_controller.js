@@ -8,6 +8,8 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         let doctype = doc.doctype
         this.skip_table_amount = []
         this.skip_fieldname_amount = []
+        this.field_tambahan = []
+        
         // check daftar fieldname dengan total didalamny untuk d gabungkan ke grand_total
         if(!sth.plantation.doctype_ref[doctype]){
             sth.plantation.setup_doctype_ref(doctype)
@@ -68,13 +70,17 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             parentfield = frappe.get_doc(cdt, cdn).parentfield
         }
         
-        this.calculate_item_values(parentfield);
+        if(parentfield){
+            this.calculate_item_values(parentfield);
+        }else{
+            this.calculate_non_table_values();
+        }
         this.calculate_grand_total();
 
         this.frm.refresh_fields();
     }
 
-    calculate_item_values(table_name, field_tambahan=[]){
+    calculate_item_values(table_name){
         let me = this
         let total = {"amount": 0, "qty": 0, "rotasi": 0}
         let total_rotasi = 0.0
@@ -84,7 +90,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         for (const item of data_table) {
             // rate * qty * (rotasi jika ada)
             item.amount = flt(item.rate * item.qty * (item.rotasi || 1), precision("amount", item));
-            for (const fieldname of field_tambahan){
+            for (const fieldname of this.field_tambahan){
                 item.amount += item[fieldname] || 0
             }
 
@@ -103,6 +109,14 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         }
 
         this.after_calculate_item_values(table_name)
+    }
+
+    calculate_non_table_values(){
+        // set on child class if needed
+    }
+
+    after_calculate_item_values(table_name){
+        // set on child class if needed
     }
 
     calculate_grand_total(){
@@ -144,7 +158,8 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                 in_list_view: 1,
                 read_only: 1,
                 disabled: 0,
-                label: __("Tahun Tanam")
+                label: __("Tahun Tanam"),
+                columns: 1
             },
             {
                 fieldtype: "Int",
@@ -154,15 +169,13 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                 disabled: 0,
                 label: __("Luas Areal")
             },
-        ]
-
-        fields.push(
             {
                 fieldtype: "Int",
                 fieldname: "sph",
                 in_list_view: 1,
                 read_only: 1,
-                label: __("SPH")
+                label: __("SPH"),
+                columns: 1
             },
             {
                 fieldtype: "Int",
@@ -171,7 +184,14 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                 read_only: 1,
                 label: __("Jumlah Pokok")
             },
-        )
+        ]
+
+        
+        if ($.isArray(opts.fields)) {
+            opts.fields.forEach((field, index) => {
+                fields.push(field);
+            });
+        }
 
         frappe.call({
             method: opts.method || "sth.plantation.utils.get_blok",
@@ -186,6 +206,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                 
                 const dialog = new frappe.ui.Dialog({
                     title: __("Select Blok"),
+                    size: "large",
                     fields: [
                         {
                             fieldname: "trans_blok",

@@ -17,19 +17,33 @@ class RencanaKerjaController(PlantationController):
     def validate(self):
         super().validate()
 
+    
+    def calculate_item_table_values(self):
+        for df in self._get_table_fields():
+            self.calculate_item_values(df.options, df.fieldname, ["budget_tambahan"])
+
+        self.mandor_amount = flt(self.upah_mandor) + flt(self.premi_mandor)
+        self.kerani_amount = flt(self.upah_kerani) + flt(self.premi_kerani)
+        self.mandor1_amount = flt(self.upah_mandor1) + flt(self.premi_mandor1)
 
 @frappe.whitelist()
-def duplicate_rencana_kerja(voucher_type, voucher_no, blok):
+def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=None):
     doc = frappe.get_doc(voucher_type, voucher_no)
 
     if isinstance(blok, str):
         blok = json.loads(blok)
 
+    if fieldname_addons and isinstance(fieldname_addons, str):
+        fieldname_addons = json.loads(fieldname_addons)
+
     new_doc_list = []
     for d in blok:
         new_doc = frappe.new_doc(voucher_type)
         new_doc.update(doc.as_dict(no_default_fields=True))
-        new_doc.blok = d
+        new_doc.blok = d["item"]
+        
+        for key, fieldname in fieldname_addons.items():
+            new_doc.set(fieldname, d.get(key))
 
         new_doc.submit()
         new_doc_list.append(get_link_to_form(voucher_type, new_doc.name))
@@ -44,12 +58,15 @@ def get_not_used_blok(args):
     conditions = []
 
     fieldname = ""
+    if args.get("fieldname"):
+        fieldname += ",`tabBlok`." + ",`tabBlok`.".join(args.get("fieldname"))
+        
     # tolong d ubah klo ada waktu
     return frappe.db.sql("""
         SELECT `tabBlok`.name as item, `tabBlok`.tahun_tanam, `tabBlok`.luas_areal, `tabBlok`.sph, `tabBlok`.jumlah_pokok {fieldname}
         FROM `tabBlok`
         left join `tab{doctype}` on `tabBlok`.name = `tab{doctype}`.blok 
-        WHERE `tab{doctype}`.docstatus < 2 or `tab{doctype}`.blok is null
+        WHERE `tab{doctype}`.docstatus != 1 or `tab{doctype}`.blok is null
         {fcond}{mcond}
     """.format(
         **{
