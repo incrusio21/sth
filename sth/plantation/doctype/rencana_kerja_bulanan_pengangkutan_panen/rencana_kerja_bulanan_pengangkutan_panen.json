@@ -1,0 +1,351 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-02 13:22:53.057810",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_myy9",
+  "rencana_kerja_bulanan",
+  "unit",
+  "divisi",
+  "blok",
+  "luas_blok",
+  "tahun_tanam",
+  "sph",
+  "jumlah_pokok",
+  "column_break_ixrj",
+  "company",
+  "kode_kegiatan",
+  "tonase",
+  "jarak_pks",
+  "amended_from",
+  "section_break_curd",
+  "from_date",
+  "column_break_fxic",
+  "to_date",
+  "biaya_supervisi_section",
+  "upah_mandor",
+  "premi_mandor",
+  "column_break_rxnc",
+  "upah_kerani",
+  "premi_kerani",
+  "column_break_oaiw",
+  "upah_mandor1",
+  "premi_mandor1",
+  "section_break_xgkx",
+  "column_break_exnc",
+  "mandor_amount",
+  "kerani_amount",
+  "mandor1_amount",
+  "column_break_fsda",
+  "kendaraan_amount",
+  "biaya_angkut_amount",
+  "budget_tambahan_amount",
+  "grand_total",
+  "biaya_kendaran_tab",
+  "kendaraan",
+  "biaya_angkut_tab",
+  "biaya_angkut"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_myy9",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "rencana_kerja_bulanan",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Rencana Kerja Bulanan",
+   "options": "Rencana Kerja Bulanan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "rencana_kerja_bulanan.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "blok.luas_areal",
+   "fieldname": "luas_blok",
+   "fieldtype": "Data",
+   "label": "Luas Blok",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.tahun_tanam",
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Data",
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.sph",
+   "fieldname": "sph",
+   "fieldtype": "Data",
+   "label": "SPH",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.jumlah_pokok",
+   "fieldname": "jumlah_pokok",
+   "fieldtype": "Float",
+   "label": "Jumlah Pokok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ixrj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kode_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tonase",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Tonase",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Bulanan Pengangkutan Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_curd",
+   "fieldtype": "Section Break",
+   "label": "Details RKB"
+  },
+  {
+   "fetch_from": "rencana_kerja_bulanan.from_date",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fxic",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rencana_kerja_bulanan.to_date",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Supervisi"
+  },
+  {
+   "fieldname": "upah_mandor",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor"
+  },
+  {
+   "fieldname": "premi_mandor",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor"
+  },
+  {
+   "fieldname": "column_break_rxnc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upah_kerani",
+   "fieldtype": "Currency",
+   "label": "Upah Kerani"
+  },
+  {
+   "fieldname": "premi_kerani",
+   "fieldtype": "Currency",
+   "label": "Premi Kerani"
+  },
+  {
+   "fieldname": "column_break_oaiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upah_mandor1",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor 1"
+  },
+  {
+   "fieldname": "premi_mandor1",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor 1"
+  },
+  {
+   "bold": 1,
+   "fieldname": "section_break_xgkx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_exnc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mandor_amount",
+   "fieldtype": "Currency",
+   "label": "Mandor Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kerani_amount",
+   "fieldtype": "Currency",
+   "label": "Kerani Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mandor1_amount",
+   "fieldtype": "Currency",
+   "label": "Mandor 1 Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fsda",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "budget_tambahan_amount",
+   "fieldtype": "Currency",
+   "label": "Budget Tambahan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Bulanan Pengangkutan Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "jarak_pks",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jarak Ke PKS",
+   "reqd": 1
+  },
+  {
+   "fieldname": "biaya_kendaran_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Kendaran"
+  },
+  {
+   "fieldname": "biaya_angkut_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Angkut"
+  },
+  {
+   "fieldname": "kendaraan_amount",
+   "fieldtype": "Currency",
+   "label": "Kendaraan Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kendaraan",
+   "fieldtype": "Table",
+   "label": "Kendaraan Detail",
+   "options": "RBK Pengangkutan Kendaraan"
+  },
+  {
+   "fieldname": "biaya_angkut_amount",
+   "fieldtype": "Currency",
+   "label": "Angkut Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_angkut",
+   "fieldtype": "Table",
+   "label": "Biaya Angkut Detail",
+   "options": "RBK Biaya Angkut"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-02 15:50:15.703878",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rencana Kerja Bulanan Pengangkutan Panen",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
