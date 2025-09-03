@@ -28,7 +28,7 @@ sth.plantation.BudgetSupervisiTahunan = class BudgetSupervisiTahunan extends sth
         let doc = this.frm.doc
         // biaya per tahun = grand total / qty table bibitan atau perawatan
         for (const item of doc.distribusi) {
-            item.rate = flt(doc.grand_total / doc.jml_hk, precision("rate", item))
+            item.rate = doc.grand_total / doc.jml_hk
         }
         this.calculate_item_values("distribusi")
     }

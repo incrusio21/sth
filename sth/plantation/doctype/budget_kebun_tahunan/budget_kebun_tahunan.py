@@ -6,13 +6,7 @@ from frappe.model.document import Document
 
 
 class BudgetKebunTahunan(Document):
-	
-	def validate(self):
-		self.set_estimasi_upah()
-	
-	def set_estimasi_upah(self):
-		fields = "pembibitan_detail" if self.is_bibitan else "perawatan_detail"
-		self.set(fields, [])
+	pass
 
 def on_doctype_update():
 	frappe.db.add_unique("Budget Kebun Tahunan", ["unit", "periode_budget"], constraint_name="unique_unit_periode")

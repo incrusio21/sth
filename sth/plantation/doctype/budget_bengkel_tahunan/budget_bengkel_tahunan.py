@@ -16,7 +16,8 @@ class BudgetBengkelTahunan(BudgetController):
 	def validate(self):
 		super().validate()
 		self.set_rp_per_jam()
-		self.validate_kendaraan_distribusi_rate()
+		if self.distribusi:
+			self.validate_kendaraan_distribusi_rate()
 
 	def on_submit(self):
 		self.update_budget_traksi()
@@ -37,15 +38,15 @@ class BudgetBengkelTahunan(BudgetController):
 		query = (
 			frappe.qb.from_(bdt)
 			.inner_join(bbt)
-			.on(bdt.name == bbt.parent)
+			.on(bbt.name == bdt.parent)
 			.select(
 				bdt.item, bbt.name
             )
 			.where(
                 (bdt.docstatus == 1) &
 				(bbt.name != self.name) & 
-				(bdt.budget_kebun_tahunan == self.budget_kebun_tahunan) &
-				(bdt.divisi == self.divisi)
+				(bbt.budget_kebun_tahunan == self.budget_kebun_tahunan) &
+				(bbt.divisi == self.divisi)
 			)
 		)
 
@@ -53,8 +54,8 @@ class BudgetBengkelTahunan(BudgetController):
 			total_jam += d.qty
 			d.rate = self.rp_kmhm
 			all_kendaraan.append(d.item)
-
-		query = query.where(bdt.isin(all_kendaraan))
+			
+		query = query.where(bdt.item.isin(all_kendaraan))
 		if kendaraan_exist := query.run(as_dict=True):
 			message = "There is a duplicate vehicle against the Budget Bengkel"
 			for ex in kendaraan_exist:

@@ -18,8 +18,8 @@ class BudgetSupervisiTahunan(BudgetController):
 		self.set_distribusi_rate()
 
 	def set_distribusi_rate(self):
-		precision = frappe.get_precision("Detail Budget Distribusi", "rate")
-		rate_distribusi = flt(self.grand_total / self.jml_hk, precision)
+		# precision = frappe.get_precision("Detail Budget Distribusi", "rate")
+		rate_distribusi = self.grand_total / self.jml_hk
 		for item in self.distribusi:
 			item.rate = rate_distribusi
 

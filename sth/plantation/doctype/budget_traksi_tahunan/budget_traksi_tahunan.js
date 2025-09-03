@@ -9,9 +9,16 @@ frappe.ui.form.on("Budget Traksi Tahunan", {
 
         frm.refresh_fields()
     },
+    divisi(frm){
+        frm.set_value("kode_kendaraan", "")
+    },
     kode_kendaraan(frm){
         frm.clear_table("bengkel")
         if(!frm.doc.kode_kendaraan) return
+
+        if(!frm.doc.divisi){
+            frappe.throw("Please Select Divisi First")
+        }
 
         frappe.call({
             method: "sth.plantation.doctype.budget_traksi_tahunan.budget_traksi_tahunan.get_biaya_bengkel",
@@ -41,7 +48,9 @@ sth.plantation.BudgetTraksiTahunan = class BudgetTraksiTahunan extends sth.plant
         super.refresh(doc)
     }
 
-    set_query_field(frm){
+    set_query_field(){
+        super.set_query_field()
+        
         this.frm.set_query("kode_kendaraan", function(doc){
             if(!doc.divisi){
                 frappe.throw("Please Select Divisi First")

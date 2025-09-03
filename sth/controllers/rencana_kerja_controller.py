@@ -44,7 +44,7 @@ def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=Non
         new_doc.update(doc.as_dict(no_default_fields=True))
         new_doc.blok = d["item"]
         
-        for key, fieldname in fieldname_addons.items():
+        for key, fieldname in (fieldname_addons or {}).items():
             new_doc.set(fieldname, d.get(key))
 
         new_doc.submit()

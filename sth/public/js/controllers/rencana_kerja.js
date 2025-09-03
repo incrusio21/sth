@@ -6,6 +6,7 @@ sth.plantation.setup_rencana_kerja_controller = function() {
         setup(doc) {
             super.setup(doc)
             this.update_field_duplicate = []
+            this.block_fieldname = []
             this.fieldname_duplicate_edit = []
             
             let me = this
@@ -73,7 +74,7 @@ sth.plantation.setup_rencana_kerja_controller = function() {
                     filters: {
                         divisi: me.frm.doc.divisi
                     }, 
-                    fieldname: (this.update_field_duplicate || []).map((d) => d.fieldname),
+                    fieldname: this.block_fieldname,
                 }
             }, (data) => {
                 frappe.call({

@@ -22,19 +22,6 @@ sth.plantation.BudgetPanenTahunan = class BudgetPanenTahunan extends sth.plantat
 
     set_query_field(){
         super.set_query_field()
-        
-        this.frm.set_query("item", "peralatan", function(doc){
-            if(!doc.divisi){
-                frappe.throw("Please Select Divisi First")
-            }
-
-		    return{
-		        filters: {
-                    divisi: doc.divisi,
-                    tipe_master: "Alat Berat"
-                }
-		    }
-		})
     }
 }
 

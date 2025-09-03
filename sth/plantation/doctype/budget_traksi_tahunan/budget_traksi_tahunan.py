@@ -38,7 +38,7 @@ def get_biaya_bengkel(tahun_budget, divisi, kendaraan):
 		.inner_join(bbt)
 		.on(bbt.name == bdt.parent)
 		.select(
-			bbt.name.as_("item"), ConstantColumn(1).as_("qty"), bdt.amount.as_("rate")
+			bbt.name.as_("item"), bdt.qty, bdt.rate, bdt.amount
 		)
 		.where(
 			(bdt.docstatus == 1) &
