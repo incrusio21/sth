@@ -13,9 +13,12 @@ from sth.controllers.plantation_controller import PlantationController
 class RencanaKerjaController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.skip_calculate_supervisi = False
 
     def validate(self):
-        self.calculate_supervisi_amount()
+        if not self.skip_calculate_supervisi:
+            self.calculate_supervisi_amount()
+    
         super().validate()
 
     

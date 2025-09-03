@@ -6,6 +6,10 @@ from frappe.utils import flt
 from sth.controllers.rencana_kerja_controller import RencanaKerjaController
 
 class RencanaKerjaBulananSupport(RencanaKerjaController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.skip_calculate_supervisi = True
+		
 	def update_rate_or_qty_value(self, item, precision):
         # set on child class if needed
 		item.rate = self.ump_harian
