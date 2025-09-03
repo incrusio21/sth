@@ -73,7 +73,7 @@ sth.plantation.setup_rencana_kerja_controller = function() {
                     filters: {
                         divisi: me.frm.doc.divisi
                     }, 
-                    fieldname: Object.keys(this.fieldname_duplicate_edit),
+                    fieldname: (this.update_field_duplicate || []).map((d) => d.fieldname),
                 }
             }, (data) => {
                 frappe.call({

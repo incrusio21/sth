@@ -52,7 +52,7 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
         
         doc.jumlah_janjang = flt(doc.jumlah_pokok * doc.akp)
         doc.tonase = flt(doc.jumlah_janjang * doc.bjr)
-        doc.total_upah = doc.upah_per_basis ? flt(doc.tonase / doc.upah_per_basis) : 0
+        doc.total_upah = flt(doc.tonase * doc.upah_per_basis)
         doc.pemanen_amount = flt(doc.total_upah) + flt(doc.premi)
     }
 }

@@ -15,7 +15,7 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 		
 		self.jumlah_janjang = flt(self.jumlah_pokok * self.akp)
 		self.tonase = flt(self.jumlah_janjang * self.bjr)
-		self.total_upah = flt(self.tonase / self.upah_per_basis) if self.upah_per_basis else 0
+		self.total_upah = flt(self.tonase * self.upah_per_basis)
 		self.pemanen_amount = flt(self.total_upah) + flt(self.premi)
 
 	def check_rkb_pengangkutan(self):
