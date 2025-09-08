@@ -18,6 +18,7 @@
   "company",
   "ump_harian",
   "kode_kegiatan",
+  "volume_basis",
   "amended_from",
   "section_break_curd",
   "from_date",
@@ -290,13 +291,20 @@
    "fieldtype": "Float",
    "label": "UMP Harian",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.v_basis",
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "label": "Volume Basis",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-03 13:42:28.409586",
+ "modified": "2025-09-08 10:48:38.953953",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Umum",

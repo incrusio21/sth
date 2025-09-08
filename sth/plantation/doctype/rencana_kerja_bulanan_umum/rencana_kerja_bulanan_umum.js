@@ -36,6 +36,15 @@ sth.plantation.RencanaKerjaBulananUmum = class RencanaKerjaBulananUmum extends s
 
     }
 
+    qty(doc, cdt, cdn){
+        this.calculate_total(cdt, cdn)
+
+        if(cdt == "RKB Umum Pegawai" && doc.volume_basis){
+            let item = locals[cdt][cdn]
+            frappe.model.set_value(cdt, cdn, "jumlah_hk", item.qty / doc.volume_basis)
+        }
+    }
+
     premi(_, cdt, cdn){
         this.calculate_total(cdt, cdn)
     }
