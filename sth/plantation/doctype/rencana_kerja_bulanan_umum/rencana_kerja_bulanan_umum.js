@@ -9,6 +9,14 @@ sth.plantation.setup_rencana_kerja_controller()
 // 	},
 // });
 
+frappe.ui.form.on("RKB Umum Pegawai", {
+	pegawai_add(frm) {
+        if(!frm.doc.kode_kegiatan){
+            frappe.throw("Please Fill Kode Kegiatan First")
+        }
+	},
+});
+
 sth.plantation.RencanaKerjaBulananUmum = class RencanaKerjaBulananUmum extends sth.plantation.RencanaKerjaController {
     setup(doc) {
         super.setup(doc)
@@ -50,6 +58,8 @@ sth.plantation.RencanaKerjaBulananUmum = class RencanaKerjaBulananUmum extends s
     }
 
     update_rate_or_qty_value(item){
+        if(item.rate) return
+
         item.rate = this.frm.doc.ump_harian
     }
 

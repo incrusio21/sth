@@ -288,7 +288,7 @@
   {
    "fieldname": "biaya_kendaran_tab",
    "fieldtype": "Tab Break",
-   "label": "Biaya Kendaran"
+   "label": "Biaya Kendaraan"
   },
   {
    "fieldname": "biaya_angkut_tab",

@@ -10,14 +10,20 @@ from sth.controllers.rencana_kerja_controller import RencanaKerjaController
 class RencanaKerjaBulananPengangkutanPanen(RencanaKerjaController):
 	def validate(self):
 		self.get_tonase()
+		self.vliadate_jarak_pks()
 		super().validate()
 
+	def vliadate_jarak_pks(self):
+		if not self.jarak_pks:
+			frappe.throw("Please fill Jarak Ke PKS First")
+			
 	def get_tonase(self):
 		self.tonase = get_tonase(self.rencana_kerja_bulanan, self.blok)
 
 	def update_rate_or_qty_value(self, item, precision):
         # set on child class if needed
-		item.qty = flt(self.tonase / item.kap_kg * self.jarak_pks * 2, precision)
+		if item.parentfield == "kendaraan":
+			item.qty = flt(self.tonase / item.kap_kg * self.jarak_pks * 2, precision)
 
 @frappe.whitelist()
 def get_tonase(rkb, blok):

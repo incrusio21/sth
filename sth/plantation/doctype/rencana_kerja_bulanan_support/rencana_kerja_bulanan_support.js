@@ -26,6 +26,8 @@ sth.plantation.RencanaKerjaBulananSupport = class RencanaKerjaBulananSupport ext
     }
 
     update_rate_or_qty_value(item){
+        if(item.rate) return
+
         item.rate = this.frm.doc.ump_harian
     }
 

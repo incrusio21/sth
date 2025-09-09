@@ -56,9 +56,13 @@ sth.plantation.RencanaKerjaBulananPengangkutan = class RencanaKerjaBulananPengan
         })
 
         this.frm.set_query("item", "kendaraan", function(doc){
+            if(!doc.unit){
+                frappe.throw("Please Select RKB First")
+            }
+
 		    return{
 		        filters: {
-                    divisi: doc.unit
+                    unit: doc.unit
                 }
 		    }
 		})
