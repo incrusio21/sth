@@ -1,50 +1,50 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
  "creation": "2025-06-30 10:33:14.406832",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_df5v",
-  "naming_series",
-  "tgl_trk",
+  "tanggal_transaksi",
   "unit",
   "divisi",
   "blok",
   "column_break_exgg",
-  "mndr_pnn",
-  "mandor_1",
-  "kerani_divisi",
-  "data_blok_section",
-  "table_urnx",
+  "company",
+  "mandor",
+  "mandor1",
+  "kerani",
+  "amended_from",
+  "section_break_wnju",
+  "kegiatan_amount",
+  "material_amount",
+  "column_break_ztur",
+  "grand_total",
   "kegiatan_tab",
   "data_kegiatan_section",
-  "kegiatan",
+  "kode_kegiatan",
+  "rate_basis",
+  "volume_basis",
   "is_it_kontanan",
-  "es_vlm",
   "column_break_cjta",
+  "tipe_kegiatan",
+  "es_vlm",
   "es_tk",
+  "section_break_pjqv",
+  "rkb_type",
+  "rkb_no",
+  "estimasi_material_tab",
+  "material",
   "estimasi_alat_berat_dan_kendaraan_tab",
   "tabel_estimasi_alat_berat_dan_kendaraan_section",
-  "table_jyli",
-  "estimasi_material_tab",
-  "tabel_estimasi_material_section",
-  "table_rczd",
-  "amended_from"
+  "table_jyli"
  ],
  "fields": [
   {
    "fieldname": "section_break_df5v",
    "fieldtype": "Section Break",
    "label": "Header"
-  },
-  {
-   "default": "Today",
-   "fieldname": "tgl_trk",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Tanggal Transaksi"
   },
   {
    "fetch_from": "blok.divisi",
@@ -74,44 +74,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "kegiatan",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "mndr_pnn",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Mandor",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "mandor_1",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Mandor 1",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "kerani_divisi",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Kerani Divisi",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "data_blok_section",
-   "fieldtype": "Section Break",
-   "label": "Informasi Data Blok"
-  },
-  {
    "default": "0",
    "fieldname": "is_it_kontanan",
    "fieldtype": "Check",
@@ -128,13 +90,7 @@
   },
   {
    "fieldname": "tabel_estimasi_alat_berat_dan_kendaraan_section",
-   "fieldtype": "Section Break",
-   "label": "Tabel Estimasi Alat Berat dan Kendaraan"
-  },
-  {
-   "fieldname": "tabel_estimasi_material_section",
-   "fieldtype": "Section Break",
-   "label": "Tabel Estimasi Material"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "table_jyli",
@@ -142,21 +98,6 @@
    "options": "Detail Estimasi Alat Berat dan Kendaraan RKH"
   },
   {
-   "fieldname": "table_rczd",
-   "fieldtype": "Table",
-   "options": "Detail Estimasi Material RKH"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Kode Transaksi"
-  },
-  {
-   "fetch_from": "divisi.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -166,11 +107,6 @@
    "label": "Unit/Kebun",
    "options": "Unit",
    "reqd": 1
-  },
-  {
-   "fieldname": "table_urnx",
-   "fieldtype": "Table",
-   "options": "Informasi Blok"
   },
   {
    "fieldname": "kegiatan_tab",
@@ -198,6 +134,7 @@
    "label": "Estimasi Alat Berat dan Kendaraan"
   },
   {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Perawatan\"",
    "fieldname": "estimasi_material_tab",
    "fieldtype": "Tab Break",
    "label": "Estimasi Material"
@@ -211,17 +148,137 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "tanggal_transaksi",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mandor",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mandor1",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mandor 1",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kerani",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Kerani Divisi",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kegiatan.v_basis",
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "label": "Volume Basis",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kegiatan.rp_basis",
+   "fieldname": "rate_basis",
+   "fieldtype": "Currency",
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_wnju",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kegiatan_amount",
+   "fieldtype": "Currency",
+   "label": "Kegiatan Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_amount",
+   "fieldtype": "Currency",
+   "label": "Material Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ztur",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Material Detail",
+   "options": "Detial RKH Material"
+  },
+  {
+   "fieldname": "tipe_kegiatan",
+   "fieldtype": "Link",
+   "label": "Tipe Kegiatan",
+   "options": "Kegiatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kode_kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_pjqv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rkb_type",
+   "fieldtype": "Link",
+   "label": "RKB Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rkb_no",
+   "fieldtype": "Dynamic Link",
+   "label": "RKB No",
+   "options": "rkb_type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-29 09:19:27.538475",
+ "modified": "2025-09-08 16:45:36.294267",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

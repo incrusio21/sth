@@ -47,6 +47,7 @@
   "material_amount",
   "budget_tambahan_amount",
   "grand_total",
+  "used_amount",
   "detail_material_tab",
   "detail_material_section",
   "material"
@@ -339,13 +340,20 @@
    "in_preview": 1,
    "label": "Tenaga Kerja Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "used_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Used Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-01 16:42:12.410495",
+ "modified": "2025-09-09 09:18:34.212285",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",

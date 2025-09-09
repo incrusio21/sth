@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_link_to_form
 from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.query_builder.functions import Sum
 
 from sth.controllers.plantation_controller import PlantationController
 
@@ -30,6 +31,25 @@ class RencanaKerjaController(PlantationController):
     def update_value_after_amount(self, item, precision):
         # set on child class if needed
         item.amount = flt(item.amount + (item.get("budget_tambahan") or 0), precision)
+
+    def update_used_total(self):
+        rkh = frappe.qb.DocType("Rencana Kerja Harian")
+
+        query = (
+			frappe.qb.from_(rkh)
+			.select(
+				Sum(rkh.kegiatan_amount)
+            )
+			.where(
+                (rkh.docstatus == 1) &
+				(rkh.kode_kegiatan == self.kode_kegiatan) & 
+				(rkh.divisi == self.divisi) &
+				(rkh.blok == self.blok) &
+				(rkh.tanggal_transaksi.between(self.from_date, self.to_date))
+			)
+		).run()[0][0] or 0.0
+
+        self.db_set("used_amount", query) 
 
 @frappe.whitelist()
 def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=None):

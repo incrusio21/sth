@@ -56,6 +56,10 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
     set_query_field(){
         this.frm.set_query("divisi", function(doc){
+            if(!doc.unit){
+                frappe.throw("Please Select Unit/Kebun First")
+            }
+            
             return{
                 filters: {
                     unit: doc.unit

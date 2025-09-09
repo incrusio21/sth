@@ -8,7 +8,10 @@
  "field_order": [
   "section_break_coqy",
   "n_tipe",
-  "amended_from"
+  "column_break_zigr",
+  "amended_from",
+  "section_break_gfvn",
+  "rkb_voucher_type"
  ],
  "fields": [
   {
@@ -32,12 +35,26 @@
    "label": "Nama Tipe",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "column_break_zigr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_gfvn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rkb_voucher_type",
+   "fieldtype": "Link",
+   "label": "RKB Voucher Type",
+   "options": "DocType"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 15:09:44.349421",
+ "modified": "2025-09-08 16:50:45.391639",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Kegiatan",
