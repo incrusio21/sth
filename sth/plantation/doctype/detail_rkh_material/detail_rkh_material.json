@@ -11,7 +11,7 @@
   "uom",
   "column_break_rsez",
   "dosis",
-  "jumlah",
+  "qty",
   "rate",
   "amount",
   "reference_from_section",
@@ -23,7 +23,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item",
-   "options": "Item"
+   "options": "Item",
+   "read_only": 1
   },
   {
    "fetch_from": "item.item_group",
@@ -53,14 +54,6 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Dosis",
-   "options": "Item Group",
-   "reqd": 1
-  },
-  {
-   "fieldname": "jumlah",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Jumlah",
    "reqd": 1
   },
   {
@@ -68,7 +61,6 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -89,16 +81,23 @@
    "fieldtype": "Data",
    "label": "Prevdoc Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-08 17:03:13.123443",
+ "modified": "2025-09-09 12:54:56.998074",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Detial RKH Material",
+ "name": "Detail RKH Material",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

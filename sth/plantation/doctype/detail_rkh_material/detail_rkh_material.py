@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class DetialRKHMaterial(Document):
+class DetailRKHMaterial(Document):
 	pass

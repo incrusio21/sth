@@ -35,7 +35,7 @@ class RencanaKerjaController(PlantationController):
     def update_used_total(self):
         rkh = frappe.qb.DocType("Rencana Kerja Harian")
 
-        query = (
+        used_total = (
 			frappe.qb.from_(rkh)
 			.select(
 				Sum(rkh.kegiatan_amount)
@@ -49,7 +49,10 @@ class RencanaKerjaController(PlantationController):
 			)
 		).run()[0][0] or 0.0
 
-        self.db_set("used_amount", query) 
+        if used_total > self.grand_total:
+            frappe.throw("Used amount exceeds grand total.")
+
+        self.db_set("used_amount", used_total) 
 
 @frappe.whitelist()
 def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=None):

@@ -17,12 +17,14 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 	def update_used_total(self):
 		super().update_used_total()
 
-		rkh_m = frappe.qb.DocType("Detial RKH Material")
+		rkh_m = frappe.qb.DocType("Detail RKH Material")
 		rkh = frappe.qb.DocType("Rencana Kerja Harian")
 		
 		material_used = frappe._dict(
 			(
-				frappe.qb.from_(rkh)
+				frappe.qb.from_(rkh_m)
+				.inner_join(rkh)
+            	.on(rkh.name == rkh_m.parent)
 				.select(
 					rkh_m.prevdoc_detail, Sum(rkh.kegiatan_amount)
 				)
@@ -33,10 +35,15 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 					(rkh.blok == self.blok) &
 					(rkh.tanggal_transaksi.between(self.from_date, self.to_date))
 				)
-				.group_by(rkh_m.prevdoc_detail)
+				.groupby(rkh_m.prevdoc_detail)
 			).run()
 		)
-
+		
 		for d in self.material:
-			d.db_set("used_amount", material_used.get(d.name) or 0.0) 
+			used_total = material_used.get(d.name) or 0.0
+			if used_total > d.amount:
+				frappe.throw("Used amount exceeds Amount of Item {}.".format(d.item))
 
+			d.db_set("used_amount", used_total) 
+
+		

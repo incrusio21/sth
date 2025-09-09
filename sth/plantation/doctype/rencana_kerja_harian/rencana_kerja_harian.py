@@ -2,15 +2,16 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
 
+from sth.controllers.plantation_controller import PlantationController
 
-class RencanaKerjaHarian(Document):
+class RencanaKerjaHarian(PlantationController):
 	def validate(self):
+		super().validate()
 		self.validate_duplicate_rkh()
 		self.check_material()
 	
-	def duplicate_rkh(self):
+	def validate_duplicate_rkh(self):
 		pass
 
 	def check_material(self):
@@ -30,22 +31,22 @@ class RencanaKerjaHarian(Document):
 def get_rencana_kerja_bulanan(kode_kegiatan, tipe_kegiatan, divisi, blok, tanggal_rkh):
 	voucher_type = frappe.get_value("Tipe Kegiatan", tipe_kegiatan, "rkb_voucher_type")
 	rkb = frappe.db.get_value(voucher_type, {
-		"kode_kegiatan": kode_kegiatan, "divisi": divisi, "blok": blok, "from_date": [">=", tanggal_rkh], "to_date": ["<=", tanggal_rkh],
+		"kode_kegiatan": kode_kegiatan, "divisi": divisi, "blok": blok, "from_date": ["<=", tanggal_rkh], "to_date": [">=", tanggal_rkh],
 		"docstatus": 1
 	})
 
 	if not rkb:
-		frappe.throw(""" Rencana Kerja Bulanan not Found for <br> 
+		frappe.throw(""" {} not Found for Filters <br> 
 			Kegiatan : {} <br> 
 			Divisi : {} <br> 
 			Blok : {} <br>
-			Date : {} """.format(kode_kegiatan, divisi, blok, tanggal_rkh))
+			Date : {} """.format(voucher_type, kode_kegiatan, divisi, blok, tanggal_rkh))
 
 	# no rencana kerja bualanan
 	ress = { "rkb_type": voucher_type, "rkb_no": rkb}
 	if voucher_type == "Rencana Kerja Bulanan Perawatan":
 		ress["material"] = frappe.db.get_all("Detail Material RK", 
-			filters={"parent": rkb}, fields=["item", "uom", "name as prevdoc_detail"]
+			filters={"parent": rkb}, fields=["item", "rate", "uom", "name as prevdoc_detail"]
 		)
 
 	return ress

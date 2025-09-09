@@ -20,6 +20,7 @@
   "kegiatan_amount",
   "material_amount",
   "column_break_ztur",
+  "pegawai_amount",
   "grand_total",
   "kegiatan_tab",
   "data_kegiatan_section",
@@ -29,16 +30,17 @@
   "is_it_kontanan",
   "column_break_cjta",
   "tipe_kegiatan",
-  "es_vlm",
-  "es_tk",
+  "target_volume",
+  "qty_tenaga_kerja",
   "section_break_pjqv",
   "rkb_type",
   "rkb_no",
   "estimasi_material_tab",
   "material",
-  "estimasi_alat_berat_dan_kendaraan_tab",
-  "tabel_estimasi_alat_berat_dan_kendaraan_section",
-  "table_jyli"
+  "kendaraan_tab",
+  "biaya_angkut_tab",
+  "pegawai_tab",
+  "pegawai"
  ],
  "fields": [
   {
@@ -89,15 +91,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tabel_estimasi_alat_berat_dan_kendaraan_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "table_jyli",
-   "fieldtype": "Table",
-   "options": "Detail Estimasi Alat Berat dan Kendaraan RKH"
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -114,30 +107,10 @@
    "label": "Kegiatan"
   },
   {
-   "fieldname": "es_vlm",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Estimasi Volume",
-   "reqd": 1
-  },
-  {
-   "fieldname": "es_tk",
-   "fieldtype": "Int",
-   "in_preview": 1,
-   "label": "Estimasi Jumlah Tenaga Kerja",
-   "reqd": 1
-  },
-  {
-   "fieldname": "estimasi_alat_berat_dan_kendaraan_tab",
-   "fieldtype": "Tab Break",
-   "label": "Estimasi Alat Berat dan Kendaraan"
-  },
-  {
    "depends_on": "eval:doc.tipe_kegiatan == \"Perawatan\"",
    "fieldname": "estimasi_material_tab",
    "fieldtype": "Tab Break",
-   "label": "Estimasi Material"
+   "label": "Material"
   },
   {
    "fieldname": "amended_from",
@@ -180,14 +153,14 @@
    "reqd": 1
   },
   {
-   "fetch_from": "kegiatan.v_basis",
+   "fetch_from": "kode_kegiatan.v_basis",
    "fieldname": "volume_basis",
    "fieldtype": "Float",
    "label": "Volume Basis",
    "read_only": 1
   },
   {
-   "fetch_from": "kegiatan.rp_basis",
+   "fetch_from": "kode_kegiatan.rp_basis",
    "fieldname": "rate_basis",
    "fieldtype": "Currency",
    "label": "Rupiah/Satuan Basis",
@@ -223,13 +196,14 @@
    "fieldname": "material",
    "fieldtype": "Table",
    "label": "Material Detail",
-   "options": "Detial RKH Material"
+   "options": "Detail RKH Material"
   },
   {
+   "fetch_from": "kode_kegiatan.tipe_kegiatan",
    "fieldname": "tipe_kegiatan",
    "fieldtype": "Link",
    "label": "Tipe Kegiatan",
-   "options": "Kegiatan",
+   "options": "Tipe Kegiatan",
    "read_only": 1
   },
   {
@@ -269,13 +243,58 @@
    "label": "RKB No",
    "options": "rkb_type",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "kendaraan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kendaraan"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "biaya_angkut_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Angkut"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Biaya Umum\"",
+   "fieldname": "pegawai_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pegawai"
+  },
+  {
+   "fieldname": "pegawai",
+   "fieldtype": "Table",
+   "label": "Pegawai Detail",
+   "options": "Detail RKH Pegawai"
+  },
+  {
+   "fieldname": "pegawai_amount",
+   "fieldtype": "Currency",
+   "label": "Pegawai Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_volume",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Estimasi Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty_tenaga_kerja",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Estimasi Jumlah Tenaga Kerja",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-08 16:45:36.294267",
+ "modified": "2025-09-09 13:07:20.452449",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
