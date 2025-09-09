@@ -21,7 +21,7 @@ class PlantationController(Document):
             self.calculate_item_values(df.options, df.fieldname)
 
     def calculate_item_values(self, options, table_fieldname):
-        total = {"amount": 0, "qty": 0, "rotasi": 0}
+        total = {"amount": 0, "qty": 0}
         rotasi_total = 0
         table_item = self.get(table_fieldname)
         
@@ -39,10 +39,8 @@ class PlantationController(Document):
 
             total["amount"] += d.amount
             total["qty"] += flt(d.qty)
-            rotasi_total += d.get("rotasi") or 0
 
-        total["rotasi"] = (rotasi_total / len(table_item) if table_item else 0)
-        for total_field in ["amount", "qty", "rotasi"]:
+        for total_field in ["amount", "qty"]:
             fieldname = f"{table_fieldname}_{total_field}"
             if not self.meta.has_field(fieldname):
                 continue
