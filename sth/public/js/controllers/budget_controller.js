@@ -39,7 +39,11 @@ sth.plantation.setup_budget_controller = function() {
         company(){
             this.frm.set_value("budget_kebun_tahunan", "")
         }
-
+ 
+        rotasi(_, cdt, cdn){
+            this.calculate_total(cdt, cdn)
+        }
+        
         is_distibute(doc){
             if(doc.is_distibute){
 

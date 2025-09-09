@@ -44,10 +44,6 @@ sth.plantation.TransactionController = class TransactionController extends frapp
     rate(_, cdt, cdn){
         this.calculate_total(cdt, cdn)
     }
-    
-    rotasi(_, cdt, cdn){
-        this.calculate_total(cdt, cdn)
-    }
 
     // mempersingkat structur koding
     doctype_ref(dict){
@@ -55,6 +51,18 @@ sth.plantation.TransactionController = class TransactionController extends frapp
     }
 
     set_query_field(){
+        this.frm.set_query("unit", function(doc){
+            if(!doc.company){
+                frappe.throw("Please Select Company First")
+            }
+            
+            return{
+                filters: {
+                    company: doc.company
+                }
+            }
+        })
+
         this.frm.set_query("divisi", function(doc){
             if(!doc.unit){
                 frappe.throw("Please Select Unit/Kebun First")
