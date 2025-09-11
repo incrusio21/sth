@@ -1,26 +1,31 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "DPDA-.#####",
  "creation": "2025-07-08 11:47:37.973174",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "doubletone_tab",
   "section_break_c2zr",
-  "naming_series",
-  "tanggal_transaksi",
-  "tp_bbt",
-  "gdg",
-  "amended_from",
-  "keterangan",
+  "data_pencatatan_type",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
   "column_break_nxva",
+  "company",
+  "amended_from",
+  "section_break_pygr",
   "divisi",
   "blok",
+  "bibit_type",
+  "keterangan",
+  "column_break_zytd",
+  "data_penyemaian_bibit",
   "item_code",
   "batch",
-  "jmlh_bbt",
-  "tab_2_tab"
+  "available_qty",
+  "qty"
  ],
  "fields": [
   {
@@ -38,20 +43,9 @@
    "search_index": 1
   },
   {
-   "fieldname": "tab_2_tab",
-   "fieldtype": "Tab Break",
-   "label": "Afkir"
-  },
-  {
    "fieldname": "doubletone_tab",
    "fieldtype": "Tab Break",
    "label": "Doubletone"
-  },
-  {
-   "default": "Today",
-   "fieldname": "tanggal_transaksi",
-   "fieldtype": "Date",
-   "label": "Tanggal Transaksi"
   },
   {
    "fieldname": "column_break_nxva",
@@ -75,32 +69,25 @@
    "reqd": 1
   },
   {
+   "fetch_from": "data_penyemaian_bibit.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kode Item",
+   "label": "Item Code",
+   "no_copy": 1,
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fetch_from": "item_code.batch_number_series",
+   "fetch_from": "data_penyemaian_bibit.batch",
    "fieldname": "batch",
    "fieldtype": "Link",
    "label": "Batch",
-   "options": "Item"
-  },
-  {
-   "fieldname": "tp_bbt",
-   "fieldtype": "Link",
-   "label": "Tipe Bibit",
-   "options": "Tipe Bibit",
+   "no_copy": 1,
+   "options": "Batch",
+   "read_only": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "gdg",
-   "fieldtype": "Link",
-   "label": "Gudang",
-   "options": "Warehouse"
   },
   {
    "fieldname": "keterangan",
@@ -108,24 +95,90 @@
    "label": "Keterangan"
   },
   {
-   "fieldname": "jmlh_bbt",
-   "fieldtype": "Float",
-   "label": "Jumlah Bibit"
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "search_index": 1
   },
   {
-   "fieldname": "naming_series",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "data_pencatatan_type",
    "fieldtype": "Select",
-   "label": "No Document"
+   "label": "Data Pencatatan Type",
+   "options": "\nDobletone\nAfkir",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bibit_type",
+   "fieldtype": "Link",
+   "label": "Bibit Type",
+   "options": "Tipe Bibitan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "data_penyemaian_bibit",
+   "fieldtype": "Link",
+   "label": "Data Penyemaian Bibit",
+   "no_copy": 1,
+   "options": "Data Penyemaian Bibit",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_pygr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_zytd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "data_penyemaian_bibit.transplanting_qty",
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "label": "Available Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Jumlah Bibit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:07:23.845189",
+ "modified": "2025-09-11 14:09:43.027066",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Pencatatan Dobletone Dan Afkir",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

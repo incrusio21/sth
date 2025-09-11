@@ -1,44 +1,41 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "DPNMB-.#####",
  "creation": "2025-07-08 13:36:17.515805",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_zzrf",
-  "naming_series",
-  "tgl_trk",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
+  "column_break_onba",
+  "company",
+  "amended_from",
+  "section_break_toxq",
   "no_spb",
   "divisi",
   "blok",
-  "address",
-  "kdr",
-  "nm_spr",
-  "nama_assisten",
-  "intex",
-  "amended_from",
-  "column_break_onba",
-  "kgt",
-  "gdg",
+  "description",
+  "column_break_pdlg",
+  "data_penyemaian_bibit",
   "item_code",
   "batch",
-  "stk_bibit",
-  "jmlh_bbt",
-  "ket"
+  "available_qty",
+  "qty",
+  "shipping_detail_section",
+  "alat_berat_dan_kendaraan",
+  "employee",
+  "employee_assisten",
+  "intex",
+  "column_break_auoy",
+  "address"
  ],
  "fields": [
   {
    "fieldname": "section_break_zzrf",
    "fieldtype": "Section Break"
-  },
-  {
-   "default": "Today",
-   "fieldname": "tgl_trk",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Tanggal",
-   "reqd": 1
   },
   {
    "fetch_from": "blok.divisi",
@@ -58,11 +55,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "ket",
-   "fieldtype": "Small Text",
-   "label": "Keterangan"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -77,30 +69,24 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "batch.batch_number_series",
+   "fetch_from": "data_penyemaian_bibit.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kode Item",
+   "label": "Item Code",
+   "no_copy": 1,
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fetch_from": "item_code.batch_number_series",
+   "fetch_from": "data_penyemaian_bibit.batch",
    "fieldname": "batch",
    "fieldtype": "Link",
    "label": "Batch",
-   "options": "Item"
-  },
-  {
-   "fieldname": "stk_bibit",
-   "fieldtype": "Float",
-   "label": "Stok Bibit"
-  },
-  {
-   "fieldname": "jmlh_bbt",
-   "fieldtype": "Float",
-   "label": "Jumlah yang Ditanam",
+   "no_copy": 1,
+   "options": "Batch",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -114,50 +100,16 @@
    "search_index": 1
   },
   {
-   "fieldname": "gdg",
-   "fieldtype": "Link",
-   "label": "Gudang",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
    "fieldname": "no_spb",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "No SPB"
   },
   {
-   "fieldname": "kdr",
-   "fieldtype": "Link",
-   "label": "Kendaraan",
-   "options": "Alat Berat Dan Kendaraan"
-  },
-  {
-   "fieldname": "nm_spr",
-   "fieldtype": "Link",
-   "label": "Nama Sopir",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "nama_assisten",
-   "fieldtype": "Link",
-   "label": "Nama Assisten",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
    "fieldname": "intex",
    "fieldtype": "Select",
    "label": "Intex",
    "options": "\nTanam Inti\nSisip Inti\nTanam Plasma\nTanam Inti\nJual\nAfiliasi"
-  },
-  {
-   "fieldname": "kgt",
-   "fieldtype": "Link",
-   "label": "Kegiatan",
-   "options": "Kegiatan Before",
-   "reqd": 1
   },
   {
    "fieldname": "address",
@@ -167,20 +119,112 @@
    "options": "Address"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_toxq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_pdlg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Detail"
+  },
+  {
+   "fieldname": "column_break_auoy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "data_penyemaian_bibit",
+   "fieldtype": "Link",
+   "label": "Data Penyemaian Bibit",
+   "no_copy": 1,
+   "options": "Data Penyemaian Bibit",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "label": "Available Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Jumlah Bibit",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "alat_berat_dan_kendaraan",
+   "fieldtype": "Link",
+   "label": "Kendaraan",
+   "options": "Alat Berat Dan Kendaraan"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nama Sopir",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_assisten",
+   "fieldtype": "Link",
+   "label": "Nama Assisten",
+   "options": "Employee",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-11 13:57:38.022794",
+ "modified": "2025-09-11 14:22:53.803193",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penanaman Bibit",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

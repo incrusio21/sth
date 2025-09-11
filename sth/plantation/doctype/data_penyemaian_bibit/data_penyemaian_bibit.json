@@ -1,26 +1,34 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "DPB-.#####",
  "creation": "2025-07-08 11:32:40.649941",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_oqec",
-  "naming_series",
-  "tgl_trk",
-  "tgl_tnm",
-  "gdg",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
   "amended_from",
-  "prec",
-  "column_break_ykgo",
   "divisi",
-  "blok",
+  "column_break_ykgo",
+  "company",
+  "voucher_no",
   "item_code",
-  "jb",
   "batch",
-  "ssi",
-  "jml_tnm"
+  "amount",
+  "detail_qty_section",
+  "qty_planting",
+  "qty_before_afkir",
+  "qty_dobletone",
+  "qty_after_afkir",
+  "column_break_ddbb",
+  "qty",
+  "transplanting_qty",
+  "planting_qty",
+  "reference_section",
+  "stock_entry"
  ],
  "fields": [
   {
@@ -38,25 +46,125 @@
    "search_index": 1
   },
   {
-   "fieldname": "tgl_tnm",
-   "fieldtype": "Date",
-   "label": "Tanggal Tanam"
-  },
-  {
-   "fieldname": "gdg",
-   "fieldtype": "Link",
-   "label": "Gudang",
-   "options": "Warehouse"
-  },
-  {
-   "fieldname": "prec",
-   "fieldtype": "Link",
-   "label": "No Doocument Purchase Receipt",
-   "options": "Purchase Receipt"
-  },
-  {
    "fieldname": "column_break_ykgo",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Batch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Link",
+   "label": "Purchase Receipt",
+   "options": "Purchase Receipt",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "description": "(Qty Planting - Qty Seed Afkir +  Qty Dobletone - Qty After Afkir)",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Grand Total Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry",
+   "no_copy": 1,
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail_qty_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Qty"
+  },
+  {
+   "fieldname": "qty_planting",
+   "fieldtype": "Float",
+   "label": "Qty Planting"
+  },
+  {
+   "default": "0",
+   "fieldname": "qty_before_afkir",
+   "fieldtype": "Float",
+   "label": "Qty Seed Afkir",
+   "no_copy": 1
+  },
+  {
+   "description": "(Total Data Pencatatan Dobletone)",
+   "fieldname": "qty_dobletone",
+   "fieldtype": "Float",
+   "label": "Qty Dobletone",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "(Total Data Pencatatan Afkir)",
+   "fieldname": "qty_after_afkir",
+   "fieldtype": "Float",
+   "label": "Qty After Afkir",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ddbb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time"
   },
   {
    "fieldname": "divisi",
@@ -65,68 +173,47 @@
    "options": "Divisi"
   },
   {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Blok",
-   "options": "Blok",
-   "reqd": 1
+   "description": "(Total Data Pemindahan Transplanting Bibit)",
+   "fieldname": "transplanting_qty",
+   "fieldtype": "Float",
+   "label": "Transplanting Seed Qty",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kode Item",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "item_code.variant_of",
-   "fieldname": "jb",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Jenis Bibit",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "item_code.batch_number_series",
-   "fieldname": "batch",
-   "fieldtype": "Link",
-   "label": "Batch",
-   "options": "Item"
-  },
-  {
-   "fieldname": "ssi",
-   "fieldtype": "Link",
-   "label": "Stock Saat Ini",
-   "options": "Stock Ledger Entry"
-  },
-  {
-   "fieldname": "jml_tnm",
-   "fieldtype": "Int",
-   "label": "Jumlah Tanam"
-  },
-  {
-   "default": "Today",
-   "fieldname": "tgl_trk",
-   "fieldtype": "Date",
-   "label": "Tanggal Transakasi"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
+   "description": "(Total Data Penanaman Bibit)",
+   "fieldname": "planting_qty",
+   "fieldtype": "Float",
+   "label": "Planting Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2025-07-08 14:07:13.554672",
+ "links": [
+  {
+   "group": "Preparation",
+   "link_doctype": "Data Pencatatan Dobletone Dan Afkir",
+   "link_fieldname": "data_penyemaian_bibit"
+  },
+  {
+   "group": "Transfer",
+   "link_doctype": "Data Pemindahan Transplanting Bibit",
+   "link_fieldname": "data_penyemaian_bibit"
+  },
+  {
+   "group": "Planting",
+   "link_doctype": "Data Penanaman Bibit",
+   "link_fieldname": "data_penyemaian_bibit"
+  }
+ ],
+ "modified": "2025-09-11 14:09:08.439802",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penyemaian Bibit",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

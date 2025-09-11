@@ -1,25 +1,28 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "DPTB-.#####",
  "creation": "2025-07-08 13:20:43.519398",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_zzrf",
-  "naming_series",
-  "tgl_trk",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
+  "column_break_onba",
+  "company",
+  "amended_from",
+  "section_break_ijru",
   "divisi",
   "blok",
   "ket",
-  "amended_from",
-  "column_break_onba",
+  "column_break_vcrf",
+  "data_penyemaian_bibit",
   "item_code",
   "batch",
-  "stk_bibit",
-  "gdg_asl",
-  "gdg_tj",
-  "jmlh_bbt"
+  "available_qty",
+  "qty"
  ],
  "fields": [
   {
@@ -35,14 +38,6 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "tgl_trk",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Tanggal",
-   "reqd": 1
   },
   {
    "fetch_from": "blok.divisi",
@@ -66,37 +61,24 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "data_penyemaian_bibit.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kode Item",
+   "label": "Item Code",
+   "no_copy": 1,
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fetch_from": "item_code.batch_number_series",
+   "fetch_from": "data_penyemaian_bibit.batch",
    "fieldname": "batch",
    "fieldtype": "Link",
    "label": "Batch",
-   "options": "Item"
-  },
-  {
-   "fieldname": "stk_bibit",
-   "fieldtype": "Float",
-   "label": "Stok Bibit"
-  },
-  {
-   "fieldname": "gdg_asl",
-   "fieldtype": "Link",
-   "label": "Gudang Asal",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
-   "fieldname": "gdg_tj",
-   "fieldtype": "Link",
-   "label": "Gudang Tujuan",
-   "options": "Warehouse",
+   "no_copy": 1,
+   "options": "Batch",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -105,25 +87,78 @@
    "label": "Keterangan"
   },
   {
-   "fieldname": "jmlh_bbt",
-   "fieldtype": "Float",
-   "label": "Jumlah yang dipindah",
+   "default": "Today",
+   "depends_on": "eval:!doc.set_posting_time",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "no_copy": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:!doc.set_posting_time",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "report_hide": 1,
    "reqd": 1
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
+   "default": "0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_ijru",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vcrf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "data_penyemaian_bibit",
+   "fieldtype": "Link",
+   "label": "Data Penyemaian Bibit",
+   "no_copy": 1,
+   "options": "Data Penyemaian Bibit",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "label": "Available Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Jumlah Bibit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-08 14:05:37.026136",
+ "modified": "2025-09-11 13:09:56.811824",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Pemindahan Transplanting Bibit",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
