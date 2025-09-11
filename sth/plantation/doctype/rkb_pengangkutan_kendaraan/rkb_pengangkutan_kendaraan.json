@@ -1,14 +1,15 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-09-02 15:46:41.264531",
+ "creation": "2025-09-02 15:34:09.273316",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "item",
-  "jumlah_hk",
-  "column_break_smwp",
+  "uom",
+  "kap_kg",
+  "column_break_xspq",
   "qty",
   "rate",
   "amount"
@@ -18,41 +19,52 @@
    "fieldname": "item",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kegiatan",
-   "options": "Kegiatan"
+   "label": "Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
   },
   {
-   "fetch_from": "item.v_basis",
-   "fieldname": "jumlah_hk",
-   "fieldtype": "Float",
+   "columns": 1,
+   "fetch_from": "item.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Jumlah HK",
+   "label": "Satuan",
+   "options": "UOM",
    "read_only": 1
   },
   {
-   "fieldname": "column_break_smwp",
+   "columns": 1,
+   "fetch_from": "item.kap_kg",
+   "fieldname": "kap_kg",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Kap Kg",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xspq",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Volume",
-   "options": "Kegiatan"
+   "label": "KM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate",
-   "options": "Kegiatan"
+   "label": "Rate"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "options": "Kegiatan",
    "read_only": 1
   }
  ],
@@ -60,10 +72,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-02 15:50:31.627670",
+ "modified": "2025-09-03 11:27:52.831549",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "RBK Biaya Angkut",
+ "name": "RKB Pengangkutan Kendaraan",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

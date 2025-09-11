@@ -32,7 +32,7 @@
   },
   {
    "fieldname": "luas_areal",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Luas Areal",
    "reqd": 1
@@ -105,7 +105,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-01 10:59:39.006026",
+ "modified": "2025-09-10 14:57:38.156775",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

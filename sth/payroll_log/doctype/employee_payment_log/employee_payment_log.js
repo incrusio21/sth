@@ -1,7 +1,7 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Batch Bibit", {
+// frappe.ui.form.on("Employee Payment Log", {
 // 	refresh(frm) {
 
 // 	},

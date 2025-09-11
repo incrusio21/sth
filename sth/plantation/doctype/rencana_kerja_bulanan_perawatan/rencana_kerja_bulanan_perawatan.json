@@ -9,22 +9,28 @@
   "section_break_x1i5",
   "rencana_kerja_bulanan",
   "unit",
-  "divisi",
-  "blok",
-  "luas_blok",
-  "tahun_tanam",
-  "sph",
-  "jumlah_pokok",
-  "column_break_dbwg",
-  "company",
+  "kategori_kegiatan",
+  "is_bibitan",
   "kode_kegiatan",
   "uom",
   "qty_basis",
+  "column_break_dbwg",
+  "company",
+  "divisi",
   "qty",
   "jumlah_tenaga_kerja",
   "upah_per_basis",
   "premi",
   "amended_from",
+  "batchblok_section",
+  "column_break_cggo",
+  "blok",
+  "tahun_tanam",
+  "luas_blok",
+  "sph",
+  "jumlah_pokok",
+  "column_break_ibxc",
+  "batch",
   "details_rkb_section",
   "from_date",
   "column_break_saba",
@@ -181,13 +187,14 @@
    "options": "Detail Material RK"
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "blok",
    "fieldtype": "Link",
    "label": "Blok",
-   "options": "Blok",
-   "reqd": 1
+   "options": "Blok"
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fetch_from": "blok.luas_areal",
    "fieldname": "luas_blok",
    "fieldtype": "Data",
@@ -195,6 +202,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fetch_from": "blok.tahun_tanam",
    "fieldname": "tahun_tanam",
    "fieldtype": "Data",
@@ -202,6 +210,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fetch_from": "blok.sph",
    "fieldname": "sph",
    "fieldtype": "Data",
@@ -209,6 +218,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fetch_from": "blok.jumlah_pokok",
    "fieldname": "jumlah_pokok",
    "fieldtype": "Float",
@@ -347,13 +357,51 @@
    "in_preview": 1,
    "label": "Used Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "batchblok_section",
+   "fieldtype": "Section Break",
+   "label": "Batch/Blok"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "column_break_ibxc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Batch"
+  },
+  {
+   "fieldname": "kategori_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kategori Kegiatan",
+   "options": "Kategori Kegiatan",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "kategori_kegiatan.is_bibitan",
+   "fieldname": "is_bibitan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Bibitan ?",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "column_break_cggo",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 09:18:34.212285",
+ "modified": "2025-09-10 12:52:05.039758",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",

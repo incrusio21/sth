@@ -4,6 +4,8 @@
 frappe.ui.form.on("Rencana Kerja Harian", {
 	refresh(frm) {
         frm.set_df_property("material", "cannot_add_rows", true);
+        frm.set_df_property("kendaraan", "cannot_add_rows", true);
+        frm.set_df_property("angkut", "cannot_add_rows", true);
 	},
     target_volume(frm) {
         frm.doc.qty_tenaga_kerja = frm.doc.volume_basis ? flt(frm.doc.target_volume / frm.doc.volume_basis) : 0
@@ -28,12 +30,12 @@ frappe.ui.form.on("Detial RKH Material", {
 	},
 });
 
-sth.plantation.RencanaKerjaHarian = class RencanaKerjaBulananUmum extends sth.plantation.TransactionController {
+sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantation.TransactionController {
     setup(doc) {
         super.setup(doc)
 
         let me = this
-        for (const fieldname of ["kode_kegiatan", "tipe_kegiatan", "divisi", "blok", "tanggal_transaksi"]) {
+        for (const fieldname of ["kode_kegiatan", "tipe_kegiatan", "divisi", "blok", "posting_date"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function() {
                 me.get_rkb_data()
             });
@@ -54,7 +56,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaBulananUmum extends sth.pl
                 }
             }
         })
-
+        
         this.frm.set_query("kode_kegiatan", function(doc){
             return{
                 filters: {
@@ -69,7 +71,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaBulananUmum extends sth.pl
     get_rkb_data(){
         let me = this
         let doc = this.frm.doc
-        if(!(doc.kode_kegiatan && doc.tipe_kegiatan && doc.divisi && doc.blok && doc.tanggal_transaksi)) return
+        if(!(doc.kode_kegiatan && doc.tipe_kegiatan && doc.divisi && doc.blok && doc.posting_date)) return
         
         frappe.call({
             method: "sth.plantation.doctype.rencana_kerja_harian.rencana_kerja_harian.get_rencana_kerja_bulanan",
@@ -78,7 +80,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaBulananUmum extends sth.pl
                 tipe_kegiatan: doc.tipe_kegiatan,
                 divisi: doc.divisi,
                 blok: doc.blok,
-                tanggal_rkh: doc.tanggal_transaksi
+                posting_date: doc.posting_date
             },
             freeze: true,
             callback: function (data) {

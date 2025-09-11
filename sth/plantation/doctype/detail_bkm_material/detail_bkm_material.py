@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class RBKBiayaAngkut(Document):
+class DetailBKMMaterial(Document):
 	pass

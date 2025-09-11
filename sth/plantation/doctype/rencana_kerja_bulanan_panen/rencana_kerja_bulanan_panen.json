@@ -52,7 +52,8 @@
   "column_break_fsda",
   "pemanen_amount",
   "budget_tambahan_amount",
-  "grand_total"
+  "grand_total",
+  "used_amount"
  ],
  "fields": [
   {
@@ -166,6 +167,7 @@
    "label": "Details RKB"
   },
   {
+   "fetch_from": "rencana_kerja_bulanan.from_date",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
@@ -176,6 +178,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "rencana_kerja_bulanan.to_date",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
@@ -349,13 +352,19 @@
    "fieldtype": "Percent",
    "label": "Angka Kerapatan Panen (%)",
    "reqd": 1
+  },
+  {
+   "fieldname": "used_amount",
+   "fieldtype": "Currency",
+   "label": "Used Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-02 13:08:33.223296",
+ "modified": "2025-09-09 13:34:53.586880",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Panen",

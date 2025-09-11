@@ -288,7 +288,7 @@
   {
    "fieldname": "biaya_kendaran_tab",
    "fieldtype": "Tab Break",
-   "label": "Biaya Kendaraan"
+   "label": "Biaya Kendaran"
   },
   {
    "fieldname": "biaya_angkut_tab",
@@ -305,7 +305,7 @@
    "fieldname": "kendaraan",
    "fieldtype": "Table",
    "label": "Kendaraan Detail",
-   "options": "RBK Pengangkutan Kendaraan"
+   "options": "RKB Pengangkutan Kendaraan"
   },
   {
    "fieldname": "biaya_angkut_amount",
@@ -317,14 +317,14 @@
    "fieldname": "biaya_angkut",
    "fieldtype": "Table",
    "label": "Biaya Angkut Detail",
-   "options": "RBK Biaya Angkut"
+   "options": "RKB Biaya Angkut"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-02 15:50:15.703878",
+ "modified": "2025-09-09 15:29:12.065750",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Pengangkutan Panen",
