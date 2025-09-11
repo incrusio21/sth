@@ -30,8 +30,8 @@ class BukuKerjaMandorPerawatan(PlantationController):
 
 		for hk in self.hasil_kerja:
 			hk.hari_kerja = flt(hk.qty / self.volume_basis)
-			if self.per_premi and hk.hari_kerja > flt(self.per_premi / 100):
-				hk.premi = self.rp_per_basis
+			if self.per_premi and hk.hari_kerja > flt(self.volume_basis * ((1 + self.per_premi) / 100)):
+				hk.premi = self.rupiah_premi
 
 	def get_rencana_kerja_harian(self):
 		ret = get_rencana_kerja_harian(self.kode_kegiatan, self.divisi, self.blok, self.posting_date)

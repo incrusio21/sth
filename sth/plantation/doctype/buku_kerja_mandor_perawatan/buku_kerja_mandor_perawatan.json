@@ -15,6 +15,7 @@
   "volume_basis",
   "rp_per_basis",
   "per_premi",
+  "rupiah_premi",
   "column_break_souy",
   "company",
   "posting_date",
@@ -285,13 +286,21 @@
    "in_list_view": 1,
    "label": "% Premi",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.rp_prm",
+   "fieldname": "rupiah_premi",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rupiah Premi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-11 13:23:28.619051",
+ "modified": "2025-09-11 14:04:41.249119",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",
