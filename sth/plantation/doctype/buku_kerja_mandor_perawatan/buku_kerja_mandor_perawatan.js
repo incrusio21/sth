@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Buku Kerja Mandor Perawatan", {
 	refresh(frm) {
-        frm.set_df_property("material", "cannot_add_rows", true);
+
 	},
     kategori_kegiatan(frm){
         frm.set_value("blok", "")
@@ -16,7 +16,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         super.setup(doc)
 
         let me = this
-        for (const fieldname of ["volume_basis"]) {
+        for (const fieldname of ["volume_basis", "rp_per_basis", ""]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "hasil_kerja")
             });
@@ -69,7 +69,13 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     }
 
     update_rate_or_qty_value(item){
-        item.hari_kerja = flt(item.qty / this.frm.doc.volume_basis)
+        if(item.parentfield == "hasil_kerja"){
+            item.hari_kerja = flt(item.qty / this.frm.doc.volume_basis)
+            item.rate = this.frm.doc.rp_per_basis
+            if(this.frm.doc.per_premi && item.hari_kerja > flt(this.frm.doc.per_premi / 100)){
+                item.premi = this.frm.doc.rp_per_basis
+            }
+        }
     }
 
     get_rkh_data(){

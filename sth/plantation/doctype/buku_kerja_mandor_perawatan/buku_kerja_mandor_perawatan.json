@@ -13,6 +13,8 @@
   "kode_kegiatan",
   "uom",
   "volume_basis",
+  "rp_per_basis",
+  "per_premi",
   "column_break_souy",
   "company",
   "posting_date",
@@ -267,13 +269,29 @@
    "label": "Stock Entry",
    "options": "Stock Entry",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.rp_basis",
+   "fieldname": "rp_per_basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.pr_prm",
+   "fieldname": "per_premi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "% Premi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-11 12:06:10.639356",
+ "modified": "2025-09-11 13:23:28.619051",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

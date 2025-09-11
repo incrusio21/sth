@@ -68,6 +68,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
 
     }
 
+    
     get_rkb_data(){
         let me = this
         let doc = this.frm.doc

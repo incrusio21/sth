@@ -4,7 +4,7 @@
 import frappe
 from frappe.query_builder.functions import Sum
 
-from frappe.utils import get_link_to_form
+from frappe.utils import flt, get_link_to_form
 from sth.controllers.plantation_controller import PlantationController
 from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
@@ -18,14 +18,20 @@ class BukuKerjaMandorPerawatan(PlantationController):
 		self.skip_calculate_table = ["material"]
 
 	def validate(self):
-		self.validate_hasil_kerja()
+		self.get_rencana_kerja_harian()
+		self.validate_hasil_kerja_harian()
 		self.check_material()
 
 		super().validate()
 	
-	def validate_hasil_kerja(self):
+	def validate_hasil_kerja_harian(self):
 		if self.uom == "HA" and self.hasil_kerja_qty > self.luas_blok:
 			frappe.throw("Hasil Kerja exceeds Luas Blok")
+
+		for hk in self.hasil_kerja:
+			hk.hari_kerja = flt(hk.qty / self.volume_basis)
+			if self.per_premi and hk.hari_kerja > flt(self.per_premi / 100):
+				hk.premi = self.rp_per_basis
 
 	def get_rencana_kerja_harian(self):
 		ret = get_rencana_kerja_harian(self.kode_kegiatan, self.divisi, self.blok, self.posting_date)
