@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class RBKPengangkutanKendaraan(Document):
+class RKBPengangkutanKendaraan(Document):
 	pass

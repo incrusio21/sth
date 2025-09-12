@@ -42,10 +42,8 @@ class RencanaKerjaController(PlantationController):
             )
 			.where(
                 (rkh.docstatus == 1) &
-				(rkh.kode_kegiatan == self.kode_kegiatan) & 
-				(rkh.divisi == self.divisi) &
-				(rkh.blok == self.blok) &
-				(rkh.tanggal_transaksi.between(self.from_date, self.to_date))
+                (rkh.voucher_type == self.doctype) &
+                (rkh.voucher_no == self.name)
 			)
 		).run()[0][0] or 0.0
 

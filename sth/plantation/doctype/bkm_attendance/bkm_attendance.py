@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class BatchBibit(Document):
+class BKMAttendance(Document):
 	pass

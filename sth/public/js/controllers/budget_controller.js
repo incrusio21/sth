@@ -135,20 +135,24 @@ sth.plantation.setup_budget_controller = function() {
         }
 
         after_calculate_item_values(table_name){
+            // update nilai sebaran dan rotasi jika ada
             let data_table = this.frm.doc[table_name] || []
+            let total_rotasi = 0.0
 
             // set on child class if 
             let per_month_table = Object.keys(
                 this.frm.fields_dict[table_name].grid.fields_map
             ).filter(key => key.includes("rp_"));
 
-            if(per_month_table.length == 0) return
-            
-            // menghitung amount, rotasi, qty
             for (const item of data_table) {
-                // jika tidak ada fieldname degan kata per_ skip sebaran                
+                total_rotasi += item.rotasi || 0
+                
+                // jika tidak ada fieldname degan kata per_ skip sebaran    
+                if(per_month_table.length == 0) continue
                 this.calculate_sebaran_values(item, per_month_table)
             }
+            
+            this.frm.doc[`${table_name}_rotasi`] = flt(total_rotasi / data_table.length) || 0;
         }
 
         clear_table(list_table=[]){

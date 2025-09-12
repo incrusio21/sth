@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestBatchBibit(FrappeTestCase):
+class TestEmployeePaymentLog(FrappeTestCase):
 	pass

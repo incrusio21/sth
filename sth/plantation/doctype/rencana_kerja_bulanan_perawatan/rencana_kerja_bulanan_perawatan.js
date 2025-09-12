@@ -7,7 +7,10 @@ frappe.ui.form.on("Rencana Kerja Bulanan Perawatan", {
 	refresh(frm) {
         
 	},
-    
+    kategori_kegiatan(frm){
+        frm.set_value("blok", "")
+        frm.set_value("batch", "")
+    }
 });
 
 sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan extends sth.plantation.RencanaKerjaController {
@@ -24,16 +27,37 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
 
     set_query_field(){
         super.set_query_field()
-    
-        this.frm.set_query("kode_kegiatan", function(doc){
-            return{
-                filters: {
-                    company: doc.company,
-                    tipe_kegiatan: "Perawatan",
-                    is_group: 0
+        
+        this.frm.set_query("kategori_kegiatan", function(){
+		    return{
+		        filters: {
+                    is_perawatan: 1
                 }
+		    }
+		})
+
+        this.frm.set_query("kode_kegiatan", function(doc){
+            if(!(doc.company && doc.kategori_kegiatan)){
+                frappe.throw("Please Select Kategori Kegiata and Company First")
             }
-        })
+
+		    return{
+		        filters: {
+                    is_group: 0,
+                    kategori_kegiatan: doc.kategori_kegiatan,
+                    company: doc.company
+                }
+		    }
+		})
+
+        this.frm.set_query("batch", function(doc){
+		    return{
+		        filters: {
+                    company: doc.company
+                }
+		    }
+		})
+
 
     }
 

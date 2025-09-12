@@ -6,11 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_df5v",
-  "tanggal_transaksi",
   "unit",
   "divisi",
   "blok",
   "column_break_exgg",
+  "posting_date",
   "company",
   "mandor",
   "mandor1",
@@ -18,8 +18,10 @@
   "amended_from",
   "section_break_wnju",
   "kegiatan_amount",
-  "material_amount",
   "column_break_ztur",
+  "material_amount",
+  "kendaraan_amount",
+  "biaya_angkut_amount",
   "pegawai_amount",
   "grand_total",
   "kegiatan_tab",
@@ -33,11 +35,12 @@
   "target_volume",
   "qty_tenaga_kerja",
   "section_break_pjqv",
-  "rkb_type",
-  "rkb_no",
+  "voucher_type",
+  "voucher_no",
   "estimasi_material_tab",
   "material",
   "kendaraan_tab",
+  "kendaraan",
   "biaya_angkut_tab",
   "pegawai_tab",
   "pegawai"
@@ -49,7 +52,6 @@
    "label": "Header"
   },
   {
-   "fetch_from": "blok.divisi",
    "fieldname": "divisi",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -123,12 +125,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "tanggal_transaksi",
-   "fieldtype": "Date",
-   "label": "Tanggal Transaksi",
-   "reqd": 1
-  },
-  {
    "fieldname": "mandor",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -177,6 +173,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Perawatan\"",
    "fieldname": "material_amount",
    "fieldtype": "Currency",
    "label": "Material Total",
@@ -231,20 +228,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "rkb_type",
-   "fieldtype": "Link",
-   "label": "RKB Type",
-   "options": "DocType",
-   "read_only": 1
-  },
-  {
-   "fieldname": "rkb_no",
-   "fieldtype": "Dynamic Link",
-   "label": "RKB No",
-   "options": "rkb_type",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
    "fieldname": "kendaraan_tab",
    "fieldtype": "Tab Break",
@@ -269,6 +252,7 @@
    "options": "Detail RKH Pegawai"
   },
   {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Biaya Umum\"",
    "fieldname": "pegawai_amount",
    "fieldtype": "Currency",
    "label": "Pegawai Total",
@@ -288,13 +272,53 @@
    "in_preview": 1,
    "label": "Estimasi Jumlah Tenaga Kerja",
    "reqd": 1
+  },
+  {
+   "fieldname": "kendaraan",
+   "fieldtype": "Table",
+   "label": "Kendaraan Detail",
+   "options": "Detail RKH Kendaraan"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "kendaraan_amount",
+   "fieldtype": "Currency",
+   "label": "Kendaraan Total",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "biaya_angkut_amount",
+   "fieldtype": "Currency",
+   "label": "Biaya Angkut Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 13:07:20.452449",
+ "modified": "2025-09-11 09:30:39.039243",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",

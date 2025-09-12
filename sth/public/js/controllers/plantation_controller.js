@@ -93,8 +93,8 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
     calculate_item_values(table_name){
         let me = this
-        let total = {"amount": 0, "qty": 0, "rotasi": 0}
-        let total_rotasi = 0.0
+        let total = {"amount": 0, "qty": 0}
+        
         let data_table = me.frm.doc[table_name] || []
         
         // menghitung amount, rotasi, qty
@@ -106,14 +106,12 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
             this.update_value_after_amount(item)
 
+            // total amount dan qty untuk d input ke doctype utama jika d butuhkan
             total["amount"] += item.amount;
             total["qty"] += item.qty
-            total_rotasi += item.rotasi || 0
         }
         
-        total["rotasi"] = total_rotasi / data_table.length;
-        
-        for (const total_field of ["amount", "qty", "rotasi"]) {
+        for (const total_field of ["amount", "qty"]) {
             let fieldname = `${table_name}_${total_field}`
             if (!this.frm.fields_dict[fieldname]) continue;
 

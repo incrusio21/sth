@@ -26,14 +26,12 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 				.inner_join(rkh)
             	.on(rkh.name == rkh_m.parent)
 				.select(
-					rkh_m.prevdoc_detail, Sum(rkh.kegiatan_amount)
+					rkh_m.prevdoc_detail, Sum(rkh_m.amount)
 				)
 				.where(
 					(rkh.docstatus == 1) &
-					(rkh.kode_kegiatan == self.kode_kegiatan) & 
-					(rkh.divisi == self.divisi) &
-					(rkh.blok == self.blok) &
-					(rkh.tanggal_transaksi.between(self.from_date, self.to_date))
+					(rkh.voucher_type == self.doctype) &
+                	(rkh.voucher_no == self.name)
 				)
 				.groupby(rkh_m.prevdoc_detail)
 			).run()

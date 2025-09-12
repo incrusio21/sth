@@ -10,6 +10,7 @@ class PlantationController(Document):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.skip_table_amount = []
+        self.skip_calculate_table = []
         self.skip_fieldname_amount = []
 
     def validate(self):
@@ -18,11 +19,13 @@ class PlantationController(Document):
 
     def calculate_item_table_values(self):
         for df in self._get_table_fields():
+            if df.fieldname in self.skip_calculate_table:
+                continue
+
             self.calculate_item_values(df.options, df.fieldname)
 
     def calculate_item_values(self, options, table_fieldname):
         total = {"amount": 0, "qty": 0}
-        rotasi_total = 0
         table_item = self.get(table_fieldname)
         
         # set precision setiap table agar pembulatan untuk menghidari selesih grand total akibat floating-point precision
