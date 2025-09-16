@@ -4,6 +4,7 @@
 import frappe
 
 from frappe.utils import get_link_to_form
+from sth.controllers.prev_doc_validate import validate_previous_document
 from sth.controllers.plantation_controller import PlantationController
 
 force_item_fields = (
@@ -11,8 +12,12 @@ force_item_fields = (
 	"voucher_no"
 )
 
-class RencanaKerjaHarian(PlantationController):
+class RencanaKerjaHarian(PlantationController, validate_previous_document):
 	def validate(self):
+		# memaksa material menjadi array kosong
+		if self.tipe_kegiatan != "Perawatan":
+			self.material = []
+
 		self.get_rencana_kerja_bulanan()
 		self.validate_duplicate_rkh()
 		self.check_material()
@@ -36,36 +41,6 @@ class RencanaKerjaHarian(PlantationController):
 		}, pluck="name"):
 			frappe.throw("Rencan Kerja Harian already Used in {}".format(doc))
 
-	def check_material(self):
-		if self.tipe_kegiatan != "Perawatan":
-			self.material = []
-
-		material_list = [m.item for m in self.material]
-		if not material_list:
-			return
-		
-		rkb_m = frappe.qb.DocType("Detail Material RK")
-		material_used = frappe._dict(
-			(
-				frappe.qb.from_(rkb_m)
-				.select(
-					rkb_m.item, rkb_m.name
-				)
-				.where(
-					(rkb_m.item.isin(material_list)) &
-					(rkb_m.parent == self.voucher_no)
-				)
-				.groupby(rkb_m.item)
-			).run()
-		)
-
-		for d in self.material:
-			rkb_material = material_used.get(d.item) or ""
-			if not rkb_material:
-				frappe.throw("Item {} is not listed in the {}.".format(d.item, get_link_to_form(self.voucher_type, self.voucher_no)))
-
-			d.prevdoc_detail = rkb_material
-
 	def on_submit(self):
 		self.update_rkb_used()
 
@@ -73,7 +48,7 @@ class RencanaKerjaHarian(PlantationController):
 		self.update_rkb_used()
 
 	def update_rkb_used(self):
-		frappe.get_doc(self.voucher_type, self.voucher_no).update_used_total()
+		frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
 
 @frappe.whitelist()
 def get_rencana_kerja_bulanan(kode_kegiatan, tipe_kegiatan, divisi, blok, posting_date):

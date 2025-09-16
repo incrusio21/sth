@@ -33,6 +33,7 @@
   "hasil_kerja_qty",
   "hasil_kerja_amount",
   "column_break_alsz",
+  "material_amount",
   "grand_total",
   "hasil_kerja_tab",
   "hasil_kerja",
@@ -41,6 +42,9 @@
   "more_information_tab",
   "reference_section",
   "rencana_kerja_harian",
+  "voucher_type",
+  "voucher_no",
+  "column_break_ewzr",
   "stock_entry"
  ],
  "fields": [
@@ -170,7 +174,7 @@
    "fieldname": "hasil_kerja",
    "fieldtype": "Table",
    "label": "Absensi Hasil Kerja",
-   "options": "Detail BKM Absensi Hasil Kerja"
+   "options": "Detail BKM Hasil Kerja Perawatan"
   },
   {
    "fieldname": "hasil_kerja_qty",
@@ -294,13 +298,38 @@
    "in_list_view": 1,
    "label": "Rupiah Premi",
    "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ewzr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Material only calculated after document submit",
+   "fieldname": "material_amount",
+   "fieldtype": "Currency",
+   "label": "Material Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-11 14:04:41.249119",
+ "modified": "2025-09-16 16:58:00.607822",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

@@ -53,7 +53,10 @@
   "material_amount",
   "budget_tambahan_amount",
   "grand_total",
-  "used_amount",
+  "section_break_xtya",
+  "used_total",
+  "column_break_lcrd",
+  "realized_total",
   "detail_material_tab",
   "detail_material_section",
   "material"
@@ -352,13 +355,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "used_amount",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Used Amount",
-   "read_only": 1
-  },
-  {
    "fieldname": "batchblok_section",
    "fieldtype": "Section Break",
    "label": "Batch/Blok"
@@ -395,13 +391,35 @@
    "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "column_break_cggo",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xtya",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "used_total",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Used Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lcrd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realized_total",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Realized Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-10 12:52:05.039758",
+ "modified": "2025-09-16 11:25:59.740724",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",

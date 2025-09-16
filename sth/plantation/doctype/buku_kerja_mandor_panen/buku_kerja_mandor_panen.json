@@ -1,135 +1,167 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2025-07-21 09:54:46.556436",
+ "creation": "2025-09-15 11:58:40.385332",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_2wm0",
-  "naming_series",
-  "tgl_trk",
+  "unit",
   "divisi",
-  "blok",
-  "cost_center",
+  "kode_kegiatan",
+  "uom",
+  "volume_basis",
+  "rp_per_basis",
+  "per_premi",
+  "rupiah_premi",
   "column_break_souy",
-  "kgt",
-  "stts_nrml",
-  "chk_kontan",
-  "mdr",
-  "mdr1",
-  "krdvs",
-  "tabel_prestasi_section",
-  "table_kjhb",
-  "tabel_kegiatan_dan_absensi_pekerja_section",
-  "table_qibi",
-  "amended_from"
+  "company",
+  "posting_date",
+  "mandor",
+  "mandor1",
+  "kerani",
+  "status",
+  "amended_from",
+  "section_break_wzob",
+  "blok",
+  "tahun_tanam",
+  "luas_blok",
+  "column_break_hvgf",
+  "section_break_lacm",
+  "hasil_kerja_qty",
+  "hasil_kerja_amount",
+  "column_break_alsz",
+  "grand_total",
+  "hasil_kerja_tab",
+  "hasil_kerja",
+  "penalty_fees_section",
+  "buah_tidak_dipanen",
+  "buah_mentah_disimpan",
+  "buah_mentah_ditinggal",
+  "column_break_wxmq",
+  "brondolan_tinggal",
+  "pelepah_tidak_disusun",
+  "tangkai_panjang",
+  "column_break_jkab",
+  "buah_tidak_disusun",
+  "pelepah_sengkleh",
+  "more_information_tab",
+  "reference_section",
+  "rencana_kerja_harian",
+  "column_break_khlg",
+  "voucher_type",
+  "voucher_no"
  ],
  "fields": [
   {
    "fieldname": "section_break_2wm0",
-   "fieldtype": "Section Break",
-   "label": "Header"
+   "fieldtype": "Section Break"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
-  },
-  {
-   "default": "Today",
-   "fieldname": "tgl_trk",
-   "fieldtype": "Date",
+   "fieldname": "unit",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Tanggal",
+   "label": "Unit",
+   "options": "Unit",
    "reqd": 1
   },
   {
-   "fieldname": "cost_center",
+   "fieldname": "divisi",
    "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kode_kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Satuan",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.v_basis",
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Volume Basis",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.rp_basis",
+   "fieldname": "rp_per_basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.pr_prm",
+   "fieldname": "per_premi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "% Premi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.rp_prm",
+   "fieldname": "rupiah_premi",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rupiah Premi",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_souy",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "blok",
+   "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Blok",
-   "options": "Blok",
+   "label": "Company",
+   "options": "Company",
    "reqd": 1
   },
   {
-   "fieldname": "mdr",
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mandor",
    "fieldtype": "Link",
    "label": "Mandor",
    "options": "Employee",
    "reqd": 1
   },
   {
-   "fieldname": "mdr1",
+   "fieldname": "mandor1",
    "fieldtype": "Link",
    "label": "Mandor 1",
    "options": "Employee",
    "reqd": 1
   },
   {
-   "fieldname": "krdvs",
+   "fieldname": "kerani",
    "fieldtype": "Link",
    "label": "Kerani Divisi",
    "options": "Employee",
    "reqd": 1
-  },
-  {
-   "fieldname": "tabel_prestasi_section",
-   "fieldtype": "Section Break",
-   "label": "Tabel Absensi Pekerjaan Panen"
-  },
-  {
-   "fieldname": "table_kjhb",
-   "fieldtype": "Table",
-   "options": "Detail BKM Absensi Pekerjaan Panen"
-  },
-  {
-   "fieldname": "tabel_kegiatan_dan_absensi_pekerja_section",
-   "fieldtype": "Section Break",
-   "label": "Tabel Denda Panen"
-  },
-  {
-   "fieldname": "table_qibi",
-   "fieldtype": "Table",
-   "options": "Denda Panen"
-  },
-  {
-   "fetch_from": "blok.divisi",
-   "fieldname": "divisi",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Divisi",
-   "reqd": 1
-  },
-  {
-   "fieldname": "kgt",
-   "fieldtype": "Link",
-   "label": "Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "stts_nrml",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Normal\nBanjir",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "chk_kontan",
-   "fieldtype": "Check",
-   "label": "Is it Kontanan"
   },
   {
    "fieldname": "amended_from",
@@ -140,17 +172,215 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "section_break_wzob",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fetch_from": "blok.tahun_tanam",
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fetch_from": "blok.luas_areal",
+   "fieldname": "luas_blok",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Luas Blok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hvgf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_lacm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "hasil_kerja_qty",
+   "fieldtype": "Float",
+   "label": "Hasil Kerja Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_amount",
+   "fieldtype": "Currency",
+   "label": "Upah Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_alsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_tab",
+   "fieldtype": "Tab Break",
+   "label": "Hasil Kerja"
+  },
+  {
+   "fieldname": "hasil_kerja",
+   "fieldtype": "Table",
+   "label": "Absensi Hasil Kerja",
+   "options": "Detail BKM Hasil Kerja Panen"
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "rencana_kerja_harian",
+   "fieldtype": "Link",
+   "label": "Rencana Kerja Harian",
+   "options": "Rencana Kerja Harian",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Buku Kerja Mandor Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Normal\nBanjir"
+  },
+  {
+   "fieldname": "penalty_fees_section",
+   "fieldtype": "Section Break",
+   "label": "Penalty Fees"
+  },
+  {
+   "fetch_from": "company.buah_tidak_dipanen",
+   "fieldname": "buah_tidak_dipanen",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "S",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.buah_mentah_disimpan",
+   "fieldname": "buah_mentah_disimpan",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "M1",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.buah_mentah_ditinggal",
+   "fieldname": "buah_mentah_ditinggal",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "M2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wxmq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.brondolan_tinggal",
+   "fieldname": "brondolan_tinggal",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "GL",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.pelepah_tidak_disusun",
+   "fieldname": "pelepah_tidak_disusun",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "PB",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.tangkai_panjang",
+   "fieldname": "tangkai_panjang",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "TP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jkab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.buah_tidak_disusun",
+   "fieldname": "buah_tidak_disusun",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "BT",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.pelepah_sengkleh",
+   "fieldname": "pelepah_sengkleh",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "PS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_khlg",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-25 16:15:13.796145",
+ "modified": "2025-09-16 11:59:58.765616",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -116,9 +116,9 @@ boot_session = "sth.startup.boot.boot_session"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Stock Entry": "sth.overrides.stock_entry.StockEntry"
+}
 
 # Document Events
 # ---------------

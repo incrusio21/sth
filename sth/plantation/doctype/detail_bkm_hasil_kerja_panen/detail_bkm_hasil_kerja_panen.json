@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-15 13:36:11.510984",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "status",
+  "hari_kerja",
+  "qty",
+  "brondolan",
+  "column_break_eqqk",
+  "rate",
+  "premi",
+  "denda",
+  "amount",
+  "denda_section",
+  "buah_tidak_dipanen",
+  "buah_mentah_disimpan",
+  "buah_mentah_ditinggal",
+  "column_break_lnky",
+  "brondolan_tinggal",
+  "pelepah_tidak_disusun",
+  "tangkai_panjang",
+  "column_break_nnrp",
+  "buah_tidak_disusun",
+  "pelepah_sengkleh"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Kehadiran",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Janjang",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "hari_kerja",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hari Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eqqk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upah per Kilo",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "label": "Premi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "brondolan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Brondolan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "denda",
+   "fieldtype": "Currency",
+   "label": "Denda",
+   "read_only": 1
+  },
+  {
+   "fieldname": "denda_section",
+   "fieldtype": "Section Break",
+   "label": "Denda"
+  },
+  {
+   "fieldname": "buah_tidak_dipanen",
+   "fieldtype": "Float",
+   "label": "S"
+  },
+  {
+   "fieldname": "buah_mentah_disimpan",
+   "fieldtype": "Float",
+   "label": "M1"
+  },
+  {
+   "fieldname": "buah_mentah_ditinggal",
+   "fieldtype": "Float",
+   "label": "M2"
+  },
+  {
+   "fieldname": "column_break_lnky",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "brondolan_tinggal",
+   "fieldtype": "Float",
+   "label": "GL"
+  },
+  {
+   "fieldname": "pelepah_tidak_disusun",
+   "fieldtype": "Float",
+   "label": "PB"
+  },
+  {
+   "fieldname": "tangkai_panjang",
+   "fieldtype": "Float",
+   "label": "TP"
+  },
+  {
+   "fieldname": "column_break_nnrp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "buah_tidak_disusun",
+   "fieldtype": "Float",
+   "label": "BT"
+  },
+  {
+   "fieldname": "pelepah_sengkleh",
+   "fieldtype": "Float",
+   "label": "PS"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-16 11:10:06.297232",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail BKM Hasil Kerja Panen",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

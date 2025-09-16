@@ -71,7 +71,9 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     update_rate_or_qty_value(item){
         if(item.parentfield == "hasil_kerja"){
             item.hari_kerja = flt(item.qty / this.frm.doc.volume_basis)
-            item.rate = this.frm.doc.rp_per_basis
+            
+            item.rate = item.rate ?? this.frm.doc.rp_per_basis
+            
             if(this.frm.doc.per_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.per_premi) / 100))){
                 item.premi = this.frm.doc.rupiah_premi
             }

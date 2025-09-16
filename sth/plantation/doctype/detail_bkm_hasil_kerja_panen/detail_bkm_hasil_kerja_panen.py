@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class DetailBKMAbsensiPekerjaanPanen(Document):
+class DetailBKMHasilKerjaPanen(Document):
 	pass

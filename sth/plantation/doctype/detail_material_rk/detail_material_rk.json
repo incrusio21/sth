@@ -15,7 +15,9 @@
   "budget_tambahan",
   "amount",
   "section_break_xwdy",
-  "used_amount"
+  "used_total",
+  "column_break_enrh",
+  "realized_total"
  ],
  "fields": [
   {
@@ -87,11 +89,23 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "used_amount",
+   "fieldname": "used_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Used Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_enrh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realized_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Realized Amount",
    "read_only": 1
   }
  ],
@@ -99,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-09 09:18:15.966676",
+ "modified": "2025-09-16 11:27:50.763713",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Material RK",

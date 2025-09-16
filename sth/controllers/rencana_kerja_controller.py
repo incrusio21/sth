@@ -15,6 +15,7 @@ class RencanaKerjaController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.skip_calculate_supervisi = False
+        self.realization_doctype = ""
 
     def validate(self):
         if not self.skip_calculate_supervisi:
@@ -22,7 +23,6 @@ class RencanaKerjaController(PlantationController):
     
         super().validate()
 
-    
     def calculate_supervisi_amount(self):
         self.mandor_amount = flt(self.upah_mandor) + flt(self.premi_mandor)
         self.kerani_amount = flt(self.upah_kerani) + flt(self.premi_kerani)
@@ -32,13 +32,13 @@ class RencanaKerjaController(PlantationController):
         # set on child class if needed
         item.amount = flt(item.amount + (item.get("budget_tambahan") or 0), precision)
 
-    def update_used_total(self):
+    def calculate_used_and_realized(self):
         rkh = frappe.qb.DocType("Rencana Kerja Harian")
 
         used_total = (
 			frappe.qb.from_(rkh)
 			.select(
-				Sum(rkh.kegiatan_amount)
+				Sum(rkh.grand_total)
             )
 			.where(
                 (rkh.docstatus == 1) &
@@ -48,9 +48,30 @@ class RencanaKerjaController(PlantationController):
 		).run()[0][0] or 0.0
 
         if used_total > self.grand_total:
-            frappe.throw("Used amount exceeds grand total.")
+            frappe.throw("Used Total exceeds grand total.")
 
-        self.db_set("used_amount", used_total) 
+        if self.realization_doctype:
+            bkm = frappe.qb.DocType(self.realization_doctype)
+
+            realized_total = (
+                frappe.qb.from_(bkm)
+                .select(
+                    Sum(bkm.grand_total)
+                )
+                .where(
+                    (bkm.docstatus == 1) &
+                    (bkm.voucher_type == self.doctype) &
+                    (bkm.voucher_no == self.name)
+                )
+            ).run()[0][0] or 0.0
+
+            if realized_total > self.grand_total:
+                frappe.throw("Realization Total exceeds grand total.")
+
+            self.realized_total = realized_total
+        
+        self.used_total = used_total
+        self.db_update()
 
 @frappe.whitelist()
 def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=None):
