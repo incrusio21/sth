@@ -12,8 +12,7 @@
   "uom",
   "volume_basis",
   "rp_per_basis",
-  "per_premi",
-  "rupiah_premi",
+  "upah_brondolan",
   "column_break_souy",
   "company",
   "posting_date",
@@ -27,24 +26,26 @@
   "tahun_tanam",
   "luas_blok",
   "column_break_hvgf",
-  "section_break_lacm",
   "hasil_kerja_qty",
+  "brondolan_qty",
+  "bjr",
+  "section_break_lacm",
   "hasil_kerja_amount",
   "column_break_alsz",
   "grand_total",
   "hasil_kerja_tab",
   "hasil_kerja",
   "penalty_fees_section",
-  "buah_tidak_dipanen",
-  "buah_mentah_disimpan",
-  "buah_mentah_ditinggal",
+  "buah_tidak_dipanen_rate",
+  "buah_mentah_disimpan_rate",
+  "buah_mentah_ditinggal_rate",
   "column_break_wxmq",
-  "brondolan_tinggal",
-  "pelepah_tidak_disusun",
-  "tangkai_panjang",
+  "brondolan_tinggal_rate",
+  "pelepah_tidak_disusun_rate",
+  "tangkai_panjang_rate",
   "column_break_jkab",
-  "buah_tidak_disusun",
-  "pelepah_sengkleh",
+  "buah_tidak_disusun_rate",
+  "pelepah_sengkleh_rate",
   "more_information_tab",
   "reference_section",
   "rencana_kerja_harian",
@@ -104,22 +105,6 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Rupiah/Satuan Basis",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.pr_prm",
-   "fieldname": "per_premi",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "% Premi",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.rp_prm",
-   "fieldname": "rupiah_premi",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Rupiah Premi",
    "read_only": 1
   },
   {
@@ -280,79 +265,15 @@
   {
    "fieldname": "penalty_fees_section",
    "fieldtype": "Section Break",
-   "label": "Penalty Fees"
-  },
-  {
-   "fetch_from": "company.buah_tidak_dipanen",
-   "fieldname": "buah_tidak_dipanen",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "S",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "company.buah_mentah_disimpan",
-   "fieldname": "buah_mentah_disimpan",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "M1",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "company.buah_mentah_ditinggal",
-   "fieldname": "buah_mentah_ditinggal",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "M2",
-   "read_only": 1
+   "label": "Penalty Fees Rate"
   },
   {
    "fieldname": "column_break_wxmq",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "company.brondolan_tinggal",
-   "fieldname": "brondolan_tinggal",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "GL",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "company.pelepah_tidak_disusun",
-   "fieldname": "pelepah_tidak_disusun",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "PB",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "company.tangkai_panjang",
-   "fieldname": "tangkai_panjang",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "TP",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_jkab",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "company.buah_tidak_disusun",
-   "fieldname": "buah_tidak_disusun",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "BT",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "company.pelepah_sengkleh",
-   "fieldname": "pelepah_sengkleh",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "PS",
-   "read_only": 1
   },
   {
    "fieldname": "voucher_type",
@@ -371,13 +292,89 @@
   {
    "fieldname": "column_break_khlg",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "kode_kegiatan.upah_brondolan",
+   "fieldname": "upah_brondolan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upah Brondolan",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.buah_tidak_dipanen",
+   "fieldname": "buah_tidak_dipanen_rate",
+   "fieldtype": "Currency",
+   "label": "S",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.buah_mentah_disimpan",
+   "fieldname": "buah_mentah_disimpan_rate",
+   "fieldtype": "Currency",
+   "label": "M1",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.buah_mentah_ditinggal",
+   "fieldname": "buah_mentah_ditinggal_rate",
+   "fieldtype": "Currency",
+   "label": "M2",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.brondolan_tinggal",
+   "fieldname": "brondolan_tinggal_rate",
+   "fieldtype": "Currency",
+   "label": "GL",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.pelepah_tidak_disusun",
+   "fieldname": "pelepah_tidak_disusun_rate",
+   "fieldtype": "Currency",
+   "label": "PB",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.tangkai_panjang",
+   "fieldname": "tangkai_panjang_rate",
+   "fieldtype": "Currency",
+   "label": "TP",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.buah_tidak_disusun",
+   "fieldname": "buah_tidak_disusun_rate",
+   "fieldtype": "Currency",
+   "label": "BT",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.pelepah_sengkleh",
+   "fieldname": "pelepah_sengkleh_rate",
+   "fieldtype": "Currency",
+   "label": "PS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "brondolan_qty",
+   "fieldtype": "Float",
+   "label": "Brondolan Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-16 11:59:58.765616",
+ "modified": "2025-09-17 11:20:10.854951",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

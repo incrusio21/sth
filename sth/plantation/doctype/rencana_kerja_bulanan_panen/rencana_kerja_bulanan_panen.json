@@ -53,7 +53,10 @@
   "pemanen_amount",
   "budget_tambahan_amount",
   "grand_total",
-  "used_amount"
+  "section_break_ekyx",
+  "used_total",
+  "column_break_mzxj",
+  "realized_total"
  ],
  "fields": [
   {
@@ -354,9 +357,23 @@
    "reqd": 1
   },
   {
-   "fieldname": "used_amount",
+   "fieldname": "section_break_ekyx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "used_total",
    "fieldtype": "Currency",
    "label": "Used Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_mzxj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realized_total",
+   "fieldtype": "Currency",
+   "label": "Realized Amount",
    "read_only": 1
   }
  ],
@@ -364,7 +381,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 13:34:53.586880",
+ "modified": "2025-09-17 12:02:23.870248",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Panen",

@@ -10,10 +10,11 @@
   "status",
   "hari_kerja",
   "qty",
-  "brondolan",
+  "qty_brondolan",
   "column_break_eqqk",
   "rate",
-  "premi",
+  "brondolan",
+  "brondolan_amount",
   "denda",
   "amount",
   "denda_section",
@@ -58,8 +59,7 @@
    "fieldname": "hari_kerja",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hari Kerja",
-   "read_only": 1
+   "label": "Hari Kerja"
   },
   {
    "fieldname": "column_break_eqqk",
@@ -69,15 +69,8 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Upah per Kilo",
+   "label": "Upah Janjang",
    "reqd": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "premi",
-   "fieldtype": "Currency",
-   "label": "Premi",
-   "read_only": 1
   },
   {
    "fieldname": "amount",
@@ -89,9 +82,9 @@
   {
    "columns": 1,
    "fieldname": "brondolan",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Jumlah Brondolan"
+   "fieldtype": "Currency",
+   "label": "Upah Brondolan",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -152,13 +145,27 @@
    "fieldname": "pelepah_sengkleh",
    "fieldtype": "Float",
    "label": "PS"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty_brondolan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Brondolan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "brondolan_amount",
+   "fieldtype": "Currency",
+   "label": "Brondolan Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-16 11:10:06.297232",
+ "modified": "2025-09-17 11:40:06.113567",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Panen",

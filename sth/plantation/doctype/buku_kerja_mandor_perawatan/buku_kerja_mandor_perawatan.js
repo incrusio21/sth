@@ -86,7 +86,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         if(!(doc.kode_kegiatan && doc.divisi && doc.blok && doc.posting_date)) return
         
         frappe.call({
-            method: "sth.plantation.doctype.buku_kerja_mandor_perawatan.buku_kerja_mandor_perawatan.get_rencana_kerja_harian",
+            method: "sth.controllers.queries.get_rencana_kerja_harian",
             args: {
                 kode_kegiatan: doc.kode_kegiatan,
                 divisi: doc.divisi,

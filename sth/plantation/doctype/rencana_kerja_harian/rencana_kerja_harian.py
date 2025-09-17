@@ -3,8 +3,6 @@
 
 import frappe
 
-from frappe.utils import get_link_to_form
-from sth.controllers.prev_doc_validate import validate_previous_document
 from sth.controllers.plantation_controller import PlantationController
 
 force_item_fields = (
@@ -12,7 +10,7 @@ force_item_fields = (
 	"voucher_no"
 )
 
-class RencanaKerjaHarian(PlantationController, validate_previous_document):
+class RencanaKerjaHarian(PlantationController):
 	def validate(self):
 		# memaksa material menjadi array kosong
 		if self.tipe_kegiatan != "Perawatan":
@@ -20,7 +18,7 @@ class RencanaKerjaHarian(PlantationController, validate_previous_document):
 
 		self.get_rencana_kerja_bulanan()
 		self.validate_duplicate_rkh()
-		self.check_material()
+		self.validate_previous_document()
 
 		super().validate()
 	
@@ -40,6 +38,11 @@ class RencanaKerjaHarian(PlantationController, validate_previous_document):
 			"docstatus": 1, "name": ["!=", self.name]
 		}, pluck="name"):
 			frappe.throw("Rencan Kerja Harian already Used in {}".format(doc))
+
+	def validate_previous_document(self):
+		from sth.controllers.prev_doc_validate import validate_previous_document
+
+		validate_previous_document(self)
 
 	def on_submit(self):
 		self.update_rkb_used()

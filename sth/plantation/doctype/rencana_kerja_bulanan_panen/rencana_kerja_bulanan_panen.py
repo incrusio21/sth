@@ -6,6 +6,10 @@ from frappe.utils import flt
 from sth.controllers.rencana_kerja_controller import RencanaKerjaController
 
 class RencanaKerjaBulananPanen(RencanaKerjaController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.realization_doctype = "Buku Kerja Mandor Panen"
+
 	def validate(self):
 		super().validate()
 		self.check_rkb_pengangkutan()

@@ -64,7 +64,7 @@ class RencanaKerjaController(PlantationController):
                     (bkm.voucher_no == self.name)
                 )
             ).run()[0][0] or 0.0
-
+            
             if realized_total > self.grand_total:
                 frappe.throw("Realization Total exceeds grand total.")
 
