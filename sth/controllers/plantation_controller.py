@@ -9,6 +9,7 @@ from frappe.model.document import Document
 class PlantationController(Document):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fieldname_total = ["amount"]
         self.skip_table_amount = []
         self.skip_calculate_table = []
         self.skip_fieldname_amount = []
@@ -25,7 +26,7 @@ class PlantationController(Document):
             self.calculate_item_values(df.options, df.fieldname)
 
     def calculate_item_values(self, options, table_fieldname):
-        total = {"amount": 0, "qty": 0}
+        total = { f: 0 for f in self.fieldname_total}
         table_item = self.get(table_fieldname)
         
         # set precision setiap table agar pembulatan untuk menghidari selesih grand total akibat floating-point precision
@@ -40,21 +41,28 @@ class PlantationController(Document):
             # update nilai setelah menghitung amount
             self.update_value_after_amount(d, precision)
 
-            total["amount"] += d.amount
-            total["qty"] += flt(d.qty)
+            for f in self.fieldname_total:
+                if d.get(f):
+                    total[f] += d.get(f)
 
-        for total_field in ["amount", "qty"]:
+        for total_field in self.fieldname_total:
             fieldname = f"{table_fieldname}_{total_field}"
             if not self.meta.has_field(fieldname):
                 continue
             
             self.set(fieldname, flt(total[total_field], self.precision(fieldname)))
 
+        self.after_calculate_item_values(table_fieldname, options, total)
+
     def update_rate_or_qty_value(self, item, precision):
         # set on child class if needed
         pass
 
     def update_value_after_amount(self, item, precision):
+        # set on child class if needed
+        pass
+    
+    def after_calculate_item_values(self, table_fieldname, options, total):
         # set on child class if needed
         pass
 

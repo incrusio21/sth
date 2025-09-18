@@ -24,6 +24,10 @@ frappe.ui.form.on("Detail Budget Upah Perawatan", {
 });
 
 sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth.plantation.BudgetController {
+    setup(doc) {
+        super.setup(doc)
+        this.fieldname_total.push("qty", "rotasi")
+    }
     set_query_field(){
         super.set_query_field()
 
@@ -94,6 +98,13 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
         this.frm.set_value("kegiatan", "")
         this.frm.set_value("divisi", "")
         this.clear_table(["upah_perawatan", "upah_bibitan"])
+    }
+
+    after_calculate_item_values(table_name, total){
+        super.after_calculate_item_values(table_name, total)
+        
+        let data_table = this.frm.doc[table_name] || []
+        this.frm.doc[`mean_${table_name}_rotasi`] = flt(total["rotasi"] / data_table.length) || 0;
     }
 
     after_calculate_grand_total(){

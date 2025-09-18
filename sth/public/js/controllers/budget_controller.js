@@ -134,10 +134,9 @@ sth.plantation.setup_budget_controller = function() {
             })
         }
 
-        after_calculate_item_values(table_name){
+        after_calculate_item_values(table_name, total){
             // update nilai sebaran dan rotasi jika ada
             let data_table = this.frm.doc[table_name] || []
-            let total_rotasi = 0.0
 
             // set on child class if 
             let per_month_table = Object.keys(
@@ -145,14 +144,10 @@ sth.plantation.setup_budget_controller = function() {
             ).filter(key => key.includes("rp_"));
 
             for (const item of data_table) {
-                total_rotasi += item.rotasi || 0
-                
                 // jika tidak ada fieldname degan kata per_ skip sebaran    
                 if(per_month_table.length == 0) continue
                 this.calculate_sebaran_values(item, per_month_table)
             }
-            
-            this.frm.doc[`${table_name}_rotasi`] = flt(total_rotasi / data_table.length) || 0;
         }
 
         clear_table(list_table=[]){

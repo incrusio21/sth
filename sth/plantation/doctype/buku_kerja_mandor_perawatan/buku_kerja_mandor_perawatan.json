@@ -29,8 +29,11 @@
   "luas_blok",
   "column_break_hvgf",
   "batch",
-  "section_break_lacm",
+  "section_break_cepw",
+  "hasil_kerja_hasil",
+  "column_break_qnwo",
   "hasil_kerja_qty",
+  "section_break_lacm",
   "hasil_kerja_amount",
   "column_break_alsz",
   "material_amount",
@@ -179,7 +182,7 @@
   {
    "fieldname": "hasil_kerja_qty",
    "fieldtype": "Float",
-   "label": "Hasil Kerja Total",
+   "label": "Hari Kerja Total",
    "read_only": 1
   },
   {
@@ -323,13 +326,27 @@
    "fieldtype": "Currency",
    "label": "Material Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_cepw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qnwo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hasil_kerja_hasil",
+   "fieldtype": "Float",
+   "label": "Hasil Kerja Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-16 16:58:00.607822",
+ "modified": "2025-09-18 11:26:46.647369",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

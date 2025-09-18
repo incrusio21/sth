@@ -15,14 +15,16 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     setup(doc) {
         super.setup(doc)
 
+        this.fieldname_total.push("qty", "hasil")
+
         let me = this
-        for (const fieldname of ["volume_basis", "rp_per_basis", ""]) {
+        for (const fieldname of ["volume_basis", "rp_per_basis"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "hasil_kerja")
             });
         }
 
-        for (const fieldname of ["kode_kegiatan", "divisi", "blok", "posting_date"]) {
+        for (const fieldname of ["kode_kegiatan", "divisi", "is_bibitan", "blok", "batch","posting_date"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function() {
                 me.get_rkh_data()
             });
@@ -68,10 +70,13 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
 
     }
 
+    hasil(_, cdt, cdn){
+        this.calculate_total(cdt, cdn)
+    }
+
     update_rate_or_qty_value(item){
         if(item.parentfield == "hasil_kerja"){
-            item.hari_kerja = flt(item.qty / this.frm.doc.volume_basis)
-            
+            item.qty = flt(item.hasil / this.frm.doc.volume_basis)
             item.rate = item.rate ?? this.frm.doc.rp_per_basis
             
             if(this.frm.doc.per_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.per_premi) / 100))){
@@ -83,15 +88,20 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     get_rkh_data(){
         let me = this
         let doc = this.frm.doc
-        if(!(doc.kode_kegiatan && doc.divisi && doc.blok && doc.posting_date)) return
+        if (
+            !(doc.kode_kegiatan && doc.divisi && doc.posting_date) ||
+            (doc.is_bibitan && !doc.batch) ||
+            (!doc.is_bibitan && !doc.blok)
+        ) return;
         
         frappe.call({
             method: "sth.controllers.queries.get_rencana_kerja_harian",
             args: {
                 kode_kegiatan: doc.kode_kegiatan,
                 divisi: doc.divisi,
-                blok: doc.blok,
-                posting_date: doc.posting_date
+                blok: doc.is_bibitan ? doc.batch : doc.blok,
+                posting_date: doc.posting_date,
+                is_bibitan: doc.is_bibitan
             },
             freeze: true,
             callback: function (data) {
