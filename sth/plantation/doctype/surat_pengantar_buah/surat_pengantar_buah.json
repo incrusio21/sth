@@ -1,24 +1,29 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
  "creation": "2025-07-08 14:49:30.296827",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_5orq",
-  "naming_series",
-  "tanggal_transaksi",
+  "unit",
   "divisi",
+  "kendaraan",
+  "internal_kg",
   "column_break_bvfg",
-  "cost_center",
-  "ekst",
-  "nm_pabrik",
+  "posting_date",
+  "company",
+  "pabrik",
+  "pabrik_type",
   "amended_from",
-  "data_timbangan_internal_section",
-  "table_kydr",
-  "data_timbangan_eksternal_section",
-  "table_ogdb"
+  "section_break_xfoy",
+  "in_time",
+  "column_break_wpkr",
+  "out_time",
+  "internal_section",
+  "internal_pabrik",
+  "eksternal_pabrik_section",
+  "eksternal_pabrik"
  ],
  "fields": [
   {
@@ -37,16 +42,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Data",
-   "label": "No SPB"
-  },
-  {
-   "fieldname": "tanggal_transaksi",
-   "fieldtype": "Data",
-   "label": "Tanggal Transaksi"
-  },
-  {
    "fieldname": "divisi",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -59,56 +54,108 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "cost_center",
+   "fieldname": "pabrik",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Cost Center",
-   "options": "Cost Center",
+   "label": "Nama Pabrik",
+   "options": "Pabrik",
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "ekst",
-   "fieldtype": "Check",
-   "label": "Eksternal"
-  },
-  {
-   "fieldname": "nm_pabrik",
+   "fetch_from": "pabrik.type",
+   "fieldname": "pabrik_type",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama Pabrik",
+   "label": "Pabrik Type",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date",
    "reqd": 1
   },
   {
-   "fieldname": "data_timbangan_internal_section",
-   "fieldtype": "Section Break",
-   "label": "Data Timbangan Internal"
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   },
   {
-   "fieldname": "table_kydr",
+   "fieldname": "kendaraan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "internal_kg",
+   "fieldtype": "Float",
+   "label": "Internal Kg"
+  },
+  {
+   "fieldname": "section_break_xfoy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "in_time",
+   "fieldtype": "Time",
+   "label": "In Time"
+  },
+  {
+   "fieldname": "column_break_wpkr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "out_time",
+   "fieldtype": "Time",
+   "label": "Out Time"
+  },
+  {
+   "fieldname": "internal_pabrik",
    "fieldtype": "Table",
-   "options": "Data Timbangan Internal"
+   "label": "Internal Pabrik",
+   "options": "Timbangan Internal Pabrik"
   },
   {
-   "fieldname": "data_timbangan_eksternal_section",
+   "depends_on": "eval:doc.pabrik_type == \"Internal\"",
+   "fieldname": "internal_section",
    "fieldtype": "Section Break",
-   "label": "Data Timbangan Eksternal"
+   "label": "Internal Pabrik"
   },
   {
-   "fieldname": "table_ogdb",
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "eksternal_pabrik_section",
+   "fieldtype": "Section Break",
+   "label": "Eksternal Pabrik"
+  },
+  {
+   "fieldname": "eksternal_pabrik",
    "fieldtype": "Table",
-   "options": "Data Timbangan Eksternal"
+   "label": "Eksternal Pabrik",
+   "options": "Timbangan Eksternal Pabrik"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-24 10:25:12.380758",
+ "modified": "2025-09-18 16:48:36.778224",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

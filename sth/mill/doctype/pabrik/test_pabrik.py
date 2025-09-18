@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDataTimbanganInternal(FrappeTestCase):
+class TestPabrik(FrappeTestCase):
 	pass

@@ -145,6 +145,9 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
     calculate_grand_total(){
         let grand_total = 0.0
+        
+        this.before_calculate_grand_total()
+
         for (const field of this.doctype_ref("amount")) {
             if(in_list(this.skip_table_amount, field.replace("_amount", "")) || 
                 in_list(this.skip_fieldname_amount, field)) continue;
@@ -155,6 +158,10 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.frm.doc.grand_total = grand_total
 
         this.after_calculate_grand_total()
+    }
+
+    before_calculate_grand_total(){
+        // set on child class if needed
     }
 
     after_calculate_grand_total(){

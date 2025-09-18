@@ -1,18 +1,28 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
  "creation": "2025-07-08 14:49:03.285814",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_tz8v",
-  "naming_series",
-  "no_document_panen",
-  "get_data",
+  "bkm_panen",
+  "divisi",
+  "blok",
   "column_break_qfjb",
-  "tanggal_document",
-  "cost_center"
+  "posting_date",
+  "company",
+  "hari_kerja",
+  "amended_from",
+  "rekap_kontanan_section",
+  "jumlah_janjang",
+  "jumlah_brondolan",
+  "column_break_kzhr",
+  "upah_panen_total",
+  "upah_mandor_total",
+  "upah_mandor1_total",
+  "total_upah_kerani",
+  "grand_total"
  ],
  "fields": [
   {
@@ -21,44 +31,125 @@
    "label": "Header"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
-  },
-  {
-   "fieldname": "no_document_panen",
-   "fieldtype": "Link",
-   "label": "No Document Panen",
-   "options": "Buku Kerja Mandor Panen"
-  },
-  {
-   "fieldname": "get_data",
-   "fieldtype": "Button",
-   "label": "Get Data"
-  },
-  {
    "fieldname": "column_break_qfjb",
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
-   "fieldname": "tanggal_document",
-   "fieldtype": "Date",
-   "label": "Tanggal Document"
+   "fieldname": "bkm_panen",
+   "fieldtype": "Link",
+   "label": "BKM Panen",
+   "options": "Buku Kerja Mandor Panen",
+   "reqd": 1
   },
   {
-   "fieldname": "cost_center",
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "bkm_panen.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bkm_panen.blok",
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Cost Center",
-   "options": "Cost Center",
+   "label": "Company",
+   "options": "Company",
    "reqd": 1
+  },
+  {
+   "fetch_from": "bkm_panen.hari_kerja_total",
+   "fieldname": "hari_kerja",
+   "fieldtype": "Float",
+   "label": "Hari Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rekap_kontanan_section",
+   "fieldtype": "Section Break",
+   "label": "Rekap Kontanan"
+  },
+  {
+   "fetch_from": "bkm_panen.hasil_kerja_qty",
+   "fieldname": "jumlah_janjang",
+   "fieldtype": "Float",
+   "label": "Jumlah Janjang",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bkm_panen.hasil_kerja_qty_brondolan",
+   "fieldname": "jumlah_brondolan",
+   "fieldtype": "Float",
+   "label": "Jumlah Brondolan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kzhr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "bkm_panen.hasil_kerja_amount",
+   "fieldname": "upah_panen_total",
+   "fieldtype": "Currency",
+   "label": "Total Upah Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upah_mandor_total",
+   "fieldtype": "Currency",
+   "label": "Total Upah Mandor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upah_mandor1_total",
+   "fieldtype": "Currency",
+   "label": "Total Upah Mandor 1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_upah_kerani",
+   "fieldtype": "Currency",
+   "label": "Total Upah Kerani",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pengajuan Panen Kontanan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-07-22 13:21:44.127306",
+ "modified": "2025-09-18 15:38:32.219246",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",
