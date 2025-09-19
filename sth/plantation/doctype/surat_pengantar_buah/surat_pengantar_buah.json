@@ -18,12 +18,18 @@
   "amended_from",
   "section_break_xfoy",
   "in_time",
+  "in_weight",
   "column_break_wpkr",
   "out_time",
+  "out_weight",
+  "pabrik_cut",
   "internal_section",
-  "internal_pabrik",
-  "eksternal_pabrik_section",
-  "eksternal_pabrik"
+  "details",
+  "section_break_blue",
+  "total_janjang",
+  "column_break_vjtg",
+  "total_brondolan",
+  "netto_weight"
  ],
  "fields": [
   {
@@ -107,12 +113,14 @@
   },
   {
    "fieldname": "section_break_xfoy",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Pabrik Input"
   },
   {
    "fieldname": "in_time",
    "fieldtype": "Time",
-   "label": "In Time"
+   "label": "In Time",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_wpkr",
@@ -121,38 +129,70 @@
   {
    "fieldname": "out_time",
    "fieldtype": "Time",
-   "label": "Out Time"
+   "label": "Out Time",
+   "read_only": 1
   },
   {
-   "fieldname": "internal_pabrik",
-   "fieldtype": "Table",
-   "label": "Internal Pabrik",
-   "options": "Timbangan Internal Pabrik"
-  },
-  {
-   "depends_on": "eval:doc.pabrik_type == \"Internal\"",
    "fieldname": "internal_section",
-   "fieldtype": "Section Break",
-   "label": "Internal Pabrik"
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "in_weight",
+   "fieldtype": "Float",
+   "label": "In Weight",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.pabrik_type == \"External\"",
-   "fieldname": "eksternal_pabrik_section",
-   "fieldtype": "Section Break",
-   "label": "Eksternal Pabrik"
+   "fieldname": "pabrik_cut",
+   "fieldtype": "Float",
+   "label": "Potongan Pabrik",
+   "read_only": 1
   },
   {
-   "fieldname": "eksternal_pabrik",
+   "fieldname": "details",
    "fieldtype": "Table",
-   "label": "Eksternal Pabrik",
-   "options": "Timbangan Eksternal Pabrik"
+   "label": "Blok Janjang",
+   "options": "SPB Timbangan Pabrik"
+  },
+  {
+   "fieldname": "netto_weight",
+   "fieldtype": "Float",
+   "label": "Netto Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "out_weight",
+   "fieldtype": "Float",
+   "label": "Out Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_blue",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_janjang",
+   "fieldtype": "Float",
+   "label": "Total Janjang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vjtg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_brondolan",
+   "fieldtype": "Float",
+   "label": "Total Brondolan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 16:48:36.778224",
+ "modified": "2025-09-19 13:14:02.541652",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

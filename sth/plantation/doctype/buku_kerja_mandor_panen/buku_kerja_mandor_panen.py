@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import flt
+from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
@@ -71,3 +72,31 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			frappe.throw("BKM Panen already used")
 
 		self.db_set("is_used", 1 if kontanan else 0)
+
+	def calculate_transfered_weight(self):
+		spb = frappe.qb.DocType("SPB Timbangan Pabrik")
+
+		self.transfered_hasil_kerja, self.transfered_brondolan, self.weight_total = (
+			frappe.qb.from_(spb)
+			.select(
+				Coalesce(Sum(spb.qty), 0), 
+				Coalesce(Sum(spb.brondolan_qty), 0),
+				Coalesce(Sum(spb.netto_weight), 0)
+            )
+			.where(
+                (spb.docstatus == 1) &
+                (spb.bkm_panen == self.name)
+			)
+		).run()[0]
+
+		if self.transfered_hasil_kerja > self.hasil_kerja_qty:
+			frappe.throw("Transfered Janjang exceeds limit.")
+
+		if self.transfered_brondolan > self.hasil_kerja_qty:
+			frappe.throw("Transfered Brondolan exceeds limit.")
+
+		self.bjr = 0.0
+		if self.weight_total and self.transfered_hasil_kerja:
+			self.bjr = flt((self.weight_total - self.transfered_brondolan) / self.transfered_hasil_kerja, self.precision("bjr"))
+
+		self.db_update()

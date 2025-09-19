@@ -29,7 +29,10 @@
   "column_break_hvgf",
   "hari_kerja_total",
   "hasil_kerja_qty",
+  "transfered_hasil_kerja",
   "hasil_kerja_qty_brondolan",
+  "transfered_brondolan",
+  "weight_total",
   "bjr",
   "section_break_lacm",
   "hasil_kerja_amount",
@@ -390,13 +393,31 @@
    "fieldtype": "Check",
    "label": "Used ?",
    "read_only": 1
+  },
+  {
+   "fieldname": "transfered_hasil_kerja",
+   "fieldtype": "Float",
+   "label": "Transfered Hasil Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transfered_brondolan",
+   "fieldtype": "Float",
+   "label": "Transfered Brondolan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight_total",
+   "fieldtype": "Float",
+   "label": "Weight Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 15:29:25.170809",
+ "modified": "2025-09-19 09:41:06.811416",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

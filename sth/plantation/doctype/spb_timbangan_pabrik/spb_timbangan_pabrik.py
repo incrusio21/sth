@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class TimbanganInternalPabrik(Document):
+class SPBTimbanganPabrik(Document):
 	pass

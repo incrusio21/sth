@@ -12,12 +12,8 @@
   "qty",
   "brondolan_qty",
   "section_break_trza",
-  "in_weight",
-  "bjr",
-  "column_break_mxsp",
-  "out_weight",
   "netto_weight",
-  "section_break_prlt",
+  "column_break_mxsp",
   "bkm_panen"
  ],
  "fields": [
@@ -30,10 +26,9 @@
   },
   {
    "fieldname": "panen_date",
-   "fieldtype": "Link",
+   "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Tanggal Panen",
-   "options": "Blok"
+   "label": "Tanggal Panen"
   },
   {
    "fieldname": "column_break_wtdb",
@@ -43,41 +38,21 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Jumlah Janjang",
-   "options": "Blok"
+   "label": "Jumlah Janjang"
   },
   {
    "fieldname": "brondolan_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Jumlah Brondolan",
-   "options": "Blok"
+   "label": "Jumlah Brondolan"
   },
   {
    "fieldname": "section_break_trza",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "in_weight",
-   "fieldtype": "Float",
-   "label": "In Weight",
-   "read_only": 1
-  },
-  {
-   "fieldname": "bjr",
-   "fieldtype": "Float",
-   "label": "BJR",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_mxsp",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "out_weight",
-   "fieldtype": "Float",
-   "label": "Out Weight",
-   "read_only": 1
   },
   {
    "fieldname": "netto_weight",
@@ -87,24 +62,21 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_prlt",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "bkm_panen",
    "fieldtype": "Link",
    "label": "BKM Panen",
-   "options": "Buku Kerja Mandor Panen"
+   "options": "Buku Kerja Mandor Panen",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-18 16:49:17.298113",
+ "modified": "2025-09-19 13:13:37.166884",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Timbangan Internal Pabrik",
+ "name": "SPB Timbangan Pabrik",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
