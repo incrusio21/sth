@@ -1,0 +1,399 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-18 15:52:42.755015",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_df5v",
+  "unit",
+  "divisi",
+  "column_break_exgg",
+  "posting_date",
+  "company",
+  "mandor",
+  "mandor1",
+  "kerani",
+  "amended_from",
+  "section_break_wnju",
+  "kegiatan_amount",
+  "column_break_ztur",
+  "material_amount",
+  "kendaraan_amount",
+  "biaya_angkut_amount",
+  "pegawai_amount",
+  "grand_total",
+  "kegiatan_tab",
+  "data_kegiatan_section",
+  "kode_kegiatan",
+  "rate_basis",
+  "volume_basis",
+  "is_it_kontanan",
+  "column_break_cjta",
+  "kategori_kegiatan",
+  "is_bibitan",
+  "tipe_kegiatan",
+  "target_volume",
+  "qty_tenaga_kerja",
+  "section_break_vkip",
+  "blok",
+  "column_break_zzhm",
+  "batch",
+  "section_break_pjqv",
+  "voucher_type",
+  "voucher_no",
+  "estimasi_material_tab",
+  "material",
+  "kendaraan_tab",
+  "kendaraan",
+  "biaya_angkut_tab",
+  "pegawai_tab",
+  "pegawai",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_df5v",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_exgg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mandor",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mandor1",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mandor 1",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kerani",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Kerani Divisi",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rencana Kerja Harian",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_wnju",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kegiatan_amount",
+   "fieldtype": "Currency",
+   "label": "Kegiatan Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ztur",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Perawatan\"",
+   "fieldname": "material_amount",
+   "fieldtype": "Currency",
+   "label": "Material Total",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "kendaraan_amount",
+   "fieldtype": "Currency",
+   "label": "Kendaraan Total",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "biaya_angkut_amount",
+   "fieldtype": "Currency",
+   "label": "Biaya Angkut Total",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Biaya Umum\"",
+   "fieldname": "pegawai_amount",
+   "fieldtype": "Currency",
+   "label": "Pegawai Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kegiatan"
+  },
+  {
+   "fieldname": "data_kegiatan_section",
+   "fieldtype": "Section Break",
+   "label": "Data Kegiatan"
+  },
+  {
+   "fieldname": "kode_kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.rp_basis",
+   "fieldname": "rate_basis",
+   "fieldtype": "Currency",
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.v_basis",
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "label": "Volume Basis",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_it_kontanan",
+   "fieldtype": "Check",
+   "label": "Is It Kontanan"
+  },
+  {
+   "fieldname": "column_break_cjta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "kode_kegiatan.kategori_kegiatan",
+   "fieldname": "kategori_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kategori Kegiatan",
+   "options": "Kategori Kegiatan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "kategori_kegiatan.is_bibitan",
+   "fieldname": "is_bibitan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Bibitan ?",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.tipe_kegiatan",
+   "fieldname": "tipe_kegiatan",
+   "fieldtype": "Link",
+   "label": "Tipe Kegiatan",
+   "options": "Tipe Kegiatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_volume",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Estimasi Volume",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty_tenaga_kerja",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Estimasi Jumlah Tenaga Kerja",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_vkip",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Blok",
+   "mandatory_depends_on": "eval:!doc.is_bibitan",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "column_break_zzhm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Batch",
+   "mandatory_depends_on": "eval:doc.is_bibitan",
+   "options": "Batch"
+  },
+  {
+   "fieldname": "section_break_pjqv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Perawatan\"",
+   "fieldname": "estimasi_material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Material"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Material Detail",
+   "options": "Detail RKH Material"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "kendaraan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kendaraan"
+  },
+  {
+   "fieldname": "kendaraan",
+   "fieldtype": "Table",
+   "label": "Kendaraan Detail",
+   "options": "Detail RKH Kendaraan"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "biaya_angkut_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Angkut"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Biaya Umum\"",
+   "fieldname": "pegawai_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pegawai"
+  },
+  {
+   "fieldname": "pegawai",
+   "fieldtype": "Table",
+   "label": "Pegawai Detail",
+   "options": "Detail RKH Pegawai"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pengajuan Budget Tambahan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-18 15:52:42.755015",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Pengajuan Budget Tambahan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -9,7 +9,6 @@ frappe.ui.form.on("Rencana Kerja Harian", {
 	},
     target_volume(frm) {
         frm.doc.qty_tenaga_kerja = frm.doc.volume_basis ? flt(frm.doc.target_volume / frm.doc.volume_basis) : 0
-        frm.doc.kegiatan_amount = flt(frm.doc.rate_basis * frm.doc.qty_tenaga_kerja)
 	},
     kode_kegiatan(frm){
         frm.set_value("blok", "")
@@ -24,6 +23,12 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         for (const fieldname of ["target_volume"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "material")
+            });
+        }
+
+        for (const fieldname of ["qty_tenaga_kerja"]) {
+            frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
+                me.calculate_total(cdt, cdn)
             });
         }
 
@@ -68,6 +73,11 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         if(item.parentfield == "material"){
             item.qty = flt(item.dosis / this.frm.doc.target_volume)
         }
+    }
+
+    before_calculate_grand_total(){
+		let qty = this.frm.doc.tipe_kegiatan == "Panen"  ? this.frm.doc.target_volume : this.frm.doc.qty_tenaga_kerja
+        this.frm.doc.kegiatan_amount = flt(this.frm.doc.rate_basis * qty)
     }
 
     get_rkb_data(){

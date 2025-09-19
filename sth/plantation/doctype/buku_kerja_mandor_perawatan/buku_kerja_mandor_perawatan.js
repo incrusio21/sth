@@ -18,7 +18,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         this.fieldname_total.push("qty", "hasil")
 
         let me = this
-        for (const fieldname of ["volume_basis", "rp_per_basis"]) {
+        for (const fieldname of ["hari_kerja", "volume_basis", "rp_per_basis"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "hasil_kerja")
             });
@@ -82,6 +82,12 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             if(this.frm.doc.per_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.per_premi) / 100))){
                 item.premi = this.frm.doc.rupiah_premi
             }
+        }
+    }
+
+    after_calculate_item_values(table_name, total){
+        if(table_name == "hasil_kerja"){
+            this.frm.doc[`hari_kerja_total`] = flt(total["hari_kerja"] / data_table.length) || 0;
         }
     }
 

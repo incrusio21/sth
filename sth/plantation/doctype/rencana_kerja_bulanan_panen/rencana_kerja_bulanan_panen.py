@@ -32,4 +32,4 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 		)
 
 		if rkb_angkut:
-			frappe.thorw("Block {} with {} already contains the Rencana Kerja Bulanan Pengangkutan Panen".format(self.blok, self.rencana_kerja_bulanan))
+			frappe.throw("Blok {} with {} already contains the Rencana Kerja Bulanan Pengangkutan Panen".format(self.blok, self.rencana_kerja_bulanan))

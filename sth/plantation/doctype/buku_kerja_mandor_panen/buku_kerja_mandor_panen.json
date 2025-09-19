@@ -16,6 +16,7 @@
   "column_break_souy",
   "company",
   "posting_date",
+  "is_kontananan",
   "mandor",
   "mandor1",
   "kerani",
@@ -26,8 +27,9 @@
   "tahun_tanam",
   "luas_blok",
   "column_break_hvgf",
+  "hari_kerja_total",
   "hasil_kerja_qty",
-  "brondolan_qty",
+  "hasil_kerja_qty_brondolan",
   "bjr",
   "section_break_lacm",
   "hasil_kerja_amount",
@@ -49,6 +51,7 @@
   "more_information_tab",
   "reference_section",
   "rencana_kerja_harian",
+  "is_used",
   "column_break_khlg",
   "voucher_type",
   "voucher_no"
@@ -358,15 +361,34 @@
    "read_only": 1
   },
   {
-   "fieldname": "brondolan_qty",
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_qty_brondolan",
    "fieldtype": "Float",
    "label": "Brondolan Total",
    "read_only": 1
   },
   {
-   "fieldname": "bjr",
+   "fieldname": "hari_kerja_total",
    "fieldtype": "Float",
-   "label": "BJR",
+   "label": "Hari Kerja Total",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_kontananan",
+   "fieldtype": "Check",
+   "label": "Kontanan ?"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_used",
+   "fieldtype": "Check",
+   "label": "Used ?",
    "read_only": 1
   }
  ],
@@ -374,7 +396,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-17 11:20:10.854951",
+ "modified": "2025-09-18 15:29:25.170809",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

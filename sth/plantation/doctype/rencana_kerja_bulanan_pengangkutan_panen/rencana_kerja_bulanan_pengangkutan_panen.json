@@ -43,6 +43,11 @@
   "biaya_angkut_amount",
   "budget_tambahan_amount",
   "grand_total",
+  "section_break_pdws",
+  "biaya_kerja_total",
+  "used_total",
+  "column_break_xtkv",
+  "realized_total",
   "biaya_kendaran_tab",
   "kendaraan",
   "biaya_angkut_tab",
@@ -318,13 +323,39 @@
    "fieldtype": "Table",
    "label": "Biaya Angkut Detail",
    "options": "RKB Biaya Angkut"
+  },
+  {
+   "fieldname": "section_break_pdws",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "biaya_kerja_total",
+   "fieldtype": "Currency",
+   "label": "Biaya Kerja Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "used_total",
+   "fieldtype": "Currency",
+   "label": "Used Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_xtkv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realized_total",
+   "fieldtype": "Currency",
+   "label": "Realized Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-09 15:29:12.065750",
+ "modified": "2025-09-17 16:54:06.454003",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Pengangkutan Panen",

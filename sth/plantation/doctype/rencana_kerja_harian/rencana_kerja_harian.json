@@ -353,7 +353,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Batch",
-   "mandatory_depends_on": "eval:!doc.is_bibitan",
+   "mandatory_depends_on": "eval:doc.is_bibitan",
    "options": "Batch"
   }
  ],
@@ -361,7 +361,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 10:22:40.590335",
+ "modified": "2025-09-18 13:28:10.646607",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",

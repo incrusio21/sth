@@ -8,6 +8,12 @@ from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
 
 class BukuKerjaMandorPanen(BukuKerjaMandorController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.fieldname_total.extend([
+			"hari_kerja", "qty", "qty_brondolan"
+		])
+
 	def validate(self):
 		super().validate()
 		self.calculate_brondolan_qty()
@@ -42,3 +48,26 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	
 	def update_value_after_amount(self, item, precision):
 		item.amount += item.brondolan_amount - flt(item.denda)
+
+	def after_calculate_item_values(self, table_fieldname, options, total):
+		if table_fieldname == "hasil_kerja":
+			self.hari_kerja_total = flt(total["hari_kerja"])
+
+	def update_kontanan_used(self):
+		ppk = frappe.qb.DocType("Pengajuan Panen Kontanan")
+
+		kontanan = (
+			frappe.qb.from_(ppk)
+			.select(
+				ppk.name
+            )
+			.where(
+                (ppk.docstatus == 1) &
+                (ppk.bkm_panen == self.name)
+			)
+		).run()
+
+		if kontanan and len(kontanan) > 1:
+			frappe.throw("BKM Panen already used")
+
+		self.db_set("is_used", 1 if kontanan else 0)

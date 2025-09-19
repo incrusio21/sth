@@ -30,7 +30,7 @@
   "column_break_hvgf",
   "batch",
   "section_break_cepw",
-  "hasil_kerja_hasil",
+  "hari_kerja_total",
   "column_break_qnwo",
   "hasil_kerja_qty",
   "section_break_lacm",
@@ -336,7 +336,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "hasil_kerja_hasil",
+   "fieldname": "hari_kerja_total",
    "fieldtype": "Float",
    "label": "Hasil Kerja Total",
    "read_only": 1
@@ -346,7 +346,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 11:26:46.647369",
+ "modified": "2025-09-18 13:57:51.020723",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

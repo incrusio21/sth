@@ -11,8 +11,10 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     setup(doc) {
         super.setup(doc)
 
+        this.fieldname_total.push("hari_kerja", "qty", "qty_brondolan")
+
         let me = this
-        for (const fieldname of ["buah_tidak_dipanen_rate", "buah_mentah_disimpan_rate", 
+        for (const fieldname of ["hari_kerja", "buah_tidak_dipanen_rate", "buah_mentah_disimpan_rate", 
             "buah_mentah_ditinggal_rate", "brondolan_tinggal_rate", "pelepah_tidak_disusun_rate", "pelepah_sengkleh_rate"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "hasil_kerja")
@@ -92,7 +94,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         item.amount += item.brondolan_amount - item.denda
     }
 
-    after_calculate_item_values(table_name){
+    after_calculate_item_values(table_name, total){
         // update nilai sebaran dan rotasi jika ada
         let data_table = this.frm.doc[table_name] || []
         let brondolan_qty = 0.0
@@ -102,6 +104,10 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         }
         
         this.frm.doc.brondolan_qty = brondolan_qty || 0;
+
+        if(table_name == "hasil_kerja"){
+            this.frm.doc.hari_kerja_total = flt(total["hari_kerja"]);
+        }
     }
 
     get_rkh_data(){

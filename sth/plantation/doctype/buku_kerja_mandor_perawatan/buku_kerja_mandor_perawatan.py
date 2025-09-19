@@ -22,6 +22,10 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		if self.per_premi and item.hari_kerja > flt(self.volume_basis * ((1 + self.per_premi) / 100)):
 			item.premi = self.rupiah_premi
 
+	def after_calculate_item_values(self, table_fieldname, options, total):
+		if table_fieldname == "hasil_kerja":
+			self.hari_kerja_total = flt(total["hari_kerja"])
+			
 	def on_submit(self, update_realization=True):
 		super().on_submit(update_realization=False)
 		if not self.material:

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class TimbanganEksternalPabrik(Document):
+class PengajuanBudgetTambahan(Document):
 	pass
