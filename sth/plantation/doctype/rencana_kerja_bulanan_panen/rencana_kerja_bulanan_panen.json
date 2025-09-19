@@ -18,6 +18,7 @@
   "company",
   "kode_kegiatan",
   "upah_per_basis",
+  "volume_basis",
   "rotasi",
   "akp",
   "bjr",
@@ -389,13 +390,20 @@
    "fieldtype": "Currency",
    "label": "Biaya Kerja Amount",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.v_basis",
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "label": "Volume Basis",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-17 16:51:29.944598",
+ "modified": "2025-09-19 15:23:53.864576",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Panen",

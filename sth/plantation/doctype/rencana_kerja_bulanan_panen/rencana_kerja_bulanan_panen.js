@@ -25,7 +25,7 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
         this.fieldname_duplicate_edit = {"last_bjr": "bjr"}
 
         let me = this
-        for (const fieldname of ["akp", "jumlah_pokok", "bjr", "tonase","qty_basis", "upah_per_basis", "premi"]) {
+        for (const fieldname of ["akp", "volume_basis", "jumlah_pokok", "bjr", "tonase","qty_basis", "upah_per_basis", "premi"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn)
             });
@@ -52,6 +52,9 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
         
         doc.jumlah_janjang = flt(doc.jumlah_pokok * doc.akp)
         doc.tonase = flt(doc.jumlah_janjang * doc.bjr)
+        if(!doc.jumlah_tenaga_kerja){
+            doc.jumlah_tenaga_kerja = flt(doc.tonase / volume_basis)
+        }
         doc.total_upah = flt(doc.tonase * doc.upah_per_basis)
         doc.pemanen_amount = flt(doc.total_upah) + flt(doc.premi)
     }

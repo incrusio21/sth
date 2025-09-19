@@ -19,6 +19,9 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 		
 		self.jumlah_janjang = flt(self.jumlah_pokok * self.akp)
 		self.tonase = flt(self.jumlah_janjang * self.bjr)
+		if not self.jumlah_tenaga_kerja and self.volume_basis:
+			self.jumlah_tenaga_kerja = flt(self.tonase / self.volume_basis)
+			
 		self.total_upah = flt(self.tonase * self.upah_per_basis)
 		self.pemanen_amount = flt(self.total_upah) + flt(self.premi)
 
