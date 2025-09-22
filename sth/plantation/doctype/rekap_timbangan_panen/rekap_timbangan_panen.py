@@ -71,6 +71,9 @@ def get_bkm_panen(blok, posting_date):
 		)
 	).run(as_dict=1)
 
+	if not rekap_timbangan:
+		frappe.throw("Please create Surat Pengantar Buah First")
+
 	ress = { 
 		"buku_kerja_mandor_panen": bkm["bkm_panen"],
 		"details": rekap_timbangan
