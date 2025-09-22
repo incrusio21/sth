@@ -45,14 +45,14 @@ class PengajuanBudgetTambahan(PlantationController):
 
 	# 	validate_previous_document(self)
 
-	def on_submit(self):
-		self.update_pbt_used()
+	# def on_submit(self):
+	# 	self.update_pbt_used()
 
-	def on_cancel(self):
-		self.update_pbt_used()
+	# def on_cancel(self):
+	# 	self.update_pbt_used()
 
-	def update_pbt_used(self):
-		frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
+	# def update_pbt_used(self):
+	# 	frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
 
 @frappe.whitelist()
 def get_rencana_kerja_bulanan(kode_kegiatan, tipe_kegiatan, divisi, blok, posting_date):
