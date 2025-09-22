@@ -17,7 +17,6 @@ class BudgetController(PlantationController):
         super().validate()
 
         self.check_total_sebaran()
-        self.calculate_item_sebaran_and_rotasi()
 
     def check_duplicate_data(self):
         if not self.duplicate_param:
@@ -34,25 +33,13 @@ class BudgetController(PlantationController):
         # set on child class if needed
         item.amount = flt(item.amount * (item.get("rotasi") or 1), precision)
 
-    def calculate_item_sebaran_and_rotasi(self):
-        for df in self._get_table_fields():        
-            rotasi_total = 0
-            table_item = self.get(df.fieldname)
-
-            # cari fieldname dengan kata rp pada table
-            per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(df.options).get_valid_columns()))
-            for d in table_item:
-                rotasi_total += d.get("rotasi") or 0
-
-                if per_month_table:
-                    self.calculate_sebaran_values(d, per_month_table)
-
-            # check jika ada rotasi untuk input total rotasi
-            fieldname = f"{df.fieldname}_rotasi"
-            if not self.meta.has_field(fieldname):
-                continue
-
-            self.set(fieldname, flt((rotasi_total / len(table_item)) if table_item else 0, self.precision(fieldname)))
+    def after_calculate_item_values(self, table_fieldname, options, total):
+        table_item = self.get(table_fieldname)
+        # cari fieldname dengan kata rp pada table
+        per_month_table = list(filter(lambda key: "rp_" in key, frappe.get_meta(options).get_valid_columns()))
+        for d in table_item:
+            if per_month_table:
+                self.calculate_sebaran_values(d, per_month_table)
 
     def calculate_sebaran_values(self, item, sebaran_list=[]):
         # hitung nilai sebaran selama 12 bulan

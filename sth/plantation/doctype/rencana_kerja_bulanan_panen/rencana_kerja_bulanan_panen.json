@@ -18,6 +18,7 @@
   "company",
   "kode_kegiatan",
   "upah_per_basis",
+  "volume_basis",
   "rotasi",
   "akp",
   "bjr",
@@ -31,9 +32,10 @@
   "column_break_fxic",
   "to_date",
   "biaya_pemanen_section",
-  "tenaga_kerja",
-  "total_upah",
+  "jumlah_tenaga_kerja",
+  "realized_tenaga_kerja",
   "column_break_owqk",
+  "total_upah",
   "premi",
   "biaya_supervisi_section",
   "upah_mandor",
@@ -54,6 +56,7 @@
   "budget_tambahan_amount",
   "grand_total",
   "section_break_ekyx",
+  "biaya_kerja_total",
   "used_total",
   "column_break_mzxj",
   "realized_total"
@@ -276,11 +279,6 @@
    "label": "Biaya Pemanen"
   },
   {
-   "fieldname": "tenaga_kerja",
-   "fieldtype": "Float",
-   "label": "Tenaga Kerja"
-  },
-  {
    "fieldname": "total_upah",
    "fieldtype": "Currency",
    "label": "Total Upah",
@@ -375,13 +373,37 @@
    "fieldtype": "Currency",
    "label": "Realized Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "jumlah_tenaga_kerja",
+   "fieldtype": "Float",
+   "label": "Jumlah Tenaga Kerja"
+  },
+  {
+   "fieldname": "realized_tenaga_kerja",
+   "fieldtype": "Float",
+   "label": "Realized Tenaga Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_kerja_total",
+   "fieldtype": "Currency",
+   "label": "Biaya Kerja Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.v_basis",
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "label": "Volume Basis",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-17 12:02:23.870248",
+ "modified": "2025-09-19 15:23:53.864576",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Panen",

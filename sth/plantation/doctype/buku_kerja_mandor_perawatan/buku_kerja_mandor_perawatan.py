@@ -7,15 +7,25 @@ from frappe.utils import flt
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
 class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.fieldname_total.extend([
+			"qty", "hasil"
+		])
+
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.hari_kerja = flt(item.qty / self.volume_basis)
+		item.qty = flt(item.hasil / self.volume_basis)
 		item.rate = item.get("rate") or self.rp_per_basis
 		if self.per_premi and item.hari_kerja > flt(self.volume_basis * ((1 + self.per_premi) / 100)):
 			item.premi = self.rupiah_premi
 
+	def after_calculate_item_values(self, table_fieldname, options, total):
+		if table_fieldname == "hasil_kerja":
+			self.hari_kerja_total = flt(total["hari_kerja"])
+			
 	def on_submit(self, update_realization=True):
 		super().on_submit(update_realization=False)
 		if not self.material:

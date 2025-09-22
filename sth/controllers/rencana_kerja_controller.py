@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_link_to_form
 from frappe.desk.reportview import get_filters_cond, get_match_cond
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.plantation_controller import PlantationController
 
@@ -20,13 +20,18 @@ class RencanaKerjaController(PlantationController):
     def validate(self):
         if not self.skip_calculate_supervisi:
             self.calculate_supervisi_amount()
-    
+
+        self.calculate_biaya_kerja_total()
         super().validate()
 
     def calculate_supervisi_amount(self):
         self.mandor_amount = flt(self.upah_mandor) + flt(self.premi_mandor)
         self.kerani_amount = flt(self.upah_kerani) + flt(self.premi_kerani)
         self.mandor1_amount = flt(self.upah_mandor1) + flt(self.premi_mandor1)
+
+    def calculate_biaya_kerja_total(self):
+        self.biaya_kerja_total = flt(self.grand_total - self.mandor_amount - self.kerani_amount - self.mandor1_amount)
+        self.realized_total = self.used_total = 0.0
 
     def update_value_after_amount(self, item, precision):
         # set on child class if needed
@@ -35,7 +40,7 @@ class RencanaKerjaController(PlantationController):
     def calculate_used_and_realized(self):
         rkh = frappe.qb.DocType("Rencana Kerja Harian")
 
-        used_total = (
+        self.used_total = (
 			frappe.qb.from_(rkh)
 			.select(
 				Sum(rkh.grand_total)
@@ -47,34 +52,35 @@ class RencanaKerjaController(PlantationController):
 			)
 		).run()[0][0] or 0.0
 
-        if used_total > self.grand_total:
-            frappe.throw("Used Total exceeds grand total.")
+        if self.used_total > self.biaya_kerja_total:
+            frappe.throw("Used Total exceeds limit.")
 
         if self.realization_doctype:
             bkm = frappe.qb.DocType(self.realization_doctype)
 
-            realized_total = (
+            self.realized_total, self.realized_tenaga_kerja = (
                 frappe.qb.from_(bkm)
                 .select(
-                    Sum(bkm.grand_total)
+                    Coalesce(Sum(bkm.grand_total), 0), 
+                    Coalesce(Sum(bkm.hari_kerja_total), 0)
                 )
                 .where(
                     (bkm.docstatus == 1) &
                     (bkm.voucher_type == self.doctype) &
                     (bkm.voucher_no == self.name)
                 )
-            ).run()[0][0] or 0.0
+            ).run()[0]
             
-            if realized_total > self.grand_total:
-                frappe.throw("Realization Total exceeds grand total.")
+            if self.realized_total > self.biaya_kerja_total:
+                frappe.throw("Realization Total exceeds limit.")
 
-            self.realized_total = realized_total
+            if self.realized_tenaga_kerja > self.jumlah_tenaga_kerja:
+                frappe.throw("Realization Hari Kerja exceeds Jumlah Hari Kerja.")
         
-        self.used_total = used_total
         self.db_update()
 
 @frappe.whitelist()
-def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=None):
+def duplicate_rencana_kerja(voucher_type, voucher_no, blok, is_batch=None, fieldname_addons=None):
     doc = frappe.get_doc(voucher_type, voucher_no)
 
     if isinstance(blok, str):
@@ -87,8 +93,11 @@ def duplicate_rencana_kerja(voucher_type, voucher_no, blok, fieldname_addons=Non
     for d in blok:
         new_doc = frappe.new_doc(voucher_type)
         new_doc.update(doc.as_dict(no_default_fields=True))
-        new_doc.blok = d["item"]
-        
+        if is_batch:
+            new_doc.batch = d["item"]
+        else:    
+            new_doc.blok = d["item"]
+
         for key, fieldname in (fieldname_addons or {}).items():
             new_doc.set(fieldname, d.get(key))
 

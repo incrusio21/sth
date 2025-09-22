@@ -8,7 +8,6 @@
   "section_break_df5v",
   "unit",
   "divisi",
-  "blok",
   "column_break_exgg",
   "posting_date",
   "company",
@@ -31,9 +30,15 @@
   "volume_basis",
   "is_it_kontanan",
   "column_break_cjta",
+  "kategori_kegiatan",
+  "is_bibitan",
   "tipe_kegiatan",
   "target_volume",
   "qty_tenaga_kerja",
+  "section_break_vkip",
+  "blok",
+  "column_break_zzhm",
+  "batch",
   "section_break_pjqv",
   "voucher_type",
   "voucher_no",
@@ -63,6 +68,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.is_bibitan",
    "fieldname": "blok",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -70,8 +76,8 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Blok",
-   "options": "Blok",
-   "reqd": 1
+   "mandatory_depends_on": "eval:!doc.is_bibitan",
+   "options": "Blok"
   },
   {
    "fieldname": "column_break_exgg",
@@ -312,13 +318,50 @@
    "label": "Voucher No",
    "options": "voucher_type",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.kategori_kegiatan",
+   "fieldname": "kategori_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kategori Kegiatan",
+   "options": "Kategori Kegiatan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "kategori_kegiatan.is_bibitan",
+   "fieldname": "is_bibitan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Bibitan ?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_vkip",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_zzhm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Batch",
+   "mandatory_depends_on": "eval:doc.is_bibitan",
+   "options": "Batch"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-11 09:30:39.039243",
+ "modified": "2025-09-18 13:28:10.646607",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",

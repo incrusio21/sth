@@ -36,6 +36,9 @@ class BukuKerjaMandorController(PlantationController):
                     self.set(fieldname, value)
 
     def validate_hasil_kerja_harian(self):
+        if self.get("is_bibitan"):
+            return
+        
         if self.uom == "HA" and self.hasil_kerja_qty > self.luas_blok:
             frappe.throw("Hasil Kerja exceeds Luas Blok")
 
@@ -56,7 +59,7 @@ class BukuKerjaMandorController(PlantationController):
         for emp in self.hasil_kerja:
             doc = frappe.new_doc("Employee Payment Log")
 
-            doc.hari_kerja = emp.hari_kerja
+            doc.hari_kerja = emp.qty
             doc.amount = emp.amount
 
             doc.employee = emp.employee

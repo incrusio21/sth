@@ -6,6 +6,7 @@ frappe.provide("sth.plantation");
 sth.plantation.TransactionController = class TransactionController extends frappe.ui.form.Controller {
     setup(doc) {
         let doctype = doc.doctype
+        this.fieldname_total = ["amount"]
         this.skip_table_amount = []
         this.skip_fieldname_amount = []
         
@@ -93,7 +94,10 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
     calculate_item_values(table_name){
         let me = this
-        let total = {"amount": 0, "qty": 0}
+        const total = {};
+        for (const f of this.fieldname_total) {
+            total[f] = 0;
+        }
         
         let data_table = me.frm.doc[table_name] || []
         
@@ -105,20 +109,21 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             item.amount = flt(item.rate * item.qty, precision("amount", item));
 
             this.update_value_after_amount(item)
-
+            
             // total amount dan qty untuk d input ke doctype utama jika d butuhkan
-            total["amount"] += item.amount;
-            total["qty"] += item.qty
+            for (const f of this.fieldname_total) {
+                total[f] += item[f]
+            }
         }
         
-        for (const total_field of ["amount", "qty"]) {
+        for (const total_field of this.fieldname_total) {
             let fieldname = `${table_name}_${total_field}`
             if (!this.frm.fields_dict[fieldname]) continue;
 
             this.frm.doc[fieldname] = total[total_field];
         }
 
-        this.after_calculate_item_values(table_name)
+        this.after_calculate_item_values(table_name, total)
     }
 
     update_rate_or_qty_value(){
@@ -140,6 +145,9 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
     calculate_grand_total(){
         let grand_total = 0.0
+        
+        this.before_calculate_grand_total()
+
         for (const field of this.doctype_ref("amount")) {
             if(in_list(this.skip_table_amount, field.replace("_amount", "")) || 
                 in_list(this.skip_fieldname_amount, field)) continue;
@@ -150,6 +158,10 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.frm.doc.grand_total = grand_total
 
         this.after_calculate_grand_total()
+    }
+
+    before_calculate_grand_total(){
+        // set on child class if needed
     }
 
     after_calculate_grand_total(){

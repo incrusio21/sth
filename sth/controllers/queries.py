@@ -2,11 +2,15 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import unscrub
+from frappe.utils import cint
 
 @frappe.whitelist()
-def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date):
+def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibitan=False):
+	fieldname = "batch" if cint(is_bibitan) else "blok"
+
 	rkh = frappe.get_value("Rencana Kerja Harian", {
-		"kode_kegiatan": kode_kegiatan, "divisi": divisi, "blok": blok, "posting_date": posting_date,
+		"kode_kegiatan": kode_kegiatan, "divisi": divisi, fieldname: blok, "posting_date": posting_date,
 		"docstatus": 1
 	}, ["name as rencana_kerja_harian", "voucher_type", "voucher_no"], as_dict=1)
 
@@ -14,8 +18,8 @@ def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date):
 		frappe.throw(""" Rencana Kerja Harian not Found for Filters <br> 
 			Kegiatan : {} <br> 
 			Divisi : {} <br> 
-			Blok : {} <br>
-			Date : {} """.format(kode_kegiatan, divisi, blok, posting_date))
+			{} : {} <br>
+			Date : {} """.format(kode_kegiatan, divisi, unscrub(fieldname), blok, posting_date))
 
 	# no rencana kerja harian
 	ress = { 

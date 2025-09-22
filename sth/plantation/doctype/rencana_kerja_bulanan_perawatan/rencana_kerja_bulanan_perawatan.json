@@ -19,6 +19,7 @@
   "divisi",
   "qty",
   "jumlah_tenaga_kerja",
+  "realized_tenaga_kerja",
   "upah_per_basis",
   "premi",
   "amended_from",
@@ -54,6 +55,7 @@
   "budget_tambahan_amount",
   "grand_total",
   "section_break_xtya",
+  "biaya_kerja_total",
   "used_total",
   "column_break_lcrd",
   "realized_total",
@@ -72,7 +74,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Rencana Kerja Tahunan Perawatan",
+   "options": "Rencana Kerja Bulanan Perawatan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -105,7 +107,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Rencana Kerja Tahunan Perawatan",
+   "options": "Rencana Kerja Bulanan Perawatan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -401,6 +403,7 @@
    "fieldtype": "Currency",
    "in_preview": 1,
    "label": "Used Amount",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -412,6 +415,21 @@
    "fieldtype": "Currency",
    "in_preview": 1,
    "label": "Realized Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "realized_tenaga_kerja",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Realized Tenaga Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_kerja_total",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Biaya Kerja Amount",
    "read_only": 1
   }
  ],
@@ -419,7 +437,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-16 11:25:59.740724",
+ "modified": "2025-09-17 16:44:19.614682",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",

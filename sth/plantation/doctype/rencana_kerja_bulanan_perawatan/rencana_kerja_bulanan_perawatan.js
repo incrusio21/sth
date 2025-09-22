@@ -49,18 +49,59 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
                 }
 		    }
 		})
-
-        this.frm.set_query("batch", function(doc){
-		    return{
-		        filters: {
-                    company: doc.company
-                }
-		    }
-		})
-
-
     }
 
+    get_blok_for_duplicate(){
+        if(!this.frm.doc.is_bibitan){
+            super.get_blok_for_duplicate()
+        }else{
+            let me = this
+            
+            const dialog = new frappe.ui.Dialog({
+                title: __("Select Batch"),
+                size: "large",
+                fields: [
+                    {
+                        fieldname: "trans_blok",
+                        fieldtype: "Table",
+                        label: "Items",
+                        in_place_edit: false,
+                        reqd: 1,
+                        fields: [
+                            {
+                                fieldtype: "Link",
+                                fieldname: "item",
+                                options: "Batch",
+                                in_list_view: 1,
+                                disabled: 0,
+                                label: __("Batch")
+                            },
+                        ],
+                    }
+                ],
+                primary_action: function (data) {
+                    const selected_items = data.trans_blok
+                    if(selected_items.length < 1){
+                        frappe.throw("Please Select at least One Blok")
+                    }
+
+                    frappe.call({
+                        method: "sth.controllers.rencana_kerja_controller.duplicate_rencana_kerja",
+                        args: {
+                            voucher_type: me.frm.doc.doctype,
+                            voucher_no: me.frm.doc.name,
+                            blok: selected_items,
+                            is_batch: 1
+                        },
+                    })
+                    dialog.hide();
+                },
+                primary_action_label: __("Submit"),
+            });
+    
+            dialog.show();
+        }
+    }
     calculate_amount_addons(){
         let doc = this.frm.doc
 
