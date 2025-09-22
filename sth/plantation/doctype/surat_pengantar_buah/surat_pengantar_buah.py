@@ -13,8 +13,13 @@ force_item_fields = (
 class SuratPengantarBuah(Document):
 	
 	def validate(self):
+		self.remove_input_pabrik()
 		self.get_bkm_panen()
 		self.calculate_janjang_brondolan()
+
+	def remove_input_pabrik(self):
+		self.in_time = self.out_time = ""
+		self.in_weight = self.out_weight = self.pabrik_cut = self.netto_weight = self.total_weight = 0
 
 	def get_bkm_panen(self):
 		for d in self.details:
@@ -32,6 +37,7 @@ class SuratPengantarBuah(Document):
 		for d in self.details:
 			total_janjang += d.qty
 			total_brondolan += d.brondolan_qty
+			d.netto_weight = d.total_weight = 0.0
 
 		self.total_janjang = total_janjang
 		self.total_brondolan = total_brondolan
@@ -56,11 +62,16 @@ class SuratPengantarBuah(Document):
 		
 		self.update(args)
 
+		# hitung janjang dan total brondolan terlebih dahulu
+		self.calculate_janjang_brondolan()
+
 		if self.in_weight and self.out_weight:
 			self.netto_weight = flt(self.in_weight - self.out_weight - self.total_brondolan - self.pabrik_cut, self.precision("netto_weight"))
-	
+			self.total_weight = self.netto_weight + self.total_brondolan
+
 		for d in self.details:
-			d.netto_weight = flt((self.netto_weight * d.qty / self.total_janjang) + d.brondolan_qty, d.precision("netto_weight"))
+			d.netto_weight = flt((self.netto_weight * d.qty / self.total_janjang), d.precision("netto_weight"))
+			d.total_weight = d.netto_weight + d.brondolan_qty
 
 		self.db_update_all()
 		self.update_transfered_bkm_panen()
@@ -71,7 +82,7 @@ def get_bkm_panen(blok, posting_date):
 		"blok": blok, "posting_date": posting_date, "docstatus": 1
 	}, ["name", 
 	 	"hasil_kerja_qty", "transfered_hasil_kerja",
-		"hasil_kerja_qty_brondolan", "transfered_brondolan"
+		"hasil_kerja_qty_brondolan", "transfered_brondolan", "is_rekap"
 	], as_dict=1)
 
 	if not bkm_panen:
@@ -79,6 +90,9 @@ def get_bkm_panen(blok, posting_date):
 			Blok : {} <br> 
 			Date : {} """.format(blok, posting_date))
 	
+	if bkm_panen.is_rekap:
+		frappe.throw("Buku Kerja Mandor Panen already have Rekap Timbangan Panen")
+
 	ress = { 
 		"bkm_panen": bkm_panen.name,
 		"qty": flt(bkm_panen.hasil_kerja_qty - bkm_panen.transfered_hasil_kerja),

@@ -13,6 +13,7 @@
   "volume_basis",
   "rp_per_basis",
   "upah_brondolan",
+  "is_rekap",
   "column_break_souy",
   "company",
   "posting_date",
@@ -32,6 +33,7 @@
   "transfered_hasil_kerja",
   "hasil_kerja_qty_brondolan",
   "transfered_brondolan",
+  "netto_weight",
   "weight_total",
   "bjr",
   "section_break_lacm",
@@ -411,13 +413,26 @@
    "fieldtype": "Float",
    "label": "Weight Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "netto_weight",
+   "fieldtype": "Float",
+   "label": "Netto Weight",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_rekap",
+   "fieldtype": "Check",
+   "label": "Rekap ?",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-19 09:41:06.811416",
+ "modified": "2025-09-22 14:16:02.101487",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

@@ -9,6 +9,7 @@
   "unit",
   "divisi",
   "kendaraan",
+  "no_polisi",
   "internal_kg",
   "column_break_bvfg",
   "posting_date",
@@ -27,9 +28,10 @@
   "details",
   "section_break_blue",
   "total_janjang",
+  "netto_weight",
   "column_break_vjtg",
   "total_brondolan",
-  "netto_weight"
+  "total_weight"
  ],
  "fields": [
   {
@@ -186,13 +188,26 @@
    "fieldtype": "Float",
    "label": "Total Brondolan",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kendaraan.no_pol",
+   "fieldname": "no_polisi",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No Polisi"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-19 13:14:02.541652",
+ "modified": "2025-09-22 14:41:52.185577",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

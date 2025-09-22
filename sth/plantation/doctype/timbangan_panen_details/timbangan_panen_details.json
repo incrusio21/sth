@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-22 10:44:16.775811",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "surat_pengantar_buah",
+  "spb_date",
+  "no_polisi",
+  "column_break_truv",
+  "bjr",
+  "jumlah_janjang",
+  "total_brondolan",
+  "total_weight",
+  "netto_weight"
+ ],
+ "fields": [
+  {
+   "fieldname": "surat_pengantar_buah",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Surat Pengantar Buah",
+   "options": "Surat Pengantar Buah",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "surat_pengantar_buah.posting_date",
+   "fieldname": "spb_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal SPB",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "surat_pengantar_buah.no_polisi",
+   "fieldname": "no_polisi",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No Polisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_truv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "BJR",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "jumlah_janjang",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Janjang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "netto_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Netto Weight",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_brondolan",
+   "fieldtype": "Float",
+   "label": "Total Brondolan",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-22 15:58:18.641490",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Timbangan Panen Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
