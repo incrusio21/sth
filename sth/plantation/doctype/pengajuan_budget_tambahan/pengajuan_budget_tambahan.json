@@ -6,8 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_df5v",
-  "unit",
   "rencana_kerja_bulanan",
+  "unit",
   "divisi",
   "blok",
   "column_break_exgg",
@@ -55,6 +55,7 @@
    "label": "Header"
   },
   {
+   "fetch_from": "rencana_kerja_bulanan.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -326,12 +327,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
    "fieldname": "tonase",
    "fieldtype": "Float",
    "label": "Tonase",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
    "fieldname": "jarak_pks",
    "fieldtype": "Float",
    "label": "Jarak Ke PKS",
@@ -348,7 +351,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-23 09:15:18.596578",
+ "modified": "2025-09-23 13:06:25.868089",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Budget Tambahan",

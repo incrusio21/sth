@@ -8,6 +8,7 @@
  "field_order": [
   "item",
   "jumlah_hk",
+  "basis",
   "column_break_smwp",
   "qty",
   "rate",
@@ -22,7 +23,6 @@
    "options": "Kegiatan"
   },
   {
-   "fetch_from": "item.v_basis",
    "fieldname": "jumlah_hk",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -54,13 +54,21 @@
    "label": "Amount",
    "options": "Kegiatan",
    "read_only": 1
+  },
+  {
+   "fetch_from": "item.v_basis",
+   "fieldname": "basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Basis",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-23 09:13:38.675034",
+ "modified": "2025-09-23 11:11:30.540386",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "PBT Biaya Angkut",

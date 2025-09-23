@@ -79,15 +79,23 @@ frappe.ui.form.on("Detail PBT Kendaraan", {
       if (tipe_master == "Alat Berat" || tipe_master == "Kendaraan Umum") {
         frappe.db.get_value("Company",
           { name: frm.doc.company },
-          ["name", "ump"]
+          ["name", "custom_ump_harian"]
         ).then(companyRes => {
           if (!companyRes.message) return
-          const { ump } = companyRes.message
+          const { custom_ump_harian } = companyRes.message
 
-          frappe.model.set_value(cdt, cdn, "rate", ump)
+          frappe.model.set_value(cdt, cdn, "rate", custom_ump_harian)
         });
       }
     });
+  },
+});
+
+frappe.ui.form.on("PBT Biaya Angkut", {
+  qty(frm, cdt, cdn) {
+    let item = locals[cdt][cdn];
+
+    frappe.model.set_value(cdt, cdn, "jumlah_hk", item.qty / item.basis)
   },
 });
 
