@@ -65,6 +65,8 @@ class BukuKerjaMandorController(PlantationController):
             doc.employee = emp.employee
             doc.company = self.company
             doc.attendance_date = self.posting_date
+            
+            doc.kegiatan_account = self.kegiatan_account
 
             doc.voucher_type = self.doctype
             doc.voucher_no = self.name

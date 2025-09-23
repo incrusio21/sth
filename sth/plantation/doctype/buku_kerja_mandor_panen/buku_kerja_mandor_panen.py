@@ -74,6 +74,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.db_set("is_used", 1 if kontanan else 0)
 
 	def calculate_transfered_weight(self):
+		if self.is_rekap:
+			frappe.throw("BKM Panen already have Rekap Timbangan Panen")
+
 		spb = frappe.qb.DocType("SPB Timbangan Pabrik")
 
 		self.transfered_hasil_kerja, self.transfered_brondolan = (

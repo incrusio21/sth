@@ -33,14 +33,24 @@ class SuratPengantarBuah(Document):
 						self.set(fieldname, value)
 
 	def calculate_janjang_brondolan(self):
-		total_janjang = total_brondolan = 0.0
+		total_janjang = total_brondolan = netto_weight_i = total_weight_i = 0.0
 		for d in self.details:
 			total_janjang += d.qty
 			total_brondolan += d.brondolan_qty
 			d.netto_weight = d.total_weight = 0.0
 
+			if self.pabrik_type == "External":
+				d.netto_weight_internal = d.total_weight_internal - d.brondolan_qty
+			else:
+				d.netto_weight_internal = d.total_weight_internal = 0.0
+
+			netto_weight_i += d.netto_weight_internal
+			total_weight_i += d.total_weight_internal
+
 		self.total_janjang = total_janjang
 		self.total_brondolan = total_brondolan
+		self.netto_weight_internal = netto_weight_i
+		self.total_weight_internal = total_weight_i
 
 	def on_submit(self):
 		self.update_transfered_bkm_panen()

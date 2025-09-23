@@ -9,6 +9,7 @@
   "unit",
   "divisi",
   "kode_kegiatan",
+  "kegiatan_account",
   "uom",
   "volume_basis",
   "rp_per_basis",
@@ -426,13 +427,22 @@
    "fieldtype": "Check",
    "label": "Rekap ?",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.account",
+   "fieldname": "kegiatan_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-22 14:16:02.101487",
+ "modified": "2025-09-23 16:29:02.428156",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

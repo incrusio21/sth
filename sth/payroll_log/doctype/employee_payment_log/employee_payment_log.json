@@ -10,6 +10,11 @@
   "column_break_ojxs",
   "company",
   "posting_date",
+  "section_break_fghh",
+  "kegiatan_account",
+  "column_break_amqp",
+  "employee_payment_account",
+  "journal_entry",
   "section_break_rfin",
   "amount",
   "column_break_uorb",
@@ -74,13 +79,42 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fghh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_payment_account",
+   "fieldtype": "Link",
+   "label": "Employee Payment Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan_account",
+   "fieldtype": "Link",
+   "label": "Kegiatan Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_amqp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 11:44:53.835267",
+ "modified": "2025-09-23 16:20:19.100134",
  "modified_by": "Administrator",
  "module": "Payroll Log",
  "name": "Employee Payment Log",
