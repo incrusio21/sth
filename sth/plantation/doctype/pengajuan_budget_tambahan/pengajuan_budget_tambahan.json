@@ -28,6 +28,8 @@
   "kode_kegiatan",
   "rate_basis",
   "volume_basis",
+  "tonase",
+  "jarak_pks",
   "is_it_kontanan",
   "column_break_cjta",
   "tipe_kegiatan",
@@ -41,6 +43,7 @@
   "kendaraan_tab",
   "kendaraan",
   "biaya_angkut_tab",
+  "biaya_angkut",
   "pegawai_tab",
   "pegawai",
   "amended_from"
@@ -321,13 +324,31 @@
    "label": "Rencana Kerja Bulanan",
    "options": "Rencana Kerja Bulanan",
    "reqd": 1
+  },
+  {
+   "fieldname": "tonase",
+   "fieldtype": "Float",
+   "label": "Tonase",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jarak_pks",
+   "fieldtype": "Float",
+   "label": "Jarak Ke PKS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_angkut",
+   "fieldtype": "Table",
+   "label": "Biaya Angkut Detail",
+   "options": "PBT Biaya Angkut"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-21 19:17:24.381553",
+ "modified": "2025-09-23 09:15:18.596578",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Budget Tambahan",

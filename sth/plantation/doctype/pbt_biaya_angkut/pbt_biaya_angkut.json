@@ -1,15 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-09-21 19:12:41.575946",
+ "creation": "2025-09-23 09:13:38.675034",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "item",
-  "uom",
-  "kap_kg",
-  "column_break_xspq",
+  "jumlah_hk",
+  "column_break_smwp",
   "qty",
   "rate",
   "amount"
@@ -19,52 +18,41 @@
    "fieldname": "item",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kendaraan",
-   "options": "Alat Berat Dan Kendaraan",
-   "reqd": 1
+   "label": "Kegiatan",
+   "options": "Kegiatan"
   },
   {
-   "columns": 1,
-   "fetch_from": "item.uom",
-   "fieldname": "uom",
-   "fieldtype": "Link",
+   "fetch_from": "item.v_basis",
+   "fieldname": "jumlah_hk",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Satuan",
-   "options": "UOM",
+   "label": "Jumlah HK",
    "read_only": 1
   },
   {
-   "columns": 1,
-   "fetch_from": "item.kap_kg",
-   "fieldname": "kap_kg",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Kap Kg",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_xspq",
+   "fieldname": "column_break_smwp",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "KM"
+   "label": "Volume",
+   "options": "Kegiatan"
   },
   {
-   "default": "0",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate"
+   "label": "Rate",
+   "options": "Kegiatan"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+   "options": "Kegiatan",
    "read_only": 1
   }
  ],
@@ -72,10 +60,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-22 16:48:03.047787",
+ "modified": "2025-09-23 09:13:38.675034",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Detail PBT Kendaraan",
+ "name": "PBT Biaya Angkut",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
