@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-22 10:32:38.602236",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_u26c",
+  "blok",
+  "panen_date",
+  "buku_kerja_mandor_panen",
+  "column_break_zpgd",
+  "company",
+  "amended_from",
+  "section_break_fpms",
+  "details",
+  "section_break_veaa",
+  "total_janjang",
+  "netto_weight",
+  "bjr",
+  "column_break_tfdr",
+  "total_brondolan",
+  "total_weight"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_u26c",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rekap Timbangan Panen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "panen_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Panen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_zpgd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_fpms",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Timbangan Panen Details"
+  },
+  {
+   "fieldname": "section_break_veaa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_janjang",
+   "fieldtype": "Float",
+   "label": "Total Janjang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tfdr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "netto_weight",
+   "fieldtype": "Float",
+   "label": "Netto Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_brondolan",
+   "fieldtype": "Float",
+   "label": "Total Brondolan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buku_kerja_mandor_panen",
+   "fieldtype": "Link",
+   "label": "Buku Kerja Mandor Panen",
+   "options": "Buku Kerja Mandor Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-22 15:44:50.232156",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rekap Timbangan Panen",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

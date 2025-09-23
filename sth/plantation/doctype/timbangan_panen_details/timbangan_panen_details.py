@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class DetailAmbilKGTmbangan(Document):
+class TimbanganPanenDetails(Document):
 	pass
