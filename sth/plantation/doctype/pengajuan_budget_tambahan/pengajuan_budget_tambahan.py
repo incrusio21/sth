@@ -79,6 +79,7 @@ class PengajuanBudgetTambahan(PlantationController):
 			doc.tambahan_tenaga_kerja_amount = tambahan_tenaga_kerja_amount
 			doc.tambahan_material_amount = tambahan_material_amount
 			doc.budget_tambahan_amount = budget_tambahan_amount
+			doc.grand_total = doc.grand_total + doc.budget_tambahan_amount
 
 			for row in self.material:
 				doc.append("tambahan_material", {
@@ -125,6 +126,7 @@ class PengajuanBudgetTambahan(PlantationController):
 			doc.tambahan_kendaraan_amount = tambahan_kendaraan_amount
 			doc.tambahan_angkut_amount = tambahan_angkut_amount
 			doc.budget_tambahan_amount = budget_tambahan_amount
+			doc.grand_total = doc.grand_total + doc.budget_tambahan_amount
 
 			doc.flags.ignore_validate = True
 			doc.flags.ignore_permissions = True
