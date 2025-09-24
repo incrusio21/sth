@@ -38,9 +38,11 @@
   "mandor_amount",
   "kerani_amount",
   "mandor1_amount",
-  "column_break_fsda",
   "kendaraan_amount",
   "biaya_angkut_amount",
+  "column_break_fsda",
+  "tambahan_kendaraan_amount",
+  "tambahan_angkut_amount",
   "budget_tambahan_amount",
   "grand_total",
   "section_break_pdws",
@@ -51,7 +53,11 @@
   "biaya_kendaran_tab",
   "kendaraan",
   "biaya_angkut_tab",
-  "biaya_angkut"
+  "biaya_angkut",
+  "biaya_kendaraan_tambahan_tab",
+  "kendaraan_tambahan",
+  "biaya_angkut_tambahan_tab",
+  "angkut_tambahan"
  ],
  "fields": [
   {
@@ -262,6 +268,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "budget_tambahan_amount",
    "fieldtype": "Currency",
    "label": "Budget Tambahan",
@@ -349,13 +356,54 @@
    "fieldtype": "Currency",
    "label": "Realized Amount",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_kendaraan_amount",
+   "fieldtype": "Currency",
+   "label": "Tambahan Kendaraan Total",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_angkut_amount",
+   "fieldtype": "Currency",
+   "label": "Tambahan Angkut Total",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "biaya_kendaraan_tambahan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Tambahan Kendaraan"
+  },
+  {
+   "fieldname": "biaya_angkut_tambahan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Tambahan Angkut"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "kendaraan_tambahan",
+   "fieldtype": "Table",
+   "label": "Kendaraan Tambahan Detail",
+   "options": "RKB Pengangkutan Tambahan Kendaraan",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "angkut_tambahan",
+   "fieldtype": "Table",
+   "label": "Angkut Tambahan Detail",
+   "options": "RKB Biaya Tambahan Angkut",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-17 16:54:06.454003",
+ "modified": "2025-09-24 09:49:28.776132",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Pengangkutan Panen",

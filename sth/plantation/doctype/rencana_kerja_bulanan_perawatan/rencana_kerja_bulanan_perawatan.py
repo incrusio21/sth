@@ -73,3 +73,20 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 			d.used_total = used_total
 			d.realized_total = real_total
 			d.db_update()
+
+@frappe.whitelist()
+def get_pengajuan_budget_tambahan(rencana_kerja_bulanan, kode_kegiatan):
+	query_pbt = frappe.db.sql("""
+		SELECT pbt.name, pbt.kode_kegiatan, pbt.rate_basis, pbt.volume_basis, pbt.tipe_kegiatan, pbt.target_volume, pbt.qty_tenaga_kerja FROM `tabPengajuan Budget Tambahan` as pbt
+		WHERE pbt.rencana_kerja_bulanan = %s AND pbt.kode_kegiatan = %s;
+	""", (rencana_kerja_bulanan, kode_kegiatan), as_dict=True)
+
+	query_pbt_material = frappe.db.sql("""
+		SELECT dpm.item, dpm.uom, dpm.dosis, dpm.qty, dpm.rate, dpm.amount FROM `tabDetail PBT Material` as dpm
+		WHERE dpm.parent = %s;
+	""", (query_pbt[0]['name']), as_dict=True)
+
+	return {
+		'pengajuan_budget_tambahan': query_pbt[0],
+		'material': query_pbt_material
+	}

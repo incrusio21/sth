@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-24 09:46:43.150963",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "jumlah_hk",
+  "basis",
+  "column_break_smwp",
+  "qty",
+  "rate",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "jumlah_hk",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah HK",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.v_basis",
+   "fieldname": "basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Basis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_smwp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Volume",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Kegiatan",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-24 09:46:43.150963",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "RKB Biaya Tambahan Angkut",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

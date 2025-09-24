@@ -4,10 +4,36 @@
 sth.plantation.setup_rencana_kerja_controller()
 
 frappe.ui.form.on("Rencana Kerja Bulanan Perawatan", {
-	refresh(frm) {
-        
-	},
-    kategori_kegiatan(frm){
+    refresh(frm) {
+        if (cur_frm.doc.docstatus != 1) return
+
+        // frappe.call({
+        //     method: "sth.plantation.doctype.rencana_kerja_bulanan_perawatan.rencana_kerja_bulanan_perawatan.get_pengajuan_budget_tambahan",
+        //     args: {
+        //         rencana_kerja_bulanan: frm.doc.rencana_kerja_bulanan,
+        //         kode_kegiatan: frm.doc.kode_kegiatan,
+        //     },
+        //     callback: function (r) {
+        //         if (!r.message) return
+        //         const { pengajuan_budget_tambahan, material } = r.message
+
+        //         frm.set_value("tambahan_kode_kegiatan", pengajuan_budget_tambahan.kode_kegiatan);
+        //         frm.set_value("tambahan_rate_basis", pengajuan_budget_tambahan.rate_basis);
+        //         frm.set_value("tambahan_volume_basis", pengajuan_budget_tambahan.volume_basis);
+        //         frm.set_value("tambahan_tipe_kegiatan", pengajuan_budget_tambahan.tipe_kegiatan);
+        //         frm.set_value("tambahan_target_volume", pengajuan_budget_tambahan.target_volume);
+        //         frm.set_value("tambahan_qty_tenaga_kerja", pengajuan_budget_tambahan.qty_tenaga_kerja);
+
+        //         material.forEach(d => {
+        //             let row = frm.add_child("tambahan_material", d);
+        //         });
+
+        //         frm.refresh_fields()
+        //         console.log(r.message)
+        //     }
+        // })
+    },
+    kategori_kegiatan(frm) {
         frm.set_value("blok", "")
         frm.set_value("batch", "")
     }
@@ -19,44 +45,44 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
 
         let me = this
         for (const fieldname of ["qty_basis", "upah_per_basis", "premi"]) {
-            frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
+            frappe.ui.form.on(doc.doctype, fieldname, function (doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn)
             });
         }
     }
 
-    set_query_field(){
+    set_query_field() {
         super.set_query_field()
-        
-        this.frm.set_query("kategori_kegiatan", function(){
-		    return{
-		        filters: {
+
+        this.frm.set_query("kategori_kegiatan", function () {
+            return {
+                filters: {
                     is_perawatan: 1
                 }
-		    }
-		})
+            }
+        })
 
-        this.frm.set_query("kode_kegiatan", function(doc){
-            if(!(doc.company && doc.kategori_kegiatan)){
+        this.frm.set_query("kode_kegiatan", function (doc) {
+            if (!(doc.company && doc.kategori_kegiatan)) {
                 frappe.throw("Please Select Kategori Kegiata and Company First")
             }
 
-		    return{
-		        filters: {
+            return {
+                filters: {
                     is_group: 0,
                     kategori_kegiatan: doc.kategori_kegiatan,
                     company: doc.company
                 }
-		    }
-		})
+            }
+        })
     }
 
-    get_blok_for_duplicate(){
-        if(!this.frm.doc.is_bibitan){
+    get_blok_for_duplicate() {
+        if (!this.frm.doc.is_bibitan) {
             super.get_blok_for_duplicate()
-        }else{
+        } else {
             let me = this
-            
+
             const dialog = new frappe.ui.Dialog({
                 title: __("Select Batch"),
                 size: "large",
@@ -81,7 +107,7 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
                 ],
                 primary_action: function (data) {
                     const selected_items = data.trans_blok
-                    if(selected_items.length < 1){
+                    if (selected_items.length < 1) {
                         frappe.throw("Please Select at least One Blok")
                     }
 
@@ -98,11 +124,11 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
                 },
                 primary_action_label: __("Submit"),
             });
-    
+
             dialog.show();
         }
     }
-    calculate_amount_addons(){
+    calculate_amount_addons() {
         let doc = this.frm.doc
 
         doc.jumlah_tenaga_kerja = doc.qty_basis ? flt(doc.qty / doc.qty_basis) : 0

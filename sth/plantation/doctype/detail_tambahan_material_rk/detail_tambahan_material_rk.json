@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-23 16:47:12.640995",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_group",
+  "uom",
+  "column_break_rsez",
+  "dosis",
+  "qty",
+  "rate",
+  "amount",
+  "reference_from_section",
+  "prevdoc_detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "item.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "item.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Satuan",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rsez",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "dosis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Dosis",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_from_section",
+   "fieldtype": "Section Break",
+   "label": "Reference From"
+  },
+  {
+   "fieldname": "prevdoc_detail",
+   "fieldtype": "Data",
+   "label": "Prevdoc Detail",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-23 16:47:12.640995",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail Tambahan Material RK",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

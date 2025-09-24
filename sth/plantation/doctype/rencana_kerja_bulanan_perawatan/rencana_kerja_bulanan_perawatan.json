@@ -50,8 +50,10 @@
   "kerani_amount",
   "mandor1_amount",
   "tenaga_kerja_amount",
-  "column_break_bijc",
   "material_amount",
+  "column_break_bijc",
+  "tambahan_tenaga_kerja_amount",
+  "tambahan_material_amount",
   "budget_tambahan_amount",
   "grand_total",
   "section_break_xtya",
@@ -61,7 +63,19 @@
   "realized_total",
   "detail_material_tab",
   "detail_material_section",
-  "material"
+  "material",
+  "tambahan_kegiatan_tab",
+  "data_tambahan_kegiatan_section",
+  "tambahan_kode_kegiatan",
+  "tambahan_rate_basis",
+  "tambahan_volume_basis",
+  "column_break_ebap",
+  "tambahan_tipe_kegiatan",
+  "tambahan_target_volume",
+  "tambahan_qty_tenaga_kerja",
+  "tambahan_detail_material_tab",
+  "tambahan_detail_material_section",
+  "tambahan_material"
  ],
  "fields": [
   {
@@ -263,6 +277,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "budget_tambahan_amount",
    "fieldtype": "Currency",
    "in_preview": 1,
@@ -431,13 +446,105 @@
    "in_preview": 1,
    "label": "Biaya Kerja Amount",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "tambahan_kegiatan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tambahan Kegiatan"
+  },
+  {
+   "fieldname": "data_tambahan_kegiatan_section",
+   "fieldtype": "Section Break",
+   "label": "Data Tambahan Kegiatan"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_kode_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ebap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_rate_basis",
+   "fieldtype": "Currency",
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_volume_basis",
+   "fieldtype": "Float",
+   "label": "Volume Basis",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_tipe_kegiatan",
+   "fieldtype": "Link",
+   "label": "Tipe Kegiatan",
+   "options": "Tipe Kegiatan",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_target_volume",
+   "fieldtype": "Float",
+   "label": "Estimasi Volume",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_qty_tenaga_kerja",
+   "fieldtype": "Float",
+   "label": "Estimasi Jumlah Tenaga Kerja",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tambahan_detail_material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tambahan Detail Material"
+  },
+  {
+   "fieldname": "tambahan_detail_material_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_material",
+   "fieldtype": "Table",
+   "label": "Tambahan Material Detail",
+   "options": "Detail Tambahan Material RK",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_tenaga_kerja_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Tambahan Tenaga Kerja Total",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tambahan_material_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Tambahan Material Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-17 16:44:19.614682",
+ "modified": "2025-09-24 09:27:07.811340",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",
