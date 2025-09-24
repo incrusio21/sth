@@ -7,6 +7,13 @@
 // 	},
 // });
 
+frappe.ui.form.on("SPB Timbangan Pabrik", {
+	total_weight_internal(frm, cdt, cdn) {
+        let item = locals[cdt][cdn]
+        frappe.model.set_value(cdt, cdn, "netto_weight_internal", flt(item.total_weight_internal - item.brondolan_qty))
+	},
+});
+
 sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.form.Controller {
     refresh() {
         this.set_query_field()

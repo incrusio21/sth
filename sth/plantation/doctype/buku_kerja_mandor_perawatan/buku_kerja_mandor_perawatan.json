@@ -11,6 +11,7 @@
   "kategori_kegiatan",
   "is_bibitan",
   "kode_kegiatan",
+  "kegiatan_account",
   "uom",
   "volume_basis",
   "rp_per_basis",
@@ -340,13 +341,22 @@
    "fieldtype": "Float",
    "label": "Hasil Kerja Total",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kode_kegiatan.account",
+   "fieldname": "kegiatan_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 13:57:51.020723",
+ "modified": "2025-09-23 16:30:58.263187",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

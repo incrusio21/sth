@@ -10,7 +10,6 @@
   "divisi",
   "kendaraan",
   "no_polisi",
-  "internal_kg",
   "column_break_bvfg",
   "posting_date",
   "company",
@@ -28,9 +27,12 @@
   "details",
   "section_break_blue",
   "total_janjang",
-  "netto_weight",
-  "column_break_vjtg",
   "total_brondolan",
+  "column_break_ndhg",
+  "netto_weight_internal",
+  "total_weight_internal",
+  "column_break_vjtg",
+  "netto_weight",
   "total_weight"
  ],
  "fields": [
@@ -108,12 +110,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.pabrik_type == \"External\"",
-   "fieldname": "internal_kg",
-   "fieldtype": "Float",
-   "label": "Internal Kg"
-  },
-  {
+   "depends_on": "eval:doc.docstatus > 0",
    "fieldname": "section_break_xfoy",
    "fieldtype": "Section Break",
    "label": "Pabrik Input"
@@ -201,13 +198,30 @@
    "fieldtype": "Float",
    "label": "Total Weight",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "column_break_ndhg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "netto_weight_internal",
+   "fieldtype": "Float",
+   "label": "Netto Weight Internal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight_internal",
+   "fieldtype": "Float",
+   "label": "Total Weight Internal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-22 14:41:52.185577",
+ "modified": "2025-09-23 16:50:05.590710",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",
