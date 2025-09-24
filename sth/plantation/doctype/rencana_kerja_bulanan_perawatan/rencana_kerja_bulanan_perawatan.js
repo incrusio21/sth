@@ -5,7 +5,21 @@ sth.plantation.setup_rencana_kerja_controller()
 
 frappe.ui.form.on("Rencana Kerja Bulanan Perawatan", {
     refresh(frm) {
-        if (cur_frm.doc.docstatus != 1) return
+        // if (cur_frm.doc.docstatus != 1) return
+
+        if (
+            frm.doc.tambahan_rate_basis == 0 &&
+            frm.doc.tambahan_volume_basis == 0 &&
+            frm.doc.tambahan_target_volume == 0 &&
+            frm.doc.tambahan_qty_tenaga_kerja == 0
+        ) {
+            frm.toggle_display([
+                "tambahan_rate_basis",
+                "tambahan_volume_basis",
+                "tambahan_target_volume",
+                "tambahan_qty_tenaga_kerja"
+            ], false);
+        }
 
         // frappe.call({
         //     method: "sth.plantation.doctype.rencana_kerja_bulanan_perawatan.rencana_kerja_bulanan_perawatan.get_pengajuan_budget_tambahan",
