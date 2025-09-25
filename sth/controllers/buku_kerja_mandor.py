@@ -20,7 +20,7 @@ class BukuKerjaMandorController(PlantationController):
         self.get_rencana_kerja_harian()
         self.validate_hasil_kerja_harian()
         self.validate_previous_document()
-
+        self.get_employee_payment_account()
         super().validate()
 
     def get_rencana_kerja_harian(self):
@@ -47,8 +47,12 @@ class BukuKerjaMandorController(PlantationController):
 
         validate_previous_document(self)
 
+    def get_employee_payment_account(self):
+        self.employee_payment_account = frappe.get_cached_value("Company", self.company, "employee_payment_account")
+
     def on_submit(self, update_realization=True):
         self.make_payment_log()
+        self.create_journal_entry()
         self.make_attendance()
         self.check_emp_hari_kerja()
 
@@ -73,6 +77,38 @@ class BukuKerjaMandorController(PlantationController):
 
             doc.save()
 
+    def create_journal_entry(self):
+        if not (self.employee_payment_account and self.kegiatan_account):
+            frappe.throw("Please Set Employee Payment Account and Kegiatan Account First")
+
+        je = frappe.new_doc("Journal Entry")
+        je.update({
+            "company": self.company,
+            "posting_date": self.posting_date,
+        })
+        
+        total_payment = 0.0
+        for emp in self.hasil_kerja:
+            if not emp.amount:
+                continue
+
+            je.append("account", {
+                "account": self.employee_payment_account,
+                "party_type": "Employee",
+                "party": emp.employee,
+                "debit_in_account_currency": emp.amount
+            })
+            total_payment += emp.amount
+
+        je.append("account", {
+            "account": self.kegiatan_account,
+            "debit_in_account_currency": total_payment
+        })
+
+        je.submit()
+
+        self.db_set("journal_entry", je.name)
+          
     def make_attendance(self):
         for emp in self.hasil_kerja:
             attendance_detail = {
@@ -117,10 +153,22 @@ class BukuKerjaMandorController(PlantationController):
                 frappe.throw("Employee {} exceeds Hari Kerja".format(emp.employee))
 
     def on_cancel(self):
+        self.remove_journal()
         self.delete_payment_log()
 
         self.update_rkb_realization()
 
+    def remove_journal(self):
+        if not self.journal_entry:
+            return
+        
+        doc = frappe.get_doc("Journal Entry", self.journal_entry)
+        if doc.docstatus == 1:
+            doc.cancel()
+
+        self.db_set("journal_entry", "")
+        doc.delete()
+                
     def delete_payment_log(self):
         filters={"voucher_type": self.doctype, "voucher_no": self.name}
         for emp_log in frappe.get_all("Employee Payment Log", 

@@ -58,9 +58,12 @@
   "reference_section",
   "rencana_kerja_harian",
   "is_used",
+  "journal_entry",
   "column_break_khlg",
   "voucher_type",
-  "voucher_no"
+  "voucher_no",
+  "section_break_lpwn",
+  "employee_payment_account"
  ],
  "fields": [
   {
@@ -436,13 +439,31 @@
    "label": "Kegiatan Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_lpwn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_payment_account",
+   "fieldtype": "Link",
+   "label": "Employee Payment Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-23 16:29:02.428156",
+ "modified": "2025-09-25 16:11:42.723960",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

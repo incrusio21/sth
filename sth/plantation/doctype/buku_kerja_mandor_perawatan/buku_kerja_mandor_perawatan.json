@@ -49,7 +49,10 @@
   "voucher_type",
   "voucher_no",
   "column_break_ewzr",
-  "stock_entry"
+  "stock_entry",
+  "journal_entry",
+  "section_break_mptt",
+  "employee_payment_account"
  ],
  "fields": [
   {
@@ -350,13 +353,31 @@
    "label": "Kegiatan Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_mptt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_payment_account",
+   "fieldtype": "Link",
+   "label": "Employee Payment Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-23 16:30:58.263187",
+ "modified": "2025-09-25 16:10:23.516892",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",
