@@ -2,15 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Rencana Kerja Harian", {
-	refresh(frm) {
+    refresh(frm) {
         frm.set_df_property("material", "cannot_add_rows", true);
         frm.set_df_property("kendaraan", "cannot_add_rows", true);
         frm.set_df_property("angkut", "cannot_add_rows", true);
-	},
+    },
     target_volume(frm) {
         frm.doc.qty_tenaga_kerja = frm.doc.volume_basis ? flt(frm.doc.target_volume / frm.doc.volume_basis) : 0
-	},
-    kode_kegiatan(frm){
+    },
+    kode_kegiatan(frm) {
         frm.set_value("blok", "")
         frm.set_value("batch", "")
     }
@@ -21,46 +21,46 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         super.setup(doc)
 
         for (const fieldname of ["target_volume"]) {
-            frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
+            frappe.ui.form.on(doc.doctype, fieldname, function (doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "material")
             });
         }
 
         for (const fieldname of ["qty_tenaga_kerja"]) {
-            frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
+            frappe.ui.form.on(doc.doctype, fieldname, function (doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn)
             });
         }
 
         let me = this
         for (const fieldname of ["kode_kegiatan", "tipe_kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
-            frappe.ui.form.on(doc.doctype, fieldname, function() {
+            frappe.ui.form.on(doc.doctype, fieldname, function () {
                 me.get_rkb_data()
             });
         }
     }
 
-    dosis(_, cdt, cdn){
+    dosis(_, cdt, cdn) {
         this.calculate_total(cdt, cdn)
     }
 
-    set_query_field(){
+    set_query_field() {
         super.set_query_field()
-        
-        this.frm.set_query("blok", function(doc){
-            if(!doc.divisi){
+
+        this.frm.set_query("blok", function (doc) {
+            if (!doc.divisi) {
                 frappe.throw("Please Select Divisi First")
             }
 
-            return{
+            return {
                 filters: {
                     divisi: doc.divisi,
                 }
             }
         })
-        
-        this.frm.set_query("kode_kegiatan", function(doc){
-            return{
+
+        this.frm.set_query("kode_kegiatan", function (doc) {
+            return {
                 filters: {
                     company: doc.company,
                     is_group: 0
@@ -69,18 +69,18 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         })
     }
 
-    update_rate_or_qty_value(item){
-        if(item.parentfield == "material"){
+    update_rate_or_qty_value(item) {
+        if (item.parentfield == "material") {
             item.qty = flt(item.dosis / this.frm.doc.target_volume)
         }
     }
 
-    before_calculate_grand_total(){
-		let qty = this.frm.doc.tipe_kegiatan == "Panen"  ? this.frm.doc.target_volume : this.frm.doc.qty_tenaga_kerja
+    before_calculate_grand_total() {
+        let qty = this.frm.doc.tipe_kegiatan == "Panen" ? this.frm.doc.target_volume : this.frm.doc.qty_tenaga_kerja
         this.frm.doc.kegiatan_amount = flt(this.frm.doc.rate_basis * qty)
     }
 
-    get_rkb_data(){
+    get_rkb_data() {
         let me = this
         let doc = this.frm.doc
         if (

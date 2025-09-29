@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "RKH-.#####",
  "creation": "2025-06-30 10:33:14.406832",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -361,10 +362,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 13:28:10.646607",
+ "modified": "2025-09-29 11:02:06.106392",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

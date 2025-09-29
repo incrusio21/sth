@@ -90,6 +90,10 @@ def get_rencana_kerja_bulanan(kode_kegiatan, tipe_kegiatan, divisi, blok, postin
 		ress["material"] = frappe.db.get_all("Detail Material RK", 
 			filters={"parent": rkb}, fields=["item", "rate", "uom", "name as prevdoc_detail"]
 		)
+	if voucher_type == "Rencana Kerja Bulanan Pengangkutan Panen":
+		ress["kendaraan"] = frappe.db.get_all("RKB Pengangkutan Kendaraan",
+			filters={"parent": rkb}, fields=["item", "uom", "kap_kg", "qty", "rate", "amount"]
+		)
 
 	return ress
 

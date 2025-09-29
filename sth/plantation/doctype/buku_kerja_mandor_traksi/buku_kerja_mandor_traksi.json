@@ -1,14 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "BKMT-.#####",
  "creation": "2025-07-08 14:51:56.691429",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "details_kendaraan_tab",
   "section_break_kqlq",
-  "naming_series",
   "tgl_trk",
   "company",
   "unit",
@@ -31,7 +30,7 @@
   "column_break_pcdo",
   "rp_sat",
   "premi_kgt",
-  "subtotal",
+  "pekerjaan_subtotal",
   "section_break_dpfs",
   "blok",
   "project",
@@ -44,7 +43,7 @@
   "column_break_nplu",
   "uph",
   "premi",
-  "sbttl_uph",
+  "operator_subtotal",
   "ket"
  ],
  "fields": [
@@ -54,15 +53,10 @@
    "label": "Header"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "No Document"
-  },
-  {
-   "default": "Today",
    "fieldname": "tgl_trk",
    "fieldtype": "Date",
-   "label": "Tanggal Transaksi"
+   "label": "Tanggal Transaksi",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_kkgv",
@@ -135,12 +129,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.jk != \"Dump Truck\"",
    "fetch_from": "company.custom_ump_harian",
    "fieldname": "uph",
    "fieldtype": "Currency",
    "label": "UMP"
   },
   {
+   "depends_on": "eval:doc.jk != \"Dump Truck\"",
    "fieldname": "premi",
    "fieldtype": "Currency",
    "label": "Premi"
@@ -210,35 +206,23 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
    "fetch_from": "kgt.rp_basis",
    "fieldname": "rp_sat",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Rp Satuan"
+   "label": "Rp Satuan",
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
    "fetch_from": "kgt.rp_prm",
    "fieldname": "premi_kgt",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Premi"
-  },
-  {
-   "fieldname": "subtotal",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Subtotal",
-   "read_only": 1
-  },
-  {
-   "fieldname": "sbttl_uph",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Subtotal",
+   "label": "Premi",
    "read_only": 1
   },
   {
@@ -280,6 +264,7 @@
    "options": "Blok"
   },
   {
+   "fetch_from": "kgt.kategori_kegiatan",
    "fieldname": "kk",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -323,17 +308,35 @@
    "in_preview": 1,
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
+   "fieldname": "pekerjaan_subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jk != \"Dump Truck\"",
+   "fieldname": "operator_subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-22 16:19:21.927007",
+ "modified": "2025-09-29 13:46:09.373653",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
