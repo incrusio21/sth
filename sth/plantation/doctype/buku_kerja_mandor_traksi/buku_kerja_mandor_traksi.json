@@ -1,0 +1,357 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 14:51:56.691429",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_kendaraan_tab",
+  "section_break_kqlq",
+  "naming_series",
+  "tgl_trk",
+  "company",
+  "unit",
+  "divisi",
+  "column_break_kkgv",
+  "mdr",
+  "designation",
+  "kdr",
+  "jk",
+  "bbm",
+  "jmlh_bbm",
+  "amended_from",
+  "pekerjaan_tab",
+  "detail_pekerjaan_section",
+  "kgt",
+  "kk",
+  "is_bibitan_",
+  "hk",
+  "uom",
+  "column_break_pcdo",
+  "rp_sat",
+  "premi_kgt",
+  "subtotal",
+  "section_break_dpfs",
+  "blok",
+  "project",
+  "column_break_gulh",
+  "batch",
+  "operator_tab",
+  "do",
+  "nk",
+  "jbtn",
+  "column_break_nplu",
+  "uph",
+  "premi",
+  "sbttl_uph",
+  "ket"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_kqlq",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "fieldname": "column_break_kkgv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kdr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kendaraan",
+   "options": "Alat Berat Dan Kendaraan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kdr.tipe_master",
+   "fieldname": "jk",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jenis Kendaraan",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kdr.jns_bbm",
+   "fieldname": "bbm",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jenis BBM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jmlh_bbm",
+   "fieldtype": "Float",
+   "label": "Jumlah Penggunaan BBM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mdr",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "do",
+   "fieldtype": "Section Break",
+   "label": "Detail Operator/Supir"
+  },
+  {
+   "fetch_from": "kdr.operator",
+   "fieldname": "nk",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Operator/Supir",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mdr.designation",
+   "fieldname": "jbtn",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jabatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nplu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.custom_ump_harian",
+   "fieldname": "uph",
+   "fieldtype": "Currency",
+   "label": "UMP"
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "label": "Premi"
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "pekerjaan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pekerjaan"
+  },
+  {
+   "fieldname": "operator_tab",
+   "fieldtype": "Tab Break",
+   "label": "Operator"
+  },
+  {
+   "fetch_from": "mdr.designation",
+   "fieldname": "designation",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jabatan"
+  },
+  {
+   "fieldname": "detail_pekerjaan_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Pekerjaan"
+  },
+  {
+   "fieldname": "column_break_pcdo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Buku Kerja Mandor Traksi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "hk",
+   "fieldtype": "Float",
+   "label": "Volume"
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Satuan",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kgt.rp_basis",
+   "fieldname": "rp_sat",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Rp Satuan"
+  },
+  {
+   "fetch_from": "kgt.rp_prm",
+   "fieldname": "premi_kgt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Premi"
+  },
+  {
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sbttl_uph",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details_kendaraan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details Kendaraan"
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Perusahaan",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "blok.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "kk",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kategori Kegiatan",
+   "options": "Kategori Kegiatan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "kk.is_bibitan",
+   "fieldname": "is_bibitan_",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "is bibitan ?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_dpfs",
+   "fieldtype": "Section Break",
+   "label": "Blok/Batch/Project"
+  },
+  {
+   "fieldname": "column_break_gulh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.is_bibitan",
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Batch",
+   "options": "Blok"
+  },
+  {
+   "depends_on": "eval:!doc.is_bibitan",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Project",
+   "options": "Project"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-22 16:19:21.927007",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Buku Kerja Mandor Traksi",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

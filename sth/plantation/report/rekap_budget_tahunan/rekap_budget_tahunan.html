@@ -1,0 +1,108 @@
+<h4>Rekap Budget Tahunan</h4>
+
+<hr>
+
+<div>
+  {% if filters.company %}
+  <h5>Company: {{ filters.company }}</h5>
+  {% endif %}
+  {% if filters.unit %}
+  <h5>Unit: {{ filters.unit }}</h5>
+  {% endif %}
+  {% if filters.divisi %}
+  <h5>Divisi: {{ filters.divisi }}</h5>
+  {% endif %}
+  {% if filters.kegiatan %}
+  <h5>Kegiata: {{ filters.kegiatan }}</h5>
+  {% endif %}
+  {% if filters.periode %}
+  <h5>Periode/Tahun: {{ filters.periode }}</h5>
+  {% endif %}
+</div>
+
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">URAIAN KEGIATAN</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">SATUAN</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">VOLUME</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">AMOUNT</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="12">DISTRIBUSI (Rp)</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Rp/SAT</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;">JAN</th>
+      <th style="text-align:center; vertical-align: middle !important;">FEB</th>
+      <th style="text-align:center; vertical-align: middle !important;">MAR</th>
+      <th style="text-align:center; vertical-align: middle !important;">APR</th>
+      <th style="text-align:center; vertical-align: middle !important;">MAY</th>
+      <th style="text-align:center; vertical-align: middle !important;">JUN</th>
+      <th style="text-align:center; vertical-align: middle !important;">JUL</th>
+      <th style="text-align:center; vertical-align: middle !important;">AUG</th>
+      <th style="text-align:center; vertical-align: middle !important;">SEP</th>
+      <th style="text-align:center; vertical-align: middle !important;">OCT</th>
+      <th style="text-align:center; vertical-align: middle !important;">NOV</th>
+      <th style="text-align:center; vertical-align: middle !important;">DEC</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% index = 0 %}
+    {% for row in data %}
+    <tr>
+      <td>
+        {{ row.head ? String.fromCharCode(65 + index) : "" }}
+      </td>
+      <td>{{ row.uraian_kegiatan }}</td>
+      <td>{{ row.satuan }}</td>
+      <td>{{ row.volume }}</td>
+      <td>
+        {{ row.amount ? "Rp " + (row.amount || 0).toLocaleString('id-ID') : "" }}
+        <!-- {{ row.uranian_kegiatan ? "Rp " + (row.amount || 0).toLocaleString('id-ID') : "" }} -->
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.jan != null ? "Rp " + (row.jan || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.feb != null ? "Rp " + (row.feb || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.mar != null ? "Rp " + (row.mar || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.apr != null ? "Rp " + (row.apr || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.may != null ? "Rp " + (row.may || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.jun != null ? "Rp " + (row.jun || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.jul != null ? "Rp " + (row.jul || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.aug != null ? "Rp " + (row.aug || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.sep != null ? "Rp " + (row.sep || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.oct != null ? "Rp " + (row.oct || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.nov != null ? "Rp " + (row.nov || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.uraian_kegiatan && row.dec != null ? "Rp " + (row.dec || 0).toLocaleString('id-ID') : "" }}
+      </td>
+      <td>
+        {{ row.rp_per_sat ? "Rp " + (row.rp_per_sat || 0).toLocaleString('id-ID') : "" }}
+      </td>
+    </tr>
+    {% row.head ? index++ : "" %}
+    {% endfor %}
+  </tbody>
+</table>
