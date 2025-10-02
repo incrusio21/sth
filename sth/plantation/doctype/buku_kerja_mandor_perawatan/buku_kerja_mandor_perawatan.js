@@ -87,7 +87,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
 
     after_calculate_item_values(table_name, total){
         if(table_name == "hasil_kerja"){
-            this.frm.doc[`hari_kerja_total`] = flt(total["hari_kerja"] / data_table.length) || 0;
+            this.frm.doc[`hari_kerja_total`] = flt(total["qty"]) || 0;
         }
     }
 

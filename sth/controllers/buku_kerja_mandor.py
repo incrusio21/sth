@@ -92,17 +92,27 @@ class BukuKerjaMandorController(PlantationController):
             if not emp.amount:
                 continue
 
-            je.append("account", {
+            je.append("accounts", {
                 "account": self.employee_payment_account,
                 "party_type": "Employee",
                 "party": emp.employee,
                 "debit_in_account_currency": emp.amount
             })
+            je.append("accounts", {
+                "account": self.employee_payment_account,
+                "party_type": "Employee",
+                "party": emp.employee,
+                "credit_in_account_currency": emp.amount
+            })
             total_payment += emp.amount
 
-        je.append("account", {
+        je.append("accounts", {
             "account": self.kegiatan_account,
             "debit_in_account_currency": total_payment
+        })
+        je.append("accounts", {
+            "account": self.kegiatan_account,
+            "credit_in_account_currency": total_payment
         })
 
         je.submit()

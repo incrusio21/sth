@@ -25,12 +25,16 @@ class RencanaKerjaController(PlantationController):
         super().validate()
 
     def calculate_supervisi_amount(self):
-        self.mandor_amount = flt(self.upah_mandor) + flt(self.premi_mandor)
-        self.kerani_amount = flt(self.upah_kerani) + flt(self.premi_kerani)
-        self.mandor1_amount = flt(self.upah_mandor1) + flt(self.premi_mandor1)
+        self.mandor_amount = flt(self.upah_mandor + self.premi_mandor)
+        self.kerani_amount = flt(self.upah_kerani + self.premi_kerani)
+        self.mandor1_amount = flt(self.upah_mandor1 + self.premi_mandor1)
 
     def calculate_biaya_kerja_total(self):
-        self.biaya_kerja_total = flt(self.grand_total - self.mandor_amount - self.kerani_amount - self.mandor1_amount)
+        self.biaya_kerja_total = self.grand_total
+        
+        if not self.skip_calculate_supervisi:
+           self.biaya_kerja_total -= self.mandor_amount - self.kerani_amount - self.mandor1_amount
+
         self.realized_total = self.used_total = 0.0
 
     def update_value_after_amount(self, item, precision):

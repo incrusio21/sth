@@ -9,6 +9,7 @@ from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.skip_calculate_supervisi = True
 		self.fieldname_total.extend([
 			"qty", "hasil"
 		])
@@ -24,7 +25,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 	def after_calculate_item_values(self, table_fieldname, options, total):
 		if table_fieldname == "hasil_kerja":
-			self.hari_kerja_total = flt(total["hari_kerja"])
+			self.hari_kerja_total = flt(total["qty"])
 			
 	def on_submit(self, update_realization=True):
 		super().on_submit(update_realization=False)
