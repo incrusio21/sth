@@ -35,7 +35,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         let me = this
         for (const fieldname of ["kode_kegiatan", "tipe_kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function () {
-                me.get_rkb_data()
+                // me.get_rkb_data()
             });
         }
     }
@@ -80,31 +80,31 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         this.frm.doc.kegiatan_amount = flt(this.frm.doc.rate_basis * qty)
     }
 
-    get_rkb_data() {
-        let me = this
-        let doc = this.frm.doc
-        if (
-            !(doc.kode_kegiatan && doc.tipe_kegiatan && doc.divisi && doc.posting_date) ||
-            (doc.is_bibitan && !doc.batch) ||
-            (!doc.is_bibitan && !doc.blok)
-        ) return;
+    // get_rkb_data() {
+    //     let me = this
+    //     let doc = this.frm.doc
+    //     if (
+    //         !(doc.kode_kegiatan && doc.tipe_kegiatan && doc.divisi && doc.posting_date) ||
+    //         (doc.is_bibitan && !doc.batch) ||
+    //         (!doc.is_bibitan && !doc.blok)
+    //     ) return;
 
-        frappe.call({
-            method: "sth.plantation.doctype.rencana_kerja_harian.rencana_kerja_harian.get_rencana_kerja_bulanan",
-            args: {
-                kode_kegiatan: doc.kode_kegiatan,
-                tipe_kegiatan: doc.tipe_kegiatan,
-                divisi: doc.divisi,
-                blok: doc.is_bibitan ? doc.batch : doc.blok,
-                posting_date: doc.posting_date,
-                is_bibitan: doc.is_bibitan,
-            },
-            freeze: true,
-            callback: function (data) {
-                me.frm.set_value(data.message)
-            }
-        })
-    }
+    //     frappe.call({
+    //         method: "sth.plantation.doctype.rencana_kerja_harian.rencana_kerja_harian.get_rencana_kerja_bulanan",
+    //         args: {
+    //             kode_kegiatan: doc.kode_kegiatan,
+    //             tipe_kegiatan: doc.tipe_kegiatan,
+    //             divisi: doc.divisi,
+    //             blok: doc.is_bibitan ? doc.batch : doc.blok,
+    //             posting_date: doc.posting_date,
+    //             is_bibitan: doc.is_bibitan,
+    //         },
+    //         freeze: true,
+    //         callback: function (data) {
+    //             me.frm.set_value(data.message)
+    //         }
+    //     })
+    // }
 }
 
 cur_frm.script_manager.make(sth.plantation.RencanaKerjaHarian);

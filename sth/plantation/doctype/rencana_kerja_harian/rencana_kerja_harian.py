@@ -22,7 +22,7 @@ class RencanaKerjaHarian(PlantationController):
 		if self.tipe_kegiatan != "Perawatan":
 			self.material = []
 
-		self.get_rencana_kerja_bulanan()
+		# self.get_rencana_kerja_bulanan()
 		self.validate_duplicate_rkh()
 		self.validate_previous_document()
 		self.calculate_kegiatan_amount()
@@ -58,14 +58,14 @@ class RencanaKerjaHarian(PlantationController):
 		qty = self.target_volume if self.tipe_kegiatan == "Panen" else self.qty_tenaga_kerja 
 		self.kegiatan_amount = flt(self.rate_basis * qty)
 
-	def on_submit(self):
-		self.update_rkb_used()
+	# def on_submit(self):
+	# 	self.update_rkb_used()
 
-	def on_cancel(self):
-		self.update_rkb_used()
+	# def on_cancel(self):
+	# 	self.update_rkb_used()
 
-	def update_rkb_used(self):
-		frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
+	# def update_rkb_used(self):
+	# 	frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
 
 @frappe.whitelist()
 def get_rencana_kerja_bulanan(kode_kegiatan, tipe_kegiatan, divisi, blok, posting_date, is_bibitan=False):

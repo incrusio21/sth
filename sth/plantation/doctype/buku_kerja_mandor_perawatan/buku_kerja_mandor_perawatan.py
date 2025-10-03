@@ -33,6 +33,12 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			self.update_rkb_realization()
 		else:
 			self.create_ste_issue()
+
+	def before_save(self):
+		for row in self.hasil_kerja:
+			row.amount = (row.hasil or 0) * (row.rate or 0)
+			if row.premi:
+				row.amount += row.premi
 			
 	def create_ste_issue(self):
 		ste = frappe.new_doc("Stock Entry")

@@ -16,7 +16,8 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 		super().calculate_item_table_values()
 		
 		self.jumlah_tenaga_kerja = flt(self.qty / self.qty_basis) if self.qty_basis else 0
-		self.tenaga_kerja_amount = flt(self.jumlah_tenaga_kerja * self.upah_per_basis) + flt(self.premi)
+		self.tenaga_kerja_amount = flt(self.qty * self.upah_per_basis) + flt(self.premi)
+		# self.tenaga_kerja_amount = flt(self.jumlah_tenaga_kerja * self.upah_per_basis) + flt(self.premi)
 
 	def calculate_used_and_realized(self):
 		super().calculate_used_and_realized()

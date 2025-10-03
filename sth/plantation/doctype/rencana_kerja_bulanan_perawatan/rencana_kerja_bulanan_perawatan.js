@@ -50,7 +50,7 @@ frappe.ui.form.on("Rencana Kerja Bulanan Perawatan", {
     kategori_kegiatan(frm) {
         frm.set_value("blok", "")
         frm.set_value("batch", "")
-    }
+    },
 });
 
 sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan extends sth.plantation.RencanaKerjaController {
@@ -146,7 +146,8 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
         let doc = this.frm.doc
 
         doc.jumlah_tenaga_kerja = doc.qty_basis ? flt(doc.qty / doc.qty_basis) : 0
-        doc.tenaga_kerja_amount = flt(doc.jumlah_tenaga_kerja * doc.upah_per_basis) + flt(doc.premi)
+        doc.tenaga_kerja_amount = flt(doc.qty * doc.upah_per_basis) + flt(doc.premi)
+        // doc.tenaga_kerja_amount = flt(doc.jumlah_tenaga_kerja * doc.upah_per_basis) + flt(doc.premi)
     }
 }
 

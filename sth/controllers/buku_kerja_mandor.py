@@ -17,7 +17,7 @@ force_item_fields = (
 class BukuKerjaMandorController(PlantationController):
     
     def validate(self):
-        self.get_rencana_kerja_harian()
+        # self.get_rencana_kerja_harian()
         self.validate_hasil_kerja_harian()
         self.validate_previous_document()
         self.get_employee_payment_account()
