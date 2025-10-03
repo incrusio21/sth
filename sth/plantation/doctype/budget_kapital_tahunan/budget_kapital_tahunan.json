@@ -12,6 +12,22 @@
   "column_break_jntt",
   "company",
   "amended_from",
+  "sebaran__section",
+  "total_sebaran",
+  "per_januari",
+  "per_februari",
+  "per_maret",
+  "per_april",
+  "per_mei",
+  "per_juni",
+  "column_break_lbin",
+  "is_distribute",
+  "per_juli",
+  "per_agustus",
+  "per_september",
+  "per_oktober",
+  "per_november",
+  "per_desember",
   "detail",
   "kapital",
   "section_break_wdwf",
@@ -102,13 +118,119 @@
    "fieldtype": "Currency",
    "label": "Grand Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "sebaran__section",
+   "fieldtype": "Section Break",
+   "label": "Sebaran % "
+  },
+  {
+   "default": "0",
+   "fieldname": "total_sebaran",
+   "fieldtype": "Percent",
+   "label": "Total Sebaran",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "per_januari",
+   "fieldtype": "Percent",
+   "label": "Januari",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_februari",
+   "fieldtype": "Percent",
+   "label": "Februari",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_maret",
+   "fieldtype": "Percent",
+   "label": "Maret",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_april",
+   "fieldtype": "Percent",
+   "label": "April",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_mei",
+   "fieldtype": "Percent",
+   "label": "Mei",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_juni",
+   "fieldtype": "Percent",
+   "label": "Juni",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_juli",
+   "fieldtype": "Percent",
+   "label": "Juli",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_agustus",
+   "fieldtype": "Percent",
+   "label": "Agustus",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_september",
+   "fieldtype": "Percent",
+   "label": "September",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_oktober",
+   "fieldtype": "Percent",
+   "label": "Oktober",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_november",
+   "fieldtype": "Percent",
+   "label": "November",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_desember",
+   "fieldtype": "Percent",
+   "label": "Desember",
+   "read_only_depends_on": "eval:doc.is_distribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_distribute",
+   "fieldtype": "Check",
+   "label": "Distribute equally across 12 months"
+  },
+  {
+   "fieldname": "column_break_lbin",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-18 11:46:41.726120",
+ "modified": "2025-10-03 15:46:26.459707",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Kapital Tahunan",

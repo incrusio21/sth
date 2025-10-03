@@ -24,7 +24,7 @@
   "per_mei",
   "per_juni",
   "column_break_dzod",
-  "is_distibute",
+  "is_distribute",
   "per_juli",
   "per_agustus",
   "per_september",
@@ -225,84 +225,84 @@
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_januari",
    "fieldtype": "Percent",
    "label": "Januari"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_februari",
    "fieldtype": "Percent",
    "label": "Februari"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_maret",
    "fieldtype": "Percent",
    "label": "Maret"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_april",
    "fieldtype": "Percent",
    "label": "April"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_mei",
    "fieldtype": "Percent",
    "label": "Mei"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_juni",
    "fieldtype": "Percent",
    "label": "Juni"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_juli",
    "fieldtype": "Percent",
    "label": "Juli"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_agustus",
    "fieldtype": "Percent",
    "label": "Agustus"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_september",
    "fieldtype": "Percent",
    "label": "September"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_oktober",
    "fieldtype": "Percent",
    "label": "Oktober"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_november",
    "fieldtype": "Percent",
    "label": "November"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distibute",
+   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_desember",
    "fieldtype": "Percent",
    "label": "Desember"
@@ -394,7 +394,7 @@
   },
   {
    "default": "0",
-   "fieldname": "is_distibute",
+   "fieldname": "is_distribute",
    "fieldtype": "Check",
    "label": "Distribute equally across 12 months"
   }

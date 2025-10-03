@@ -44,7 +44,7 @@ sth.plantation.setup_budget_controller = function() {
             this.calculate_total(cdt, cdn)
         }
         
-        is_distibute(doc){
+        is_distribute(doc){
             if(doc.is_distibute){
 
                 for (const month of sth.plantation.month) {
