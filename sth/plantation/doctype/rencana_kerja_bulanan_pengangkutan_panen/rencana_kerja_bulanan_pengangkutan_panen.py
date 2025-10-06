@@ -8,6 +8,10 @@ from frappe.query_builder.functions import Sum
 from sth.controllers.rencana_kerja_controller import RencanaKerjaController
 
 class RencanaKerjaBulananPengangkutanPanen(RencanaKerjaController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.skip_calculate_supervisi = True
+
 	def validate(self):
 		self.get_tonase()
 		self.vliadate_jarak_pks()
