@@ -49,7 +49,7 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
     calculate_amount_addons(){
         let doc = this.frm.doc
         
-        doc.jumlah_janjang = flt(doc.jumlah_pokok * doc.akp)
+        doc.jumlah_janjang = flt(doc.jumlah_pokok * doc.akp/100)
         doc.tonase = flt(doc.jumlah_janjang * doc.bjr)
         if(!doc.jumlah_tenaga_kerja){
             doc.jumlah_tenaga_kerja = flt(doc.tonase / doc.volume_basis)

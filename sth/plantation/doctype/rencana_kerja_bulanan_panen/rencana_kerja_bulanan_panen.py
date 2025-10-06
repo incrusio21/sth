@@ -17,7 +17,7 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 	def calculate_item_table_values(self):
 		super().calculate_item_table_values()
 		
-		self.jumlah_janjang = flt(self.jumlah_pokok * self.akp)
+		self.jumlah_janjang = flt(self.jumlah_pokok * self.akp/100)
 		self.tonase = flt(self.jumlah_janjang * self.bjr)
 		if not self.jumlah_tenaga_kerja and self.volume_basis:
 			self.jumlah_tenaga_kerja = flt(self.tonase / self.volume_basis)
