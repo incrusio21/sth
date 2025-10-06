@@ -11,6 +11,7 @@
   "column_break_zigr",
   "amended_from",
   "section_break_gfvn",
+  "is_panen",
   "rkb_voucher_type"
  ],
  "fields": [
@@ -49,12 +50,18 @@
    "fieldtype": "Link",
    "label": "RKB Voucher Type",
    "options": "DocType"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_panen",
+   "fieldtype": "Check",
+   "label": "Is Panen"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-08 16:50:45.391639",
+ "modified": "2025-10-06 15:59:01.257872",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Kegiatan",
