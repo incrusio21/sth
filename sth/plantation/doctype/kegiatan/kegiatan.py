@@ -12,6 +12,18 @@ class Kegiatan(NestedSet):
 
 		self.name = get_autoname_with_number(self.kd_kgt, self.nm_kgt, self.company)
 
+	def validate(self):
+		self.validate_items_company()
+		self.validate_material()
+
+	def validate_items_company(self):
+		if self.is_group:
+			self.items = []
+
+	def validate_material(self):
+		if self.is_group:
+			self.material = []
+
 @frappe.whitelist()
 def get_children(doctype, parent, company, kategori_kegiatan=None, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_accounts

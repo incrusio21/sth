@@ -75,6 +75,15 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             }
         })
 
+        this.frm.set_query("item", "material", function (doc) {
+            return {
+                query: 'sth.controllers.queries.material_kegiatan_query',
+                filters: {
+                    kegiatan: ["=", doc.kegiatan],
+                }
+            }
+        })
+
     }
 
     hasil(_, cdt, cdn) {

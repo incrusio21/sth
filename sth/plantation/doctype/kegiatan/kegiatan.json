@@ -24,7 +24,9 @@
   "lft",
   "rgt",
   "section_break_xthm",
-  "items"
+  "items",
+  "material_tab",
+  "material"
  ],
  "fields": [
   {
@@ -157,13 +159,25 @@
    "fieldtype": "Table",
    "label": "Items",
    "options": "Kegiatan Company"
+  },
+  {
+   "depends_on": "eval:!doc.is_group",
+   "fieldname": "material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Material"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Material",
+   "options": "Kegiatan Material"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-10-03 16:22:06.008745",
+ "modified": "2025-10-06 16:40:26.019537",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

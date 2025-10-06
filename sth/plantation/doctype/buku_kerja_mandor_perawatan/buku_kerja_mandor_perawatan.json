@@ -364,7 +364,7 @@
    "fieldname": "kegiatan",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kode Kegiatan",
+   "label": "Kegiatan",
    "options": "Kegiatan",
    "reqd": 1
   }
@@ -373,7 +373,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-06 14:27:52.160435",
+ "modified": "2025-10-06 16:54:37.895048",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",
