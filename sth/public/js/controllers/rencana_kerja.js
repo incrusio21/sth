@@ -83,7 +83,8 @@ sth.plantation.setup_rencana_kerja_controller = function() {
                         voucher_type: me.frm.doc.doctype,
                         voucher_no: me.frm.doc.name,
                         blok: data,
-                        fieldname_addons: this.fieldname_duplicate_edit
+                        fieldname_addons: this.fieldname_duplicate_edit || 
+                            Object.fromEntries(this.update_field_duplicate.map(key => [key, key]))
                     },
                 })
             })

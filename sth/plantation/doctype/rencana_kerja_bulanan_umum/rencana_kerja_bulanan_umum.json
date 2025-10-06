@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:RKB-UM-{MM}/{YYYY}-{#####}",
  "creation": "2025-09-03 10:56:30.760074",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,6 +9,7 @@
   "rencana_kerja_bulanan",
   "unit",
   "divisi",
+  "blok",
   "column_break_ixrj",
   "company",
   "ump_harian",
@@ -20,11 +20,27 @@
   "from_date",
   "column_break_fxic",
   "to_date",
+  "luas_blok",
+  "tahun_tanam",
+  "sph",
+  "jumlah_pokok",
+  "biaya_supervisi_section",
+  "upah_mandor",
+  "premi_mandor",
+  "column_break_rxnc",
+  "upah_kerani",
+  "premi_kerani",
+  "column_break_oaiw",
+  "upah_mandor1",
+  "premi_mandor1",
   "section_break_xgkx",
   "column_break_exnc",
+  "mandor_amount",
+  "kerani_amount",
+  "mandor1_amount",
+  "column_break_fsda",
   "pegawai_amount",
   "budget_tambahan_amount",
-  "column_break_fsda",
   "grand_total",
   "biaya_pegawai_tab",
   "pegawai"
@@ -139,7 +155,7 @@
   {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
-   "label": "Grandtotal",
+   "label": "Grand Total",
    "read_only": 1
   },
   {
@@ -182,17 +198,116 @@
    "fieldtype": "Float",
    "label": "Volume Basis",
    "read_only": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "blok.luas_areal",
+   "fieldname": "luas_blok",
+   "fieldtype": "Data",
+   "label": "Luas Blok",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.tahun_tanam",
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Data",
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.sph",
+   "fieldname": "sph",
+   "fieldtype": "Data",
+   "label": "SPH",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.jumlah_pokok",
+   "fieldname": "jumlah_pokok",
+   "fieldtype": "Float",
+   "label": "Jumlah Pokok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Supervisi"
+  },
+  {
+   "fieldname": "upah_mandor",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor"
+  },
+  {
+   "fieldname": "premi_mandor",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor"
+  },
+  {
+   "fieldname": "column_break_rxnc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upah_kerani",
+   "fieldtype": "Currency",
+   "label": "Upah Kerani"
+  },
+  {
+   "fieldname": "premi_kerani",
+   "fieldtype": "Currency",
+   "label": "Premi Kerani"
+  },
+  {
+   "fieldname": "column_break_oaiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upah_mandor1",
+   "fieldtype": "Currency",
+   "label": "Upah Mandor 1"
+  },
+  {
+   "fieldname": "premi_mandor1",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor 1"
+  },
+  {
+   "fieldname": "mandor_amount",
+   "fieldtype": "Currency",
+   "label": "Mandor Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kerani_amount",
+   "fieldtype": "Currency",
+   "label": "Kerani Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mandor1_amount",
+   "fieldtype": "Currency",
+   "label": "Mandor 1 Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-02 16:15:58.378233",
+ "modified": "2025-10-06 14:12:12.083905",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Umum",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

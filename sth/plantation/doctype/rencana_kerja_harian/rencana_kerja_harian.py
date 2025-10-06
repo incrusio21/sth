@@ -56,7 +56,7 @@ class RencanaKerjaHarian(PlantationController):
 			self.qty_tenaga_kerja = flt(self.target_volume / self.volume_basis) if self.volume_basis else 0
 
 		qty = self.target_volume if self.tipe_kegiatan == "Panen" else self.qty_tenaga_kerja 
-		self.kegiatan_amount = flt(self.rate_basis * qty)
+		self.kegiatan_amount = flt(self.rupiah_basis * qty)
 
 	# def on_submit(self):
 	# 	self.update_rkb_used()

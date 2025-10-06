@@ -32,8 +32,6 @@ sth.plantation.RencanaKerjaBulananPengangkutan = class RencanaKerjaBulananPengan
             }
         ]
         
-        this.fieldname_duplicate_edit = {"jarak_pks": "jarak_pks"}
-
         let me = this
         for (const fieldname of ["tonase", "jarak_pks"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
@@ -48,9 +46,8 @@ sth.plantation.RencanaKerjaBulananPengangkutan = class RencanaKerjaBulananPengan
         this.frm.set_query("kode_kegiatan", function(doc){
             return{
                 filters: {
-                    company: doc.company,
-                    tipe_kegiatan: "Traksi",
-                    is_group: 0
+                    company: ["=", doc.company],
+                    tipe_kegiatan: "Traksi"
                 }
             }
         })

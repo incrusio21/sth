@@ -8,12 +8,9 @@
   "section_break_2wm0",
   "unit",
   "divisi",
-  "kode_kegiatan",
-  "kegiatan_account",
+  "kegiatan",
   "uom",
-  "volume_basis",
-  "rp_per_basis",
-  "upah_brondolan",
+  "blok",
   "is_rekap",
   "column_break_souy",
   "company",
@@ -24,15 +21,20 @@
   "kerani",
   "status",
   "amended_from",
-  "section_break_wzob",
-  "blok",
+  "detail_bkm_section",
+  "kegiatan_account",
+  "volume_basis",
+  "rupiah_basis",
+  "upah_brondolan",
+  "column_break_bngb",
   "tahun_tanam",
   "luas_blok",
-  "column_break_hvgf",
-  "hari_kerja_total",
+  "section_break_wzob",
   "hasil_kerja_qty",
-  "transfered_hasil_kerja",
   "hasil_kerja_qty_brondolan",
+  "hari_kerja_total",
+  "column_break_hvgf",
+  "transfered_hasil_kerja",
   "transfered_brondolan",
   "netto_weight",
   "weight_total",
@@ -87,14 +89,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "kode_kegiatan",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kode Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
    "fetch_from": "kode_kegiatan.uom",
    "fieldname": "uom",
    "fieldtype": "Link",
@@ -104,19 +98,10 @@
    "read_only": 1
   },
   {
-   "fetch_from": "kode_kegiatan.v_basis",
    "fieldname": "volume_basis",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Volume Basis",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.rp_basis",
-   "fieldname": "rp_per_basis",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Rupiah/Satuan Basis",
    "read_only": 1
   },
   {
@@ -306,7 +291,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "kode_kegiatan.upah_brondolan",
    "fieldname": "upah_brondolan",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -432,7 +416,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "kode_kegiatan.account",
    "fieldname": "kegiatan_account",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -457,13 +440,37 @@
    "label": "Employee Payment Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "detail_bkm_section",
+   "fieldtype": "Section Break",
+   "label": "Detail BKM"
+  },
+  {
+   "fieldname": "column_break_bngb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-25 16:11:42.723960",
+ "modified": "2025-10-06 15:22:01.768009",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

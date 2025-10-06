@@ -10,13 +10,9 @@
   "unit",
   "divisi",
   "blok",
-  "luas_blok",
-  "tahun_tanam",
-  "sph",
-  "jumlah_pokok",
   "column_break_ixrj",
   "company",
-  "kode_kegiatan",
+  "kegiatan",
   "tonase",
   "jarak_pks",
   "amended_from",
@@ -24,6 +20,10 @@
   "from_date",
   "column_break_fxic",
   "to_date",
+  "luas_blok",
+  "tahun_tanam",
+  "sph",
+  "jumlah_pokok",
   "biaya_supervisi_section",
   "upah_mandor",
   "premi_mandor",
@@ -143,13 +143,6 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fieldname": "kode_kegiatan",
-   "fieldtype": "Link",
-   "label": "Kegiatan",
-   "options": "Kegiatan",
    "reqd": 1
   },
   {
@@ -398,13 +391,20 @@
    "label": "Angkut Tambahan Detail",
    "options": "RKB Biaya Tambahan Angkut",
    "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-24 14:42:43.093126",
+ "modified": "2025-10-06 14:11:37.833462",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Pengangkutan Panen",

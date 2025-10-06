@@ -19,8 +19,8 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			return
 		
 		item.qty = flt(item.hasil / self.volume_basis)
-		item.rate = item.get("rate") or self.rp_per_basis
-		if self.per_premi and item.hari_kerja > flt(self.volume_basis * ((1 + self.per_premi) / 100)):
+		item.rate = item.get("rate") or self.rupiah_basis
+		if self.persentase_premi and item.hari_kerja > flt(self.volume_basis * ((1 + self.persentase_premi) / 100)):
 			item.premi = self.rupiah_premi
 
 	def after_calculate_item_values(self, table_fieldname, options, total):

@@ -27,15 +27,16 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         super.setup(doc)
 
         this.fieldname_total.push("qty", "hasil")
+        this.kegiatan_fetch_fieldname = ["volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi"]
 
         let me = this
-        for (const fieldname of ["hari_kerja", "volume_basis", "rp_per_basis"]) {
+        for (const fieldname of ["hari_kerja", "volume_basis", "rupiah_basis"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function (doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn, "hasil_kerja")
             });
         }
 
-        for (const fieldname of ["kode_kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
+        for (const fieldname of ["kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function () {
                 // me.get_rkh_data()
             });
@@ -65,16 +66,11 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             }
         })
 
-        this.frm.set_query("kode_kegiatan", function (doc) {
-            if (!(doc.company && doc.kategori_kegiatan)) {
-                frappe.throw("Please Select Kategori Kegiata and Company First")
-            }
-
+        this.frm.set_query("kegiatan", function (doc) {
             return {
                 filters: {
-                    is_group: 0,
-                    kategori_kegiatan: doc.kategori_kegiatan,
-                    company: doc.company
+                    kategori_kegiatan: ["=", doc.kategori_kegiatan],
+                    company: ["=", doc.company],
                 }
             }
         })
@@ -88,9 +84,9 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     update_rate_or_qty_value(item) {
         if (item.parentfield == "hasil_kerja") {
             item.qty = flt(item.hasil / this.frm.doc.volume_basis)
-            item.rate = item.rate ?? this.frm.doc.rp_per_basis
+            item.rate = item.rate ?? this.frm.doc.rupiah_basis
 
-            if (this.frm.doc.per_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.per_premi) / 100))) {
+            if (this.frm.doc.persentase_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.persentase_premi) / 100))) {
                 item.premi = this.frm.doc.rupiah_premi
             }
         }
@@ -112,30 +108,30 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         }
     }
 
-    // get_rkh_data() {
-    //     let me = this
-    //     let doc = this.frm.doc
-    //     if (
-    //         !(doc.kode_kegiatan && doc.divisi && doc.posting_date) ||
-    //         (doc.is_bibitan && !doc.batch) ||
-    //         (!doc.is_bibitan && !doc.blok)
-    //     ) return;
+    get_rkh_data() {
+        let me = this
+        let doc = this.frm.doc
+        if (
+            !(doc.kegiatan && doc.divisi && doc.posting_date) ||
+            (doc.is_bibitan && !doc.batch) ||
+            (!doc.is_bibitan && !doc.blok)
+        ) return;
 
-    //     frappe.call({
-    //         method: "sth.controllers.queries.get_rencana_kerja_harian",
-    //         args: {
-    //             kode_kegiatan: doc.kode_kegiatan,
-    //             divisi: doc.divisi,
-    //             blok: doc.is_bibitan ? doc.batch : doc.blok,
-    //             posting_date: doc.posting_date,
-    //             is_bibitan: doc.is_bibitan
-    //         },
-    //         freeze: true,
-    //         callback: function (data) {
-    //             me.frm.set_value(data.message)
-    //         }
-    //     })
-    // }
+        frappe.call({
+            method: "sth.controllers.queries.get_rencana_kerja_harian",
+            args: {
+                kode_kegiatan: doc.kegiatan,
+                divisi: doc.divisi,
+                blok: doc.is_bibitan ? doc.batch : doc.blok,
+                posting_date: doc.posting_date,
+                is_bibitan: doc.is_bibitan
+            },
+            freeze: true,
+            callback: function (data) {
+                me.frm.set_value(data.message)
+            }
+        })
+    }
 }
 
 cur_frm.script_manager.make(sth.plantation.BukuKerjaMandorPerawatan);

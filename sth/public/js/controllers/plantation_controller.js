@@ -9,7 +9,8 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.fieldname_total = ["amount"]
         this.skip_table_amount = []
         this.skip_fieldname_amount = []
-        
+        this.kegiatan_fetch_fieldname = []
+
         // check daftar fieldname dengan total didalamny untuk d gabungkan ke grand_total
         if(!sth.plantation.doctype_ref[doctype]){
             sth.plantation.setup_doctype_ref(doctype)
@@ -20,6 +21,14 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.set_query_field()
     }
     
+    company(doc) {
+        this.fetch_data_kegiatan(doc.kegiatan, doc.company)
+    }
+
+    kegiatan(doc) {
+        this.fetch_data_kegiatan(doc.kegiatan, doc.company)
+    }
+
     item(doc, cdt, cdn){
         let data = frappe.get_doc(cdt, cdn)
         let doctype = this.frm.fields_dict[data.parentfield].grid.fields_map.item.options;
@@ -168,10 +177,6 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         // set on child class if needed
     }
 
-    after_calculate_grand_total(){
-        // set on child class if needed
-    }
-    
     get_blok_list(opts, callback){
         const fields = [
             {
@@ -268,6 +273,27 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                 dialog.show();
             }
         })
+    }
+
+    fetch_data_kegiatan(kegiatan, company) {
+        let me = this
+        if(!me.kegiatan_fetch_fieldname) return
+        
+        if(!(kegiatan && company)){
+            me.frm.set_value(Object.fromEntries(me.kegiatan_fetch_fieldname.map(key => [key, ""])))
+        }else{
+            frappe.call({
+                method: "sth.controllers.queries.kegiatan_fetch_data",
+                args: {
+                    kegiatan: kegiatan,
+                    company: company,
+                    fieldname: me.kegiatan_fetch_fieldname
+                },
+                callback: (data) => {
+                    me.frm.set_value(data.message)
+                }
+            })
+        }
     }
 }
 

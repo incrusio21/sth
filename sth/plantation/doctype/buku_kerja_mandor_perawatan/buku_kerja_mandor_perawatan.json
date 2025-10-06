@@ -10,13 +10,11 @@
   "divisi",
   "kategori_kegiatan",
   "is_bibitan",
-  "kode_kegiatan",
+  "kegiatan",
   "kegiatan_account",
   "uom",
-  "volume_basis",
-  "rp_per_basis",
-  "per_premi",
-  "rupiah_premi",
+  "blok",
+  "batch",
   "column_break_souy",
   "company",
   "posting_date",
@@ -25,11 +23,13 @@
   "kerani",
   "amended_from",
   "section_break_wzob",
-  "blok",
+  "volume_basis",
+  "rupiah_basis",
+  "persentase_premi",
+  "rupiah_premi",
+  "column_break_hvgf",
   "tahun_tanam",
   "luas_blok",
-  "column_break_hvgf",
-  "batch",
   "section_break_cepw",
   "hari_kerja_total",
   "column_break_qnwo",
@@ -105,14 +105,6 @@
    "hidden": 1,
    "label": "Bibitan ?",
    "read_only": 1
-  },
-  {
-   "fieldname": "kode_kegiatan",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kode Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_wzob",
@@ -251,7 +243,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "kode_kegiatan.v_basis",
    "fieldname": "volume_basis",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -283,23 +274,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "kode_kegiatan.rp_basis",
-   "fieldname": "rp_per_basis",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Rupiah/Satuan Basis",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.pr_prm",
-   "fieldname": "per_premi",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "% Premi",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.rp_prm",
    "fieldname": "rupiah_premi",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -371,13 +345,35 @@
    "label": "Employee Payment Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "persentase_premi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "% Premi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-25 16:10:23.516892",
+ "modified": "2025-10-06 14:27:52.160435",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-03 14:16:07.074616",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "account",
+  "section_break_noeb",
+  "volume_basis",
+  "rupiah_basis",
+  "upah_brondolan",
+  "column_break_rqow",
+  "persentase_premi",
+  "rupiah_premi"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "section_break_noeb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "volume_basis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Volume Basis"
+  },
+  {
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rupiah/Satuan Basis"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:parent.is_panen",
+   "fieldname": "upah_brondolan",
+   "fieldtype": "Currency",
+   "label": "Upah Brondolan"
+  },
+  {
+   "fieldname": "column_break_rqow",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "persentase_premi",
+   "fieldtype": "Percent",
+   "label": "Persentase Premi"
+  },
+  {
+   "fieldname": "rupiah_premi",
+   "fieldtype": "Currency",
+   "label": "Rupiah Premi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-10-06 11:12:38.030040",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Kegiatan Company",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

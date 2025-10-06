@@ -26,7 +26,7 @@ class BukuKerjaMandorController(PlantationController):
     def get_rencana_kerja_harian(self):
         from sth.controllers.queries import get_rencana_kerja_harian
 
-        ret = get_rencana_kerja_harian(self.kode_kegiatan, self.divisi, self.blok, self.posting_date)
+        ret = get_rencana_kerja_harian(self.kegiatan, self.divisi, self.blok, self.posting_date)
         for fieldname, value in ret.items():
             if self.meta.get_field(fieldname) and value is not None:
                 if (

@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "RKH-.#####",
  "creation": "2025-06-30 10:33:14.406832",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -26,8 +25,8 @@
   "grand_total",
   "kegiatan_tab",
   "data_kegiatan_section",
-  "kode_kegiatan",
-  "rate_basis",
+  "kegiatan",
+  "rupiah_basis",
   "volume_basis",
   "is_it_kontanan",
   "column_break_cjta",
@@ -156,17 +155,9 @@
    "reqd": 1
   },
   {
-   "fetch_from": "kode_kegiatan.v_basis",
    "fieldname": "volume_basis",
    "fieldtype": "Float",
    "label": "Volume Basis",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.rp_basis",
-   "fieldname": "rate_basis",
-   "fieldtype": "Currency",
-   "label": "Rupiah/Satuan Basis",
    "read_only": 1
   },
   {
@@ -209,15 +200,6 @@
    "label": "Tipe Kegiatan",
    "options": "Tipe Kegiatan",
    "read_only": 1
-  },
-  {
-   "fieldname": "kode_kegiatan",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -356,17 +338,31 @@
    "label": "Batch",
    "mandatory_depends_on": "eval:doc.is_bibitan",
    "options": "Batch"
+  },
+  {
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Currency",
+   "label": "Rupiah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-29 11:02:06.106392",
+ "modified": "2025-10-06 14:14:23.591825",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
- "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

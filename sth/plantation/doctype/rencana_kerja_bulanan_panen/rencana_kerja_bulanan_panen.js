@@ -12,7 +12,6 @@ frappe.ui.form.on("Rencana Kerja Bulanan Panen", {
 sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends sth.plantation.RencanaKerjaController {
     setup(doc) {
         super.setup(doc)
-
         this.update_field_duplicate = [
             {
                 fieldtype: "Float",
@@ -23,6 +22,7 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
         ]
         
         this.fieldname_duplicate_edit = {"last_bjr": "bjr"}
+        this.kegiatan_fetch_fieldname = ["volume_basis", "rupiah_basis"]
 
         let me = this
         for (const fieldname of ["akp", "volume_basis", "jumlah_pokok", "bjr", "tonase","qty_basis", "upah_per_basis", "premi"]) {
@@ -35,12 +35,11 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
     set_query_field(){
         super.set_query_field()
     
-        this.frm.set_query("kode_kegiatan", function(doc){
+        this.frm.set_query("kegiatan", function(doc){
             return{
                 filters: {
-                    company: doc.company,
+                    company: ["=", doc.company],
                     tipe_kegiatan: "Panen",
-                    is_group: 0
                 }
             }
         })
@@ -53,7 +52,7 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
         doc.jumlah_janjang = flt(doc.jumlah_pokok * doc.akp)
         doc.tonase = flt(doc.jumlah_janjang * doc.bjr)
         if(!doc.jumlah_tenaga_kerja){
-            doc.jumlah_tenaga_kerja = flt(doc.tonase / volume_basis)
+            doc.jumlah_tenaga_kerja = flt(doc.tonase / doc.volume_basis)
         }
         doc.total_upah = flt(doc.tonase * doc.upah_per_basis)
         doc.pemanen_amount = flt(doc.total_upah) + flt(doc.premi)

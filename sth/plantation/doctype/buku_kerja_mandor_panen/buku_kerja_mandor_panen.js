@@ -12,6 +12,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         super.setup(doc)
 
         this.fieldname_total.push("hari_kerja", "qty", "qty_brondolan")
+        this.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi", "upah_brondolan"]
 
         let me = this
         for (const fieldname of ["hari_kerja", "buah_tidak_dipanen_rate", "buah_mentah_disimpan_rate",
@@ -21,7 +22,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             });
         }
 
-        for (const fieldname of ["kode_kegiatan", "divisi", "blok", "posting_date"]) {
+        for (const fieldname of ["kegiatan", "divisi", "blok", "posting_date"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function () {
                 // me.get_rkh_data()
             });
@@ -51,16 +52,11 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             }
         })
 
-        this.frm.set_query("kode_kegiatan", function (doc) {
-            if (!(doc.company)) {
-                frappe.throw("Please Select Kategori Kegiata and Company First")
-            }
-
+        this.frm.set_query("kegiatan", function (doc) {
             return {
                 filters: {
-                    is_group: 0,
                     tipe_kegiatan: "Panen",
-                    company: doc.company
+                    company: ["=", doc.company],
                 }
             }
         })
@@ -71,7 +67,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         let doc = this.frm.doc
         item.hari_kerja = doc.volume_basis ? flt(item.qty / doc.volume_basis) : 1
 
-        item.rate = item.rate ?? doc.rp_per_basis
+        item.rate = item.rate ?? doc.rupiah_basis
         item.brondolan = doc.upah_brondolan
 
         // perhitungan denda
@@ -110,25 +106,25 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         }
     }
 
-    // get_rkh_data() {
-    //     let me = this
-    //     let doc = this.frm.doc
-    //     if (!(doc.kode_kegiatan && doc.divisi && doc.blok && doc.posting_date)) return
+    get_rkh_data() {
+        let me = this
+        let doc = this.frm.doc
+        if (!(doc.kegiatan && doc.divisi && doc.blok && doc.posting_date)) return
 
-    //     frappe.call({
-    //         method: "sth.controllers.queries.get_rencana_kerja_harian",
-    //         args: {
-    //             kode_kegiatan: doc.kode_kegiatan,
-    //             divisi: doc.divisi,
-    //             blok: doc.blok,
-    //             posting_date: doc.posting_date
-    //         },
-    //         freeze: true,
-    //         callback: function (data) {
-    //             me.frm.set_value(data.message)
-    //         }
-    //     })
-    // }
+        frappe.call({
+            method: "sth.controllers.queries.get_rencana_kerja_harian",
+            args: {
+                kode_kegiatan: doc.kegiatan,
+                divisi: doc.divisi,
+                blok: doc.blok,
+                posting_date: doc.posting_date
+            },
+            freeze: true,
+            callback: function (data) {
+                me.frm.set_value(data.message)
+            }
+        })
+    }
 }
 
 cur_frm.script_manager.make(sth.plantation.BukuKerjaMandorPerawatan);

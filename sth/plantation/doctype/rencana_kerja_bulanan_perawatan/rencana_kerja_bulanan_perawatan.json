@@ -11,49 +11,33 @@
   "unit",
   "kategori_kegiatan",
   "is_bibitan",
-  "kode_kegiatan",
+  "kegiatan",
   "uom",
-  "qty_basis",
+  "blok",
+  "batch",
   "column_break_dbwg",
   "company",
   "divisi",
   "qty",
   "jumlah_tenaga_kerja",
   "realized_tenaga_kerja",
-  "upah_per_basis",
   "premi",
   "amended_from",
-  "batchblok_section",
+  "details_section",
   "column_break_cggo",
-  "blok",
+  "from_date",
+  "volume_basis",
+  "rupiah_basis",
+  "column_break_ibxc",
+  "to_date",
   "tahun_tanam",
   "luas_blok",
   "sph",
   "jumlah_pokok",
-  "column_break_ibxc",
-  "batch",
-  "details_rkb_section",
-  "from_date",
-  "column_break_saba",
-  "to_date",
-  "biaya_supervisi_section",
-  "upah_mandor",
-  "premi_mandor",
-  "column_break_mljk",
-  "upah_kerani",
-  "premi_kerani",
-  "column_break_rvqb",
-  "upah_mandor1",
-  "premi_mandor1",
   "section_break_srdl",
-  "mandor_amount",
-  "kerani_amount",
-  "mandor1_amount",
   "tenaga_kerja_amount",
   "material_amount",
   "column_break_bijc",
-  "tambahan_tenaga_kerja_amount",
-  "tambahan_material_amount",
   "budget_tambahan_amount",
   "grand_total",
   "section_break_xtya",
@@ -63,19 +47,7 @@
   "realized_total",
   "detail_material_tab",
   "detail_material_section",
-  "material",
-  "tambahan_kegiatan_tab",
-  "data_tambahan_kegiatan_section",
-  "tambahan_kode_kegiatan",
-  "tambahan_rate_basis",
-  "tambahan_volume_basis",
-  "column_break_ebap",
-  "tambahan_tipe_kegiatan",
-  "tambahan_target_volume",
-  "tambahan_qty_tenaga_kerja",
-  "tambahan_detail_material_tab",
-  "tambahan_detail_material_section",
-  "tambahan_material"
+  "material"
  ],
  "fields": [
   {
@@ -161,21 +133,11 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "details_rkb_section",
-   "fieldtype": "Section Break",
-   "label": "Details RKB"
-  },
-  {
    "fetch_from": "rencana_kerja_bulanan.from_date",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_saba",
-   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "rencana_kerja_bulanan.to_date",
@@ -193,7 +155,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "in_preview": 1,
@@ -246,17 +207,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "kode_kegiatan",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Kode Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_preview": 1,
@@ -278,92 +228,11 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "budget_tambahan_amount",
    "fieldtype": "Currency",
    "in_preview": 1,
    "label": "Budget Tambahan",
    "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.rp_basis",
-   "fieldname": "upah_per_basis",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Upah/Satuan Basis",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kode_kegiatan.v_basis",
-   "fieldname": "qty_basis",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Volume Basis",
-   "read_only": 1
-  },
-  {
-   "fieldname": "biaya_supervisi_section",
-   "fieldtype": "Section Break",
-   "label": "Biaya Supervisi"
-  },
-  {
-   "fieldname": "upah_mandor",
-   "fieldtype": "Currency",
-   "label": "Upah Mandor"
-  },
-  {
-   "fieldname": "premi_mandor",
-   "fieldtype": "Currency",
-   "label": "Premi Mandor"
-  },
-  {
-   "fieldname": "column_break_mljk",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "upah_kerani",
-   "fieldtype": "Currency",
-   "label": "Upah Kerani"
-  },
-  {
-   "fieldname": "premi_kerani",
-   "fieldtype": "Currency",
-   "label": "Premi Kerani"
-  },
-  {
-   "fieldname": "column_break_rvqb",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "mandor_amount",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Mandor Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "kerani_amount",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Kerani Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "mandor1_amount",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Mandor 1 Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "upah_mandor1",
-   "fieldtype": "Currency",
-   "label": "Upah Mandor 1"
-  },
-  {
-   "fieldname": "premi_mandor1",
-   "fieldtype": "Currency",
-   "label": "Premi Mandor 1"
   },
   {
    "fieldname": "tenaga_kerja_amount",
@@ -373,12 +242,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "batchblok_section",
-   "fieldtype": "Section Break",
-   "label": "Batch/Blok"
-  },
-  {
-   "depends_on": "eval:doc.is_bibitan",
    "fieldname": "column_break_ibxc",
    "fieldtype": "Column Break"
   },
@@ -449,103 +312,42 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "tambahan_kegiatan_tab",
-   "fieldtype": "Tab Break",
-   "label": "Tambahan Kegiatan"
-  },
-  {
-   "fieldname": "data_tambahan_kegiatan_section",
+   "collapsible": 1,
+   "fieldname": "details_section",
    "fieldtype": "Section Break",
-   "label": "Data Tambahan Kegiatan"
+   "label": "Details RKB"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_kode_kegiatan",
-   "fieldtype": "Link",
-   "label": "Kegiatan",
-   "options": "Kegiatan",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_ebap",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_rate_basis",
-   "fieldtype": "Currency",
-   "label": "Rupiah/Satuan Basis",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_volume_basis",
+   "fieldname": "volume_basis",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Volume Basis",
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_tipe_kegiatan",
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Upah/Satuan Basis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan",
    "fieldtype": "Link",
-   "label": "Tipe Kegiatan",
-   "options": "Tipe Kegiatan",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_target_volume",
-   "fieldtype": "Float",
-   "label": "Estimasi Volume",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_qty_tenaga_kerja",
-   "fieldtype": "Float",
-   "label": "Estimasi Jumlah Tenaga Kerja",
-   "read_only": 1
-  },
-  {
-   "fieldname": "tambahan_detail_material_tab",
-   "fieldtype": "Tab Break",
-   "label": "Tambahan Detail Material"
-  },
-  {
-   "fieldname": "tambahan_detail_material_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_material",
-   "fieldtype": "Table",
-   "label": "Tambahan Material Detail",
-   "options": "Detail Tambahan Material RK",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_tenaga_kerja_amount",
-   "fieldtype": "Currency",
+   "in_filter": 1,
+   "in_list_view": 1,
    "in_preview": 1,
-   "label": "Tambahan Tenaga Kerja Total",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "tambahan_material_amount",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Tambahan Material Total",
-   "read_only": 1
+   "in_standard_filter": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-24 14:43:31.400695",
+ "modified": "2025-10-06 13:21:20.942445",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Perawatan",

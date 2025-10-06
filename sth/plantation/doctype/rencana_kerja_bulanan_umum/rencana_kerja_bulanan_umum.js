@@ -35,9 +35,8 @@ sth.plantation.RencanaKerjaBulananUmum = class RencanaKerjaBulananUmum extends s
         this.frm.set_query("kode_kegiatan", function(doc){
             return{
                 filters: {
-                    company: doc.company,
-                    tipe_kegiatan: "Biaya Umum",
-                    is_group: 0
+                    company: ["=", doc.company],
+                    tipe_kegiatan: "Biaya Umum"
                 }
             }
         })

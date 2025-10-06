@@ -36,7 +36,8 @@ sth.plantation.setup_budget_controller = function() {
 
         }
 
-        company(){
+        company(doc){
+            super.company(doc)
             this.frm.set_value("budget_kebun_tahunan", "")
         }
  

@@ -30,7 +30,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.rate = item.get("rate") or self.rp_per_basis
+		item.rate = item.get("rate") or self.rupiah_basis
 		item.brondolan = self.upah_brondolan
 
 		# perhitungan denda
@@ -48,7 +48,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 					pelepah_tidak_disusun + tangkai_panjang + buah_tidak_disusun + pelepah_sengkleh)
 	
 	def update_value_after_amount(self, item, precision):
-		item.amount += item.brondolan_amount - flt(item.denda)
+		item.amount += item.brondolan_amount
 
 	def after_calculate_item_values(self, table_fieldname, options, total):
 		if table_fieldname == "hasil_kerja":

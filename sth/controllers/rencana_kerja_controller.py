@@ -21,8 +21,8 @@ class RencanaKerjaController(PlantationController):
         if not self.skip_calculate_supervisi:
             self.calculate_supervisi_amount()
 
-        self.calculate_biaya_kerja_total()
         super().validate()
+        self.calculate_biaya_kerja_total()
 
     def calculate_supervisi_amount(self):
         self.mandor_amount = flt(self.upah_mandor + self.premi_mandor)

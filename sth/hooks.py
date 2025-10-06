@@ -112,6 +112,8 @@ boot_session = "sth.startup.boot.boot_session"
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
+standard_queries = {"Kegiatan": "sth.controllers.queries.kegiatan_query"}
+
 # DocType Class
 # ---------------
 # Override standard doctype classes
@@ -131,6 +133,7 @@ override_doctype_class = {
 # 		"on_trash": "method"
 # 	}
 # }
+
 
 # Scheduled Tasks
 # ---------------

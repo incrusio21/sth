@@ -13,10 +13,23 @@ class PlantationController(Document):
         self.skip_table_amount = []
         self.skip_calculate_table = []
         self.skip_fieldname_amount = []
+        self.kegiatan_fetch_fieldname = []
 
     def validate(self):
+        self.fetch_kegiatan_data()
         self.calculate_item_table_values()
         self.calculate_grand_total()
+
+    def fetch_kegiatan_data(self):
+        if not self.kegiatan_fetch_fieldname:
+            return
+        
+        if not (self.kegiatan and self.company):
+            self.update({key: "" for key in self.kegiatan_fetch_fieldname})
+        else:
+            from sth.controllers.queries import kegiatan_fetch_data
+
+            self.update(kegiatan_fetch_data(self.kegiatan, self.company, self.kegiatan_fetch_fieldname))
 
     def calculate_item_table_values(self):
         for df in self._get_table_fields():

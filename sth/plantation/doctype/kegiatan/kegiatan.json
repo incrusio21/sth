@@ -12,29 +12,19 @@
   "kd_kgt",
   "nm_kgt",
   "uom",
+  "column_break_exsm",
   "kategori_kegiatan",
   "tipe_kegiatan",
-  "column_break_exsm",
-  "company",
-  "kode_perusahaan",
-  "divisi",
-  "blok",
-  "account",
+  "old_parent",
+  "is_panen",
+  "is_bibitan",
+  "column_break_lrzd",
   "tp_bbt",
   "tp_pnn",
-  "old_parent",
   "lft",
-  "column_break_lrzd",
-  "v_basis",
-  "rp_basis",
-  "pr_prm",
-  "rp_prm",
-  "uph",
-  "upah_brondolan",
-  "rp_prm_mndr",
-  "rp_prm_mndr_1",
-  "rp_prm_krn",
-  "rgt"
+  "rgt",
+  "section_break_xthm",
+  "items"
  ],
  "fields": [
   {
@@ -63,21 +53,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Perusahaan",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "company.abbr",
-   "fieldname": "kode_perusahaan",
-   "fieldtype": "Data",
-   "label": "Kode Perusahaan",
-   "read_only": 1
-  },
-  {
    "fieldname": "tipe_kegiatan",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -86,34 +61,8 @@
    "reqd": 1
   },
   {
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "label": "COA",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "blok.divisi",
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "label": "Divisi",
-   "options": "Divisi"
-  },
-  {
    "fieldname": "column_break_lrzd",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "v_basis",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Volume Basis "
-  },
-  {
-   "fieldname": "rp_basis",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Rupiah/Satuan Basis"
   },
   {
    "fieldname": "lft",
@@ -159,45 +108,20 @@
    "unique": 1
   },
   {
-   "fieldname": "rp_prm",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Rupiah Premi"
-  },
-  {
-   "fieldname": "rp_prm_mndr",
-   "fieldtype": "Currency",
-   "label": "Rupiah Premi Mandor"
-  },
-  {
-   "fieldname": "rp_prm_mndr_1",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Rupiah Premi Mandor 1"
-  },
-  {
-   "fieldname": "pr_prm",
-   "fieldtype": "Percent",
-   "in_preview": 1,
-   "label": "Persentase Premi"
-  },
-  {
+   "depends_on": "eval:doc.is_bibitan && !doc.is_group",
    "fieldname": "tp_bbt",
    "fieldtype": "Link",
    "label": "Tipe Bibitan",
+   "mandatory_depends_on": "eval:doc.is_bibitan && !doc.is_group",
    "options": "Tipe Bibitan"
   },
   {
+   "depends_on": "eval:doc.is_panen && !doc.is_group",
    "fieldname": "tp_pnn",
    "fieldtype": "Select",
    "label": "Tipe Panen",
-   "options": "Mekanis\nManual"
-  },
-  {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "options": "Blok"
+   "mandatory_depends_on": "eval:doc.is_panen && !doc.is_group",
+   "options": "\nMekanis\nManual"
   },
   {
    "fieldname": "kd_kgt",
@@ -208,29 +132,38 @@
    "unique": 1
   },
   {
-   "fieldname": "uph",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Upah"
+   "default": "0",
+   "fetch_from": "tipe_kegiatan.is_panen",
+   "fieldname": "is_panen",
+   "fieldtype": "Check",
+   "label": "Panen ?",
+   "read_only": 1
   },
   {
-   "fieldname": "rp_prm_krn",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Rupiah Premi Kerani"
+   "default": "0",
+   "fetch_from": "kategori_kegiatan.is_bibitan",
+   "fieldname": "is_bibitan",
+   "fieldtype": "Check",
+   "label": "Bibitan ?",
+   "read_only": 1
   },
   {
-   "fieldname": "upah_brondolan",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Upah Brondolan"
+   "depends_on": "eval:!doc.is_group",
+   "fieldname": "section_break_xthm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Kegiatan Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-04 16:19:36.934365",
+ "modified": "2025-10-03 16:22:06.008745",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",
@@ -254,7 +187,9 @@
  "quick_entry": 1,
  "row_format": "Dynamic",
  "search_fields": "nm_kgt",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "nm_kgt"
 }
