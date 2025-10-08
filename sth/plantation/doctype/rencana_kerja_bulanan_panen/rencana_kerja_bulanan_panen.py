@@ -22,7 +22,7 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 		if not self.jumlah_tenaga_kerja and self.volume_basis:
 			self.jumlah_tenaga_kerja = flt(self.tonase / self.volume_basis)
 			
-		self.total_upah = flt(self.tonase * self.upah_per_basis)
+		self.total_upah = flt(self.tonase * self.rupiah_basis)
 		self.pemanen_amount = flt(self.total_upah) + flt(self.premi)
 
 	def check_rkb_pengangkutan(self):

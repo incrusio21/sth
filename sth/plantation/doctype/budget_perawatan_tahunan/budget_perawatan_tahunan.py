@@ -13,10 +13,10 @@ class BudgetPerawatanTahunan(BudgetController):
 		self.fieldname_total.extend([
 			"qty", "rotasi"
 		])
-
 		self.duplicate_param.extend([
 			"divisi", "kegiatan"
 		])
+		self.kegiatan_fetch_fieldname = ["rupiah_basis"]
 
 	def validate(self):
 		super().validate()
@@ -30,6 +30,12 @@ class BudgetPerawatanTahunan(BudgetController):
 	def set_ha_per_tahun(self):
 		table_field = "upah_bibitan" if self.is_bibitan else "upah_perawatan"
 		self.ha_per_tahun = flt(self.grand_total / self.get(f"{table_field}_qty"), self.precision("ha_per_tahun"))
+
+	def update_rate_or_qty_value(self, item, precision):
+		if item.parentfield not in ["upah_bibitan", "upah_perawatan"]:
+			return
+		
+		item.rate = item.get("rate") or self.rupiah_basis
 
 	def after_calculate_item_values(self, table_fieldname, options, total):
 		super().after_calculate_item_values(table_fieldname, options, total)

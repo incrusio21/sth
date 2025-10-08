@@ -21,13 +21,13 @@ def kegiatan_query(
 	page_len,
 	filters,
 	reference_doctype: str | None = None,
-	ignore_user_permissions: bool = False,
+	ignore_user_permissions: bool = True,
 ):
 	doctype = "Kegiatan"
 	doctype_child = "Kegiatan Company"
 	conditions = []
 	fields = get_fields(doctype, ["name", "nm_kgt"])
-	ignore_permissions = False
+	ignore_permissions = True
 	filters = filters or {}
 	filters_child = {}
 
@@ -61,7 +61,7 @@ def kegiatan_query(
 				"fields": ", ".join(fields),
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions) if filters else "",
-				"fcondchild": get_filters_cond(doctype_child, filters_child, conditions) if filters_child else "",
+				"fcondchild": get_filters_cond(doctype_child, filters_child, conditions, ignore_permissions=True) if filters_child else "",
 				"mcond": mcond,
 			}
 		),
@@ -143,7 +143,7 @@ def material_kegiatan_query(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			fcondchild=get_filters_cond(doctype_child, filters_child, conditions) if filters_child else "",
+			fcondchild=get_filters_cond(doctype_child, filters_child, conditions, ignore_permissions=True) if filters_child else "",
 			mcond=get_match_cond(doctype).replace("%", "%%"),
 			description_cond=description_cond,
 		),

@@ -12,7 +12,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.kegiatan_fetch_fieldname = []
 
         // check daftar fieldname dengan total didalamny untuk d gabungkan ke grand_total
-        if(!sth.plantation.doctype_ref[doctype]){
+        if (!sth.plantation.doctype_ref[doctype]) {
             sth.plantation.setup_doctype_ref(doctype)
         }
     }
@@ -20,7 +20,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
     refresh() {
         this.set_query_field()
     }
-    
+
     company(doc) {
         this.fetch_data_kegiatan(doc.kegiatan, doc.company)
     }
@@ -29,7 +29,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.fetch_data_kegiatan(doc.kegiatan, doc.company)
     }
 
-    item(doc, cdt, cdn){
+    item(doc, cdt, cdn) {
         let data = frappe.get_doc(cdt, cdn)
         let doctype = this.frm.fields_dict[data.parentfield].grid.fields_map.item.options;
 
@@ -46,39 +46,39 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             }
         })
     }
-    
-    qty(_, cdt, cdn){
+
+    qty(_, cdt, cdn) {
         this.calculate_total(cdt, cdn)
     }
 
-    rate(_, cdt, cdn){
+    rate(_, cdt, cdn) {
         this.calculate_total(cdt, cdn)
     }
 
     // mempersingkat structur koding
-    doctype_ref(dict){
+    doctype_ref(dict) {
         return sth.plantation.doctype_ref[this.frm.doc.doctype][dict]
     }
 
-    set_query_field(){
-        this.frm.set_query("unit", function(doc){
-            if(!doc.company){
+    set_query_field() {
+        this.frm.set_query("unit", function (doc) {
+            if (!doc.company) {
                 frappe.throw("Please Select Company First")
             }
-            
-            return{
+
+            return {
                 filters: {
                     company: doc.company
                 }
             }
         })
 
-        this.frm.set_query("divisi", function(doc){
-            if(!doc.unit){
+        this.frm.set_query("divisi", function (doc) {
+            if (!doc.unit) {
                 frappe.throw("Please Select Unit/Kebun First")
             }
-            
-            return{
+
+            return {
                 filters: {
                     unit: doc.unit
                 }
@@ -86,14 +86,14 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         })
     }
 
-    calculate_total(cdt, cdn, parentfield=null){
-        if(!parentfield){
+    calculate_total(cdt, cdn, parentfield = null) {
+        if (!parentfield) {
             parentfield = frappe.get_doc(cdt, cdn).parentfield
         }
-        
-        if(parentfield){
+
+        if (parentfield) {
             this.calculate_item_values(parentfield);
-        }else{
+        } else {
             this.calculate_non_table_values();
         }
         this.calculate_grand_total();
@@ -101,15 +101,15 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.frm.refresh_fields();
     }
 
-    calculate_item_values(table_name){
+    calculate_item_values(table_name) {
         let me = this
         const total = {};
         for (const f of this.fieldname_total) {
             total[f] = 0;
         }
-        
+
         let data_table = me.frm.doc[table_name] || []
-        
+
         // menghitung amount, rotasi, qty
         for (const item of data_table) {
             // rate * qty * (rotasi jika ada)
@@ -118,13 +118,13 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             item.amount = flt(item.rate * item.qty, precision("amount", item));
 
             this.update_value_after_amount(item)
-            
+
             // total amount dan qty untuk d input ke doctype utama jika d butuhkan
             for (const f of this.fieldname_total) {
                 total[f] += item[f]
             }
         }
-        
+
         for (const total_field of this.fieldname_total) {
             let fieldname = `${table_name}_${total_field}`
             if (!this.frm.fields_dict[fieldname]) continue;
@@ -135,32 +135,32 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.after_calculate_item_values(table_name, total)
     }
 
-    update_rate_or_qty_value(){
+    update_rate_or_qty_value() {
         // set on child class if needed
     }
 
-    update_value_after_amount(){
+    update_value_after_amount() {
         // set on child class if needed
     }
 
 
-    calculate_non_table_values(){
+    calculate_non_table_values() {
         // set on child class if needed
     }
 
-    after_calculate_item_values(table_name){
+    after_calculate_item_values(table_name) {
         // set on child class if needed
     }
 
-    calculate_grand_total(){
+    calculate_grand_total() {
         let grand_total = 0.0
-        
+
         this.before_calculate_grand_total()
 
         for (const field of this.doctype_ref("amount")) {
-            if(in_list(this.skip_table_amount, field.replace("_amount", "")) || 
+            if (in_list(this.skip_table_amount, field.replace("_amount", "")) ||
                 in_list(this.skip_fieldname_amount, field)) continue;
-            
+
             grand_total += this.frm.doc[field] || 0;
         }
 
@@ -169,15 +169,15 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.after_calculate_grand_total()
     }
 
-    before_calculate_grand_total(){
+    before_calculate_grand_total() {
         // set on child class if needed
     }
 
-    after_calculate_grand_total(){
+    after_calculate_grand_total() {
         // set on child class if needed
     }
 
-    get_blok_list(opts, callback){
+    get_blok_list(opts, callback) {
         const fields = [
             {
                 fieldtype: "Link",
@@ -222,7 +222,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             },
         ]
 
-        
+
         if ($.isArray(opts.fields)) {
             opts.fields.forEach((field, index) => {
                 fields.push(field);
@@ -239,7 +239,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                 if (data.message.length == 0) {
                     frappe.throw(__("Blok Not Found."))
                 }
-                
+
                 const dialog = new frappe.ui.Dialog({
                     title: __("Select Blok"),
                     size: "large",
@@ -260,7 +260,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                     ],
                     primary_action: function () {
                         const selected_items = dialog.fields_dict.trans_blok.grid.get_selected_children();
-                        if(selected_items.length < 1){
+                        if (selected_items.length < 1) {
                             frappe.throw("Please Select at least One Blok")
                         }
 
@@ -269,7 +269,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
                     },
                     primary_action_label: __("Submit"),
                 });
-        
+
                 dialog.show();
             }
         })
@@ -277,11 +277,11 @@ sth.plantation.TransactionController = class TransactionController extends frapp
 
     fetch_data_kegiatan(kegiatan, company) {
         let me = this
-        if(!me.kegiatan_fetch_fieldname) return
-        
-        if(!(kegiatan && company)){
+        if (!me.kegiatan_fetch_fieldname) return
+
+        if (!(kegiatan && company)) {
             me.frm.set_value(Object.fromEntries(me.kegiatan_fetch_fieldname.map(key => [key, ""])))
-        }else{
+        } else {
             frappe.call({
                 method: "sth.controllers.queries.kegiatan_fetch_data",
                 args: {
@@ -306,8 +306,8 @@ sth.plantation.setup_doctype_ref = function (doctype) {
         "amount": [],
         "table_fieldname": []
     };
-    
-   fields.forEach(d => {
+
+    fields.forEach(d => {
         if (d.fieldtype === "Currency" && in_list(d.fieldname, "amount")) {
             sth.plantation.doctype_ref[doctype].amount.push(d.fieldname);
         }

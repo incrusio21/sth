@@ -49,7 +49,7 @@ class PlantationController(Document):
             # update nilai rate atau qty sebelum perhitungan
             self.update_rate_or_qty_value(d, precision)
 
-            d.amount = flt(d.rate * flt(d.qty), precision)
+            d.amount = flt((d.rate or 0) * (d.qty or 0), precision)
 
             # update nilai setelah menghitung amount
             self.update_value_after_amount(d, precision)

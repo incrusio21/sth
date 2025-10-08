@@ -12,7 +12,7 @@ frappe.ui.form.on("Budget Perawatan Tahunan", {
 
         frm.cscript.add_blok_in_table("upah_perawatan",
             { divisi: frm.doc.divisi }, 
-            { "uom": frm.doc.uom }
+            { "uom": frm.doc.uom, "rate": frm.doc.rupiah_basis },
         )
     }
 });
@@ -27,6 +27,7 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
     setup(doc) {
         super.setup(doc)
         this.fieldname_total.push("qty", "rotasi")
+        this.kegiatan_fetch_fieldname = ["rupiah_basis"]
     }
     set_query_field(){
         super.set_query_field()
@@ -97,6 +98,12 @@ sth.plantation.BudgetPerawatanTahunan = class BudgetPerawatanTahunan extends sth
         this.frm.set_value("kegiatan", "")
         this.frm.set_value("divisi", "")
         this.clear_table(["upah_perawatan", "upah_bibitan"])
+    }
+
+    update_rate_or_qty_value(item){
+        if(in_list(["upah_bibitan", "upah_perawatan"], item.parentfield)){
+            item.rate = item.rate || this.frm.doc.rupiah_basis
+        }
     }
 
     after_calculate_item_values(table_name, total){

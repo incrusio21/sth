@@ -59,10 +59,11 @@ class BudgetController(PlantationController):
             return 
             
         for month in per_month_field:
-            if self.is_distibute:
+            if self.get("is_distribute"):
                 self.set(month, 100 / 12)
 
-            total_sebaran += self.get(month)
+            total_sebaran += flt(self.get(month))
+            # total_sebaran += self.get(month)
 
         self.total_sebaran = flt(total_sebaran, self.precision("total_sebaran"))
         if self.total_sebaran != 100:

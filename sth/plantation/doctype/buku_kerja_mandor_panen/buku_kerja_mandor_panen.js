@@ -67,7 +67,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         let doc = this.frm.doc
         item.hari_kerja = doc.volume_basis ? flt(item.qty / doc.volume_basis) : 1
 
-        item.rate = item.rate ?? doc.rupiah_basis
+        item.rate = item.rate || doc.rupiah_basis
         item.brondolan = doc.upah_brondolan
 
         // perhitungan denda

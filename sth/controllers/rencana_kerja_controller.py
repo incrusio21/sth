@@ -25,9 +25,9 @@ class RencanaKerjaController(PlantationController):
         self.calculate_biaya_kerja_total()
 
     def calculate_supervisi_amount(self):
-        self.mandor_amount = flt(self.upah_mandor + self.premi_mandor)
-        self.kerani_amount = flt(self.upah_kerani + self.premi_kerani)
-        self.mandor1_amount = flt(self.upah_mandor1 + self.premi_mandor1)
+        self.mandor_amount = flt((self.upah_mandor or 0) + (self.premi_mandor or 0))
+        self.kerani_amount = flt((self.upah_kerani or 0) + (self.premi_kerani or 0))
+        self.mandor1_amount = flt((self.upah_mandor1 or 0) + (self.premi_mandor1 or 0))
 
     def calculate_biaya_kerja_total(self):
         self.biaya_kerja_total = self.grand_total

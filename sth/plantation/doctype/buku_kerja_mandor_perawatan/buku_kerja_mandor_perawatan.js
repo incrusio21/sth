@@ -93,7 +93,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     update_rate_or_qty_value(item) {
         if (item.parentfield == "hasil_kerja") {
             item.qty = flt(item.hasil / this.frm.doc.volume_basis)
-            item.rate = item.rate ?? this.frm.doc.rupiah_basis
+            item.rate = item.rate || this.frm.doc.rupiah_basis
 
             if (this.frm.doc.persentase_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.persentase_premi) / 100))) {
                 item.premi = this.frm.doc.rupiah_premi
@@ -103,7 +103,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
 
     after_calculate_item_values(table_name, total) {
         if (table_name == "hasil_kerja") {
-            this.frm.doc[`hari_kerja_total`] = flt(total["qty"]) || 0;
+            this.frm.doc[`hari_kerja_total`] = flt(total["hasil"]) || 0;
 
             for (let d of this.frm.doc.hasil_kerja) {
                 d.amount = flt(d.hasil) * flt(d.rate) + flt(d.premi);
