@@ -9,8 +9,9 @@
   "header_section",
   "item",
   "uom",
-  "qty",
+  "account",
   "column_break_cqpp",
+  "qty",
   "rate",
   "amount",
   "sebaran_rp_section",
@@ -154,13 +155,20 @@
    "fieldtype": "Currency",
    "label": "Desember",
    "read_only": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-07 14:59:48.216372",
+ "modified": "2025-10-08 16:37:41.697894",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Budget Upah",

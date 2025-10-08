@@ -15,19 +15,18 @@ def get_blok(args):
     return frappe.get_all("Blok", filters=args, fields=fields)
 
 @frappe.whitelist()
-def get_rate_item(item, company, doctype="Item"):
-    rate = 0
-
+def get_details_item(item, company, doctype="Item"):
+    item_details = { "rate": 0, "accounts": "" }
     match doctype:
         case "Item":
-            rate = frappe.get_value("Item Price", {"item_code": item}, "price_list_rate") 
+            item_details["rate"] = frappe.get_value("Item Price", {"item_code": item}, "price_list_rate") 
         case "Data Kapital":
-            rate = frappe.get_value("Data Kapital", item, "rate")
+            item_details["rate"] = frappe.get_value("Data Kapital", item, "rate")
         case "Alat Berat Dan Kendaraan":
-            rate = frappe.get_value("Alat Berat Dan Kendaraan", item, "basis_rpkg")
+            item_details["rate"] = frappe.get_value("Alat Berat Dan Kendaraan", item, "basis_rpkg")
         case "Kegiatan":
-            rate = frappe.get_value("Kegiatan", item, "rp_basis")
+            item_details["rate"] = frappe.get_value("Kegiatan", item, "rp_basis")
         case _:
-            rate = frappe.get_value("Company Rate", {"parent": item, "company": company, "parenttype": doctype}, "rate")
+            item_details = frappe.get_value("Company Rate", {"parent": item, "company": company, "parenttype": doctype}, ["rate", "account"], as_dict=1)
 
-    return { "rate": rate or 0 }
+    return item_details

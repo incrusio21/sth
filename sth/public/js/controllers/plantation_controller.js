@@ -42,7 +42,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             },
             freeze: true,
             callback: function (data) {
-                frappe.model.set_value(cdt, cdn, "rate", data.message.rate)
+                frappe.model.set_value(cdt, cdn, data.message)
             }
         })
     }
