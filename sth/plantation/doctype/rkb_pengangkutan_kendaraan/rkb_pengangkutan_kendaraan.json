@@ -9,10 +9,12 @@
   "item",
   "uom",
   "kap_kg",
+  "trip",
   "column_break_xspq",
   "qty",
   "rate",
-  "amount"
+  "amount",
+  "rate_tbs"
  ],
  "fields": [
   {
@@ -47,6 +49,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -66,13 +69,27 @@
    "in_list_view": 1,
    "label": "Amount",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "trip",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Trip",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_tbs",
+   "fieldtype": "Currency",
+   "label": "Biaya per kilo TBS (Rp/Kg)",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-03 11:27:52.831549",
+ "modified": "2025-10-10 15:43:33.679594",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "RKB Pengangkutan Kendaraan",

@@ -25,9 +25,15 @@ class RencanaKerjaBulananPengangkutanPanen(RencanaKerjaController):
 		self.tonase = get_tonase(self.rencana_kerja_bulanan, self.blok)
 
 	def update_rate_or_qty_value(self, item, precision):
-        # set on child class if needed
+		# set on child class if needed
 		if item.parentfield == "kendaraan":
-			item.qty = flt(self.tonase / item.kap_kg * self.jarak_pks * 2, precision)
+			item.trip = flt(self.tonase / item.kap_kg, 0)
+
+			item.qty = flt(item.trip * self.jarak_pks * 2, precision)
+
+	def update_value_after_amount(self, item, precision):
+		if item.parentfield == "kendaraan":
+			item.rate_tbs = flt(item.amount / self.tonase, precision)
 
 @frappe.whitelist()
 def get_tonase(rkb, blok):

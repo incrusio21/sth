@@ -76,9 +76,18 @@ sth.plantation.RencanaKerjaBulananPengangkutan = class RencanaKerjaBulananPengan
     }
     
     update_rate_or_qty_value(item){
+        let doc = this.frm.doc
         if(item.parentfield == "kendaraan"){
-            let doc = this.frm.doc
-            item.qty = flt(doc.tonase / item.kap_kg * doc.jarak_pks * 2, precision("amount", item))
+            item.trip = flt(doc.tonase / item.kap_kg, 0)
+
+            item.qty = flt(item.trip * doc.jarak_pks * 2, precision("amount", item))
+        }
+    }
+
+    update_value_after_amount(item) {
+        let doc = this.frm.doc
+        if(item.parentfield == "kendaraan"){
+            item.rate_tbs = flt(item.amount / doc.tonase, precision("rate_tbs", item))
         }
     }
 }
