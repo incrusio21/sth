@@ -119,7 +119,8 @@ standard_queries = {"Kegiatan": "sth.controllers.queries.kegiatan_query"}
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Stock Entry": "sth.overrides.stock_entry.StockEntry"
+	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
+	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 }
 
 # Document Events

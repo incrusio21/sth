@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-09 12:33:58.564791",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pkp",
+  "employment_type",
+  "column_break_mgkk",
+  "company",
+  "multiplier"
+ ],
+ "fields": [
+  {
+   "fieldname": "pkp",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "PKP",
+   "options": "Master PKP",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employment_type",
+   "fieldtype": "Link",
+   "label": "Employment Type",
+   "options": "Employment Type"
+  },
+  {
+   "fieldname": "column_break_mgkk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "multiplier",
+   "fieldtype": "Int",
+   "label": "Multiplier",
+   "non_negative": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-09 13:15:56.192311",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Natura Multiplier",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
