@@ -9,36 +9,47 @@ from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.skip_calculate_supervisi = True
+
+		self.plantation_setting_def.extend([
+			["salary_component", "bkm_perawatan_component"],
+			["premi_salary_component", "premi_sc"],
+		])
+
 		self.fieldname_total.extend([
-			"qty", "hasil"
+			"qty", "hari_kerja", "premi"
+		])
+
+		self.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi"]
+
+		self.payment_log_updater.extend([
+			{
+				"target_link": "premi_epl",
+				"target_amount": "premi",
+				"target_salary_component": "premi_salary_component",
+				"removed_if_zero": True
+			}
 		])
 
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.qty = flt(item.hasil / self.volume_basis)
 		item.rate = item.get("rate") or self.rupiah_basis
+		item.hari_kerja = flt(item.qty / self.volume_basis)
+
 		if self.persentase_premi and item.hari_kerja > flt(self.volume_basis * ((1 + self.persentase_premi) / 100)):
 			item.premi = self.rupiah_premi
 
-	def after_calculate_item_values(self, table_fieldname, options, total):
-		if table_fieldname == "hasil_kerja":
-			self.hari_kerja_total = flt(total["hasil"])
-			
+	def after_calculate_grand_total(self):
+		self.grand_total += self.hasil_kerja_premi 
+
 	def on_submit(self, update_realization=True):
 		super().on_submit(update_realization=False)
 		if not self.material:
-			self.update_rkb_realization()
+			pass
+			# self.update_rkb_realization()
 		else:
 			self.create_ste_issue()
-
-	def before_save(self):
-		for row in self.hasil_kerja:
-			row.amount = (row.hasil or 0) * (row.rate or 0)
-			if row.premi:
-				row.amount += row.premi
 			
 	def create_ste_issue(self):
 		ste = frappe.new_doc("Stock Entry")
@@ -73,19 +84,12 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 		self.db_update_all()
 
-		self.update_rkb_realization()
+		# self.update_rkb_realization()
 
 	def on_cancel(self):
 		self.delete_ste()
 
 		super().on_cancel()
-
-	def delete_payment_log(self):
-		filters={"voucher_type": self.doctype, "voucher_no": self.name}
-		for emp_log in frappe.get_all("Employee Payment Log", 
-			filters=filters, pluck="name"
-		):
-			frappe.delete_doc("Employee Payment Log", emp_log)
 
 	def delete_ste(self):
 		if not self.stock_entry:

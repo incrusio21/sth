@@ -11,48 +11,67 @@ from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.plantation_setting_def.extend([
+			["salary_component", "bkm_panen_component"],
+			["denda_salary_component", "denda_sc"],
+			["brondolan_salary_component", "brondolan_sc"],
+		])
+
 		self.fieldname_total.extend([
-			"hari_kerja", "qty", "qty_brondolan"
+			"hari_kerja", "qty", "qty_brondolan", "brondolan_amount", "denda"
+		])
+
+		self.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi", "upah_brondolan"]
+
+		self.payment_log_updater.extend([
+			{
+				"target_link": "denda_epl",
+				"target_amount": "denda",
+				"target_salary_component": "denda_salary_component",
+				"removed_if_zero": True
+			},
+			{
+				"target_link": "brondolan_epl",
+				"target_amount": "brondolan_amount",
+				"target_salary_component": "brondolan_salary_component",
+				"removed_if_zero": True
+			}
 		])
 
 	def validate(self):
 		super().validate()
-		self.calculate_brondolan_qty()
 
-	def calculate_brondolan_qty(self):
-		brondolan_qty = 0.0
-		for d in self.hasil_kerja:
-			brondolan_qty += d.qty_brondolan or 0
+	def set_salary_component(self):
+		hr_panen = frappe.db.get_value("Plantation Settings", None, ["denda_sc", "brondolan_sc"], as_dict=1)
 
-		self.brondolan_qty = brondolan_qty
+		self.denda_salary_component = hr_panen.denda_sc
+		self.brondolan_sc = hr_panen.brondolan_sc
 		
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.rate = item.get("rate") or self.rupiah_basis
-		item.brondolan = self.upah_brondolan
+		item.rate = flt(item.get("rate") or self.rupiah_basis)
+		item.brondolan = flt(self.upah_brondolan)
 
-		# perhitungan denda
-		buah_tidak_dipanen = flt(self.buah_tidak_dipanen_rate * flt(item.buah_tidak_dipanen))
-		buah_mentah_disimpan = flt(self.buah_mentah_disimpan_rate * flt(item.buah_mentah_disimpan))
-		buah_mentah_ditinggal = flt(self.buah_mentah_ditinggal_rate * flt(item.buah_mentah_ditinggal))
-		brondolan_tinggal = flt(self.brondolan_tinggal_rate * flt(item.brondolan_tinggal))
-		pelepah_tidak_disusun = flt(self.pelepah_tidak_disusun_rate * flt(item.pelepah_tidak_disusun))
-		tangkai_panjang = flt(self.tangkai_panjang_rate * flt(item.tangkai_panjang))
-		buah_tidak_disusun = flt(self.buah_tidak_disusun_rate * flt(item.buah_tidak_disusun))
-		pelepah_sengkleh = flt(self.pelepah_sengkleh_rate * flt(item.pelepah_sengkleh))
+		item.hari_kerja = flt(item.jumlah_janjang / self.volume_basis)
 
-		item.brondolan = flt(item.brondolan * flt(item.qty_brondolan))
-		item.denda = flt(buah_tidak_dipanen + buah_mentah_disimpan + buah_mentah_ditinggal + brondolan_tinggal +
-					pelepah_tidak_disusun + tangkai_panjang + buah_tidak_disusun + pelepah_sengkleh)
-	
 	def update_value_after_amount(self, item, precision):
-		item.amount += item.brondolan_amount
+		# Hitung total brondolan
+		item.brondolan_amount = flt(item.brondolan * flt(item.qty_brondolan), precision)
 
-	def after_calculate_item_values(self, table_fieldname, options, total):
-		if table_fieldname == "hasil_kerja":
-			self.hari_kerja_total = flt(total["hari_kerja"])
+		# Perhitungan denda
+		factors = [ 
+			"buah_tidak_dipanen", "buah_mentah_disimpan", "buah_mentah_ditinggal",
+			"brondolan_tinggal", "pelepah_tidak_disusun","tangkai_panjang",
+			"buah_tidak_disusun", "pelepah_sengkleh"
+		]
+
+		# Hitung total denda dengan menjumlahkan rate * nilai item
+		item.denda = sum(flt(item.get(field)) * flt(self.get(f"{field}_rate")) for field in factors)
+
+	def after_calculate_grand_total(self):
+		self.grand_total -= self.hasil_kerja_denda 
 
 	def update_kontanan_used(self):
 		ppk = frappe.qb.DocType("Pengajuan Panen Kontanan")

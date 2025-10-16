@@ -31,11 +31,12 @@
   "tahun_tanam",
   "luas_blok",
   "section_break_cepw",
-  "hari_kerja_total",
-  "column_break_qnwo",
   "hasil_kerja_qty",
+  "column_break_qnwo",
+  "hasil_kerja_hari_kerja",
   "section_break_lacm",
   "hasil_kerja_amount",
+  "hasil_kerja_premi",
   "column_break_alsz",
   "material_amount",
   "grand_total",
@@ -52,7 +53,9 @@
   "stock_entry",
   "journal_entry",
   "section_break_mptt",
-  "employee_payment_account"
+  "salary_component",
+  "column_break_egmp",
+  "premi_salary_component"
  ],
  "fields": [
   {
@@ -178,7 +181,7 @@
   {
    "fieldname": "hasil_kerja_qty",
    "fieldtype": "Float",
-   "label": "Hari Kerja Total",
+   "label": "Hasil Kerja Total",
    "read_only": 1
   },
   {
@@ -314,12 +317,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "hari_kerja_total",
-   "fieldtype": "Float",
-   "label": "Hasil Kerja Total",
-   "read_only": 1
-  },
-  {
    "fetch_from": "kode_kegiatan.account",
    "fieldname": "kegiatan_account",
    "fieldtype": "Link",
@@ -338,13 +335,6 @@
   {
    "fieldname": "section_break_mptt",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "employee_payment_account",
-   "fieldtype": "Link",
-   "label": "Employee Payment Account",
-   "options": "Account",
-   "read_only": 1
   },
   {
    "fieldname": "rupiah_basis",
@@ -367,13 +357,43 @@
    "label": "Kegiatan",
    "options": "Kegiatan",
    "reqd": 1
+  },
+  {
+   "fieldname": "hasil_kerja_premi",
+   "fieldtype": "Currency",
+   "label": "Upah Permi Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_hari_kerja",
+   "fieldtype": "Float",
+   "label": "Hari Kerja Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_egmp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "premi_salary_component",
+   "fieldtype": "Link",
+   "label": "Premi Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-06 16:54:37.895048",
+ "modified": "2025-10-16 15:36:54.938034",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

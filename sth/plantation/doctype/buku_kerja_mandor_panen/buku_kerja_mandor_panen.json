@@ -32,7 +32,7 @@
   "section_break_wzob",
   "hasil_kerja_qty",
   "hasil_kerja_qty_brondolan",
-  "hari_kerja_total",
+  "hasil_kerja_hari_kerja",
   "column_break_hvgf",
   "transfered_hasil_kerja",
   "transfered_brondolan",
@@ -41,6 +41,8 @@
   "bjr",
   "section_break_lacm",
   "hasil_kerja_amount",
+  "hasil_kerja_brondolan_amount",
+  "hasil_kerja_denda",
   "column_break_alsz",
   "grand_total",
   "hasil_kerja_tab",
@@ -60,12 +62,14 @@
   "reference_section",
   "rencana_kerja_harian",
   "is_used",
-  "journal_entry",
   "column_break_khlg",
   "voucher_type",
   "voucher_no",
   "section_break_lpwn",
-  "employee_payment_account"
+  "salary_component",
+  "column_break_xcox",
+  "brondolan_salary_component",
+  "denda_salary_component"
  ],
  "fields": [
   {
@@ -366,12 +370,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "hari_kerja_total",
-   "fieldtype": "Float",
-   "label": "Hari Kerja Total",
-   "read_only": 1
-  },
-  {
    "default": "0",
    "fieldname": "is_kontananan",
    "fieldtype": "Check",
@@ -424,22 +422,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_lpwn",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "employee_payment_account",
-   "fieldtype": "Link",
-   "label": "Employee Payment Account",
-   "options": "Account",
-   "read_only": 1
   },
   {
    "fieldname": "detail_bkm_section",
@@ -464,13 +448,56 @@
    "in_list_view": 1,
    "label": "Rupiah/Satuan Basis",
    "read_only": 1
+  },
+  {
+   "fieldname": "denda_salary_component",
+   "fieldtype": "Link",
+   "label": "Denda Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
+  },
+  {
+   "fieldname": "brondolan_salary_component",
+   "fieldtype": "Link",
+   "label": "Brondolan Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_xcox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hasil_kerja_hari_kerja",
+   "fieldtype": "Float",
+   "label": "Hari Kerja Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_brondolan_amount",
+   "fieldtype": "Currency",
+   "label": "Brondolan Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_denda",
+   "fieldtype": "Currency",
+   "label": "Denda Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-06 15:22:01.768009",
+ "modified": "2025-10-16 11:58:30.729323",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

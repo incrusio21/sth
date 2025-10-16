@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-16 10:50:12.931609",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "perawatan_default_section",
+  "bkm_perawatan_component",
+  "column_break_cbzs",
+  "premi_sc",
+  "panen_default_section",
+  "bkm_panen_component",
+  "column_break_pxng",
+  "denda_sc",
+  "brondolan_sc"
+ ],
+ "fields": [
+  {
+   "fieldname": "panen_default_section",
+   "fieldtype": "Section Break",
+   "label": "Panen Default"
+  },
+  {
+   "fieldname": "denda_sc",
+   "fieldtype": "Link",
+   "label": "Denda Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "brondolan_sc",
+   "fieldtype": "Link",
+   "label": "Brondolan Salary Componen",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "bkm_panen_component",
+   "fieldtype": "Link",
+   "label": "BKM Panen Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_pxng",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "perawatan_default_section",
+   "fieldtype": "Section Break",
+   "label": "Perawatan Default"
+  },
+  {
+   "fieldname": "bkm_perawatan_component",
+   "fieldtype": "Link",
+   "label": "BKM Perawatan Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_cbzs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "premi_sc",
+   "fieldtype": "Link",
+   "label": "Premi Salary Component",
+   "options": "Salary Component"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-10-16 15:36:07.560958",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Plantation Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

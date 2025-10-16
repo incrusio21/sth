@@ -91,3 +91,9 @@ class PlantationController(Document):
             grand_total += self.get(fieldname) or 0
 
         self.grand_total = grand_total
+
+        self.after_calculate_grand_total()
+        
+    def after_calculate_grand_total(self):
+        # set on child class if needed
+        pass

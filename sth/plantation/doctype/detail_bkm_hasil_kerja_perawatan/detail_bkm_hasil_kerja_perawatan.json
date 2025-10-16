@@ -8,12 +8,15 @@
  "field_order": [
   "employee",
   "status",
-  "hasil",
+  "hari_kerja",
   "qty",
   "column_break_eqqk",
   "rate",
   "premi",
-  "amount"
+  "amount",
+  "reference_section",
+  "employee_payment_log",
+  "premi_epl"
  ],
  "fields": [
   {
@@ -63,23 +66,44 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hari Kerja",
+   "label": "Hasil Kerja",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "employee_payment_log",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_epl",
+   "fieldtype": "Link",
+   "label": "Premi Payment Log",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
    "read_only": 1
   },
   {
    "columns": 1,
-   "fieldname": "hasil",
+   "fieldname": "hari_kerja",
    "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Hasil Kerja",
-   "reqd": 1
+   "label": "Hari Kerja",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-03 10:51:57.402403",
+ "modified": "2025-10-16 15:54:11.527024",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Perawatan",

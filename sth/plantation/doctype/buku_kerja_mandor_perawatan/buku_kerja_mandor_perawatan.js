@@ -26,8 +26,8 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     setup(doc) {
         super.setup(doc)
 
-        this.fieldname_total.push("qty", "hasil")
-        this.kegiatan_fetch_fieldname = ["volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi"]
+        this.fieldname_total.push("qty", "hari_kerja", "premi")
+        this.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi"]
 
         let me = this
         for (const fieldname of ["hari_kerja", "volume_basis", "rupiah_basis"]) {
@@ -91,30 +91,18 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
     }
 
     update_rate_or_qty_value(item) {
-        if (item.parentfield == "hasil_kerja") {
-            item.qty = flt(item.hasil / this.frm.doc.volume_basis)
-            item.rate = item.rate || this.frm.doc.rupiah_basis
+        if (item.parentfield != "hasil_kerja") return
 
-            if (this.frm.doc.persentase_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.persentase_premi) / 100))) {
-                item.premi = this.frm.doc.rupiah_premi
-            }
+        item.rate = item.rate || this.frm.doc.rupiah_basis
+        item.hari_kerja = flt(item.qty / this.frm.doc.volume_basis)
+
+        if (this.frm.doc.persentase_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.persentase_premi) / 100))) {
+            item.premi = this.frm.doc.rupiah_premi
         }
     }
 
-    after_calculate_item_values(table_name, total) {
-        if (table_name == "hasil_kerja") {
-            this.frm.doc[`hari_kerja_total`] = flt(total["hasil"]) || 0;
-
-            for (let d of this.frm.doc.hasil_kerja) {
-                d.amount = flt(d.hasil) * flt(d.rate) + flt(d.premi);
-
-                if (d.premi) {
-                    d.amount += flt(d.premi);
-                }
-            }
-
-            this.frm.refresh_field("hasil_kerja");
-        }
+    after_calculate_grand_total(){
+		this.frm.doc.grand_total += this.frm.doc.hasil_kerja_premi 
     }
 
     get_rkh_data() {

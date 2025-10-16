@@ -15,13 +15,51 @@ force_item_fields = (
 )
 
 class BukuKerjaMandorController(PlantationController):
-    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.plantation_setting_def = []
+
+        self.payment_log_updater = [
+            {
+                "target_link": "employee_payment_log",
+                "target_amount": "amount",
+                "target_account": "kegiatan_account",
+                "target_salary_component": "salary_component",
+                "hari_kerja": True,
+                "removed_if_zero": False,
+            }
+        ]
+
     def validate(self):
+        self.validate_emp_hari_kerja()
+        self.get_plantation_setting()
         # self.get_rencana_kerja_harian()
         self.validate_hasil_kerja_harian()
         self.validate_previous_document()
         self.get_employee_payment_account()
         super().validate()
+    
+    def validate_emp_hari_kerja(self):
+        emp_log = self.check_emp_hari_kerja(validate=True)
+
+        for emp in self.hasil_kerja:
+            already_used = emp_log.get(emp.employee) or 0
+            if (emp.hari_kerja + already_used) > 1:
+                frappe.throw("Employee {} exceeds Hari Kerja".format(emp.employee))
+
+    def get_plantation_setting(self):
+        if not self.plantation_setting_def:
+            return
+        
+        target_fields = {
+            (ps[1] if isinstance(ps, list) else ps): (ps[0] if isinstance(ps, list) else ps)
+            for ps in self.plantation_setting_def
+        }
+
+        plan_settings = frappe.db.get_value("Plantation Settings", None, list(target_fields), as_dict=1)
+        
+        for key, fieldname in target_fields.items():
+            self.set(fieldname, plan_settings.get(key))
 
     def get_rencana_kerja_harian(self):
         from sth.controllers.queries import get_rencana_kerja_harian
@@ -51,73 +89,82 @@ class BukuKerjaMandorController(PlantationController):
         self.employee_payment_account = frappe.get_cached_value("Company", self.company, "employee_payment_account")
 
     def on_submit(self, update_realization=True):
-        self.make_payment_log()
-        self.create_journal_entry()
+        self.create_or_update_payment_log()
+        # self.create_journal_entry()
         self.make_attendance()
         self.check_emp_hari_kerja()
 
-        if update_realization:
-            self.update_rkb_realization()
+        # if update_realization:
+        #     self.update_rkb_realization()
 
-    def make_payment_log(self):
+    def create_or_update_payment_log(self):
         for emp in self.hasil_kerja:
-            doc = frappe.new_doc("Employee Payment Log")
+            for log_updater in self.payment_log_updater:
+                amount = emp.get(log_updater["target_amount"])
+                if target_key := emp.get(log_updater["target_link"]):
+                    doc = frappe.get_doc("Employee Payment Log", target_key)
+                else:
+                    if log_updater.get("removed_if_zero") and not amount:
+                        continue
 
-            doc.hari_kerja = emp.qty
-            doc.amount = emp.amount
+                    doc = frappe.new_doc("Employee Payment Log")
 
-            doc.employee = emp.employee
-            doc.company = self.company
-            doc.attendance_date = self.posting_date
-            
-            doc.kegiatan_account = self.kegiatan_account
+                doc.employee = emp.employee
+                doc.company = self.company
+                doc.posting_date = self.posting_date
 
-            doc.voucher_type = self.doctype
-            doc.voucher_no = self.name
+                doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
+                doc.amount = amount
 
-            doc.save()
+                doc.salary_component = self.get(log_updater["target_salary_component"])
+                
+                if log_updater.get("target_account"):
+                    doc.account = self.get(log_updater["target_account"])
 
-    def create_journal_entry(self):
-        if not (self.employee_payment_account and self.kegiatan_account):
-            frappe.throw("Please Set Employee Payment Account and Kegiatan Account First")
+                doc.save()
 
-        je = frappe.new_doc("Journal Entry")
-        je.update({
-            "company": self.company,
-            "posting_date": self.posting_date,
-        })
-        
-        total_payment = 0.0
-        for emp in self.hasil_kerja:
-            if not emp.amount:
-                continue
+                emp.set(log_updater["target_link"], doc.name)
 
-            je.append("accounts", {
-                "account": self.employee_payment_account,
-                "party_type": "Employee",
-                "party": emp.employee,
-                "debit_in_account_currency": emp.amount
-            })
-            je.append("accounts", {
-                "account": self.employee_payment_account,
-                "party_type": "Employee",
-                "party": emp.employee,
-                "credit_in_account_currency": emp.amount
-            })
-            total_payment += emp.amount
+        self.update_child_table("hasil_kerja")
 
-        je.append("accounts", {
-            "account": self.kegiatan_account,
-            "debit_in_account_currency": total_payment
-        })
-        je.append("accounts", {
-            "account": self.kegiatan_account,
-            "credit_in_account_currency": total_payment
-        })
+    # def create_journal_entry(self):
+    #     if not (self.salary_component and self.kegiatan_account):
+    #         frappe.throw("Please Set Salary Component and Kegiatan Account First")
 
-        je.submit()
+    #     je = frappe.new_doc("Journal Entry")
+    #     je.update({
+    #         "company": self.company,
+    #         "posting_date": self.posting_date,
+    #     })
 
-        self.db_set("journal_entry", je.name)
+    #     total_payment = {}
+    #     for je_updater in self.payment_log_updater:
+    #         for emp in self.hasil_kerja:
+    #             amount = emp.get(je_updater["target_amount"])
+    #             if not amount:
+    #                 continue
+                
+    #             total_payment.setdefault(je_updater["target_link"], {
+    #                 "salary_component":
+    #                 "biaya_kebun":
+    #             })
+    #             je.append("accounts", {
+    #                 "account": self.employee_payment_account,
+    #                 "party_type": "Employee",
+    #                 "party": emp.employee,
+    #                 "debit_in_account_currency": emp.amount
+    #             })
+
+    #             total_payment += emp.amount
+
+    #     je.append("accounts", {
+    #         "account": self.kegiatan_account,
+    #         "credit_in_account_currency": total_payment
+    #     })
+
+    #     je.submit()
+
+    #     self.db_set("journal_entry", je.name)
           
     def make_attendance(self):
         for emp in self.hasil_kerja:
@@ -141,7 +188,7 @@ class BukuKerjaMandorController(PlantationController):
                     
                 frappe.db.rollback(save_point=add_att)  # preserve transaction in postgres
 
-    def check_emp_hari_kerja(self):
+    def check_emp_hari_kerja(self, validate=False):
         employee_list = [emp.employee for emp in self.hasil_kerja]
 
         payment_log = frappe.qb.DocType("Employee Payment Log")
@@ -156,30 +203,42 @@ class BukuKerjaMandorController(PlantationController):
                 (payment_log.posting_date == self.posting_date)
             )
             .groupby(payment_log.employee)
-        ).run(as_dict=1)
+        ).run(as_dict=not validate)
 
+        if validate:
+            return frappe._dict(employee_hk)
+        
         for emp in employee_hk:
             if emp.hari_kerja > 1:
                 frappe.throw("Employee {} exceeds Hari Kerja".format(emp.employee))
 
     def on_cancel(self):
-        self.remove_journal()
+        # self.remove_journal()
         self.delete_payment_log()
 
-        self.update_rkb_realization()
+        # self.update_rkb_realization()
 
-    def remove_journal(self):
-        if not self.journal_entry:
-            return
+    # def remove_journal(self):
+    #     if not self.journal_entry:
+    #         return
         
-        doc = frappe.get_doc("Journal Entry", self.journal_entry)
-        if doc.docstatus == 1:
-            doc.cancel()
+    #     doc = frappe.get_doc("Journal Entry", self.journal_entry)
+    #     if doc.docstatus == 1:
+    #         doc.cancel()
 
-        self.db_set("journal_entry", "")
-        doc.delete()
+    #     self.db_set("journal_entry", "")
+    #     doc.delete()
                 
     def delete_payment_log(self):
+        for emp in self.hasil_kerja:
+            for log_updater in self.payment_log_updater:
+                value = emp.get(log_updater["target_link"])
+                if not value:
+                    continue
+
+                emp.db_set(log_updater["target_link"], "")
+                frappe.delete_doc("Employee Payment Log", value)
+
         filters={"voucher_type": self.doctype, "voucher_no": self.name}
         for emp_log in frappe.get_all("Employee Payment Log", 
             filters=filters, pluck="name"

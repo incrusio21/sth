@@ -8,15 +8,21 @@
  "field_order": [
   "employee",
   "status",
-  "hari_kerja",
-  "qty",
-  "qty_brondolan",
   "column_break_eqqk",
+  "hari_kerja",
+  "quantity_section",
+  "jumlah_janjang",
+  "qty_brondolan",
+  "column_break_rlyc",
+  "bjr",
+  "qty",
+  "rate_section",
   "rate",
   "brondolan",
+  "column_break_kngi",
   "brondolan_amount",
-  "denda",
   "amount",
+  "denda",
   "denda_section",
   "buah_tidak_dipanen",
   "buah_mentah_disimpan",
@@ -27,7 +33,12 @@
   "tangkai_panjang",
   "column_break_nnrp",
   "buah_tidak_disusun",
-  "pelepah_sengkleh"
+  "pelepah_sengkleh",
+  "reference_section",
+  "employee_payment_log",
+  "brondolan_epl",
+  "column_break_jqtg",
+  "denda_epl"
  ],
  "fields": [
   {
@@ -50,16 +61,15 @@
    "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Jumlah Janjang",
-   "reqd": 1
+   "label": "Weight",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "hari_kerja",
    "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Hari Kerja"
+   "label": "Hari Kerja",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_eqqk",
@@ -159,13 +169,80 @@
    "fieldtype": "Currency",
    "label": "Brondolan Amount",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "employee_payment_log",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "columns": 1,
+   "fieldname": "jumlah_janjang",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Janjang",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rlyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_section",
+   "fieldtype": "Section Break",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "column_break_kngi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jqtg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "brondolan_epl",
+   "fieldtype": "Link",
+   "label": "Brondolan Employee Payment Log",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "denda_epl",
+   "fieldtype": "Link",
+   "label": "Denda Employee Payment Log",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-17 11:40:06.113567",
+ "modified": "2025-10-16 15:53:55.322093",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Panen",
