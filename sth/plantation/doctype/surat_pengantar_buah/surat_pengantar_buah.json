@@ -17,10 +17,15 @@
   "pabrik_type",
   "amended_from",
   "section_break_xfoy",
-  "in_time",
-  "in_weight",
+  "column_break_dwtw",
+  "in_time_internal",
+  "out_time_internal",
+  "in_weight_internal",
+  "out_weight_internal",
   "column_break_wpkr",
+  "in_time",
   "out_time",
+  "in_weight",
   "out_weight",
   "pabrik_cut",
   "internal_section",
@@ -116,6 +121,7 @@
    "label": "Pabrik Input"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "in_time",
    "fieldtype": "Time",
    "label": "In Time",
@@ -126,6 +132,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "out_time",
    "fieldtype": "Time",
    "label": "Out Time",
@@ -136,12 +143,14 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "in_weight",
    "fieldtype": "Float",
    "label": "In Weight",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.pabrik_type == \"External\"",
    "fieldname": "pabrik_cut",
    "fieldtype": "Float",
@@ -161,6 +170,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "out_weight",
    "fieldtype": "Float",
    "label": "Out Weight",
@@ -215,13 +225,49 @@
    "fieldtype": "Float",
    "label": "Total Weight Internal",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "in_time_internal",
+   "fieldtype": "Time",
+   "label": "In Time Internal",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "out_time_internal",
+   "fieldtype": "Time",
+   "label": "Out Time Internal",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "in_weight_internal",
+   "fieldtype": "Float",
+   "label": "In Weight Internal",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "out_weight_internal",
+   "fieldtype": "Float",
+   "label": "Out Weight Internal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dwtw",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-23 16:50:05.590710",
+ "modified": "2025-10-17 23:17:40.110859",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

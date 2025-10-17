@@ -13,7 +13,9 @@
   "rupiah_basis",
   "upah_brondolan",
   "column_break_rqow",
+  "have_premi",
   "persentase_premi",
+  "min_basis_premi",
   "rupiah_premi"
  ],
  "fields": [
@@ -59,21 +61,36 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.have_premi",
    "fieldname": "persentase_premi",
    "fieldtype": "Percent",
    "label": "Persentase Premi"
   },
   {
+   "depends_on": "eval:doc.have_premi",
    "fieldname": "rupiah_premi",
    "fieldtype": "Currency",
    "label": "Rupiah Premi"
+  },
+  {
+   "default": "0",
+   "fieldname": "have_premi",
+   "fieldtype": "Check",
+   "label": "Have Premi"
+  },
+  {
+   "fieldname": "min_basis_premi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Min Basis Premi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-06 11:12:38.030040",
+ "modified": "2025-10-17 17:09:16.859711",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan Company",

@@ -10,7 +10,8 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         this.skip_table_amount = []
         this.skip_fieldname_amount = []
         this.kegiatan_fetch_fieldname = []
-
+        this.max_qty_fieldname = {}
+        
         // check daftar fieldname dengan total didalamny untuk d gabungkan ke grand_total
         if (!sth.plantation.doctype_ref[doctype]) {
             sth.plantation.setup_doctype_ref(doctype)
@@ -22,6 +23,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
     }
 
     company(doc) {
+        console.log("tsa")
         this.fetch_data_kegiatan(doc.kegiatan, doc.company)
     }
 
@@ -109,13 +111,15 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         }
 
         let data_table = me.frm.doc[table_name] || []
+        let max_qty = this.max_qty_fieldname[table_name] || undefined
 
         // menghitung amount, rotasi, qty
         for (const item of data_table) {
             // rate * qty * (rotasi jika ada)
             this.update_rate_or_qty_value(item)
-
-            item.amount = flt(item.rate * item.qty, precision("amount", item));
+            
+            let qty = !max_qty || item.qty < this.frm.doc[max_qty] ? item.qty : this.frm.doc[max_qty] 
+            item.amount = flt(item.rate * qty, precision("amount", item));
 
             this.update_value_after_amount(item)
 
@@ -276,6 +280,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
     }
 
     fetch_data_kegiatan(kegiatan, company) {
+        console.log("tes")
         let me = this
         if (!me.kegiatan_fetch_fieldname) return
 

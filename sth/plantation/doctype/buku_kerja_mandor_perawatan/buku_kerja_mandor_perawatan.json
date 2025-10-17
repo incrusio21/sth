@@ -11,7 +11,6 @@
   "kategori_kegiatan",
   "is_bibitan",
   "kegiatan",
-  "kegiatan_account",
   "uom",
   "blok",
   "batch",
@@ -23,9 +22,11 @@
   "kerani",
   "amended_from",
   "section_break_wzob",
+  "kegiatan_account",
   "volume_basis",
   "rupiah_basis",
-  "persentase_premi",
+  "have_premi",
+  "min_basis_premi",
   "rupiah_premi",
   "column_break_hvgf",
   "tahun_tanam",
@@ -36,7 +37,7 @@
   "hasil_kerja_hari_kerja",
   "section_break_lacm",
   "hasil_kerja_amount",
-  "hasil_kerja_premi",
+  "hasil_kerja_premi_amount",
   "column_break_alsz",
   "material_amount",
   "grand_total",
@@ -248,7 +249,6 @@
   {
    "fieldname": "volume_basis",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Volume Basis",
    "read_only": 1
   },
@@ -277,9 +277,9 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.have_premi",
    "fieldname": "rupiah_premi",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Rupiah Premi",
    "read_only": 1
   },
@@ -339,15 +339,7 @@
   {
    "fieldname": "rupiah_basis",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Rupiah/Satuan Basis",
-   "read_only": 1
-  },
-  {
-   "fieldname": "persentase_premi",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "% Premi",
    "read_only": 1
   },
   {
@@ -357,12 +349,6 @@
    "label": "Kegiatan",
    "options": "Kegiatan",
    "reqd": 1
-  },
-  {
-   "fieldname": "hasil_kerja_premi",
-   "fieldtype": "Currency",
-   "label": "Upah Permi Total",
-   "read_only": 1
   },
   {
    "fieldname": "hasil_kerja_hari_kerja",
@@ -387,13 +373,33 @@
    "label": "Premi Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "have_premi",
+   "fieldtype": "Check",
+   "label": "Have Premi",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.have_premi",
+   "fieldname": "min_basis_premi",
+   "fieldtype": "Float",
+   "label": "Min Basis Premi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_premi_amount",
+   "fieldtype": "Currency",
+   "label": "Upah Permi Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-16 15:36:54.938034",
+ "modified": "2025-10-17 21:13:40.092147",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

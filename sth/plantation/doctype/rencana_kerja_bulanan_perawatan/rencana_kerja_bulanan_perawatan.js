@@ -145,7 +145,6 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
 
         doc.jumlah_tenaga_kerja = doc.volume_basis ? flt(doc.qty / doc.volume_basis) : 0
         doc.tenaga_kerja_amount = flt(doc.qty * doc.rupiah_basis) + flt(doc.premi)
-        // doc.tenaga_kerja_amount = flt(doc.jumlah_tenaga_kerja * doc.rupiah_basis) + flt(doc.premi)
     }
 }
 

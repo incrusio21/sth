@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet
 
 
@@ -19,6 +20,9 @@ class Kegiatan(NestedSet):
 	def validate_items_company(self):
 		if self.is_group:
 			self.items = []
+
+		for d in self.items:
+			d.min_basis_premi = flt(d.volume_basis * (100 + d.persentase_premi) / 100) if d.have_premi else 0
 
 	def validate_material(self):
 		if self.is_group:

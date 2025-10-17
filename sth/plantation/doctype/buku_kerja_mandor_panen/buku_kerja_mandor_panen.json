@@ -30,11 +30,11 @@
   "tahun_tanam",
   "luas_blok",
   "section_break_wzob",
-  "hasil_kerja_qty",
+  "hasil_kerja_jumlah_janjang",
   "hasil_kerja_qty_brondolan",
   "hasil_kerja_hari_kerja",
   "column_break_hvgf",
-  "transfered_hasil_kerja",
+  "transfered_janjang",
   "transfered_brondolan",
   "netto_weight",
   "weight_total",
@@ -196,12 +196,6 @@
   {
    "fieldname": "section_break_lacm",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "hasil_kerja_qty",
-   "fieldtype": "Float",
-   "label": "Hasil Kerja Total",
-   "read_only": 1
   },
   {
    "fieldname": "hasil_kerja_amount",
@@ -383,12 +377,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "transfered_hasil_kerja",
-   "fieldtype": "Float",
-   "label": "Transfered Hasil Kerja",
-   "read_only": 1
-  },
-  {
    "fieldname": "transfered_brondolan",
    "fieldtype": "Float",
    "label": "Transfered Brondolan",
@@ -491,13 +479,25 @@
    "label": "Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_jumlah_janjang",
+   "fieldtype": "Float",
+   "label": "Janjang Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transfered_janjang",
+   "fieldtype": "Float",
+   "label": "Transfered Hasil Kerja",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-16 11:58:30.729323",
+ "modified": "2025-10-17 22:50:53.530678",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

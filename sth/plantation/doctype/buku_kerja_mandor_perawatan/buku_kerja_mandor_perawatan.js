@@ -1,46 +1,28 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
+sth.plantation.setup_bkm_controller()
+
 frappe.ui.form.on("Buku Kerja Mandor Perawatan", {
     refresh(frm) {
 
     },
     kategori_kegiatan(frm) {
-        frm.set_value("blok", "")
-        frm.set_value("batch", "")
+        frm.set_value({"blok": "", "batch": ""})
     },
 });
 
-// frappe.ui.form.on("Detail BKM Hasil Kerja Perawatan", {
-//     hasil(frm, cdt, cdn) {
-//         let item = locals[cdt][cdn]
-//         const amount = item.hasil
-
-//         frappe.model.set_value(cdt, cdn, "amount", amount)
-//         refresh_field("hasil_kerja")
-//         console.log(item.hasil, item.rate, item.premi, item.amount)
-//     },
-// });
-
-sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends sth.plantation.TransactionController {
+sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends sth.plantation.BKMController {
     setup(doc) {
         super.setup(doc)
+               
+        this.fieldname_total.push("premi_amount")
+        this.kegiatan_fetch_fieldname.push("have_premi", "min_basis_premi", "rupiah_premi")
 
-        this.fieldname_total.push("qty", "hari_kerja", "premi")
-        this.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi"]
+        this.get_data_rkh_field.push("batch")
+        this.hasil_kerja_update_field.push("have_premi", "min_basis_premi", "rupiah_premi")
 
-        let me = this
-        for (const fieldname of ["hari_kerja", "volume_basis", "rupiah_basis"]) {
-            frappe.ui.form.on(doc.doctype, fieldname, function (doc, cdt, cdn) {
-                me.calculate_total(cdt, cdn, "hasil_kerja")
-            });
-        }
-
-        for (const fieldname of ["kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
-            frappe.ui.form.on(doc.doctype, fieldname, function () {
-                // me.get_rkh_data()
-            });
-        }
+        this.setup_bkm(doc)
     }
 
     set_query_field() {
@@ -50,18 +32,6 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             return {
                 filters: {
                     is_perawatan: 1
-                }
-            }
-        })
-
-        this.frm.set_query("blok", function (doc) {
-            if (!doc.divisi) {
-                frappe.throw("Please Select Divisi First")
-            }
-
-            return {
-                filters: {
-                    divisi: doc.divisi,
                 }
             }
         })
@@ -86,48 +56,24 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
 
     }
 
-    hasil(_, cdt, cdn) {
-        this.calculate_total(cdt, cdn)
-    }
-
     update_rate_or_qty_value(item) {
         if (item.parentfield != "hasil_kerja") return
 
+        let doc = this.frm.doc
+        
         item.rate = item.rate || this.frm.doc.rupiah_basis
-        item.hari_kerja = flt(item.qty / this.frm.doc.volume_basis)
+        item.hari_kerja = flt(item.qty / doc.volume_basis)
 
-        if (this.frm.doc.persentase_premi && item.hari_kerja >= flt(this.frm.doc.volume_basis * ((1 + this.frm.doc.persentase_premi) / 100))) {
-            item.premi = this.frm.doc.rupiah_premi
+        if (doc.have_premi & item.hari_kerja > 1){
+            item.hari_kerja =  1
+            if (doc.persentase_premi && item.qty >= doc.min_basis_premi) {
+                item.premi_amount = doc.rupiah_premi
+            }
         }
     }
 
-    after_calculate_grand_total(){
-		this.frm.doc.grand_total += this.frm.doc.hasil_kerja_premi 
-    }
-
-    get_rkh_data() {
-        let me = this
-        let doc = this.frm.doc
-        if (
-            !(doc.kegiatan && doc.divisi && doc.posting_date) ||
-            (doc.is_bibitan && !doc.batch) ||
-            (!doc.is_bibitan && !doc.blok)
-        ) return;
-
-        frappe.call({
-            method: "sth.controllers.queries.get_rencana_kerja_harian",
-            args: {
-                kode_kegiatan: doc.kegiatan,
-                divisi: doc.divisi,
-                blok: doc.is_bibitan ? doc.batch : doc.blok,
-                posting_date: doc.posting_date,
-                is_bibitan: doc.is_bibitan
-            },
-            freeze: true,
-            callback: function (data) {
-                me.frm.set_value(data.message)
-            }
-        })
+    update_value_after_amount(item) {
+        item.sub_total = flt(item.amount) + flt(item.premi_amount)
     }
 }
 

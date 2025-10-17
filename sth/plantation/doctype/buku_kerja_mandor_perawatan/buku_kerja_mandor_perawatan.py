@@ -15,11 +15,9 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			["premi_salary_component", "premi_sc"],
 		])
 
-		self.fieldname_total.extend([
-			"qty", "hari_kerja", "premi"
-		])
+		self.fieldname_total.extend(["premi_amount"])
 
-		self.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi"]
+		self.kegiatan_fetch_fieldname.extend(["have_premi", "min_basis_premi", "rupiah_premi"])
 
 		self.payment_log_updater.extend([
 			{
@@ -36,13 +34,17 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		
 		item.rate = item.get("rate") or self.rupiah_basis
 		item.hari_kerja = flt(item.qty / self.volume_basis)
+		
+		if self.have_premi and item.hari_kerja > 1:
+			item.hari_kerja =  1
 
-		if self.persentase_premi and item.hari_kerja > flt(self.volume_basis * ((1 + self.persentase_premi) / 100)):
-			item.premi = self.rupiah_premi
+			if item.qty >= self.min_basis_premi:
+				item.premi_amount = self.rupiah_premi
 
-	def after_calculate_grand_total(self):
-		self.grand_total += self.hasil_kerja_premi 
-
+	def update_value_after_amount(self, item, precision):
+		# Hitung total brondolan
+		item.sub_total = flt(item.amount + item.premi_amount, precision)
+		
 	def on_submit(self, update_realization=True):
 		super().on_submit(update_realization=False)
 		if not self.material:

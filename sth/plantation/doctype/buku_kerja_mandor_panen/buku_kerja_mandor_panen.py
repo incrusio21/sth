@@ -18,10 +18,10 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		])
 
 		self.fieldname_total.extend([
-			"hari_kerja", "qty", "qty_brondolan", "brondolan_amount", "denda"
+			"jumlah_janjang", "qty_brondolan", "brondolan_amount", "denda"
 		])
 
-		self.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis", "persentase_premi", "rupiah_premi", "upah_brondolan"]
+		self.kegiatan_fetch_fieldname.extend(["upah_brondolan"])
 
 		self.payment_log_updater.extend([
 			{
@@ -70,6 +70,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		# Hitung total denda dengan menjumlahkan rate * nilai item
 		item.denda = sum(flt(item.get(field)) * flt(self.get(f"{field}_rate")) for field in factors)
 
+		item.sub_total = flt(item.amount + item.brondolan_amount, precision)
+
 	def after_calculate_grand_total(self):
 		self.grand_total -= self.hasil_kerja_denda 
 
@@ -98,7 +100,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		spb = frappe.qb.DocType("SPB Timbangan Pabrik")
 
-		self.transfered_hasil_kerja, self.transfered_brondolan = (
+		self.transfered_janjang, self.transfered_brondolan = (
 			frappe.qb.from_(spb)
 			.select(
 				Coalesce(Sum(spb.qty), 0), 
@@ -110,10 +112,10 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			)
 		).run()[0]
 
-		if self.transfered_hasil_kerja > self.hasil_kerja_qty:
+		if self.transfered_janjang > self.hasil_kerja_jumlah_janjang:
 			frappe.throw("Transfered Janjang exceeds limit.")
 
-		if self.transfered_brondolan > self.hasil_kerja_qty:
+		if self.transfered_brondolan > self.hasil_kerja_qty_brondolan:
 			frappe.throw("Transfered Brondolan exceeds limit.")
 
 		self.db_update()

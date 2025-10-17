@@ -10,6 +10,7 @@
   "column_break_ojxs",
   "company",
   "posting_date",
+  "is_paid",
   "section_break_rfin",
   "column_break_rhjm",
   "column_break_uorb",
@@ -104,13 +105,20 @@
    "label": "Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_paid",
+   "fieldtype": "Check",
+   "label": "Is Paid",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-16 14:58:52.390947",
+ "modified": "2025-10-17 16:28:04.303690",
  "modified_by": "Administrator",
  "module": "Payroll Log",
  "name": "Employee Payment Log",

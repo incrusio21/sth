@@ -7,13 +7,6 @@
 // 	},
 // });
 
-frappe.ui.form.on("SPB Timbangan Pabrik", {
-	total_weight_internal(frm, cdt, cdn) {
-        let item = locals[cdt][cdn]
-        frappe.model.set_value(cdt, cdn, "netto_weight_internal", flt(item.total_weight_internal - item.brondolan_qty))
-	},
-});
-
 sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.form.Controller {
     refresh() {
         this.set_query_field()
@@ -27,9 +20,15 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         }
 
         if(me.frm.doc.docstatus == 1){
-            this.frm.add_custom_button("Update Timbangan", function(){
+            this.frm.add_custom_button("Pabrik", function(){
                 me.set_timbangan()
-            })
+            }, "Update Timbangan")
+
+            if(me.frm.doc.pabrik_type == "External"){
+                this.frm.add_custom_button("Internal", function(){
+                    me.set_timbangan("_internal")
+                }, "Update Timbangan")
+            }
         }
     }
 
@@ -101,49 +100,31 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         })
     }
 
-    set_timbangan(){
+    set_timbangan(tipe_timbangan=""){
         let me = this
         let doc = this.frm.doc
-        
+        let timbangan = doc.in_time ? "out" : "in"
+
         let fields = [
             {
                 fieldtype: "Time",
-                fieldname: "in_time",
+                fieldname: `${timbangan}_time${tipe_timbangan}`,
                 disabled: 0,
                 reqd: 1,
-                label: __("In Time"),
+                label: __(`${frappe.unscrub(timbangan)} Time`),
                 default: doc.in_time
             },
             {
                 fieldtype: "Float",
-                fieldname: "in_weight",
+                fieldname: `${timbangan}_weight${tipe_timbangan}`,
                 disabled: 0,
                 reqd: 1,
-                label: __("In Weight"),
+                label: __(`${frappe.unscrub(timbangan)} Weight (Kg)`),
                 default: doc.in_weight
-            },
-            {
-                fieldtype: "Column Break",
-            },
-            {
-                fieldtype: "Time",
-                fieldname: "out_time",
-                disabled: 0,
-                reqd: 1,
-                label: __("Out Time"),
-                default: doc.out_time
-            },
-            {
-                fieldtype: "Float",
-                fieldname: "out_weight",
-                disabled: 0,
-                reqd: 1,
-                label: __("Out Weight"),
-                default: doc.out_weight
-            },
+            }
         ]
 
-        if(doc.pabrik_type == "External"){
+        if(!tipe_timbangan && timbangan == "out" && doc.pabrik_type == "External"){
             fields.push({
                 fieldtype: "Float",
                 fieldname: "pabrik_cut",

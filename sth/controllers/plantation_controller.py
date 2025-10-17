@@ -9,6 +9,7 @@ from frappe.model.document import Document
 class PlantationController(Document):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.max_qty_fieldname = {}
         self.fieldname_total = ["amount"]
         self.skip_table_amount = []
         self.skip_calculate_table = []
@@ -44,12 +45,14 @@ class PlantationController(Document):
         
         # set precision setiap table agar pembulatan untuk menghidari selesih grand total akibat floating-point precision
         precision = frappe.get_precision(options, "amount")
+        max_qty = self.max_qty_fieldname.get(table_fieldname)
 
         for d in table_item:
             # update nilai rate atau qty sebelum perhitungan
             self.update_rate_or_qty_value(d, precision)
 
-            d.amount = flt((d.rate or 0) * (d.qty or 0), precision)
+            qty = d.qty if not max_qty or d.qty < self.get(max_qty) else self.get(max_qty) 
+            d.amount = flt((d.rate or 0) * qty, precision)
 
             # update nilai setelah menghitung amount
             self.update_value_after_amount(d, precision)

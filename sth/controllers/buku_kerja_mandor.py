@@ -4,6 +4,7 @@
 import frappe
 from frappe.query_builder.functions import Sum
 
+from frappe.utils import get_link_to_form
 from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 from sth.controllers.plantation_controller import PlantationController
@@ -18,7 +19,17 @@ class BukuKerjaMandorController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.plantation_setting_def = []
+        
+        self.fieldname_total.extend([
+			"hari_kerja", "qty"
+		])
+        
+        self.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis"]
 
+        self.max_qty_fieldname = {
+            "hasil_kerja": "volume_basis"
+        }
+        
         self.payment_log_updater = [
             {
                 "target_link": "employee_payment_log",
@@ -31,13 +42,14 @@ class BukuKerjaMandorController(PlantationController):
         ]
 
     def validate(self):
-        self.validate_emp_hari_kerja()
         self.get_plantation_setting()
         # self.get_rencana_kerja_harian()
         self.validate_hasil_kerja_harian()
         self.validate_previous_document()
         self.get_employee_payment_account()
         super().validate()
+        
+        self.validate_emp_hari_kerja()
     
     def validate_emp_hari_kerja(self):
         emp_log = self.check_emp_hari_kerja(validate=True)
@@ -57,7 +69,9 @@ class BukuKerjaMandorController(PlantationController):
         }
 
         plan_settings = frappe.db.get_value("Plantation Settings", None, list(target_fields), as_dict=1)
-        
+        if not plan_settings:
+            frappe.throw("Please set data in {} first".format(get_link_to_form("Plantation Settings", "Plantation Settings")))
+
         for key, fieldname in target_fields.items():
             self.set(fieldname, plan_settings.get(key))
 
@@ -112,6 +126,7 @@ class BukuKerjaMandorController(PlantationController):
                 doc.employee = emp.employee
                 doc.company = self.company
                 doc.posting_date = self.posting_date
+                doc.status = "Approved"
 
                 doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
                 doc.amount = amount
@@ -235,7 +250,7 @@ class BukuKerjaMandorController(PlantationController):
                 value = emp.get(log_updater["target_link"])
                 if not value:
                     continue
-
+                
                 emp.db_set(log_updater["target_link"], "")
                 frappe.delete_doc("Employee Payment Log", value)
 

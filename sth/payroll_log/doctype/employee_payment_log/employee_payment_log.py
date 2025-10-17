@@ -6,4 +6,7 @@ from frappe.model.document import Document
 
 
 class EmployeePaymentLog(Document):
-    pass
+    
+    def validate(self):
+        if self.is_paid:
+            frappe.throw("Payment for Employee {} has been made.".format(self.employee))

@@ -18,8 +18,8 @@ class SuratPengantarBuah(Document):
 		self.calculate_janjang_brondolan()
 
 	def remove_input_pabrik(self):
-		self.in_time = self.out_time = ""
-		self.in_weight = self.out_weight = self.pabrik_cut = self.netto_weight = self.total_weight = 0
+		self.in_time = self.out_time = self.in_time_internal = self.out_time_internal = ""
+		self.in_weight = self.in_weight_internal = self.out_weight = self.out_weight_internal = self.pabrik_cut = 0
 
 	def get_bkm_panen(self):
 		for d in self.details:
@@ -33,24 +33,14 @@ class SuratPengantarBuah(Document):
 						self.set(fieldname, value)
 
 	def calculate_janjang_brondolan(self):
-		total_janjang = total_brondolan = netto_weight_i = total_weight_i = 0.0
+		total_janjang = total_brondolan = 0.0
 		for d in self.details:
 			total_janjang += d.qty
 			total_brondolan += d.brondolan_qty
 			d.netto_weight = d.total_weight = 0.0
 
-			if self.pabrik_type == "External":
-				d.netto_weight_internal = d.total_weight_internal - d.brondolan_qty
-			else:
-				d.netto_weight_internal = d.total_weight_internal = 0.0
-
-			netto_weight_i += d.netto_weight_internal
-			total_weight_i += d.total_weight_internal
-
 		self.total_janjang = total_janjang
 		self.total_brondolan = total_brondolan
-		self.netto_weight_internal = netto_weight_i
-		self.total_weight_internal = total_weight_i
 
 	def on_submit(self):
 		self.update_transfered_bkm_panen()
@@ -68,30 +58,30 @@ class SuratPengantarBuah(Document):
 		if isinstance(args, str):
 			args = json.loads(args)
 		
-		self.pabrik_cut = 0.0
-		
 		self.update(args)
+		
+		# if self.out_time:
+		# 	# hitung janjang dan total brondolan terlebih dahulu
+		# 	self.calculate_janjang_brondolan()
 
-		# hitung janjang dan total brondolan terlebih dahulu
-		self.calculate_janjang_brondolan()
+		# 	if self.in_weight and self.out_weight:
+		# 		self.netto_weight = flt(self.in_weight - self.out_weight - self.total_brondolan - self.pabrik_cut, self.precision("netto_weight"))
+		# 		self.total_weight = self.netto_weight + self.total_brondolan
 
-		if self.in_weight and self.out_weight:
-			self.netto_weight = flt(self.in_weight - self.out_weight - self.total_brondolan - self.pabrik_cut, self.precision("netto_weight"))
-			self.total_weight = self.netto_weight + self.total_brondolan
+		# 	for d in self.details:
+		# 		d.netto_weight = flt((self.netto_weight * d.qty / self.total_janjang), d.precision("netto_weight"))
+		# 		d.total_weight = d.netto_weight + d.brondolan_qty
 
-		for d in self.details:
-			d.netto_weight = flt((self.netto_weight * d.qty / self.total_janjang), d.precision("netto_weight"))
-			d.total_weight = d.netto_weight + d.brondolan_qty
-
-		self.db_update_all()
-		self.update_transfered_bkm_panen()
+		self.save()
+		# self.db_update_all()
+		# self.update_transfered_bkm_panen()
 
 @frappe.whitelist()
 def get_bkm_panen(blok, posting_date):
 	bkm_panen = frappe.get_value("Buku Kerja Mandor Panen", {
 		"blok": blok, "posting_date": posting_date, "docstatus": 1
 	}, ["name", 
-	 	"hasil_kerja_qty", "transfered_hasil_kerja",
+	 	"hasil_kerja_jumlah_janjang", "transfered_janjang",
 		"hasil_kerja_qty_brondolan", "transfered_brondolan", "is_rekap"
 	], as_dict=1)
 
@@ -105,7 +95,7 @@ def get_bkm_panen(blok, posting_date):
 
 	ress = { 
 		"bkm_panen": bkm_panen.name,
-		"qty": flt(bkm_panen.hasil_kerja_qty - bkm_panen.transfered_hasil_kerja),
+		"qty": flt(bkm_panen.hasil_kerja_jumlah_janjang - bkm_panen.transfered_janjang),
 		"brondolan_qty": flt(bkm_panen.hasil_kerja_qty_brondolan - bkm_panen.transfered_brondolan),
 	}
 

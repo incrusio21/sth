@@ -76,8 +76,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
     }
 
     before_calculate_grand_total() {
-        let qty = this.frm.doc.tipe_kegiatan == "Panen" ? this.frm.doc.target_volume : this.frm.doc.qty_tenaga_kerja
-        this.frm.doc.kegiatan_amount = flt(this.frm.doc.rate_basis * qty)
+        this.frm.doc.kegiatan_amount = flt(this.frm.doc.rupiah_basis * this.frm.doc.target_volume)
     }
 
     get_rkb_data() {
