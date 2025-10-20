@@ -63,7 +63,8 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         
         item.rate = item.rate || this.frm.doc.rupiah_basis
         item.hari_kerja = flt(item.qty / doc.volume_basis)
-
+        item.premi_amount = 0
+        
         if (doc.have_premi & item.hari_kerja > 1){
             item.hari_kerja =  1
             if (doc.persentase_premi && item.qty >= doc.min_basis_premi) {

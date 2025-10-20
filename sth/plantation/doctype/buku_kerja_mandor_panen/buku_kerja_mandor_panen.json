@@ -19,6 +19,7 @@
   "mandor",
   "mandor1",
   "kerani",
+  "status_panen",
   "status",
   "amended_from",
   "detail_bkm_section",
@@ -253,9 +254,9 @@
   },
   {
    "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "label": "Status",
-   "options": "Normal\nBanjir"
+   "read_only": 1
   },
   {
    "fieldname": "penalty_fees_section",
@@ -355,6 +356,7 @@
    "fieldname": "bjr",
    "fieldtype": "Float",
    "label": "BJR",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -380,18 +382,21 @@
    "fieldname": "transfered_brondolan",
    "fieldtype": "Float",
    "label": "Transfered Brondolan",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "weight_total",
    "fieldtype": "Float",
    "label": "Weight Total",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "netto_weight",
    "fieldtype": "Float",
    "label": "Netto Weight",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -490,14 +495,21 @@
    "fieldname": "transfered_janjang",
    "fieldtype": "Float",
    "label": "Transfered Hasil Kerja",
+   "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "status_panen",
+   "fieldtype": "Select",
+   "label": "Status Panen",
+   "options": "Normal\nBanjir"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-17 22:50:53.530678",
+ "modified": "2025-10-18 21:55:49.649319",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

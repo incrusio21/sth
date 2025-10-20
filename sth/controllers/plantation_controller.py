@@ -18,8 +18,7 @@ class PlantationController(Document):
 
     def validate(self):
         self.fetch_kegiatan_data()
-        self.calculate_item_table_values()
-        self.calculate_grand_total()
+        self.calculate()
 
     def fetch_kegiatan_data(self):
         if not self.kegiatan_fetch_fieldname:
@@ -31,6 +30,10 @@ class PlantationController(Document):
             from sth.controllers.queries import kegiatan_fetch_data
 
             self.update(kegiatan_fetch_data(self.kegiatan, self.company, self.kegiatan_fetch_fieldname))
+
+    def calculate(self):
+        self.calculate_item_table_values()
+        self.calculate_grand_total()
 
     def calculate_item_table_values(self):
         for df in self._get_table_fields():

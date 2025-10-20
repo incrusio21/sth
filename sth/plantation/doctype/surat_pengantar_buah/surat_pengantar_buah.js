@@ -15,19 +15,25 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         for (const fieldname of ["blok", "panen_date"]) {
             frappe.ui.form.on("SPB Timbangan Pabrik", fieldname, function(frm, cdt, cdn) {
                 let items = locals[cdt][cdn]
-                me.get_bkm_panen_data(items)
+                me.get_bkm_panen_data(items, "blok", "panen_date")
             });
         }
 
-        if(me.frm.doc.docstatus == 1){
-            this.frm.add_custom_button("Pabrik", function(){
-                me.set_timbangan()
-            }, "Update Timbangan")
+        for (const fieldname of ["blok_restan", "panen_date_restan"]) {
+            frappe.ui.form.on("SPB Timbangan Pabrik", fieldname, function(frm, cdt, cdn) {
+                let items = locals[cdt][cdn]
+                me.get_bkm_panen_data(items, "blok_restan", "panen_date_restan", true)
+            });
+        }
 
-            if(me.frm.doc.pabrik_type == "External"){
-                this.frm.add_custom_button("Internal", function(){
-                    me.set_timbangan("_internal")
-                }, "Update Timbangan")
+        if(me.frm.doc.docstatus == 1 && me.frm.doc.workflow_state != "Weighed"){
+            const { pabrik_type } = me.frm.doc;
+
+            me.frm.add_custom_button("Mill", () => me.set_timbangan(), "Weighbridge");
+
+            // Internal In/Out
+            if (pabrik_type == "External") {
+                me.frm.add_custom_button("Internal", () => me.set_timbangan("_internal"), "Weighbridge");
             }
         }
     }
@@ -80,22 +86,36 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
                 }
             }
         })
+
+        this.frm.set_query("blok_restan", "details", function(doc){
+            return{
+                filters: {
+                    unit: ["=", doc.unit]
+                }
+            }
+        })
     }
 
-    get_bkm_panen_data(item){
+    get_bkm_panen_data(item, blok_fieldname, date_fieldname, restan=false){
         let me = this
+        let restan_field = restan ? "_restan" : ""
 
-        if(!(item.blok && item.panen_date)) return
+        if(!(item[blok_fieldname] && item[date_fieldname])) return
         
         frappe.call({
             method: "sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah.get_bkm_panen",
             args: {
-                blok: item.blok,
-                posting_date: item.panen_date
+                blok: item[blok_fieldname],
+                posting_date: item[date_fieldname],
+                restan: restan
             },
             freeze: true,
-            callback: function (data) {
-                frappe.model.set_value(item.doctype, item.name, data.message)
+            callback: function (r) {
+                $.each(r.message, function(k, v) {
+                    item[k + restan_field] = v;
+                });
+
+                me.frm.refresh_fields("items")
             }
         })
     }
@@ -103,35 +123,53 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
     set_timbangan(tipe_timbangan=""){
         let me = this
         let doc = this.frm.doc
-        let timbangan = doc.in_time ? "out" : "in"
 
         let fields = [
             {
                 fieldtype: "Time",
-                fieldname: `${timbangan}_time${tipe_timbangan}`,
+                fieldname: `in_time${tipe_timbangan}`,
                 disabled: 0,
                 reqd: 1,
-                label: __(`${frappe.unscrub(timbangan)} Time`),
+                label: __(`In Time`),
                 default: doc.in_time
             },
             {
                 fieldtype: "Float",
-                fieldname: `${timbangan}_weight${tipe_timbangan}`,
+                fieldname: `in_weight${tipe_timbangan}`,
                 disabled: 0,
                 reqd: 1,
-                label: __(`${frappe.unscrub(timbangan)} Weight (Kg)`),
+                label: __(`In Weight (Kg)`),
                 default: doc.in_weight
+            },
+            {
+                fieldtype: "Column Break",
+            },
+            {
+                fieldtype: "Time",
+                fieldname: `out_time${tipe_timbangan}`,
+                disabled: 0,
+                reqd: 1,
+                label: __(`Out Time`),
+                default: doc.out_time
+            },
+            {
+                fieldtype: "Float",
+                fieldname: `out_weight${tipe_timbangan}`,
+                disabled: 0,
+                reqd: 1,
+                label: __(`Out Weight (Kg)`),
+                default: doc.out_weight
             }
         ]
 
-        if(!tipe_timbangan && timbangan == "out" && doc.pabrik_type == "External"){
+        if(!tipe_timbangan && doc.pabrik_type == "External"){
             fields.push({
                 fieldtype: "Float",
-                fieldname: "pabrik_cut",
+                fieldname: "mill_cut",
                 disabled: 0,
                 reqd: 1,
-                label: __("Potongan Pabrik"),
-                default: doc.pabrik_cut
+                label: __("Mill Cut"),
+                default: doc.mill_cut
             })
         }
 
@@ -158,4 +196,5 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         dialog.show();
     }
 }
+
 cur_frm.script_manager.make(sth.plantation.SuratPengantarBuah);

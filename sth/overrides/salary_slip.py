@@ -52,7 +52,7 @@ class SalarySlip(SalarySlip):
 
             emp_pl = (
                 frappe.qb.from_(epl)
-                .select(epl.name, epl.account, epl.amount)
+                .select(epl.name, epl.account, epl.amount, epl.status)
                 .where(
                     (epl.employee == self.employee)
                     & (epl.company == self.company)
@@ -71,7 +71,10 @@ class SalarySlip(SalarySlip):
                     account_total[pl.account] += pl.amount
 
                 total_amount += pl.amount
-                
+
+                if pl.status != "Approved":
+                    frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
+
                 self.payment_log_list.append(pl.name)
 
             struct_row.account_rate = json.dumps(account_total)

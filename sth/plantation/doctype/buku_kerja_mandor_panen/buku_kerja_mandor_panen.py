@@ -39,7 +39,28 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		])
 
 	def validate(self):
+		self.reset_automated_data()
+
 		super().validate()
+
+	def reset_automated_data(self):
+		self.transfered_janjang = self.transfered_brondolan = \
+		self.netto_weight = self.weight_total = self.bjr = 0
+
+	def on_submit(self):
+		self.set_status()
+
+		super().on_submit()
+
+	def set_status(self, update_payment_log=False):
+		if frappe.db.exists("Rekap Timbangan Panen", {"buku_kerja_mandor_panen": self.name, "docstatus": 1}):
+			self.status = "Approved"
+		else:
+			self.status = "Pending"
+
+		if update_payment_log:
+			self.calculate()
+			self.create_or_update_payment_log()
 
 	def set_salary_component(self):
 		hr_panen = frappe.db.get_value("Plantation Settings", None, ["denda_sc", "brondolan_sc"], as_dict=1)
@@ -51,6 +72,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		if item.parentfield != "hasil_kerja":
 			return
 		
+		item.qty = self.bjr
 		item.rate = flt(item.get("rate") or self.rupiah_basis)
 		item.brondolan = flt(self.upah_brondolan)
 
@@ -95,12 +117,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.db_set("is_used", 1 if kontanan else 0)
 
 	def calculate_transfered_weight(self):
-		if self.is_rekap:
-			frappe.throw("BKM Panen already have Rekap Timbangan Panen")
-
 		spb = frappe.qb.DocType("SPB Timbangan Pabrik")
 
-		self.transfered_janjang, self.transfered_brondolan = (
+		transfered_janjang, transfered_brondolan = (
 			frappe.qb.from_(spb)
 			.select(
 				Coalesce(Sum(spb.qty), 0), 
@@ -111,6 +130,20 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
                 (spb.bkm_panen == self.name)
 			)
 		).run()[0]
+
+		transfered_restan = (
+			frappe.qb.from_(spb)
+			.select(
+				Coalesce(Sum(spb.qty_restan), 0), 
+            )
+			.where(
+                (spb.docstatus == 1) &
+                (spb.bkm_panen_restan == self.name)
+			)
+		).run()[0][0]
+
+		self.transfered_janjang = flt(transfered_janjang + transfered_restan, self.precision("transfered_janjang"))
+		self.transfered_brondolan = transfered_brondolan
 
 		if self.transfered_janjang > self.hasil_kerja_jumlah_janjang:
 			frappe.throw("Transfered Janjang exceeds limit.")
@@ -142,4 +175,5 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.is_rekap, values = (1, rekap_timbangan[0]) if rekap_timbangan else (0, (0, 0, 0))
 		self.bjr, self.netto_weight, self.weight_total = values
 
+		self.set_status(update_payment_log=True)
 		self.db_update()

@@ -11,11 +11,18 @@
   "column_break_wtdb",
   "qty",
   "brondolan_qty",
+  "bkm_panen",
+  "restan_section",
+  "blok_restan",
+  "panen_date_restan",
+  "column_break_sjkl",
+  "qty_restan",
+  "bkm_panen_restan",
   "section_break_trza",
+  "total_janjang",
   "total_weight",
-  "netto_weight",
   "column_break_mxsp",
-  "bkm_panen"
+  "netto_weight"
  ],
  "fields": [
   {
@@ -72,16 +79,57 @@
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Total Weight",
    "read_only": 1
+  },
+  {
+   "fieldname": "restan_section",
+   "fieldtype": "Section Break",
+   "label": "Restan"
+  },
+  {
+   "fieldname": "blok_restan",
+   "fieldtype": "Link",
+   "label": "Blok Restan",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "column_break_sjkl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_janjang",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Janjang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bkm_panen_restan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "BKM Panen Restan",
+   "options": "Buku Kerja Mandor Panen",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.blok_restan",
+   "fieldname": "panen_date_restan",
+   "fieldtype": "Date",
+   "label": "Tanggal Panen Restan"
+  },
+  {
+   "depends_on": "eval:doc.blok_restan",
+   "fieldname": "qty_restan",
+   "fieldtype": "Float",
+   "label": "Jumlah Janjang Restan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-17 23:27:52.476457",
+ "modified": "2025-10-20 16:40:14.779558",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "SPB Timbangan Pabrik",

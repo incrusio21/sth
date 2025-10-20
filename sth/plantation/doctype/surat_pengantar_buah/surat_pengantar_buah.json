@@ -18,16 +18,16 @@
   "amended_from",
   "section_break_xfoy",
   "column_break_dwtw",
-  "in_time_internal",
-  "out_time_internal",
-  "in_weight_internal",
-  "out_weight_internal",
-  "column_break_wpkr",
   "in_time",
   "out_time",
   "in_weight",
   "out_weight",
-  "pabrik_cut",
+  "mill_cut",
+  "column_break_wpkr",
+  "in_time_internal",
+  "out_time_internal",
+  "in_weight_internal",
+  "out_weight_internal",
   "internal_section",
   "details",
   "section_break_blue",
@@ -36,9 +36,11 @@
   "column_break_ndhg",
   "netto_weight_internal",
   "total_weight_internal",
+  "bjr_internal",
   "column_break_vjtg",
   "netto_weight",
-  "total_weight"
+  "total_weight",
+  "bjr"
  ],
  "fields": [
   {
@@ -115,16 +117,18 @@
    "reqd": 1
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:doc.docstatus > 0",
    "fieldname": "section_break_xfoy",
    "fieldtype": "Section Break",
-   "label": "Pabrik Input"
+   "label": "Timbangan"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "in_time",
    "fieldtype": "Time",
    "label": "In Time",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -136,6 +140,7 @@
    "fieldname": "out_time",
    "fieldtype": "Time",
    "label": "Out Time",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -147,14 +152,7 @@
    "fieldname": "in_weight",
    "fieldtype": "Float",
    "label": "In Weight",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.pabrik_type == \"External\"",
-   "fieldname": "pabrik_cut",
-   "fieldtype": "Float",
-   "label": "Potongan Pabrik",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -174,6 +172,7 @@
    "fieldname": "out_weight",
    "fieldtype": "Float",
    "label": "Out Weight",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -215,12 +214,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
    "fieldname": "netto_weight_internal",
    "fieldtype": "Float",
    "label": "Netto Weight Internal",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
    "fieldname": "total_weight_internal",
    "fieldtype": "Float",
    "label": "Total Weight Internal",
@@ -232,6 +233,7 @@
    "fieldname": "in_time_internal",
    "fieldtype": "Time",
    "label": "In Time Internal",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -240,6 +242,7 @@
    "fieldname": "out_time_internal",
    "fieldtype": "Time",
    "label": "Out Time Internal",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -248,6 +251,7 @@
    "fieldname": "in_weight_internal",
    "fieldtype": "Float",
    "label": "In Weight Internal",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -256,18 +260,41 @@
    "fieldname": "out_weight_internal",
    "fieldtype": "Float",
    "label": "Out Weight Internal",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "column_break_dwtw",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "bjr_internal",
+   "fieldtype": "Float",
+   "label": "BJR Internal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.pabrik_type == \"External\"",
+   "fieldname": "mill_cut",
+   "fieldtype": "Float",
+   "label": "Mill Cut",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-17 23:17:40.110859",
+ "modified": "2025-10-20 14:10:17.248611",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

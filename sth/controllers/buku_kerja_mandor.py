@@ -112,6 +112,9 @@ class BukuKerjaMandorController(PlantationController):
         #     self.update_rkb_realization()
 
     def create_or_update_payment_log(self):
+        # cek jika bkm memiliki field status
+        status = self.meta.get_field("status")
+
         for emp in self.hasil_kerja:
             for log_updater in self.payment_log_updater:
                 amount = emp.get(log_updater["target_amount"])
@@ -126,7 +129,8 @@ class BukuKerjaMandorController(PlantationController):
                 doc.employee = emp.employee
                 doc.company = self.company
                 doc.posting_date = self.posting_date
-                doc.status = "Approved"
+                
+                doc.status = self.status if status else "Approved"
 
                 doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
                 doc.amount = amount
