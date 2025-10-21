@@ -14,7 +14,11 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			["salary_component", "bkm_perawatan_component"],
 			["premi_salary_component", "premi_sc"],
 		])
-
+		
+		self.max_qty_fieldname = {
+            "hasil_kerja": "volume_basis"
+        }
+		
 		self.fieldname_total.extend(["premi_amount"])
 
 		self.kegiatan_fetch_fieldname.extend(["have_premi", "min_basis_premi", "rupiah_premi"])
@@ -59,6 +63,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 	def create_ste_issue(self):
 		ste = frappe.new_doc("Stock Entry")
 		ste.stock_entry_type = "Material Used"
+		ste.posting_date = self.posting_date
 		ste.set_purpose_for_stock_entry()
 
 		for d in self.material:

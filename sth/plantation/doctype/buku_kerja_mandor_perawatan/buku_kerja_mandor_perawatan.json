@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:BKM-PWT-{#####}",
  "creation": "2025-07-08 14:08:50.503557",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -403,6 +404,7 @@
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

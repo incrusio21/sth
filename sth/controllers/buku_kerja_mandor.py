@@ -25,10 +25,6 @@ class BukuKerjaMandorController(PlantationController):
 		])
         
         self.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis"]
-
-        self.max_qty_fieldname = {
-            "hasil_kerja": "volume_basis"
-        }
         
         self.payment_log_updater = [
             {
@@ -45,7 +41,7 @@ class BukuKerjaMandorController(PlantationController):
         self.get_plantation_setting()
         # self.get_rencana_kerja_harian()
         self.validate_hasil_kerja_harian()
-        self.validate_previous_document()
+        # self.validate_previous_document()
         self.get_employee_payment_account()
         super().validate()
         
@@ -106,7 +102,7 @@ class BukuKerjaMandorController(PlantationController):
         self.create_or_update_payment_log()
         # self.create_journal_entry()
         self.make_attendance()
-        self.check_emp_hari_kerja()
+        # self.check_emp_hari_kerja()
 
         # if update_realization:
         #     self.update_rkb_realization()

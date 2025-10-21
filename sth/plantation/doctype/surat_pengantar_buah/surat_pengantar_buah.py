@@ -128,26 +128,24 @@ class SuratPengantarBuah(Document):
 	def calculate_total_weight(self):
 		if self.out_weight and self.in_weight:
 			self.total_weight = flt(self.in_weight - self.out_weight - self.mill_cut, self.precision("total_weight"))
-			self.netto_weight = flt(self.total_weight, self.precision("netto_weight"))
-			self.bjr = flt(self.netto_weight / self.total_janjang, self.precision("bjr"))
+			self.bjr = flt(self.total_weight / self.total_janjang, self.precision("bjr"))
 		
-		if self.netto_weight < 0:
+		if self.total_weight < 0:
 			frappe.throw("Out weight is greater than In weight")
 
 		if self.out_weight_internal and self.in_weight_internal:
 			self.total_weight_internal = flt(self.in_weight_internal - self.out_weight_internal, self.precision("total_weight_internal"))
-			self.netto_weight_internal = flt(self.total_weight_internal, self.precision("netto_weight_internal"))
-			self.bjr_internal = flt(self.netto_weight_internal / self.total_janjang, self.precision("bjr"))
+			self.bjr_internal = flt(self.total_weight_internal / self.total_janjang, self.precision("bjr"))
 
-		if self.netto_weight_internal < 0:
+		if self.total_weight_internal < 0:
 			frappe.throw("Out weight is greater than In weight")
 
 	def calculate_weight_in_blok(self):
 		precision = get_field_precision(
-			frappe.get_meta("SPB Timbangan Pabrik").get_field("netto_weight")
+			frappe.get_meta("SPB Timbangan Pabrik").get_field("total_weight")
 		)
 		for d in self.details:
-			d.total_weight = flt(self.netto_weight * d.total_janjang / self.total_janjang, precision)
+			d.total_weight = flt(self.total_weight * d.total_janjang / self.total_janjang, precision)
 
 			
 @frappe.whitelist()

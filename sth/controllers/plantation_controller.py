@@ -54,7 +54,7 @@ class PlantationController(Document):
             # update nilai rate atau qty sebelum perhitungan
             self.update_rate_or_qty_value(d, precision)
 
-            qty = d.qty if not max_qty or d.qty < self.get(max_qty) else self.get(max_qty) 
+            qty = self.get(max_qty)  if max_qty and d.qty > self.get(max_qty) else d.qty
             d.amount = flt((d.rate or 0) * qty, precision)
 
             # update nilai setelah menghitung amount

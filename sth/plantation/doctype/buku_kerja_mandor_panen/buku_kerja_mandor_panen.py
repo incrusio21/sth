@@ -72,11 +72,12 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.qty = self.bjr
+		item.bjr = self.bjr
+		item.qty = (item.bjr * item.jumlah_janjang)
 		item.rate = flt(item.get("rate") or self.rupiah_basis)
 		item.brondolan = flt(self.upah_brondolan)
 
-		item.hari_kerja = flt(item.jumlah_janjang / self.volume_basis)
+		item.hari_kerja = min(flt(item.qty / self.volume_basis), 1)
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total brondolan

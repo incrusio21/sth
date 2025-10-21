@@ -64,13 +64,10 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         })
 
         this.frm.set_query("kendaraan", function(doc){
-            if(!doc.divisi){
-                frappe.throw("Please Select Divisi First")
-            }
-            
+
             return{
                 filters: {
-                    divisi: doc.divisi
+                    unit: ["=",doc.unit]
                 }
             }
         })
@@ -82,7 +79,8 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
             
             return{
                 filters: {
-                    unit: doc.unit
+                    unit: ["=", doc.unit],
+                    divisi: ["=", doc.divisi],
                 }
             }
         })
@@ -90,7 +88,8 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         this.frm.set_query("blok_restan", "details", function(doc){
             return{
                 filters: {
-                    unit: ["=", doc.unit]
+                    unit: ["=", doc.unit],
+                    divisi: ["=", doc.divisi],
                 }
             }
         })

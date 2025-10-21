@@ -53,7 +53,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
         item.rate = item.rate || this.frm.doc.rupiah_basis
         item.brondolan = doc.upah_brondolan
 
-        item.hari_kerja = flt(item.jumlah_janjang / doc.volume_basis)
+        item.hari_kerja = flt(item.qty / doc.volume_basis)
     }
 
     update_value_after_amount(item) {
