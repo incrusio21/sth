@@ -119,17 +119,16 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def calculate_transfered_weight(self):
 		spb = frappe.qb.DocType("SPB Timbangan Pabrik")
 
-		transfered_janjang, transfered_brondolan = (
+		transfered_janjang = (
 			frappe.qb.from_(spb)
 			.select(
-				Coalesce(Sum(spb.qty), 0), 
-				Coalesce(Sum(spb.brondolan_qty), 0)
+				Coalesce(Sum(spb.qty), 0)
             )
 			.where(
                 (spb.docstatus == 1) &
                 (spb.bkm_panen == self.name)
 			)
-		).run()[0]
+		).run()[0][0]
 
 		transfered_restan = (
 			frappe.qb.from_(spb)
@@ -143,13 +142,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		).run()[0][0]
 
 		self.transfered_janjang = flt(transfered_janjang + transfered_restan, self.precision("transfered_janjang"))
-		self.transfered_brondolan = transfered_brondolan
 
 		if self.transfered_janjang > self.hasil_kerja_jumlah_janjang:
 			frappe.throw("Transfered Janjang exceeds limit.")
-
-		if self.transfered_brondolan > self.hasil_kerja_qty_brondolan:
-			frappe.throw("Transfered Brondolan exceeds limit.")
 
 		self.db_update()
 
@@ -160,7 +155,6 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			frappe.qb.from_(spb)
 			.select(
 				spb.bjr, 
-				spb.netto_weight,
 				spb.total_weight
             )
 			.where(
@@ -173,7 +167,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			frappe.throw("Only one Rekap timbangan Panen is allowed per document")
 
 		self.is_rekap, values = (1, rekap_timbangan[0]) if rekap_timbangan else (0, (0, 0, 0))
-		self.bjr, self.netto_weight, self.weight_total = values
+		self.bjr, self.weight_total = values
 
 		self.set_status(update_payment_log=True)
 		self.db_update()

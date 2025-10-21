@@ -16,7 +16,7 @@ class SuratPengantarBuah(Document):
 	def validate(self):
 		self.remove_input_pabrik()
 		self.get_bkm_panen()
-		self.calculate_janjang_brondolan()
+		self.calculate_janjang()
 
 	def remove_input_pabrik(self):
 		self.in_time = self.out_time = self.in_time_internal = self.out_time_internal = ""
@@ -44,8 +44,8 @@ class SuratPengantarBuah(Document):
 						):
 							self.set(f"{fieldname}_restan", value)
 
-	def calculate_janjang_brondolan(self):
-		total_janjang = total_brondolan = 0.0
+	def calculate_janjang(self):
+		total_janjang = 0.0
 		for d in self.details:
 			
 			if not d.blok_restan:
@@ -54,12 +54,10 @@ class SuratPengantarBuah(Document):
 			d.total_janjang = d.qty + d.qty_restan
 
 			total_janjang += d.total_janjang
-			total_brondolan += d.brondolan_qty
-			
-			d.netto_weight = d.total_weight = 0.0
+
+			d.total_weight = 0.0
 
 		self.total_janjang = total_janjang
-		self.total_brondolan = total_brondolan
 
 	def on_submit(self):
 		self.update_transfered_bkm_panen()
@@ -130,7 +128,7 @@ class SuratPengantarBuah(Document):
 	def calculate_total_weight(self):
 		if self.out_weight and self.in_weight:
 			self.total_weight = flt(self.in_weight - self.out_weight - self.mill_cut, self.precision("total_weight"))
-			self.netto_weight = flt(self.total_weight - self.total_brondolan, self.precision("netto_weight"))
+			self.netto_weight = flt(self.total_weight, self.precision("netto_weight"))
 			self.bjr = flt(self.netto_weight / self.total_janjang, self.precision("bjr"))
 		
 		if self.netto_weight < 0:
@@ -138,7 +136,7 @@ class SuratPengantarBuah(Document):
 
 		if self.out_weight_internal and self.in_weight_internal:
 			self.total_weight_internal = flt(self.in_weight_internal - self.out_weight_internal, self.precision("total_weight_internal"))
-			self.netto_weight_internal = flt(self.total_weight_internal - self.total_brondolan, self.precision("netto_weight_internal"))
+			self.netto_weight_internal = flt(self.total_weight_internal, self.precision("netto_weight_internal"))
 			self.bjr_internal = flt(self.netto_weight_internal / self.total_janjang, self.precision("bjr"))
 
 		if self.netto_weight_internal < 0:
@@ -149,8 +147,7 @@ class SuratPengantarBuah(Document):
 			frappe.get_meta("SPB Timbangan Pabrik").get_field("netto_weight")
 		)
 		for d in self.details:
-			d.netto_weight = flt(self.netto_weight * d.total_janjang / self.total_janjang, precision)
-			d.total_weight = flt(d.netto_weight * d.brondolan_qty, precision)
+			d.total_weight = flt(self.netto_weight * d.total_janjang / self.total_janjang, precision)
 
 			
 @frappe.whitelist()
@@ -159,7 +156,7 @@ def get_bkm_panen(blok, posting_date):
 		"blok": blok, "posting_date": posting_date, "docstatus": 1
 	}, ["name", 
 	 	"hasil_kerja_jumlah_janjang", "transfered_janjang",
-		"hasil_kerja_qty_brondolan", "transfered_brondolan", "is_rekap"
+		"is_rekap"
 	], as_dict=1)
 
 	if not bkm_panen:
@@ -170,7 +167,6 @@ def get_bkm_panen(blok, posting_date):
 	ress = { 
 		"bkm_panen": bkm_panen.name,
 		"qty": flt(bkm_panen.hasil_kerja_jumlah_janjang - bkm_panen.transfered_janjang),
-		"brondolan_qty": flt(bkm_panen.hasil_kerja_qty_brondolan - bkm_panen.transfered_brondolan),
 	}
 
 	return ress

@@ -32,13 +32,10 @@
   "details",
   "section_break_blue",
   "total_janjang",
-  "total_brondolan",
   "column_break_ndhg",
-  "netto_weight_internal",
   "total_weight_internal",
   "bjr_internal",
   "column_break_vjtg",
-  "netto_weight",
   "total_weight",
   "bjr"
  ],
@@ -162,12 +159,6 @@
    "options": "SPB Timbangan Pabrik"
   },
   {
-   "fieldname": "netto_weight",
-   "fieldtype": "Float",
-   "label": "Netto Weight",
-   "read_only": 1
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "out_weight",
    "fieldtype": "Float",
@@ -190,12 +181,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "total_brondolan",
-   "fieldtype": "Float",
-   "label": "Total Brondolan",
-   "read_only": 1
-  },
-  {
    "fetch_from": "kendaraan.no_pol",
    "fieldname": "no_polisi",
    "fieldtype": "Data",
@@ -212,13 +197,6 @@
    "depends_on": "eval:doc.pabrik_type == \"External\"",
    "fieldname": "column_break_ndhg",
    "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.pabrik_type == \"External\"",
-   "fieldname": "netto_weight_internal",
-   "fieldtype": "Float",
-   "label": "Netto Weight Internal",
-   "read_only": 1
   },
   {
    "depends_on": "eval:doc.pabrik_type == \"External\"",
@@ -294,7 +272,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-20 14:10:17.248611",
+ "modified": "2025-10-21 15:14:19.070870",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

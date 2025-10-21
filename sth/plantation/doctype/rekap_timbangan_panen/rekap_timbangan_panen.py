@@ -9,7 +9,7 @@ from frappe.model.document import Document
 class RekapTimbanganPanen(Document):
 	def validate(self):
 		self.get_bkm_panen()
-		self.calculate_janjang_brondolan()
+		self.calculate_janjang()
 
 	def get_bkm_panen(self):
 		ret = get_bkm_panen(self.blok, self.panen_date)
@@ -21,20 +21,17 @@ class RekapTimbanganPanen(Document):
 				):				
 				self.set(fieldname, value)
 
-	def calculate_janjang_brondolan(self):
-		total_janjang = total_brondolan = netto_weight = 0.0
+	def calculate_janjang(self):
+		total_janjang = total_weight = 0.0
 		for d in self.details:
-			d.bjr = flt(d.netto_weight / d.jumlah_janjang)
+			d.bjr = flt(d.total_weight / d.jumlah_janjang)
 			total_janjang += d.jumlah_janjang
-			total_brondolan += d.total_brondolan
-			netto_weight += d.netto_weight
+			total_weight += d.total_weight
 
 		self.total_janjang = total_janjang
-		self.total_brondolan = total_brondolan
-		self.netto_weight = netto_weight
-		self.total_weight = self.netto_weight + self.total_brondolan
+		self.total_weight = self.total_weight
 		
-		self.bjr = flt(self.netto_weight / self.total_janjang)
+		self.bjr = flt(self.total_weight / self.total_janjang)
 
 	def on_submit(self):
 		self.update_transfered_bkm_panen()
