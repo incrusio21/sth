@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.utils import flt, now
+from frappe.utils import date_diff, flt, now
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
@@ -166,11 +166,21 @@ class SalarySlip(SalarySlip):
         """Returns data for evaluating formula"""
         data, default_data = super().get_data_for_eval()
 
-        filters = { "company": data.company }
+        company = frappe.get_cached_doc("Company", self.company).as_dict()
+
+        filters = { "company": self.company }
         data.natura_rate = default_data.natura_rate = frappe.get_value("Natura Price", {
             **filters, "valid_from": ["<=", self.end_date]}, "harga_beras", order_by="valid_from desc") or 0
 
         data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
             **filters, "pkp": data.pkp, "employment_type": data.employment_type }, "multiplier") or 0
+
+        data.ump_harian = default_data.ump_harian = company.custom_ump_harian
+        
+        start_date = data.date_of_joining if date_diff(data.date_of_joining, self.start_date) > 0 else self.start_date
+        end_date = data.contract_end_date if data.get("contract_end_date") \
+            and date_diff(data.contract_end_date, self.end_date) < 0 else self.end_date
+
+        data.total_holidays = default_data.total_holidays = len(self.get_holidays_for_employee(start_date , end_date))
 
         return data, default_data
