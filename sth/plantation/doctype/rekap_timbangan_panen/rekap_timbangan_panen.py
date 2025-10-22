@@ -29,7 +29,7 @@ class RekapTimbanganPanen(Document):
 			total_weight += d.total_weight
 
 		self.total_janjang = total_janjang
-		self.total_weight = self.total_weight
+		self.total_weight = total_weight
 		
 		self.bjr = flt(self.total_weight / self.total_janjang)
 

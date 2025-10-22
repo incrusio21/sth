@@ -12,9 +12,7 @@
   "column_break_truv",
   "bjr",
   "jumlah_janjang",
-  "total_brondolan",
-  "total_weight",
-  "netto_weight"
+  "total_weight"
  ],
  "fields": [
   {
@@ -62,20 +60,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "netto_weight",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Netto Weight",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "total_brondolan",
-   "fieldtype": "Float",
-   "label": "Total Brondolan",
-   "read_only": 1
-  },
-  {
    "columns": 1,
    "fieldname": "total_weight",
    "fieldtype": "Float",
@@ -87,7 +71,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-22 15:58:18.641490",
+ "modified": "2025-10-21 16:59:09.948371",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Timbangan Panen Details",
