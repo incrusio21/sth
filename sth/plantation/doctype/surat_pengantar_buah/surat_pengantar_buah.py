@@ -14,11 +14,11 @@ force_item_fields = (
 class SuratPengantarBuah(Document):
 	
 	def validate(self):
-		self.remove_input_pabrik()
+		self.remove_input_pks()
 		self.get_bkm_panen()
 		self.calculate_janjang()
 
-	def remove_input_pabrik(self):
+	def remove_input_pks(self):
 		self.in_time = self.out_time = self.in_time_internal = self.out_time_internal = ""
 		self.in_weight = self.in_weight_internal = self.out_weight = self.out_weight_internal = self.mill_cut = 0
 
@@ -134,7 +134,7 @@ class SuratPengantarBuah(Document):
 			frappe.throw("Out weight is greater than In weight")
 
 		if self.out_weight_internal and self.in_weight_internal:
-			self.total_weight_internal = flt(self.in_weight_internal - self.out_weight_internal, self.precision("total_weight_internal"))
+			self.total_weight_internal = flt(self.out_weight_internal - self.in_weight_internal, self.precision("total_weight_internal"))
 			self.bjr_internal = flt(self.total_weight_internal / self.total_janjang, self.precision("bjr"))
 
 		if self.total_weight_internal < 0:
