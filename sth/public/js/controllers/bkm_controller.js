@@ -7,7 +7,7 @@ sth.plantation.setup_bkm_controller = function() {
             super.setup(doc)
             
             this.fieldname_total.push("qty", "hari_kerja")
-            this.max_qty_fieldname = { "hasil_kerja": "volume_basis" }
+            
             this.kegiatan_fetch_fieldname = ["account as kegiatan_account", "volume_basis", "rupiah_basis"]
 
             this.get_data_rkh_field = ["kegiatan", "divisi", "posting_date", "blok"]

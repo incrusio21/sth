@@ -36,7 +36,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         let doctype = this.frm.fields_dict[data.parentfield].grid.fields_map.item.options;
 
         frappe.call({
-            method: "sth.plantation.utils.get_rate_item",
+            method: "sth.plantation.utils.get_details_item",
             args: {
                 item: data.item,
                 doctype: doctype,
@@ -118,7 +118,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             // rate * qty * (rotasi jika ada)
             this.update_rate_or_qty_value(item)
             
-            let qty = !max_qty || item.qty < this.frm.doc[max_qty] ? item.qty : this.frm.doc[max_qty] 
+            let qty = max_qty && flt(item.qty) > this.frm.doc[max_qty] ? this.frm.doc[max_qty] : item.qty  
             item.amount = flt(item.rate * qty, precision("amount", item));
 
             this.update_value_after_amount(item)
