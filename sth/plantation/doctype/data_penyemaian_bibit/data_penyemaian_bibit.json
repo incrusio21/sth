@@ -10,14 +10,16 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "amended_from",
   "divisi",
   "column_break_ykgo",
   "company",
   "voucher_no",
+  "select_item",
+  "purchase_receipt_item",
   "item_code",
   "batch",
   "amount",
+  "amended_from",
   "detail_qty_section",
   "qty_planting",
   "qty_before_afkir",
@@ -28,7 +30,8 @@
   "transplanting_qty",
   "planting_qty",
   "reference_section",
-  "stock_entry"
+  "stock_entry",
+  "connection_tab"
  ],
  "fields": [
   {
@@ -55,14 +58,14 @@
    "in_list_view": 1,
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "batch",
    "fieldtype": "Link",
    "label": "Batch",
    "options": "Batch",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "voucher_no",
@@ -84,6 +87,7 @@
    "fieldtype": "Float",
    "label": "Grand Total Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -114,14 +118,17 @@
   {
    "fieldname": "qty_planting",
    "fieldtype": "Float",
-   "label": "Qty Planting"
+   "label": "Qty Planting",
+   "non_negative": 1,
+   "reqd": 1
   },
   {
    "default": "0",
    "fieldname": "qty_before_afkir",
    "fieldtype": "Float",
    "label": "Qty Seed Afkir",
-   "no_copy": 1
+   "no_copy": 1,
+   "non_negative": 1
   },
   {
    "description": "(Total Data Pencatatan Dobletone)",
@@ -129,6 +136,7 @@
    "fieldtype": "Float",
    "label": "Qty Dobletone",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -137,6 +145,7 @@
    "fieldtype": "Float",
    "label": "Qty After Afkir",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -178,6 +187,7 @@
    "fieldtype": "Float",
    "label": "Transplanting Seed Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -186,7 +196,27 @@
    "fieldtype": "Float",
    "label": "Planting Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.docstatus",
+   "fieldname": "select_item",
+   "fieldtype": "Button",
+   "label": "Select Item"
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "connection_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connection",
+   "show_dashboard": 1
   }
  ],
  "grid_page_length": 50,
@@ -209,7 +239,7 @@
    "link_fieldname": "data_penyemaian_bibit"
   }
  ],
- "modified": "2025-09-11 14:09:08.439802",
+ "modified": "2025-10-24 13:19:31.454376",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penyemaian Bibit",

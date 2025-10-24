@@ -13,7 +13,8 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
             return {
                 "filters": [
                     ["company",  "=", doc.company],
-                    ["docstatus",  "=", 1],                    
+                    ["docstatus",  "=", 1],
+                    ["per_penyemaian", "<", 100]                    
                 ]
             };            
         });
@@ -38,51 +39,110 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
 		});
 	},
     voucher_no(frm){
-        cur_frm.set_value('item_code', null)
-        cur_frm.set_value('batch', null)
+        sth.form.reset_value(frm, ["purchase_receipt_item", "item_code", "batch"])
     },
-    item_code(frm){
-        cur_frm.set_value('batch', null)
+    select_item(frm){
+        const fields = [
+            {
+                fieldtype: "Data",
+                fieldname: "detail_name",
+                hidden: 1,
+                read_only: 1,
+                label: __("New Doc")
+            },
+            {
+                fieldtype: "Link",
+                fieldname: "item_code",
+                options: "Item",
+                in_list_view: 1,
+                read_only: 1,
+                disabled: 0,
+                label: __("Item")
+            },
+            {
+                fieldtype: "Link",
+                fieldname: "batch_no",
+                options: "Batch",
+                in_list_view: 1,
+                read_only: 1,
+                disabled: 0,
+                label: __("Batch")
+            },
+            {
+                fieldtype: "Float",
+                fieldname: "remaining_qty",
+                in_list_view: 1,
+                read_only: 1,
+                disabled: 0,
+                label: __("Remaining Qty")
+            },
+        ]
+
+        frappe.call({
+            method: "sth.plantation.doctype.data_penyemaian_bibit.data_penyemaian_bibit.select_purchase_receipt_item",
+            args: {
+                voucher_no: frm.doc.voucher_no
+            },
+            freeze: true,
+            callback: function (data) {
+                if (data.message.length == 0) {
+                    frappe.throw(__("Item Not Found."))
+                }
+
+                const dialog = new frappe.ui.Dialog({
+                    title: __("Select Item"),
+                    size: "large",
+                    fields: [
+                        {
+                            fieldname: "trans_item",
+                            fieldtype: "Table",
+                            label: "Items",
+                            cannot_add_rows: 1,
+                            cannot_delete_rows: 1,
+                            in_place_edit: false,
+                            reqd: 1,
+                            get_data: () => {
+                                return data.message;
+                            },
+                            fields: fields,
+                        }
+                    ],
+                    primary_action: function () {
+                        const selected_items = dialog.fields_dict.trans_item.grid.get_selected_children();
+
+                        if (selected_items.length != 1) {
+                            frappe.throw("Please Select at One Item")
+                        }
+                        
+                        frm.doc.purchase_receipt_item =  selected_items[0].detail_name
+                        frm.doc.item_code =  selected_items[0].item_code
+                        frm.doc.item_code =  selected_items[0].item_code
+                        frm.doc.batch =  selected_items[0].batch_no
+                        frm.doc.qty_planting =  selected_items[0].remaining_qty
+
+                        frm.trigger("calculate_qty")
+                        
+                        dialog.hide();
+                    },
+                    primary_action_label: __("Select Item"),
+                });
+
+                dialog.show();
+            }
+        })
     },
-    batch: async function(frm) {
-        let total = await calculate_total_qty(frm);
-        frm.set_value("qty_planting", total);        
+
+    qty_planting(frm){
+        frm.trigger("calculate_qty")
     },
-    qty_planting: async function(frm) {                
-        await validate_qty_planting(frm);
-    },
+
     qty_before_afkir(frm){
-        calculate_grand_total_qty(frm);
+        frm.trigger("calculate_qty")
+    },
+
+    calculate_qty(frm){
+        frm.doc.qty = flt(frm.doc.qty_planting - frm.doc.qty_before_afkir)
+
+        frm.refresh_fields()
     }
 });
-
-async function validate_qty_planting(frm) {
-    let total = await calculate_total_qty(frm);
-    if(frm.doc.qty_planting>total){
-        frm.set_value("qty_planting", total);
-        frappe.msgprint("Qty Planting must not be greater than " + total);
-    }else if(frm.doc.qty_planting<0){
-        frm.set_value("qty_planting", total);
-        frappe.msgprint("Qty Planting must not be less than 0");
-    }
-    calculate_grand_total_qty(frm);
-}
-
-async function calculate_total_qty(frm) {
-    if (frm.doc.voucher_no && frm.doc.item_code && frm.doc.batch) {
-        let r = await frappe.call({
-            method: "sth.plantation.doctype.data_penyemaian_bibit.data_penyemaian_bibit.get_total_qty",
-            args: {
-                parent: frm.doc.voucher_no,
-                item_code: frm.doc.item_code,
-                batch_no: frm.doc.batch
-            }
-        });
-        return r.message || 0;
-    }
-    return 0;
-}
-
-function calculate_grand_total_qty(frm) {
-    frm.set_value("qty", frm.doc.qty_planting-frm.doc.qty_before_afkir);
-}
