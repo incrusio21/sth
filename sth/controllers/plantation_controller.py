@@ -87,6 +87,9 @@ class PlantationController(Document):
 
     def calculate_grand_total(self):
         grand_total = 0.0
+
+        self.before_calculate_grand_total()
+
         amount_fieldname = list(filter(lambda key: "amount" in key, self.meta.get_valid_columns()))
         for fieldname in amount_fieldname:
             # skip perhitungan total untuk table/fieldname tertentu
@@ -99,7 +102,11 @@ class PlantationController(Document):
         self.grand_total = grand_total
 
         self.after_calculate_grand_total()
-        
+
+    def before_calculate_grand_total(self):
+        # set on child class if needed
+        pass
+
     def after_calculate_grand_total(self):
         # set on child class if needed
         pass

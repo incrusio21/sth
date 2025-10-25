@@ -15,8 +15,10 @@
   "hari_kerja",
   "amended_from",
   "component_section",
-  "supervisi_component",
+  "salary_account",
+  "paid_account",
   "column_break_yfhd",
+  "supervisi_component",
   "against_panen_component",
   "upah_supervisi_section",
   "mandor",
@@ -34,7 +36,7 @@
   "jumlah_janjang",
   "jumlah_brondolan",
   "column_break_kzhr",
-  "upah_panen_total",
+  "upah_panen_amount",
   "upah_supervisi_amount",
   "grand_total",
   "hasil_panen_tab",
@@ -120,13 +122,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "bkm_panen.grand_total",
-   "fieldname": "upah_panen_total",
-   "fieldtype": "Currency",
-   "label": "Total Upah Panen",
-   "read_only": 1
-  },
-  {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Grand Total",
@@ -158,7 +153,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.kerani_divisi",
+   "depends_on": "eval:doc.kerani",
    "fieldname": "upah_kerani",
    "fieldtype": "Currency",
    "label": "Premi Kerani"
@@ -168,13 +163,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.mandor_1",
+   "depends_on": "eval:doc.mandor1",
    "fieldname": "upah_mandor1",
    "fieldtype": "Currency",
    "label": "Premi Mandor 1"
   },
   {
-   "fetch_from": "bkm_panen.grand_total",
    "fieldname": "upah_supervisi_amount",
    "fieldtype": "Currency",
    "label": "Total Upah Supervisi",
@@ -257,13 +251,32 @@
    "label": "Kerani Divisi",
    "options": "Employee",
    "read_only": 1
+  },
+  {
+   "fieldname": "salary_account",
+   "fieldtype": "Link",
+   "label": "Salary Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "paid_account",
+   "fieldtype": "Link",
+   "label": "Paid Account",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "bkm_panen.grand_total",
+   "fieldname": "upah_panen_amount",
+   "fieldtype": "Currency",
+   "label": "Total Upah Panen",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-25 21:20:26.565839",
+ "modified": "2025-10-25 23:12:02.877283",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

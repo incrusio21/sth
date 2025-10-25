@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import get_link_to_form
+from frappe.utils import flt, get_link_to_form
 
 from sth.controllers.plantation_controller import PlantationController
 
@@ -11,6 +11,7 @@ class PengajuanPanenKontanan(PlantationController):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.skip_calculate_table = ["hasil_panen"]
 		self.supervisi_list = ["mandor", "mandor1", "kerani"]
 
 	def validate(self):
@@ -18,12 +19,22 @@ class PengajuanPanenKontanan(PlantationController):
 		super().validate()
 
 	def get_data_bkm_panen(self):
-		pass
+		self.set("hasil_panen", 
+			frappe.get_all(
+				"Detail BKM Hasil Kerja Panen", 
+				filters={"parent": self.bkm_panen}, 
+				fields=["employee", "qty", "sub_total as amount"]
+			)  
+		)
 
+	def before_calculate_grand_total(self):
+		self.upah_supervisi_amount = flt(self.upah_mandor) + flt(self.upah_mandor1) + flt(self.upah_kerani)
+		
 	def on_submit(self):
 		self.validate_duplicate_ppk()
 		self.check_status_bkm_panen()
 		self.create_or_update_epl_supervisi()
+		self.create_journal_payment()
 
 	def validate_duplicate_ppk(self):
 		if dup_ppk := frappe.db.get_value("Pengajuan Panen Kontanan", 
@@ -52,8 +63,9 @@ class PengajuanPanenKontanan(PlantationController):
 			if amount:
 				doc.employee = self.get("employee")
 				doc.company = self.company
+
 				doc.posting_date = self.posting_date
-				doc.payroll_date = self.payroll_date
+				doc.payroll_date = self.posting_date
 
 				doc.status = "Approved"
 				doc.amount = amount
@@ -73,16 +85,35 @@ class PengajuanPanenKontanan(PlantationController):
 					doc.delete()
 			
 			self.set(target_link, detail_name)
+	
+	def create_journal_payment(self):
+		doc = frappe.new_doc("Journal Entry")
 		
+		doc.posting_date = self.posting_date
+		doc.company = self.company
+
+		doc.set("accounts", [
+			{
+				"account": self.salary_account,
+				"debit_in_account_currency": self.grand_total
+			},
+			{
+				"account": self.paid_account,
+				"credit_in_account_currency": self.grand_total
+			}
+		])
+
+		doc.submit()
+
 	def on_cancel(self):
 		self.check_status_bkm_panen()
-		self.delete_payment_log()
+		self.delete_pl_and_jv()
 
 	def check_status_bkm_panen(self):
 		doc = frappe.get_doc("Buku Kerja Mandor Panen", self.bkm_panen)
 		doc.update_kontanan_used()
 
-	def delete_payment_log(self):
+	def delete_pl_and_jv(self):
 		for emp in self.supervisi_list:
 			target_link = f"{emp}_epl"
 			value = self.get(target_link)
@@ -91,3 +122,10 @@ class PengajuanPanenKontanan(PlantationController):
 			
 			self.db_set(target_link, "")
 			frappe.delete_doc("Employee Payment Log", value)
+
+		if self.journal_entry:
+			doc = frappe.get_doc("Journal Entry", self.journal_entry)
+			if doc.docstatus == 1:
+				doc.cancel()
+
+			doc.delete()

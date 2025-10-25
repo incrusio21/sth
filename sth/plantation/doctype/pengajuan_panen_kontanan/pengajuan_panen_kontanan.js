@@ -4,22 +4,41 @@
 frappe.ui.form.on("Pengajuan Panen Kontanan", {
 	refresh(frm) {
         frm.set_df_property("hasil_panen", "cannot_add_rows", true);
+	}
+});
 
-        frm.set_query("bkm_panen", function(doc){
-            if(!doc.company){
-                frappe.throw("Please Select Company First")
-            }
+sth.plantation.PengajuanPanenKontanan = class PengajuanPanenKontanan extends sth.plantation.TransactionController {
+    setup(doc) {
+        let me = this
+        super.setup(doc)
 
+        this.skip_calculate_table = ["hasil_panen"]
+
+        for (const fieldname of ["upah_mandor", "upah_mandor1", "upah_kerani"]) {
+            frappe.ui.form.on(doc.doctype, fieldname, function(doc, cdt, cdn) {
+                me.calculate_total(cdt, cdn)
+            });
+        }
+    }
+
+    set_query_field(){
+        this.frm.set_query("bkm_panen", function(doc){
             return{
                 filters: {
-                    company: doc.company,
+                    company: ["=", doc.company],
                     is_kontanan: 1,
-                    is_rekap: 1
+                    is_rekap: 1,
+                    against_salary_component: ["is", "not set"]
                 }
             }
         })
-	},
-    upah_panen_total(frm){
-        frm.doc.grand_total = frm.doc.upah_panen_total
     }
-});
+
+    before_calculate_grand_total() {
+        let doc = this.frm.doc
+
+        doc.upah_supervisi_amount = flt(doc.upah_mandor) + flt(doc.upah_mandor1) + flt(doc.upah_kerani)
+    }
+}
+
+cur_frm.script_manager.make(sth.plantation.PengajuanPanenKontanan);
