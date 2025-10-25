@@ -3,6 +3,8 @@
 
 frappe.ui.form.on("Pengajuan Panen Kontanan", {
 	refresh(frm) {
+        frm.set_df_property("hasil_panen", "cannot_add_rows", true);
+
         frm.set_query("bkm_panen", function(doc){
             if(!doc.company){
                 frappe.throw("Please Select Company First")
@@ -11,8 +13,8 @@ frappe.ui.form.on("Pengajuan Panen Kontanan", {
             return{
                 filters: {
                     company: doc.company,
-                    is_kontananan: 1,
-                    is_used: 0,
+                    is_kontanan: 1,
+                    is_rekap: 1
                 }
             }
         })

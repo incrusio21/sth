@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-24 15:09:19.309739",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "column_break_eqqk",
+  "bkm_panen_detail",
+  "section_break_bjno",
+  "qty",
+  "column_break_rlyc",
+  "amount",
+  "reference_section",
+  "employee_payment_log",
+  "column_break_jqtg"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Karyawan",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eqqk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rlyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "employee_payment_log",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jqtg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bkm_panen_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "BKM Panen Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_bjno",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-10-24 15:16:22.550326",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail PK Hasil Panen",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

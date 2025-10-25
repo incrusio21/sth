@@ -47,6 +47,14 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.transfered_janjang = self.transfered_brondolan = \
 		self.netto_weight = self.weight_total = self.bjr = 0
 
+	def set_payroll_date(self):
+		super().set_payroll_date()
+
+		if self.is_kontanan:
+			self.payroll_date = frappe.db.get_value("Pengajuan Panen Kontanan", {
+				"bkm_panen": self.name, "docstatus": 1
+			}, "posting_date") or ""
+
 	def on_submit(self):
 		self.set_status()
 
@@ -99,23 +107,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.grand_total -= self.hasil_kerja_denda 
 
 	def update_kontanan_used(self):
-		ppk = frappe.qb.DocType("Pengajuan Panen Kontanan")
+		self.set_payroll_date()
 
-		kontanan = (
-			frappe.qb.from_(ppk)
-			.select(
-				ppk.name
-            )
-			.where(
-                (ppk.docstatus == 1) &
-                (ppk.bkm_panen == self.name)
-			)
-		).run()
-
-		if kontanan and len(kontanan) > 1:
-			frappe.throw("BKM Panen already used")
-
-		self.db_set("is_used", 1 if kontanan else 0)
+		self.set_status(update_payment_log=True)
 
 	def calculate_transfered_weight(self):
 		spb = frappe.qb.DocType("SPB Timbangan Pabrik")

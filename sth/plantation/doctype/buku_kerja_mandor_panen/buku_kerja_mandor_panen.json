@@ -15,7 +15,8 @@
   "column_break_souy",
   "company",
   "posting_date",
-  "is_kontananan",
+  "payroll_date",
+  "is_kontanan",
   "mandor",
   "mandor1",
   "kerani",
@@ -68,6 +69,7 @@
   "voucher_no",
   "section_break_lpwn",
   "salary_component",
+  "against_salary_component",
   "column_break_xcox",
   "brondolan_salary_component",
   "denda_salary_component"
@@ -367,12 +369,6 @@
   },
   {
    "default": "0",
-   "fieldname": "is_kontananan",
-   "fieldtype": "Check",
-   "label": "Kontanan ?"
-  },
-  {
-   "default": "0",
    "fieldname": "is_used",
    "fieldtype": "Check",
    "label": "Used ?",
@@ -503,13 +499,34 @@
    "fieldtype": "Select",
    "label": "Status Panen",
    "options": "Normal\nBanjir"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_kontanan",
+   "fieldtype": "Check",
+   "label": "Kontanan ?"
+  },
+  {
+   "default": "Today",
+   "depends_on": "eval:doc.is_kontanan",
+   "fieldname": "payroll_date",
+   "fieldtype": "Date",
+   "label": "Payroll Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "against_salary_component",
+   "fieldtype": "Link",
+   "label": "Against Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-18 21:55:49.649319",
+ "modified": "2025-10-24 20:35:03.237480",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

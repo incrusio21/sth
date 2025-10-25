@@ -38,6 +38,8 @@ class BukuKerjaMandorController(PlantationController):
         ]
 
     def validate(self):
+        self.set_payroll_date()
+        
         self.get_plantation_setting()
         # self.get_rencana_kerja_harian()
         self.validate_hasil_kerja_harian()
@@ -47,6 +49,10 @@ class BukuKerjaMandorController(PlantationController):
         
         self.validate_emp_hari_kerja()
     
+    def set_payroll_date(self):
+        # update fungsi ini jika ada aturan khusus untuk document
+        self.payroll_date = self.posting_date
+
     def validate_emp_hari_kerja(self):
         emp_log = self.check_emp_hari_kerja(validate=True)
 
@@ -109,36 +115,46 @@ class BukuKerjaMandorController(PlantationController):
 
     def create_or_update_payment_log(self):
         # cek jika bkm memiliki field status
-        status = self.meta.get_field("status")
+        status = self.meta.has_field("status")
 
         for emp in self.hasil_kerja:
             for log_updater in self.payment_log_updater:
+                is_new = False
                 amount = emp.get(log_updater["target_amount"])
                 if target_key := emp.get(log_updater["target_link"]):
                     doc = frappe.get_doc("Employee Payment Log", target_key)
                 else:
-                    if log_updater.get("removed_if_zero") and not amount:
-                        continue
-
+                    is_new = True
                     doc = frappe.new_doc("Employee Payment Log")
-
-                doc.employee = emp.employee
-                doc.company = self.company
-                doc.posting_date = self.posting_date
                 
-                doc.status = self.status if status else "Approved"
+                detail_name = ""
+                # jika ada nilai atau kosong tapi tidak di hapus 
+                if amount or not log_updater.get("removed_if_zero"):
+                    doc.employee = emp.employee
+                    doc.company = self.company
+                    doc.posting_date = self.posting_date
+                    doc.payroll_date = self.payroll_date
 
-                doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
-                doc.amount = amount
+                    doc.status = self.status if status else "Approved"
 
-                doc.salary_component = self.get(log_updater["target_salary_component"])
+                    doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
+                    doc.amount = amount
+
+                    doc.salary_component = self.get(log_updater["target_salary_component"])
+                    doc.against_salary_component = self.get("against_salary_component")
+
+                    if log_updater.get("target_account"):
+                        doc.account = self.get(log_updater["target_account"])
+
+                    doc.save()
+
+                    detail_name = doc.name
+                else:
+                    # removed jika nilai kosong dan bukan document baru
+                    if not is_new:
+                        doc.delete()
                 
-                if log_updater.get("target_account"):
-                    doc.account = self.get(log_updater["target_account"])
-
-                doc.save()
-
-                emp.set(log_updater["target_link"], doc.name)
+                emp.set(log_updater["target_link"], detail_name)
 
         self.update_child_table("hasil_kerja")
 
@@ -253,12 +269,6 @@ class BukuKerjaMandorController(PlantationController):
                 
                 emp.db_set(log_updater["target_link"], "")
                 frappe.delete_doc("Employee Payment Log", value)
-
-        filters={"voucher_type": self.doctype, "voucher_no": self.name}
-        for emp_log in frappe.get_all("Employee Payment Log", 
-            filters=filters, pluck="name"
-        ):
-            frappe.delete_doc("Employee Payment Log", emp_log)
 
     def update_rkb_realization(self):
         frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()

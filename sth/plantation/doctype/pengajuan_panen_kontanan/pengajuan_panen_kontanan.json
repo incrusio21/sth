@@ -14,15 +14,31 @@
   "company",
   "hari_kerja",
   "amended_from",
+  "component_section",
+  "supervisi_component",
+  "column_break_yfhd",
+  "against_panen_component",
+  "upah_supervisi_section",
+  "mandor",
+  "mandor1",
+  "kerani",
+  "column_break_sdcb",
+  "upah_mandor",
+  "upah_mandor1",
+  "upah_kerani",
+  "column_break_vfqu",
+  "mandor_epl",
+  "mandor1_epl",
+  "kerani_epl",
   "rekap_kontanan_section",
   "jumlah_janjang",
   "jumlah_brondolan",
   "column_break_kzhr",
   "upah_panen_total",
-  "upah_mandor_total",
-  "upah_mandor1_total",
-  "total_upah_kerani",
-  "grand_total"
+  "upah_supervisi_amount",
+  "grand_total",
+  "hasil_panen_tab",
+  "hasil_panen"
  ],
  "fields": [
   {
@@ -74,7 +90,7 @@
    "reqd": 1
   },
   {
-   "fetch_from": "bkm_panen.hari_kerja_total",
+   "fetch_from": "bkm_panen.hasil_kerja_hari_kerja",
    "fieldname": "hari_kerja",
    "fieldtype": "Float",
    "label": "Hari Kerja",
@@ -86,7 +102,7 @@
    "label": "Rekap Kontanan"
   },
   {
-   "fetch_from": "bkm_panen.hasil_kerja_qty",
+   "fetch_from": "bkm_panen.hasil_kerja_jumlah_janjang",
    "fieldname": "jumlah_janjang",
    "fieldtype": "Float",
    "label": "Jumlah Janjang",
@@ -104,28 +120,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "bkm_panen.hasil_kerja_amount",
+   "fetch_from": "bkm_panen.grand_total",
    "fieldname": "upah_panen_total",
    "fieldtype": "Currency",
    "label": "Total Upah Panen",
-   "read_only": 1
-  },
-  {
-   "fieldname": "upah_mandor_total",
-   "fieldtype": "Currency",
-   "label": "Total Upah Mandor",
-   "read_only": 1
-  },
-  {
-   "fieldname": "upah_mandor1_total",
-   "fieldtype": "Currency",
-   "label": "Total Upah Mandor 1",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_upah_kerani",
-   "fieldtype": "Currency",
-   "label": "Total Upah Kerani",
    "read_only": 1
   },
   {
@@ -143,13 +141,129 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "upah_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Supervisi"
+  },
+  {
+   "depends_on": "eval:doc.mandor",
+   "fieldname": "upah_mandor",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor"
+  },
+  {
+   "fieldname": "column_break_sdcb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.kerani_divisi",
+   "fieldname": "upah_kerani",
+   "fieldtype": "Currency",
+   "label": "Premi Kerani"
+  },
+  {
+   "fieldname": "column_break_vfqu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.mandor_1",
+   "fieldname": "upah_mandor1",
+   "fieldtype": "Currency",
+   "label": "Premi Mandor 1"
+  },
+  {
+   "fetch_from": "bkm_panen.grand_total",
+   "fieldname": "upah_supervisi_amount",
+   "fieldtype": "Currency",
+   "label": "Total Upah Supervisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_panen_tab",
+   "fieldtype": "Tab Break",
+   "label": "Hasil Panen"
+  },
+  {
+   "fieldname": "hasil_panen",
+   "fieldtype": "Table",
+   "label": "Hasil Panen",
+   "options": "Detail PK Hasil Panen"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "component_section",
+   "fieldtype": "Section Break",
+   "label": "Component"
+  },
+  {
+   "fieldname": "supervisi_component",
+   "fieldtype": "Link",
+   "label": "Supervisi Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_yfhd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "against_panen_component",
+   "fieldtype": "Link",
+   "label": "Against Panen Component",
+   "options": "Salary Component"
+  },
+  {
+   "fetch_from": "bkm_panen.mandor",
+   "fieldname": "mandor",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mandor_epl",
+   "fieldtype": "Link",
+   "label": "Mandor Payment Log",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mandor1_epl",
+   "fieldtype": "Link",
+   "label": "Mandor 1 Payment Log",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kerani_epl",
+   "fieldtype": "Link",
+   "label": "Kerani Payment Log",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bkm_panen.mandor1",
+   "fieldname": "mandor1",
+   "fieldtype": "Link",
+   "label": "Mandor 1",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bkm_panen.kerani",
+   "fieldname": "kerani",
+   "fieldtype": "Link",
+   "label": "Kerani Divisi",
+   "options": "Employee",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 15:38:32.219246",
+ "modified": "2025-10-25 21:20:26.565839",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

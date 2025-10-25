@@ -6,7 +6,13 @@ import json
 import frappe
 from frappe.utils import date_diff, flt, now
 
-from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
+from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
+from hrms.payroll.doctype.payroll_period.payroll_period import (
+	get_period_factor,
+)
+from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
+	set_loan_repayment,
+)
 
 class SalarySlip(SalarySlip):
     def on_submit(self):
@@ -37,48 +43,112 @@ class SalarySlip(SalarySlip):
     def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
         # agar payment log selalu generate ulang
         self.payment_log_list = []
-        
-        super().calculate_net_pay(skip_tax_breakup_computation)
+        self._against_employee_payment = {}
 
-    def calculate_component_amounts(self, component_type):
-        super().calculate_component_amounts(component_type)
+        def set_gross_pay_and_base_gross_pay():
+            self.gross_pay = self.get_component_totals("earnings", depends_on_payment_days=1)
+            self.base_gross_pay = flt(
+                flt(self.gross_pay) * flt(self.exchange_rate), self.precision("base_gross_pay")
+            )
 
-        self.add_employee_payment(component_type)
+        if self.salary_structure:
+            self.calculate_component_amounts("earnings")
 
-	
-    def add_employee_payment(self, component_type):
-        for struct_row in self._salary_structure_doc.get(component_type, {"is_flexible_payment": 1}):
-            epl = frappe.qb.DocType("Employee Payment Log")
+        # get remaining numbers of sub-period (period for which one salary is processed)
+        if self.payroll_period:
+            self.remaining_sub_periods = get_period_factor(
+                self.employee,
+                self.start_date,
+                self.end_date,
+                self.payroll_frequency,
+                self.payroll_period,
+                joining_date=self.joining_date,
+                relieving_date=self.relieving_date,
+            )[1]
 
-            emp_pl = (
-                frappe.qb.from_(epl)
-                .select(epl.name, epl.account, epl.amount, epl.status)
-                .where(
-                    (epl.employee == self.employee)
-                    & (epl.company == self.company)
-                    & (epl.posting_date.between(self.start_date, self.end_date))
-                    & (epl.salary_component == struct_row.salary_component)
-                    & (epl.is_paid != 1)
+        set_gross_pay_and_base_gross_pay()
+
+        if self.salary_structure:
+            self.calculate_component_amounts("deductions")
+
+        self.add_against_employee_payment()
+
+        set_loan_repayment(self)
+
+        self.set_precision_for_component_amounts()
+        self.set_net_pay()
+        if not skip_tax_breakup_computation:
+            self.compute_income_tax_breakup()
+
+    def add_against_employee_payment(self):
+        for component, total_amount in self._against_employee_payment.items():
+            component_type = "earnings" if total_amount > 0 else "deductions"
+
+            self.update_component_row(
+                get_salary_component_data(component), 
+                flt(abs(total_amount)), 
+                component_type
+            )
+
+    def add_structure_components(self, component_type):
+        self.data, self.default_data = self.get_data_for_eval()
+
+        for struct_row in self._salary_structure_doc.get(component_type):
+            if not struct_row.is_flexible_payment:
+                self.add_structure_component(struct_row, component_type)
+            else:
+                self.add_employee_payment(struct_row, component_type)
+
+    def add_employee_payment(self, struct_row, component_type):
+        epl = frappe.qb.DocType("Employee Payment Log")
+
+        emp_pl = (
+            frappe.qb.from_(epl)
+            .select(epl.name, epl.account, epl.against_salary_component, epl.amount, epl.status)
+            .where(
+                (epl.employee == self.employee)
+                & (epl.company == self.company)
+                & (epl.payroll_date.between(self.start_date, self.end_date))
+                & (epl.salary_component == struct_row.salary_component)
+                & (epl.is_paid != 1)
+            )
+            .for_update()
+        ).run(as_dict=1)
+
+        account_total = {}
+        total_amount = 0.0
+        for pl in emp_pl:
+            if pl.account:
+                account_total.setdefault(pl.account, 0)                    
+                account_total[pl.account] += pl.amount
+
+            total_amount += pl.amount
+
+            if pl.status != "Approved":
+                frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
+
+            if pl.against_salary_component:
+                key = pl.against_salary_component
+                self._against_employee_payment[key] = self._against_employee_payment.get(key, 0) + (
+                    pl.amount if component_type == "deductions" else -pl.amount
                 )
-                .for_update()
-            ).run(as_dict=1)
 
-            account_total = {}
-            total_amount = 0.0
-            for pl in emp_pl:
-                if pl.account:
-                    account_total.setdefault(pl.account, 0)                    
-                    account_total[pl.account] += pl.amount
+            self.payment_log_list.append(pl.name)
 
-                total_amount += pl.amount
+        struct_row.account_rate = json.dumps(account_total)
 
-                if pl.status != "Approved":
-                    frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
+        # default behavior, the system does not add if component amount is zero
+        # if remove_if_zero_valued is unchecked, then ask system to add component row
+        remove_if_zero_valued = frappe.get_cached_value(
+            "Salary Component", struct_row.salary_component, "remove_if_zero_valued"
+        )
 
-                self.payment_log_list.append(pl.name)
-
-            struct_row.account_rate = json.dumps(account_total)
-            self.update_component_row(struct_row, flt(total_amount), component_type)
+        self.update_component_row(
+            struct_row, 
+            flt(total_amount), 
+            component_type,
+            remove_if_zero_valued=remove_if_zero_valued,
+        )
 
     def update_component_row(
 		self,

@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:BKM-PWT-{#####}",
  "creation": "2025-07-08 14:08:50.503557",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -18,6 +17,7 @@
   "column_break_souy",
   "company",
   "posting_date",
+  "payroll_date",
   "mandor",
   "mandor1",
   "kerani",
@@ -394,17 +394,24 @@
    "fieldtype": "Currency",
    "label": "Upah Permi Total",
    "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "payroll_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Payroll Date",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-18 22:27:07.750686",
+ "modified": "2025-10-23 10:55:48.236611",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

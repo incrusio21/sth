@@ -7,9 +7,10 @@
  "field_order": [
   "employee",
   "hari_kerja",
+  "posting_date",
   "column_break_ojxs",
   "company",
-  "posting_date",
+  "payroll_date",
   "status",
   "is_paid",
   "section_break_rfin",
@@ -18,6 +19,7 @@
   "amount",
   "reference_tab",
   "salary_component",
+  "against_salary_component",
   "account",
   "column_break_nxan",
   "salary_slip"
@@ -32,8 +34,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_ojxs",
-   "fieldtype": "Column Break"
+   "fieldname": "hari_kerja",
+   "fieldtype": "Float",
+   "label": "Hari Kerja",
+   "read_only": 1
   },
   {
    "fieldname": "posting_date",
@@ -43,23 +47,7 @@
    "reqd": 1
   },
   {
-   "fieldname": "hari_kerja",
-   "fieldtype": "Float",
-   "label": "Hari Kerja",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_rfin",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "label": "Amount",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_uorb",
+   "fieldname": "column_break_ojxs",
    "fieldtype": "Column Break"
   },
   {
@@ -71,24 +59,46 @@
    "reqd": 1
   },
   {
+   "fieldname": "payroll_date",
+   "fieldtype": "Date",
+   "label": "Payroll Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_paid",
+   "fieldtype": "Check",
+   "label": "Is Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rfin",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "column_break_rhjm",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_uorb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
   },
   {
    "fieldname": "reference_tab",
    "fieldtype": "Tab Break",
    "label": "Reference"
-  },
-  {
-   "fieldname": "column_break_nxan",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "salary_slip",
-   "fieldtype": "Link",
-   "label": "Salary Slip",
-   "options": "Salary Slip",
-   "read_only": 1
   },
   {
    "fieldname": "salary_component",
@@ -108,16 +118,21 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "is_paid",
-   "fieldtype": "Check",
-   "label": "Is Paid",
+   "fieldname": "column_break_nxan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_slip",
+   "fieldtype": "Link",
+   "label": "Salary Slip",
+   "options": "Salary Slip",
    "read_only": 1
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Data",
-   "label": "Status",
+   "fieldname": "against_salary_component",
+   "fieldtype": "Link",
+   "label": "Against Salary Component",
+   "options": "Salary Component",
    "read_only": 1
   }
  ],
@@ -125,9 +140,9 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-18 21:30:00.030415",
+ "modified": "2025-10-24 19:49:27.196829",
  "modified_by": "Administrator",
- "module": "Payroll Log",
+ "module": "HR Customize",
  "name": "Employee Payment Log",
  "owner": "Administrator",
  "permissions": [
