@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
@@ -48,12 +48,12 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.netto_weight = self.weight_total = self.bjr = 0
 
 	def set_payroll_date(self):
-		super().set_payroll_date()
-
-		if self.is_kontanan:
-			self.payroll_date = frappe.db.get_value("Pengajuan Panen Kontanan", {
+		if not self.is_kontanan:
+			super().set_payroll_date()
+		else:
+			self.payroll_date, self.against_panen_component = frappe.db.get_value("Pengajuan Panen Kontanan", {
 				"bkm_panen": self.name, "docstatus": 1
-			}, "posting_date") or ""
+			}, ["posting_date", "against_salary_component"]) or ["", ""]
 
 	def on_submit(self):
 		self.set_status()
@@ -107,8 +107,12 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.grand_total -= self.hasil_kerja_denda 
 
 	def update_kontanan_used(self):
-		self.set_payroll_date()
+		if not self.is_rekap:
+			frappe.throw("Please Rekap BKM Panen {} first".format(
+				get_link_to_form(self.doctype, self.name)
+			))
 
+		self.set_payroll_date()
 		self.set_status(update_payment_log=True)
 
 	def calculate_transfered_weight(self):
@@ -144,6 +148,11 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.db_update()
 
 	def set_data_rekap_weight(self):
+		if self.against_salary_component:
+			frappe.throw("BKM Panen {} already used in Pembayaran Kontanan".format(
+				get_link_to_form(self.doctype, self.name)
+			))
+
 		spb = frappe.qb.DocType("Rekap Timbangan Panen")
 
 		rekap_timbangan = (
