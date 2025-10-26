@@ -51,9 +51,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		if not self.is_kontanan:
 			super().set_payroll_date()
 		else:
-			self.payroll_date, self.against_panen_component = frappe.db.get_value("Pengajuan Panen Kontanan", {
+			self.payroll_date, self.against_salary_component = frappe.db.get_value("Pengajuan Panen Kontanan", {
 				"bkm_panen": self.name, "docstatus": 1
-			}, ["posting_date", "against_salary_component"]) or ["", ""]
+			}, ["posting_date", "against_panen_component"]) or ["", ""]
 
 	def on_submit(self):
 		self.set_status()
@@ -113,6 +113,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			))
 
 		self.set_payroll_date()
+		self.db_update()
+		
 		self.set_status(update_payment_log=True)
 
 	def calculate_transfered_weight(self):
@@ -170,7 +172,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		if len(rekap_timbangan) > 1:
 			frappe.throw("Only one Rekap timbangan Panen is allowed per document")
 
-		self.is_rekap, values = (1, rekap_timbangan[0]) if rekap_timbangan else (0, (0, 0, 0))
+		self.is_rekap, values = (1, rekap_timbangan[0]) if rekap_timbangan else (0, (0, 0))
 		self.bjr, self.weight_total = values
 
 		self.set_status(update_payment_log=True)

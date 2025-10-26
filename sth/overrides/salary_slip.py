@@ -71,7 +71,7 @@ class SalarySlip(SalarySlip):
         if self.salary_structure:
             self.calculate_component_amounts("deductions")
 
-        self.add_against_employee_payment()
+        self.calculate_against_employee_payment()
 
         set_loan_repayment(self)
 
@@ -80,15 +80,29 @@ class SalarySlip(SalarySlip):
         if not skip_tax_breakup_computation:
             self.compute_income_tax_breakup()
 
-    def add_against_employee_payment(self):
+    def calculate_against_employee_payment(self):
+        # hapus component against terlebih dahulu 
+        self.remove_against_employee_payment()
+
         for component, total_amount in self._against_employee_payment.items():
             component_type = "earnings" if total_amount > 0 else "deductions"
 
+            struct_row = get_salary_component_data(component)
+            struct_row.against_employee_payment = 1
+
             self.update_component_row(
-                get_salary_component_data(component), 
+                struct_row, 
                 flt(abs(total_amount)), 
                 component_type
             )
+
+    def remove_against_employee_payment(self):
+        removed_component = []
+        for component_type in ["earnings", "deductions"]:
+            removed_component.extend(self.get(component_type, {"against_employee_payment": 1}))
+        
+        for d in removed_component:
+            self.remove(d)
 
     def add_structure_components(self, component_type):
         self.data, self.default_data = self.get_data_for_eval()
@@ -199,6 +213,8 @@ class SalarySlip(SalarySlip):
                 "is_flexible_benefit",
                 "variable_based_on_taxable_salary",
                 "exempted_from_income_tax",
+                "is_flexible_payment",
+                "against_employee_payment",
             ):
                 component_row.set(attr, component_data.get(attr))
 

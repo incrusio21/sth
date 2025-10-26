@@ -40,7 +40,9 @@
   "upah_supervisi_amount",
   "grand_total",
   "hasil_panen_tab",
-  "hasil_panen"
+  "hasil_panen",
+  "more_information_tab",
+  "journal_entry"
  ],
  "fields": [
   {
@@ -195,7 +197,8 @@
    "fieldname": "supervisi_component",
    "fieldtype": "Link",
    "label": "Supervisi Component",
-   "options": "Salary Component"
+   "options": "Salary Component",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_yfhd",
@@ -205,7 +208,8 @@
    "fieldname": "against_panen_component",
    "fieldtype": "Link",
    "label": "Against Panen Component",
-   "options": "Salary Component"
+   "options": "Salary Component",
+   "reqd": 1
   },
   {
    "fetch_from": "bkm_panen.mandor",
@@ -256,13 +260,15 @@
    "fieldname": "salary_account",
    "fieldtype": "Link",
    "label": "Salary Account",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "paid_account",
    "fieldtype": "Link",
    "label": "Paid Account",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fetch_from": "bkm_panen.grand_total",
@@ -270,13 +276,25 @@
    "fieldtype": "Currency",
    "label": "Total Upah Panen",
    "read_only": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-25 23:12:02.877283",
+ "modified": "2025-10-26 12:19:07.307946",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

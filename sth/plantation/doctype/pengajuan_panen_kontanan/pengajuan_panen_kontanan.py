@@ -58,10 +58,11 @@ class PengajuanPanenKontanan(PlantationController):
 				doc = frappe.new_doc("Employee Payment Log")
 
 			amount = self.get(f"upah_{emp}") or 0
+			detail_name = ""
 
 			# jika ada nilai atau kosong 
 			if amount:
-				doc.employee = self.get("employee")
+				doc.employee = self.get(emp)
 				doc.company = self.company
 
 				doc.posting_date = self.posting_date
@@ -70,8 +71,8 @@ class PengajuanPanenKontanan(PlantationController):
 				doc.status = "Approved"
 				doc.amount = amount
 
-				doc.salary_component = self.get("salary_component")
-				doc.against_salary_component = self.get("against_salary_component")
+				doc.salary_component = self.get("supervisi_component")
+				doc.against_salary_component = self.get("against_panen_component")
 
 				# if log_updater.get("target_account"):
 				# 	doc.account = self.get(log_updater["target_account"])
@@ -84,7 +85,7 @@ class PengajuanPanenKontanan(PlantationController):
 				if not is_new:
 					doc.delete()
 			
-			self.set(target_link, detail_name)
+			self.db_set(target_link, detail_name)
 	
 	def create_journal_payment(self):
 		doc = frappe.new_doc("Journal Entry")
@@ -104,6 +105,8 @@ class PengajuanPanenKontanan(PlantationController):
 		])
 
 		doc.submit()
+
+		self.db_set("journal_entry", doc.name)
 
 	def on_cancel(self):
 		self.check_status_bkm_panen()
@@ -128,4 +131,5 @@ class PengajuanPanenKontanan(PlantationController):
 			if doc.docstatus == 1:
 				doc.cancel()
 
+			self.db_set("journal_entry", "")
 			doc.delete()

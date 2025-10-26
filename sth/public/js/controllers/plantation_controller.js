@@ -23,7 +23,6 @@ sth.plantation.TransactionController = class TransactionController extends frapp
     }
 
     company(doc) {
-        console.log("tsa")
         this.fetch_data_kegiatan(doc.kegiatan, doc.company)
     }
 
