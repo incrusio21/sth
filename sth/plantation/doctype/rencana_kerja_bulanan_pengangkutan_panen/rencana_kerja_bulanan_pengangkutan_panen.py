@@ -3,26 +3,24 @@
 
 import frappe
 from frappe.utils import flt
-from frappe.query_builder.functions import Sum
 
-from sth.controllers.rencana_kerja_controller import RencanaKerjaController
+from sth.controllers.rencana_kerja_controller import RencanaKerjaController, get_tonase
 
 class RencanaKerjaBulananPengangkutanPanen(RencanaKerjaController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.skip_calculate_supervisi = True
 
 	def validate(self):
 		self.get_tonase()
-		self.vliadate_jarak_pks()
+		self.validate_jarak_pks()
 		super().validate()
 
-	def vliadate_jarak_pks(self):
+	def validate_jarak_pks(self):
 		if not self.jarak_pks:
 			frappe.throw("Please fill Jarak Ke PKS First")
 			
 	def get_tonase(self):
-		self.tonase = get_tonase(self.rencana_kerja_bulanan, self.blok)
+		self.tonase = get_tonase(self.rencana_kerja_bulanan, {"blok": self.blok})
 
 	def update_rate_or_qty_value(self, item, precision):
 		# set on child class if needed
@@ -34,21 +32,3 @@ class RencanaKerjaBulananPengangkutanPanen(RencanaKerjaController):
 	def update_value_after_amount(self, item, precision):
 		if item.parentfield == "kendaraan":
 			item.rate_tbs = flt(item.amount / self.tonase, precision)
-
-@frappe.whitelist()
-def get_tonase(rkb, blok):
-	rkb_panen = frappe.qb.DocType("Rencana Kerja Bulanan Panen")
-
-	query = (
-		frappe.qb.from_(rkb_panen)
-		.select(
-			Sum(rkb_panen.tonase)
-		)
-		.where(
-			(rkb_panen.docstatus == 1) &
-			(rkb_panen.rencana_kerja_bulanan == rkb) &
-			(rkb_panen.blok == blok)
-		)
-	)
-
-	return query.run()[0][0] or 0.0

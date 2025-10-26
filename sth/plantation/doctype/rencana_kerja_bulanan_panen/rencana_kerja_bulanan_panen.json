@@ -38,21 +38,14 @@
   "total_upah",
   "premi",
   "biaya_supervisi_section",
-  "upah_mandor",
-  "premi_mandor",
-  "column_break_rxnc",
-  "upah_kerani",
-  "premi_kerani",
-  "column_break_oaiw",
-  "upah_mandor1",
-  "premi_mandor1",
+  "upah_supervisi",
+  "premi_supervisi",
+  "column_break_dtns",
   "section_break_xgkx",
   "column_break_exnc",
-  "mandor_amount",
-  "kerani_amount",
-  "mandor1_amount",
-  "column_break_fsda",
   "pemanen_amount",
+  "supervisi_amount",
+  "column_break_fsda",
   "budget_tambahan_amount",
   "grand_total",
   "section_break_ekyx",
@@ -201,67 +194,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "biaya_supervisi_section",
-   "fieldtype": "Section Break",
-   "label": "Biaya Supervisi"
-  },
-  {
-   "fieldname": "upah_mandor",
-   "fieldtype": "Currency",
-   "label": "Upah Mandor"
-  },
-  {
-   "fieldname": "premi_mandor",
-   "fieldtype": "Currency",
-   "label": "Premi Mandor"
-  },
-  {
-   "fieldname": "column_break_rxnc",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "upah_kerani",
-   "fieldtype": "Currency",
-   "label": "Upah Kerani"
-  },
-  {
-   "fieldname": "premi_kerani",
-   "fieldtype": "Currency",
-   "label": "Premi Kerani"
-  },
-  {
-   "fieldname": "column_break_oaiw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "upah_mandor1",
-   "fieldtype": "Currency",
-   "label": "Upah Mandor 1"
-  },
-  {
-   "fieldname": "premi_mandor1",
-   "fieldtype": "Currency",
-   "label": "Premi Mandor 1"
-  },
-  {
-   "fieldname": "mandor_amount",
-   "fieldtype": "Currency",
-   "label": "Mandor Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "kerani_amount",
-   "fieldtype": "Currency",
-   "label": "Kerani Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "mandor1_amount",
-   "fieldtype": "Currency",
-   "label": "Mandor 1 Total",
-   "read_only": 1
-  },
-  {
    "fieldname": "budget_tambahan_amount",
    "fieldtype": "Currency",
    "label": "Budget Tambahan",
@@ -395,13 +327,40 @@
    "label": "Kegiatan",
    "options": "Kegiatan",
    "reqd": 1
+  },
+  {
+   "fieldname": "supervisi_amount",
+   "fieldtype": "Currency",
+   "label": "Supervisi Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "biaya_supervisi_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Supervisi"
+  },
+  {
+   "fieldname": "upah_supervisi",
+   "fieldtype": "Currency",
+   "label": "Upah Supervisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_supervisi",
+   "fieldtype": "Currency",
+   "label": "Premi Supervisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dtns",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-06 14:06:44.472459",
+ "modified": "2025-10-23 14:16:21.263041",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Panen",

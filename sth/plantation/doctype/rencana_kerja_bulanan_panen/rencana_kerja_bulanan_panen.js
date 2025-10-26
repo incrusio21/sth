@@ -46,7 +46,7 @@ sth.plantation.RencanaKerjaBulananPanen = class RencanaKerjaBulananPanen extends
 
     }
 
-    calculate_amount_addons(){
+    calculate_non_table_values(){
         let doc = this.frm.doc
         
         doc.jumlah_janjang = flt(doc.jumlah_pokok * doc.akp/100)

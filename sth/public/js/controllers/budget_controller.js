@@ -149,15 +149,5 @@ sth.plantation.setup_budget_controller = function () {
                 this.calculate_sebaran_values(item, per_month_table)
             }
         }
-
-        clear_table(list_table = []) {
-            for (const field_table of list_table || []) {
-                this.frm.clear_table(field_table)
-                this.calculate_item_values(field_table)
-            }
-
-            this.calculate_grand_total();
-            this.frm.refresh_fields();
-        }
     }
 }

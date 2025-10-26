@@ -6,11 +6,13 @@ sth.plantation.setup_rencana_kerja_controller()
 frappe.ui.form.on("Rencana Kerja Bulanan Pengangkutan Panen", {
 	blok(frm) {
         frappe.call({
-            method: "sth.plantation.doctype.rencana_kerja_bulanan_pengangkutan_panen.rencana_kerja_bulanan_pengangkutan_panen.get_tonase",
+            method: "sth.controllers.rencana_kerja_controller.get_tonase",
             frezee: true,
             args: {
                 rkb: frm.doc.rencana_kerja_bulanan,
-                blok: frm.doc.blok,
+                filters: {
+                    blok: frm.doc.blok,
+                }
             },
             callback: function (data) {
                 frm.set_value("tonase", data.message)

@@ -299,6 +299,16 @@ sth.plantation.TransactionController = class TransactionController extends frapp
             })
         }
     }
+
+    clear_table(list_table = []) {
+        for (const field_table of list_table || []) {
+            this.frm.clear_table(field_table)
+            this.calculate_item_values(field_table)
+        }
+
+        this.calculate_grand_total();
+        this.frm.refresh_fields();
+    }
 }
 
 

@@ -14,26 +14,18 @@ from sth.controllers.plantation_controller import PlantationController
 class RencanaKerjaController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.skip_calculate_supervisi = False
         self.realization_doctype = ""
 
     def validate(self):
-        if not self.skip_calculate_supervisi:
-            self.calculate_supervisi_amount()
 
         super().validate()
         self.calculate_biaya_kerja_total()
 
-    def calculate_supervisi_amount(self):
-        self.mandor_amount = flt((self.upah_mandor or 0) + (self.premi_mandor or 0))
-        self.kerani_amount = flt((self.upah_kerani or 0) + (self.premi_kerani or 0))
-        self.mandor1_amount = flt((self.upah_mandor1 or 0) + (self.premi_mandor1 or 0))
-
     def calculate_biaya_kerja_total(self):
         self.biaya_kerja_total = self.grand_total
         
-        if not self.skip_calculate_supervisi:
-           self.biaya_kerja_total -= self.mandor_amount - self.kerani_amount - self.mandor1_amount
+        if self.get("supervisi_amount"):
+            self.biaya_kerja_total -= self.supervisi_amount
 
         self.realized_total = self.used_total = 0.0
 
@@ -137,3 +129,26 @@ def get_not_used_blok(args):
         }
     ), as_dict=1
 )
+
+@frappe.whitelist()
+def get_tonase(rkb, filters={}):
+    if isinstance(filters, str):
+        filters = json.loads(filters)
+
+    rkb_panen = frappe.qb.DocType("Rencana Kerja Bulanan Panen")
+
+    query = (
+        frappe.qb.from_(rkb_panen)
+        .select(
+            Sum(rkb_panen.tonase)
+        )
+        .where(
+            (rkb_panen.docstatus == 1) &
+            (rkb_panen.rencana_kerja_bulanan == rkb)
+        )
+    )
+
+    for fieldname, value in filters.items():
+        query = query.where(rkb_panen[fieldname] == value)
+
+    return query.run()[0][0] or 0.0

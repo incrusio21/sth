@@ -140,7 +140,7 @@ sth.plantation.RencanaKerjaBulananPerawatan = class RencanaKerjaBulananPerawatan
         }
     }
 
-    calculate_amount_addons() {
+    calculate_non_table_values() {
         let doc = this.frm.doc
 
         doc.jumlah_tenaga_kerja = doc.volume_basis ? flt(doc.qty / doc.volume_basis) : 0

@@ -50,18 +50,6 @@ sth.plantation.setup_rencana_kerja_controller = function() {
         update_value_after_amount(item){
            item.amount = flt(item.amount + (item.budget_tambahan || 0), precision("amount", item));
         }
-
-        calculate_non_table_values(){
-            let doc = this.frm.doc
-            doc.mandor_amount = flt(doc.upah_mandor)  + flt(doc.premi_mandor)
-            doc.kerani_amount = flt(doc.upah_kerani) + flt(doc.premi_kerani)
-            doc.mandor1_amount = flt(doc.upah_mandor1) + flt(doc.premi_mandor1)
-            this.calculate_amount_addons()
-        }
-
-        calculate_amount_addons(){
-            // set on child class if needed
-        }
         
         get_blok_for_duplicate(){
             let me = this

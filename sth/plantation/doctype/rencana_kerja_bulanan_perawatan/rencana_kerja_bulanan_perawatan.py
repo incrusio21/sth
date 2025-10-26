@@ -11,7 +11,6 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.realization_doctype = "Buku Kerja Mandor Perawatan"
-		self.skip_calculate_supervisi = True
 
 	def calculate_item_table_values(self):
 		super().calculate_item_table_values()
