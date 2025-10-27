@@ -119,6 +119,8 @@ standard_queries = {"Kegiatan": "sth.controllers.queries.kegiatan_query"}
 # Override standard doctype classes
 
 override_doctype_class = {
+	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
+	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 }
