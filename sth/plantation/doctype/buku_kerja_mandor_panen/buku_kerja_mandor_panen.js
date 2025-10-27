@@ -15,7 +15,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
         super.setup(doc)
         
         this.fieldname_total.push("jumlah_janjang", "qty_brondolan", "brondolan_amount", "denda")
-        this.kegiatan_fetch_fieldname.push("upah_brondolan")
+        this.kegiatan_fetch_fieldname.push("upah_brondolan", "premi_kontanan_basis")
         
         this.hasil_kerja_update_field.push("buah_tidak_dipanen_rate", "buah_mentah_disimpan_rate",
             "buah_mentah_ditinggal_rate", "brondolan_tinggal_rate", "pelepah_tidak_disusun_rate", "pelepah_sengkleh_rate")
@@ -73,7 +73,8 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
 
         //  Hitung total brondolan
 		item.brondolan_amount = flt(item.brondolan * flt(item.qty_brondolan))
-        item.sub_total = item.amount + item.brondolan_amount
+        item.kontanan = doc.is_kontanan ? flt(item.qty * flt(doc.premi_kontanan_basis), precision) : 0
+        item.sub_total = item.amount + item.brondolan_amount + item.kontanan
     }
 
     after_calculate_grand_total(){

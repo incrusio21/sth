@@ -12,6 +12,7 @@
   "volume_basis",
   "rupiah_basis",
   "upah_brondolan",
+  "premi_kontanan_basis",
   "column_break_rqow",
   "have_premi",
   "persentase_premi",
@@ -84,13 +85,20 @@
    "in_list_view": 1,
    "label": "Min Basis Premi",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:parent.is_panen",
+   "fieldname": "premi_kontanan_basis",
+   "fieldtype": "Currency",
+   "label": "Premi Kontanan Basis"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-17 17:09:16.859711",
+ "modified": "2025-10-27 13:48:13.874329",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan Company",

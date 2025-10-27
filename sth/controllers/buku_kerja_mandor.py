@@ -116,7 +116,7 @@ class BukuKerjaMandorController(PlantationController):
     def create_or_update_payment_log(self):
         # cek jika bkm memiliki field status
         status = self.meta.has_field("status")
-
+        removed_epl = []
         for emp in self.hasil_kerja:
             for log_updater in self.payment_log_updater:
                 is_new = False
@@ -152,12 +152,16 @@ class BukuKerjaMandorController(PlantationController):
                 else:
                     # removed jika nilai kosong dan bukan document baru
                     if not is_new:
-                        doc.delete()
+                        removed_epl.append(doc)
                 
                 emp.set(log_updater["target_link"], detail_name)
 
         self.update_child_table("hasil_kerja")
 
+        # hapus epl yang tidak digunakan
+        for r in removed_epl:
+            r.delete()
+            
     # def create_journal_entry(self):
     #     if not (self.salary_component and self.kegiatan_account):
     #         frappe.throw("Please Set Salary Component and Kegiatan Account First")

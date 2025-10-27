@@ -11,6 +11,8 @@
   "premi_sc",
   "panen_default_section",
   "bkm_panen_component",
+  "premi_kontanan_component",
+  "aginst_kontanan_component",
   "column_break_pxng",
   "denda_sc",
   "brondolan_sc"
@@ -63,13 +65,25 @@
    "fieldtype": "Link",
    "label": "Premi Salary Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "premi_kontanan_component",
+   "fieldtype": "Link",
+   "label": "Premi Kontanan Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "aginst_kontanan_component",
+   "fieldtype": "Link",
+   "label": "Aginst Kontanan Component",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-16 15:36:07.560958",
+ "modified": "2025-10-27 13:58:37.586445",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

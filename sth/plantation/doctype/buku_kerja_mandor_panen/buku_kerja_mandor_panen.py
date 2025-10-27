@@ -15,15 +15,22 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			["salary_component", "bkm_panen_component"],
 			["denda_salary_component", "denda_sc"],
 			["brondolan_salary_component", "brondolan_sc"],
+			["kontanan_salary_component", "premi_kontanan_component"],
 		])
 
 		self.fieldname_total.extend([
-			"jumlah_janjang", "qty_brondolan", "brondolan_amount", "denda"
+			"jumlah_janjang", "qty_brondolan", "brondolan_amount", "denda", "kontanan_amount"
 		])
 
-		self.kegiatan_fetch_fieldname.extend(["upah_brondolan"])
+		self.kegiatan_fetch_fieldname.extend(["upah_brondolan", "premi_kontanan_basis"])
 
 		self.payment_log_updater.extend([
+			{
+				"target_link": "kontanan_epl",
+				"target_amount": "kontanan_amount",
+				"target_salary_component": "kontanan_salary_component",
+				"removed_if_zero": True
+			},
 			{
 				"target_link": "denda_epl",
 				"target_amount": "denda",
@@ -90,6 +97,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def update_value_after_amount(self, item, precision):
 		# Hitung total brondolan
 		item.brondolan_amount = flt(item.brondolan * flt(item.qty_brondolan), precision)
+		item.kontanan_amount = flt(item.qty * flt(self.premi_kontanan_basis), precision) if self.is_kontanan else 0
 
 		# Perhitungan denda
 		factors = [ 
@@ -101,7 +109,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		# Hitung total denda dengan menjumlahkan rate * nilai item
 		item.denda = sum(flt(item.get(field)) * flt(self.get(f"{field}_rate")) for field in factors)
 
-		item.sub_total = flt(item.amount + item.brondolan_amount, precision)
+		item.sub_total = flt(item.amount + item.brondolan_amount + item.kontanan, precision)
 
 	def after_calculate_grand_total(self):
 		self.grand_total -= self.hasil_kerja_denda 

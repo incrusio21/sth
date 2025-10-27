@@ -28,6 +28,7 @@
   "volume_basis",
   "rupiah_basis",
   "upah_brondolan",
+  "premi_kontanan_basis",
   "column_break_bngb",
   "tahun_tanam",
   "luas_blok",
@@ -44,8 +45,9 @@
   "section_break_lacm",
   "hasil_kerja_amount",
   "hasil_kerja_brondolan_amount",
-  "hasil_kerja_denda",
+  "hasil_kerja_kontanan_amount",
   "column_break_alsz",
+  "hasil_kerja_denda",
   "grand_total",
   "hasil_kerja_tab",
   "hasil_kerja",
@@ -69,6 +71,7 @@
   "voucher_no",
   "section_break_lpwn",
   "salary_component",
+  "kontanan_salary_component",
   "against_salary_component",
   "column_break_xcox",
   "brondolan_salary_component",
@@ -520,13 +523,32 @@
    "label": "Against Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fieldname": "premi_kontanan_basis",
+   "fieldtype": "Currency",
+   "label": "Premi Kontanan Basis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_kontanan_amount",
+   "fieldtype": "Currency",
+   "label": "Premi Kontanan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kontanan_salary_component",
+   "fieldtype": "Link",
+   "label": "Kontanan Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-24 20:35:03.237480",
+ "modified": "2025-10-27 13:55:40.645768",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

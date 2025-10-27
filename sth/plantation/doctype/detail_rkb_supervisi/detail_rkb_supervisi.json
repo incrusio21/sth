@@ -6,22 +6,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "divisi",
+  "blok",
   "column_break_fjaw",
   "tonase",
   "section_break_crgq",
   "rencana_kerja_bulanan_panen"
  ],
  "fields": [
-  {
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Blok",
-   "options": "Divisi",
-   "read_only": 1,
-   "reqd": 1
-  },
   {
    "fieldname": "column_break_fjaw",
    "fieldtype": "Column Break"
@@ -43,13 +34,22 @@
    "label": "Rencana Kerja Bulanan Panen",
    "options": "Rencana Kerja Bulanan Panen",
    "read_only": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-27 09:58:21.400430",
+ "modified": "2025-10-27 11:27:22.910984",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail RKB Supervisi",
