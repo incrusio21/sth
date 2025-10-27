@@ -10,10 +10,7 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.realization_doctype = "Buku Kerja Mandor Panen"
-		
-		if self.get("rencana_kerja_bulanan"):
-			is_reposting_supervisi_in_progress(self.rencana_kerja_bulanan)
-
+	
 	def validate(self):
 		super().validate()
 		self.check_pengangkutan_and_supervisi()
@@ -55,11 +52,11 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 		if rkb_supervisi:
 			frappe.throw("Divisi {} with {} already contains the Rencana Kerja Bulanan Supervisi Panen".format(self.divisi, self.rencana_kerja_bulanan))
 
-def is_reposting_supervisi_in_progress(rkb):
-	reposting_in_progress = frappe.db.exists(
-		"Rencana Kerja Bulanan Supervisi Panen", {"rencana_kerja_bulanan": rkb,"docstatus": 1, "status": ["in", ["Queued", "In Progress"]]}
-	)
-	if reposting_in_progress:
-		frappe.msgprint(
-			_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1
-		)
+	def update_upah_supervisi(self, doc=None):
+		
+		self.upah_supervisi = self.premi_supervisi = 0
+		if doc and doc.docstatus == 1:
+			self.upah_supervisi = flt(doc.upah_supervisi * self.tonase / doc.total_tonase)
+			self.premi_supervisi = flt(doc.premi_supervisi * self.tonase / doc.total_tonase)
+
+		self.calculate()

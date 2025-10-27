@@ -9,11 +9,14 @@
 
 sth.plantation.RencanaKerjaBulananSupervisiPanen = class RencanaKerjaBulananSupervisiPanen extends frappe.ui.form.Controller {
     refresh() {
+        this.frm.set_df_property("details", "cannot_add_rows", true);
+        this.frm.set_df_property("details", "cannot_delete_rows", true);
+
         this.set_query_field()
     }
 
     set_query_field() {
-        this.frm.set_query("divisi", "details", function(doc){
+        this.frm.set_query("divisi", function(doc){
             return{
                 filters: {
                     unit: doc.unit,
@@ -22,13 +25,8 @@ sth.plantation.RencanaKerjaBulananSupervisiPanen = class RencanaKerjaBulananSupe
         })
     }
 
-    rencana_kerja_bulanan(){
-        this.frm.clear_table("details")
-
-        this.frm.refresh_fields();
-    }
-
-    divisi(doc, cdt, cdn){
+    divisi(doc){
+        let me = this
         frappe.call({
             method: "sth.controllers.rencana_kerja_controller.get_tonase",
             frezee: true,
@@ -39,7 +37,7 @@ sth.plantation.RencanaKerjaBulananSupervisiPanen = class RencanaKerjaBulananSupe
                 }
             },
             callback: function (data) {
-                frappe.model.set_value(cdt, cdn, "tonase", data.message)
+                me.frm.set_value("total_tonase", data.message)
             }
         })
     }

@@ -8,18 +8,17 @@
   "section_break_nbyx",
   "rencana_kerja_bulanan",
   "unit",
+  "divisi",
   "column_break_miar",
   "company",
-  "status",
   "amended_from",
-  "section_break_awwz",
-  "details",
-  "section_break_xory",
-  "error_log",
-  "section_break_ncgc",
-  "rkb_to_be_repost",
-  "column_break_hzbo",
-  "current_index"
+  "section_break_nqti",
+  "upah_supervisi",
+  "premi_supervisi",
+  "column_break_ggea",
+  "total_tonase",
+  "rkb_panen_tab",
+  "details"
  ],
  "fields": [
   {
@@ -65,64 +64,53 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_awwz",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_nqti",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "upah_supervisi",
+   "fieldtype": "Currency",
+   "label": "Upah Supervisi"
+  },
+  {
+   "fieldname": "premi_supervisi",
+   "fieldtype": "Currency",
+   "label": "Premi Supervisi"
+  },
+  {
+   "fieldname": "column_break_ggea",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tonase",
+   "fieldtype": "Currency",
+   "label": "Total Tonase",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rkb_panen_tab",
+   "fieldtype": "Tab Break",
+   "label": "RKB Panen"
   },
   {
    "fieldname": "details",
    "fieldtype": "Table",
    "label": "Details",
    "options": "Detail RKB Supervisi"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_ncgc",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "rkb_to_be_repost",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "label": "RKB to Be Repost",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_hzbo",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "current_index",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Current Index",
-   "no_copy": 1,
-   "print_hide": 1
-  },
-  {
-   "fieldname": "section_break_xory",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "error_log",
-   "fieldtype": "Long Text",
-   "label": "Error Log",
-   "no_copy": 1,
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-26 19:02:16.837368",
+ "modified": "2025-10-27 10:02:49.554179",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Supervisi Panen",
