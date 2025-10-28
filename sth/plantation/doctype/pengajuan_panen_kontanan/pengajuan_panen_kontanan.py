@@ -16,6 +16,7 @@ class PengajuanPanenKontanan(PlantationController):
 
 	def validate(self):
 		self.get_data_bkm_panen()
+		self.get_plantation_setting()
 		super().validate()
 
 	def get_data_bkm_panen(self):
@@ -27,9 +28,23 @@ class PengajuanPanenKontanan(PlantationController):
 			)  
 		)
 
+	def get_plantation_setting(self):
+		plan_settings = frappe.db.get_value("Plantation Settings", None, ["supervisi_kontanan_component", "against_kontanan_component"], as_dict=1)
+		if not plan_settings:
+			frappe.throw("Please set data in {} first".format(get_link_to_form("Plantation Settings", "Plantation Settings")))
+
+		self.update(plan_settings)
+
 	def before_calculate_grand_total(self):
 		self.upah_supervisi_amount = flt(self.upah_mandor) + flt(self.upah_mandor1) + flt(self.upah_kerani)
-		
+	
+	def before_submit(self):
+		self.validate_account_and_salary_component()
+
+	def validate_account_and_salary_component(self):
+		if not (self.salary_account and self.paid_account):
+			frappe.throw("Please set Account first")
+
 	def on_submit(self):
 		self.validate_duplicate_ppk()
 		self.check_status_bkm_panen()
@@ -72,7 +87,7 @@ class PengajuanPanenKontanan(PlantationController):
 				doc.amount = amount
 
 				doc.salary_component = self.get("supervisi_component")
-				doc.against_salary_component = self.get("against_panen_component")
+				doc.against_salary_component = self.get("against_kontanan_component")
 
 				# if log_updater.get("target_account"):
 				# 	doc.account = self.get(log_updater["target_account"])

@@ -12,10 +12,11 @@
   "panen_default_section",
   "bkm_panen_component",
   "premi_kontanan_component",
-  "aginst_kontanan_component",
+  "supervisi_kontanan_component",
   "column_break_pxng",
   "denda_sc",
-  "brondolan_sc"
+  "brondolan_sc",
+  "against_kontanan_component"
  ],
  "fields": [
   {
@@ -73,9 +74,15 @@
    "options": "Salary Component"
   },
   {
-   "fieldname": "aginst_kontanan_component",
+   "fieldname": "supervisi_kontanan_component",
    "fieldtype": "Link",
-   "label": "Aginst Kontanan Component",
+   "label": "Supervisi Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "against_kontanan_component",
+   "fieldtype": "Link",
+   "label": "Against Kontanan Component",
    "options": "Salary Component"
   }
  ],
@@ -83,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-27 13:58:37.586445",
+ "modified": "2025-10-28 16:15:58.126534",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

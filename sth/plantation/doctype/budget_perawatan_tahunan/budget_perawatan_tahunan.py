@@ -16,7 +16,7 @@ class BudgetPerawatanTahunan(BudgetController):
 		self.duplicate_param.extend([
 			"divisi", "kegiatan"
 		])
-		self.kegiatan_fetch_fieldname = ["rupiah_basis"]
+		self.kegiatan_fetch_if_empty_fieldname = ["rupiah_basis"]
 
 	def validate(self):
 		super().validate()
