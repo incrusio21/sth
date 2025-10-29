@@ -60,7 +60,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		else:
 			self.payroll_date, self.against_salary_component = frappe.db.get_value("Pengajuan Panen Kontanan", {
 				"bkm_panen": self.name, "docstatus": 1
-			}, ["posting_date", "against_panen_component"]) or ["", ""]
+			}, ["posting_date", "against_kontanan_component"]) or ["", ""]
 
 	def on_submit(self):
 		self.set_status()

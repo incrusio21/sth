@@ -15,21 +15,27 @@ class PlantationController(Document):
         self.skip_calculate_table = []
         self.skip_fieldname_amount = []
         self.kegiatan_fetch_fieldname = []
+        self.kegiatan_fetch_if_empty_fieldname = []
 
     def validate(self):
         self.fetch_kegiatan_data()
         self.calculate()
 
     def fetch_kegiatan_data(self):
-        if not self.kegiatan_fetch_fieldname:
+        if not (self.kegiatan_fetch_fieldname or self.kegiatan_fetch_if_empty_fieldname):
             return
         
         if not (self.kegiatan and self.company):
             self.update({key: "" for key in self.kegiatan_fetch_fieldname})
         else:
             from sth.controllers.queries import kegiatan_fetch_data
+            
+            for fieldname in self.kegiatan_fetch_if_empty_fieldname:
+                if self.get(fieldname) is None:
+                    self.kegiatan_fetch_fieldname.append(fieldname)
 
-            self.update(kegiatan_fetch_data(self.kegiatan, self.company, self.kegiatan_fetch_fieldname))
+            if self.kegiatan_fetch_fieldname:
+                self.update(kegiatan_fetch_data(self.kegiatan, self.company, self.kegiatan_fetch_fieldname))
 
     def calculate(self):
         self.calculate_item_table_values()

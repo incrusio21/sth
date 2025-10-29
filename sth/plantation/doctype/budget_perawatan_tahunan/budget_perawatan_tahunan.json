@@ -481,15 +481,14 @@
   {
    "fieldname": "rupiah_basis",
    "fieldtype": "Currency",
-   "label": "Rupiah/Satuan Basis",
-   "read_only": 1
+   "label": "Rupiah/Satuan Basis"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-07 15:36:18.947557",
+ "modified": "2025-10-28 13:43:01.729876",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Perawatan Tahunan",
