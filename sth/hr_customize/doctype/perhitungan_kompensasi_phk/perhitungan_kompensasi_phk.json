@@ -1,0 +1,184 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-02 10:57:32.601027",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_tmct",
+  "column_break_mfxg",
+  "transaction_date",
+  "ssa",
+  "ec",
+  "en",
+  "nik",
+  "eg",
+  "company",
+  "column_break_yiil",
+  "l_date",
+  "ilb",
+  "document_attach",
+  "dphk",
+  "grttl",
+  "amended_from",
+  "perhitungan_tab",
+  "table_seym"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_tmct",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Perhitungan Kompensasi PHK",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "ec.no_ktp",
+   "fieldname": "nik",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "NIK"
+  },
+  {
+   "fetch_from": "ec.grade",
+   "fieldname": "eg",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee Grade"
+  },
+  {
+   "fieldname": "column_break_yiil",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mfxg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "l_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Layoff Date",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Transaction Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "ec.company",
+   "fieldname": "company",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Company"
+  },
+  {
+   "fieldname": "ilb",
+   "fieldtype": "Link",
+   "label": "Issued Letter By",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "document_attach",
+   "fieldtype": "Attach",
+   "label": "Document Attach"
+  },
+  {
+   "fieldname": "dphk",
+   "fieldtype": "Link",
+   "label": "Dasar PHK",
+   "options": "Setup Dasar PHK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "perhitungan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Perhitungan"
+  },
+  {
+   "fieldname": "table_seym",
+   "fieldtype": "Table",
+   "options": "Detail Perhitungan Kompensasi PHK"
+  },
+  {
+   "fieldname": "grttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ssa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Salary Structure Assignement",
+   "options": "Salary Structure Assignment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "ssa.employee",
+   "fieldname": "ec",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee Code",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "ec.employee_name",
+   "fieldname": "en",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee Name"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-02 13:01:53.637779",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Perhitungan Kompensasi PHK",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

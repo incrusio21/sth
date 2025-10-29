@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-02 14:44:47.337662",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "nik",
+  "ec",
+  "en",
+  "jd",
+  "mk",
+  "ssa",
+  "column_break_ufzx",
+  "company",
+  "unit",
+  "norek",
+  "bank_name",
+  "designation",
+  "thr_section",
+  "gp",
+  "uang_daging",
+  "column_break_isrc",
+  "umr",
+  "sbttl"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fetch_from": "ec.custom_nip",
+   "fieldname": "nik",
+   "fieldtype": "Read Only",
+   "in_preview": 1,
+   "label": "NIK",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ssa.employee",
+   "fieldname": "ec",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee Code",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "ec.employee_name",
+   "fieldname": "en",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee Name"
+  },
+  {
+   "fetch_from": "ec.date_of_joining",
+   "fieldname": "jd",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Joining Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mk",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Masa Kerja ( Tahun )"
+  },
+  {
+   "fieldname": "ssa",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Salary Structure Assignment",
+   "options": "Salary Structure Assignment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ufzx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "ec.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "ec.custom_unit",
+   "fieldname": "unit",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Unit"
+  },
+  {
+   "fetch_from": "ec.bank_ac_no",
+   "fieldname": "norek",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No Rekening"
+  },
+  {
+   "fetch_from": "ec.bank_name",
+   "fieldname": "bank_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Bank Name"
+  },
+  {
+   "fetch_from": "ec.designation",
+   "fieldname": "designation",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Designation"
+  },
+  {
+   "fieldname": "thr_section",
+   "fieldtype": "Section Break",
+   "label": "THR"
+  },
+  {
+   "fetch_from": "ssa.base",
+   "fieldname": "gp",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Gaji Pokok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uang_daging",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Uang Daging",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_isrc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.custom_ump_harian",
+   "fieldname": "umr",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "UMR",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "sbttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subotal",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-17 10:33:28.472196",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Detail Transaksi THR",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

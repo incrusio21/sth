@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-02 09:46:36.911909",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mkd",
+  "mks",
+  "fp",
+  "column_break_ojnv"
+ ],
+ "fields": [
+  {
+   "fieldname": "mkd",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Masa Kerja Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mks",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Masa Kerja Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fp",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Faktor Pengali",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ojnv",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-02 09:52:06.825747",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Detail Uang Pisah",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

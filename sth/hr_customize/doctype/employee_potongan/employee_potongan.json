@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:POTKAR-{#####}",
  "creation": "2025-10-09 15:28:19.589177",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -108,10 +109,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-10 14:09:11.726763",
+ "modified": "2025-10-10 16:31:32.624009",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Potongan",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
