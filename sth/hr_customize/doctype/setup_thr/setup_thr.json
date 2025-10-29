@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SET-THR-{fiscalyear}",
+ "creation": "2025-09-02 13:53:42.299848",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "header_section",
+  "company",
+  "column_break_iund",
+  "unit",
+  "staff_up_tab",
+  "fpsu",
+  "column_break_wjdb",
+  "egksh",
+  "karyawan_satuan_hasil_tab",
+  "fpksh",
+  "column_break_hkds",
+  "egstaff",
+  "karyawan_non_satuan_hasil_tab",
+  "fpnsh",
+  "column_break_tizw",
+  "egnsh",
+  "khl_tab",
+  "fpkhl",
+  "column_break_jlqz",
+  "egkhl"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_iund",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "staff_up_tab",
+   "fieldtype": "Tab Break",
+   "in_preview": 1,
+   "label": "Staff Up"
+  },
+  {
+   "description": "Masa Kerja < 1 Thn , Jumlah bln Bekerja / 12 X Gp",
+   "fieldname": "fpsu",
+   "fieldtype": "Int",
+   "label": "Faktor Pengali"
+  },
+  {
+   "fieldname": "column_break_wjdb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "karyawan_satuan_hasil_tab",
+   "fieldtype": "Tab Break",
+   "in_preview": 1,
+   "label": "Karyawan Satuan Hasil"
+  },
+  {
+   "fieldname": "fpksh",
+   "fieldtype": "Int",
+   "label": "Faktor Pengali"
+  },
+  {
+   "fieldname": "column_break_hkds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "karyawan_non_satuan_hasil_tab",
+   "fieldtype": "Tab Break",
+   "in_preview": 1,
+   "label": "Karyawan Non Satuan Hasil"
+  },
+  {
+   "fieldname": "fpnsh",
+   "fieldtype": "Int",
+   "label": "Faktor Pengali"
+  },
+  {
+   "fieldname": "column_break_tizw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "khl_tab",
+   "fieldtype": "Tab Break",
+   "in_preview": 1,
+   "label": "KHL"
+  },
+  {
+   "description": "Masa Kerja < 1 Thn , Jumlah bln Bekerja / 12 X UMR",
+   "fieldname": "fpkhl",
+   "fieldtype": "Int",
+   "label": "Faktor Pengali"
+  },
+  {
+   "fieldname": "column_break_jlqz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "in_preview": 1,
+   "label": "Details"
+  },
+  {
+   "fieldname": "egksh",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "egstaff",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "egnsh",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "egkhl",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-17 10:35:54.733710",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Setup THR",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

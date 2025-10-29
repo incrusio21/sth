@@ -1,0 +1,165 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:fn",
+ "creation": "2025-08-13 11:36:34.324806",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "g_id",
+  "fn",
+  "jop",
+  "gndr",
+  "nat_id",
+  "id_num",
+  "id_p",
+  "column_break_jcsf",
+  "dob",
+  "nationality",
+  "address",
+  "ph1",
+  "ph2",
+  "company__institution",
+  "email"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "g_id",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Guest ID",
+   "options": "Guest",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "g_id.fn",
+   "fieldname": "fn",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Full Name (as per ID)",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "g_id.jop",
+   "fieldname": "jop",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Job Title / Position",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "g_id.gndr",
+   "fieldname": "gndr",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "g_id.nat_id",
+   "fieldname": "nat_id",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "ID Type",
+   "options": "National ID\nPassport\nDriver\u2019s License",
+   "reqd": 1
+  },
+  {
+   "fieldname": "id_num",
+   "fieldtype": "Int",
+   "label": "ID Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "id_p",
+   "fieldtype": "Image",
+   "label": "ID Picture"
+  },
+  {
+   "fieldname": "column_break_jcsf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "g_id.dob",
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fetch_from": "g_id.nationality",
+   "fieldname": "nationality",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nationality",
+   "options": "Nationality"
+  },
+  {
+   "fetch_from": "g_id.address",
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Address",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "g_id.ph1",
+   "fieldname": "ph1",
+   "fieldtype": "Phone",
+   "in_preview": 1,
+   "label": "Contact Number 1",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "g_id.contact_number_2",
+   "fieldname": "ph2",
+   "fieldtype": "Phone",
+   "in_preview": 1,
+   "label": "Contact Number 2"
+  },
+  {
+   "fetch_from": "g_id.company__institution",
+   "fieldname": "company__institution",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Company / Institution"
+  },
+  {
+   "fetch_from": "g_id.email",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Email"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-03 13:42:17.520756",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Guest Detail",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

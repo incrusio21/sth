@@ -1,0 +1,162 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:fn",
+ "creation": "2025-08-11 09:42:41.267772",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "g_id",
+  "fn",
+  "jop",
+  "gndr",
+  "nat_id",
+  "id_num",
+  "id_p",
+  "column_break_jcsf",
+  "dob",
+  "nationality",
+  "address",
+  "ph1",
+  "contact_number_2",
+  "company__institution",
+  "email"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "g_id",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Guest ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fn",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Full Name (as per ID)",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "jop",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Job Title / Position",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gndr",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nat_id",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "ID Type",
+   "options": "National ID\nPassport\nDriver\u2019s License",
+   "reqd": 1
+  },
+  {
+   "fieldname": "id_num",
+   "fieldtype": "Int",
+   "label": "ID Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "id_p",
+   "fieldtype": "Attach Image",
+   "label": "ID Picture"
+  },
+  {
+   "fieldname": "column_break_jcsf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Nationality",
+   "options": "Nationality"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ph1",
+   "fieldtype": "Phone",
+   "in_preview": 1,
+   "label": "Contact Number 1",
+   "reqd": 1
+  },
+  {
+   "fieldname": "contact_number_2",
+   "fieldtype": "Phone",
+   "in_preview": 1,
+   "label": "Contact Number 2"
+  },
+  {
+   "fieldname": "company__institution",
+   "fieldtype": "Data",
+   "label": "Company / Institution"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-03 13:42:35.385664",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Guest",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

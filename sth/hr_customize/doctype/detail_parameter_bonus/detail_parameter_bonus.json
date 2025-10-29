@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-26 13:36:52.547055",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "kv",
+  "cv",
+  "column_break_need"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "description": "Ex : A , B , C etc",
+   "fieldname": "kv",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "KPI Value",
+   "reqd": 1
+  },
+  {
+   "description": "Ex : 5x , 4x etc",
+   "fieldname": "cv",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Compensation Value"
+  },
+  {
+   "fieldname": "column_break_need",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-26 13:39:45.695966",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Detail Parameter Bonus",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

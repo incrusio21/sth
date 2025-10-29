@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:SET-NTR-{#####}",
  "creation": "2025-10-09 11:03:28.740245",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -47,10 +48,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-09 12:31:50.419142",
+ "modified": "2025-10-10 16:11:39.674961",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Natura Price",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

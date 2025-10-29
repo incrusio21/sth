@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-26 14:53:26.413787",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "bp",
+  "et",
+  "column_break_qhdv",
+  "company",
+  "unit",
+  "employee_detail_tab",
+  "get_employee_data",
+  "table_dtls"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "bp",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bonus Period",
+   "options": "Setup Bonus",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "bp.et",
+   "fieldname": "et",
+   "fieldtype": "Link",
+   "label": "Employment Type",
+   "options": "Setup Bonus"
+  },
+  {
+   "fieldname": "column_break_qhdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "bp.company",
+   "fieldname": "company",
+   "fieldtype": "Read Only",
+   "label": "Company"
+  },
+  {
+   "fetch_from": "bp.unit",
+   "fieldname": "unit",
+   "fieldtype": "Read Only",
+   "label": "Unit"
+  },
+  {
+   "fieldname": "employee_detail_tab",
+   "fieldtype": "Tab Break",
+   "label": "Employee Detail"
+  },
+  {
+   "fieldname": "table_dtls",
+   "fieldtype": "Table",
+   "options": "Detail Transaksi Bonus"
+  },
+  {
+   "fieldname": "get_employee_data",
+   "fieldtype": "Button",
+   "label": "Get Employee Data"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-26 15:29:27.710206",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Transaksi Bonus",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

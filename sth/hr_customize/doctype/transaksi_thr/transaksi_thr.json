@@ -1,0 +1,153 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:TRK-THR-{eg}-{fiscal_year}",
+ "creation": "2025-09-02 14:26:02.413938",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rghp",
+  "fisal_year",
+  "company",
+  "unit",
+  "column_break_pgny",
+  "eg",
+  "rg",
+  "section_break_casa",
+  "column_break_mvah",
+  "amended_from",
+  "column_break_pedy",
+  "grttl",
+  "list_thr_karyawan_tab",
+  "ged",
+  "table_mzzo"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_rghp",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transaksi THR",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fisal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Periode",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pgny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "eg",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Grade",
+   "options": "Employee Grade",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rg",
+   "fieldtype": "Link",
+   "label": "Religion Group",
+   "options": "Religion Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_casa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "grttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "list_thr_karyawan_tab",
+   "fieldtype": "Tab Break",
+   "label": "List THR Karyawan"
+  },
+  {
+   "fieldname": "column_break_mvah",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pedy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "table_mzzo",
+   "fieldtype": "Table",
+   "options": "Detail Transaksi THR"
+  },
+  {
+   "fieldname": "ged",
+   "fieldtype": "Button",
+   "label": "Get Employee Data"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-03 13:06:05.115030",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Transaksi THR",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-02 09:55:29.908750",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "eg",
+  "mkd",
+  "column_break_ojnv",
+  "fp",
+  "max",
+  "mks"
+ ],
+ "fields": [
+  {
+   "fieldname": "mkd",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Masa Kerja Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mks",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Masa Kerja Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fp",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Faktor Pengali",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ojnv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "max",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Max Rupiah"
+  },
+  {
+   "fieldname": "eg",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee Grade",
+   "options": "Employee Grade",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-02 10:55:20.229434",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Detail Uang Pisah Non Staff",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

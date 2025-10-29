@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-26 14:58:07.630457",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "eid",
+  "en",
+  "tmk",
+  "mk",
+  "ls",
+  "unit",
+  "company",
+  "column_break_fquo",
+  "norek",
+  "nilai",
+  "pb",
+  "tb"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "eid",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Employee ID",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "eid.employee_name",
+   "fieldname": "en",
+   "fieldtype": "Read Only",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Name"
+  },
+  {
+   "fetch_from": "eid.date_of_joining",
+   "fieldname": "tmk",
+   "fieldtype": "Read Only",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "TMK"
+  },
+  {
+   "fieldname": "mk",
+   "fieldtype": "Read Only",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Masa Kerja"
+  },
+  {
+   "fieldname": "column_break_fquo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "eid.company",
+   "fieldname": "company",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Company"
+  },
+  {
+   "fetch_from": "eid.custom_unit",
+   "fieldname": "unit",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Unit"
+  },
+  {
+   "fetch_from": "eid.employment_type",
+   "fieldname": "ls",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Level Status"
+  },
+  {
+   "fetch_from": "eid.bank_ac_no",
+   "fieldname": "norek",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "No Rekening"
+  },
+  {
+   "fetch_from": "eid.custom_bonus_value",
+   "fieldname": "nilai",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "KPI Value"
+  },
+  {
+   "fieldname": "pb",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Compensation Value"
+  },
+  {
+   "fieldname": "tb",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Bonus"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-17 10:38:53.458600",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Detail Transaksi Bonus",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

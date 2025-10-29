@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-02 12:42:25.294083",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nm",
+  "fp",
+  "column_break_ugre",
+  "fps",
+  "gaji_pokok",
+  "sbttl"
+ ],
+ "fields": [
+  {
+   "fieldname": "nm",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Komponen",
+   "options": "Setup Komponen PHK",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fp",
+   "fieldtype": "Int",
+   "label": "Faktor Pengali",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ugre",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fps",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Faktor Pengali Setup"
+  },
+  {
+   "fieldname": "gaji_pokok",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Gaji Pokok"
+  },
+  {
+   "fieldname": "sbttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-02 12:49:23.692127",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Detail Perhitungan Kompensasi PHK",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

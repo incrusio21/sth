@@ -14,10 +14,10 @@
  "fields": [
   {
    "fieldname": "pkp",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "PKP",
-   "options": "Master PKP",
+   "options": "TK0\nTK1\nTK2\nTK3\nK0\nK1\nK2\nK3",
    "reqd": 1
   },
   {
@@ -48,7 +48,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-09 13:15:56.192311",
+ "modified": "2025-10-13 10:03:17.507938",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Natura Multiplier",
