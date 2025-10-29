@@ -28,7 +28,11 @@ app_include_js = "sth.bundle.js"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+	"Training Event": "public/js/training_event.js",
+	"Travel Request": "public/js/travel_request.js",
+	"Payment Entry": "public/js/payment_entry.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -123,19 +127,22 @@ override_doctype_class = {
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
+	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 }
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Training Event": {
+		"on_submit": "sth.custom.training_event.create_journal_entry",
+		"on_cancel": "sth.custom.training_event.delete_journal_entry",
+	},
+	"Travel Request": {
+		"on_submit": "sth.custom.travel_request.create_employee_advance",
+	}
+}
 
 
 # Scheduled Tasks
