@@ -136,12 +136,8 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
         frm.trigger("calculate_qty")
     },
 
-    qty_before_afkir(frm){
-        frm.trigger("calculate_qty")
-    },
-
     calculate_qty(frm){
-        frm.doc.qty = flt(frm.doc.qty_planting - frm.doc.qty_before_afkir)
+        frm.doc.qty = flt(frm.doc.qty_planting)
 
         frm.refresh_fields()
     }
