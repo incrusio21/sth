@@ -7,18 +7,20 @@
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "eid",
-  "en",
-  "tmk",
-  "mk",
-  "ls",
-  "unit",
-  "company",
+  "employee",
+  "employee_name",
+  "date_of_joining",
+  "employment_type",
+  "custom_kriteria",
   "column_break_fquo",
-  "norek",
-  "nilai",
-  "pb",
-  "tb"
+  "bank_ac_no",
+  "kpi_value",
+  "compensation_value",
+  "salary",
+  "total_bonus",
+  "more_information_section",
+  "employee_payment_log_earning_bonus",
+  "employee_payment_log_deduction_bonus"
  ],
  "fields": [
   {
@@ -27,7 +29,11 @@
    "label": "Header"
   },
   {
-   "fieldname": "eid",
+   "fieldname": "column_break_fquo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
@@ -36,97 +42,106 @@
    "reqd": 1
   },
   {
-   "fetch_from": "eid.employee_name",
-   "fieldname": "en",
-   "fieldtype": "Read Only",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Employee Name"
+   "label": "Employee Name",
+   "read_only": 1
   },
   {
-   "fetch_from": "eid.date_of_joining",
-   "fieldname": "tmk",
-   "fieldtype": "Read Only",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Data",
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "TMK"
-  },
-  {
-   "fieldname": "mk",
-   "fieldtype": "Read Only",
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Masa Kerja"
-  },
-  {
-   "fieldname": "column_break_fquo",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "eid.company",
-   "fieldname": "company",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Company"
-  },
-  {
-   "fetch_from": "eid.custom_unit",
-   "fieldname": "unit",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Unit"
+   "label": "TMK",
+   "read_only": 1
   },
   {
    "fetch_from": "eid.employment_type",
-   "fieldname": "ls",
-   "fieldtype": "Read Only",
+   "fieldname": "employment_type",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Level Status"
+   "label": "Level Status",
+   "read_only": 1
   },
   {
-   "fetch_from": "eid.bank_ac_no",
-   "fieldname": "norek",
-   "fieldtype": "Read Only",
+   "fieldname": "custom_kriteria",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "No Rekening"
+   "label": "Kriteria",
+   "read_only": 1
   },
   {
-   "fetch_from": "eid.custom_bonus_value",
-   "fieldname": "nilai",
-   "fieldtype": "Read Only",
+   "fieldname": "bank_ac_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No Rekening",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kpi_value",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "KPI Value"
   },
   {
-   "fieldname": "pb",
-   "fieldtype": "Data",
+   "fieldname": "compensation_value",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Compensation Value"
+   "label": "Compensation Value",
+   "read_only": 1
   },
   {
-   "fieldname": "tb",
+   "fieldname": "salary",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Total Bonus"
+   "label": "Salary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_bonus",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Bonus",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "employee_payment_log_earning_bonus",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log Earning Bonus",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_payment_log_deduction_bonus",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log Deduction Bonus",
+   "options": "Employee Payment Log",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-17 10:38:53.458600",
+ "modified": "2025-10-31 14:17:08.568001",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi Bonus",

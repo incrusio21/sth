@@ -10,6 +10,7 @@
   "unit",
   "company",
   "column_break_mrlz",
+  "eg",
   "et",
   "detail_parameter_bonus_tab",
   "table_zcyy"
@@ -46,8 +47,7 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Employee Type",
-   "options": "Employment Type",
-   "reqd": 1
+   "options": "Employment Type"
   },
   {
    "fieldname": "detail_parameter_bonus_tab",
@@ -58,12 +58,18 @@
    "fieldname": "table_zcyy",
    "fieldtype": "Table",
    "options": "Detail Parameter Bonus"
+  },
+  {
+   "fieldname": "eg",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-17 10:37:08.263431",
+ "modified": "2025-10-29 15:08:11.041820",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Bonus",
