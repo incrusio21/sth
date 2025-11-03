@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-03 13:51:54.864425",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bonus_default_section",
+  "earning_bonus_component",
+  "column_break_bnad",
+  "deduction_bonus_component",
+  "thr_default_section",
+  "earning_thr_component",
+  "column_break_frao",
+  "deduction_thr_component",
+  "phk_default_section",
+  "earning_phk_component",
+  "column_break_iplp",
+  "deduction_phk_component"
+ ],
+ "fields": [
+  {
+   "collapsible": 1,
+   "fieldname": "bonus_default_section",
+   "fieldtype": "Section Break",
+   "label": "Bonus Default"
+  },
+  {
+   "fieldname": "earning_bonus_component",
+   "fieldtype": "Link",
+   "label": "Earning Bonus Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_bnad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "deduction_bonus_component",
+   "fieldtype": "Link",
+   "label": "Deduction Bonus Component",
+   "options": "Salary Component"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "thr_default_section",
+   "fieldtype": "Section Break",
+   "label": "THR Default"
+  },
+  {
+   "fieldname": "earning_thr_component",
+   "fieldtype": "Link",
+   "label": "Earning THR Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_frao",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "deduction_thr_component",
+   "fieldtype": "Link",
+   "label": "Deduction THR Component",
+   "options": "Salary Component"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "phk_default_section",
+   "fieldtype": "Section Break",
+   "label": "PHK Default"
+  },
+  {
+   "fieldname": "earning_phk_component",
+   "fieldtype": "Link",
+   "label": "Earning PHK Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_iplp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "deduction_phk_component",
+   "fieldtype": "Link",
+   "label": "Deduction PHK Component",
+   "options": "Salary Component"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-03 13:59:56.275071",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Bonus and Allowance Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

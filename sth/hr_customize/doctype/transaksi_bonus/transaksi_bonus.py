@@ -31,7 +31,7 @@ class TransaksiBonus(Document):
 						frappe.log_error(f"Payment Log {log_name} tidak ditemukan", "Cancel Transaksi Bonus")
 
 	def make_employee_payment_log(self, emp, log_type):
-		hr_settings = frappe.get_single("HR Settings")
+		hr_settings = frappe.get_single("Bonus and Allowance Settings")
 		company = frappe.get_doc("Company", self.company)
 
 		settings_field = {
@@ -40,7 +40,7 @@ class TransaksiBonus(Document):
 		}
 
 		if not settings_field.get(log_type):
-			frappe.throw(f"Salary Component untuk '{log_type}' belum diset di HR Settings")
+			frappe.throw(f"Salary Component untuk '{log_type}' belum diset di Bonus and Allowance Settings")
 
 		payment_log = frappe.new_doc("Employee Payment Log")
 		payment_log.update({
