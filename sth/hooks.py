@@ -4,7 +4,6 @@ app_publisher = "DAS"
 app_description = "STH Module"
 app_email = "digitalasiasolusindo@gmail.com"
 app_license = "mit"
-fixtures = ["Custom Field", "Property Setter"]
 # required_apps = []
 
 # Includes in <head>
