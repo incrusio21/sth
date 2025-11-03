@@ -145,7 +145,7 @@
    "description": null,
    "docstatus": 0,
    "dt": "Salary Detail",
-   "fetch_from": null,
+   "fetch_from": "salary_component.is_flexible_payment",
    "fetch_if_empty": 0,
    "fieldname": "is_flexible_payment",
    "fieldtype": "Check",
