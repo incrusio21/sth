@@ -33,6 +33,7 @@ doctype_js = {
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
 	"Payment Entry": "public/js/payment_entry.js",
+    "Loan" : "hr_customize/custom/loan.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -125,6 +126,7 @@ standard_queries = {"Kegiatan": "sth.controllers.queries.kegiatan_query"}
 
 override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
+	"Loan Disbursement": "sth.overrides.loan_disbursement.LoanDisbursement",
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
@@ -136,6 +138,21 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
+	# "*": {
+	# 	"on_update": "method",
+	# 	"on_cancel": "method",
+	# 	"on_trash": "method"
+	# }
+	"Loan": {
+		"validate": "sth.hr_customize.custom.loan.Loan",
+	},
+    "Loan Repayment": {
+		"on_cancel": "sth.hr_customize.custom.loan_repayment.LoanRepayment",
+	},
+	"Loan Disbursement": {
+        "on_submit": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
+		"on_cancel": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
+	},    
 	"Training Event": {
 		"on_submit": "sth.custom.training_event.create_journal_entry",
 		"on_cancel": "sth.custom.training_event.delete_journal_entry",
@@ -175,9 +192,9 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "sth.event.get_events"
-# }
+override_whitelisted_methods = {
+	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

@@ -46,7 +46,7 @@ class DataPenyemaianBibit(StatusUpdater):
 	def calculate_grand_total_qty(self):
 		self.calculate_qty_dobletone_and_afkir()
 
-		self.qty = flt(self.qty_planting - self.qty_before_afkir + self.qty_dobletone - self.qty_after_afkir)
+		self.qty = flt(self.qty_planting + self.qty_dobletone - self.qty_after_afkir)
 
 	def calculate_qty_dobletone_and_afkir(self):
 		dpda = frappe.qb.DocType("Data Pencatatan Dobletone Dan Afkir")

@@ -4,7 +4,8 @@
 import json
 
 import frappe
-from frappe.utils import date_diff, flt, now
+from frappe.utils import date_diff, flt, month_diff, now
+from frappe.query_builder.functions import IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
 from hrms.payroll.doctype.payroll_period.payroll_period import (
@@ -17,24 +18,27 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 class SalarySlip(SalarySlip):
     def on_submit(self):
         super().on_submit()
-        self.update_emp_payment_log()
+        self.update_payment_related("Employee Payment Log", "payment_log_list")
+        self.update_payment_related("Loan Repayment", "loan_repayment_list")
 
     def on_cancel(self):
         super().on_submit()
-        self.update_emp_payment_log(cancel=1)
 
-    def update_emp_payment_log(self, cancel=0):
-        epl = frappe.qb.DocType("Employee Payment Log")
+        self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
+        self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
+
+    def update_payment_related(self, doctype, list_field, cancel=0):
+        dt = frappe.qb.DocType(doctype)
 
         query = (
-            frappe.qb.update(epl)
-            .set(epl.is_paid, 0 if cancel else 1)
-            .set(epl.salary_slip, "" if cancel else self.name)
-            .set(epl.modified, now())
-            .set(epl.modified_by, frappe.session.user)
+            frappe.qb.update(dt)
+            .set(dt.is_paid, 0 if cancel else 1)
+            .set(dt.salary_slip, "" if cancel else self.name)
+            .set(dt.modified, now())
+            .set(dt.modified_by, frappe.session.user)
             .where(
-                (epl.salary_slip == self.name) if cancel
-                else (epl.name.isin(self.payment_log_list))
+                (dt.salary_slip == self.name) if cancel
+                else (dt.name.isin(getattr(self, list_field)))
             )
         )
 
@@ -43,6 +47,7 @@ class SalarySlip(SalarySlip):
     def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
         # agar payment log selalu generate ulang
         self.payment_log_list = []
+        self.loan_repayment_list = []
         self._against_employee_payment = {}
 
         def set_gross_pay_and_base_gross_pay():
@@ -75,6 +80,8 @@ class SalarySlip(SalarySlip):
 
         set_loan_repayment(self)
 
+        self.calculate_subsidy_loan()
+        
         self.set_precision_for_component_amounts()
         self.set_net_pay()
         if not skip_tax_breakup_computation:
@@ -86,15 +93,7 @@ class SalarySlip(SalarySlip):
 
         for component, total_amount in self._against_employee_payment.items():
             component_type = "earnings" if total_amount > 0 else "deductions"
-
-            struct_row = get_salary_component_data(component)
-            struct_row.against_employee_payment = 1
-
-            self.update_component_row(
-                struct_row, 
-                flt(abs(total_amount)), 
-                component_type
-            )
+            self.add_component_custom(component, component_type, abs(total_amount))
 
     def remove_against_employee_payment(self):
         removed_component = []
@@ -162,6 +161,78 @@ class SalarySlip(SalarySlip):
             flt(total_amount), 
             component_type,
             remove_if_zero_valued=remove_if_zero_valued,
+        )
+
+    def calculate_subsidy_loan(self):
+        self.add_repaymant_subsidy()
+        if self.get("loans"):
+            self.add_loans_monthly_subsidy()
+
+    def add_repaymant_subsidy(self):
+        lp = frappe.qb.DocType("Loan Repayment")
+
+        query = (
+            frappe.qb.from_(lp)
+            .select(lp.name, lp.subsidy_component, lp.against_subsidy_component, lp.amount_paid)
+            .where(
+                (IfNull(lp.subsidy_component, "") != "")
+                & (lp.docstatus == 1)
+                & (lp.is_paid == 0)
+                & (lp.posting_date <= self.end_date)
+            )
+            .for_update()
+        )
+
+        subsidy_list = query.run(as_dict=True)
+
+        subsidy_component, against_component = {}, {}
+
+        for sc in subsidy_list:
+            subsidy_component.setdefault(sc.subsidy_component, 0)
+            against_component.setdefault(sc.against_subsidy_component, 0)
+
+            subsidy_component[sc.subsidy_component] += sc.amount_paid
+            against_component[sc.against_subsidy_component] += sc.amount_paid
+            
+            self.loan_repayment_list.append(sc.name)
+
+        for component, total_amount in subsidy_component.items():
+            self.add_component_custom(component, "earnings", total_amount)
+
+        for component, total_amount in against_component.items():
+            self.add_component_custom(component, "deductions", total_amount)
+        
+    def add_loans_monthly_subsidy(self):
+        if self.payroll_frequency != "Monthly":
+            return
+        
+        monthly_subsidy = {}
+        for l in self.loans:
+            if not l.monthly_subsidy_component:
+                continue
+
+            monthly_subsidy.setdefault(l.monthly_subsidy_component, 0)
+            diff = month_diff(self.end_date, l.repayment_start_date) - 1
+            
+            subsidy_amount = frappe.get_value('Monthly Subsidy', 
+                {"from_month": ["<=", diff], "to_month": [">=", diff], "parent": l.loan},
+                "subsidy_amount"
+            ) or 0
+
+            monthly_subsidy[l.monthly_subsidy_component] += subsidy_amount
+
+        for component, total_amount in monthly_subsidy.items():
+            self.add_component_custom(component, "earnings", total_amount)
+
+    def add_component_custom(self, component, component_type, total_amount):
+        struct_row = get_salary_component_data(component)
+        struct_row.against_employee_payment = 1
+
+        self.update_component_row(
+            struct_row, 
+            flt(total_amount), 
+            component_type,
+            remove_if_zero_valued=True
         )
 
     def update_component_row(

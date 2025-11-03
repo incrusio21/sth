@@ -22,7 +22,6 @@
   "amended_from",
   "detail_qty_section",
   "qty_planting",
-  "qty_before_afkir",
   "qty_dobletone",
   "qty_after_afkir",
   "column_break_ddbb",
@@ -123,14 +122,6 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "qty_before_afkir",
-   "fieldtype": "Float",
-   "label": "Qty Seed Afkir",
-   "no_copy": 1,
-   "non_negative": 1
-  },
-  {
    "description": "(Total Data Pencatatan Dobletone)",
    "fieldname": "qty_dobletone",
    "fieldtype": "Float",
@@ -143,7 +134,7 @@
    "description": "(Total Data Pencatatan Afkir)",
    "fieldname": "qty_after_afkir",
    "fieldtype": "Float",
-   "label": "Qty After Afkir",
+   "label": "Qty Afkir",
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
@@ -239,7 +230,7 @@
    "link_fieldname": "data_penyemaian_bibit"
   }
  ],
- "modified": "2025-10-24 13:19:31.454376",
+ "modified": "2025-10-30 09:54:17.543362",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penyemaian Bibit",
