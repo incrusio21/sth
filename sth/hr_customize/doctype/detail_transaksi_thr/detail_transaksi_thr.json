@@ -8,23 +8,25 @@
  "field_order": [
   "header_section",
   "nik",
-  "ec",
-  "en",
-  "jd",
-  "mk",
-  "ssa",
-  "column_break_ufzx",
-  "company",
-  "unit",
-  "norek",
-  "bank_name",
+  "employee",
+  "employee_name",
   "designation",
+  "employee_grade",
+  "employment_type",
+  "date_of_joining",
+  "salary_structure_assignment",
+  "column_break_ufzx",
+  "custom_divisi",
+  "custom_kriteria",
+  "bank_ac_no",
+  "bank_name",
   "thr_section",
-  "gp",
-  "uang_daging",
-  "column_break_isrc",
+  "gaji_pokok",
   "umr",
-  "sbttl"
+  "natura",
+  "uang_daging",
+  "subtotal",
+  "column_break_isrc"
  ],
  "fields": [
   {
@@ -35,96 +37,33 @@
   {
    "fetch_from": "ec.custom_nip",
    "fieldname": "nik",
-   "fieldtype": "Read Only",
-   "in_preview": 1,
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "NIK",
    "read_only": 1
-  },
-  {
-   "fetch_from": "ssa.employee",
-   "fieldname": "ec",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Employee Code",
-   "options": "Employee"
-  },
-  {
-   "fetch_from": "ec.employee_name",
-   "fieldname": "en",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Employee Name"
-  },
-  {
-   "fetch_from": "ec.date_of_joining",
-   "fieldname": "jd",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Joining Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "mk",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Masa Kerja ( Tahun )"
-  },
-  {
-   "fieldname": "ssa",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Salary Structure Assignment",
-   "options": "Salary Structure Assignment",
-   "reqd": 1
   },
   {
    "fieldname": "column_break_ufzx",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "ec.company",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Company",
-   "options": "Company"
-  },
-  {
-   "fetch_from": "ec.custom_unit",
-   "fieldname": "unit",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Unit"
-  },
-  {
-   "fetch_from": "ec.bank_ac_no",
-   "fieldname": "norek",
-   "fieldtype": "Read Only",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "No Rekening"
-  },
-  {
    "fetch_from": "ec.bank_name",
    "fieldname": "bank_name",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Bank Name"
+   "label": "Bank Name",
+   "read_only": 1
   },
   {
    "fetch_from": "ec.designation",
    "fieldname": "designation",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Designation"
+   "in_standard_filter": 1,
+   "label": "Designation",
+   "read_only": 1
   },
   {
    "fieldname": "thr_section",
@@ -132,19 +71,10 @@
    "label": "THR"
   },
   {
-   "fetch_from": "ssa.base",
-   "fieldname": "gp",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Gaji Pokok",
-   "read_only": 1
-  },
-  {
    "fieldname": "uang_daging",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Uang Daging",
    "read_only": 1
   },
@@ -155,19 +85,118 @@
   {
    "fetch_from": "company.custom_ump_harian",
    "fieldname": "umr",
-   "fieldtype": "Read Only",
+   "fieldtype": "Currency",
    "in_list_view": 1,
-   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "UMR",
    "read_only": 1
   },
   {
-   "bold": 1,
-   "fieldname": "sbttl",
-   "fieldtype": "Currency",
+   "fetch_from": "ssa.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.employment_type",
+   "fieldname": "employment_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Subotal",
+   "label": "Date Of Joining",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_structure_assignment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Salary Structure Assignment",
+   "options": "Salary Structure Assignment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "ec.custom_kriteria",
+   "fieldname": "custom_kriteria",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Kriteria",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.bank_ac_no",
+   "fieldname": "bank_ac_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Bank A/C No.",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ssa.base",
+   "fieldname": "gaji_pokok",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gaji Pokok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "natura",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Natura",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.employment_type",
+   "fieldname": "employee_grade",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Grade",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.custom_divisi",
+   "fieldname": "custom_divisi",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Divisi",
    "read_only": 1
   }
  ],
@@ -175,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-17 10:33:28.472196",
+ "modified": "2025-11-04 13:20:43.347403",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi THR",

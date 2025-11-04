@@ -11,6 +11,8 @@
   "company",
   "column_break_iund",
   "unit",
+  "rules_tab",
+  "table_thr_rules",
   "staff_up_tab",
   "fpsu",
   "column_break_wjdb",
@@ -144,12 +146,23 @@
    "fieldtype": "Link",
    "label": "Employee Grade",
    "options": "Employee Grade"
+  },
+  {
+   "fieldname": "rules_tab",
+   "fieldtype": "Tab Break",
+   "label": "Rules"
+  },
+  {
+   "fieldname": "table_thr_rules",
+   "fieldtype": "Table",
+   "label": "THR rules",
+   "options": "THR Setup Rule"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-17 10:35:54.733710",
+ "modified": "2025-11-04 11:23:29.567931",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup THR",
