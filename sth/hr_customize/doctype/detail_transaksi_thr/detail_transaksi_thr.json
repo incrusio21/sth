@@ -14,7 +14,6 @@
   "employee_grade",
   "employment_type",
   "date_of_joining",
-  "salary_structure_assignment",
   "column_break_ufzx",
   "custom_divisi",
   "custom_kriteria",
@@ -25,8 +24,12 @@
   "umr",
   "natura",
   "uang_daging",
+  "thr_rule",
   "subtotal",
-  "column_break_isrc"
+  "column_break_isrc",
+  "more_information_section",
+  "employee_payment_log_earning_thr",
+  "employee_payment_log_deduction_thr"
  ],
  "fields": [
   {
@@ -129,15 +132,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "salary_structure_assignment",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Salary Structure Assignment",
-   "options": "Salary Structure Assignment",
-   "reqd": 1
-  },
-  {
    "fetch_from": "ec.custom_kriteria",
    "fieldname": "custom_kriteria",
    "fieldtype": "Read Only",
@@ -198,13 +192,39 @@
    "in_standard_filter": 1,
    "label": "Divisi",
    "read_only": 1
+  },
+  {
+   "fieldname": "thr_rule",
+   "fieldtype": "Data",
+   "label": "THR Rule",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "employee_payment_log_earning_thr",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log Earning THR",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_payment_log_deduction_thr",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log Deduction THR",
+   "options": "Employee Payment Log",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-04 13:20:43.347403",
+ "modified": "2025-11-05 14:39:21.828015",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi THR",

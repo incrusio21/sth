@@ -7,28 +7,15 @@ from frappe.utils import flt, nowdate
 
 class TransaksiBonus(Document):
 	def on_submit(self):
+		self.create_journal_entry()
+
 		for emp in self.table_employee:
 			self.make_employee_payment_log(emp, "earning")
 			self.make_employee_payment_log(emp, "deduction")
 
 	def on_cancel(self):
-		for emp in self.table_employee:
-			for field in ["employee_payment_log_earning_bonus", "employee_payment_log_deduction_bonus"]:
-				frappe.db.set_value(
-					"Detail Transaksi Bonus",
-					emp.name,
-					field,
-					None
-				)
-				log_name = emp.get(field)
-				if log_name:
-					try:
-						log_doc = frappe.get_doc("Employee Payment Log", log_name)
-						if log_doc.docstatus == 1:
-							log_doc.cancel()
-						log_doc.delete(ignore_permissions=True)
-					except frappe.DoesNotExistError:
-						frappe.log_error(f"Payment Log {log_name} tidak ditemukan", "Cancel Transaksi Bonus")
+		self.delete_journal_entry()
+		self.remove_employee_payment_log(self.table_employee)
 
 	def make_employee_payment_log(self, emp, log_type):
 		hr_settings = frappe.get_single("Bonus and Allowance Settings")
@@ -72,6 +59,71 @@ class TransaksiBonus(Document):
 				fieldname,
 				payment_log.name
 			)
+
+	def remove_employee_payment_log(self, table_employee):
+		for emp in table_employee:
+			for field in ["employee_payment_log_earning_bonus", "employee_payment_log_deduction_bonus"]:
+				frappe.db.set_value(
+					"Detail Transaksi Bonus",
+					emp.name,
+					field,
+					None
+				)
+				log_name = emp.get(field)
+				if log_name:
+					try:
+						log_doc = frappe.get_doc("Employee Payment Log", log_name)
+						if log_doc.docstatus == 1:
+							log_doc.cancel()
+						log_doc.delete(ignore_permissions=True)
+					except frappe.DoesNotExistError:
+						frappe.log_error(f"Payment Log {log_name} tidak ditemukan", "Cancel Transaksi Bonus")
+
+	def create_journal_entry(self):
+		company = frappe.get_doc("Company", self.company)
+
+		je = frappe.new_doc("Journal Entry")
+		je.update({
+			"company": self.company,
+			"posting_date": self.posting_date,
+		})
+
+		je.append("accounts", {
+			"account": self.payable_bonus_account,
+			# "account": company.custom_default_thr_account,
+			# "party_type": "Employee",
+			# "party": emp.employee,
+			"debit_in_account_currency": sum(emp.total_bonus for emp in self.table_employee if emp.total_bonus)
+		})
+		
+		je.append("accounts", {
+			"account": self.bonus_account,
+			# "account": company.default_payable_account,
+			# "party_type": "Supplier",
+			# "party": self.supplier,
+			"credit_in_account_currency": sum(emp.total_bonus for emp in self.table_employee if emp.total_bonus)
+		})
+
+		je.submit()
+		self.db_set("journal_entry", je.name)
+
+	def delete_journal_entry(self):
+		if self.journal_entry:
+			je_name = self.journal_entry
+
+			try:
+				je = frappe.get_doc("Journal Entry", je_name)
+				
+				if je.docstatus == 1:
+						je.cancel()
+				
+				frappe.delete_doc("Journal Entry", je_name, force=1)
+				self.db_set("journal_entry", None)
+
+			except frappe.DoesNotExistError:
+				frappe.msgprint(f"Journal Entry {je_name} tidak ditemukan, mungkin sudah dihapus.")
+			except Exception as e:
+				frappe.throw(f"Gagal menghapus Journal Entry {je_name}: {str(e)}")
 
 	@frappe.whitelist()
 	def get_setup_bonus(self, name, kpi_value):

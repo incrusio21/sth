@@ -10,6 +10,7 @@
   "date",
   "company",
   "column_break_pgny",
+  "posting_date",
   "unit",
   "setup_thr",
   "eg",
@@ -18,10 +19,14 @@
   "column_break_mvah",
   "amended_from",
   "column_break_pedy",
-  "grttl",
+  "more_information_section",
+  "journal_entry",
   "list_thr_karyawan_tab",
   "get_employee_data",
-  "table_employee"
+  "table_employee",
+  "payment_account_settings_tab",
+  "payable_thr_account",
+  "thr_account"
  ],
  "fields": [
   {
@@ -82,14 +87,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "grttl",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Grandtotal",
-   "read_only": 1
-  },
-  {
    "fieldname": "list_thr_karyawan_tab",
    "fieldtype": "Tab Break",
    "label": "List THR Karyawan"
@@ -128,13 +125,51 @@
    "fieldtype": "Table",
    "label": "Employee",
    "options": "Detail Transaksi THR"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_account_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payment Account Settings"
+  },
+  {
+   "fieldname": "payable_thr_account",
+   "fieldtype": "Link",
+   "label": "Payable THR Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "thr_account",
+   "fieldtype": "Link",
+   "label": "THR Account ",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-04 13:03:02.479890",
+ "modified": "2025-11-05 14:49:35.562412",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

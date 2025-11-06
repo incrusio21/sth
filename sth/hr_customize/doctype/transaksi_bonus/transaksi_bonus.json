@@ -14,13 +14,15 @@
   "eg",
   "et",
   "bp",
+  "more_information_section",
+  "journal_entry",
   "employee_detail_tab",
   "get_employee_data",
   "table_employee",
   "amended_from",
-  "section_break_zawq",
-  "employee_payment_log_earning_bonus",
-  "employee_payment_log_deduction_bonus"
+  "account_tab",
+  "payable_bonus_account",
+  "bonus_account"
  ],
  "fields": [
   {
@@ -108,29 +110,43 @@
    "reqd": 1
   },
   {
-   "fieldname": "employee_payment_log_earning_bonus",
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "journal_entry",
    "fieldtype": "Link",
-   "label": "Employee Payment Log Earning Bonus",
-   "options": "Employee Payment Log",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
    "read_only": 1
   },
   {
-   "fieldname": "employee_payment_log_deduction_bonus",
-   "fieldtype": "Link",
-   "label": "Employee Payment Log Deduction Bonus",
-   "options": "Employee Payment Log",
-   "read_only": 1
+   "fieldname": "account_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payment Account Settings"
   },
   {
-   "fieldname": "section_break_zawq",
-   "fieldtype": "Section Break"
+   "fieldname": "bonus_account",
+   "fieldtype": "Link",
+   "label": "Bonus Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payable_bonus_account",
+   "fieldtype": "Link",
+   "label": "Payable Bonus Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-31 13:54:03.628404",
+ "modified": "2025-11-05 10:51:22.460256",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",

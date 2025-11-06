@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Transaksi Bonus", {
   async refresh(frm) {
-    if (frm.doc.docstatus === 0 && frm.is_new()) {
+    if (frm.doc.docstatus === 0 || frm.is_new()) {
       cur_frm.toggle_display("get_employee_data", true);
     } else {
       cur_frm.toggle_display("get_employee_data", false);

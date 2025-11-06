@@ -12,23 +12,7 @@
   "column_break_iund",
   "unit",
   "rules_tab",
-  "table_thr_rules",
-  "staff_up_tab",
-  "fpsu",
-  "column_break_wjdb",
-  "egksh",
-  "karyawan_satuan_hasil_tab",
-  "fpksh",
-  "column_break_hkds",
-  "egstaff",
-  "karyawan_non_satuan_hasil_tab",
-  "fpnsh",
-  "column_break_tizw",
-  "egnsh",
-  "khl_tab",
-  "fpkhl",
-  "column_break_jlqz",
-  "egkhl"
+  "table_thr_rules"
  ],
  "fields": [
   {
@@ -56,96 +40,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "staff_up_tab",
-   "fieldtype": "Tab Break",
-   "in_preview": 1,
-   "label": "Staff Up"
-  },
-  {
-   "description": "Masa Kerja < 1 Thn , Jumlah bln Bekerja / 12 X Gp",
-   "fieldname": "fpsu",
-   "fieldtype": "Int",
-   "label": "Faktor Pengali"
-  },
-  {
-   "fieldname": "column_break_wjdb",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "karyawan_satuan_hasil_tab",
-   "fieldtype": "Tab Break",
-   "in_preview": 1,
-   "label": "Karyawan Satuan Hasil"
-  },
-  {
-   "fieldname": "fpksh",
-   "fieldtype": "Int",
-   "label": "Faktor Pengali"
-  },
-  {
-   "fieldname": "column_break_hkds",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "karyawan_non_satuan_hasil_tab",
-   "fieldtype": "Tab Break",
-   "in_preview": 1,
-   "label": "Karyawan Non Satuan Hasil"
-  },
-  {
-   "fieldname": "fpnsh",
-   "fieldtype": "Int",
-   "label": "Faktor Pengali"
-  },
-  {
-   "fieldname": "column_break_tizw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "khl_tab",
-   "fieldtype": "Tab Break",
-   "in_preview": 1,
-   "label": "KHL"
-  },
-  {
-   "description": "Masa Kerja < 1 Thn , Jumlah bln Bekerja / 12 X UMR",
-   "fieldname": "fpkhl",
-   "fieldtype": "Int",
-   "label": "Faktor Pengali"
-  },
-  {
-   "fieldname": "column_break_jlqz",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "details_tab",
    "fieldtype": "Tab Break",
    "in_preview": 1,
    "label": "Details"
-  },
-  {
-   "fieldname": "egksh",
-   "fieldtype": "Link",
-   "label": "Employee Grade",
-   "options": "Employee Grade"
-  },
-  {
-   "fieldname": "egstaff",
-   "fieldtype": "Link",
-   "label": "Employee Grade",
-   "options": "Employee Grade"
-  },
-  {
-   "fieldname": "egnsh",
-   "fieldtype": "Link",
-   "label": "Employee Grade",
-   "options": "Employee Grade"
-  },
-  {
-   "fieldname": "egkhl",
-   "fieldtype": "Link",
-   "label": "Employee Grade",
-   "options": "Employee Grade"
   },
   {
    "fieldname": "rules_tab",
@@ -162,7 +60,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-04 11:23:29.567931",
+ "modified": "2025-11-05 10:56:47.802237",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup THR",

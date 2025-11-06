@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Transaksi THR", {
   refresh(frm) {
-    if (frm.doc.docstatus === 0 && frm.is_new()) {
+    if (frm.doc.docstatus === 0 || frm.is_new()) {
       cur_frm.toggle_display("get_employee_data", true);
     } else {
       cur_frm.toggle_display("get_employee_data", false);
@@ -27,7 +27,6 @@ frappe.ui.form.on("Transaksi THR", {
       return;
     }
 
-    const company = await frappe.db.get_value("Company", frm.doc.company, ["custom_uang_daging"]);
     const records = await frappe.db.get_list("Employee", {
       filters: {
         custom_unit: frm.doc.unit,
@@ -36,6 +35,7 @@ frappe.ui.form.on("Transaksi THR", {
       fields: [
         "no_ktp",
         "name",
+        "pkp_status",
         "employee_name",
         "date_of_joining",
         "grade",
@@ -57,34 +57,36 @@ frappe.ui.form.on("Transaksi THR", {
     frm.clear_table("table_employee");
 
     for (const emp of records) {
-      const response = await frappe.call({
-        method: "get_salary_structure_assignment",
+      const thr_rate = await frappe.call({
+        method: "get_thr_rate",
         doc: frm.doc,
         args: {
           employee: emp.name,
+          pkp_status: emp.pkp_status,
+          employee_grade: emp.grade,
+          employment_type: emp.employment_type,
+          kriteria: emp.custom_kriteria,
         },
       });
 
-      if (!response.message) {
-        frappe.msgprint(__("Employee tidak memiliki Salary Structure Assignment."));
-        console.log(response.message);
-        return;
+      if (thr_rate.message) {
+        frm.add_child("table_employee", {
+          nik: emp.no_ktp,
+          employee: emp.name,
+          employee_name: emp.employee_name,
+          date_of_joining: emp.date_of_joining,
+          employee_grade: emp.grade,
+          employment_type: emp.employment_type,
+          custom_kriteria: emp.custom_kriteria,
+          bank_ac_no: emp.bank_ac_no,
+          bank_name: emp.bank_name,
+          designation: emp.designation,
+          custom_divisi: emp.custom_divisi,
+          custom_kriteria: emp.custom_kriteria,
+          ...thr_rate.message
+        });
+        console.log(thr_rate.message);
       }
-      frm.add_child("table_employee", {
-        nik: emp.no_ktp,
-        employee: emp.name,
-        employee_name: emp.employee_name,
-        date_of_joining: emp.date_of_joining,
-        employee_grade: emp.grade,
-        employment_type: emp.employment_type,
-        custom_kriteria: emp.custom_kriteria,
-        bank_ac_no: emp.bank_ac_no,
-        bank_name: emp.bank_name,
-        designation: emp.designation,
-        custom_divisi: emp.custom_divisi,
-        custom_kriteria: emp.custom_kriteria,
-        uang_daging: company.message.custom_uang_daging ?? 0,
-      });
     }
 
     frm.refresh_field("table_employee");
