@@ -9,7 +9,7 @@
   "employee_grade",
   "employment_type",
   "kriteria",
-  "working_period",
+  "masa_kerja",
   "natura_rate",
   "payment_days",
   "uang_daging",
@@ -41,14 +41,6 @@
    "options": "\nSatuan Hasil\nNon Satuan Hasil"
   },
   {
-   "fieldname": "working_period",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Masa Kerja",
-   "options": "\n> 1 Tahun\n< 1 Tahun"
-  },
-  {
    "description": "Harga Rata2 Beras / KG / Hari",
    "fieldname": "natura_rate",
    "fieldtype": "Currency",
@@ -73,13 +65,21 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Formula"
+  },
+  {
+   "fieldname": "masa_kerja",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Masa Kerja",
+   "options": "\n> 1 Tahun\n< 1 Tahun"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-05 11:55:38.751339",
+ "modified": "2025-11-06 10:12:28.602701",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "THR Setup Rule",

@@ -65,7 +65,7 @@ frappe.ui.form.on("Transaksi THR", {
           pkp_status: emp.pkp_status,
           employee_grade: emp.grade,
           employment_type: emp.employment_type,
-          kriteria: emp.custom_kriteria,
+          kriteria: emp.custom_kriteria
         },
       });
 

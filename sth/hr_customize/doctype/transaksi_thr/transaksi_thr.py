@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, nowdate, today, date_diff, getdate
 
 class TransaksiTHR(Document):
 	def on_submit(self):
@@ -140,6 +140,15 @@ class TransaksiTHR(Document):
 			LIMIT 1;
 		""", (employee), as_dict=True)
 
+	def get_jumlah_bulan_bekerja(self, date_of_joining):
+		if not date_of_joining:
+			return 0
+
+		today_date = getdate(today())
+		doj = getdate(date_of_joining)
+		months = (today_date.year - doj.year) * 12 + (today_date.month - doj.month)
+		return max(0, months)
+
 	@frappe.whitelist()
 	def get_thr_rate(self, employee, pkp_status, employee_grade, employment_type, kriteria):
 		company = frappe.get_doc("Company", self.company)
@@ -169,12 +178,21 @@ class TransaksiTHR(Document):
 			fieldname="multiplier"
 		)
 
-		thr_rule = self.get_thr_rule(employee_grade, employment_type, kriteria)
+		# ambil data date_of_joining
+		date_of_joining = frappe.db.get_value("Employee", employee, "date_of_joining")
+		days = date_diff(today(), getdate(date_of_joining))
+		years = days / 365
+		masa_kerja = "> 1 Tahun" if years > 1 else "< 1 Tahun"
+
+		jumlah_bulan_bekerja = self.get_jumlah_bulan_bekerja(date_of_joining)
+
+		thr_rule = self.get_thr_rule(employee_grade, employment_type, kriteria, masa_kerja)
 		context = {
 			"GP": gaji_pokok[0]["base"] if gaji_pokok else 0,
 			"Natura": ((natura_price[0]["harga_beras"] if natura_price else 0) * (natura_multiplier or 0)),
 			"Uang_Daging": company.custom_uang_daging or 0,
-			"UMR": (company.custom_ump_harian or 0) * 30
+			"UMR": (company.custom_ump_harian or 0) * 30,
+			"Jumlah_Bulan_Bekerja": jumlah_bulan_bekerja
     }
 		subtotal = frappe.safe_eval(thr_rule or "0", None, context)
 
@@ -185,17 +203,29 @@ class TransaksiTHR(Document):
 			"natura_multiplier": natura_multiplier or 0,
 			"natura": ((natura_price[0]["harga_beras"] if natura_price else 0) * (natura_multiplier or 0)),
 			"uang_daging": company.custom_uang_daging or 0,
+			"masa_kerja": masa_kerja,
 			"thr_rule": thr_rule,
+			"jumlah_bulan_bekerja": jumlah_bulan_bekerja,
 			"subtotal": subtotal
 		}
 
-	def get_thr_rule(self, employee_grade, employment_type=None, kriteria=None):
-		possible_filters = [
+	def get_thr_rule(self, employee_grade, employment_type=None, kriteria=None, masa_kerja=None):
+		possible_filters = []
+
+		if employment_type == "KHL" and masa_kerja:
+			possible_filters.extend([
+				{"employee_grade": employee_grade, "employment_type": employment_type, "kriteria": kriteria, "masa_kerja": masa_kerja},
+				{"employee_grade": employee_grade, "employment_type": employment_type, "masa_kerja": masa_kerja},
+				{"employee_grade": employee_grade, "kriteria": kriteria, "masa_kerja": masa_kerja},
+				{"employee_grade": employee_grade, "masa_kerja": masa_kerja},
+			])
+
+		possible_filters.extend([
 			{"employee_grade": employee_grade, "employment_type": employment_type, "kriteria": kriteria},
 			{"employee_grade": employee_grade, "employment_type": employment_type},
 			{"employee_grade": employee_grade, "kriteria": kriteria},
 			{"employee_grade": employee_grade},
-		]
+		])
 
 		for f in possible_filters:
 			thr_rule = frappe.db.get_value("THR Setup Rule", f, "formula")

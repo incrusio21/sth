@@ -25,6 +25,8 @@
   "natura",
   "uang_daging",
   "thr_rule",
+  "masa_kerja",
+  "jumlah_bulan_bekerja",
   "subtotal",
   "column_break_isrc",
   "more_information_section",
@@ -134,7 +136,7 @@
   {
    "fetch_from": "ec.custom_kriteria",
    "fieldname": "custom_kriteria",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Kriteria",
@@ -218,13 +220,31 @@
    "label": "Employee Payment Log Deduction THR",
    "options": "Employee Payment Log",
    "read_only": 1
+  },
+  {
+   "fetch_from": "ec.custom_kriteria",
+   "fieldname": "masa_kerja",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Masa Kerja",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ec.custom_kriteria",
+   "fieldname": "jumlah_bulan_bekerja",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Jumlah Bulan Bekerja",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-05 14:39:21.828015",
+ "modified": "2025-11-06 10:21:51.260827",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi THR",
