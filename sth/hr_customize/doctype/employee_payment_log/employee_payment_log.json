@@ -19,6 +19,7 @@
   "amount",
   "reference_tab",
   "salary_component",
+  "type",
   "against_salary_component",
   "account",
   "column_break_nxan",
@@ -134,13 +135,21 @@
    "label": "Against Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fetch_from": "salary_component.type",
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-24 19:49:27.196829",
+ "modified": "2025-11-04 11:21:03.130699",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Payment Log",
