@@ -9,6 +9,7 @@ from erpnext.controllers.queries import get_fields, has_ignored_field
 from frappe.model.document import Document
 
 from sth.utils import generate_duplicate_key
+from sth.hr_customize import get_overtime_settings
 
 class LemburList(Document):
 	
@@ -20,7 +21,7 @@ class LemburList(Document):
 
 	def validate_employee_overtime(self):
 		# check jika lembur hanya boleh untuk pegawai tertentu
-		if not frappe.db.get_single_value("Overtime Settings", "overtime_for_selected_staff"):
+		if not get_overtime_settings("overtime_for_selected_staff"):
 			return
 		
 		# untuk sekarang hanya akan mengecek designation
@@ -61,7 +62,7 @@ class LemburList(Document):
 
 	def set_missing_value(self):
 		if not self.salary_component:
-			self.salary_component = frappe.get_value("Overtime Settings", None, 'default_salary_component')
+			self.salary_component = get_overtime_settings("default_salary_component")
 
 		if getdate(self.posting_date).month != self.month_number:
 			frappe.throw("Posting Date does not match the period of {}".format(self.month_period))
@@ -77,8 +78,10 @@ class LemburList(Document):
 	
 	def calculate_total_overtime(self):
 		# cari child sesuai dengan nama
-		overtime_settings = frappe.get_all("Overtime Rounding Settings", 
-			filters={'parent' : "Overtime Settings"}, fields=['start_time', 'end_time', 'rounding_time'], order_by="rounding_time desc")
+		overtime_settings = sorted(get_overtime_settings("roundings"), key=lambda x: x.end_time, reverse=True)
+
+		# frappe.get_all("Overtime Rounding Settings", 
+		# 	filters={'parent' : "Overtime Settings"}, fields=['start_time', 'end_time', 'rounding_time'], order_by="rounding_time desc")
 
 		tidak_lembur = ''
 
@@ -290,6 +293,13 @@ def employee_sellected_staff_query(
 		)
 
 	mcond = "" if ignore_permissions else get_match_cond(doctype)
+
+	if get_overtime_settings("overtime_for_selected_staff"):
+		# telalu malas untuk join table
+		filters["designation"] = [
+			"in", 
+			frappe.get_all("Designation", filters={"can_overtime": 1}, pluck="name")
+		]
 
 	return frappe.db.sql(
 		"""select {fields} from `tabEmployee`
