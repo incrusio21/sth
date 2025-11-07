@@ -8,6 +8,8 @@
   "section_break_wefo",
   "employee",
   "employee_name",
+  "pkp_status",
+  "employment_type",
   "natura_price",
   "is_holiday",
   "column_break_pphu",
@@ -156,13 +158,28 @@
    "label": "Natura Price",
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employment_type",
+   "fieldname": "employment_type",
+   "fieldtype": "Link",
+   "label": "Employment Type",
+   "options": "Employment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.pkp_status",
+   "fieldname": "pkp_status",
+   "fieldtype": "Data",
+   "label": "PKP Status",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-07 19:30:00.910580",
+ "modified": "2025-11-07 21:09:28.274229",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Lembur List",

@@ -17,6 +17,7 @@ class LemburList(Document):
 		self.validate_employee_overtime()
 		self.validate_detail_overtime()
 		self.set_missing_value()
+		self.set_natura_price()
 		self.calculate()
 
 	def validate_employee_overtime(self):
@@ -67,10 +68,25 @@ class LemburList(Document):
 		if getdate(self.posting_date).month != self.month_number:
 			frappe.throw("Posting Date does not match the period of {}".format(self.month_period))
 
-		self.natura_price = frappe.get_value("Natura Price", {
+	def set_natura_price(self):
+		import calendar
+
+		natura_rate = frappe.get_value("Natura Price", {
             "company": self.company, 
 			"valid_from": ["<=", get_last_day(self.posting_date)]
 		}, "harga_beras", order_by="valid_from desc") or 0
+
+		natura_multiplier = frappe.get_value("Natura Multiplier", {
+            "company": self.company, 
+			"pkp": self.pkp_status, 
+			"employment_type": self.employment_type }, "multiplier") or 0
+		
+		date = getdate(self.posting_date)
+
+		self.natura_price = flt(
+			natura_rate * natura_multiplier * 
+			calendar.monthrange(date.year, date.month)[1]
+		)
 
 	def calculate(self):
 		self.calculate_total_overtime()
