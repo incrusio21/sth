@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-06 11:27:06.930473",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "overtime_date",
+  "rejected",
+  "is_recap",
+  "column_break_tero",
+  "overtime_from",
+  "overtime_to",
+  "section_break_xnen",
+  "overtime_today",
+  "column_break_ezig",
+  "job",
+  "section_break_qdlr",
+  "duplicate_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "overtime_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "rejected",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Rejected"
+  },
+  {
+   "fieldname": "column_break_tero",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overtime_from",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Overtime From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "overtime_to",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Overtime To",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_xnen",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "job",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Job",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_recap",
+   "fieldtype": "Check",
+   "label": "Is Recap",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "overtime_today",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Overtime Today",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ezig",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qdlr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "duplicate_key",
+   "fieldtype": "Data",
+   "label": "Employee Overtime Date",
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-07 16:45:01.146293",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Lembur Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

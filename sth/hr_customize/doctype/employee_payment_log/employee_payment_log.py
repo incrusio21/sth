@@ -8,7 +8,12 @@ from frappe.model.document import Document
 class EmployeePaymentLog(Document):
     
     def validate(self):
+        self.set_status()
         self.document_already_paid()
+
+    def set_status(self):
+        if not self.status:
+            self.status = "Approved"
 
     def on_trash(self):
         self.document_already_paid()

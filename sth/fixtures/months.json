@@ -1,0 +1,86 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:02:25.094309",
+  "month_number": 1,
+  "name": "Januari"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:02:31.744575",
+  "month_number": 2,
+  "name": "Februari"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:02:38.539730",
+  "month_number": 3,
+  "name": "Maret"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:02:45.468578",
+  "month_number": 4,
+  "name": "April"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:02:52.036551",
+  "month_number": 5,
+  "name": "Mei"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:02:58.843178",
+  "month_number": 6,
+  "name": "Juni"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:03:09.230729",
+  "month_number": 7,
+  "name": "Juli"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:03:14.336543",
+  "month_number": 8,
+  "name": "Agustus"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:03:21.270049",
+  "month_number": 9,
+  "name": "September"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:03:28.414306",
+  "month_number": 10,
+  "name": "Oktober"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:03:34.216447",
+  "month_number": 11,
+  "name": "November"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Months",
+  "modified": "2025-11-07 16:03:39.792921",
+  "month_number": 12,
+  "name": "Desember"
+ }
+]

@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-07 09:18:54.967001",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "overtime_max",
+  "overtime_for_selected_staff",
+  "column_break_yzlq",
+  "default_salary_component",
+  "section_break_izvq",
+  "roundings"
+ ],
+ "fields": [
+  {
+   "description": "Maksimal Jam Lembur Selama Satu Bulan",
+   "fieldname": "overtime_max",
+   "fieldtype": "Float",
+   "label": "Overtime Max"
+  },
+  {
+   "fieldname": "section_break_izvq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "roundings",
+   "fieldtype": "Table",
+   "label": "Roundings",
+   "options": "Overtime Rounding Settings"
+  },
+  {
+   "fieldname": "column_break_yzlq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_salary_component",
+   "fieldtype": "Link",
+   "label": "Default Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "default": "0",
+   "fieldname": "overtime_for_selected_staff",
+   "fieldtype": "Check",
+   "label": "Overtime for Selected Staff"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-07 17:00:21.062578",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Overtime Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
