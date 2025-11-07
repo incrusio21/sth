@@ -7,13 +7,14 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_rghp",
-  "date",
+  "posting_date",
   "company",
   "column_break_pgny",
-  "posting_date",
   "unit",
   "setup_thr",
-  "eg",
+  "employee_grade",
+  "employment_type",
+  "kriteria",
   "rg",
   "section_break_casa",
   "column_break_mvah",
@@ -68,14 +69,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "eg",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Employee Grade",
-   "options": "Employee Grade"
-  },
-  {
    "fieldname": "rg",
    "fieldtype": "Link",
    "hidden": 1,
@@ -98,15 +91,6 @@
   {
    "fieldname": "column_break_pedy",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "Today",
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Transaction Date",
-   "reqd": 1
   },
   {
    "fieldname": "setup_thr",
@@ -163,13 +147,34 @@
    "label": "Journal Entry",
    "options": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "employment_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employment Type",
+   "options": "Employment Type"
+  },
+  {
+   "fieldname": "kriteria",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Kriteria",
+   "options": "\nSatuan Hasil\nNon Satuan Hasil"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-05 14:49:35.562412",
+ "modified": "2025-11-06 15:28:54.049672",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

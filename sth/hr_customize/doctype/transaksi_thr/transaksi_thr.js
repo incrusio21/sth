@@ -27,11 +27,25 @@ frappe.ui.form.on("Transaksi THR", {
       return;
     }
 
+    let filters = {
+      company: frm.doc.company,
+      custom_unit: frm.doc.unit,
+    };
+
+    if (frm.doc.employee_grade) {
+      filters.grade = frm.doc.employee_grade;
+    }
+
+    if (frm.doc.employment_type) {
+      filters.employment_type = frm.doc.employment_type;
+    }
+
+    if (frm.doc.kriteria) {
+      filters.custom_kriteria = frm.doc.kriteria;
+    }
+
     const records = await frappe.db.get_list("Employee", {
-      filters: {
-        custom_unit: frm.doc.unit,
-        company: frm.doc.company,
-      },
+      filters: filters,
       fields: [
         "no_ktp",
         "name",
