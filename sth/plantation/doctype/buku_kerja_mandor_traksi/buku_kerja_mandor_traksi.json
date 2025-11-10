@@ -48,7 +48,10 @@
   "uph",
   "premi",
   "operator_subtotal",
-  "ket"
+  "ket",
+  "more_information_tab",
+  "employee_payment_log_upah",
+  "employee_payment_log_premi"
  ],
  "fields": [
   {
@@ -364,13 +367,32 @@
    "label": "Status",
    "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home",
    "reqd": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "employee_payment_log_upah",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log Upah",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_payment_log_premi",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log Premi",
+   "options": "Employee Payment Log",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-10 10:19:40.438029",
+ "modified": "2025-11-10 10:29:18.245140",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
