@@ -1,0 +1,206 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-06 11:19:29.643149",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_wefo",
+  "employee",
+  "employee_name",
+  "pkp_status",
+  "employment_type",
+  "natura_price",
+  "is_holiday",
+  "column_break_pphu",
+  "company",
+  "posting_date",
+  "month_period",
+  "month_number",
+  "amended_from",
+  "section_break_euvl",
+  "details",
+  "section_break_khql",
+  "overtime_total",
+  "column_break_ynoa",
+  "overtime_amount",
+  "reference_tab",
+  "salary_component",
+  "column_break_jzsg",
+  "employee_payment_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_wefo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lembur List",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_holiday",
+   "fieldtype": "Check",
+   "label": "is Holiday"
+  },
+  {
+   "fieldname": "column_break_pphu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_euvl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Lembur Detail"
+  },
+  {
+   "fieldname": "section_break_khql",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "overtime_total",
+   "fieldtype": "Float",
+   "label": "Overtime Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ynoa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overtime_amount",
+   "fieldtype": "Currency",
+   "label": "Overtime Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_tab",
+   "fieldtype": "Tab Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "employee_payment_log",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_jzsg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "month_period",
+   "fieldtype": "Link",
+   "label": "Month Period",
+   "options": "Months",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "month_period.month_number",
+   "fieldname": "month_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Month Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "natura_price",
+   "fieldtype": "Currency",
+   "label": "Natura Price",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employment_type",
+   "fieldname": "employment_type",
+   "fieldtype": "Link",
+   "label": "Employment Type",
+   "options": "Employment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.pkp_status",
+   "fieldname": "pkp_status",
+   "fieldtype": "Data",
+   "label": "PKP Status",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-07 21:09:28.274229",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Lembur List",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

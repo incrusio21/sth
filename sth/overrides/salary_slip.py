@@ -330,7 +330,7 @@ class SalarySlip(SalarySlip):
             **filters, "valid_from": ["<=", self.end_date]}, "harga_beras", order_by="valid_from desc") or 0
 
         data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
-            **filters, "pkp": data.pkp, "employment_type": data.employment_type }, "multiplier") or 0
+            **filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
 
         data.ump_harian = default_data.ump_harian = company.custom_ump_harian
         

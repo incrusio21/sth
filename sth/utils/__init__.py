@@ -6,6 +6,9 @@ from frappe import _
 from frappe.utils import formatdate, get_link_to_form
 from frappe.query_builder import DocType
 
+def generate_duplicate_key(self, fieldname, key=None, cancel=0):
+    self.set(fieldname, None if cancel else "|".join(key))
+
 def validate_overlap(doc, from_date, to_date, from_date_field="from_date", to_date_field="to_date", company=None, for_field=None):
     doctype = DocType(doc.doctype)
 

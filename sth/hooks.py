@@ -118,7 +118,10 @@ boot_session = "sth.startup.boot.boot_session"
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
-standard_queries = {"Kegiatan": "sth.controllers.queries.kegiatan_query"}
+standard_queries = {
+    "Kegiatan": "sth.controllers.queries.kegiatan_query",
+    "Months": "sth.controllers.queries.month_query",
+}
 
 # DocType Class
 # ---------------

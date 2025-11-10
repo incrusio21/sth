@@ -69,9 +69,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 	def set_status(self, update_payment_log=False):
 		if frappe.db.exists("Rekap Timbangan Panen", {"buku_kerja_mandor_panen": self.name, "docstatus": 1}):
-			self.status = "Approved"
+			self.db_set("status", "Approved")
 		else:
-			self.status = "Pending"
+			self.db_set("status", "Pending")
 
 		if update_payment_log:
 			self.calculate()

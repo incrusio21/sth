@@ -194,6 +194,50 @@ def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibit
 
 	return ress
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def month_query(
+	doctype,
+	txt,
+	searchfield,
+	start,
+	page_len,
+	filters,
+	reference_doctype: str | None = None,
+	ignore_user_permissions: bool = True,
+):
+	doctype = "Months"
+	conditions = []
+	fields = get_fields(doctype, ["name", "month_number"])
+	ignore_permissions = True
+	filters = filters or {}
+
+	if reference_doctype and ignore_user_permissions:
+		ignore_permissions = has_ignored_field(reference_doctype, doctype) and has_permission(
+			doctype,
+			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
+		)
+
+	mcond = "" if ignore_permissions else get_match_cond(doctype)
+	
+	return frappe.db.sql(
+		"""select {fields} from `tabMonths`
+		where ({key} like %(txt)s or month_number like %(txt)s)
+			{fcond} {mcond}
+		order by
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			idx desc, month_number asc
+		limit %(page_len)s offset %(start)s""".format(
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"fcond": get_filters_cond(doctype, filters, conditions) if filters else "",
+				"mcond": mcond,
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)
+
 def get_fields(doctype, fields=None):
 	if fields is None:
 		fields = []
