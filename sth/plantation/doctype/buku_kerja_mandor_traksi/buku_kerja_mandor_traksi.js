@@ -283,6 +283,7 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
         if (r.message) {
           if (frm.doc.jk == "Dump Truck") {
             hari_kerja = (frm.doc.hk / r.message) > 1 ? 1 : parseFloat((frm.doc.hk / r.message).toFixed(2));
+            console.log({ hari_kerja });
             frm.set_value("hari_kerja", hari_kerja)
           } else {
             frm.set_value("hari_kerja", 1)

@@ -12,34 +12,38 @@
   "company",
   "unit",
   "divisi",
+  "tipe_master_kendaraan",
   "column_break_kkgv",
   "mdr",
   "designation",
   "kdr",
   "jk",
   "bbm",
+  "kmhm_awal",
+  "kmhm_akhir",
   "jmlh_bbm",
   "amended_from",
   "pekerjaan_tab",
   "detail_pekerjaan_section",
-  "kgt",
+  "kegiatan",
   "kk",
-  "is_bibitan_",
+  "is_bibitan",
   "hk",
-  "uom",
+  "hari_kerja",
   "column_break_pcdo",
-  "rp_sat",
-  "premi_kgt",
+  "rupiah_basis",
+  "rupiah_premi",
+  "subtotal_upah",
   "pekerjaan_subtotal",
   "section_break_dpfs",
   "blok",
-  "project",
-  "column_break_gulh",
   "batch",
+  "project",
   "operator_tab",
   "do",
   "nk",
   "jbtn",
+  "status",
   "column_break_nplu",
   "uph",
   "premi",
@@ -107,12 +111,12 @@
    "label": "Detail Operator/Supir"
   },
   {
-   "fetch_from": "kdr.operator",
    "fieldname": "nk",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Nama Operator/Supir",
+   "options": "Employee",
    "reqd": 1
   },
   {
@@ -145,14 +149,6 @@
    "fieldname": "ket",
    "fieldtype": "Small Text",
    "label": "Keterangan"
-  },
-  {
-   "fieldname": "kgt",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kegiatan",
-   "options": "Kegiatan"
   },
   {
    "fieldname": "pekerjaan_tab",
@@ -197,35 +193,6 @@
    "label": "Volume"
   },
   {
-   "fetch_from": "kgt.uom",
-   "fieldname": "uom",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Satuan",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.jk == \"Dump Truck\"",
-   "fetch_from": "kgt.rp_basis",
-   "fieldname": "rp_sat",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Rp Satuan",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.jk == \"Dump Truck\"",
-   "fetch_from": "kgt.rp_prm",
-   "fieldname": "premi_kgt",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Premi",
-   "read_only": 1
-  },
-  {
    "fieldname": "details_kendaraan_tab",
    "fieldtype": "Tab Break",
    "label": "Details Kendaraan"
@@ -264,7 +231,7 @@
    "options": "Blok"
   },
   {
-   "fetch_from": "kgt.kategori_kegiatan",
+   "fetch_from": "kegiatan.kategori_kegiatan",
    "fieldname": "kk",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -274,22 +241,9 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fetch_from": "kk.is_bibitan",
-   "fieldname": "is_bibitan_",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "is bibitan ?",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_dpfs",
    "fieldtype": "Section Break",
    "label": "Blok/Batch/Project"
-  },
-  {
-   "fieldname": "column_break_gulh",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.is_bibitan",
@@ -315,7 +269,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Subtotal",
+   "label": "Grand Total",
    "read_only": 1
   },
   {
@@ -326,13 +280,97 @@
    "in_preview": 1,
    "label": "Subtotal",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kdr.kmhm_akhir",
+   "fieldname": "kmhm_awal",
+   "fieldtype": "Float",
+   "label": "KMHM Awal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kmhm_akhir",
+   "fieldtype": "Float",
+   "label": "KMHM Akhir"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan"
+  },
+  {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
+   "fetch_from": "kgt.rp_basis",
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Rp Satuan",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
+   "fetch_from": "kgt.rp_prm",
+   "fieldname": "rupiah_premi",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Premi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kgt.uom",
+   "fieldname": "hari_kerja",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Hari Kerja",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
+   "fieldname": "subtotal_upah",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "kk.is_bibitan",
+   "fieldname": "is_bibitan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "is bibitan ?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tipe_master_kendaraan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tipe Master Kendaraan",
+   "options": "\nAlat Berat\nKendaraan Umum\nDump Truck"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Status",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-29 13:46:09.373653",
+ "modified": "2025-11-10 10:19:40.438029",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
