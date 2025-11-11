@@ -78,10 +78,10 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			self.create_or_update_payment_log()
 
 	def set_salary_component(self):
-		hr_panen = frappe.db.get_value("Plantation Settings", None, ["denda_sc", "brondolan_sc"], as_dict=1)
+		from sth.plantation import get_plantation_settings
 
-		self.denda_salary_component = hr_panen.denda_sc
-		self.brondolan_sc = hr_panen.brondolan_sc
+		for key, fieldname in {"denda_sc": "denda_salary_component", "brondolan_sc": "brondolan_sc"}:
+			self.set(fieldname, get_plantation_settings(key))
 		
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":

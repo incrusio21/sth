@@ -29,11 +29,10 @@ class PengajuanPanenKontanan(PlantationController):
 		)
 
 	def get_plantation_setting(self):
-		plan_settings = frappe.db.get_value("Plantation Settings", None, ["supervisi_kontanan_component", "against_kontanan_component"], as_dict=1)
-		if not plan_settings:
-			frappe.throw("Please set data in {} first".format(get_link_to_form("Plantation Settings", "Plantation Settings")))
+		from sth.plantation import get_plantation_settings
 
-		self.update(plan_settings)
+		for fieldname in ["supervisi_kontanan_component", "against_kontanan_component"]:
+			self.set(fieldname, get_plantation_settings(fieldname))
 
 	def before_calculate_grand_total(self):
 		self.upah_supervisi_amount = flt(self.upah_mandor) + flt(self.upah_mandor1) + flt(self.upah_kerani)

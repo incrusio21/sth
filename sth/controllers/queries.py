@@ -68,7 +68,6 @@ def kegiatan_query(
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
 	)
 
-
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def material_kegiatan_query(
@@ -156,7 +155,6 @@ def material_kegiatan_query(
 		},
 		as_dict=as_dict,
 	)
-
 
 @frappe.whitelist()
 def kegiatan_fetch_data(kegiatan, company, fieldname):

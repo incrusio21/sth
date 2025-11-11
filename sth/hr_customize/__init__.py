@@ -6,11 +6,11 @@ from frappe import clear_last_message
 
 def get_overtime_settings(key: str):
 	"""Return the value associated with the given `key` from Overtime Settings DocType."""
-	if not (system_settings := getattr(frappe.local, "overtime_settings", None)):
+	if not (overtime_settings := getattr(frappe.local, "overtime_settings", None)):
 		try:
-			frappe.local.system_settings = system_settings = frappe.get_cached_doc("Overtime Settings")
+			frappe.local.overtime_settings = overtime_settings = frappe.get_cached_doc("Overtime Settings")
 		except frappe.DoesNotExistError:  # possible during new install
 			clear_last_message()
 			return
 
-	return system_settings.get(key)
+	return overtime_settings.get(key)
