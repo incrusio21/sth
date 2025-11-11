@@ -48,7 +48,7 @@ class PengajuanPanenKontanan(PlantationController):
 		self.validate_duplicate_ppk()
 		self.check_status_bkm_panen()
 		self.create_or_update_epl_supervisi()
-		self.create_journal_payment()
+		# self.create_journal_payment()
 
 	def validate_duplicate_ppk(self):
 		if dup_ppk := frappe.db.get_value("Pengajuan Panen Kontanan", 
@@ -140,10 +140,10 @@ class PengajuanPanenKontanan(PlantationController):
 			self.db_set(target_link, "")
 			frappe.delete_doc("Employee Payment Log", value)
 
-		if self.journal_entry:
-			doc = frappe.get_doc("Journal Entry", self.journal_entry)
-			if doc.docstatus == 1:
-				doc.cancel()
+		# if self.journal_entry:
+		# 	doc = frappe.get_doc("Journal Entry", self.journal_entry)
+		# 	if doc.docstatus == 1:
+		# 		doc.cancel()
 
-			self.db_set("journal_entry", "")
-			doc.delete()
+		# 	self.db_set("journal_entry", "")
+		# 	doc.delete()
