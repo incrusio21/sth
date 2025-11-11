@@ -2,8 +2,7 @@ import frappe
 
 @frappe.whitelist()
 def test_buat_gl():
-	doc = frappe.get_doc("Pengajuan Panen Kontanan","PPK-00195")
-	master_pembuatan_gl_dan_pl(doc,"validate")
+	pass
 
 
 @frappe.whitelist()
@@ -25,10 +24,9 @@ def master_pembuatan_gl_dan_pl(doc,method):
 @frappe.whitelist()
 def pembuatan_gl_entry(self,akun_debit, akun_credit, nilai_debit, nilai_credit):
 	from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
-	from erpnext.controllers.accounts_controller import get_gl_dict
 	gl_entries = []
 	gl_entries.append(
-		get_gl_dict(self,
+		self.get_gl_dict(
 			{
 				"account": akun_debit,
 				"against": akun_credit,
@@ -40,7 +38,7 @@ def pembuatan_gl_entry(self,akun_debit, akun_credit, nilai_debit, nilai_credit):
 	)
 
 	gl_entries.append(
-		get_gl_dict(self,
+		self.get_gl_dict(
 			{
 				"account": akun_credit,
 				"against": akun_debit,
