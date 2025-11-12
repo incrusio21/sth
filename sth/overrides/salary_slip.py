@@ -173,6 +173,8 @@ class SalarySlip(SalarySlip):
             .select(lp.name, lp.subsidy_component, lp.against_subsidy_component, lp.amount_paid)
             .where(
                 (IfNull(lp.subsidy_component, "") != "")
+                &(lp.applicant == self.employee)
+                & (lp.company == self.company)
                 & (lp.docstatus == 1)
                 & (lp.is_paid == 0)
                 & (lp.posting_date <= self.end_date)

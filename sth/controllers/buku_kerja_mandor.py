@@ -70,12 +70,10 @@ class BukuKerjaMandorController(PlantationController):
             for ps in self.plantation_setting_def
         }
 
-        plan_settings = frappe.db.get_value("Plantation Settings", None, list(target_fields), as_dict=1)
-        if not plan_settings:
-            frappe.throw("Please set data in {} first".format(get_link_to_form("Plantation Settings", "Plantation Settings")))
+        from sth.plantation import get_plantation_settings
 
         for key, fieldname in target_fields.items():
-            self.set(fieldname, plan_settings.get(key))
+            self.set(fieldname, get_plantation_settings(key))
 
     def get_rencana_kerja_harian(self):
         from sth.controllers.queries import get_rencana_kerja_harian

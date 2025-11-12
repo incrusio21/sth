@@ -32,7 +32,6 @@ doctype_js = {
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
 	"Expense Claim": "public/js/expense_claim.js",
-	"Payment Entry": "public/js/payment_entry.js",
     "Loan" : "hr_customize/custom/loan.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
