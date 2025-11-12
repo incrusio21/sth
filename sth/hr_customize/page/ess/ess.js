@@ -10,6 +10,17 @@ frappe.pages['ess'].on_page_load = function (wrapper) {
 	frappe.ess_page.setup(wrapper);
 }
 
+function getAge(birthDateStr) {
+	const birthDate = new Date(birthDateStr);
+	const today = new Date();
+	let age = today.getFullYear() - birthDate.getFullYear();
+	const m = today.getMonth() - birthDate.getMonth();
+	if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+		age--;
+	}
+	return age;
+}
+
 frappe.ess_page = {
 	setup: async function (wrapper) {
 		let page = wrapper.ess_page;
@@ -20,6 +31,12 @@ frappe.ess_page = {
 				filters: { user_id: frappe.session.user }
 			}
 		});
+
+		if (!emp_list.message[0]) {
+			$(page.body).html(`<h4 class="text-center">Silahkan lengkapi data employee dan users</h4>`);
+			return;
+		}
+
 		const emp_doc = await frappe.call({
 			method: "frappe.client.get",
 			args: {
@@ -27,109 +44,275 @@ frappe.ess_page = {
 				name: emp_list.message[0].name
 			}
 		});
+		const atasan = await frappe.call({
+			method: "sth.overrides.ess.get_employee",
+			args: {
+				employee: emp_doc.message.reports_to,
+			},
+		});
+		const exit_interview = await frappe.call({
+			method: "sth.overrides.ess.get_exit_interview_unrestricted",
+			args: {
+				employee: emp_list.message[0].name,
+			},
+		});
+		const leaves = await frappe.call({
+			method: "hrms.hr.doctype.leave_application.leave_application.get_leave_details",
+			args: {
+				employee: emp_list.message[0].name,
+				date: new Date().toISOString().split("T")[0]
+			},
+		});
+		const kpi_values = await frappe.call({
+			method: "sth.overrides.ess.get_kpi_values",
+			args: {
+				employee: emp_list.message[0].name,
+				date: new Date().toISOString().split("T")[0]
+			},
+		});
+		const grievances = await frappe.call({
+			method: "sth.overrides.ess.get_employee_grievance",
+			args: {
+				employee: emp_list.message[0].name,
+			},
+		});
 
-		const { no_ktp, employee_name, company, designation, date_of_joining, date_of_birth, current_address, custom_nomor_kartu_keluarga, custom_no_bpjs_ketenagakerjaan, custom_no_bpjs_kesehatan, npwp, cell_number, personal_email, image } = emp_doc.message;
+		const { name, no_ktp, employee_name, company, designation, date_of_joining, date_of_birth, current_address, custom_nomor_kartu_keluarga, custom_no_bpjs_ketenagakerjaan, custom_no_bpjs_kesehatan, npwp, cell_number, emergency_phone_number, personal_email, image, department, reports_to, bio } = emp_doc.message;
+		const { custom_upload_file_document, interview_summary } = exit_interview.message;
+		let tableCuti = ``;
+		let tableKpi = ``;
+		let tableGrievance = ``;
+
+		for (const key in leaves.message.leave_allocation) {
+			const data = leaves.message.leave_allocation[key];
+			tableCuti += `
+			<tr>
+				<td>${key}</td>
+				<td class="text-center">${data.total_leaves}</td>
+				<td class="text-center">${data.leaves_taken}</td>
+				<td class="text-center">${data.remaining_leaves}</td>
+			</tr>
+			`;
+		}
+		for (const key in kpi_values.message) {
+			const data = kpi_values.message[key]
+			tableKpi += `
+				<tr>
+					<td>${data.year}</td>
+					<td class="text-center">${data.kpi_value}</td>
+				</tr>
+			`;
+		}
+		for (const key in grievances.message) {
+			const data = grievances.message[key]
+			tableGrievance += `
+				<tr>
+					<td>${data.tipe}</td>
+					<td class="text-center">${data.from}</td>
+					<td class="text-center">${data.until}</td>
+				</tr>
+			`;
+		}
 
 		$(page.body).html(`
-			<h3>Basis Informasi (Data Pribadi & Kepegawaian)</h3>
-			<table>
-				<tr>
-					<td>No Induk Karyawan</td>
-					<td>:</td>
-					<td>${no_ktp ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Nama</td>
-					<td>:</td>
-					<td>${employee_name ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Perusahaan</td>
-					<td>:</td>
-					<td>${company ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Jabatan</td>
-					<td>:</td>
-					<td>${designation ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Tanggal Masuk</td>
-					<td>:</td>
-					<td>${date_of_joining ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Tanggal Lahir</td>
-					<td>:</td>
-					<td>${date_of_birth ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Usia</td>
-					<td>:</td>
-					<td></td>
-				</tr>
-				<tr>
-					<td>Alamat</td>
-					<td>:</td>
-					<td>${current_address ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>No. KTP</td>
-					<td>:</td>
-					<td>${no_ktp ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>No. KK</td>
-					<td>:</td>
-					<td>${custom_nomor_kartu_keluarga ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>BPJS Ketenagakerjaan</td>
-					<td>:</td>
-					<td>${custom_no_bpjs_ketenagakerjaan ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>BPJS Kesehatan</td>
-					<td>:</td>
-					<td>${custom_no_bpjs_kesehatan ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>NPWP</td>
-					<td>:</td>
-					<td>${npwp ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>No. HP</td>
-					<td>:</td>
-					<td>${cell_number ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>HP Keluarga</td>
-					<td>:</td>
-					<td></td>
-				</tr>
-				<tr>
-					<td>Email</td>
-					<td>:</td>
-					<td>${personal_email ?? '-'}</td>
-				</tr>
-				<tr>
-					<td>Foto</td>
-					<td>:</td>
-					<td>
-						<img src="${image}" width="150"/>
-					</td>
-				</tr>
-			</table>
+				<h4>1. BASIS INFORMASI</h4>
+				<div class="container-fluid px-0">
+					<div class="row">
+						<div class="col-5 ps-0">
+							<table>
+								<tr>
+									<td>No Induk Karyawan</td>
+									<td>:</td>
+									<td>${name ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Nama</td>
+									<td>:</td>
+									<td>${employee_name ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Perusahaan</td>
+									<td>:</td>
+									<td>${company ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Jabatan</td>
+									<td>:</td>
+									<td>${designation ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Tanggal Masuk</td>
+									<td>:</td>
+									<td>${date_of_joining ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Tanggal Lahir</td>
+									<td>:</td>
+									<td>${date_of_birth ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Usia</td>
+									<td>:</td>
+									<td>${date_of_birth ? getAge(date_of_birth) : '-'}</td>
+								</tr>
+								<tr>
+									<td>Alamat</td>
+									<td>:</td>
+									<td>${current_address ?? '-'}</td>
+								</tr>
+							</table>
+						</div>
+						<div class="col-5">
+							<table>
+								<tr>
+									<td>No. KTP</td>
+									<td>:</td>
+									<td>${no_ktp ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>No. KK</td>
+									<td>:</td>
+									<td>${custom_nomor_kartu_keluarga ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>BPJS Ketenagakerjaan</td>
+									<td>:</td>
+									<td>${custom_no_bpjs_ketenagakerjaan ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>BPJS Kesehatan</td>
+									<td>:</td>
+									<td>${custom_no_bpjs_kesehatan ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>NPWP</td>
+									<td>:</td>
+									<td>${npwp ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>No. HP</td>
+									<td>:</td>
+									<td>${cell_number ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>HP Keluarga</td>
+									<td>:</td>
+									<td>${emergency_phone_number ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Email</td>
+									<td>:</td>
+									<td>${personal_email ?? '-'}</td>
+								</tr>
+							</table>
+						</div>
+						<div class="col-2">
+							${image ? `<img src="${image}" class="img-fluid">` : ''}
+						</div>
+					</div >
+				</div >
+				<h4 class="mt-5">2. STRUKTUR ORGANISASI</h4>
+				<div class="container-fluid px-0">
+					<div class="row">
+						<div class="col-5 ps-0">
+							<table>
+								<tr>
+									<td>Departement</td>
+									<td>:</td>
+									<td>${department ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Atasan</td>
+									<td>:</td>
+									<td>${atasan.message.employee_name ?? '-'}</td>
+								</tr>
+								<tr>
+									<td>Jobdes</td>
+									<td>:</td>
+									<td>${bio ?? '-'}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+				<h4 class="mt-5">3. KPI</h4>
+				<div class="container-fluid px-0">
+					<div class="row">
+						<div class="col-5 ps-0">
+							<table>
+								<tr>
+									<td>Nilai Kinerja</td>
+									<td>:</td>
+									<td>
+										<table border="1">
+											<tr>
+												<th>Tahun</th>
+												<th>KPI Value</th>
+											</tr>
+											${tableKpi}
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td>Surat Teguran/Peringatan</td>
+									<td>:</td>
+									<td>
+										<table border="1">
+											<tr>
+												<th>Tipe</th>
+												<th>Masa berlaku Dari</th>
+												<th>Masa berlaku Sampai</th>
+											</tr>
+											${tableGrievance}
+										</table>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+				<h4 class="mt-5">4. Cuti</h4>
+				<div class="container-fluid px-0">
+					<div class="row">
+						<div class="col-5 ps-0">
+							<table border="1">
+								<tr>
+									<th>Tipe Cuti</th>
+									<th>Hak Cuti</th>
+									<th>Cuti Terpakai</th>
+									<th>Sisa Cuti</th>
+								</tr>
+								${tableCuti}
+							</table>
+						</div>
+					</div>
+				</div>
+				<h4 class="mt-5">5. EXIT INTERVIEW</h4>
+				<div class="container-fluid px-0">
+					<div class="row">
+						<div class="col-5 ps-0">
+							<table>
+								<tr>
+									<td>Upload Surat Pengunduran Diri</td>
+									<td>:</td>
+									<td>
+									${custom_upload_file_document ? `<a href="${custom_upload_file_document}" class="underline" target="_blank">${custom_upload_file_document}</a>` : '-'}
+									</td>
+								</tr>
+								<tr>
+									<td>Exit Interview di isi ybs/HR</td>
+									<td>:</td>
+									<td>${interview_summary ?? '-'}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
 		`);
 
 		// // Tambahkan tombol
-		// page.add_action_item('Create Leave Application', () => {
-		// 	frappe.new_doc('Leave Application');
-		// });
-
-		// page.add_action_item('Create Expense Claim', () => {
-		// 	frappe.new_doc('Expense Claim');
-		// });
+		page.add_action_item("Export PDF", () => {
+			frappe.msgprint("Export PDF");
+		});
 	}
 };

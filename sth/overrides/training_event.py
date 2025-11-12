@@ -13,6 +13,15 @@ from erpnext.setup.utils import get_exchange_rate
 from hrms.hr.doctype.expense_claim.expense_claim import get_outstanding_amount_for_claim
 
 @frappe.whitelist()
+def get_purchase_invoice_for_training_event(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
+	doc = frappe.get_doc(dt, dn)
+
+	pi = frappe.new_doc("Purchase Invoice")
+	pi.supplier = doc.supplier
+
+	return pi
+
+@frappe.whitelist()
 def get_payment_entry_for_training_event(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
 	doc = frappe.get_doc(dt, dn)
 

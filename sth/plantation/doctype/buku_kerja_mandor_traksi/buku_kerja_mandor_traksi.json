@@ -123,7 +123,6 @@
    "reqd": 1
   },
   {
-   "fetch_from": "mdr.designation",
    "fieldname": "jbtn",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -164,7 +163,6 @@
    "label": "Operator"
   },
   {
-   "fetch_from": "mdr.designation",
    "fieldname": "designation",
    "fieldtype": "Read Only",
    "in_list_view": 1,
@@ -392,7 +390,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-10 10:29:18.245140",
+ "modified": "2025-11-11 13:26:33.243118",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
