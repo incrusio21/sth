@@ -9,6 +9,7 @@
   "bkm_panen",
   "divisi",
   "blok",
+  "employee",
   "column_break_qfjb",
   "posting_date",
   "company",
@@ -39,6 +40,7 @@
   "upah_panen_amount",
   "upah_supervisi_amount",
   "grand_total",
+  "advance_paid",
   "hasil_panen_tab",
   "hasil_panen",
   "more_information_tab",
@@ -286,13 +288,26 @@
    "label": "Against Kontanan Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fieldname": "advance_paid",
+   "fieldtype": "Currency",
+   "label": "Advance Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Person in Charge",
+   "options": "Employee",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-28 16:18:46.494960",
+ "modified": "2025-11-12 15:17:25.417661",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

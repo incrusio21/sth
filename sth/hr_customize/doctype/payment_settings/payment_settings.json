@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-10 13:56:14.159985",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "internal_employee",
+  "section_break_ehjk",
+  "reference"
+ ],
+ "fields": [
+  {
+   "fieldname": "internal_employee",
+   "fieldtype": "Link",
+   "label": "Internal Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "section_break_ehjk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Table",
+   "label": "Reference",
+   "options": "Payment Reference Settings"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-10 15:22:37.688691",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Payment Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

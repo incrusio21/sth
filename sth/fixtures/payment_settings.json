@@ -1,0 +1,38 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Payment Settings",
+  "modified": "2025-11-12 15:44:45.931557",
+  "name": "Payment Settings",
+  "reference": [
+   {
+    "doctype_ref": "Sales Order\nSales Invoice\nJournal Entry\nDunning",
+    "parent": "Payment Settings",
+    "parentfield": "reference",
+    "parenttype": "Payment Settings",
+    "party_type": "Customer"
+   },
+   {
+    "doctype_ref": "Purchase Order\nPurchase Invoice\nJournal Entry",
+    "parent": "Payment Settings",
+    "parentfield": "reference",
+    "parenttype": "Payment Settings",
+    "party_type": "Supplier"
+   },
+   {
+    "doctype_ref": "Expense Claim\nEmployee Advance\nLeave Encashment\nJournal Entry\nPengajuan Panen Kontanan",
+    "parent": "Payment Settings",
+    "parentfield": "reference",
+    "parenttype": "Payment Settings",
+    "party_type": "Employee"
+   },
+   {
+    "doctype_ref": "Journal Entry",
+    "parent": "Payment Settings",
+    "parentfield": "reference",
+    "parenttype": "Payment Settings",
+    "party_type": "Shareholder"
+   }
+  ]
+ }
+]

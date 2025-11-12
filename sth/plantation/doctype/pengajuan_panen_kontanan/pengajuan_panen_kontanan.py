@@ -17,6 +17,7 @@ class PengajuanPanenKontanan(PlantationController):
 	def validate(self):
 		self.get_data_bkm_panen()
 		self.get_plantation_setting()
+		self.set_missing_value()
 		super().validate()
 
 	def get_data_bkm_panen(self):
@@ -33,6 +34,11 @@ class PengajuanPanenKontanan(PlantationController):
 
 		for fieldname in ["supervisi_kontanan_component", "against_kontanan_component"]:
 			self.set(fieldname, get_plantation_settings(fieldname))
+
+	def set_missing_value(self):
+		from sth.hr_customize import get_payment_settings
+
+		self.employee = get_payment_settings("internal_employee") or ""
 
 	def before_calculate_grand_total(self):
 		self.upah_supervisi_amount = flt(self.upah_mandor) + flt(self.upah_mandor1) + flt(self.upah_kerani)

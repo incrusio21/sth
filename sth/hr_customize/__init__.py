@@ -14,3 +14,14 @@ def get_overtime_settings(key: str):
 			return
 
 	return overtime_settings.get(key)
+
+def get_payment_settings(key: str):
+	"""Return the value associated with the given `key` from Payment Settings DocType."""
+	if not (payment_settings := getattr(frappe.local, "payment_settings", None)):
+		try:
+			frappe.local.payment_settings = payment_settings = frappe.get_cached_doc("Payment Settings")
+		except frappe.DoesNotExistError:  # possible during new install
+			clear_last_message()
+			return
+
+	return payment_settings.get(key)
