@@ -21,6 +21,8 @@
   "document_attach",
   "dphk",
   "amended_from",
+  "accounting_dimension_section",
+  "cost_center",
   "section_break_atts",
   "column_break_ybbb",
   "column_break_wbmt",
@@ -204,13 +206,24 @@
    "in_preview": 1,
    "label": "Outstanding Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 17:11:26.846521",
+ "modified": "2025-11-13 20:23:30.670013",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",

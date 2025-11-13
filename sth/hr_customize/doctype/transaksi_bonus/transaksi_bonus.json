@@ -16,6 +16,8 @@
   "et",
   "bp",
   "amended_from",
+  "accounting_dimensions_section",
+  "cost_center",
   "section_break_rdyy",
   "column_break_vhkd",
   "column_break_jytn",
@@ -168,13 +170,24 @@
    "label": "Person in Charge",
    "options": "Employee",
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 17:00:18.237976",
+ "modified": "2025-11-13 20:22:52.817199",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",
