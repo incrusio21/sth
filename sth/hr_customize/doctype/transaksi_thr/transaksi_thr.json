@@ -121,7 +121,7 @@
   {
    "fieldname": "payment_account_settings_tab",
    "fieldtype": "Tab Break",
-   "label": "Payment Account Settings"
+   "label": "Account Settings"
   },
   {
    "fieldname": "payable_thr_account",
@@ -176,7 +176,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 11:28:10.804423",
+ "modified": "2025-11-13 12:03:39.800341",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",
