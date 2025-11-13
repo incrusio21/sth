@@ -7,27 +7,29 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_rghp",
-  "posting_date",
   "company",
+  "posting_date",
   "unit",
   "setup_thr",
+  "employee",
   "column_break_pgny",
   "rg",
   "employee_grade",
   "employment_type",
   "kriteria",
+  "amended_from",
   "section_break_casa",
   "column_break_mvah",
-  "amended_from",
   "column_break_pedy",
-  "more_information_section",
-  "journal_entry",
+  "grand_total",
+  "outstanding_amount",
   "list_thr_karyawan_tab",
   "get_employee_data",
   "table_employee",
-  "payment_account_settings_tab",
-  "payable_thr_account",
-  "thr_account"
+  "more_information_tab",
+  "accounts_details_section",
+  "salary_account",
+  "credit_to"
  ],
  "fields": [
   {
@@ -119,38 +121,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "payment_account_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Account Settings"
-  },
-  {
-   "fieldname": "payable_thr_account",
-   "fieldtype": "Link",
-   "label": "Payable THR Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "thr_account",
-   "fieldtype": "Link",
-   "label": "THR Account ",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "more_information_section",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
-   "read_only": 1
-  },
-  {
    "fieldname": "employee_grade",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -170,13 +140,56 @@
    "in_list_view": 1,
    "label": "Kriteria",
    "options": "\nSatuan Hasil\nNon Satuan Hasil"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Person in Charge",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "accounts_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Details"
+  },
+  {
+   "fieldname": "salary_account",
+   "fieldtype": "Link",
+   "label": "Salary Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 12:03:39.800341",
+ "modified": "2025-11-13 16:45:48.558305",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

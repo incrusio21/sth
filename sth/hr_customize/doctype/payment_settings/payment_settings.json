@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "internal_employee",
+  "column_break_vvit",
+  "outstanding_doctype",
   "section_break_ehjk",
   "reference"
  ],
@@ -25,13 +27,23 @@
    "fieldtype": "Table",
    "label": "Reference",
    "options": "Payment Reference Settings"
+  },
+  {
+   "fieldname": "column_break_vvit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "enter list of Doctype, each on a new line.",
+   "fieldname": "outstanding_doctype",
+   "fieldtype": "Small Text",
+   "label": "Outstanding Doctype"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-10 15:22:37.688691",
+ "modified": "2025-11-12 16:32:20.608023",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Payment Settings",

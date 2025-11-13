@@ -6,3 +6,11 @@
 
 // 	},
 // });
+
+sth.plantation.PerhitunganKaryawanPHK = class PerhitunganKaryawanPHK extends sth.plantation.AccountsController {
+    refresh() {
+        this.show_general_ledger()
+    }
+}
+
+cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);

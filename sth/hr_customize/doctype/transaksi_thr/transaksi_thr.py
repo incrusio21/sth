@@ -2,19 +2,34 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
 from frappe.utils import flt, nowdate, today, date_diff, getdate
 
-class TransaksiTHR(Document):
+from sth.controllers.accounts_controller import AccountsController
+
+class TransaksiTHR(AccountsController):
+	def validate(self):
+		self.calculate()
+		self.set_missing_value()
+		super().validate()
+
+	def calculate(self):
+		grand_total = 0
+		for row in self.table_employee:
+			grand_total += row.subtotal
+
+		self.grand_total = flt(grand_total)
+
 	def on_submit(self):
-		# self.create_journal_entry()
 		for emp in self.table_employee:
 			self.make_employee_payment_log(emp, "earning")
 			self.make_employee_payment_log(emp, "deduction")
 
+		self.make_gl_entry()
+
 	def on_cancel(self):
-		self.delete_journal_entry()
+		super().on_cancel()
 		self.remove_employee_payment_log(self.table_employee)
+		self.make_gl_entry()
 
 	def make_employee_payment_log(self, emp, log_type):
 		hr_settings = frappe.get_single("Bonus and Allowance Settings")
@@ -77,57 +92,6 @@ class TransaksiTHR(Document):
 						log_doc.delete(ignore_permissions=True)
 					except frappe.DoesNotExistError:
 						frappe.log_error(f"Payment Log {log_name} tidak ditemukan", "Cancel Transaksi THR")
-
-	def create_journal_entry(self):
-		company = frappe.get_doc("Company", self.company)
-
-		total_thr = sum(emp.subtotal for emp in self.table_employee if emp.subtotal)
-
-		je = frappe.new_doc("Journal Entry")
-		je.update({
-			"company": self.company,
-			"posting_date": self.posting_date,
-		})
-
-		# Buat kedua baris akun
-		debit_row = {
-			"account": self.payable_thr_account,
-			"debit_in_account_currency": total_thr
-		}
-
-		credit_row = {
-			"account": self.thr_account,
-			"credit_in_account_currency": total_thr
-		}
-
-		debit_row["against_account"] = self.thr_account
-		credit_row["against_account"] = self.payable_thr_account
-
-		je.append("accounts", debit_row)
-		je.append("accounts", credit_row)
-
-		je.set_total_debit_credit()
-		je.submit()
-
-		self.db_set("journal_entry", je.name)
-
-	def delete_journal_entry(self):
-		if self.journal_entry:
-			je_name = self.journal_entry
-
-			try:
-				je = frappe.get_doc("Journal Entry", je_name)
-				
-				if je.docstatus == 1:
-						je.cancel()
-				
-				frappe.delete_doc("Journal Entry", je_name, force=1)
-				self.db_set("journal_entry", None)
-
-			except frappe.DoesNotExistError:
-				frappe.msgprint(f"Journal Entry {je_name} tidak ditemukan, mungkin sudah dihapus.")
-			except Exception as e:
-				frappe.throw(f"Gagal menghapus Journal Entry {je_name}: {str(e)}")
 
 	@frappe.whitelist()
 	def get_salary_structure_assignment(self, employee):

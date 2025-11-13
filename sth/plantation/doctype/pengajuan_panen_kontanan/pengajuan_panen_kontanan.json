@@ -19,6 +19,8 @@
   "column_break_yfhd",
   "supervisi_component",
   "against_kontanan_component",
+  "column_break_qzgl",
+  "cost_center",
   "upah_supervisi_section",
   "mandor",
   "mandor1",
@@ -38,14 +40,14 @@
   "upah_panen_amount",
   "upah_supervisi_amount",
   "grand_total",
-  "advance_paid",
+  "outstanding_amount",
   "hasil_panen_tab",
   "hasil_panen",
-  "account_settings_tab",
-  "salary_account",
-  "paid_account",
   "more_information_tab",
-  "journal_entry"
+  "accounts_details_section",
+  "salary_account",
+  "credit_to",
+  "column_break_jbcm"
  ],
  "fields": [
   {
@@ -194,7 +196,7 @@
    "collapsible": 1,
    "fieldname": "component_section",
    "fieldtype": "Section Break",
-   "label": "Component"
+   "label": "Component / Accounting Dimension"
   },
   {
    "fieldname": "supervisi_component",
@@ -259,12 +261,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "paid_account",
-   "fieldtype": "Link",
-   "label": "Paid Account",
-   "options": "Account"
-  },
-  {
    "fetch_from": "bkm_panen.grand_total",
    "fieldname": "upah_panen_amount",
    "fieldtype": "Currency",
@@ -277,23 +273,10 @@
    "label": "More Information"
   },
   {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
-   "read_only": 1
-  },
-  {
    "fieldname": "against_kontanan_component",
    "fieldtype": "Link",
    "label": "Against Kontanan Component",
    "options": "Salary Component",
-   "read_only": 1
-  },
-  {
-   "fieldname": "advance_paid",
-   "fieldtype": "Currency",
-   "label": "Advance Paid",
    "read_only": 1
   },
   {
@@ -304,16 +287,42 @@
    "read_only": 1
   },
   {
-   "fieldname": "account_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Account Settings"
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounts_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Details"
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_jbcm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qzgl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 10:58:14.434966",
+ "modified": "2025-11-13 14:38:34.435076",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

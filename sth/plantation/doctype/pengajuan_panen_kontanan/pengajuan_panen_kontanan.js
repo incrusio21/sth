@@ -21,6 +21,11 @@ sth.plantation.PengajuanPanenKontanan = class PengajuanPanenKontanan extends sth
         }
     }
 
+    refresh() {
+        super.refresh()
+        this.show_general_ledger()
+    }
+
     set_query_field(){
         this.frm.set_query("bkm_panen", function(doc){
             return{
@@ -33,7 +38,7 @@ sth.plantation.PengajuanPanenKontanan = class PengajuanPanenKontanan extends sth
             }
         })
     }
-
+    
     before_calculate_grand_total() {
         let doc = this.frm.doc
 

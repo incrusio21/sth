@@ -3,12 +3,12 @@
 
 frappe.provide("sth.plantation");
 
-sth.plantation.TransactionController = class TransactionController extends frappe.ui.form.Controller {
+sth.plantation.TransactionController = class TransactionController extends sth.plantation.AccountsController {
     setup(doc) {
         let doctype = doc.doctype
         this.fieldname_total = ["amount"]
         this.skip_table_amount = []
-        this.skip_fieldname_amount = []
+        this.skip_fieldname_amount = ["outstanding_amount"]
         this.kegiatan_fetch_fieldname = []
         this.max_qty_fieldname = {}
         
@@ -163,7 +163,7 @@ sth.plantation.TransactionController = class TransactionController extends frapp
         for (const field of this.doctype_ref("amount")) {
             if (in_list(this.skip_table_amount, field.replace("_amount", "")) ||
                 in_list(this.skip_fieldname_amount, field)) continue;
-
+            
             grand_total += this.frm.doc[field] || 0;
         }
 
