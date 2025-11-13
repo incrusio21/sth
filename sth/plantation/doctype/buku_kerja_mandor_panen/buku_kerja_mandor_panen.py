@@ -109,7 +109,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		# Hitung total denda dengan menjumlahkan rate * nilai item
 		item.denda = sum(flt(item.get(field)) * flt(self.get(f"{field}_rate")) for field in factors)
 
-		item.sub_total = flt(item.amount + item.brondolan_amount + item.kontanan, precision)
+		item.sub_total = flt(item.amount + item.brondolan_amount + item.kontanan_amount, precision)
 
 	def after_calculate_grand_total(self):
 		self.grand_total -= self.hasil_kerja_denda 
