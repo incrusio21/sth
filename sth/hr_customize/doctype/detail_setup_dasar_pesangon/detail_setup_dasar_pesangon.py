@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class CheckRollKebunLog(Document):
+class DetailSetupDasarPesangon(Document):
 	pass

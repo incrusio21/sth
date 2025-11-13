@@ -5,9 +5,13 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "fp",
+  "header_section",
+  "company",
+  "component",
   "column_break_dbrd",
-  "mrp"
+  "unit",
+  "section_break_sout",
+  "table_wgnt"
  ],
  "fields": [
   {
@@ -15,24 +19,48 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "fp",
-   "fieldtype": "Int",
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Faktor Pengali Pesangon",
-   "reqd": 1
+   "label": "Company",
+   "options": "Company"
   },
   {
-   "fieldname": "mrp",
-   "fieldtype": "Currency",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_sout",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "table_wgnt",
+   "fieldtype": "Table",
+   "options": "Detail Setup Dasar Pesangon"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "component",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Max Rp Pesangon",
+   "in_preview": 1,
+   "label": "Component",
+   "options": "Setup Komponen PHK",
    "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-17 10:36:15.446069",
+ "modified": "2025-11-13 13:33:32.923183",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Dasar Pesangon",

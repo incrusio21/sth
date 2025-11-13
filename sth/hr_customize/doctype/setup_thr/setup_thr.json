@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:SET-THR-{fiscalyear}",
+ "autoname": "format:SET-THR-{#####}",
  "creation": "2025-09-02 13:53:42.299848",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -60,7 +60,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-05 10:56:47.802237",
+ "modified": "2025-11-13 10:55:19.542331",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup THR",
