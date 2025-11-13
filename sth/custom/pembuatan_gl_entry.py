@@ -28,6 +28,18 @@ def test_buat_gl():
 @frappe.whitelist()
 def master_pembuatan_gl_dan_pl(doc,method):
 	# menentukan pembuatan gl
+	if method == "on_cancel":
+		doc.ignore_linked_doctypes = (
+			"GL Entry",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+			"Payment Ledger Entry"
+		)
+
 	akun_debit = ""
 	akun_credit = ""
 	nilai_debit = ""
