@@ -125,7 +125,7 @@
   {
    "fieldname": "account_tab",
    "fieldtype": "Tab Break",
-   "label": "Payment Account Settings"
+   "label": "Account Settings"
   },
   {
    "fieldname": "bonus_account",
@@ -146,7 +146,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-05 10:51:22.460256",
+ "modified": "2025-11-13 10:58:55.955654",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",
@@ -167,6 +167,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

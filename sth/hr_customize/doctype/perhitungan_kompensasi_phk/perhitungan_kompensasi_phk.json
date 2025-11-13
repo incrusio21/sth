@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:PK-PHK-{ec}",
  "creation": "2025-09-02 10:57:32.601027",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -22,7 +23,10 @@
   "grttl",
   "amended_from",
   "perhitungan_tab",
-  "table_seym"
+  "table_seym",
+  "account_tab",
+  "payable_phk_account",
+  "phk_account"
  ],
  "fields": [
   {
@@ -151,16 +155,36 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Employee Name"
+  },
+  {
+   "fieldname": "account_tab",
+   "fieldtype": "Tab Break",
+   "label": "Account Settings"
+  },
+  {
+   "fieldname": "payable_phk_account",
+   "fieldtype": "Link",
+   "label": "Payable PHK Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phk_account",
+   "fieldtype": "Link",
+   "label": "PHK Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-02 13:01:53.637779",
+ "modified": "2025-11-13 11:02:10.380529",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -178,6 +202,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

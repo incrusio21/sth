@@ -66,7 +66,7 @@ from erpnext.controllers.accounts_controller import set_balance_in_account_curre
 
 @frappe.whitelist()
 def test_buat_gl():
-	doc = frappe.get_doc("Pengajuan Panen Kontanan","PPK-00174")
+	doc = frappe.get_doc("Transaksi THR","TRK-THR-eg-fiscal_year")
 	master_pembuatan_gl_dan_pl(doc,"validate")
 
 @frappe.whitelist()
@@ -83,11 +83,39 @@ def master_pembuatan_gl_dan_pl(doc,method):
 		nilai_debit = doc.get("grand_total")
 		nilai_credit = doc.get("grand_total")
 
+	elif doc.doctype == "Transaksi THR":
+		akun_debit = doc.get("thr_account")
+		akun_credit = doc.get("payable_thr_account")
+		grand_total = 0
+		for row in doc.table_employee:
+			grand_total += row.get("subtotal")
+		nilai_debit = grand_total
+		nilai_credit = grand_total
+
+	elif doc.doctype == "Transaksi Bonus":
+		akun_debit = doc.get("bonus_account")
+		akun_credit = doc.get("payable_bonus_account")
+		grand_total = 0
+		for row in doc.table_employee:
+			grand_total += row.get("subtotal")
+		nilai_debit = grand_total
+		nilai_credit = grand_total
+
+	elif doc.doctype == "Perhitungan Kompensasi PHK":
+		akun_debit = doc.get("phk_account")
+		akun_credit = doc.get("payable_phk_account")
+		grand_total = doc.get("grttl")
+		nilai_debit = grand_total
+		nilai_credit = grand_total
+
 	pembuatan_gl_entry(doc,akun_debit, akun_credit, nilai_debit, nilai_credit)
 
 @frappe.whitelist()
 def pembuatan_gl_entry(self,akun_debit, akun_credit, nilai_debit, nilai_credit):
 	from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
+
+	party = frappe.get_single("HR Customize Settings").get("employee_for_transaction")
+	cost_center = erpnext.get_default_cost_center(self.company)
 	gl_entries = []
 	gl_entries.append(
 		get_gl_dict(self,
@@ -96,7 +124,7 @@ def pembuatan_gl_entry(self,akun_debit, akun_credit, nilai_debit, nilai_credit):
 				"against": akun_credit,
 				"debit": nilai_debit,
 				"debit_in_account_currency": nilai_debit,
-				"cost_center": "Main - TML"		
+				"cost_center": cost_center		
 			},
 			item=self,
 		)
@@ -109,7 +137,9 @@ def pembuatan_gl_entry(self,akun_debit, akun_credit, nilai_debit, nilai_credit):
 				"against": akun_debit,
 				"credit": nilai_debit,
 				"credit_in_account_currency": nilai_debit,
-				"cost_center": "Main - TML"			
+				"cost_center": cost_center,
+				"party_type": "Employee",
+				"party": party	
 			},
 			item=self,
 		)

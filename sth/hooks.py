@@ -162,7 +162,24 @@ doc_events = {
 	},
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
+	},
+	"Pengajuan Panen Kontanan":{
+		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
+		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
+	},
+	"Transaksi THR":{
+		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
+		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
+	},
+	"Transaksi Bonus":{
+		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
+		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
+	},
+	"Perhitungan Komponen PHK":{
+		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
+		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
 	}
+	
 }
 
 

@@ -16,8 +16,6 @@
   "hari_kerja",
   "amended_from",
   "component_section",
-  "salary_account",
-  "paid_account",
   "column_break_yfhd",
   "supervisi_component",
   "against_kontanan_component",
@@ -43,6 +41,9 @@
   "advance_paid",
   "hasil_panen_tab",
   "hasil_panen",
+  "account_settings_tab",
+  "salary_account",
+  "paid_account",
   "more_information_tab",
   "journal_entry"
  ],
@@ -301,13 +302,18 @@
    "label": "Person in Charge",
    "options": "Employee",
    "read_only": 1
+  },
+  {
+   "fieldname": "account_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Account Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-12 15:17:25.417661",
+ "modified": "2025-11-13 10:58:14.434966",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

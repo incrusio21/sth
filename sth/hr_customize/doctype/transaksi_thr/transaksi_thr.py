@@ -7,7 +7,7 @@ from frappe.utils import flt, nowdate, today, date_diff, getdate
 
 class TransaksiTHR(Document):
 	def on_submit(self):
-		self.create_journal_entry()
+		# self.create_journal_entry()
 		for emp in self.table_employee:
 			self.make_employee_payment_log(emp, "earning")
 			self.make_employee_payment_log(emp, "deduction")
