@@ -1,5 +1,6 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
+
 import frappe
 from frappe.permissions import has_permission
 from frappe.desk.reportview import get_filters_cond, get_match_cond
@@ -25,7 +26,7 @@ def get_payment_reference(
 	reference_doctype: str | None = None,
 	ignore_user_permissions: bool = False,
 ):
-	doctype = "Doctype"
+	doctype = "DocType"
 	conditions = []
 	fields = get_fields(doctype, ["name"])
 	ignore_permissions = False

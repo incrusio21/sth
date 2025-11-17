@@ -9,20 +9,27 @@
   "header_section",
   "unit",
   "company",
+  "employee",
   "column_break_qhdv",
   "posting_date",
   "eg",
   "et",
   "bp",
-  "more_information_section",
-  "journal_entry",
+  "amended_from",
+  "accounting_dimensions_section",
+  "cost_center",
+  "section_break_rdyy",
+  "column_break_vhkd",
+  "column_break_jytn",
+  "grand_total",
+  "outstanding_amount",
   "employee_detail_tab",
   "get_employee_data",
   "table_employee",
-  "amended_from",
-  "account_tab",
+  "more_information_tab",
+  "accounts_details_section",
   "payable_bonus_account",
-  "bonus_account"
+  "credit_to"
  ],
  "fields": [
   {
@@ -110,43 +117,77 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_information_section",
-   "fieldtype": "Section Break",
-   "label": "More Information"
+   "fieldname": "payable_bonus_account",
+   "fieldtype": "Link",
+   "label": "Salary Account",
+   "options": "Account",
+   "reqd": 1
   },
   {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
+   "fieldname": "section_break_rdyy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vhkd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jytn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
    "read_only": 1
   },
   {
-   "fieldname": "account_tab",
+   "fieldname": "more_information_tab",
    "fieldtype": "Tab Break",
-   "label": "Account Settings"
+   "label": "More Information"
   },
   {
-   "fieldname": "bonus_account",
+   "fieldname": "accounts_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Details"
+  },
+  {
+   "fieldname": "credit_to",
    "fieldtype": "Link",
-   "label": "Bonus Account",
+   "label": "Credit To",
    "options": "Account",
    "reqd": 1
   },
   {
-   "fieldname": "payable_bonus_account",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
    "fieldtype": "Link",
-   "label": "Payable Bonus Account",
-   "options": "Account",
-   "reqd": 1
+   "label": "Person in Charge",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 10:58:55.955654",
+ "modified": "2025-11-13 20:22:52.817199",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",
@@ -167,7 +208,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

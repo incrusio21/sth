@@ -8,25 +8,32 @@
  "field_order": [
   "section_break_tmct",
   "column_break_mfxg",
-  "transaction_date",
   "ssa",
-  "ec",
-  "en",
+  "employee",
+  "employee_name",
   "nik",
   "eg",
-  "company",
   "column_break_yiil",
+  "company",
+  "posting_date",
   "l_date",
   "ilb",
   "document_attach",
   "dphk",
-  "grttl",
   "amended_from",
+  "accounting_dimension_section",
+  "cost_center",
+  "section_break_atts",
+  "column_break_ybbb",
+  "column_break_wbmt",
+  "grand_total",
+  "outstanding_amount",
   "perhitungan_tab",
   "table_seym",
   "account_tab",
-  "payable_phk_account",
-  "phk_account"
+  "accounts_details_section",
+  "salary_account",
+  "credit_to"
  ],
  "fields": [
   {
@@ -45,7 +52,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "ec.no_ktp",
    "fieldname": "nik",
    "fieldtype": "Read Only",
    "in_list_view": 1,
@@ -53,12 +59,12 @@
    "label": "NIK"
   },
   {
-   "fetch_from": "ec.grade",
+   "fetch_from": "employee.grade",
    "fieldname": "eg",
    "fieldtype": "Read Only",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Employee Grade"
+   "label": "Grade"
   },
   {
    "fieldname": "column_break_yiil",
@@ -78,21 +84,13 @@
    "reqd": 1
   },
   {
-   "default": "Today",
-   "fieldname": "transaction_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Transaction Date",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "ec.company",
    "fieldname": "company",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Company"
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "ilb",
@@ -123,14 +121,6 @@
    "options": "Detail Perhitungan Kompensasi PHK"
   },
   {
-   "fieldname": "grttl",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Grandtotal",
-   "read_only": 1
-  },
-  {
    "fieldname": "ssa",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -140,47 +130,100 @@
    "reqd": 1
   },
   {
+   "fieldname": "account_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "accounts_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Details"
+  },
+  {
+   "fieldname": "salary_account",
+   "fieldtype": "Link",
+   "label": "Salary Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
    "fetch_from": "ssa.employee",
-   "fieldname": "ec",
+   "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Employee Code",
+   "label": "Employee",
    "options": "Employee"
   },
   {
-   "fetch_from": "ec.employee_name",
-   "fieldname": "en",
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
    "fieldtype": "Read Only",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Employee Name"
   },
   {
-   "fieldname": "account_tab",
-   "fieldtype": "Tab Break",
-   "label": "Account Settings"
-  },
-  {
-   "fieldname": "payable_phk_account",
-   "fieldtype": "Link",
-   "label": "Payable PHK Account",
-   "options": "Account",
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Posting Date",
    "reqd": 1
   },
   {
-   "fieldname": "phk_account",
+   "fieldname": "section_break_atts",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ybbb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wbmt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
    "fieldtype": "Link",
-   "label": "PHK Account",
-   "options": "Account",
-   "reqd": 1
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 11:02:10.380529",
+ "modified": "2025-11-13 20:23:30.670013",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",
@@ -202,7 +245,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

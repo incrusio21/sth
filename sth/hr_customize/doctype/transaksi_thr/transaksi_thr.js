@@ -110,3 +110,11 @@ frappe.ui.form.on("Transaksi THR", {
     frm.refresh_field("table_employee");
   }
 });
+
+sth.plantation.TransaksiTHR = class TransaksiTHR extends sth.plantation.AccountsController {
+    refresh() {
+        this.show_general_ledger()
+    }
+}
+
+cur_frm.script_manager.make(sth.plantation.TransaksiTHR);

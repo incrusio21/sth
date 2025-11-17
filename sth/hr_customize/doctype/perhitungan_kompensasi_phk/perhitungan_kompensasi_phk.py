@@ -2,8 +2,12 @@
 # For license information, please see license.txt
 
 # import frappe
-from frappe.model.document import Document
+from sth.controllers.accounts_controller import AccountsController
 
+class PerhitunganKompensasiPHK(AccountsController):
+	def on_submit(self):
+		self.make_gl_entry()
 
-class PerhitunganKompensasiPHK(Document):
-	pass
+	def on_cancel(self):
+		super().on_cancel()
+		self.make_gl_entry()

@@ -6,7 +6,6 @@ from frappe.utils import flt, get_link_to_form
 
 from sth.controllers.plantation_controller import PlantationController
 
-
 class PengajuanPanenKontanan(PlantationController):
 
 	def __init__(self, *args, **kwargs):
@@ -35,11 +34,6 @@ class PengajuanPanenKontanan(PlantationController):
 		for fieldname in ["supervisi_kontanan_component", "against_kontanan_component"]:
 			self.set(fieldname, get_plantation_settings(fieldname))
 
-	def set_missing_value(self):
-		from sth.hr_customize import get_payment_settings
-
-		self.employee = get_payment_settings("internal_employee") or ""
-
 	def before_calculate_grand_total(self):
 		self.upah_supervisi_amount = flt(self.upah_mandor) + flt(self.upah_mandor1) + flt(self.upah_kerani)
 	
@@ -47,14 +41,14 @@ class PengajuanPanenKontanan(PlantationController):
 		self.validate_account_and_salary_component()
 
 	def validate_account_and_salary_component(self):
-		if not (self.salary_account and self.paid_account):
+		if not (self.salary_account and self.credit_to):
 			frappe.throw("Please set Account first")
 
 	def on_submit(self):
 		self.validate_duplicate_ppk()
 		self.check_status_bkm_panen()
 		self.create_or_update_epl_supervisi()
-		# self.create_journal_payment()
+		self.make_gl_entry()
 
 	def validate_duplicate_ppk(self):
 		if dup_ppk := frappe.db.get_value("Pengajuan Panen Kontanan", 
@@ -107,36 +101,28 @@ class PengajuanPanenKontanan(PlantationController):
 			
 			self.db_set(target_link, detail_name)
 	
-	def create_journal_payment(self):
-		doc = frappe.new_doc("Journal Entry")
-		
-		doc.posting_date = self.posting_date
-		doc.company = self.company
-
-		doc.set("accounts", [
-			{
-				"account": self.salary_account,
-				"debit_in_account_currency": self.grand_total
-			},
-			{
-				"account": self.paid_account,
-				"credit_in_account_currency": self.grand_total
-			}
-		])
-
-		doc.submit()
-
-		self.db_set("journal_entry", doc.name)
-
 	def on_cancel(self):
+		super().on_cancel()
 		self.check_status_bkm_panen()
-		self.delete_pl_and_jv()
+		self.delete_employee_payment_log()
+		self.make_gl_entry()
+
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+			"Payment Ledger Entry",
+		)
 
 	def check_status_bkm_panen(self):
 		doc = frappe.get_doc("Buku Kerja Mandor Panen", self.bkm_panen)
 		doc.update_kontanan_used()
 
-	def delete_pl_and_jv(self):
+	def delete_employee_payment_log(self):
 		for emp in self.supervisi_list:
 			target_link = f"{emp}_epl"
 			value = self.get(target_link)
@@ -145,11 +131,3 @@ class PengajuanPanenKontanan(PlantationController):
 			
 			self.db_set(target_link, "")
 			frappe.delete_doc("Employee Payment Log", value)
-
-		# if self.journal_entry:
-		# 	doc = frappe.get_doc("Journal Entry", self.journal_entry)
-		# 	if doc.docstatus == 1:
-		# 		doc.cancel()
-
-		# 	self.db_set("journal_entry", "")
-		# 	doc.delete()

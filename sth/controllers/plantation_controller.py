@@ -4,22 +4,23 @@
 import frappe
 from frappe.utils import flt
 
-from frappe.model.document import Document
+from sth.controllers.accounts_controller import AccountsController
 
-class PlantationController(Document):
+class PlantationController(AccountsController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_qty_fieldname = {}
         self.fieldname_total = ["amount"]
         self.skip_table_amount = []
         self.skip_calculate_table = []
-        self.skip_fieldname_amount = []
+        self.skip_fieldname_amount = ["outstanding_amount"]
         self.kegiatan_fetch_fieldname = []
         self.kegiatan_fetch_if_empty_fieldname = []
 
     def validate(self):
         self.fetch_kegiatan_data()
         self.calculate()
+        super().validate()
 
     def fetch_kegiatan_data(self):
         if not (self.kegiatan_fetch_fieldname or self.kegiatan_fetch_if_empty_fieldname):

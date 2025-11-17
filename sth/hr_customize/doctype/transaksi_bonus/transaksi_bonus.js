@@ -147,3 +147,11 @@ frappe.ui.form.on("Detail Transaksi Bonus", {
     }
   },
 });
+
+sth.plantation.TransaksiBonus = class TransaksiBonus extends sth.plantation.AccountsController {
+    refresh() {
+        this.show_general_ledger()
+    }
+}
+
+cur_frm.script_manager.make(sth.plantation.TransaksiBonus);

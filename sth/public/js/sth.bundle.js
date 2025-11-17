@@ -1,4 +1,5 @@
 import "./utils/main"
+import "./controllers/accounts_controller";
 import "./controllers/plantation_controller";
 import "./controllers/budget_controller";
 import "./controllers/rencana_kerja";

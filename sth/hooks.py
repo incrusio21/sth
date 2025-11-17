@@ -162,24 +162,7 @@ doc_events = {
 	},
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
-	},
-	"Pengajuan Panen Kontanan":{
-		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
-		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
-	},
-	"Transaksi THR":{
-		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
-		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
-	},
-	"Transaksi Bonus":{
-		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
-		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
-	},
-	"Perhitungan Komponen PHK":{
-		"on_submit": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl",
-		"on_cancel": "sth.custom.pembuatan_gl_entry.master_pembuatan_gl_dan_pl"
 	}
-	
 }
 
 
@@ -213,7 +196,8 @@ doc_events = {
 # ------------------------------
 #
 override_whitelisted_methods = {
-	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement"
+	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
+	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 }
 #
 # each overriding function accepts a `data` argument;
