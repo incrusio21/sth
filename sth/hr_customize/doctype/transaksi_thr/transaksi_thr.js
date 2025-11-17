@@ -32,6 +32,10 @@ frappe.ui.form.on("Transaksi THR", {
       custom_unit: frm.doc.unit,
     };
 
+    if (frm.doc.religion_group) {
+      filters.custom_religion_group = frm.doc.religion_group
+    }
+
     if (frm.doc.employee_grade) {
       filters.grade = frm.doc.employee_grade;
     }

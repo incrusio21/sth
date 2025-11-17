@@ -140,6 +140,15 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
       };
     });
   },
+  divisi(frm) {
+    frm.set_query("blok", function () {
+      return {
+        filters: [
+          ["Blok", "divisi", "=", frm.doc.divisi]
+        ]
+      };
+    });
+  },
   mdr(frm) {
     if (frm.doc.mdr) {
       frappe.db.get_value("Employee", frm.doc.mdr, "designation", function (r) {

@@ -12,7 +12,7 @@
   "unit",
   "setup_thr",
   "column_break_pgny",
-  "rg",
+  "religion_group",
   "employee_grade",
   "employment_type",
   "kriteria",
@@ -67,14 +67,6 @@
   {
    "fieldname": "column_break_pgny",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "rg",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Religion Group",
-   "options": "Religion Group"
   },
   {
    "fieldname": "section_break_casa",
@@ -170,13 +162,21 @@
    "in_list_view": 1,
    "label": "Kriteria",
    "options": "\nSatuan Hasil\nNon Satuan Hasil"
+  },
+  {
+   "fieldname": "religion_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Religion Group",
+   "options": "Religion Group"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 12:03:39.800341",
+ "modified": "2025-11-13 16:06:53.201430",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

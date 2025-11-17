@@ -1,14 +1,20 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:kk",
+ "autoname": "field:kode_komponen",
  "creation": "2025-09-02 09:29:11.138793",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "kk",
-  "column_break_tubb"
+  "kode_komponen",
+  "company",
+  "unit",
+  "column_break_etwk",
+  "employee_grade",
+  "valid_from",
+  "section_break_nxkk",
+  "table_dasar_perhitungan"
  ],
  "fields": [
   {
@@ -17,7 +23,7 @@
    "label": "Header"
   },
   {
-   "fieldname": "kk",
+   "fieldname": "kode_komponen",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
@@ -26,14 +32,49 @@
    "unique": 1
   },
   {
-   "fieldname": "column_break_tubb",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_etwk",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_nxkk",
+   "fieldtype": "Section Break",
+   "label": "Dasar Perhitungan"
+  },
+  {
+   "fieldname": "table_dasar_perhitungan",
+   "fieldtype": "Table",
+   "label": "Table Dasar Perhitungan",
+   "options": "Detail Setup Komponen PHK"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-02 12:55:11.401293",
+ "modified": "2025-11-13 16:30:22.558763",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Komponen PHK",
