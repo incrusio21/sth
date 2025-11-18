@@ -10,14 +10,14 @@
   "header_section",
   "nm",
   "column_break_ochv",
-  "salary_component",
-  "detail_tab",
+  "detail_section",
   "table_pphp"
  ],
  "fields": [
   {
    "fieldname": "header_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "nm",
@@ -38,27 +38,20 @@
    "label": "Header"
   },
   {
-   "fieldname": "detail_tab",
-   "fieldtype": "Tab Break",
-   "label": "Detail"
-  },
-  {
    "fieldname": "table_pphp",
    "fieldtype": "Table",
    "options": "Detail Dasar PHK"
   },
   {
-   "fieldname": "salary_component",
-   "fieldtype": "Link",
-   "label": "Salary Component",
-   "options": "Salary Component",
-   "reqd": 1
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-02 12:53:05.228616",
+ "modified": "2025-11-18 15:34:09.427438",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Dasar PHK",

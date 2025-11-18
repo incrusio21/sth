@@ -33,7 +33,8 @@ doctype_js = {
 	"Travel Request": "public/js/travel_request.js",
 	"Expense Claim": "public/js/expense_claim.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
-    "Loan" : "hr_customize/custom/loan.js"
+  "Loan": "hr_customize/custom/loan.js",
+  "Employee": "public/js/employee.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
