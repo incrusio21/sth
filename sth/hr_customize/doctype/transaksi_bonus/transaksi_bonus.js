@@ -36,7 +36,7 @@ frappe.ui.form.on("Transaksi Bonus", {
     }
   },
   make_payment_entry: function (frm) {
-    let method = "sth.hr_customize.doctype.transaksi_bonus.transaksi_bonus.get_payment_entry_for_training_event";
+    let method = "sth.hr_customize.doctype.transaksi_bonus.transaksi_bonus.get_payment_entry";
     return frappe.call({
       method: method,
       args: {
@@ -149,9 +149,9 @@ frappe.ui.form.on("Detail Transaksi Bonus", {
 });
 
 sth.plantation.TransaksiBonus = class TransaksiBonus extends sth.plantation.AccountsController {
-    refresh() {
-        this.show_general_ledger()
-    }
+  refresh() {
+    this.show_general_ledger()
+  }
 }
 
 cur_frm.script_manager.make(sth.plantation.TransaksiBonus);

@@ -16,7 +16,7 @@ class TransaksiBonus(AccountsController):
 	def calculate(self):
 		grand_total = 0
 		for row in self.table_employee:
-			grand_total += row.subtotal
+			grand_total += row.total_bonus
 
 		self.grand_total = flt(grand_total)
 
@@ -144,7 +144,7 @@ class TransaksiBonus(AccountsController):
 		}
 
 @frappe.whitelist()
-def get_payment_entry_for_training_event(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
+def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
 	doc = frappe.get_doc(dt, dn)
 
 	# party_account = get_party_account(doc)
@@ -158,6 +158,7 @@ def get_payment_entry_for_training_event(dt, dn, party_amount=None, bank_account
 	# bank = get_bank_cash_account(doc, bank_account)
 	bank_account = frappe.get_doc("Bank Account", {"company": doc.company})
 	company = frappe.get_doc("Company", doc.company)
+	payment_settings = frappe.get_single("Payment Settings")
 
 	# paid_amount, received_amount = get_paid_amount_and_received_amount(
 	# 	doc, party_account_currency, bank, outstanding_amount, payment_type, bank_amount
@@ -168,27 +169,29 @@ def get_payment_entry_for_training_event(dt, dn, party_amount=None, bank_account
 	pe.company = doc.company
 	pe.posting_date = nowdate()
 	pe.party_type = "Employee"
-	pe.party = "SADIMIN"
-	# pe.party_name = frappe.get_doc("Supplier", doc.get("supplier")).supplier_name
-	# pe.bank_account = bank_account.name
-	# pe.paid_from = bank_account.account
-	# pe.paid_to = company.default_payable_account
-	# pe.paid_amount = doc.custom_grand_total_costing
-	# pe.received_amount = doc.custom_grand_total_costing
+	pe.internal_employee = 1
+	pe.party = payment_settings.internal_employee
+	pe.party_name = payment_settings.internal_employee
+	pe.bank_account = bank_account.name
+	pe.paid_from = bank_account.account
+	pe.paid_to = company.default_payable_account
+	pe.paid_amount = doc.grand_total
+	pe.received_amount = doc.grand_total
+	pe.total_allocated_amount = doc.grand_total
 
-	# pe.append(
-	# 	"references",
-	# 	{
-	# 		"reference_doctype": dt,
-	# 		"reference_name": dn,
-	# 		"total_amount": doc.custom_grand_total_costing,
-	# 		"outstanding_amount": doc.custom_grand_total_costing,
-	# 		"allocated_amount": doc.custom_grand_total_costing,
-	# 	},
-	# )
+	pe.append(
+		"references",
+		{
+			"reference_doctype": dt,
+			"reference_name": dn,
+			"total_amount": doc.grand_total,
+			"outstanding_amount": doc.grand_total,
+			"allocated_amount": doc.grand_total,
+		},
+	)
 
-	# pe.setup_party_account_field()
-	# pe.set_missing_values()
-	# pe.set_missing_ref_details()
+	pe.setup_party_account_field()
+	pe.set_missing_values()
+	pe.set_missing_ref_details()
 
 	return pe

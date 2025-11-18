@@ -197,3 +197,56 @@ class TransaksiTHR(AccountsController):
 					return thr_rule
 
 		return None
+	
+@frappe.whitelist()
+def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
+	doc = frappe.get_doc(dt, dn)
+
+	# party_account = get_party_account(doc)
+	# party_account_currency = get_account_currency(party_account)
+	payment_type = "Pay"
+	# grand_total, outstanding_amount = get_grand_total_and_outstanding_amount(
+	# 	doc, party_amount, party_account_currency
+	# )
+
+	# # bank or cash
+	# bank = get_bank_cash_account(doc, bank_account)
+	bank_account = frappe.get_doc("Bank Account", {"company": doc.company})
+	company = frappe.get_doc("Company", doc.company)
+	payment_settings = frappe.get_single("Payment Settings")
+
+	# paid_amount, received_amount = get_paid_amount_and_received_amount(
+	# 	doc, party_account_currency, bank, outstanding_amount, payment_type, bank_amount
+	# )
+
+	pe = frappe.new_doc("Payment Entry")
+	pe.payment_type = payment_type
+	pe.company = doc.company
+	pe.posting_date = nowdate()
+	pe.party_type = "Employee"
+	pe.internal_employee = 1
+	pe.party = payment_settings.internal_employee
+	pe.party_name = payment_settings.internal_employee
+	pe.bank_account = bank_account.name
+	pe.paid_from = bank_account.account
+	pe.paid_to = company.default_payable_account
+	pe.paid_amount = doc.grand_total
+	pe.received_amount = doc.grand_total
+	pe.total_allocated_amount = doc.grand_total
+
+	pe.append(
+		"references",
+		{
+			"reference_doctype": dt,
+			"reference_name": dn,
+			"total_amount": doc.grand_total,
+			"outstanding_amount": doc.grand_total,
+			"allocated_amount": doc.grand_total,
+		},
+	)
+
+	pe.setup_party_account_field()
+	pe.set_missing_values()
+	pe.set_missing_ref_details()
+
+	return pe

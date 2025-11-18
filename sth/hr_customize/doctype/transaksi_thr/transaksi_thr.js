@@ -9,7 +9,31 @@ frappe.ui.form.on("Transaksi THR", {
       cur_frm.toggle_display("get_employee_data", false);
     }
 
+    if (frm.doc.docstatus === 1 && frappe.model.can_create("Payment Entry")) {
+      frm.add_custom_button(
+        __("Payment"),
+        function () {
+          frm.events.make_payment_entry(frm);
+        },
+        __("Create"),
+      );
+    }
+
     frm.set_df_property("table_employee", "cannot_add_rows", true);
+  },
+  make_payment_entry: function (frm) {
+    let method = "sth.hr_customize.doctype.transaksi_thr.transaksi_thr.get_payment_entry";
+    return frappe.call({
+      method: method,
+      args: {
+        dt: frm.doc.doctype,
+        dn: frm.doc.name,
+      },
+      callback: function (r) {
+        var doclist = frappe.model.sync(r.message);
+        frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+      },
+    });
   },
   async unit(frm) {
     const result = await frappe.db.get_value("Setup THR", {
@@ -112,9 +136,9 @@ frappe.ui.form.on("Transaksi THR", {
 });
 
 sth.plantation.TransaksiTHR = class TransaksiTHR extends sth.plantation.AccountsController {
-    refresh() {
-        this.show_general_ledger()
-    }
+  refresh() {
+    this.show_general_ledger()
+  }
 }
 
 cur_frm.script_manager.make(sth.plantation.TransaksiTHR);

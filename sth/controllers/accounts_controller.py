@@ -37,7 +37,7 @@ class AccountsController(Document):
           
     def set_outstanding_amount(self):
         if self.meta.has_field("outstanding_amount"):
-            self.outstanding_amount = self.grand_total
+            self.outstanding_amount = flt(self.grand_total)
     
     def on_cancel(self):
         self.ignore_linked_doctypes = (
@@ -232,12 +232,13 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 	# Didn't use db_set for optimisation purpose
 	ref_doc.outstanding_amount = outstanding_amount
-	frappe.db.set_value(
-		voucher_type,
-		voucher_no,
-		"outstanding_amount",
-		outstanding_amount,
-	)
+	if voucher_type not in ["Transaksi Bonus", "Transaksi THR"]:
+		frappe.db.set_value(
+			voucher_type,
+			voucher_no,
+			"outstanding_amount",
+			outstanding_amount,
+		)
 
 	# ref_doc.set_status(update=True)
 	ref_doc.notify_update()

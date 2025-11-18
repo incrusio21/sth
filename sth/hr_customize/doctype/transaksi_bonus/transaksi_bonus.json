@@ -28,7 +28,7 @@
   "table_employee",
   "more_information_tab",
   "accounts_details_section",
-  "payable_bonus_account",
+  "salary_account",
   "credit_to"
  ],
  "fields": [
@@ -117,13 +117,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "payable_bonus_account",
-   "fieldtype": "Link",
-   "label": "Salary Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_rdyy",
    "fieldtype": "Section Break"
   },
@@ -181,13 +174,20 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "salary_account",
+   "fieldtype": "Link",
+   "label": "Salary Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 20:22:52.817199",
+ "modified": "2025-11-17 13:24:44.490881",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",
@@ -208,6 +208,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
