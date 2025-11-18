@@ -13,6 +13,7 @@
   "employee_name",
   "nik",
   "eg",
+  "exit_interview",
   "column_break_yiil",
   "company",
   "posting_date",
@@ -217,13 +218,19 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "exit_interview",
+   "fieldtype": "Link",
+   "label": "Exit Interview",
+   "options": "Exit Interview"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 20:23:30.670013",
+ "modified": "2025-11-17 14:49:04.504029",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",
