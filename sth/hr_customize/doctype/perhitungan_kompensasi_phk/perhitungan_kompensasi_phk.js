@@ -2,16 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
-    async ssa(frm) {
-        ssa = await frappe.db.get_doc("Salary Structure Assignment", frm.doc.ssa);
+    // 	refresh(frm) {
 
-        if (ssa) {
-            frm.set_query("exit_interview", function () {
-                return {
-                    filters: [["Exit Interview", "employee", "=", ssa.employee]]
-                };
-            });
-        }
+    // 	},
+    ssa(frm) {
+        fetchTableSeym(frm);
+    },
+    dphk(frm) {
+        fetchTableSeym(frm);
     }
 });
 
@@ -22,3 +20,17 @@ sth.plantation.PerhitunganKaryawanPHK = class PerhitunganKaryawanPHK extends sth
 }
 
 cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);
+
+function fetchTableSeym(frm) {
+    if (!frm.doc.ssa || !frm.doc.dphk) {
+        return
+    }
+    frm.call('fetch_perhitungan', { throw_if_missing: true })
+        .then(r => {
+            if (r.message) {
+                let linked_doc = r.message;
+                // do something with linked_doc
+
+            }
+        })
+}
