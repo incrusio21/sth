@@ -13,6 +13,8 @@
   "column_break_etwk",
   "employee_grade",
   "valid_from",
+  "is_cuti",
+  "tipe_cuti",
   "section_break_nxkk",
   "table_dasar_perhitungan"
  ],
@@ -69,12 +71,26 @@
    "fieldtype": "Table",
    "label": "Table Dasar Perhitungan",
    "options": "Detail Setup Komponen PHK"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cuti",
+   "fieldtype": "Check",
+   "label": "Is Cuti"
+  },
+  {
+   "depends_on": "eval:doc.is_cuti",
+   "fieldname": "tipe_cuti",
+   "fieldtype": "Link",
+   "label": "Tipe Cuti",
+   "mandatory_depends_on": "eval:doc.is_cuti",
+   "options": "Leave Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-13 16:30:22.558763",
+ "modified": "2025-11-18 10:41:29.290432",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Komponen PHK",

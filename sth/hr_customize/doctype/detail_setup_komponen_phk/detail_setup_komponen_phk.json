@@ -14,16 +14,19 @@
   {
    "fieldname": "from_month",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "From Month"
   },
   {
    "fieldname": "to_month",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "To Month"
   },
   {
    "fieldname": "pengkali",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Pengkali"
   }
  ],
@@ -31,7 +34,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-13 16:28:12.576810",
+ "modified": "2025-11-18 10:40:01.599480",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Setup Komponen PHK",
