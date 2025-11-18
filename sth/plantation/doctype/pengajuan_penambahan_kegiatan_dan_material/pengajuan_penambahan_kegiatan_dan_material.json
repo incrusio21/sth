@@ -1,0 +1,249 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-08 10:39:46.823646",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_amz9",
+  "naming_series",
+  "tgl_trk",
+  "blok",
+  "divisi",
+  "column_break_xevj",
+  "employee",
+  "jns_kry",
+  "amended_from",
+  "rekap_section",
+  "grttl_kgt",
+  "grttl_mt",
+  "column_break_yaxx",
+  "grttl_alt",
+  "grttl",
+  "kegiatan_tab",
+  "detail_kegiatan_section",
+  "kgt",
+  "vlm",
+  "column_break_qdjt",
+  "jml_hk",
+  "ttl_uph",
+  "premi",
+  "ttl_pnmbhn",
+  "dmt",
+  "detail_material_section",
+  "table_ijha",
+  "detail_alat_section",
+  "table_oooz"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_amz9",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "column_break_xevj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kgt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "label": "Premi"
+  },
+  {
+   "bold": 1,
+   "fieldname": "ttl_pnmbhn",
+   "fieldtype": "Currency",
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl_trk",
+   "fieldtype": "Date",
+   "label": "Tanggal Pengajuan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Document"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nama Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employment_type",
+   "fieldname": "jns_kry",
+   "fieldtype": "Data",
+   "label": "Tipe Karyawan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "vlm",
+   "fieldtype": "Float",
+   "label": "Volume"
+  },
+  {
+   "fieldname": "jml_hk",
+   "fieldtype": "Int",
+   "label": "Jumlah Hari Kerja"
+  },
+  {
+   "fieldname": "ttl_uph",
+   "fieldtype": "Currency",
+   "label": "Total Upah"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pengajuan Penambahan Kegiatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Divisi"
+  },
+  {
+   "fieldname": "kegiatan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kegiatan"
+  },
+  {
+   "fieldname": "detail_kegiatan_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Kegiatan"
+  },
+  {
+   "fieldname": "column_break_qdjt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dmt",
+   "fieldtype": "Tab Break",
+   "label": "Material Dan Alat"
+  },
+  {
+   "bold": 1,
+   "fieldname": "grttl",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rekap_section",
+   "fieldtype": "Section Break",
+   "label": "Rekap"
+  },
+  {
+   "fieldname": "grttl_kgt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal Kegiatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grttl_mt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal Material",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yaxx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grttl_alt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grandtotal Alat",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail_material_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Material"
+  },
+  {
+   "fieldname": "table_ijha",
+   "fieldtype": "Table",
+   "in_filter": 1,
+   "options": "Detail Budget Material"
+  },
+  {
+   "fieldname": "detail_alat_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Alat"
+  },
+  {
+   "fieldname": "table_oooz",
+   "fieldtype": "Table",
+   "options": "Detail Budget Peralatan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-08-19 10:31:35.269607",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Pengajuan Penambahan Kegiatan Dan Material",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

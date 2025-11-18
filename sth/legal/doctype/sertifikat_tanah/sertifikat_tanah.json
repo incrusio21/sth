@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:ns",
+ "creation": "2025-09-10 13:42:26.355494",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_nmiu",
+  "ns",
+  "js",
+  "np",
+  "wil",
+  "column_break_asvx",
+  "ll",
+  "issue_date",
+  "expiry_date",
+  "status",
+  "fs",
+  "ket",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_nmiu",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sertifikat Tanah",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "ns",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Sertifikat",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "js",
+   "fieldtype": "Link",
+   "label": "Jenis Sertifikat",
+   "options": "Jenis Sertifikat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "np",
+   "fieldtype": "Data",
+   "label": "Nama Pemilik",
+   "reqd": 1
+  },
+  {
+   "fieldname": "wil",
+   "fieldtype": "Link",
+   "label": "Wilayah",
+   "options": "Wilayah"
+  },
+  {
+   "fieldname": "column_break_asvx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ll",
+   "fieldtype": "Float",
+   "label": "Luas Lahan (Ha)"
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Terbit"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Berakhir"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nAktif\nNon Aktif"
+  },
+  {
+   "fieldname": "fs",
+   "fieldtype": "Attach",
+   "label": "File Sertifikat"
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-10 13:47:28.274351",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Sertifikat Tanah",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

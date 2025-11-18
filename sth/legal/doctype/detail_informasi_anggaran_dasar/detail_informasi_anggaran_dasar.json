@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-11 10:45:13.147987",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ja",
+  "na",
+  "tgl_akta",
+  "nn",
+  "no_sk",
+  "tgl_sk",
+  "column_break_rikm",
+  "alamat",
+  "md",
+  "mds",
+  "ku",
+  "note",
+  "fd"
+ ],
+ "fields": [
+  {
+   "fieldname": "ja",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jenis Akta",
+   "options": "Jenis Akta",
+   "reqd": 1
+  },
+  {
+   "fieldname": "na",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Akta",
+   "options": "Nomor Akta",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "na.tgl_akta",
+   "fieldname": "tgl_akta",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Akta",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nn",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Notaris",
+   "options": "Nama Notaris",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_sk",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No. SK Kehakiman",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tgl_sk",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal SK Kehakiman",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rikm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alamat",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Alamat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "md",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Modal Dasar",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mds",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Modal Disetor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ku",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan Usaha",
+   "reqd": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Keterangan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fd",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "File Dokumen"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-11 11:13:02.424212",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Detail Informasi Anggaran Dasar",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,173 @@
+<h4>Rekap Kegiatan Rawat</h4>
+
+<hr>
+
+<div>
+  {% if filters.company %}
+  <h5>Company: {{ filters.company }}</h5>
+  {% endif %}
+  {% if filters.unit %}
+  <h5>Unit: {{ filters.unit }}</h5>
+  {% endif %}
+  {% if filters.divisi %}
+  <h5>Divisi: {{ filters.divisi }}</h5>
+  {% endif %}
+  {% if filters.kegiatan %}
+  <h5>Kegiata: {{ filters.kegiatan }}</h5>
+  {% endif %}
+  {% if filters.periode %}
+  <h5>Periode/Tahun: {{ filters.periode }}</h5>
+  {% endif %}
+</div>
+
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">NO KEGIATAN</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">NAMA KEGIATAN</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">VOLUME</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">BUDGET</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">COST/SAT</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="24">MONTH</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">JAN</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">FEB</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">MAR</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">APR</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">MAY</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">JUN</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">JUL</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">AUG</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">SEP</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">OCT</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">NOV</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="2">DEC</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+      <th style="text-align:center; vertical-align: middle !important;">HA</th>
+      <th style="text-align:center; vertical-align: middle !important;">COST</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in data %}
+    <tr>
+      <td>
+        {{ row.no_kegiatan }}
+      </td>
+      <td>
+        {% if row.head %}
+        <b>{{ row.nama_kegiatan }}</b>
+        {% else %}
+        {{ row.nama_kegiatan }}
+        {% endif %}
+      </td>
+      <td>
+        {{ row.volume ? (row.volume || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.budget ? "Rp " + (row.budget || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.cost_sat ? "Rp " + (row.cost_sat || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.jan_ha ? (row.jan_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.jan_cost ? "Rp " + (row.jan_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.feb_ha ? (row.feb_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.feb_cost ? "Rp " + (row.feb_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.mar_ha ? (row.mar_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.mar_cost ? "Rp " + (row.mar_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.apr_ha ? (row.apr_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.apr_cost ? "Rp " + (row.apr_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.may_ha ? (row.may_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.may_cost ? "Rp " + (row.may_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.jun_ha ? (row.jun_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.jun_cost ? "Rp " + (row.jun_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.jul_ha ? (row.jul_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.jul_cost ? "Rp " + (row.jul_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.aug_ha ? (row.aug_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.aug_cost ? "Rp " + (row.aug_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.sep_ha ? (row.sep_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.sep_cost ? "Rp " + (row.sep_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.oct_ha ? (row.oct_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.oct_cost ? "Rp " + (row.oct_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.nov_ha ? (row.nov_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.nov_cost ? "Rp " + (row.nov_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.dec_ha ? (row.dec_ha || 0).toLocaleString('en-US') : "" }}
+      </td>
+      <td>
+        {{ row.dec_cost ? "Rp " + (row.dec_cost || 0).toLocaleString('en-US') : "" }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-10 13:54:47.401911",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1xrb",
+  "company",
+  "unit",
+  "np",
+  "adil",
+  "penggugat",
+  "tergugat",
+  "jp",
+  "advokat",
+  "last_update",
+  "column_break_mfza",
+  "status",
+  "tgl_daftar",
+  "tgl_ptsn",
+  "ket",
+  "amar_putusan",
+  "file_dokumen"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1xrb",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "column_break_mfza",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Berjalan\nMenang\nKalah\nSelesai\nBatal"
+  },
+  {
+   "fieldname": "ket",
+   "fieldtype": "Small Text",
+   "label": "Ringkasan Putusan"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "np",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nomor Putusan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "penggugat",
+   "fieldtype": "Data",
+   "label": "Penggugat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tergugat",
+   "fieldtype": "Data",
+   "label": "Tergugat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jp",
+   "fieldtype": "Select",
+   "label": "Jenis Perkara",
+   "options": "Pidana\nPerdata\nAdministrasi\nLain - Lain"
+  },
+  {
+   "fieldname": "advokat",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Advokat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "last_update",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Last Update By"
+  },
+  {
+   "fieldname": "tgl_daftar",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Daftar",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tgl_ptsn",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Putusan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amar_putusan",
+   "fieldtype": "Small Text",
+   "label": "Amar Putusan"
+  },
+  {
+   "fieldname": "file_dokumen",
+   "fieldtype": "Attach",
+   "label": "File Dokumen"
+  },
+  {
+   "fieldname": "adil",
+   "fieldtype": "Data",
+   "label": "Pengadilan",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-12 09:22:46.857317",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Litigasi",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

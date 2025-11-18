@@ -27,7 +27,7 @@
   },
   {
    "fieldname": "fp",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Faktor Pengali",
    "reqd": 1
@@ -41,7 +41,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-02 10:51:25.997540",
+ "modified": "2025-11-17 16:59:22.517670",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Dasar PHK",

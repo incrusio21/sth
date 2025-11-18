@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-11 11:58:42.153265",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "np",
+  "kp",
+  "no_ijn",
+  "tgl_trbt",
+  "tgl_akhir",
+  "ym",
+  "column_break_zkor",
+  "kd",
+  "ku",
+  "employee",
+  "tdu",
+  "fd",
+  "note"
+ ],
+ "fields": [
+  {
+   "fetch_from": "np.kp",
+   "fieldname": "kp",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kategori Perijinan",
+   "options": "Kategori Perijinan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "np",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Perijinan",
+   "options": "Nama Perijinan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_ijn",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Perijinan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tgl_trbt",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Di Terbitkan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tgl_akhir",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Berakhir",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ym",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Yang Mengeluarkan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_zkor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kd",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kedudukan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ku",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kegiatan Usaha",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Penanggung Jawab",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tdu",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Daftar Ulang",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fd",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "File Dokumen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-04 13:39:23.567396",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Detail Informasi Dokumen Perijinan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

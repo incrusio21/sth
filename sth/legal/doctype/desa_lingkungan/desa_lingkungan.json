@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{desa}-{handil}-{#####}",
+ "creation": "2025-09-12 15:29:45.755082",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "perusahaan",
+  "unit",
+  "desa",
+  "handil",
+  "column_break_tcdc",
+  "prov",
+  "kab",
+  "kec"
+ ],
+ "fields": [
+  {
+   "fieldname": "perusahaan",
+   "fieldtype": "Link",
+   "label": "Perusahaan",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_tcdc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "desa",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Desa",
+   "reqd": 1
+  },
+  {
+   "fieldname": "handil",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Handil",
+   "reqd": 1
+  },
+  {
+   "fieldname": "prov",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Provinsi",
+   "options": "Provinsi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kab",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kabupaten",
+   "options": "Kabupaten",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kec",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kecamatan",
+   "options": "Kecamatan",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-04 13:46:22.905604",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Desa Lingkungan",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
