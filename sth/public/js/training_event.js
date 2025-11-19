@@ -9,7 +9,7 @@ frappe.ui.form.on("Training Event", {
     //     __("Create"),
     //   );
     // }
-    if (frm.doc.docstatus === 1) {
+    if (frm.doc.docstatus === 1 && !frm.doc.custom_purchase_invoice) {
       frm.add_custom_button(
         __("Purchase Invoice"),
         function () {
@@ -20,7 +20,7 @@ frappe.ui.form.on("Training Event", {
     }
   },
   make_purchase_invoice: function (frm) {
-    let method = "sth.overrides.training_event.get_purchase_invoice_for_training_event";
+    let method = "sth.overrides.training_event.get_purchase_invoice";
     return frappe.call({
       method: method,
       args: {

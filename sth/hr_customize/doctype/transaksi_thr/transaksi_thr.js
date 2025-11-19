@@ -72,6 +72,10 @@ frappe.ui.form.on("Transaksi THR", {
       filters.custom_kriteria = frm.doc.kriteria;
     }
 
+    if (frm.doc.religion_group) {
+      filters.custom_religion_group = frm.doc.religion_group;
+    }
+
     const records = await frappe.db.get_list("Employee", {
       filters: filters,
       fields: [
@@ -127,13 +131,57 @@ frappe.ui.form.on("Transaksi THR", {
           custom_kriteria: emp.custom_kriteria,
           ...thr_rate.message
         });
-        console.log(thr_rate.message);
+        toggle_thr_fields(frm, thr_rate.message.thr_rule);
       }
     }
 
     frm.refresh_field("table_employee");
   }
 });
+
+function toggle_thr_fields(frm, rule) {
+  const grid = frm.fields_dict.table_employee.grid;
+
+  const all_fields = [
+    "gaji_pokok",
+    "umr",
+    "uang_daging",
+    "natura",
+    "masa_kerja",
+    "jumlah_bulan_bekerja"
+  ];
+
+  // Hide semua field dulu
+  all_fields.forEach(f => grid.update_docfield_property(f, "hidden", 1));
+
+  const rule_map = [
+    { key: "UMR", fields: ["umr"] },
+    { key: "GP", fields: ["gaji_pokok"] },
+    { key: "Uang_Daging", fields: ["uang_daging"] },
+    { key: "Natura", fields: ["natura"] },
+    {
+      key: "Jumlah_Bulan_Bekerja",
+      fields: ["jumlah_bulan_bekerja", "masa_kerja"]
+    },
+  ];
+
+  // Show berdasarkan rule
+  rule_map.forEach(item => {
+    console.log({
+      rule: rule,
+      item: item,
+      key: item.key,
+      value: rule.includes(item.key)
+    });
+    if (rule.includes(item.key)) {
+      item.fields.forEach(f => {
+        grid.update_docfield_property(f, "hidden", 0);
+      });
+    }
+  });
+
+  grid.refresh();
+}
 
 sth.plantation.TransaksiTHR = class TransaksiTHR extends sth.plantation.AccountsController {
   refresh() {

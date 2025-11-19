@@ -13,11 +13,11 @@
   "setup_thr",
   "employee",
   "column_break_pgny",
-  "religion_group",
   "employee_grade",
   "employment_type",
   "kriteria",
   "amended_from",
+  "religion_group",
   "accounting_dimension_section",
   "cost_center",
   "section_break_casa",
@@ -189,13 +189,19 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "religion_group",
+   "fieldtype": "Link",
+   "label": "Religion Group",
+   "options": "Religion Group"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 20:18:52.433296",
+ "modified": "2025-11-18 15:14:02.260708",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

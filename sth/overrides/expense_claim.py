@@ -1,4 +1,5 @@
 import frappe
+from frappe.model.mapper import get_mapped_doc
 
 @frappe.whitelist()
 def get_travel_request_expenses(travel_request, company):
@@ -23,3 +24,51 @@ def get_travel_request_expenses(travel_request, company):
 def get_travel_request_costing(costing_name):
     doc = frappe.get_doc("Travel Request Costing", costing_name)
     return doc
+
+@frappe.whitelist()
+def make_purchase_invoice_from_expense_claim(source_name, target_doc=None):
+
+    def set_missing_values(source, target):
+        target.billing_address = None
+        target.set_missing_values()
+        target.calculate_taxes_and_totals()
+
+    def map_item(source_doc, target_doc, source_parent):
+        target_doc.qty = 1
+        target_doc.rate = source_doc.sanctioned_amount
+        target_doc.amount = source_doc.sanctioned_amount
+        target_doc.cost_center = source_doc.cost_center
+
+    doclist = get_mapped_doc(
+        "Expense Claim",
+        source_name,
+        {
+            "Expense Claim": {
+                "doctype": "Purchase Invoice",
+                "field_map": {
+                    "posting_date": "posting_date",
+                    "company": "company",
+                },
+                "postprocess": lambda source, target: set_missing_values(source, target),
+            },
+            "Expense Claim Detail": {
+                "doctype": "Purchase Invoice Item",
+                "field_map": {
+                    "description": "description",
+                    "expense_type": "item_name",
+                    "sanctioned_amount": "amount",
+                },
+                "postprocess": map_item,
+            },
+        },
+        target_doc,
+    )
+
+    default_supplier = "Employee Claims"
+
+    if not frappe.db.exists("Supplier", default_supplier):
+        frappe.throw(f"Supplier '{default_supplier}' does not exist. Please create it first.")
+
+    doclist.supplier = default_supplier
+
+    return doclist

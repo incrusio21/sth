@@ -33,7 +33,8 @@ doctype_js = {
 	"Travel Request": "public/js/travel_request.js",
 	"Expense Claim": "public/js/expense_claim.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
-    "Loan" : "hr_customize/custom/loan.js"
+  "Loan" : "hr_customize/custom/loan.js",
+  "Purchase Invoice": "public/js/purchase_invoice.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -162,6 +163,9 @@ doc_events = {
 	},
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
+	},
+	"Purchase Invoice": {
+    "on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	}
 }
 
