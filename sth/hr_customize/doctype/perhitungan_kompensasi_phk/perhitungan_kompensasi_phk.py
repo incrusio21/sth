@@ -39,7 +39,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 
 			perhitungan_component = {
 				"nm": row.nm,
-				"fp": row.fp,
+				"fp": row.fp if row.fp else 0,
 				"gaji_pokok": base
 			}
 			cond = {
@@ -50,7 +50,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 			pengkali_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "pengkali")
 
 			perhitungan_component.update({"fps": (pengkali_komponen if pengkali_komponen else 0)})
-			result = row.fp * perhitungan_component["fps"] * base
+			result = perhitungan_component["fp"] * perhitungan_component["fps"] * base
 			if setup_komponen_phk.is_cuti:
 				remaining_leave = get_cuti_balance(setup_komponen_phk.tipe_cuti, self.l_date, self.employee)
 				result = remaining_leave / 30 * base
