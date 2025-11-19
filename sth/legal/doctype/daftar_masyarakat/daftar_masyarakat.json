@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:DM-{nama}-{#####}",
+ "creation": "2025-09-12 15:33:43.264504",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "nama",
+  "npr",
+  "norek",
+  "hp",
+  "pd",
+  "column_break_xlqy",
+  "address",
+  "desa",
+  "kec",
+  "kabupaten",
+  "ktp",
+  "fktp"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_xlqy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama",
+   "reqd": 1
+  },
+  {
+   "fieldname": "npr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Pemilik Rekening",
+   "reqd": 1
+  },
+  {
+   "fieldname": "norek",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No Rekening",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hp",
+   "fieldtype": "Phone",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Hp",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pd",
+   "fieldtype": "Select",
+   "label": "Perangkat Desa",
+   "options": "Ya\nTidak"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "desa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Desa",
+   "options": "Desa Lingkungan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kec",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kecamatan",
+   "options": "Kecamatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kabupaten",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kabupaten",
+   "options": "Kabupaten",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ktp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "KTP",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fktp",
+   "fieldtype": "Attach Image",
+   "label": "Foto KTP"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-04 13:50:51.401890",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Daftar Masyarakat",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

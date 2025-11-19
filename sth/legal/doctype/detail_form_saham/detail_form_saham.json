@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-11 10:53:10.067615",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "npwp",
+  "column_break_gizj",
+  "qty",
+  "rate",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.npwp",
+   "fieldname": "npwp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "NPWP"
+  },
+  {
+   "fieldname": "column_break_gizj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "\u03a3 Lembar Saham",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "\u03a3 Nilai Saham Per Lembar",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "\u03a3 Saham"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-11 14:54:33.617792",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Detail Form Saham",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

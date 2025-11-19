@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:nc",
+ "creation": "2025-09-10 13:23:47.942894",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "nc",
+  "column_break_ieyx",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "nc",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Checklist",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_ieyx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Aktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-10 13:25:48.719041",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Checklist",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

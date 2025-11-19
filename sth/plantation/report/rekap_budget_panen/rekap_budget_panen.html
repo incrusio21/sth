@@ -1,0 +1,78 @@
+<h4>Rekap Budget Panen</h4>
+
+<hr>
+
+<div>
+  {% if filters.company %}
+  <h5>Company: {{ filters.company }}</h5>
+  {% endif %}
+  {% if filters.unit %}
+  <h5>Unit: {{ filters.unit }}</h5>
+  {% endif %}
+  {% if filters.divisi %}
+  <h5>Divisi: {{ filters.divisi }}</h5>
+  {% endif %}
+  {% if filters.periode %}
+  <h5>Periode/Tahun: {{ filters.periode }}</h5>
+  {% endif %}
+</div>
+
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">DIVISI</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">BLOK</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">TAHUN TANAM</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">LUAS</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">POKOK</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">SPH</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">KG</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="12">SEBARAN TONASE
+      </th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">TOTAL
+      </th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;">JAN</th>
+      <th style="text-align:center; vertical-align: middle !important;">FEB</th>
+      <th style="text-align:center; vertical-align: middle !important;">MAR</th>
+      <th style="text-align:center; vertical-align: middle !important;">APR</th>
+      <th style="text-align:center; vertical-align: middle !important;">MAY</th>
+      <th style="text-align:center; vertical-align: middle !important;">JUN</th>
+      <th style="text-align:center; vertical-align: middle !important;">JUL</th>
+      <th style="text-align:center; vertical-align: middle !important;">AUG</th>
+      <th style="text-align:center; vertical-align: middle !important;">SEP</th>
+      <th style="text-align:center; vertical-align: middle !important;">OCT</th>
+      <th style="text-align:center; vertical-align: middle !important;">NOV</th>
+      <th style="text-align:center; vertical-align: middle !important;">DEC</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in data %}
+    <tr>
+      <td>{{ row.divisi }}</td>
+      <td>{{ row.blok }}</td>
+      <td>{{ row.tahun_tanam }}</td>
+      <td>{{ row.luas.toLocaleString('en-US') }}</td>
+      <td>{{ row.pokok.toLocaleString('en-US') }}</td>
+      <td>{{ row.sph.toLocaleString('en-US') }}</td>
+      <td>{{ row.kg.toLocaleString('en-US') }}</td>
+      <td>{{ row.jan.toLocaleString('en-US') }}</td>
+      <td>{{ row.feb.toLocaleString('en-US') }}</td>
+      <td>{{ row.mar.toLocaleString('en-US') }}</td>
+      <td>{{ row.apr.toLocaleString('en-US') }}</td>
+      <td>{{ row.may.toLocaleString('en-US') }}</td>
+      <td>{{ row.jun.toLocaleString('en-US') }}</td>
+      <td>{{ row.jul.toLocaleString('en-US') }}</td>
+      <td>{{ row.aug.toLocaleString('en-US') }}</td>
+      <td>{{ row.sep.toLocaleString('en-US') }}</td>
+      <td>{{ row.oct.toLocaleString('en-US') }}</td>
+      <td>{{ row.nov.toLocaleString('en-US') }}</td>
+      <td>{{ row.dec.toLocaleString('en-US') }}</td>
+      <td>{{ row.total.toLocaleString('en-US') }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

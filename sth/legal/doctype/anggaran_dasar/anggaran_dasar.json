@@ -1,0 +1,153 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:AD-{#####}",
+ "creation": "2025-09-10 13:31:08.735648",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_tab",
+  "section_break_gzmq",
+  "status_anggaran_dasar",
+  "akta",
+  "column_break_lpdk",
+  "company",
+  "posting_date",
+  "amended_from",
+  "detail_akta_section",
+  "jenis_akta",
+  "tanggal_akta",
+  "section_break_psjl",
+  "saham",
+  "susunan_pengurus_dan_komisaris_tab",
+  "table_gllk"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_gzmq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lpdk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "header_tab",
+   "fieldtype": "Tab Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "susunan_pengurus_dan_komisaris_tab",
+   "fieldtype": "Tab Break",
+   "label": "Susunan Pengurus dan Komisaris"
+  },
+  {
+   "fieldname": "table_gllk",
+   "fieldtype": "Table",
+   "label": "Officer",
+   "options": "Detail Susunan Pengurus dan Komisaris"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Anggaran Dasar",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status_anggaran_dasar",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Status Anggaran Dasar",
+   "options": "Status Anggaran Dasar",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_psjl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "akta",
+   "fieldtype": "Link",
+   "label": "Akta",
+   "options": "Nomor Akta"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "detail_akta_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Akta"
+  },
+  {
+   "fieldname": "jenis_akta",
+   "fieldtype": "Data",
+   "label": "Jenis Akta",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tanggal_akta",
+   "fieldtype": "Date",
+   "label": "Tanggal Akta",
+   "read_only": 1
+  },
+  {
+   "fieldname": "saham",
+   "fieldtype": "Table",
+   "label": "Saham",
+   "options": "Detail Form Saham"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-11 14:55:27.949469",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Anggaran Dasar",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

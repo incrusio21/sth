@@ -1,0 +1,68 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":3}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Buku Cek\",\"col\":3}}]",
+ "creation": "2025-10-29 13:20:04.900745",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "money-coins-1",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Finance",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Cek",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cheque Book",
+   "link_count": 0,
+   "link_to": "Cheque Book",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Deposito",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Deposito",
+   "link_count": 0,
+   "link_to": "Deposito",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-10-31 13:19:42.237488",
+ "modified_by": "Administrator",
+ "module": "FAT STH CUSTOM",
+ "name": "Finance",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 27.0,
+ "shortcuts": [],
+ "title": "Finance"
+}

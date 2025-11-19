@@ -1,0 +1,240 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:GIS-{#####}",
+ "creation": "2025-09-12 14:42:18.363959",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_tab",
+  "unit",
+  "divisi",
+  "blok",
+  "npl",
+  "column_break_abhd",
+  "sppt",
+  "persil",
+  "lhi",
+  "lhp",
+  "tlh",
+  "lbd",
+  "tab_2_tab",
+  "batas_lokasi_section",
+  "bt",
+  "bb",
+  "bu",
+  "bs",
+  "address",
+  "column_break_inij",
+  "ul_x",
+  "ul_y",
+  "lr_x",
+  "lr_y",
+  "keterangan"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pemilik Lahan"
+  },
+  {
+   "fetch_from": "divisi.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Unit/Kebun",
+   "options": "Unit"
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Divisi",
+   "options": "Divisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "npl",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Pemilik Lahan",
+   "options": "Daftar Masyarakat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "persil",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No. Persil",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sppt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No. SHM/SPPT",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_abhd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Batas Lokasi"
+  },
+  {
+   "fieldname": "lhi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Luas Lahan Inti (Ha)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lhp",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Luas Lahan Plasma (Ha)",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "tlh",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Luas Lahan (Ha)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lbd",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Luas Bisa Ditanam (Ha)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "batas_lokasi_section",
+   "fieldtype": "Section Break",
+   "label": "Batas Lokasi"
+  },
+  {
+   "fieldname": "bt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Batas Timur"
+  },
+  {
+   "fieldname": "bb",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Batas Barat"
+  },
+  {
+   "fieldname": "bu",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Batas Utara"
+  },
+  {
+   "fieldname": "bs",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Batas Selatan"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "column_break_inij",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ul_x",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Koordinat UL_X"
+  },
+  {
+   "fieldname": "ul_y",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Koordinat UL_Y"
+  },
+  {
+   "fieldname": "lr_x",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Koordinat LR_X"
+  },
+  {
+   "fieldname": "lr_y",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kooordinat LR_Y"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-04 13:43:02.059413",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "GIS",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

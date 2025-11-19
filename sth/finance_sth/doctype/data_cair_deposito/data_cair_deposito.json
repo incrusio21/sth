@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-29 11:32:23.312609",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status_penerimaan_bunga",
+  "tanggal_penerimaan_bunga_seharusnya",
+  "tanggal_penerimaan_bunga_aktual",
+  "total_bunga_per_bulan",
+  "nilai_pajak",
+  "penalty",
+  "nilai_penerimaan_bunga_seharusnya",
+  "column_break_gygz",
+  "nilai_penerimaan_bunga_aktual",
+  "selisih_bunga_seharusnya_dan_aktual",
+  "generate_je_penerimaan",
+  "extra_bunga",
+  "no_je_penerimaan_bunga"
+ ],
+ "fields": [
+  {
+   "fieldname": "status_penerimaan_bunga",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Status Penerimaan Bunga",
+   "options": "Belum Cair\nCair"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_penerimaan_bunga_seharusnya",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Penerimaan Bunga Seharusnya"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_penerimaan_bunga_aktual",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Penerimaan Bunga Aktual"
+  },
+  {
+   "fieldname": "total_bunga_per_bulan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Bunga Per Bulan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nilai_pajak",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nilai Pajak",
+   "read_only": 1
+  },
+  {
+   "fieldname": "penalty",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Penalty"
+  },
+  {
+   "fieldname": "nilai_penerimaan_bunga_seharusnya",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nilai Penerimaan Bunga Seharusnya",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_gygz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nilai_penerimaan_bunga_aktual",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nilai Penerimaan Bunga Aktual"
+  },
+  {
+   "bold": 1,
+   "fieldname": "selisih_bunga_seharusnya_dan_aktual",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Selisih Bunga Seharusnya dan Aktual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "generate_je_penerimaan",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Generate JE Penerimaan"
+  },
+  {
+   "default": "0",
+   "fieldname": "extra_bunga",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Extra Bunga"
+  },
+  {
+   "fieldname": "no_je_penerimaan_bunga",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No JE Penerimaan Bunga",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-13 16:52:43.135337",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Data Cair Deposito",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

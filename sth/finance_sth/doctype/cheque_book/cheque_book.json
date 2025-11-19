@@ -1,0 +1,173 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:BK-CEK-{#####}",
+ "creation": "2025-10-29 14:39:57.970838",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "company",
+  "bank_account",
+  "bank",
+  "rekening_no",
+  "account",
+  "currency",
+  "column_break_lmer",
+  "status",
+  "cheque_start_no",
+  "cheque_end_no",
+  "cheque_warning_no",
+  "cheques_total",
+  "remaining_cheques",
+  "cheque_usage_history_tab",
+  "table_ezdi"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "bank_account.bank",
+   "fieldname": "bank",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Bank"
+  },
+  {
+   "fetch_from": "bank_account.bank_account_no",
+   "fieldname": "rekening_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Bank Account No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_account.account",
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "account.account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lmer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Available\nEmpty"
+  },
+  {
+   "fieldname": "cheque_start_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Cheque Start No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cheque_end_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Cheque End No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cheque_warning_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Cheque Warning No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cheques_total",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Cheques Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remaining_cheques",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Remaining Cheques",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cheque_usage_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cheque Usage History"
+  },
+  {
+   "fieldname": "table_ezdi",
+   "fieldtype": "Table",
+   "options": "Cheque Usage History"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-13 16:53:13.816423",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Cheque Book",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:DP-{#####}",
+ "creation": "2025-09-10 13:36:01.755721",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_j2oz",
+  "company",
+  "informasi_perijinan_tab",
+  "table_yavp",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_j2oz",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "bold": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "informasi_perijinan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Informasi Perijinan"
+  },
+  {
+   "fieldname": "table_yavp",
+   "fieldtype": "Table",
+   "options": "Detail Informasi Dokumen Perijinan"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Dokumen Perijinan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-04 13:41:24.736596",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Dokumen Perijinan",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

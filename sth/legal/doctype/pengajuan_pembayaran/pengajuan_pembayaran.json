@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:PP-{#####}",
+ "creation": "2025-09-10 13:54:31.391242",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_m4ut",
+  "unit",
+  "kategori",
+  "pemesan",
+  "location",
+  "no_rek",
+  "atas_nama_penerima",
+  "bukti_pembelian",
+  "column_break_nuan",
+  "company",
+  "posting_date",
+  "mode_of_payment",
+  "account",
+  "tujuan",
+  "amended_from",
+  "section_break_xeao",
+  "details",
+  "section_break_ocpf",
+  "status",
+  "column_break_rhwu",
+  "grand_total",
+  "outstanding_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_m4ut",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pengajuan Pembayaran",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nUnpaid\nPartialy Paid\nPaid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nuan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Biaya",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_rek",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Rekening",
+   "reqd": 1
+  },
+  {
+   "fieldname": "atas_nama_penerima",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Atas Nama Penerima",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tujuan",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tujuan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kategori",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kategori",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pemesan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Pemesanan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "np.supplier_primary_address",
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Lokasi Pemesan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bukti_pembelian",
+   "fieldtype": "Attach",
+   "label": "Bukti Pembelian"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_ocpf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_rhwu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_xeao",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Pengajuan Pembayaran Details"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-11 14:39:11.316931",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Pengajuan Pembayaran",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

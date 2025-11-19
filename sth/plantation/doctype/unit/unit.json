@@ -8,11 +8,9 @@
  "field_order": [
   "section_break_njnv",
   "unit",
-  "company",
   "npwp",
   "column_break_fyry",
-  "is_it_plasma_",
-  "basis_brondolan",
+  "company",
   "cost_center"
  ],
  "fields": [
@@ -25,7 +23,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Perusahaan",
+   "label": "Company",
    "options": "Company",
    "reqd": 1
   },
@@ -34,22 +32,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "is_it_plasma_",
-   "fieldtype": "Check",
-   "label": "Is it Plasma ?"
-  },
-  {
-   "fieldname": "basis_brondolan",
-   "fieldtype": "Currency",
-   "label": "Basis Brondolan ( Rp/ Kg )",
-   "reqd": 1
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama Unit",
+   "in_preview": 1,
+   "label": "Unit Name",
    "reqd": 1,
    "unique": 1
   },
@@ -70,7 +57,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-26 13:08:23.331145",
+ "modified": "2025-11-18 15:14:37.687285",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",
