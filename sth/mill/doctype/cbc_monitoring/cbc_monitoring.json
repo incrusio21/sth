@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-11-20 09:31:48.778952",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_p0cs",
+  "naming_series",
+  "posting_date",
+  "document_reference",
+  "column_break_awov",
+  "unit",
+  "company",
+  "amended_from",
+  "sterilizer_monitoring_tab",
+  "cbc_operating_hours_start__till_stop_section",
+  "cbc_machine",
+  "machine_station",
+  "column_break_fecv",
+  "starting_hour_meter",
+  "ending_hour_meter",
+  "total_hour_meter",
+  "utp5"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_p0cs",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "CBC-"
+  },
+  {
+   "fieldname": "column_break_awov",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "document_reference.unit",
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "document_reference.company",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "CBC Monitoring",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sterilizer_monitoring_tab",
+   "fieldtype": "Tab Break",
+   "label": "CBC Monitoring"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "CBC Monitoring",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cbc_operating_hours_start__till_stop_section",
+   "fieldtype": "Section Break",
+   "label": "CBC Operating Hours (Start  Till Stop)"
+  },
+  {
+   "fieldname": "utp5",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Image Upload"
+  },
+  {
+   "fieldname": "document_reference",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Document Reference",
+   "options": "Sterilizer Transaction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cbc_machine",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "CBC Machine",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "starting_hour_meter",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Starting Hour Meter"
+  },
+  {
+   "fieldname": "ending_hour_meter",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Ending Hour Meter"
+  },
+  {
+   "fieldname": "column_break_fecv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_hour_meter",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Hour Meter",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "cbc_machine.station",
+   "fieldname": "machine_station",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Machine Station",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Posting Date"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-20 13:53:50.986402",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "CBC Monitoring",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -12,16 +12,23 @@
   "machine",
   "machine_station",
   "column_break_awov",
+  "status",
   "unit",
   "company",
   "amended_from",
   "sterilizer_monitoring_tab",
   "detail_section",
-  "sterilizer_pressure",
-  "upload_pressure_photo",
+  "sp1",
+  "upp1",
   "column_break_zwan",
-  "upload_sterilizer_graph_photo",
-  "upload_sterilizer_logrecord_photo",
+  "usg1",
+  "usl1",
+  "seconds_pressure_section",
+  "sp2",
+  "upp2",
+  "column_break_mjgl",
+  "usg2",
+  "usl2",
   "tbs_process_tab",
   "unit_type",
   "quantity_to_process",
@@ -84,38 +91,11 @@
   {
    "fieldname": "detail_section",
    "fieldtype": "Section Break",
-   "label": "Detail"
-  },
-  {
-   "description": "Satuan dalam Kg/Cm\u00b2",
-   "fieldname": "sterilizer_pressure",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Sterilizer Pressure",
-   "reqd": 1
-  },
-  {
-   "fieldname": "upload_pressure_photo",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Pressure Photo"
+   "label": "First Pressure"
   },
   {
    "fieldname": "column_break_zwan",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "upload_sterilizer_graph_photo",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Sterilizer Graph Photo"
-  },
-  {
-   "fieldname": "upload_sterilizer_logrecord_photo",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Sterilizer Log/Record Photo"
   },
   {
    "fetch_from": "machine.station",
@@ -133,7 +113,7 @@
   {
    "fieldname": "tbs_process_tab",
    "fieldtype": "Tab Break",
-   "label": "TBS Process"
+   "label": "TBS Sterilizer Process"
   },
   {
    "fieldname": "unit_type",
@@ -146,9 +126,10 @@
    "fieldtype": "Select",
    "in_preview": 1,
    "label": "Series",
-   "options": "SST-"
+   "options": "MILL-"
   },
   {
+   "description": "Qty in Unit Type",
    "fieldname": "quantity_to_process",
    "fieldtype": "Float",
    "label": "Quantity To Process"
@@ -165,6 +146,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Qty in Unit Type",
    "fieldname": "pending_quantity",
    "fieldtype": "Float",
    "in_preview": 1,
@@ -185,16 +167,85 @@
    "in_preview": 1,
    "label": "Capacity Per Lorry",
    "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "On Progress\nComplete"
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sp1",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Sterilizer Pressure",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upp1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Pressure Photo"
+  },
+  {
+   "fieldname": "usg1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Graph Photo"
+  },
+  {
+   "fieldname": "usl1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Log/Record Photo"
+  },
+  {
+   "fieldname": "seconds_pressure_section",
+   "fieldtype": "Section Break",
+   "label": "Seconds Pressure"
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sp2",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Sterilizer Pressure",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upp2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Pressure Photo"
+  },
+  {
+   "fieldname": "column_break_mjgl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "usg2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Graph Photo"
+  },
+  {
+   "fieldname": "usl2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Log/Record Photo"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-19 16:59:39.707645",
+ "modified": "2025-11-20 13:03:49.417804",
  "modified_by": "Administrator",
  "module": "Mill",
- "name": "Sterilizer Station",
+ "name": "Sterilizer Transaction",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

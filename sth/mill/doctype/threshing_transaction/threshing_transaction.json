@@ -17,19 +17,16 @@
   "amended_from",
   "sterilizer_monitoring_tab",
   "detail_section",
-  "sterilizer_pressure",
-  "upload_pressure_photo",
-  "column_break_zwan",
-  "upload_sterilizer_graph_photo",
-  "upload_sterilizer_logrecord_photo",
+  "inspection_result",
+  "inspection_photo_upload",
   "tbs_process_tab",
+  "sterilizer_reference",
   "unit_type",
+  "column_break_hdny",
   "quantity_to_process",
   "total_weight_process",
-  "column_break_hdny",
   "pending_quantity",
-  "total_weight_pending_process",
-  "capacity_per_lorry"
+  "total_weight_pending_process"
  ],
  "fields": [
   {
@@ -91,7 +88,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Sterilizer Station",
+   "options": "Threshing Station",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -103,61 +100,31 @@
   },
   {
    "fieldname": "detail_section",
-   "fieldtype": "Section Break",
-   "label": "Detail"
-  },
-  {
-   "description": "Satuan dalam Kg/Cm\u00b2",
-   "fieldname": "sterilizer_pressure",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Sterilizer Pressure",
-   "reqd": 1
-  },
-  {
-   "fieldname": "upload_pressure_photo",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Pressure Photo"
-  },
-  {
-   "fieldname": "column_break_zwan",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "upload_sterilizer_graph_photo",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Sterilizer Graph Photo"
-  },
-  {
-   "fieldname": "upload_sterilizer_logrecord_photo",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Sterilizer Log/Record Photo"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "tbs_process_tab",
    "fieldtype": "Tab Break",
-   "label": "TBS Process"
+   "label": "TBS Threshing Process"
   },
   {
+   "fetch_from": "sterilizer_reference.unit_type",
    "fieldname": "unit_type",
    "fieldtype": "Select",
    "label": "Unit Type",
    "options": "Lorry\nCycle"
   },
   {
+   "description": "Qty in Unit Type",
    "fieldname": "quantity_to_process",
    "fieldtype": "Float",
-   "label": "Quantity To Process"
+   "label": "Quantity To Threshing Process"
   },
   {
    "fieldname": "total_weight_process",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Total Weight Process",
+   "label": "Total Weight Threshing Process",
    "read_only": 1
   },
   {
@@ -165,25 +132,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Qty in Unit Type",
    "fieldname": "pending_quantity",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Pending Quantity",
+   "label": "Pending Threshing Quantity",
    "read_only": 1
   },
   {
    "fieldname": "total_weight_pending_process",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Total Weight Pending Process",
-   "read_only": 1
-  },
-  {
-   "description": "In Kilograms",
-   "fieldname": "capacity_per_lorry",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Capacity Per Lorry",
+   "label": "Total Weight Pending Threshing Process",
    "read_only": 1
   },
   {
@@ -191,20 +151,42 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Sterilizer Station",
+   "options": "Threshing Station",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "inspection_result",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Inspection Result",
+   "reqd": 1
+  },
+  {
+   "fieldname": "inspection_photo_upload",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Inspection Photo Upload"
+  },
+  {
+   "fieldname": "sterilizer_reference",
+   "fieldtype": "Link",
+   "label": "Document Reference",
+   "options": "Sterilizer Transaction",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-19 17:02:12.174905",
+ "modified": "2025-11-20 13:49:11.251397",
  "modified_by": "Administrator",
  "module": "Mill",
- "name": "Threshing Station",
+ "name": "Threshing Transaction",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

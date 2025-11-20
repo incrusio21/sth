@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestThreshingStation(FrappeTestCase):
+class TestPressMotorAmpereInspection(FrappeTestCase):
 	pass

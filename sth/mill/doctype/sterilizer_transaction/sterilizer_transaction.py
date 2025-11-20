@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SterilizerStation(Document):
+class SterilizerTransaction(Document):
 	pass

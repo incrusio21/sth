@@ -28,6 +28,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 			base = ump_harian * days_in_month
 		else:
 			base = frappe.db.get_value("Salary Structure Assignment", self.ssa, "base")
+			
 		setup_dasar_phk_components = frappe.db.get_all("Detail Dasar PHK", {"parent": self.dphk}, "*")
 
 		working_month = month_diff(self.l_date, employee.date_of_joining)
@@ -39,7 +40,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 
 			perhitungan_component = {
 				"nm": row.nm,
-				"fp": row.fp if row.fp else 0,
+				"fp": row.fp if row and row.fp else 0,
 				"gaji_pokok": base
 			}
 			cond = {
@@ -50,6 +51,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 			pengkali_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "pengkali")
 
 			perhitungan_component.update({"fps": (pengkali_komponen if pengkali_komponen else 0)})
+			frappe.throw(f"{perhitungan_component}")
 			result = perhitungan_component["fp"] * perhitungan_component["fps"] * base
 			if setup_komponen_phk.is_cuti:
 				remaining_leave = get_cuti_balance(setup_komponen_phk.tipe_cuti, self.l_date, self.employee)
@@ -60,12 +62,13 @@ class PerhitunganKompensasiPHK(AccountsController):
 
 	@frappe.whitelist()
 	def fetch_ssa(self):
-		ssa = frappe.db.get_all('Salary Structure Assignment', filters={'employee': self.employee}, order_by='from_date desc', page_length=1)
 		employee = frappe.db.get_value("Employee", self.employee, "*")
-		if employee.grade != "NON STAF" and employee.custom_kriteria != "Satuan Hasil":
-			if not ssa:
-				frappe.throw(f"Salary Structure Assignment <b> {self.employee} : {self.employee_name}</b>")
-			self.ssa = ssa[0].name
+		if employee.grade == "NON STAF" and employee.custom_kriteria == "Satuan Hasil":
+			return
+		ssa = frappe.db.get_all('Salary Structure Assignment', filters={'employee': self.employee}, order_by='from_date desc', page_length=1)
+		if not ssa:
+			frappe.throw(f"Salary Structure Assignment <b> {self.employee} : {self.employee_name}</b>")
+		self.ssa = ssa[0].name
 
 def get_cuti_balance(leave_type, date, employee):
 	result = get_leave_balance_on(employee, leave_type, date)

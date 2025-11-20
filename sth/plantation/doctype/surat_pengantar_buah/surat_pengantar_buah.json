@@ -1,6 +1,8 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "format:SPB-{#####}",
  "creation": "2025-07-08 14:49:30.296827",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -72,7 +74,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Nama Pabrik",
-   "options": "Pabrik",
+   "options": "Mill Master",
    "reqd": 1
   },
   {
@@ -272,10 +274,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-21 15:14:19.070870",
+ "modified": "2025-11-20 11:18:40.396629",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestPabrik(FrappeTestCase):
+class TestPressHydraulicPressureInspection(FrappeTestCase):
 	pass
