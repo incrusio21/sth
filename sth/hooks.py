@@ -35,8 +35,9 @@ doctype_js = {
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Loan": "hr_customize/custom/loan.js",
 	"Employee": "public/js/employee.js",
+    "Supplier Quotation": "public/js/supplier_quotation.js",
 }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Request for Quotation" : "public/js/request_for_quotation_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -163,6 +164,9 @@ doc_events = {
 	},
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
+	},
+    "Supplier Quotation": {
+        "before_submit": "sth.custom.supplier_quotation.update_status_rfq"
 	}
 }
 
