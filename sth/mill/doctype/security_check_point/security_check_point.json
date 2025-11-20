@@ -11,13 +11,13 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "transaction_type",
   "reference_document",
   "column_break_zhml",
   "machine",
   "machine_station",
   "inspection_result",
   "image_upload",
-  "amended_from",
   "amended_from"
  ],
  "fields": [
@@ -29,7 +29,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "PCT-"
+   "options": "SCP-"
   },
   {
    "default": "Today",
@@ -104,7 +104,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Press Cake Temperature Inspection",
+   "options": "Security Check Point",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -118,13 +118,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Transaction Type",
+   "options": "Receive\nDispatch"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 14:46:18.286201",
+ "modified": "2025-11-20 14:50:55.592508",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
