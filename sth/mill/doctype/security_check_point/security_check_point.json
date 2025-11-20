@@ -1,17 +1,113 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-11-20 14:21:07.580812",
+ "autoname": "naming_series:",
+ "creation": "2025-11-20 14:46:18.286201",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_zstt",
+  "section_break_bapn",
+  "naming_series",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
+  "reference_document",
+  "column_break_zhml",
+  "machine",
+  "machine_station",
+  "inspection_result",
+  "image_upload",
+  "amended_from",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "section_break_zstt",
+   "fieldname": "section_break_bapn",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "PCT-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Posting Date",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:!doc.set_posting_time",
+   "search_index": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Posting Time",
+   "read_only_depends_on": "eval:!doc.set_posting_time"
+  },
+  {
+   "default": "0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time"
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Reference Document",
+   "options": "Sterilizer Transaction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_zhml",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Machine",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "machine.station",
+   "fieldname": "machine_station",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Machine Station",
+   "read_only": 1
+  },
+  {
+   "description": "Satuan dalam \u00b0C",
+   "fieldname": "inspection_result",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Inspection Result",
+   "reqd": 1
+  },
+  {
+   "fieldname": "image_upload",
+   "fieldtype": "Attach Image",
+   "label": "Image Upload",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Press Cake Temperature Inspection",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "amended_from",
@@ -28,10 +124,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 14:21:07.580812",
+ "modified": "2025-11-20 14:46:18.286201",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
