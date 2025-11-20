@@ -37,11 +37,11 @@ class RekapTimbanganPanen(Document):
 		self.update_transfered_bkm_panen()
 
 	def on_cancel(self):
-		self.update_transfered_bkm_panen()
+		self.update_transfered_bkm_panen(is_cancel=1)
 		
-	def update_transfered_bkm_panen(self):
+	def update_transfered_bkm_panen(self,is_cancel=0):
 		doc = frappe.get_doc("Buku Kerja Mandor Panen", self.buku_kerja_mandor_panen)
-		doc.set_data_rekap_weight()
+		doc.set_data_rekap_weight(is_cancel)
 
 
 @frappe.whitelist()
