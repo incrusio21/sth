@@ -4,3 +4,4 @@ Mill
 Payroll Log
 HR Customize
 Buying STH
+Finance STH
