@@ -115,10 +115,10 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.grand_total -= self.hasil_kerja_denda 
 
 	def update_kontanan_used(self):
-		if not self.is_rekap:
-			frappe.throw("Please Rekap BKM Panen {} first".format(
-				get_link_to_form(self.doctype, self.name)
-			))
+		# if not self.is_rekap:
+		# 	frappe.throw("Please Rekap BKM Panen {} first".format(
+		# 		get_link_to_form(self.doctype, self.name)
+		# 	))
 
 		self.set_payroll_date()
 		self.db_update()
