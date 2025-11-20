@@ -8,13 +8,14 @@
  "field_order": [
   "header_section",
   "kode_komponen",
-  "company",
   "unit",
   "column_break_etwk",
   "employee_grade",
   "valid_from",
   "is_cuti",
   "tipe_cuti",
+  "detail_company_section",
+  "table_company",
   "section_break_nxkk",
   "table_dasar_perhitungan"
  ],
@@ -32,12 +33,6 @@
    "label": "Kode Komponen",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company"
   },
   {
    "fieldname": "unit",
@@ -85,12 +80,23 @@
    "label": "Tipe Cuti",
    "mandatory_depends_on": "eval:doc.is_cuti",
    "options": "Leave Type"
+  },
+  {
+   "fieldname": "detail_company_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Company"
+  },
+  {
+   "fieldname": "table_company",
+   "fieldtype": "Table",
+   "label": "Table Company",
+   "options": "Setup Komponen Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-18 10:41:29.290432",
+ "modified": "2025-11-18 13:33:41.110872",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Komponen PHK",

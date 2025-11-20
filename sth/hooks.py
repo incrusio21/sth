@@ -33,8 +33,8 @@ doctype_js = {
 	"Travel Request": "public/js/travel_request.js",
 	"Expense Claim": "public/js/expense_claim.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
-  "Loan": "hr_customize/custom/loan.js",
-  "Employee": "public/js/employee.js",
+	"Loan": "hr_customize/custom/loan.js",
+	"Employee": "public/js/employee.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -66,10 +66,10 @@ doctype_js = {
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "sth.utils.jinja_methods",
-# 	"filters": "sth.utils.jinja_filters"
-# }
+jinja = {
+	"methods": "sth.utils.encrypt",
+	# "filters": "sth.utils.jinja_filters"
+}
 
 # Installation
 # ------------

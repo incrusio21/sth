@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import formatdate, get_link_to_form
 from frappe.query_builder import DocType
+from cryptography.fernet import Fernet
 
 def generate_duplicate_key(self, fieldname, key=None, cancel=0):
     self.set(fieldname, None if cancel else "|".join(key))
@@ -45,3 +46,11 @@ def validate_overlap(doc, from_date, to_date, from_date_field="from_date", to_da
             + _(") for {0}").format(exists_for)
         )
         frappe.throw(msg)
+
+def encrypt(text = "") -> str:
+    cipher = Fernet(frappe.conf.salt)
+    return cipher.encrypt(text.encode()).decode()
+
+def decrypt(token = "") -> str:
+    cipher = Fernet(frappe.conf.salt)
+    return cipher.decrypt(token.encode()).decode()

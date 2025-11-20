@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Supplier</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <style>
+        /* HTML: <div class="loader"></div> */
+        .loader {
+            width: 23px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 3px solid;
+            border-color: #ffffff #0000;
+            animation: l1 1s infinite;
+        }
+
+        @keyframes l1 {
+            to {
+                transform: rotate(.5turn)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto mt-5">
+        <div class="card mx-auto" style="width: 90%;">
+            <div class="card-body">
+                <h1 class="card-title">Supplier Quotation</h1>
+                <hr>
+                <div>
+                    <div class="mb-3 d-flex gap-5">
+                        <div style="width: 30%;">
+                            <label class="form-label">Supplier</label>
+                            <input type="text" class="form-control form-control-sm" value="{{ supplier }}"
+                                name="supplier" readonly disabled>
+                        </div>
+                        <div>
+                            <label for="file-upload" class="form-label">Attach</label>
+                            <input class="form-control form-control-sm" type="file" id="file-upload" accept=".pdf"
+                                style="width: 70%;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Items</label>
+                        <table class="table table-responsive" id="items">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="checkAll">
+                                        </div>
+                                    </th>
+                                    <th style="width: 5%;">No</th>
+                                    <th>Item Code</th>
+                                    <th style="width: 15%;">Qty</th>
+                                    <th style="width: 20%;">Rate</th>
+                                    <th style="width: 25%;">Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for idx,item in enumerate(items) %}
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input form-check-input-row" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td data-field="idx">{{ idx+1 }}</td>
+                                    <td data-field="item_code">{{ item.item_code }}</td>
+                                    <td data-field="qty">{{ item.qty | int }}</td>
+                                    <td data-field="rate">
+                                        <input type="text" class="form-control form-control-sm number-format"
+                                            style="width: 100%;">
+                                    </td>
+                                    <td data-field="desc">
+                                        {{ item.description }}
+                                    </td>
+                                    <td><Button class="btn btn-light btn-sm btn-duplicate">Duplicate</Button></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mb-3" id="btn-delete" style="display: none;">
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </div>
+                    <button class="btn btn-primary d-flex gap-2 ms-auto" id="submit-form">
+                        <div class="loader" style="display: none;"></div>
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.8.1"></script>
+        <script>
+            var opt = {
+                digitGroupSeparator: ',',
+                decimalCharacter: '.',
+                decimalPlaces: 4
+            }
+
+            AutoNumeric.multiple('.number-format', opt);
+
+            function initMoney(el) {
+                return new AutoNumeric(el, opt);
+            }
+
+            function toggleDeleteBtn() {
+                let checkedRow = $(".form-check-input-row:checked")
+                if (checkedRow.length) {
+                    $("#btn-delete").show()
+                } else {
+                    $("#btn-delete").hide()
+                }
+            }
+
+            function refreshIdx() {
+                $("td[data-field='idx']").each((idx, el) => {
+                    $(el).text(idx + 1)
+                })
+            }
+
+            function uploadFile(file, doctype, docname) {
+                let form_data = new FormData();
+                form_data.append('file', file);
+                form_data.append('doctype', doctype);
+                form_data.append('docname', docname);
+                form_data.append('fieldname', "custom_file_upload");
+                form_data.append('is_private', "1");
+
+                $.ajax({
+                    url: '/api/method/upload_file',
+                    method: 'POST',
+                    data: form_data,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Frappe-CSRF-Token": "{{ csrf_token }}"
+                    },
+                    success: function (res) {
+                        window.location.href = "/success-page"
+                    },
+                    error: function (err) {
+                        console.error("Error:", err);
+                    }
+                })
+            }
+
+            $(".form-check-input-row").on("change", function () {
+                toggleDeleteBtn()
+            })
+
+            $("#checkAll").on("click", function (e) {
+                $(".form-check-input-row").prop("checked", this.checked)
+                toggleDeleteBtn()
+            })
+
+            $("#btn-delete").on("click", function () {
+                $(".form-check-input-row:checked").closest("tr").remove()
+                $(this).hide()
+                $("#checkAll").prop("checked", false)
+                refreshIdx()
+            })
+
+            $(".btn-duplicate").on("click", function () {
+                let duplicateRow = $(this).closest("tr").clone(true)
+                let descEl = $(duplicateRow).find("td[data-field='desc']")
+                let qtyEl = $(duplicateRow).find("td[data-field='qty']")
+
+                let valQty = qtyEl.find('input').val() || qtyEl.text()
+
+                let inputQty = $(`
+                   <input type="number" min="1" class="form-control form-control-sm" value="${valQty}"
+                    style="width: 100%;">
+                `)
+
+                let inputDesc = $(`
+                    <textarea class="form-control form-control-sm"
+                        rows="1"></textarea>
+                `)
+
+                descEl.html(inputDesc)
+                qtyEl.html(inputQty)
+
+                initMoney(duplicateRow.find(".number-format")[0])
+                duplicateRow.insertAfter($(this).closest("tr"))
+                refreshIdx()
+            })
+
+            $("#submit-form").on("click", function (e) {
+                $(this).prop("disabled", true)
+                $(".loader").show()
+                let file_upload = $("#file-upload")[0].files[0]
+                const formData = new FormData();
+                formData.append("rfq", "{{ rfq }}")
+                formData.append("supplier", $("input[name='supplier']").val())
+                formData.append("file_url", `/private/files/${file_upload.name}`)
+
+                items = []
+                $("#items tbody tr").each(function (idx, el) {
+                    var $el = $(el)
+                    let strRate = $el.find("td[data-field='rate'] input")[0]
+                    let elQty = $el.find("td[data-field='qty']")
+                    let elDesc = $el.find("td[data-field='desc']")
+
+                    let qty = parseInt(elQty.find('input').val() || elQty.text())
+                    let desc = elQty.find('textarea').val() || elQty.text()
+
+                    items.push({
+                        item_code: $el.find("td[data-field='item_code']").text(),
+                        qty,
+                        rate: AutoNumeric.getAutoNumericElement(strRate).getNumber(),
+                        desc,
+                    })
+                })
+
+                formData.append("items", JSON.stringify(items))
+
+                $.ajax({
+                    url: '/api/method/sth.api.create_sq',
+                    method: 'POST',
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    headers: {
+                        "X-Frappe-CSRF-Token": "{{ csrf_token }}"
+                    },
+                    success: function (res) {
+                        uploadFile(file_upload, res.message.doctype, res.message.docname)
+                    },
+                    error: function (err) {
+                        console.error("Error:", err);
+                    }
+                }).always(() => {
+                    $(this).prop("disabled", false)
+                    $(".loader").hide()
+                });
+
+                // console.log(Object.fromEntries(formData));
+            })
+        </script>
+</body>
+
+</html>
