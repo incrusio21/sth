@@ -173,7 +173,7 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"sth.tasks.all"
 # 	],
@@ -186,10 +186,10 @@ doc_events = {
 # 	"weekly": [
 # 		"sth.tasks.weekly"
 # 	],
-# 	"monthly": [
-# 		"sth.tasks.monthly"
-# 	],
-# }
+	"monthly": [
+		"sth.tasks.employee.update_employee_employment_tenure"
+	],
+}
 
 # Testing
 # -------

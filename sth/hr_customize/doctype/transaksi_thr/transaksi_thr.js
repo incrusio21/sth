@@ -51,6 +51,8 @@ frappe.ui.form.on("Transaksi THR", {
       return;
     }
 
+    frm.clear_table("table_employee");
+
     let filters = {
       company: frm.doc.company,
       custom_unit: frm.doc.unit,
@@ -76,33 +78,20 @@ frappe.ui.form.on("Transaksi THR", {
       filters.custom_religion_group = frm.doc.religion_group;
     }
 
-    const records = await frappe.db.get_list("Employee", {
-      filters: filters,
-      fields: [
-        "no_ktp",
-        "name",
-        "pkp_status",
-        "employee_name",
-        "date_of_joining",
-        "grade",
-        "employment_type",
-        "custom_kriteria",
-        "bank_ac_no",
-        "bank_name",
-        "designation",
-        "custom_divisi",
-        "custom_kriteria",
-      ],
+    const records = await frappe.call({
+      method: "get_all_employee",
+      doc: frm.doc,
+      args: {
+        filters: filters
+      },
     });
 
-    if (!records?.length) {
+    if (!records?.message.length) {
       frappe.msgprint(__("Tidak ada data karyawan yang ditemukan."));
       return;
     }
 
-    frm.clear_table("table_employee");
-
-    for (const emp of records) {
+    for (const emp of records.message) {
       const thr_rate = await frappe.call({
         method: "get_thr_rate",
         doc: frm.doc,
@@ -116,7 +105,18 @@ frappe.ui.form.on("Transaksi THR", {
       });
 
       if (thr_rate.message) {
-        frm.add_child("table_employee", {
+        const rule_map = [
+          { key: "UMR", fields: ["umr"] },
+          { key: "GP", fields: ["gaji_pokok"] },
+          { key: "Uang_Daging", fields: ["uang_daging"] },
+          { key: "Natura", fields: ["natura"] },
+          {
+            key: "Jumlah_Bulan_Bekerja",
+            fields: ["jumlah_bulan_bekerja", "masa_kerja"]
+          },
+        ];
+
+        let row = frm.add_child("table_employee", {
           nik: emp.no_ktp,
           employee: emp.name,
           employee_name: emp.employee_name,
@@ -128,15 +128,36 @@ frappe.ui.form.on("Transaksi THR", {
           bank_name: emp.bank_name,
           designation: emp.designation,
           custom_divisi: emp.custom_divisi,
-          custom_kriteria: emp.custom_kriteria,
-          ...thr_rate.message
+          pkp_status: emp.pkp_status,
+          thr_rule: thr_rate.message.thr_rule,
+          subtotal: thr_rate.message.subtotal,
         });
-        toggle_thr_fields(frm, thr_rate.message.thr_rule);
+
+        // RESET semua field
+        rule_map.forEach(item => {
+          item.fields.forEach(f => row[f] = null);
+        });
+
+        // ISI field sesuai rule
+        if (row.thr_rule) {
+          rule_map.forEach(item => {
+            if (row.thr_rule.includes(item.key)) {
+              item.fields.forEach(f => {
+                row[f] = thr_rate.message[f];
+              });
+            } else {
+              item.fields.forEach(f => {
+                delete row[f];
+              });
+            }
+          });
+        }
+        console.log("Row:", JSON.stringify(row));
       }
     }
 
     frm.refresh_field("table_employee");
-  }
+  },
 });
 
 function toggle_thr_fields(frm, rule) {
@@ -167,13 +188,17 @@ function toggle_thr_fields(frm, rule) {
 
   // Show berdasarkan rule
   rule_map.forEach(item => {
-    console.log({
-      rule: rule,
-      item: item,
-      key: item.key,
-      value: rule.includes(item.key)
-    });
+    // console.log({
+    //   id: Math.random(),
+    //   rule: rule,
+    //   key: item.key,
+    //   is_show: rule.includes(item.key)
+    // });
     if (rule.includes(item.key)) {
+      // console.log({
+      //   message: "END",
+      //   fields: item.fields
+      // });
       item.fields.forEach(f => {
         grid.update_docfield_property(f, "hidden", 0);
       });

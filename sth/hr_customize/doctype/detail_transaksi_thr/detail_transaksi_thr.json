@@ -19,6 +19,7 @@
   "custom_kriteria",
   "bank_ac_no",
   "bank_name",
+  "pkp_status",
   "thr_section",
   "gaji_pokok",
   "umr",
@@ -238,19 +239,26 @@
    "in_standard_filter": 1,
    "label": "Jumlah Bulan Bekerja",
    "read_only": 1
+  },
+  {
+   "fieldname": "pkp_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "PKP Status"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-06 10:21:51.260827",
+ "modified": "2025-11-20 10:07:43.755659",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi THR",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

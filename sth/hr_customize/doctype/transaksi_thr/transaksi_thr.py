@@ -114,7 +114,31 @@ class TransaksiTHR(AccountsController):
 		return max(0, months)
 
 	@frappe.whitelist()
-	def get_thr_rate(self, employee, pkp_status, employee_grade, employment_type, kriteria):
+	def get_all_employee(self, filters):
+		records = frappe.get_list(
+			"Employee",
+			filters=filters,
+			fields=[
+			"no_ktp",
+			"name",
+			"pkp_status",
+			"employee_name",
+			"date_of_joining",
+			"grade",
+			"employment_type",
+			"custom_kriteria",
+			"bank_ac_no",
+			"bank_name",
+			"designation",
+			"custom_divisi",
+			"custom_kriteria",
+			]
+		)
+
+		return records
+
+	@frappe.whitelist()
+	def get_thr_rate(self, employee, pkp_status=None, employee_grade=None, employment_type=None, kriteria=None):
 		company = frappe.get_doc("Company", self.company)
 
 		# ambil gaji pokok terbaru
