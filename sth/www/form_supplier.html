@@ -7,9 +7,16 @@
     <title>Form Supplier</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+        integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* HTML: <div class="loader"></div> */
+        /*body {
+            background: url("/files/bg4.svg");
+            background-position: center;
+            background-repeat: no-repeat;
+        }*/
+
         .loader {
             width: 23px;
             aspect-ratio: 1;
@@ -29,7 +36,8 @@
 
 <body>
     <div class="container mx-auto mt-5">
-        <div class="card mx-auto" style="width: 90%;">
+        <div class="card mx-auto shadow p-3" style="width: 90%;">
+            {% if status == "Open" %}
             <div class="card-body">
                 <h1 class="card-title">Supplier Quotation</h1>
                 <hr>
@@ -37,56 +45,58 @@
                     <div class="mb-3 d-flex gap-5">
                         <div style="width: 30%;">
                             <label class="form-label">Supplier</label>
-                            <input type="text" class="form-control form-control-sm" value="{{ supplier }}"
+                            <input type="text" class="form-control form-control-sm" value="{{ supplier or '' }}"
                                 name="supplier" readonly disabled>
                         </div>
                         <div>
-                            <label for="file-upload" class="form-label">Attach</label>
+                            <label for="file-upload" class="form-label">File Upload</label>
                             <input class="form-control form-control-sm" type="file" id="file-upload" accept=".pdf"
                                 style="width: 70%;">
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Items</label>
-                        <table class="table table-responsive" id="items">
-                            <thead>
-                                <tr>
-                                    <th style="width: 5%;">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="checkAll">
-                                        </div>
-                                    </th>
-                                    <th style="width: 5%;">No</th>
-                                    <th>Item Code</th>
-                                    <th style="width: 15%;">Qty</th>
-                                    <th style="width: 20%;">Rate</th>
-                                    <th style="width: 25%;">Description</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for idx,item in enumerate(items) %}
-                                <tr>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input form-check-input-row" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td data-field="idx">{{ idx+1 }}</td>
-                                    <td data-field="item_code">{{ item.item_code }}</td>
-                                    <td data-field="qty">{{ item.qty | int }}</td>
-                                    <td data-field="rate">
-                                        <input type="text" class="form-control form-control-sm number-format"
-                                            style="width: 100%;">
-                                    </td>
-                                    <td data-field="desc">
-                                        {{ item.description }}
-                                    </td>
-                                    <td><Button class="btn btn-light btn-sm btn-duplicate">Duplicate</Button></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="items">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%;">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="" id="checkAll">
+                                            </div>
+                                        </th>
+                                        <th style="width: 5%;">No</th>
+                                        <th>Item Code</th>
+                                        <th style="width: 15%;">Qty</th>
+                                        <th style="width: 20%;">Rate</th>
+                                        <th style="width: 25%;">Description</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for idx,item in enumerate(items) %}
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input form-check-input-row" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td data-field="idx">{{ idx+1 }}</td>
+                                        <td data-field="item_code">{{ item.item_code }}</td>
+                                        <td data-field="qty">{{ item.qty | int }}</td>
+                                        <td data-field="rate">
+                                            <input type="text" class="form-control form-control-sm number-format"
+                                                style="width: 100%;">
+                                        </td>
+                                        <td data-field="desc">
+                                            {{ item.description }}
+                                        </td>
+                                        <td><Button class="btn btn-light btn-sm btn-duplicate">Duplicate</Button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="mb-3" id="btn-delete" style="display: none;">
                         <button class="btn btn-sm btn-danger">Delete</button>
@@ -97,9 +107,19 @@
                     </button>
                 </div>
             </div>
+            {% else %}
+            <div class="card-body hide">
+                <div class="alert alert-info text-center" role="alert">
+                    <h5>Sorry, Quotation has been closed</h5>
+                </div>
+            </div>
+            {% endif %}
         </div>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
+            integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.8.1"></script>
         <script>
             var opt = {
@@ -148,7 +168,7 @@
                         "X-Frappe-CSRF-Token": "{{ csrf_token }}"
                     },
                     success: function (res) {
-                        window.location.href = "/success-page"
+                        window.location.replace("/success-page")
                     },
                     error: function (err) {
                         console.error("Error:", err);
@@ -202,9 +222,9 @@
                 $(".loader").show()
                 let file_upload = $("#file-upload")[0].files[0]
                 const formData = new FormData();
-                formData.append("rfq", "{{ rfq }}")
+                formData.append("rfq", "{{ rfq or '' }}")
                 formData.append("supplier", $("input[name='supplier']").val())
-                formData.append("file_url", `/private/files/${file_upload.name}`)
+                formData.append("file_url", file_upload ? file_upload?.name : "")
 
                 items = []
                 $("#items tbody tr").each(function (idx, el) {
@@ -239,14 +259,19 @@
                         uploadFile(file_upload, res.message.doctype, res.message.docname)
                     },
                     error: function (err) {
-                        console.error("Error:", err);
+                        if (err.status == 422) {
+                            err.responseJSON.message.forEach((row) => {
+                                toastr.error(row, "Error")
+                            })
+                        }
+                        //console.error("Error:", err);
                     }
                 }).always(() => {
                     $(this).prop("disabled", false)
                     $(".loader").hide()
                 });
 
-                // console.log(Object.fromEntries(formData));
+                //console.log(Object.fromEntries(formData));
             })
         </script>
 </body>
