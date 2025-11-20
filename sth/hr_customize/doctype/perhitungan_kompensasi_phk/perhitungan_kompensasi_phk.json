@@ -77,13 +77,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
+   "fetch_from": "employee.relieving_date",
    "fieldname": "l_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Relieving Date",
-   "reqd": 1
+   "label": "Relieving Date"
   },
   {
    "fieldname": "company",
@@ -239,7 +238,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-19 14:42:59.983246",
+ "modified": "2025-11-20 16:41:20.037498",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",

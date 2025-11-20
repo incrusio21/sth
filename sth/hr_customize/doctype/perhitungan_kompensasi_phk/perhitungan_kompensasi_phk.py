@@ -32,8 +32,14 @@ class PerhitunganKompensasiPHK(AccountsController):
 		setup_dasar_phk_components = frappe.db.get_all("Detail Dasar PHK", {"parent": self.dphk}, "*")
 
 		working_month = month_diff(self.l_date, employee.date_of_joining)
+		self.table_seym = []
 		for row in setup_dasar_phk_components:
-			setup_komponen_phk = frappe.db.get_value("Setup Komponen PHK", {'name': row.nm, 'employee_grade': self.eg}, "*")
+			query = """ SELECT * FROM `tabSetup Komponen PHK` WHERE name = %(name)s AND (employee_grade = %(grade)s OR employee_grade is NULL) LIMIT 1"""
+			values = {
+				"name": row.nm,
+				"grade": self.eg
+			}
+			setup_komponen_phk = frappe.db.sql(query, values, as_dict=True)
 			setup_komponen_company = frappe.db.get_value("Setup Komponen Company", {'parent': row.nm, 'company': self.company}, "*")
 			if not setup_komponen_phk or not setup_komponen_company:
 				continue
@@ -51,10 +57,9 @@ class PerhitunganKompensasiPHK(AccountsController):
 			pengkali_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "pengkali")
 
 			perhitungan_component.update({"fps": (pengkali_komponen if pengkali_komponen else 0)})
-			frappe.throw(f"{perhitungan_component}")
 			result = perhitungan_component["fp"] * perhitungan_component["fps"] * base
-			if setup_komponen_phk.is_cuti:
-				remaining_leave = get_cuti_balance(setup_komponen_phk.tipe_cuti, self.l_date, self.employee)
+			if setup_komponen_phk[0].is_cuti:
+				remaining_leave = get_cuti_balance(setup_komponen_phk[0].tipe_cuti, self.l_date, self.employee)
 				result = remaining_leave / 30 * base
 			perhitungan_component.update({"sbttl": result})
 			self.append("table_seym", perhitungan_component)
