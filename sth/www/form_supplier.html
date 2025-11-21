@@ -263,8 +263,10 @@
                             err.responseJSON.message.forEach((row) => {
                                 toastr.error(row, "Error")
                             })
+                        } else if (err.status == 417) {
+                            toastr.error("Form failed to process", "Error")
                         }
-                        //console.error("Error:", err);
+                        console.error("Error:", err);
                     }
                 }).always(() => {
                     $(this).prop("disabled", false)

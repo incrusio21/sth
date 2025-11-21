@@ -13,7 +13,6 @@ def create_sq():
         return invalidMessage
     
     rfq_name = decrypt(data.get("rfq"))
-    
     doc_sq = make_supplier_quotation_from_rfq(rfq_name,for_supplier=data.get("supplier"))
     doc_sq.custom_file_upload = f"/private/files/{data.file_url}"
     doc_sq.valid_till = doc_sq.transaction_date
@@ -42,7 +41,7 @@ def validate_request(data):
     message = []
     if not data.get("rfq"):
         message.append("RFQ is required")
-    
+
     if not data.get("supplier"):
         message.append("Supplier is required")
     
