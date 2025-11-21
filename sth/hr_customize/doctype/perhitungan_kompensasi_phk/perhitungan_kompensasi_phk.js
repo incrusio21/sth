@@ -5,6 +5,7 @@ frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm){
         filterExitInterview(frm)
         setDefaultAccount(frm)
+        createPayment(frm)
     },
     employee(frm) {
         fetchSSA(frm);
@@ -64,4 +65,12 @@ function setDefaultAccount(frm) {
             let linked_doc = r.message;
         }
     })
+}
+
+function createPayment(frm) {
+    if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
+        frm.add_custom_button('Payment', () => {
+            frm.doc.status = 'Closed'
+        }, 'Create');
+    }
 }
