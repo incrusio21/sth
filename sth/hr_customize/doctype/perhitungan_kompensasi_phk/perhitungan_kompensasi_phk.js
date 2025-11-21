@@ -2,8 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
-    refresh(frm){
-    },
     employee(frm) {
         fetchSSA(frm);
         fetchExitInterview(frm);
@@ -22,7 +20,7 @@ sth.plantation.PerhitunganKaryawanPHK = class PerhitunganKaryawanPHK extends sth
 cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);
 
 function fetchTableSeym(frm) {
-    if (!frm.doc.dphk) {
+    if (!frm.doc.dphk || !frm.doc.employee) {
         return
     }
     frm.call('fetch_perhitungan', { throw_if_missing: true })
@@ -34,6 +32,9 @@ function fetchTableSeym(frm) {
 }
 
 function fetchSSA(frm) {
+    if (!frm.doc.employee) {
+        return
+    }
     frm.call('fetch_ssa', { throw_if_missing: true })
     .then(r => {
         if (r.message) {
@@ -43,6 +44,9 @@ function fetchSSA(frm) {
 }
 
 function fetchExitInterview(frm){
+    if (!frm.doc.employee) {
+        return
+    }
     frappe.db.get_value("Exit Interview", {
         "employee": frm.doc.employee, 
         "ref_doctype": frm.doc.doctype, 
