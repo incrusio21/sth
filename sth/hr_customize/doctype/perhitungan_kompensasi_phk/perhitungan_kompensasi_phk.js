@@ -4,6 +4,7 @@
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm){
         filterExitInterview(frm)
+        setDefaultAccount(frm)
     },
     employee(frm) {
         fetchSSA(frm);
@@ -54,4 +55,13 @@ function filterExitInterview(frm) {
             }
         }
     });
+}
+
+function setDefaultAccount(frm) {  
+    frm.call('fetch_default_account', { throw_if_missing: true })
+    .then(r => {
+        if (r.message) {
+            let linked_doc = r.message;
+        }
+    })
 }

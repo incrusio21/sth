@@ -88,6 +88,13 @@ class PerhitunganKompensasiPHK(AccountsController):
 		if not ssa:
 			frappe.throw(f"Salary Structure Assignment <b> {self.employee} : {self.employee_name}</b>")
 		self.ssa = ssa[0].name
+  
+	@frappe.whitelist()
+	def fetch_default_account(self):
+		phk_debit_account = frappe.db.get_single_value('Bonus and Allowance Settings', 'phk_debit_account')
+		phk_credit_account = frappe.db.get_single_value('Bonus and Allowance Settings', 'phk_credit_account')
+		self.salary_account = phk_debit_account
+		self.credit_to = phk_credit_account
 
 def get_cuti_balance(leave_type, date, employee):
 	result = get_leave_balance_on(employee, leave_type, date)
