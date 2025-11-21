@@ -12,6 +12,7 @@ from sth.controllers.accounts_controller import AccountsController
 class PerhitunganKompensasiPHK(AccountsController):
 	def on_submit(self):
 		self.make_gl_entry()
+		self.update_exit_interview()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -62,7 +63,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 			if setup_komponen_phk[0].is_cuti:
 				remaining_leave = get_cuti_balance(setup_komponen_phk[0].tipe_cuti, self.l_date, self.employee)
 				result = remaining_leave / 30 * base
-			if detail_setup_komponen and result > detail_setup_komponen.maximum:
+			if detail_setup_komponen and detail_setup_komponen.maximum > 0  and result > detail_setup_komponen.maximum:
 				result = detail_setup_komponen.maximum
 			grand_total += result
 			perhitungan_component.update({"sbttl": result})
@@ -71,6 +72,12 @@ class PerhitunganKompensasiPHK(AccountsController):
 		self.grand_total = grand_total
 		self.outstanding_amount = grand_total
 
+
+	def update_exit_interview(self):
+		updated = {
+			"reference_document_name": self.name
+		}
+		frappe.db.set_value("Exit Interview", self.exit_interview, updated)
 
 	@frappe.whitelist()
 	def fetch_ssa(self):
@@ -84,4 +91,17 @@ class PerhitunganKompensasiPHK(AccountsController):
 
 def get_cuti_balance(leave_type, date, employee):
 	result = get_leave_balance_on(employee, leave_type, date)
+	return result
+
+@frappe.whitelist()
+def filter_exit_interview(doctype, txt, searchfield, start, page_len, filters):
+	cond = {
+			"employee": filters.get("employee"),
+			"ref_doctype": "Perhitungan Kompensasi PHK",
+		}
+	query = """ SELECT name AS value FROM `tabExit Interview` 
+		WHERE employee = %(employee)s AND ref_doctype = %(ref_doctype)s 
+		AND reference_document_name IS NULL"""
+	result = frappe.db.sql(query, cond)
+
 	return result

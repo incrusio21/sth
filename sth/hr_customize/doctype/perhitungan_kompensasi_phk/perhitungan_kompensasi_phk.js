@@ -2,9 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
+    refresh(frm){
+        filterExitInterview(frm)
+    },
     employee(frm) {
         fetchSSA(frm);
-        fetchExitInterview(frm);
     },
     dphk(frm) {
         fetchTableSeym(frm);
@@ -43,20 +45,13 @@ function fetchSSA(frm) {
     })
 }
 
-function fetchExitInterview(frm){
-    if (!frm.doc.employee) {
-        return
-    }
-    frappe.db.get_value("Exit Interview", {
-        "employee": frm.doc.employee, 
-        "ref_doctype": frm.doc.doctype, 
-        "reference_document_name": ["is", "not set"],
-        "employee_status": "Exit Confirmed"
-    }, "name").then(r => {
-        if (Object.keys(r.message).length === 0) {
-            frappe.throw(`Mohon buat dokumen <b>Exit Interview</b> untuk Employee <b> ${frm.doc.employee} : ${frm.doc.employee_name}</b> terlebih dahulu !!`)
+function filterExitInterview(frm) {
+    frm.set_query('exit_interview', ()=>{
+        return {
+            query: "sth.hr_customize.doctype.perhitungan_kompensasi_phk.perhitungan_kompensasi_phk.filter_exit_interview",
+            filters: {
+                employee : frm.doc.employee
+            }
         }
-        frm.set_value('exit_interview', r.message.name)
-        frm.refresh_field('exit_interview')
-    })
+    });
 }
