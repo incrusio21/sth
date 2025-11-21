@@ -20,6 +20,9 @@ class PerhitunganKompensasiPHK(AccountsController):
 	@frappe.whitelist()
 	def fetch_perhitungan(self):
 		employee = frappe.db.get_value("Employee", self.employee, "*")
+		working_month = month_diff(self.l_date, employee.date_of_joining)
+		self.table_seym = []
+		grand_total = 0
 		base = 0
 		if employee.grade == "NON STAF" and employee.custom_kriteria == "Satuan Hasil":
 			ump_harian = frappe.db.get_value("Company", self.company, "custom_ump_harian")
@@ -31,8 +34,6 @@ class PerhitunganKompensasiPHK(AccountsController):
 			
 		setup_dasar_phk_components = frappe.db.get_all("Detail Dasar PHK", {"parent": self.dphk}, "*")
 
-		working_month = month_diff(self.l_date, employee.date_of_joining)
-		self.table_seym = []
 		for row in setup_dasar_phk_components:
 			query = """ SELECT * FROM `tabSetup Komponen PHK` WHERE name = %(name)s AND (employee_grade = %(grade)s OR employee_grade is NULL) LIMIT 1"""
 			values = {
@@ -54,15 +55,21 @@ class PerhitunganKompensasiPHK(AccountsController):
 				"from_month": ['<', working_month],
 				"to_month": ['>', working_month],
 			}
-			pengkali_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "pengkali")
-
-			perhitungan_component.update({"fps": (pengkali_komponen if pengkali_komponen else 0)})
+			detail_setup_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "*")
+			
+			perhitungan_component.update({"fps": (detail_setup_komponen.pengkali if detail_setup_komponen and detail_setup_komponen.pengkali else 0)})
 			result = perhitungan_component["fp"] * perhitungan_component["fps"] * base
 			if setup_komponen_phk[0].is_cuti:
 				remaining_leave = get_cuti_balance(setup_komponen_phk[0].tipe_cuti, self.l_date, self.employee)
 				result = remaining_leave / 30 * base
+			if detail_setup_komponen and result > detail_setup_komponen.maximum:
+				result = detail_setup_komponen.maximum
+			grand_total += result
 			perhitungan_component.update({"sbttl": result})
 			self.append("table_seym", perhitungan_component)
+
+		self.grand_total = grand_total
+		self.outstanding_amount = grand_total
 
 
 	@frappe.whitelist()

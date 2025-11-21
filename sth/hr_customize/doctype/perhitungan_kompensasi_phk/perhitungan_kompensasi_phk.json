@@ -117,6 +117,7 @@
    "label": "Perhitungan"
   },
   {
+   "description": "Note: Perhitungan akan muncul apabila sudah ada exit interview yang belum terhubung ke perhitungan dan Relieving Date di employee sudah terisi",
    "fieldname": "table_seym",
    "fieldtype": "Table",
    "options": "Detail Perhitungan Kompensasi PHK"
@@ -238,7 +239,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 16:41:20.037498",
+ "modified": "2025-11-21 10:03:16.729243",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",

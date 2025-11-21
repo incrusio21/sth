@@ -20,7 +20,7 @@ sth.plantation.PerhitunganKaryawanPHK = class PerhitunganKaryawanPHK extends sth
 cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);
 
 function fetchTableSeym(frm) {
-    if (!frm.doc.dphk || !frm.doc.employee) {
+    if (!frm.doc.dphk || !frm.doc.employee || !frm.doc.l_date || !frm.doc.exit_interview) {
         return
     }
     frm.call('fetch_perhitungan', { throw_if_missing: true })
@@ -53,6 +53,9 @@ function fetchExitInterview(frm){
         "reference_document_name": ["is", "not set"],
         "employee_status": "Exit Confirmed"
     }, "name").then(r => {
+        if (Object.keys(r.message).length === 0) {
+            frappe.throw(`Mohon buat dokumen <b>Exit Interview</b> untuk Employee <b> ${frm.doc.employee} : ${frm.doc.employee_name}</b> terlebih dahulu !!`)
+        }
         frm.set_value('exit_interview', r.message.name)
         frm.refresh_field('exit_interview')
     })
