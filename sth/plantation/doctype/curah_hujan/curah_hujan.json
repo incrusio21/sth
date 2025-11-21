@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-06-23 15:43:35.527763",
@@ -9,7 +10,7 @@
   "section_break_eunb",
   "naming_series",
   "tgl_trk",
-  "divisi",
+  "unit",
   "employee",
   "designation",
   "column_break_fnlg",
@@ -27,15 +28,8 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "Document No"
-  },
-  {
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Divisi",
-   "options": "Divisi",
-   "reqd": 1
+   "label": "Series",
+   "options": "CH-"
   },
   {
    "fieldname": "column_break_fnlg",
@@ -85,12 +79,20 @@
    "fieldname": "ket",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-24 10:20:06.895679",
+ "modified": "2025-11-20 11:02:46.484041",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Curah Hujan",

@@ -35,8 +35,9 @@ doctype_js = {
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Loan": "hr_customize/custom/loan.js",
 	"Employee": "public/js/employee.js",
+    "Supplier Quotation": "public/js/supplier_quotation.js",
 }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Request for Quotation" : "public/js/request_for_quotation_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -135,6 +136,7 @@ override_doctype_class = {
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
+	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
 }
 
 # Document Events
@@ -166,6 +168,9 @@ doc_events = {
 	},
 	"Purchase Invoice": {
     "on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
+	},
+  "Supplier Quotation": {
+    "before_submit": "sth.custom.supplier_quotation.update_status_rfq"
 	}
 }
 

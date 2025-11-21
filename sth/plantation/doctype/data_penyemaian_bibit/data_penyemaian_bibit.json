@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "DPB-.#####",
+ "autoname": "naming_series:",
  "creation": "2025-07-08 11:32:40.649941",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_oqec",
+  "naming_series",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -81,7 +82,7 @@
    "reqd": 1
   },
   {
-   "description": "(Qty Planting - Qty Seed Afkir +  Qty Dobletone - Qty After Afkir)",
+   "description": "(Qty Planting  +  Qty Dobletone - Qty After Afkir)",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Grand Total Qty",
@@ -208,6 +209,12 @@
    "fieldtype": "Tab Break",
    "label": "Connection",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "DPB-"
   }
  ],
  "grid_page_length": 50,
@@ -230,11 +237,11 @@
    "link_fieldname": "data_penyemaian_bibit"
   }
  ],
- "modified": "2025-10-30 09:54:17.543362",
+ "modified": "2025-11-20 10:58:19.346745",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penyemaian Bibit",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

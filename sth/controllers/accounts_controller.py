@@ -232,7 +232,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 	# Didn't use db_set for optimisation purpose
 	ref_doc.outstanding_amount = outstanding_amount
-	if voucher_type not in ["Transaksi Bonus", "Transaksi THR"]:
+	if voucher_type not in ["Transaksi Bonus", "Transaksi THR", "Perhitungan Kompensasi PHK"]:
 		frappe.db.set_value(
 			voucher_type,
 			voucher_no,

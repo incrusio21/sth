@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-11-19 17:01:50.526356",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_p0cs",
+  "naming_series",
+  "transaction_date",
+  "machine",
+  "machine_station",
+  "column_break_awov",
+  "unit",
+  "company",
+  "amended_from",
+  "sterilizer_monitoring_tab",
+  "detail_section",
+  "inspection_result",
+  "inspection_photo_upload",
+  "tbs_process_tab",
+  "sterilizer_reference",
+  "unit_type",
+  "column_break_hdny",
+  "quantity_to_process",
+  "total_weight_process",
+  "pending_quantity",
+  "total_weight_pending_process"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_p0cs",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "SST-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Transaction Date"
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Machine",
+   "options": "Mill Machine"
+  },
+  {
+   "fetch_from": "machine.station",
+   "fieldname": "machine_station",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Machine Station",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_awov",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "machine.unit",
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "machine.company",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Threshing Station",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sterilizer_monitoring_tab",
+   "fieldtype": "Tab Break",
+   "label": "Threshing Monitoring"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tbs_process_tab",
+   "fieldtype": "Tab Break",
+   "label": "TBS Threshing Process"
+  },
+  {
+   "fetch_from": "sterilizer_reference.unit_type",
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "label": "Unit Type",
+   "options": "Lorry\nCycle"
+  },
+  {
+   "description": "Qty in Unit Type",
+   "fieldname": "quantity_to_process",
+   "fieldtype": "Float",
+   "label": "Quantity To Threshing Process"
+  },
+  {
+   "fieldname": "total_weight_process",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Weight Threshing Process",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hdny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Qty in Unit Type",
+   "fieldname": "pending_quantity",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pending Threshing Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight_pending_process",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Weight Pending Threshing Process",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Threshing Station",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "inspection_result",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Inspection Result",
+   "reqd": 1
+  },
+  {
+   "fieldname": "inspection_photo_upload",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Inspection Photo Upload"
+  },
+  {
+   "fieldname": "sterilizer_reference",
+   "fieldtype": "Link",
+   "label": "Document Reference",
+   "options": "Sterilizer Transaction",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-20 13:49:11.251397",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Threshing Transaction",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -157,8 +157,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		self.db_update()
 
-	def set_data_rekap_weight(self):
-		if self.against_salary_component:
+	def set_data_rekap_weight(self, is_cancel=0):
+		if self.against_salary_component and is_cancel == 0:
 			frappe.throw("BKM Panen {} already used in Pembayaran Kontanan".format(
 				get_link_to_form(self.doctype, self.name)
 			))

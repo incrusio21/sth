@@ -15,8 +15,10 @@
   "deduction_thr_component",
   "phk_default_section",
   "earning_phk_component",
+  "phk_debit_account",
   "column_break_iplp",
-  "deduction_phk_component"
+  "deduction_phk_component",
+  "phk_credit_account"
  ],
  "fields": [
   {
@@ -84,13 +86,25 @@
    "fieldtype": "Link",
    "label": "Deduction PHK Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "phk_debit_account",
+   "fieldtype": "Link",
+   "label": "PHK Debit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "phk_credit_account",
+   "fieldtype": "Link",
+   "label": "PHK Credit Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-03 13:59:56.275071",
+ "modified": "2025-11-21 14:22:50.510090",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Bonus and Allowance Settings",

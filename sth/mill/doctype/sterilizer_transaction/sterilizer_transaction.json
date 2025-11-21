@@ -1,0 +1,270 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-11-19 16:03:04.781286",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_p0cs",
+  "naming_series",
+  "transaction_date",
+  "machine",
+  "machine_station",
+  "column_break_awov",
+  "status",
+  "unit",
+  "company",
+  "amended_from",
+  "sterilizer_monitoring_tab",
+  "detail_section",
+  "sp1",
+  "upp1",
+  "column_break_zwan",
+  "usg1",
+  "usl1",
+  "seconds_pressure_section",
+  "sp2",
+  "upp2",
+  "column_break_mjgl",
+  "usg2",
+  "usl2",
+  "tbs_process_tab",
+  "unit_type",
+  "quantity_to_process",
+  "total_weight_process",
+  "column_break_hdny",
+  "pending_quantity",
+  "total_weight_pending_process",
+  "capacity_per_lorry"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_p0cs",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sterilizer Station",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Transaction Date"
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Machine",
+   "options": "Mill Machine"
+  },
+  {
+   "fetch_from": "machine.unit",
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "machine.company",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_awov",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "First Pressure"
+  },
+  {
+   "fieldname": "column_break_zwan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "machine.station",
+   "fieldname": "machine_station",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Machine Station",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sterilizer_monitoring_tab",
+   "fieldtype": "Tab Break",
+   "label": "Sterilizer Monitoring"
+  },
+  {
+   "fieldname": "tbs_process_tab",
+   "fieldtype": "Tab Break",
+   "label": "TBS Sterilizer Process"
+  },
+  {
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "label": "Unit Type",
+   "options": "Lorry\nCycle"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "MILL-"
+  },
+  {
+   "description": "Qty in Unit Type",
+   "fieldname": "quantity_to_process",
+   "fieldtype": "Float",
+   "label": "Quantity To Process"
+  },
+  {
+   "fieldname": "total_weight_process",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Weight Process",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hdny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Qty in Unit Type",
+   "fieldname": "pending_quantity",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pending Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight_pending_process",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Weight Pending Process",
+   "read_only": 1
+  },
+  {
+   "description": "In Kilograms",
+   "fieldname": "capacity_per_lorry",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Capacity Per Lorry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "On Progress\nComplete"
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sp1",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Sterilizer Pressure",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upp1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Pressure Photo"
+  },
+  {
+   "fieldname": "usg1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Graph Photo"
+  },
+  {
+   "fieldname": "usl1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Log/Record Photo"
+  },
+  {
+   "fieldname": "seconds_pressure_section",
+   "fieldtype": "Section Break",
+   "label": "Seconds Pressure"
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sp2",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Sterilizer Pressure",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upp2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Pressure Photo"
+  },
+  {
+   "fieldname": "column_break_mjgl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "usg2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Graph Photo"
+  },
+  {
+   "fieldname": "usl2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Log/Record Photo"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-20 13:03:49.417804",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sterilizer Transaction",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

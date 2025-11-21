@@ -1,18 +1,18 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "DPNMB-.#####",
+ "autoname": "naming_series:",
  "creation": "2025-07-08 13:36:17.515805",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_zzrf",
+  "naming_series",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "column_break_onba",
   "company",
-  "amended_from",
   "section_break_toxq",
   "no_spb",
   "divisi",
@@ -30,7 +30,8 @@
   "employee_assisten",
   "intex",
   "column_break_auoy",
-  "address"
+  "address",
+  "amended_from"
  ],
  "fields": [
   {
@@ -214,17 +215,23 @@
    "label": "Nama Assisten",
    "options": "Employee",
    "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "DPNMB-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-11 14:22:53.803193",
+ "modified": "2025-11-20 10:58:58.483711",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penanaman Bibit",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

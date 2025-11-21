@@ -1,17 +1,17 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "BKMT-.#####",
+ "autoname": "naming_series:",
  "creation": "2025-07-08 14:51:56.691429",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "details_kendaraan_tab",
   "section_break_kqlq",
+  "naming_series",
   "tgl_trk",
   "company",
   "unit",
-  "divisi",
   "tipe_master_kendaraan",
   "column_break_kkgv",
   "mdr",
@@ -36,6 +36,7 @@
   "subtotal_upah",
   "pekerjaan_subtotal",
   "section_break_dpfs",
+  "divisi",
   "blok",
   "batch",
   "project",
@@ -60,6 +61,7 @@
    "label": "Header"
   },
   {
+   "default": "Today",
    "fieldname": "tgl_trk",
    "fieldtype": "Date",
    "label": "Tanggal Transaksi",
@@ -98,8 +100,7 @@
   {
    "fieldname": "jmlh_bbm",
    "fieldtype": "Float",
-   "label": "Jumlah Penggunaan BBM",
-   "reqd": 1
+   "label": "Jumlah Penggunaan BBM"
   },
   {
    "fieldname": "mdr",
@@ -300,6 +301,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Kegiatan",
+   "link_filters": "[[\"Kegiatan\",\"tipe_kegiatan\",\"=\",\"Traksi\"]]",
    "options": "Kegiatan"
   },
   {
@@ -384,17 +386,23 @@
    "label": "Employee Payment Log Premi",
    "options": "Employee Payment Log",
    "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BKM-TRK-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-11 13:26:33.243118",
+ "modified": "2025-11-20 10:56:22.541170",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

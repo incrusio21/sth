@@ -3,10 +3,12 @@
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm){
+        filterExitInterview(frm)
+        setDefaultAccount(frm)
+        createPayment(frm)
     },
     employee(frm) {
         fetchSSA(frm);
-        fetchExitInterview(frm);
     },
     dphk(frm) {
         fetchTableSeym(frm);
@@ -22,7 +24,7 @@ sth.plantation.PerhitunganKaryawanPHK = class PerhitunganKaryawanPHK extends sth
 cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);
 
 function fetchTableSeym(frm) {
-    if (!frm.doc.dphk) {
+    if (!frm.doc.dphk || !frm.doc.employee || !frm.doc.l_date || !frm.doc.exit_interview) {
         return
     }
     frm.call('fetch_perhitungan', { throw_if_missing: true })
@@ -34,6 +36,9 @@ function fetchTableSeym(frm) {
 }
 
 function fetchSSA(frm) {
+    if (!frm.doc.employee) {
+        return
+    }
     frm.call('fetch_ssa', { throw_if_missing: true })
     .then(r => {
         if (r.message) {
@@ -42,14 +47,30 @@ function fetchSSA(frm) {
     })
 }
 
-function fetchExitInterview(frm){
-    frappe.db.get_value("Exit Interview", {
-        "employee": frm.doc.employee, 
-        "ref_doctype": frm.doc.doctype, 
-        "reference_document_name": ["is", "not set"],
-        "employee_status": "Exit Confirmed"
-    }, "name").then(r => {
-        frm.set_value('exit_interview', r.message.name)
-        frm.refresh_field('exit_interview')
+function filterExitInterview(frm) {
+    frm.set_query('exit_interview', ()=>{
+        return {
+            query: "sth.hr_customize.doctype.perhitungan_kompensasi_phk.perhitungan_kompensasi_phk.filter_exit_interview",
+            filters: {
+                employee : frm.doc.employee
+            }
+        }
+    });
+}
+
+function setDefaultAccount(frm) {  
+    frm.call('fetch_default_account', { throw_if_missing: true })
+    .then(r => {
+        if (r.message) {
+            let linked_doc = r.message;
+        }
     })
+}
+
+function createPayment(frm) {
+    if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
+        frm.add_custom_button('Payment', () => {
+            frm.doc.status = 'Closed'
+        }, 'Create');
+    }
 }
