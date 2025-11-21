@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-07-08 14:49:03.285814",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_tz8v",
+  "naming_series",
   "bkm_panen",
   "divisi",
   "blok",
@@ -316,16 +318,23 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "PPK-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 14:38:34.435076",
+ "modified": "2025-11-20 16:29:50.087865",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

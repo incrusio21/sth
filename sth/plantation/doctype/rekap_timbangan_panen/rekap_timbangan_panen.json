@@ -1,11 +1,14 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-09-22 10:32:38.602236",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_u26c",
+  "naming_series",
   "blok",
   "panen_date",
   "buku_kerja_mandor_panen",
@@ -102,16 +105,23 @@
    "fieldtype": "Float",
    "label": "Total Weight",
    "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "RKP-TBG-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-23 12:50:28.790801",
+ "modified": "2025-11-20 16:28:53.390557",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Timbangan Panen",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

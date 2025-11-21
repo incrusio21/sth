@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "field:divisi",
  "creation": "2025-06-23 14:48:34.625031",
  "doctype": "DocType",
@@ -52,7 +53,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-31 11:35:50.797382",
+ "modified": "2025-11-21 10:22:46.883445",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Divisi",

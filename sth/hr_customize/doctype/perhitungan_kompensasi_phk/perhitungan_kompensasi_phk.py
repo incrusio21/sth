@@ -53,11 +53,11 @@ class PerhitunganKompensasiPHK(AccountsController):
 			}
 			cond = {
 				"parent": row.nm,
-				"from_month": ['<', working_month],
-				"to_month": ['>', working_month],
+				"from_month": ['<=', working_month],
+				"to_month": ['>=', working_month],
 			}
 			detail_setup_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "*")
-			
+
 			perhitungan_component.update({"fps": (detail_setup_komponen.pengkali if detail_setup_komponen and detail_setup_komponen.pengkali else 0)})
 			result = perhitungan_component["fp"] * perhitungan_component["fps"] * base
 			if setup_komponen_phk[0].is_cuti:

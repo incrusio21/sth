@@ -11,14 +11,26 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "column_break_mtrn",
   "transaction_type",
-  "reference_document",
-  "column_break_zhml",
-  "machine",
-  "machine_station",
-  "inspection_result",
-  "image_upload",
-  "amended_from"
+  "vehicle_entry_time",
+  "vehicle_exit_time",
+  "qr_code_scan",
+  "amended_from",
+  "driver_data_tab",
+  "driver_details_section",
+  "driver_name",
+  "license_number",
+  "column_break_izww",
+  "driver_image",
+  "vehicle_details_section",
+  "rear_view_photo_column",
+  "license_plate",
+  "column_break_dwkb",
+  "front_view_photo",
+  "rear_view_photo",
+  "left_side_photo",
+  "right_side_photo"
  ],
  "fields": [
   {
@@ -28,7 +40,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "Series",
+   "label": "Vehicle Queue Number",
    "options": "SCP-"
   },
   {
@@ -56,50 +68,6 @@
    "label": "Edit Posting Date and Time"
   },
   {
-   "fieldname": "reference_document",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Reference Document",
-   "options": "Sterilizer Transaction",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_zhml",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "machine",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Machine",
-   "options": "Mill Machine",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "machine.station",
-   "fieldname": "machine_station",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Machine Station",
-   "read_only": 1
-  },
-  {
-   "description": "Satuan dalam \u00b0C",
-   "fieldname": "inspection_result",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Inspection Result",
-   "reqd": 1
-  },
-  {
-   "fieldname": "image_upload",
-   "fieldtype": "Attach Image",
-   "label": "Image Upload",
-   "reqd": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -125,13 +93,125 @@
    "in_preview": 1,
    "label": "Transaction Type",
    "options": "Receive\nDispatch"
+  },
+  {
+   "fieldname": "column_break_mtrn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driver_data_tab",
+   "fieldtype": "Tab Break",
+   "label": "Driver Data"
+  },
+  {
+   "fieldname": "qr_code_scan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "QR Code Scan",
+   "options": "Driver"
+  },
+  {
+   "fieldname": "driver_details_section",
+   "fieldtype": "Section Break",
+   "label": "Driver Details"
+  },
+  {
+   "fetch_from": "qr_code_scan.full_name",
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Driver Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "qr_code_scan.license_number",
+   "fieldname": "license_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "License Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_izww",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fieldname": "rear_view_photo_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_license_plate",
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "License Plate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dwkb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "front_view_photo",
+   "fieldtype": "Image",
+   "label": "Front View Photo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rear_view_photo",
+   "fieldtype": "Image",
+   "label": "Rear View Photo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "left_side_photo",
+   "fieldtype": "Image",
+   "label": "Left Side Photo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "right_side_photo",
+   "fieldtype": "Image",
+   "label": "Right Side Photo",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_driver_image_upload",
+   "fieldname": "driver_image",
+   "fieldtype": "Image",
+   "in_preview": 1,
+   "label": "Driver Image",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "vehicle_entry_time",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Vehicle Entry Time",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "vehicle_exit_time",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Vehicle Exit Time"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 14:50:55.592508",
+ "modified": "2025-11-20 16:07:14.955510",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

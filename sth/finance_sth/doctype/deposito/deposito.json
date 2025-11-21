@@ -239,21 +239,19 @@
   },
   {
    "fieldname": "pajak",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Pajak",
-   "options": "Potongan Pajak"
+   "label": "Pajak"
   },
   {
    "description": "Pajak dalam % untuk satu periode",
    "fetch_from": "pajak.persentase",
    "fieldname": "persentase_pajak",
-   "fieldtype": "Link",
+   "fieldtype": "Percent",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Persentase Pajak",
-   "options": "Potongan Pajak",
    "read_only": 1
   },
   {
@@ -346,7 +344,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 16:52:33.261494",
+ "modified": "2025-11-20 15:06:09.296393",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

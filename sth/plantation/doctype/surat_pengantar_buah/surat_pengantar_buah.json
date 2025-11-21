@@ -2,12 +2,13 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:SPB-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-07-08 14:49:30.296827",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_5orq",
+  "naming_series",
   "unit",
   "divisi",
   "kendaraan",
@@ -268,17 +269,23 @@
    "label": "Mill Cut",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SPB-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 11:18:40.396629",
+ "modified": "2025-11-20 16:28:14.785458",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
