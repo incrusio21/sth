@@ -11,8 +11,10 @@ class ExitInterview(ExitInterview):
 		cond = {
 			"employee": self.employee,
 			"ref_doctype": "Perhitungan Kompensasi PHK",
+			"name": self.name
 		}
-		query = """ SELECT * FROM `tabExit Interview` WHERE employee = %(employee)s AND ref_doctype = %(ref_doctype)s AND reference_document_name IS NULL """
+		query = """ SELECT * FROM `tabExit Interview` 
+				WHERE employee = %(employee)s AND ref_doctype = %(ref_doctype)s AND reference_document_name IS NULL AND name <> %(name)s"""
 		exit = frappe.db.sql(query, cond, as_dict=True)
 		if exit and len(exit) > 0:
 			frappe.throw(f"Dokumen Exit Interview dengan Employee <b>{self.employee} : {self.employee_name}</b> masih ada yang belum digunakan")

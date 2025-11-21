@@ -91,10 +91,8 @@ class PerhitunganKompensasiPHK(AccountsController):
   
 	@frappe.whitelist()
 	def fetch_default_account(self):
-		phk_debit_account = frappe.db.get_single_value('Bonus and Allowance Settings', 'phk_debit_account')
-		phk_credit_account = frappe.db.get_single_value('Bonus and Allowance Settings', 'phk_credit_account')
-		self.salary_account = phk_debit_account
-		self.credit_to = phk_credit_account
+		custom_default_phk_account = frappe.db.get_value('Company', self.company, "custom_default_phk_account")
+		self.credit_to = custom_default_phk_account
 
 def get_cuti_balance(leave_type, date, employee):
 	result = get_leave_balance_on(employee, leave_type, date)
@@ -108,7 +106,7 @@ def filter_exit_interview(doctype, txt, searchfield, start, page_len, filters):
 		}
 	query = """ SELECT name AS value FROM `tabExit Interview` 
 		WHERE employee = %(employee)s AND ref_doctype = %(ref_doctype)s 
-		AND reference_document_name IS NULL"""
+		AND docstatus = 1 AND reference_document_name IS NULL"""
 	result = frappe.db.sql(query, cond)
 
 	return result
