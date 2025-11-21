@@ -136,6 +136,7 @@ override_doctype_class = {
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
+	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
 }
 
 # Document Events
