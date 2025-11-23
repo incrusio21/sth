@@ -5,6 +5,7 @@ frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm){
         filterExitInterview(frm)
         setDefaultAccount(frm)
+        setDefaultSalaryComponent(frm)
         createPayment(frm)
     },
     employee(frm) {
@@ -67,10 +68,22 @@ function setDefaultAccount(frm) {
     })
 }
 
+function setDefaultSalaryComponent(frm) {  
+    frm.call('fetch_default_salary_component', { throw_if_missing: true })
+    .then(r => {
+        if (r.message) {
+            let linked_doc = r.message;
+        }
+    })
+}
+
 function createPayment(frm) {
     if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
         frm.add_custom_button('Payment', () => {
-            frm.doc.status = 'Closed'
+        frappe.model.open_mapped_doc({
+            method: "sth.hr_customize.doctype.perhitungan_kompensasi_phk.perhitungan_kompensasi_phk.make_payment_entry",
+            frm: frm,
+        })
         }, 'Create');
     }
 }
