@@ -115,7 +115,7 @@ def filter_exit_interview(doctype, txt, searchfield, start, page_len, filters):
 		}
 	query = """ SELECT name AS value FROM `tabExit Interview` 
 		WHERE employee = %(employee)s AND ref_doctype = %(ref_doctype)s 
-		AND reference_document_name IS NULL"""
+		AND docstatus = 1 AND reference_document_name IS NULL"""
 	result = frappe.db.sql(query, cond)
 
 	return result
