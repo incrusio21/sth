@@ -73,7 +73,6 @@ class PerhitunganKompensasiPHK(AccountsController):
 		self.grand_total = grand_total
 		self.outstanding_amount = grand_total
 
-
 	def update_exit_interview(self):
 		updated = {
 			"reference_document_name": self.name

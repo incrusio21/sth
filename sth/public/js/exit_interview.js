@@ -5,7 +5,7 @@ frappe.ui.form.on("Exit Interview", {
 })
 
 function btnCreatePerhitunganPHK(frm) {
-    if (frm.doc.reference_document_name) {
+    if (frm.doc.reference_document_name && frm.doc.docstatus != 0) {
         return
     }
     frm.add_custom_button('Perhitungan Kompensasi PHK', () => {
