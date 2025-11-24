@@ -22,6 +22,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 	def on_cancel(self):
 		super().on_cancel()
 		self.make_gl_entry()
+		self.delete_employee_payment()
 
 	@frappe.whitelist()
 	def fetch_perhitungan(self):
@@ -97,6 +98,12 @@ class PerhitunganKompensasiPHK(AccountsController):
 		doc.save()
 
 		self.db_set('employee_payment_log', doc.name)
+  
+	def delete_employee_payment(self):
+		epl = self.employee_payment_log
+		frappe.get_doc('Exit Interview', self.exit_interview).cancel()
+		self.db_set('employee_payment_log', None)
+		frappe.db.delete('Employee Payment Log', epl)
 
 	@frappe.whitelist()
 	def fetch_ssa(self):

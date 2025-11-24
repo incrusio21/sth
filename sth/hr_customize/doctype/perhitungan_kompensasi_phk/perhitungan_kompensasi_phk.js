@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm){
+        frm.ignore_doctypes_on_cancel_all = ["Exit Interview"]
         filterExitInterview(frm)
         setDefaultAccount(frm)
         setDefaultSalaryComponent(frm)
