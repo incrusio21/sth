@@ -23,7 +23,17 @@ class ExitInterview(ExitInterview):
 
 @frappe.whitelist()
 def make_perhitungan_kompensasi_phk(source_name, target_doc=None):
-    doc = get_mapped_doc(
+	def post_process(source, target):
+		company = frappe.db.get_value("Company", source.company, "*")
+		earning_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "earning_phk_component")
+		deduction_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "deduction_phk_component")
+  
+		target.salary_account = company.custom_default_phk_salary_account
+		target.credit_to = company.custom_default_phk_account
+		target.earning_phk_component = earning_phk
+		target.deduction_phk_component = deduction_phk
+  
+	doc = get_mapped_doc(
 		"Exit Interview",
 		source_name,
 		{
@@ -36,8 +46,10 @@ def make_perhitungan_kompensasi_phk(source_name, target_doc=None):
 					"custom_upload_file_document": "exit_interview_attach"
 				}
 			}
-		}
+		},
+		target_doc,
+		post_process,
 	)
-    
-    
-    return doc
+	
+	
+	return doc

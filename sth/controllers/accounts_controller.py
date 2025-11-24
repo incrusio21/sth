@@ -34,6 +34,9 @@ class AccountsController(Document):
         self.set_outstanding_amount()
 
     def validate_credit_to_acc(self):
+        if not self.meta.has_field("credit_to"):
+            return
+        
         # if not self.credit_to:
         #     self.credit_to = get_party_account("Supplier", self.supplier, self.company)
         #     if not self.credit_to:
@@ -51,7 +54,7 @@ class AccountsController(Document):
                 title=_("Invalid Account"),
             )
 
-        if self.supplier and account.account_type != "Payable":
+        if self.employee and account.account_type != "Payable":
             frappe.throw(
                 _(
                     "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
