@@ -22,8 +22,9 @@ class TransaksiBonus(AccountsController):
 
 	def on_submit(self):
 		for emp in self.table_employee:
-			self.make_employee_payment_log(emp, "earning")
-			self.make_employee_payment_log(emp, "deduction")
+			self.make_employee_payment_log(emp)
+			# self.make_employee_payment_log(emp, "earning")
+			# self.make_employee_payment_log(emp, "deduction")
 
 		self.make_gl_entry()
 
@@ -32,48 +33,68 @@ class TransaksiBonus(AccountsController):
 		self.remove_employee_payment_log(self.table_employee)
 		self.make_gl_entry()
 		
-	def make_employee_payment_log(self, emp, log_type):
-		hr_settings = frappe.get_single("Bonus and Allowance Settings")
-		company = frappe.get_doc("Company", self.company)
+	def make_employee_payment_log(self, emp):
+		doc = frappe.new_doc("Employee Payment Log")
+		doc.employee = self.employee
+		doc.company = self.company
+		doc.posting_date = self.posting_date
+		doc.payroll_date = self.posting_date
+		doc.hari_kerja = 1
+		doc.status = "Approved"
+		doc.amount = self.grand_total
+		doc.salary_component = self.earning_bonus_component
+		doc.against_salary_component = self.deduction_bonus_component
+		doc.save()
 
-		settings_field = {
-			"earning": hr_settings.earning_bonus_component,
-			"deduction": hr_settings.deduction_bonus_component,
-		}
+		frappe.db.set_value(
+			"Detail Transaksi Bonus",
+			emp.name,
+			"employee_payment_log",
+			doc.name
+		)
 
-		if not settings_field.get(log_type):
-			frappe.throw(f"Salary Component untuk '{log_type}' belum diset di Bonus and Allowance Settings")
+	# def make_employee_payment_log(self, emp, log_type):
+	# 	hr_settings = frappe.get_single("Bonus and Allowance Settings")
+	# 	company = frappe.get_doc("Company", self.company)
 
-		payment_log = frappe.new_doc("Employee Payment Log")
-		payment_log.update({
-			"employee": emp.employee,
-			"hari_kerja": 1,
-			"company": self.company,
-			"posting_date": self.posting_date,
-			"payroll_date": self.posting_date,
-			"status": "Approved",
-			"is_paid": 0,
-			"amount": flt(emp.total_bonus),
-			"salary_component": settings_field[log_type],
-			"account": company.custom_default_bonus_account
-		})
+	# 	settings_field = {
+	# 		"earning": hr_settings.earning_bonus_component,
+	# 		"deduction": hr_settings.deduction_bonus_component,
+	# 	}
 
-		payment_log.insert(ignore_permissions=True)
-		payment_log.submit()
+	# 	if not settings_field.get(log_type):
+	# 		frappe.throw(f"Salary Component untuk '{log_type}' belum diset di Bonus and Allowance Settings")
 
-		field_map = {
-			"earning": "employee_payment_log_earning_bonus",
-			"deduction": "employee_payment_log_deduction_bonus",
-		}
+	# 	payment_log = frappe.new_doc("Employee Payment Log")
+	# 	payment_log.update({
+	# 		"employee": emp.employee,
+	# 		"hari_kerja": 1,
+	# 		"company": self.company,
+	# 		"posting_date": self.posting_date,
+	# 		"payroll_date": self.posting_date,
+	# 		"status": "Approved",
+	# 		"is_paid": 0,
+	# 		"amount": flt(emp.total_bonus),
+	# 		"salary_component": settings_field[log_type],
+	# 		"account": company.custom_default_bonus_account
+	# 	})
 
-		fieldname = field_map.get(log_type)
-		if fieldname:
-			frappe.db.set_value(
-				"Detail Transaksi Bonus",
-				emp.name,
-				fieldname,
-				payment_log.name
-			)
+	# 	payment_log.insert(ignore_permissions=True)
+	# 	payment_log.submit()
+
+	# 	field_map = {
+	# 		"earning": "employee_payment_log_earning_bonus",
+	# 		"deduction": "employee_payment_log_deduction_bonus",
+	# 	}
+
+	# 	fieldname = field_map.get(log_type)
+	# 	if fieldname:
+	# 		frappe.db.set_value(
+	# 			"Detail Transaksi Bonus",
+	# 			emp.name,
+	# 			fieldname,
+	# 			payment_log.name
+	# 		)
 
 	def remove_employee_payment_log(self, table_employee):
 		for emp in table_employee:

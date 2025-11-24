@@ -29,7 +29,10 @@
   "more_information_tab",
   "accounts_details_section",
   "salary_account",
-  "credit_to"
+  "credit_to",
+  "components_details_section",
+  "earning_bonus_component",
+  "deduction_bonus_component"
  ],
  "fields": [
   {
@@ -148,6 +151,7 @@
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
+   "link_filters": "[[\"Account\",\"account_type\",\"=\",\"Payable\"]]",
    "options": "Account",
    "reqd": 1
   },
@@ -181,13 +185,30 @@
    "label": "Salary Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "components_details_section",
+   "fieldtype": "Section Break",
+   "label": "Components Details"
+  },
+  {
+   "fieldname": "earning_bonus_component",
+   "fieldtype": "Link",
+   "label": "Earning Bonus Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "deduction_bonus_component",
+   "fieldtype": "Link",
+   "label": "Deduction Bonus Component",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-17 13:24:44.490881",
+ "modified": "2025-11-24 11:28:49.338299",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",

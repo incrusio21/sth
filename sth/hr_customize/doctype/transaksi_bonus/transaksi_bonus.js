@@ -5,6 +5,7 @@ frappe.ui.form.on("Transaksi Bonus", {
   async refresh(frm) {
     if (frm.doc.docstatus === 0 || frm.is_new()) {
       cur_frm.toggle_display("get_employee_data", true);
+      fetchAccountAndSalaryAccount(frm);
     } else {
       cur_frm.toggle_display("get_employee_data", false);
     }
@@ -147,6 +148,27 @@ frappe.ui.form.on("Detail Transaksi Bonus", {
     }
   },
 });
+
+async function fetchAccountAndSalaryAccount(frm) {
+  const company = await frappe.db.get_doc("Company", frm.doc.company);
+  const salarySettings = await frappe.call({
+    method: "frappe.client.get",
+    args: {
+      doctype: "Bonus and Allowance Settings",
+      name: "Bonus and Allowance Settings"
+    }
+  });
+
+  if (company) {
+    frm.set_value("salary_account", company.custom_default_bonus_salary_account);
+    frm.set_value("credit_to", company.custom_default_bonus_account);
+  }
+
+  if (salarySettings.message) {
+    frm.set_value("earning_bonus_component", salarySettings.message.earning_bonus_component);
+    frm.set_value("deduction_bonus_component", salarySettings.message.deduction_bonus_component);
+  }
+}
 
 sth.plantation.TransaksiBonus = class TransaksiBonus extends sth.plantation.AccountsController {
   refresh() {

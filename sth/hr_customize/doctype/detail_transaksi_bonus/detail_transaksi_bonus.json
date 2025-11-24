@@ -20,7 +20,8 @@
   "total_bonus",
   "more_information_section",
   "employee_payment_log_earning_bonus",
-  "employee_payment_log_deduction_bonus"
+  "employee_payment_log_deduction_bonus",
+  "employee_payment_log"
  ],
  "fields": [
   {
@@ -125,6 +126,7 @@
   {
    "fieldname": "employee_payment_log_earning_bonus",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Employee Payment Log Earning Bonus",
    "options": "Employee Payment Log",
    "read_only": 1
@@ -132,7 +134,15 @@
   {
    "fieldname": "employee_payment_log_deduction_bonus",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Employee Payment Log Deduction Bonus",
+   "options": "Employee Payment Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_payment_log",
+   "fieldtype": "Link",
+   "label": "Employee Payment Log",
    "options": "Employee Payment Log",
    "read_only": 1
   }
@@ -141,13 +151,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-31 14:17:08.568001",
+ "modified": "2025-11-24 13:10:11.032724",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi Bonus",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
