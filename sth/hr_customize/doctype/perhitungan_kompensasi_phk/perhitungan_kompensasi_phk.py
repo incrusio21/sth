@@ -5,6 +5,7 @@ import frappe
 import calendar
 
 from frappe.utils import month_diff, getdate
+from frappe.model.mapper import get_mapped_doc
 
 from hrms.hr.doctype.leave_application.leave_application import get_leave_balance_on
 from sth.controllers.accounts_controller import AccountsController
@@ -91,10 +92,16 @@ class PerhitunganKompensasiPHK(AccountsController):
   
 	@frappe.whitelist()
 	def fetch_default_account(self):
-		phk_debit_account = frappe.db.get_single_value('Bonus and Allowance Settings', 'phk_debit_account')
-		phk_credit_account = frappe.db.get_single_value('Bonus and Allowance Settings', 'phk_credit_account')
-		self.salary_account = phk_debit_account
-		self.credit_to = phk_credit_account
+		company = frappe.db.get_value("Company", self.company, "*")
+		self.salary_account = company.custom_default_phk_salary_account
+		self.credit_to = company.custom_default_phk_account
+
+	@frappe.whitelist()
+	def fetch_default_salary_component(self):
+		earning_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "earning_phk_component")
+		deduction_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "deduction_phk_component")
+		self.earning_phk_component = earning_phk
+		self.deduction_phk_component = deduction_phk
 
 def get_cuti_balance(leave_type, date, employee):
 	result = get_leave_balance_on(employee, leave_type, date)
@@ -108,7 +115,46 @@ def filter_exit_interview(doctype, txt, searchfield, start, page_len, filters):
 		}
 	query = """ SELECT name AS value FROM `tabExit Interview` 
 		WHERE employee = %(employee)s AND ref_doctype = %(ref_doctype)s 
-		AND reference_document_name IS NULL"""
+		AND docstatus = 1 AND reference_document_name IS NULL"""
 	result = frappe.db.sql(query, cond)
 
 	return result
+
+@frappe.whitelist()
+def make_payment_entry(source_name, target_doc=None):
+	def post_process(source, target):
+		internal_employee = frappe.db.get_single_value("Payment Settings", "internal_employee")
+		employee = frappe.db.get_value("Employee", internal_employee, "*")
+		company = frappe.db.get_value("Company", source.company, "*")
+  
+		target.internal_employee = 1
+		target.payment_type = "Pay"
+		target.party_type = "Employee"
+		target.party = employee.name
+		target.party_name = employee.employee_name
+		target.paid_amount = source.outstanding_amount
+		target.paid_to_account_currency = company.default_currency
+		target.append("references", {
+			"reference_doctype": "Perhitungan Kompensasi PHK",
+			"reference_name": source.name,
+			"total_amount": source.grand_total,
+			"outstanding_amount": source.outstanding_amount,
+			"allocated_amount": source.outstanding_amount
+		})
+	doclist = get_mapped_doc(
+		"Perhitungan Kompensasi PHK",
+		source_name,
+		{
+			"Perhitungan Kompensasi PHK": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"salary_account": "paid_from",
+					"credit_to": "paid_to"
+				}
+			}
+		},
+  		target_doc,
+		post_process,
+	)
+ 
+	return doclist	

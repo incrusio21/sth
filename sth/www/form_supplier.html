@@ -125,7 +125,7 @@
             var opt = {
                 digitGroupSeparator: ',',
                 decimalCharacter: '.',
-                decimalPlaces: 4
+                decimalPlaces: 2
             }
 
             AutoNumeric.multiple('.number-format', opt);
@@ -234,7 +234,7 @@
                     let elDesc = $el.find("td[data-field='desc']")
 
                     let qty = parseInt(elQty.find('input').val() || elQty.text())
-                    let desc = elQty.find('textarea').val() || elQty.text()
+                    let desc = elDesc.find('textarea').val() || elDesc.text()
 
                     items.push({
                         item_code: $el.find("td[data-field='item_code']").text(),

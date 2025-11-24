@@ -17,10 +17,12 @@ from erpnext.accounts.utils import (
 	get_fiscal_years,
 )
 from erpnext.controllers.accounts_controller import (
-    set_balance_in_account_currency,
-    update_gl_dict_with_app_based_fields, 
-    update_gl_dict_with_regional_fields
+	set_balance_in_account_currency,
+	update_gl_dict_with_app_based_fields, 
+	update_gl_dict_with_regional_fields
 )
+
+from sth.hr_customize import get_payment_settings
 
 class AccountsController(Document):
     def __init__(self, *args, **kwargs):
@@ -28,29 +30,56 @@ class AccountsController(Document):
         self._party_type = "Employee"
 
     def validate(self):
+        self.validate_credit_to_acc()
         self.set_outstanding_amount()
 
-    def set_missing_value(self):
-        from sth.hr_customize import get_payment_settings
+    def validate_credit_to_acc(self):
+        # if not self.credit_to:
+        #     self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+        #     if not self.credit_to:
+        #         self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
 
+        account = frappe.get_cached_value(
+            "Account", self.credit_to, ["account_type", "report_type", "account_currency"], as_dict=True
+        )
+
+        if account.report_type != "Balance Sheet":
+            frappe.throw(
+                _(
+                    "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
+                ).format(frappe.bold(_("Credit To"))),
+                title=_("Invalid Account"),
+            )
+
+        if self.supplier and account.account_type != "Payable":
+            frappe.throw(
+                _(
+                    "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
+                ).format(frappe.bold(_("Credit To")), frappe.bold(self.credit_to)),
+                title=_("Invalid Account"),
+            )
+
+        self.party_account_currency = account.account_currency
+            
+    def set_missing_value(self):
         self.employee = get_payment_settings("internal_employee") or ""
-          
+            
     def set_outstanding_amount(self):
         if self.meta.has_field("outstanding_amount"):
             self.outstanding_amount = flt(self.grand_total)
-    
+
     def on_cancel(self):
         self.ignore_linked_doctypes = (
-			"GL Entry",
-			"Repost Payment Ledger",
-			"Repost Payment Ledger Items",
-			"Repost Accounting Ledger",
-			"Repost Accounting Ledger Items",
-			"Unreconcile Payment",
-			"Unreconcile Payment Entries",
-			"Payment Ledger Entry",
-		)
-         
+            "GL Entry",
+            "Repost Payment Ledger",
+            "Repost Payment Ledger Items",
+            "Repost Accounting Ledger",
+            "Repost Accounting Ledger Items",
+            "Unreconcile Payment",
+            "Unreconcile Payment Entries",
+            "Payment Ledger Entry",
+        )
+            
     def on_trash(self):
         # delete sl and gl entries on deletion of transaction
         if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
@@ -74,7 +103,7 @@ class AccountsController(Document):
             frappe.qb.from_(sle).delete().where(
                 (sle.voucher_type == self.doctype) & (sle.voucher_no == self.name)
             ).run()
-               
+                
     def make_gl_entry(self, gl_entries=None):
         from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
@@ -104,7 +133,7 @@ class AccountsController(Document):
         self.make_salary_gl_entry(gl_entries)
 
         return gl_entries
-    
+
     def make_party_gl_entry(self, gl_entries):
         gl_entries.append(
             self.get_gl_dict(
@@ -117,7 +146,7 @@ class AccountsController(Document):
                     "party_type": self._party_type,
                     "party": self.get(scrub(self._party_type)),
                     "against_voucher": self.name,
-			        "against_voucher_type": self.doctype,	
+                    "against_voucher_type": self.doctype,	
                 },
                 item=self,
             )
@@ -138,7 +167,7 @@ class AccountsController(Document):
                 item=self,
             )
         )
-    
+
     def get_gl_dict(self, args, account_currency=None, item=None):
         """this method populates the common properties of a gl entry record"""
 
@@ -204,7 +233,7 @@ class AccountsController(Document):
             gl_dict.update({"against_voucher": self.get("against_voucher")})
 
         return gl_dict
-    
+	
 def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
 	ple = frappe.qb.DocType("Payment Ledger Entry")
 	vouchers = [frappe._dict({"voucher_type": voucher_type, "voucher_no": voucher_no})]
@@ -222,7 +251,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 	ref_doc = frappe.get_doc(voucher_type, voucher_no)
 	
-    # on cancellation outstanding can be an empty list
+	# on cancellation outstanding can be an empty list
 	voucher_outstanding = ple_query.get_voucher_outstandings(vouchers, common_filter=common_filter)
 
 	outstanding = voucher_outstanding[0]["outstanding_in_account_currency"] if voucher_outstanding else 0
@@ -232,13 +261,12 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 	# Didn't use db_set for optimisation purpose
 	ref_doc.outstanding_amount = outstanding_amount
-	if voucher_type not in ["Transaksi Bonus", "Transaksi THR", "Perhitungan Kompensasi PHK"]:
-		frappe.db.set_value(
-			voucher_type,
-			voucher_no,
-			"outstanding_amount",
-			outstanding_amount,
-		)
+	frappe.db.set_value(
+		voucher_type,
+		voucher_no,
+		"outstanding_amount",
+		outstanding_amount,
+	)
 
 	# ref_doc.set_status(update=True)
 	ref_doc.notify_update()
