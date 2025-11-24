@@ -37,15 +37,13 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			return
 		
 		item.rate = item.get("rate") or self.rupiah_basis
-		item.hari_kerja = flt(item.qty / self.volume_basis)
 		item.premi_amount = 0
 
-		if self.have_premi and item.hari_kerja > 1:
-			item.hari_kerja =  1
-
-			if item.qty >= self.min_basis_premi:
-				item.premi_amount = self.rupiah_premi
+		if not self.manual_hk:
+			item.hari_kerja = min(flt(item.qty / (self.volume_basis or 1)), 1)
 		
+		if self.have_premi and item.qty >= self.min_basis_premi:
+			item.premi_amount = self.rupiah_premi
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total brondolan

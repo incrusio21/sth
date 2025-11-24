@@ -92,7 +92,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		item.rate = flt(item.get("rate") or self.rupiah_basis)
 		item.brondolan = flt(self.upah_brondolan)
 
-		item.hari_kerja = min(flt(item.qty / self.volume_basis), 1)
+		if not self.manual_hk:
+			item.hari_kerja = min(flt(item.qty / self.volume_basis), 1)
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total brondolan

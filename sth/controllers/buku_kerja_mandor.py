@@ -106,7 +106,7 @@ class BukuKerjaMandorController(PlantationController):
         self.create_or_update_payment_log()
         # self.create_journal_entry()
         self.make_attendance()
-        # self.check_emp_hari_kerja()
+        self.check_emp_hari_kerja()
 
         # if update_realization:
         #     self.update_rkb_realization()
@@ -159,45 +159,6 @@ class BukuKerjaMandorController(PlantationController):
         # hapus epl yang tidak digunakan
         for r in removed_epl:
             r.delete()
-            
-    # def create_journal_entry(self):
-    #     if not (self.salary_component and self.kegiatan_account):
-    #         frappe.throw("Please Set Salary Component and Kegiatan Account First")
-
-    #     je = frappe.new_doc("Journal Entry")
-    #     je.update({
-    #         "company": self.company,
-    #         "posting_date": self.posting_date,
-    #     })
-
-    #     total_payment = {}
-    #     for je_updater in self.payment_log_updater:
-    #         for emp in self.hasil_kerja:
-    #             amount = emp.get(je_updater["target_amount"])
-    #             if not amount:
-    #                 continue
-                
-    #             total_payment.setdefault(je_updater["target_link"], {
-    #                 "salary_component":
-    #                 "biaya_kebun":
-    #             })
-    #             je.append("accounts", {
-    #                 "account": self.employee_payment_account,
-    #                 "party_type": "Employee",
-    #                 "party": emp.employee,
-    #                 "debit_in_account_currency": emp.amount
-    #             })
-
-    #             total_payment += emp.amount
-
-    #     je.append("accounts", {
-    #         "account": self.kegiatan_account,
-    #         "credit_in_account_currency": total_payment
-    #     })
-
-    #     je.submit()
-
-    #     self.db_set("journal_entry", je.name)
           
     def make_attendance(self):
         for emp in self.hasil_kerja:
@@ -243,24 +204,13 @@ class BukuKerjaMandorController(PlantationController):
         
         for emp in employee_hk:
             if emp.hari_kerja > 1:
-                frappe.throw("Employee {} exceeds Hari Kerja".format(emp.employee))
+                frappe.msgprint("Employee {} exceeds Hari Kerja".format(emp.employee))
 
     def on_cancel(self):
         # self.remove_journal()
         self.delete_payment_log()
 
         # self.update_rkb_realization()
-
-    # def remove_journal(self):
-    #     if not self.journal_entry:
-    #         return
-        
-    #     doc = frappe.get_doc("Journal Entry", self.journal_entry)
-    #     if doc.docstatus == 1:
-    #         doc.cancel()
-
-    #     self.db_set("journal_entry", "")
-    #     doc.delete()
                 
     def delete_payment_log(self):
         for emp in self.hasil_kerja:
