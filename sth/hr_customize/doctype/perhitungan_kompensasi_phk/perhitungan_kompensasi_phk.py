@@ -11,6 +11,9 @@ from hrms.hr.doctype.leave_application.leave_application import get_leave_balanc
 from sth.controllers.accounts_controller import AccountsController
 
 class PerhitunganKompensasiPHK(AccountsController):
+	def validate(self):
+		self.fetch_default_salary_component()
+		
 	def on_submit(self):
 		self.make_employee_payment_log()
 		self.update_exit_interview()
@@ -92,6 +95,8 @@ class PerhitunganKompensasiPHK(AccountsController):
 		doc.salary_component = self.earning_phk_component
 		doc.against_salary_component = self.deduction_phk_component
 		doc.save()
+
+		self.db_set('employee_payment_log', doc.name)
 
 	@frappe.whitelist()
 	def fetch_ssa(self):

@@ -64,6 +64,7 @@ function setDefaultAccount(frm) {
     .then(r => {
         if (r.message) {
             let linked_doc = r.message;
+            frm.refresh()
         }
     })
 }
@@ -73,6 +74,7 @@ function setDefaultSalaryComponent(frm) {
     .then(r => {
         if (r.message) {
             let linked_doc = r.message;
+            frm.refresh()
         }
     })
 }
