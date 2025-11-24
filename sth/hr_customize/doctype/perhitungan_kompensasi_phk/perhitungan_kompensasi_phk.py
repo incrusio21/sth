@@ -12,8 +12,9 @@ from sth.controllers.accounts_controller import AccountsController
 
 class PerhitunganKompensasiPHK(AccountsController):
 	def on_submit(self):
-		self.make_gl_entry()
+		self.make_employee_payment_log()
 		self.update_exit_interview()
+		self.make_gl_entry()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -79,6 +80,18 @@ class PerhitunganKompensasiPHK(AccountsController):
 		}
 		frappe.db.set_value("Exit Interview", self.exit_interview, updated)
 
+	def make_employee_payment_log(self):
+		doc = frappe.new_doc("Employee Payment Log")
+		doc.employee = self.employee
+		doc.company = self.company
+		doc.posting_date = self.posting_date
+		doc.payroll_date = self.posting_date
+		doc.status = "Approved"
+		doc.amount = self.grand_total
+		doc.salary_component = self.earning_phk_component
+		doc.against_salary_component = self.deduction_phk_component
+		doc.save()
+
 	@frappe.whitelist()
 	def fetch_ssa(self):
 		employee = frappe.db.get_value("Employee", self.employee, "*")
@@ -122,11 +135,9 @@ def filter_exit_interview(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def make_payment_entry(source_name, target_doc=None):
 	def post_process(source, target):
-		internal_employee = frappe.db.get_single_value("Payment Settings", "internal_employee")
-		employee = frappe.db.get_value("Employee", internal_employee, "*")
+		employee = frappe.db.get_value("Employee", source.employee, "*")
 		company = frappe.db.get_value("Company", source.company, "*")
-  
-		target.internal_employee = 1
+
 		target.payment_type = "Pay"
 		target.party_type = "Employee"
 		target.party = employee.name
