@@ -86,6 +86,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 		doc.company = self.company
 		doc.posting_date = self.posting_date
 		doc.payroll_date = self.posting_date
+		doc.hari_kerja = 1
 		doc.status = "Approved"
 		doc.amount = self.grand_total
 		doc.salary_component = self.earning_phk_component
