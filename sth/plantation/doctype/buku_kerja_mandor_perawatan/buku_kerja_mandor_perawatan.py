@@ -46,6 +46,9 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			item.premi_amount = self.rupiah_premi
 
 	def update_value_after_amount(self, item, precision):
+		if item.parentfield != "hasil_kerja":
+			return
+		
 		# Hitung total brondolan
 		item.sub_total = flt(item.amount + item.premi_amount, precision)
 		

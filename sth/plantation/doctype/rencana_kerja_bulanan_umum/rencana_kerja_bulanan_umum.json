@@ -1,11 +1,14 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-09-03 10:56:30.760074",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_myy9",
+  "naming_series",
   "rencana_kerja_bulanan",
   "unit",
   "divisi",
@@ -298,16 +301,24 @@
    "fieldtype": "Currency",
    "label": "Mandor 1 Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "RKB-UMM-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-06 14:12:12.083905",
+ "modified": "2025-11-25 10:13:42.748880",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Umum",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -1,11 +1,14 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "format:BGT-KAP-{#####}",
  "creation": "2025-07-24 15:39:36.838187",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_1ayj",
+  "naming_series",
   "budget_kebun_tahunan",
   "unit",
   "fiscal_year",
@@ -224,16 +227,24 @@
   {
    "fieldname": "column_break_lbin",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BGT-KAP-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-03 15:46:26.459707",
+ "modified": "2025-11-25 09:49:40.114048",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Kapital Tahunan",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

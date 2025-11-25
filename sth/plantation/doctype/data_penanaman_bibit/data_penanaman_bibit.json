@@ -13,6 +13,7 @@
   "set_posting_time",
   "column_break_onba",
   "company",
+  "amended_from",
   "section_break_toxq",
   "no_spb",
   "divisi",
@@ -30,8 +31,7 @@
   "employee_assisten",
   "intex",
   "column_break_auoy",
-  "address",
-  "amended_from"
+  "address"
  ],
  "fields": [
   {
@@ -60,7 +60,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Data Pemindahan Transplanting Bibit",
+   "options": "Data Penanaman Bibit",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -95,7 +95,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Data Pemindahan Transplanting Bibit",
+   "options": "Data Penanaman Bibit",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -220,14 +220,15 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "DPNMB-"
+   "options": "DPNMB-",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 10:58:58.483711",
+ "modified": "2025-11-25 10:02:00.446495",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penanaman Bibit",
