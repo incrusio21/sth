@@ -33,6 +33,7 @@ frappe.ui.form.on("Transaksi Bonus", {
         );
 
         frm.fields_dict["table_employee"].grid.refresh();
+        frm.refresh_field("table_employee");
       });
     }
   },

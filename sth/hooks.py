@@ -161,10 +161,10 @@ doc_events = {
         "on_submit": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 		"on_cancel": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 	},    
-	"Training Event": {
-		"on_submit": "sth.custom.training_event.create_journal_entry",
-		"on_cancel": "sth.custom.training_event.delete_journal_entry",
-	},
+	# "Training Event": {
+	# 	"on_submit": "sth.custom.training_event.create_journal_entry",
+	# 	"on_cancel": "sth.custom.training_event.delete_journal_entry",
+	# },
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
 	},
