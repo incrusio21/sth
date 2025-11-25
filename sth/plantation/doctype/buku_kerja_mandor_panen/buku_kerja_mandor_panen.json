@@ -24,7 +24,7 @@
   "mandor1",
   "kerani",
   "status_panen",
-  "status",
+  "manual_hk",
   "amended_from",
   "detail_bkm_section",
   "kegiatan_account",
@@ -69,6 +69,7 @@
   "reference_section",
   "rencana_kerja_harian",
   "is_used",
+  "status",
   "column_break_khlg",
   "voucher_type",
   "voucher_no",
@@ -551,13 +552,19 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "BKM-PNN-"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_hk",
+   "fieldtype": "Check",
+   "label": "Manual HK"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 10:57:25.390318",
+ "modified": "2025-11-24 14:53:00.267073",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

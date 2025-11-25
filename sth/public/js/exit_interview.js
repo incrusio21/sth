@@ -2,6 +2,7 @@ frappe.ui.form.on("Exit Interview", {
     refresh(frm){
         btnCreatePerhitunganPHK(frm);
         frm.set_value('ref_doctype', 'Perhitungan Kompensasi PHK');
+        frm.ignore_doctypes_on_cancel_all = ["Perhitungan Kompensasi PHK"]
     }
 })
 
