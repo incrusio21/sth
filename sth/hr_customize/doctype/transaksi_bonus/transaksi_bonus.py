@@ -98,7 +98,7 @@ class TransaksiBonus(AccountsController):
 
 	def remove_employee_payment_log(self, table_employee):
 		for emp in table_employee:
-			for field in ["employee_payment_log_earning_bonus", "employee_payment_log_deduction_bonus"]:
+			for field in ["employee_payment_log"]:
 				frappe.db.set_value(
 					"Detail Transaksi Bonus",
 					emp.name,

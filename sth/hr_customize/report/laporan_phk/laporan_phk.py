@@ -8,9 +8,24 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = []
 
-	data.append({
-		"nama": "Testing"
-	})
+	query_l_phk = frappe.db.sql("""
+		SELECT 
+		pkp.employee_name as nama,
+		ee.no_ktp as nik_ktp,
+		ee.bank_ac_no as no_rek,
+		ee.date_of_joining as tanggal_masuk_kerja,
+		ee.relieving_date as tanggal_phk,
+		ee.company as pt,
+		pkp.dphk as dasar_phk,
+		eilb.employee_name as yang_mengeluarkan_surat,
+		pkp.grand_total as pesangon_kompensasi
+		FROM `tabPerhitungan Kompensasi PHK` as pkp
+		JOIN `tabEmployee` as ee ON ee.name = pkp.employee
+		JOIN `tabEmployee` as eilb ON eilb.name = pkp.ilb;
+  """, as_dict=True)
+
+	for emp in query_l_phk:
+		data.append(emp)
 
 	return columns, data
 

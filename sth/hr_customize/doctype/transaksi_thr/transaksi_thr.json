@@ -31,7 +31,10 @@
   "more_information_tab",
   "accounts_details_section",
   "salary_account",
-  "credit_to"
+  "credit_to",
+  "components_details_section",
+  "earning_thr_component",
+  "deduction_thr_component"
  ],
  "fields": [
   {
@@ -195,13 +198,30 @@
    "fieldtype": "Link",
    "label": "Religion Group",
    "options": "Religion Group"
+  },
+  {
+   "fieldname": "components_details_section",
+   "fieldtype": "Section Break",
+   "label": "Components Details"
+  },
+  {
+   "fieldname": "earning_thr_component",
+   "fieldtype": "Link",
+   "label": "Earning THR Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "deduction_thr_component",
+   "fieldtype": "Link",
+   "label": "Deduction THR Component",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-18 15:14:02.260708",
+ "modified": "2025-11-24 13:25:45.509362",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

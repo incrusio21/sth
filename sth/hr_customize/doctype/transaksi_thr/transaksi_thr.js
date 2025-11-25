@@ -5,6 +5,7 @@ frappe.ui.form.on("Transaksi THR", {
   refresh(frm) {
     if (frm.doc.docstatus === 0 || frm.is_new()) {
       cur_frm.toggle_display("get_employee_data", true);
+      fetchAccountAndSalaryAccount(frm);
     } else {
       cur_frm.toggle_display("get_employee_data", false);
     }
@@ -115,20 +116,8 @@ frappe.ui.form.on("Transaksi THR", {
       return;
     }
 
-    for (const emp of records.message) {
-      const thr_rate = await frappe.call({
-        method: "get_thr_rate",
-        doc: frm.doc,
-        args: {
-          employee: emp.name,
-          pkp_status: emp.pkp_status,
-          employee_grade: emp.grade,
-          employment_type: emp.employment_type,
-          kriteria: emp.custom_kriteria
-        },
-      });
-
-      if (thr_rate.message.thr_rule) {
+    for (const [index, emp] of records.message.entries()) {
+      if (emp.thr_rate.thr_rule) {
         let row = frm.add_child("table_employee", {
           nik: emp.no_ktp,
           employee: emp.name,
@@ -142,8 +131,8 @@ frappe.ui.form.on("Transaksi THR", {
           designation: emp.designation,
           custom_divisi: emp.custom_divisi,
           custom_kriteria: emp.custom_kriteria,
-          thr_rule: thr_rate.message.thr_rule,
-          subtotal: thr_rate.message.subtotal,
+          thr_rule: emp.thr_rate.thr_rule,
+          subtotal: emp.thr_rate.subtotal,
         });
 
         const rule_map = [
@@ -161,7 +150,7 @@ frappe.ui.form.on("Transaksi THR", {
           rule_map.forEach(item => {
             if (row.thr_rule.includes(item.key)) {
               item.fields.forEach(f => {
-                row[f] = thr_rate.message[f] ?? null;
+                row[f] = emp.thr_rate[f] ?? null;
               });
             } else {
               item.fields.forEach(f => {
@@ -170,79 +159,64 @@ frappe.ui.form.on("Transaksi THR", {
             }
           });
         }
-
       }
+
+      // const thr_rate = await frappe.call({
+      //   method: "get_thr_rate",
+      //   doc: frm.doc,
+      //   args: {
+      //     employee: emp.name,
+      //     pkp_status: emp.pkp_status,
+      //     employee_grade: emp.grade,
+      //     employment_type: emp.employment_type,
+      //     kriteria: emp.custom_kriteria
+      //   },
+      // });
+
+      // if (thr_rate.message.thr_rule) {
+      //   let row = frm.add_child("table_employee", {
+      //     nik: emp.no_ktp,
+      //     employee: emp.name,
+      //     employee_name: emp.employee_name,
+      //     date_of_joining: emp.date_of_joining,
+      //     employee_grade: emp.grade,
+      //     employment_type: emp.employment_type,
+      //     custom_kriteria: emp.custom_kriteria,
+      //     bank_ac_no: emp.bank_ac_no,
+      //     bank_name: emp.bank_name,
+      //     designation: emp.designation,
+      //     custom_divisi: emp.custom_divisi,
+      //     custom_kriteria: emp.custom_kriteria,
+      //     thr_rule: thr_rate.message.thr_rule,
+      //     subtotal: thr_rate.message.subtotal,
+      //   });
+
+      //   const rule_map = [
+      //     { key: "UMR", fields: ["umr"] },
+      //     { key: "GP", fields: ["gaji_pokok"] },
+      //     { key: "Uang_Daging", fields: ["uang_daging"] },
+      //     { key: "Natura", fields: ["natura"] },
+      //     {
+      //       key: "Jumlah_Bulan_Bekerja",
+      //       fields: ["jumlah_bulan_bekerja", "masa_kerja"]
+      //     },
+      //   ];
+
+      //   if (row.thr_rule) {
+      //     rule_map.forEach(item => {
+      //       if (row.thr_rule.includes(item.key)) {
+      //         item.fields.forEach(f => {
+      //           row[f] = thr_rate.message[f] ?? null;
+      //         });
+      //       } else {
+      //         item.fields.forEach(f => {
+      //           row[f] = null;
+      //         });
+      //       }
+      //     });
+      //   }
+      // }
     }
-
-    // for (const emp of records.message) {
-    //   const thr_rate = await frappe.call({
-    //     method: "get_thr_rate",
-    //     doc: frm.doc,
-    //     args: {
-    //       employee: emp.name,
-    //       pkp_status: emp.pkp_status,
-    //       employee_grade: emp.grade,
-    //       employment_type: emp.employment_type,
-    //       kriteria: emp.custom_kriteria
-    //     },
-    //   });
-
-    //   if (thr_rate.message) {
-    //     let row = frm.add_child("table_employee", {
-    //       nik: emp.no_ktp,
-    //       employee: emp.name,
-    //       employee_name: emp.employee_name,
-    //       date_of_joining: emp.date_of_joining,
-    //       employee_grade: emp.grade,
-    //       employment_type: emp.employment_type,
-    //       custom_kriteria: emp.custom_kriteria,
-    //       bank_ac_no: emp.bank_ac_no,
-    //       bank_name: emp.bank_name,
-    //       designation: emp.designation,
-    //       custom_divisi: emp.custom_divisi,
-    //       custom_kriteria: emp.custom_kriteria,
-    //       thr_rule: thr_rate.message.thr_rule,
-    //       subtotal: thr_rate.message.subtotal,
-    //     });
-
-    //     frm.doc.table_employee.forEach(r => {
-    //       const rule_map = [
-    //         { key: "UMR", fields: ["umr"] },
-    //         { key: "GP", fields: ["gaji_pokok"] },
-    //         { key: "Uang_Daging", fields: ["uang_daging"] },
-    //         { key: "Natura", fields: ["natura"] },
-    //         {
-    //           key: "Jumlah_Bulan_Bekerja",
-    //           fields: ["jumlah_bulan_bekerja", "masa_kerja"]
-    //         },
-    //       ];
-
-    //       if (r.thr_rule) {
-    //         rule_map.forEach(item => {
-    //           if (r.thr_rule.includes(item.key)) {
-    //             item.fields.forEach(f => {
-    //               console.log(emp.employee_name, f, thr_rate.message[f], thr_rate.message);
-    //               r[f] = thr_rate.message[f]
-    //             });
-    //           } else {
-    //             item.fields.forEach(f => {
-    //               r[f] = null
-    //             });
-    //           }
-    //         });
-    //       } else {
-    //         r.gaji_pokok = null;
-    //         r.umr = null;
-    //         r.uang_daging = null;
-    //         r.natura = null;
-    //         r.masa_kerja = null;
-    //         r.jumlah_bulan_bekerja = null;
-    //       }
-    //     });
-    //   }
-
-    //   frm.refresh_field("table_employee");
-    // }
     frm.refresh_field("table_employee");
 
     frm.doc.table_employee.forEach(r => {
@@ -262,7 +236,6 @@ frappe.ui.form.on("Transaksi THR", {
           if (r[f] == 0 || r[f] == undefined || r[f] == null) {
             r[f] = null;
           }
-          console.log(`${Math.random()} - ${f} - ${r[f]}`)
         });
       });
 
@@ -271,52 +244,25 @@ frappe.ui.form.on("Transaksi THR", {
   },
 });
 
-function toggle_thr_fields(frm, rule) {
-  const grid = frm.fields_dict.table_employee.grid;
-
-  const all_fields = [
-    "gaji_pokok",
-    "umr",
-    "uang_daging",
-    "natura",
-    "masa_kerja",
-    "jumlah_bulan_bekerja"
-  ];
-
-  // Hide semua field dulu
-  all_fields.forEach(f => grid.update_docfield_property(f, "hidden", 1));
-
-  const rule_map = [
-    { key: "UMR", fields: ["umr"] },
-    { key: "GP", fields: ["gaji_pokok"] },
-    { key: "Uang_Daging", fields: ["uang_daging"] },
-    { key: "Natura", fields: ["natura"] },
-    {
-      key: "Jumlah_Bulan_Bekerja",
-      fields: ["jumlah_bulan_bekerja", "masa_kerja"]
-    },
-  ];
-
-  // Show berdasarkan rule
-  rule_map.forEach(item => {
-    // console.log({
-    //   id: Math.random(),
-    //   rule: rule,
-    //   key: item.key,
-    //   is_show: rule.includes(item.key)
-    // });
-    if (rule.includes(item.key)) {
-      // console.log({
-      //   message: "END",
-      //   fields: item.fields
-      // });
-      item.fields.forEach(f => {
-        grid.update_docfield_property(f, "hidden", 0);
-      });
+async function fetchAccountAndSalaryAccount(frm) {
+  const company = await frappe.db.get_doc("Company", frm.doc.company);
+  const salarySettings = await frappe.call({
+    method: "frappe.client.get",
+    args: {
+      doctype: "Bonus and Allowance Settings",
+      name: "Bonus and Allowance Settings"
     }
   });
 
-  grid.refresh();
+  if (company) {
+    frm.set_value("salary_account", company.custom_default_bonus_salary_account);
+    frm.set_value("credit_to", company.custom_default_bonus_account);
+  }
+
+  if (salarySettings.message) {
+    frm.set_value("earning_thr_component", salarySettings.message.earning_thr_component);
+    frm.set_value("deduction_thr_component", salarySettings.message.deduction_thr_component);
+  }
 }
 
 sth.plantation.TransaksiTHR = class TransaksiTHR extends sth.plantation.AccountsController {

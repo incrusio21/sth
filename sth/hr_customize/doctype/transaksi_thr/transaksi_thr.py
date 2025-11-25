@@ -21,8 +21,9 @@ class TransaksiTHR(AccountsController):
 
 	def on_submit(self):
 		for emp in self.table_employee:
-			self.make_employee_payment_log(emp, "earning")
-			self.make_employee_payment_log(emp, "deduction")
+			self.make_employee_payment_log(emp)
+			# self.make_employee_payment_log(emp, "earning")
+			# self.make_employee_payment_log(emp, "deduction")
 
 		self.make_gl_entry()
 
@@ -31,52 +32,72 @@ class TransaksiTHR(AccountsController):
 		self.remove_employee_payment_log(self.table_employee)
 		self.make_gl_entry()
 
-	def make_employee_payment_log(self, emp, log_type):
-		hr_settings = frappe.get_single("Bonus and Allowance Settings")
-		company = frappe.get_doc("Company", self.company)
+	def make_employee_payment_log(self, emp):
+		doc = frappe.new_doc("Employee Payment Log")
+		doc.employee = self.employee
+		doc.company = self.company
+		doc.posting_date = self.posting_date
+		doc.payroll_date = self.posting_date
+		doc.hari_kerja = 1
+		doc.status = "Approved"
+		doc.amount = self.grand_total
+		doc.salary_component = self.earning_thr_component
+		doc.against_salary_component = self.deduction_thr_component
+		doc.save()
 
-		settings_field = {
-			"earning": hr_settings.earning_thr_component,
-			"deduction": hr_settings.deduction_thr_component,
-		}
+		frappe.db.set_value(
+			"Detail Transaksi THR",
+			emp.name,
+			"employee_payment_log",
+			doc.name
+		)
 
-		if not settings_field.get(log_type):
-			frappe.throw(f"Salary Component untuk '{log_type}' belum diset di Bonus and Allowance Settings")
+	# def make_employee_payment_log(self, emp, log_type):
+	# 	hr_settings = frappe.get_single("Bonus and Allowance Settings")
+	# 	company = frappe.get_doc("Company", self.company)
 
-		payment_log = frappe.new_doc("Employee Payment Log")
-		payment_log.update({
-			"employee": emp.employee,
-			"hari_kerja": 1,
-			"company": self.company,
-			"posting_date": self.posting_date,
-			"payroll_date": self.posting_date,
-			"status": "Approved",
-			"is_paid": 0,
-			"amount": flt(emp.subtotal),
-			"salary_component": settings_field[log_type],
-			"account": company.custom_default_thr_account
-		})
+	# 	settings_field = {
+	# 		"earning": hr_settings.earning_thr_component,
+	# 		"deduction": hr_settings.deduction_thr_component,
+	# 	}
 
-		payment_log.insert(ignore_permissions=True)
-		payment_log.submit()
+	# 	if not settings_field.get(log_type):
+	# 		frappe.throw(f"Salary Component untuk '{log_type}' belum diset di Bonus and Allowance Settings")
 
-		field_map = {
-			"earning": "employee_payment_log_earning_thr",
-			"deduction": "employee_payment_log_deduction_thr",
-		}
+	# 	payment_log = frappe.new_doc("Employee Payment Log")
+	# 	payment_log.update({
+	# 		"employee": emp.employee,
+	# 		"hari_kerja": 1,
+	# 		"company": self.company,
+	# 		"posting_date": self.posting_date,
+	# 		"payroll_date": self.posting_date,
+	# 		"status": "Approved",
+	# 		"is_paid": 0,
+	# 		"amount": flt(emp.subtotal),
+	# 		"salary_component": settings_field[log_type],
+	# 		"account": company.custom_default_thr_account
+	# 	})
 
-		fieldname = field_map.get(log_type)
-		if fieldname:
-			frappe.db.set_value(
-				"Detail Transaksi THR",
-				emp.name,
-				fieldname,
-				payment_log.name
-			)
+	# 	payment_log.insert(ignore_permissions=True)
+	# 	payment_log.submit()
+
+	# 	field_map = {
+	# 		"earning": "employee_payment_log_earning_thr",
+	# 		"deduction": "employee_payment_log_deduction_thr",
+	# 	}
+
+	# 	fieldname = field_map.get(log_type)
+	# 	if fieldname:
+	# 		frappe.db.set_value(
+	# 			"Detail Transaksi THR",
+	# 			emp.name,
+	# 			fieldname,
+	# 			payment_log.name
+	# 		)
 
 	def remove_employee_payment_log(self, table_employee):
 		for emp in table_employee:
-			for field in ["employee_payment_log_earning_thr", "employee_payment_log_deduction_thr"]:
+			for field in ["employee_payment_log"]:
 				frappe.db.set_value(
 					"Detail Transaksi THR",
 					emp.name,
@@ -93,16 +114,16 @@ class TransaksiTHR(AccountsController):
 					except frappe.DoesNotExistError:
 						frappe.log_error(f"Payment Log {log_name} tidak ditemukan", "Cancel Transaksi THR")
 
-	@frappe.whitelist()
-	def get_salary_structure_assignment(self, employee):
-		return frappe.db.sql("""
-			SELECT
-			ssa.base as gaji_pokok
-			FROM `tabSalary Structure Assignment` as ssa
-			WHERE ssa.employee = %s
-			ORDER BY ssa.from_date DESC
-			LIMIT 1;
-		""", (employee), as_dict=True)
+	# @frappe.whitelist()
+	# def get_salary_structure_assignment(self, employee):
+	# 	return frappe.db.sql("""
+	# 		SELECT
+	# 		ssa.base as gaji_pokok
+	# 		FROM `tabSalary Structure Assignment` as ssa
+	# 		WHERE ssa.employee = %s
+	# 		ORDER BY ssa.from_date DESC
+	# 		LIMIT 1;
+	# 	""", (employee), as_dict=True)
 
 	def get_jumlah_bulan_bekerja(self, date_of_joining):
 		if not date_of_joining:
@@ -134,6 +155,16 @@ class TransaksiTHR(AccountsController):
 			"custom_kriteria",
 			]
 		)
+
+		for emp in records:
+			thr = self.get_thr_rate(
+				employee=emp.name,
+				pkp_status=emp.pkp_status,
+				employee_grade=emp.grade,
+				employment_type=emp.employment_type,
+				kriteria=emp.custom_kriteria
+			)
+			emp["thr_rate"] = thr
 
 		return records
 

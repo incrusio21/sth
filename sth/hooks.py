@@ -35,8 +35,9 @@ doctype_js = {
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Loan": "hr_customize/custom/loan.js",
 	"Employee": "public/js/employee.js",
-    "Supplier Quotation": "public/js/supplier_quotation.js",
-    "Exit Interview": "public/js/exit_interview.js",
+	"Supplier Quotation": "public/js/supplier_quotation.js",
+	"Exit Interview": "public/js/exit_interview.js",
+	"Purchase Invoice": "public/js/purchase_invoice.js"
 }
 doctype_list_js = {"Request for Quotation" : "public/js/request_for_quotation_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
