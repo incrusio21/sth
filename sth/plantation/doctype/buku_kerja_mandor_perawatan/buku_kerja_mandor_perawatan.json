@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-07-08 14:08:50.503557",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_2wm0",
+  "naming_series",
   "unit",
   "divisi",
   "kategori_kegiatan",
@@ -409,16 +411,24 @@
    "fieldname": "manual_hk",
    "fieldtype": "Check",
    "label": "Manual HK"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BKM-PWT-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-24 14:47:31.175128",
+ "modified": "2025-11-25 09:59:32.563810",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

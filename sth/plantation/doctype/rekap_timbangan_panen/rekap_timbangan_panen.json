@@ -110,14 +110,15 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "RKP-TBG-"
+   "options": "RKP-TBG-",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 16:28:53.390557",
+ "modified": "2025-11-25 10:02:19.860492",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Timbangan Panen",

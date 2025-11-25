@@ -1,11 +1,14 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-09-03 15:34:25.426152",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_myy9",
+  "naming_series",
   "rencana_kerja_bulanan",
   "unit",
   "column_break_ixrj",
@@ -136,16 +139,24 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "RKB-SUP-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-03 15:39:24.108021",
+ "modified": "2025-11-25 10:07:36.032068",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Support",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

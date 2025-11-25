@@ -214,7 +214,8 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "DPB-"
+   "options": "DPB-",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -237,7 +238,7 @@
    "link_fieldname": "data_penyemaian_bibit"
   }
  ],
- "modified": "2025-11-20 10:58:19.346745",
+ "modified": "2025-11-25 10:03:13.323109",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penyemaian Bibit",

@@ -1,12 +1,15 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-07-24 16:05:41.497824",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
   "section_break_fbzl",
+  "naming_series",
   "budget_kebun_tahunan",
   "unit",
   "fiscal_year",
@@ -225,87 +228,87 @@
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_januari",
    "fieldtype": "Percent",
-   "label": "Januari"
+   "label": "Januari",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_februari",
    "fieldtype": "Percent",
-   "label": "Februari"
+   "label": "Februari",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_maret",
    "fieldtype": "Percent",
-   "label": "Maret"
+   "label": "Maret",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_april",
    "fieldtype": "Percent",
-   "label": "April"
+   "label": "April",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_mei",
    "fieldtype": "Percent",
-   "label": "Mei"
+   "label": "Mei",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_juni",
    "fieldtype": "Percent",
-   "label": "Juni"
+   "label": "Juni",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_juli",
    "fieldtype": "Percent",
-   "label": "Juli"
+   "label": "Juli",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_agustus",
    "fieldtype": "Percent",
-   "label": "Agustus"
+   "label": "Agustus",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_september",
    "fieldtype": "Percent",
-   "label": "September"
+   "label": "September",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_oktober",
    "fieldtype": "Percent",
-   "label": "Oktober"
+   "label": "Oktober",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_november",
    "fieldtype": "Percent",
-   "label": "November"
+   "label": "November",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "default": "0",
-   "read_only_depends_on": "eval:doc.is_distribute",
    "fieldname": "per_desember",
    "fieldtype": "Percent",
-   "label": "Desember"
+   "label": "Desember",
+   "read_only_depends_on": "eval:doc.is_distribute"
   },
   {
    "fieldname": "tonase",
@@ -397,16 +400,24 @@
    "fieldname": "is_distribute",
    "fieldtype": "Check",
    "label": "Distribute equally across 12 months"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BGT-PNN-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-06 14:41:56.036626",
+ "modified": "2025-11-25 09:55:09.546308",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Panen Tahunan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

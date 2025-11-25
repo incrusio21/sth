@@ -1,13 +1,15 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:BGT-PWT-{budget_kebun_tahunan}",
+ "autoname": "naming_series:",
  "creation": "2025-07-24 16:04:36.298042",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
   "section_break_fbzl",
+  "naming_series",
   "budget_kebun_tahunan",
   "unit",
   "thn_bgt",
@@ -482,17 +484,24 @@
    "fieldname": "rupiah_basis",
    "fieldtype": "Currency",
    "label": "Rupiah/Satuan Basis"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BGT-PWT-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-28 13:43:01.729876",
+ "modified": "2025-11-25 09:48:59.663782",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Perawatan Tahunan",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

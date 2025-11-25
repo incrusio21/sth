@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-10-22 16:54:44.108940",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_nbyx",
+  "naming_series",
   "rencana_kerja_bulanan",
   "unit",
   "divisi",
@@ -104,16 +106,24 @@
    "fieldtype": "Table",
    "label": "Details",
    "options": "Detail RKB Supervisi"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "RKB-SPV-.#####",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-27 11:39:15.642201",
+ "modified": "2025-11-25 10:06:45.251135",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Bulanan Supervisi Panen",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

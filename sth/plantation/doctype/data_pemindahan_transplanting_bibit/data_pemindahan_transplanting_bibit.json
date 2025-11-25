@@ -154,14 +154,15 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "DPTB-"
+   "options": "DPTB-",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 10:59:37.915688",
+ "modified": "2025-11-25 10:02:35.210093",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Pemindahan Transplanting Bibit",
