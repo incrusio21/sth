@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:nama_komoditi",
+ "creation": "2025-11-25 13:37:15.319055",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "nama_komoditi",
+  "tempat_penyerahan",
+  "keterangan_per_komoditi"
+ ],
+ "fields": [
+  {
+   "fieldname": "tempat_penyerahan",
+   "fieldtype": "Link",
+   "label": "Tempat Penyerahan",
+   "options": "Location"
+  },
+  {
+   "fieldname": "nama_komoditi",
+   "fieldtype": "Data",
+   "label": "Nama Komoditi",
+   "unique": 1
+  },
+  {
+   "fieldname": "keterangan_per_komoditi",
+   "fieldtype": "Table",
+   "label": "Keterangan Per Komoditi",
+   "options": "Keterangan Per Komoditi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-25 13:45:15.485091",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "Komoditi",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
