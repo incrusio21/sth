@@ -1,49 +1,39 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:ns",
+ "autoname": "naming_series:",
  "creation": "2025-09-10 13:42:26.355494",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_nmiu",
-  "ns",
+  "naming_series",
+  "company",
+  "unit",
   "js",
-  "np",
-  "wil",
-  "column_break_asvx",
+  "lokasi",
   "ll",
-  "issue_date",
-  "expiry_date",
+  "nsu",
+  "tsu",
+  "npp",
+  "nps",
+  "tts",
+  "tps",
+  "nh",
+  "np",
+  "column_break_asvx",
+  "mb",
   "status",
+  "last_updt",
   "fs",
-  "ket",
-  "amended_from"
+  "ket"
  ],
  "fields": [
   {
    "fieldname": "section_break_nmiu",
    "fieldtype": "Section Break",
    "label": "Header"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Sertifikat Tanah",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "ns",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Nomor Sertifikat",
-   "reqd": 1,
-   "unique": 1
   },
   {
    "fieldname": "js",
@@ -59,33 +49,13 @@
    "reqd": 1
   },
   {
-   "fieldname": "wil",
-   "fieldtype": "Link",
-   "label": "Wilayah",
-   "options": "Wilayah"
-  },
-  {
    "fieldname": "column_break_asvx",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "ll",
    "fieldtype": "Float",
-   "label": "Luas Lahan (Ha)"
-  },
-  {
-   "fieldname": "issue_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Terbit"
-  },
-  {
-   "fieldname": "expiry_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Berakhir"
+   "label": "Luas Lahan (M2)"
   },
   {
    "fieldname": "status",
@@ -102,17 +72,117 @@
    "fieldname": "ket",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "STL-"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Perusahaan",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lokasi",
+   "fieldtype": "Data",
+   "label": "Lokasi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nsu",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Surat Ukur",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "tsu",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Surat Ukur",
+   "reqd": 1
+  },
+  {
+   "fieldname": "npp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No. Peta Pendaftaran",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "nps",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No. Pengecekan Sertifikat",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "tts",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Terbit Sertifikat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tps",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Pengecekan Sertifikat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nh",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Hak",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "mb",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Masa Berlaku",
+   "reqd": 1
+  },
+  {
+   "fieldname": "last_updt",
+   "fieldtype": "Read Only",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Last Update"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-09-10 13:47:28.274351",
+ "modified": "2025-11-25 15:15:21.679690",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
- "naming_rule": "By fieldname",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -125,7 +195,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

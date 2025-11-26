@@ -1,0 +1,286 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"NTjjLg4IWk\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget Tahunan\",\"col\":4}},{\"id\":\"4KIcxry6u4\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Bulanan\",\"col\":5}},{\"id\":\"GZ-G-a2esl\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian\",\"col\":3}},{\"id\":\"6-1PwcsycB\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}}]",
+ "creation": "2025-09-22 15:11:23.900561",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "quality-3",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Budgeting",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Tahunan",
+   "link_count": 8,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Kebun Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Kebun Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Perawatan Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Perawatan Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Panen Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Panen Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Traksi Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Traksi Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Bengkel Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Bengkel Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Supervisi Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Supervisi Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Biaya Umum Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Biaya Umum Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Kapital Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Kapital Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Harian",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Harian",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Harian",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Budget Tahunan",
+   "link_count": 0,
+   "link_to": "Rekap Budget Tahunan",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Kegiatan Rawat",
+   "link_count": 0,
+   "link_to": "Rekap Kegiatan Rawat",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Kegiatan Panen",
+   "link_count": 0,
+   "link_to": "Rekap Kegiatan Panen",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Kegiatan Traksi",
+   "link_count": 0,
+   "link_to": "Rekap Kegiatan Traksi",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Budget Panen",
+   "link_count": 0,
+   "link_to": "Rekap Budget Panen",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Kebutuhan Material",
+   "link_count": 0,
+   "link_to": "Rekap Kebutuhan Material",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan",
+   "link_count": 7,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan Perawatan",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan Perawatan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan Panen",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan Panen",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan Pengangkutan Panen",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan Pengangkutan Panen",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan Umum",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan Umum",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan Support",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan Support",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Bulanan Supervisi Panen",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Bulanan Supervisi Panen",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 16:42:34.095525",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Budgeting",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "Plantation",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 5.0,
+ "shortcuts": [],
+ "title": "Budgeting"
+}

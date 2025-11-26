@@ -1,10 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-10-09 12:33:58.564791",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "pkp",
   "employment_type",
   "column_break_mgkk",
@@ -43,15 +45,22 @@
    "fieldtype": "Int",
    "label": "Multiplier",
    "non_negative": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "NM-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-13 10:03:17.507938",
+ "modified": "2025-11-26 09:05:32.200338",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Natura Multiplier",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

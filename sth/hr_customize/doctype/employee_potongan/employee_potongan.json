@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:POTKAR-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-10-09 15:28:19.589177",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_a3kp",
+  "naming_series",
   "unit",
   "employment_type",
   "jenis_potongan",
@@ -103,17 +104,23 @@
    "label": "Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "POTKAR-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-10 16:31:32.624009",
+ "modified": "2025-11-25 15:03:06.140861",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Potongan",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:PP-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-09-10 13:54:31.391242",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_m4ut",
+  "naming_series",
   "unit",
   "kategori",
   "pemesan",
@@ -177,17 +178,23 @@
    "fieldtype": "Table",
    "label": "Details",
    "options": "Pengajuan Pembayaran Details"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "PPL-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-11 14:39:11.316931",
+ "modified": "2025-11-25 15:12:05.635590",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

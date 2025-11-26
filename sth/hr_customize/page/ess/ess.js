@@ -37,54 +37,82 @@ frappe.ess_page = {
 			return;
 		}
 
-		const emp_doc = await frappe.call({
-			method: "frappe.client.get",
-			args: {
-				doctype: "Employee",
-				name: emp_list.message[0].name
-			}
-		});
-		const atasan = await frappe.call({
-			method: "sth.overrides.ess.get_employee",
-			args: {
-				employee: emp_doc.message.reports_to,
-			},
-		});
-		const exit_interview = await frappe.call({
-			method: "sth.overrides.ess.get_exit_interview_unrestricted",
+		const res = await frappe.call({
+			method: "sth.overrides.ess.get_employee_dashboard_data",
 			args: {
 				employee: emp_list.message[0].name,
 			},
 		});
-		const leaves = await frappe.call({
-			method: "hrms.hr.doctype.leave_application.leave_application.get_leave_details",
-			args: {
-				employee: emp_list.message[0].name,
-				date: new Date().toISOString().split("T")[0]
-			},
-		});
-		const kpi_values = await frappe.call({
-			method: "sth.overrides.ess.get_kpi_values",
-			args: {
-				employee: emp_list.message[0].name,
-				date: new Date().toISOString().split("T")[0]
-			},
-		});
-		const grievances = await frappe.call({
-			method: "sth.overrides.ess.get_employee_grievance",
-			args: {
-				employee: emp_list.message[0].name,
-			},
-		});
+		const data = res.message;
 
-		const { name, no_ktp, employee_name, company, designation, date_of_joining, date_of_birth, current_address, custom_nomor_kartu_keluarga, custom_no_bpjs_ketenagakerjaan, custom_no_bpjs_kesehatan, npwp, cell_number, emergency_phone_number, personal_email, image, department, reports_to, bio } = emp_doc.message;
-		const { custom_upload_file_document, interview_summary } = exit_interview.message;
+		const emp_doc = data.employee;
+		const atasan = data.atasan;
+		const exit_interview = data.exit_interview;
+		const kpi_values = data.kpi_values;
+		const grievances = data.grievances;
+		const leaves = data.leave_details.leave_allocation;
+
+		// const emp_list = await frappe.call({
+		// 	method: "frappe.client.get_list",
+		// 	args: {
+		// 		doctype: "Employee",
+		// 		filters: { user_id: frappe.session.user }
+		// 	}
+		// });
+
+		// if (!emp_list.message[0]) {
+		// 	$(page.body).html(`<h4 class="text-center">Silahkan lengkapi data employee dan users</h4>`);
+		// 	return;
+		// }
+
+		// const emp_doc = await frappe.call({
+		// 	method: "frappe.client.get",
+		// 	args: {
+		// 		doctype: "Employee",
+		// 		name: emp_list.message[0].name
+		// 	}
+		// });
+		// // const atasan = await frappe.call({
+		// // 	method: "sth.overrides.ess.get_employee",
+		// // 	args: {
+		// // 		employee: emp_doc.message.reports_to,
+		// // 	},
+		// // });
+		// const exit_interview = await frappe.call({
+		// 	method: "sth.overrides.ess.get_exit_interview_unrestricted",
+		// 	args: {
+		// 		employee: emp_list.message[0].name,
+		// 	},
+		// });
+		// const leaves = await frappe.call({
+		// 	method: "hrms.hr.doctype.leave_application.leave_application.get_leave_details",
+		// 	args: {
+		// 		employee: emp_list.message[0].name,
+		// 		date: new Date().toISOString().split("T")[0]
+		// 	},
+		// });
+		// const kpi_values = await frappe.call({
+		// 	method: "sth.overrides.ess.get_kpi_values",
+		// 	args: {
+		// 		employee: emp_list.message[0].name,
+		// 		date: new Date().toISOString().split("T")[0]
+		// 	},
+		// });
+		// const grievances = await frappe.call({
+		// 	method: "sth.overrides.ess.get_employee_grievance",
+		// 	args: {
+		// 		employee: emp_list.message[0].name,
+		// 	},
+		// });
+
+		const { name, no_ktp, employee_name, company, designation, date_of_joining, date_of_birth, current_address, custom_nomor_kartu_keluarga, custom_no_bpjs_ketenagakerjaan, custom_no_bpjs_kesehatan, npwp, cell_number, emergency_phone_number, personal_email, image, department, reports_to, bio } = emp_doc;
+		const { custom_upload_file_document, interview_summary } = exit_interview;
 		let tableCuti = ``;
 		let tableKpi = ``;
 		let tableGrievance = ``;
 
-		for (const key in leaves.message.leave_allocation) {
-			const data = leaves.message.leave_allocation[key];
+		for (const key in leaves) {
+			const data = leaves[key];
 			tableCuti += `
 			<tr>
 				<td>${key}</td>
@@ -94,8 +122,8 @@ frappe.ess_page = {
 			</tr>
 			`;
 		}
-		for (const key in kpi_values.message) {
-			const data = kpi_values.message[key]
+		for (const key in kpi_values) {
+			const data = kpi_values[key]
 			tableKpi += `
 				<tr>
 					<td>${data.year}</td>
@@ -103,8 +131,8 @@ frappe.ess_page = {
 				</tr>
 			`;
 		}
-		for (const key in grievances.message) {
-			const data = grievances.message[key]
+		for (const key in grievances) {
+			const data = grievances[key]
 			tableGrievance += `
 				<tr>
 					<td>${data.tipe}</td>
@@ -224,7 +252,7 @@ frappe.ess_page = {
 								<tr>
 									<td>Atasan</td>
 									<td>:</td>
-									<td>${atasan.message.employee_name ?? '-'}</td>
+									<td>${atasan?.employee_name ?? '-'}</td>
 								</tr>
 								<tr>
 									<td>Jobdes</td>

@@ -1,13 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:AD-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-09-10 13:31:08.735648",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
   "section_break_gzmq",
+  "naming_series",
   "status_anggaran_dasar",
   "akta",
   "column_break_lpdk",
@@ -119,17 +120,22 @@
    "fieldtype": "Table",
    "label": "Saham",
    "options": "Detail Form Saham"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ADL-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-11-11 14:55:27.949469",
+ "modified": "2025-11-26 09:19:47.263146",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -142,7 +148,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

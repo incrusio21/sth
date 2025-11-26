@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:GIS-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-09-12 14:42:18.363959",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
+  "naming_series",
   "unit",
   "divisi",
   "blok",
@@ -208,16 +209,22 @@
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "PAD-GIS-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-04 13:43:02.059413",
+ "modified": "2025-11-25 15:13:13.662642",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "GIS",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
