@@ -28,6 +28,7 @@ class AccountsController(Document):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._party_type = "Employee"
+        self._expense_account = "salary_account"
 
     def validate(self):
         self.validate_credit_to_acc()
@@ -142,7 +143,7 @@ class AccountsController(Document):
             self.get_gl_dict(
                 {
                     "account": self.credit_to,
-                    "against": self.salary_account,
+                    "against": self.get(self._expense_account),
                     "credit": self.grand_total,
                     "credit_in_account_currency": self.grand_total,
                     "cost_center": self.cost_center,
@@ -161,7 +162,7 @@ class AccountsController(Document):
         gl_entries.append(
             self.get_gl_dict(
                 {
-                    "account": self.salary_account,
+                    "account": self.get(self._expense_account),
                     "against": self.get(scrub(self._party_type)) or self.credit_to,
                     "debit": self.grand_total,
                     "debit_in_account_currency": self.grand_total,
