@@ -94,6 +94,7 @@ async function showTrainingEventSelector(frm) {
         false
       );
       frm.refresh_field("items");
+      frm.trigger("calculate_taxes_and_totals");
       d.hide();
     }
   });
