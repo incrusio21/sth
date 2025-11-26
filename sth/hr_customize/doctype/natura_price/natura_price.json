@@ -1,11 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:SET-NTR-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-10-09 11:03:28.740245",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "company",
   "column_break_ydjc",
   "harga_beras",
@@ -43,16 +44,22 @@
    "fieldname": "valid_from",
    "fieldtype": "Date",
    "label": "Valid From"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SET-NP-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-10 16:11:39.674961",
+ "modified": "2025-11-26 09:06:27.119405",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Natura Price",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

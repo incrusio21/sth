@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-09-10 13:54:47.401911",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_1xrb",
+  "naming_series",
   "company",
   "unit",
   "np",
@@ -129,15 +131,22 @@
    "fieldtype": "Data",
    "label": "Pengadilan",
    "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "LTGSL-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-12 09:22:46.857317",
+ "modified": "2025-11-25 15:14:51.215005",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Litigasi",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

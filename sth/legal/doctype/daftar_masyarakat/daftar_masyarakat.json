@@ -1,11 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:DM-{nama}-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-09-12 15:33:43.264504",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "nama",
   "npr",
   "norek",
@@ -108,16 +109,22 @@
    "fieldname": "fktp",
    "fieldtype": "Attach Image",
    "label": "Foto KTP"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "DML-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-04 13:50:51.401890",
+ "modified": "2025-11-25 15:14:09.551282",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Daftar Masyarakat",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

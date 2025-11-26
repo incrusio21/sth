@@ -1,13 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:SET-THR-{#####}",
+ "autoname": "naming_series:",
  "creation": "2025-09-02 13:53:42.299848",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "details_tab",
   "header_section",
+  "naming_series",
   "company",
   "column_break_iund",
   "unit",
@@ -62,16 +63,22 @@
    "fieldtype": "HTML",
    "label": "Help",
    "options": "<h3>Help</h3>\n\n<p>Notes:</p>\n\n<ol> <li> Use <code>GP</code> for the employee\u2019s basic salary </li> <li> Use <code>UMR</code> for the employee\u2019s regional minimum wage </li> <li> Use <code>Natura</code> if the employee receives in-kind benefits </li> <li> Use <code>Uang_Daging</code> if the employee receives a meat allowance </li> <li> Use <code>Jumlah_Bulan_Bekerja</code> to calculate the employee\u2019s total months of service </li> </ol>\n\n<h4>Examples</h4>\n<ol>\n<li>Calculating Basic Formula THR<code><pre><code>Formula: 1 * (GP + Natura + Uang_Daging)</code></pre></code></li><code>\n</code></ol>"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SET-THR-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-18 10:48:19.984040",
+ "modified": "2025-11-26 09:04:42.450382",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup THR",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -88,7 +95,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -34,7 +34,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         }
 
         let me = this
-        for (const fieldname of ["kode_kegiatan", "tipe_kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
+        for (const fieldname of ["kegiatan", "tipe_kegiatan", "divisi", "is_bibitan", "blok", "batch", "posting_date"]) {
             frappe.ui.form.on(doc.doctype, fieldname, function () {
                 // me.get_rkb_data()
             });

@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:SB-{fiscal_year}-{et}",
+ "autoname": "naming_series:",
  "creation": "2025-08-26 13:40:17.160945",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_section",
+  "naming_series",
   "unit",
   "company",
   "column_break_mrlz",
@@ -64,16 +65,22 @@
    "fieldtype": "Link",
    "label": "Employee Grade",
    "options": "Employee Grade"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SET-BNS-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-29 15:08:11.041820",
+ "modified": "2025-11-26 09:07:19.680449",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Bonus",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

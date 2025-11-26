@@ -1,0 +1,177 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"3JNihNzekb\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Bibitan\",\"col\":4}},{\"id\":\"v0fPr3sSgy\",\"type\":\"card\",\"data\":{\"card_name\":\"BKM\",\"col\":4}},{\"id\":\"x0EAZ10i66\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Lainnya\",\"col\":4}}]",
+ "creation": "2025-09-23 15:38:12.021285",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "getting-started",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "BKM",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi Bibitan",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Penyemaian Bibit",
+   "link_count": 0,
+   "link_to": "Data Penyemaian Bibit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Pencatatan Dobletone Dan Afkir",
+   "link_count": 0,
+   "link_to": "Data Pencatatan Dobletone Dan Afkir",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Pemindahan Transplanting Bibit",
+   "link_count": 0,
+   "link_to": "Data Pemindahan Transplanting Bibit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Penanaman Bibit",
+   "link_count": 0,
+   "link_to": "Data Penanaman Bibit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "BKM",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mandor Perawatan",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mandor Perawatan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mandor Panen",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mandor Panen",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Surat Pengantar Buah",
+   "link_count": 0,
+   "link_to": "Surat Pengantar Buah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rekap Timbangan Panen",
+   "link_count": 0,
+   "link_to": "Rekap Timbangan Panen",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengajuan Panen Kontanan",
+   "link_count": 0,
+   "link_to": "Pengajuan Panen Kontanan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Curah Hujan",
+   "link_count": 0,
+   "link_to": "Curah Hujan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi Lainnya",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengajuan Budget Tambahan",
+   "link_count": 0,
+   "link_to": "Pengajuan Budget Tambahan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Material Request",
+   "link_count": 0,
+   "link_to": "Material Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-11-25 16:42:34.357490",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "BKM",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "Plantation",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 6.0,
+ "shortcuts": [],
+ "title": "BKM"
+}

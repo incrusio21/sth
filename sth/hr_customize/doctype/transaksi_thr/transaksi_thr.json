@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_rghp",
+  "naming_series",
   "company",
   "posting_date",
   "unit",
@@ -215,13 +216,19 @@
    "fieldtype": "Link",
    "label": "Deduction THR Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "THR-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-24 13:25:45.509362",
+ "modified": "2025-11-25 15:02:30.156043",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",
