@@ -50,11 +50,9 @@
    "label": "HEADERS"
   },
   {
-   "allow_in_quick_entry": 1,
    "default": "PDO-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Naming Series",
    "options": "PDO-",
    "reqd": 1
@@ -265,7 +263,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 16:22:42.573169",
+ "modified": "2025-11-26 16:28:26.266457",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",
