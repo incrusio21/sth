@@ -1,0 +1,294 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-11-26 13:26:19.002300",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "headers_tab",
+  "naming_series",
+  "unit",
+  "months",
+  "fiscal_year",
+  "column_break_izgh",
+  "company",
+  "bahan_bakar_tab",
+  "bahan_bakar_details_section",
+  "bahan_bakar_transaction_number",
+  "pdo_bahan_bakar",
+  "grand_total_bahan_bakar",
+  "outstanding_amount_bahan_bakar",
+  "perjalanan_dinas_tab",
+  "perjalanan_dinas_details_section",
+  "perjalanan_dinas_transaction_number",
+  "pdo_perjalanan_dinas",
+  "grand_total_perjalanan_dinas",
+  "outstanding_amount_perjalanan_dinas",
+  "kas_tab",
+  "kas_details_section",
+  "kas_transaction_number",
+  "pdo_kas",
+  "grand_total_kas",
+  "outstanding_amount_kas",
+  "dana_cadangan_tab",
+  "dana_cadangan_transaction_number",
+  "pdo_dana_cadangan",
+  "grand_total_dana_cadangan",
+  "outstanding_amount_dana_cadangan",
+  "pdo_non_pdo",
+  "non_pdo_transaction_number",
+  "list_non_pdo",
+  "grand_total_non_pdo",
+  "outstanding_amount__pdo",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "headers_tab",
+   "fieldtype": "Tab Break",
+   "label": "HEADERS"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "PDO-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Naming Series",
+   "options": "PDO-",
+   "reqd": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bahan_bakar_tab",
+   "fieldtype": "Tab Break",
+   "label": "BAHAN BAKAR"
+  },
+  {
+   "fieldname": "perjalanan_dinas_tab",
+   "fieldtype": "Tab Break",
+   "label": "PERJALANAN DINAS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kas_tab",
+   "fieldtype": "Tab Break",
+   "label": "KAS"
+  },
+  {
+   "fieldname": "dana_cadangan_tab",
+   "fieldtype": "Tab Break",
+   "label": "DANA CADANGAN"
+  },
+  {
+   "fieldname": "months",
+   "fieldtype": "Link",
+   "label": "Months",
+   "options": "Months",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bahan_bakar_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bahan Bakar Details"
+  },
+  {
+   "fieldname": "pdo_bahan_bakar",
+   "fieldtype": "Table",
+   "label": "List Bahan Bakar",
+   "options": "PDO Bahan Bakar Table"
+  },
+  {
+   "fieldname": "perjalanan_dinas_details_section",
+   "fieldtype": "Section Break",
+   "label": "Perjalanan Dinas Details"
+  },
+  {
+   "fieldname": "column_break_izgh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pdo_perjalanan_dinas",
+   "fieldtype": "Table",
+   "label": "List Perjalanan Dinas",
+   "options": "PDO Perjalanan Dinas Table"
+  },
+  {
+   "fieldname": "bahan_bakar_transaction_number",
+   "fieldtype": "Data",
+   "label": "No Transaksi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "perjalanan_dinas_transaction_number",
+   "fieldtype": "Data",
+   "label": "No Transaksi"
+  },
+  {
+   "fieldname": "kas_details_section",
+   "fieldtype": "Section Break",
+   "label": "Kas Details"
+  },
+  {
+   "fieldname": "kas_transaction_number",
+   "fieldtype": "Data",
+   "label": "No Transaksi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pdo_kas",
+   "fieldtype": "Table",
+   "label": "List Kas",
+   "options": "PDO Kas Table"
+  },
+  {
+   "fieldname": "dana_cadangan_transaction_number",
+   "fieldtype": "Data",
+   "label": "No Transaksi"
+  },
+  {
+   "fieldname": "pdo_dana_cadangan",
+   "fieldtype": "Table",
+   "label": "List Dana Cadangan",
+   "options": "PDO Dana Cadangan Table"
+  },
+  {
+   "fieldname": "non_pdo_transaction_number",
+   "fieldtype": "Data",
+   "label": "No Transaksi"
+  },
+  {
+   "fieldname": "list_non_pdo",
+   "fieldtype": "Table",
+   "label": "List Non PDO",
+   "options": "PDO NON PDO Table"
+  },
+  {
+   "fieldname": "pdo_non_pdo",
+   "fieldtype": "Tab Break",
+   "label": "NON PDO"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Permintaan Dana Operasional",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "grand_total_bahan_bakar",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount_bahan_bakar",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_perjalanan_dinas",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount_perjalanan_dinas",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_kas",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount_kas",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount"
+  },
+  {
+   "fieldname": "grand_total_dana_cadangan",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount_dana_cadangan",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_non_pdo",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount__pdo",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-26 16:22:42.573169",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Permintaan Dana Operasional",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
