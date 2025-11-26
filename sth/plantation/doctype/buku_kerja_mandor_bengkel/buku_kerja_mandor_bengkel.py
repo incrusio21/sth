@@ -5,7 +5,17 @@ import frappe
 from frappe.model.document import Document
 
 class BukuKerjaMandorBengkel(Document):
-	pass
+	def on_submit(self):
+		self.update_kendaraan_field(self.kmhm_akhir)
+  
+	def on_cancel(self):
+		self.update_kendaraan_field(self.kmhm_awal)
+
+	def update_kendaraan_field(self, km_value):
+		if not self.kd_kndr:
+			return
+
+		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kd_kndr, "kmhm_akhir", km_value)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

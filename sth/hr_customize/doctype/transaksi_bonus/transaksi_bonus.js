@@ -57,6 +57,7 @@ frappe.ui.form.on("Transaksi Bonus", {
       return;
     }
 
+    frappe.dom.freeze("Mengambil data employee...");
     const records = await frappe.db.get_list("Employee", {
       filters: {
         custom_unit: frm.doc.unit,
@@ -104,6 +105,7 @@ frappe.ui.form.on("Transaksi Bonus", {
     }
 
     frm.refresh_field("table_employee");
+    frappe.dom.unfreeze();
   },
   async et(frm) {
     const result = await frappe.db.get_value("Setup Bonus", {

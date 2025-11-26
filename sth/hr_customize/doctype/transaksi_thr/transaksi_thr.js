@@ -109,6 +109,8 @@ frappe.ui.form.on("Transaksi THR", {
       args: {
         filters: filters
       },
+      freeze: true,
+      freeze_message: "Mengambil data employee...",
     });
 
     if (!records?.message.length) {

@@ -1,4 +1,24 @@
 frappe.ui.form.on("Expense Claim", {
+  refresh(frm) {
+    if (frm.doc.docstatus == 0 || frm.is_new()) {
+      frm.add_custom_button(
+        __("Get Travel Request Expense"),
+        function () {
+          if (!(frm.doc.employee)) {
+            frappe.msgprint(__("Lengkapi Employee terlebih dahulu."));
+            return;
+          }
+          if (!(frm.doc.custom_travel_request)) {
+            frappe.msgprint(__("Lengkapi Travel Request terlebih dahulu."));
+            return;
+          }
+
+          frm.clear_table("expenses");
+          frm.clear_table("advances");
+          show_expense_selector(frm);
+        });
+    }
+  },
   async custom_get_travel_request_expense(frm) {
     if (!(frm.doc.employee)) {
       frappe.msgprint(__("Lengkapi Employee terlebih dahulu."));
