@@ -11,6 +11,15 @@ frappe.ui.form.on("Payment Entry", {
                 },
             };
         });
+        
+        frm.set_query('custom_cheque_number', () => {
+            return {
+                filters: {
+                    reference_doc: null, 
+                    reference_name: null, 
+                }
+            }
+        })
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
