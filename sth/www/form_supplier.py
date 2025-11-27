@@ -22,6 +22,7 @@ def get_context(context):
         context.items = doc.get("items")
         context.status = doc.get("custom_offering_status")
         context.country = frappe.get_all("Country",pluck="name")
+        context.is_exist_sq = frappe.db.exists("Supplier Quotation Item",{"request_for_quotation": rfq_name})
 
     return context
 
