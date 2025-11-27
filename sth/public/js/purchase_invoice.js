@@ -61,8 +61,8 @@ async function showTrainingEventSelector(frm) {
     async primary_action() {
       const selected_items = d.fields_dict.table_training_event.grid.get_selected_children();
 
-      if (selected_items.length < 1) {
-        frappe.throw("Please Select at least One Training Event")
+      if (selected_items.length != 1) {
+        frappe.throw("Select Only One Training Event")
       }
 
       const training_events = selected_items.map(r => r.name);
@@ -93,6 +93,9 @@ async function showTrainingEventSelector(frm) {
         "hidden",
         false
       );
+
+      frm.set_value("custom_reference_doctype", "Training Event");
+      frm.set_value("custom_reference_name", selected_items[0].name);
       frm.refresh_field("items");
       frm.trigger("calculate_taxes_and_totals");
       d.hide();

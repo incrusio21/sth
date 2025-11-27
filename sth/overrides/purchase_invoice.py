@@ -4,7 +4,11 @@ import frappe
 def get_all_training_event_by_supplier(supplier):
   events = frappe.get_all(
     "Training Event",
-    filters={"supplier": supplier},
+    filters={
+      "supplier": supplier,
+      "docstatus": 1,
+      "custom_purchase_invoice": ["is", "not set"],
+    },
     fields=[
       "name",
       "custom_posting_date",

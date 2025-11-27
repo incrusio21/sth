@@ -1,13 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "TB-.#####",
  "creation": "2025-08-26 14:53:26.413787",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "naming_series",
   "unit",
   "company",
   "employee",
@@ -196,30 +195,26 @@
    "fieldname": "earning_bonus_component",
    "fieldtype": "Link",
    "label": "Earning Bonus Component",
-   "options": "Salary Component"
+   "options": "Salary Component",
+   "read_only": 1
   },
   {
    "fieldname": "deduction_bonus_component",
    "fieldtype": "Link",
    "label": "Deduction Bonus Component",
-   "options": "Salary Component"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "TB-"
+   "options": "Salary Component",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 09:08:11.673344",
+ "modified": "2025-11-27 10:06:25.051700",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -236,6 +231,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
