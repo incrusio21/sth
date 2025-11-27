@@ -178,11 +178,15 @@ doc_events = {
 	"Purchase Invoice": {
     "on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
-  "Supplier Quotation": {
+  	"Supplier Quotation": {
     "before_submit": "sth.custom.supplier_quotation.update_status_rfq"
 	},
 	"Payment Entry":{
-		"validate": "sth.custom.payment_entry.cek_kriteria"
+		"validate": [
+			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
+		],
+		"on_submit": "sth.custom.payment_entry.update_check_book",
+		"on_cancel": "sth.custom.payment_entry.update_check_book"
 	}
 }
 

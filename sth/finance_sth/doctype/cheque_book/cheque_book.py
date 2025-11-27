@@ -175,7 +175,7 @@ def change_cheque_number(cheque_usage_history, cheque_number):
 		"issue_date": cheque_number.issue_date
 	}
 	if cheque_usage_history.cheque_no != cheque_number.name:
-		old_cheque_number = frappe.get_doc("Cheque Number")
+		old_cheque_number = frappe.get_doc("Cheque Number", cheque_usage_history.cheque_no)
 		old_cheque_number.reference_doc= None
 		old_cheque_number.reference_name= None
 		old_cheque_number.status= None
@@ -185,7 +185,7 @@ def change_cheque_number(cheque_usage_history, cheque_number):
 		old_cheque_number.db_update()
 		values.update({"cheque_no": cheque_number.name})
 
-	frappe.db.set_value("Cheque Usage History", values)
+	frappe.db.set_value("Cheque Usage History", cheque_usage_history.name, values)
 
 def append_cheque_history(cheque_number):
     cheque_book = frappe.get_doc("Cheque Book", cheque_number.cheque_book)
