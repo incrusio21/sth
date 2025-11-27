@@ -2,13 +2,13 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-11-27 16:38:11.357988",
+ "creation": "2025-11-27 16:33:33.559407",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_wtzj",
   "naming_series",
-  "pdo_dana_cadangan_vtwo",
+  "pdo_perjalanan_dinas_vtwo",
   "grand_total",
   "outstanding_amount",
   "more_information_tab",
@@ -26,12 +26,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "DC-",
+   "default": "PD-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Naming Series",
-   "options": "DC-",
+   "options": "PD-",
    "read_only": 1,
    "reqd": 1
   },
@@ -95,32 +95,22 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "pdo_dana_cadangan_vtwo",
+   "fieldname": "pdo_perjalanan_dinas_vtwo",
    "fieldtype": "Table",
-   "label": "List Dana Cadangan",
-   "options": "PDO Dana Cadangan Table Vtwo",
+   "label": "List Perjalanan Dinas",
+   "options": "PDO Perjalanan Dinas Table Vtwo",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PDO Perjalanan Dinas Vtwo",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -128,10 +118,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:40:26.646647",
+ "modified": "2025-11-27 16:36:36.028610",
  "modified_by": "Administrator",
  "module": "Finance STH",
- "name": "PDO Dana Cadangan Vtwo",
+ "name": "PDO Perjalanan Dinas Vtwo",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

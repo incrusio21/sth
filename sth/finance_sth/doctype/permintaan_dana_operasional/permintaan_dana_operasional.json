@@ -89,8 +89,7 @@
   {
    "fieldname": "perjalanan_dinas_tab",
    "fieldtype": "Tab Break",
-   "label": "PERJALANAN DINAS",
-   "read_only": 1
+   "label": "PERJALANAN DINAS"
   },
   {
    "fieldname": "kas_tab",
@@ -158,7 +157,8 @@
   {
    "fieldname": "perjalanan_dinas_transaction_number",
    "fieldtype": "Data",
-   "label": "No Transaksi"
+   "label": "No Transaksi",
+   "read_only": 1
   },
   {
    "fieldname": "kas_details_section",
@@ -180,7 +180,8 @@
   {
    "fieldname": "dana_cadangan_transaction_number",
    "fieldtype": "Data",
-   "label": "No Transaksi"
+   "label": "No Transaksi",
+   "read_only": 1
   },
   {
    "fieldname": "pdo_dana_cadangan",
@@ -191,7 +192,8 @@
   {
    "fieldname": "non_pdo_transaction_number",
    "fieldtype": "Data",
-   "label": "No Transaksi"
+   "label": "No Transaksi",
+   "read_only": 1
   },
   {
    "fieldname": "list_non_pdo",
@@ -368,7 +370,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 21:44:02.525468",
+ "modified": "2025-11-27 16:47:04.823486",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",
