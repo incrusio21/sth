@@ -19,7 +19,7 @@ class FormSupplier {
             discount: 0,
             ongkos_angkut: 0,
             ppn_ongkos_angkut: 0,
-            ppbkb: 0,
+            pbbkb: 0,
             pph_22: 0,
         }
         this.wrapperDiscount = $('tr[data-type="discount"]')
@@ -32,6 +32,7 @@ class FormSupplier {
 
         this.initSelect2("select[name='country[]']");
         AutoNumeric.multiple('.number-format', this.opt);
+        AutoNumeric.getAutoNumericElement('input[name="ppn_ongkos_angkut"]').set(11);
     }
 
     initSelect2(el) {
@@ -68,8 +69,12 @@ class FormSupplier {
     }
 
     calculateGrandTotals() {
-        // console.log(net_total, discount, ongkos_angkut, ppn_ongkos_angkut, ppbkb, pph_22)
-        const grand_total = this.net_total - this.charges.discount + this.charges.ongkos_angkut + this.charges.ppn_ongkos_angkut + this.charges.ppbkb + this.charges.pph_22
+        // console.log(net_total, discount, ongkos_angkut, ppn_ongkos_angkut, pbbkb, pph_22)
+
+        const ppn_ongkos_amount = parseFloat($("tr[data-type='ppn_ongkos_angkut']").find('.amount').attr('data-value'))
+        const discount_amount = parseFloat(this.wrapperDiscount.find('.amount').attr('data-value'))
+
+        const grand_total = this.net_total - discount_amount + this.charges.ongkos_angkut + ppn_ongkos_amount + this.charges.pbbkb + this.charges.pph_22
         $('input[name="grand_total"]').val(`Rp.${this.numberFormat(grand_total)}`)
     }
 
@@ -107,15 +112,16 @@ class FormSupplier {
     calculateDiscount() {
         const percent = numeral(this.wrapperDiscount.find('input').val()).value()
         const amount = this.net_total * percent / 100
-        this.charges.discount = amount
-        this.wrapperDiscount.find('.amount').text(`Rp. ${this.numberFormat(amount)}`)
+        this.charges.discount = percent
+        this.wrapperDiscount.find('.amount').text(`Rp. ${this.numberFormat(amount)}`).attr("data-value", amount)
     }
 
     calculatePpnOngkos() {
         let ppn_ongkos = $("#charges tr[data-type='ppn_ongkos_angkut']")
-        let amount_ppn = this.charges.ongkos_angkut * parseFloat(ppn_ongkos.find('input').val()) / 100
-        this.charges.ppn_ongkos_angkut = amount_ppn
-        ppn_ongkos.find('.amount').text(`Rp. ${this.numberFormat(amount_ppn)}`)
+        const ppn_ongkos_val = numeral(ppn_ongkos.find('input').val()).value()
+        let amount_ppn = this.charges.ongkos_angkut * ppn_ongkos_val / 100
+        this.charges.ppn_ongkos_angkut = ppn_ongkos_val
+        ppn_ongkos.find('.amount').text(`Rp. ${this.numberFormat(amount_ppn)}`).attr("data-value", amount_ppn)
     }
 
     refreshIdx() {
@@ -210,6 +216,7 @@ class FormSupplier {
             formData.append("file_url", file_upload ? file_upload?.name : "")
 
             let serialize = $(this).serializeArray()
+            // console.log(serialize)
             for (let field of serialize) {
                 if (field.name.includes("[]")) {
                     let title = field.name.replaceAll("[]", "")
@@ -220,7 +227,7 @@ class FormSupplier {
             }
 
             formData.append("items", JSON.stringify(items))
-            formData.append("tax", JSON.stringify(self.charges))
+            formData.append("charges_and_discount", JSON.stringify(self.charges))
             $("#btn-submit").prop("disabled", true)
             $(".loader").show()
 
@@ -234,7 +241,7 @@ class FormSupplier {
                     "X-Frappe-CSRF-Token": "{{ csrf_token }}"
                 },
                 success: function (res) {
-                    // uploadFile(file_upload, res.message.doctype, res.message.docname)
+                    self.uploadFile(file_upload, res.message.doctype, res.message.docname)
                 },
                 error: function (err) {
                     if (err.status == 422) {

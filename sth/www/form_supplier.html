@@ -50,7 +50,13 @@
 
 <body>
     <div class="pt-2">
-        {% if status == "Open" %}
+        {% if is_exist_sq %}
+        <div class="container-fluid">
+            <div class="alert alert-success text-center" role="alert">
+                <h5>Terima kasih telah mengisi form quotation kami</h5>
+            </div>
+        </div>
+        {% elif status == "Open" %}
         <div class="container-fluid">
             <div class="card-title fs-2">Supplier Quotation</div>
             <hr>
@@ -129,8 +135,8 @@
                                             {{ item.item_name }}
                                             <input type="hidden" name="item_name[]" value="{{ item.item_name }}">
                                         </td>
-                                        <td data-field="merek">
-                                            <input type="text" name="merek[]" class="form-control form-control-sm"
+                                        <td data-field="merk">
+                                            <input type="text" name="merk[]" class="form-control form-control-sm"
                                                 style="width: 100%;">
                                         </td>
                                         <td data-field="country">
@@ -198,7 +204,7 @@
                                                 <input type="text" name="ongkos_angkut"
                                                     class="form-control form-control-sm w-100 number-format">
                                             </td>
-                                            <td class="amount">Rp. 0</td>
+                                            <td class="amount" data-value="0">Rp. 0</td>
                                         </tr>
                                         <tr data-type="ppn_ongkos_angkut">
                                             <td>PPN Ongkos Angkut(%)</td>
@@ -206,12 +212,12 @@
                                                 <input type="text" name="ppn_ongkos_angkut"
                                                     class="form-control form-control-sm w-100 number-format">
                                             </td>
-                                            <td class="amount">Rp. 0</td>
+                                            <td class="amount" data-value="0">Rp. 0</td>
                                         </tr>
-                                        <tr data-type="ppbkb">
-                                            <td>PPBKB</td>
+                                        <tr data-type="pbbkb">
+                                            <td>PBBKB</td>
                                             <td>
-                                                <input type="text" name="ppbkb"
+                                                <input type="text" name="pbbkb"
                                                     class="form-control form-control-sm w-100 number-format">
                                             </td>
                                             <td class="amount">Rp. 0</td>
@@ -241,9 +247,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mb-3"">
+                    <div class="mb-3">
                         <label>Payment Terms</label>
-                        <textarea id=" payment_terms" class="form-control form-control-sm" rows="3"></textarea>
+                        <textarea name="terms" class="form-control form-control-sm" rows="3"></textarea>
                     </div>
                     <button class="btn btn-primary d-flex gap-2 ms-auto" id="btn-submit" type="submit">
                         <div class="loader" style="display: none;"></div>
@@ -253,7 +259,7 @@
             </form>
         </div>
         {% else %}
-        <div class="container-fluid hide">
+        <div class="container-fluid">
             <div class="alert alert-info text-center" role="alert">
                 <h5>Sorry, Quotation has been closed</h5>
             </div>
