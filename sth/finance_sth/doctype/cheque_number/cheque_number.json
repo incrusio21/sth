@@ -2,7 +2,7 @@
  "actions": [],
  "allow_copy": 1,
  "allow_rename": 1,
- "autoname": "{code}. .{number}",
+ "autoname": "format:{code}{number}",
  "creation": "2025-11-26 20:49:14.281964",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -71,11 +71,11 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-27 09:54:12.462382",
+ "modified": "2025-11-27 10:06:47.419869",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Cheque Number",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

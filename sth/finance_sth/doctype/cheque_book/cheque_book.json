@@ -22,7 +22,8 @@
   "cheques_total",
   "remaining_cheques",
   "cheque_usage_history_tab",
-  "table_ezdi"
+  "table_ezdi",
+  "amended_from"
  ],
  "fields": [
   {
@@ -103,6 +104,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cheque_end_no",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -111,6 +113,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cheque_warning_no",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -151,12 +154,23 @@
    "in_preview": 1,
    "label": "Cheque Code",
    "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cheque Book",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 16:47:39.335993",
+ "modified": "2025-11-27 10:47:25.802187",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Cheque Book",
