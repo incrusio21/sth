@@ -39,16 +39,24 @@ def create_sq():
 
 def validate_request(data):
     message = []
-    if not data.get("rfq"):
-        message.append("RFQ is required")
+    req_data = ["rfq","supplier","file_url"]
+    title_alias = {"file_url": "File upload"}
 
-    if not data.get("supplier"):
-        message.append("Supplier is required")
+    for row in req_data:
+        if not data.get(row):
+            message.append(f"{title_alias[row] or row.replace('_'," ").capitalize()} is required")    
+
+    # if not data.get("rfq"):
+    #     message.append("RFQ is required")
+
+    # if not data.get("supplier"):
+    #     message.append("Supplier is required")
+        
     
     if not json.loads(data.get("items")):
         message.append("Items is required")
     
-    if not data.get("file_url"):
-        message.append("File upload is required")
+    # if not data.get("file_url"):
+    #     message.append("File upload is required")
     
     return message
