@@ -19,9 +19,9 @@ def get_context(context):
         context.supplier = decrypt(supplier)
         
         doc = frappe.get_doc("Request for Quotation",rfq_name)
-        doc_dict = doc.as_dict()
         context.items = doc.get("items")
-        context.status = doc.get("custom_offering_status")    
+        context.status = doc.get("custom_offering_status")
+        context.country = frappe.get_all("Country",pluck="name")
 
     return context
 
