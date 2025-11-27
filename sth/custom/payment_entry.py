@@ -1,5 +1,8 @@
 import frappe
 
+from sth.finance_sth.doctype.cheque_number.cheque_number import update_cheque_number_pe
+from sth.finance_sth.doctype.cheque_book.cheque_book import update_cheque_book_pe
+
 def cek_kriteria(self,method):
 	if self.references:
 		for row in self.references:
@@ -36,3 +39,25 @@ def fill_kriteria(self,doctype, docname):
 					"type": doctype,
 					"name1": docname
 				})
+			self.append("detail_dokumen_finance",{
+				"rincian_dokumen_finance": row.rincian_dokumen_finance
+			})
+
+def update_check_book(self, method):
+    if self.mode_of_payment != "Cheque" and not self.custom_cheque_number:
+        return
+    status = {
+		"on_submit": "Used",
+		"on_cancel": "Void"
+	}
+    data = frappe._dict({
+		"reference_doc": self.doctype,
+		"reference_name": self.name,
+		"status": status.get(method, "Draft"),
+		"cheque_amount": self.paid_amount,
+		"issue_date": self.posting_date,
+		"note": self.remarks
+	})
+    
+    cheque_number = update_cheque_number_pe(self.custom_cheque_number, data)
+    update_cheque_book_pe(cheque_number)

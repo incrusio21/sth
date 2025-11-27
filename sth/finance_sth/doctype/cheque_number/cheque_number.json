@@ -12,7 +12,11 @@
   "cheque_book",
   "status",
   "reference_doc",
-  "reference_name"
+  "reference_name",
+  "column_break_lckh",
+  "issue_date",
+  "cheque_amount",
+  "note"
  ],
  "fields": [
   {
@@ -65,13 +69,35 @@
    "label": "Code",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_lckh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Issue Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cheque_amount",
+   "fieldtype": "Currency",
+   "label": "Cheque Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-27 10:06:47.419869",
+ "modified": "2025-11-27 14:28:54.007935",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Cheque Number",
