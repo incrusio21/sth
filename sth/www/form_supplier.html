@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Supplier</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
-        integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/assets/sth/css/lib/toastr.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
         /*body {
             background: url("/files/bg4.svg");
@@ -31,45 +32,83 @@
                 transform: rotate(.5turn)
             }
         }
+
+        * {
+            font-size: 14px;
+        }
+
+        table td {
+            padding: 2px 7px !important;
+        }
+
+        table td,
+        table td div {
+            font-size: 13px;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container mx-auto mt-5">
-        <div class="card mx-auto shadow p-3" style="width: 90%;">
-            {% if status == "Open" %}
-            <div class="card-body">
-                <h1 class="card-title">Supplier Quotation</h1>
-                <hr>
+    <div class="pt-2">
+        {% if status == "Open" %}
+        <div class="container-fluid">
+            <div class="card-title fs-2">Supplier Quotation</div>
+            <hr>
+            <form method="post" id="submit-form">
                 <div>
-                    <div class="mb-3 d-flex gap-5">
-                        <div style="width: 30%;">
+                    <div class="mb-3 row">
+                        <div class="col-xl-3 col-md-6 mb-2">
                             <label class="form-label">Supplier</label>
                             <input type="text" class="form-control form-control-sm" value="{{ supplier or '' }}"
-                                name="supplier" readonly disabled>
+                                name="supplier" readonly>
                         </div>
-                        <div>
+                        <div class="col-xl-3 col-md-6 mb-2">
+                            <label class="form-label">Valid Till</label>
+                            <input type="text" class="form-control form-control-sm datepicker" name="valid_date">
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-2">
+                            <label class="form-label">Estimated Delivery</label>
+                            <input type="text" class="form-control form-control-sm datepicker" name="estimated_date">
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-2">
                             <label for="file-upload" class="form-label">File Upload</label>
                             <input class="form-control form-control-sm" type="file" id="file-upload" accept=".pdf"
-                                style="width: 70%;">
+                                required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Items</label>
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="items">
+                            <table class="table table-bordered mb-1" id="items">
+                                <colgroup>
+                                    <col style="width: 1%; text-align: center;">
+                                    <col style="width: 1%; text-align: center;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 15%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 13%;">
+                                    <col style="width: 15%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 13%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 3%;">
+                                </colgroup>
                                 <thead>
                                     <tr>
-                                        <th style="width: 5%;">
+                                        <th>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" value="" id="checkAll">
                                             </div>
                                         </th>
-                                        <th style="width: 5%;">No</th>
-                                        <th>Item Code</th>
-                                        <th style="width: 15%;">Qty</th>
-                                        <th style="width: 20%;">Rate</th>
-                                        <th style="width: 25%;">Description</th>
+                                        <th>No</th>
+                                        <th>Kode Barang</th>
+                                        <th>Nama Barang</th>
+                                        <th>Merk</th>
+                                        <th>Negara Buatan</th>
+                                        <th>Spesifikasi</th>
+                                        <th>Jumlah</th>
+                                        <th>Harga</th>
+                                        <th>Sub Total</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -81,15 +120,41 @@
                                                 <input class="form-check-input form-check-input-row" type="checkbox">
                                             </div>
                                         </td>
-                                        <td data-field="idx">{{ idx+1 }}</td>
-                                        <td data-field="item_code">{{ item.item_code }}</td>
-                                        <td data-field="qty">{{ item.qty | int }}</td>
-                                        <td data-field="rate">
-                                            <input type="text" class="form-control form-control-sm number-format"
+                                        <td data-field='idx'>{{ idx + 1 }}</td>
+                                        <td data-field="item_code">
+                                            {{ item.item_code }}
+                                            <input type="hidden" name="item_code[]" value="{{ item.item_code }}">
+                                        </td>
+                                        <td data-field="item_name">
+                                            {{ item.item_name }}
+                                            <input type="hidden" name="item_name[]" value="{{ item.item_name }}">
+                                        </td>
+                                        <td data-field="merek">
+                                            <input type="text" name="merek[]" class="form-control form-control-sm"
                                                 style="width: 100%;">
                                         </td>
+                                        <td data-field="country">
+                                            <select class="form-select" name="country[]">
+                                                {% for data in country %}
+                                                <option value="{{ data }}">{{ data }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
                                         <td data-field="desc">
-                                            {{ item.description }}
+                                            <textarea class="form-control form-control-sm" name="desc[]"
+                                                rows="1">{{ item.description }}</textarea>
+                                        </td>
+                                        <td data-field="qty">
+                                            <input type="number" min="1" name="qty[]"
+                                                class="form-control form-control-sm" value="{{ item.qty | int }}"
+                                                style="width: 100%;">
+                                        </td>
+                                        <td data-field="rate">
+                                            <input type="text" name="rate[]"
+                                                class="form-control form-control-sm number-format" style="width: 100%;">
+                                        </td>
+                                        <td data-field="subtotal">
+                                            <div class="display" data-value="0">Rp. 0</div>
                                         </td>
                                         <td><Button class="btn btn-light btn-sm btn-duplicate">Duplicate</Button></td>
                                     </tr>
@@ -97,185 +162,112 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="btn-delete" style="display: none;">
+                            <button class="btn btn-sm btn-danger rounded-3">Delete</button>
+                        </div>
                     </div>
-                    <div class="mb-3" id="btn-delete" style="display: none;">
-                        <button class="btn btn-sm btn-danger">Delete</button>
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Charges</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered mb-0" id="charges">
+                                    <colgroup>
+                                        <col style="width: 30%">
+                                        <col style="width: 35%">
+                                        <col style="width: 35%">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Percent/Rate</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-type="discount">
+                                            <td>Discount(%)</td>
+                                            <td>
+                                                <input type="text" name="discount"
+                                                    class="form-control form-control-sm w-100 number-format">
+                                            </td>
+                                            <td class="amount">Rp. 0</td>
+                                        </tr>
+                                        <tr data-type="ongkos_angkut">
+                                            <td>Ongkos Angkut</td>
+                                            <td>
+                                                <input type="text" name="ongkos_angkut"
+                                                    class="form-control form-control-sm w-100 number-format">
+                                            </td>
+                                            <td class="amount">Rp. 0</td>
+                                        </tr>
+                                        <tr data-type="ppn_ongkos_angkut">
+                                            <td>PPN Ongkos Angkut(%)</td>
+                                            <td>
+                                                <input type="text" name="ppn_ongkos_angkut"
+                                                    class="form-control form-control-sm w-100 number-format">
+                                            </td>
+                                            <td class="amount">Rp. 0</td>
+                                        </tr>
+                                        <tr data-type="ppbkb">
+                                            <td>PPBKB</td>
+                                            <td>
+                                                <input type="text" name="ppbkb"
+                                                    class="form-control form-control-sm w-100 number-format">
+                                            </td>
+                                            <td class="amount">Rp. 0</td>
+                                        </tr>
+                                        <tr data-type="pph_22">
+                                            <td>PPH 22</td>
+                                            <td>
+                                                <input type="text" name="pph_22"
+                                                    class="form-control form-control-sm w-100 number-format">
+                                            </td>
+                                            <td class="amount">Rp. 0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="my-3">
+                                <label class="form-label">Sub Total</label>
+                                <input type="text" name="net_total" data-value="0" value="Rp.0"
+                                    class="form-control form-control-sm w-50" readonly disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Grand Total</label>
+                                <input type="text" name="grand_total" value="Rp.0"
+                                    class="form-control form-control-sm w-50" readonly disabled>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn btn-primary d-flex gap-2 ms-auto" id="submit-form">
+                    <div class="mb-3"">
+                        <label>Payment Terms</label>
+                        <textarea id=" payment_terms" class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary d-flex gap-2 ms-auto" id="btn-submit" type="submit">
                         <div class="loader" style="display: none;"></div>
                         Submit
                     </button>
                 </div>
-            </div>
-            {% else %}
-            <div class="card-body hide">
-                <div class="alert alert-info text-center" role="alert">
-                    <h5>Sorry, Quotation has been closed</h5>
-                </div>
-            </div>
-            {% endif %}
+            </form>
         </div>
+        {% else %}
+        <div class="container-fluid hide">
+            <div class="alert alert-info text-center" role="alert">
+                <h5>Sorry, Quotation has been closed</h5>
+            </div>
+        </div>
+        {% endif %}
+
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
-            integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="/assets/sth/js/lib/toastr.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.8.1"></script>
-        <script>
-            var opt = {
-                digitGroupSeparator: ',',
-                decimalCharacter: '.',
-                decimalPlaces: 2
-            }
-
-            AutoNumeric.multiple('.number-format', opt);
-
-            function initMoney(el) {
-                return new AutoNumeric(el, opt);
-            }
-
-            function toggleDeleteBtn() {
-                let checkedRow = $(".form-check-input-row:checked")
-                if (checkedRow.length) {
-                    $("#btn-delete").show()
-                } else {
-                    $("#btn-delete").hide()
-                }
-            }
-
-            function refreshIdx() {
-                $("td[data-field='idx']").each((idx, el) => {
-                    $(el).text(idx + 1)
-                })
-            }
-
-            function uploadFile(file, doctype, docname) {
-                let form_data = new FormData();
-                form_data.append('file', file);
-                form_data.append('doctype', doctype);
-                form_data.append('docname', docname);
-                form_data.append('fieldname', "custom_file_upload");
-                form_data.append('is_private', "1");
-
-                $.ajax({
-                    url: '/api/method/upload_file',
-                    method: 'POST',
-                    data: form_data,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        "Accept": "application/json",
-                        "X-Frappe-CSRF-Token": "{{ csrf_token }}"
-                    },
-                    success: function (res) {
-                        window.location.replace("/success-page")
-                    },
-                    error: function (err) {
-                        console.error("Error:", err);
-                    }
-                })
-            }
-
-            $(".form-check-input-row").on("change", function () {
-                toggleDeleteBtn()
-            })
-
-            $("#checkAll").on("click", function (e) {
-                $(".form-check-input-row").prop("checked", this.checked)
-                toggleDeleteBtn()
-            })
-
-            $("#btn-delete").on("click", function () {
-                $(".form-check-input-row:checked").closest("tr").remove()
-                $(this).hide()
-                $("#checkAll").prop("checked", false)
-                refreshIdx()
-            })
-
-            $(".btn-duplicate").on("click", function () {
-                let duplicateRow = $(this).closest("tr").clone(true)
-                let descEl = $(duplicateRow).find("td[data-field='desc']")
-                let qtyEl = $(duplicateRow).find("td[data-field='qty']")
-
-                let valQty = qtyEl.find('input').val() || qtyEl.text()
-
-                let inputQty = $(`
-                   <input type="number" min="1" class="form-control form-control-sm" value="${valQty}"
-                    style="width: 100%;">
-                `)
-
-                let inputDesc = $(`
-                    <textarea class="form-control form-control-sm"
-                        rows="1"></textarea>
-                `)
-
-                descEl.html(inputDesc)
-                qtyEl.html(inputQty)
-
-                initMoney(duplicateRow.find(".number-format")[0])
-                duplicateRow.insertAfter($(this).closest("tr"))
-                refreshIdx()
-            })
-
-            $("#submit-form").on("click", function (e) {
-                $(this).prop("disabled", true)
-                $(".loader").show()
-                let file_upload = $("#file-upload")[0].files[0]
-                const formData = new FormData();
-                formData.append("rfq", "{{ rfq or '' }}")
-                formData.append("supplier", $("input[name='supplier']").val())
-                formData.append("file_url", file_upload ? file_upload?.name : "")
-
-                items = []
-                $("#items tbody tr").each(function (idx, el) {
-                    var $el = $(el)
-                    let strRate = $el.find("td[data-field='rate'] input")[0]
-                    let elQty = $el.find("td[data-field='qty']")
-                    let elDesc = $el.find("td[data-field='desc']")
-
-                    let qty = parseInt(elQty.find('input').val() || elQty.text())
-                    let desc = elDesc.find('textarea').val() || elDesc.text()
-
-                    items.push({
-                        item_code: $el.find("td[data-field='item_code']").text(),
-                        qty,
-                        rate: AutoNumeric.getAutoNumericElement(strRate).getNumber(),
-                        desc,
-                    })
-                })
-
-                formData.append("items", JSON.stringify(items))
-
-                $.ajax({
-                    url: '/api/method/sth.api.create_sq',
-                    method: 'POST',
-                    processData: false,
-                    contentType: false,
-                    data: formData,
-                    headers: {
-                        "X-Frappe-CSRF-Token": "{{ csrf_token }}"
-                    },
-                    success: function (res) {
-                        uploadFile(file_upload, res.message.doctype, res.message.docname)
-                    },
-                    error: function (err) {
-                        if (err.status == 422) {
-                            err.responseJSON.message.forEach((row) => {
-                                toastr.error(row, "Error")
-                            })
-                        } else if (err.status == 417) {
-                            toastr.error("Form failed to process", "Error")
-                        }
-                        console.error("Error:", err);
-                    }
-                }).always(() => {
-                    $(this).prop("disabled", false)
-                    $(".loader").hide()
-                });
-
-                //console.log(Object.fromEntries(formData));
-            })
-        </script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+        <script src="/assets/sth/js/lib/numeral.min.js"></script>
+        <script>{% include "templates/includes/form_supplier.js" %} </script>
 </body>
 
 </html>
