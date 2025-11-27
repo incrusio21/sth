@@ -180,6 +180,9 @@ doc_events = {
 	},
   "Supplier Quotation": {
     "before_submit": "sth.custom.supplier_quotation.update_status_rfq"
+	},
+	"Payment Entry":{
+		"validate": "sth.custom.payment_entry.cek_kriteria"
 	}
 }
 
