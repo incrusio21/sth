@@ -20,6 +20,10 @@
   "tanggal_akta",
   "section_break_psjl",
   "saham",
+  "section_break_sslx",
+  "column_break_pojw",
+  "column_break_alar",
+  "grand_total",
   "susunan_pengurus_dan_komisaris_tab",
   "table_gllk"
  ],
@@ -126,12 +130,30 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "ADL-"
+  },
+  {
+   "fieldname": "section_break_sslx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_pojw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_alar",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "\u03a3 Saham",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 09:19:47.263146",
+ "modified": "2025-11-27 12:34:38.275075",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",
