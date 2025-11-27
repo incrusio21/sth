@@ -14,21 +14,27 @@
   "location",
   "no_rek",
   "atas_nama_penerima",
+  "employee",
   "bukti_pembelian",
   "column_break_nuan",
   "company",
   "posting_date",
   "mode_of_payment",
-  "account",
+  "expense_account",
   "tujuan",
   "amended_from",
+  "accounting_dimension_section",
+  "cost_center",
   "section_break_xeao",
   "details",
   "section_break_ocpf",
   "status",
   "column_break_rhwu",
   "grand_total",
-  "outstanding_amount"
+  "outstanding_amount",
+  "more_info_tab",
+  "accounting_details_section",
+  "credit_to"
  ],
  "fields": [
   {
@@ -55,15 +61,6 @@
   {
    "fieldname": "column_break_nuan",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Biaya",
-   "options": "Account",
-   "reqd": 1
   },
   {
    "fieldname": "no_rek",
@@ -184,13 +181,59 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "PPL-"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Person in Charge",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Biaya",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 15:12:05.635590",
+ "modified": "2025-11-27 12:31:35.437771",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",
