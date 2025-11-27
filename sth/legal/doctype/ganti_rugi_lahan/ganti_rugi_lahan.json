@@ -11,18 +11,19 @@
   "naming_series",
   "unit",
   "pembayaran_lahan",
-  "credit_to",
+  "employee",
   "dp",
   "column_break_usul",
   "company",
   "posting_date",
   "keterangan",
   "amended_from",
+  "accounting_dimension_section",
+  "cost_center",
   "section_break_gzcl",
+  "jenis_biaya",
   "sppt",
   "pemilik_lahan",
-  "jenis_biaya",
-  "biaya_account",
   "column_break_rigv",
   "qty",
   "rate",
@@ -31,7 +32,11 @@
   "status",
   "column_break_xqce",
   "grand_total",
-  "outstanding_amount"
+  "outstanding_amount",
+  "more_information_tab",
+  "accounts_details_section",
+  "expense_account",
+  "credit_to"
  ],
  "fields": [
   {
@@ -66,8 +71,10 @@
   },
   {
    "fieldname": "company",
-   "fieldtype": "Read Only",
-   "label": "Company"
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "sppt",
@@ -99,7 +106,7 @@
   {
    "fieldname": "jenis_biaya",
    "fieldtype": "Link",
-   "label": "Jenis Biaya GRL",
+   "label": "Jenis Biaya",
    "options": "Jenis Biaya Ganti Rugi Lahan"
   },
   {
@@ -107,10 +114,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "sppt.tlh",
    "fieldname": "qty",
    "fieldtype": "Data",
-   "label": "Luas (Ha)"
+   "label": "Luas (Ha)",
+   "read_only": 1
   },
   {
    "fieldname": "rate",
@@ -135,7 +142,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nUnpaid\nPartialy Paid\nPaid"
+   "options": "Draft\nUnpaid\nPartialy Paid\nPaid",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_xqce",
@@ -173,19 +181,10 @@
    "reqd": 1
   },
   {
-   "fetch_from": "sppt.npl",
    "fieldname": "pemilik_lahan",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Pemilik Lahan",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "jenis_biaya.coa",
-   "fieldname": "biaya_account",
-   "fieldtype": "Link",
-   "label": "Biaya Account",
-   "options": "Account",
    "read_only": 1
   },
   {
@@ -194,16 +193,53 @@
    "label": "Series",
    "options": "GRL-",
    "reqd": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "accounts_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Details"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Person in Charge",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 13:07:16.657834",
+ "modified": "2025-11-26 16:38:04.103113",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

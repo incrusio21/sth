@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-26 21:49:57.006108",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "fund_type",
+  "amount",
+  "revised_amount",
+  "column_break_uuvo",
+  "cash_bank_balance_adjustment"
+ ],
+ "fields": [
+  {
+   "fieldname": "fund_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jenis Dana",
+   "options": "Account"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Nilai"
+  },
+  {
+   "fieldname": "revised_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Nilai Revisi"
+  },
+  {
+   "fieldname": "column_break_uuvo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_bank_balance_adjustment",
+   "fieldtype": "Currency",
+   "label": "Penyesuaian Saldo Cash/bank"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-26 21:49:57.006108",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "PDO Dana Cadangan Vtwo",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -11,14 +11,14 @@
   "unit",
   "divisi",
   "blok",
-  "npl",
+  "pemilik_lahan",
   "column_break_abhd",
   "sppt",
   "persil",
-  "lhi",
-  "lhp",
-  "tlh",
-  "lbd",
+  "lahan_inti",
+  "lahan_plasma",
+  "total_lahan",
+  "luas_tanam",
   "tab_2_tab",
   "batas_lokasi_section",
   "bt",
@@ -67,15 +67,6 @@
    "options": "Blok"
   },
   {
-   "fieldname": "npl",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Nama Pemilik Lahan",
-   "options": "Daftar Masyarakat",
-   "reqd": 1
-  },
-  {
    "fieldname": "persil",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -99,39 +90,6 @@
    "fieldname": "tab_2_tab",
    "fieldtype": "Tab Break",
    "label": "Batas Lokasi"
-  },
-  {
-   "fieldname": "lhi",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Luas Lahan Inti (Ha)",
-   "reqd": 1
-  },
-  {
-   "fieldname": "lhp",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Luas Lahan Plasma (Ha)",
-   "reqd": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "tlh",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Total Luas Lahan (Ha)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "lbd",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Luas Bisa Ditanam (Ha)",
-   "reqd": 1
   },
   {
    "fieldname": "batas_lokasi_section",
@@ -215,12 +173,54 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "PAD-GIS-"
+  },
+  {
+   "fieldname": "lahan_inti",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Luas Lahan Inti (Ha)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lahan_plasma",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Luas Lahan Plasma (Ha)",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_lahan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Luas Lahan (Ha)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "luas_tanam",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Luas Bisa Ditanam (Ha)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pemilik_lahan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Pemilik Lahan",
+   "options": "Daftar Masyarakat",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-25 15:13:13.662642",
+ "modified": "2025-11-26 16:34:22.743723",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "GIS",

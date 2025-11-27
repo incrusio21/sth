@@ -1,39 +1,23 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:njb",
+ "autoname": "prompt",
  "creation": "2025-09-10 13:20:45.774769",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "njb",
-  "coa",
+  "column_break_wxvb",
   "column_break_yhvl",
-  "ket"
+  "ket",
+  "section_break_vajf",
+  "company_account"
  ],
  "fields": [
   {
    "fieldname": "header_section",
    "fieldtype": "Section Break",
    "label": "Header"
-  },
-  {
-   "fieldname": "njb",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Nama Jenis Biaya GRL",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "coa",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Coa Biaya",
-   "options": "Account",
-   "reqd": 1
   },
   {
    "fieldname": "column_break_yhvl",
@@ -43,16 +27,30 @@
    "fieldname": "ket",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "fieldname": "section_break_vajf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company_account",
+   "fieldtype": "Table",
+   "label": "Company Account",
+   "options": "Account Ganti Rugi Lahan"
+  },
+  {
+   "fieldname": "column_break_wxvb",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 13:22:18.907450",
+ "modified": "2025-11-26 16:30:53.850778",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Jenis Biaya Ganti Rugi Lahan",
- "naming_rule": "By fieldname",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

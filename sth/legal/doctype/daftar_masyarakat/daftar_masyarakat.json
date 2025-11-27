@@ -13,10 +13,10 @@
   "hp",
   "pd",
   "column_break_xlqy",
-  "address",
-  "desa",
-  "kec",
   "kabupaten",
+  "kecamatan",
+  "desa",
+  "address",
   "ktp",
   "fktp"
  ],
@@ -80,21 +80,12 @@
    "reqd": 1
   },
   {
-   "fieldname": "kec",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kecamatan",
-   "options": "Kecamatan",
-   "reqd": 1
-  },
-  {
    "fieldname": "kabupaten",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Kabupaten",
-   "options": "Kabupaten",
+   "options": "Territory",
    "reqd": 1
   },
   {
@@ -114,13 +105,23 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "DML-"
+   "options": "DML-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kecamatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Kecamatan",
+   "options": "Territory",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-25 15:14:09.551282",
+ "modified": "2025-11-26 13:42:51.955943",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Daftar Masyarakat",
