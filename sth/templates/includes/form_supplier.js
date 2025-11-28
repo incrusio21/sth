@@ -1,4 +1,4 @@
-//const today = new Date().toISOString().split("T")[0]
+//
 
 class FormSupplier {
     constructor() {
@@ -8,6 +8,7 @@ class FormSupplier {
     }
 
     initData() {
+        this.today = new Date().toISOString().split("T")[0]
         this.wrapperItems = $("#items tbody")
         this.opt = {
             digitGroupSeparator: ',',
@@ -26,9 +27,14 @@ class FormSupplier {
     }
 
     initEvent() {
-        $(".datepicker").datepicker({
-            dateFormat: "yy-mm-dd",
-        }).datepicker("setDate", new Date());
+        $('.datepicker').each((idx, el) => {
+            const dt = new AirDatepicker(el, {
+                selectedDates: [new Date()],
+                autoClose: true,
+                dateFormat: 'yyyy-dd-MM',
+                locale: this.getLocale()
+            })
+        })
 
         this.initSelect2("select[name='country[]']");
         AutoNumeric.multiple('.number-format', this.opt);
@@ -45,6 +51,29 @@ class FormSupplier {
 
     initMoney(el) {
         return new AutoNumeric(el, this.opt);
+    }
+
+    getLocale() {
+        const localeEn = {
+            days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            daysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            daysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            months: [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ],
+            monthsShort: [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ],
+            today: 'Today',
+            clear: 'Clear',
+            dateFormat: 'yyyy-MM-dd',
+            timeFormat: 'HH:mm',
+            firstDay: 0
+        };
+
+        return localeEn
     }
 
     toggleDeleteBtn() {
