@@ -17,17 +17,17 @@ def create_sq():
 
     doc_sq = make_supplier_quotation_from_rfq(rfq_name,for_supplier=data.get("supplier"))
     doc_sq.custom_file_upload = f"/private/files/{data.file_url}"
-    doc_sq.valid_till = doc_sq.transaction_date
+    doc_sq.valid_till = data.get('valid_date')
     doc_sq.terms = data.get('terms')
+    doc_sq.custom_required_by = data.get('estimated_date')
 
     doc_sq.custom_material_request = doc_sq.items[0].material_request
     doc_sq.items = []
-    
 
     for idx,item in enumerate(items_data.get("item_code")):
         item_details = get_item_details({"item_code":item,"company": doc_sq.company,"doctype": doc_sq.doctype,"conversion_rate":doc_sq.conversion_rate})
 
-        child  = doc_sq.append("items")
+        child = doc_sq.append("items")
         child.update(item_details)
         child.description = items_data["desc"][idx]
         child.custom_country = items_data["country"][idx]
