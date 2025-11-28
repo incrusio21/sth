@@ -66,15 +66,17 @@
                         <div class="col-xl-3 col-md-6 mb-2">
                             <label class="form-label">Supplier</label>
                             <input type="text" class="form-control form-control-sm" value="{{ supplier or '' }}"
-                                name="supplier" readonly>
+                                name="supplier" readonly required>
                         </div>
                         <div class="col-xl-3 col-md-6 mb-2">
                             <label class="form-label">Valid Till</label>
-                            <input type="text" class="form-control form-control-sm datepicker" name="valid_date">
+                            <input type="text" class="form-control form-control-sm datepicker" name="valid_date"
+                                required>
                         </div>
                         <div class="col-xl-3 col-md-6 mb-2">
                             <label class="form-label">Estimated Delivery</label>
-                            <input type="text" class="form-control form-control-sm datepicker" name="estimated_date">
+                            <input type="text" class="form-control form-control-sm datepicker" name="estimated_date"
+                                required>
                         </div>
                         <div class="col-xl-3 col-md-6 mb-2">
                             <label for="file-upload" class="form-label">File Upload</label>
