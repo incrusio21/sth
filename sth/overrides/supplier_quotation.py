@@ -9,7 +9,11 @@ def make_purchase_order(source_name, target_doc=None):
 		target.run_method("get_schedule_dates")
 		target.run_method("calculate_taxes_and_totals")
 		
-		target.custom_transaction_type,target.custom_sub_transaction_type = frappe.db.get_value("Material Request",source.custom_material_request,["custom_document_type","custom_sub_transaction_type"])
+		data_transaction = frappe.db.get_value("Material Request",source.custom_material_request,["custom_document_type","custom_sub_transaction_type"])
+		if data_transaction:
+			target.custom_transaction_type = data_transaction.custom_document_type 
+			target.custom_sub_transaction_type = data_transaction.custom_sub_transaction_type
+
 		tax_template_name = frappe.get_value("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":target.company}, pluck="name")
 		target.taxes_and_charges = tax_template_name
 
@@ -18,6 +22,9 @@ def make_purchase_order(source_name, target_doc=None):
 		for data in unassign_tax:
 			tax = target.append('taxes')
 			tax.update(data)
+
+		for row in target.items:
+			row.schedule_date = source.custom_required_by
 
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
