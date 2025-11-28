@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Supplier</title>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="/assets/sth/css/lib/toastr.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.min.css" rel="stylesheet">
 
     <style>
         /*body {
@@ -50,13 +50,7 @@
 
 <body>
     <div class="pt-2">
-        {% if is_exist_sq %}
-        <div class="container-fluid">
-            <div class="alert alert-success text-center" role="alert">
-                <h5>Terima kasih telah mengisi form quotation kami</h5>
-            </div>
-        </div>
-        {% elif status == "Open" %}
+        {% if status == "Open" %}
         <div class="container-fluid">
             <div class="card-title fs-2">Supplier Quotation</div>
             <hr>
@@ -267,14 +261,13 @@
             </div>
         </div>
         {% endif %}
-
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <script src="/assets/sth/js/lib/toastr.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.8.1"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
         <script src="/assets/sth/js/lib/numeral.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.0/air-datepicker.min.js"></script>
         <script>{% include "templates/includes/form_supplier.js" %} </script>
 </body>
 
