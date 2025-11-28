@@ -1,0 +1,1 @@
+import "../../buying_sth/doctype/purchase_order_type/configure_column_controller.js";
