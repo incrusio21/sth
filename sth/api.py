@@ -20,7 +20,7 @@ def create_sq():
     doc_sq.valid_till = doc_sq.transaction_date
     doc_sq.terms = data.get('terms')
 
-    mq_ref = doc_sq.items[0].material_request
+    doc_sq.custom_material_request = doc_sq.items[0].material_request
     doc_sq.items = []
     
 
@@ -34,7 +34,6 @@ def create_sq():
         child.custom_merk = items_data["merk"][idx]
         child.rate = items_data["rate"][idx]
         child.qty = items_data["qty"][idx]
-        child.material_request = mq_ref
         child.request_for_quotation = rfq_name
     
     doc_sq.taxes = []
