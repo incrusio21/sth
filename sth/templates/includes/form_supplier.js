@@ -160,7 +160,7 @@ class FormSupplier {
     initAction() {
         var self = this
 
-        this.wrapperItems.on("input", "input[name='rate[]']", function () {
+        this.wrapperItems.on("input", "input[name='rate[]'],input[name='qty[]']", function () {
             let row = $(this).closest("tr")
             self.calculateAmount("items", row)
             self.calculateNetTotals()
