@@ -9,8 +9,11 @@ sth.ConfigureColumn.Controller = class {
         Object.assign(this, opts);
 		this.wrapper = $(wrapper).html(`<div class="column-editor"></div>`);
 
+        if(!this.doctype) return
+		this.doctype += " Item"
+		
         frappe.model.with_doctype(this.doctype, function () {
-            me.docfields = frappe.meta.get_docfields("Purchase Order Item", "items")
+            me.docfields = frappe.meta.get_docfields(me.doctype, "items")
             me.prepare_wrapper_for_columns();
             me.render_selected_columns();
 

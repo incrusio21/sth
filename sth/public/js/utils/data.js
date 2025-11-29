@@ -5,7 +5,7 @@ frappe.provide("sth.form");
 
 sth.form = {
     doctype_setting: {},
-    
+    purchase_type_column: {},
     reset_value: function (frm, fields=[]) {
         if(!Array.isArray(fields)){
             fields = [fields]
@@ -37,6 +37,35 @@ sth.form = {
                     })
                     .filter(Boolean);
             }
+        }
+    },
+    setup_column_table_items: async function(frm, purchase_type, doctype_table, fields="items"){
+        // Simpan konfigurasi doctype lama untuk perbandingan
+        const old_doctype_setting = this.doctype_setting[frm.doctype] || {};
+
+        // Ambil konfigurasi kolom dari cache atau API jika belum ada
+        if (purchase_type && !this.purchase_type_column[purchase_type]) {
+            // get list visible column berdasarkan order type
+            this.purchase_type_column[purchase_type] = (
+                await frappe.call(
+                    "sth.buying_sth.doctype.purchase_type.purchase_type.get_order_type_configure_column",
+                    {
+                        order_type: purchase_type,
+                    }
+                )
+            ).message;
+        }
+
+        // Buat konfigurasi baru berdasarkan order_type
+        const new_doctype_setting = this.purchase_type_column[purchase_type]?.length > 0 
+        ? { [doctype_table]: this.purchase_type_column[purchase_type] }
+        : {};
+
+        // Update grid jika konfigurasi berubah
+        const has_changed = JSON.stringify(old_doctype_setting) !== JSON.stringify(new_doctype_setting);
+        if (has_changed) {
+            this.doctype_setting[frm.doctype] = new_doctype_setting;
+            frm.fields_dict[fields].grid.reset_grid();
         }
     }
 }

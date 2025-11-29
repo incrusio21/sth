@@ -7,7 +7,7 @@ from frappe.utils import cint
 from frappe.model.document import Document
 
 
-class PurchaseOrderType(Document):
+class PurchaseType(Document):
 	def validate(self):
 		self.validate_columns_width()
 
@@ -21,3 +21,14 @@ class PurchaseOrderType(Document):
 
 		if total_column_width and total_column_width > 10:
 			frappe.throw(_("The total column width cannot be more than 10."))
+
+
+@frappe.whitelist()
+def get_order_type_configure_column(order_type):
+    return frappe.db.sql(
+        """
+        select fieldname, columns from `tabPurchase Type Item Column`
+        where `parent`=%s
+        order by idx """,
+        (order_type), as_dict=1
+    )
