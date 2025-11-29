@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class OrderTypeItemColumn(Document):
+class PurchaseTypeItemColumn(Document):
 	pass
