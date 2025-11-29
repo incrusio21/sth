@@ -61,4 +61,5 @@ def insert_childs(doc, childs):
 
 def update_transaction_number(doc, data, childs):
 	main_pdo = frappe.get_doc(data['reference_doc'], data['reference_name'])
-	main_pdo.db_set('bahan_bakar_transaction_number', doc.name if childs else None)
+	main_pdo.bahan_bakar_transaction_number = doc.name if childs else None
+	main_pdo.db_update()
