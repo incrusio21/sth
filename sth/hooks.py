@@ -37,8 +37,6 @@ doctype_js = {
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Purchase Invoice": "public/js/purchase_invoice.js",
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
-	"Purchase Invoice": "public/js/purchase_invoice.js",
-	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
 	"Purchase Receipt": "buying_sth/custom/purchase_receipt.js",
 	"Quotation": "public/js/quotation.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
@@ -187,6 +185,7 @@ doc_events = {
 	},
     "Purchase Order": {
 		"onload": "sth.buying_sth.custom.purchase_order.onload_order_type",
+        "on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress"
 	},
     "Purchase Receipt": {
 		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
@@ -202,19 +201,6 @@ doc_events = {
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
 	},
-	"Purchase Invoice": {
-    "on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
-	},
-  	"Supplier Quotation": {
-    "before_submit": "sth.custom.supplier_quotation.update_status_rfq"
-	},
-	"Payment Entry":{
-		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
-		],
-		"on_submit": "sth.custom.payment_entry.update_check_book",
-		"on_cancel": "sth.custom.payment_entry.update_check_book"
-	}
 }
 
 
