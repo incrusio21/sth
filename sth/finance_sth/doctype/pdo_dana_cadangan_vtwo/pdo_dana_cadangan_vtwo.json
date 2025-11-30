@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "employee",
   "pdo_dana_cadangan_vtwo",
   "grand_total",
   "outstanding_amount",
@@ -95,32 +96,30 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "pdo_dana_cadangan_vtwo",
    "fieldtype": "Table",
    "label": "List Dana Cadangan",
    "options": "PDO Dana Cadangan Table Vtwo",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PDO Dana Cadangan Vtwo",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -128,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:40:26.646647",
+ "modified": "2025-11-30 14:29:08.741239",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Dana Cadangan Vtwo",

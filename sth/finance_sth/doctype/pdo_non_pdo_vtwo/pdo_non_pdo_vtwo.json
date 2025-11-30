@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "employee",
   "pdo_non_pdo_vtwo",
   "grand_total",
   "outstanding_amount",
@@ -95,32 +96,30 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "pdo_non_pdo_vtwo",
    "fieldtype": "Table",
    "label": "List Non PDO",
    "options": "PDO NON PDO Table Vtwo",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PDO NON PDO Vtwo",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -128,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:42:01.253328",
+ "modified": "2025-11-30 14:29:28.089530",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO NON PDO Vtwo",

@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "employee",
   "pdo_perjalanan_dinas_vtwo",
   "grand_total",
   "outstanding_amount",
@@ -111,6 +112,14 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -118,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:36:36.028610",
+ "modified": "2025-11-30 14:28:59.650035",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Perjalanan Dinas Vtwo",

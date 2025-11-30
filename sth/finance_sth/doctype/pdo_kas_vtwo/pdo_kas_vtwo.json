@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "employee",
   "pdo_kas_vtwo",
   "grand_total",
   "outstanding_amount",
@@ -111,6 +112,14 @@
    "options": "PDO Kas Table Vtwo",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -118,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:36:07.561220",
+ "modified": "2025-11-30 14:29:17.828899",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Vtwo",

@@ -20,6 +20,9 @@ PROCESSORS_INSERT = {
 pdo_categories = ["Bahan Bakar", "Perjalanan Dinas", "Kas", "Dana Cadangan", "NON PDO"]
 
 class PermintaanDanaOperasional(Document):
+	def validate(self):
+		self.validate_child_tables()
+		
 	def on_update(self):
 		self.process_data_to_insert_vtwo()
 
@@ -46,6 +49,7 @@ class PermintaanDanaOperasional(Document):
 				"credit_to": self.get(f"{fieldname}_credit_to"),
 				"reference_doc": "Permintaan Dana Operasional",
 				"reference_name": self.name,
+				"employee": frappe.db.get_single_value("Payment Settings", "internal_employee")
 			}
 			
 			childs = self.get(f"pdo_{fieldname}")
@@ -58,7 +62,7 @@ class PermintaanDanaOperasional(Document):
 		for pdo in pdo_categories:
 			fieldname = pdo.lower().replace(" ", "_")
 
-			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number"):
+			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number") and self.get(f"grand_total_{fieldname}") > 0:
 				doctype_vtwo = f"PDO {pdo} Vtwo"
 				docname_vtwo = self.get(f"{fieldname}_transaction_number")
 				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
@@ -68,7 +72,7 @@ class PermintaanDanaOperasional(Document):
 		for pdo in pdo_categories:
 			fieldname = pdo.lower().replace(" ", "_")
 
-			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number"):
+			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number") and self.get(f"grand_total_{fieldname}") > 0:
 				doctype_vtwo = f"PDO {pdo} Vtwo"
 				docname_vtwo = self.get(f"{fieldname}_transaction_number")
 				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
@@ -83,3 +87,24 @@ class PermintaanDanaOperasional(Document):
 				docname_vtwo = self.get(f"{fieldname}_transaction_number")
 				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
 				doc.delete()
+	
+	def validate_child_tables(self):
+		validation_map = {
+			"pdo_bahan_bakar": ["plafon", "unit_price", "revised_plafon", "revised_unit_price"],
+			"pdo_perjalanan_dinas": ["plafon", "hari_dinas", "revised_plafon", "revised_duty_day"],
+			"pdo_kas": ["qty", "price", "revised_qty", "revised_price"],
+			"pdo_dana_cadangan": ["amount", "revised_amount"],
+			"pdo_non_pdo": ["qty", "price", "revised_qty", "revised_price"],
+		}
+
+		for pdo in pdo_categories:
+			fieldname = pdo.lower().replace(" ", "_")
+
+			if not self.get(f"pdo_{fieldname}") and not self.get(f"{fieldname}_transaction_number"):
+				continue
+			for row in self.get(f"pdo_{fieldname}"):
+				for valid in validation_map[f"pdo_{fieldname}"]:
+					if row.get(valid) > 0:
+						continue
+					msg = f"Pada Tabel {pdo} baris ke {row.idx} field currency atau angka harus lebih besar dari 0"
+					frappe.throw(msg)
