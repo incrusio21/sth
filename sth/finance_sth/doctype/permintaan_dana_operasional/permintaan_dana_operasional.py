@@ -17,13 +17,19 @@ PROCESSORS_INSERT = {
 	"Dana Cadangan": process_pdo_dana_cadangan,
 	"NON PDO": process_pdo_non_pdo,
 }
+pdo_categories = ["Bahan Bakar", "Perjalanan Dinas", "Kas", "Dana Cadangan", "NON PDO"]
 
 class PermintaanDanaOperasional(Document):
 	def on_update(self):
 		self.process_data_to_insert_vtwo()
 
+	def on_submit(self):
+		self.submit_pdo_vtwo()
+
+	def before_cancel(self):
+		self.cancel_pdo_vtwo()
+
 	def process_data_to_insert_vtwo(self):
-		pdo_categories = ["Bahan Bakar", "Perjalanan Dinas", "Kas", "Dana Cadangan", "NON PDO"]
 		for pdo in pdo_categories:
 			fieldname = pdo.lower().replace(" ", "_")
 
@@ -44,3 +50,23 @@ class PermintaanDanaOperasional(Document):
 			handlers = PROCESSORS_INSERT.get(pdo)
 			if handlers:
 				handlers(data, childs)
+	
+	def submit_pdo_vtwo(self):
+		for pdo in pdo_categories:
+			fieldname = pdo.lower().replace(" ", "_")
+
+			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number"):
+				doctype_vtwo = f"PDO {pdo} Vtwo"
+				docname_vtwo = self.get(f"{fieldname}_transaction_number")
+				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
+				doc.submit()
+    
+	def cancel_pdo_vtwo(self):
+		for pdo in pdo_categories:
+			fieldname = pdo.lower().replace(" ", "_")
+
+			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number"):
+				doctype_vtwo = f"PDO {pdo} Vtwo"
+				docname_vtwo = self.get(f"{fieldname}_transaction_number")
+				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
+				doc.cancel()
