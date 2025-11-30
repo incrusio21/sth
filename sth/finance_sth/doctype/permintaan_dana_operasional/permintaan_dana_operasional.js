@@ -4,6 +4,9 @@ const pdoCategories = ["Bahan Bakar", "Perjalanan Dinas", "Kas", "Dana Cadangan"
 
 
 frappe.ui.form.on("Permintaan Dana Operasional", {
+    setup(frm){
+        frm.ignore_doctypes_on_cancel_all = ["PDO Bahan Bakar Vtwo", "PDO Perjalanan Dinas Vtwo", "PDO Kas Vtwo", "PDO Dana Cadangan Vtwo", "PDO NON PDO Vtwo"];
+    },
 	refresh(frm) {
         filterCreditTo(frm)
         processFilterSubDetail(frm)

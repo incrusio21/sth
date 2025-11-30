@@ -8,10 +8,14 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "company",
+  "posting_date",
   "employee",
   "pdo_dana_cadangan_vtwo",
   "grand_total",
   "outstanding_amount",
+  "accounting_dimensions_section",
+  "cost_center",
   "more_information_tab",
   "account_details_section",
   "debit_to",
@@ -120,6 +124,33 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -127,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-30 14:29:08.741239",
+ "modified": "2025-11-30 22:41:13.492704",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Dana Cadangan Vtwo",

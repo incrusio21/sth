@@ -49,7 +49,10 @@ class PermintaanDanaOperasional(Document):
 				"credit_to": self.get(f"{fieldname}_credit_to"),
 				"reference_doc": "Permintaan Dana Operasional",
 				"reference_name": self.name,
-				"employee": frappe.db.get_single_value("Payment Settings", "internal_employee")
+				"employee": frappe.db.get_single_value("Payment Settings", "internal_employee"),
+				"cost_center": self.get(f"{fieldname}_cost_center"),
+				"company": self.company,
+				"posting_date": self.posting_date,
 			}
 			
 			childs = self.get(f"pdo_{fieldname}")
