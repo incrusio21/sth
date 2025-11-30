@@ -48,11 +48,11 @@
   "more_information_dc_section",
   "dana_cadangan_debit_to",
   "dana_cadangan_credit_to",
-  "pdo_non_pdo",
+  "pdo_non_pdo_tab",
   "non_pdo_transaction_number",
-  "list_non_pdo",
+  "pdo_non_pdo",
   "grand_total_non_pdo",
-  "outstanding_amount__pdo",
+  "outstanding_amount_non_pdo",
   "amended_from",
   "more_information_non_pdo_section",
   "non_pdo_debit_to",
@@ -196,15 +196,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "list_non_pdo",
+   "fieldname": "pdo_non_pdo",
    "fieldtype": "Table",
    "label": "List Non PDO",
    "options": "PDO NON PDO Table"
-  },
-  {
-   "fieldname": "pdo_non_pdo",
-   "fieldtype": "Tab Break",
-   "label": "NON PDO"
   },
   {
    "fieldname": "amended_from",
@@ -267,12 +262,6 @@
    "fieldname": "grand_total_non_pdo",
    "fieldtype": "Currency",
    "label": "Grand Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "outstanding_amount__pdo",
-   "fieldtype": "Currency",
-   "label": "Outstanding Amount",
    "read_only": 1
   },
   {
@@ -364,13 +353,24 @@
    "fieldtype": "Link",
    "label": "Credit To",
    "options": "Account"
+  },
+  {
+   "fieldname": "pdo_non_pdo_tab",
+   "fieldtype": "Tab Break",
+   "label": "NON PDO"
+  },
+  {
+   "fieldname": "outstanding_amount_non_pdo",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:47:04.823486",
+ "modified": "2025-11-30 09:55:29.667302",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

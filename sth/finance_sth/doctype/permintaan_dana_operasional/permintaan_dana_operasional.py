@@ -8,12 +8,14 @@ from sth.finance_sth.doctype.pdo_bahan_bakar_vtwo.pdo_bahan_bakar_vtwo import pr
 from sth.finance_sth.doctype.pdo_perjalanan_dinas_vtwo.pdo_perjalanan_dinas_vtwo import process_pdo_perjalanan_dinas
 from sth.finance_sth.doctype.pdo_kas_vtwo.pdo_kas_vtwo import process_pdo_kas
 from sth.finance_sth.doctype.pdo_dana_cadangan_vtwo.pdo_dana_cadangan_vtwo import process_pdo_dana_cadangan
+from sth.finance_sth.doctype.pdo_non_pdo_vtwo.pdo_non_pdo_vtwo import process_pdo_non_pdo
 
 PROCESSORS_INSERT = {
 	"Bahan Bakar": process_pdo_bahan_bakar,
 	"Perjalanan Dinas": process_pdo_perjalanan_dinas,
 	"Kas": process_pdo_kas,
 	"Dana Cadangan": process_pdo_dana_cadangan,
+	"NON PDO": process_pdo_non_pdo,
 }
 
 class PermintaanDanaOperasional(Document):

@@ -50,6 +50,8 @@ def insert_childs(doc, childs):
 			"sub_detail": row.sub_detail,
 			"type": row.type,
 			"item_code": row.item_code,
+			"item_name": row.item_name,
+			"uom": row.uom,
 			"qty": row.qty,
 			"price": row.price,
 			"revised_qty": row.revised_qty,
