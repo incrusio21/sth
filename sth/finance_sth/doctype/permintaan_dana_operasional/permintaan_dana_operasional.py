@@ -29,6 +29,9 @@ class PermintaanDanaOperasional(Document):
 	def before_cancel(self):
 		self.cancel_pdo_vtwo()
 
+	def on_trash(self):
+		self.delete_pdo_vtwo()
+
 	def process_data_to_insert_vtwo(self):
 		for pdo in pdo_categories:
 			fieldname = pdo.lower().replace(" ", "_")
@@ -60,7 +63,7 @@ class PermintaanDanaOperasional(Document):
 				docname_vtwo = self.get(f"{fieldname}_transaction_number")
 				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
 				doc.submit()
-    
+	
 	def cancel_pdo_vtwo(self):
 		for pdo in pdo_categories:
 			fieldname = pdo.lower().replace(" ", "_")
@@ -70,3 +73,13 @@ class PermintaanDanaOperasional(Document):
 				docname_vtwo = self.get(f"{fieldname}_transaction_number")
 				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
 				doc.cancel()
+	
+	def delete_pdo_vtwo(self):
+		for pdo in pdo_categories:
+			fieldname = pdo.lower().replace(" ", "_")
+
+			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number"):
+				doctype_vtwo = f"PDO {pdo} Vtwo"
+				docname_vtwo = self.get(f"{fieldname}_transaction_number")
+				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
+				doc.delete()

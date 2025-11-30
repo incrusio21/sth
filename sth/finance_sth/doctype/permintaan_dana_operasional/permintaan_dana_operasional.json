@@ -244,7 +244,8 @@
   {
    "fieldname": "outstanding_amount_kas",
    "fieldtype": "Currency",
-   "label": "Outstanding Amount"
+   "label": "Outstanding Amount",
+   "read_only": 1
   },
   {
    "fieldname": "grand_total_dana_cadangan",
@@ -370,7 +371,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-30 09:55:29.667302",
+ "modified": "2025-11-30 10:30:02.958176",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",
