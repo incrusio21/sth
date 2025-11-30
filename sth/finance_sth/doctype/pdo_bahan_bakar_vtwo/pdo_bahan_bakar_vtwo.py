@@ -2,11 +2,20 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
 
+from sth.controllers.accounts_controller import AccountsController
 
-class PDOBahanBakarVtwo(Document):
-	pass
+class PDOBahanBakarVtwo(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._expense_account = "debit_to"
+
+	def on_submit(self):
+		self.make_gl_entry()
+
+	def on_cancel(self):
+		super().on_cancel()
+		self.make_gl_entry()
 
 def process_pdo_bahan_bakar(data, childs):
 	pdo_bahan_bakar = frappe.db.get_value("PDO Bahan Bakar Vtwo", {
