@@ -1,0 +1,73 @@
+import frappe,copy
+from frappe.utils import flt
+from frappe.model.mapper import get_mapped_doc
+
+@frappe.whitelist()
+def make_purchase_order(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+		target.run_method("get_schedule_dates")
+		target.run_method("calculate_taxes_and_totals")
+		
+		data_transaction = frappe.db.get_value("Material Request",source.custom_material_request,["custom_document_type","custom_sub_transaction_type"])
+		if data_transaction:
+			target.custom_transaction_type = data_transaction.custom_document_type 
+			target.custom_sub_transaction_type = data_transaction.custom_sub_transaction_type
+
+		tax_template_name = frappe.get_value("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":target.company}, pluck="name")
+		target.taxes_and_charges = tax_template_name
+
+		list_taxes = [r.account_head for r in target.taxes]
+		unassign_tax = fetch_unassigned_taxes(tax_template_name,list_taxes)
+		for data in unassign_tax:
+			tax = target.append('taxes')
+			tax.update(data)
+
+		for row in target.items:
+			row.schedule_date = source.custom_required_by
+
+	def update_item(obj, target, source_parent):
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+
+	doclist = get_mapped_doc(
+		"Supplier Quotation",
+		source_name,
+		{
+			"Supplier Quotation": {
+				"doctype": "Purchase Order",
+				"field_no_map": ["transaction_date"],
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Supplier Quotation Item": {
+				"doctype": "Purchase Order Item",
+				"field_map": [
+					["name", "supplier_quotation_item"],
+					["parent", "supplier_quotation"],
+					["material_request", "material_request"],
+					["material_request_item", "material_request_item"],
+					["sales_order", "sales_order"],
+				],
+				"postprocess": update_item,
+			},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+			},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	return doclist
+
+def fetch_unassigned_taxes(template_name,list_taxes):
+	# mencari taxes yang belum dimasukkan pada suatu reference template
+
+	query = frappe.db.sql("""
+		select ptc.charge_type,ptc.account_head,ptc.description,ptc.rate,ptc.tax_amount, ptc.category, ptc.add_deduct_tax 
+		from `tabPurchase Taxes and Charges` ptc
+		join `tabPurchase Taxes and Charges Template` ptt on ptt.name = ptc.parent
+		where ptt.name = %s and ptc.account_head not in %s
+	""",[template_name,list_taxes],as_dict=True)
+	return query

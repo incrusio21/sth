@@ -9,6 +9,7 @@
   "cheque_no",
   "status",
   "reference_document",
+  "reference_name",
   "issue_date",
   "column_break_uido",
   "cheque_amount",
@@ -29,13 +30,6 @@
    "in_preview": 1,
    "label": "Status",
    "options": "Draft\nUsed\nVoid"
-  },
-  {
-   "fieldname": "reference_document",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Reference Document"
   },
   {
    "fieldname": "issue_date",
@@ -61,13 +55,23 @@
    "fieldtype": "Small Text",
    "in_preview": 1,
    "label": "Note"
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Data",
+   "label": "Reference Document"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "label": "Reference Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-13 16:53:21.738500",
+ "modified": "2025-11-27 14:21:19.848350",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Cheque Usage History",

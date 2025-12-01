@@ -1,59 +1,187 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-11-26 21:49:57.006108",
+ "autoname": "naming_series:",
+ "creation": "2025-11-27 16:38:11.357988",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "fund_type",
-  "amount",
-  "revised_amount",
-  "column_break_uuvo",
-  "cash_bank_balance_adjustment"
+  "section_break_wtzj",
+  "naming_series",
+  "company",
+  "posting_date",
+  "employee",
+  "pdo_dana_cadangan_vtwo",
+  "grand_total",
+  "outstanding_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "more_information_tab",
+  "account_details_section",
+  "debit_to",
+  "credit_to",
+  "reference_details_section",
+  "reference_doc",
+  "reference_name",
+  "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "fund_type",
+   "fieldname": "section_break_wtzj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "DC-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Naming Series",
+   "options": "DC-",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Account Details"
+  },
+  {
+   "fieldname": "debit_to",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Jenis Dana",
-   "options": "Account"
+   "label": "Debit To",
+   "options": "Account",
+   "read_only": 1
   },
   {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Nilai"
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "read_only": 1
   },
   {
-   "fieldname": "revised_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Nilai Revisi"
+   "fieldname": "reference_details_section",
+   "fieldtype": "Section Break",
+   "label": "Reference Details"
   },
   {
-   "fieldname": "column_break_uuvo",
-   "fieldtype": "Column Break"
+   "fieldname": "reference_doc",
+   "fieldtype": "Link",
+   "label": "Reference Document",
+   "options": "DocType",
+   "read_only": 1
   },
   {
-   "fieldname": "cash_bank_balance_adjustment",
-   "fieldtype": "Currency",
-   "label": "Penyesuaian Saldo Cash/bank"
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doc",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pdo_dana_cadangan_vtwo",
+   "fieldtype": "Table",
+   "label": "List Dana Cadangan",
+   "options": "PDO Dana Cadangan Table Vtwo",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PDO Dana Cadangan Vtwo",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
- "istable": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 21:49:57.006108",
+ "modified": "2025-11-30 22:41:13.492704",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Dana Cadangan Vtwo",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
- "permissions": [],
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

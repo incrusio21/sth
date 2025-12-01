@@ -6,15 +6,15 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "pdo_category"
+  "category"
  ],
  "fields": [
   {
-   "fieldname": "pdo_category",
-   "fieldtype": "Link",
+   "fieldname": "category",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "PDO Category",
-   "options": "PDO Category",
+   "label": "Category",
+   "options": "\nBahan Bakar\nPerjalanan Dinas\nKas\nDana Cadangan\nNON PDO",
    "reqd": 1
   }
  ],
@@ -22,7 +22,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-26 15:36:31.484518",
+ "modified": "2025-11-30 11:38:39.107646",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Category Type Table",

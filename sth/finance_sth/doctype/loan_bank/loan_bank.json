@@ -1,0 +1,180 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-27 16:04:49.594303",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_yjie",
+  "loan_number",
+  "bank",
+  "nomor_rekening",
+  "loan_type",
+  "facility_type",
+  "purpose",
+  "loan_amount",
+  "loan_tenure",
+  "due_date",
+  "bulan_jatuh_tempo",
+  "availability_periode",
+  "grace_periode",
+  "credit_fee",
+  "interest_rate",
+  "penalty",
+  "description",
+  "number_of_month",
+  "principal_calculation_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_yjie",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "loan_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nomor Pinjaman",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nomor_rekening",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nomor Rekening",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Jenis Pinjaman",
+   "options": "\nKRK\nKISI",
+   "reqd": 1
+  },
+  {
+   "fieldname": "facility_type",
+   "fieldtype": "Select",
+   "label": "Jenis Fasilitas",
+   "options": "\nTranche A\nTranche B\nTranche C",
+   "reqd": 1
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Small Text",
+   "label": "Tujuan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pinjaman",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_tenure",
+   "fieldtype": "Int",
+   "label": "Jangka Waktu",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Int",
+   "label": "Tanggal Jatuh Tempo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bulan_jatuh_tempo",
+   "fieldtype": "Link",
+   "label": "Bulan Jatuh Tempo",
+   "options": "Months",
+   "reqd": 1
+  },
+  {
+   "fieldname": "availability_periode",
+   "fieldtype": "Int",
+   "label": "Masa Penarikan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grace_periode",
+   "fieldtype": "Int",
+   "label": "Grace Periode",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_fee",
+   "fieldtype": "Currency",
+   "label": "Biaya Kredit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest_rate",
+   "fieldtype": "Percent",
+   "label": "Suku Bunga",
+   "reqd": 1
+  },
+  {
+   "fieldname": "penalty",
+   "fieldtype": "Percent",
+   "label": "Penalty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "number_of_month",
+   "fieldtype": "Int",
+   "label": "Jumlah Bulan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "principal_calculation_type",
+   "fieldtype": "Select",
+   "label": "Tipe Perhitungan Pokok",
+   "options": "\nPer Pencairan",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-27 16:28:55.610403",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Loan Bank",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

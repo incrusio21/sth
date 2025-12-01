@@ -29,22 +29,24 @@ app_include_js = "sth.bundle.js"
 
 # include js in doctype views
 doctype_js = {
+	"Customer": "public/js/customer.js",
+	"Delivery Note": "public/js/delivery_note.js",
+	"Employee": "public/js/employee.js",
+	"Expense Claim": "public/js/expense_claim.js",
+	"Loan": "hr_customize/custom/loan.js",
+	"Payment Entry": "hr_customize/custom/payment_entry.js",
+	"Purchase Invoice": "public/js/purchase_invoice.js",
+	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
+	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
+	"Quotation": "public/js/quotation.js",
+	"Sales Invoice": "public/js/sales_invoice.js",
+	"Sales Order": "public/js/sales_order.js",
+	"Supplier Quotation": "public/js/supplier_quotation.js",
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
-	"Expense Claim": "public/js/expense_claim.js",
-	"Payment Entry": "hr_customize/custom/payment_entry.js",
-	"Loan": "hr_customize/custom/loan.js",
-	"Employee": "public/js/employee.js",
-	"Supplier Quotation": "public/js/supplier_quotation.js",
 	"Exit Interview": "public/js/exit_interview.js",
-	"Purchase Invoice": "public/js/purchase_invoice.js",
-	"Customer": "public/js/customer.js",
-	"Quotation": "public/js/quotation.js",
-	"Sales Order": "public/js/sales_order.js",
-	"Delivery Note": "public/js/delivery_note.js",
-	"Sales Invoice": "public/js/sales_invoice.js"
-	
 }
+
 doctype_list_js = {
     "Request for Quotation" : "public/js/request_for_quotation_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -167,7 +169,31 @@ doc_events = {
 	"Loan Disbursement": {
         "on_submit": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 		"on_cancel": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
-	},    
+	},
+    "Payment Entry":{
+		"validate": [
+			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
+		],
+		"on_submit": "sth.custom.payment_entry.update_check_book",
+		"on_cancel": "sth.custom.payment_entry.update_check_book"
+	},
+    "Project": {
+      	"on_update": "sth.legal.custom.project.create_task_by_order"  
+	},
+	"Purchase Invoice": {
+    	"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
+	},
+    "Purchase Order": {
+		"onload": "sth.buying_sth.custom.purchase_order.onload_order_type",
+        "on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress"
+	},
+    "Purchase Receipt": {
+		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
+	},
+  	"Supplier Quotation": {
+    	"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
+	},
+    
 	# "Training Event": {
 	# 	"on_submit": "sth.custom.training_event.create_journal_entry",
 	# 	"on_cancel": "sth.custom.training_event.delete_journal_entry",
@@ -175,12 +201,6 @@ doc_events = {
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
 	},
-	"Purchase Invoice": {
-    "on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
-	},
-  "Supplier Quotation": {
-    "before_submit": "sth.custom.supplier_quotation.update_status_rfq"
-	}
 }
 
 
@@ -216,6 +236,8 @@ scheduler_events = {
 override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
+    "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
+    "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt"
 }
 #
 # each overriding function accepts a `data` argument;

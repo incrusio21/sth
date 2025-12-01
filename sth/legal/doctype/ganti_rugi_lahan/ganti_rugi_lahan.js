@@ -27,7 +27,7 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
     },
 });
 
-sth.legal.GantiRugiLahan = class PengajuanPanenKontanan extends sth.plantation.AccountsController {
+sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsController {
     setup() {
         let me = this
 

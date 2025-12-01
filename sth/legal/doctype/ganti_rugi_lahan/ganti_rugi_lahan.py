@@ -14,9 +14,8 @@ class GantiRugiLahan(AccountsController):
 	def validate(self):
 		self.set_missing_value()
 		self.fetch_sppt_data()
-		super().validate()
-
 		self.calculate_total()
+		super().validate()
 
 	@frappe.whitelist()
 	def fetch_sppt_data(self):

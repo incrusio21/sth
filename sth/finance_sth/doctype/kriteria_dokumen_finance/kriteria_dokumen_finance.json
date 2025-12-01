@@ -1,30 +1,36 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:category_name",
- "creation": "2025-11-26 15:32:38.401542",
+ "autoname": "field:dokumen_finance",
+ "creation": "2025-11-27 11:42:51.324670",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "category_name"
+  "dokumen_finance",
+  "kriteria_dokumen_finance"
  ],
  "fields": [
   {
-   "fieldname": "category_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Category Name",
-   "reqd": 1,
+   "fieldname": "kriteria_dokumen_finance",
+   "fieldtype": "Table",
+   "label": "Kriteria Dokumen Finance",
+   "options": "Kriteria Satuan Dokumen Finance"
+  },
+  {
+   "fieldname": "dokumen_finance",
+   "fieldtype": "Link",
+   "label": "Dokumen Finance",
+   "options": "DocType",
    "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 15:33:34.048404",
+ "modified": "2025-11-27 11:45:24.644352",
  "modified_by": "Administrator",
  "module": "Finance STH",
- "name": "PDO Category",
+ "name": "Kriteria Dokumen Finance",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -42,6 +48,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -8,9 +8,14 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "company",
+  "posting_date",
+  "employee",
   "pdo_bahan_bakar_vtwo",
   "grand_total",
   "outstanding_amount",
+  "accounting_details_section",
+  "cost_center",
   "more_information_tab",
   "account_details_section",
   "debit_to",
@@ -111,6 +116,42 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -118,7 +159,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-26 22:00:27.358252",
+ "modified": "2025-11-30 22:39:32.630139",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Bahan Bakar Vtwo",

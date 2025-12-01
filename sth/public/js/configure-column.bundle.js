@@ -1,0 +1,1 @@
+import "../../buying_sth/doctype/purchase_type/configure_column"
