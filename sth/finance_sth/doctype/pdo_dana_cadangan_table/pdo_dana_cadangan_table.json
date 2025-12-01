@@ -24,13 +24,15 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Nilai"
+   "label": "Nilai",
+   "reqd": 1
   },
   {
    "fieldname": "revised_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Nilai Revisi"
+   "label": "Nilai Revisi",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_uuvo",
@@ -46,7 +48,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-26 16:11:00.699866",
+ "modified": "2025-11-30 13:53:28.891764",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Dana Cadangan Table",

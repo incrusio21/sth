@@ -8,9 +8,14 @@
  "field_order": [
   "section_break_wtzj",
   "naming_series",
+  "company",
+  "posting_date",
+  "employee",
   "pdo_non_pdo_vtwo",
   "grand_total",
   "outstanding_amount",
+  "accounting_dimensions_section",
+  "cost_center",
   "more_information_tab",
   "account_details_section",
   "debit_to",
@@ -95,30 +100,55 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "PDO Perjalanan Dinas Vtwo",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "pdo_non_pdo_vtwo",
    "fieldtype": "Table",
    "label": "List Non PDO",
    "options": "PDO NON PDO Table Vtwo",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PDO NON PDO Vtwo",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
    "read_only": 1,
    "reqd": 1
   }
@@ -128,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:42:01.253328",
+ "modified": "2025-11-30 22:43:10.869396",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO NON PDO Vtwo",
