@@ -10,6 +10,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 	refresh(frm) {
         filterCreditTo(frm)
         processFilterSubDetail(frm)
+        filterFundType(frm)
 	},
 });
 
@@ -28,7 +29,7 @@ frappe.ui.form.on("PDO Bahan Bakar Table", {
     },
     revised_unit_price(frm, cdt, cdn) {
         processBahanBakar(frm, cdt, cdn);
-    },
+    }
 });
 
 frappe.ui.form.on("PDO Perjalanan Dinas Table", {
@@ -47,6 +48,10 @@ frappe.ui.form.on("PDO Perjalanan Dinas Table", {
     revised_duty_day(frm, cdt, cdn) {
         processPerjalananDinas(frm, cdt, cdn);
     },
+    type(frm, cdt, cdn){
+        const curRow = locals[cdt][cdn]
+        getExpenseAccount(frm, curRow, cdt, cdn)
+    }
 });
 
 
@@ -66,6 +71,10 @@ frappe.ui.form.on("PDO Kas Table", {
     revised_price(frm, cdt, cdn) {
         processKas(frm, cdt, cdn);
     },
+    type(frm, cdt, cdn){
+        const curRow = locals[cdt][cdn]
+        getExpenseAccount(frm, curRow, cdt, cdn)
+    }
 });
 
 frappe.ui.form.on("PDO NON PDO Table", {
@@ -84,6 +93,10 @@ frappe.ui.form.on("PDO NON PDO Table", {
     revised_price(frm, cdt, cdn) {
         processNonPdo(frm, cdt, cdn);
     },
+    type(frm, cdt, cdn){
+        const curRow = locals[cdt][cdn]
+        getExpenseAccount(frm, curRow, cdt, cdn)
+    }
 });
 
 frappe.ui.form.on("PDO Dana Cadangan Table", {
@@ -254,9 +267,34 @@ function filterSubDetail(frm, childTable, category) {
 function filterType(frm, childTable) { 
     frm.fields_dict[childTable].grid.get_field('type').get_query = function (doc, cdt, cdn) {
         return {
+            query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_type',
             filters : {
-                custom_routine_type: "Rutin",
-                custom_pdo_type: locals[cdt][cdn].sub_detail
+                routine_type: locals[cdt][cdn].routine_type,
+                pdo_type: locals[cdt][cdn].sub_detail,
+                company: frm.doc.company
+            }
+        }
+    }
+}
+
+function getExpenseAccount(frm, curRow, cdt, cdn) {
+    frappe.call('sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_expense_account', {
+        company: frm.doc.company,
+        parent: curRow.type
+    }).then(r => {
+        const default_account = r.message
+        frappe.model.set_value(cdt, cdn, 'debit_to', default_account)
+    })
+
+    frm.refresh_field(curRow.parentfield)
+}
+
+function filterFundType(frm) {
+    frm.fields_dict.pdo_dana_cadangan.grid.get_field('fund_type').get_query = function (doc, cdt, cdn) {
+        return {
+            query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_fund_type',
+            filters: {
+                company: frm.doc.company
             }
         }
     }

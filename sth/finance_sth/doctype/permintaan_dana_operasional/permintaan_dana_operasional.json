@@ -14,6 +14,7 @@
   "column_break_izgh",
   "company",
   "posting_date",
+  "required_by",
   "bahan_bakar_tab",
   "bahan_bakar_details_section",
   "bahan_bakar_transaction_number",
@@ -31,7 +32,6 @@
   "grand_total_perjalanan_dinas",
   "outstanding_amount_perjalanan_dinas",
   "more_information_pd_section",
-  "perjalanan_dinas_debit_to",
   "perjalanan_dinas_credit_to",
   "perjalanan_dinas_cost_center",
   "kas_tab",
@@ -41,7 +41,6 @@
   "grand_total_kas",
   "outstanding_amount_kas",
   "more_information_kas_section",
-  "kas_debit_to",
   "kas_credit_to",
   "kas_cost_center",
   "dana_cadangan_tab",
@@ -50,7 +49,6 @@
   "grand_total_dana_cadangan",
   "outstanding_amount_dana_cadangan",
   "more_information_dc_section",
-  "dana_cadangan_debit_to",
   "dana_cadangan_credit_to",
   "dana_cadangan_cost_center",
   "pdo_non_pdo_tab",
@@ -59,7 +57,6 @@
   "grand_total_non_pdo",
   "outstanding_amount_non_pdo",
   "more_information_non_pdo_section",
-  "non_pdo_debit_to",
   "non_pdo_credit_to",
   "non_pdo_cost_center",
   "amended_from"
@@ -288,13 +285,6 @@
    "label": "More Information"
   },
   {
-   "fieldname": "perjalanan_dinas_debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "perjalanan_dinas_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
@@ -306,13 +296,6 @@
    "fieldname": "more_information_kas_section",
    "fieldtype": "Section Break",
    "label": "More Information"
-  },
-  {
-   "fieldname": "kas_debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
   },
   {
    "fieldname": "kas_credit_to",
@@ -328,13 +311,6 @@
    "label": "More Information"
   },
   {
-   "fieldname": "dana_cadangan_debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "dana_cadangan_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
@@ -346,13 +322,6 @@
    "fieldname": "more_information_non_pdo_section",
    "fieldtype": "Section Break",
    "label": "More Information"
-  },
-  {
-   "fieldname": "non_pdo_debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
   },
   {
    "fieldname": "non_pdo_credit_to",
@@ -417,13 +386,19 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "required_by",
+   "fieldtype": "Date",
+   "label": "Required By",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-30 22:46:26.814839",
+ "modified": "2025-12-01 11:02:36.287780",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",
