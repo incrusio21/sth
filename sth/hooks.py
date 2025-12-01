@@ -46,6 +46,7 @@ doctype_js = {
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
 	"Exit Interview": "public/js/exit_interview.js",
+    "Material Request": "public/js/material_request.js",
 }
 
 doctype_list_js = {
@@ -245,6 +246,7 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
+    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.overrides.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt"
 }
 #
