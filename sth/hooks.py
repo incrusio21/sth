@@ -196,6 +196,7 @@ doc_events = {
 	},
 	"Sales Order": {
 		"validate": "sth.sales_sth.custom.sales_order.check_dn_pending",
+		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
 	},
   	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
