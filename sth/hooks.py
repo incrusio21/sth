@@ -194,6 +194,9 @@ doc_events = {
 	"Purchase Receipt": {
 		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
 	},
+	"Sales Order": {
+		"validate": "sth.sales_sth.custom.sales_order.check_dn_pending",
+	},
   	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
 	},
