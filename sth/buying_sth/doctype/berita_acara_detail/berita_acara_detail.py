@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PDOCategory(Document):
+class BeritaAcaraDetail(Document):
 	pass

@@ -13,6 +13,7 @@
   "fiscal_year",
   "column_break_izgh",
   "company",
+  "posting_date",
   "bahan_bakar_tab",
   "bahan_bakar_details_section",
   "bahan_bakar_transaction_number",
@@ -22,6 +23,7 @@
   "more_information_bb_section",
   "bahan_bakar_debit_to",
   "bahan_bakar_credit_to",
+  "bahan_bakar_cost_center",
   "perjalanan_dinas_tab",
   "perjalanan_dinas_details_section",
   "perjalanan_dinas_transaction_number",
@@ -31,6 +33,7 @@
   "more_information_pd_section",
   "perjalanan_dinas_debit_to",
   "perjalanan_dinas_credit_to",
+  "perjalanan_dinas_cost_center",
   "kas_tab",
   "kas_details_section",
   "kas_transaction_number",
@@ -40,6 +43,7 @@
   "more_information_kas_section",
   "kas_debit_to",
   "kas_credit_to",
+  "kas_cost_center",
   "dana_cadangan_tab",
   "dana_cadangan_transaction_number",
   "pdo_dana_cadangan",
@@ -48,15 +52,17 @@
   "more_information_dc_section",
   "dana_cadangan_debit_to",
   "dana_cadangan_credit_to",
-  "pdo_non_pdo",
+  "dana_cadangan_cost_center",
+  "pdo_non_pdo_tab",
   "non_pdo_transaction_number",
-  "list_non_pdo",
+  "pdo_non_pdo",
   "grand_total_non_pdo",
-  "outstanding_amount__pdo",
-  "amended_from",
+  "outstanding_amount_non_pdo",
   "more_information_non_pdo_section",
   "non_pdo_debit_to",
-  "non_pdo_credit_to"
+  "non_pdo_credit_to",
+  "non_pdo_cost_center",
+  "amended_from"
  ],
  "fields": [
   {
@@ -196,25 +202,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "list_non_pdo",
+   "fieldname": "pdo_non_pdo",
    "fieldtype": "Table",
    "label": "List Non PDO",
    "options": "PDO NON PDO Table"
-  },
-  {
-   "fieldname": "pdo_non_pdo",
-   "fieldtype": "Tab Break",
-   "label": "NON PDO"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Permintaan Dana Operasional",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "grand_total_bahan_bakar",
@@ -249,7 +240,8 @@
   {
    "fieldname": "outstanding_amount_kas",
    "fieldtype": "Currency",
-   "label": "Outstanding Amount"
+   "label": "Outstanding Amount",
+   "read_only": 1
   },
   {
    "fieldname": "grand_total_dana_cadangan",
@@ -270,22 +262,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "outstanding_amount__pdo",
-   "fieldtype": "Currency",
-   "label": "Outstanding Amount",
-   "read_only": 1
-  },
-  {
    "fieldname": "bahan_bakar_debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "bahan_bakar_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -303,13 +291,15 @@
    "fieldname": "perjalanan_dinas_debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "perjalanan_dinas_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -321,13 +311,15 @@
    "fieldname": "kas_debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "kas_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -339,13 +331,15 @@
    "fieldname": "dana_cadangan_debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "dana_cadangan_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -357,20 +351,79 @@
    "fieldname": "non_pdo_debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "non_pdo_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pdo_non_pdo_tab",
+   "fieldtype": "Tab Break",
+   "label": "NON PDO"
+  },
+  {
+   "fieldname": "outstanding_amount_non_pdo",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bahan_bakar_cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "perjalanan_dinas_cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "kas_cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dana_cadangan_cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "non_pdo_cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Permintaan Dana Operasional",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:47:04.823486",
+ "modified": "2025-11-30 22:46:26.814839",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

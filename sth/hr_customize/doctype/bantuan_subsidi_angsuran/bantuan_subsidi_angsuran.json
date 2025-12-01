@@ -1,0 +1,150 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-12 10:29:07.897422",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "th_ke",
+  "rp_prm",
+  "column_break_ncms",
+  "pembagian_per_bulan_section",
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "mei",
+  "jun",
+  "column_break_iwgm",
+  "jul",
+  "agu",
+  "sep",
+  "okt",
+  "nov",
+  "des"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "th_ke",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tahun Ke",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rp_prm",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Rupiah Premi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ncms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pembagian_per_bulan_section",
+   "fieldtype": "Section Break",
+   "label": "Pembagian Per Bulan"
+  },
+  {
+   "fieldname": "jan",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Januari"
+  },
+  {
+   "fieldname": "feb",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Februari"
+  },
+  {
+   "fieldname": "mar",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Maret"
+  },
+  {
+   "fieldname": "apr",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "April"
+  },
+  {
+   "fieldname": "mei",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Mei"
+  },
+  {
+   "fieldname": "jun",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Juni"
+  },
+  {
+   "fieldname": "column_break_iwgm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jul",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Juli"
+  },
+  {
+   "fieldname": "agu",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Agustus"
+  },
+  {
+   "fieldname": "sep",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "September"
+  },
+  {
+   "fieldname": "okt",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Oktober"
+  },
+  {
+   "fieldname": "nov",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "November"
+  },
+  {
+   "fieldname": "des",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Desember"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-01 10:29:25.918153",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Bantuan Subsidi Angsuran",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

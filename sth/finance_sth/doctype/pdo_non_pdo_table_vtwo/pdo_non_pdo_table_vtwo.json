@@ -8,8 +8,8 @@
  "field_order": [
   "employee",
   "designation",
+  "sub_detail",
   "type",
-  "jenis",
   "item_code",
   "item_name",
   "uom",
@@ -40,13 +40,6 @@
   },
   {
    "fieldname": "type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Sub Detail",
-   "options": "PDO Type"
-  },
-  {
-   "fieldname": "jenis",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Jenis",
@@ -118,13 +111,20 @@
    "in_list_view": 1,
    "label": "Total Revisi",
    "read_only": 1
+  },
+  {
+   "fieldname": "sub_detail",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sub Detail",
+   "options": "PDO Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-26 21:50:28.239380",
+ "modified": "2025-11-30 09:53:34.893097",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO NON PDO Table Vtwo",
