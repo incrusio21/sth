@@ -99,12 +99,9 @@ class ChequeBook(Document):
 	def validate_numbers(self):
 		start_no = int(self.cheque_start_no)
 		end_no = int(self.cheque_end_no)
-		warning_no = int(self.cheque_warning_no)
 
 		if start_no > end_no:
 			frappe.throw("<b>Cheque Start Number </b> tidak boleh lebih besar dari <b>Cheque End Number</b>")
-		if warning_no < start_no or warning_no > end_no:
-			frappe.throw("<b>Cheque Waring Number</b> harus diantara <b>Cheque Start Number</b> dan <b>Cheque End Number</b>")
 
 
 def get_cheque_numbers(cheque_start_no, cheque_end_no):
