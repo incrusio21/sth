@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-01 16:28:31.986660",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "delivery_note",
+  "komoditi",
+  "tempat_penyerahan",
+  "jenis_berikat",
+  "force_majeure",
+  "perselisihan",
+  "lainnya"
+ ],
+ "fields": [
+  {
+   "fieldname": "delivery_note",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Delivery Note",
+   "options": "Delivery Note"
+  },
+  {
+   "fieldname": "komoditi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Komoditi",
+   "options": "Komoditi"
+  },
+  {
+   "fieldname": "tempat_penyerahan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tempat Penyerahan",
+   "options": "Location"
+  },
+  {
+   "fieldname": "jenis_berikat",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Jenis Berikat",
+   "options": "Ya\nTidak"
+  },
+  {
+   "fieldname": "force_majeure",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Force Majeure"
+  },
+  {
+   "fieldname": "perselisihan",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Perselisihan"
+  },
+  {
+   "fieldname": "lainnya",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Lainnya"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-01 16:31:28.748755",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "Keterangan Komoditi Invoice",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
