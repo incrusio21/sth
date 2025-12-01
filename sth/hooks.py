@@ -31,6 +31,7 @@ app_include_js = "sth.bundle.js"
 doctype_js = {
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
+	"Driver": "public/js/driver.js",
 	"Employee": "public/js/employee.js",
 	"Expense Claim": "public/js/expense_claim.js",
 	"Loan": "hr_customize/custom/loan.js",
