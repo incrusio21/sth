@@ -23,7 +23,10 @@ sth.form = {
         frm.fields_dict[field_grid].grid.setup_user_defined_columns = function() {
             if (!this.frm) return;
             
-            let user_settings = me.doctype_setting[this.frm.doctype] || frappe.get_user_settings(this.frm.doctype, "GridView");
+            let user_settings = frappe.get_user_settings(this.frm.doctype, "GridView") 
+            if(!Object.keys(user_settings).length){
+                user_settings = me.doctype_setting[this.frm.doctype];
+            }
             if (user_settings && user_settings[this.doctype] && user_settings[this.doctype].length) {
                 this.user_defined_columns = user_settings[this.doctype]
                     .map((row) => {
@@ -64,6 +67,7 @@ sth.form = {
         // Update grid jika konfigurasi berubah
         const has_changed = JSON.stringify(old_doctype_setting) !== JSON.stringify(new_doctype_setting);
         if (has_changed) {
+            console.log("tesa")
             this.doctype_setting[frm.doctype] = new_doctype_setting;
             frm.fields_dict[fields].grid.reset_grid();
         }
