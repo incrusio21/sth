@@ -17,7 +17,7 @@ frappe.ui.form.on("Payment Entry", {
                 filters: {
                     reference_doc: null, 
                     reference_name: null, 
-                    bank_account: (frm.doc.paid_from ? frm.doc.paid_from: null)
+                    bank_account: (!frm.doc.paid_from ? null: frm.doc.paid_from)
                 }
             }
         })
