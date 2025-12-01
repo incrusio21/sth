@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2025-11-25 11:16:43.271062",
@@ -88,7 +89,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-01 13:52:43.514981",
+ "modified": "2025-12-01 15:48:44.908722",
  "modified_by": "Administrator",
  "module": "Buying STH",
  "name": "Purchase Type",

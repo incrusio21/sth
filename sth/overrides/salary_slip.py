@@ -252,6 +252,9 @@ class SalarySlip(SalarySlip):
             self.remove(d)
 
     def calculate_employee_payment(self):
+        if not getattr(self, "_salary_structure_doc", None):
+            self.set_salary_structure_doc()
+            
         for (component, component_type), value in self._employee_payment.items():
             self.add_component_custom(
                 component, 
