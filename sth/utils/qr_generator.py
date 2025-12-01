@@ -22,11 +22,14 @@ def get_qr_svg(data):
     return svg.decode()
 
 @frappe.whitelist()
-def generate_qr_for_doc(doctype, docname, fieldname=None):
-    doc = frappe.get_doc(doctype, docname)
+def generate_qr_for_doc(doc, method):
 
-    data = doc.name if not fieldname else doc.get(fieldname)
+    fieldname = "name"
 
+    if doc.doctype == "Driver":
+        fieldname = "license_number"
+
+    data = doc.get(fieldname)
     qr_svg_b64 = get_qr_svg(data)
 
     if hasattr(doc, "custom_qr"):
