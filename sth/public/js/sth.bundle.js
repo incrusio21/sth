@@ -5,3 +5,4 @@ import "./controllers/budget_controller";
 import "./controllers/rencana_kerja";
 import "./controllers/bkm_controller";
 import "./controllers/komoditi_editor";
+import "./controllers/queries";
