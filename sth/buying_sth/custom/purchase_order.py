@@ -10,12 +10,13 @@ from frappe.utils import flt, get_link_to_form
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 
 def onload_order_type(self, method):
-    if self.purchase_type:
-        order_type = frappe.get_cached_doc("Purchase Type", self.purchase_type)
-        # check apakah po butuh check progress dan apa field apa yg d gunakan untuk penamaan (items_code, kegiatan)
-        self.set_onload("future_type", order_type.future_type)
-        self.set_onload("check_progress", order_type.check_progress)
-        self.set_onload("progress_benchmark", order_type.progress_benchmark)
+    order_type = frappe.get_cached_doc("Purchase Type", self.purchase_type)
+
+    self._purchase_type_field = ["future_type", "check_progress", "progress_benchmark"]
+    self.run_method("field_purchase_type")
+    # check apakah po butuh check progress dan apa field apa yg d gunakan untuk penamaan (items_code, kegiatan)
+    for d in self._purchase_type_field:
+        self.set_onload(d, order_type.get(d))
 
 @frappe.whitelist()
 def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):

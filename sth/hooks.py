@@ -36,6 +36,7 @@ doctype_js = {
 	"Expense Claim": "public/js/expense_claim.js",
 	"Loan": "hr_customize/custom/loan.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
+	"Project": "legal/custom/project.js",
 	"Purchase Invoice": "public/js/purchase_invoice.js",
 	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
@@ -182,15 +183,21 @@ doc_events = {
 		"on_submit": "sth.custom.payment_entry.update_check_book",
 		"on_cancel": "sth.custom.payment_entry.update_check_book"
 	},
-	"Project": {
-	  	"on_update": "sth.legal.custom.project.create_task_by_order"  
+    "Project": {
+      	"validate": "sth.legal.custom.project.Project",
+      	"on_update": "sth.legal.custom.project.Project",
+      	"on_trash": "sth.legal.custom.project.Project",
 	},
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
 	"Purchase Order": {
 		"onload": "sth.buying_sth.custom.purchase_order.onload_order_type",
-		"on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress"
+		"validate": "sth.legal.custom.purchase_order.PurchaseOrder",
+		"on_submit": "sth.legal.custom.purchase_order.PurchaseOrder",
+		"on_cancel": "sth.legal.custom.purchase_order.PurchaseOrder",
+        "on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress",
+		"field_purchase_type": "sth.legal.custom.purchase_order.field_purchase_type",
 	},
 	"Purchase Receipt": {
 		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",

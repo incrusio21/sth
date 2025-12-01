@@ -3,44 +3,117 @@
 
 import frappe
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 
-def create_task_by_order(self, method):
-    # jika bukan untuk proposal. hapus purchase order
-    if not self.for_proposal:
-        self.purchase_order = None
+class Project:
+    def __init__(self, doc, method):
+        self.doc = doc
+        self.method = method
+
+        match self.method:
+            case "validate":
+                self.validate_proposal_type()
+                self.validate_order_adendum()
+            case "on_update":
+                self.validate_and_update_project()
+                self.validate_purchase_order()
+                self.create_task_by_order()
+            case "on_trash":
+                self.validate_and_update_project(delete=1)
     
-    before_save = self.get_latest()
-    # pastikan purchase order pada project tidak boleh berubah
-    if (
-        before_save and 
-        before_save.purchase_order and 
-        before_save.purchase_order != self.purchase_order
-    ):
-        frappe.throw(_("No changes allowed to Purchase Order"))
+    def validate_proposal_type(self):
+        # jika document baru tidak perlu ada pengecekan
+        before_doc = self.doc.get_latest()
+        if not before_doc:
+            return
+        
+        if before_doc.proposal_type != self.doc.proposal_type:
+            frappe.throw("Proposal Type cannot be change")
 
-    # skip create task jika tidak terdapat data po atau task sudah ada
-    if not self.purchase_order or frappe.db.exists("Task", {"purchase_order": self.purchase_order}):
-        return
-    
-    po = frappe.get_doc("Purchase Order", self.purchase_order)
-    # run hanya untuk ambil key onload
-    po.run_method("onload")
 
-    # jika po bukan submit atau bukan merupakan check progress
-    if po.docstatus != 1 or not po.get_onload("check_progress"):
-        frappe.throw(f"Unable to create project from Purchase Order {self.purchase_order}")
+    def validate_order_adendum(self):
+        if self.doc.project_type != "Adendum" or self.doc.proposal_type != "Transaction":
+            return
+        
+        # get purchase order dari adendum
+        new_po = frappe.get_value("Purchase Order", {"from_order": self.doc.last_purchase_order, "docstatus": 1}, "name")
+        if not new_po:
+            frappe.throw(f"Please create new Purchase Order for Project {self.doc.project_type} first")
 
-    subject = po.get_onload("progress_benchmark")
-    for item in po.items:
-        task = frappe.new_doc("Task")
+        self.doc.purchase_order = new_po
 
-        task.update({
-            "subject": item.get(subject),
-            "project": self.name,
-            "purchase_order": self.purchase_order,
-            "purchase_order_item": item.name,
-            "progress": item.progress_received
-        })
+    def validate_and_update_project(self, delete=0):
+        # paksa status selalu menjadi cancelled ketika sudah ada yang adendum
+        if not delete and frappe.db.exists("Project", {"from_project": self.doc.name}):
+            self.db_set("status", "Cancelled") 
+        
+        # jika tidak ada project awal. skip
+        if not self.doc.from_project:
+           return
+        
+        status = "Cancelled" if not delete else "Open"
+        frappe.db.set_value("Project", self.doc.from_project, "status", status)
 
-        task.save()
+    def validate_purchase_order(self):
+        # jika bukan untuk proposal. hapus purchase order
+        if not self.doc.for_proposal:
+            self.doc.purchase_order = None
+        
+        before_save = self.doc.get_latest()
+        # pastikan purchase order pada project tidak boleh berubah
+        if (
+            before_save and 
+            before_save.purchase_order and 
+            before_save.purchase_order != self.doc.purchase_order
+        ):
+            frappe.throw(_("No changes allowed to Purchase Order"))
 
+    def create_task_by_order(self):
+        # skip create task jika tidak terdapat data po atau task sudah ada
+        if not self.doc.purchase_order or frappe.db.exists("Task", {"purchase_order": self.doc.purchase_order}):
+            return
+        
+        po = frappe.get_doc("Purchase Order", self.doc.purchase_order)
+        # run hanya untuk ambil key onload
+        po.run_method("onload")
+
+        # jika po bukan submit atau bukan merupakan check progress
+        if po.docstatus != 1 or not po.get_onload("check_progress"):
+            frappe.throw(f"Unable to create project from Purchase Order {self.doc.purchase_order}")
+
+        subject = po.get_onload("progress_benchmark")
+        for item in po.items:
+            task = frappe.new_doc("Task")
+
+            task.update({
+                "subject": item.get(subject),
+                "project": self.doc.name,
+                "purchase_order": self.doc.purchase_order,
+                "purchase_order_item": item.name,
+                "progress": item.progress_received
+            })
+
+            task.save()
+
+@frappe.whitelist()
+def make_project_adendum(source_name, target_doc=None):
+    def set_missing_values(source, target):
+        target.project_type = "Adendum"
+        target.last_purchase_order = source.purchase_order or source.last_purchase_order
+
+    doc = get_mapped_doc(
+        "Project",
+        source_name,
+        {
+            "Project": {
+                "doctype": "Project",
+                "field_map": {
+                    "name": "from_project"
+                },
+            },
+        },
+        target_doc,
+        set_missing_values,
+    )
+
+    return doc

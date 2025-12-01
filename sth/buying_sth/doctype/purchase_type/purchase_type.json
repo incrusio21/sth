@@ -11,6 +11,7 @@
   "column_break_qkip",
   "disabled",
   "check_progress",
+  "order_revisions",
   "progress_benchmark",
   "section_break_yejt",
   "fields_html",
@@ -76,6 +77,12 @@
    "fieldtype": "Link",
    "label": "Future Type",
    "options": "Purchase Type"
+  },
+  {
+   "default": "0",
+   "fieldname": "order_revisions",
+   "fieldtype": "Check",
+   "label": "Order Revisions"
   }
  ],
  "grid_page_length": 50,
