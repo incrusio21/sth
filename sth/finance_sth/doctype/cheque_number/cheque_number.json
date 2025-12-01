@@ -11,6 +11,7 @@
   "number",
   "cheque_book",
   "status",
+  "bank_account",
   "reference_doc",
   "reference_name",
   "column_break_lckh",
@@ -91,13 +92,20 @@
    "fieldtype": "Small Text",
    "label": "Note",
    "read_only": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-27 14:28:54.007935",
+ "modified": "2025-12-01 13:08:31.410490",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Cheque Number",
