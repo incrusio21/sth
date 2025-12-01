@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2025-11-25 11:16:43.271062",
@@ -68,7 +69,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Document Type",
-   "options": "Purchase Order\nPurchase Receipt",
+   "options": "Purchase Order\nPurchase Receipt\nPurchase Invoice",
    "reqd": 1
   },
   {
@@ -81,9 +82,9 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-29 10:23:06.756910",
+ "modified": "2025-12-01 15:48:44.908722",
  "modified_by": "Administrator",
- "module": "Buying Sth",
+ "module": "Buying STH",
  "name": "Purchase Type",
  "naming_rule": "Set by user",
  "owner": "Administrator",

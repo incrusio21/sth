@@ -9,10 +9,10 @@ def make_purchase_order(source_name, target_doc=None):
 		target.run_method("get_schedule_dates")
 		target.run_method("calculate_taxes_and_totals")
 		
-		data_transaction = frappe.db.get_value("Material Request",source.custom_material_request,["custom_document_type","custom_sub_transaction_type"])
-		if data_transaction:
-			target.custom_transaction_type = data_transaction.custom_document_type 
-			target.custom_sub_transaction_type = data_transaction.custom_sub_transaction_type
+		purchase_type,sub_purchase_type = frappe.db.get_value("Material Request",source.custom_material_request,["purchase_type","sub_purchase_type"])
+		if purchase_type == "Berita Acara":
+			target.purchase_type = "Non Capex"
+			target.sub_purchase_type = sub_purchase_type
 
 		tax_template_name = frappe.get_value("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":target.company}, pluck="name")
 		target.taxes_and_charges = tax_template_name
