@@ -96,6 +96,9 @@ class ChequeBook(Document):
 		self.remaining_cheques = total_cheque_number - used_cheque_number
 		self.db_update_all()
 
+		if self.remaining_cheque_warning == self.remaining_cheques:
+			frappe.msgprint(f"Sisa Cheque Number saat ini {self.remaining_cheques} di Check Book {self.name}")
+
 	def validate_numbers(self):
 		start_no = int(self.cheque_start_no)
 		end_no = int(self.cheque_end_no)
