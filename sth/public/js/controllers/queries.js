@@ -4,9 +4,13 @@ sth.queries = {
     item_by_subtype: function (doc) {
         let filters = {}
 
-        if (doc.sub_transaction_type == "Purchase Request" || doc.custom_sub_transaction_type == "Purchase Request") {
+        if (doc.sub_purchase_type == "Purchase Request") {
             filters = {
                 is_stock_item: 1
+            }
+        } else if (doc.sub_purchase_type == "Service Request") {
+            filters = {
+                is_stock_item: 0
             }
         }
 
