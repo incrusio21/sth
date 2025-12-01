@@ -161,9 +161,6 @@ doc_events = {
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
 	# }
-	"Driver": {
-		"validate": "sth.utils.qr_generator.generate_qr_for_doc",
-	},
 	"Loan": {
 		"validate": "sth.hr_customize.custom.loan.Loan",
 	},
