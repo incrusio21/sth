@@ -27,7 +27,7 @@ def generate_qr_for_doc(doc, method):
     fieldname = "name"
 
     if doc.doctype == "Driver":
-        fieldname = "license_number"
+        fieldname = "custom_license_plate"
 
     data = doc.get(fieldname)
     qr_svg_b64 = get_qr_svg(data)
