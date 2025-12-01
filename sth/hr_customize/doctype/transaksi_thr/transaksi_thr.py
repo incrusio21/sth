@@ -215,6 +215,9 @@ class TransaksiTHR(AccountsController):
 		# ambil seluruh THR Rule sekali
 		thr_rules = frappe.get_all(
 			"THR Setup Rule",
+			filters={
+				"parent": self.setup_thr,
+			},
 			fields=["employee_grade", "employment_type", "kriteria", "masa_kerja", "formula"],
 		)
 
