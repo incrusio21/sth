@@ -34,6 +34,5 @@ def generate_qr_for_doc(doc, method):
 
     if hasattr(doc, "custom_qr"):
         doc.custom_qr = qr_svg_b64
-        doc.save(ignore_permissions=True)
 
     return qr_svg_b64
