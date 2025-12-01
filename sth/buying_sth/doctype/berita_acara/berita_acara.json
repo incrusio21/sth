@@ -11,7 +11,7 @@
   "date",
   "column_break_safl",
   "unit",
-  "doc",
+  "sub_purchase_type",
   "detail_section",
   "table_klkc",
   "amended_from",
@@ -45,14 +45,6 @@
    "fieldtype": "Link",
    "label": "Organisasi",
    "options": "Unit"
-  },
-  {
-   "fieldname": "doc",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tipe Document",
-   "options": "Document Type"
   },
   {
    "fieldname": "detail_section",
@@ -92,13 +84,19 @@
    "fieldname": "ttd",
    "fieldtype": "Signature",
    "label": "Tanda Tangan"
+  },
+  {
+   "fieldname": "sub_purchase_type",
+   "fieldtype": "Select",
+   "label": "Sub Purchase Type",
+   "options": "\nPurchase Request\nService Request"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-01 10:13:19.926528",
+ "modified": "2025-12-01 11:55:45.304856",
  "modified_by": "Administrator",
  "module": "Buying STH",
  "name": "Berita Acara",
