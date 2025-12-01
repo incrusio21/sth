@@ -13,7 +13,7 @@
    "columns": 0,
    "creation": "2025-11-26 21:20:50.020364",
    "default": null,
-   "depends_on": "eval:doc.mode_of_payment == \"Cheque\" && doc.paid_from",
+   "depends_on": "eval:doc.mode_of_payment == \"Cheque\" && doc.bank_account",
    "description": null,
    "docstatus": 0,
    "dt": "Payment Entry",
