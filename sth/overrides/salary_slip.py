@@ -168,8 +168,9 @@ class SalarySlip(SalarySlip):
         if not getattr(self, "_employee_payment_log", None):
             self.set_employee_payment_doc()
 
-        # hapus component against terlebih dahulu 
+        # hapus component against terlebih dahulu untuk d create ulang
         self.remove_flexibel_payment()
+        self.calculate_employee_payment()
 
         if self.salary_structure:
             self.calculate_component_amounts("earnings")
@@ -190,8 +191,6 @@ class SalarySlip(SalarySlip):
 
         if self.salary_structure:
             self.calculate_component_amounts("deductions")
-
-        self.calculate_employee_payment()
 
         set_loan_repayment(self)
 

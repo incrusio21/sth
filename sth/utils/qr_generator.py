@@ -3,34 +3,36 @@ from base64 import b64encode
 from pyqrcode import create as qrcreate
 import frappe
 
-def debug_create_qr():
-    generate_qr_for_doc("Driver","HR-DRI-2025-00001")
+@frappe.whitelist()
+def validate_create_qr(doc,method):
+	generate_qr_for_doc(doc, 1)
 
 def get_qr_svg(data):
-    """Get SVG code to display Qrcode for OTP."""
-    url = qrcreate(data)
-    svg = ""
-    stream = BytesIO()
-    try:
-        url.svg(stream, scale=4, quiet_zone=1, module_color="#222")
-        svg = stream.getvalue().decode().replace("\n", "")
-        svg = b64encode(svg.encode())
-        print("MAKING QR")
-    finally:
-        stream.close()
+	"""Get SVG code to display Qrcode for OTP."""
+	url = qrcreate(data)
+	svg = ""
+	stream = BytesIO()
+	try:
+		url.svg(stream, scale=4, quiet_zone=1, module_color="#222")
+		svg = stream.getvalue().decode().replace("\n", "")
+		svg = b64encode(svg.encode())
+		print("MAKING QR")
+	finally:
+		stream.close()
 
-    return svg.decode()
+	return svg.decode()
 
 @frappe.whitelist()
-def generate_qr_for_doc(doctype, docname, fieldname=None):
-    doc = frappe.get_doc(doctype, docname)
+def generate_qr_for_doc(doc, dont_save=0):
+	data = doc.name
+	if doc.doctype == "Driver":
+		data = doc.get("custom_license_plate")
 
-    data = doc.name if not fieldname else doc.get(fieldname)
+	qr_svg_b64 = get_qr_svg(data)
 
-    qr_svg_b64 = get_qr_svg(data)
+	if hasattr(doc, "custom_qr"):
+		doc.custom_qr = qr_svg_b64
+		if dont_save == 0:
+			doc.save(ignore_permissions=True)
 
-    if hasattr(doc, "custom_qr"):
-        doc.custom_qr = qr_svg_b64
-        doc.save(ignore_permissions=True)
-
-    return qr_svg_b64
+	return qr_svg_b64

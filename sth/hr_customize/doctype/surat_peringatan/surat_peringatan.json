@@ -1,0 +1,151 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-08-12 11:25:51.851502",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rjfu",
+  "naming_series",
+  "tp",
+  "tmb",
+  "amended_from",
+  "column_break_akhf",
+  "nm_kry",
+  "spel",
+  "divisi",
+  "dol",
+  "jenis_pelanggaran_section",
+  "js",
+  "column_break_akku",
+  "deskripsi"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_rjfu",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "No Pengajuan",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tp",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Pengajuan",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tmb",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal Masa Berlaku",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Surat Peringatan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_akhf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nm_kry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nama Karyawan",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "spel",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Sifat Pelanggaran"
+  },
+  {
+   "fetch_from": "nm_kry.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Read Only",
+   "in_preview": 1,
+   "label": "Divisi"
+  },
+  {
+   "fieldname": "dol",
+   "fieldtype": "Link",
+   "label": "Dikeluarkan Oleh",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jenis_pelanggaran_section",
+   "fieldtype": "Section Break",
+   "label": "Jenis Pelanggaran"
+  },
+  {
+   "fieldname": "js",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Jenis Surat",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_akku",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "js.deskripsi",
+   "fieldname": "deskripsi",
+   "fieldtype": "Long Text",
+   "label": "Deskripsi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-01 10:30:30.202587",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Surat Peringatan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
