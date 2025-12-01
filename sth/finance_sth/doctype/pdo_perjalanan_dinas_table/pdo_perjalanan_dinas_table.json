@@ -8,8 +8,10 @@
  "field_order": [
   "employee",
   "sub_detail",
+  "routine_type",
   "license_plate_number",
   "type",
+  "debit_to",
   "hari_dinas",
   "plafon",
   "revised_duty_day",
@@ -88,21 +90,38 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sub Detail",
-   "options": "PDO Type"
+   "options": "PDO Type",
+   "reqd": 1
   },
   {
    "fieldname": "type",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Jenis",
-   "options": "Expense Claim Type"
+   "options": "Expense Claim Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "routine_type",
+   "fieldtype": "Select",
+   "label": "Tipe Rutin",
+   "options": "\nRutin\nTidak Rutin",
+   "reqd": 1
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-30 13:53:09.268070",
+ "modified": "2025-12-01 11:05:56.840648",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Perjalanan Dinas Table",

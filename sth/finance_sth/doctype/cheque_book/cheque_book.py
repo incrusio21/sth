@@ -30,7 +30,7 @@ class ChequeBook(Document):
 
 	def make_cheque_number(self):
 		cheque_numbers = get_cheque_numbers(self.cheque_start_no, self.cheque_end_no)
-		create_cheque_number(self.name, self.cheque_code, cheque_numbers.start_no, cheque_numbers.end_no)
+		create_cheque_number(self.name, self.cheque_code, cheque_numbers.start_no, cheque_numbers.end_no, self.bank_account)
 
 		self.update_total_remaining()
 
@@ -78,7 +78,7 @@ class ChequeBook(Document):
 			delete_cheque_number(self.cheque_code, end_no, old_end_no)
 		if end_no > old_end_no:
 			end_no += 1
-			create_cheque_number(self.name, self.cheque_code, old_end_no, end_no)
+			create_cheque_number(self.name, self.cheque_code, old_end_no, end_no, self.bank_account)
 	
 		self.update_total_remaining()
 
@@ -134,13 +134,14 @@ def check_usage_cheque_number(cheque_code, start_no, end_no):
 	str_cheque = ", ".join(cheque_is_used)
 	frappe.throw(f"Cheque Number <b>{str_cheque}</b> sudah digunakan, mohon periksa kembali")
 
-def create_cheque_number(cheque_book, cheque_code, start_no, end_no):
+def create_cheque_number(cheque_book, cheque_code, start_no, end_no, bank_account):
 	for i in range(start_no, end_no):
 		doc = frappe.get_doc({
 			'doctype': 'Cheque Number',
 			'number': i,
 			'code': cheque_code,
-			'cheque_book': cheque_book
+			'cheque_book': cheque_book,
+			'bank_account': bank_account
 		})
 		doc.insert()
 
@@ -182,6 +183,7 @@ def change_cheque_number(cheque_usage_history, cheque_number):
 		old_cheque_number.note= None
 		old_cheque_number.issue_date= None
 		old_cheque_number.cheque_amount= 0
+		old_cheque_number.bank_account= None
 		old_cheque_number.db_update()
 		values.update({"cheque_no": cheque_number.name})
 

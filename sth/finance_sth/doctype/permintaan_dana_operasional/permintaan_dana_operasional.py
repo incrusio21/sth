@@ -53,6 +53,7 @@ class PermintaanDanaOperasional(Document):
 				"cost_center": self.get(f"{fieldname}_cost_center"),
 				"company": self.company,
 				"posting_date": self.posting_date,
+				"required_by": self.required_by,
 			}
 			
 			childs = self.get(f"pdo_{fieldname}")
@@ -111,3 +112,49 @@ class PermintaanDanaOperasional(Document):
 						continue
 					msg = f"Pada Tabel {pdo} baris ke {row.idx} field currency atau angka harus lebih besar dari 0"
 					frappe.throw(msg)
+
+@frappe.whitelist()
+def filter_type(doctype, txt, searchfield, start, page_len, filters):
+	ect = frappe.qb.DocType("Expense Claim Type")
+	eca = frappe.qb.DocType("Expense Claim Account")
+	
+	query = (
+		frappe.qb.from_(ect)
+		.select(ect.name.as_('value'))
+		.inner_join(eca)
+		.on(
+			(ect.name == eca.parent) &
+			(ect.custom_routine_type == filters.get('routine_type')) &
+			(ect.custom_pdo_type == filters.get('pdo_type'))
+		)
+		.where(
+			(eca.company == filters.get('company')) &
+			(ect.name.like(f'%{txt}%'))
+		)
+	)
+
+	return query.run()
+
+@frappe.whitelist()
+def get_expense_account(company, parent):
+    default_account = frappe.db.get_value("Expense Claim Account", {
+		"company": company,
+		"parent": parent
+	}, "default_account")
+    
+    return default_account
+
+@frappe.whitelist()
+def filter_fund_type(doctype, txt, searchfield, start, page_len, filters):
+	account = frappe.qb.DocType("Account")
+	account_type = list(["Cash", "Bank"])
+	query = (
+		frappe.qb.from_(account)
+		.select(account.name.as_('value'))
+		.where(
+			(account.company == filters.get('company')) &
+			(account.account_type.isin(account_type))
+		)
+	)
+
+	return query.run()
