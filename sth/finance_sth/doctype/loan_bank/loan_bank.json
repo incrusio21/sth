@@ -6,23 +6,42 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "headers_tab",
   "headers_section",
   "naming_series",
   "transaction_number",
+  "company",
   "bank",
   "bank_account",
-  "loan_type",
+  "type",
   "jenis_fasilitas",
   "loan_purpose",
   "loan_term",
   "due_days",
-  "column_break_ahqa"
+  "column_break_ahqa",
+  "commitment_periode",
+  "availability_period",
+  "availability_period_type",
+  "grace_period",
+  "grace_period_type",
+  "loan_interest",
+  "loan_interest_type",
+  "pinalti",
+  "description",
+  "months_duration",
+  "loan_type",
+  "principal_calculation_method",
+  "tab_2_tab",
+  "pencairan_details_section",
+  "disbursements",
+  "angsuran_tab",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "headers_section",
    "fieldtype": "Section Break",
-   "label": "Headers"
+   "label": "Headers Details"
   },
   {
    "default": "{###}/{mm}/{YYYY}",
@@ -56,14 +75,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "loan_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Jenis",
-   "options": "\nKISI",
-   "reqd": 1
-  },
-  {
    "fieldname": "jenis_fasilitas",
    "fieldtype": "Select",
    "label": "Jenis Fasilitas",
@@ -91,13 +102,138 @@
   {
    "fieldname": "column_break_ahqa",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commitment_periode",
+   "fieldtype": "Data",
+   "label": "Commitment Periode"
+  },
+  {
+   "fieldname": "availability_period",
+   "fieldtype": "Int",
+   "label": "Availability Periode (Bulan)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "availability_period_type",
+   "fieldtype": "Select",
+   "label": "Tipe Availibilty Periode",
+   "options": "SEJAK PENANDATANGANAN FASILITAS KREDIT",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grace_period",
+   "fieldtype": "Int",
+   "label": "Grace Periode (Bulan)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grace_period_type",
+   "fieldtype": "Select",
+   "label": "Tipe Grace Periode",
+   "options": "SEJAK PENARIKAN PERTAMA KALI",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "PENCAIRAN"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Jenis",
+   "options": "\nKISI",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_interest",
+   "fieldtype": "Percent",
+   "label": "Suku Bunga (%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_interest_type",
+   "fieldtype": "Select",
+   "label": "Tipe Suku Bunga",
+   "options": "FLOATING RATE",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pinalti",
+   "fieldtype": "Int",
+   "label": "Pinalti",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "months_duration",
+   "fieldtype": "Int",
+   "label": "Jumlah Bulan"
+  },
+  {
+   "fieldname": "loan_type",
+   "fieldtype": "Select",
+   "label": "Jenis Pinjaman",
+   "options": "\nTERM LOAN",
+   "reqd": 1
+  },
+  {
+   "fieldname": "principal_calculation_method",
+   "fieldtype": "Select",
+   "label": "Tipe Perhitungan Pokok",
+   "options": "\nPer Pencairan\nTotal Pencairan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "headers_tab",
+   "fieldtype": "Tab Break",
+   "label": "HEADERS"
+  },
+  {
+   "fieldname": "angsuran_tab",
+   "fieldtype": "Tab Break",
+   "label": "ANGSURAN"
+  },
+  {
+   "fieldname": "pencairan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Pencairan Details"
+  },
+  {
+   "fieldname": "disbursements",
+   "fieldtype": "Table",
+   "label": "List Pencairan",
+   "options": "Disbursement Loan Bank"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Bank",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-02 15:54:48.043280",
+ "modified": "2025-12-02 16:22:57.683835",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",
