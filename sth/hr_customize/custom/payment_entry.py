@@ -54,7 +54,7 @@ def get_payment_reference(
 		
 	return frappe.db.sql(
 		"""select {fields} from `tabDocType`
-		where ({key} like %(txt)s like %(txt)s)
+		where ({key} like %(txt)s)
 			{fcond} {mcond}
 		order by
 			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),\
