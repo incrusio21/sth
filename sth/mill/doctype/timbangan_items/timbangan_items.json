@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-01 17:05:35.432068",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "column_break_kqfw",
+  "item_name",
+  "weight_section",
+  "bruto",
+  "tara",
+  "column_break_nlub",
+  "netto"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_kqfw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "weight_section",
+   "fieldtype": "Section Break",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bruto",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Bruto",
+   "precision": "2"
+  },
+  {
+   "fieldname": "tara",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tara",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_nlub",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "netto",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Netto",
+   "precision": "2"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-02 09:38:05.750773",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Timbangan Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
