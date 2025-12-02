@@ -1,41 +1,43 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-11-27 16:04:49.594303",
+ "autoname": "naming_series:",
+ "creation": "2025-12-02 15:28:33.227578",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_yjie",
-  "loan_number",
+  "headers_section",
+  "naming_series",
+  "transaction_number",
   "bank",
-  "nomor_rekening",
+  "bank_account",
   "loan_type",
-  "facility_type",
-  "purpose",
-  "loan_amount",
-  "loan_tenure",
-  "due_date",
-  "bulan_jatuh_tempo",
-  "availability_periode",
-  "grace_periode",
-  "credit_fee",
-  "interest_rate",
-  "penalty",
-  "description",
-  "number_of_month",
-  "principal_calculation_type"
+  "jenis_fasilitas",
+  "loan_purpose",
+  "loan_term",
+  "due_days",
+  "column_break_ahqa"
  ],
  "fields": [
   {
-   "fieldname": "section_break_yjie",
-   "fieldtype": "Section Break"
+   "fieldname": "headers_section",
+   "fieldtype": "Section Break",
+   "label": "Headers"
   },
   {
-   "fieldname": "loan_number",
-   "fieldtype": "Data",
+   "default": "{###}/{mm}/{YYYY}",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Nomor Pinjaman",
+   "label": "Naming Series",
+   "options": "{###}/{mm}/{YYYY}",
    "reqd": 1
+  },
+  {
+   "fieldname": "transaction_number",
+   "fieldtype": "Data",
+   "label": "No. Peminjaman",
+   "read_only": 1
   },
   {
    "fieldname": "bank",
@@ -46,116 +48,60 @@
    "reqd": 1
   },
   {
-   "fieldname": "nomor_rekening",
+   "fieldname": "bank_account",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Nomor Rekening",
-   "options": "Account",
+   "options": "Bank Account",
    "reqd": 1
   },
   {
    "fieldname": "loan_type",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Jenis Pinjaman",
-   "options": "\nKRK\nKISI",
+   "label": "Jenis",
+   "options": "\nKISI",
    "reqd": 1
   },
   {
-   "fieldname": "facility_type",
+   "fieldname": "jenis_fasilitas",
    "fieldtype": "Select",
    "label": "Jenis Fasilitas",
-   "options": "\nTranche A\nTranche B\nTranche C",
+   "options": "TERM LOAN (TL)",
    "reqd": 1
   },
   {
-   "fieldname": "purpose",
-   "fieldtype": "Small Text",
+   "fieldname": "loan_purpose",
+   "fieldtype": "Data",
    "label": "Tujuan",
    "reqd": 1
   },
   {
-   "fieldname": "loan_amount",
-   "fieldtype": "Currency",
-   "label": "Jumlah Pinjaman",
-   "reqd": 1
-  },
-  {
-   "fieldname": "loan_tenure",
-   "fieldtype": "Int",
+   "fieldname": "loan_term",
+   "fieldtype": "Date",
    "label": "Jangka Waktu",
    "reqd": 1
   },
   {
-   "fieldname": "due_date",
+   "fieldname": "due_days",
    "fieldtype": "Int",
-   "label": "Tanggal Jatuh Tempo",
+   "label": "Jatuh Tempo",
    "reqd": 1
   },
   {
-   "fieldname": "bulan_jatuh_tempo",
-   "fieldtype": "Link",
-   "label": "Bulan Jatuh Tempo",
-   "options": "Months",
-   "reqd": 1
-  },
-  {
-   "fieldname": "availability_periode",
-   "fieldtype": "Int",
-   "label": "Masa Penarikan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "grace_periode",
-   "fieldtype": "Int",
-   "label": "Grace Periode",
-   "reqd": 1
-  },
-  {
-   "fieldname": "credit_fee",
-   "fieldtype": "Currency",
-   "label": "Biaya Kredit",
-   "reqd": 1
-  },
-  {
-   "fieldname": "interest_rate",
-   "fieldtype": "Percent",
-   "label": "Suku Bunga",
-   "reqd": 1
-  },
-  {
-   "fieldname": "penalty",
-   "fieldtype": "Percent",
-   "label": "Penalty",
-   "reqd": 1
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Keterangan"
-  },
-  {
-   "fieldname": "number_of_month",
-   "fieldtype": "Int",
-   "label": "Jumlah Bulan",
-   "reqd": 1
-  },
-  {
-   "fieldname": "principal_calculation_type",
-   "fieldtype": "Select",
-   "label": "Tipe Perhitungan Pokok",
-   "options": "\nPer Pencairan",
-   "reqd": 1
+   "fieldname": "column_break_ahqa",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:28:55.610403",
+ "modified": "2025-12-02 15:54:48.043280",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

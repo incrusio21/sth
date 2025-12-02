@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:{date}-{from_currency}",
+ "creation": "2025-12-02 14:16:02.212483",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kurs_details_section",
+  "date",
+  "from_currency",
+  "column_break_rewf",
+  "selling_exchange_rate",
+  "buying_exchange_rate",
+  "exchange_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "kurs_details_section",
+   "fieldtype": "Section Break",
+   "label": "Kurs Details"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from_currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "From Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rewf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "selling_exchange_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Selling Exchange Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "buying_exchange_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Buying Exchange Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Currency",
+   "label": "Middle Exchange Rate",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-02 14:24:41.559220",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Kurs Mata Uang",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
