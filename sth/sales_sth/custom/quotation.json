@@ -210,7 +210,7 @@
    "docstatus": 0,
    "dt": "Quotation",
    "fetch_from": "komoditi.tempat_penyerahan",
-   "fetch_if_empty": 0,
+   "fetch_if_empty": 1,
    "fieldname": "tempat_penyerahan",
    "fieldtype": "Link",
    "hidden": 0,
@@ -231,7 +231,7 @@
    "length": 0,
    "link_filters": null,
    "mandatory_depends_on": null,
-   "modified": "2025-11-26 10:34:57.312739",
+   "modified": "2025-12-02 11:24:23.079766",
    "modified_by": "Administrator",
    "module": "Sales STH",
    "name": "Quotation-tempat_penyerahan",
@@ -252,7 +252,7 @@
    "search_index": 0,
    "show_dashboard": 0,
    "sort_options": 0,
-   "translatable": 1,
+   "translatable": 0,
    "unique": 0,
    "width": null
   }
