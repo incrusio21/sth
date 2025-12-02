@@ -48,6 +48,7 @@ doctype_js = {
 	"Travel Request": "public/js/travel_request.js",
 	"Exit Interview": "public/js/exit_interview.js",
     "Material Request": "public/js/material_request.js",
+    "Currency Exchange": "public/js/currency_exchange.js",
 }
 
 doctype_list_js = {
