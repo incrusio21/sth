@@ -11,6 +11,7 @@
   "naming_series",
   "company",
   "nama_bank",
+  "bank",
   "bank_coa",
   "mata_uang",
   "no_rekening",
@@ -76,7 +77,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Nama Bank",
+   "label": "Bank Account",
    "options": "Bank Account"
   },
   {
@@ -86,7 +87,7 @@
    "hidden": 1,
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Bank Coa",
+   "label": "Bank COA",
    "options": "Account",
    "read_only": 1
   },
@@ -107,6 +108,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "No Rekening",
+   "length": 20,
    "read_only": 1
   },
   {
@@ -275,12 +277,13 @@
    "reqd": 1
   },
   {
-   "default": "360",
+   "fetch_from": "bank.deposit_year_days",
    "fieldname": "hari_per_tahun",
    "fieldtype": "Int",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Hari per Tahun",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -338,13 +341,22 @@
    "fieldtype": "Small Text",
    "in_preview": 1,
    "label": "Keterangan"
+  },
+  {
+   "fetch_from": "nama_bank.bank",
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Bank",
+   "options": "Bank",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 15:06:09.296393",
+ "modified": "2025-12-03 09:33:45.418122",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
