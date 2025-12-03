@@ -13,7 +13,7 @@ erpnext.utils.update_progress_received = function (opts) {
 	const benchmark_field = child_meta.fields.find((f) => f.fieldname == benchmark_fieldname)
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
 
-    // Siapkan data dari child table items
+	// Siapkan data dari child table items
 	this.data = frm.doc[opts.child_docname].map((d) => {
 		return {
 			docname: d.name,
@@ -22,11 +22,11 @@ erpnext.utils.update_progress_received = function (opts) {
 			qty: d.qty,
 			uom: d.uom,
 			rate: d.rate,
-            progress_received: d.progress_received
+			progress_received: d.progress_received
 		};
 	});
-    
-    // Konfigurasi field untuk dialog table
+
+	// Konfigurasi field untuk dialog table
 	const fields = [
 		{
 			fieldtype: "Data",
@@ -82,8 +82,8 @@ erpnext.utils.update_progress_received = function (opts) {
 			precision: get_precision("progress_received"),
 		},
 	];
-    
-    // Buat dan tampilkan dialog
+
+	// Buat dan tampilkan dialog
 	let dialog = new frappe.ui.Dialog({
 		title: __("Update Progress"),
 		size: "extra-large",
@@ -104,7 +104,7 @@ erpnext.utils.update_progress_received = function (opts) {
 			},
 		],
 		primary_action: function () {
-            // Kirim data ke server untuk update progress
+			// Kirim data ke server untuk update progress
 			frappe.call({
 				method: "sth.buying_sth.custom.purchase_order.update_progress_item",
 				freeze: true,
@@ -128,40 +128,45 @@ erpnext.utils.update_progress_received = function (opts) {
 };
 
 frappe.ui.form.on("Purchase Order", {
-    setup(frm){
-        sth.form.setup_fieldname_select(frm, "items")
-    },
-    refresh(frm){
+	setup(frm) {
+		sth.form.setup_fieldname_select(frm, "items")
+	},
+	refresh(frm) {
 		frm.set_query("purchase_type", () => {
-            return {
-                filters: {
-                    document_type: frm.doctype
-                }
-            }
-        })
-		
+			return {
+				filters: {
+					document_type: frm.doctype
+				}
+			}
+		})
+
 		frm.trigger("set_query_field")
 		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
-    },
-    purchase_type(frm){
+	},
+
+	// onload_post_render(frm) {
+	// 	frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent('Get Items From')}"]`).remove()
+	// },
+
+	purchase_type(frm) {
 		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
-    },
+	},
 	set_query_field(frm) {
-        if (frm.doc.docstatus == 1 && !["Closed", "Delivered"].includes(frm.doc.status)) {
-            if (
-                frm.doc.status !== "Closed" &&
-                flt(frm.doc.per_received) < 100 &&
-                flt(frm.doc.per_billed) < 100 &&
-                frm.doc.__onload.check_progress
-            ) {
-                frm.add_custom_button(__("Update Progress"), () => {
-                    erpnext.utils.update_progress_received({
-                        frm: frm,
-                        child_docname: "items",
-                        child_doctype: "Purchase Order Item",
-                    });
-                });
-            }
-        }
+		if (frm.doc.docstatus == 1 && !["Closed", "Delivered"].includes(frm.doc.status)) {
+			if (
+				frm.doc.status !== "Closed" &&
+				flt(frm.doc.per_received) < 100 &&
+				flt(frm.doc.per_billed) < 100 &&
+				frm.doc.__onload.check_progress
+			) {
+				frm.add_custom_button(__("Update Progress"), () => {
+					erpnext.utils.update_progress_received({
+						frm: frm,
+						child_docname: "items",
+						child_doctype: "Purchase Order Item",
+					});
+				});
+			}
+		}
 	}
 });

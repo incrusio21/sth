@@ -24,17 +24,21 @@ class FormSupplier {
             pph_22: 0,
         }
         this.wrapperDiscount = $('tr[data-type="discount"]')
+        this.dt = {}
     }
 
     initEvent() {
+
         $('.datepicker').each((idx, el) => {
-            const dt = new AirDatepicker(el, {
+            this.dt[$(el).attr('name')] = new AirDatepicker(el, {
                 selectedDates: [new Date()],
                 autoClose: true,
-                dateFormat: 'yyyy-dd-MM',
+                dateFormat: 'yyyy-MM-dd',
                 locale: this.getLocale()
             })
         })
+
+        this.dt.estimated_date?.selectDate(new Date('{{ required_date }}'))
 
         this.initSelect2("select[name='country[]']");
         AutoNumeric.multiple('.number-format', this.opt);

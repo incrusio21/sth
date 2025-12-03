@@ -17,13 +17,37 @@ frappe.ui.form.on("Payment Entry", {
                 filters: {
                     reference_doc: null, 
                     reference_name: null, 
-                    bank_account: frm.doc.paid_from
+                    bank_account: frm.doc.bank_account 
+                }
+            }
+        })
+        
+        frm.set_query('unit', (doc) => {
+            return {
+                filters: {
+                    company: ["=", doc.company],
+                }
+            }
+        })
+
+        frm.set_query('reference_name', "references", (doc) => {
+            return {
+                filters: {
+                    docstatus: 1,
+                    company: ["=", doc.company],
+                    unit: doc.unit   
                 }
             }
         })
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
+    },
+    unit(frm){
+        if(!frm.doc.unit) return
+        
+        frm.clear_table("references")
+        frm.refresh_field("references")
     },
     internal_employee(frm){
         if(!frm.doc.internal_employee) return

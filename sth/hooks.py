@@ -36,6 +36,7 @@ doctype_js = {
 	"Expense Claim": "public/js/expense_claim.js",
 	"Loan": "hr_customize/custom/loan.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
+	"Project": "legal/custom/project.js",
 	"Purchase Invoice": "public/js/purchase_invoice.js",
 	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
@@ -46,6 +47,8 @@ doctype_js = {
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
 	"Exit Interview": "public/js/exit_interview.js",
+    "Material Request": "public/js/material_request.js",
+    "Currency Exchange": "public/js/currency_exchange.js",
 }
 
 doctype_list_js = {
@@ -181,21 +184,35 @@ doc_events = {
 		"on_submit": "sth.custom.payment_entry.update_check_book",
 		"on_cancel": "sth.custom.payment_entry.update_check_book"
 	},
-	"Project": {
-	  	"on_update": "sth.legal.custom.project.create_task_by_order"  
+    "Project": {
+      	"validate": "sth.legal.custom.project.Project",
+      	"on_update": "sth.legal.custom.project.Project",
+      	"on_trash": "sth.legal.custom.project.Project",
 	},
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
 	"Purchase Order": {
 		"onload": "sth.buying_sth.custom.purchase_order.onload_order_type",
-		"on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress"
+		"validate": "sth.legal.custom.purchase_order.PurchaseOrder",
+		"on_submit": "sth.legal.custom.purchase_order.PurchaseOrder",
+		"on_cancel": "sth.legal.custom.purchase_order.PurchaseOrder",
+        "on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress",
+		"field_purchase_type": "sth.legal.custom.purchase_order.field_purchase_type",
 	},
 	"Purchase Receipt": {
 		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
 	},
+	"Sales Order": {
+		"validate": "sth.sales_sth.custom.sales_order.check_dn_pending",
+		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
+	},
   	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
+	},
+    "Material Request": {
+		"on_submit": "sth.custom.material_request.update_ba_reference",
+        "on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	
 	# "Training Event": {
@@ -241,6 +258,7 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
+    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.overrides.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt"
 }
 #

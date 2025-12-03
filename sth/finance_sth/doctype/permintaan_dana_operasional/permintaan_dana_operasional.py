@@ -45,7 +45,6 @@ class PermintaanDanaOperasional(Document):
 			data = {
 				"grand_total": self.get(f"grand_total_{fieldname}"),
 				"outstanding_amount": self.get(f"outstanding_amount_{fieldname}"),
-				"debit_to": self.get(f"{fieldname}_debit_to"),
 				"credit_to": self.get(f"{fieldname}_credit_to"),
 				"reference_doc": "Permintaan Dana Operasional",
 				"reference_name": self.name,
@@ -55,6 +54,9 @@ class PermintaanDanaOperasional(Document):
 				"posting_date": self.posting_date,
 				"required_by": self.required_by,
 			}
+
+			if pdo == "Bahan Bakar":
+				data.update({"debit_to": self.get(f"{fieldname}_debit_to")})
 			
 			childs = self.get(f"pdo_{fieldname}")
 			

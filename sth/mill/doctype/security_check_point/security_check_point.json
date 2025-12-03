@@ -16,21 +16,26 @@
   "vehicle_entry_time",
   "vehicle_exit_time",
   "qr_code_scan",
-  "amended_from",
   "driver_data_tab",
   "driver_details_section",
   "driver_name",
   "license_number",
   "column_break_izww",
+  "driver_view",
   "driver_image",
   "vehicle_details_section",
   "rear_view_photo_column",
   "license_plate",
+  "front_image",
+  "rear_image",
+  "left_image",
+  "right_image",
   "column_break_dwkb",
   "front_view_photo",
   "rear_view_photo",
   "left_side_photo",
-  "right_side_photo"
+  "right_side_photo",
+  "amended_from"
  ],
  "fields": [
   {
@@ -163,32 +168,28 @@
    "fieldname": "front_view_photo",
    "fieldtype": "Image",
    "label": "Front View Photo",
+   "options": "front_image",
    "read_only": 1
   },
   {
    "fieldname": "rear_view_photo",
    "fieldtype": "Image",
    "label": "Rear View Photo",
+   "options": "rear_image",
    "read_only": 1
   },
   {
    "fieldname": "left_side_photo",
    "fieldtype": "Image",
    "label": "Left Side Photo",
+   "options": "left_image",
    "read_only": 1
   },
   {
    "fieldname": "right_side_photo",
    "fieldtype": "Image",
    "label": "Right Side Photo",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "qr_code_scan.custom_driver_image_upload",
-   "fieldname": "driver_image",
-   "fieldtype": "Image",
-   "in_preview": 1,
-   "label": "Driver Image",
+   "options": "right_image",
    "read_only": 1
   },
   {
@@ -205,13 +206,56 @@
    "fieldtype": "Time",
    "in_preview": 1,
    "label": "Vehicle Exit Time"
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_driver_image_upload",
+   "fieldname": "driver_view",
+   "fieldtype": "Image",
+   "label": "Driver View",
+   "options": "driver_image",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_driver_image_upload",
+   "fieldname": "driver_image",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Driver Image"
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_front_view_photo",
+   "fieldname": "front_image",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Front Image"
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_rear_view_photo",
+   "fieldname": "rear_image",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Rear Image"
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_left_side_photo",
+   "fieldname": "left_image",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Left Image"
+  },
+  {
+   "fetch_from": "qr_code_scan.custom_right_side_photo",
+   "fieldname": "right_image",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Right Image"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 16:07:14.955510",
+ "modified": "2025-12-01 16:59:16.860862",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

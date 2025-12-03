@@ -96,6 +96,9 @@ class ChequeBook(Document):
 		self.remaining_cheques = total_cheque_number - used_cheque_number
 		self.db_update_all()
 
+		if self.remaining_cheque_warning == self.remaining_cheques:
+			frappe.msgprint(f"Sisa Cheque Number saat ini {self.remaining_cheques} di Check Book {self.name}")
+
 	def validate_numbers(self):
 		start_no = int(self.cheque_start_no)
 		end_no = int(self.cheque_end_no)
@@ -164,6 +167,16 @@ def update_cheque_book_pe(cheque_number):
 		change_cheque_number(cheque_usage_history, cheque_number)
 	else:
 		append_cheque_history(cheque_number)
+	total_cheque_number = frappe.db.count("Cheque Number", {
+											"cheque_book": cheque_number.cheque_book
+										})
+	used_cheque_number = frappe.db.count("Cheque Number", {
+										"cheque_book": cheque_number.cheque_book,
+										"reference_doc": ["is", "set"],
+										"reference_name": ["is", "set"]
+									})
+	remaining_cheque = total_cheque_number - used_cheque_number
+	frappe.db.set_value('Cheque Book', cheque_number.cheque_book, "remaining_cheques", remaining_cheque)
 
 def change_cheque_number(cheque_usage_history, cheque_number):
 	values = {
