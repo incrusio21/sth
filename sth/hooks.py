@@ -210,6 +210,10 @@ doc_events = {
   	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
 	},
+    "Material Request": {
+		"on_submit": "sth.custom.material_request.update_ba_reference",
+        "on_cancel": "sth.custom.material_request.update_ba_reference",
+	},
 	
 	# "Training Event": {
 	# 	"on_submit": "sth.custom.training_event.create_journal_entry",

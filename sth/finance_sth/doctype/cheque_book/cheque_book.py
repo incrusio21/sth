@@ -167,6 +167,8 @@ def update_cheque_book_pe(cheque_number):
 		change_cheque_number(cheque_usage_history, cheque_number)
 	else:
 		append_cheque_history(cheque_number)
+	cheque_book_doc = frappe.get_doc("Cheque Book", cheque_number.cheque_book)
+	cheque_book_doc.update_total_remaining()
 
 def change_cheque_number(cheque_usage_history, cheque_number):
 	values = {
