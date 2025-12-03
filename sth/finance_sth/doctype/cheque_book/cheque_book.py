@@ -92,14 +92,9 @@ class ChequeBook(Document):
 											"reference_name": ["is", "set"]
 										})
 
-		# self.cheques_total = total_cheque_number
-		# self.remaining_cheques = total_cheque_number - used_cheque_number
-		# self.db_update_all()
-		values = {
-			"cheques_total": total_cheque_number,
-			"remaining_cheques": total_cheque_number - used_cheque_number
-		}
-		frappe.db.set_value("Cheque Book", self.name, values)
+		self.cheques_total = total_cheque_number
+		self.remaining_cheques = total_cheque_number - used_cheque_number
+		self.db_update_all()
 
 		if self.remaining_cheque_warning == self.remaining_cheques:
 			frappe.msgprint(f"Sisa Cheque Number saat ini {self.remaining_cheques} di Check Book {self.name}")
@@ -172,8 +167,16 @@ def update_cheque_book_pe(cheque_number):
 		change_cheque_number(cheque_usage_history, cheque_number)
 	else:
 		append_cheque_history(cheque_number)
-	cheque_book_doc = frappe.get_doc("Cheque Book", cheque_number.cheque_book)
-	cheque_book_doc.update_total_remaining()
+	total_cheque_number = frappe.db.count("Cheque Number", {
+											"cheque_book": cheque_number.cheque_book
+										})
+	used_cheque_number = frappe.db.count("Cheque Number", {
+										"cheque_book": cheque_number.cheque_book,
+										"reference_doc": ["is", "set"],
+										"reference_name": ["is", "set"]
+									})
+	remaining_cheque = total_cheque_number - used_cheque_number
+	frappe.db.set_value('Cheque Book', cheque_number.cheque_book, "remaining_cheques", remaining_cheque)
 
 def change_cheque_number(cheque_usage_history, cheque_number):
 	values = {
