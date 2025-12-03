@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:disbursement_number",
+ "creation": "2025-12-03 16:17:00.141525",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "disbursement_number",
+  "disbursement_date",
+  "disbursement_amouny",
+  "due_days",
+  "column_break_bbib",
+  "reference_doc",
+  "reference_name",
+  "journal_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "disbursement_number",
+   "fieldtype": "Data",
+   "label": "No. Pencairan",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "disbursement_date",
+   "fieldtype": "Date",
+   "label": "Tanggal Pencairan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disbursement_amouny",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pencairan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "due_days",
+   "fieldtype": "Int",
+   "label": "Jatuh Tempo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bbib",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_doc",
+   "fieldtype": "Link",
+   "label": "Reference Document",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doc",
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-03 16:22:46.515872",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Disbursement Loan",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
