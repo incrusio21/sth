@@ -17,6 +17,7 @@
   "jenis_fasilitas",
   "loan_purpose",
   "loan_term",
+  "loan_amount",
   "due_days",
   "column_break_ahqa",
   "commitment_periode",
@@ -24,6 +25,8 @@
   "availability_period_type",
   "grace_period",
   "grace_period_type",
+  "credit_charge",
+  "credit_charge_type",
   "loan_interest",
   "loan_interest_type",
   "pinalti",
@@ -46,12 +49,12 @@
    "label": "Headers Details"
   },
   {
-   "default": "{###}/{mm}/{YYYY}",
+   "default": "###./.MM./.YYYY",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Naming Series",
-   "options": "{###}/{mm}/{YYYY}",
+   "options": "###./.MM./.YYYY",
    "reqd": 1
   },
   {
@@ -242,13 +245,34 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "loan_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Fasilitas",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_charge",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Biaya Kredit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_charge_type",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Tipe Biaya Kredit",
+   "options": "FLAT, DIBAYAR DI MUKA",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-03 09:51:59.520636",
+ "modified": "2025-12-03 10:44:30.528864",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",
