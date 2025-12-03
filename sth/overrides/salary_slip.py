@@ -116,11 +116,7 @@ class SalarySlip(SalarySlip):
 		# butuh buat rumusnya yang bpjs - chandra
 		# karyawan tetap - 30 hari
 		# selain itu - 25 hari
-		if self.employment_type == "KARYAWAN TETAP":
-			self.total_hari = 30
-		else:
-			self.total_hari = 25
-		
+		self.total_hari = frappe.utils.flt(frappe.get_value("Employment Type", self.employment_type, "hari_ump"))
 
 		# update holiday_days - chandra
 		self.holiday_days = olah_holiday(holidays,list_attendance)
