@@ -182,7 +182,8 @@ doc_events = {
 			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
 		],
 		"on_submit": "sth.custom.payment_entry.update_check_book",
-		"on_cancel": "sth.custom.payment_entry.update_check_book"
+		"on_cancel": "sth.custom.payment_entry.update_check_book",
+		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
     "Project": {
       	"validate": "sth.legal.custom.project.Project",
