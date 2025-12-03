@@ -16,339 +16,363 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
 
+from datetime import datetime, timedelta
+
 class SalarySlip(SalarySlip):
-    def on_submit(self):
-        super().on_submit()
-        self.update_payment_related("Employee Payment Log", "payment_log_list")
-        self.update_payment_related("Loan Repayment", "loan_repayment_list")
+	def on_submit(self):
+		super().on_submit()
+		self.update_payment_related("Employee Payment Log", "payment_log_list")
+		self.update_payment_related("Loan Repayment", "loan_repayment_list")
 
-    def on_cancel(self):
-        super().on_submit()
+	def on_cancel(self):
+		super().on_submit()
 
-        self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
-        self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
+		self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
+		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
 
-    def update_payment_related(self, doctype, list_field, cancel=0):
-        dt = frappe.qb.DocType(doctype)
+	def update_payment_related(self, doctype, list_field, cancel=0):
+		dt = frappe.qb.DocType(doctype)
 
-        query = (
-            frappe.qb.update(dt)
-            .set(dt.is_paid, 0 if cancel else 1)
-            .set(dt.salary_slip, "" if cancel else self.name)
-            .set(dt.modified, now())
-            .set(dt.modified_by, frappe.session.user)
-            .where(
-                (dt.salary_slip == self.name) if cancel
-                else (dt.name.isin(getattr(self, list_field)))
-            )
-        )
+		query = (
+			frappe.qb.update(dt)
+			.set(dt.is_paid, 0 if cancel else 1)
+			.set(dt.salary_slip, "" if cancel else self.name)
+			.set(dt.modified, now())
+			.set(dt.modified_by, frappe.session.user)
+			.where(
+				(dt.salary_slip == self.name) if cancel
+				else (dt.name.isin(getattr(self, list_field)))
+			)
+		)
 
-        query.run()
+		query.run()
 
-    def get_working_days_details(self, lwp=None, for_preview=0):
-        payroll_settings = frappe.get_cached_value(
-            "Payroll Settings",
-            None,
-            (
-                "payroll_based_on",
-                "include_holidays_in_total_working_days",
-                "consider_marked_attendance_on_holidays",
-                "daily_wages_fraction_for_half_day",
-                "consider_unmarked_attendance_as",
-            ),
-            as_dict=1,
-        )
+	def get_working_days_details(self, lwp=None, for_preview=0):
+		payroll_settings = frappe.get_cached_value(
+			"Payroll Settings",
+			None,
+			(
+				"payroll_based_on",
+				"include_holidays_in_total_working_days",
+				"consider_marked_attendance_on_holidays",
+				"daily_wages_fraction_for_half_day",
+				"consider_unmarked_attendance_as",
+			),
+			as_dict=1,
+		)
 
-        consider_marked_attendance_on_holidays = (
-            payroll_settings.include_holidays_in_total_working_days
-            and payroll_settings.consider_marked_attendance_on_holidays
-        )
+		consider_marked_attendance_on_holidays = (
+			payroll_settings.include_holidays_in_total_working_days
+			and payroll_settings.consider_marked_attendance_on_holidays
+		)
 
-        daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
+		daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
 
-        working_days = date_diff(self.end_date, self.start_date) + 1
-        if for_preview:
-            self.total_working_days = working_days
-            self.payment_days = working_days
-            return
+		working_days = date_diff(self.end_date, self.start_date) + 1
+		if for_preview:
+			self.total_working_days = working_days
+			self.payment_days = working_days
+			return
 
-        holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-        working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
+		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
+		working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
 
-        if not cint(payroll_settings.include_holidays_in_total_working_days):
-            working_days_list = [i for i in working_days_list if i not in holidays]
+		if not cint(payroll_settings.include_holidays_in_total_working_days):
+			working_days_list = [i for i in working_days_list if i not in holidays]
 
-            working_days -= len(holidays)
-            if working_days < 0:
-                frappe.throw(_("There are more holidays than working days this month."))
+			working_days -= len(holidays)
+			if working_days < 0:
+				frappe.throw(_("There are more holidays than working days this month."))
 
-        if not payroll_settings.payroll_based_on:
-            frappe.throw(_("Please set Payroll based on in Payroll settings"))
+		if not payroll_settings.payroll_based_on:
+			frappe.throw(_("Please set Payroll based on in Payroll settings"))
 
-        if payroll_settings.payroll_based_on == "Attendance":
-            actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
-                holidays, daily_wages_fraction_for_half_day, consider_marked_attendance_on_holidays
-            )
-            self.absent_days = absent
-        else:
-            actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
-                holidays, working_days_list, daily_wages_fraction_for_half_day
-            )
+		if payroll_settings.payroll_based_on == "Attendance":
+			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
+				holidays, daily_wages_fraction_for_half_day, consider_marked_attendance_on_holidays
+			)
+			self.absent_days = absent
+		else:
+			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
+				holidays, working_days_list, daily_wages_fraction_for_half_day
+			)
 
-        if not lwp:
-            lwp = actual_lwp
-        elif lwp != actual_lwp:
-            frappe.msgprint(
-                _("Leave Without Pay does not match with approved {} records").format(
-                    payroll_settings.payroll_based_on
-                )
-            )
+		if not lwp:
+			lwp = actual_lwp
+		elif lwp != actual_lwp:
+			frappe.msgprint(
+				_("Leave Without Pay does not match with approved {} records").format(
+					payroll_settings.payroll_based_on
+				)
+			)
 
-        self.leave_without_pay = lwp
-        self.total_working_days = working_days
-        self.holiday_days = len(self.get_holidays_for_employee(self.actual_start_date , self.actual_end_date))
-        self.not_check_out = self._get_not_out_attendance_days()
-        
-        payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
+		self.leave_without_pay = lwp
+		self.total_working_days = working_days
+		self.holiday_days = len(self.get_holidays_for_employee(self.actual_start_date , self.actual_end_date))
 
-        if flt(payment_days) > flt(lwp):
-            self.payment_days = flt(payment_days) - flt(lwp)
+		# update holiday_days  chandra
+		list_attendance = self._get_not_out_attendance_days_in_list()
+		self.holiday_days = olah_holiday(holidays,list_attendance)
 
-            if payroll_settings.payroll_based_on == "Attendance":
-                self.payment_days -= flt(absent)
+		self.not_check_out = self._get_not_out_attendance_days()
+		
+		payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
 
-            consider_unmarked_attendance_as = payroll_settings.consider_unmarked_attendance_as or "Present"
+		if flt(payment_days) > flt(lwp):
+			self.payment_days = flt(payment_days) - flt(lwp)
 
-            if (
-                payroll_settings.payroll_based_on == "Attendance"
-                and consider_unmarked_attendance_as == "Absent"
-            ):
-                unmarked_days = self.get_unmarked_days(
-                    payroll_settings.include_holidays_in_total_working_days, holidays
-                )
-                half_absent_days = self.get_half_absent_days(
-                    payroll_settings.include_holidays_in_total_working_days,
-                    consider_marked_attendance_on_holidays,
-                    holidays,
-                )
-                self.absent_days += (
-                    unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
-                )  # will be treated as absent
-                self.payment_days -= unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
-        else:
-            self.payment_days = 0
-    
-    def _get_not_out_attendance_days(self) -> float:
-        Attendance = frappe.qb.DocType("Attendance")
-        query = (
-            frappe.qb.from_(Attendance)
-            .select(Count("*"))
-            .where(
-                (Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
-                & (Attendance.employee == self.employee)
-                & (Attendance.docstatus == 1)
-                & (Attendance.status == "Present")
+			if payroll_settings.payroll_based_on == "Attendance":
+				self.payment_days -= flt(absent)
+
+			consider_unmarked_attendance_as = payroll_settings.consider_unmarked_attendance_as or "Present"
+
+			if (
+				payroll_settings.payroll_based_on == "Attendance"
+				and consider_unmarked_attendance_as == "Absent"
+			):
+				unmarked_days = self.get_unmarked_days(
+					payroll_settings.include_holidays_in_total_working_days, holidays
+				)
+				half_absent_days = self.get_half_absent_days(
+					payroll_settings.include_holidays_in_total_working_days,
+					consider_marked_attendance_on_holidays,
+					holidays,
+				)
+				self.absent_days += (
+					unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
+				)  # will be treated as absent
+				self.payment_days -= unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
+		else:
+			self.payment_days = 0
+	
+	def _get_not_out_attendance_days(self) -> float:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.status == "Present")
 				& (Attendance.out_time.notnull())
-            )
-        )
+			)
+		)
 
-        return query.run()[0][0]
-    
-    def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
-        # agar payment log selalu generate ulang
-        self.payment_log_list = []
-        self.loan_repayment_list = []
-        
-        def set_gross_pay_and_base_gross_pay():
-            self.gross_pay = self.get_component_totals("earnings", depends_on_payment_days=1)
-            self.base_gross_pay = flt(
-                flt(self.gross_pay) * flt(self.exchange_rate), self.precision("base_gross_pay")
-            )
+		return query.run()[0][0]
 
-        if not getattr(self, "_employee_payment_log", None):
-            self.set_employee_payment_doc()
+	# tambahan chandra
+	def _get_not_out_attendance_days_in_list(self) -> list:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Attendance.attendance_date)
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.status == "Present")
+			)
+		)
 
-        # hapus component against terlebih dahulu untuk d create ulang
-        self.remove_flexibel_payment()
-        self.calculate_employee_payment()
+		result = query.run()
+		return [row[0] for row in result]
+	
+	def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
+		# agar payment log selalu generate ulang
+		self.payment_log_list = []
+		self.loan_repayment_list = []
+		
+		def set_gross_pay_and_base_gross_pay():
+			self.gross_pay = self.get_component_totals("earnings", depends_on_payment_days=1)
+			self.base_gross_pay = flt(
+				flt(self.gross_pay) * flt(self.exchange_rate), self.precision("base_gross_pay")
+			)
 
-        if self.salary_structure:
-            self.calculate_component_amounts("earnings")
+		if not getattr(self, "_employee_payment_log", None):
+			self.set_employee_payment_doc()
 
-        # get remaining numbers of sub-period (period for which one salary is processed)
-        if self.payroll_period:
-            self.remaining_sub_periods = get_period_factor(
-                self.employee,
-                self.start_date,
-                self.end_date,
-                self.payroll_frequency,
-                self.payroll_period,
-                joining_date=self.joining_date,
-                relieving_date=self.relieving_date,
-            )[1]
+		# hapus component against terlebih dahulu untuk d create ulang
+		self.remove_flexibel_payment()
+		self.calculate_employee_payment()
 
-        set_gross_pay_and_base_gross_pay()
+		if self.salary_structure:
+			self.calculate_component_amounts("earnings")
 
-        if self.salary_structure:
-            self.calculate_component_amounts("deductions")
+		# get remaining numbers of sub-period (period for which one salary is processed)
+		if self.payroll_period:
+			self.remaining_sub_periods = get_period_factor(
+				self.employee,
+				self.start_date,
+				self.end_date,
+				self.payroll_frequency,
+				self.payroll_period,
+				joining_date=self.joining_date,
+				relieving_date=self.relieving_date,
+			)[1]
 
-        set_loan_repayment(self)
+		set_gross_pay_and_base_gross_pay()
 
-        self.calculate_subsidy_loan()
-        
-        self.set_precision_for_component_amounts()
-        self.set_net_pay()
-        if not skip_tax_breakup_computation:
-            self.compute_income_tax_breakup()
+		if self.salary_structure:
+			self.calculate_component_amounts("deductions")
 
-    def set_employee_payment_doc(self) -> None:
-        epl = frappe.qb.DocType("Employee Payment Log")
+		set_loan_repayment(self)
 
-        emp_pl = (
-            frappe.qb.from_(epl)
-            .select(epl.name, epl.account, epl.salary_component, epl.type, epl.against_salary_component, epl.amount, epl.status)
-            .where(
-                (epl.employee == self.employee)
-                & (epl.company == self.company)
-                & (epl.payroll_date.between(self.start_date, self.end_date))
-                & (epl.is_paid != 1)
-            )
-            .for_update()
-        ).run(as_dict=1)
-        
-        self._employee_payment, self._against_employee_payment = {}, {}
-        for pl in emp_pl:
-            
-            if pl.status != "Approved":
-                frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
+		self.calculate_subsidy_loan()
+		
+		self.set_precision_for_component_amounts()
+		self.set_net_pay()
+		if not skip_tax_breakup_computation:
+			self.compute_income_tax_breakup()
 
-            key = (pl.salary_component, scrub(f"{pl.type}s"))
-            self._employee_payment.setdefault(key, {
-                "account": {},
-                "amount": 0,
-            })
+	def set_employee_payment_doc(self) -> None:
+		epl = frappe.qb.DocType("Employee Payment Log")
 
-            if pl.account:
-                self._employee_payment[key]["account"].setdefault(pl.account, 0)                    
-                self._employee_payment[key]["account"][pl.account] += pl.amount
+		emp_pl = (
+			frappe.qb.from_(epl)
+			.select(epl.name, epl.account, epl.salary_component, epl.type, epl.against_salary_component, epl.amount, epl.status)
+			.where(
+				(epl.employee == self.employee)
+				& (epl.company == self.company)
+				& (epl.payroll_date.between(self.start_date, self.end_date))
+				& (epl.is_paid != 1)
+			)
+			.for_update()
+		).run(as_dict=1)
+		
+		self._employee_payment, self._against_employee_payment = {}, {}
+		for pl in emp_pl:
+			
+			if pl.status != "Approved":
+				frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
 
-            self._employee_payment[key]["amount"] += pl.amount
+			key = (pl.salary_component, scrub(f"{pl.type}s"))
+			self._employee_payment.setdefault(key, {
+				"account": {},
+				"amount": 0,
+			})
 
-            if pl.against_salary_component:
-                key_against = pl.against_salary_component
-                self._against_employee_payment.setdefault(key_against, 0)
-                self._against_employee_payment[key_against] += (
-                    pl.amount if pl.type == "deductions" else -pl.amount
-                )
+			if pl.account:
+				self._employee_payment[key]["account"].setdefault(pl.account, 0)                    
+				self._employee_payment[key]["account"][pl.account] += pl.amount
 
-            self.payment_log_list.append(pl.name)
+			self._employee_payment[key]["amount"] += pl.amount
 
-    def remove_flexibel_payment(self):
-        removed_component = []
-        for component_type in ["earnings", "deductions"]:
-            removed_component.extend(self.get(component_type, {"is_flexibel_payment": 1}))
-        
-        for d in removed_component:
-            self.remove(d)
+			if pl.against_salary_component:
+				key_against = pl.against_salary_component
+				self._against_employee_payment.setdefault(key_against, 0)
+				self._against_employee_payment[key_against] += (
+					pl.amount if pl.type == "deductions" else -pl.amount
+				)
 
-    def calculate_employee_payment(self):
-        if not getattr(self, "_salary_structure_doc", None):
-            self.set_salary_structure_doc()
-            
-        for (component, component_type), value in self._employee_payment.items():
-            self.add_component_custom(
-                component, 
-                component_type, 
-                abs(value["amount"]),
-                {"account_rate": json.dumps(value["account"])}
-            )
+			self.payment_log_list.append(pl.name)
 
-        for component, total_amount in self._against_employee_payment.items():
-            component_type = "earnings" if total_amount > 0 else "deductions"
-            self.add_component_custom(
-                component, 
-                component_type, 
-                abs(total_amount)
-            )
+	def remove_flexibel_payment(self):
+		removed_component = []
+		for component_type in ["earnings", "deductions"]:
+			removed_component.extend(self.get(component_type, {"is_flexibel_payment": 1}))
+		
+		for d in removed_component:
+			self.remove(d)
 
-    def calculate_subsidy_loan(self):
-        self.add_repaymant_subsidy()
-        if self.get("loans"):
-            self.add_loans_monthly_subsidy()
+	def calculate_employee_payment(self):
+		if not getattr(self, "_salary_structure_doc", None):
+			self.set_salary_structure_doc()
+			
+		for (component, component_type), value in self._employee_payment.items():
+			self.add_component_custom(
+				component, 
+				component_type, 
+				abs(value["amount"]),
+				{"account_rate": json.dumps(value["account"])}
+			)
 
-    def add_repaymant_subsidy(self):
-        lp = frappe.qb.DocType("Loan Repayment")
+		for component, total_amount in self._against_employee_payment.items():
+			component_type = "earnings" if total_amount > 0 else "deductions"
+			self.add_component_custom(
+				component, 
+				component_type, 
+				abs(total_amount)
+			)
 
-        query = (
-            frappe.qb.from_(lp)
-            .select(lp.name, lp.subsidy_component, lp.against_subsidy_component, lp.amount_paid)
-            .where(
-                (IfNull(lp.subsidy_component, "") != "")
-                &(lp.applicant == self.employee)
-                & (lp.company == self.company)
-                & (lp.docstatus == 1)
-                & (lp.is_paid == 0)
-                & (lp.posting_date <= self.end_date)
-            )
-            .for_update()
-        )
+	def calculate_subsidy_loan(self):
+		self.add_repaymant_subsidy()
+		if self.get("loans"):
+			self.add_loans_monthly_subsidy()
 
-        subsidy_list = query.run(as_dict=True)
+	def add_repaymant_subsidy(self):
+		lp = frappe.qb.DocType("Loan Repayment")
 
-        subsidy_component, against_component = {}, {}
+		query = (
+			frappe.qb.from_(lp)
+			.select(lp.name, lp.subsidy_component, lp.against_subsidy_component, lp.amount_paid)
+			.where(
+				(IfNull(lp.subsidy_component, "") != "")
+				&(lp.applicant == self.employee)
+				& (lp.company == self.company)
+				& (lp.docstatus == 1)
+				& (lp.is_paid == 0)
+				& (lp.posting_date <= self.end_date)
+			)
+			.for_update()
+		)
 
-        for sc in subsidy_list:
-            subsidy_component.setdefault(sc.subsidy_component, 0)
-            against_component.setdefault(sc.against_subsidy_component, 0)
+		subsidy_list = query.run(as_dict=True)
 
-            subsidy_component[sc.subsidy_component] += sc.amount_paid
-            against_component[sc.against_subsidy_component] += sc.amount_paid
-            
-            self.loan_repayment_list.append(sc.name)
+		subsidy_component, against_component = {}, {}
 
-        for component, total_amount in subsidy_component.items():
-            self.add_component_custom(component, "earnings", total_amount)
+		for sc in subsidy_list:
+			subsidy_component.setdefault(sc.subsidy_component, 0)
+			against_component.setdefault(sc.against_subsidy_component, 0)
 
-        for component, total_amount in against_component.items():
-            self.add_component_custom(component, "deductions", total_amount)
-        
-    def add_loans_monthly_subsidy(self):
-        if self.payroll_frequency != "Monthly":
-            return
-        
-        monthly_subsidy = {}
-        for l in self.loans:
-            if not l.monthly_subsidy_component:
-                continue
+			subsidy_component[sc.subsidy_component] += sc.amount_paid
+			against_component[sc.against_subsidy_component] += sc.amount_paid
+			
+			self.loan_repayment_list.append(sc.name)
 
-            monthly_subsidy.setdefault(l.monthly_subsidy_component, 0)
-            diff = month_diff(self.end_date, l.repayment_start_date) - 1
-            
-            subsidy_amount = frappe.get_value('Monthly Subsidy', 
-                {"from_month": ["<=", diff], "to_month": [">=", diff], "parent": l.loan},
-                "subsidy_amount"
-            ) or 0
+		for component, total_amount in subsidy_component.items():
+			self.add_component_custom(component, "earnings", total_amount)
 
-            monthly_subsidy[l.monthly_subsidy_component] += subsidy_amount
+		for component, total_amount in against_component.items():
+			self.add_component_custom(component, "deductions", total_amount)
+		
+	def add_loans_monthly_subsidy(self):
+		if self.payroll_frequency != "Monthly":
+			return
+		
+		monthly_subsidy = {}
+		for l in self.loans:
+			if not l.monthly_subsidy_component:
+				continue
 
-        for component, total_amount in monthly_subsidy.items():
-            self.add_component_custom(component, "earnings", total_amount)
+			monthly_subsidy.setdefault(l.monthly_subsidy_component, 0)
+			diff = month_diff(self.end_date, l.repayment_start_date) - 1
+			
+			subsidy_amount = frappe.get_value('Monthly Subsidy', 
+				{"from_month": ["<=", diff], "to_month": [">=", diff], "parent": l.loan},
+				"subsidy_amount"
+			) or 0
 
-    def add_component_custom(self, component, component_type, total_amount, add_struck=None):
-        struct_row = get_salary_component_data(component)
-        struct_row.is_flexible_payment = 1
+			monthly_subsidy[l.monthly_subsidy_component] += subsidy_amount
 
-        if add_struck:
-            struct_row.update(add_struck)
+		for component, total_amount in monthly_subsidy.items():
+			self.add_component_custom(component, "earnings", total_amount)
 
-        self.update_component_row(
-            struct_row, 
-            flt(total_amount), 
-            component_type,
-            remove_if_zero_valued=True
-        )
+	def add_component_custom(self, component, component_type, total_amount, add_struck=None):
+		struct_row = get_salary_component_data(component)
+		struct_row.is_flexible_payment = 1
 
-    def update_component_row(
+		if add_struck:
+			struct_row.update(add_struck)
+
+		self.update_component_row(
+			struct_row, 
+			flt(total_amount), 
+			component_type,
+			remove_if_zero_valued=True
+		)
+
+	def update_component_row(
 		self,
 		component_data,
 		amount,
@@ -359,92 +383,128 @@ class SalarySlip(SalarySlip):
 		default_amount=None,
 		remove_if_zero_valued=None,
 	):
-        component_row = None
-        for d in self.get(component_type):
-            if d.salary_component != component_data.salary_component:
-                continue
+		component_row = None
+		for d in self.get(component_type):
+			if d.salary_component != component_data.salary_component:
+				continue
 
-            if (not d.additional_salary and (not additional_salary or additional_salary.overwrite)) or (
-                additional_salary and additional_salary.name == d.additional_salary
-            ):
-                component_row = d
-                break
+			if (not d.additional_salary and (not additional_salary or additional_salary.overwrite)) or (
+				additional_salary and additional_salary.name == d.additional_salary
+			):
+				component_row = d
+				break
 
-        if additional_salary and additional_salary.overwrite:
-            # Additional Salary with overwrite checked, remove default rows of same component
-            self.set(
-                component_type,
-                [
-                    d
-                    for d in self.get(component_type)
-                    if d.salary_component != component_data.salary_component
-                    or (d.additional_salary and additional_salary.name != d.additional_salary)
-                    or d == component_row
-                ],
-            )
+		if additional_salary and additional_salary.overwrite:
+			# Additional Salary with overwrite checked, remove default rows of same component
+			self.set(
+				component_type,
+				[
+					d
+					for d in self.get(component_type)
+					if d.salary_component != component_data.salary_component
+					or (d.additional_salary and additional_salary.name != d.additional_salary)
+					or d == component_row
+				],
+			)
 
-        if not component_row:
-            if not (amount or default_amount) and remove_if_zero_valued:
-                return
+		if not component_row:
+			if not (amount or default_amount) and remove_if_zero_valued:
+				return
 
-            component_row = self.append(component_type)
-            for attr in (
-                "depends_on_payment_days",
-                "salary_component",
-                "abbr",
-                "do_not_include_in_total",
-                "is_tax_applicable",
-                "is_flexible_benefit",
-                "variable_based_on_taxable_salary",
-                "exempted_from_income_tax",
-                "is_flexible_payment",
-                "against_employee_payment",
-            ):
-                component_row.set(attr, component_data.get(attr))
+			component_row = self.append(component_type)
+			for attr in (
+				"depends_on_payment_days",
+				"salary_component",
+				"abbr",
+				"do_not_include_in_total",
+				"is_tax_applicable",
+				"is_flexible_benefit",
+				"variable_based_on_taxable_salary",
+				"exempted_from_income_tax",
+				"is_flexible_payment",
+				"against_employee_payment",
+			):
+				component_row.set(attr, component_data.get(attr))
 
-        if additional_salary:
-            if additional_salary.overwrite:
-                component_row.additional_amount = flt(
-                    flt(amount) - flt(component_row.get("default_amount", 0)),
-                    component_row.precision("additional_amount"),
-                )
-            else:
-                component_row.default_amount = 0
-                component_row.additional_amount = amount
+		if additional_salary:
+			if additional_salary.overwrite:
+				component_row.additional_amount = flt(
+					flt(amount) - flt(component_row.get("default_amount", 0)),
+					component_row.precision("additional_amount"),
+				)
+			else:
+				component_row.default_amount = 0
+				component_row.additional_amount = amount
 
-            component_row.is_recurring_additional_salary = is_recurring
-            component_row.additional_salary = additional_salary.name
-            component_row.deduct_full_tax_on_selected_payroll_date = (
-                additional_salary.deduct_full_tax_on_selected_payroll_date
-            )
-        else:
-            component_row.default_amount = default_amount or amount
-            component_row.additional_amount = 0
-            component_row.deduct_full_tax_on_selected_payroll_date = (
-                component_data.deduct_full_tax_on_selected_payroll_date
-            )
+			component_row.is_recurring_additional_salary = is_recurring
+			component_row.additional_salary = additional_salary.name
+			component_row.deduct_full_tax_on_selected_payroll_date = (
+				additional_salary.deduct_full_tax_on_selected_payroll_date
+			)
+		else:
+			component_row.default_amount = default_amount or amount
+			component_row.additional_amount = 0
+			component_row.deduct_full_tax_on_selected_payroll_date = (
+				component_data.deduct_full_tax_on_selected_payroll_date
+			)
 
-        component_row.amount = amount
-        component_row.account_list_rate = component_data.get("account_rate") or "{}"
+		component_row.amount = amount
+		component_row.account_list_rate = component_data.get("account_rate") or "{}"
 
-        self.update_component_amount_based_on_payment_days(component_row, remove_if_zero_valued)
+		self.update_component_amount_based_on_payment_days(component_row, remove_if_zero_valued)
 
-        if data:
-            data[component_row.abbr] = component_row.amount
+		if data:
+			data[component_row.abbr] = component_row.amount
 			
-    def get_data_for_eval(self):
-        """Returns data for evaluating formula"""
-        data, default_data = super().get_data_for_eval()
+	def get_data_for_eval(self):
+		"""Returns data for evaluating formula"""
+		data, default_data = super().get_data_for_eval()
 
-        company = frappe.get_cached_doc("Company", self.company).as_dict()
+		company = frappe.get_cached_doc("Company", self.company).as_dict()
 
-        filters = { "company": self.company }
-        data.natura_rate = default_data.natura_rate = frappe.get_value("Natura Price", {
-            **filters, "valid_from": ["<=", self.end_date]}, "harga_beras", order_by="valid_from desc") or 0
+		filters = { "company": self.company }
+		data.natura_rate = default_data.natura_rate = frappe.get_value("Natura Price", {
+			**filters, "valid_from": ["<=", self.end_date]}, "harga_beras", order_by="valid_from desc") or 0
 
-        data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
-            **filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
+		data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
+			**filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
 
-        data.ump_harian = default_data.ump_harian = company.custom_ump_harian
+		data.ump_harian = default_data.ump_harian = company.custom_ump_harian
 
-        return data, default_data
+		return data, default_data
+
+@frappe.whitelist()
+def olah_holiday(holidays, attendance):
+
+	holiday = 0
+	for date_str in holidays:
+		date = date_str
+		weekday = date.weekday()
+		days_to_monday = weekday
+		monday = date - timedelta(days=days_to_monday)
+		
+		date_list = []
+		for i in range(6):
+			current_date = monday + timedelta(days=i)
+			date_list.append(current_date.strftime('%Y-%m-%d'))
+		
+		# ini baru cek per tanggal ini libur semua atau tidak
+		tidak_libur_semua = 1
+		for satu_date in date_list:
+			if satu_date not in holidays:
+				tidak_libur_semua = 0
+
+				for satu_attendance in attendance:
+					if str(satu_attendance) == str(satu_date):
+						tidak_libur_semua = 1
+
+		if tidak_libur_semua == 1:
+			holiday += 1
+
+	return holiday
+
+@frappe.whitelist()
+def debug_holiday():
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00073/00001")
+	doc.get_working_days_details()	
+

@@ -138,6 +138,7 @@
   {
    "depends_on": "eval:doc.jk != \"Dump Truck\"",
    "fetch_from": "company.custom_ump_harian",
+   "fetch_if_empty": 1,
    "fieldname": "uph",
    "fieldtype": "Currency",
    "label": "UMP"
@@ -399,7 +400,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:00:26.974740",
+ "modified": "2025-12-03 18:00:25.916634",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
