@@ -110,8 +110,13 @@ class SalarySlip(SalarySlip):
 		self.total_working_days = working_days
 		self.holiday_days = len(self.get_holidays_for_employee(self.actual_start_date , self.actual_end_date))
 
-		# update holiday_days  chandra
+		
 		list_attendance = self._get_not_out_attendance_days_in_list()
+		self.employment_type = frappe.get_value("Employee", self.employee, "employment_type")
+		# butuh buat rumusnya yang bpjs - chandra
+		self.total_hari = date_diff(self.end_date, self.start_date) + 1
+
+		# update holiday_days - chandra
 		self.holiday_days = olah_holiday(holidays,list_attendance)
 
 		self.not_check_out = self._get_not_out_attendance_days()
