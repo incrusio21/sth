@@ -81,7 +81,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Timbangan Items"
+   "options": "Timbangan Items",
+   "reqd": 1
   },
   {
    "fieldname": "type",
@@ -246,7 +247,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-02 10:27:01.883369",
+ "modified": "2025-12-02 14:23:22.360762",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
@@ -270,5 +271,7 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }
