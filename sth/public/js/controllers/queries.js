@@ -17,5 +17,17 @@ sth.queries = {
         return {
             filters
         }
+    },
+
+    divisi: function (doc) {
+        let filters = {}
+
+        if (doc.unit) {
+            filters = {
+                unit: doc.unit
+            }
+        }
+
+        return { filters }
     }
 }
