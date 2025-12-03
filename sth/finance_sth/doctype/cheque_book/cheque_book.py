@@ -167,16 +167,8 @@ def update_cheque_book_pe(cheque_number):
 		change_cheque_number(cheque_usage_history, cheque_number)
 	else:
 		append_cheque_history(cheque_number)
-	total_cheque_number = frappe.db.count("Cheque Number", {
-											"cheque_book": cheque_number.cheque_book
-										})
-	used_cheque_number = frappe.db.count("Cheque Number", {
-										"cheque_book": cheque_number.cheque_book,
-										"reference_doc": ["is", "set"],
-										"reference_name": ["is", "set"]
-									})
-	remaining_cheque = total_cheque_number - used_cheque_number
-	frappe.db.set_value('Cheque Book', cheque_number.cheque_book, "remaining_cheques", remaining_cheque)
+	cheque_book_doc = frappe.get_doc("Cheque Book", cheque_number.cheque_book)
+	cheque_book_doc.update_total_remaining()
 
 def change_cheque_number(cheque_usage_history, cheque_number):
 	values = {
