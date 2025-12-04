@@ -152,6 +152,7 @@ override_doctype_class = {
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
+	"Bank Account": "sth.overrides.bank_account.BankAccount",
 }
 
 # Document Events
