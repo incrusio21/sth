@@ -3,21 +3,34 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:31:08.735648",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
   "section_break_gzmq",
   "naming_series",
+  "posting_date",
+  "company",
+  "column_break_lpdk",
   "status_anggaran_dasar",
   "akta",
-  "column_break_lpdk",
-  "company",
-  "posting_date",
   "amended_from",
   "detail_akta_section",
   "jenis_akta",
   "tanggal_akta",
+  "nama_notaris",
+  "nomor_sk_kehakiman",
+  "tanggal_sk_kehakiman",
+  "column_break_tanb",
+  "kedudukan",
+  "alamat",
+  "modal_dasar",
+  "modal_di_setor",
+  "kegiatan_usaha",
+  "bnri",
+  "tbnri",
+  "keterangan",
   "section_break_psjl",
   "saham",
   "section_break_sslx",
@@ -97,9 +110,8 @@
   },
   {
    "fieldname": "akta",
-   "fieldtype": "Link",
-   "label": "Akta",
-   "options": "Nomor Akta"
+   "fieldtype": "Data",
+   "label": "Akta"
   },
   {
    "collapsible": 1,
@@ -109,15 +121,14 @@
   },
   {
    "fieldname": "jenis_akta",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Jenis Akta",
-   "read_only": 1
+   "options": "Jenis Akta"
   },
   {
    "fieldname": "tanggal_akta",
    "fieldtype": "Date",
-   "label": "Tanggal Akta",
-   "read_only": 1
+   "label": "Tanggal Akta"
   },
   {
    "fieldname": "saham",
@@ -148,12 +159,81 @@
    "fieldtype": "Currency",
    "label": "\u03a3 Saham",
    "read_only": 1
+  },
+  {
+   "fieldname": "nama_notaris",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Notaris"
+  },
+  {
+   "fieldname": "nomor_sk_kehakiman",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor SK Kehakiman"
+  },
+  {
+   "fieldname": "tanggal_sk_kehakiman",
+   "fieldtype": "Date",
+   "label": "Tanggal SK Kehakiman"
+  },
+  {
+   "fieldname": "column_break_tanb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kedudukan",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Kedudukan"
+  },
+  {
+   "fieldname": "alamat",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "modal_dasar",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Modal Dasar"
+  },
+  {
+   "fieldname": "modal_di_setor",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Modal Di Setor"
+  },
+  {
+   "fieldname": "kegiatan_usaha",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Kegiatan Usaha"
+  },
+  {
+   "fieldname": "bnri",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "BNRI"
+  },
+  {
+   "fieldname": "tbnri",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "TBNRI"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Keterangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-27 12:34:38.275075",
+ "modified": "2025-12-04 14:55:25.240809",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",

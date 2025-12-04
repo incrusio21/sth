@@ -2,9 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("GIS", {
-	// refresh(frm) {
-
-	// },
+	refresh(frm) {
+        frm.set_query("blok", (doc) => {
+            return {
+                filters: {
+                    unit: ["=", doc.unit]
+                }
+            }
+        })
+	},
     lahan_inti(frm){
         frm.trigger("calculate_total_lahan")
     },

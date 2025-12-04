@@ -64,20 +64,17 @@
    "fieldname": "np",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nomor Putusan",
-   "reqd": 1
+   "label": "Nomor Putusan"
   },
   {
    "fieldname": "penggugat",
    "fieldtype": "Data",
-   "label": "Penggugat",
-   "reqd": 1
+   "label": "Penggugat"
   },
   {
    "fieldname": "tergugat",
    "fieldtype": "Data",
-   "label": "Tergugat",
-   "reqd": 1
+   "label": "Tergugat"
   },
   {
    "fieldname": "jp",
@@ -90,8 +87,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Advokat",
-   "reqd": 1
+   "label": "Advokat"
   },
   {
    "fieldname": "last_update",
@@ -105,16 +101,14 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Tanggal Daftar",
-   "reqd": 1
+   "label": "Tanggal Daftar"
   },
   {
    "fieldname": "tgl_ptsn",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Tanggal Putusan",
-   "reqd": 1
+   "label": "Tanggal Putusan"
   },
   {
    "fieldname": "amar_putusan",
@@ -129,8 +123,7 @@
   {
    "fieldname": "adil",
    "fieldtype": "Data",
-   "label": "Pengadilan",
-   "reqd": 1
+   "label": "Pengadilan"
   },
   {
    "fieldname": "naming_series",
@@ -142,7 +135,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-25 15:14:51.215005",
+ "modified": "2025-12-04 16:48:26.533506",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Litigasi",

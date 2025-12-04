@@ -220,7 +220,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 16:34:22.743723",
+ "modified": "2025-12-04 12:58:55.188902",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "GIS",
@@ -241,7 +241,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "sppt"
 }

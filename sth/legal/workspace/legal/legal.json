@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Wbl6XNpx4M\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Legal</span>\",\"col\":12}},{\"id\":\"vQ_eEv09sY\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":3}},{\"id\":\"rTnnthUOy5\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Lainnya\",\"col\":3}}]",
+ "content": "[{\"id\":\"Wbl6XNpx4M\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Legal</span>\",\"col\":12}},{\"id\":\"kx_-k1ak0P\",\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"id\":\"vQ_eEv09sY\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":3}}]",
  "creation": "2025-09-12 16:22:06.684546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -105,8 +105,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Transaksi Lainnya",
-   "link_count": 2,
+   "label": "Master Data",
+   "link_count": 10,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -114,9 +114,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Proposal",
+   "label": "Jenis Biaya Ganti Rugi Lahan",
    "link_count": 0,
-   "link_to": "Purchase Order",
+   "link_to": "Jenis Biaya Ganti Rugi Lahan",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -124,15 +124,95 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "SPK",
+   "label": "Daftar Masyarakat",
    "link_count": 0,
-   "link_to": "Project",
+   "link_to": "Daftar Masyarakat",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Desa Lingkungan",
+   "link_count": 0,
+   "link_to": "Desa Lingkungan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jenis Sertifikat",
+   "link_count": 0,
+   "link_to": "Jenis Sertifikat",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Nama Perijinan",
+   "link_count": 0,
+   "link_to": "Nama Perijinan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kategori Perijinan",
+   "link_count": 0,
+   "link_to": "Kategori Perijinan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Status Anggaran Dasar",
+   "link_count": 0,
+   "link_to": "Status Anggaran Dasar",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Nomor Akta",
+   "link_count": 0,
+   "link_to": "Nomor Akta",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jenis Akta",
+   "link_count": 0,
+   "link_to": "Jenis Akta",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Territory",
+   "link_count": 0,
+   "link_to": "Territory",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-11-25 16:42:37.915403",
+ "modified": "2025-12-04 14:01:36.582796",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",

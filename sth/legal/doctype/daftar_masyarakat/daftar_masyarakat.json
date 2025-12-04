@@ -17,8 +17,7 @@
   "kecamatan",
   "desa",
   "address",
-  "ktp",
-  "fktp"
+  "ktp"
  ],
  "fields": [
   {
@@ -97,11 +96,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "fktp",
-   "fieldtype": "Attach Image",
-   "label": "Foto KTP"
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -121,7 +115,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 13:42:51.955943",
+ "modified": "2025-12-04 16:11:04.439322",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Daftar Masyarakat",

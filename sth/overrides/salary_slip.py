@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, cint, date_diff, flt, getdate, month_diff, now
+from frappe.utils import add_days, get_first_day_of_week, get_last_day_of_week, get_start_of_week_index, flt, month_diff, now
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -48,110 +48,52 @@ class SalarySlip(SalarySlip):
 		query.run()
 
 	def get_working_days_details(self, lwp=None, for_preview=0):
-		payroll_settings = frappe.get_cached_value(
-			"Payroll Settings",
-			None,
-			(
-				"payroll_based_on",
-				"include_holidays_in_total_working_days",
-				"consider_marked_attendance_on_holidays",
-				"daily_wages_fraction_for_half_day",
-				"consider_unmarked_attendance_as",
-			),
-			as_dict=1,
-		)
-
-		consider_marked_attendance_on_holidays = (
-			payroll_settings.include_holidays_in_total_working_days
-			and payroll_settings.consider_marked_attendance_on_holidays
-		)
-
-		daily_wages_fraction_for_half_day = flt(payroll_settings.daily_wages_fraction_for_half_day) or 0.5
-
-		working_days = date_diff(self.end_date, self.start_date) + 1
-		if for_preview:
-			self.total_working_days = working_days
-			self.payment_days = working_days
-			return
-
-		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
-		working_days_list = [add_days(getdate(self.start_date), days=day) for day in range(0, working_days)]
-
-		if not cint(payroll_settings.include_holidays_in_total_working_days):
-			working_days_list = [i for i in working_days_list if i not in holidays]
-
-			working_days -= len(holidays)
-			if working_days < 0:
-				frappe.throw(_("There are more holidays than working days this month."))
-
-		if not payroll_settings.payroll_based_on:
-			frappe.throw(_("Please set Payroll based on in Payroll settings"))
-
-		if payroll_settings.payroll_based_on == "Attendance":
-			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
-				holidays, daily_wages_fraction_for_half_day, consider_marked_attendance_on_holidays
-			)
-			self.absent_days = absent
-		else:
-			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
-				holidays, working_days_list, daily_wages_fraction_for_half_day
-			)
-
-		if not lwp:
-			lwp = actual_lwp
-		elif lwp != actual_lwp:
-			frappe.msgprint(
-				_("Leave Without Pay does not match with approved {} records").format(
-					payroll_settings.payroll_based_on
-				)
-			)
-
-		self.leave_without_pay = lwp
-		self.total_working_days = working_days
-		self.holiday_days = len(self.get_holidays_for_employee(self.actual_start_date , self.actual_end_date))
-
-		
-		list_attendance = self._get_not_out_attendance_days_in_list()
-		self.employment_type = frappe.get_value("Employee", self.employee, "employment_type")
-		# butuh buat rumusnya yang bpjs - chandra
-		# karyawan tetap - 30 hari
-		# selain itu - 25 hari
-		self.total_hari = frappe.utils.flt(frappe.get_value("Employment Type", self.employment_type, "hari_ump"))
-
-		# update holiday_days - chandra
-		self.holiday_days = olah_holiday(holidays,list_attendance)
+		super().get_working_days_details(lwp, for_preview)
 
 		self.not_check_out = self._get_not_out_attendance_days()
 		
-		payment_days = self.get_payment_days(payroll_settings.include_holidays_in_total_working_days)
+		self.calculate_holidays()
 
-		if flt(payment_days) > flt(lwp):
-			self.payment_days = flt(payment_days) - flt(lwp)
+	def calculate_holidays(self):
+		list_attendance = self._get_attendance_days()
+		holidays = self.get_holidays_for_employee(self.actual_start_date, self.actual_end_date)
 
-			if payroll_settings.payroll_based_on == "Attendance":
-				self.payment_days -= flt(absent)
+		self.holiday_days = 0
+		week_start = week_end = None
+		for h in holidays:
+			# jika tidak terdapat tanggal akhir atau 
+			# holidays sudah tidak masuk dalam minggu terpilih
+			if not week_end or h > week_start:
+				# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
+				week_start = max(get_first_day_of_week(h), self.actual_start_date)
+				week_end = min(get_last_day_of_week(h), self.actual_end_date)
+			else:
+				# skip krn holidays sudah di hitung untuk minggu ini
+				continue
+			
+			current_week_holiday = 0
+			att_exist = False
+			allWeekOff = True 
+			# cek tanggal pada minggu ini 
+			# ada berapa holidays dan 
+			# apakah ada att atau minggu libur
+			current_date = week_start
+			while current_date <= week_end:
+				if current_date not in holidays:
+					allWeekOff = False
+				else:
+					current_week_holiday += 1
 
-			consider_unmarked_attendance_as = payroll_settings.consider_unmarked_attendance_as or "Present"
+				if current_date in list_attendance:
+					att_exist = True
+				
+				current_date = add_days(current_date, 1)
+			
+			# jika seluruh hari dalam satu minggu libur 
+			# atau terdapat attendance tambahkan holidays
+			if allWeekOff or att_exist:
+				self.holiday_days += current_week_holiday
 
-			if (
-				payroll_settings.payroll_based_on == "Attendance"
-				and consider_unmarked_attendance_as == "Absent"
-			):
-				unmarked_days = self.get_unmarked_days(
-					payroll_settings.include_holidays_in_total_working_days, holidays
-				)
-				half_absent_days = self.get_half_absent_days(
-					payroll_settings.include_holidays_in_total_working_days,
-					consider_marked_attendance_on_holidays,
-					holidays,
-				)
-				self.absent_days += (
-					unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
-				)  # will be treated as absent
-				self.payment_days -= unmarked_days + half_absent_days * daily_wages_fraction_for_half_day
-		else:
-			self.payment_days = 0
-	
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
 		query = (
@@ -162,11 +104,26 @@ class SalarySlip(SalarySlip):
 				& (Attendance.employee == self.employee)
 				& (Attendance.docstatus == 1)
 				& (Attendance.status == "Present")
-				& (Attendance.out_time.notnull())
+				& (Attendance.out_time.isnull())
 			)
 		)
 
 		return query.run()[0][0]
+	
+	def _get_attendance_days(self) -> float:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Attendance.attendance_date)
+			.where(
+				(Attendance.attendance_date.between(self.start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.status.isin(["Present"]))
+			)
+		)
+
+		return query.run()
 
 	# tambahan chandra
 	def _get_not_out_attendance_days_in_list(self) -> list:
@@ -476,7 +433,15 @@ class SalarySlip(SalarySlip):
 		data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
 			**filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
 
-		data.ump_harian = default_data.ump_harian = company.custom_ump_harian
+		# data.total_hari = default_data.total_hari = 30 if data.employment_type == "KARYAWAN TETAP" else 25
+		# supaya tidak hardcode, total hari dari employment_type
+		data.total_hari = default_data.total_hari = frappe.utils.flt(frappe.get_value("Employment Type", data.employment_type, "hari_ump"))
+
+		# data.ump_harian = default_data.ump_harian = company.custom_ump_harian #flt(company.ump/data.total_hari)
+
+		# ump_harian yang dari company bulanan dibagi dengan employement type hari - chandra
+		# data.ump_harian = default_data.ump_harian = company.custom_ump_harian #flt(company.ump/data.total_hari)
+		data.ump_harian = default_data.ump_harian = frappe.utils.flt(company.umr_bulanan) / data.total_hari #flt(company.ump/data.total_hari)
 
 		return data, default_data
 

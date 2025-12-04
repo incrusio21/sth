@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:42:26.355494",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -15,6 +16,7 @@
   "ll",
   "column_break_asvx",
   "company",
+  "berlaku_selamanya",
   "mb",
   "status",
   "last_updt",
@@ -29,7 +31,8 @@
   "column_break_mtqo",
   "tsu",
   "tts",
-  "tps"
+  "tps",
+  "nomor_nib"
  ],
  "fields": [
   {
@@ -124,7 +127,6 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "No. Peta Pendaftaran",
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -133,7 +135,6 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "No. Pengecekan Sertifikat",
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -149,8 +150,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Tanggal Pengecekan Sertifikat",
-   "reqd": 1
+   "label": "Tanggal Pengecekan Sertifikat"
   },
   {
    "fieldname": "nh",
@@ -162,12 +162,13 @@
    "unique": 1
   },
   {
+   "depends_on": "eval:doc.berlaku_selamanya == 0",
    "fieldname": "mb",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Masa Berlaku",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0"
   },
   {
    "fieldname": "last_updt",
@@ -183,12 +184,26 @@
   {
    "fieldname": "column_break_mtqo",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "berlaku_selamanya",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Berlaku Selamanya"
+  },
+  {
+   "fieldname": "nomor_nib",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Nomor NIB"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-03 19:30:19.303474",
+ "modified": "2025-12-04 15:47:06.989180",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
