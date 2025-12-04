@@ -164,6 +164,9 @@ doc_events = {
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
 	# }
+	"Delivery Note": {
+		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
+	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
 	},
@@ -205,11 +208,14 @@ doc_events = {
 		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
 	},
 	"Quotation": {
-		"validate": "sth.sales_sth.custom.quotation.calculate_ongkos_angkut",
+		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Sales Order": {
-		"validate": "sth.sales_sth.custom.sales_order.check_dn_pending",
+		"validate": ["sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],
 		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
+	},
+	"Sales Invoice": {
+		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
   	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"

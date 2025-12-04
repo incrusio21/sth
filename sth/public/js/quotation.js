@@ -11,6 +11,8 @@ frappe.ui.form.on('Quotation', {
     
     refresh: function(frm) {
         set_komoditi_filter(frm);
+        // set read-only valid_till
+        frm.set_df_property('valid_till', 'hidden', 1);
     },
 
     komoditi: function(frm) {
