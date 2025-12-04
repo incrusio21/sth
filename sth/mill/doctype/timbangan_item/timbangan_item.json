@@ -45,7 +45,8 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Bruto",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -53,7 +54,8 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Tara",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_nlub",
@@ -65,17 +67,18 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Netto",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-02 10:49:19.342998",
+ "modified": "2025-12-04 16:28:34.740814",
  "modified_by": "Administrator",
  "module": "Mill",
- "name": "Timbangan Items",
+ "name": "Timbangan Item",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

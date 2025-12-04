@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class TimbanganItems(Document):
+class TimbanganItem(Document):
 	pass
