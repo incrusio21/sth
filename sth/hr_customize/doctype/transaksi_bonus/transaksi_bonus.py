@@ -142,7 +142,8 @@ class TransaksiBonus(AccountsController):
 
 		if kriteria == "Satuan Hasil":
 			company = frappe.get_doc("Company", company)
-			salary = flt(company.custom_ump_harian * 30)
+			salary = company.umr_bulanan
+			# salary = flt(company.custom_ump_harian * 30)
 		elif kriteria == "Non Satuan Hasil":
 			latest_ssa = frappe.db.get_value(
 				"Salary Structure Assignment",

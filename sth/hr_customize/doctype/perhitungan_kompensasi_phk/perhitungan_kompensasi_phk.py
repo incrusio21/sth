@@ -32,10 +32,12 @@ class PerhitunganKompensasiPHK(AccountsController):
 		grand_total = 0
 		base = 0
 		if employee.grade == "NON STAF" and employee.custom_kriteria == "Satuan Hasil":
-			ump_harian = frappe.db.get_value("Company", self.company, "custom_ump_harian")
-			l_date = getdate(self.l_date)
-			days_in_month = calendar.monthrange(l_date.year, l_date.month)[1]
-			base = ump_harian * days_in_month
+			# ump_harian = frappe.db.get_value("Company", self.company, "custom_ump_harian")
+			# l_date = getdate(self.l_date)
+			# days_in_month = calendar.monthrange(l_date.year, l_date.month)[1]
+			# base = ump_harian * days_in_month
+			umr_bulanan = frappe.db.get_value("Company", self.company, "umr_bulanan")
+			base = umr_bulanan
 		else:
 			base = frappe.db.get_value("Salary Structure Assignment", self.ssa, "base")
 			

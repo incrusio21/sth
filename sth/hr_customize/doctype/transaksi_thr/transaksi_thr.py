@@ -210,7 +210,8 @@ class TransaksiTHR(AccountsController):
 		# ambil konfigurasi company
 		company = frappe.get_doc("Company", self.company)
 		uang_daging = company.custom_uang_daging or 0
-		umr = (company.custom_ump_harian or 0) * 30
+		# umr = (company.custom_ump_harian or 0) * 30
+		umr = (company.umr_bulanan or 0) * 30
 
 		# ambil seluruh THR Rule sekali
 		thr_rules = frappe.get_all(
