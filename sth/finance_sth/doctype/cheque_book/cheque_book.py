@@ -200,6 +200,7 @@ def append_cheque_history(cheque_number):
 		"cheque_amount": cheque_number.cheque_amount,
 		"note": cheque_number.note,
 		"issue_date": cheque_number.issue_date,
+		"upload_cheque_book": cheque_number.upload_cheque_book,
 	})
 	cheque_book.db_update_all()
 

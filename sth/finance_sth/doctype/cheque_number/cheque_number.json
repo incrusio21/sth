@@ -17,7 +17,8 @@
   "column_break_lckh",
   "issue_date",
   "cheque_amount",
-  "note"
+  "note",
+  "upload_cheque_book"
  ],
  "fields": [
   {
@@ -99,13 +100,19 @@
    "label": "Bank Account",
    "options": "Bank Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "upload_cheque_book",
+   "fieldtype": "Attach",
+   "label": "Upload Cheque Book",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-01 13:08:31.410490",
+ "modified": "2025-12-04 13:13:23.117049",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Cheque Number",
