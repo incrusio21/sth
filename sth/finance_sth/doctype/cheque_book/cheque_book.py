@@ -185,15 +185,14 @@ def change_cheque_number(cheque_usage_history, cheque_number):
 		old_cheque_number.note= None
 		old_cheque_number.issue_date= None
 		old_cheque_number.cheque_amount= 0
-		old_cheque_number.bank_account= None
 		old_cheque_number.db_update()
 		values.update({"cheque_no": cheque_number.name})
 
 	frappe.db.set_value("Cheque Usage History", cheque_usage_history.name, values)
 
 def append_cheque_history(cheque_number):
-    cheque_book = frappe.get_doc("Cheque Book", cheque_number.cheque_book)
-    cheque_book.append("table_ezdi", {
+	cheque_book = frappe.get_doc("Cheque Book", cheque_number.cheque_book)
+	cheque_book.append("table_ezdi", {
 		"cheque_no": cheque_number.name,
 		"reference_document": cheque_number.reference_doc,
 		"reference_name": cheque_number.reference_name,
@@ -202,4 +201,32 @@ def append_cheque_history(cheque_number):
 		"note": cheque_number.note,
 		"issue_date": cheque_number.issue_date,
 	})
-    cheque_book.db_update_all()
+	cheque_book.db_update_all()
+
+def delete_cheque_history(cheque_number): 
+	cn_doc = frappe.get_doc("Cheque Number", cheque_number) 
+	cb_doc = frappe.get_doc("Cheque Book", cn_doc.cheque_book) 
+	for row in cb_doc.table_ezdi: 
+		if row.cheque_no != cheque_number: 
+			continue 
+		row.docstatus = 0 
+		row.db_update_all() 
+		row.delete() 
+	
+	idx = 0
+	
+	cn_doc.note= None,
+	cn_doc.cheque_amount= 0,
+	cn_doc.issue_date= None,
+	cn_doc.reference_doc= None,
+	cn_doc.reference_name= None,
+	cn_doc.status= None
+	cn_doc.db_update_all()
+	
+	
+	cb_doc.update_total_remaining()	
+	for row in cb_doc.table_ezdi: 
+		idx+=1 
+		row.idx = idx 
+		row.db_update_all() 
+		cb_doc.db_update_all()

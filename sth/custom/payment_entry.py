@@ -1,7 +1,7 @@
 import frappe
 
 from sth.finance_sth.doctype.cheque_number.cheque_number import update_cheque_number_pe
-from sth.finance_sth.doctype.cheque_book.cheque_book import update_cheque_book_pe
+from sth.finance_sth.doctype.cheque_book.cheque_book import update_cheque_book_pe, delete_cheque_history
 
 def cek_kriteria(self,method):
 	if self.references:
@@ -44,13 +44,17 @@ def fill_kriteria(self,doctype, docname):
 			})
 
 def update_check_book(self, method):
-    if self.mode_of_payment != "Cheque" and not self.custom_cheque_number:
-        return
-    status = {
+	if self.mode_of_payment != "Cheque" and not self.custom_cheque_number:
+		return
+	if method == "on_trash":
+		delete_cheque_history(self.custom_cheque_number)
+		return
+
+	status = {
 		"on_submit": "Used",
 		"on_cancel": "Void"
 	}
-    data = frappe._dict({
+	data = frappe._dict({
 		"reference_doc": self.doctype,
 		"reference_name": self.name,
 		"status": status.get(method, "Draft"),
@@ -58,6 +62,6 @@ def update_check_book(self, method):
 		"issue_date": self.posting_date,
 		"note": self.remarks
 	})
-    
-    cheque_number = update_cheque_number_pe(self.custom_cheque_number, data)
-    update_cheque_book_pe(cheque_number)
+	
+	cheque_number = update_cheque_number_pe(self.custom_cheque_number, data)
+	update_cheque_book_pe(cheque_number)
