@@ -43,9 +43,14 @@
   "table_aodn",
   "more_information_tab",
   "denda",
+  "grand_total",
+  "outstanding_amount",
   "column_break_ggqp",
   "status_document",
-  "keterangan"
+  "keterangan",
+  "accounting_details_section",
+  "debit_to",
+  "credit_to"
  ],
  "fields": [
   {
@@ -121,7 +126,7 @@
   },
   {
    "fieldname": "no_bilyet",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "No Bilyet",
@@ -292,6 +297,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Bunga Per Hari",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -350,13 +356,45 @@
    "label": "Bank",
    "options": "Bank",
    "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Total Nilai Penerimaan Bunga Seharusnya",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-03 09:33:45.418122",
+ "modified": "2025-12-04 16:32:06.155310",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
@@ -380,5 +418,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
