@@ -6,3 +6,8 @@
 
 // 	},
 // });
+
+frappe.ui.form.on("Timbangan Item", {
+
+});
+

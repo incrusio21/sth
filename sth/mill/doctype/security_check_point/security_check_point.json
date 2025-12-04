@@ -13,6 +13,9 @@
   "set_posting_time",
   "column_break_mtrn",
   "transaction_type",
+  "receive_type",
+  "dispatch_type",
+  "purchase_order",
   "vehicle_entry_time",
   "vehicle_exit_time",
   "qr_code_scan",
@@ -25,7 +28,9 @@
   "driver_image",
   "vehicle_details_section",
   "rear_view_photo_column",
+  "transporter_name",
   "license_plate",
+  "vehicle_date",
   "front_image",
   "rear_image",
   "left_image",
@@ -43,10 +48,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "Q-.YY.MM.DD.-.###",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Vehicle Queue Number",
-   "options": "SCP-"
+   "options": "Q-.YY.MM.DD.-.###"
   },
   {
    "default": "Today",
@@ -73,29 +79,10 @@
    "label": "Edit Posting Date and Time"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Security Check Point",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Security Check Point",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "transaction_type",
    "fieldtype": "Select",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Transaction Type",
    "options": "Receive\nDispatch"
   },
@@ -113,6 +100,7 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "QR Code Scan",
+   "mandatory_depends_on": "eval:doc.receive_type != \"Purchase Order\"",
    "options": "Driver"
   },
   {
@@ -157,8 +145,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "License Plate",
-   "read_only": 1
+   "label": "License Plate"
   },
   {
    "fieldname": "column_break_dwkb",
@@ -202,6 +189,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "vehicle_exit_time",
    "fieldtype": "Time",
    "in_preview": 1,
@@ -249,13 +237,56 @@
    "fieldtype": "Attach",
    "hidden": 1,
    "label": "Right Image"
+  },
+  {
+   "depends_on": "eval:doc.receive_type == \"Purchase Order\"",
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "mandatory_depends_on": "eval:doc.receive_type == \"Purchase Order\"",
+   "options": "Purchase Order"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type == 'Receive'",
+   "fieldname": "receive_type",
+   "fieldtype": "Select",
+   "label": "Receive Type",
+   "options": "\nTBS Internal\nTBS Eksternal\nLain - Lain"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type == 'Dispatch'",
+   "fieldname": "dispatch_type",
+   "fieldtype": "Select",
+   "label": "Dispatch Type",
+   "options": "\nProduct\nBy Product\nLain - Lain"
+  },
+  {
+   "fetch_from": "qr_code_scan.transporter",
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "label": "Transporter Name"
+  },
+  {
+   "fieldname": "vehicle_date",
+   "fieldtype": "Date",
+   "label": "Vehicle Date"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Security Check Point",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-01 16:59:16.860862",
+ "modified": "2025-12-04 16:21:10.986598",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
