@@ -15,9 +15,9 @@ frappe.ui.form.on("Payment Entry", {
         frm.set_query('custom_cheque_number', () => {
             return {
                 filters: {
-                    reference_doc: null, 
-                    reference_name: null, 
-                    bank_account: frm.doc.bank_account 
+                    reference_doc: ["=", null], 
+                    reference_name: ["=", null], 
+                    bank_account: ["=", frm.doc.bank_account] 
                 }
             }
         })
@@ -36,6 +36,15 @@ frappe.ui.form.on("Payment Entry", {
                     docstatus: 1,
                     company: ["=", doc.company],
                     unit: doc.unit   
+                }
+            }
+        })
+
+        frm.set_query('bank_account', (doc) => {
+            return {
+                filters: {
+                    unit: ["=", doc.unit],
+                    company: ["=", doc.company],
                 }
             }
         })

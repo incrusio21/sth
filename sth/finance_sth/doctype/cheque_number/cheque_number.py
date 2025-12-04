@@ -16,7 +16,7 @@ def update_cheque_number_pe(cheque_number, data):
 	doc.cheque_amount = data.cheque_amount
 	doc.note = data.note
 	doc.issue_date = data.issue_date
-	doc.bank_account = data.bank_account
+	doc.upload_cheque_book = data.upload_cheque_book
 	doc.db_update_all()
 
 	return doc

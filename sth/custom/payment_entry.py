@@ -60,7 +60,8 @@ def update_check_book(self, method):
 		"status": status.get(method, "Draft"),
 		"cheque_amount": self.paid_amount,
 		"issue_date": self.posting_date,
-		"note": self.remarks
+		"note": self.remarks,
+		"upload_cheque_book": self.upload_cheque_book
 	})
 	
 	cheque_number = update_cheque_number_pe(self.custom_cheque_number, data)
