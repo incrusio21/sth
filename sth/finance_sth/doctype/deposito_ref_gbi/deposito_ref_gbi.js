@@ -1,7 +1,7 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Deposito", {
+// frappe.ui.form.on("Deposito Ref GBI", {
 // 	refresh(frm) {
 
 // 	},

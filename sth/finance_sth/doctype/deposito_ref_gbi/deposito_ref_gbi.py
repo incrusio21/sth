@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class Deposito(Document):
+class DepositoRefGBI(Document):
 	pass

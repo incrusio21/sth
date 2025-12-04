@@ -2,321 +2,142 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-10-28 15:27:51.159037",
+ "creation": "2025-12-04 22:18:36.419560",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_jncl",
-  "column_break_ihhw",
+  "section_break_crbn",
   "naming_series",
   "company",
-  "nama_bank",
   "bank",
-  "bank_coa",
-  "mata_uang",
-  "no_rekening",
-  "kategori_deposito",
-  "no_bilyet",
-  "nilai_deposito",
-  "column_break_xqwn",
-  "tanggal_valuta",
-  "tanggal_penempatan",
-  "periode_penempatan_bilyet",
-  "tanggal_jatuh_tempo_seharusnya",
-  "tanggal_jatuh_tempo_aktual",
-  "status_aro",
-  "perpanjang_aro",
-  "amended_from",
-  "bunga_tab",
-  "periode_bunga",
-  "tanggal_cair_pertama",
-  "bunga",
-  "pajak",
-  "persentase_pajak",
-  "column_break_jjwr",
-  "jaminan",
-  "total_hari",
-  "hari_per_tahun",
-  "bunga_per_hari",
-  "amount_bunga_per_hari",
-  "history_bunga_cair_tab",
-  "table_aodn",
+  "bilyet_number",
+  "value_date",
+  "maturity_date",
+  "jangka_waktu_bulan",
+  "interest",
+  "column_break_cbgg",
+  "deposit_amount",
+  "jenis_deposito",
+  "collateral_type",
+  "letter_of_guarantee",
+  "collateral_owner_name",
+  "posting_date",
+  "deposited_by",
+  "accounting_dimensions_section",
+  "cost_center",
   "more_information_tab",
-  "denda",
-  "grand_total",
-  "outstanding_amount",
-  "column_break_ggqp",
-  "status_document",
-  "keterangan",
   "accounting_details_section",
   "debit_to",
   "credit_to"
  ],
  "fields": [
   {
-   "fieldname": "section_break_jncl",
+   "fieldname": "section_break_crbn",
    "fieldtype": "Section Break",
-   "label": "Header"
-  },
-  {
-   "fieldname": "column_break_ihhw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "INVT-.MM.-.YYYY.-.#####"
+   "label": "Deposito Details"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "in_preview": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
   },
   {
-   "fieldname": "nama_bank",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Bank Account",
-   "options": "Bank Account"
-  },
-  {
-   "fetch_from": "nama_bank.account",
-   "fieldname": "bank_coa",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Bank COA",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "bank_coa.account_currency",
-   "fieldname": "mata_uang",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Mata Uang",
-   "options": "Currency",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "nama_bank.bank_account_no",
-   "fieldname": "no_rekening",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "No Rekening",
-   "length": 20,
-   "read_only": 1
-  },
-  {
-   "fieldname": "kategori_deposito",
+   "default": "DPST-",
+   "fieldname": "naming_series",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kategori Deposito",
-   "options": "Deposito Berjangka\nInvestasi Asuransi\nPiutang Promisory Note\nSimpanan Berjangka\nObligasi"
+   "label": "Naming Series",
+   "options": "\nDPST-",
+   "reqd": 1
   },
   {
-   "fieldname": "no_bilyet",
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bilyet_number",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "in_preview": 1,
-   "label": "No Bilyet",
+   "label": "No. Bilyet",
    "reqd": 1
   },
   {
-   "fieldname": "nilai_deposito",
-   "fieldtype": "Currency",
-   "label": "Nilai Deposito",
+   "fieldname": "value_date",
+   "fieldtype": "Date",
+   "label": "Tanggal Valuta",
    "reqd": 1
   },
   {
-   "fieldname": "column_break_xqwn",
+   "fieldname": "maturity_date",
+   "fieldtype": "Date",
+   "label": "Tanggal jatuh tempo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jangka_waktu_bulan",
+   "fieldtype": "Int",
+   "label": "Jangka Waktu (Bulan)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Percent",
+   "label": "Suku Bunga (%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_cbgg",
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
-   "fieldname": "tanggal_valuta",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Valuta"
+   "fieldname": "deposit_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Deposito",
+   "reqd": 1
   },
   {
-   "default": "Today",
-   "fieldname": "tanggal_penempatan",
+   "fieldname": "jenis_deposito",
+   "fieldtype": "Select",
+   "label": "Jenis Deposito",
+   "options": "\nDeposito Berjangka(Non Automatic Roll Over)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "collateral_type",
+   "fieldtype": "Data",
+   "label": "Jenis Jaminan"
+  },
+  {
+   "fieldname": "letter_of_guarantee",
+   "fieldtype": "Data",
+   "label": "Surat jaminan"
+  },
+  {
+   "fieldname": "collateral_owner_name",
+   "fieldtype": "Link",
+   "label": "Nama Pemilik",
+   "options": "Company"
+  },
+  {
+   "fieldname": "posting_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
    "label": "Tanggal Penempatan",
    "reqd": 1
   },
   {
-   "fieldname": "periode_penempatan_bilyet",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Periode Penempatan Bilyet",
-   "options": "\n1 Bulan\n3 Bulan\n6 Bulan\n1 Tahun\n3 Tahun\n5 Tahun",
-   "reqd": 1
-  },
-  {
-   "fieldname": "tanggal_jatuh_tempo_seharusnya",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Jatuh Tempo Seharusnya",
-   "read_only": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "tanggal_jatuh_tempo_aktual",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Jatuh Tempo Aktual"
-  },
-  {
-   "fieldname": "status_aro",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Status ARO",
-   "options": "Non ARO\nARO",
-   "reqd": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "depends_on": "eval:doc.status_aro == \"ARO\"",
-   "description": "Perpanjang Aro H+?, e.g: H+1 = 1, H+0 = 0",
-   "fieldname": "perpanjang_aro",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Perpanjang ARO",
-   "mandatory_depends_on": "eval:doc.status_aro == \"ARO\""
-  },
-  {
-   "fieldname": "amended_from",
+   "fieldname": "deposited_by",
    "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Deposito",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "bunga_tab",
-   "fieldtype": "Tab Break",
-   "label": "Bunga"
-  },
-  {
-   "fieldname": "periode_bunga",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Periode Bunga",
-   "options": "\nDaily\nMonthly\nYearly"
-  },
-  {
-   "default": "Today",
-   "fieldname": "tanggal_cair_pertama",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Cair Pertama"
-  },
-  {
-   "description": "Bunga dalam % untuk satu periode ",
-   "fieldname": "bunga",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Bunga"
-  },
-  {
-   "fieldname": "pajak",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Pajak"
-  },
-  {
-   "description": "Pajak dalam % untuk satu periode",
-   "fetch_from": "pajak.persentase",
-   "fieldname": "persentase_pajak",
-   "fieldtype": "Percent",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Persentase Pajak",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_jjwr",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "jaminan",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Jaminan"
-  },
-  {
-   "default": "jumlah investasi dalam hari",
-   "fieldname": "total_hari",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Total Hari",
+   "label": "Disetor Oleh",
+   "options": "Company",
    "reqd": 1
-  },
-  {
-   "fetch_from": "bank.deposit_year_days",
-   "fieldname": "hari_per_tahun",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Hari per Tahun",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "bunga_per_hari",
-   "fieldtype": "Percent",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Bunga Per Hari",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amount_bunga_per_hari",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Amount Bunga Per Hari",
-   "read_only": 1
-  },
-  {
-   "fieldname": "history_bunga_cair_tab",
-   "fieldtype": "Tab Break",
-   "label": "History Bunga Cair"
-  },
-  {
-   "fieldname": "table_aodn",
-   "fieldtype": "Table",
-   "options": "Data Cair Deposito"
   },
   {
    "fieldname": "more_information_tab",
@@ -324,53 +145,6 @@
    "label": "More Information"
   },
   {
-   "fieldname": "denda",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Denda"
-  },
-  {
-   "fieldname": "column_break_ggqp",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status_document",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Status Document",
-   "options": "Draft\nBelum Cair\nBreak\nCair"
-  },
-  {
-   "fieldname": "keterangan",
-   "fieldtype": "Small Text",
-   "in_preview": 1,
-   "label": "Keterangan"
-  },
-  {
-   "fetch_from": "nama_bank.bank",
-   "fieldname": "bank",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Bank",
-   "options": "Bank",
-   "read_only": 1
-  },
-  {
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "label": "Total Nilai Penerimaan Bunga Seharusnya",
-   "read_only": 1
-  },
-  {
-   "fieldname": "outstanding_amount",
-   "fieldtype": "Currency",
-   "label": "Outstanding Amount",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
    "fieldname": "accounting_details_section",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
@@ -388,13 +162,25 @@
    "label": "Credit To",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 16:32:06.155310",
+ "modified": "2025-12-04 22:39:55.893911",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
