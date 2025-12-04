@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, get_first_day_of_week, get_last_day_of_week, get_start_of_week_index, flt, month_diff, now
+from frappe.utils import add_days, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -60,13 +60,15 @@ class SalarySlip(SalarySlip):
 
 		self.holiday_days = 0
 		week_start = week_end = None
+		actual_start, actual_end = getdate(self.actual_start_date), getdate(self.actual_end_date)
+
 		for h in holidays:
 			# jika tidak terdapat tanggal akhir atau 
 			# holidays sudah tidak masuk dalam minggu terpilih
-			if not week_end or h > week_start:
+			if not week_end or h > week_end:
 				# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
-				week_start = max(get_first_day_of_week(h), self.actual_start_date)
-				week_end = min(get_last_day_of_week(h), self.actual_end_date)
+				week_start = max(get_first_day_of_week(h), actual_start)
+				week_end = min(get_last_day_of_week(h), actual_end)
 			else:
 				# skip krn holidays sudah di hitung untuk minggu ini
 				continue
@@ -83,7 +85,7 @@ class SalarySlip(SalarySlip):
 					allWeekOff = False
 				else:
 					current_week_holiday += 1
-
+				
 				if current_date in list_attendance:
 					att_exist = True
 				
@@ -121,9 +123,9 @@ class SalarySlip(SalarySlip):
 				& (Attendance.docstatus == 1)
 				& (Attendance.status.isin(["Present"]))
 			)
-		)
+		).run()
 
-		return query.run()
+		return query[0] if query else []
 
 	# tambahan chandra
 	def _get_not_out_attendance_days_in_list(self) -> list:
@@ -477,6 +479,6 @@ def olah_holiday(holidays, attendance):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00073/00001")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00072/00001")
 	doc.get_working_days_details()	
 
