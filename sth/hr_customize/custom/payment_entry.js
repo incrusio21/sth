@@ -39,6 +39,15 @@ frappe.ui.form.on("Payment Entry", {
                 }
             }
         })
+
+        frm.set_query('bank_account', (doc) => {
+            return {
+                filters: {
+                    unit: ["=", doc.unit],
+                    company: ["=", doc.company],
+                }
+            }
+        })
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
