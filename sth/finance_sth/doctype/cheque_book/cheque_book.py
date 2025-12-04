@@ -184,6 +184,7 @@ def change_cheque_number(cheque_usage_history, cheque_number):
 		old_cheque_number.status= None
 		old_cheque_number.note= None
 		old_cheque_number.issue_date= None
+		old_cheque_number.upload_cheque_book= None
 		old_cheque_number.cheque_amount= 0
 		old_cheque_number.db_update()
 		values.update({"cheque_no": cheque_number.name})
@@ -222,6 +223,7 @@ def delete_cheque_history(cheque_number):
 	cn_doc.reference_doc= None,
 	cn_doc.reference_name= None,
 	cn_doc.status= None
+	cn_doc.upload_cheque_book = None
 	cn_doc.db_update_all()
 	
 	
