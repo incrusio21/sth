@@ -46,6 +46,7 @@ class TransaksiTHR(AccountsController):
 
 		doc.voucher_type = self.doctype
 		doc.voucher_no = self.name
+		doc.voucher_detail_no = emp.name
 		doc.component_type = "THR"
 
 		doc.save()

@@ -17,7 +17,7 @@ class EmployeePaymentLog(Document):
             self.status = "Approved"
 
     def on_trash(self):
-        self.remove_document()
+        # self.remove_document()
         self.document_already_paid()
     
     def remove_document(self):
@@ -78,11 +78,27 @@ doctype_map = {
         {
             "target_link": "employee_payment_log",
             "component_type": "Bonus",
+        },
+        {
+            "target_link": "employee_payment_log_earning_bonus",
+            "component_type": "Bonus",
+        },
+        {
+            "target_link": "employee_payment_log_deduction_bonus",
+            "component_type": "Bonus",
         }
     ],
     "Transaksi THR": [
         {
             "target_link": "employee_payment_log",
+            "component_type": "THR",
+        },
+        {
+            "target_link": "employee_payment_log_earning_thr",
+            "component_type": "THR",
+        },
+        {
+            "target_link": "employee_payment_log_deduction_thr",
             "component_type": "THR",
         }
     ],
@@ -117,6 +133,22 @@ def patch_every_emp():
 
                         if frappe.db.exists("Employee Payment Log", epl):
                             frappe.set_value("Employee Payment Log", epl, {
+                                "voucher_type": doc.doctype,
+                                "voucher_no": doc.name,
+                                "voucher_detail_no": hk.name,
+                                "component_type": log_updater["component_type"],
+                            })
+
+                            hk.db_set(log_updater["target_link"], None)
+            elif doc.get("table_employee"):
+                for hk in doc.table_employee:
+                    for log_updater in epl_log:
+                        epl = hk.get(log_updater["target_link"])
+                        if not epl:
+                            continue
+
+                        if frappe.db.exists("Employee Payment Log", epl):
+                            frappe.db.set_value("Employee Payment Log", epl, {
                                 "voucher_type": doc.doctype,
                                 "voucher_no": doc.name,
                                 "voucher_detail_no": hk.name,
