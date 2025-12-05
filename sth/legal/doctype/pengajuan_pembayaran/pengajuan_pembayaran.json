@@ -8,19 +8,18 @@
  "field_order": [
   "section_break_m4ut",
   "naming_series",
+  "posting_date",
   "unit",
-  "kategori",
   "pemesan",
   "location",
-  "no_rek",
-  "atas_nama_penerima",
   "employee",
   "bukti_pembelian",
   "column_break_nuan",
   "company",
-  "posting_date",
-  "mode_of_payment",
   "expense_account",
+  "bank_account",
+  "no_rek",
+  "atas_nama_penerima",
   "tujuan",
   "amended_from",
   "accounting_dimension_section",
@@ -94,19 +93,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "kategori",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kategori",
-   "reqd": 1
-  },
-  {
    "fieldname": "pemesan",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Pemesanan",
+   "label": "Nama Pemesan",
    "reqd": 1
   },
   {
@@ -121,7 +112,7 @@
   {
    "fieldname": "bukti_pembelian",
    "fieldtype": "Attach",
-   "label": "Bukti Pembelian"
+   "label": "Upload Document"
   },
   {
    "fieldname": "company",
@@ -137,13 +128,6 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Posting Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "mode_of_payment",
-   "fieldtype": "Link",
-   "label": "Mode of Payment",
-   "options": "Mode of Payment",
    "reqd": 1
   },
   {
@@ -212,7 +196,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Biaya",
+   "label": "Kategori",
    "options": "Account",
    "reqd": 1
   },
@@ -227,13 +211,20 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 12:31:35.437771",
+ "modified": "2025-12-04 16:45:12.804444",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

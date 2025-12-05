@@ -3,21 +3,23 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:59:22.043570",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_1eew",
   "naming_series",
+  "tipe_surat",
+  "jenis_surat",
+  "nomor_surat_external",
   "tanggal_surat",
   "company",
   "unit",
-  "tujuan",
   "lks",
-  "ts",
-  "js",
-  "dpt",
   "column_break_yawx",
-  "status",
+  "status_dokumen",
+  "dpt",
+  "tujuan",
   "date_received",
   "ringkasan",
   "fs",
@@ -28,13 +30,6 @@
    "fieldname": "section_break_1eew",
    "fieldtype": "Section Break",
    "label": "Header"
-  },
-  {
-   "fieldname": "js",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Jenis Surat"
   },
   {
    "fieldname": "column_break_yawx",
@@ -85,13 +80,6 @@
    "label": "Lokasi"
   },
   {
-   "fieldname": "ts",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tipe Surat"
-  },
-  {
    "fieldname": "dpt",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -103,11 +91,6 @@
    "fieldtype": "Data",
    "label": "Tujuan",
    "reqd": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status"
   },
   {
    "fieldname": "ringkasan",
@@ -124,14 +107,40 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "Series",
+   "label": "Nomor Surat Internal",
    "options": "SM-"
+  },
+  {
+   "depends_on": "eval:doc.jenis_surat == \"External\"",
+   "fieldname": "nomor_surat_external",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Surat External"
+  },
+  {
+   "fieldname": "tipe_surat",
+   "fieldtype": "Select",
+   "label": "Tipe Surat",
+   "options": "Masuk\nKeluar"
+  },
+  {
+   "fieldname": "jenis_surat",
+   "fieldtype": "Select",
+   "label": "Jenis Surat",
+   "options": "Internal\nExternal"
+  },
+  {
+   "fieldname": "status_dokumen",
+   "fieldtype": "Select",
+   "label": "Status Dokumen",
+   "options": "Sudah Upload\nBelum Upload"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-25 15:13:41.726501",
+ "modified": "2025-12-04 16:50:51.518273",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Surat Menyurat",

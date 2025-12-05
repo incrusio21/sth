@@ -49,10 +49,12 @@ doctype_js = {
 	"Exit Interview": "public/js/exit_interview.js",
     "Material Request": "public/js/material_request.js",
     "Currency Exchange": "public/js/currency_exchange.js",
+    "Request for Quotation" : "public/js/request_for_quotation.js"
 }
 
 doctype_list_js = {
-	"Request for Quotation" : "public/js/request_for_quotation_list.js"}
+	"Request for Quotation" : "public/js/request_for_quotation_list.js"
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

@@ -10,6 +10,7 @@
   "kp",
   "no_ijn",
   "tgl_trbt",
+  "berlaku_selamanya",
   "tgl_akhir",
   "ym",
   "column_break_zkor",
@@ -57,12 +58,13 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.berlaku_selamanya == 0",
    "fieldname": "tgl_akhir",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Tanggal Berakhir",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0"
   },
   {
    "fieldname": "ym",
@@ -121,13 +123,21 @@
    "fieldname": "note",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "default": "0",
+   "fieldname": "berlaku_selamanya",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Berlaku Selamanya"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-04 13:39:23.567396",
+ "modified": "2025-12-04 10:19:49.204194",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Detail Informasi Dokumen Perijinan",

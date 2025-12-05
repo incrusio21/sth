@@ -3,14 +3,16 @@
  "allow_rename": 1,
  "autoname": "format:DP-{#####}",
  "creation": "2025-09-10 13:36:01.755721",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_j2oz",
   "company",
+  "column_break_ilyf",
+  "amended_from",
   "informasi_perijinan_tab",
-  "table_yavp",
-  "amended_from"
+  "details"
  ],
  "fields": [
   {
@@ -36,11 +38,6 @@
    "label": "Informasi Perijinan"
   },
   {
-   "fieldname": "table_yavp",
-   "fieldtype": "Table",
-   "options": "Detail Informasi Dokumen Perijinan"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -49,12 +46,22 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_ilyf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Detail Informasi Dokumen Perijinan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 09:21:28.425437",
+ "modified": "2025-12-04 10:18:26.552691",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",
