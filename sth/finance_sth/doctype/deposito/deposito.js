@@ -1,10 +1,18 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
+frappe.provide('sth.finance_sth');
+sth.finance_sth.Deposito = class Deposito extends sth.plantation.AccountsController {
+    refresh() {
+        this.show_general_ledger()
+    }
+}
+
+cur_frm.script_manager.make(sth.finance_sth.Deposito);
 
 frappe.ui.form.on("Deposito", {
 	refresh(frm) {
         filterBankAccount(frm)
-        filterCreditTo(frm)
+        filterAccount(frm)
 	},
     value_date(frm){
         calculateTenor(frm) 
@@ -74,11 +82,20 @@ function calculateDeposito(frm) {
     frm.refresh_field("outstanding_amount")
 }
 
-function filterCreditTo(frm) {
-    frm.set_query("debit_to", () => {
+function filterAccount(frm) {
+    frm.set_query("debit_to", (doc) => {
         return {
             filters: {
-                account_type: "Receivable"
+                account_type: "Receivable",
+                company: doc.company
+            }
+        }
+    })
+    frm.set_query("expense_account", (doc) => {
+        return {
+            filters: {
+                account_type: ["!=","Receivable"],
+                company: doc.company
             }
         }
     })
