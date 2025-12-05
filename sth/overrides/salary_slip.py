@@ -426,7 +426,18 @@ class SalarySlip(SalarySlip):
 
 		# ump_harian yang dari company bulanan dibagi dengan employement type hari - chandra
 		# data.ump_harian = default_data.ump_harian = company.custom_ump_harian #flt(company.ump/data.total_hari)
+
 		data.ump_harian = default_data.ump_harian = frappe.utils.flt(company.ump_bulanan) / data.total_hari #flt(company.ump/data.total_hari)
+		
+		custom_kriteria = frappe.get_value("Employee",self.employee,"custom_kriteria")
+		
+		if custom_kriteria == "Satuan Hasil":
+			data.bpjs_amount = default_data.bpjs_amount = frappe.utils.flt(company.ump_bulanan)
+		elif custom_kriteria == "Non Satuan Hasil":
+			data.bpjs_amount = default_data.bpjs_amount = data.ump_harian * data.payment_days
+
+		# frappe.throw(str(data.bpjs_amount))
+
 		# frappe.throw(str(data.ump_harian))
 		return data, default_data
 
