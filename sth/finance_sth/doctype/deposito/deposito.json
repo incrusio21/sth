@@ -43,7 +43,7 @@
   "payment",
   "accounting_details_section",
   "debit_to",
-  "credit_to",
+  "expense_account",
   "amended_from"
  ],
  "fields": [
@@ -162,13 +162,6 @@
    "fieldname": "debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "credit_to",
-   "fieldtype": "Link",
-   "label": "Credit To",
    "options": "Account",
    "reqd": 1
   },
@@ -294,13 +287,20 @@
    "fieldtype": "Int",
    "label": "Hari dalam 1 Tahun",
    "read_only": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-05 13:41:15.608976",
+ "modified": "2025-12-05 14:45:33.410600",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

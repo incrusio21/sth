@@ -11,7 +11,7 @@ class Deposito(AccountsController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._expense_account = "expense_account"
-		self._expense_account = "expense_account"
+		self._party_account_field = "debit_to"
 
 	def validate(self):
 		self.calculate_deposito()
