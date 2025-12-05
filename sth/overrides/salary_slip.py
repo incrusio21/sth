@@ -112,7 +112,7 @@ class SalarySlip(SalarySlip):
 
 		return query.run()[0][0]
 	
-	def _get_attendance_days(self) -> float:
+	def _get_attendance_days(self) -> list:
 		Attendance = frappe.qb.DocType("Attendance")
 		query = (
 			frappe.qb.from_(Attendance)
@@ -125,24 +125,7 @@ class SalarySlip(SalarySlip):
 			)
 		).run()
 
-		return query[0] if query else []
-
-	# tambahan chandra
-	def _get_not_out_attendance_days_in_list(self) -> list:
-		Attendance = frappe.qb.DocType("Attendance")
-		query = (
-			frappe.qb.from_(Attendance)
-			.select(Attendance.attendance_date)
-			.where(
-				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
-				& (Attendance.employee == self.employee)
-				& (Attendance.docstatus == 1)
-				& (Attendance.status == "Present")
-			)
-		)
-
-		result = query.run()
-		return [row[0] for row in result]
+		return [row[0] for row in query]
 	
 	def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
 		# agar payment log selalu generate ulang
@@ -444,7 +427,7 @@ class SalarySlip(SalarySlip):
 		# ump_harian yang dari company bulanan dibagi dengan employement type hari - chandra
 		# data.ump_harian = default_data.ump_harian = company.custom_ump_harian #flt(company.ump/data.total_hari)
 		data.ump_harian = default_data.ump_harian = frappe.utils.flt(company.ump_bulanan) / data.total_hari #flt(company.ump/data.total_hari)
-
+		# frappe.throw(str(data.ump_harian))
 		return data, default_data
 
 @frappe.whitelist()
@@ -479,6 +462,6 @@ def olah_holiday(holidays, attendance):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00072/00001")
-	doc.get_working_days_details()	
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00075/00001")
+	doc.calculate_holidays()	
 
