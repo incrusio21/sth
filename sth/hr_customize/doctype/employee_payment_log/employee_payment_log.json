@@ -15,6 +15,10 @@
   "is_paid",
   "section_break_rfin",
   "column_break_rhjm",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "component_type",
   "column_break_uorb",
   "amount",
   "reference_tab",
@@ -143,13 +147,39 @@
    "in_list_view": 1,
    "label": "Type",
    "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "component_type",
+   "fieldtype": "Data",
+   "label": "Component Type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-04 11:21:03.130699",
+ "modified": "2025-12-04 16:25:44.977014",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Payment Log",

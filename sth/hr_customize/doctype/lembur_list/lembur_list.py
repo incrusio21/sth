@@ -253,10 +253,7 @@ class LemburList(Document):
 		self.create_or_update_payment_log()
 
 	def create_or_update_payment_log(self):
-		if target_key := self.get("employee_payment_log"):
-			doc = frappe.get_doc("Employee Payment Log", target_key)
-		else:
-			doc = frappe.new_doc("Employee Payment Log")
+		doc = frappe.new_doc("Employee Payment Log")
 
 		doc.employee = self.employee
 		doc.company = self.company
@@ -266,9 +263,12 @@ class LemburList(Document):
 		doc.amount = self.overtime_amount
 
 		doc.salary_component = self.get("salary_component")
-		doc.save()
 
-		self.db_set("employee_payment_log", doc.name)
+		doc.voucher_type = self.doctype
+		doc.voucher_no = self.name
+		doc.component_type = "Lembur"
+
+		doc.save()
 
 	def before_cancel(self):
 		for d in self.details:
@@ -278,16 +278,16 @@ class LemburList(Document):
 		self.remove_employee_payment_log()
 
 	def remove_employee_payment_log(self):
-		value = self.get("employee_payment_log")
-		if not value:
-			return
-		
-		self.db_set("employee_payment_log", "")
-		frappe.delete_doc("Employee Payment Log", value)
+		for epl in frappe.get_all(
+			"Employee Payment Log", 
+			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+			pluck="name"
+		):
+			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def employee_sellected_staff_query(
+def employee_selected_staff_query(
 	doctype,
 	txt,
 	searchfield,

@@ -14,7 +14,7 @@ class PlantationController(AccountsController):
         self.skip_table_amount = []
         self.skip_calculate_table = []
         self.skip_fieldname_amount = ["outstanding_amount"]
-        self.kegiatan_fetch_fieldname = []
+        self.kegiatan_fetch_fieldname = ["uom"]
         self.kegiatan_fetch_if_empty_fieldname = []
 
     def validate(self):

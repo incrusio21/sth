@@ -22,7 +22,8 @@ sth.plantation.setup_bkm_controller = function() {
                     // me.get_rkh_data()
                 });
             }
-
+            
+            // calculate grand total lagi jika field berubah
             for (const fieldname of this.hasil_kerja_update_field) {
                 frappe.ui.form.on(doc.doctype, fieldname, function (doc, cdt, cdn) {
                     if(fieldname == "rupiah_basis"){

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.exceptions import DoesNotExistError
 from frappe.query_builder.functions import Sum
 
 from frappe.utils import get_link_to_form
@@ -28,10 +29,10 @@ class BukuKerjaMandorController(PlantationController):
         
         self.payment_log_updater = [
             {
-                "target_link": "employee_payment_log",
                 "target_amount": "amount",
                 "target_account": "kegiatan_account",
                 "target_salary_component": "salary_component",
+                "component_type": "Upah",
                 "hari_kerja": True,
                 "removed_if_zero": False,
             }
@@ -119,13 +120,17 @@ class BukuKerjaMandorController(PlantationController):
             for log_updater in self.payment_log_updater:
                 is_new = False
                 amount = emp.get(log_updater["target_amount"])
-                if target_key := emp.get(log_updater["target_link"]):
-                    doc = frappe.get_doc("Employee Payment Log", target_key)
-                else:
+                try:
+                    doc = frappe.get_last_doc("Employee Payment Log", {
+                        "voucher_type": self.doctype,
+                        "voucher_no": self.name,
+                        "voucher_detail_no": emp.name,
+                        "component_type": log_updater["component_type"]
+                    })
+                except DoesNotExistError:
                     is_new = True
                     doc = frappe.new_doc("Employee Payment Log")
                 
-                detail_name = ""
                 # jika ada nilai atau kosong tapi tidak di hapus 
                 if amount or not log_updater.get("removed_if_zero"):
                     doc.employee = emp.employee
@@ -138,6 +143,12 @@ class BukuKerjaMandorController(PlantationController):
                     doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
                     doc.amount = amount
 
+                    # details
+                    doc.voucher_type = self.doctype
+                    doc.voucher_no = self.name
+                    doc.voucher_detail_no = emp.name
+                    doc.component_type = log_updater["component_type"]
+
                     doc.salary_component = self.get(log_updater["target_salary_component"])
                     doc.against_salary_component = self.get("against_salary_component")
 
@@ -145,15 +156,11 @@ class BukuKerjaMandorController(PlantationController):
                         doc.account = self.get(log_updater["target_account"])
 
                     doc.save()
-
-                    detail_name = doc.name
                 else:
                     # removed jika nilai kosong dan bukan document baru
                     if not is_new:
                         removed_epl.append(doc)
                 
-                emp.set(log_updater["target_link"], detail_name)
-
         self.update_child_table("hasil_kerja")
 
         # hapus epl yang tidak digunakan
@@ -213,14 +220,12 @@ class BukuKerjaMandorController(PlantationController):
         # self.update_rkb_realization()
                 
     def delete_payment_log(self):
-        for emp in self.hasil_kerja:
-            for log_updater in self.payment_log_updater:
-                value = emp.get(log_updater["target_link"])
-                if not value:
-                    continue
-                
-                emp.db_set(log_updater["target_link"], "")
-                frappe.delete_doc("Employee Payment Log", value)
+        for epl in frappe.get_all(
+            "Employee Payment Log", 
+            filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+            pluck="name"
+        ):
+            frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
     def update_rkb_realization(self):
         frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()

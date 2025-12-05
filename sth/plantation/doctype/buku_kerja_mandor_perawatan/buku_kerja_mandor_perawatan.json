@@ -56,7 +56,6 @@
   "voucher_no",
   "column_break_ewzr",
   "stock_entry",
-  "journal_entry",
   "section_break_mptt",
   "salary_component",
   "column_break_egmp",
@@ -242,7 +241,6 @@
    "reqd": 1
   },
   {
-   "fetch_from": "kode_kegiatan.uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -327,13 +325,6 @@
    "in_list_view": 1,
    "label": "Kegiatan Account",
    "options": "Account",
-   "read_only": 1
-  },
-  {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
    "read_only": 1
   },
   {
@@ -424,7 +415,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 09:59:32.563810",
+ "modified": "2025-12-04 10:32:34.404965",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

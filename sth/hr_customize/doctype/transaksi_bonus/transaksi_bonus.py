@@ -39,19 +39,16 @@ class TransaksiBonus(AccountsController):
 		doc.company = self.company
 		doc.posting_date = self.posting_date
 		doc.payroll_date = self.posting_date
-		doc.hari_kerja = 0
-		doc.status = "Approved"
+		
 		doc.amount = self.grand_total
 		doc.salary_component = self.earning_bonus_component
 		doc.against_salary_component = self.deduction_bonus_component
-		doc.save()
 
-		frappe.db.set_value(
-			"Detail Transaksi Bonus",
-			emp.name,
-			"employee_payment_log",
-			doc.name
-		)
+		doc.voucher_type = self.doctype
+		doc.voucher_no = self.name
+		doc.component_type = "Bonus"
+
+		doc.save()
 
 	# def make_employee_payment_log(self, emp, log_type):
 	# 	hr_settings = frappe.get_single("Bonus and Allowance Settings")
@@ -97,23 +94,12 @@ class TransaksiBonus(AccountsController):
 	# 		)
 
 	def remove_employee_payment_log(self, table_employee):
-		for emp in table_employee:
-			for field in ["employee_payment_log"]:
-				frappe.db.set_value(
-					"Detail Transaksi Bonus",
-					emp.name,
-					field,
-					None
-				)
-				log_name = emp.get(field)
-				if log_name:
-					try:
-						log_doc = frappe.get_doc("Employee Payment Log", log_name)
-						if log_doc.docstatus == 1:
-							log_doc.cancel()
-						log_doc.delete(ignore_permissions=True)
-					except frappe.DoesNotExistError:
-						frappe.log_error(f"Payment Log {log_name} tidak ditemukan", "Cancel Transaksi Bonus")
+		for epl in frappe.get_all(
+			"Employee Payment Log", 
+			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+			pluck="name"
+		):
+			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
 	@frappe.whitelist()
 	def get_setup_bonus(self, name, kpi_value):

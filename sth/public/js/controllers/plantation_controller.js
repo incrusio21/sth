@@ -279,7 +279,6 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
     }
 
     fetch_data_kegiatan(kegiatan, company) {
-        console.log("tes")
         let me = this
         if (!me.kegiatan_fetch_fieldname) return
 

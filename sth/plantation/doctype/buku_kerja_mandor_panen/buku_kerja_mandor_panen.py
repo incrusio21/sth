@@ -26,21 +26,21 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		self.payment_log_updater.extend([
 			{
-				"target_link": "kontanan_epl",
 				"target_amount": "kontanan_amount",
 				"target_salary_component": "kontanan_salary_component",
+                "component_type": "Kontanan",
 				"removed_if_zero": True
 			},
 			{
-				"target_link": "denda_epl",
 				"target_amount": "denda",
 				"target_salary_component": "denda_salary_component",
+                "component_type": "Denda",
 				"removed_if_zero": True
 			},
 			{
-				"target_link": "brondolan_epl",
 				"target_amount": "brondolan_amount",
 				"target_salary_component": "brondolan_salary_component",
+                "component_type": "Brondolan",
 				"removed_if_zero": True
 			}
 		])

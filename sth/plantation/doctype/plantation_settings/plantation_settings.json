@@ -5,6 +5,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "traksi_default_section",
+  "bkm_traksi_component",
   "perawatan_default_section",
   "bkm_perawatan_component",
   "column_break_cbzs",
@@ -84,13 +86,24 @@
    "fieldtype": "Link",
    "label": "Against Kontanan Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "traksi_default_section",
+   "fieldtype": "Section Break",
+   "label": "Traksi Default"
+  },
+  {
+   "fieldname": "bkm_traksi_component",
+   "fieldtype": "Link",
+   "label": "BKM Traksi Component",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-28 16:15:58.126534",
+ "modified": "2025-12-03 16:53:00.618494",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

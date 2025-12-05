@@ -25,9 +25,9 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 		self.payment_log_updater.extend([
 			{
-				"target_link": "premi_epl",
-				"target_amount": "premi",
+				"target_amount": "premi_amount",
 				"target_salary_component": "premi_salary_component",
+                "component_type": "Premi",
 				"removed_if_zero": True
 			}
 		])

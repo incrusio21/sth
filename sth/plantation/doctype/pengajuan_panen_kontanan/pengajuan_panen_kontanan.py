@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import unscrub
+from frappe.exceptions import DoesNotExistError
 from frappe.utils import flt, get_link_to_form
 
 from sth.controllers.plantation_controller import PlantationController
@@ -62,18 +64,17 @@ class PengajuanPanenKontanan(PlantationController):
 
 	def create_or_update_epl_supervisi(self):
 		for emp in self.supervisi_list:
-			is_new = False
-			target_link = f"{emp}_epl"
-
-			if target_key := self.get(target_link):
-				doc = frappe.get_doc("Employee Payment Log", target_key)
-			else:
+			try:
+				doc = frappe.get_last_doc("Employee Payment Log", {
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"component_type": unscrub(emp)
+				})
+			except DoesNotExistError:
 				is_new = True
 				doc = frappe.new_doc("Employee Payment Log")
 
 			amount = self.get(f"upah_{emp}") or 0
-			detail_name = ""
-
 			# jika ada nilai atau kosong 
 			if amount:
 				doc.employee = self.get(emp)
@@ -82,25 +83,23 @@ class PengajuanPanenKontanan(PlantationController):
 				doc.posting_date = self.posting_date
 				doc.payroll_date = self.posting_date
 
-				doc.status = "Approved"
 				doc.amount = amount
 
 				doc.salary_component = self.get("supervisi_component")
 				doc.against_salary_component = self.get("against_kontanan_component")
 
+				doc.voucher_type = self.doctype
+				doc.voucher_no = self.name
+				doc.component_type = "Kontanan"
 				# if log_updater.get("target_account"):
 				# 	doc.account = self.get(log_updater["target_account"])
 
 				doc.save()
-
-				detail_name = doc.name
 			else:
 				# removed jika nilai kosong dan bukan document baru
 				if not is_new:
 					doc.delete()
 			
-			self.db_set(target_link, detail_name)
-	
 	def on_cancel(self):
 		super().on_cancel()
 		self.check_status_bkm_panen()
@@ -123,11 +122,9 @@ class PengajuanPanenKontanan(PlantationController):
 		doc.update_kontanan_used()
 
 	def delete_employee_payment_log(self):
-		for emp in self.supervisi_list:
-			target_link = f"{emp}_epl"
-			value = self.get(target_link)
-			if not value:
-				continue
-			
-			self.db_set(target_link, "")
-			frappe.delete_doc("Employee Payment Log", value)
+		for epl in frappe.get_all(
+			"Employee Payment Log", 
+			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+			pluck="name"
+		):
+			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
