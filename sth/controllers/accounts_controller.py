@@ -132,7 +132,7 @@ class AccountsController(Document):
         update_voucher_outstanding(
             self.doctype,
             self.name,
-            self.get(scrub(self._party_account_fieldS)),
+            self.get(scrub(self._party_account_field)),
             self._party_type,
             self.get(scrub(self._party_type))
         )
