@@ -10,6 +10,9 @@ from frappe.utils import flt, get_link_to_form
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 
 def onload_order_type(self, method):
+    if not self.purchase_type:
+        return
+    
     order_type = frappe.get_cached_doc("Purchase Type", self.purchase_type)
 
     self._purchase_type_field = ["future_type", "check_progress", "progress_benchmark"]
