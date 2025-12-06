@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-05 09:25:32.618620",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "premi_type",
+  "column_break_biln",
+  "amount",
+  "company"
+ ],
+ "fields": [
+  {
+   "fieldname": "premi_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Premi Type",
+   "options": "Hari Biasa\nHari Libur\nTutup Buku"
+  },
+  {
+   "fieldname": "column_break_biln",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-05 09:28:00.140412",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Designation Attendance Premi",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

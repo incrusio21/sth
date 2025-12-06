@@ -141,6 +141,9 @@ class SalarySlip(SalarySlip):
 		if not getattr(self, "_employee_payment_log", None):
 			self.set_employee_payment_doc()
 
+		# tambahan untuk tutup buku. krn jika tidak
+		self.set_addons_premi()
+
 		# hapus component against terlebih dahulu untuk d create ulang
 		self.remove_flexibel_payment()
 		self.calculate_employee_payment()
@@ -175,8 +178,11 @@ class SalarySlip(SalarySlip):
 			self.compute_income_tax_breakup()
 
 	def set_employee_payment_doc(self) -> None:
-		epl = frappe.qb.DocType("Employee Payment Log")
+		# get structur first
+		if not getattr(self, "_salary_structure_doc", None):
+			self.set_salary_structure_doc()
 
+		epl = frappe.qb.DocType("Employee Payment Log")
 		emp_pl = (
 			frappe.qb.from_(epl)
 			.select(epl.name, epl.account, epl.salary_component, epl.type, epl.against_salary_component, epl.amount, epl.status)
@@ -191,10 +197,11 @@ class SalarySlip(SalarySlip):
 		
 		self._employee_payment, self._against_employee_payment = {}, {}
 		for pl in emp_pl:
-			
+			# throw jika status payment log belum approved (document belum fix)
 			if pl.status != "Approved":
 				frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
 
+			# set key berdasarkan component dan nama table
 			key = (pl.salary_component, scrub(f"{pl.type}s"))
 			self._employee_payment.setdefault(key, {
 				"account": {},
@@ -216,6 +223,29 @@ class SalarySlip(SalarySlip):
 
 			self.payment_log_list.append(pl.name)
 
+	def set_addons_premi(self):
+		if getdate(self.end_date) != getdate(self.actual_end_date):
+			return
+		
+		designation = frappe.get_cached_doc("Designation", self.data.designation)
+		addons_premi = 0
+		for premi in designation.premi:
+			if premi.company == self.doc.company and premi.premi_type not in ("Tutup Buku"):
+				continue
+			
+			addons_premi += premi.amount or 0
+
+		# jika premi tambahan masukkan dalam employee payment log
+		if addons_premi:
+			key = (designation.salary_component, "earnings")
+			self._employee_payment.setdefault(key, {
+				"account": {},
+				"amount": 0,
+			})
+
+			self._employee_payment[key]["amount"] += addons_premi
+		
+
 	def remove_flexibel_payment(self):
 		removed_component = []
 		for component_type in ["earnings", "deductions"]:
@@ -224,10 +254,7 @@ class SalarySlip(SalarySlip):
 		for d in removed_component:
 			self.remove(d)
 
-	def calculate_employee_payment(self):
-		if not getattr(self, "_salary_structure_doc", None):
-			self.set_salary_structure_doc()
-			
+	def calculate_employee_payment(self):	
 		for (component, component_type), value in self._employee_payment.items():
 			self.add_component_custom(
 				component, 
@@ -418,27 +445,12 @@ class SalarySlip(SalarySlip):
 		data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
 			**filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
 
-		# data.total_hari = default_data.total_hari = 30 if data.employment_type == "KARYAWAN TETAP" else 25
-		# supaya tidak hardcode, total hari dari employment_type
-		data.total_hari = default_data.total_hari = frappe.utils.flt(frappe.get_value("Employment Type", data.employment_type, "hari_ump"))
-
-		# data.ump_harian = default_data.ump_harian = company.custom_ump_harian #flt(company.ump/data.total_hari)
-
-		# ump_harian yang dari company bulanan dibagi dengan employement type hari - chandra
-		# data.ump_harian = default_data.ump_harian = company.custom_ump_harian #flt(company.ump/data.total_hari)
-
-		data.ump_harian = default_data.ump_harian = frappe.utils.flt(company.ump_bulanan) / data.total_hari #flt(company.ump/data.total_hari)
+		data.total_hari = default_data.total_hari = flt(frappe.get_value("Employment Type", data.employment_type, "hari_ump"))
+		data.ump_harian = default_data.ump_harian = flt(company.ump_bulanan) / data.total_hari
 		
-		custom_kriteria = frappe.get_value("Employee",self.employee,"custom_kriteria")
+		data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
+			if data.custom_kriteria == "Satuan Hasil" else flt(data.ump_harian * data.payment_days)
 		
-		if custom_kriteria == "Satuan Hasil":
-			data.bpjs_amount = default_data.bpjs_amount = frappe.utils.flt(company.ump_bulanan)
-		elif custom_kriteria == "Non Satuan Hasil":
-			data.bpjs_amount = default_data.bpjs_amount = data.ump_harian * data.payment_days
-
-		# frappe.throw(str(data.bpjs_amount))
-
-		# frappe.throw(str(data.ump_harian))
 		return data, default_data
 
 @frappe.whitelist()

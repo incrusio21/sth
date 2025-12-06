@@ -168,6 +168,11 @@ doc_events = {
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
 	# }
+    "Attendance": {
+        "validate": "sth.hr_customize.custom.attendance.Attendance",
+        "on_submit": "sth.hr_customize.custom.attendance.Attendance",
+        "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
+	},
 	"Delivery Note": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
