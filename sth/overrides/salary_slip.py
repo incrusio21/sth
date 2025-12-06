@@ -227,10 +227,10 @@ class SalarySlip(SalarySlip):
 		if getdate(self.end_date) != getdate(self.actual_end_date):
 			return
 		
-		designation = frappe.get_cached_doc("Designation", self.data.designation)
+		designation = frappe.get_cached_doc("Designation", self.designation)
 		addons_premi = 0
 		for premi in designation.premi:
-			if premi.company == self.doc.company and premi.premi_type not in ("Tutup Buku"):
+			if premi.company == self.company and premi.premi_type not in ("Tutup Buku"):
 				continue
 			
 			addons_premi += premi.amount or 0
