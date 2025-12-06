@@ -43,6 +43,16 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
             }
         })
 
+        for (const fieldname of ["mandor", "mandor1", "kerani"]) {
+            this.frm.set_query(fieldname, function () {
+                return {
+                    query: "sth.controllers.queries.employee_designation_query",
+                      filters: {
+                        supervisi: "Agronomi"
+                    }
+                };
+            });
+        }
     }
 
     update_rate_or_qty_value(item) {
