@@ -43,9 +43,9 @@ class LemburList(Document):
 					row.idx
 				) + '<br>'
 				continue
-
+			
 			if getdate(row.overtime_date).month != self.month_number:
-				frappe.throw("Overtime on {} #Row{} does not match the period of {}".format(
+				frappe.throw("Overtime on {} #Row {} does not match the period of {}".format(
 						format_date(row.overtime_date, "dd-mm-yyyy"), 
 						row.idx, 
 						self.month_period
@@ -101,7 +101,7 @@ class LemburList(Document):
 
 		tidak_lembur = ''
 
-		overtime_total = 0
+		overtime_totals = 0
 		for row in self.details:
 			# attendance belum d siapkan
 			# if not row.jam_check_out:
@@ -154,10 +154,10 @@ class LemburList(Document):
 			row.overtime_today = lembur
 
 			if not row.rejected:
-				overtime_total += lembur
+				overtime_totals += lembur
 		
 		# Jumlah Jam Lembur = total jumlah jam lembur
-		self.overtime_total = overtime_total
+		self.overtime_total = overtime_totals
 		
 	def calculate_overtime_amount(self):
 		# ngecek apakah lemburnya di hari libur atau tidak (pakai doc Holiday List)
