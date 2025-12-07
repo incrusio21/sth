@@ -9,25 +9,16 @@
   "section_break_coqy",
   "n_tipe",
   "column_break_zigr",
-  "amended_from",
   "section_break_gfvn",
+  "rkb_voucher_type",
+  "column_break_rigb",
   "is_panen",
-  "rkb_voucher_type"
+  "is_traksi"
  ],
  "fields": [
   {
    "fieldname": "section_break_coqy",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Tipe Kegiatan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "n_tipe",
@@ -56,12 +47,22 @@
    "fieldname": "is_panen",
    "fieldtype": "Check",
    "label": "Is Panen"
+  },
+  {
+   "fieldname": "column_break_rigb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_traksi",
+   "fieldtype": "Check",
+   "label": "Is Traksi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-06 15:59:01.257872",
+ "modified": "2025-12-06 16:04:12.258606",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Kegiatan",

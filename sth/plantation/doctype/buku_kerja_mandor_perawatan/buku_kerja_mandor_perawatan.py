@@ -21,7 +21,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		
 		self.fieldname_total.extend(["premi_amount"])
 
-		self.kegiatan_fetch_fieldname.extend(["have_premi", "min_basis_premi", "rupiah_premi"])
+		self.kegiatan_fetch_fieldname.extend(["min_basis_premi", "rupiah_premi"])
 
 		self.payment_log_updater.extend([
 			{

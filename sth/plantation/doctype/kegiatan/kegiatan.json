@@ -16,15 +16,19 @@
   "kategori_kegiatan",
   "tipe_kegiatan",
   "old_parent",
-  "is_panen",
-  "is_bibitan",
   "column_break_lrzd",
   "tp_bbt",
   "tp_pnn",
   "lft",
   "rgt",
+  "is_panen",
+  "is_bibitan",
   "section_break_xthm",
   "item_code",
+  "column_break_gfce",
+  "have_premi",
+  "premi_type",
+  "section_break_adyq",
   "items",
   "material_tab",
   "material"
@@ -177,13 +181,35 @@
    "fieldtype": "Link",
    "label": "Item Code",
    "options": "Item"
+  },
+  {
+   "fieldname": "column_break_gfce",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "have_premi",
+   "fieldtype": "Check",
+   "label": "Have Premi"
+  },
+  {
+   "depends_on": "eval:doc.have_premi",
+   "fieldname": "premi_type",
+   "fieldtype": "Select",
+   "label": "Premi Type",
+   "mandatory_depends_on": "eval:doc.have_premi",
+   "options": "\nPercentage\nDay Status"
+  },
+  {
+   "fieldname": "section_break_adyq",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-11-28 10:34:32.421647",
+ "modified": "2025-12-06 16:14:57.633171",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

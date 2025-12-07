@@ -11,13 +11,20 @@
   "section_break_noeb",
   "volume_basis",
   "rupiah_basis",
+  "column_break_rqow",
   "upah_brondolan",
   "premi_kontanan_basis",
-  "column_break_rqow",
-  "have_premi",
+  "premi_percentage_section",
   "persentase_premi",
   "min_basis_premi",
-  "rupiah_premi"
+  "column_break_sgpz",
+  "rupiah_premi",
+  "premi_day_status_section",
+  "workday",
+  "workday_base",
+  "column_break_gqci",
+  "holiday",
+  "holiday_base"
  ],
  "fields": [
   {
@@ -62,22 +69,14 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.have_premi",
    "fieldname": "persentase_premi",
    "fieldtype": "Percent",
    "label": "Persentase Premi"
   },
   {
-   "depends_on": "eval:doc.have_premi",
    "fieldname": "rupiah_premi",
    "fieldtype": "Currency",
    "label": "Rupiah Premi"
-  },
-  {
-   "default": "0",
-   "fieldname": "have_premi",
-   "fieldtype": "Check",
-   "label": "Have Premi"
   },
   {
    "fieldname": "min_basis_premi",
@@ -92,13 +91,55 @@
    "fieldname": "premi_kontanan_basis",
    "fieldtype": "Currency",
    "label": "Premi Kontanan Basis"
+  },
+  {
+   "depends_on": "eval:parent.have_premi \n&& parent.premi_type == \"Percentage\"",
+   "fieldname": "premi_percentage_section",
+   "fieldtype": "Section Break",
+   "label": "Premi Percentage"
+  },
+  {
+   "fieldname": "column_break_sgpz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:parent.have_premi \n&& parent.premi_type == \"Day Status\"",
+   "fieldname": "premi_day_status_section",
+   "fieldtype": "Section Break",
+   "label": "Premi Day Status"
+  },
+  {
+   "fieldname": "workday",
+   "fieldtype": "Currency",
+   "label": "Workday"
+  },
+  {
+   "fieldname": "column_break_gqci",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "holiday",
+   "fieldtype": "Currency",
+   "label": "Holiday"
+  },
+  {
+   "default": "0",
+   "fieldname": "workday_base",
+   "fieldtype": "Check",
+   "label": "Base Salary"
+  },
+  {
+   "default": "0",
+   "fieldname": "holiday_base",
+   "fieldtype": "Check",
+   "label": "Base Salary"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-27 13:48:13.874329",
+ "modified": "2025-12-06 16:26:10.462294",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan Company",
