@@ -16,9 +16,9 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			["premi_salary_component", "premi_sc"],
 		])
 		
-		self.max_qty_fieldname = {
-            "hasil_kerja": "volume_basis"
-        }
+		# self.max_qty_fieldname = {
+        #     "hasil_kerja": "volume_basis"
+        # }
 		
 		self.fieldname_total.extend(["premi_amount"])
 
@@ -39,62 +39,32 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def set_posting_datetime(self):
 		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
-
-	def set_employee_premi(self):
-		for d in self.hasil_kerja:
-			# check apakah merupakan hari libur pegawai
-			self.is_holiday = frappe.db.exists("Holiday", {"parent": d.holiday_list, "holiday_date": self.posting_date})
-			if self.is_holiday:
-				pass				
-
+	
 	def on_submit(self):
 		super().on_submit()
 		self.update_kendaraan_field()
 		self.create_or_update_mandor_premi()
 
+	def on_cancel(self):
+		super().on_cancel()
+		self.update_kendaraan_field()
+		self.create_or_update_mandor_premi()
+	
 	def create_or_update_mandor_premi(self):
 		bkm_mandor_creation_savepoint = "create_bkm_mandor"
 		try:
 			frappe.db.savepoint(bkm_mandor_creation_savepoint)
-			bkm_obj = frappe.get_doc(doctype="Buku Kerja Mandor Premi", employee=self.employee, posting_date=self.posting_date)
+			bkm_obj = frappe.get_doc(doctype="Buku Kerja Mandor Premi", employee=self.employee, voucher_type=self.doctype, posting_date=self.posting_date)
 			bkm_obj.flags.ignore_permissions = 1
 			bkm_obj.insert()
 		except frappe.UniqueValidationError:
 			frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
-			bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {"employee": self.employee, "posting_date": self.posting_date})
+			bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
+				"employee": self.employee, 
+				"doctype": self.doctype, 
+				"posting_date": self.posting_date
+			})
 			bkm_obj.save()
-
-		# jika ada grand total maka update payment log
-		if bkm_obj.grand_total:
-			bkm_obj.create_or_update_payment_log()
-
-		self.db_set("buku_kerja_mandor_premi", bkm_obj.name)
-
-	def on_cancel(self):
-		super().on_cancel()
-		self.update_kendaraan_field()
-		self.check_and_remove_mandor_premi()
-	
-	def check_and_remove_mandor_premi(self):
-		Traksi = frappe.qb.DocType("Buku Kerja Mandor Traksi")
-
-		bkm_premi = self.buku_kerja_mandor_premi
-
-		# Group by kategori tertentu
-		traksi_count = (
-			frappe.qb.from_(Traksi)
-			.select(
-				Count(Traksi.name)
-			)
-			.where(
-				(Traksi.buku_kerja_mandor_premi == bkm_premi) & 
-				(Traksi.name != self.name)
-			)
-		).run()[0][0] or 0
-
-		self.db_set("buku_kerja_mandor_premi", None)
-		if not traksi_count:
-			frappe.delete_doc("Buku Kerja Mandor Premi", bkm_premi)
 
 	def update_kendaraan_field(self, cancel=0):
 		if not self.kendaraan:
@@ -122,13 +92,16 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		
 	def update_rate_or_qty_value(self, item, precision):
 		item.rate = item.get("rate") or self.rupiah_basis
-		item.premi_amount = 0
+		# set rate pegawai jika bukan dump truck
+		if self.tipe_master_kendaraan not in ("Dump Truck"):
+			item.rate = flt(item.base/item.total_hari, precision)
 
 		if not self.get("manual_hk"):
 			item.hari_kerja = min(flt(item.qty / (self.volume_basis or 1)), 1)
 		
-		if self.have_premi and item.qty >= self.min_basis_premi:
-			item.premi_amount = self.rupiah_premi
+		item.premi_amount = 0
+		# if self.have_premi and item.qty >= self.min_basis_premi:
+		# 	item.premi_amount = self.rupiah_premi
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total + premi
@@ -140,7 +113,44 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		hasil_kerja = self.hasil_kerja[0] if self.get("hasil_kerja") else self.append("hasil_kerja", {})
 		hasil_kerja.update({
-			"employee": detail_kendaraan.operator
+			"employee": detail_kendaraan.operator,
+			**get_details_employee(detail_kendaraan.operator)
 		})
-			
+
 		
+	
+	def set_traksi_premi(self):
+		if self.is_heavy_equipment:
+			premi_alat_berat = sorted(get_overtime_settings("roundings"), key=lambda x: x.end_time, reverse=True)
+
+			selisih_kmhm = self.kmhm_akhir - self.kmhm_awal
+			premi_value = 0
+			
+			for premi in premi_alat_berat:
+				# hentikan jika selisih sudah lebih kecil sama dengan 0
+				if selisih_kmhm <= 0:
+					break
+				
+				# tentukan
+				jumlah = premi.end_time if premi.end_time else selisih_kmhm
+				premi_value += flt(premi.amount * jumlah)
+				selisih_kmhm -= jumlah
+		else:
+			pass
+
+
+@frappe.whitelist()
+def get_details_employee(employee):
+	hk_details = {}
+
+	employee = frappe.get_cached_doc("Employee", detail_kendaraan.operator).as_dict()
+	hasil_kerja = self.hasil_kerja[0] if self.get("hasil_kerja") else self.append("hasil_kerja", {})
+	
+	hasil_kerja.update({
+		"holiday_list": employee.holiday_list,
+		"employment_type": employee.employment_type,
+		"is_holiday": frappe.db.exists("Holiday", {"parent": d.holiday_list, "holiday_date": self.posting_date}),
+		"total_hari": frappe.get_value("Employment Type", employee.employment_type, "hari_ump"),
+	})
+
+	return hk_details

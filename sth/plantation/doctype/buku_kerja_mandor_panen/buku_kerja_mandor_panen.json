@@ -9,6 +9,7 @@
  "field_order": [
   "section_break_2wm0",
   "naming_series",
+  "posting_date",
   "unit",
   "divisi",
   "kegiatan",
@@ -17,11 +18,11 @@
   "is_rekap",
   "column_break_souy",
   "company",
-  "posting_date",
   "payroll_date",
   "is_kontanan",
-  "mandor",
   "mandor1",
+  "mandor",
+  "kerani_panen",
   "kerani",
   "status_panen",
   "manual_hk",
@@ -141,23 +142,20 @@
   {
    "fieldname": "mandor",
    "fieldtype": "Link",
-   "label": "Mandor",
-   "options": "Employee",
-   "reqd": 1
+   "label": "Mandor Panen",
+   "options": "Employee"
   },
   {
    "fieldname": "mandor1",
    "fieldtype": "Link",
    "label": "Mandor 1",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "fieldname": "kerani",
    "fieldtype": "Link",
    "label": "Kerani Divisi",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "fieldname": "amended_from",
@@ -559,13 +557,19 @@
    "fieldname": "manual_hk",
    "fieldtype": "Check",
    "label": "Manual HK"
+  },
+  {
+   "fieldname": "kerani_panen",
+   "fieldtype": "Link",
+   "label": "Kerani Panen",
+   "options": "Employee"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:00:05.903425",
+ "modified": "2025-12-06 11:12:21.126770",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

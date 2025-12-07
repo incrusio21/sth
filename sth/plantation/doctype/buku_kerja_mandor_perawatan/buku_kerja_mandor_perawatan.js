@@ -73,7 +73,6 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
 
         let doc = this.frm.doc
         
-        item.rate = item.rate || this.frm.doc.rupiah_basis
         item.premi_amount = 0
         
         if (!self.manual_hk){

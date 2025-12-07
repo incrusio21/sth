@@ -17,6 +17,7 @@
   "posting_time",
   "posting_datetime",
   "payroll_date",
+  "manual_hk",
   "column_break_zqng",
   "company",
   "tipe_master_kendaraan",
@@ -28,8 +29,8 @@
   "amended_from",
   "details_kendaraan_section",
   "jenis_alat",
-  "column_break_mujm",
   "bbm",
+  "column_break_mujm",
   "section_break_toiw",
   "hasil_kerja_amount",
   "hasil_kerja_premi_amount",
@@ -46,6 +47,12 @@
   "volume_basis",
   "column_break_xwio",
   "rupiah_basis",
+  "ump_bulanan",
+  "column_break_kguq",
+  "premi_workday",
+  "ump_as_workday",
+  "premi_holiday",
+  "ump_as_holiday",
   "section_break_dpfs",
   "divisi",
   "blok",
@@ -241,7 +248,7 @@
    "reqd": 1
   },
   {
-   "default": "Today",
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -406,13 +413,56 @@
    "fieldtype": "Float",
    "label": "Selisih KMHM",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_hk",
+   "fieldtype": "Check",
+   "is_virtual": 1,
+   "label": "Manual HK"
+  },
+  {
+   "fetch_from": "company.umr_bulanan",
+   "fieldname": "ump_bulanan",
+   "fieldtype": "Currency",
+   "label": "UMP Bulanan"
+  },
+  {
+   "fieldname": "column_break_kguq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "premi_workday",
+   "fieldtype": "Currency",
+   "label": "Premi Workday",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_holiday",
+   "fieldtype": "Currency",
+   "label": "Premi Holiday",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ump_as_workday",
+   "fieldtype": "Check",
+   "label": "UMP as Workday",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ump_as_holiday",
+   "fieldtype": "Check",
+   "label": "UMP as Holiday",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-07 15:11:05.731173",
+ "modified": "2025-12-07 22:10:16.678555",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",
