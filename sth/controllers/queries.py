@@ -217,16 +217,6 @@ def employee_designation_query(
 	)
 
 @frappe.whitelist()
-def kegiatan_fetch_data(kegiatan, company, fieldname):
-	if isinstance(fieldname, str):
-		fieldname = json.loads(fieldname)
-
-	return frappe.get_value("Kegiatan Company", {
-		"parent": kegiatan,
-		"company": company
-	}, fieldname, as_dict=1)
-
-@frappe.whitelist()
 def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibitan=False):
 	fieldname = "batch" if cint(is_bibitan) else "blok"
 
