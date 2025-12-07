@@ -13,6 +13,7 @@
   "amount",
   "section_break_rgmj",
   "column_break_xqos",
+  "voucher_type",
   "column_break_xzjg",
   "grand_total",
   "more_info_tab",
@@ -91,13 +92,20 @@
    "label": "Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 16:19:11.860695",
+ "modified": "2025-12-07 18:09:39.045304",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Premi",

@@ -14,7 +14,8 @@ class BukuKerjaMandorPremi(Document):
 		self.calculate_grand_total()
 
 	def get_amount_and_divided_by(self):
-		Traksi = frappe.qb.DocType("Buku Kerja Mandor Traksi")
+		# get total dari voucher type tertentu
+		Traksi = frappe.qb.DocType(self.voucher_type)
 
 		# Group by kategori tertentu
 		self.amount, self.divided_by = (
@@ -32,8 +33,17 @@ class BukuKerjaMandorPremi(Document):
 
 	def calculate_grand_total(self):
 		self.grand_total = flt(1.4 * self.amount / (self.divided_by or 1), self.precision("grand_total"))
-		
+
+	def on_update(self):
+		if not self.grand_total:
+			self.delete()
+		else:
+			self.create_or_update_payment_log()
+
 	def create_or_update_payment_log(self):
+		if not self.salary_component:
+			return
+
 		try:
 			doc = frappe.get_last_doc("Employee Payment Log", {
 				"voucher_type": self.doctype,
@@ -58,6 +68,8 @@ class BukuKerjaMandorPremi(Document):
 		doc.save()
 		
 	def on_trash(self):
+		self.remove_document()
+
 		for epl in frappe.get_all(
 			"Employee Payment Log", 
 			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
@@ -65,5 +77,14 @@ class BukuKerjaMandorPremi(Document):
 		):
 			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
+	def remove_document(self):
+		# skip jika berasal dari transaksi
+		if self.flags.transaction_employee:
+			return
+		
+		msg = _("Individual Buku Kerja Mandor Premi cannot be deleted.")
+		msg += "<br>" + _("Please cancel related transaction.")
+		frappe.throw(msg)
+
 def on_doctype_update():
-	frappe.db.add_unique("Buku Kerja Mandor Premi", ["employee", "posting_date"], constraint_name="unique_item_warehouse")
+	frappe.db.add_unique("Buku Kerja Mandor Premi", ["employee", "voucher_type", "posting_date"], constraint_name="unique_item_warehouse")

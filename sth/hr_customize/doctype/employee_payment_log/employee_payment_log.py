@@ -25,7 +25,7 @@ class EmployeePaymentLog(Document):
         if self.flags.transaction_employee:
             return
         
-        msg = _("Individual Employee Payment Ledger Entry cannot be cancelled.")
+        msg = _("Individual Employee Payment Ledger Entry cannot be deleted.")
         msg += "<br>" + _("Please cancel related transaction.")
         frappe.throw(msg)
 
