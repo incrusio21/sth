@@ -2,164 +2,145 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
-from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
+from frappe.utils import get_datetime, flt
+from frappe.query_builder.functions import Count
 
-class BukuKerjaMandorTraksi(Document):
+from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
-	@frappe.whitelist()
-	def get_employee_traksi(self):
-		return frappe.db.sql("""
-			SELECT e.name, d.designation_name
-			FROM `tabEmployee` e
-			JOIN `tabDesignation` d ON d.name = e.designation
-			WHERE d.is_jabatan_traksi = 1
-		""", as_dict=True)
+class BukuKerjaMandorTraksi(BukuKerjaMandorController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 
-	@frappe.whitelist()
-	def get_employee_supervisi(self):
-		return frappe.db.sql("""
-			SELECT e.name, d.designation_name
-			FROM `tabEmployee` e
-			JOIN `tabDesignation` d ON d.name = e.designation
-			WHERE d.custom_supervisi = 'Traksi'
-		""", as_dict=True)
+		self.plantation_setting_def.extend([
+			["salary_component", "bkm_traksi_component"],
+			["premi_salary_component", "premi_sc"],
+		])
+		
+		self.max_qty_fieldname = {
+            "hasil_kerja": "volume_basis"
+        }
+		
+		self.fieldname_total.extend(["premi_amount"])
 
-	@frappe.whitelist() 
-	def get_volume_basis_kegiatan(self, kegiatan, company):
-		volume_basis = frappe.db.sql("""
-			SELECT 
-			k.name,
-			kc.account,
-			kc.volume_basis
-			FROM `tabKegiatan` as k
-			JOIN `tabKegiatan Company` as kc ON kc.parent = k.name
-			WHERE k.name = %s AND kc.company = %s
-			LIMIT 1;
-		""", (kegiatan, company), as_dict=True)
-		return volume_basis[0]['volume_basis']
+		self.payment_log_updater.extend([
+			{
+				"target_amount": "premi_amount",
+				"target_salary_component": "premi_salary_component",
+                "component_type": "Premi",
+				"removed_if_zero": True
+			}
+		])
+	
+	def validate(self):
+		self.set_posting_datetime()
+		super().validate()
 
-	@frappe.whitelist() 
-	def get_min_basis_premi_and_rupiah_premi_kegiatan(self, kegiatan, company):
-		volume_basis = frappe.db.sql("""
-			SELECT 
-			k.name,
-			kc.account,
-			kc.min_basis_premi,
-			kc.rupiah_premi
-			FROM `tabKegiatan` as k
-			JOIN `tabKegiatan Company` as kc ON kc.parent = k.name
-			WHERE k.name = %s AND kc.company = %s
-			LIMIT 1;
-		""", (kegiatan, company), as_dict=True)
-		return {
-			"min_basis_premi": volume_basis[0]['min_basis_premi'],
-			"rupiah_premi": volume_basis[0]['rupiah_premi'],
-		}
+		self.set_employee_premi()
 
-	def before_save(self):
-		if self.jk == "Dump Truck":
-			volume_basis = self.get_volume_basis_kegiatan(self.kegiatan, self.company)
-			self.hari_kerja = self.hari_kerja = 1 if (self.hk / volume_basis) > 1 else round(self.hk / volume_basis, 2)
+	def set_posting_datetime(self):
+		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
 
-			self.pekerjaan_subtotal = (self.hk * self.rupiah_basis) + self.rupiah_premi
-		else:
-			self.operator_subtotal = self.uph + self.premi
-			self.hari_kerja = 1
+	def set_employee_premi(self):
+		for d in self.hasil_kerja:
+			# check apakah merupakan hari libur pegawai
+			self.is_holiday = frappe.db.exists("Holiday", {"parent": d.holiday_list, "holiday_date": self.posting_date})
+			if self.is_holiday:
+				pass				
 
 	def on_submit(self):
-		self.make_attendance()
-		self.make_employee_payment_log()
-		self.update_kendaraan_field(self.kmhm_akhir)
+		super().on_submit()
+		self.update_kendaraan_field()
+		self.create_or_update_mandor_premi()
+
+	def create_or_update_mandor_premi(self):
+		bkm_mandor_creation_savepoint = "create_bkm_mandor"
+		try:
+			frappe.db.savepoint(bkm_mandor_creation_savepoint)
+			bkm_obj = frappe.get_doc(doctype="Buku Kerja Mandor Premi", employee=self.employee, posting_date=self.posting_date)
+			bkm_obj.flags.ignore_permissions = 1
+			bkm_obj.insert()
+		except frappe.UniqueValidationError:
+			frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
+			bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {"employee": self.employee, "posting_date": self.posting_date})
+			bkm_obj.save()
+
+		# jika ada grand total maka update payment log
+		if bkm_obj.grand_total:
+			bkm_obj.create_or_update_payment_log()
+
+		self.db_set("buku_kerja_mandor_premi", bkm_obj.name)
 
 	def on_cancel(self):
-		self.delete_payment_log()
-		self.update_kendaraan_field(self.kmhm_awal)
+		super().on_cancel()
+		self.update_kendaraan_field()
+		self.check_and_remove_mandor_premi()
+	
+	def check_and_remove_mandor_premi(self):
+		Traksi = frappe.qb.DocType("Buku Kerja Mandor Traksi")
 
-	def update_kendaraan_field(self, km_value):
-		if not self.kdr:
+		bkm_premi = self.buku_kerja_mandor_premi
+
+		# Group by kategori tertentu
+		traksi_count = (
+			frappe.qb.from_(Traksi)
+			.select(
+				Count(Traksi.name)
+			)
+			.where(
+				(Traksi.buku_kerja_mandor_premi == bkm_premi) & 
+				(Traksi.name != self.name)
+			)
+		).run()[0][0] or 0
+
+		self.db_set("buku_kerja_mandor_premi", None)
+		if not traksi_count:
+			frappe.delete_doc("Buku Kerja Mandor Premi", bkm_premi)
+
+	def update_kendaraan_field(self, cancel=0):
+		if not self.kendaraan:
 			return
 
-		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kdr, "kmhm_akhir", km_value)
-
-	def make_employee_payment_log(self):
-		plantation_settings = frappe.get_single("Plantation Settings")
-
-		account = frappe.db.sql("""
-			SELECT 
-				k.name,
-				kc.account
-			FROM `tabKegiatan` AS k
-			JOIN `tabKegiatan Company` AS kc ON kc.parent = k.name
-			WHERE k.name = %s AND kc.company = %s
-		""", (self.kegiatan, self.company), as_dict=True)
-
-		upah_amount = self.subtotal_upah if self.jk == "Dump Truck" else self.uph
-		premi_amount = self.rupiah_premi if self.jk == "Dump Truck" else self.premi
-
-		upah_log = frappe.new_doc("Employee Payment Log")
-		upah_log.update({
-			"employee": self.nk,
-			"hari_kerja": self.hari_kerja,
-			"company": self.company,
-			"posting_date": self.tgl_trk,
-			"payroll_date": self.tgl_trk,
-			"status": "Approved",
-			"is_paid": 0,
-			"amount": upah_amount,
-			"salary_component": plantation_settings.bkm_traksi_component,
-			"account": account[0]['account']
-		})
-		upah_log.insert(ignore_permissions=True)
-		upah_log.submit()
-		self.db_set("employee_payment_log_upah", upah_log.name)
+		# cek apakah terdapat future pemakaian kendaraan
+		if future_bkm := frappe.get_value(
+			"Buku Kerja Mandor Traksi", 
+			{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]}, 
+			"name",
+			order_by="posting_datetime"
+		):
+			status = "Submitted" if not cancel else "Canceled"
+			frappe.throw(f"Document cannot be {status} because Document {future_bkm} with a future date and time already exists.")
 		
-		if premi_amount and premi_amount != 0:
-			premi_log = frappe.new_doc("Employee Payment Log")
-			premi_log.update({
-				"employee": self.nk,
-				"hari_kerja": self.hari_kerja,
-				"company": self.company,
-				"posting_date": self.tgl_trk,
-				"payroll_date": self.tgl_trk,
-				"status": "Approved",
-				"is_paid": 0,
-				"amount": premi_amount,
-				"salary_component": plantation_settings.premi_sc_traksi,
-				"account": account[0]['account']
-			})
-			premi_log.insert(ignore_permissions=True)
-			premi_log.submit()
-			self.db_set("employee_payment_log_premi", premi_log.name)
+		alat_kendaraan = frappe.get_doc("Alat Berat Dan Kendaraan", self.kendaraan, for_update=1)
+		# memastikan kmhm sesuai dengan yang ada pata keendaraan
+		if not cancel and alat_kendaraan.kmhm_akhir != self.kmhm_awal:
+			frappe.throw(f"Initial KM/HM on the document does not match the final KM/HM on {self.kendaraan}")
+		
+		# ubah nilai pada kendaraan sesuai dengan document
+		new_value = self.kmhm_awal if cancel else self.kmhm_akhir
+		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", new_value)
 
-	def delete_payment_log(self):
-		if self.employee_payment_log_upah:
-			log_name = self.employee_payment_log_upah
-			self.db_set("employee_payment_log_upah", None)
-			frappe.delete_doc("Employee Payment Log", log_name, force=1)
+		
+	def update_rate_or_qty_value(self, item, precision):
+		item.rate = item.get("rate") or self.rupiah_basis
+		item.premi_amount = 0
 
-		if self.employee_payment_log_premi:
-			log_name = self.employee_payment_log_premi
-			self.db_set("employee_payment_log_premi", None)
-			frappe.delete_doc("Employee Payment Log", log_name, force=1)
+		if not self.get("manual_hk"):
+			item.hari_kerja = min(flt(item.qty / (self.volume_basis or 1)), 1)
+		
+		if self.have_premi and item.qty >= self.min_basis_premi:
+			item.premi_amount = self.rupiah_premi
 
-	def make_attendance(self):
-		savepoint = "add_attendance"
-		try:
-			frappe.db.savepoint(savepoint)
+	def update_value_after_amount(self, item, precision):
+		# Hitung total + premi
+		item.sub_total = flt(item.amount + item.premi_amount, precision)
+		
+	@frappe.whitelist()
+	def get_details_kendaraan(self):
+		detail_kendaraan = frappe.get_cached_doc("Alat Berat Dan Kendaraan", self.kendaraan)
 
-			attendance = frappe.new_doc("Attendance")
-			attendance.update({
-				"employee": self.nk,
-				"employee_name": self.nk,
-				"status": self.status,
-				"company": self.company,
-				"attendance_date": self.tgl_trk
-			})
-			attendance.flags.ignore_permissions = True
-			attendance.submit()
-
-		except DuplicateAttendanceError:
-			if frappe.message_log:
-				frappe.message_log.pop()
-			frappe.db.rollback(save_point=savepoint)
+		hasil_kerja = self.hasil_kerja[0] if self.get("hasil_kerja") else self.append("hasil_kerja", {})
+		hasil_kerja.update({
+			"employee": detail_kendaraan.operator
+		})
+			
+		
