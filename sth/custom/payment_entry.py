@@ -66,3 +66,14 @@ def update_check_book(self, method):
 	
 	cheque_number = update_cheque_number_pe(self.custom_cheque_number, data)
 	update_cheque_book_pe(cheque_number)
+
+
+def update_status_deposito(self, method):
+	for ref in self.references:
+		if ref.reference_doctype != "Deposito":
+			continue
+		doc = frappe.get_doc("Deposito", ref.reference_name)
+		doc.is_redeemed = "Sudah" if method == "on_submit" else "Belum"
+		doc.payment = self.name if method == "on_submit" else None
+		doc.total_realization = ref.allocated_amount if method == "on_submit" else 0
+		doc.db_update_all()
