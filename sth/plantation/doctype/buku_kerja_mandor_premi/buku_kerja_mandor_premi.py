@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.exceptions import DoesNotExistError
+from frappe import _
 from frappe.utils import flt
+from frappe.exceptions import DoesNotExistError
 from frappe.query_builder.functions import Sum, Count
 
 from frappe.model.document import Document
@@ -21,7 +22,7 @@ class BukuKerjaMandorPremi(Document):
 		self.amount, self.divided_by = (
 			frappe.qb.from_(Traksi)
 			.select(
-				Sum(Traksi.amount),
+				Sum(Traksi.hasil_kerja_premi_amount),
 				Count(Traksi.name)
 			)
 			.where(
@@ -32,7 +33,7 @@ class BukuKerjaMandorPremi(Document):
 		).run()[0] or [0, 0]
 
 	def calculate_grand_total(self):
-		self.grand_total = flt(1.4 * self.amount / (self.divided_by or 1), self.precision("grand_total"))
+		self.grand_total = flt(1.4 * (self.amount or 0) / (self.divided_by or 1), self.precision("grand_total"))
 
 	def on_update(self):
 		if not self.grand_total:

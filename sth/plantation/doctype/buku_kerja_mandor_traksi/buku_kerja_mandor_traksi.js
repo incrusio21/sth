@@ -7,7 +7,13 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
   	refresh(frm) {
 		frm.set_df_property("hasil_kerja", "cannot_add_rows", true);
 		frm.set_df_property("hasil_kerja", "cannot_delete_rows", true);
-  	}
+  	},
+	posting_date(frm){
+		frm.cscript.get_employee_data({
+			childrens: frm.doc.hasil_kerja,
+			posting_date: frm.doc.posting_date
+		})
+	}
 //   tgl_trk(frm) {
 //     frappe.db.get_value("Rencana Kerja Harian",
 //       { posting_date: frm.doc.tgl_trk },
@@ -39,15 +45,10 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 	employee(frm, cdt, cdn){
 		let data = frappe.get_doc(cdt, cdn)
-		frappe.call({
-			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
-			args: {
-				employee: data.employee,
-			},
-			freeze: true,
-			callback: function (data) {
-				cur_frm.cscript.calculate_total(null,null, "hasil_kerja")
-			}
+
+		frm.cscript.get_employee_data({
+			childrens: [data],
+			posting_date: frm.doc.posting_date
 		})
 	}
 })
@@ -73,6 +74,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 
         this.setup_bkm(doc)
 	}
+
   	set_query_field() {
 		this.frm.set_query("unit", function (doc) {
 			return {
@@ -117,6 +119,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
             };
 		});
    	}
+
 	kendaraan(doc){
 		let me = this
 		
@@ -129,6 +132,21 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		})
 	}
 
+	get_employee_data(args){
+		if(!args.childrens) return
+
+		let me = this
+		frappe.call({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
+			args: args,
+			freeze: true,
+			callback: function (data) {
+				me.frm.doc.hasil_kerja = data.message
+				me.calculate_total(null, null, "hasil_kerja")
+			}
+		})
+	}
+	
 	update_rate_or_qty_value(item) {
         if (item.parentfield != "hasil_kerja") return
 
@@ -142,11 +160,21 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         }
         
-		item.premi_amount = 0
-        if (doc.have_premi && doc.persentase_premi && item.qty >= doc.min_basis_premi){
-            item.premi_amount = doc.rupiah_premi
-        }
+		if(doc.is_heavy_equipment){
+
+		}else{
+			this.set_premi_non_heavy_equipment(item)
+		}
     }
+	
+	set_premi_non_heavy_equipment(item){
+		let doc = this.frm.doc
+		let fields = item.is_holiday ? "holiday" : "workday"
+		let premi = doc[`ump_as_${fields}`] ? flt(doc.ump_bulanan/item.total_hari) :
+			doc[`premi_${fields}`]
+		
+		item.premi_amount = flt(premi*item.qty)
+	}
 
 	update_value_after_amount(item) {
         item.sub_total = flt(item.amount) + flt(item.premi_amount)
