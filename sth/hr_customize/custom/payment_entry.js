@@ -1,6 +1,7 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
+frappe.ui.form.off("Payment Entry", "validate_reference_document");
 frappe.ui.form.on("Payment Entry", {
     refresh(frm) {
         frm.set_query("reference_doctype", "references", function () {
@@ -48,6 +49,7 @@ frappe.ui.form.on("Payment Entry", {
                 }
             }
         })
+        frm.ignore_doctypes_on_cancel_all = ["Deposito"];
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
@@ -67,5 +69,48 @@ frappe.ui.form.on("Payment Entry", {
                 frm.set_value("party", data.message)
             }
         })
-    }
+    },
+
+    validate_reference_document: function (frm, row) {
+		var _validate = function (i, row) {
+			if (!row.reference_doctype) {
+				return;
+			}
+
+			if (
+				frm.doc.party_type == "Customer" &&
+				!["Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Deposito"].includes(row.reference_doctype)
+			) {
+				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
+				frappe.msgprint(
+					__(
+						"Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning, Deposito",
+						[row.idx]
+					)
+				);
+				return false;
+			}
+
+			if (
+				frm.doc.party_type == "Supplier" &&
+				!["Purchase Order", "Purchase Invoice", "Journal Entry"].includes(row.reference_doctype)
+			) {
+				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
+				frappe.msgprint(
+					__(
+						"Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry",
+						[row.idx]
+					)
+				);
+				return false;
+			}
+		};
+
+		if (row) {
+			_validate(0, row);
+		} else {
+			$.each(frm.doc.vouchers || [], _validate);
+		}
+	},
+
 });
