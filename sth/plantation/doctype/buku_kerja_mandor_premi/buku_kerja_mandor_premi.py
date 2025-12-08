@@ -12,6 +12,7 @@ from frappe.model.document import Document
 class BukuKerjaMandorPremi(Document):
 	def validate(self):
 		self.get_amount_and_divided_by()
+		self.set_missing_values()
 		self.calculate_grand_total()
 
 	def get_amount_and_divided_by(self):
@@ -26,11 +27,16 @@ class BukuKerjaMandorPremi(Document):
 				Count(Traksi.name)
 			)
 			.where(
+				(Traksi.docstatus == 1) & 
 				(Traksi.mandor == self.employee) & 
 				(Traksi.company == self.company) & 
 				(Traksi.posting_date == self.posting_date)
 			)
 		).run()[0] or [0, 0]
+
+	def set_missing_values(self):
+		from sth.plantation import get_plantation_settings
+		self.salary_component = get_plantation_settings("bkm_traksi_mandor")
 
 	def calculate_grand_total(self):
 		self.grand_total = flt(1.4 * (self.amount or 0) / (self.divided_by or 1), self.precision("grand_total"))
@@ -42,9 +48,6 @@ class BukuKerjaMandorPremi(Document):
 			self.create_or_update_payment_log()
 
 	def create_or_update_payment_log(self):
-		if not self.salary_component:
-			return
-
 		try:
 			doc = frappe.get_last_doc("Employee Payment Log", {
 				"voucher_type": self.doctype,

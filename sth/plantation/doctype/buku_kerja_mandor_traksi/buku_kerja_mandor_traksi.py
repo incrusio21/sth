@@ -80,7 +80,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def on_cancel(self):
 		super().on_cancel()
-		self.update_kendaraan_field()
+		self.update_kendaraan_field(cancel=1)
 		self.create_or_update_mandor_premi()
 	
 	def create_or_update_mandor_premi(self):
@@ -92,6 +92,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			bkm_obj.flags.transaction_employee = 1
 			bkm_obj.insert()
 		except frappe.UniqueValidationError:
+			if frappe.message_log:
+				frappe.message_log.pop()
 			frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
 			bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
 				"employee": self.mandor, 
@@ -118,7 +120,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		alat_kendaraan = frappe.get_doc("Alat Berat Dan Kendaraan", self.kendaraan, for_update=1)
 		# memastikan kmhm sesuai dengan yang ada pata keendaraan
 		if not cancel and alat_kendaraan.kmhm_akhir != self.kmhm_awal:
-			frappe.throw(f"Initial KM/HM on the document does not match the final KM/HM on {self.kendaraan}")
+			frappe.throw(f"Initial KM/HM on the document does not match the final KM/HM on {self.kendaraan}. Save to get newest Data")
 		
 		# ubah nilai pada kendaraan sesuai dengan document
 		new_value = self.kmhm_awal if cancel else self.kmhm_akhir

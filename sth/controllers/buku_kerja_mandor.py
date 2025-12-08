@@ -113,10 +113,13 @@ class BukuKerjaMandorController(PlantationController):
         #     self.update_rkb_realization()
 
     def create_or_update_payment_log(self):
+        
         # cek jika bkm memiliki field status
         status = self.meta.has_field("status")
         removed_epl = []
         for emp in self.hasil_kerja:
+            
+
             for log_updater in self.payment_log_updater:
                 is_new = False
                 amount = emp.get(log_updater["target_amount"])
@@ -161,8 +164,6 @@ class BukuKerjaMandorController(PlantationController):
                     if not is_new:
                         removed_epl.append(doc)
                 
-        self.update_child_table("hasil_kerja")
-
         # hapus epl yang tidak digunakan
         for r in removed_epl:
             r.delete()

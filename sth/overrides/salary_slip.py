@@ -96,6 +96,25 @@ class SalarySlip(SalarySlip):
 			if allWeekOff or att_exist:
 				self.holiday_days += current_week_holiday
 
+		# holiday_days ditambahkan dengan attendance dengan leave type sakit - chandra
+
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.status == "On Leave")
+				& (Attendance.leave_type == "Sakit")
+			)
+		)
+
+		self.holiday_days += frappe.utils.flt(query.run()[0][0])
+
+
+
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
 		query = (

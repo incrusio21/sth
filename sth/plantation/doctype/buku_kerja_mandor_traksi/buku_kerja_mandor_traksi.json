@@ -35,12 +35,13 @@
   "hasil_kerja_amount",
   "hasil_kerja_premi_amount",
   "column_break_fkos",
-  "pekerjaan_subtotal",
+  "grand_total",
   "pekerjaan_tab",
   "detail_pekerjaan_section",
   "kegiatan",
   "column_break_pcdo",
   "is_heavy_equipment",
+  "premi_heavy_equipment",
   "details_kegiatan_section",
   "kegiatan_account",
   "uom",
@@ -177,15 +178,6 @@
    "options": "Project"
   },
   {
-   "depends_on": "eval:doc.jk == \"Dump Truck\"",
-   "fieldname": "pekerjaan_subtotal",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Grand Total",
-   "read_only": 1
-  },
-  {
    "fetch_from": "kendaraan.kmhm_akhir",
    "fieldname": "kmhm_awal",
    "fieldtype": "Float",
@@ -317,7 +309,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.jk == \"Dump Truck\"",
    "fieldname": "hasil_kerja_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -377,7 +368,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.jk == \"Dump Truck\"",
    "fieldname": "hasil_kerja_premi_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -455,6 +445,21 @@
    "fieldname": "ump_as_holiday",
    "fieldtype": "Check",
    "label": "UMP as Holiday",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_heavy_equipment",
+   "fieldtype": "Currency",
+   "label": "Premi Heavy Equipment",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Grand Total",
    "read_only": 1
   }
  ],
