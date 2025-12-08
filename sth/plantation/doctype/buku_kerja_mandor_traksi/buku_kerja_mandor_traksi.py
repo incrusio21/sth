@@ -3,7 +3,7 @@
 
 import json
 import frappe
-from frappe.utils import get_datetime, flt
+from frappe.utils import floor, flt, get_datetime
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
@@ -52,24 +52,23 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def set_premi_heavy_equipment(self):
 		self.premi_heavy_equipment = 0
-
 		if not self.is_heavy_equipment:
 			return
 		
-		premi_alat_berat = sorted(get_overtime_settings("roundings"), key=lambda x: x.end_time, reverse=True)
+		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict()
 
-		selisih_kmhm = self.selisih_kmhm
-		premi_value = 0
-		
-		for premi in premi_alat_berat:
+		selisih_kmhm = floor(self.selisih_kmhm/60)
+		premi_value = 0		
+		for premi in jenis_alat.premi:
 			# hentikan jika selisih sudah lebih kecil sama dengan 0
 			if selisih_kmhm <= 0:
 				break
 			
-			# tentukan
 			jumlah = premi.end_time if premi.end_time else selisih_kmhm
 			premi_value += flt(premi.amount * jumlah)
 			selisih_kmhm -= jumlah
+
+		self.premi_heavy_equipment = premi_value
 
 	def validate_details_employee(self):
 		get_details_employee(self.hasil_kerja, self.posting_date)
@@ -96,8 +95,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
 			bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
 				"employee": self.mandor, 
-				"doctype": self.doctype, 
-				"posting_date": self.posting_date
+				"posting_date": self.posting_date,
+				"voucher_type": self.doctype
 			})
 			bkm_obj.flags.transaction_employee = 1
 			bkm_obj.save()

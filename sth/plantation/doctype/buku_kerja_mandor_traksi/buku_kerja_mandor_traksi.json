@@ -394,6 +394,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "kegiatan.heavy_equipment",
    "fieldname": "is_heavy_equipment",
    "fieldtype": "Check",
    "label": "Is Heavy Equipment",
@@ -461,7 +462,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 00:00:10.388120",
+ "modified": "2025-12-08 11:01:07.512446",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

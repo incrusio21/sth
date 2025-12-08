@@ -23,6 +23,7 @@
   "rgt",
   "is_panen",
   "is_bibitan",
+  "heavy_equipment",
   "section_break_xthm",
   "item_code",
   "column_break_gfce",
@@ -203,13 +204,20 @@
   {
    "fieldname": "section_break_adyq",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "heavy_equipment",
+   "fieldtype": "Check",
+   "label": "Heavy Equipment ?",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-06 16:14:57.633171",
+ "modified": "2025-12-08 11:00:41.577658",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",
