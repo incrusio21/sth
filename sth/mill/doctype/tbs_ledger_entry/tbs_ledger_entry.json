@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-05 13:17:41.845219",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_kzlg",
+  "posting_date",
+  "posting_time",
+  "posting_datetime",
+  "column_break_knnw",
+  "type",
+  "voucher_type",
+  "voucher_no",
+  "is_cancelled",
+  "section_break_xbzw",
+  "balance_qty",
+  "actual_qty",
+  "amended_from",
+  "column_break_feny",
+  "item_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_kzlg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nInternal\nEksternal"
+  },
+  {
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Actual Qty"
+  },
+  {
+   "fieldname": "balance_qty",
+   "fieldtype": "Float",
+   "label": "Balance Qty"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "TBS Ledger Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_knnw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "is cancelled"
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Posting Datetime"
+  },
+  {
+   "fieldname": "section_break_xbzw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_feny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-05 15:24:45.853332",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "TBS Ledger Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
