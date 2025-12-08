@@ -75,5 +75,5 @@ def update_status_deposito(self, method):
 		doc = frappe.get_doc("Deposito", ref.reference_name)
 		doc.is_redeemed = "Sudah" if method == "on_submit" else "Belum"
 		doc.payment = self.name if method == "on_submit" else None
-		doc.total_realization = ref.allocated_amount if method == "on_submit" else 0
+		doc.total_realization = self.paid_amount if method == "on_submit" else 0
 		doc.db_update_all()
