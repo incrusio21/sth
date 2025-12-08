@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-08 11:02:13.019712",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status_pkp",
+  "no_sppkp",
+  "section_break_tapb",
+  "no_npwp",
+  "alamat",
+  "column_break_krvh",
+  "nama_npwp",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "status_pkp",
+   "fieldtype": "Check",
+   "label": "Status PKP"
+  },
+  {
+   "depends_on": "eval:doc.status_pkp",
+   "fieldname": "no_sppkp",
+   "fieldtype": "Data",
+   "label": "No SPPKP"
+  },
+  {
+   "fieldname": "section_break_tapb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "no_npwp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No NPWP"
+  },
+  {
+   "fieldname": "alamat",
+   "fieldtype": "Small Text",
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "column_break_krvh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama_npwp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama NPWP"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-08 11:22:28.301933",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Supplier Legal Profile",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
