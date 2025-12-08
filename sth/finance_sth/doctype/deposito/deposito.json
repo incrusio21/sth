@@ -9,6 +9,7 @@
   "section_break_crbn",
   "naming_series",
   "company",
+  "unit",
   "bank",
   "bank_account",
   "year_days",
@@ -294,13 +295,20 @@
    "label": "Expense Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-05 14:45:33.410600",
+ "modified": "2025-12-08 10:35:24.472060",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
