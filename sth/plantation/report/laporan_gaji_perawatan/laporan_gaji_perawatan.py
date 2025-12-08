@@ -1,6 +1,3 @@
-# Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
-# For license information, please see license.txt
-
 import frappe
 from frappe import _
 from frappe.utils import getdate
@@ -155,7 +152,6 @@ def get_columns(filters):
 def get_data(filters):
 	conditions = get_conditions(filters)
 	
-	# Query untuk mendapatkan data dari Employee Payment Log
 	query = """
 		SELECT 
 			epl.voucher_no,
@@ -176,7 +172,6 @@ def get_data(filters):
 	
 	epl_data = frappe.db.sql(query, filters, as_dict=1)
 	
-	# Group data by voucher_no untuk menggabungkan Upah dan Premi
 	voucher_dict = {}
 	for row in epl_data:
 		key = row.voucher_no
@@ -195,25 +190,21 @@ def get_data(filters):
 		elif row.component_type == 'Premi':
 			voucher_dict[key]['p_premi'] = row.amount
 	
-	# Proses data untuk mendapatkan detail dari voucher
 	data = []
 	employee_totals = {}
 	
 	for voucher_no, voucher_data in voucher_dict.items():
 		
-		# Get voucher document
 		if not voucher_data.get('voucher_type') or not voucher_no:
 			continue
 			
 		voucher_doc = frappe.get_doc(voucher_data.get('voucher_type'), voucher_no)
 		
-		# Get employee document
 		if not voucher_data.get('employee'):
 			continue
 			
 		employee_doc = frappe.get_doc("Employee", voucher_data['employee'])
 		
-		# Get kegiatan document for UOM
 		kegiatan_doc = None
 		if voucher_doc.get('kegiatan'):
 			try:
@@ -221,7 +212,6 @@ def get_data(filters):
 			except:
 				kegiatan_doc = None
 		
-		# Build row data
 		row = {
 			'voucher_no': voucher_no,
 			'blok': voucher_doc.get('blok', ''),
@@ -246,7 +236,6 @@ def get_data(filters):
 		
 		data.append(row)
 		
-		# Accumulate employee totals
 		employee = voucher_data['employee']
 		if employee not in employee_totals:
 			employee_totals[employee] = {
@@ -260,7 +249,6 @@ def get_data(filters):
 		employee_totals[employee]['total'] += row['total']
 		
 	
-	# Add employee subtotals
 	final_data = []
 	current_employee = None
 	current_employee_name = ""
@@ -268,7 +256,6 @@ def get_data(filters):
 	for row in data:
 		if current_employee != row['employee']:
 			if current_employee:
-				# Add subtotal for previous employee
 				final_data.append({
 					'voucher_no': '',
 					'blok': '',
@@ -293,7 +280,6 @@ def get_data(filters):
 		
 		final_data.append(row)
 	
-	# Add last employee subtotal
 	if current_employee:
 		final_data.append({
 			'voucher_no': '',
@@ -321,7 +307,6 @@ def get_conditions(filters):
 	conditions = []
 	
 	if filters.get("bulan"):
-		# Konversi nama bulan Indonesia ke angka
 		bulan_map = {
 			"Januari": 1, "Februari": 2, "Maret": 3, "April": 4,
 			"Mei": 5, "Juni": 6, "Juli": 7, "Agustus": 8,
