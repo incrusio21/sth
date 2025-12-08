@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-08 10:42:46.627574",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama_bank",
+  "no_rekening",
+  "column_break_ufmt",
+  "atas_nama",
+  "is_default",
+  "is_active",
+  "section_break_kqub",
+  "cabang",
+  "negara",
+  "column_break_uxwa",
+  "kota",
+  "mata_uang"
+ ],
+ "fields": [
+  {
+   "fieldname": "nama_bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "no_rekening",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No. Rekening"
+  },
+  {
+   "fieldname": "column_break_ufmt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "atas_nama",
+   "fieldtype": "Data",
+   "label": "Atas Nama"
+  },
+  {
+   "fieldname": "section_break_kqub",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cabang",
+   "fieldtype": "Link",
+   "label": "Cabang",
+   "options": "Branch"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "negara",
+   "fieldtype": "Link",
+   "label": "Negara",
+   "options": "Country"
+  },
+  {
+   "fieldname": "column_break_uxwa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kota",
+   "fieldtype": "Link",
+   "label": "Kota",
+   "options": "City"
+  },
+  {
+   "fieldname": "mata_uang",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mata Uang",
+   "options": "Currency"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-08 10:53:50.062723",
+ "modified_by": "Administrator",
+ "module": "Buying STH",
+ "name": "Supplier Bank",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
