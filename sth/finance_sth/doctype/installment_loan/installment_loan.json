@@ -2,15 +2,19 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:disbursement_number",
- "creation": "2025-12-03 16:17:00.141525",
+ "creation": "2025-12-08 16:49:12.950606",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_jv3n",
   "disbursement_number",
-  "disbursement_date",
-  "disbursement_amount",
-  "due_days",
-  "column_break_bbib",
+  "payment_date",
+  "installment_month",
+  "principal",
+  "loan_interest",
+  "interest_amount",
+  "payment_total",
+  "column_break_onwx",
   "reference_doc",
   "reference_name",
   "reference_doc_detail",
@@ -20,87 +24,111 @@
  ],
  "fields": [
   {
+   "fieldname": "section_break_jv3n",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "disbursement_number",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "No. Pencairan",
-   "read_only": 1,
+   "reqd": 1,
    "unique": 1
   },
   {
-   "fieldname": "disbursement_date",
-   "fieldtype": "Date",
-   "label": "Tanggal Pencairan",
-   "read_only": 1
-  },
-  {
-   "fieldname": "due_days",
-   "fieldtype": "Int",
-   "label": "Jatuh Tempo",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_bbib",
+   "fieldname": "column_break_onwx",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "label": "Tanggal Pembayaran",
+   "reqd": 1
+  },
+  {
+   "fieldname": "installment_month",
+   "fieldtype": "Int",
+   "label": "Bulan Ke",
+   "reqd": 1
+  },
+  {
+   "fieldname": "principal",
+   "fieldtype": "Currency",
+   "label": "Pokok",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_interest",
+   "fieldtype": "Percent",
+   "label": "Suku Bunga (%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Bunga",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_total",
+   "fieldtype": "Currency",
+   "label": "Total Pembayaran",
+   "reqd": 1
   },
   {
    "fieldname": "reference_doc",
    "fieldtype": "Link",
    "label": "Reference Document",
    "options": "DocType",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
    "options": "reference_doc",
-   "read_only": 1
-  },
-  {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "reference_doc_detail",
    "fieldtype": "Link",
    "label": "Reference Document Detail",
-   "options": "DocType"
+   "options": "DocType",
+   "reqd": 1
   },
   {
    "fieldname": "reference_name_detail",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name Detail",
    "options": "reference_doc_detail",
-   "read_only": 1
+   "reqd": 1
   },
   {
-   "fieldname": "disbursement_amount",
-   "fieldtype": "Currency",
-   "label": "Jumlah Pencairan",
-   "read_only": 1
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry"
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Disbursement Loan",
+   "options": "Installment Loan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   }
  ],
  "grid_page_length": 50,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 14:31:40.068240",
+ "modified": "2025-12-08 16:57:07.928112",
  "modified_by": "Administrator",
  "module": "Finance STH",
- "name": "Disbursement Loan",
+ "name": "Installment Loan",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -114,6 +142,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
