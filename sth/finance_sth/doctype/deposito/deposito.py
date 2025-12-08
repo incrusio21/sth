@@ -16,7 +16,6 @@ class Deposito(AccountsController):
 
 	def validate(self):
 		self.calculate_deposito()
-		self.set_missing_value()
 
 	def on_submit(self):
 		self.make_gl_entry()
