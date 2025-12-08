@@ -13,6 +13,12 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 			childrens: frm.doc.hasil_kerja,
 			posting_date: frm.doc.posting_date
 		})
+	},
+	kmhm_akhir(frm){
+		frm.set_value("selisih_kmhm", flt(frm.doc.kmhm_akhir) - flt(frm.doc.kmhm_awal))
+	},
+	kmhm_awal(frm){
+		frm.set_value("selisih_kmhm", flt(frm.doc.kmhm_akhir) - flt(frm.doc.kmhm_awal))
 	}
 //   tgl_trk(frm) {
 //     frappe.db.get_value("Rencana Kerja Harian",
@@ -161,12 +167,12 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
         }
         
 		if(doc.is_heavy_equipment){
-
+			item.premi_amount = flt(doc.premi_heavy_equipment)
 		}else{
 			this.set_premi_non_heavy_equipment(item)
 		}
     }
-	
+
 	set_premi_non_heavy_equipment(item){
 		let doc = this.frm.doc
 		let fields = item.is_holiday ? "holiday" : "workday"

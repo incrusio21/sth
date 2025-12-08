@@ -319,7 +319,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "kode_kegiatan.account",
    "fieldname": "kegiatan_account",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -370,13 +369,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "have_premi",
-   "fieldtype": "Check",
-   "label": "Have Premi",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.have_premi",
    "fieldname": "min_basis_premi",
    "fieldtype": "Float",
@@ -409,13 +401,21 @@
    "label": "Series",
    "options": "BKM-PWT-.#####",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "kegiatan.have_premi",
+   "fieldname": "have_premi",
+   "fieldtype": "Check",
+   "label": "Have Premi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 10:32:34.404965",
+ "modified": "2025-12-08 09:52:54.282297",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

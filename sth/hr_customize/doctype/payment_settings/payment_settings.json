@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "internal_employee",
+  "receivable_customer",
   "column_break_vvit",
   "outstanding_doctype",
   "section_break_ehjk",
@@ -37,13 +38,19 @@
    "fieldname": "outstanding_doctype",
    "fieldtype": "Small Text",
    "label": "Outstanding Doctype"
+  },
+  {
+   "fieldname": "receivable_customer",
+   "fieldtype": "Link",
+   "label": "Receivable Customer",
+   "options": "Customer"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-12 16:32:20.608023",
+ "modified": "2025-12-08 10:23:59.967113",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Payment Settings",

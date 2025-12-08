@@ -12,7 +12,6 @@
   "unit",
   "column_break_wums",
   "company",
-  "uph_hr",
   "amended_from"
  ],
  "fields": [
@@ -56,18 +55,13 @@
    "label": "Unit/Kebun",
    "options": "Unit",
    "reqd": 1
-  },
-  {
-   "fieldname": "uph_hr",
-   "fieldtype": "Currency",
-   "label": "Upah Harian"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 09:57:37.158785",
+ "modified": "2025-12-06 12:15:39.558160",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budget Kebun Tahunan",

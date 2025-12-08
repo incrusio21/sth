@@ -85,7 +85,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
         //  Hitung total brondolan
 		item.brondolan_amount = flt(item.brondolan * flt(item.qty_brondolan))
         item.kontanan = doc.is_kontanan ? flt(item.qty * flt(doc.premi_kontanan_basis), precision) : 0
-        item.sub_total = item.amount + item.brondolan_amount + item.kontanan
+        item.sub_total = flt(item.amount) + flt(item.brondolan_amount) + flt(item.kontanan)
     }
 
     after_calculate_grand_total(){

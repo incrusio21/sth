@@ -34,6 +34,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	
 	def validate(self):
 		self.set_posting_datetime()
+		self.validate_selisih_kmhm()
+		self.set_premi_heavy_equipment()
 		super().validate()
 
 		self.validate_details_employee()
@@ -41,6 +43,34 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def set_posting_datetime(self):
 		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
 	
+	def validate_selisih_kmhm(self):
+		selisih = self.kmhm_akhir - self.kmhm_awal
+		if selisih <= 0:
+			frappe.throw("KM/HM Akhir cannot less than KM/HM Awal")
+
+		self.selisih_kmhm = selisih
+
+	def set_premi_heavy_equipment(self):
+		self.premi_heavy_equipment = 0
+
+		if not self.is_heavy_equipment:
+			return
+		
+		premi_alat_berat = sorted(get_overtime_settings("roundings"), key=lambda x: x.end_time, reverse=True)
+
+		selisih_kmhm = self.selisih_kmhm
+		premi_value = 0
+		
+		for premi in premi_alat_berat:
+			# hentikan jika selisih sudah lebih kecil sama dengan 0
+			if selisih_kmhm <= 0:
+				break
+			
+			# tentukan
+			jumlah = premi.end_time if premi.end_time else selisih_kmhm
+			premi_value += flt(premi.amount * jumlah)
+			selisih_kmhm -= jumlah
+
 	def validate_details_employee(self):
 		get_details_employee(self.hasil_kerja, self.posting_date)
 
@@ -106,20 +136,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		
 		item.premi_amount = 0
 		if self.is_heavy_equipment:
-			premi_alat_berat = sorted(get_overtime_settings("roundings"), key=lambda x: x.end_time, reverse=True)
-
-			selisih_kmhm = self.kmhm_akhir - self.kmhm_awal
-			premi_value = 0
-			
-			for premi in premi_alat_berat:
-				# hentikan jika selisih sudah lebih kecil sama dengan 0
-				if selisih_kmhm <= 0:
-					break
-				
-				# tentukan
-				jumlah = premi.end_time if premi.end_time else selisih_kmhm
-				premi_value += flt(premi.amount * jumlah)
-				selisih_kmhm -= jumlah
+			item.premi_amount = flt(self.premi_heavy_equipment)
 		else:
 			self.set_premi_non_heavy_equipment(item, precision)
 
@@ -154,11 +171,15 @@ def get_details_employee(childrens, posting_date):
 	
 	for ch in childrens:
 		employee = frappe.get_cached_doc("Employee", ch.get("employee")).as_dict()
+
 		ch.update({
 			"holiday_list": employee.holiday_list,
 			"employment_type": employee.employment_type,
 			"is_holiday": 1 if frappe.db.exists("Holiday", {"parent": employee.holiday_list, "holiday_date": posting_date}) else 0,
-			"total_hari": frappe.get_value("Employment Type", employee.employment_type, "hari_ump")
+			"total_hari": frappe.get_value("Employment Type", employee.employment_type, "hari_ump"),
+			"base": frappe.get_value("Salary Structure Assignment", {
+				"employee": employee.name, "company": employee.company, "from_date": ["<=", posting_date]
+			}, "base", order_by="from_date desc"),
 		})
 
 	return childrens

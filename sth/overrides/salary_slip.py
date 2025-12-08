@@ -454,36 +454,6 @@ class SalarySlip(SalarySlip):
 		return data, default_data
 
 @frappe.whitelist()
-def olah_holiday(holidays, attendance):
-
-	holiday = 0
-	for date_str in holidays:
-		date = date_str
-		weekday = date.weekday()
-		days_to_monday = weekday
-		monday = date - timedelta(days=days_to_monday)
-		
-		date_list = []
-		for i in range(6):
-			current_date = monday + timedelta(days=i)
-			date_list.append(current_date.strftime('%Y-%m-%d'))
-		
-		# ini baru cek per tanggal ini libur semua atau tidak
-		tidak_libur_semua = 1
-		for satu_date in date_list:
-			if satu_date not in holidays:
-				tidak_libur_semua = 0
-
-				for satu_attendance in attendance:
-					if str(satu_attendance) == str(satu_date):
-						tidak_libur_semua = 1
-
-		if tidak_libur_semua == 1:
-			holiday += 1
-
-	return holiday
-
-@frappe.whitelist()
 def debug_holiday():
 	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00075/00001")
 	doc.calculate_holidays()	

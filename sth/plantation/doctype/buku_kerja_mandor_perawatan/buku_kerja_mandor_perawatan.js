@@ -17,7 +17,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         super.setup(doc)
                
         this.fieldname_total.push("premi_amount")
-        this.kegiatan_fetch_fieldname.push("have_premi", "min_basis_premi", "rupiah_premi")
+        this.kegiatan_fetch_fieldname.push("min_basis_premi", "rupiah_premi")
         this.max_qty_fieldname = { "hasil_kerja": "volume_basis" }
         
         this.get_data_rkh_field.push("batch")
@@ -79,7 +79,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         }
         
-        if (doc.have_premi && doc.persentase_premi && item.qty >= doc.min_basis_premi){
+        if (doc.have_premi && item.qty >= doc.min_basis_premi){
             item.premi_amount = doc.rupiah_premi
         }
     }

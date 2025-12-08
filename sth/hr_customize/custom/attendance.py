@@ -23,7 +23,7 @@ class Attendance:
             self.is_holiday = 1
     
     def validate_premi_amount_and_component(self):
-        if self.status not in ("Present"):
+        if self.doc.status not in ("Present"):
             return
             
         designation = frappe.get_cached_doc("Designation", self.doc.designation)
