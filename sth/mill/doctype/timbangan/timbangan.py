@@ -6,4 +6,5 @@ from frappe.model.document import Document
 
 
 class Timbangan(Document):
-	pass
+	def on_submit(self):
+		pass
