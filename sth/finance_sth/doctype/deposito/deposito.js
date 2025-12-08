@@ -13,6 +13,7 @@ frappe.ui.form.on("Deposito", {
 	refresh(frm) {
         filterBankAccount(frm)
         filterAccount(frm)
+        filterUnit(frm)
 	},
     value_date(frm){
         calculateTenor(frm) 
@@ -96,6 +97,16 @@ function filterAccount(frm) {
             filters: {
                 account_type: ["!=","Receivable"],
                 company: doc.company
+            }
+        }
+    })
+}
+
+function filterUnit(frm) {
+    frm.set_query("unit", (doc) => {
+        return {
+            filters: {
+                company: ["=",doc.company]
             }
         }
     })
