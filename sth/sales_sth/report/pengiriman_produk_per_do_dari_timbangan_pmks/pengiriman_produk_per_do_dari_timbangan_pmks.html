@@ -1,0 +1,86 @@
+<h4>Pengiriman Produk Per DO Dari Timbangan PMKS</h4>
+<hr>
+
+<div>
+  {% if filters.company %}
+  <h5>Company: {{ filters.company }}</h5>
+  {% endif %}
+  {% if filters.unit %}
+  <h5>Unit: {{ filters.unit }}</h5>
+  {% endif %}
+  {% if filters.divisi %}
+  <h5>Divisi: {{ filters.divisi }}</h5>
+  {% endif %}
+  {% if filters.kegiatan %}
+  <h5>Kegiata: {{ filters.kegiatan }}</h5>
+  {% endif %}
+  {% if filters.periode %}
+  <h5>Periode/Tahun: {{ filters.periode }}</h5>
+  {% endif %}
+</div>
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Kode PT</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No Transaksi</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Tanggal</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No.Kontrak</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No. SIPB</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No. DO</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Kendaraan</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Nama Sopir</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Berat Bersih Pabrik</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Berat Bersih Pembeli</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="3">Kontrak</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="3">Transportir</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No. Invoice</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;">Nama Customer</th>
+      <th style="text-align:center; vertical-align: middle !important;">Harga Satuan</th>
+      <th style="text-align:center; vertical-align: middle !important;">Nilai per Truk</th>
+      <th style="text-align:center; vertical-align: middle !important;">Nama</th>
+      <th style="text-align:center; vertical-align: middle !important;">Harga Satuan</th>
+      <th style="text-align:center; vertical-align: middle !important;">Nilai Per Truk</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% index = 0 %}
+    {% for row in data %}
+    <tr>
+      <td>{{index + 1}}</td>
+      <td>{{row.kode_pt}}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    {% row.head ? index++ : "" %}
+    {% endfor %}
+    <tr>
+      <td colspan="9">Total</td>
+      <td>400000</td>
+      <td>0</td>
+      <td colspan="2"></td>
+      <td>6135192000</td>
+      <td colspan="2"></td>
+      <td>0</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
