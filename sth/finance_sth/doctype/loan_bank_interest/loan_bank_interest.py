@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class TransaksiTraksi(Document):
+class LoanBankInterest(Document):
 	pass

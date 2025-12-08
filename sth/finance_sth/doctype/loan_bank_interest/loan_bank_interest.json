@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-07 19:26:26.289330",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_bank",
+  "bank",
+  "date",
+  "interest"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No. Transaksi",
+   "options": "Loan Bank",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "loan_bank.bank",
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank",
+   "options": "Bank",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Nilai (%)",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-07 20:01:13.531669",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Loan Bank Interest",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

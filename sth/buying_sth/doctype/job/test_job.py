@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestTransaksiTraksi(FrappeTestCase):
+class TestJob(FrappeTestCase):
 	pass

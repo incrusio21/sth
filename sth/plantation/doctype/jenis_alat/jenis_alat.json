@@ -1,14 +1,15 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:jns_alt",
+ "autoname": "prompt",
  "creation": "2025-08-11 10:50:41.256230",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_gc4p",
-  "jns_alt",
-  "amended_from"
+  "disabled",
+  "section_break_wugh",
+  "premi"
  ],
  "fields": [
   {
@@ -17,32 +18,30 @@
    "label": "Header"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Tipe Alat",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   },
   {
-   "fieldname": "jns_alt",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Jenis Alat",
-   "reqd": 1,
-   "unique": 1
+   "fieldname": "section_break_wugh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Table",
+   "label": "Premi",
+   "options": "Jenis Alat Premi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-11 10:51:25.024957",
+ "modified": "2025-12-07 13:47:54.815913",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Jenis Alat",
- "naming_rule": "By fieldname",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -61,5 +60,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

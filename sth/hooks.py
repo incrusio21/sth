@@ -170,6 +170,11 @@ doc_events = {
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
 	# }
+    "Attendance": {
+        "validate": "sth.hr_customize.custom.attendance.Attendance",
+        "on_submit": "sth.hr_customize.custom.attendance.Attendance",
+        "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
+	},
 	"Delivery Note": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
@@ -190,8 +195,8 @@ doc_events = {
 		"validate": [
 			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
 		],
-		"on_submit": "sth.custom.payment_entry.update_check_book",
-		"on_cancel": "sth.custom.payment_entry.update_check_book",
+		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito"],
+		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
     "Project": {

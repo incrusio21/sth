@@ -43,6 +43,16 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
             }
         })
 
+        for (const fieldname of ["mandor", "mandor1", "kerani"]) {
+            this.frm.set_query(fieldname, function () {
+                return {
+                    query: "sth.controllers.queries.employee_designation_query",
+                      filters: {
+                        supervisi: "Agronomi"
+                    }
+                };
+            });
+        }
     }
 
     update_rate_or_qty_value(item) {
@@ -50,7 +60,6 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
 
         let doc = this.frm.doc
 
-        item.rate = item.rate || this.frm.doc.rupiah_basis
         item.brondolan = doc.upah_brondolan
 
         if (!self.manual_hk){
@@ -76,7 +85,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
         //  Hitung total brondolan
 		item.brondolan_amount = flt(item.brondolan * flt(item.qty_brondolan))
         item.kontanan = doc.is_kontanan ? flt(item.qty * flt(doc.premi_kontanan_basis), precision) : 0
-        item.sub_total = item.amount + item.brondolan_amount + item.kontanan
+        item.sub_total = flt(item.amount) + flt(item.brondolan_amount) + flt(item.kontanan)
     }
 
     after_calculate_grand_total(){

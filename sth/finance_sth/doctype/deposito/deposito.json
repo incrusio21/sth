@@ -9,13 +9,18 @@
   "section_break_crbn",
   "naming_series",
   "company",
+  "unit",
   "bank",
+  "bank_account",
+  "year_days",
+  "currency",
   "bilyet_number",
   "value_date",
   "maturity_date",
-  "jangka_waktu_bulan",
-  "interest",
+  "tenor",
   "column_break_cbgg",
+  "interest",
+  "tax",
   "deposit_amount",
   "jenis_deposito",
   "collateral_type",
@@ -23,12 +28,24 @@
   "collateral_owner_name",
   "posting_date",
   "deposited_by",
+  "section_break_flio",
+  "interest_amount",
+  "tax_amount",
+  "column_break_cskc",
+  "total",
+  "total_realization",
   "accounting_dimensions_section",
   "cost_center",
   "more_information_tab",
+  "payment_details_section",
+  "grand_total",
+  "outstanding_amount",
+  "is_redeemed",
+  "payment",
   "accounting_details_section",
   "debit_to",
-  "credit_to"
+  "expense_account",
+  "amended_from"
  ],
  "fields": [
   {
@@ -81,13 +98,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "jangka_waktu_bulan",
-   "fieldtype": "Int",
-   "label": "Jangka Waktu (Bulan)",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "interest",
    "fieldtype": "Percent",
    "label": "Suku Bunga (%)",
@@ -107,7 +117,7 @@
    "fieldname": "jenis_deposito",
    "fieldtype": "Select",
    "label": "Jenis Deposito",
-   "options": "\nDeposito Berjangka(Non Automatic Roll Over)",
+   "options": "\nNon Roll Over\nRoll Over Pokok\nRoll Over Pokok + Bunga",
    "reqd": 1
   },
   {
@@ -157,13 +167,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "credit_to",
-   "fieldtype": "Link",
-   "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -174,13 +177,138 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Deposito",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tenor",
+   "fieldtype": "Float",
+   "label": "Jangka Waktu (Bulan)",
+   "precision": "0",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "bank_account.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Mata Uang",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Details"
+  },
+  {
+   "default": "Belum",
+   "fieldname": "is_redeemed",
+   "fieldtype": "Select",
+   "label": "Status Dicairkan",
+   "options": "\nBelum\nSudah",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment",
+   "fieldtype": "Link",
+   "label": "Payment",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax",
+   "fieldtype": "Percent",
+   "label": "Pajak (%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_flio",
+   "fieldtype": "Section Break",
+   "label": "Deposito Calculation"
+  },
+  {
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Bunga",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pajak",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cskc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_realization",
+   "fieldtype": "Currency",
+   "label": "Total Realisasi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank.deposit_year_days",
+   "fieldname": "year_days",
+   "fieldtype": "Int",
+   "label": "Hari dalam 1 Tahun",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 22:39:55.893911",
+ "modified": "2025-12-08 10:35:24.472060",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

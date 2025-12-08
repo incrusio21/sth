@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _, scrub
+from frappe import _, scrub, unscrub
 from frappe.utils import flt, formatdate
 from frappe.model.document import Document
 
@@ -29,13 +29,14 @@ class AccountsController(Document):
         super().__init__(*args, **kwargs)
         self._party_type = "Employee"
         self._expense_account = "salary_account"
+        self._party_account_field = "credit_to"
 
     def validate(self):
         self.validate_credit_to_acc()
         self.set_outstanding_amount()
 
     def validate_credit_to_acc(self):
-        if not self.meta.has_field("credit_to"):
+        if not self.meta.has_field(self._party_account_field):
             return
         
         # if not self.credit_to:
@@ -55,11 +56,17 @@ class AccountsController(Document):
                 title=_("Invalid Account"),
             )
 
-        if self.employee and account.account_type != "Payable":
+        account_type = "Payable" if self._party_account_field == "credit_to" else "Receivable"
+        if self.employee and account.account_type != account_type:
             frappe.throw(
                 _(
-                    "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
-                ).format(frappe.bold(_("Credit To")), frappe.bold(self.credit_to)),
+                    "Please ensure that the {0} account {1} is a {2} account. " \
+                    "You can change the account type to {2} or select a different account."
+                ).format(
+                    frappe.bold(_(unscrub(self._party_account_field))), 
+                    frappe.bold(self.credit_to),
+                    account_type
+                ), 
                 title=_("Invalid Account"),
             )
 
@@ -125,7 +132,7 @@ class AccountsController(Document):
         update_voucher_outstanding(
             self.doctype,
             self.name,
-            self.credit_to,
+            self.get(scrub(self._party_account_field)),
             self._party_type,
             self.get(scrub(self._party_type))
         )
@@ -139,13 +146,14 @@ class AccountsController(Document):
         return gl_entries
 
     def make_party_gl_entry(self, gl_entries):
+        credit_or_debit = "credit" if self._party_account_field == "credit_to" else "debit"
         gl_entries.append(
             self.get_gl_dict(
                 {
-                    "account": self.credit_to,
+                    "account": self.get(self._party_account_field),
                     "against": self.get(self._expense_account),
-                    "credit": self.grand_total,
-                    "credit_in_account_currency": self.grand_total,
+                    credit_or_debit: self.grand_total,
+                    f"{credit_or_debit}_in_account_currency": self.grand_total,
                     "cost_center": self.cost_center,
                     "party_type": self._party_type,
                     "party": self.get(scrub(self._party_type)),
@@ -158,14 +166,15 @@ class AccountsController(Document):
 
     def make_salary_gl_entry(self, gl_entries):
         cost_center = erpnext.get_default_cost_center(self.company)
-        
+        credit_or_debit = "credit" if self._party_account_field != "credit_to" else "debit"
+
         gl_entries.append(
             self.get_gl_dict(
                 {
                     "account": self.get(self._expense_account),
                     "against": self.get(scrub(self._party_type)) or self.credit_to,
-                    "debit": self.grand_total,
-                    "debit_in_account_currency": self.grand_total,
+                    credit_or_debit: self.grand_total,
+                    f"{credit_or_debit}_in_account_currency": self.grand_total,
                     "cost_center": cost_center		
                 },
                 item=self,

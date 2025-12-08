@@ -18,9 +18,24 @@ class Kegiatan(NestedSet):
 	def validate_items_company(self):
 		if self.is_group:
 			self.items = []
-
+		
+		if not self.have_premi:
+			self.premi_type = None
+			
 		for d in self.items:
-			d.min_basis_premi = flt(d.volume_basis * (100 + d.persentase_premi) / 100) if d.have_premi else 0
+			# Reset premi fields if not applicable
+			if not self.have_premi or self.premi_type != "Percentage":
+				d.persentase_premi = d.rupiah_premi = d.min_basis_premi = 0
+			else:
+				d.min_basis_premi = flt(d.volume_basis * (100 + d.persentase_premi) / 100)
+
+			# Reset day status fields if not applicable
+			if not self.have_premi or self.premi_type != "Day Status":
+				d.workday = d.holiday = d.workday_base = d.holiday_base = 0
+			else:
+				d.workday = 0 if d.workday_base else d.workday
+				d.holiday = 0 if d.holiday_base else d.holiday
+
 
 	def validate_material(self):
 		if self.is_group:

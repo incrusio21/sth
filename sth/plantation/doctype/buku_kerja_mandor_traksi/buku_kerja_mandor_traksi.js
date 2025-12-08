@@ -1,333 +1,190 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
-sth.plantation.setup_budget_controller()
+sth.plantation.setup_bkm_controller()
 
 frappe.ui.form.on("Buku Kerja Mandor Traksi", {
-  refresh(frm) {
-    // frm.toggle_display("kendaraan_pengganti", frm.doc.is_kendaraan_pengganti)
-    // frm.set_df_property("kdr", "read_only", frm.doc.is_kendaraan_pengganti)
+  	refresh(frm) {
+		frm.set_df_property("hasil_kerja", "cannot_add_rows", true);
+		frm.set_df_property("hasil_kerja", "cannot_delete_rows", true);
+  	},
+	posting_date(frm){
+		frm.cscript.get_employee_data({
+			childrens: frm.doc.hasil_kerja,
+			posting_date: frm.doc.posting_date
+		})
+	},
+	kmhm_akhir(frm){
+		frm.set_value("selisih_kmhm", flt(frm.doc.kmhm_akhir) - flt(frm.doc.kmhm_awal))
+	},
+	kmhm_awal(frm){
+		frm.set_value("selisih_kmhm", flt(frm.doc.kmhm_akhir) - flt(frm.doc.kmhm_awal))
+	}
+//   tgl_trk(frm) {
+//     frappe.db.get_value("Rencana Kerja Harian",
+//       { posting_date: frm.doc.tgl_trk },
+//       ["name"]
+//     ).then(r => {
+//       if (Object.keys(r.message).length === 0) {
+//         // frappe.throw("Rencana Kerja Harian Tidak Ditemukan!")
+//         return
+//       }
 
-    // frm.toggle_display("operator_supir_pengganti", frm.doc.is_operator_supir_pengganti)
-    // frm.set_df_property("nk", "read_only", frm.doc.is_operator_supir_pengganti)
+//       frappe.db.get_doc("Rencana Kerja Harian", r.message.name)
+//         .then(doc => {
+//           const rkh_kendaraan = doc.kendaraan.map(r => r.item_pengganti || r.item)
 
-    if (frm.is_new()) {
-      frm.toggle_display("blok", false);
-      frm.toggle_display("batch", false);
-    } else {
-      frappe.db.get_doc("Kegiatan", frm.doc.kegiatan).then(r => {
-        if (r.is_bibitan) {
-          frm.toggle_display("batch", true);
-          frm.toggle_display("blok", false);
-        } else {
-          frm.toggle_display("batch", false);
-          frm.toggle_display("blok", true);
-        }
-      });
-    }
+//           frm.set_query("kdr", function () {
+//             return {
+//               filters: [
+//                 ["Alat Berat Dan Kendaraan", "name", "in", rkh_kendaraan]
+//               ]
+//             };
+//           });
 
-    frappe.call({
-      method: "get_employee_supervisi",
-      doc: frm.doc,
-      callback: function (r) {
-        if (r.message) {
-          let employee = r.message.map(row => row.name);
-          frm.set_query("mdr", function () {
-            return {
-              filters: [["Employee", "name", "in", employee]]
-            };
-          });
-        }
-      }
-    })
-
-    frappe.call({
-      method: "get_employee_traksi",
-      doc: frm.doc,
-      callback: function (r) {
-        if (r.message) {
-          let employee = r.message.map(row => row.name);
-          frm.set_query("nk", function () {
-            return {
-              filters: [["Employee", "name", "in", employee]]
-            };
-          });
-        }
-      }
-    })
-
-    frappe.db.get_value("Company",
-      { name: frm.doc.company },
-      ["name", "custom_ump_harian"]
-    ).then(r => {
-      if (!r.message) return
-      frm.set_value("uph", r.message.custom_ump_harian)
-    })
-  },
-  // is_kendaraan_pengganti(frm) {
-  //   frm.toggle_display("kendaraan_pengganti", frm.doc.is_kendaraan_pengganti)
-  //   frm.set_df_property("kdr", "read_only", frm.doc.is_kendaraan_pengganti)
-  // },
-  // is_operator_supir_pengganti(frm) {
-  //   frm.toggle_display("operator_supir_pengganti", frm.doc.is_operator_supir_pengganti)
-  //   frm.set_df_property("nk", "read_only", frm.doc.is_operator_supir_pengganti)
-
-  //   if (frm.doc.is_operator_supir_pengganti) {
-  //     frappe.call({
-  //       method: "get_employee_traksi",
-  //       doc: frm.doc,
-  //       callback: function (r) {
-  //         if (r.message) {
-  //           let employee = r.message.map(row => row.name);
-  //           frm.set_query("operator_supir_pengganti", function () {
-  //             return {
-  //               filters: [["Employee", "name", "in", employee]]
-  //             };
-  //           });
-  //         }
-  //       }
-  //     })
-  //   }
-  // },
-  tgl_trk(frm) {
-    frappe.db.get_value("Rencana Kerja Harian",
-      { posting_date: frm.doc.tgl_trk },
-      ["name"]
-    ).then(r => {
-      if (Object.keys(r.message).length === 0) {
-        // frappe.throw("Rencana Kerja Harian Tidak Ditemukan!")
-        return
-      }
-
-      frappe.db.get_doc("Rencana Kerja Harian", r.message.name)
-        .then(doc => {
-          const rkh_kendaraan = doc.kendaraan.map(r => r.item_pengganti || r.item)
-
-          frm.set_query("kdr", function () {
-            return {
-              filters: [
-                ["Alat Berat Dan Kendaraan", "name", "in", rkh_kendaraan]
-              ]
-            };
-          });
-
-          console.log(rkh_kendaraan);
-        });
-    });
-  },
-  company(frm) {
-    frm.set_query("unit", function () {
-      return {
-        filters: [
-          ["Unit", "company", "=", frm.doc.company]
-        ]
-      };
-    });
-  },
-  unit(frm) {
-    frm.set_query("kendaraan_pengganti", function () {
-      return {
-        filters: [
-          ["Alat Berat Dan Kendaraan", "unit", "=", frm.doc.unit]
-        ]
-      };
-    });
-    frm.set_query("blok", function () {
-      return {
-        filters: [
-          ["Blok", "unit", "=", frm.doc.unit]
-        ]
-      };
-    });
-  },
-  divisi(frm) {
-    frm.set_query("blok", function () {
-      return {
-        filters: [
-          ["Blok", "divisi", "=", frm.doc.divisi]
-        ]
-      };
-    });
-  },
-  mdr(frm) {
-    if (frm.doc.mdr) {
-      frappe.db.get_value("Employee", frm.doc.mdr, "designation", function (r) {
-        if (r && r.designation) {
-          // ambil nama jabatannya (bukan kode)
-          frappe.db.get_value("Designation", r.designation, "designation_name", function (res) {
-            if (res && res.designation_name) {
-              frm.set_value("designation", res.designation_name);
-            }
-          });
-        }
-      });
-    } else {
-      frm.set_value("designation", "");
-    }
-  },
-  nk(frm) {
-    if (frm.doc.nk) {
-      frappe.db.get_value("Employee", frm.doc.nk, "designation", function (r) {
-        if (r && r.designation) {
-          // ambil nama jabatannya (bukan kode)
-          frappe.db.get_value("Designation", r.designation, "designation_name", function (res) {
-            if (res && res.designation_name) {
-              frm.set_value("jbtn", res.designation_name);
-            }
-          });
-        }
-      });
-    } else {
-      frm.set_value("jbtn", "");
-    }
-  },
-  // kendaraan_pengganti(frm) {
-  //   frappe.db.get_doc("Alat Berat Dan Kendaraan", frm.doc.kendaraan_pengganti)
-  //     .then(doc => {
-  //       frm.set_value('jk', doc.tipe_master);
-  //     })
-  // },
-  tipe_master_kendaraan(frm) {
-    if (frm.doc.tipe_master_kendaraan) {
-      frm.set_query("kdr", function () {
-        return {
-          filters: [
-            ["Alat Berat Dan Kendaraan", "tipe_master", "=", frm.doc.tipe_master_kendaraan]
-          ]
-        };
-      });
-    } else {
-      frm.set_query("kdr", function () {
-        return {};
-      });
-    }
-    // if (frm.doc.tgl_trk == undefined) {
-    //   frappe.throw("Tanggal Transaksi Harap Diisi!")
-    //   return
-    // }
-
-    // frappe.db.get_value("Rencana Kerja Harian",
-    //   { posting_date: frm.doc.tgl_trk },
-    //   ["name"]
-    // ).then(r => {
-    //   if (Object.keys(r.message).length === 0) {
-    //     // frappe.throw("Rencana Kerja Harian Tidak Ditemukan!")
-    //     return
-    //   }
-
-    //   frappe.db.get_doc("Rencana Kerja Harian", r.message.name)
-    //     .then(doc => {
-    //       const rkh_kendaraan = doc.kendaraan.map(r => r.item_pengganti || r.item)
-
-    //       frm.set_query("kdr", function () {
-    //         return {
-    //           filters: [
-    //             ["Alat Berat Dan Kendaraan", "name", "in", rkh_kendaraan],
-    //             ["Alat Berat Dan Kendaraan", "tipe_master", "=", frm.doc.tipe_master_kendaraan]
-    //           ]
-    //         };
-    //       });
-
-    //       console.log(rkh_kendaraan);
-    //     });
-    // });
-  },
-  kdr(frm) {
-    if (frm.doc.kdr) {
-      frappe.db.get_value("Alat Berat Dan Kendaraan", frm.doc.kdr, "operator")
-        .then(r => {
-          if (r.message) {
-            frm.set_value("nk", r.message.operator);
-          }
-        });
-    } else {
-      frm.set_value("nk", "");
-    }
-  },
-  kegiatan(frm) {
-    frappe.db.get_doc("Kegiatan", frm.doc.kegiatan).then(r => {
-      if (r.is_bibitan) {
-        frm.toggle_display("batch", true);
-        frm.toggle_display("blok", false);
-      } else {
-        frm.toggle_display("batch", false);
-        frm.toggle_display("blok", true);
-      }
-    });
-  },
-  hk(frm) {
-    frappe.call({
-      method: "get_min_basis_premi_and_rupiah_premi_kegiatan",
-      doc: frm.doc,
-      args: {
-        kegiatan: frm.doc.kegiatan,
-        company: frm.doc.company,
-      },
-      callback: function (r) {
-        if (!r.message) return;
-
-        console.log(r.message, frm.doc.hk)
-        if (frm.doc.hk >= r.message.min_basis_premi) {
-          frm.set_value("rupiah_premi", r.message.rupiah_premi);
-        }
-
-        const pekerjaan_subtotal = (frm.doc.hk * frm.doc.rupiah_basis) + frm.doc.rupiah_premi
-        const subtotal_upah = (frm.doc.hk * frm.doc.rupiah_basis)
-
-        if (frm.doc.jk == "Dump Truck") {
-          frm.set_value("subtotal_upah", subtotal_upah)
-          frm.set_value("pekerjaan_subtotal", pekerjaan_subtotal)
-        }
-      }
-    })
-
-    frappe.call({
-      method: "get_volume_basis_kegiatan",
-      doc: frm.doc,
-      args: {
-        kegiatan: frm.doc.kegiatan,
-        company: frm.doc.company,
-      },
-      callback: function (r) {
-        if (r.message) {
-          if (frm.doc.jk == "Dump Truck") {
-            hari_kerja = (frm.doc.hk / r.message) > 1 ? 1 : parseFloat((frm.doc.hk / r.message).toFixed(2));
-            console.log({ hari_kerja });
-            frm.set_value("hari_kerja", hari_kerja)
-          } else {
-            frm.set_value("hari_kerja", 1)
-          }
-        }
-      }
-    })
-  },
-  rupiah_premi(frm) {
-    const pekerjaan_subtotal = (frm.doc.hk * frm.doc.rupiah_basis) + frm.doc.rupiah_premi
-
-    if (frm.doc.jk == "Dump Truck") {
-      frm.set_value("pekerjaan_subtotal", pekerjaan_subtotal)
-    }
-  },
-  premi(frm) {
-    if (frm.doc.jk != "Dump Truck" && frm.doc.uph != 0) {
-      const operator_subtotal = frm.doc.uph + frm.doc.premi
-      console.log({
-        "operator_subtotal": operator_subtotal,
-        "uph": frm.doc.uph,
-        "premi": frm.doc.premi
-      })
-      frm.set_value("operator_subtotal", operator_subtotal)
-    }
-  }
+//           console.log(rkh_kendaraan);
+//         });
+//     });
+//   }
 });
 
-sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.plantation.BudgetController {
-  setup(doc) {
-    super.setup(doc)
-    this.kegiatan_fetch_fieldname = ["rupiah_basis"]
-  }
-  set_query_field() { }
-  company(doc) { }
+frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
+	employee(frm, cdt, cdn){
+		let data = frappe.get_doc(cdt, cdn)
+
+		frm.cscript.get_employee_data({
+			childrens: [data],
+			posting_date: frm.doc.posting_date
+		})
+	}
+})
+
+sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.plantation.BKMController {
+	setup(doc) {
+		super.setup(doc)
+
+		this.fieldname_total.push("premi_amount")
+        this.kegiatan_fetch_fieldname.push(
+			"workday as premi_workday", "holiday as premi_holiday", 
+			"workday_base as ump_as_workday", "holiday_base as ump_as_holiday"
+		)
+
+		// calculate grand total lagi jika field berubah
+		for (const fieldname of ["base", "total_hari"]) {
+			frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", fieldname, function (frm, cdt, cdn) {
+				me.calculate_total(cdt, cdn)
+			});
+		}
+        // this.get_data_rkh_field.push("batch")
+        this.hasil_kerja_update_field.push("premi_workday", "premi_holiday", "ump_bulanan", "ump_as_workday", "ump_as_holiday")
+
+        this.setup_bkm(doc)
+	}
+
+  	set_query_field() {
+		this.frm.set_query("unit", function (doc) {
+			return {
+				filters: {
+					company: ["=", doc.company]
+				}
+			};
+		});
+
+		this.frm.set_query("blok", function (doc) {
+			return {
+				filters: {
+					unit: ["=", doc.unit],
+					divisi: ["=", doc.divisi],
+				}
+			};
+		});
+
+		this.frm.set_query("mandor", function () {
+            return {
+				query: "sth.controllers.queries.employee_designation_query",
+              	filters: {
+					supervisi: "Traksi"
+				}
+            };
+		});
+
+		this.frm.set_query("kendaraan", function (doc) {
+			return {
+				filters: {
+					tipe_master: ["=", doc.tipe_master_kendaraan]
+				} 
+			};
+		});
+
+		this.frm.set_query("employee", "hasil_kerja", function () {
+            return {
+				query: "sth.controllers.queries.employee_designation_query",
+              	filters: {
+					is_traksi: 1
+				}
+            };
+		});
+   	}
+
+	kendaraan(doc){
+		let me = this
+		
+		this.frm.call({
+			method: "get_details_kendaraan",
+			doc: doc,
+			callback: () => {
+				me.calculate_total(null, null, "hasil_kerja")
+			}
+		})
+	}
+
+	get_employee_data(args){
+		if(!args.childrens) return
+
+		let me = this
+		frappe.call({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
+			args: args,
+			freeze: true,
+			callback: function (data) {
+				me.frm.doc.hasil_kerja = data.message
+				me.calculate_total(null, null, "hasil_kerja")
+			}
+		})
+	}
+	
+	update_rate_or_qty_value(item) {
+        if (item.parentfield != "hasil_kerja") return
+
+        let doc = this.frm.doc
+        
+		if (!in_list(["Dump Truck"], doc.tipe_master_kendaraan)){
+			item.rate = flt(item.base/item.total_hari)
+		}
+        
+		if (!doc.manual_hk){
+			item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
+        }
+        
+		if(doc.is_heavy_equipment){
+			item.premi_amount = flt(doc.premi_heavy_equipment)
+		}else{
+			this.set_premi_non_heavy_equipment(item)
+		}
+    }
+
+	set_premi_non_heavy_equipment(item){
+		let doc = this.frm.doc
+		let fields = item.is_holiday ? "holiday" : "workday"
+		let premi = doc[`ump_as_${fields}`] ? flt(doc.ump_bulanan/item.total_hari) :
+			doc[`premi_${fields}`]
+		
+		item.premi_amount = flt(premi*item.qty)
+	}
+
+	update_value_after_amount(item) {
+        item.sub_total = flt(item.amount) + flt(item.premi_amount)
+    }
 }
 
 cur_frm.script_manager.make(sth.plantation.BukuKerjaMandorTraksi);

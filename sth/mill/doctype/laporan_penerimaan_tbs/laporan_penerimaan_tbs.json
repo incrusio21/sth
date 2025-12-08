@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-12-05 10:31:28.571761",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_wnhv",
+  "posting_date",
+  "naming_series",
+  "column_break_brwj",
+  "tipe",
+  "get_data_timbangan",
+  "section_break_waih",
+  "items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_wnhv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "\nLP-.DD.MM.YY.-.###"
+  },
+  {
+   "fieldname": "column_break_brwj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "label": "Tipe",
+   "options": "\nInternal\nEksternal"
+  },
+  {
+   "fieldname": "get_data_timbangan",
+   "fieldtype": "Button",
+   "label": "Get Data Timbangan"
+  },
+  {
+   "fieldname": "section_break_waih",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Laporan TBS Items"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Laporan Penerimaan TBS",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-05 13:12:15.698773",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Laporan Penerimaan TBS",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -157,14 +157,64 @@ def material_kegiatan_query(
 	)
 
 @frappe.whitelist()
-def kegiatan_fetch_data(kegiatan, company, fieldname):
-	if isinstance(fieldname, str):
-		fieldname = json.loads(fieldname)
+@frappe.validate_and_sanitize_search_inputs
+def employee_designation_query(
+	doctype,
+	txt,
+	searchfield,
+	start,
+	page_len,
+	filters,
+	reference_doctype: str | None = None,
+	ignore_user_permissions: bool = True,
+):
+	doctype = "Employee"
+	doctype_child = "Designation"
+	conditions = []
+	fields = get_fields(doctype, ["name", "employee_name"])
+	ignore_permissions = True
+	filters = filters or {}
+	filters_child = {}
 
-	return frappe.get_value("Kegiatan Company", {
-		"parent": kegiatan,
-		"company": company
-	}, fieldname, as_dict=1)
+	if reference_doctype and ignore_user_permissions:
+		ignore_permissions = has_ignored_field(reference_doctype, doctype) and has_permission(
+			doctype,
+			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
+		)
+
+	mcond = "" if ignore_permissions else get_match_cond(doctype)
+	if filters.get("supervisi"):
+		filters_child["custom_supervisi"] = filters["supervisi"]
+		del filters["supervisi"]
+
+	if filters.get("is_traksi"):
+		filters_child["is_jabatan_traksi"] = filters["is_traksi"]
+		del filters["is_traksi"]
+
+	return frappe.db.sql(
+		"""select {fields} from `tabEmployee`
+		join `tabDesignation` on `tabDesignation`.name = `tabEmployee`.designation
+		where status in ('Active', 'Suspended')
+			and `tabEmployee`.docstatus < 2
+			and (`tabEmployee`.{key} like %(txt)s
+				or `tabEmployee`.employee_name like %(txt)s)
+			{fcond} {mcond} {fcondchild}
+		order by
+			(case when locate(%(_txt)s, `tabEmployee`.name) > 0 then locate(%(_txt)s, `tabEmployee`.name) else 99999 end),
+			(case when locate(%(_txt)s, `tabEmployee`.employee_name) > 0 then locate(%(_txt)s, `tabEmployee`.employee_name) else 99999 end),
+			`tabEmployee`.idx desc,
+			`tabEmployee`.name, `tabEmployee`.employee_name
+		limit %(page_len)s offset %(start)s""".format(
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"fcond": get_filters_cond(doctype, filters, conditions) if filters else "",
+				"fcondchild": get_filters_cond(doctype_child, filters_child, conditions, ignore_permissions=True) if filters_child else "",
+				"mcond": mcond,
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)
 
 @frappe.whitelist()
 def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibitan=False):

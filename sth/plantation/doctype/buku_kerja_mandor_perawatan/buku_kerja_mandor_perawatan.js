@@ -17,7 +17,7 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
         super.setup(doc)
                
         this.fieldname_total.push("premi_amount")
-        this.kegiatan_fetch_fieldname.push("have_premi", "min_basis_premi", "rupiah_premi")
+        this.kegiatan_fetch_fieldname.push("min_basis_premi", "rupiah_premi")
         this.max_qty_fieldname = { "hasil_kerja": "volume_basis" }
         
         this.get_data_rkh_field.push("batch")
@@ -55,6 +55,17 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             }
         })
 
+        for (const fieldname of ["mandor", "mandor1", "kerani"]) {
+            this.frm.set_query(fieldname, function () {
+                return {
+                    query: "sth.controllers.queries.employee_designation_query",
+                      filters: {
+                        supervisi: "Agronomi"
+                    }
+                };
+            });
+        }
+
     }
 
     update_rate_or_qty_value(item) {
@@ -62,14 +73,13 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
 
         let doc = this.frm.doc
         
-        item.rate = item.rate || this.frm.doc.rupiah_basis
         item.premi_amount = 0
         
         if (!self.manual_hk){
             item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         }
         
-        if (doc.have_premi && doc.persentase_premi && item.qty >= doc.min_basis_premi){
+        if (doc.have_premi && item.qty >= doc.min_basis_premi){
             item.premi_amount = doc.rupiah_premi
         }
     }

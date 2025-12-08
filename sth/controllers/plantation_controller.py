@@ -1,6 +1,8 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe.utils import flt
 
@@ -29,14 +31,14 @@ class PlantationController(AccountsController):
         if not (self.kegiatan and self.company):
             self.update({key: "" for key in self.kegiatan_fetch_fieldname})
         else:
-            from sth.controllers.queries import kegiatan_fetch_data
-            
             for fieldname in self.kegiatan_fetch_if_empty_fieldname:
                 if self.get(fieldname) is None:
                     self.kegiatan_fetch_fieldname.append(fieldname)
 
             if self.kegiatan_fetch_fieldname:
-                self.update(kegiatan_fetch_data(self.kegiatan, self.company, self.kegiatan_fetch_fieldname))
+                self.update(
+                    fetch_kegiatan_company(self.kegiatan, self.company, self.kegiatan_fetch_fieldname)
+                )
 
     def calculate(self):
         self.calculate_item_table_values()
@@ -117,3 +119,13 @@ class PlantationController(AccountsController):
     def after_calculate_grand_total(self):
         # set on child class if needed
         pass
+
+@frappe.whitelist()
+def fetch_kegiatan_company(kegiatan, company, fieldname):
+	if isinstance(fieldname, str):
+		fieldname = json.loads(fieldname)
+
+	return frappe.get_value("Kegiatan Company", {
+		"parent": kegiatan,
+		"company": company
+	}, fieldname, as_dict=1)

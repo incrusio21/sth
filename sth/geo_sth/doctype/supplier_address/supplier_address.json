@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-08 11:35:51.998558",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kota",
+  "provinsi",
+  "alamat",
+  "column_break_achp",
+  "negara",
+  "is_active",
+  "telepon",
+  "fax",
+  "section_break_znyx",
+  "jabatan",
+  "telepon_genggam",
+  "column_break_mhag",
+  "contact_person",
+  "section_break_icvv",
+  "email_konfirmasi_pembayaran",
+  "column_break_sfir",
+  "email_koresponden"
+ ],
+ "fields": [
+  {
+   "fieldname": "kota",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kota",
+   "options": "City"
+  },
+  {
+   "fieldname": "provinsi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Provinsi",
+   "options": "Province"
+  },
+  {
+   "fieldname": "alamat",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "column_break_achp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "negara",
+   "fieldtype": "Link",
+   "label": "Negara",
+   "options": "Country"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "section_break_znyx",
+   "fieldtype": "Section Break",
+   "label": "PIC"
+  },
+  {
+   "fieldname": "telepon",
+   "fieldtype": "Data",
+   "label": "Telepon"
+  },
+  {
+   "fieldname": "fax",
+   "fieldtype": "Data",
+   "label": "Fax"
+  },
+  {
+   "fieldname": "column_break_mhag",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  },
+  {
+   "fieldname": "jabatan",
+   "fieldtype": "Data",
+   "label": "Jabatan"
+  },
+  {
+   "fieldname": "section_break_icvv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "telepon_genggam",
+   "fieldtype": "Data",
+   "label": "Telepon Genggam"
+  },
+  {
+   "fieldname": "email_konfirmasi_pembayaran",
+   "fieldtype": "Data",
+   "label": "Email Konfirmasi Pembayaran"
+  },
+  {
+   "fieldname": "column_break_sfir",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email_koresponden",
+   "fieldtype": "Data",
+   "label": "Email Koresponden"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-08 11:49:39.684926",
+ "modified_by": "Administrator",
+ "module": "Geo STH",
+ "name": "Supplier Address",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

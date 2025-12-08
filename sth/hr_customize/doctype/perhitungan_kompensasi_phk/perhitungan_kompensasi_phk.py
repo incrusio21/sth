@@ -92,20 +92,24 @@ class PerhitunganKompensasiPHK(AccountsController):
 		doc.company = self.company
 		doc.posting_date = self.posting_date
 		doc.payroll_date = self.posting_date
-		doc.hari_kerja = 0
-		doc.status = "Approved"
 		doc.amount = self.grand_total
 		doc.salary_component = self.earning_phk_component
 		doc.against_salary_component = self.deduction_phk_component
-		doc.save()
 
-		self.db_set('employee_payment_log', doc.name)
+		doc.voucher_type = self.doctype
+		doc.voucher_no = self.name
+		doc.component_type = "Kompensasi"
+
+		doc.save()
   
 	def delete_employee_payment(self):
-		epl = self.employee_payment_log
 		frappe.get_doc('Exit Interview', self.exit_interview).cancel()
-		self.db_set('employee_payment_log', None)
-		frappe.db.delete('Employee Payment Log', epl)
+		for epl in frappe.get_all(
+			"Employee Payment Log", 
+			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+			pluck="name"
+		):
+			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
 	@frappe.whitelist()
 	def fetch_ssa(self):

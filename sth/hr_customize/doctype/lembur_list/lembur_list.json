@@ -149,7 +149,7 @@
   {
    "fetch_from": "month_period.month_number",
    "fieldname": "month_number",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "hidden": 1,
    "label": "Month Number",
    "read_only": 1
@@ -187,7 +187,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 15:04:33.295309",
+ "modified": "2025-12-07 21:46:28.622207",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Lembur List",

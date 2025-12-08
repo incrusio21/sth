@@ -5,6 +5,7 @@ frappe.provide("sth.plantation");
 
 sth.plantation.TransactionController = class TransactionController extends sth.plantation.AccountsController {
     setup(doc) {
+        let me = this
         let doctype = doc.doctype
         this.fieldname_total = ["amount"]
         this.skip_table_amount = []
@@ -16,18 +17,16 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
         if (!sth.plantation.doctype_ref[doctype]) {
             sth.plantation.setup_doctype_ref(doctype)
         }
+
+        for (const fieldname of ["company", "kegiatan"]) {
+			frappe.ui.form.on(doctype, fieldname, function (frm) {
+                me.fetch_data_kegiatan(frm.doc.kegiatan, frm.doc.company)
+			});
+		}
     }
 
     refresh() {
         this.set_query_field()
-    }
-
-    company(doc) {
-        this.fetch_data_kegiatan(doc.kegiatan, doc.company)
-    }
-
-    kegiatan(doc) {
-        this.fetch_data_kegiatan(doc.kegiatan, doc.company)
     }
 
     item(doc, cdt, cdn) {
@@ -35,7 +34,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
         let doctype = this.frm.fields_dict[data.parentfield].grid.fields_map.item.options;
 
         frappe.call({
-            method: "sth.plantation.utils.get_details_item",
+            method: "sth.controllers.plantation_controller.get_details_item",
             args: {
                 item: data.item,
                 doctype: doctype,
@@ -279,7 +278,6 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
     }
 
     fetch_data_kegiatan(kegiatan, company) {
-        console.log("tes")
         let me = this
         if (!me.kegiatan_fetch_fieldname) return
 
@@ -287,7 +285,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
             me.frm.set_value(Object.fromEntries(me.kegiatan_fetch_fieldname.map(key => [key, ""])))
         } else {
             frappe.call({
-                method: "sth.controllers.queries.kegiatan_fetch_data",
+                method: "sth.controllers.plantation_controller.fetch_kegiatan_company",
                 args: {
                     kegiatan: kegiatan,
                     company: company,

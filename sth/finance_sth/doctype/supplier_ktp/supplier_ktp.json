@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-08 13:02:26.466692",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama",
+  "rtrw",
+  "keldesa",
+  "kecamatan",
+  "column_break_akob",
+  "nik",
+  "kota",
+  "alamat",
+  "provinsi",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "rtrw",
+   "fieldtype": "Data",
+   "label": "RT/RW"
+  },
+  {
+   "fieldname": "keldesa",
+   "fieldtype": "Data",
+   "label": "Kel/Desa"
+  },
+  {
+   "fieldname": "alamat",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "column_break_akob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "NIK"
+  },
+  {
+   "fieldname": "kecamatan",
+   "fieldtype": "Data",
+   "label": "Kecamatan"
+  },
+  {
+   "fieldname": "kota",
+   "fieldtype": "Link",
+   "label": "Kota",
+   "options": "City"
+  },
+  {
+   "fieldname": "provinsi",
+   "fieldtype": "Link",
+   "label": "Provinsi",
+   "options": "Province"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-08 13:07:32.228183",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Supplier KTP",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
