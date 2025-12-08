@@ -10,35 +10,22 @@
   "header_tab",
   "section_break_gzmq",
   "naming_series",
-  "posting_date",
-  "company",
-  "column_break_lpdk",
   "status_anggaran_dasar",
-  "akta",
+  "column_break_lpdk",
+  "company",
+  "posting_date",
   "amended_from",
   "detail_akta_section",
-  "jenis_akta",
-  "tanggal_akta",
-  "nama_notaris",
-  "nomor_sk_kehakiman",
-  "tanggal_sk_kehakiman",
+  "akta",
   "column_break_tanb",
-  "kedudukan",
-  "alamat",
-  "modal_dasar",
-  "modal_di_setor",
-  "kegiatan_usaha",
-  "bnri",
-  "tbnri",
-  "keterangan",
   "section_break_psjl",
   "saham",
+  "section_break_boxd",
+  "susunan_pengurus",
   "section_break_sslx",
   "column_break_pojw",
   "column_break_alar",
-  "grand_total",
-  "susunan_pengurus_dan_komisaris_tab",
-  "table_gllk"
+  "grand_total"
  ],
  "fields": [
   {
@@ -64,17 +51,6 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
-  },
-  {
-   "fieldname": "susunan_pengurus_dan_komisaris_tab",
-   "fieldtype": "Tab Break",
-   "label": "Susunan Pengurus dan Komisaris"
-  },
-  {
-   "fieldname": "table_gllk",
-   "fieldtype": "Table",
-   "label": "Officer",
-   "options": "Detail Susunan Pengurus dan Komisaris"
   },
   {
    "fieldname": "amended_from",
@@ -110,25 +86,13 @@
   },
   {
    "fieldname": "akta",
-   "fieldtype": "Data",
-   "label": "Akta"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "detail_akta_section",
-   "fieldtype": "Section Break",
-   "label": "Detail Akta"
-  },
-  {
-   "fieldname": "jenis_akta",
    "fieldtype": "Link",
-   "label": "Jenis Akta",
-   "options": "Jenis Akta"
+   "label": "Akta",
+   "options": "Akta List"
   },
   {
-   "fieldname": "tanggal_akta",
-   "fieldtype": "Date",
-   "label": "Tanggal Akta"
+   "fieldname": "detail_akta_section",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "saham",
@@ -161,79 +125,24 @@
    "read_only": 1
   },
   {
-   "fieldname": "nama_notaris",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Nama Notaris"
-  },
-  {
-   "fieldname": "nomor_sk_kehakiman",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Nomor SK Kehakiman"
-  },
-  {
-   "fieldname": "tanggal_sk_kehakiman",
-   "fieldtype": "Date",
-   "label": "Tanggal SK Kehakiman"
-  },
-  {
    "fieldname": "column_break_tanb",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "kedudukan",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Kedudukan"
+   "fieldname": "section_break_boxd",
+   "fieldtype": "Section Break"
   },
   {
-   "fieldname": "alamat",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Alamat"
-  },
-  {
-   "fieldname": "modal_dasar",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Modal Dasar"
-  },
-  {
-   "fieldname": "modal_di_setor",
-   "fieldtype": "Currency",
-   "in_preview": 1,
-   "label": "Modal Di Setor"
-  },
-  {
-   "fieldname": "kegiatan_usaha",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Kegiatan Usaha"
-  },
-  {
-   "fieldname": "bnri",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "BNRI"
-  },
-  {
-   "fieldname": "tbnri",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "TBNRI"
-  },
-  {
-   "fieldname": "keterangan",
-   "fieldtype": "Small Text",
-   "in_preview": 1,
-   "label": "Keterangan"
+   "fieldname": "susunan_pengurus",
+   "fieldtype": "Table",
+   "label": "Susunan Pengurus",
+   "options": "Detail Susunan Pengurus dan Komisaris"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 14:55:25.240809",
+ "modified": "2025-12-08 13:39:20.782885",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",
