@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now
+from frappe.utils import add_days, flt, getdate, get_first_day_of_week, month_diff, now
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -16,7 +16,7 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
 
-from datetime import datetime, timedelta
+LEAVE_CODE_MAP = "leave_code_map"
 
 class SalarySlip(SalarySlip):
 	def on_submit(self):
@@ -56,7 +56,7 @@ class SalarySlip(SalarySlip):
 
 	def calculate_holidays(self):
 
-		list_status_code_lwp = self._get_status_code_lwp()
+		list_status_code_lwp = self.get_status_code_lwp()
 		list_attendance = self._get_attendance_days(list_status_code_lwp)
 
 		holidays = self.get_holidays_for_employee(self.actual_start_date, self.actual_end_date)
@@ -94,8 +94,11 @@ class SalarySlip(SalarySlip):
 				else:
 					current_week_holiday += 1
 				
-				if current_date in list_attendance:
+				if status_code := list_attendance.get(current_date):
 					att_exist = True
+					# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
+					if status_code in list_status_code_lwp:
+						self.holiday_days += 1
 				
 				current_date = add_days(current_date, 1)
 			
@@ -109,23 +112,23 @@ class SalarySlip(SalarySlip):
 
 		# holiday_days ditambahkan dengan attendance dengan leave type sakit - chandra
 
-		Attendance = frappe.qb.DocType("Attendance")
-		query = (
-			frappe.qb.from_(Attendance)
-			.select(Attendance.name, Attendance.status_code)
-			.where(
-				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
-				& (Attendance.employee == self.employee)
-				& (Attendance.docstatus == 1)
-				& (Attendance.status == "On Leave")
-			)
-		)
+		# Attendance = frappe.qb.DocType("Attendance")
+		# query = (
+		# 	frappe.qb.from_(Attendance)
+		# 	.select(Attendance.name, Attendance.status_code)
+		# 	.where(
+		# 		(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+		# 		& (Attendance.employee == self.employee)
+		# 		& (Attendance.docstatus == 1)
+		# 		& (Attendance.status == "On Leave")
+		# 	)
+		# )
 
-		list_attendance_leave = query.run(as_dict=True)
+		# list_attendance_leave = query.run(as_dict=True)
 
-		for row in list_attendance_leave:
-			if row.status_code in list_status_code_lwp:
-				self.holiday_days += 1
+		# for row in list_attendance_leave:
+		# 	if row.status_code in list_status_code_lwp:
+		# 		self.holiday_days += 1
 
 
 	def _get_not_out_attendance_days(self) -> float:
@@ -148,28 +151,32 @@ class SalarySlip(SalarySlip):
 		Attendance = frappe.qb.DocType("Attendance")
 		query = (
 			frappe.qb.from_(Attendance)
-			.select(Attendance.attendance_date)
+			.select(Attendance.attendance_date, Attendance.status_code)
 			.where(
 				(Attendance.attendance_date.between(self.start_date, self.actual_end_date))
 				& (Attendance.employee == self.employee)
 				& (Attendance.docstatus == 1)
-				& ((Attendance.status.isin(["Present"])) | (Attendance.status_code.isin(list_lwp)) )
+				& ((Attendance.status.isin(["Present"])) | (Attendance.status_code.isin(list_lwp)))
 			)
 		).run()
 		
-		return [row[0] for row in query]
+		return {row[0]: row[1] for row in query}
 
-	def _get_status_code_lwp(self) -> list:
-		leave_type = frappe.qb.DocType("Leave Type")
-		query = (
-			frappe.qb.from_(leave_type)
-			.select(leave_type.status_code)
-			.where(
-				(leave_type.is_lwp == 1)
-			)
-		).run()
+	def get_status_code_lwp(self) -> list:
+			
+		def _get_leave_code_map():
+			leave_type = frappe.qb.DocType("Leave Type")
+			query = (
+				frappe.qb.from_(leave_type)
+				.select(leave_type.status_code)
+				.where(
+					(leave_type.is_lwp == 1)
+				)
+			).run()
 
-		return [row[0] for row in query]
+			return [row[0] for row in query]
+
+		return frappe.cache().get_value(LEAVE_CODE_MAP, _get_leave_code_map)
 	
 	def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
 		# agar payment log selalu generate ulang
