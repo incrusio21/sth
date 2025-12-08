@@ -15,10 +15,6 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			["premi_salary_component", "premi_sc"],
 		])
 		
-		self.max_qty_fieldname = {
-            "hasil_kerja": "volume_basis"
-        }
-		
 		self.fieldname_total.extend(["premi_amount"])
 
 		self.kegiatan_fetch_fieldname.extend(["min_basis_premi", "rupiah_premi"])
