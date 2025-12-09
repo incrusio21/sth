@@ -100,7 +100,8 @@ function filterAccount(frm) {
         return {
             filters: {
                 account_type: "Receivable",
-                company: doc.company
+                company: doc.company,
+                is_group: ["=", doc.bank]
             }
         }
     })
@@ -108,7 +109,8 @@ function filterAccount(frm) {
         return {
             filters: {
                 account_type: ["!=","Receivable"],
-                company: doc.company
+                company: doc.company,
+                is_group: ["=", doc.bank]
             }
         }
     })
