@@ -29,6 +29,7 @@ app_include_js = "sth.bundle.js"
 
 # include js in doctype views
 doctype_js = {
+	"Asset": "public/js/asset.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
 	"Driver": "public/js/driver.js",
@@ -170,6 +171,9 @@ doc_events = {
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
 	# }
+	"Asset": {
+		"validate": ["sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+	},
     "Attendance": {
         "validate": "sth.hr_customize.custom.attendance.Attendance",
         "on_submit": "sth.hr_customize.custom.attendance.Attendance",
