@@ -112,6 +112,14 @@ function filterAccount(frm) {
             }
         }
     })
+
+    frappe.db.get_value("Company", frm.doc.company, "*")
+    .then(r => {
+        if (frm.is_new()) {
+            frm.set_value('debit_to', r.message.default_deposito_debit_account)
+            frm.set_value('expense_account', r.message.default_deposito_expense_account)
+        }
+    })
 }
 
 function filterUnit(frm) {

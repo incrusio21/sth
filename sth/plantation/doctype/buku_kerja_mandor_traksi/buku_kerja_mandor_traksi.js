@@ -168,7 +168,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
    	}
 
 	get_kegiatan_data(args){
-		if(!args.childrens) return
+		if(args.childrens.length == 0) return
 
 		let me = this
 		frappe.call({
