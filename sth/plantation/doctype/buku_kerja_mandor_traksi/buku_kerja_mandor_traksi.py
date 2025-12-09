@@ -160,7 +160,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 			hk.premi_heavy_equipment = 0
 			if jenis_alat.get("premi"):
-				selisih_kmhm = (hk.kmhm_ahkir - kmhm_akhir)
+				selisih_kmhm = floor((hk.kmhm_ahkir - kmhm_akhir)/60)
 				for premi in jenis_alat.premi:
 					# hentikan jika selisih sudah lebih kecil sama dengan 0
 					if selisih_kmhm <= premi.start_time:
