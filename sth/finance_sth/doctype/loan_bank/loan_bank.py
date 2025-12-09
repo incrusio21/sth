@@ -7,7 +7,7 @@ from frappe.model.document import Document
 from sth.finance_sth.doctype.disbursement_loan.disbursement_loan import make_disbursement_loan
 
 class LoanBank(Document):
-	def on_update_after_submit(self):
+	def validate(self):
 		self.process_disbursement()
 		self.process_installment()
 
@@ -54,7 +54,6 @@ def create_disbursement(loan_bank):
 		disbursement_loan.insert(
 			ignore_permissions=True
 		)
-		disbursement_loan.submit()
 
 
 def update_disbursement(loan_bank):
@@ -90,6 +89,8 @@ def create_installment(loan_bank):
 		values = {
 			"doctype": "Installment Loan",
 			"disbursement_number": loan_bank.disbursement_number,
+			"disbursement_amount": loan_bank.disbursement_amount,
+			"disbursement_date": loan_bank.disbursement_date,
 			"payment_date": loan_bank.payment_date,
 			"installment_month": loan_bank.installment_month,
 			"principal": loan_bank.principal,
@@ -105,7 +106,6 @@ def create_installment(loan_bank):
 		disbursement_loan.insert(
 			ignore_permissions=True
 		)
-		disbursement_loan.submit()
 
 
 def update_installment(loan_bank):
@@ -119,6 +119,8 @@ def update_installment(loan_bank):
 			"loan_interest",
 			"interest_amount",
 			"payment_total",
+			"disbursement_amount",
+			"disbursement_date",
 		]
 
 		if is_doc_changed(doc, loan_bank, check_fields):
@@ -128,6 +130,8 @@ def update_installment(loan_bank):
 			doc.loan_interest = loan_bank.loan_interest
 			doc.interest_amount = loan_bank.interest_amount
 			doc.payment_total = loan_bank.payment_total
+			doc.disbursement_amount = loan_bank.disbursement_amount
+			doc.disbursement_date = loan_bank.disbursement_date
 			doc.db_update_all()
 
 def delete_installment(installments):

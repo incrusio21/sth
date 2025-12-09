@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "disbursement_number",
+  "disbursement_date",
+  "disbursement_amount",
   "payment_date",
   "installment_month",
   "principal",
@@ -78,13 +80,29 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "disbursement_number.disbursement_amount",
+   "fieldname": "disbursement_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pencairan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "disbursement_number.disbursement_date",
+   "fieldname": "disbursement_date",
+   "fieldtype": "Date",
+   "label": "Tanggal Pencairan",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-08 16:48:27.090559",
+ "modified": "2025-12-09 09:26:54.071355",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Installment Loan Bank",
