@@ -71,11 +71,6 @@ def get_columns():
 	]
 
 def get_data(filters):
-
-	employee = frappe.get_doc("Employee", filters.get("employee"))
-	ump_bulanan = frappe.get_doc("Company", employee.company).ump_bulanan 
-	hari_ump = frappe.get_doc("Employment Type", employee.employment_type).hari_ump
-
 	bulan_map = {
 		"Januari": 1, "Februari": 2, "Maret": 3, "April": 4,
 		"Mei": 5, "Juni": 6, "Juli": 7, "Agustus": 8,
@@ -84,20 +79,72 @@ def get_data(filters):
 	month_num = bulan_map.get(filters.get("bulan"), 1)
 	year = int(filters.get("tahun"))
 	
+	# Get all employees who have attendance in the selected month
+	employee_list = get_employees_with_attendance(filters, month_num, year)
+	
+	if not employee_list:
+		return []
+	
+	result = []
+	
+	# Process each employee
+	for employee_id in employee_list:
+		employee_data = process_employee(employee_id, filters, month_num, year)
+		result.extend(employee_data)
+	
+	return result
+
+def get_employees_with_attendance(filters, month_num, year):
+	"""Get list of employees who have attendance in the selected month"""
+	
+	# If employee filter is provided, use only that employee
+	if filters.get("employee"):
+		return [filters.get("employee")]
+	
+	# Otherwise, get all employees with attendance in that month
+	query = """
+		SELECT DISTINCT 
+			a.employee
+		FROM 
+			`tabAttendance` a
+		WHERE 
+			a.docstatus = 1
+			AND MONTH(a.attendance_date) = %(month)s
+			AND YEAR(a.attendance_date) = %(year)s
+		ORDER BY 
+			a.employee
+	"""
+	
+	employees = frappe.db.sql(query, {
+		"month": month_num,
+		"year": year
+	}, as_dict=1)
+	
+	return [emp.employee for emp in employees]
+
+def process_employee(employee_id, filters, month_num, year):
+	"""Process attendance and salary data for a single employee"""
+	
+	employee = frappe.get_doc("Employee", employee_id)
+	ump_bulanan = frappe.get_doc("Company", employee.company).ump_bulanan 
+	hari_ump = frappe.get_doc("Employment Type", employee.employment_type).hari_ump
+	
 	num_days = calendar.monthrange(year, month_num)[1]
 	all_dates = [datetime(year, month_num, day).date() for day in range(1, num_days + 1)]
 
+	# Get Employee Payment Log for Premi Kehadiran
 	epl = frappe.qb.DocType("Employee Payment Log")
 	emp_pl = (
 		frappe.qb.from_(epl)
 		.select(epl.posting_date, epl.amount)
 		.where(
-			(epl.employee == filters.get("employee"))
+			(epl.employee == employee_id)
 			& (epl.salary_component == "Premi Kehadiran")
 			& (epl.posting_date.isin(all_dates))
 		)
 	).run(as_dict=1)
 
+	# Get holidays for the employee
 	holiday_query = """
 		SELECT 
 			holiday_date
@@ -114,13 +161,14 @@ def get_data(filters):
 	"""	
 
 	holidays = frappe.db.sql(holiday_query, {
-		"employee": filters.get("employee"),
+		"employee": employee_id,
 		"month": month_num,
 		"year": year
 	}, as_dict=1)
 	
 	holiday_dates = {getdate(h.holiday_date) for h in holidays}
 
+	# Get attendance data
 	attendance_query = """
 		SELECT 
 			a.name as no_transaksi,
@@ -138,7 +186,7 @@ def get_data(filters):
 	"""
 	
 	attendance_data = frappe.db.sql(attendance_query, {
-		"employee": filters.get("employee"),
+		"employee": employee_id,
 		"month": month_num,
 		"year": year
 	}, as_dict=1)
@@ -150,6 +198,7 @@ def get_data(filters):
 	total_premi_kehadiran = 0
 	total_amount = 0
 	
+	# Process each date in the month
 	for date in all_dates:
 		attendance_row = attendance_dict.get(date)
 		
@@ -192,7 +241,7 @@ def get_data(filters):
 		total_premi_kehadiran += premi_kehadiran
 		total_amount += total
 	
-
+	# Add total row for this employee
 	result.append({
 		"no_transaksi": "",
 		"divisi": "",

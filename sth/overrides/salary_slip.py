@@ -94,6 +94,7 @@ class SalarySlip(SalarySlip):
 				else:
 					current_week_holiday += 1
 				
+				# jika terdapat attendance di hari tersebut
 				if status_code := list_attendance.get(current_date):
 					att_exist = True
 					# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur

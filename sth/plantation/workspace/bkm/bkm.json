@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"3JNihNzekb\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Bibitan\",\"col\":4}},{\"id\":\"v0fPr3sSgy\",\"type\":\"card\",\"data\":{\"card_name\":\"BKM\",\"col\":4}},{\"id\":\"x0EAZ10i66\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Lainnya\",\"col\":4}}]",
+ "content": "[{\"id\":\"3JNihNzekb\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Bibitan\",\"col\":4}},{\"id\":\"v0fPr3sSgy\",\"type\":\"card\",\"data\":{\"card_name\":\"BKM\",\"col\":4}},{\"id\":\"x0EAZ10i66\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Lainnya\",\"col\":4}},{\"id\":\"CV-lG6zcss\",\"type\":\"card\",\"data\":{\"card_name\":\"Absensi\",\"col\":4}},{\"id\":\"onJRymhnHW\",\"type\":\"card\",\"data\":{\"card_name\":\"Report\",\"col\":4}}]",
  "creation": "2025-09-23 15:38:12.021285",
  "custom_blocks": [],
  "docstatus": 0,
@@ -159,9 +159,67 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Report",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Kantor",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Kantor",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Perawatan",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Perawatan",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Traksi",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Traksi",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Absensi",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Attendance",
+   "link_count": 0,
+   "link_to": "Attendance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-11-25 16:42:34.357490",
+ "modified": "2025-12-09 10:25:40.274141",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "BKM",

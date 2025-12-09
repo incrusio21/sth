@@ -96,11 +96,10 @@
   },
   {
    "fieldname": "employee",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Penanggung Jawab",
-   "options": "Employee",
    "reqd": 1
   },
   {
@@ -137,7 +136,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-04 10:19:49.204194",
+ "modified": "2025-12-09 10:24:15.515047",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Detail Informasi Dokumen Perijinan",
