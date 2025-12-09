@@ -1,7 +1,8 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
-
+import math
 import frappe
+
 from frappe.model.document import Document
 from frappe.utils import date_diff
 
@@ -14,6 +15,9 @@ class Deposito(AccountsController):
 		self._party_account_field = "debit_to"
 		self._party_type = "Customer"
 		self.customer = frappe.db.get_single_value("Payment Settings", "receivable_customer")
+		self._party_type = "Customer"
+		self.payment_term = None
+
 
 	def validate(self):
 		self.calculate_deposito()
@@ -44,4 +48,5 @@ class Deposito(AccountsController):
 		self.outstanding_amount = total
 
 	def calculate_tenor(self):
-		self.tenor = (date_diff(self.maturity_date, self.value_date)+1) / self.month_days
+		tenor = (date_diff(self.maturity_date, self.value_date)+1) / self.month_days
+		self.tenor = math.floor(tenor)

@@ -311,6 +311,7 @@
    "fieldname": "month_days",
    "fieldtype": "Int",
    "label": "Hari dalam 1 Bulan",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -336,7 +337,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 11:26:33.396135",
+ "modified": "2025-12-09 16:53:46.003924",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

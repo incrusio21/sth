@@ -10,7 +10,9 @@
   "disbursement_number",
   "disbursement_date",
   "disbursement_amount",
+  "disbursement_total",
   "payment_date",
+  "days",
   "installment_month",
   "principal",
   "loan_interest",
@@ -137,6 +139,20 @@
    "label": "Tanggal Pencairan",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "disbursement_number.disbursement_amount",
+   "fieldname": "disbursement_total",
+   "fieldtype": "Currency",
+   "label": "Total Pencairan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "days",
+   "fieldtype": "Int",
+   "label": "Days",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -144,7 +160,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 09:27:25.888976",
+ "modified": "2025-12-09 15:59:57.577446",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Installment Loan",

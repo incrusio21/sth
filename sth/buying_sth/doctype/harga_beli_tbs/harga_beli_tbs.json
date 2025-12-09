@@ -14,7 +14,10 @@
   "section_break_cvkk",
   "harga",
   "column_break_xxmr",
-  "jarak"
+  "jarak",
+  "section_break_sexk",
+  "get_penerimaan",
+  "item"
  ],
  "fields": [
   {
@@ -57,8 +60,7 @@
   {
    "fieldname": "harga",
    "fieldtype": "Currency",
-   "label": "Harga",
-   "reqd": 1
+   "label": "Harga"
   },
   {
    "fieldname": "column_break_xxmr",
@@ -66,18 +68,33 @@
   },
   {
    "fieldname": "jarak",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Jarak",
    "non_negative": 1,
-   "options": "\nRing 1\nRing 2",
+   "options": "Price List",
    "precision": "2",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_sexk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_penerimaan",
+   "fieldtype": "Button",
+   "label": "Get Penerimaan"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Table",
+   "label": "Item",
+   "options": "Harga Beli Item"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-09 13:45:14.801412",
+ "modified": "2025-12-09 16:33:39.371409",
  "modified_by": "Administrator",
  "module": "Buying STH",
  "name": "Harga Beli TBS",
@@ -97,7 +114,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

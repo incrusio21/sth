@@ -1,4 +1,14 @@
 frappe.ui.form.on("Employee", {
+  setup(frm) {
+    frm.set_query("divisi", function () {
+      return {
+        filters: {
+          unit: frm.doc.unit
+        }
+      }
+    })
+  },
+
   date_of_joining(frm) {
     if (frm.doc.date_of_joining) {
       frm.set_value("custom_employment_tenure", getMonthDifference(frm.doc.date_of_joining));

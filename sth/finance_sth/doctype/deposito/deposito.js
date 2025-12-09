@@ -50,8 +50,10 @@ function calculateTenor(frm) {
 
     const diffDay = frappe.datetime.get_day_diff(endDate, startDate) + 1
     const month = Math.floor(diffDay / monthDays);
+    frm.set_value('month_days', diffDay)
     frm.set_value('tenor', month)
     frm.refresh_field('tenor')
+    frm.refresh_field('month_days')
 
     calculateDeposito(frm)
 }
@@ -101,7 +103,7 @@ function filterAccount(frm) {
             filters: {
                 account_type: "Receivable",
                 company: doc.company,
-                is_group: ["=", doc.bank]
+                is_group: ["=", 0]
             }
         }
     })
@@ -110,7 +112,7 @@ function filterAccount(frm) {
             filters: {
                 account_type: ["!=","Receivable"],
                 company: doc.company,
-                is_group: ["=", doc.bank]
+                is_group: ["=", 0]
             }
         }
     })
