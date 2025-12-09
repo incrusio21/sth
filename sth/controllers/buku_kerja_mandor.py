@@ -43,7 +43,7 @@ class BukuKerjaMandorController(PlantationController):
         
         self.get_plantation_setting()
         # self.get_rencana_kerja_harian()
-        self.validate_hasil_kerja_harian()
+        # self.validate_hasil_kerja_harian()
         # self.validate_previous_document()
         self.get_employee_payment_account()
         super().validate()
@@ -156,7 +156,7 @@ class BukuKerjaMandorController(PlantationController):
                     doc.against_salary_component = self.get("against_salary_component")
 
                     if log_updater.get("target_account"):
-                        doc.account = self.get(log_updater["target_account"])
+                        doc.account = emp.get(log_updater["target_account"]) or self.get(log_updater["target_account"])
 
                     doc.save()
                 else:
