@@ -35,6 +35,9 @@ frappe.ui.form.on("Installment Loan Bank", {
     disbursement_number(frm, cdt, cdn){
         validateChangeInstallment(frm, cdt, cdn)
         checkGracePrincipal(frm, cdt, cdn)
+    },
+    payment_date(frm, cdt, cdn){
+        getDaysInstallment(frm, cdt, cdn)
     }
 })
 
@@ -154,6 +157,28 @@ function checkGracePrincipal(frm, cdt, cdn) {
         frappe.model.set_value(cdt, cdn, 'principal', pricipalAmount)
         frm.refresh_field('disbursements')
     }
+}
+
+function getDaysInstallment(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    const startDate = curRow.disbursement_date;
+    const endDate = curRow.payment_date;
+
+    if (!startDate || !endDate) {
+        return;
+    }
+    const days = frappe.datetime.get_day_diff(endDate, startDate)
+
+    frappe.model.set_value(cdt, cdn, 'days', days)
+    frm.refresh_field('installments')
+}
+
+function calculateInterestAmount(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    if (!curRow.loan_interest || !curRow.days) {
+        return
+    }
+    let interestAmount = 0
 }
 
 let editId = null;

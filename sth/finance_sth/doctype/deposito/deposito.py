@@ -15,6 +15,9 @@ class Deposito(AccountsController):
 		self._party_account_field = "debit_to"
 		self._party_type = "Customer"
 		self.customer = frappe.db.get_single_value("Payment Settings", "receivable_customer")
+		self._party_type = "Customer"
+		self.payment_term = None
+
 
 	def validate(self):
 		self.calculate_deposito()
