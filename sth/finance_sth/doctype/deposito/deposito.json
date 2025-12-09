@@ -13,6 +13,7 @@
   "bank",
   "bank_account",
   "year_days",
+  "month_days",
   "currency",
   "bilyet_number",
   "value_date",
@@ -273,7 +274,7 @@
   {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total",
+   "label": "Total Bunga (Setelah Pajak)",
    "read_only": 1
   },
   {
@@ -302,13 +303,19 @@
    "label": "Unit",
    "options": "Unit",
    "reqd": 1
+  },
+  {
+   "fieldname": "month_days",
+   "fieldtype": "Int",
+   "label": "Hari dalam 1 Bulan",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 10:35:24.472060",
+ "modified": "2025-12-09 10:59:34.028136",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
