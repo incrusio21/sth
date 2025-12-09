@@ -43,7 +43,6 @@ class BukuKerjaMandorController(PlantationController):
         
         self.get_plantation_setting()
         # self.get_rencana_kerja_harian()
-        # self.validate_hasil_kerja_harian()
         # self.validate_previous_document()
         self.get_employee_payment_account()
         super().validate()
@@ -87,13 +86,6 @@ class BukuKerjaMandorController(PlantationController):
                     or fieldname in force_item_fields
                 ):
                     self.set(fieldname, value)
-
-    def validate_hasil_kerja_harian(self):
-        if self.get("is_bibitan"):
-            return
-        
-        if self.uom == "HA" and self.hasil_kerja_qty > self.luas_blok:
-            frappe.throw("Hasil Kerja exceeds Luas Blok")
 
     def validate_previous_document(self):
         from sth.controllers.prev_doc_validate import validate_previous_document

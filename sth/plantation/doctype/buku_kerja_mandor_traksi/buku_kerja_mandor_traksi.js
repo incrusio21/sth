@@ -20,11 +20,11 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 		})
 	},
 	kendaraan(frm){
-		this.frm.call({
+		frappe.call({
 			method: "get_details_kendaraan",
 			doc: frm.doc,
 			callback: (data) => {
-				frm.cscript._set_values_for_item_list(data.message);
+				frm.cscript.calculate_total(null,null,"hasil_kerja");
 			}
 		})
 	}
@@ -83,6 +83,15 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 		frm.cscript.get_kegiatan_data({
 			childrens: [data],
 			company: frm.doc.company
+		})
+	},
+	kmhm_ahkir(frm, cdt, cdn){
+		frappe.call({
+			method: "get_details_diffrence",
+			doc: frm.doc,
+			callback: (data) => {
+				frm.cscript.calculate_total(null,null,"hasil_kerja");
+			}
 		})
 	},
 	employee(frm, cdt, cdn){
@@ -168,7 +177,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
    	}
 
 	get_kegiatan_data(args){
-		if(!args.childrens) return
+		if(args.childrens.length == 0) return
 
 		let me = this
 		frappe.call({
@@ -222,7 +231,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
         }
         
 		if(in_list(["Alat Berat"], doc.tipe_master_kendaraan)){
-			item.premi_amount = flt(doc.premi_heavy_equipment)
+			item.premi_amount = flt(item.premi_heavy_equipment)
 		}else{
 			this.set_premi_non_heavy_equipment(item)
 		}

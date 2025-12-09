@@ -32,8 +32,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def validate(self):
 		self.set_posting_datetime()
 		self.validate_selisih_kmhm()
-		self.set_premi_heavy_equipment()
 		# set data emloyee
+		self.set_details_diffrence(self.kmhm_awal, self.jns_alt)
 		get_details_employee(self.hasil_kerja, self.posting_date)
 		get_details_kegiatan(self.hasil_kerja, self.company)
 		
@@ -49,26 +49,6 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			frappe.throw("KM/HM Akhir cannot less than KM/HM Awal")
 
 		self.selisih_kmhm = selisih
-
-	@frappe.whitelist()
-	def set_premi_heavy_equipment(self):
-		if self.tipe_master_kendaraan not in ("Alat Berat"):
-			return
-		
-		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict()
-
-		selisih_kmhm = floor(self.selisih_kmhm/60)
-		premi_value = 0		
-		for premi in jenis_alat.premi:
-			# hentikan jika selisih sudah lebih kecil sama dengan 0
-			if selisih_kmhm <= 0:
-				break
-			
-			jumlah = premi.end_time if premi.end_time else selisih_kmhm
-			premi_value += flt(premi.amount * jumlah)
-			selisih_kmhm -= jumlah
-
-		self.premi_heavy_equipment = premi_value
 
 	def on_submit(self):
 		super().on_submit()
@@ -160,7 +140,41 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			self.append("hasil_kerja", {})
 		
 		get_details_employee(self.hasil_kerja, self.posting_date, detail_kendaraan.operator)
-	
+		self.set_details_diffrence(detail_kendaraan.kmhm_akhir, detail_kendaraan.jns_alt)
+
+	@frappe.whitelist()
+	def set_details_diffrence(self, kmhm_awal=None, jenis_alat=None):
+		if not self.kendaraan:
+			return
+		
+		if not kmhm_awal:
+			kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir")
+		
+		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict() \
+			if self.tipe_master_kendaraan in ("Alat Berat") else {}
+
+		kmhm_akhir = kmhm_awal
+		for hk in self.hasil_kerja:
+			if not hk.kmhm_ahkir or hk.kmhm_ahkir < kmhm_akhir:
+				hk.kmhm_ahkir = kmhm_akhir
+
+			hk.premi_heavy_equipment = 0
+			if jenis_alat.get("premi"):
+				selisih_kmhm = (hk.kmhm_ahkir - kmhm_akhir)
+				for premi in jenis_alat.premi:
+					# hentikan jika selisih sudah lebih kecil sama dengan 0
+					if selisih_kmhm <= premi.start_time:
+						break
+					
+					jumlah = premi.end_time if premi.end_time and selisih_kmhm > premi.end_time else selisih_kmhm
+					print(jumlah)
+					hk.premi_heavy_equipment += flt(premi.amount * jumlah)
+					selisih_kmhm -= jumlah
+
+			kmhm_akhir = hk.kmhm_ahkir
+
+		self.kmhm_akhir = kmhm_akhir
+
 @frappe.whitelist()
 def get_details_employee(childrens, posting_date, new_employee=None):
 	if isinstance(childrens, str):
@@ -220,7 +234,7 @@ def get_details_kegiatan(childrens, company):
 		], row[1:], strict=False)) for row in result}
 	
 	kegiatan_details = _get_kegiatan_upah()
-	
+
 	for ch in childrens:
 		# update table dengan details kegiatan
 		if kegiatan := kegiatan_details.get(ch.get("kegiatan")):
