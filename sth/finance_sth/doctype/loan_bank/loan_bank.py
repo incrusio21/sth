@@ -7,7 +7,11 @@ from frappe.model.document import Document
 from sth.finance_sth.doctype.disbursement_loan.disbursement_loan import make_disbursement_loan
 
 class LoanBank(Document):
-	def validate(self):
+	def on_update(self):
+		self.process_disbursement()
+		self.process_installment()
+  
+	def after_insert(self):
 		self.process_disbursement()
 		self.process_installment()
 
@@ -71,10 +75,10 @@ def update_disbursement(loan_bank):
 			doc.db_update_all()
 
 def is_doc_changed(old_doc, new_doc, fields):
-    for field in fields:
-        if old_doc.get(field) != new_doc.get(field):
-            return True
-    return False
+	for field in fields:
+		if old_doc.get(field) != new_doc.get(field):
+			return True
+	return False
 
 def delete_disbursement(disbursements):
 	cond = {

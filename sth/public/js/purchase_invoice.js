@@ -1,6 +1,13 @@
 frappe.ui.form.on("Purchase Invoice", {
   refresh(frm) {
-    console.log(frm.doc.custom_reference_doctype);
+    frm.set_query("purchase_type", () => {
+      return {
+        filters: {
+          document_type: frm.doctype
+        }
+      }
+    })
+
     frm.fields_dict.items.grid.update_docfield_property(
       "custom_receipt_attachment",
       "hidden",

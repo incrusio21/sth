@@ -220,7 +220,7 @@ def get_data(filters):
 			'employee_name': employee_doc.get('employee_name', ''),
 			'posting_date': voucher_data['posting_date'],
 			'kegiatan': voucher_doc.get('kegiatan_account', ''),
-			'hasil_kerja_qty': voucher_doc.get('hasil_kerja_qty', 0),
+			'hasil_kerja_qty': voucher_doc.get('hasil_kerja_qty', 0) if voucher_data['voucher_type'] == 'Buku Kerja Mandor Perawatan' else voucher_doc.get('weight_total', 0) ,
 			'brondolan': voucher_doc.get('hasil_kerja_qty_brondolan', 0) if voucher_data['voucher_type'] == 'Buku Kerja Mandor Panen' else 0,
 			'satuan': kegiatan_doc.get('uom', '') if kegiatan_doc else '',
 			'basis': voucher_doc.get('volume_basis', 0),
@@ -272,8 +272,8 @@ def get_data(filters):
 					'kondisi': '',
 					'tipe': '',
 					'p_upah': employee_totals[current_employee]['p_upah'],
-					'p_premi': employee_totals[current_employee]['p_premi'],
-					'total': employee_totals[current_employee]['total']
+					'p_premi': employee_totals[current_employee]['p_premi'], 
+					'total': employee_totals[current_employee]['total'], 
 				})
 			current_employee = row['employee']
 			current_employee_name = frappe.get_doc("Employee", row['employee']).get('employee_name', '')
@@ -297,8 +297,8 @@ def get_data(filters):
 			'kondisi': '',
 			'tipe': '',
 			'p_upah': employee_totals[current_employee]['p_upah'],
-			'p_premi': employee_totals[current_employee]['p_premi'],
-			'total': employee_totals[current_employee]['total']
+			'p_premi': employee_totals[current_employee]['p_premi'], 
+			'total': employee_totals[current_employee]['total'], 
 		})
 	
 	return final_data
