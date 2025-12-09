@@ -38,4 +38,4 @@ class Deposito(AccountsController):
 		self.outstanding_amount = total
 
 	def calculate_tenor(self):
-		self.tenor = date_diff(self.maturity_date, self.value_date)+1 / self.month_days
+		self.tenor = (date_diff(self.maturity_date, self.value_date)+1) / self.month_days
