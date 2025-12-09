@@ -6,12 +6,87 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_4ntw",
+  "tanggal",
+  "jarak",
+  "column_break_kiin",
+  "nama_supplier",
+  "unit",
+  "section_break_jits",
+  "harga",
+  "beban_pph_22",
+  "percent",
+  "column_break_vdwi",
+  "bonus",
+  "subsisi_angkut",
   "amended_from"
  ],
  "fields": [
   {
    "fieldname": "section_break_4ntw",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal"
+  },
+  {
+   "fieldname": "jarak",
+   "fieldtype": "Select",
+   "label": "Jarak",
+   "options": "\nRing 1\nRing 2"
+  },
+  {
+   "fieldname": "column_break_kiin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama_supplier",
+   "fieldtype": "Link",
+   "label": "Nama Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_jits",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "harga",
+   "fieldtype": "Currency",
+   "label": "Harga (kg)",
+   "precision": "3"
+  },
+  {
+   "default": "0",
+   "fieldname": "beban_pph_22",
+   "fieldtype": "Check",
+   "label": "Beban PPH 22"
+  },
+  {
+   "fieldname": "percent",
+   "fieldtype": "Percent",
+   "label": "Percent"
+  },
+  {
+   "fieldname": "column_break_vdwi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bonus",
+   "fieldtype": "Currency",
+   "label": "Bonus (kg)",
+   "precision": "3"
+  },
+  {
+   "fieldname": "subsisi_angkut",
+   "fieldtype": "Float",
+   "label": "Subsisi Angkut (kg)"
   },
   {
    "fieldname": "amended_from",
@@ -28,7 +103,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 11:42:17.877354",
+ "modified": "2025-12-09 13:28:39.505919",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",
@@ -51,5 +126,7 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }
