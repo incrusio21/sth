@@ -181,6 +181,9 @@ doc_events = {
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
 	},
+    "Leave Type": {
+		"on_change": "sth.hr_customize.custom.leave_type.clear_cache"
+	},
 	"Loan": {
 		"validate": "sth.hr_customize.custom.loan.Loan",
 	},
@@ -190,6 +193,10 @@ doc_events = {
 	"Loan Disbursement": {
 		"on_submit": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 		"on_cancel": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
+	},
+    "Material Request": {
+		"on_submit": "sth.custom.material_request.update_ba_reference",
+        "on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	"Payment Entry":{
 		"validate": [
@@ -230,10 +237,6 @@ doc_events = {
 	},
   	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
-	},
-    "Material Request": {
-		"on_submit": "sth.custom.material_request.update_ba_reference",
-        "on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	
 	# "Training Event": {
