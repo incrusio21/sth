@@ -1,7 +1,8 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
-
+import math
 import frappe
+
 from frappe.model.document import Document
 from frappe.utils import date_diff
 
@@ -44,4 +45,5 @@ class Deposito(AccountsController):
 		self.outstanding_amount = total
 
 	def calculate_tenor(self):
-		self.tenor = (date_diff(self.maturity_date, self.value_date)+1) / self.month_days
+		tenor = (date_diff(self.maturity_date, self.value_date)+1) / self.month_days
+		self.tenor = math.floor(tenor)
