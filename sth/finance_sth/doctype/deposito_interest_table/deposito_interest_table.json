@@ -25,7 +25,8 @@
   "accounting_details_section",
   "cost_center",
   "debit_to",
-  "expense_account"
+  "expense_account",
+  "deposito_interest"
  ],
  "fields": [
   {
@@ -181,13 +182,19 @@
    "label": "Total Bunga (Setelah Pajak)",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "deposito_interest",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Deposito Interest"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-09 21:22:39.550688",
+ "modified": "2025-12-09 23:01:02.659333",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito Interest Table",

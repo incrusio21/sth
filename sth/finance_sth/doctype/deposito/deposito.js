@@ -34,6 +34,12 @@ frappe.ui.form.on("Deposito", {
     }
 });
 
+frappe.ui.form.on("Deposito Interest Table", {
+    create_payment(frm, cdt, cdn){
+        makePaymentEntry(frm, cdt, cdn)
+    }
+})
+
 function filterBankAccount(frm) {
     frm.set_query('bank_account', (doc) => {
         return {
@@ -66,4 +72,19 @@ function getMaturityDate(frm) {
     let maturityDate = frappe.datetime.add_months(valueDate, tenor);
     frm.set_value('maturity_date', maturityDate)
     frm.refresh_field('maturity_date')
+}
+
+function makePaymentEntry(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    if (curRow.payment) {
+        frappe.throw(`Payment Receive untuk Bunga Deposito Row:${curRow.idx} ini sudah dibuat`)
+    }
+    frappe.call({
+        method: "sth.finance_sth.doctype.deposito.deposito.make_payment_entry",
+        args: {source_name: curRow.deposito_interest},
+    }).then(r => {
+        frappe.model.sync(r.message);
+        frappe.set_route("Form", r.message.doctype, r.message.name);
+    })
+
 }
