@@ -71,17 +71,26 @@ function calculateDeposito(frm) {
 
     const diffDay = frm.doc.tenor
     const interestAmount = depositAmount * interest * (diffDay*monthDays) /yearDays;
+    const interestAmountMonthly = depositAmount * interest *monthDays /yearDays;
     const taxAmount = interestAmount * tax;
+    const taxAmountMonthly = interestAmountMonthly * tax;
     const total = interestAmount - taxAmount;
+    const totalMonthly = interestAmountMonthly - taxAmountMonthly;
 
     frm.set_value("interest_amount", interestAmount)
     frm.set_value("tax_amount", taxAmount)
     frm.set_value("total", total)
+    frm.set_value("interest_amount_monthly", interestAmountMonthly)
+    frm.set_value("tax_amount_monthly", taxAmountMonthly)
+    frm.set_value("total_monthly", totalMonthly)
     frm.set_value("grand_total", total)
     frm.set_value("outstanding_amount", total)
     frm.refresh_field("interest_amount")
     frm.refresh_field("tax_amount")
     frm.refresh_field("total")
+    frm.refresh_field("interest_amount_monthly")
+    frm.refresh_field("tax_amount_monthly")
+    frm.refresh_field("total_monthly")
     frm.refresh_field("grand_total")
     frm.refresh_field("outstanding_amount")
 }
