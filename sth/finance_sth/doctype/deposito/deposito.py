@@ -57,6 +57,8 @@ class Deposito(Document):
 		for row in self.deposito_interest_table:
 			values = {
 				"doctype": "Deposito Interest",
+				"company": self.company,
+				"unit": self.unit,
 				"posting_date": row.posting_date,
 				"value_date": row.value_date,
 				"maturity_date": row.maturity_date,
