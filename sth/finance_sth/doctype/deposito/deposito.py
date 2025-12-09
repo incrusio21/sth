@@ -30,12 +30,18 @@ class Deposito(AccountsController):
 		interest_amount = self.deposit_amount * (self.interest/100)  * (self.tenor*self.month_days) / self.year_days
 		tax_amount = interest_amount * (self.tax/100)
 		total = interest_amount - tax_amount
+		interest_amount_monthly = self.deposit_amount * (self.interest/100)  * self.month_days / self.year_days
+		tax_amount_monthly = interest_amount_monthly * (self.tax/100)
+		total_monthly = interest_amount_monthly - tax_amount_monthly
 		
 		self.interest_amount = interest_amount
 		self.tax_amount = tax_amount
 		self.total = total
+		self.interest_amount_monthly = interest_amount_monthly
+		self.tax_amount_monthly = tax_amount_monthly
+		self.total_monthly = total_monthly
 		self.grand_total = total
 		self.outstanding_amount = total
 
 	def calculate_tenor(self):
-		self.tenor = date_diff(self.maturity_date, self.value_date)+1
+		self.tenor = (date_diff(self.maturity_date, self.value_date)+1) / self.month_days

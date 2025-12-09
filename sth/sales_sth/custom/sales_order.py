@@ -20,8 +20,15 @@ def check_dn_pending(self,method):
 
 @frappe.whitelist()
 def validate_price_list(self,method):
-	for row in self.items:
-		if row.rate and row.price_list_rate and row.price_list_rate != 0:
-			if abs(row.rate - row.price_list_rate) > 5:
-				frappe.throw("Nilai Rate tidak boleh lebih dari / kurang dari 5 dari Nilai Price List Rate")
-				
+	if not self.is_new():
+		item_price_list = frappe.db.sql(""" SELECT name, item_code, price_list_rate FROM `tabItem Price` WHERE price_list = "{}" """.format(self.selling_price_list), as_dict=1)
+
+		for row in self.items:
+			if row.rate:
+				check_price_list = 0
+				for satu_item_price in item_price_list:
+					if satu_item_price.item_code == row.item_code:
+						check_price_list = satu_item_price.price_list_rate
+						if abs(row.rate - check_price_list) > 5:
+							frappe.throw("Nilai Rate tidak boleh lebih dari / kurang dari 5 dari Nilai Price List Rate")
+					

@@ -24,45 +24,29 @@
   "kendaraan",
   "kmhm_awal",
   "kmhm_akhir",
-  "selisih_kmhm",
   "bbm_totals",
   "amended_from",
   "details_kendaraan_section",
   "jenis_alat",
   "bbm",
   "column_break_mujm",
+  "default_employee",
+  "ump_bulanan",
   "section_break_toiw",
   "hasil_kerja_amount",
   "hasil_kerja_premi_amount",
   "column_break_fkos",
-  "grand_total",
+  "pekerjaan_subtotal",
+  "tab_5_tab",
+  "upah_section",
+  "hasil_kerja",
   "pekerjaan_tab",
-  "detail_pekerjaan_section",
-  "kegiatan",
-  "column_break_pcdo",
-  "is_heavy_equipment",
-  "premi_heavy_equipment",
-  "details_kegiatan_section",
-  "kegiatan_account",
-  "uom",
-  "volume_basis",
-  "column_break_xwio",
-  "rupiah_basis",
-  "ump_bulanan",
-  "column_break_kguq",
-  "premi_workday",
-  "ump_as_workday",
-  "premi_holiday",
-  "ump_as_holiday",
   "section_break_dpfs",
   "divisi",
   "blok",
   "batch",
   "column_break_fvuy",
   "project",
-  "tab_5_tab",
-  "upah_section",
-  "hasil_kerja",
   "more_information_tab",
   "buku_kerja_mandor_premi",
   "column_break_jklo",
@@ -100,15 +84,6 @@
    "label": "Jabatan",
    "options": "Designation",
    "read_only": 1
-  },
-  {
-   "fieldname": "detail_pekerjaan_section",
-   "fieldtype": "Section Break",
-   "label": "Detail Pekerjaan"
-  },
-  {
-   "fieldname": "column_break_pcdo",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -187,21 +162,7 @@
   {
    "fieldname": "kmhm_akhir",
    "fieldtype": "Float",
-   "label": "KMHM Akhir"
-  },
-  {
-   "fieldname": "kegiatan",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Kegiatan",
-   "link_filters": "[[\"Kegiatan\",\"tipe_kegiatan\",\"=\",\"Traksi\"]]",
-   "options": "Kegiatan"
-  },
-  {
-   "fieldname": "rupiah_basis",
-   "fieldtype": "Currency",
-   "label": "Rupiah Basis",
+   "label": "KMHM Akhir",
    "read_only": 1
   },
   {
@@ -309,6 +270,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
    "fieldname": "hasil_kerja_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -334,13 +296,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "kegiatan_account",
-   "fieldtype": "Link",
-   "label": "Kegiatan Account",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_knxf",
    "fieldtype": "Section Break"
   },
@@ -352,22 +307,7 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "details_kegiatan_section",
-   "fieldtype": "Section Break",
-   "label": "Details Kegiatan"
-  },
-  {
-   "fieldname": "volume_basis",
-   "fieldtype": "Float",
-   "label": "Volume Basis",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_xwio",
-   "fieldtype": "Column Break"
-  },
-  {
+   "depends_on": "eval:doc.jk == \"Dump Truck\"",
    "fieldname": "hasil_kerja_premi_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -376,33 +316,13 @@
    "read_only": 1
   },
   {
-   "fieldname": "uom",
-   "fieldtype": "Link",
-   "label": "UOM",
-   "options": "UOM",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "kegiatan.heavy_equipment",
-   "fieldname": "is_heavy_equipment",
-   "fieldtype": "Check",
-   "label": "Is Heavy Equipment",
-   "read_only": 1
-  },
-  {
    "fetch_from": "kendaraan.jns_alt",
    "fieldname": "jenis_alat",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Jenis Alat",
-   "read_only": 1
-  },
-  {
-   "fieldname": "selisih_kmhm",
-   "fieldtype": "Float",
-   "label": "Selisih KMHM",
+   "options": "Jenis Alat",
    "read_only": 1
   },
   {
@@ -418,56 +338,27 @@
    "label": "UMP Bulanan"
   },
   {
-   "fieldname": "column_break_kguq",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "premi_workday",
-   "fieldtype": "Currency",
-   "label": "Premi Workday",
-   "read_only": 1
-  },
-  {
-   "fieldname": "premi_holiday",
-   "fieldtype": "Currency",
-   "label": "Premi Holiday",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "ump_as_workday",
-   "fieldtype": "Check",
-   "label": "UMP as Workday",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "ump_as_holiday",
-   "fieldtype": "Check",
-   "label": "UMP as Holiday",
-   "read_only": 1
-  },
-  {
-   "fieldname": "premi_heavy_equipment",
-   "fieldtype": "Currency",
-   "label": "Premi Heavy Equipment",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.jk == \"Dump Truck\"",
-   "fieldname": "grand_total",
+   "fieldname": "pekerjaan_subtotal",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Grand Total",
    "read_only": 1
+  },
+  {
+   "fetch_from": "kendaraan.operator",
+   "fieldname": "default_employee",
+   "fieldtype": "Link",
+   "label": "Default Employee",
+   "options": "Employee"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 11:01:07.512446",
+ "modified": "2025-12-09 13:59:37.109634",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

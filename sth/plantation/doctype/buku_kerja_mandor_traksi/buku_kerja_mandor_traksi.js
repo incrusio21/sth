@@ -5,8 +5,7 @@ sth.plantation.setup_bkm_controller()
 
 frappe.ui.form.on("Buku Kerja Mandor Traksi", {
   	refresh(frm) {
-		frm.set_df_property("hasil_kerja", "cannot_add_rows", true);
-		frm.set_df_property("hasil_kerja", "cannot_delete_rows", true);
+
   	},
 	posting_date(frm){
 		frm.cscript.get_employee_data({
@@ -14,12 +13,37 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 			posting_date: frm.doc.posting_date
 		})
 	},
-	kmhm_akhir(frm){
-		frm.set_value("selisih_kmhm", flt(frm.doc.kmhm_akhir) - flt(frm.doc.kmhm_awal))
+	company(frm){
+		frm.cscript.get_kegiatan_data({
+			childrens: frm.doc.hasil_kerja,
+			company: frm.doc.company
+		})
 	},
-	kmhm_awal(frm){
-		frm.set_value("selisih_kmhm", flt(frm.doc.kmhm_akhir) - flt(frm.doc.kmhm_awal))
+	kendaraan(frm){
+		frappe.call({
+			method: "get_details_kendaraan",
+			doc: frm.doc,
+			callback: (data) => {
+				frm.cscript.calculate_total(null,null,"hasil_kerja");
+			}
+		})
 	}
+	// kmhm_akhir(frm){
+	// 	frm.trigger("premi_heavy_equipment")
+	// },
+	// kmhm_awal(frm){
+	// 	frm.trigger("premi_heavy_equipment")
+	// },
+	// premi_heavy_equipment(frm){
+	// 	frappe.call({
+	// 		method: "set_premi_heavy_equipment",
+	// 		doc: frm.doc,
+	// 		freeze: true,
+	// 		callback: function (data) {
+	// 			me.calculate_total(null, null, "hasil_kerja")
+	// 		}
+	// 	})
+	// }
 //   tgl_trk(frm) {
 //     frappe.db.get_value("Rencana Kerja Harian",
 //       { posting_date: frm.doc.tgl_trk },
@@ -49,6 +73,27 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 });
 
 frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
+	hasil_kerja_add(frm, cdt, cdn){
+		frappe.model.set_value(cdt, cdn, "employee", frm.doc.default_employee)
+	},
+	kegiatan(frm, cdt, cdn){
+		let data = frappe.get_doc(cdt, cdn)
+		if(!data.kegiatan) return
+
+		frm.cscript.get_kegiatan_data({
+			childrens: [data],
+			company: frm.doc.company
+		})
+	},
+	kmhm_ahkir(frm, cdt, cdn){
+		frappe.call({
+			method: "get_details_diffrence",
+			doc: frm.doc,
+			callback: (data) => {
+				frm.cscript.calculate_total(null,null,"hasil_kerja");
+			}
+		})
+	},
 	employee(frm, cdt, cdn){
 		let data = frappe.get_doc(cdt, cdn)
 
@@ -64,10 +109,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		super.setup(doc)
 
 		this.fieldname_total.push("premi_amount")
-        this.kegiatan_fetch_fieldname.push(
-			"workday as premi_workday", "holiday as premi_holiday", 
-			"workday_base as ump_as_workday", "holiday_base as ump_as_holiday"
-		)
+		this.kegiatan_fetch_fieldname = []
 
 		// calculate grand total lagi jika field berubah
 		for (const fieldname of ["base", "total_hari"]) {
@@ -116,6 +158,14 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			};
 		});
 
+		this.frm.set_query("kegiatan", "hasil_kerja", function () {
+            return {
+              	filters: {
+					tipe_kegiatan: "Traksi"
+				}
+            };
+		});
+
 		this.frm.set_query("employee", "hasil_kerja", function () {
             return {
 				query: "sth.controllers.queries.employee_designation_query",
@@ -126,14 +176,16 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		});
    	}
 
-	kendaraan(doc){
+	get_kegiatan_data(args){
+		if(args.childrens.length == 0) return
+
 		let me = this
-		
-		this.frm.call({
-			method: "get_details_kendaraan",
-			doc: doc,
-			callback: () => {
-				me.calculate_total(null, null, "hasil_kerja")
+		frappe.call({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
+			args: args,
+			freeze: true,
+			callback: function (data) {
+				me._set_values_for_item_list(data.message);
 			}
 		})
 	}
@@ -147,17 +199,29 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			args: args,
 			freeze: true,
 			callback: function (data) {
-				me.frm.doc.hasil_kerja = data.message
-				me.calculate_total(null, null, "hasil_kerja")
+				me._set_values_for_item_list(data.message);
 			}
 		})
 	}
 	
+	_set_values_for_item_list(children) {
+		for (const child of children) {
+			let data = frappe.get_doc(child.doctype, child.name)
+
+			for (const [key, value] of Object.entries(child)) {
+				data[key] = value 
+			}
+		}
+
+		this.calculate_total(children[0].doctype, children[0].name)
+	}
+
 	update_rate_or_qty_value(item) {
         if (item.parentfield != "hasil_kerja") return
 
         let doc = this.frm.doc
-        
+        item.rate = item.rupiah_basis
+
 		if (!in_list(["Dump Truck"], doc.tipe_master_kendaraan)){
 			item.rate = flt(item.base/item.total_hari)
 		}
@@ -166,8 +230,8 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         }
         
-		if(doc.is_heavy_equipment){
-			item.premi_amount = flt(doc.premi_heavy_equipment)
+		if(in_list(["Alat Berat"], doc.tipe_master_kendaraan)){
+			item.premi_amount = flt(item.premi_heavy_equipment)
 		}else{
 			this.set_premi_non_heavy_equipment(item)
 		}
@@ -176,8 +240,8 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	set_premi_non_heavy_equipment(item){
 		let doc = this.frm.doc
 		let fields = item.is_holiday ? "holiday" : "workday"
-		let premi = doc[`ump_as_${fields}`] ? flt(doc.ump_bulanan/item.total_hari) :
-			doc[`premi_${fields}`]
+		let premi = item[`ump_as_${fields}`] ? flt(doc.ump_bulanan/item.total_hari) :
+			item[`premi_${fields}`]
 		
 		item.premi_amount = flt(premi*item.qty)
 	}

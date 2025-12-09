@@ -10,6 +10,7 @@
   "posting_date",
   "naming_series",
   "column_break_brwj",
+  "company",
   "tipe",
   "get_data_timbangan",
   "section_break_waih",
@@ -43,6 +44,7 @@
    "options": "\nInternal\nEksternal"
   },
   {
+   "description": "Timbangan yang diambil per hari ini",
    "fieldname": "get_data_timbangan",
    "fieldtype": "Button",
    "label": "Get Data Timbangan"
@@ -66,13 +68,19 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-05 13:12:15.698773",
+ "modified": "2025-12-09 09:29:08.601094",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Penerimaan TBS",

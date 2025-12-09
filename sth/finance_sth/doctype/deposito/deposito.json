@@ -30,9 +30,12 @@
   "posting_date",
   "deposited_by",
   "section_break_flio",
+  "interest_amount_monthly",
+  "tax_amount_monthly",
+  "total_monthly",
+  "column_break_cskc",
   "interest_amount",
   "tax_amount",
-  "column_break_cskc",
   "total",
   "total_realization",
   "accounting_dimensions_section",
@@ -309,13 +312,31 @@
    "fieldtype": "Int",
    "label": "Hari dalam 1 Bulan",
    "reqd": 1
+  },
+  {
+   "fieldname": "interest_amount_monthly",
+   "fieldtype": "Currency",
+   "label": "Jumlah Bunga (1 Bulan)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount_monthly",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pajak (1 Bulan)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_monthly",
+   "fieldtype": "Currency",
+   "label": "Total Bunga Per 1 Bulan (Setelah Pajak)",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 10:59:34.028136",
+ "modified": "2025-12-09 11:26:33.396135",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

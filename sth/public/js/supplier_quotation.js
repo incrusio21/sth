@@ -6,7 +6,7 @@ frappe.ui.form.on("Supplier Quotation", {
                 let rfq = frm.doc.items[0].request_for_quotation
                 frappe.xcall("sth.custom.supplier_quotation.reopen_rfq", { name: rfq, freeze: true })
                     .then((res) => {
-                        console.log("Oke")
+                        // console.log("Oke")
                         frm.reload_doc()
                     })
             })

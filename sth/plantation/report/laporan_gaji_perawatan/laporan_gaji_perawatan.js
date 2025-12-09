@@ -36,5 +36,16 @@ frappe.query_reports["Laporan Gaji Perawatan"] = {
 			"options": "Employee",
 			"default": ""
 		}
-	]
+	],
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		
+		if (data && data.employee_name && data.employee_name.includes("Total")) {
+			if (column.fieldname === "p_upah" || column.fieldname === "p_premi" || column.fieldname === "total") {
+				value = value.bold();
+			}
+		}
+		
+		return value;
+	}
 };

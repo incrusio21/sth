@@ -28,6 +28,17 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			}
 		])
 
+	def validate(self):
+		self.validate_hasil_kerja_harian()
+		super().validate()
+		
+	def validate_hasil_kerja_harian(self):
+		if self.get("is_bibitan"):
+			return
+		
+		if self.uom == "HA" and self.hasil_kerja_qty > self.luas_blok:
+			frappe.throw("Hasil Kerja exceeds Luas Blok")
+
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
 			return
