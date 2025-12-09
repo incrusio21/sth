@@ -1,0 +1,265 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-09 20:11:13.416995",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_ghbt",
+  "company",
+  "unit",
+  "posting_date",
+  "value_date",
+  "maturity_date",
+  "day_in_months",
+  "deposito_amount",
+  "interest",
+  "tax",
+  "column_break_icxc",
+  "interest_amount",
+  "tax_amount",
+  "total",
+  "total_realization",
+  "grand_total",
+  "outstanding_amount",
+  "cost_center",
+  "more_information_tab",
+  "refrences_details_section",
+  "reference_doc",
+  "reference_name",
+  "reference_detail_doc",
+  "reference_detail_name",
+  "accounting_details_section",
+  "debit_to",
+  "expense_account",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_ghbt",
+   "fieldtype": "Section Break",
+   "label": "Deposito Interest Details"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Penempatan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "value_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Valuta",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "maturity_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Jatuh Tempo",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "day_in_months",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Jumlah Hari (1 Bulan)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "deposito_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Deposito",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Percent",
+   "label": "Suku Bunga (%)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax",
+   "fieldtype": "Percent",
+   "label": "Pajak (%)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_icxc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Bunga",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pajak",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_realization",
+   "fieldtype": "Currency",
+   "label": "Total Realisasi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Deposito Interest",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "refrences_details_section",
+   "fieldtype": "Section Break",
+   "label": "Refrences Details"
+  },
+  {
+   "fieldname": "reference_doc",
+   "fieldtype": "Link",
+   "label": "Reference Document",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doc",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_detail_doc",
+   "fieldtype": "Link",
+   "label": "Reference Detail Document",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_detail_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Detail Name",
+   "options": "reference_detail_doc",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total Bunga (Setelah Pajak)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-09 21:57:22.577135",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Deposito Interest",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
