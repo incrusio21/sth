@@ -125,7 +125,8 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "read_only": 1
   },
   {
    "fetch_from": "ticket_number.transporter_name",
@@ -172,6 +173,7 @@
    "precision": "2"
   },
   {
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fieldname": "blok",
    "fieldtype": "Link",
    "label": "Blok",
@@ -265,7 +267,8 @@
    "fieldname": "divisi",
    "fieldtype": "Link",
    "label": "Divisi",
-   "options": "Divisi"
+   "options": "Divisi",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -295,7 +298,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 16:31:56.281444",
+ "modified": "2025-12-09 14:20:25.424219",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
