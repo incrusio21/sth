@@ -58,7 +58,7 @@ function filterAccountCreditTo(frm) {
 
 function getDisbursementNumber(frm, cdt, cdn) {
     let length = frm.doc.disbursements.length.toString()
-    let number = length.padStart(3, "0")
+    let number = length.padStart(5, "0")
     const docname = frm.doc.name
     const disbursementNumber = `${docname}-${number}`
     frappe.model.set_value(cdt, cdn, "disbursement_number", disbursementNumber)

@@ -202,7 +202,6 @@
    "label": "ANGSURAN"
   },
   {
-   "depends_on": "eval:doc.docstatus ==1",
    "fieldname": "pencairan_details_section",
    "fieldtype": "Section Break",
    "label": "Pencairan Details"
@@ -227,7 +226,6 @@
    "options": "Installment Loan Bank"
   },
   {
-   "depends_on": "eval:doc.docstatus ==1",
    "fieldname": "angsuran_details_section",
    "fieldtype": "Section Break",
    "label": "Angsuran Details"
@@ -288,7 +286,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 10:43:27.679686",
+ "modified": "2025-12-09 11:04:14.167835",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",
