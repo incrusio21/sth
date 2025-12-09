@@ -36,5 +36,17 @@ frappe.query_reports["Laporan Gaji Traksi"] = {
 			"options": "Alat Berat Dan Kendaraan",
 			"default": ""
 		}
-	]
+	],
+	
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		
+		if (data && data.kegiatan && data.kegiatan.includes("Total")) {
+			if (column.fieldname === "upah" || column.fieldname === "premi" || column.fieldname === "total_rp") {
+				value = value.bold();
+			}
+		}
+		
+		return value;
+	}
 };
