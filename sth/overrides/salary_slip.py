@@ -16,6 +16,8 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
 
+from calendar import monthrange
+
 LEAVE_CODE_MAP = "leave_code_map"
 
 class SalarySlip(SalarySlip):
@@ -497,9 +499,21 @@ class SalarySlip(SalarySlip):
 		data.natura_multiplier = default_data.natura_multiplier = frappe.get_value("Natura Multiplier", {
 			**filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
 
-		data.total_hari = default_data.total_hari = flt(frappe.get_value("Employment Type", data.employment_type, "hari_ump"))
-		data.ump_harian = default_data.ump_harian = flt(company.ump_bulanan) / data.total_hari
+		# cek apakah hari ump based on bulan / tidak
+		cek_ump_bulan = frappe.get_value("Employment Type", data.employment_type, "hari_ump_ikut_jumlah_hari_1_bulan")
+
+		if cek_ump_bulan == 1:
+			start_date = frappe.utils.getdate(self.start_date)
+			year = start_date.year
+			month = start_date.month
+			data.total_hari = default_data.total_hari = monthrange(year, month)[1]
+		else:
+			data.total_hari = default_data.total_hari = flt(frappe.get_value("Employment Type", data.employment_type, "hari_ump"))
+		# data.ump_harian = default_data.ump_harian = flt(company.ump_bulanan) / data.total_hari
 		
+		# ubah ump_harian ke gaji pokok dibagi hari
+		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
+
 		data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
 			if data.custom_kriteria == "Satuan Hasil" else flt(data.ump_harian * data.payment_days)
 		

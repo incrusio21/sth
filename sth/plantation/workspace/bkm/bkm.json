@@ -163,8 +163,27 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Absensi",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Attendance",
+   "link_count": 0,
+   "link_to": "Attendance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Report",
-   "link_count": 3,
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -201,25 +220,16 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "Absensi",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Attendance",
+   "is_query_report": 1,
+   "label": "Rekap Attendance",
    "link_count": 0,
-   "link_to": "Attendance",
-   "link_type": "DocType",
+   "link_to": "Rekap Attendance",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-09 10:25:40.274141",
+ "modified": "2025-12-09 12:07:18.310947",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "BKM",

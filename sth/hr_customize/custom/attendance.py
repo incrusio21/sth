@@ -21,7 +21,7 @@ class Attendance:
     def validate_status_code(self):
         if self.doc.status == "Present":
             self.doc.status_code = "H"
-        elif self.status == "On Leave":
+        elif self.doc.status == "On Leave":
             self.doc.status_code = frappe.get_value("Leave Type", self.doc.leave_type, "status_code")
         elif self.doc.status == "Absent":
             self.doc.status_code = "M"
