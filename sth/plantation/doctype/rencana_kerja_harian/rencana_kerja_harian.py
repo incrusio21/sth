@@ -30,7 +30,7 @@ class RencanaKerjaHarian(PlantationController):
 		super().validate()
 	
 	def get_rencana_kerja_bulanan(self):
-		ret = get_rencana_kerja_bulanan(self.kode_kegiatan, self.tipe_kegiatan, self.divisi, self.blok, self.posting_date)
+		ret = get_rencana_kerja_bulanan(self.kegiatan, self.tipe_kegiatan, self.divisi, self.blok, self.posting_date)
 		for fieldname, value in ret.items():
 			if self.meta.get_field(fieldname) and value is not None:
 				if (
@@ -41,7 +41,7 @@ class RencanaKerjaHarian(PlantationController):
 		
 	def validate_duplicate_rkh(self):
 		if doc := frappe.db.get_value("Rencana Kerja Harian", {
-			"kode_kegiatan": self.kode_kegiatan, "divisi": self.divisi, "blok": self.blok, "posting_date": self.posting_date,
+			"kode_kegiatan": self.kegiatan, "divisi": self.divisi, "blok": self.blok, "posting_date": self.posting_date,
 			"docstatus": 1, "name": ["!=", self.name]
 		}, pluck="name"):
 			frappe.throw("Rencan Kerja Harian already Used in {}".format(doc))

@@ -5,9 +5,36 @@ frappe.ui.form.on("Loan Bank", {
 	refresh(frm) {
         filterBankAccount(frm);
         filterAccountCreditTo(frm);
-        showInterestRateDialog(frm);
+        // showInterestRateDialog(frm);
 	},
+    availability_period(frm){
+        calculateScheduleLoan(frm);
+    },
+    grace_period(frm){
+        calculateScheduleLoan(frm);
+    },
+    actual_number_of_payments(frm){
+        calculateScheduleLoan(frm);
+    },
 });
+
+frappe.ui.form.on("Disbursement Loan Bank", {
+    disbursements_add(frm, cdt, cdn){
+        getDisbursementNumber(frm, cdt, cdn)
+    },
+    disbursement_amount(frm, cdt, cdn){
+        validateTotalAmountDisbursement(frm, cdt, cdn)
+    },
+    before_disbursements_remove(frm, cdt, cdn){
+        validateDeleteDisbursement(frm, cdt, cdn)
+    }
+});
+
+frappe.ui.form.on("Installment Loan Bank", {
+    disbursement_number(frm, cdt, cdn){
+        validateChangeInstallment(frm, cdt, cdn)
+    }
+})
 
 function filterBankAccount(frm) {
     frm.set_query('bank_account', () => {
@@ -27,6 +54,74 @@ function filterAccountCreditTo(frm) {
             }
         }
     })
+}
+
+function getDisbursementNumber(frm, cdt, cdn) {
+    let length = frm.doc.disbursements.length.toString()
+    let number = length.padStart(3, "0")
+    const docname = frm.doc.name
+    const disbursementNumber = `${docname}-${number}`
+    frappe.model.set_value(cdt, cdn, "disbursement_number", disbursementNumber)
+    frappe.model.set_value(cdt, cdn, "due_days", frm.doc.due_days)
+    frm.refresh_field("disbursements")
+}
+
+function validateTotalAmountDisbursement(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    let totalDisbursement = getTotalDisbursement(frm);
+    totalDisbursement += curRow.disbursement_amount;
+    
+    if (totalDisbursement > frm.doc.loan_amount) {
+        frappe.throw(`<b>Total Pencairan</b> tidak boleh lebih besar dari <b>Jumlah Fasilitas</b>!!`)
+    }
+}
+
+function getTotalDisbursement(frm) {
+    let total = 0
+    for (const row of frm.doc.disbursements) {
+        total += row.disbursement_amount
+    }
+
+    return total
+}
+
+function validateDeleteDisbursement(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn]
+
+    for (const row of frm.doc.installments) {
+        if (curRow.disbursement_number != row.disbursement_number) {
+            continue
+        }
+        frappe.throw(`<b>No Pencairan: ${curRow.disbursement_number}</b> tidak bisa dihapus karena digunakan di <b>Angsuran Row ${curRow.idx}</b>, mohon hapus Angsuran terlebih dahulu`)
+    }
+}
+
+function validateChangeInstallment(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn]
+
+    for (const row of frm.doc.installments) {
+        if (curRow.disbursement_number != row.disbursement_number || row.name == curRow.name) {
+            continue
+        }
+        frappe.throw(`<b>No Pencairan: ${curRow.disbursement_number}</b> digunakan di <b>Angsuran Row ${row.idx}</b>`)
+    }
+}
+
+function calculateScheduleLoan(frm) {
+    if (!frm.doc.availability_period || !frm.doc.grace_period || !frm.doc.actual_number_of_payments) {
+        return
+    }
+    let ano_payments = frm.doc.actual_number_of_payments;
+    let grace_period = frm.doc.grace_period;
+    let availibiltyPeriod = frm.doc.availability_period;
+
+    let scheduleNumberOfPayments = ano_payments - grace_period;
+    let loanLengthInYears = scheduleNumberOfPayments/availibiltyPeriod;
+    
+    frm.set_value('scheduled_number_of_payments', scheduleNumberOfPayments);
+    frm.set_value('loan_length_in_years', loanLengthInYears);
+    frm.refresh_field('scheduled_number_of_payments');
+    frm.refresh_field('loan_length_in_years');
 }
 
 let editId = null;

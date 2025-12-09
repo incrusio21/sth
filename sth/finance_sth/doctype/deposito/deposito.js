@@ -46,9 +46,10 @@ function filterBankAccount(frm) {
 function calculateTenor(frm) {
     const startDate = frm.doc.value_date;
     const endDate = frm.doc.maturity_date;
-    
+    const monthDays = frm.doc.month_days;
+
     const diffDay = frappe.datetime.get_day_diff(endDate, startDate) + 1
-    const month = Math.floor(diffDay / 30);
+    const month = Math.floor(diffDay / monthDays);
     frm.set_value('tenor', month)
     frm.refresh_field('tenor')
 
@@ -62,12 +63,14 @@ function calculateDeposito(frm) {
     const startDate = frm.doc.value_date;
     const endDate = frm.doc.maturity_date;
     const yearDays = frm.doc.year_days;
+    const monthDays = frm.doc.month_days;
+    
     if (!interest || !tax || !depositAmount || !startDate || !endDate) {
         return
     }
 
     const diffDay = frm.doc.tenor
-    const interestAmount = depositAmount * diffDay * interest/yearDays;
+    const interestAmount = depositAmount * interest * (diffDay*monthDays) /yearDays;
     const taxAmount = interestAmount * tax;
     const total = interestAmount - taxAmount;
 

@@ -17,12 +17,12 @@
   "unit",
   "lks",
   "column_break_yawx",
-  "status_dokumen",
+  "status",
   "dpt",
   "tujuan",
   "date_received",
   "ringkasan",
-  "fs",
+  "file_surat",
   "last_update"
  ],
  "fields": [
@@ -41,11 +41,6 @@
    "fieldtype": "Date",
    "label": "Tanggal Terima/Kirim",
    "reqd": 1
-  },
-  {
-   "fieldname": "fs",
-   "fieldtype": "Attach",
-   "label": "File Surat"
   },
   {
    "default": "Today",
@@ -131,16 +126,22 @@
    "options": "Internal\nExternal"
   },
   {
-   "fieldname": "status_dokumen",
+   "fieldname": "file_surat",
+   "fieldtype": "Attach",
+   "label": "File Surat"
+  },
+  {
+   "fieldname": "status",
    "fieldtype": "Select",
-   "label": "Status Dokumen",
-   "options": "Sudah Upload\nBelum Upload"
+   "label": "Status",
+   "options": "Belum Upload\nSudah Upload",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 16:50:51.518273",
+ "modified": "2025-12-08 13:57:04.790043",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Surat Menyurat",

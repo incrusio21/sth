@@ -8,12 +8,15 @@
  "field_order": [
   "disbursement_number",
   "disbursement_date",
-  "disbursement_amouny",
+  "disbursement_amount",
   "due_days",
   "column_break_bbib",
   "reference_doc",
   "reference_name",
-  "journal_entry"
+  "reference_doc_detail",
+  "reference_name_detail",
+  "journal_entry",
+  "amended_from"
  ],
  "fields": [
   {
@@ -27,12 +30,6 @@
    "fieldname": "disbursement_date",
    "fieldtype": "Date",
    "label": "Tanggal Pencairan",
-   "read_only": 1
-  },
-  {
-   "fieldname": "disbursement_amouny",
-   "fieldtype": "Currency",
-   "label": "Jumlah Pencairan",
    "read_only": 1
   },
   {
@@ -65,12 +62,42 @@
    "label": "Journal Entry",
    "options": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_doc_detail",
+   "fieldtype": "Link",
+   "label": "Reference Document Detail",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name_detail",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name Detail",
+   "options": "reference_doc_detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disbursement_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pencairan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Disbursement Loan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-12-03 16:22:46.515872",
+ "modified": "2025-12-08 14:31:40.068240",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Disbursement Loan",

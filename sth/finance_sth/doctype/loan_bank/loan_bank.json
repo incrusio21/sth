@@ -25,18 +25,17 @@
   "availability_period_type",
   "grace_period",
   "grace_period_type",
+  "actual_number_of_payments",
+  "scheduled_number_of_payments",
+  "loan_length_in_years",
   "credit_charge",
   "credit_charge_type",
   "loan_interest",
   "loan_interest_type",
   "pinalti",
   "description",
-  "months_duration",
   "loan_type",
   "principal_calculation_method",
-  "accounting_details_section",
-  "debit_to",
-  "credit_to",
   "tab_2_tab",
   "pencairan_details_section",
   "disbursements",
@@ -98,8 +97,7 @@
   {
    "fieldname": "loan_term",
    "fieldtype": "Date",
-   "label": "Jangka Waktu",
-   "reqd": 1
+   "label": "Jangka Waktu"
   },
   {
    "fieldname": "due_days",
@@ -180,11 +178,6 @@
    "label": "Keterangan"
   },
   {
-   "fieldname": "months_duration",
-   "fieldtype": "Int",
-   "label": "Jumlah Bulan"
-  },
-  {
    "fieldname": "loan_type",
    "fieldtype": "Select",
    "label": "Jenis Pinjaman",
@@ -215,7 +208,6 @@
    "label": "Pencairan Details"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "disbursements",
    "fieldtype": "Table",
    "label": "List Pencairan",
@@ -229,7 +221,6 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "installments",
    "fieldtype": "Table",
    "label": "List Angsuran",
@@ -273,23 +264,23 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
+   "fieldname": "loan_length_in_years",
+   "fieldtype": "Int",
+   "label": "Loan Length in Years",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "credit_to",
-   "fieldtype": "Link",
-   "label": "Credit To",
-   "options": "Account",
+   "fieldname": "actual_number_of_payments",
+   "fieldtype": "Int",
+   "label": "Jumlah Bulan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scheduled_number_of_payments",
+   "fieldtype": "Int",
+   "label": "Scheduled Number of Payments",
+   "read_only": 1,
    "reqd": 1
   }
  ],
@@ -297,7 +288,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-03 16:27:00.378082",
+ "modified": "2025-12-09 10:43:27.679686",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",

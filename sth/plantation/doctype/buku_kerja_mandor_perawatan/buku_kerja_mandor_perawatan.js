@@ -18,7 +18,6 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
                
         this.fieldname_total.push("premi_amount")
         this.kegiatan_fetch_fieldname.push("min_basis_premi", "rupiah_premi")
-        this.max_qty_fieldname = { "hasil_kerja": "volume_basis" }
         
         this.get_data_rkh_field.push("batch")
         this.hasil_kerja_update_field.push("have_premi", "min_basis_premi", "rupiah_premi")

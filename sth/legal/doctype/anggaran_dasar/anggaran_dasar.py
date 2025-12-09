@@ -6,4 +6,9 @@ from frappe.model.document import Document
 
 
 class AnggaranDasar(Document):
-	pass
+	
+	def validate(self):
+		self.clear_akta_list()
+
+	def clear_akta_list(self):
+		self.akta = None

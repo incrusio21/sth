@@ -16,7 +16,8 @@ def create_mr(source_name,target_doc=None):
 		"Berita Acara": {
 			"doctype": "Material Request",
 			"field_map":{
-				"name" : "berita_acara"
+				"name" : "berita_acara",
+				"required_date": "schedule_date"
 			},
 			"validation": {
 				"docstatus": ["=", 1],

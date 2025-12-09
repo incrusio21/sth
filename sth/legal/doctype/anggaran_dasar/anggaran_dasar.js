@@ -3,7 +3,8 @@
 
 frappe.ui.form.on("Anggaran Dasar", {
 	refresh(frm) {
-
+		frm.set_df_property("saham", "cannot_add_rows", true);
+		frm.set_df_property("susunan_pengurus", "cannot_add_rows", true);
 	},
     calculate_total(frm){
         let totals = 0
@@ -15,6 +16,7 @@ frappe.ui.form.on("Anggaran Dasar", {
         frm.set_value("grand_total", totals)
     }
 });
+
 
 frappe.ui.form.on("Detail Form Saham", {
     qty(frm){

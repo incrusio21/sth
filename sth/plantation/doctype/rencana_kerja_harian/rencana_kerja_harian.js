@@ -10,7 +10,7 @@ frappe.ui.form.on("Rencana Kerja Harian", {
     target_volume(frm) {
         frm.doc.qty_tenaga_kerja = frm.doc.volume_basis ? flt(frm.doc.target_volume / frm.doc.volume_basis) : 0
     },
-    kode_kegiatan(frm) {
+    kegiatan(frm) {
         frm.set_value("blok", "")
         frm.set_value("batch", "")
     }

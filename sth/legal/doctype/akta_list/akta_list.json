@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2025-12-08 13:24:09.483980",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "jenis_akta",
+  "column_break_auht",
+  "posting_date",
+  "section_break_yvor",
+  "nama_notaris",
+  "nomor_sk_kehakiman",
+  "tanggal_sk_kehakiman",
+  "kedudukan",
+  "alamat",
+  "column_break_cfmx",
+  "modal_dasar",
+  "modal_di_setor",
+  "kegiatan_usaha",
+  "bnri",
+  "tbnri",
+  "keteranga"
+ ],
+ "fields": [
+  {
+   "fieldname": "jenis_akta",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jenis Akta",
+   "options": "Jenis Akta",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_auht",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_yvor",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nama_notaris",
+   "fieldtype": "Data",
+   "label": "Nama Notaris"
+  },
+  {
+   "fieldname": "nomor_sk_kehakiman",
+   "fieldtype": "Data",
+   "label": "Nomor SK Kehakiman"
+  },
+  {
+   "fieldname": "tanggal_sk_kehakiman",
+   "fieldtype": "Date",
+   "label": "Tanggal SK Kehakiman"
+  },
+  {
+   "fieldname": "kedudukan",
+   "fieldtype": "Data",
+   "label": "Kedudukan"
+  },
+  {
+   "fieldname": "alamat",
+   "fieldtype": "Small Text",
+   "label": "Alamat"
+  },
+  {
+   "fieldname": "column_break_cfmx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "modal_dasar",
+   "fieldtype": "Currency",
+   "label": "Modal Dasar"
+  },
+  {
+   "fieldname": "modal_di_setor",
+   "fieldtype": "Currency",
+   "label": "Modal Di Setor"
+  },
+  {
+   "fieldname": "kegiatan_usaha",
+   "fieldtype": "Data",
+   "label": "Kegiatan Usaha"
+  },
+  {
+   "fieldname": "bnri",
+   "fieldtype": "Data",
+   "label": "BNRI"
+  },
+  {
+   "fieldname": "tbnri",
+   "fieldtype": "Data",
+   "label": "TBNRI"
+  },
+  {
+   "fieldname": "keteranga",
+   "fieldtype": "Small Text",
+   "label": "Keteranga"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-08 13:36:41.444165",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Akta List",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -27,7 +27,7 @@ class Deposito(AccountsController):
 
 	def calculate_deposito(self):
 		self.calculate_tenor()
-		interest_amount = self.deposit_amount * self.tenor * (self.interest/100) / self.year_days
+		interest_amount = self.deposit_amount * (self.interest/100)  * (self.tenor*self.month_days) / self.year_days
 		tax_amount = interest_amount * (self.tax/100)
 		total = interest_amount - tax_amount
 		
