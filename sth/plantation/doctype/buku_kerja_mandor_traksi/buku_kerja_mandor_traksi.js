@@ -190,7 +190,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
    	}
 	
 	get_details_data(opts){
-		if(args.childrens.length == 0) return
+		if(opts.args.childrens.length == 0) return
 
 		let me = this
 		frappe.call({
@@ -247,7 +247,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
 	update_value_after_amount(item) {
-        item.sub_total = flt(item.amount) + flt(item.premi_amount)
+        item.sub_total = flt(item.amount) + flt(item.premi_amount || 0)
     }
 }
 
