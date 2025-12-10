@@ -3,10 +3,12 @@
 
 import frappe
 from frappe.model.document import Document
+from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 class BukuKerjaMandorBengkel(Document):
 	def on_submit(self):
 		self.update_kendaraan_field(self.kmhm_akhir)
+		self.make_attendance()
   
 	def on_cancel(self):
 		self.update_kendaraan_field(self.kmhm_awal)
@@ -16,6 +18,28 @@ class BukuKerjaMandorBengkel(Document):
 			return
 
 		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kd_kndr, "kmhm_akhir", km_value)
+
+	def make_attendance(self):
+		for emp in self.table_kryn:
+			attendance_detail = {
+				"employee": emp.employee, "attendance_date": self.posting_date
+			}
+
+			add_att = "add_attendance"
+			try:
+				frappe.db.savepoint(add_att)
+				attendance = frappe.get_doc({
+					"doctype": "Attendance",
+					"status": "Present",
+					**attendance_detail
+				})
+				attendance.flags.ignore_permissions = 1
+				attendance.submit()
+			except DuplicateAttendanceError:
+				if frappe.message_log:
+					frappe.message_log.pop()
+					
+				frappe.db.rollback(save_point=add_att)  # preserve transaction in postgres
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
