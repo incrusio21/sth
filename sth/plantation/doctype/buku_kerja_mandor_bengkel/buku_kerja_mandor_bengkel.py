@@ -9,6 +9,7 @@ class BukuKerjaMandorBengkel(Document):
 	def on_submit(self):
 		self.make_attendance()
 		self.update_kendaraan_field(self.kmhm_akhir)
+		self.make_attendance()
   
 	def on_cancel(self):
 		self.update_kendaraan_field(self.kmhm_awal)
