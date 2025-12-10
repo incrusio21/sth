@@ -31,7 +31,7 @@
   "section_break_flio",
   "interest_amount",
   "tax_amount",
-  "column_break_cskc",
+  "column_break_uuor",
   "total",
   "total_realization",
   "bunga_deposito_tab",
@@ -211,10 +211,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_cskc",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "total",
    "fieldtype": "Currency",
    "label": "Bunga Netto",
@@ -267,13 +263,17 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_uuor",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 20:42:54.057276",
+ "modified": "2025-12-10 14:46:30.630823",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
