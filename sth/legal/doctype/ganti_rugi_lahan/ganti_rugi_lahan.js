@@ -8,23 +8,53 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
 
 	// },
     
-    pembayaran_lahan(frm){
-        frm.trigger("fetch_gis")
-    },
-
-    sppt(frm){
-        frm.trigger("fetch_gis")
-    },
-
-    fetch_gis(frm){
-        frm.call({
-            doc: frm.doc,
-            method: "fetch_sppt_data",
-            callback: (r) => {
-                frm.cscript.calculate_total()
-            },
+    company(frm) {
+        frm.cscript.get_details_account({
+            method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.fetch_company_account",
+            args: {
+                company: frm.doc.company,
+                childrens: frm.doc.items.length > 0 ? frm.doc.items : null,
+            }
         })
     },
+
+    pembayaran_lahan(frm){
+        frm.cscript.get_details_account({
+            method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_details_sppt",
+            args: {
+                pembayaran_lahan: frm.doc.pembayaran_lahan,
+                childrens: frm.doc.items.length > 0 ? frm.doc.items : null,
+            }
+        })
+    },
+});
+
+frappe.ui.form.on("Ganti Rugi Lahan Item", {
+    jenis_biaya(frm, cdt, cdn){
+        let data = frappe.get_doc(cdt, cdn)
+
+        frm.cscript.get_details_account({
+            method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_details_jenis_biaya",
+            args: {
+                company: frm.doc.company,
+                childrens: [data],
+                sppt_update: 1 
+            }
+        })
+    },
+    sppt(frm, cdt, cdn){
+        let data = frappe.get_doc(cdt, cdn)
+
+        if(!data.sppt) return;
+
+        frm.cscript.get_details_account({
+            method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_details_sppt",
+            args: {
+                pembayaran_lahan: frm.doc.pembayaran_lahan,
+                childrens: [data],
+            }
+        })
+    }
 });
 
 sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsController {
@@ -32,7 +62,7 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
         let me = this
 
         for (const fieldname of ["qty", "rate", "biaya_surat"]) {
-            frappe.ui.form.on('Ganti Rugi Lahan', fieldname, function (doc, cdt, cdn) {
+            frappe.ui.form.on('Ganti Rugi Lahan Item', fieldname, function (doc, cdt, cdn) {
                 me.calculate_total(cdt, cdn)
             });
         }
@@ -40,37 +70,66 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
     
     refresh() {
         this.show_general_ledger()
+        this.set_query_field()
     }
 
-    company() {
-        this.get_accounts()
+    set_query_field() {
+		this.frm.set_query("sppt", "items", function (doc, cdt, cdn) {
+            let item = locals[cdt][cdn]
+
+			return {
+				filters: {
+					perangkat_desa: ["=", item.perangkat_desa]
+				}
+			};
+		});
     }
 
-    jenis_biaya() {
-        this.get_accounts()
-    }
-
-    get_accounts(){
+    get_details_account(opts){
         let me = this
 
         frappe.call({
-            method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.fetch_company_account",
-            args: {
-                company: me.frm.doc.company,
-                jenis_biaya: me.frm.doc.jenis_biaya,
-            },
+            method: opts.method,
+            args: opts.args,
             callback: function(r) {
                 if(!r.exc && r.message) {
-                    me.frm.set_value(r.message);
+                    for (const [key, value] of Object.entries(r.message)) {
+                        if(key == "childrens"){
+                            me._set_values_for_item_list(r.message.childrens, false)
+                        }else{
+                            me.frm.doc[key] = value
+                        }
+                    }
+
+                    me.calculate_total()
                 }
             }
         });
     }
 
+    _set_values_for_item_list(children, recalculate=true) {
+		for (const child of children) {
+			let data = frappe.get_doc(child.doctype, child.name)
+
+			for (const [key, value] of Object.entries(child)) {
+				data[key] = value 
+			}
+		}
+
+        if(recalculate) this.calculate_total();
+	}
+
     calculate_total(){
         let doc = this.frm.doc
 
-        doc.grand_total = flt(doc.qty) * flt(doc.rate) + flt(doc.biaya_surat)
+        let grand_total = 0
+
+        for (const child of doc.items) {
+            child.amount = flt(child.qty) * flt(child.rate) + flt(child.biaya_surat)
+			grand_total += child.amount
+		}
+
+        doc.grand_total = flt(grand_total)
 
         this.frm.refresh_fields()
     }
