@@ -1,244 +1,229 @@
 {
- "actions": [],
- "allow_import": 1,
- "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2025-10-24 14:27:37.485530",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "section_break_kqlq",
-  "naming_series",
-<<<<<<< HEAD
-  "posting_date",
-=======
->>>>>>> 7713f9c6789259aae210f5658fbecc0cfb8d0e50
-  "bkl",
-  "tp_bkl",
-  "tgl_msk",
-  "tgl_klr",
-  "wkt_prb",
-  "column_break_kkgv",
-  "company",
-  "posting_date",
-  "kd_kndr",
-  "jk",
-  "kmhm_awal",
-  "kmhm_akhir",
-  "tipe_perbaikan",
-  "keterangan",
-  "amended_from",
-  "detail_mekanik_tab",
-  "detail_pekerjaan_section",
-  "hasil_kerja",
-  "pemakaian_sparepart_tab",
-  "tabel_daftar_pemakaian_barang__spare_part__section",
-  "table_lxkk"
- ],
- "fields": [
-  {
-   "fieldname": "section_break_kqlq",
-   "fieldtype": "Section Break",
-   "label": "Header"
-  },
-  {
-   "fieldname": "bkl",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Bengkel",
-   "options": "Data Bengkel",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "bkl.tp_bkl",
-   "fieldname": "tp_bkl",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Tipe Bengkel",
-   "read_only": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "tgl_msk",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Masuk",
-   "reqd": 1
-  },
-  {
-   "fieldname": "tgl_klr",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tanggal Keluar"
-  },
-  {
-   "description": "Di Isikan Dalam Satuan Jam",
-   "fieldname": "wkt_prb",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Waktu Perbaikan"
-  },
-  {
-   "fieldname": "column_break_kkgv",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "kd_kndr",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Kode Kendaraan",
-   "options": "Alat Berat Dan Kendaraan",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "kd_kndr.tipe_master",
-   "fieldname": "jk",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Jenis Kendaraan",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "kd_kndr.kmhm_akhir",
-   "fieldname": "kmhm_awal",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "KM/HM Awal"
-  },
-  {
-   "fieldname": "kmhm_akhir",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "KM/HM Akhir"
-  },
-  {
-   "fieldname": "tipe_perbaikan",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Tipe Perbaikan",
-   "options": "Servis Berkala\nPerbaikan Ringan\nPerbaikan Berat\nModifikasi\nKecelakaan\nGaransi\nRekondisi",
-   "reqd": 1
-  },
-  {
-   "fieldname": "keterangan",
-   "fieldtype": "Small Text",
-   "label": "Keterangan"
-  },
-  {
-   "fieldname": "detail_mekanik_tab",
-   "fieldtype": "Tab Break",
-   "label": "Mekanik"
-  },
-  {
-   "fieldname": "detail_pekerjaan_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "pemakaian_sparepart_tab",
-   "fieldtype": "Tab Break",
-   "label": "Pemakaian Sparepart"
-  },
-  {
-   "fieldname": "tabel_daftar_pemakaian_barang__spare_part__section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "table_lxkk",
-   "fieldtype": "Table",
-   "options": "Detail Item Bengkel"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Buku Kerja Mandor Bengkel",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "BKM-BKL-",
-   "reqd": 1
-  },
-  {
-<<<<<<< HEAD
-=======
-   "fieldname": "hasil_kerja",
-   "fieldtype": "Table",
-   "label": "Hasil Kerja",
-   "options": "Detail Transaksi Employee"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
->>>>>>> 7713f9c6789259aae210f5658fbecc0cfb8d0e50
-   "default": "Today",
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_preview": 1,
-<<<<<<< HEAD
-   "label": "Tanggal Transaksi"
-=======
-   "label": "Date",
-   "reqd": 1
->>>>>>> 7713f9c6789259aae210f5658fbecc0cfb8d0e50
-  }
- ],
- "grid_page_length": 50,
- "is_submittable": 1,
- "links": [],
-<<<<<<< HEAD
- "modified": "2025-12-10 14:23:12.494382",
-=======
- "modified": "2025-12-10 11:50:16.546132",
->>>>>>> 7713f9c6789259aae210f5658fbecc0cfb8d0e50
- "modified_by": "Administrator",
- "module": "Plantation",
- "name": "Buku Kerja Mandor Bengkel",
- "naming_rule": "By \"Naming Series\" field",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+	"actions": [],
+	"allow_import": 1,
+	"allow_rename": 1,
+	"autoname": "naming_series:",
+	"creation": "2025-10-24 14:27:37.485530",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"section_break_kqlq",
+		"naming_series",
+		"bkl",
+		"tp_bkl",
+		"tgl_msk",
+		"tgl_klr",
+		"wkt_prb",
+		"column_break_kkgv",
+		"company",
+		"posting_date",
+		"kd_kndr",
+		"jk",
+		"kmhm_awal",
+		"kmhm_akhir",
+		"tipe_perbaikan",
+		"keterangan",
+		"amended_from",
+		"detail_mekanik_tab",
+		"detail_pekerjaan_section",
+		"hasil_kerja",
+		"pemakaian_sparepart_tab",
+		"tabel_daftar_pemakaian_barang__spare_part__section",
+		"table_lxkk"
+	],
+	"fields": [
+		{
+			"fieldname": "section_break_kqlq",
+			"fieldtype": "Section Break",
+			"label": "Header"
+		},
+		{
+			"fieldname": "bkl",
+			"fieldtype": "Link",
+			"in_filter": 1,
+			"in_preview": 1,
+			"in_standard_filter": 1,
+			"label": "Bengkel",
+			"options": "Data Bengkel",
+			"reqd": 1
+		},
+		{
+			"fetch_from": "bkl.tp_bkl",
+			"fieldname": "tp_bkl",
+			"fieldtype": "Select",
+			"in_preview": 1,
+			"in_standard_filter": 1,
+			"label": "Tipe Bengkel",
+			"read_only": 1
+		},
+		{
+			"default": "Today",
+			"fieldname": "tgl_msk",
+			"fieldtype": "Date",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "Tanggal Masuk",
+			"reqd": 1
+		},
+		{
+			"fieldname": "tgl_klr",
+			"fieldtype": "Date",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "Tanggal Keluar"
+		},
+		{
+			"description": "Di Isikan Dalam Satuan Jam",
+			"fieldname": "wkt_prb",
+			"fieldtype": "Int",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "Waktu Perbaikan"
+		},
+		{
+			"fieldname": "column_break_kkgv",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "kd_kndr",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"in_standard_filter": 1,
+			"label": "Kode Kendaraan",
+			"options": "Alat Berat Dan Kendaraan",
+			"reqd": 1
+		},
+		{
+			"fetch_from": "kd_kndr.tipe_master",
+			"fieldname": "jk",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "Jenis Kendaraan",
+			"read_only": 1
+		},
+		{
+			"fetch_from": "kd_kndr.kmhm_akhir",
+			"fieldname": "kmhm_awal",
+			"fieldtype": "Float",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "KM/HM Awal"
+		},
+		{
+			"fieldname": "kmhm_akhir",
+			"fieldtype": "Float",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "KM/HM Akhir"
+		},
+		{
+			"fieldname": "tipe_perbaikan",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "Tipe Perbaikan",
+			"options": "Servis Berkala\nPerbaikan Ringan\nPerbaikan Berat\nModifikasi\nKecelakaan\nGaransi\nRekondisi",
+			"reqd": 1
+		},
+		{
+			"fieldname": "keterangan",
+			"fieldtype": "Small Text",
+			"label": "Keterangan"
+		},
+		{
+			"fieldname": "detail_mekanik_tab",
+			"fieldtype": "Tab Break",
+			"label": "Mekanik"
+		},
+		{
+			"fieldname": "detail_pekerjaan_section",
+			"fieldtype": "Section Break"
+		},
+		{
+			"fieldname": "pemakaian_sparepart_tab",
+			"fieldtype": "Tab Break",
+			"label": "Pemakaian Sparepart"
+		},
+		{
+			"fieldname": "tabel_daftar_pemakaian_barang__spare_part__section",
+			"fieldtype": "Section Break"
+		},
+		{
+			"fieldname": "table_lxkk",
+			"fieldtype": "Table",
+			"options": "Detail Item Bengkel"
+		},
+		{
+			"fieldname": "amended_from",
+			"fieldtype": "Link",
+			"label": "Amended From",
+			"no_copy": 1,
+			"options": "Buku Kerja Mandor Bengkel",
+			"print_hide": 1,
+			"read_only": 1,
+			"search_index": 1
+		},
+		{
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"label": "Series",
+			"options": "BKM-BKL-",
+			"reqd": 1
+		},
+		{
+			"fieldname": "hasil_kerja",
+			"fieldtype": "Table",
+			"label": "Hasil Kerja",
+			"options": "Detail Transaksi Employee"
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"in_standard_filter": 1,
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"default": "Today",
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"in_list_view": 1,
+			"in_preview": 1,
+			"label": "Date",
+			"reqd": 1
+		}
+	],
+	"grid_page_length": 50,
+	"is_submittable": 1,
+	"links": [],
+	"modified": "2025-12-10 11:50:16.546132",
+	"modified_by": "Administrator",
+	"module": "Plantation",
+	"name": "Buku Kerja Mandor Bengkel",
+	"naming_rule": "By \"Naming Series\" field",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": []
 }
