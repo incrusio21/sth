@@ -219,12 +219,13 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
         if (item.parentfield != "hasil_kerja") return
 
         let doc = this.frm.doc
-        item.rate = item.rupiah_basis
-
+		let rate = item.rupiah_basis
 		if (!in_list(["Dump Truck"], doc.tipe_master_kendaraan)){
-			item.rate = flt(item.base/item.total_hari)
+			rate = flt(item.base/item.total_hari)
 		}
         
+		item.rate = item.rate || rate
+
 		if (!doc.manual_hk){
 			item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         }

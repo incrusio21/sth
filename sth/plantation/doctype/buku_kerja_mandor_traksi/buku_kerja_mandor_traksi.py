@@ -103,11 +103,13 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", new_value)
 	
 	def update_rate_or_qty_value(self, item, precision):
-		item.rate = item.rupiah_basis
+		rate = item.rupiah_basis
 		# set rate pegawai jika bukan dump truck
 		if self.tipe_master_kendaraan not in ("Dump Truck"):
-			item.rate = flt(item.base/item.total_hari, precision)
+			rate = flt(item.base/item.total_hari, precision)
 
+		item.rate = item.rate or rate
+		
 		if not self.get("manual_hk"):
 			item.hari_kerja = min(flt(item.qty / (item.volume_basis or 1)), 1)
 		
