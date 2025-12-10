@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class Pabrik(Document):
+class PengakuanPembelianTBSLuar(Document):
 	pass

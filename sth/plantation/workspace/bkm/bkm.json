@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"3JNihNzekb\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Bibitan\",\"col\":4}},{\"id\":\"v0fPr3sSgy\",\"type\":\"card\",\"data\":{\"card_name\":\"BKM\",\"col\":4}},{\"id\":\"x0EAZ10i66\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Lainnya\",\"col\":4}},{\"id\":\"CV-lG6zcss\",\"type\":\"card\",\"data\":{\"card_name\":\"Absensi\",\"col\":4}},{\"id\":\"onJRymhnHW\",\"type\":\"card\",\"data\":{\"card_name\":\"Report\",\"col\":4}}]",
+ "content": "[{\"id\":\"3JNihNzekb\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Bibitan\",\"col\":4}},{\"id\":\"v0fPr3sSgy\",\"type\":\"card\",\"data\":{\"card_name\":\"BKM\",\"col\":4}},{\"id\":\"x0EAZ10i66\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Lainnya\",\"col\":4}},{\"id\":\"CV-lG6zcss\",\"type\":\"card\",\"data\":{\"card_name\":\"Absensi\",\"col\":4}},{\"id\":\"7A2dvQ7Z-u\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}},{\"id\":\"onJRymhnHW\",\"type\":\"card\",\"data\":{\"card_name\":\"Report\",\"col\":4}}]",
  "creation": "2025-09-23 15:38:12.021285",
  "custom_blocks": [],
  "docstatus": 0,
@@ -227,9 +227,28 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setup",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kegiatan",
+   "link_count": 0,
+   "link_to": "Kegiatan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-09 12:07:18.310947",
+ "modified": "2025-12-10 11:45:18.558609",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "BKM",
