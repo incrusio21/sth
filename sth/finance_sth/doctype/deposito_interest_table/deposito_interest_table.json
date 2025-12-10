@@ -22,6 +22,7 @@
   "outstanding_amount",
   "payment",
   "create_payment",
+  "is_redeemed",
   "accounting_details_section",
   "cost_center",
   "debit_to",
@@ -172,6 +173,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "create_payment",
    "fieldtype": "Button",
    "label": "Create Payment"
@@ -188,13 +190,22 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Deposito Interest"
+  },
+  {
+   "default": "Belum",
+   "fieldname": "is_redeemed",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Dicairkan",
+   "options": "\nBelum\nSudah",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-09 23:01:02.659333",
+ "modified": "2025-12-10 16:22:09.405717",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito Interest Table",

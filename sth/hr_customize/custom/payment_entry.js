@@ -49,7 +49,7 @@ frappe.ui.form.on("Payment Entry", {
                 }
             }
         })
-        frm.ignore_doctypes_on_cancel_all = ["Deposito Interest"];
+        frm.ignore_doctypes_on_cancel_all = ["Deposito Interest", "Deposito"];
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
