@@ -3,8 +3,29 @@
 
 frappe.ui.form.on("Anggaran Dasar", {
 	refresh(frm) {
-		frm.set_df_property("saham", "cannot_add_rows", true);
-		frm.set_df_property("susunan_pengurus", "cannot_add_rows", true);
+        for (const table of ["saham", "pengurus", "kriteria"]) {
+            frm.set_df_property(table, "cannot_add_rows", true);
+
+			frm.set_query(`akta_${table}`, (doc) => {
+                return {
+                    filters: {
+                        company: ["=", doc.company]
+                    }
+                }
+            })
+            
+            frm.fields_dict[table].grid.add_custom_button("Add Row", () => {
+                if(!frm.doc[`akta_${table}`]){
+                    frappe.throw("Plase set Akta first.")
+                }
+                
+                frm.add_child(table, {
+                    akta: frm.doc[`akta_${table}`],
+                });
+    
+                frm.refresh_fields(table)
+            })
+		}
 	},
     calculate_total(frm){
         let totals = 0
