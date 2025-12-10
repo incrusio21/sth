@@ -45,6 +45,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			}
 		])
 
+		self._mandor_dict.append({"fieldname": "mandor1"})
+
 	def validate(self):
 		self.reset_automated_data()
 
@@ -91,7 +93,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		
 		item.bjr = self.bjr
 		item.qty = (item.bjr * item.jumlah_janjang)
-		item.rate = flt(item.get("rate") or self.rupiah_basis)
+		item.rate = item.get("rate") or self.rupiah_basis
 		item.brondolan = flt(self.upah_brondolan)
 
 		if not self.manual_hk:
