@@ -9,6 +9,7 @@
   "disbursement_number",
   "disbursement_date",
   "disbursement_amount",
+  "disbursement_total",
   "due_days",
   "column_break_bbib",
   "reference_doc",
@@ -91,13 +92,19 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "disbursement_total",
+   "fieldtype": "Currency",
+   "label": "Total Pencairan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-08 14:31:40.068240",
+ "modified": "2025-12-09 13:16:12.542951",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Disbursement Loan",

@@ -1,4 +1,4 @@
-frappe.ui.form.on('Driver', {
+frappe.ui.form.on('Asset', {
     refresh(frm) {
         if (frm.doc.qr) {
             render_qr(frm);

@@ -7,8 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_wnhv",
-  "posting_date",
   "naming_series",
+  "posting_date",
   "column_break_brwj",
   "company",
   "tipe",
@@ -23,15 +23,20 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Naming Series",
-   "options": "\nLP-.DD.MM.YY.-.###"
+   "options": "\nLP-.DD.MM.YY.-.###",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_brwj",
@@ -40,8 +45,11 @@
   {
    "fieldname": "tipe",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Tipe",
-   "options": "\nInternal\nEksternal"
+   "options": "\nInternal\nEksternal\nLain - Lain",
+   "reqd": 1
   },
   {
    "description": "Timbangan yang diambil per hari ini",
@@ -57,7 +65,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Laporan TBS Items"
+   "options": "Laporan TBS Items",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -72,15 +81,17 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 09:29:08.601094",
+ "modified": "2025-12-09 14:41:44.829976",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Penerimaan TBS",

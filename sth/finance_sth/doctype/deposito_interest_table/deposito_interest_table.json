@@ -1,0 +1,207 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-09 20:31:38.827135",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_ghbt",
+  "posting_date",
+  "value_date",
+  "maturity_date",
+  "day_in_months",
+  "deposito_amount",
+  "interest",
+  "tax",
+  "column_break_icxc",
+  "interest_amount",
+  "tax_amount",
+  "total",
+  "total_realization",
+  "grand_total",
+  "outstanding_amount",
+  "payment",
+  "create_payment",
+  "accounting_details_section",
+  "cost_center",
+  "debit_to",
+  "expense_account",
+  "deposito_interest"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_ghbt",
+   "fieldtype": "Section Break",
+   "label": "Deposito Interest Details"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Penempatan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "value_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Valuta",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "maturity_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Jatuh Tempo",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "day_in_months",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Jumlah Hari (1 Bulan)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "deposito_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Jumlah Deposito",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Suku Bunga (%)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Pajak (%)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_icxc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Bunga",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah Pajak",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_realization",
+   "fieldtype": "Currency",
+   "label": "Total Realisasi",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Grand Total",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Outstanding Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment",
+   "fieldtype": "Link",
+   "label": "Payment",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "create_payment",
+   "fieldtype": "Button",
+   "label": "Create Payment"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total Bunga (Setelah Pajak)",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "deposito_interest",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Deposito Interest"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-09 23:01:02.659333",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Deposito Interest Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

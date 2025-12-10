@@ -9,6 +9,7 @@
   "disbursement_number",
   "disbursement_date",
   "disbursement_amount",
+  "disbursement_total",
   "due_days"
  ],
  "fields": [
@@ -41,13 +42,19 @@
    "in_list_view": 1,
    "label": "Jatuh Tempo",
    "read_only": 1
+  },
+  {
+   "fieldname": "disbursement_total",
+   "fieldtype": "Currency",
+   "label": "Total Pencairan (Sebelum Transaksi)",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-08 11:24:14.165739",
+ "modified": "2025-12-09 13:47:56.956059",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Disbursement Loan Bank",

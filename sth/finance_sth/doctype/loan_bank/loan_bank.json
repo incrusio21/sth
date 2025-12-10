@@ -19,6 +19,7 @@
   "loan_term",
   "loan_amount",
   "due_days",
+  "days_in_year",
   "column_break_ahqa",
   "commitment_periode",
   "availability_period",
@@ -220,6 +221,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.disbursements.length > 0 && !cur_frm.is_new()",
    "fieldname": "installments",
    "fieldtype": "Table",
    "label": "List Angsuran",
@@ -280,13 +282,20 @@
    "label": "Scheduled Number of Payments",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "bank.loan_year_days",
+   "fieldname": "days_in_year",
+   "fieldtype": "Int",
+   "label": "Jumlah Hari 1 Tahun",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 11:04:14.167835",
+ "modified": "2025-12-09 16:03:08.838040",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",

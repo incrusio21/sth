@@ -22,7 +22,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item Code",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_ztxj",
@@ -61,7 +62,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Timbangan",
-   "options": "Timbangan"
+   "options": "Timbangan",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_usig",
@@ -72,7 +74,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-05 13:11:55.257524",
+ "modified": "2025-12-09 14:05:20.648225",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan TBS Items",

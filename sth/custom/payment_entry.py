@@ -70,10 +70,16 @@ def update_check_book(self, method):
 
 def update_status_deposito(self, method):
 	for ref in self.references:
-		if ref.reference_doctype != "Deposito":
+		if ref.reference_doctype != "Deposito Interest":
 			continue
-		doc = frappe.get_doc("Deposito", ref.reference_name)
-		doc.is_redeemed = "Sudah" if method == "on_submit" else "Belum"
-		doc.payment = self.name if method == "on_submit" else None
+		doc = frappe.get_doc("Deposito Interest", ref.reference_name)
+		# doc.is_redeemed = "Sudah" if method == "on_submit" else "Belum"
+		doc.payment_entry = self.name if method == "on_submit" else None
 		doc.total_realization = self.paid_amount if method == "on_submit" else 0
 		doc.db_update_all()
+
+		values = {
+			"total_realization" : doc.total_realization,
+			"payment" : doc.payment_entry
+		}
+		frappe.db.set_value(doc.reference_detail_doc, doc.reference_detail_name, values)

@@ -48,6 +48,7 @@ def create_disbursement(loan_bank):
 			"disbursement_number": loan_bank.disbursement_number,
 			"disbursement_date": loan_bank.disbursement_date,
 			"disbursement_amount": loan_bank.disbursement_amount,
+			"disbursement_total": loan_bank.disbursement_total,
 			"due_days": loan_bank.due_days,
 			"reference_doc": "Loan Bank",
 			"reference_name": loan_bank.parent,
@@ -67,11 +68,15 @@ def update_disbursement(loan_bank):
 		check_fields = [
 			"disbursement_date",
 			"disbursement_amount",
+			"disbursement_total",
+			"due_days",
 		]
 
 		if is_doc_changed(doc, loan_bank, check_fields):
 			doc.disbursement_date = loan_bank.disbursement_date
 			doc.disbursement_amount = loan_bank.disbursement_amount
+			doc.disbursement_total = loan_bank.disbursement_total
+			doc.due_days = loan_bank.due_days
 			doc.db_update_all()
 
 def is_doc_changed(old_doc, new_doc, fields):
@@ -95,6 +100,7 @@ def create_installment(loan_bank):
 			"disbursement_number": loan_bank.disbursement_number,
 			"disbursement_amount": loan_bank.disbursement_amount,
 			"disbursement_date": loan_bank.disbursement_date,
+			"disbursement_total": loan_bank.disbursement_total,
 			"payment_date": loan_bank.payment_date,
 			"installment_month": loan_bank.installment_month,
 			"principal": loan_bank.principal,
@@ -125,6 +131,7 @@ def update_installment(loan_bank):
 			"payment_total",
 			"disbursement_amount",
 			"disbursement_date",
+			"disbursement_total",
 		]
 
 		if is_doc_changed(doc, loan_bank, check_fields):
@@ -136,6 +143,7 @@ def update_installment(loan_bank):
 			doc.payment_total = loan_bank.payment_total
 			doc.disbursement_amount = loan_bank.disbursement_amount
 			doc.disbursement_date = loan_bank.disbursement_date
+			doc.disbursement_total = loan_bank.disbursement_total
 			doc.db_update_all()
 
 def delete_installment(installments):

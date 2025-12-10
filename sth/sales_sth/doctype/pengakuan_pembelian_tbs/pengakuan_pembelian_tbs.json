@@ -18,6 +18,9 @@
   "column_break_vdwi",
   "bonus",
   "subsisi_angkut",
+  "section_break_mdbx",
+  "items",
+  "document_reference",
   "amended_from"
  ],
  "fields": [
@@ -32,9 +35,9 @@
   },
   {
    "fieldname": "jarak",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Jarak",
-   "options": "\nRing 1\nRing 2"
+   "options": "Price List"
   },
   {
    "fieldname": "column_break_kiin",
@@ -97,13 +100,30 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "section_break_mdbx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Pengakuan Pembelian TBS Item"
+  },
+  {
+   "fieldname": "document_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Document Reference",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 13:28:39.505919",
+ "modified": "2025-12-09 16:53:16.289438",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",

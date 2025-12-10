@@ -75,6 +75,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		if update_payment_log:
 			self.calculate()
+			self.update_children()
+			
 			self.create_or_update_payment_log()
 
 	def set_salary_component(self):

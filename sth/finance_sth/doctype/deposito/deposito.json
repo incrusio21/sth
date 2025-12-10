@@ -13,12 +13,11 @@
   "bank",
   "bank_account",
   "year_days",
-  "month_days",
   "currency",
   "bilyet_number",
   "value_date",
-  "maturity_date",
   "tenor",
+  "maturity_date",
   "column_break_cbgg",
   "interest",
   "tax",
@@ -30,25 +29,17 @@
   "posting_date",
   "deposited_by",
   "section_break_flio",
-  "interest_amount_monthly",
-  "tax_amount_monthly",
-  "total_monthly",
-  "column_break_cskc",
   "interest_amount",
   "tax_amount",
+  "column_break_cskc",
   "total",
   "total_realization",
-  "accounting_dimensions_section",
-  "cost_center",
+  "bunga_deposito_tab",
+  "bunga_deposito_details_section",
+  "deposito_interest_table",
   "more_information_tab",
   "payment_details_section",
-  "grand_total",
-  "outstanding_amount",
   "is_redeemed",
-  "payment",
-  "accounting_details_section",
-  "debit_to",
-  "expense_account",
   "amended_from"
  ],
  "fields": [
@@ -96,9 +87,11 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.tenor",
    "fieldname": "maturity_date",
    "fieldtype": "Date",
-   "label": "Tanggal jatuh tempo",
+   "label": "Tanggal Jatuh Tempo",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -159,30 +152,6 @@
    "label": "More Information"
   },
   {
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
    "fieldname": "bank_account",
    "fieldtype": "Link",
    "label": "Bank Account",
@@ -190,21 +159,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Deposito",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "tenor",
-   "fieldtype": "Float",
+   "fieldtype": "Select",
    "label": "Jangka Waktu (Bulan)",
+   "options": "\n1\n3\n6\n12\n24",
    "precision": "0",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -229,25 +188,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "payment",
-   "fieldtype": "Link",
-   "label": "Payment",
-   "options": "Payment Entry",
-   "read_only": 1
-  },
-  {
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "outstanding_amount",
-   "fieldtype": "Currency",
-   "label": "Outstanding Amount",
-   "read_only": 1
-  },
-  {
    "fieldname": "tax",
    "fieldtype": "Percent",
    "label": "Pajak (%)",
@@ -261,7 +201,7 @@
   {
    "fieldname": "interest_amount",
    "fieldtype": "Currency",
-   "label": "Jumlah Bunga",
+   "label": "Bunga Bruto",
    "read_only": 1
   },
   {
@@ -277,7 +217,7 @@
   {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total Bunga (Setelah Pajak)",
+   "label": "Bunga Netto",
    "read_only": 1
   },
   {
@@ -290,15 +230,9 @@
    "fetch_from": "bank.deposit_year_days",
    "fieldname": "year_days",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Hari dalam 1 Tahun",
    "read_only": 1
-  },
-  {
-   "fieldname": "expense_account",
-   "fieldtype": "Link",
-   "label": "Expense Account",
-   "options": "Account",
-   "reqd": 1
   },
   {
    "fieldname": "unit",
@@ -308,35 +242,38 @@
    "reqd": 1
   },
   {
-   "fieldname": "month_days",
-   "fieldtype": "Int",
-   "label": "Hari dalam 1 Bulan",
-   "reqd": 1
+   "fieldname": "bunga_deposito_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bunga Deposito"
   },
   {
-   "fieldname": "interest_amount_monthly",
-   "fieldtype": "Currency",
-   "label": "Jumlah Bunga (1 Bulan)",
+   "fieldname": "bunga_deposito_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bunga Deposito Details"
+  },
+  {
+   "fieldname": "deposito_interest_table",
+   "fieldtype": "Table",
+   "label": "Bunga Deposito",
+   "options": "Deposito Interest Table",
    "read_only": 1
   },
   {
-   "fieldname": "tax_amount_monthly",
-   "fieldtype": "Currency",
-   "label": "Jumlah Pajak (1 Bulan)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_monthly",
-   "fieldtype": "Currency",
-   "label": "Total Bunga Per 1 Bulan (Setelah Pajak)",
-   "read_only": 1
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Deposito",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 11:26:33.396135",
+ "modified": "2025-12-09 20:42:54.057276",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

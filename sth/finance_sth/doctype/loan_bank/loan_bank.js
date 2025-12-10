@@ -24,6 +24,7 @@ frappe.ui.form.on("Disbursement Loan Bank", {
     },
     disbursement_amount(frm, cdt, cdn){
         validateTotalAmountDisbursement(frm, cdt, cdn)
+        totalAmountDisbursement(frm, cdt, cdn)
     },
     before_disbursements_remove(frm, cdt, cdn){
         validateDeleteDisbursement(frm, cdt, cdn)
@@ -33,6 +34,10 @@ frappe.ui.form.on("Disbursement Loan Bank", {
 frappe.ui.form.on("Installment Loan Bank", {
     disbursement_number(frm, cdt, cdn){
         validateChangeInstallment(frm, cdt, cdn)
+        checkGracePrincipal(frm, cdt, cdn)
+    },
+    payment_date(frm, cdt, cdn){
+        getDaysInstallment(frm, cdt, cdn)
     }
 })
 
@@ -122,6 +127,58 @@ function calculateScheduleLoan(frm) {
     frm.set_value('loan_length_in_years', loanLengthInYears);
     frm.refresh_field('scheduled_number_of_payments');
     frm.refresh_field('loan_length_in_years');
+}
+
+function totalAmountDisbursement(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    let total = 0;
+    
+    if (curRow.idx == 1) {
+        total += curRow.disbursement_amount
+    } else {
+        for (const row of frm.doc.disbursements) {
+            if (curRow.idx > row.idx) {
+                total += row.disbursement_amount
+            }
+        }
+    }
+    
+    frappe.model.set_value(cdt, cdn, 'disbursement_total', total)
+    frm.refresh_field('disbursements')
+    
+}
+
+function checkGracePrincipal(frm, cdt, cdn) {
+    let gracePeriod = frm.doc.grace_period;
+    const curRow = locals[cdt][cdn]
+    if (curRow.idx > gracePeriod) {
+        let scheduleNumberOfPayments = frm.doc.scheduled_number_of_payments;
+        let pricipalAmount = curRow.disbursement_total /  scheduleNumberOfPayments
+        frappe.model.set_value(cdt, cdn, 'principal', pricipalAmount)
+        frm.refresh_field('disbursements')
+    }
+}
+
+function getDaysInstallment(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    const startDate = curRow.disbursement_date;
+    const endDate = curRow.payment_date;
+
+    if (!startDate || !endDate) {
+        return;
+    }
+    const days = frappe.datetime.get_day_diff(endDate, startDate)
+
+    frappe.model.set_value(cdt, cdn, 'days', days)
+    frm.refresh_field('installments')
+}
+
+function calculateInterestAmount(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn];
+    if (!curRow.loan_interest || !curRow.days) {
+        return
+    }
+    let interestAmount = 0
 }
 
 let editId = null;

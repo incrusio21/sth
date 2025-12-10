@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class EmployeeUnit(Document):
+class DepositoInterestTable(Document):
 	pass
