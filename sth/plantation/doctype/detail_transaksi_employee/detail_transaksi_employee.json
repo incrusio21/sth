@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "creation": "2025-07-22 11:23:24.027335",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "header_section",
@@ -20,6 +21,7 @@
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "label": "Nama Karyawan",
    "options": "Employee",
    "reqd": 1
@@ -32,6 +34,8 @@
    "fetch_from": "employee.designation",
    "fieldname": "jbtn",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
    "label": "Jabatan"
   }
  ],
@@ -39,7 +43,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-22 11:25:25.848496",
+ "modified": "2025-12-10 11:43:18.545750",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail Transaksi Employee",

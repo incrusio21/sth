@@ -170,7 +170,7 @@ class BukuKerjaMandorController(PlantationController):
                 continue
 
             m_dict = frappe._dict({
-                "employee": self.get(mandor),
+                "employee": mandor,
                 "status": "Present"
             })
             

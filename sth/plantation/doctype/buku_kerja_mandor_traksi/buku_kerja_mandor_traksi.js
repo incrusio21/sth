@@ -97,7 +97,7 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 	},
 	kmhm_ahkir(frm, cdt, cdn){
 		frappe.call({
-			method: "get_details_diffrence",
+			method: "set_details_diffrence",
 			doc: frm.doc,
 			callback: (data) => {
 				frm.cscript.calculate_total(null,null,"hasil_kerja");

@@ -75,7 +75,7 @@
   {
    "fieldname": "pekerjaan_tab",
    "fieldtype": "Tab Break",
-   "label": "Pekerjaan"
+   "label": "Lokasi Kerja"
   },
   {
    "fetch_from": "mandor.designation",
@@ -240,7 +240,7 @@
   {
    "fieldname": "tab_5_tab",
    "fieldtype": "Tab Break",
-   "label": "Upah"
+   "label": "Kegiatan & Upah"
   },
   {
    "fieldname": "upah_section",
@@ -358,7 +358,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 13:59:37.109634",
+ "modified": "2025-12-10 11:18:26.703974",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

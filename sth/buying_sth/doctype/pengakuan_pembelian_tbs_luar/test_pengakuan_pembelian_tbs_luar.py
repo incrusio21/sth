@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestHargaBeliTBS(FrappeTestCase):
+class TestPengakuanPembelianTBSLuar(FrappeTestCase):
 	pass

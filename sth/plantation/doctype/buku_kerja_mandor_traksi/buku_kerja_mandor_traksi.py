@@ -33,7 +33,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self.set_posting_datetime()
 		self.validate_selisih_kmhm()
 		# set data emloyee
-		self.set_details_diffrence(self.kmhm_awal, self.jns_alt)
+		self.set_details_diffrence(self.kmhm_awal, self.jenis_alat)
 		get_details_employee(self.hasil_kerja, self.posting_date)
 		get_details_kegiatan(self.hasil_kerja, self.company)
 		
