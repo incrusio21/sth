@@ -2,10 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Loan Bank", {
-	refresh(frm) {
+	refresh(frm, cdt, cdn) {
         filterBankAccount(frm);
         filterAccountCreditTo(frm);
-        // showInterestRateDialog(frm);
+        filterDisbursementNumber(frm, cdt, cdn)
 	},
     availability_period(frm){
         calculateScheduleLoan(frm);
@@ -16,6 +16,9 @@ frappe.ui.form.on("Loan Bank", {
     actual_number_of_payments(frm){
         calculateScheduleLoan(frm);
     },
+    new_interest(frm){
+        showInterestRateDialog(frm);
+    }
 });
 
 frappe.ui.form.on("Disbursement Loan Bank", {
@@ -32,6 +35,9 @@ frappe.ui.form.on("Disbursement Loan Bank", {
 });
 
 frappe.ui.form.on("Installment Loan Bank", {
+    installments_add(frm, cdt, cdn){
+        getLastInterest(frm, cdt, cdn)
+    },
     disbursement_number(frm, cdt, cdn){
         validateChangeInstallment(frm, cdt, cdn)
         checkGracePrincipal(frm, cdt, cdn)
@@ -161,6 +167,9 @@ function checkGracePrincipal(frm, cdt, cdn) {
         frappe.model.set_value(cdt, cdn, 'principal', pricipalAmount)
         frm.refresh_field('installments')
         calculateInterestAmount(frm, cdt, cdn)
+    }else{
+        frappe.model.set_value(cdt, cdn, 'principal', 0)
+        frm.refresh_field('installments')
     }
 }
 
@@ -185,7 +194,7 @@ function calculateInterestAmount(frm, cdt, cdn) {
         return
     }
     let interestAmount = curRow.disbursement_total * curRow.loan_interest * curRow.days / frm.doc.days_in_year
-    let paymentTotal = curRow.principal + interestAmount
+    let paymentTotal = curRow.principal || 0 + interestAmount
     frappe.model.set_value(cdt, cdn, 'interest_amount', interestAmount)
     frappe.model.set_value(cdt, cdn, 'payment_total', paymentTotal)
     frm.refresh_field("installments")
@@ -264,7 +273,7 @@ function loadInterestList(loan_bank, dialog) {
             filters: {
                 loan_bank: loan_bank
             },
-            order_by: "date desc"
+            order_by: "date asc"
         },
         callback: function(r) {
             if (r.message) {
@@ -280,13 +289,13 @@ function saveInterest(dialog) {
 
     const payload = {
         doctype: "Loan Bank Interest",
-        loan_bank: values.loanBank,
+        loan_bank: values.loan_bank,
         bank: values.bank,
         date: values.date,
         interest: values.interest
     };
 
-    const method = editId ? "frappe.client.save" : "frappe.client.insert";
+    const method = editId ? "sth.finance_sth.doctype.loan_bank.loan_bank.update_loan_bank_interest" : "frappe.client.insert";
     if (editId) payload.name = editId;
 
     frappe.call({
@@ -295,7 +304,7 @@ function saveInterest(dialog) {
         callback: () => {
             frappe.show_alert(editId ? "Perubahan disimpan" : "Data disimpan");
 
-            loadInterestList(values.loanBank, dialog);
+            loadInterestList(values.loan_bank, dialog);
 
             editId = null;
             dialog.set_value("date", null);
@@ -320,4 +329,37 @@ function editInterest(name) {
             loadInterestList(doc.loan_bank, d);
         }
     });
+}
+
+function getLastInterest(frm, cdt, cdn) {
+    frappe.call({
+        method: "sth.finance_sth.doctype.loan_bank.loan_bank.get_last_interest",
+        args: {
+            loan_bank: frm.doc.name
+        },
+        freeze: true,
+        callback: (r) => {
+            if (r.message) {
+                frappe.model.set_value(cdt, cdn, "loan_interest", r.message)
+                frm.refresh_field('installments')
+            }
+        },
+        error: (r) => {
+            console.log(r);
+        
+        }
+    })
+}
+
+function filterDisbursementNumber(frm, cdt, cdn) {
+    if (frm.is_new()) {
+        return
+    }
+    frm.fields_dict.installments.grid.get_field('disbursement_number').get_query = (doc, cdt, cdn) => {
+        return {
+            filters : {
+                reference_name: frm.doc.name
+            }
+        }
+    }
 }

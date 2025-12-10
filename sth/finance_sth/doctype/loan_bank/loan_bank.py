@@ -10,10 +10,16 @@ class LoanBank(Document):
 	def on_update(self):
 		self.process_disbursement()
 		self.process_installment()
-  
+
 	def after_insert(self):
 		self.process_disbursement()
 		self.process_installment()
+
+	def on_submit(self):
+		self.process_child_submit()
+	
+	def before_cancel(self):
+		self.process_child_cancel()
 
 	def process_disbursement(self):
 		for row in self.disbursements:
@@ -40,6 +46,23 @@ class LoanBank(Document):
 		for d in installments:
 			delete_installment(d)
 
+	def process_child_submit(self):
+		for row in self.disbursements:
+			doc = frappe.get_doc("Disbursement Loan", row.disbursement_number)
+			doc.submit()
+
+		for row in self.disbursements:
+			doc = frappe.get_doc("Installment Loan", row.disbursement_number)
+			doc.submit()
+
+	def process_child_cancel(self):
+		for row in self.disbursements:
+			doc = frappe.get_doc("Disbursement Loan", row.disbursement_number)
+			doc.cancel()
+
+		for row in self.disbursements:
+			doc = frappe.get_doc("Installment Loan", row.disbursement_number)
+			doc.cancel()
 
 def create_disbursement(loan_bank):
 	if not frappe.db.exists("Disbursement Loan", loan_bank.disbursement_number):
@@ -153,3 +176,20 @@ def delete_installment(installments):
 	}
 	if not frappe.db.exists(installments.reference_doc_detail, cond):
 		frappe.db.delete("Installment Loan", installments.disbursement_number)
+
+
+@frappe.whitelist()
+def get_last_interest(loan_bank):
+    interest = frappe.db.get_value("Loan Bank Interest", filters={"loan_bank": loan_bank}, fieldname="interest", order_by="date desc")
+    
+    return interest
+
+@frappe.whitelist()
+def update_loan_bank_interest(doc):
+    doc = frappe.parse_json(doc)
+    docu = frappe.get_doc(doc.get('doctype'), doc.get('name'))
+    docu.date = doc.get("date")
+    docu.interest = doc.get("interest")
+    docu.save()
+    
+    return docu
