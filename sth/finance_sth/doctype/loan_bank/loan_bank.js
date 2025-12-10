@@ -35,9 +35,13 @@ frappe.ui.form.on("Installment Loan Bank", {
     disbursement_number(frm, cdt, cdn){
         validateChangeInstallment(frm, cdt, cdn)
         checkGracePrincipal(frm, cdt, cdn)
+        
     },
     payment_date(frm, cdt, cdn){
         getDaysInstallment(frm, cdt, cdn)
+    },
+    loan_interest(frm, cdt, cdn){
+        calculateInterestAmount(frm, cdt, cdn)
     }
 })
 
@@ -155,7 +159,8 @@ function checkGracePrincipal(frm, cdt, cdn) {
         let scheduleNumberOfPayments = frm.doc.scheduled_number_of_payments;
         let pricipalAmount = curRow.disbursement_total /  scheduleNumberOfPayments
         frappe.model.set_value(cdt, cdn, 'principal', pricipalAmount)
-        frm.refresh_field('disbursements')
+        frm.refresh_field('installments')
+        calculateInterestAmount(frm, cdt, cdn)
     }
 }
 
@@ -171,6 +176,7 @@ function getDaysInstallment(frm, cdt, cdn) {
 
     frappe.model.set_value(cdt, cdn, 'days', days)
     frm.refresh_field('installments')
+    calculateInterestAmount(frm, cdt, cdn)
 }
 
 function calculateInterestAmount(frm, cdt, cdn) {
@@ -178,7 +184,11 @@ function calculateInterestAmount(frm, cdt, cdn) {
     if (!curRow.loan_interest || !curRow.days) {
         return
     }
-    let interestAmount = 0
+    let interestAmount = curRow.disbursement_total * curRow.loan_interest * curRow.days / frm.doc.days_in_year
+    let paymentTotal = curRow.principal + interestAmount
+    frappe.model.set_value(cdt, cdn, 'interest_amount', interestAmount)
+    frappe.model.set_value(cdt, cdn, 'payment_total', paymentTotal)
+    frm.refresh_field("installments")
 }
 
 let editId = null;
