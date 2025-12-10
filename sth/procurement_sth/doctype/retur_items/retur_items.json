@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-10 20:56:50.997245",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kode_barang",
+  "nama_barang",
+  "column_break_tuko",
+  "jumlah"
+ ],
+ "fields": [
+  {
+   "fieldname": "kode_barang",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Barang",
+   "options": "Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_tuko",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama_barang",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Barang"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-10 21:00:32.435276",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Retur Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
