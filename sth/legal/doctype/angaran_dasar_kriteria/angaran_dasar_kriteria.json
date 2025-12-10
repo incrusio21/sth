@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-10 14:58:55.756377",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "akta",
+  "column_break_xfva",
+  "kriteria_file"
+ ],
+ "fields": [
+  {
+   "fieldname": "akta",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Akta",
+   "options": "Akta List",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xfva",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kriteria_file",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Kriteria File"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-10 15:08:22.179210",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Angaran Dasar Kriteria",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

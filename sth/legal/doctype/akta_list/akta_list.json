@@ -8,6 +8,7 @@
  "field_order": [
   "jenis_akta",
   "column_break_auht",
+  "company",
   "posting_date",
   "section_break_yvor",
   "nama_notaris",
@@ -105,12 +106,19 @@
    "fieldname": "keteranga",
    "fieldtype": "Small Text",
    "label": "Keteranga"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-08 13:36:41.444165",
+ "modified": "2025-12-10 13:19:21.687955",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",
