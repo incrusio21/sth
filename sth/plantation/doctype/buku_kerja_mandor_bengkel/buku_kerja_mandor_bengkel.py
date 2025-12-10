@@ -7,6 +7,7 @@ from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 class BukuKerjaMandorBengkel(Document):
 	def on_submit(self):
+		self.make_attendance()
 		self.update_kendaraan_field(self.kmhm_akhir)
 		self.make_attendance()
   
@@ -20,9 +21,9 @@ class BukuKerjaMandorBengkel(Document):
 		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kd_kndr, "kmhm_akhir", km_value)
 
 	def make_attendance(self):
-		for emp in self.table_kryn:
+		for emp in self.hasil_kerja:
 			attendance_detail = {
-				"employee": emp.employee, "attendance_date": self.posting_date
+				"employee": emp.employee, "company": self.company, "attendance_date": self.posting_date
 			}
 
 			add_att = "add_attendance"
@@ -30,7 +31,7 @@ class BukuKerjaMandorBengkel(Document):
 				frappe.db.savepoint(add_att)
 				attendance = frappe.get_doc({
 					"doctype": "Attendance",
-					"status": "Present",
+					"status": emp.status,
 					**attendance_detail
 				})
 				attendance.flags.ignore_permissions = 1
@@ -40,7 +41,7 @@ class BukuKerjaMandorBengkel(Document):
 					frappe.message_log.pop()
 					
 				frappe.db.rollback(save_point=add_att)  # preserve transaction in postgres
-
+				
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_employee_traksi_query(doctype, txt, searchfield, start, page_len, filters):

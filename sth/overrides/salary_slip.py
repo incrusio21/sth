@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, flt, getdate, get_first_day_of_week, month_diff, now
+from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, month_diff, now
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -112,26 +112,6 @@ class SalarySlip(SalarySlip):
 			elif att_exist :
 				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 				self.holiday_days += 1
-
-		# holiday_days ditambahkan dengan attendance dengan leave type sakit - chandra
-
-		# Attendance = frappe.qb.DocType("Attendance")
-		# query = (
-		# 	frappe.qb.from_(Attendance)
-		# 	.select(Attendance.name, Attendance.status_code)
-		# 	.where(
-		# 		(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
-		# 		& (Attendance.employee == self.employee)
-		# 		& (Attendance.docstatus == 1)
-		# 		& (Attendance.status == "On Leave")
-		# 	)
-		# )
-
-		# list_attendance_leave = query.run(as_dict=True)
-
-		# for row in list_attendance_leave:
-		# 	if row.status_code in list_status_code_lwp:
-		# 		self.holiday_days += 1
 
 
 	def _get_not_out_attendance_days(self) -> float:
@@ -500,17 +480,12 @@ class SalarySlip(SalarySlip):
 			**filters, "pkp": data.pkp_status, "employment_type": data.employment_type }, "multiplier") or 0
 
 		# cek apakah hari ump based on bulan / tidak
-		cek_ump_bulan = frappe.get_value("Employment Type", data.employment_type, "hari_ump_ikut_jumlah_hari_1_bulan")
-
-		if cek_ump_bulan == 1:
-			start_date = frappe.utils.getdate(self.start_date)
-			year = start_date.year
-			month = start_date.month
-			data.total_hari = default_data.total_hari = monthrange(year, month)[1]
-		else:
-			data.total_hari = default_data.total_hari = flt(frappe.get_value("Employment Type", data.employment_type, "hari_ump"))
-		# data.ump_harian = default_data.ump_harian = flt(company.ump_bulanan) / data.total_hari
+		employment_type = frappe.get_cached_doc("Employment Type", data.employment_type, ["hari_ump_ikut_jumlah_hari_1_bulan", "hari_ump"])
 		
+		data.total_hari = default_data.total_hari = days_diff(self.end_date, self.start_date) + 1 \
+			if employment_type.hari_ump_ikut_jumlah_hari_1_bulan else \
+			employment_type.hari_ump
+
 		# ubah ump_harian ke gaji pokok dibagi hari
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 

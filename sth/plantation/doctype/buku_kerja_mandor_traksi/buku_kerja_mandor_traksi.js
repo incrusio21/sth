@@ -8,15 +8,22 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 
   	},
 	posting_date(frm){
-		frm.cscript.get_employee_data({
-			childrens: frm.doc.hasil_kerja,
-			posting_date: frm.doc.posting_date
+		frm.cscript.get_details_data({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
+			args: {
+				childrens: frm.doc.hasil_kerja,
+				posting_date: frm.doc.posting_date
+			}
 		})
 	},
 	company(frm){
-		frm.cscript.get_kegiatan_data({
-			childrens: frm.doc.hasil_kerja,
-			company: frm.doc.company
+
+		frm.cscript.get_details_data({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
+			args: {
+				childrens: frm.doc.hasil_kerja,
+				company: frm.doc.company
+			}
 		})
 	},
 	kendaraan(frm){
@@ -80,9 +87,12 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 		let data = frappe.get_doc(cdt, cdn)
 		if(!data.kegiatan) return
 
-		frm.cscript.get_kegiatan_data({
-			childrens: [data],
-			company: frm.doc.company
+		frm.cscript.get_details_data({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
+			args: {
+				childrens: [data],
+				company: frm.doc.company
+			}
 		})
 	},
 	kmhm_ahkir(frm, cdt, cdn){
@@ -97,9 +107,12 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 	employee(frm, cdt, cdn){
 		let data = frappe.get_doc(cdt, cdn)
 
-		frm.cscript.get_employee_data({
-			childrens: [data],
-			posting_date: frm.doc.posting_date
+		frm.cscript.get_details_data({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
+			args: {
+				childrens: [data],
+				posting_date: frm.doc.posting_date
+			}
 		})
 	}
 })
@@ -175,35 +188,21 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
             };
 		});
    	}
-
-	get_kegiatan_data(args){
-		if(args.childrens.length == 0) return
-
-		let me = this
-		frappe.call({
-			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
-			args: args,
-			freeze: true,
-			callback: function (data) {
-				me._set_values_for_item_list(data.message);
-			}
-		})
-	}
-
-	get_employee_data(args){
-		if(!args.childrens) return
-
-		let me = this
-		frappe.call({
-			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
-			args: args,
-			freeze: true,
-			callback: function (data) {
-				me._set_values_for_item_list(data.message);
-			}
-		})
-	}
 	
+	get_details_data(opts){
+		if(opts.args.childrens.length == 0) return
+
+		let me = this
+		frappe.call({
+			method: opts.method,
+			args: opts.args,
+			freeze: true,
+			callback: function (data) {
+				me._set_values_for_item_list(data.message);
+			}
+		})
+	}
+
 	_set_values_for_item_list(children) {
 		for (const child of children) {
 			let data = frappe.get_doc(child.doctype, child.name)
@@ -220,12 +219,13 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
         if (item.parentfield != "hasil_kerja") return
 
         let doc = this.frm.doc
-        item.rate = item.rupiah_basis
-
+		let rate = item.rupiah_basis
 		if (!in_list(["Dump Truck"], doc.tipe_master_kendaraan)){
-			item.rate = flt(item.base/item.total_hari)
+			rate = flt(item.base/item.total_hari)
 		}
         
+		item.rate = item.rate || rate
+
 		if (!doc.manual_hk){
 			item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         }
@@ -247,7 +247,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
 	update_value_after_amount(item) {
-        item.sub_total = flt(item.amount) + flt(item.premi_amount)
+        item.sub_total = flt(item.amount) + flt(item.premi_amount || 0)
     }
 }
 

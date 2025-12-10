@@ -12,6 +12,7 @@
   "divisi",
   "blok",
   "pemilik_lahan",
+  "perangkat_desa",
   "column_break_abhd",
   "sppt",
   "persil",
@@ -215,12 +216,19 @@
    "label": "Pemilik Lahan",
    "options": "Daftar Masyarakat",
    "reqd": 1
+  },
+  {
+   "fetch_from": "pemilik_lahan.pd",
+   "fieldname": "perangkat_desa",
+   "fieldtype": "Select",
+   "label": "Perangkat Desa",
+   "options": "Ya\nTidak"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 12:58:55.188902",
+ "modified": "2025-12-09 16:16:36.868104",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "GIS",

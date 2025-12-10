@@ -38,6 +38,8 @@ class BukuKerjaMandorController(PlantationController):
             }
         ]
 
+        self._mandor_dict = [{"fieldname": "mandor"}]
+
     def validate(self):
         self.set_payroll_date()
         
@@ -159,9 +161,26 @@ class BukuKerjaMandorController(PlantationController):
         # hapus epl yang tidak digunakan
         for r in removed_epl:
             r.delete()
-          
+    
+    def get_mandor_details(self):
+        mandor_list = []
+        for m in self._mandor_dict:
+            mandor = self.get(m["fieldname"])
+            if not mandor:
+                continue
+
+            m_dict = frappe._dict({
+                "employee": self.get(mandor),
+                "status": "Present"
+            })
+            
+            mandor_list.append(m_dict)
+
+        return mandor_list
+
     def make_attendance(self):
-        for emp in self.hasil_kerja:
+        employee = self.hasil_kerja + self.get_mandor_details()
+        for emp in employee:
             attendance_detail = {
                 "employee": emp.employee, "company": self.company, "attendance_date": self.posting_date
             }

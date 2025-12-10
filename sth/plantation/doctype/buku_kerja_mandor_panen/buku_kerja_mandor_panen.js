@@ -60,6 +60,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
 
         let doc = this.frm.doc
 
+        item.rate = item.rate || doc.rupiah_basis
         item.brondolan = doc.upah_brondolan
 
         if (!self.manual_hk){
