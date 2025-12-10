@@ -45,7 +45,7 @@ class AccountsController(Document):
         #         self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
 
         account = frappe.get_cached_value(
-            "Account", self.credit_to, ["account_type", "report_type", "account_currency"], as_dict=True
+            "Account", self.get(scrub(self._party_account_field)), ["account_type", "report_type", "account_currency"], as_dict=True
         )
 
         if account.report_type != "Balance Sheet":
@@ -57,14 +57,14 @@ class AccountsController(Document):
             )
 
         account_type = "Payable" if self._party_account_field == "credit_to" else "Receivable"
-        if self.employee and account.account_type != account_type:
+        if self.get(scrub(self._party_type)) and account.account_type != account_type:
             frappe.throw(
                 _(
                     "Please ensure that the {0} account {1} is a {2} account. " \
                     "You can change the account type to {2} or select a different account."
                 ).format(
                     frappe.bold(_(unscrub(self._party_account_field))), 
-                    frappe.bold(self.credit_to),
+                    frappe.bold(self.get(scrub(self._party_account_field))),
                     account_type
                 ), 
                 title=_("Invalid Account"),

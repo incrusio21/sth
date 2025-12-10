@@ -49,7 +49,7 @@ frappe.ui.form.on("Payment Entry", {
                 }
             }
         })
-        frm.ignore_doctypes_on_cancel_all = ["Deposito"];
+        frm.ignore_doctypes_on_cancel_all = ["Deposito Interest"];
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
@@ -79,12 +79,12 @@ frappe.ui.form.on("Payment Entry", {
 
 			if (
 				frm.doc.party_type == "Customer" &&
-				!["Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Deposito"].includes(row.reference_doctype)
+				!["Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Deposito Interest"].includes(row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
 				frappe.msgprint(
 					__(
-						"Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning, Deposito",
+						"Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning, Deposito Interest",
 						[row.idx]
 					)
 				);

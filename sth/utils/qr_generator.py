@@ -27,11 +27,13 @@ def generate_qr_for_doc(doc, dont_save=0):
 	data = doc.name
 	if doc.doctype == "Driver":
 		data = doc.get("custom_license_plate")
+	elif doc.doctype == "Asset":
+		data = doc.get("asset_name")
 
 	qr_svg_b64 = get_qr_svg(data)
 
-	if hasattr(doc, "custom_qr"):
-		doc.custom_qr = qr_svg_b64
+	if hasattr(doc, "qr"):
+		doc.qr = qr_svg_b64
 		if dont_save == 0:
 			doc.save(ignore_permissions=True)
 
