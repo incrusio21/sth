@@ -20,6 +20,9 @@ def check_dn_pending(self,method):
 
 @frappe.whitelist()
 def validate_price_list(self,method):
+	return
+
+	# dimatikan dulu
 	item_price_list = frappe.db.sql(""" SELECT name, item_code, price_list_rate, allowed_rate_under, allowed_rate_over FROM `tabItem Price` WHERE price_list = "{}" """.format(self.selling_price_list), as_dict=1)
 
 	for row in self.items:
