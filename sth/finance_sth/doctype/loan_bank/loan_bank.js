@@ -5,7 +5,9 @@ frappe.ui.form.on("Loan Bank", {
 	refresh(frm, cdt, cdn) {
         filterBankAccount(frm);
         filterAccountCreditTo(frm);
-        filterDisbursementNumber(frm, cdt, cdn)
+        filterUnit(frm);
+        filterDisbursementNumber(frm, cdt, cdn);
+        hideShowAngsuran(frm);
 	},
     availability_period(frm){
         calculateScheduleLoan(frm);
@@ -36,7 +38,7 @@ frappe.ui.form.on("Disbursement Loan Bank", {
 
 frappe.ui.form.on("Installment Loan Bank", {
     installments_add(frm, cdt, cdn){
-        getLastInterest(frm, cdt, cdn)
+        // getLastInterest(frm, cdt, cdn)
     },
     disbursement_number(frm, cdt, cdn){
         validateChangeInstallment(frm, cdt, cdn)
@@ -44,6 +46,7 @@ frappe.ui.form.on("Installment Loan Bank", {
         
     },
     payment_date(frm, cdt, cdn){
+        getLastInterest(frm, cdt, cdn)
         getDaysInstallment(frm, cdt, cdn)
     },
     loan_interest(frm, cdt, cdn){
@@ -120,6 +123,10 @@ function validateChangeInstallment(frm, cdt, cdn) {
         }
         frappe.throw(`<b>No Pencairan: ${curRow.disbursement_number}</b> digunakan di <b>Angsuran Row ${row.idx}</b>`)
     }
+
+    let month = parseInt(curRow.disbursement_number.substr(12))
+    frappe.model.set_value(cdt, cdn, 'installment_month', month)
+    frm.refresh_field("installments")
 }
 
 function calculateScheduleLoan(frm) {
@@ -332,10 +339,14 @@ function editInterest(name) {
 }
 
 function getLastInterest(frm, cdt, cdn) {
+    if (!locals[cdt][cdn].payment_date) {
+        
+    }
     frappe.call({
         method: "sth.finance_sth.doctype.loan_bank.loan_bank.get_last_interest",
         args: {
-            loan_bank: frm.doc.name
+            loan_bank: frm.doc.name,
+            date: locals[cdt][cdn].payment_date
         },
         freeze: true,
         callback: (r) => {
@@ -362,4 +373,24 @@ function filterDisbursementNumber(frm, cdt, cdn) {
             }
         }
     }
+}
+
+async function hideShowAngsuran(frm) {
+    const resp = await frappe.db.get_list("Disbursement Loan", {
+        filters: { reference_name: frm.doc.name }
+    });
+
+    const check = resp.length > 0;
+
+    frm.toggle_display("installments", check);
+}
+
+function filterUnit(frm) {
+    frm.set_query('unit', (doc) => {
+        return {
+            filters: {
+                "company": ["=", frm.doc.company]
+            }
+        }
+    })
 }
