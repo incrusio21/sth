@@ -182,7 +182,7 @@ doc_events = {
         "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
 	},
 	"Delivery Note": {
-		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
@@ -235,7 +235,7 @@ doc_events = {
 		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Sales Order": {
-		"validate": ["sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],
 		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
 	},
 	"Sales Invoice": {
