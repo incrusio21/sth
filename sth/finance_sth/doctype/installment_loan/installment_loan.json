@@ -7,23 +7,36 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_jv3n",
+  "company",
+  "unit",
   "disbursement_number",
   "disbursement_date",
   "disbursement_amount",
   "disbursement_total",
+  "loan_interest",
   "payment_date",
+  "column_break_onwx",
   "days",
   "installment_month",
   "principal",
-  "loan_interest",
   "interest_amount",
   "payment_total",
-  "column_break_onwx",
+  "posting_date",
+  "grand_total",
+  "outstanding_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "accounting_details_tab",
+  "accounting_details_section",
+  "credit_to",
+  "debit_to",
+  "references_tab",
+  "references_section",
   "reference_doc",
   "reference_name",
   "reference_doc_detail",
   "reference_name_detail",
-  "journal_entry",
+  "payment_entry",
   "amended_from"
  ],
  "fields": [
@@ -109,22 +122,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Installment Loan",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fetch_from": "disbursement_number.disbursement_amount",
    "fieldname": "disbursement_amount",
    "fieldtype": "Currency",
@@ -153,6 +150,102 @@
    "fieldtype": "Int",
    "label": "Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "references_tab",
+   "fieldtype": "Tab Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "reqd": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Installment Loan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "accounting_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -160,7 +253,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 15:59:57.577446",
+ "modified": "2025-12-11 11:48:17.884706",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Installment Loan",

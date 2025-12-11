@@ -3,11 +3,13 @@
 
 frappe.ui.form.on("Loan Bank", {
 	refresh(frm, cdt, cdn) {
-        filterBankAccount(frm);
-        filterAccountCreditTo(frm);
-        filterUnit(frm);
-        filterDisbursementNumber(frm, cdt, cdn);
-        hideShowAngsuran(frm);
+        frappe.run_serially([            
+            () => filterBankAccount(frm),
+            () => filterUnit(frm),
+            () => filterDisbursementNumber(frm, cdt, cdn),
+            () => filterAccounting(frm),
+            () => hideShowAngsuran(frm),
+        ])
 	},
     availability_period(frm){
         calculateScheduleLoan(frm);
@@ -58,17 +60,8 @@ function filterBankAccount(frm) {
     frm.set_query('bank_account', () => {
         return{
             filters: {
-                bank: frm.doc.bank
-            }
-        }
-    })
-}
-
-function filterAccountCreditTo(frm) {
-    frm.set_query('credit_to', () => {
-        return{
-            filters: {
-                account_type: "Payable"
+                bank: frm.doc.bank,
+                company: frm.doc.company
             }
         }
     })
@@ -389,7 +382,44 @@ function filterUnit(frm) {
     frm.set_query('unit', (doc) => {
         return {
             filters: {
-                "company": ["=", frm.doc.company]
+                "company": ["=", doc.company]
+            }
+        }
+    })
+}
+
+function filterAccounting(frm) {
+    frm.set_query('installment_credit_to', (doc) => {
+        return {
+            filters: {
+                account_type: "Payable",
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+    frm.set_query('disbursement_debit_to', (doc) => {
+        return {
+            filters: {
+                account_type: "Receivable",
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+    frm.set_query('installment_debit_to', (doc) => {
+        return {
+            filters: {
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+    frm.set_query('expense_account', (doc) => {
+        return {
+            filters: {
+                company: ["=", doc.company],
+                is_group: 0
             }
         }
     })
