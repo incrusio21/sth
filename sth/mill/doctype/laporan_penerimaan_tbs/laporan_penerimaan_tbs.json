@@ -48,7 +48,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Tipe",
-   "options": "\nInternal\nEksternal\nLain - Lain",
+   "options": "\nTBS Internal\nTBS Eksternal\nTBS Lain - Lain",
    "reqd": 1
   },
   {
@@ -91,7 +91,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 14:41:44.829976",
+ "modified": "2025-12-10 11:34:08.711719",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Penerimaan TBS",

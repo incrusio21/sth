@@ -8,7 +8,7 @@
  "field_order": [
   "section_break_bz0d",
   "naming_series",
-  "porting_date",
+  "posting_date",
   "posting_time",
   "column_break_ckwi",
   "ticket_number",
@@ -61,15 +61,6 @@
   {
    "fieldname": "column_break_ckwi",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "Today",
-   "fieldname": "porting_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Porting Date",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_kdub",
@@ -292,13 +283,22 @@
    "fieldname": "gateweight",
    "fieldtype": "Button",
    "label": "GateWeight"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 14:20:25.424219",
+ "modified": "2025-12-10 10:51:30.169051",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
