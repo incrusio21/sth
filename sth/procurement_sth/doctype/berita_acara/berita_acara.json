@@ -10,7 +10,6 @@
   "section_break_0cbf",
   "naming_series",
   "date",
-  "required_date",
   "column_break_safl",
   "unit",
   "sub_purchase_type",
@@ -94,20 +93,15 @@
    "fieldtype": "Data",
    "label": "Material Request",
    "read_only": 1
-  },
-  {
-   "fieldname": "required_date",
-   "fieldtype": "Date",
-   "label": "Required Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 13:55:26.895588",
+ "modified": "2025-12-11 11:53:45.639605",
  "modified_by": "Administrator",
- "module": "Buying STH",
+ "module": "Procurement STH",
  "name": "Berita Acara",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
