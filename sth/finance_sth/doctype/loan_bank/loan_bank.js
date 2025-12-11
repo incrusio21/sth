@@ -35,6 +35,7 @@ frappe.ui.form.on("Disbursement Loan Bank", {
     },
     before_disbursements_remove(frm, cdt, cdn){
         validateDeleteDisbursement(frm, cdt, cdn)
+        validateRemove(frm, cdt, cdn)
     }
 });
 
@@ -53,7 +54,13 @@ frappe.ui.form.on("Installment Loan Bank", {
     },
     loan_interest(frm, cdt, cdn){
         calculateInterestAmount(frm, cdt, cdn)
-    }
+    },
+    before_installments_remove(frm, cdt, cdn){
+        validateRemove(frm, cdt, cdn)
+    },
+    installments_remove(frm, cdt, cdn){
+        recalculateGrace(frm)
+    },
 })
 
 function filterBankAccount(frm) {
@@ -170,6 +177,7 @@ function checkGracePrincipal(frm, cdt, cdn) {
     }else{
         frappe.model.set_value(cdt, cdn, 'principal', 0)
         frm.refresh_field('installments')
+        calculateInterestAmount(frm, cdt, cdn)
     }
 }
 
@@ -194,7 +202,7 @@ function calculateInterestAmount(frm, cdt, cdn) {
         return
     }
     let interestAmount = curRow.disbursement_total * curRow.loan_interest * curRow.days / frm.doc.days_in_year
-    let paymentTotal = curRow.principal || 0 + interestAmount
+    let paymentTotal = curRow.principal + interestAmount
     frappe.model.set_value(cdt, cdn, 'interest_amount', interestAmount)
     frappe.model.set_value(cdt, cdn, 'payment_total', paymentTotal)
     frm.refresh_field("installments")
@@ -423,4 +431,18 @@ function filterAccounting(frm) {
             }
         }
     })
+}
+
+function validateRemove(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn]
+
+    if (curRow.payment_entry) {
+        frappe.throw(`Row: ${curRow.idx} sudah dibuat Payment Entry <b>${curRow.payment_entry}</b>, mohon cancel Payment Entry terlebih dahulu`)
+    }
+}
+
+function recalculateGrace(frm) {
+    for (const row of frm.doc.installments) {
+        checkGracePrincipal(frm, row.doctype, row.name)
+    }
 }

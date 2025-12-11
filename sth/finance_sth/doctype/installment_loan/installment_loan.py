@@ -10,6 +10,9 @@ class InstallmentLoan(AccountsController):
 		super().__init__(*args, **kwargs)
 		self._expense_account = "debit_to"
 
+	def validate(self):
+		self.employee = frappe.db.get_single_value("Payment Settings", "internal_employee")
+	
 	def on_submit(self):
 		self.set_missing_value()
 		self.make_gl_entry()

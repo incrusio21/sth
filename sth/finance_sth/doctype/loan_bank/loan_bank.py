@@ -16,12 +16,17 @@ class LoanBank(Document):
 		self.process_installment()
 
 	def on_submit(self):
+		if not self.disbursements and not self.installments:
+			frappe.throw(f"Tabel pencairan dan Angsuran tidak boleh kosong")
+
 		self.process_child_submit()
 	
 	def before_cancel(self):
 		self.process_child_cancel()
 
 	def on_update_after_submit(self):
+		if not self.disbursements and not self.installments:
+			frappe.throw(f"Tabel pencairan dan Angsuran tidak boleh kosong")
 		self.process_disbursement(submit=True)
 		self.process_installment(submit=True)
 
@@ -245,3 +250,13 @@ def update_loan_bank_interest(doc):
 	docu.save()
 	
 	return docu
+
+def update_loan_bank_payment_entry(pe, method):
+	for ref in pe.references:
+		if ref.reference_doctype not in ["Disbursement Loan", "Installment Loan"]:
+			continue
+		doc = frappe.get_doc(ref.reference_doctype, ref.reference_name)
+		doc.payment_entry = pe.name if method == "on_submit" else None
+		doc.db_update_all()
+
+		frappe.db.set_value(doc.reference_doc_detail, doc.reference_name_detail, "payment_entry", doc.payment_entry)

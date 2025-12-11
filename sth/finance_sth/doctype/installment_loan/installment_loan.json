@@ -26,6 +26,7 @@
   "outstanding_amount",
   "accounting_dimensions_section",
   "cost_center",
+  "employee",
   "accounting_details_tab",
   "accounting_details_section",
   "credit_to",
@@ -246,6 +247,12 @@
    "label": "Posting Date",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
   }
  ],
  "grid_page_length": 50,
@@ -253,7 +260,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 11:48:17.884706",
+ "modified": "2025-12-11 15:22:10.974938",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Installment Loan",
