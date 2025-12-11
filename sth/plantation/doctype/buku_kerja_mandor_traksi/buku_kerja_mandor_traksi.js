@@ -85,6 +85,8 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 		
 		data.divisi = frm.doc.divisi
 		data.blok = frm.doc.blok
+		data.batch = frm.doc.batch
+		data.project = frm.doc.project
 		frappe.model.set_value(cdt, cdn, "employee", frm.doc.default_employee)
 	},
 	kegiatan(frm, cdt, cdn){

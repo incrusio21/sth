@@ -41,6 +41,9 @@
   "lokasi_kerja_section",
   "divisi",
   "blok",
+  "column_break_yztk",
+  "batch",
+  "project",
   "upah_section",
   "hasil_kerja",
   "more_information_tab",
@@ -194,7 +197,7 @@
   {
    "fieldname": "tab_5_tab",
    "fieldtype": "Tab Break",
-   "label": "Kegiatan & Upah"
+   "label": "Upah"
   },
   {
    "fieldname": "upah_section",
@@ -319,13 +322,29 @@
    "fieldtype": "Link",
    "label": "Divisi",
    "options": "Divisi"
+  },
+  {
+   "fieldname": "column_break_yztk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Batch"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 17:05:54.359823",
+ "modified": "2025-12-11 10:28:42.489501",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

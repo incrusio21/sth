@@ -28,7 +28,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			}
 		])
 
-		self._clear_fields = ["blok", "divisi"]
+		self._clear_fields = ["blok", "divisi", "batch", "project"]
 	
 	def validate(self):
 		self.set_posting_datetime()
