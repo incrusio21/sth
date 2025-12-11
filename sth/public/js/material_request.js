@@ -2,6 +2,10 @@ frappe.provide("sth.queries")
 
 frappe.ui.form.on("Material Request", {
     refresh(frm) {
+        if (frm.is_new()) {
+            frm.trigger('set_default_reqdate')
+        }
+
         frm.set_query("item_code", "items", sth.queries.item_by_subtype)
         frm.set_query("divisi", sth.queries.divisi)
 
@@ -10,6 +14,11 @@ frappe.ui.form.on("Material Request", {
                 frm.trigger('get_berita_acara')
             }, __("Get Items From"))
         }
+    },
+
+    set_default_reqdate(frm) {
+        const required_date = frappe.datetime.add_days(frm.doc.date, 7)
+        frm.set_value("schedule_date", required_date)
     },
 
     get_berita_acara(frm) {

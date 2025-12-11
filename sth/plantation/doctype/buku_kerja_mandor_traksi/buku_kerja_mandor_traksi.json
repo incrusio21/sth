@@ -38,15 +38,14 @@
   "column_break_fkos",
   "pekerjaan_subtotal",
   "tab_5_tab",
-  "upah_section",
-  "hasil_kerja",
-  "pekerjaan_tab",
-  "section_break_dpfs",
+  "lokasi_kerja_section",
   "divisi",
   "blok",
+  "column_break_yztk",
   "batch",
-  "column_break_fvuy",
   "project",
+  "upah_section",
+  "hasil_kerja",
   "more_information_tab",
   "buku_kerja_mandor_premi",
   "column_break_jklo",
@@ -71,11 +70,6 @@
    "in_preview": 1,
    "label": "Jenis BBM",
    "read_only": 1
-  },
-  {
-   "fieldname": "pekerjaan_tab",
-   "fieldtype": "Tab Break",
-   "label": "Pekerjaan"
   },
   {
    "fetch_from": "mandor.designation",
@@ -114,43 +108,6 @@
    "in_preview": 1,
    "label": "Unit",
    "options": "Unit"
-  },
-  {
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Divisi",
-   "options": "Divisi"
-  },
-  {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Blok",
-   "options": "Blok"
-  },
-  {
-   "fieldname": "section_break_dpfs",
-   "fieldtype": "Section Break",
-   "label": "Blok/Batch/Project"
-  },
-  {
-   "fieldname": "batch",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Batch",
-   "options": "Blok"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Project",
-   "options": "Project"
   },
   {
    "fetch_from": "kendaraan.kmhm_akhir",
@@ -258,10 +215,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_fvuy",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_toiw",
    "fieldtype": "Section Break"
   },
@@ -352,13 +305,46 @@
    "fieldtype": "Link",
    "label": "Default Employee",
    "options": "Employee"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "lokasi_kerja_section",
+   "fieldtype": "Section Break",
+   "label": "Lokasi Kerja"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "column_break_yztk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Batch"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 13:59:37.109634",
+ "modified": "2025-12-11 10:28:42.489501",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

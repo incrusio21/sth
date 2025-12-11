@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Timbangan", {
     refresh(frm) {
-
+        frm.ignore_doctypes_on_cancel_all = ["TBS Ledger Entry"]
     },
 
     set_netto(row) {

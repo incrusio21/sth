@@ -1,0 +1,174 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:no_dokumen",
+ "creation": "2025-12-10 21:05:49.782955",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_5otp",
+  "no_dokumen",
+  "diterima_oleh",
+  "no_induk_karyawan",
+  "column_break_ppsn",
+  "tanggal_transaksi",
+  "tanggal_kirim",
+  "column_break_vfsw",
+  "gudang_asal",
+  "gudang_tujuan",
+  "transportasi_section",
+  "expeditor",
+  "jenis_transportasi",
+  "kode_traksi",
+  "column_break_mfum",
+  "no_polisi",
+  "catatan",
+  "section_break_omcd",
+  "items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_5otp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "no_dokumen",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No Dokumen",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_ppsn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_transaksi",
+   "fieldtype": "Date",
+   "label": "Tanggal Transaksi"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_kirim",
+   "fieldtype": "Date",
+   "label": "Tanggal Kirim"
+  },
+  {
+   "fieldname": "diterima_oleh",
+   "fieldtype": "Link",
+   "label": "Diterima Oleh",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "diterima_oleh.custom_nip",
+   "fieldname": "no_induk_karyawan",
+   "fieldtype": "Data",
+   "label": "No Induk Karyawan"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "transportasi_section",
+   "fieldtype": "Section Break",
+   "label": "Transportasi"
+  },
+  {
+   "fieldname": "expeditor",
+   "fieldtype": "Link",
+   "label": "Expeditor",
+   "options": "Expeditor"
+  },
+  {
+   "fieldname": "jenis_transportasi",
+   "fieldtype": "Link",
+   "label": "Jenis Transportasi",
+   "options": "Jenis Transportasi"
+  },
+  {
+   "fieldname": "column_break_mfum",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_polisi",
+   "fieldtype": "Data",
+   "label": "No Polisi"
+  },
+  {
+   "fieldname": "gudang_tujuan",
+   "fieldtype": "Link",
+   "label": "Gudang Tujuan",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "gudang_asal",
+   "fieldtype": "Link",
+   "label": "Gudang Asal",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_vfsw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kode_traksi",
+   "fieldtype": "Data",
+   "label": "Kode Traksi"
+  },
+  {
+   "fieldname": "catatan",
+   "fieldtype": "Small Text",
+   "label": "Catatan"
+  },
+  {
+   "fieldname": "section_break_omcd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Surat Jalan Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Surat Jalan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-10 21:38:52.245357",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Surat Jalan",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

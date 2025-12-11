@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "creation": "2025-12-05 13:17:41.845219",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -42,7 +41,7 @@
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "\nInternal\nEksternal"
+   "options": "\nTBS Internal\nTBS Eksternal"
   },
   {
    "fieldname": "actual_qty",
@@ -108,10 +107,11 @@
   }
  ],
  "grid_page_length": 50,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-05 15:24:45.853332",
+ "modified": "2025-12-10 10:07:26.166824",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "TBS Ledger Entry",

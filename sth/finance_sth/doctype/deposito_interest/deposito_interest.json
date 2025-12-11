@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{reference_name}-{#####}",
  "creation": "2025-12-09 20:11:13.416995",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -246,10 +247,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 22:20:01.201400",
+ "modified": "2025-12-10 21:27:31.986026",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito Interest",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

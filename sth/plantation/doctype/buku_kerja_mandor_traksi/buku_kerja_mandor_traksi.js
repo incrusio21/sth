@@ -81,6 +81,12 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 
 frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 	hasil_kerja_add(frm, cdt, cdn){
+		let data = frappe.get_doc(cdt, cdn)
+		
+		data.divisi = frm.doc.divisi
+		data.blok = frm.doc.blok
+		data.batch = frm.doc.batch
+		data.project = frm.doc.project
 		frappe.model.set_value(cdt, cdn, "employee", frm.doc.default_employee)
 	},
 	kegiatan(frm, cdt, cdn){
@@ -97,7 +103,7 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 	},
 	kmhm_ahkir(frm, cdt, cdn){
 		frappe.call({
-			method: "get_details_diffrence",
+			method: "set_details_diffrence",
 			doc: frm.doc,
 			callback: (data) => {
 				frm.cscript.calculate_total(null,null,"hasil_kerja");
@@ -247,7 +253,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
 	update_value_after_amount(item) {
-        item.sub_total = flt(item.amount) + flt(item.premi_amount || 0)
+        item.sub_total = flt(item.amount || 0) + flt(item.premi_amount || 0)
     }
 }
 

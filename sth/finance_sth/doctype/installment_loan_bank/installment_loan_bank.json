@@ -45,6 +45,7 @@
    "fieldtype": "Percent",
    "in_list_view": 1,
    "label": "Suku Bunga (%)",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -52,6 +53,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Jumlah Bunga",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -59,6 +61,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Pembayaran",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -113,7 +116,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-09 15:59:52.166705",
+ "modified": "2025-12-10 22:04:37.490001",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Installment Loan Bank",

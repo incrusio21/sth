@@ -30,27 +30,29 @@ app_include_js = "sth.bundle.js"
 # include js in doctype views
 doctype_js = {
 	"Asset": "public/js/asset.js",
+    "Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
 	"Driver": "public/js/driver.js",
 	"Employee": "public/js/employee.js",
+	"Exit Interview": "public/js/exit_interview.js",
 	"Expense Claim": "public/js/expense_claim.js",
+	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
+    "Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": "public/js/purchase_invoice.js",
 	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
+    "Request for Quotation" : "public/js/request_for_quotation.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
 	"Sales Order": "public/js/sales_order.js",
 	"Supplier Quotation": "public/js/supplier_quotation.js",
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
-	"Exit Interview": "public/js/exit_interview.js",
-    "Material Request": "public/js/material_request.js",
-    "Currency Exchange": "public/js/currency_exchange.js",
-    "Request for Quotation" : "public/js/request_for_quotation.js"
+	
 }
 
 doctype_list_js = {

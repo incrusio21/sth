@@ -2,6 +2,7 @@ import frappe
 
 from sth.finance_sth.doctype.cheque_number.cheque_number import update_cheque_number_pe
 from sth.finance_sth.doctype.cheque_book.cheque_book import update_cheque_book_pe, delete_cheque_history
+from sth.finance_sth.doctype.deposito.deposito import update_deposito_payment_entry
 
 def cek_kriteria(self,method):
 	if self.references:
@@ -69,17 +70,4 @@ def update_check_book(self, method):
 
 
 def update_status_deposito(self, method):
-	for ref in self.references:
-		if ref.reference_doctype != "Deposito Interest":
-			continue
-		doc = frappe.get_doc("Deposito Interest", ref.reference_name)
-		# doc.is_redeemed = "Sudah" if method == "on_submit" else "Belum"
-		doc.payment_entry = self.name if method == "on_submit" else None
-		doc.total_realization = self.paid_amount if method == "on_submit" else 0
-		doc.db_update_all()
-
-		values = {
-			"total_realization" : doc.total_realization,
-			"payment" : doc.payment_entry
-		}
-		frappe.db.set_value(doc.reference_detail_doc, doc.reference_detail_name, values)
+	update_deposito_payment_entry(self, method)

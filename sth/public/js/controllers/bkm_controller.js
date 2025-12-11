@@ -39,17 +39,13 @@ sth.plantation.setup_bkm_controller = function() {
             super.set_query_field()
 
             this.frm.set_query("blok", function (doc) {
-                if (!doc.divisi) {
-                    frappe.throw("Please Select Divisi First")
-                }
 
                 return {
                     filters: {
-                        divisi: doc.divisi,
+                        divisi: ["=", doc.divisi],
                     }
                 }
             })
-
         }
 
         get_rkh_data() {

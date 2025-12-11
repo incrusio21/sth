@@ -9,6 +9,16 @@ sth.plantation.setup_bkm_controller()
 // 	},
 // });
 
+frappe.ui.form.on("Detail BKM Hasil Kerja Panen", {
+	hasil_kerja_add(frm, cdt, cdn){
+		let data = frappe.get_doc(cdt, cdn)
+	
+		data.blok = frm.doc.blok
+
+        frm.refresh_fields()
+	},
+})
+
 sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.plantation.BKMController {
     setup(doc) {
         let me = this
@@ -39,6 +49,14 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
                 filters: {
                     tipe_kegiatan: "Panen",
                     company: ["=", doc.company],
+                }
+            }
+        })
+
+        this.frm.set_query("blok", "hasil_kerja", function (doc) {
+            return {
+                filters: {
+                    divisi: ["=", doc.divisi]
                 }
             }
         })

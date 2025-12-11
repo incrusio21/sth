@@ -28,6 +28,11 @@
   "ump_as_workday",
   "holiday",
   "ump_as_holiday",
+  "location_details_section",
+  "blok",
+  "column_break_vydz",
+  "batch",
+  "project",
   "section_break_fdft",
   "hari_kerja",
   "qty",
@@ -74,6 +79,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -217,8 +223,10 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "kmhm_ahkir",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "KM/HM Ahkir",
    "reqd": 1
   },
@@ -227,13 +235,44 @@
    "fieldtype": "Currency",
    "label": "Premi Heavy Equipment",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "location_details_section",
+   "fieldtype": "Section Break",
+   "label": "Location Details"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vydz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-09 13:12:02.556286",
+ "modified": "2025-12-11 10:42:16.255883",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Traksi",

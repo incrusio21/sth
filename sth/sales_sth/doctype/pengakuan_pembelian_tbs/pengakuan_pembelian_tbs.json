@@ -19,6 +19,7 @@
   "bonus",
   "subsisi_angkut",
   "section_break_mdbx",
+  "get_data",
   "items",
   "document_reference",
   "amended_from"
@@ -117,13 +118,18 @@
    "hidden": 1,
    "label": "Document Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 16:53:16.289438",
+ "modified": "2025-12-10 09:49:08.963997",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",

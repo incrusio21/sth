@@ -3,7 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:31:08.735648",
- "default_view": "Report",
+ "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -15,17 +15,19 @@
   "company",
   "posting_date",
   "amended_from",
-  "detail_akta_section",
-  "akta",
-  "column_break_tanb",
   "section_break_psjl",
+  "akta_saham",
   "saham",
-  "section_break_boxd",
-  "susunan_pengurus",
   "section_break_sslx",
   "column_break_pojw",
   "column_break_alar",
-  "grand_total"
+  "grand_total",
+  "susunan_pengurus_tab",
+  "akta_pengurus",
+  "pengurus",
+  "kriteria_tab_tab",
+  "akta_kriteria",
+  "kriteria"
  ],
  "fields": [
   {
@@ -85,16 +87,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "akta",
-   "fieldtype": "Link",
-   "label": "Akta",
-   "options": "Akta List"
-  },
-  {
-   "fieldname": "detail_akta_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "saham",
    "fieldtype": "Table",
    "label": "Saham",
@@ -125,15 +117,41 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_tanb",
-   "fieldtype": "Column Break"
+   "fieldname": "kriteria",
+   "fieldtype": "Table",
+   "label": "Kriteria",
+   "options": "Angaran Dasar Kriteria"
   },
   {
-   "fieldname": "section_break_boxd",
-   "fieldtype": "Section Break"
+   "fieldname": "kriteria_tab_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kriteria"
   },
   {
-   "fieldname": "susunan_pengurus",
+   "fieldname": "susunan_pengurus_tab",
+   "fieldtype": "Tab Break",
+   "label": "Susunan Pengurus"
+  },
+  {
+   "fieldname": "akta_saham",
+   "fieldtype": "Link",
+   "label": "Akta",
+   "options": "Akta List"
+  },
+  {
+   "fieldname": "akta_pengurus",
+   "fieldtype": "Link",
+   "label": "Akta",
+   "options": "Akta List"
+  },
+  {
+   "fieldname": "akta_kriteria",
+   "fieldtype": "Link",
+   "label": "Akta",
+   "options": "Akta List"
+  },
+  {
+   "fieldname": "pengurus",
    "fieldtype": "Table",
    "label": "Susunan Pengurus",
    "options": "Detail Susunan Pengurus dan Komisaris"
@@ -142,7 +160,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-08 13:39:20.782885",
+ "modified": "2025-12-10 15:13:39.294984",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",

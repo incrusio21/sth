@@ -45,6 +45,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			}
 		])
 
+		self._clear_fields = ["blok"]
 		self._mandor_dict.append({"fieldname": "mandor1"})
 
 	def validate(self):

@@ -85,6 +85,9 @@ erpnext.utils.map_current_doc = function (opts) {
         });
     }
 
+    console.log("Masuk");
+
+
     let query_args = {};
     if (opts.get_query_filters) {
         query_args.filters = opts.get_query_filters;
