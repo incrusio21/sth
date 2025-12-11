@@ -10,8 +10,8 @@ def make_purchase_order(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 		
 		data_type = frappe.db.get_value("Material Request",source.custom_material_request,["purchase_type","sub_purchase_type"])
-		
-		if getattr(data_type,"purchase_type") == "Berita Acara":
+
+		if getattr(data_type,"purchase_type",None) == "Berita Acara":
 			target.purchase_type = "Non Capex"
 			target.sub_purchase_type = data_type.sub_purchase_type
 
@@ -64,11 +64,18 @@ def make_purchase_order(source_name, target_doc=None):
 
 def fetch_unassigned_taxes(template_name,list_taxes):
 	# mencari taxes yang belum dimasukkan pada suatu reference template
-
-	query = frappe.db.sql("""
+	param = [template_name]
+	additional = ""
+	
+	query = frappe.db.sql(f"""
 		select ptc.charge_type,ptc.account_head,ptc.description,ptc.rate,ptc.tax_amount, ptc.category, ptc.add_deduct_tax 
 		from `tabPurchase Taxes and Charges` ptc
 		join `tabPurchase Taxes and Charges Template` ptt on ptt.name = ptc.parent
-		where ptt.name = %s and ptc.account_head not in %s
-	""",[template_name,list_taxes],as_dict=True)
+		where ptt.name = %s {additional}
+	""",param,as_dict=True)
+
+	if list_taxes:
+		additional = "and ptc.account_head not in %s"
+		param.append(list_taxes)
+
 	return query
