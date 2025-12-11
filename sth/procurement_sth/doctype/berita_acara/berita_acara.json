@@ -3,23 +3,23 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-08-20 16:18:52.744355",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_0cbf",
   "naming_series",
   "date",
-  "transaction_type",
-  "sub_transaction_type",
+  "required_date",
   "column_break_safl",
   "unit",
-  "company",
-  "required_by",
-  "amended_from",
+  "sub_purchase_type",
   "detail_section",
   "table_klkc",
+  "amended_from",
   "signature_section",
   "make",
+  "material_request",
   "column_break_vukp"
  ],
  "fields": [
@@ -31,14 +31,13 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "Series",
-   "options": "BA-"
+   "label": "No Document"
   },
   {
    "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Tanggal"
   },
   {
    "fieldname": "column_break_safl",
@@ -47,9 +46,8 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
-   "label": "Unit",
-   "options": "Unit",
-   "reqd": 1
+   "label": "Organisasi",
+   "options": "Unit"
   },
   {
    "fieldname": "detail_section",
@@ -86,45 +84,30 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "unit.company",
-   "fieldname": "company",
+   "fieldname": "sub_purchase_type",
+   "fieldtype": "Select",
+   "label": "Sub Purchase Type",
+   "options": "\nPurchase Request\nService Request"
+  },
+  {
+   "fieldname": "material_request",
    "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Company",
+   "label": "Material Request",
    "read_only": 1
   },
   {
-   "default": "Berita Acara",
-   "fieldname": "transaction_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Transaction Type",
-   "options": "Document Type",
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "required_by",
+   "fieldname": "required_date",
    "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Required By"
-  },
-  {
-   "fieldname": "sub_transaction_type",
-   "fieldtype": "Select",
-   "label": "Sub Transaction Type",
-   "options": "Purchase Request",
-   "reqd": 1
+   "label": "Required Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-29 10:27:29.650317",
+ "modified": "2025-12-10 13:55:26.895588",
  "modified_by": "Administrator",
- "module": "Procurement STH",
+ "module": "Buying STH",
  "name": "Berita Acara",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
@@ -146,5 +129,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
