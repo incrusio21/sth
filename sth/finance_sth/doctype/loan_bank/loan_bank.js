@@ -377,11 +377,14 @@ function filterDisbursementNumber(frm, cdt, cdn) {
 }
 
 async function hideShowAngsuran(frm) {
-    const resp = await frappe.db.get_list("Disbursement Loan", {
+    const respDisbursement = await frappe.db.get_list("Disbursement Loan", {
         filters: { reference_name: frm.doc.name }
     });
+    const respInterest = await frappe.db.get_list("Loan Bank Interest", {
+        filters: { loan_bank: frm.doc.name }
+    });
 
-    const check = resp.length > 0;
+    const check = respDisbursement.length > 0 && respInterest.length > 0;
 
     frm.toggle_display("installments", check);
 }
