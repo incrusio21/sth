@@ -28,11 +28,11 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			}
 		])
 
+		self._clear_fields = ["blok", "divisi"]
 	
 	def validate(self):
 		self.set_posting_datetime()
 		self.validate_selisih_kmhm()
-		self.clear_fields()
 		# set data emloyee
 		self.set_details_diffrence(self.kmhm_awal, self.jenis_alat)
 		get_details_employee(self.hasil_kerja, self.posting_date)
@@ -50,9 +50,6 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			frappe.throw("KM/HM Akhir cannot less than KM/HM Awal")
 
 		self.selisih_kmhm = selisih
-
-	def clear_fields(self):
-		self.blok = self.divisi = None
 
 	def on_submit(self):
 		super().on_submit()

@@ -38,9 +38,11 @@ class BukuKerjaMandorController(PlantationController):
             }
         ]
 
+        self._clear_fields = []
         self._mandor_dict = [{"fieldname": "mandor"}]
 
     def validate(self):
+        self.clear_fields()
         self.set_payroll_date()
         
         self.get_plantation_setting()
@@ -51,6 +53,10 @@ class BukuKerjaMandorController(PlantationController):
         
         self.validate_emp_hari_kerja()
     
+    def clear_fields(self):
+        for field in self._clear_fields:
+            self.set(field, None)
+
     def set_payroll_date(self):
         # update fungsi ini jika ada aturan khusus untuk document
         self.payroll_date = self.posting_date
