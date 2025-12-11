@@ -12,6 +12,7 @@
   "naming_series",
   "transaction_number",
   "company",
+  "unit",
   "bank",
   "bank_account",
   "type",
@@ -38,14 +39,22 @@
   "description",
   "loan_type",
   "principal_calculation_method",
+  "accounting_dimensions_section",
+  "cost_center",
   "tab_2_tab",
   "pencairan_details_section",
   "disbursements",
+  "accounting_details_section",
+  "disbursement_debit_to",
+  "expense_account",
   "angsuran_tab",
   "angsuran_details_section",
   "new_interest",
   "installments",
-  "amended_from"
+  "amended_from",
+  "angsuran_accounting_details_section",
+  "installment_credit_to",
+  "installment_debit_to"
  ],
  "fields": [
   {
@@ -200,6 +209,7 @@
    "label": "HEADERS"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "angsuran_tab",
    "fieldtype": "Tab Break",
    "label": "ANGSURAN"
@@ -210,6 +220,7 @@
    "label": "Pencairan Details"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:!cur_frm.is_new()",
    "fieldname": "disbursements",
    "fieldtype": "Table",
@@ -219,12 +230,12 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "label": "Unit",
+   "label": "Company",
    "options": "Company",
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.disbursements.length > 0 && !cur_frm.is_new()",
+   "allow_on_submit": 1,
    "fieldname": "installments",
    "fieldtype": "Table",
    "label": "List Angsuran",
@@ -294,10 +305,69 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.disbursements.length > 0 && !cur_frm.is_new()",
    "fieldname": "new_interest",
    "fieldtype": "Button",
    "label": "Tambah Bunga"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Pencairan Accounting Details"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "disbursement_debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "angsuran_accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Angsuran Accounting Details"
+  },
+  {
+   "fieldname": "installment_credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "installment_debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
