@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:kode",
+ "creation": "2025-12-12 21:20:38.969089",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kode",
+  "pt",
+  "unit",
+  "jenis_bpjs",
+  "npp__no_bu",
+  "golongan",
+  "set_up_bpjs_pt_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "kode",
+   "fieldtype": "Data",
+   "label": "Kode",
+   "unique": 1
+  },
+  {
+   "fieldname": "pt",
+   "fieldtype": "Link",
+   "label": "PT",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "jenis_bpjs",
+   "fieldtype": "Select",
+   "label": "Jenis BPJS",
+   "options": "BPJS KES\nBPJS TK"
+  },
+  {
+   "fieldname": "npp__no_bu",
+   "fieldtype": "Data",
+   "label": "NPP / No BU"
+  },
+  {
+   "fieldname": "golongan",
+   "fieldtype": "Select",
+   "label": "Golongan",
+   "options": "Non Staf\nStaf Up"
+  },
+  {
+   "fieldname": "set_up_bpjs_pt_table",
+   "fieldtype": "Table",
+   "label": "Set Up BPJS PT Table",
+   "options": "Set Up BPJS PT Table"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-12 21:39:17.085360",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Set Up BPJS PT",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

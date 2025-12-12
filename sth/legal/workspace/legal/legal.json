@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Wbl6XNpx4M\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Legal</span>\",\"col\":12}},{\"id\":\"kx_-k1ak0P\",\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"id\":\"vQ_eEv09sY\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":3}}]",
+ "content": "[{\"id\":\"Wbl6XNpx4M\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Legal</span>\",\"col\":12}},{\"id\":\"kx_-k1ak0P\",\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"id\":\"vQ_eEv09sY\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":3}},{\"id\":\"Pac630pQUG\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Borongan dan Capex\",\"col\":5}},{\"id\":\"VRzQRuXCoc\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}}]",
  "creation": "2025-09-12 16:22:06.684546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -210,9 +210,67 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi Borongan dan Capex",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Proposal",
+   "link_count": 0,
+   "link_to": "Purchase Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SPK",
+   "link_count": 0,
+   "link_to": "Project",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "BAPP",
+   "link_count": 0,
+   "link_to": "Purchase Receipt",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project Management",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project",
+   "link_count": 0,
+   "link_to": "Project",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-04 14:01:36.582796",
+ "modified": "2025-12-12 13:50:57.867768",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",

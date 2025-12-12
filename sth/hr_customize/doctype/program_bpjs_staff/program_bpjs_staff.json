@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-12 21:11:48.876410",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "golongan",
+  "kriteria",
+  "patokan",
+  "batas_maksimum"
+ ],
+ "fields": [
+  {
+   "fieldname": "golongan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Golongan",
+   "options": "Staf Up\nNon Staf"
+  },
+  {
+   "fieldname": "kriteria",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Kriteria",
+   "options": "Satuan Hasil\nNon Satuan Hasil"
+  },
+  {
+   "fieldname": "patokan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Patokan",
+   "options": "UMK\nGP"
+  },
+  {
+   "fieldname": "batas_maksimum",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Batas Maksimum"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-12 21:13:17.640143",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Program BPJS Staff",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
