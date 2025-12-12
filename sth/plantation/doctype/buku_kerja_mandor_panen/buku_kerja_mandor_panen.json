@@ -38,11 +38,8 @@
   "hasil_kerja_qty_brondolan",
   "hasil_kerja_hari_kerja",
   "column_break_hvgf",
-  "transfered_janjang",
-  "transfered_brondolan",
   "netto_weight",
   "weight_total",
-  "bjr",
   "section_break_lacm",
   "hasil_kerja_amount",
   "hasil_kerja_brondolan_amount",
@@ -51,7 +48,6 @@
   "hasil_kerja_denda",
   "grand_total",
   "hasil_kerja_tab",
-  "blok",
   "hasil_kerja",
   "penalty_fees_section",
   "buah_tidak_dipanen_rate",
@@ -168,14 +164,6 @@
   {
    "fieldname": "section_break_wzob",
    "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:!doc.is_bibitan",
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Blok",
-   "options": "Blok"
   },
   {
    "fieldname": "column_break_hvgf",
@@ -340,13 +328,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "bjr",
-   "fieldtype": "Float",
-   "label": "BJR",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "hasil_kerja_qty_brondolan",
    "fieldtype": "Float",
    "label": "Brondolan Total",
@@ -357,13 +338,6 @@
    "fieldname": "is_used",
    "fieldtype": "Check",
    "label": "Used ?",
-   "read_only": 1
-  },
-  {
-   "fieldname": "transfered_brondolan",
-   "fieldtype": "Float",
-   "label": "Transfered Brondolan",
-   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -473,13 +447,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "transfered_janjang",
-   "fieldtype": "Float",
-   "label": "Transfered Hasil Kerja",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "status_panen",
    "fieldtype": "Select",
    "label": "Status Panen",
@@ -549,7 +516,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 09:27:35.838965",
+ "modified": "2025-12-12 10:13:22.207117",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

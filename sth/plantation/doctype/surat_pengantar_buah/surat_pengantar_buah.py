@@ -8,7 +8,7 @@ from frappe.utils import flt
 from frappe.model.document import Document
 
 force_item_fields = (
-	"bkm_panen",
+	"recap_panen"
 )
 
 class SuratPengantarBuah(Document):
@@ -24,25 +24,23 @@ class SuratPengantarBuah(Document):
 
 	def get_bkm_panen(self):
 		for d in self.details:
-			ret = get_bkm_panen(d.blok, d.panen_date)
-			for fieldname, value in ret.items():
-				if self.meta.get_field(fieldname) and value is not None:
-					if (
-						self.get(fieldname) is None
-						or fieldname in force_item_fields
-					):
-						self.set(fieldname, value)
-
-			# cek data blok restan
-			if d.blok_restan:
-				ret_restan = get_bkm_panen(d.blok_restan, d.panen_date_restan)
-				for fieldname, value in ret_restan.items():
-					if self.meta.get_field(fieldname) and value is not None:
-						if (
-							self.get(f"{fieldname}_restan") is None
-							or fieldname in force_item_fields
-						):
-							self.set(f"{fieldname}_restan", value)
+			for field in ("", "_restan"):
+				blok = d.get(f"blok{field}")
+				panen_date = d.get(f"panen_date{field}")
+				
+				if not (blok and panen_date):
+					continue
+					
+				ret = get_bkm_panen(blok, panen_date)
+				
+				for fieldname, value in ret.items():
+					real_field = f"{fieldname}{field}"
+					
+					if not (d.meta.get_field(real_field) and value is not None):
+						continue
+						
+					if d.get(real_field) is None or fieldname in force_item_fields:
+						d.set(real_field, value)
 
 	def calculate_janjang(self):
 		total_janjang = 0.0
@@ -67,12 +65,10 @@ class SuratPengantarBuah(Document):
 
 	def update_transfered_bkm_panen(self):
 		for d in self.details:
-			doc = frappe.get_doc("Buku Kerja Mandor Panen", d.bkm_panen)
-			doc.calculate_transfered_weight()
-
-			if d.bkm_panen_restan:
-				doc = frappe.get_doc("Buku Kerja Mandor Panen", d.bkm_panen_restan)
-				doc.calculate_transfered_weight()
+			for field in ("", "_restan"):
+				if recap := d.get(f"recap_panen{field}"):
+					doc = frappe.get_doc("Recap Panen by Blok", recap)
+					doc.calculate_transfered_weight()
 
 	def before_update_after_submit(self):
 		if self.workflow_state != "Weighed":
@@ -147,24 +143,22 @@ class SuratPengantarBuah(Document):
 		for d in self.details:
 			d.total_weight = flt(self.total_weight * d.total_janjang / self.total_janjang, precision)
 
-			
 @frappe.whitelist()
 def get_bkm_panen(blok, posting_date):
-	bkm_panen = frappe.get_value("Buku Kerja Mandor Panen", {
-		"blok": blok, "posting_date": posting_date, "docstatus": 1
+	bkm_panen = frappe.get_value("Recap Panen by Blok", {
+		"blok": blok, "posting_date": posting_date
 	}, ["name", 
-	 	"hasil_kerja_jumlah_janjang", "transfered_janjang",
-		"is_rekap"
+	 	"jumlah_janjang", "transfered_janjang"
 	], as_dict=1)
 
 	if not bkm_panen:
-		frappe.throw(""" Buku Kerja Mandor Panen not Found for Filters <br> 
+		frappe.throw(""" Recap Panen by Blok not Found for Filters <br> 
 			Blok : {} <br> 
 			Date : {} """.format(blok, posting_date))
 	
 	ress = { 
-		"bkm_panen": bkm_panen.name,
-		"qty": flt(bkm_panen.hasil_kerja_jumlah_janjang - bkm_panen.transfered_janjang),
+		"recap_panen": bkm_panen.name,
+		"qty": flt(bkm_panen.jumlah_janjang - bkm_panen.transfered_janjang),
 	}
 
 	return ress

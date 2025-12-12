@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, format_date, get_link_to_form
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
@@ -50,7 +50,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 	def validate(self):
 		self.reset_automated_data()
-
+		
 		super().validate()
 
 	def reset_automated_data(self):
@@ -69,6 +69,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.set_status()
 
 		super().on_submit()
+		self.create_recap_panen_by_blok()
 
 	def set_status(self, update_payment_log=False):
 		if frappe.db.exists("Rekap Timbangan Panen", {"buku_kerja_mandor_panen": self.name, "docstatus": 1}):
@@ -81,6 +82,52 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			self.update_children()
 			
 			self.create_or_update_payment_log()
+
+	def create_recap_panen_by_blok(self):
+		blok_dict = {}
+		for hk in self.hasil_kerja:
+			blok = blok_dict.setdefault(hk.blok, {
+				"voucher_type": self.doctype, 
+				"voucher_no": self.name,
+				"company": self.company,
+				"posting_date": self.posting_date,
+				"jumlah_janjang": 0,
+				"jumlah_brondolan": 0,
+			})
+
+			blok["jumlah_janjang"] += hk.jumlah_janjang
+			blok["jumlah_brondolan"] += hk.qty_brondolan
+		
+		message = ""
+		for b, value in blok_dict.items():
+			rekap_panen = "create_rekap_panen"
+			try:
+				frappe.db.savepoint(rekap_panen)
+				rpb = frappe.new_doc("Recap Panen by Blok")
+				rpb.blok = b
+				rpb.update(value)
+				rpb.save()
+			except frappe.UniqueValidationError:
+				if frappe.message_log:
+					frappe.message_log.pop()
+					
+				frappe.db.rollback(save_point=rekap_panen)  # preserve transaction in postgres
+				message += f"<br>{b}"
+
+		if message:
+			frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
+
+	def on_cancel(self):
+		super().on_cancel()
+		self.delete_recap_panen()
+
+	def delete_recap_panen(self):
+		for epl in frappe.get_all(
+			"Recap Panen by Blok", 
+			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+			pluck="name"
+		):
+			frappe.delete_doc("Recap Panen by Blok", epl, flags=frappe._dict(transaction_panen=True))
 
 	def set_salary_component(self):
 		from sth.plantation import get_plantation_settings
