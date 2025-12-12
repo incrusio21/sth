@@ -1,6 +1,13 @@
 // Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+let months = [
+	"Januari", "Februari", "Maret", "April", "Mei", "Juni",
+	"Juli", "Agustus", "September", "Oktober", "November", "Desember"
+];
+
+let stringMonths = months.join("\n")
+
 frappe.query_reports["History Pemakaian Barang"] = {
 	"filters": [
 		{
@@ -23,17 +30,25 @@ frappe.query_reports["History Pemakaian Barang"] = {
 			options: "Driver",
 		},
 		{
-			fieldname: "from_date",
-			label: __("Dari Tanggal"),
-			fieldtype: "Date",
-			default: frappe.datetime.add_months(frappe.datetime.get_today(), -3)
+			fieldname: "year",
+			label: __("Tahun"),
+			fieldtype: "Link",
+			options: "Fiscal Year",
+			default: new Date().getFullYear()
 		},
-
 		{
-			fieldname: "to_date",
-			label: __("Sampai Tanggal"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today()
+			fieldname: "from_month",
+			label: __("Dari Bulan"),
+			fieldtype: "Autocomplete",
+			options: stringMonths,
+			default: months[new Date().getMonth() - 3]
+		},
+		{
+			fieldname: "to_month",
+			label: __("Sampai Bulan"),
+			fieldtype: "Autocomplete",
+			options: stringMonths,
+			default: months[new Date().getMonth()]
 		},
 	]
 };
