@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{YYYY}{MM}{DD}/{unit}/{###}",
  "creation": "2025-12-09 11:42:17.877354",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -129,10 +130,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 09:49:08.963997",
+ "modified": "2025-12-12 01:09:47.858891",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

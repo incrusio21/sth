@@ -8,9 +8,6 @@ frappe.ui.form.on("Berita Acara", {
     },
 
     refresh(frm) {
-        if (frm.is_new()) {
-            frm.trigger('set_default_reqdate')
-        }
 
         if (frm.doc.docstatus == 1) {
             frm.add_custom_button("Material Request", function () {
@@ -23,8 +20,4 @@ frappe.ui.form.on("Berita Acara", {
         }
     },
 
-    set_default_reqdate(frm) {
-        const required_date = frappe.datetime.add_days(frm.doc.date, 7)
-        frm.set_value("required_date", required_date)
-    },
 });
