@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "status",
+  "attendance_status",
   "column_break_eqqk",
   "blok",
   "hari_kerja",
@@ -40,6 +40,7 @@
   "reference_section",
   "employee_payment_log",
   "brondolan_epl",
+  "status",
   "column_break_jqtg",
   "kontanan_epl",
   "denda_epl"
@@ -54,12 +55,11 @@
    "reqd": 1
   },
   {
-   "columns": 1,
    "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status Kehadiran",
-   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
+   "fieldtype": "Data",
+   "label": "Status",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -270,13 +270,21 @@
    "label": "Blok",
    "options": "Blok",
    "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "attendance_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Kehadiran",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-11 09:23:50.039060",
+ "modified": "2025-12-12 14:16:40.874009",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Panen",

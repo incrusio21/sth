@@ -182,7 +182,7 @@ doc_events = {
         "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
 	},
 	"Delivery Note": {
-		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
@@ -208,8 +208,8 @@ doc_events = {
 		"validate": [
 			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
 		],
-		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito"],
-		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito"],
+		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank"],
+		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
     "Project": {
@@ -235,14 +235,15 @@ doc_events = {
 		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Sales Order": {
-		"validate": ["sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],
 		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
 	},
 	"Sales Invoice": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
   	"Supplier Quotation": {
-		"before_submit": "sth.custom.supplier_quotation.update_status_rfq"
+		"before_submit": "sth.custom.supplier_quotation.update_status_rfq",
+        "on_submit": "sth.custom.supplier_quotation.create_po_draft"
 	},
 	
 	# "Training Event": {

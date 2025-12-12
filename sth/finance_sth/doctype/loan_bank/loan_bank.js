@@ -3,11 +3,13 @@
 
 frappe.ui.form.on("Loan Bank", {
 	refresh(frm, cdt, cdn) {
-        filterBankAccount(frm);
-        filterAccountCreditTo(frm);
-        filterUnit(frm);
-        filterDisbursementNumber(frm, cdt, cdn);
-        hideShowAngsuran(frm);
+        frappe.run_serially([            
+            () => filterBankAccount(frm),
+            () => filterUnit(frm),
+            () => filterDisbursementNumber(frm, cdt, cdn),
+            () => filterAccounting(frm),
+            () => hideShowAngsuran(frm),
+        ])
 	},
     availability_period(frm){
         calculateScheduleLoan(frm);
@@ -33,6 +35,7 @@ frappe.ui.form.on("Disbursement Loan Bank", {
     },
     before_disbursements_remove(frm, cdt, cdn){
         validateDeleteDisbursement(frm, cdt, cdn)
+        validateRemove(frm, cdt, cdn)
     }
 });
 
@@ -51,24 +54,21 @@ frappe.ui.form.on("Installment Loan Bank", {
     },
     loan_interest(frm, cdt, cdn){
         calculateInterestAmount(frm, cdt, cdn)
-    }
+    },
+    before_installments_remove(frm, cdt, cdn){
+        validateRemove(frm, cdt, cdn)
+    },
+    installments_remove(frm, cdt, cdn){
+        recalculateGrace(frm)
+    },
 })
 
 function filterBankAccount(frm) {
     frm.set_query('bank_account', () => {
         return{
             filters: {
-                bank: frm.doc.bank
-            }
-        }
-    })
-}
-
-function filterAccountCreditTo(frm) {
-    frm.set_query('credit_to', () => {
-        return{
-            filters: {
-                account_type: "Payable"
+                bank: frm.doc.bank,
+                company: frm.doc.company
             }
         }
     })
@@ -177,6 +177,7 @@ function checkGracePrincipal(frm, cdt, cdn) {
     }else{
         frappe.model.set_value(cdt, cdn, 'principal', 0)
         frm.refresh_field('installments')
+        calculateInterestAmount(frm, cdt, cdn)
     }
 }
 
@@ -201,7 +202,7 @@ function calculateInterestAmount(frm, cdt, cdn) {
         return
     }
     let interestAmount = curRow.disbursement_total * curRow.loan_interest * curRow.days / frm.doc.days_in_year
-    let paymentTotal = curRow.principal || 0 + interestAmount
+    let paymentTotal = curRow.principal + interestAmount
     frappe.model.set_value(cdt, cdn, 'interest_amount', interestAmount)
     frappe.model.set_value(cdt, cdn, 'payment_total', paymentTotal)
     frm.refresh_field("installments")
@@ -376,11 +377,14 @@ function filterDisbursementNumber(frm, cdt, cdn) {
 }
 
 async function hideShowAngsuran(frm) {
-    const resp = await frappe.db.get_list("Disbursement Loan", {
+    const respDisbursement = await frappe.db.get_list("Disbursement Loan", {
         filters: { reference_name: frm.doc.name }
     });
+    const respInterest = await frappe.db.get_list("Loan Bank Interest", {
+        filters: { loan_bank: frm.doc.name }
+    });
 
-    const check = resp.length > 0;
+    const check = respDisbursement.length > 0 && respInterest.length > 0;
 
     frm.toggle_display("installments", check);
 }
@@ -389,8 +393,59 @@ function filterUnit(frm) {
     frm.set_query('unit', (doc) => {
         return {
             filters: {
-                "company": ["=", frm.doc.company]
+                "company": ["=", doc.company]
             }
         }
     })
+}
+
+function filterAccounting(frm) {
+    frm.set_query('installment_credit_to', (doc) => {
+        return {
+            filters: {
+                account_type: "Payable",
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+    frm.set_query('disbursement_debit_to', (doc) => {
+        return {
+            filters: {
+                account_type: "Receivable",
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+    frm.set_query('installment_debit_to', (doc) => {
+        return {
+            filters: {
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+    frm.set_query('expense_account', (doc) => {
+        return {
+            filters: {
+                company: ["=", doc.company],
+                is_group: 0
+            }
+        }
+    })
+}
+
+function validateRemove(frm, cdt, cdn) {
+    const curRow = locals[cdt][cdn]
+
+    if (curRow.payment_entry) {
+        frappe.throw(`Row: ${curRow.idx} sudah dibuat Payment Entry <b>${curRow.payment_entry}</b>, mohon cancel Payment Entry terlebih dahulu`)
+    }
+}
+
+function recalculateGrace(frm) {
+    for (const row of frm.doc.installments) {
+        checkGracePrincipal(frm, row.doctype, row.name)
+    }
 }

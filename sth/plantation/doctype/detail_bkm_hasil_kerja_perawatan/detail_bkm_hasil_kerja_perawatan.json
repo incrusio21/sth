@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "status",
+  "attendance_status",
   "hari_kerja",
   "qty",
   "column_break_eqqk",
@@ -27,14 +27,6 @@
    "label": "Karyawan",
    "options": "Employee",
    "reqd": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status Kehadiran",
-   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
   },
   {
    "fieldname": "column_break_eqqk",
@@ -103,13 +95,21 @@
    "in_list_view": 1,
    "label": "Sub Total",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "attendance_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Kehadiran",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-24 15:52:50.281877",
+ "modified": "2025-12-12 14:22:00.800787",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Perawatan",

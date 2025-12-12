@@ -6,17 +6,29 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "company",
+  "unit",
   "disbursement_number",
   "disbursement_date",
   "disbursement_amount",
   "disbursement_total",
-  "due_days",
   "column_break_bbib",
+  "due_days",
+  "posting_date",
+  "grand_total",
+  "outstanding_amount",
+  "payment_entry",
+  "accounting_dimensions_section",
+  "cost_center",
+  "accounting_details_tab",
+  "debit_to",
+  "expense_account",
+  "reference_details_tab",
+  "reference_details_section",
   "reference_doc",
   "reference_name",
   "reference_doc_detail",
   "reference_name_detail",
-  "journal_entry",
   "amended_from"
  ],
  "fields": [
@@ -58,13 +70,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
-   "read_only": 1
-  },
-  {
    "fieldname": "reference_doc_detail",
    "fieldtype": "Link",
    "label": "Reference Document Detail",
@@ -84,6 +89,97 @@
    "read_only": 1
   },
   {
+   "fieldname": "disbursement_total",
+   "fieldtype": "Currency",
+   "label": "Total Pencairan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Debit To ",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Reference Details"
+  },
+  {
+   "fieldname": "reference_details_section",
+   "fieldtype": "Section Break",
+   "label": "Reference Details"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total"
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -92,19 +188,13 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "disbursement_total",
-   "fieldtype": "Currency",
-   "label": "Total Pencairan",
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 13:16:12.542951",
+ "modified": "2025-12-11 14:05:04.106322",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Disbursement Loan",

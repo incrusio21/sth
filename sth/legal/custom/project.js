@@ -3,6 +3,14 @@
 
 frappe.ui.form.on("Project", {
     refresh(frm) {
+        frm.set_query("purchase_order", () =>{
+            return {
+                filters:{
+                    purchase_type: ["in", ["Borongan", "Capex"]]
+                }
+            }
+        })
+        
         if (frm.doc.status !== "Cancelled" && frm.doc.for_proposal) {
             frm.add_custom_button(
                 __("Adendum"), () => {

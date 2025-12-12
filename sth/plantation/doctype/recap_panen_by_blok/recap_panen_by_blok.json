@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-11 16:25:33.703904",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "blok",
+  "column_break_uznt",
+  "company",
+  "posting_date",
+  "section_break_dydc",
+  "jumlah_janjang",
+  "jumlah_brondolan",
+  "column_break_ebno",
+  "transfered_janjang",
+  "section_break_ztej",
+  "column_break_nwap",
+  "voucher_type",
+  "voucher_no",
+  "column_break_mklk",
+  "total_weight",
+  "bjr"
+ ],
+ "fields": [
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "no_copy": 1,
+   "options": "Blok",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_uznt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "no_copy": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_dydc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "jumlah_janjang",
+   "fieldtype": "Float",
+   "label": "Jumlah Janjang",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "jumlah_brondolan",
+   "fieldtype": "Float",
+   "label": "Jumlah Brondolan",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ebno",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bjr",
+   "fieldtype": "Float",
+   "label": "BJR",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transfered_janjang",
+   "fieldtype": "Float",
+   "label": "Transfered Janjang",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ztej",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_nwap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mklk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "no_copy": 1,
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "no_copy": 1,
+   "options": "voucher_type",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-12 10:07:51.652843",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Recap Panen by Blok",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -7,6 +7,11 @@ def update_status_rfq(doc,method):
         frappe.db.set_value("Request for Quotation",rfq,"custom_offering_status","Closed",update_modified=False)
         frappe.db.commit()
 
+def create_po_draft(doc,method):
+    from sth.overrides.supplier_quotation import make_purchase_order
+    po = make_purchase_order(doc.name)
+    po.insert()
+
 def close_status_another_sq(rfq,except_name):
     supplier_quotations = frappe.db.sql("""
         select sq.name from `tabSupplier Quotation` sq
