@@ -106,17 +106,6 @@ class PengajuanPanenKontanan(PlantationController):
 		self.delete_employee_payment_log()
 		self.make_gl_entry()
 
-		self.ignore_linked_doctypes = (
-			"GL Entry",
-			"Repost Payment Ledger",
-			"Repost Payment Ledger Items",
-			"Repost Accounting Ledger",
-			"Repost Accounting Ledger Items",
-			"Unreconcile Payment",
-			"Unreconcile Payment Entries",
-			"Payment Ledger Entry",
-		)
-
 	def check_status_bkm_panen(self):
 		doc = frappe.get_doc("Buku Kerja Mandor Panen", self.bkm_panen)
 		doc.update_kontanan_used()

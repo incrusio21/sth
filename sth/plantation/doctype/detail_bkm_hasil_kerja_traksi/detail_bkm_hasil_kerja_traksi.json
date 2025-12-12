@@ -9,7 +9,7 @@
  "field_order": [
   "kegiatan",
   "employee",
-  "status",
+  "attendance_status",
   "column_break_eqqk",
   "employment_type",
   "total_hari",
@@ -51,14 +51,6 @@
    "label": "Karyawan",
    "options": "Employee",
    "reqd": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status Kehadiran",
-   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
   },
   {
    "columns": 1,
@@ -266,13 +258,21 @@
    "label": "Project",
    "options": "Project",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "attendance_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Kehadiran",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-11 10:42:16.255883",
+ "modified": "2025-12-12 14:21:20.158929",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Traksi",

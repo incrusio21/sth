@@ -9,9 +9,7 @@
  "field_order": [
   "section_break_u26c",
   "naming_series",
-  "blok",
-  "panen_date",
-  "buku_kerja_mandor_panen",
+  "transaction_date",
   "column_break_zpgd",
   "company",
   "amended_from",
@@ -37,19 +35,6 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "options": "Blok"
-  },
-  {
-   "fieldname": "panen_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Tanggal Panen",
-   "reqd": 1
   },
   {
    "fieldname": "column_break_zpgd",
@@ -94,13 +79,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "buku_kerja_mandor_panen",
-   "fieldtype": "Link",
-   "label": "Buku Kerja Mandor Panen",
-   "options": "Buku Kerja Mandor Panen",
-   "read_only": 1
-  },
-  {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
@@ -111,6 +89,14 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "RKP-TBG-",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transaction Date",
    "reqd": 1
   }
  ],
@@ -118,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:02:19.860492",
+ "modified": "2025-12-12 14:37:00.431228",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Timbangan Panen",

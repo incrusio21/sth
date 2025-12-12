@@ -112,14 +112,19 @@ class BukuKerjaMandorController(PlantationController):
         # if update_realization:
         #     self.update_rkb_realization()
 
-    def create_or_update_payment_log(self):
+    def create_or_update_payment_log(self, hasil_kerja_list=None):
         
         # cek jika bkm memiliki field status
-        status = self.meta.has_field("status")
-        removed_epl = []
-        for emp in self.hasil_kerja:
-            
+        table_docname = self.meta.get_options("hasil_kerja")
+        status = frappe.get_meta(table_docname).has_field("status")
 
+        # jika tidak ada daftar list, update seluruh baris pada table
+        if not hasil_kerja_list:
+            hasil_kerja_list = self.hasil_kerja
+
+        removed_epl = []
+        for emp in hasil_kerja_list:
+            
             for log_updater in self.payment_log_updater:
                 is_new = False
                 amount = emp.get(log_updater["target_amount"])
@@ -141,7 +146,7 @@ class BukuKerjaMandorController(PlantationController):
                     doc.posting_date = self.posting_date
                     doc.payroll_date = self.payroll_date
 
-                    doc.status = self.status if status else "Approved"
+                    doc.status = emp.status if status else "Approved"
 
                     doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
                     doc.amount = amount
@@ -177,7 +182,7 @@ class BukuKerjaMandorController(PlantationController):
 
             m_dict = frappe._dict({
                 "employee": mandor,
-                "status": "Present"
+                "attendance_status": "Present"
             })
             
             mandor_list.append(m_dict)
@@ -196,7 +201,7 @@ class BukuKerjaMandorController(PlantationController):
                 frappe.db.savepoint(add_att)
                 attendance = frappe.get_doc({
                     "doctype": "Attendance",
-                    "status": emp.status,
+                    "status": emp.attendance_status,
                     **attendance_detail
                 })
                 attendance.flags.ignore_permissions = 1
