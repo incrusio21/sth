@@ -9,9 +9,16 @@
   "surat_pengantar_buah",
   "no_polisi",
   "column_break_truv",
+  "posting_date",
+  "section_break_bvjj",
+  "blok",
+  "panen_date",
+  "column_break_trlx",
   "bjr",
   "jumlah_janjang",
-  "total_weight"
+  "total_weight",
+  "section_break_hrxc",
+  "recap_panen"
  ],
  "fields": [
   {
@@ -23,6 +30,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fetch_from": "surat_pengantar_buah.no_polisi",
    "fieldname": "no_polisi",
    "fieldtype": "Data",
@@ -35,6 +43,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "bjr",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -42,6 +51,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "jumlah_janjang",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -51,7 +61,50 @@
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Total Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "surat_pengantar_buah.posting_date",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_bvjj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_trlx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "panen_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_hrxc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "recap_panen",
+   "fieldtype": "Link",
+   "label": "Recap Panen",
+   "options": "Recap Panen by Blok",
    "read_only": 1
   }
  ],
@@ -59,7 +112,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-12 14:36:09.779633",
+ "modified": "2025-12-12 16:43:12.239892",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Timbangan Panen Details",

@@ -3,6 +3,7 @@
 
 import json
 import frappe
+from frappe import unscrub
 from frappe.model.meta import get_field_precision
 from frappe.utils import flt
 from frappe.model.document import Document
@@ -15,32 +16,73 @@ class SuratPengantarBuah(Document):
 	
 	def validate(self):
 		self.remove_input_pks()
-		self.get_bkm_panen()
+		self.set_missing_value()
+		self.validate_recap_panen()
 		self.calculate_janjang()
 
 	def remove_input_pks(self):
 		self.in_time = self.out_time = self.in_time_internal = self.out_time_internal = ""
 		self.in_weight = self.in_weight_internal = self.out_weight = self.out_weight_internal = self.mill_cut = 0
 
-	def get_bkm_panen(self):
-		for d in self.details:
-			for field in ("", "_restan"):
-				blok = d.get(f"blok{field}")
-				panen_date = d.get(f"panen_date{field}")
+	def set_missing_value(self):
+		def _apply_recap(detail, suffix=""):
+			blok = detail.get(f"blok{suffix}")
+			panen_date = detail.get(f"panen_date{suffix}")
+			
+			ret = get_recap_panen(blok, panen_date)
+			
+			for fieldname, value in ret.items():
+				target_field = f"{fieldname}{suffix}"
 				
-				if not (blok and panen_date):
+				if not (detail.meta.get_field(target_field) and value is not None):
 					continue
-					
-				ret = get_bkm_panen(blok, panen_date)
 				
-				for fieldname, value in ret.items():
-					real_field = f"{fieldname}{field}"
-					
-					if not (d.meta.get_field(real_field) and value is not None):
-						continue
-						
-					if d.get(real_field) is None or fieldname in force_item_fields:
-						d.set(real_field, value)
+				if detail.get(target_field) is None or target_field in force_item_fields:
+					detail.set(target_field, value)
+
+		for d in self.details:
+			_apply_recap(d)
+
+			# Process restan recap if exists
+			if d.blok_restan and d.panen_date_restan:
+				_apply_recap(d, suffix="_restan")
+
+	def validate_recap_panen(self):
+		rpb = frappe.qb.DocType("Recap Panen by Blok")
+
+		query = (
+			frappe.qb.from_(rpb)
+			.select(rpb.kontanan, rpb.voucher_no)
+			.where(
+				(rpb.voucher_type == "Buku Kerja Mandor Panen") & 
+				(rpb.name.isin([d.recap_panen for d in self.details]))
+			)
+		).run(as_dict=True)
+
+		kontanan = [r.voucher_no for r in query if r.kontanan]
+		non_kontanan = [r.voucher_no for r in query if not r.kontanan]
+
+		errors = []
+
+		if kontanan:
+			e_kontanan = frappe.db.exists("Pengajuan Panen Kontanan", {
+				"bkm_panen": ["in", kontanan], 
+				"docstatus": 1
+			})
+			if e_kontanan:
+				errors.append("Some harvests already have submitted Kontanan")
+
+		if non_kontanan:
+			p_payment = frappe.db.exists("Employee Payment Log", {
+				"voucher_type": "Buku Kerja Mandor Panen",
+				"voucher_no": ["in", non_kontanan], 
+				"is_paid": 1
+			})
+			if p_payment:
+				errors.append("Some harvests have already been paid")
+
+		if errors:
+			frappe.throw("<br>".join(errors))
 
 	def calculate_janjang(self):
 		total_janjang = 0.0
@@ -144,21 +186,25 @@ class SuratPengantarBuah(Document):
 			d.total_weight = flt(self.total_weight * d.total_janjang / self.total_janjang, precision)
 
 @frappe.whitelist()
-def get_bkm_panen(blok, posting_date):
-	bkm_panen = frappe.get_value("Recap Panen by Blok", {
+def get_recap_panen(blok, posting_date):
+	filters = {
 		"blok": blok, "posting_date": posting_date
-	}, ["name", 
-	 	"jumlah_janjang", "transfered_janjang"
+	}
+
+	recap_panen = frappe.get_value("Recap Panen by Blok", filters, [
+		"name", "jumlah_janjang", "transfered_janjang"
 	], as_dict=1)
 
-	if not bkm_panen:
-		frappe.throw(""" Recap Panen by Blok not Found for Filters <br> 
-			Blok : {} <br> 
-			Date : {} """.format(blok, posting_date))
+	if not recap_panen:
+		message = "Recap Panen by Blok not Found for Filters"
+		for key, value in filters.items():
+			message += f"<br>{unscrub(key)}: {value}"
+			
+		frappe.throw(message)
 	
 	ress = { 
-		"recap_panen": bkm_panen.name,
-		"qty": flt(bkm_panen.jumlah_janjang - bkm_panen.transfered_janjang),
+		"recap_panen": recap_panen.name,
+		"qty": flt(recap_panen.jumlah_janjang - recap_panen.transfered_janjang)
 	}
 
 	return ress

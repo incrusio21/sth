@@ -15,14 +15,14 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         for (const fieldname of ["blok", "panen_date"]) {
             frappe.ui.form.on("SPB Timbangan Pabrik", fieldname, function(frm, cdt, cdn) {
                 let items = locals[cdt][cdn]
-                me.get_bkm_panen_data(items, "blok", "panen_date")
+                me.get_recap_panen_data(items, "blok", "panen_date")
             });
         }
 
         for (const fieldname of ["blok_restan", "panen_date_restan"]) {
             frappe.ui.form.on("SPB Timbangan Pabrik", fieldname, function(frm, cdt, cdn) {
                 let items = locals[cdt][cdn]
-                me.get_bkm_panen_data(items, "blok_restan", "panen_date_restan", true)
+                me.get_recap_panen_data(items, "blok_restan", "panen_date_restan", true)
             });
         }
 
@@ -95,18 +95,18 @@ sth.plantation.SuratPengantarBuah = class SuratPengantarBuah extends frappe.ui.f
         })
     }
 
-    get_bkm_panen_data(item, blok_fieldname, date_fieldname, restan=false){
+    get_recap_panen_data(item, blok_fieldname, date_fieldname, restan=false){
         let me = this
         let restan_field = restan ? "_restan" : ""
 
         if(!(item[blok_fieldname] && item[date_fieldname])) return
         
         frappe.call({
-            method: "sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah.get_bkm_panen",
+            method: "sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah.get_recap_panen",
             args: {
                 blok: item[blok_fieldname],
                 posting_date: item[date_fieldname],
-                restan: restan
+                status: !restan
             },
             freeze: true,
             callback: function (r) {

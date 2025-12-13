@@ -90,7 +90,9 @@
   {
    "fieldname": "duplicate_key",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Employee Overtime Date",
+   "read_only": 1,
    "unique": 1
   }
  ],
@@ -98,7 +100,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-07 16:45:01.146293",
+ "modified": "2025-12-12 16:04:20.557297",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Lembur Detail",

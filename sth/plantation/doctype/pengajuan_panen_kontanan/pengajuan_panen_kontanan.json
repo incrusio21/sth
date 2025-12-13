@@ -10,12 +10,12 @@
   "naming_series",
   "bkm_panen",
   "divisi",
-  "blok",
   "employee",
   "column_break_qfjb",
   "posting_date",
   "company",
   "hari_kerja",
+  "duplicate_key",
   "amended_from",
   "component_section",
   "column_break_yfhd",
@@ -82,14 +82,6 @@
    "fieldtype": "Link",
    "label": "Divisi",
    "options": "Divisi",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "bkm_panen.blok",
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "options": "Blok",
    "read_only": 1
   },
   {
@@ -303,7 +295,8 @@
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_jbcm",
@@ -325,13 +318,21 @@
    "label": "Series",
    "options": "PPK-",
    "reqd": 1
+  },
+  {
+   "fieldname": "duplicate_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Duplicate Key",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:01:01.387616",
+ "modified": "2025-12-13 23:20:56.791070",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

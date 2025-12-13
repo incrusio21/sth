@@ -33,6 +33,7 @@ class BukuKerjaMandorController(PlantationController):
                 "target_account": "kegiatan_account",
                 "target_salary_component": "salary_component",
                 "component_type": "Upah",
+                "status": "status",
                 "hari_kerja": True,
                 "removed_if_zero": False,
             }
@@ -105,27 +106,25 @@ class BukuKerjaMandorController(PlantationController):
 
     def on_submit(self, update_realization=True):
         self.create_or_update_payment_log()
-        # self.create_journal_entry()
         self.make_attendance()
         self.check_emp_hari_kerja()
 
         # if update_realization:
         #     self.update_rkb_realization()
 
-    def create_or_update_payment_log(self, hasil_kerja_list=None):
-        
-        # cek jika bkm memiliki field status
-        table_docname = self.meta.get_options("hasil_kerja")
-        status = frappe.get_meta(table_docname).has_field("status")
-
-        # jika tidak ada daftar list, update seluruh baris pada table
-        if not hasil_kerja_list:
-            hasil_kerja_list = self.hasil_kerja
+    def create_or_update_payment_log(self, hasil_kerja_list=[], component_type=None):
 
         removed_epl = []
-        for emp in hasil_kerja_list:
-            
+        for emp in self.hasil_kerja:
+            # check apakah ada list khusus untuk d update
+            if hasil_kerja_list and emp.name not in hasil_kerja_list:
+                continue
+
             for log_updater in self.payment_log_updater:
+                # cukup update data untuk component type tertentu
+                if component_type and log_updater["component_type"] not in component_type:
+                    continue
+
                 is_new = False
                 amount = emp.get(log_updater["target_amount"])
                 try:
@@ -139,6 +138,7 @@ class BukuKerjaMandorController(PlantationController):
                     is_new = True
                     doc = frappe.new_doc("Employee Payment Log")
                 
+                status_field = log_updater.get("status")
                 # jika ada nilai atau kosong tapi tidak di hapus 
                 if amount or not log_updater.get("removed_if_zero"):
                     doc.employee = emp.employee
@@ -146,7 +146,8 @@ class BukuKerjaMandorController(PlantationController):
                     doc.posting_date = self.posting_date
                     doc.payroll_date = self.payroll_date
 
-                    doc.status = emp.status if status else "Approved"
+                    if status_field and emp.get(status_field):
+                        doc.status = emp.get(status_field)
 
                     doc.hari_kerja = emp.hari_kerja if log_updater.get("hari_kerja") else 0
                     doc.amount = amount

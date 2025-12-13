@@ -66,22 +66,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			}, ["posting_date", "against_kontanan_component"]) or ["", ""]
 
 	def on_submit(self):
-		self.set_status()
-
 		super().on_submit()
 		self.create_recap_panen_by_blok()
-
-	def set_status(self, update_payment_log=False):
-		if frappe.db.exists("Rekap Timbangan Panen", {"buku_kerja_mandor_panen": self.name, "docstatus": 1}):
-			self.db_set("status", "Approved")
-		else:
-			self.db_set("status", "Pending")
-
-		if update_payment_log:
-			self.calculate()
-			self.update_children()
-			
-			self.create_or_update_payment_log()
 
 	def create_recap_panen_by_blok(self):
 		blok_dict = {}
@@ -93,6 +79,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 				"posting_date": self.posting_date,
 				"jumlah_janjang": 0,
 				"jumlah_brondolan": 0,
+				"kontanan": self.is_kontanan
 			})
 
 			blok["jumlah_janjang"] += hk.jumlah_janjang
@@ -128,21 +115,15 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			pluck="name"
 		):
 			frappe.delete_doc("Recap Panen by Blok", epl, flags=frappe._dict(transaction_panen=True))
-
-	def set_salary_component(self):
-		from sth.plantation import get_plantation_settings
-
-		for key, fieldname in {"denda_sc": "denda_salary_component", "brondolan_sc": "brondolan_sc"}:
-			self.set(fieldname, get_plantation_settings(key))
 		
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.bjr = self.bjr
-		item.qty = (item.bjr * item.jumlah_janjang)
+		item.qty = flt((item.bjr or 0) * item.jumlah_janjang)
 		item.rate = item.get("rate") or self.rupiah_basis
 		item.brondolan = flt(self.upah_brondolan)
+		item.status = "Pending" if not item.bjr else "Approved"
 
 		if not self.manual_hk:
 			item.hari_kerja = min(flt(item.qty / self.volume_basis), 1)
@@ -167,74 +148,27 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def after_calculate_grand_total(self):
 		self.grand_total -= self.hasil_kerja_denda 
 
-	def update_kontanan_used(self):
-		if not self.is_rekap:
-			frappe.throw("Please Rekap BKM Panen {} first".format(
-				get_link_to_form(self.doctype, self.name)
-			))
-
+	def update_kontanan_used(self, cancel=0):
 		self.set_payroll_date()
+		self.is_rekap = not cancel
 		self.db_update()
 		
-		self.set_status(update_payment_log=True)
+		self.create_or_update_payment_log()
 
-	def calculate_transfered_weight(self):
-		spb = frappe.qb.DocType("SPB Timbangan Pabrik")
+	def update_hasil_kerja_bjr(self, block_dict=None):
+		# update bjr untuk menentukan nilai upah pegawai
+		update_payment_log = []
+		for hk in self.hasil_kerja:
+			if block_dict and not block_dict.get(hk.blok):
+				continue
+			
+			hk.bjr = block_dict[hk.blok]
+			update_payment_log.append(hk.name)
 
-		transfered_janjang = (
-			frappe.qb.from_(spb)
-			.select(
-				Coalesce(Sum(spb.qty), 0)
-            )
-			.where(
-                (spb.docstatus == 1) &
-                (spb.bkm_panen == self.name)
-			)
-		).run()[0][0]
+		self.calculate()
+		self.db_update_all()
+		
+		if self.is_kontanan and self.is_rekap:
+			frappe.throw(f"Document already have Pengajuan Kontanan. please cancel it first")
 
-		transfered_restan = (
-			frappe.qb.from_(spb)
-			.select(
-				Coalesce(Sum(spb.qty_restan), 0), 
-            )
-			.where(
-                (spb.docstatus == 1) &
-                (spb.bkm_panen_restan == self.name)
-			)
-		).run()[0][0]
-
-		self.transfered_janjang = flt(transfered_janjang + transfered_restan, self.precision("transfered_janjang"))
-
-		if self.transfered_janjang > self.hasil_kerja_jumlah_janjang:
-			frappe.throw("Transfered Janjang exceeds limit.")
-
-		self.db_update()
-
-	def set_data_rekap_weight(self, is_cancel=0):
-		if self.against_salary_component and is_cancel == 0:
-			frappe.throw("BKM Panen {} already used in Pembayaran Kontanan".format(
-				get_link_to_form(self.doctype, self.name)
-			))
-
-		spb = frappe.qb.DocType("Rekap Timbangan Panen")
-
-		rekap_timbangan = (
-			frappe.qb.from_(spb)
-			.select(
-				spb.bjr, 
-				spb.total_weight
-            )
-			.where(
-                (spb.docstatus == 1) &
-                (spb.buku_kerja_mandor_panen == self.name)
-			)
-		).run()
-
-		if len(rekap_timbangan) > 1:
-			frappe.throw("Only one Rekap timbangan Panen is allowed per document")
-
-		self.is_rekap, values = (1, rekap_timbangan[0]) if rekap_timbangan else (0, (0, 0))
-		self.bjr, self.weight_total = values
-
-		self.set_status(update_payment_log=True)
-		self.db_update()
+		self.create_or_update_payment_log(update_payment_log, "Upah")

@@ -63,8 +63,6 @@
   "more_information_tab",
   "reference_section",
   "rencana_kerja_harian",
-  "is_used",
-  "status",
   "column_break_khlg",
   "voucher_type",
   "voucher_no",
@@ -228,12 +226,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Data",
-   "label": "Status",
-   "read_only": 1
-  },
-  {
    "fieldname": "penalty_fees_section",
    "fieldtype": "Section Break",
    "label": "Penalty Fees Rate"
@@ -331,13 +323,6 @@
    "fieldname": "hasil_kerja_qty_brondolan",
    "fieldtype": "Float",
    "label": "Brondolan Total",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_used",
-   "fieldtype": "Check",
-   "label": "Used ?",
    "read_only": 1
   },
   {
@@ -516,7 +501,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-12 10:13:22.207117",
+ "modified": "2025-12-13 22:21:49.571721",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

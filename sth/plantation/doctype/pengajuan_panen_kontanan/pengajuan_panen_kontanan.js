@@ -32,7 +32,7 @@ sth.plantation.PengajuanPanenKontanan = class PengajuanPanenKontanan extends sth
                 filters: {
                     company: ["=", doc.company],
                     is_kontanan: 1,
-                    is_rekap: 1,
+                    is_rekap: 0,
                     against_salary_component: ["is", "not set"]
                 }
             }

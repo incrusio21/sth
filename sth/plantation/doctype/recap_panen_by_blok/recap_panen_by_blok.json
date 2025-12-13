@@ -6,9 +6,12 @@
  "engine": "InnoDB",
  "field_order": [
   "blok",
+  "divisi",
+  "unit",
   "column_break_uznt",
   "company",
   "posting_date",
+  "kontanan",
   "section_break_dydc",
   "jumlah_janjang",
   "jumlah_brondolan",
@@ -126,13 +129,36 @@
    "no_copy": 1,
    "options": "voucher_type",
    "read_only": 1
+  },
+  {
+   "fetch_from": "blok.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "blok.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kontanan",
+   "fieldtype": "Check",
+   "label": "Kontanan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-12 10:07:51.652843",
+ "modified": "2025-12-13 23:09:02.383761",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Recap Panen by Blok",
