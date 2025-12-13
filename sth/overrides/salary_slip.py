@@ -16,8 +16,6 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
 
-from calendar import monthrange
-
 LEAVE_CODE_MAP = "leave_code_map"
 
 class SalarySlip(SalarySlip):
@@ -25,7 +23,7 @@ class SalarySlip(SalarySlip):
 		super().on_submit()
 		self.update_payment_related("Employee Payment Log", "payment_log_list")
 		self.update_payment_related("Loan Repayment", "loan_repayment_list")
-
+		
 	def on_cancel(self):
 		super().on_submit()
 
@@ -112,7 +110,6 @@ class SalarySlip(SalarySlip):
 			elif att_exist :
 				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 				self.holiday_days += 1
-
 
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
@@ -219,7 +216,10 @@ class SalarySlip(SalarySlip):
 		epl = frappe.qb.DocType("Employee Payment Log")
 		emp_pl = (
 			frappe.qb.from_(epl)
-			.select(epl.name, epl.account, epl.salary_component, epl.type, epl.against_salary_component, epl.amount, epl.status)
+			.select(
+				epl.name, epl.account, epl.salary_component, 
+				epl.type, epl.against_salary_component, epl.amount, epl.status
+			)
 			.where(
 				(epl.employee == self.employee)
 				& (epl.company == self.company)
@@ -229,7 +229,9 @@ class SalarySlip(SalarySlip):
 			.for_update()
 		).run(as_dict=1)
 		
-		self._employee_payment, self._against_employee_payment = {}, {}
+		self._employee_payment = {}
+		self._against_employee_payment = {}
+
 		for pl in emp_pl:
 			# throw jika status payment log belum approved (document belum fix)
 			if pl.status != "Approved":
@@ -279,7 +281,6 @@ class SalarySlip(SalarySlip):
 
 			self._employee_payment[key]["amount"] += addons_premi
 		
-
 	def remove_flexibel_payment(self):
 		removed_component = []
 		for component_type in ["earnings", "deductions"]:
