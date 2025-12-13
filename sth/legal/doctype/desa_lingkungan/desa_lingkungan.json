@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{desa}-{handil}-{#####}",
+ "autoname": "format:{desa}-{#####}",
  "creation": "2025-09-12 15:29:45.755082",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -80,7 +80,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 13:38:10.900775",
+ "modified": "2025-12-13 13:37:07.263761",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Desa Lingkungan",

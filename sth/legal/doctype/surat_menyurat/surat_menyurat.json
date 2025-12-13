@@ -9,16 +9,17 @@
  "field_order": [
   "section_break_1eew",
   "naming_series",
-  "tipe_surat",
-  "jenis_surat",
-  "nomor_surat_external",
   "tanggal_surat",
-  "company",
-  "unit",
-  "lks",
+  "jenis_surat",
+  "tipe_surat",
+  "nomor_surat_masuk",
+  "abbr",
   "column_break_yawx",
   "status",
+  "company",
+  "unit",
   "dpt",
+  "lks",
   "tujuan",
   "date_received",
   "ringkasan",
@@ -102,17 +103,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "Nomor Surat Internal",
-   "options": "SM-",
-   "set_only_once": 1
-  },
-  {
-   "depends_on": "eval:doc.jenis_surat == \"External\"",
-   "fieldname": "nomor_surat_external",
-   "fieldtype": "Data",
-   "in_list_view": 1,
    "in_preview": 1,
-   "label": "Nomor Surat External"
+   "label": "Nomor Surat",
+   "options": "INT/.{unit}./.{abbr}./.MM./.YYYY./.#####\nEXT/.{unit}./.{abbr}./.MM./.YYYY./.#####",
+   "set_only_once": 1
   },
   {
    "fieldname": "tipe_surat",
@@ -137,12 +131,29 @@
    "label": "Status",
    "options": "Belum Upload\nSudah Upload",
    "read_only": 1
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Abbr",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.tipe_surat == \"Masuk\" && doc.jenis_surat == \"External\"",
+   "fieldname": "nomor_surat_masuk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor Surat Masuk",
+   "mandatory_depends_on": "eval: doc.tipe_surat == \"Masuk\" && doc.jenis_surat == \"External\""
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-10 09:56:05.266654",
+ "modified": "2025-12-13 13:19:26.055754",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Surat Menyurat",

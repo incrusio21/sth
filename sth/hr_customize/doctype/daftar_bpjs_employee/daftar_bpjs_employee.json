@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-13 18:00:39.698709",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama",
+  "no_ktp",
+  "jabatan",
+  "gp",
+  "beban_karyawan",
+  "beban_perusahaan",
+  "jumlah",
+  "no_bpjs_tkkes",
+  "nama_ibu_kandung",
+  "gol_darah",
+  "keterangan"
+ ],
+ "fields": [
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama"
+  },
+  {
+   "fieldname": "no_ktp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No KTP"
+  },
+  {
+   "fieldname": "jabatan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Jabatan"
+  },
+  {
+   "fieldname": "gp",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "GP"
+  },
+  {
+   "fieldname": "beban_karyawan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Beban Karyawan"
+  },
+  {
+   "fieldname": "beban_perusahaan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Beban Perusahaan"
+  },
+  {
+   "fieldname": "jumlah",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Jumlah"
+  },
+  {
+   "fieldname": "no_bpjs_tkkes",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No BPJS TK/KES"
+  },
+  {
+   "fieldname": "nama_ibu_kandung",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Ibu Kandung"
+  },
+  {
+   "fieldname": "gol_darah",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Gol Darah"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Keterangan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-13 18:02:27.209760",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Daftar BPJS Employee",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

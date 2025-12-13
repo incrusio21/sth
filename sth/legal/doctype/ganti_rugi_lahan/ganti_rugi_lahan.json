@@ -11,10 +11,10 @@
   "naming_series",
   "unit",
   "pembayaran_lahan",
-  "employee",
   "dp",
   "column_break_usul",
   "company",
+  "abbr",
   "posting_date",
   "keterangan",
   "amended_from",
@@ -29,6 +29,7 @@
   "outstanding_amount",
   "more_information_tab",
   "accounts_details_section",
+  "employee",
   "credit_to"
  ],
  "fields": [
@@ -159,6 +160,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimension_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimension"
   },
   {
@@ -176,13 +178,21 @@
    "fieldtype": "Table",
    "label": "Items",
    "options": "Ganti Rugi Lahan Item"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 10:32:38.757086",
+ "modified": "2025-12-13 14:37:14.894911",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

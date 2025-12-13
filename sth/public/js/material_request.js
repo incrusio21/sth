@@ -62,3 +62,15 @@ frappe.ui.form.on("Material Request", {
         d.show()
     }
 });
+
+frappe.ui.form.on("Material Request Item", {
+    item_code(frm, dt, dn) {
+        let row = locals[dt][dn]
+        let exist = frm.doc.items.find((data) => row.item_code == data.item_code && row.idx != data.idx)
+        if (exist) {
+            frappe.msgprint("Item code sudah terdaftar dalam tabel.")
+            frappe.model.clear_doc(exist.doctype, exist.name)
+            refresh_field("items")
+        }
+    }
+})
