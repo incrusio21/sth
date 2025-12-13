@@ -3,7 +3,6 @@
  "allow_rename": 1,
  "creation": "2025-08-20 16:13:32.674202",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "header_section",
@@ -71,16 +70,19 @@
    "options": "Alat Berat Dan Kendaraan"
   },
   {
+   "fetch_from": "kendaraan.kmhm_akhir",
    "fieldname": "km_hm",
    "fieldtype": "Float",
-   "label": "KM / HM"
+   "in_preview": 1,
+   "label": "KM / HM",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-11 11:56:46.126939",
+ "modified": "2025-12-13 12:14:41.778470",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara Detail",

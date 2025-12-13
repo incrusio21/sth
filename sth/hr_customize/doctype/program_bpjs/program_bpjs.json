@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{nama_program}",
+ "creation": "2025-12-12 18:20:05.699646",
+ "default_view": "Report",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "jenis_bpjs",
+  "nama_program",
+  "beban",
+  "program_bpjs_staff"
+ ],
+ "fields": [
+  {
+   "fieldname": "jenis_bpjs",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Jenis BPJS",
+   "options": "BPJS TK\nBPJS KES"
+  },
+  {
+   "fieldname": "nama_program",
+   "fieldtype": "Data",
+   "label": "Nama Program"
+  },
+  {
+   "fieldname": "program_bpjs_staff",
+   "fieldtype": "Table",
+   "label": "Program BPJS Staff",
+   "options": "Program BPJS Staff"
+  },
+  {
+   "fieldname": "beban",
+   "fieldtype": "Table",
+   "label": "Beban",
+   "options": "Program BPJS Beban Perusahaan"
+  }
+ ],
+ "force_re_route_to_default_view": 1,
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-12 21:45:10.704546",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Program BPJS",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -46,12 +46,14 @@
   {
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Actual Qty"
+   "label": "Actual Qty",
+   "precision": "5"
   },
   {
    "fieldname": "balance_qty",
    "fieldtype": "Float",
-   "label": "Balance Qty"
+   "label": "Balance Qty",
+   "precision": "5"
   },
   {
    "fieldname": "voucher_type",
@@ -111,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 10:07:26.166824",
+ "modified": "2025-12-12 16:29:05.255210",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "TBS Ledger Entry",

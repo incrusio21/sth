@@ -1,52 +1,39 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "prompt",
+ "autoname": "format:{nmr_akta}",
  "creation": "2025-12-08 13:24:09.483980",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "jenis_akta",
+  "header_section",
+  "nmr_akta",
+  "tgl_akta",
   "column_break_auht",
   "company",
-  "posting_date",
   "section_break_yvor",
   "nama_notaris",
   "nomor_sk_kehakiman",
   "tanggal_sk_kehakiman",
-  "kedudukan",
   "alamat",
   "column_break_cfmx",
+  "kedudukan",
   "modal_dasar",
   "modal_di_setor",
   "kegiatan_usaha",
   "bnri",
   "tbnri",
-  "keteranga"
+  "keterangan"
  ],
  "fields": [
-  {
-   "fieldname": "jenis_akta",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Jenis Akta",
-   "options": "Jenis Akta",
-   "reqd": 1
-  },
   {
    "fieldname": "column_break_auht",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_yvor",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail Akta"
   },
   {
    "fieldname": "nama_notaris",
@@ -103,26 +90,47 @@
    "label": "TBNRI"
   },
   {
-   "fieldname": "keteranga",
-   "fieldtype": "Small Text",
-   "label": "Keteranga"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "tgl_akta",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Akta",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nmr_akta",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Akta",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-10 13:19:21.687955",
+ "modified": "2025-12-13 14:22:28.729595",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",
- "naming_rule": "Set by user",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

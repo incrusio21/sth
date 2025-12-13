@@ -55,9 +55,6 @@ erpnext.utils.map_current_doc = function (opts) {
             }
         }
 
-        console.log(removed_row);
-
-
         return frappe.call({
             // Sometimes we hit the limit for URL length of a GET request
             // as we send the full target_doc. Hence this is a POST request.
@@ -73,10 +70,12 @@ erpnext.utils.map_current_doc = function (opts) {
             freeze_message: __("Mapping {0} ...", [opts.source_doctype]),
             callback: function (r) {
                 if (!r.exc) {
-                    r.message.items = r.message.items.filter((row) => !removed_row.includes(row.name)).map((item, index) => ({
-                        ...item,
-                        idx: index + 1
-                    }))
+                    r.message.items = r.message.items
+                        .filter((row) => !removed_row.includes(row.name))
+                        .map((item, index) => ({
+                            ...item,
+                            idx: index + 1
+                        }))
                     frappe.model.sync(r.message);
                     cur_frm.dirty();
                     cur_frm.refresh();
@@ -85,7 +84,7 @@ erpnext.utils.map_current_doc = function (opts) {
         });
     }
 
-    console.log("Masuk");
+    // console.log("Masuk");
 
 
     let query_args = {};

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class LaporanTBSItems(Document):
+class ProgramBPJSBebanPerusahaan(Document):
 	pass

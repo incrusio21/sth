@@ -8,6 +8,7 @@
  "field_order": [
   "naming_series",
   "nama",
+  "unit",
   "npr",
   "norek",
   "hp",
@@ -110,12 +111,20 @@
    "label": "Kecamatan",
    "options": "Territory",
    "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 16:11:04.439322",
+ "modified": "2025-12-13 13:28:01.076095",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Daftar Masyarakat",

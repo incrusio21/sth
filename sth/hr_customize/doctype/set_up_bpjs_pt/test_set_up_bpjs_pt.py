@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestPengakuanPembelianTBSLuar(FrappeTestCase):
+class TestSetUpBPJSPT(FrappeTestCase):
 	pass

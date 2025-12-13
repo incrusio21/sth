@@ -7,3 +7,4 @@ import "./controllers/bkm_controller";
 import "./controllers/komoditi_editor";
 import "./controllers/queries";
 import "./override/utils";
+import "./override/print_override"

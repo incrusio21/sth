@@ -3,17 +3,23 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:31:08.735648",
- "default_view": "List",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
   "section_break_gzmq",
   "naming_series",
-  "status_anggaran_dasar",
-  "column_break_lpdk",
-  "company",
   "posting_date",
+  "company",
+  "abbr",
+  "column_break_lpdk",
+  "status_anggaran_dasar",
+  "jns_trk",
+  "nomor_sp_ahu_perubahan_anggaran_dasar",
+  "tanggal_sp_ahu",
+  "nomor_sp_ahu_perubahan_data_perseroan",
+  "tanggal_sp_ahu_perseroan",
   "amended_from",
   "section_break_psjl",
   "akta_saham",
@@ -117,12 +123,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "kriteria",
-   "fieldtype": "Table",
-   "label": "Kriteria",
-   "options": "Angaran Dasar Kriteria"
-  },
-  {
    "fieldname": "kriteria_tab_tab",
    "fieldtype": "Tab Break",
    "label": "Kriteria"
@@ -151,16 +151,68 @@
    "options": "Akta List"
   },
   {
+   "fieldname": "kriteria",
+   "fieldtype": "Table",
+   "label": "Kriteria",
+   "options": "Angaran Dasar Kriteria"
+  },
+  {
    "fieldname": "pengurus",
    "fieldtype": "Table",
    "label": "Susunan Pengurus",
    "options": "Detail Susunan Pengurus dan Komisaris"
+  },
+  {
+   "depends_on": "eval:doc.jns_trk == \"Perubahan Anggaran Dasar\"",
+   "fieldname": "nomor_sp_ahu_perubahan_anggaran_dasar",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor SP AHU Perubahan Anggaran Dasar ",
+   "mandatory_depends_on": "eval:doc.jns_trk == \"Perubahan Anggaran Dasar\""
+  },
+  {
+   "depends_on": "eval:doc.jns_trk == \"Perubahan Anggaran Dasar\"",
+   "fieldname": "tanggal_sp_ahu",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal SP AHU",
+   "mandatory_depends_on": "eval:doc.jns_trk == \"Perubahan Anggaran Dasar\""
+  },
+  {
+   "depends_on": "eval:doc.jns_trk == \"Perubahan Data Perseroan\"",
+   "fieldname": "nomor_sp_ahu_perubahan_data_perseroan",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor SP AHU Perubahan Data Perseroan",
+   "mandatory_depends_on": "eval:doc.jns_trk == \"Perubahan Data Perseroan\""
+  },
+  {
+   "depends_on": "eval:doc.jns_trk == \"Perubahan Data Perseroan\"",
+   "fieldname": "tanggal_sp_ahu_perseroan",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal SP AHU Perseroan",
+   "mandatory_depends_on": "eval:doc.jns_trk == \"Perubahan Data Perseroan\""
+  },
+  {
+   "fieldname": "jns_trk",
+   "fieldtype": "Select",
+   "label": "Jenis Transaksi",
+   "options": "Pendirian\nPerubahan Anggaran Dasar\nPerubahan Data Perseroan\nLainnya"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-10 15:13:39.294984",
+ "modified": "2025-12-13 14:33:18.766216",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",
