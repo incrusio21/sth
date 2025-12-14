@@ -1,7 +1,7 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
-import frappe
+import frappe, erpnext
 from frappe.model.document import Document
 
 
@@ -11,6 +11,39 @@ class DaftarBPJS(Document):
 		pasang_bpjs(self)
 		self.save()
 
+	@frappe.whitelist()
+	def before_submit(self):
+		
+		account = frappe.get_cached_value(
+			"Company", self.pt, [
+				"default_bpjs_tk_credit_account", 
+				"default_bpjs_kes_credit_account",
+			]
+			, as_dict=True
+		)
+		if self.jenis_bpjs == "BPJS TK":
+			new_doc = frappe.new_doc("BPJS TK")
+			new_doc.credit_account = account.default_bpjs_tk_credit_account
+		else:
+			new_doc = frappe.new_doc("BPJS KES")
+			new_doc.credit_account = account.default_bpjs_kes_credit_account
+
+		grand_total = 0
+
+		for row in self.daftar_bpjs_employee:
+			grand_total += row.jumlah
+
+		new_doc.no_daftar_bpjs = self.name
+		new_doc.grand_total = grand_total
+		new_doc.outstanding_amount = 0
+		new_doc.posting_date = self.end_periode
+	
+		new_doc.save()
+		new_doc.submit()
+
+def debug_bpjs():
+	doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
+	doc.before_submit()
 
 def pasang_bpjs(doc):
 	# doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
@@ -24,13 +57,13 @@ def pasang_bpjs(doc):
 			.select(
 				SSAssignment.employee, 
 				SSAssignment.base,
-			 	Employee.employee_name,
-			 	Employee.no_ktp,
-			 	Employee.designation,
-			 	Employee.custom_no_bpjs_kesehatan if doc.jenis_bpjs != "BPJS TK" else Employee.custom_no_bpjs_ketenagakerjaan,
-			 	Employee.custom_nama_ibu_kandung,
-			 	Employee.blood_group
-			 	)
+				Employee.employee_name,
+				Employee.no_ktp,
+				Employee.designation,
+				Employee.custom_no_bpjs_kesehatan if doc.jenis_bpjs != "BPJS TK" else Employee.custom_no_bpjs_ketenagakerjaan,
+				Employee.custom_nama_ibu_kandung,
+				Employee.blood_group
+				)
 			.where(
 				(Employee.unit == doc.unit)
 				& (Employee.company == doc.pt)

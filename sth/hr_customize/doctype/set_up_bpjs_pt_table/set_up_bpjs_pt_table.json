@@ -8,7 +8,8 @@
  "field_order": [
   "nama_program",
   "beban_karyawan",
-  "beban_perusahaan"
+  "beban_perusahaan",
+  "expense_account"
  ],
  "fields": [
   {
@@ -29,13 +30,20 @@
    "fieldtype": "Percent",
    "in_list_view": 1,
    "label": "Beban Perusahaan"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-14 11:07:13.823876",
+ "modified": "2025-12-14 23:47:38.817445",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Set Up BPJS PT Table",

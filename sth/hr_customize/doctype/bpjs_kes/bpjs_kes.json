@@ -9,9 +9,11 @@
   "no_daftar_bpjs",
   "grand_total",
   "outstanding_amount",
-  "debit_account",
   "credit_account",
-  "party"
+  "party",
+  "company",
+  "posting_date",
+  "amended_from"
  ],
  "fields": [
   {
@@ -31,12 +33,6 @@
    "label": "Outstanding Amount"
   },
   {
-   "fieldname": "debit_account",
-   "fieldtype": "Link",
-   "label": "Debit Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "credit_account",
    "fieldtype": "Link",
    "label": "Credit Account",
@@ -47,13 +43,35 @@
    "fieldtype": "Link",
    "label": "Party",
    "options": "Employee"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "BPJS KES",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-12-14 23:12:33.769739",
+ "modified": "2025-12-15 00:17:32.056010",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "BPJS KES",
