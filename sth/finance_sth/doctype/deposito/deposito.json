@@ -23,24 +23,29 @@
   "interest",
   "tax",
   "deposit_amount",
-  "jenis_deposito",
+  "deposito_type",
   "collateral_type",
   "letter_of_guarantee",
   "collateral_owner_name",
   "posting_date",
   "deposited_by",
+  "aro_days",
+  "is_redeemed",
+  "redeemed",
   "section_break_flio",
   "interest_amount",
   "tax_amount",
   "column_break_uuor",
   "total",
   "total_realization",
+  "pinalti",
   "bunga_deposito_tab",
   "bunga_deposito_details_section",
   "deposito_interest_table",
   "more_information_tab",
   "payment_details_section",
-  "is_redeemed",
+  "payment_pay",
+  "payment_received",
   "amended_from"
  ],
  "fields": [
@@ -112,13 +117,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "jenis_deposito",
-   "fieldtype": "Select",
-   "label": "Jenis Deposito",
-   "options": "\nNon Roll Over\nRoll Over Pokok\nRoll Over Pokok + Bunga",
-   "reqd": 1
-  },
-  {
    "fieldname": "collateral_type",
    "fieldtype": "Data",
    "label": "Jenis Jaminan"
@@ -185,7 +183,7 @@
    "fieldname": "is_redeemed",
    "fieldtype": "Select",
    "label": "Status Dicairkan",
-   "options": "\nBelum\nSudah",
+   "options": "\nBelum\nSudah\nRoll Overed",
    "read_only": 1
   },
   {
@@ -256,6 +254,50 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_uuor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upload_bilyet",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Bilyet"
+  },
+  {
+   "fieldname": "deposito_type",
+   "fieldtype": "Select",
+   "label": "Jenis Deposito",
+   "options": "\nNon Roll Over\nRoll Over Pokok\nRoll Over Pokok + Bunga",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:[\"Roll Over\", \"Roll Over Pokok + Bunga\"].includes(doc.deposito_type)",
+   "fieldname": "aro_days",
+   "fieldtype": "Int",
+   "label": "Perpanjang ARO (Hari)",
+   "mandatory_depends_on": "eval:[\"Roll Over\", \"Roll Over Pokok + Bunga\"].includes(doc.deposito_type)"
+  },
+  {
+   "fieldname": "payment_pay",
+   "fieldtype": "Link",
+   "label": "Payment Entry (Setor)",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_received",
+   "fieldtype": "Link",
+   "label": "Payment Entry (Tarik)",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pinalti",
+   "fieldtype": "Currency",
+   "label": "Pinalti",
+   "read_only": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -266,21 +308,17 @@
    "search_index": 1
   },
   {
-   "fieldname": "column_break_uuor",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "upload_bilyet",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Upload Bilyet"
+   "depends_on": "eval:doc.docstatus == 1",
+   "fieldname": "redeemed",
+   "fieldtype": "Button",
+   "label": "Cairkan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 14:40:32.070389",
+ "modified": "2025-12-14 21:59:31.104610",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

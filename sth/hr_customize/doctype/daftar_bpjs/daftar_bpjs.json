@@ -19,7 +19,9 @@
   "column_break_iwjc",
   "end_periode",
   "section_break_flfu",
-  "daftar_bpjs_employee"
+  "daftar_bpjs_employee",
+  "section_break_ixnx",
+  "set_up_bpjs_detail_table"
  ],
  "fields": [
   {
@@ -78,7 +80,8 @@
   {
    "fieldname": "get_employee",
    "fieldtype": "Button",
-   "label": "Get Employee"
+   "label": "Get Employee",
+   "options": "get_employee"
   },
   {
    "fieldname": "column_break_iwjc",
@@ -98,12 +101,22 @@
    "fieldtype": "Table",
    "label": "Daftar BPJS Employee",
    "options": "Daftar BPJS Employee"
+  },
+  {
+   "fieldname": "section_break_ixnx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "set_up_bpjs_detail_table",
+   "fieldtype": "Table",
+   "label": "Set Up BPJS Detail Table",
+   "options": "Set Up BPJS Detail Table"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-13 18:04:24.450037",
+ "modified": "2025-12-14 11:43:39.767617",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Daftar BPJS",

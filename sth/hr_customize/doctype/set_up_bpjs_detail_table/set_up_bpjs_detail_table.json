@@ -1,32 +1,39 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-12 21:23:02.045207",
+ "creation": "2025-12-14 11:10:54.500539",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "nama_program",
+  "employee",
+  "program",
   "beban_karyawan",
   "beban_perusahaan"
  ],
  "fields": [
   {
-   "fieldname": "nama_program",
+   "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Nama Program",
-   "options": "Program BPJS"
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "program",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Program"
   },
   {
    "fieldname": "beban_karyawan",
-   "fieldtype": "Percent",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Beban Karyawan"
   },
   {
    "fieldname": "beban_perusahaan",
-   "fieldtype": "Percent",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Beban Perusahaan"
   }
@@ -35,10 +42,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-14 11:07:13.823876",
+ "modified": "2025-12-14 11:11:50.185985",
  "modified_by": "Administrator",
  "module": "HR Customize",
- "name": "Set Up BPJS PT Table",
+ "name": "Set Up BPJS Detail Table",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
