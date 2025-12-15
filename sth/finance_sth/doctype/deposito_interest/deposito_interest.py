@@ -10,7 +10,7 @@ class DepositoInterest(AccountsController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._party_type = "Customer"
-		self._expense_account = "expense_account"
+		self._expense_account = "income_account"
 		self._party_account_field = "debit_to"
 		self.customer = frappe.db.get_single_value("Payment Settings", "receivable_customer")
 		self.payment_term = None

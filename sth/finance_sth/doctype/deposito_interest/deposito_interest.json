@@ -33,7 +33,7 @@
   "payment_entry",
   "accounting_details_section",
   "debit_to",
-  "expense_account",
+  "income_account",
   "amended_from"
  ],
  "fields": [
@@ -154,14 +154,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "expense_account",
-   "fieldtype": "Link",
-   "label": "Expense Account",
-   "options": "Account",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -241,13 +233,21 @@
    "label": "Payment Entry",
    "options": "Payment Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "Income Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 21:27:31.986026",
+ "modified": "2025-12-15 16:38:54.882402",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito Interest",

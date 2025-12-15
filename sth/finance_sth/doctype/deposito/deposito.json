@@ -45,7 +45,7 @@
   "more_information_tab",
   "accounting_details_section",
   "credit_to",
-  "debit_to",
+  "non_current_asset",
   "payment_details_section",
   "payment_pay",
   "payment_received",
@@ -333,13 +333,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -348,13 +341,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "non_current_asset",
+   "fieldtype": "Link",
+   "label": "Non Current Asset",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 16:06:36.566227",
+ "modified": "2025-12-15 16:59:28.312572",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

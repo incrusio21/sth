@@ -6,21 +6,30 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import add_months, date_diff
 from frappe.model.mapper import get_mapped_doc
+from sth.controllers.accounts_controller import AccountsController
 
-class Deposito(Document):
-	
+class Deposito(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._party_type = "Employee"
+		self._expense_account = "non_current_asset"
+
 	def validate(self):
 		self.calculate_deposito_interest_table()
+		self.set_missing_value()
 
 	def on_submit(self):
+		self.make_gl_entry()
 		if not self.deposito_interest_table:
-			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data tdi tabel")
+			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data di tabel")
 		self.make_deposito_interest()
 
 	def on_cancel(self):
+		super().on_cancel()
+		self.make_gl_entry()
 		if not self.deposito_interest_table:
-			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data tdi tabel")
-		self.make_deposito_interest()
+			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data di tabel")
+		self.cancel_deposito_intreset()
 
 	def calculate_deposito_interest_table(self):
 		self.deposito_interest_table = []
@@ -56,8 +65,8 @@ class Deposito(Document):
 			"grand_total": total,
 			"outstanding_amount": total,
 			"is_redeemed": "Belum",
-			"debit_to": frappe.db.get_value("Company", self.company, "default_deposito_debit_account"),
-			"expense_account": frappe.db.get_value("Company", self.company, "default_deposito_expense_account")
+			"debit_to": frappe.db.get_value("Company", self.company, "default_deposito_receivable_account"),
+			"income_account": frappe.db.get_value("Company", self.company, "default_deposito_income_account")
 		})
 
 		self.interest_amount = self.interest_amount or 0 + interest_amount
@@ -87,7 +96,7 @@ class Deposito(Document):
 				"outstanding_amount": row.outstanding_amount,
 				"cost_center": row.cost_center,
 				"debit_to": row.debit_to,
-				"expense_account": row.expense_account,
+				"income_account": row.income_account,
 				"reference_doc": "Deposito",
 				"reference_name": self.name,
 				"reference_detail_doc": row.doctype,
