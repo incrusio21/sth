@@ -27,14 +27,14 @@ class Deposito(Document):
 		start_date = self.value_date
 		end_date = self.value_date
 
+		deposit_amount = self.deposit_amount
 		for i in range(0, int(self.tenor)):
 			end_date = add_months(end_date, 1)
 			days = date_diff(end_date, start_date)
-			self.calculate_interest_permonth(start_date, end_date, days)
+			deposit_amount = self.calculate_interest_permonth(start_date, end_date, days, deposit_amount)
 			start_date= end_date
 
-	def calculate_interest_permonth(self, value_date, maturity_date, days):
-		deposit_amount = self.deposit_amount
+	def calculate_interest_permonth(self, value_date, maturity_date, days, deposit_amount):
 		interest = self.interest / 100
 		tax = self.tax / 100
 		year_days = self.year_days
@@ -63,6 +63,9 @@ class Deposito(Document):
 		self.interest_amount = self.interest_amount or 0 + interest_amount
 		self.tax_amount = self.tax_amount or 0 + tax_amount
 		self.total = self.total or 0 + total
+		if self.deposito_type == "Roll Over Pokok + Bunga":
+			deposit_amount += total
+		return deposit_amount
 
 	def make_deposito_interest(self):
 		for row in self.deposito_interest_table:

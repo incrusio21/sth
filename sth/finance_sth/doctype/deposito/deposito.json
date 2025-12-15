@@ -43,9 +43,14 @@
   "bunga_deposito_details_section",
   "deposito_interest_table",
   "more_information_tab",
+  "accounting_details_section",
+  "credit_to",
+  "debit_to",
   "payment_details_section",
   "payment_pay",
   "payment_received",
+  "grand_total",
+  "outstanding_amount",
   "amended_from"
  ],
  "fields": [
@@ -271,11 +276,11 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:[\"Roll Over\", \"Roll Over Pokok + Bunga\"].includes(doc.deposito_type)",
+   "depends_on": "eval:[\"Roll Over Pokok\", \"Roll Over Pokok + Bunga\"].includes(doc.deposito_type)",
    "fieldname": "aro_days",
    "fieldtype": "Int",
    "label": "Perpanjang ARO (Hari)",
-   "mandatory_depends_on": "eval:[\"Roll Over\", \"Roll Over Pokok + Bunga\"].includes(doc.deposito_type)"
+   "mandatory_depends_on": "eval:[\"Roll Over Pokok\", \"Roll Over Pokok + Bunga\"].includes(doc.deposito_type)"
   },
   {
    "fieldname": "payment_pay",
@@ -298,6 +303,43 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.docstatus == 1 && doc.outstanding_amount > 0",
+   "fieldname": "redeemed",
+   "fieldtype": "Button",
+   "label": "Cairkan"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -306,19 +348,13 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "depends_on": "eval:doc.docstatus == 1",
-   "fieldname": "redeemed",
-   "fieldtype": "Button",
-   "label": "Cairkan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-14 21:59:31.104610",
+ "modified": "2025-12-15 16:06:36.566227",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",
