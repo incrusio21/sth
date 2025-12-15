@@ -1,35 +1,58 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe, erpnext
+from frappe import _dict, scrub, unscrub
+
 from frappe.model.document import Document
 
-
 class DaftarBPJS(Document):
-	@frappe.whitelist()
-	def get_employee(self):
-		pasang_bpjs(self)
-		self.save()
 
-	@frappe.whitelist()
-	def before_submit(self):
-		
+	def validate(self):
+		self.set_missing_value()
+
+	def set_missing_value(self):
+		set_up_bpjs = frappe.get_cached_doc("Set Up BPJS PT", self.set_up_bpjs)
+		detail_program = {d.nama_program: _dict({
+			"salary_component_karyawan": d.salary_component_karyawan,
+			"salary_component_perusahaan": d.salary_component_perusahaan,
+			"expense_account": d.expense_account,
+		}) for d in set_up_bpjs.set_up_bpjs_pt_table }
+
+		for emp in self.set_up_bpjs_detail_table:
+			if dp := detail_program.get(emp.program):
+				emp.update(dp)
+
+	def submit(self, auto_submit=False):
+		if len(self.set_up_bpjs_detail_table) > 50:
+			frappe.msgprint(
+				_(
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, " \
+					"the system will add a comment about the error on this Daftar BPJS and revert to the Draft stage"
+				)
+			)
+			self.queue_action("submit", timeout=4600)
+		else:
+			self._submit()
+
+	def on_submit(self):
+		self.create_bpjs_document()
+		self.create_payment_log()
+	
+	def create_bpjs_document(self):
 		account = frappe.get_cached_value(
 			"Company", self.pt, [
 				"default_bpjs_tk_credit_account", 
 				"default_bpjs_kes_credit_account",
-			]
-			, as_dict=True
+			], as_dict=True
 		)
-		if self.jenis_bpjs == "BPJS TK":
-			new_doc = frappe.new_doc("BPJS TK")
-			new_doc.credit_account = account.default_bpjs_tk_credit_account
-		else:
-			new_doc = frappe.new_doc("BPJS KES")
-			new_doc.credit_account = account.default_bpjs_kes_credit_account
+
+		new_doc = frappe.new_doc(self.jenis_bpjs)
+		new_doc.credit_to = account.get(f"default_{scrub(self.jenis_bpjs)}_credit_account")
 
 		grand_total = 0
-
 		for row in self.daftar_bpjs_employee:
 			grand_total += row.jumlah
 
@@ -37,9 +60,62 @@ class DaftarBPJS(Document):
 		new_doc.grand_total = grand_total
 		new_doc.outstanding_amount = 0
 		new_doc.posting_date = self.end_periode
-	
+
+		program_dict = {}
+		for emp in self.set_up_bpjs_detail_table:
+			program_dict.setdefault(emp.program, {
+				"expense_account": emp.expense_account,
+				"beban_karyawan": 0,
+				"beban_perusahaan": 0,
+				"total": 0
+			})
+
+			program_dict[emp.program]["beban_karyawan"] += emp.beban_karyawan
+			program_dict[emp.program]["beban_perusahaan"] += emp.beban_perusahaan
+			program_dict[emp.program]["total"] += emp.beban_karyawan + emp.beban_perusahaan
+
+		new_doc.expense_total = json.dumps(program_dict)
+
 		new_doc.save()
 		new_doc.submit()
+
+	def create_payment_log(self):
+
+		for emp in self.set_up_bpjs_detail_table:
+			for c_type in ["karyawan", "perusahaan"]:
+				amount = emp.get(f"beban_{c_type}") or 0
+				if amount:
+					doc = frappe.new_doc("Employee Payment Log")
+					doc.employee = emp.employee
+					doc.company = self.pt
+					doc.posting_date = self.start_periode
+					doc.payroll_date = self.start_periode
+
+					doc.amount = amount
+					doc.salary_component = emp.get(f"salary_component_{c_type}")
+
+					doc.voucher_type = self.doctype
+					doc.voucher_no = self.name
+					doc.voucher_detail_no = emp.name
+					doc.component_type = f"BPJS {unscrub(c_type)}"
+
+					doc.save()
+
+	def on_cancel(self):
+		self.remove_employee_payment_log()
+
+	def remove_employee_payment_log(self):
+		for epl in frappe.get_all(
+			"Employee Payment Log", 
+			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+			pluck="name"
+		):
+			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
+
+	@frappe.whitelist()
+	def get_employee(self):
+		pasang_bpjs(self)
+		self.save()
 
 def debug_bpjs():
 	doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")

@@ -201,6 +201,10 @@ class SalarySlip(SalarySlip):
 
 		set_loan_repayment(self)
 
+		# BPJS
+		# self.calculate_bpjs_component()
+		# BPJS
+
 		self.calculate_subsidy_loan()
 		
 		self.set_precision_for_component_amounts()
@@ -208,6 +212,59 @@ class SalarySlip(SalarySlip):
 		if not skip_tax_breakup_computation:
 			self.compute_income_tax_breakup()
 
+	def calculate_bpjs_component(self):	
+
+		if not getattr(self, "_salary_structure_doc", None):
+			self.set_salary_structure_doc()
+
+		DaftarBPJS = frappe.qb.DocType("Daftar BPJS")
+		SetUpBPJSPT = frappe.qb.DocType("Set Up BPJS PT")
+		SetUpBPJSDetailTable = frappe.qb.DocType("Set Up BPJS Detail Table")
+		SetUpBPJSPTTable = frappe.qb.DocType("Set Up BPJS PT Table")
+
+		query = (
+			frappe.qb.from_(DaftarBPJS)
+			.inner_join(SetUpBPJSPT)
+			.on(DaftarBPJS.set_up_bpjs == SetUpBPJSPT.name)
+			.inner_join(SetUpBPJSDetailTable)
+			.on(SetUpBPJSDetailTable.parent == DaftarBPJS.name)
+			.inner_join(SetUpBPJSPTTable)
+			.on(SetUpBPJSPTTable.parent == SetUpBPJSPT.name and SetUpBPJSPTTable.nama_program == SetUpBPJSDetailTable.program)
+			.select(
+				SetUpBPJSDetailTable.program, 
+				SetUpBPJSPTTable.salary_component_karyawan, 
+				SetUpBPJSPTTable.salary_component_perusahaan,
+				SetUpBPJSDetailTable.beban_karyawan,
+				SetUpBPJSDetailTable.beban_perusahaan
+			)
+			.where(
+				(DaftarBPJS.start_periode.between(self.actual_start_date, self.actual_end_date))
+				& (DaftarBPJS.end_periode.between(self.actual_start_date, self.actual_end_date))
+				& (DaftarBPJS.docstatus == 1)
+				& (SetUpBPJSDetailTable.employee == self.employee)
+			)
+		).run()
+
+
+		for row in query:
+			if abs(row[3]):
+				self.add_component_custom(
+					row[1], 
+					"earnings", 
+					abs(row[3])
+				)
+				print("{}-{}".format(row[1],row[3]))
+			if abs(row[4]):
+				self.add_component_custom(
+					row[2], 
+					"earnings", 
+					abs(row[4])
+				)
+				print("{}-{}".format(row[2],row[4]))
+
+		for row in self.earnings:
+			row.db_update()
+			
 	def set_employee_payment_doc(self) -> None:
 		# get structur first
 		if not getattr(self, "_salary_structure_doc", None):
@@ -383,6 +440,7 @@ class SalarySlip(SalarySlip):
 			remove_if_zero_valued=True
 		)
 
+
 	def update_component_row(
 		self,
 		component_data,
@@ -490,13 +548,13 @@ class SalarySlip(SalarySlip):
 		# ubah ump_harian ke gaji pokok dibagi hari
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 
-		data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
-			if data.custom_kriteria == "Satuan Hasil" else flt(data.ump_harian * data.payment_days)
+		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
+			# if data.custom_kriteria == "Satuan Hasil" else flt(data.ump_harian * data.payment_days)
 		
 		return data, default_data
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00075/00001")
-	doc.calculate_holidays()	
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00060/00002")
+	doc.calculate_bpjs_component()	
 

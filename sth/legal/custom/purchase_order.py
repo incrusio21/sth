@@ -59,9 +59,6 @@ def field_purchase_type(self, method):
     self._purchase_type_field.extend(["order_revisions"])
 
 def update_task_progress(self, method):
-    if not self.need_project:
-        return
-    
     order_item, cond = [], ""   
     for item in self.items:
         cond += """ WHEN (purchase_order = {} and purchase_order_item = {}) THEN {}

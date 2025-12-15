@@ -2,18 +2,21 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:no_daftar_bpjs",
- "creation": "2025-12-14 23:12:33.769739",
+ "creation": "2025-12-15 11:46:45.328677",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "no_daftar_bpjs",
-  "grand_total",
-  "outstanding_amount",
-  "credit_account",
-  "party",
+  "employee",
+  "credit_to",
+  "column_break_ijvw",
   "company",
   "posting_date",
-  "amended_from"
+  "grand_total",
+  "outstanding_amount",
+  "amended_from",
+  "section_break_cnsi",
+  "expense_total"
  ],
  "fields": [
   {
@@ -23,26 +26,20 @@
    "unique": 1
   },
   {
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total"
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
   },
   {
-   "fieldname": "outstanding_amount",
-   "fieldtype": "Currency",
-   "label": "Outstanding Amount"
-  },
-  {
-   "fieldname": "credit_account",
+   "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit Account",
    "options": "Account"
   },
   {
-   "fieldname": "party",
-   "fieldtype": "Link",
-   "label": "Party",
-   "options": "Employee"
+   "fieldname": "column_break_ijvw",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "company",
@@ -56,11 +53,41 @@
    "label": "Posting Date"
   },
   {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total"
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount"
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "BPJS KES",
+   "options": "BPJS Kes",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_cnsi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expense_total",
+   "fieldtype": "JSON",
+   "label": "Expense Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "BPJS Kes",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -71,10 +98,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 00:17:32.056010",
+ "modified": "2025-12-15 12:07:13.980125",
  "modified_by": "Administrator",
  "module": "HR Customize",
- "name": "BPJS KES",
+ "name": "BPJS Kes",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -91,7 +118,6 @@
    "write": 1
   }
  ],
- "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

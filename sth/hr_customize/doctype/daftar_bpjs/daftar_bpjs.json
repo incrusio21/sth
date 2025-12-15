@@ -13,6 +13,7 @@
   "jenis_bpjs",
   "npp__no_bu",
   "golongan",
+  "amended_from",
   "section_break_ngrj",
   "start_periode",
   "get_employee",
@@ -21,8 +22,7 @@
   "section_break_flfu",
   "daftar_bpjs_employee",
   "section_break_ixnx",
-  "set_up_bpjs_detail_table",
-  "amended_from"
+  "set_up_bpjs_detail_table"
  ],
  "fields": [
   {
@@ -128,7 +128,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-14 23:41:47.461106",
+ "modified": "2025-12-15 10:19:45.944709",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Daftar BPJS",

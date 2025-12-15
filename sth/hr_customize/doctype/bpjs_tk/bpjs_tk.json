@@ -7,13 +7,16 @@
  "engine": "InnoDB",
  "field_order": [
   "no_daftar_bpjs",
-  "grand_total",
-  "outstanding_amount",
-  "credit_account",
-  "party",
+  "employee",
+  "credit_to",
+  "column_break_ijvw",
   "company",
   "posting_date",
-  "amended_from"
+  "grand_total",
+  "outstanding_amount",
+  "amended_from",
+  "section_break_cnsi",
+  "expense_total"
  ],
  "fields": [
   {
@@ -31,18 +34,6 @@
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount"
-  },
-  {
-   "fieldname": "credit_account",
-   "fieldtype": "Link",
-   "label": "Credit Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Link",
-   "label": "Party",
-   "options": "Employee"
   },
   {
    "fieldname": "company",
@@ -64,6 +55,32 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_ijvw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_cnsi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expense_total",
+   "fieldtype": "JSON",
+   "label": "Expense Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -71,7 +88,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 00:17:25.815332",
+ "modified": "2025-12-15 11:46:31.222566",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "BPJS TK",
@@ -91,7 +108,6 @@
    "write": 1
   }
  ],
- "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

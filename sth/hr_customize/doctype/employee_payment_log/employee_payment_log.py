@@ -17,7 +17,7 @@ class EmployeePaymentLog(Document):
             self.status = "Approved"
 
     def on_trash(self):
-        # self.remove_document()
+        self.remove_document()
         self.document_already_paid()
     
     def remove_document(self):

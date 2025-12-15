@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestBPJSKES(FrappeTestCase):
+class TestBPJSKes(FrappeTestCase):
 	pass

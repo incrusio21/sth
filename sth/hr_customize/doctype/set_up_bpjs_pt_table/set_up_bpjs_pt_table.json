@@ -9,7 +9,9 @@
   "nama_program",
   "beban_karyawan",
   "beban_perusahaan",
-  "expense_account"
+  "expense_account",
+  "salary_component_karyawan",
+  "salary_component_perusahaan"
  ],
  "fields": [
   {
@@ -37,13 +39,27 @@
    "in_list_view": 1,
    "label": "Expense Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "salary_component_karyawan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salary Component Karyawan",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "salary_component_perusahaan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salary Component Perusahaan",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-14 23:47:38.817445",
+ "modified": "2025-12-15 00:34:13.324049",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Set Up BPJS PT Table",

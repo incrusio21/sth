@@ -1,13 +1,21 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
-import frappe, erpnext
+import json
 
+import frappe, erpnext
+from frappe import scrub
 from frappe.model.document import Document
-from sth.controllers.accounts_controller import AccountsController
 
 from erpnext.accounts.general_ledger import merge_similar_entries
-class BPJSTK(AccountsController):
+
+from sth.controllers.accounts_controller import AccountsController
+
+class BPJSKes(AccountsController):
+
+	def validate(self):
+		self.set_missing_value()
+
 	def on_submit(self):
 		self.make_gl_entry()
 
@@ -29,23 +37,19 @@ class BPJSTK(AccountsController):
 		cost_center = erpnext.get_default_cost_center(self.company)
 		credit_or_debit = "debit"
 
-		daftar_bpjs = frappe.get_doc("Daftar BPJS", self.no_daftar_bpjs)
-		setup_bpjs = frappe.get_doc("Set Up BPJS PT", daftar_bpjs.set_up_bpjs)
+		self.all_expense_account = set()
 
-		for program in setup_bpjs.set_up_bpjs_pt_table:
-			nama_program = program.nama_program
-			jumlah = 0
-			for daftar in daftar_bpjs.set_up_bpjs_detail_table:
-				if daftar.program == nama_program: 
-					jumlah += daftar.beban_karyawan + daftar.beban_perusahaan
-
+		expense = json.loads(self.expense_total)
+		for progmam, value in expense.items():
+			self.all_expense_account.add(value["expense_account"])
+			
 			gl_entries.append(
 				self.get_gl_dict(
 					{
-						"account": program.expense_account,
-						"against": self.credit_account,
-						credit_or_debit: jumlah,
-						f"{credit_or_debit}_in_account_currency": jumlah,
+						"account": value["expense_account"],
+						"against": self.get(scrub(self._party_type)) or self.credit_to,
+						credit_or_debit: value["total"],
+						f"{credit_or_debit}_in_account_currency": value["total"],
 						"cost_center": cost_center		
 					},
 					item=self,
@@ -58,9 +62,12 @@ class BPJSTK(AccountsController):
 		gl_entries.append(
 			self.get_gl_dict(
 				{
-					"account": self.credit_account,
+					"account": self.credit_to,
+					"against": ",".join(self.all_expense_account),
 					credit_or_debit: self.grand_total,
 					f"{credit_or_debit}_in_account_currency": self.grand_total,
+					"party_type": self._party_type,
+                    "party": self.get(scrub(self._party_type)),
 					"cost_center": cost_center		
 				},
 				item=self,
