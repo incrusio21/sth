@@ -14,7 +14,6 @@
   "column_break_rkaj",
   "kode_blok",
   "gudang",
-  "satuan",
   "section_break_ggxz",
   "items",
   "section_break_qtrb",
@@ -62,12 +61,6 @@
    "fieldtype": "Link",
    "label": "Gudang",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "satuan",
-   "fieldtype": "Link",
-   "label": "Satuan",
-   "options": "Unit"
   },
   {
    "fieldname": "section_break_ggxz",
@@ -118,7 +111,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 21:36:38.271625",
+ "modified": "2025-12-15 11:23:48.217810",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Gudang",

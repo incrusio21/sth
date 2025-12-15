@@ -9,5 +9,21 @@ frappe.ui.form.on('Pengakuan Pembelian TBS', {
                 frappe.model.sync(res);
                 frm.refresh();
             })
+    },
+
+    jarak(frm) {
+        const jarak = frm.doc.jarak
+        if (jarak) {
+            const method = frappe.model.get_server_module_name(frm.doctype) + "." + "get_rate"
+            frappe
+                .xcall(method, { jarak })
+                .then((res) => {
+                    frm.set_value("harga", res + frm.doc.subsidi_angkut)
+                })
+        }
+    },
+
+    subsidi_angkut(frm) {
+        frm.set_value("harga", frm.doc.harga + frm.doc.subsidi_angkut)
     }
 });

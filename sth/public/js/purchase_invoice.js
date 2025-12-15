@@ -1,4 +1,14 @@
 frappe.ui.form.on("Purchase Invoice", {
+  setup(frm) {
+    frm.set_query("nomor_pembelian", function (doc) {
+      return {
+        filters: {
+          docstatus: 1
+        }
+      }
+    })
+  },
+
   refresh(frm) {
     frm.set_query("purchase_type", () => {
       return {
@@ -21,6 +31,57 @@ frappe.ui.form.on("Purchase Invoice", {
       },
       __("Get Items From")
     );
+  },
+
+  nomor_pembelian(frm) {
+    function _map(data) {
+      frm.set_value({
+        supplier: data.nama_supplier,
+        unit: data.unit,
+        buying_price_list: data.jarak
+      })
+
+      frm.clear_table("items")
+
+      for (const row of data.items) {
+        let item = frm.add_child("items")
+        item.item_code = row.item_code
+        item.qty = row.qty
+        item.rate = row.rate
+        item.amount = row.total
+        frm.script_manager.trigger("item_code", item.doctype, item.name)
+      }
+
+      if (data.beban_pph_22) {
+        frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { company: frm.doc.company, type: "PPH 22" }).then((res) => {
+          if (!res) {
+            return
+          }
+          frm.clear_table("taxes")
+          let item = frm.add_child("taxes")
+          item.charge_type = "On Net Total"
+          item.account_head = res
+          item.rate = data.percent
+          // frm.script_manager.trigger("rate", item.doctype, item.name)
+
+        })
+      }
+
+      refresh_field("items")
+      refresh_field("taxes")
+    }
+
+    if (frm.doc.nomor_pembelian) {
+      frappe.dom.freeze("Mapping Data...")
+      frappe.xcall("frappe.client.get", { doctype: "Pengakuan Pembelian TBS", name: frm.doc.nomor_pembelian })
+        .then((res) => {
+          frappe.run_serially([
+            () => _map(res),
+            () => frappe.dom.unfreeze()
+          ])
+        })
+    }
+
   }
 });
 

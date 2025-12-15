@@ -21,7 +21,6 @@
   "blok",
   "kendaraan",
   "column_break_czpq",
-  "satuan",
   "sub_unit",
   "column_break_gnfx",
   "kegiatan",
@@ -108,16 +107,10 @@
    "options": "Blok"
   },
   {
-   "fieldname": "satuan",
-   "fieldtype": "Link",
-   "label": "Satuan",
-   "options": "Unit"
-  },
-  {
    "fieldname": "sub_unit",
    "fieldtype": "Link",
    "label": "Sub Unit",
-   "options": "Divisi"
+   "options": "Unit"
   },
   {
    "fieldname": "km",
@@ -162,7 +155,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 21:38:03.665187",
+ "modified": "2025-12-15 11:24:53.096992",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",

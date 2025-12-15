@@ -1,6 +1,6 @@
 
 import frappe
-from frappe.utils import today
+from frappe.utils import today,flt
 from frappe.model.document import Document
 from frappe import _
 
@@ -18,3 +18,9 @@ class PengakuanPembelianTBS(Document):
 		for row in data_timbangan:
 			child = self.append("items")
 			child.update(row)
+			child.rate = flt(self.harga)
+			child.total = flt(child.qty) * flt(child.rate)
+
+@frappe.whitelist()
+def get_rate(jarak):
+	return frappe.get_value("Item Price",{"item_code":"TBS","price_list": jarak},["price_list_rate"])
