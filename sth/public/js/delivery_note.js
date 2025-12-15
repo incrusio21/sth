@@ -11,6 +11,11 @@ frappe.ui.form.on('Delivery Note', {
     
     refresh: function(frm) {
         set_komoditi_filter(frm);
+        $.each(frm.fields_dict, function(fieldname, field) {
+            if (field.df.fieldtype === 'Currency') {
+                frm.set_df_property(fieldname, 'hidden', 1);
+            }
+        });
     },
 
     komoditi: function(frm) {

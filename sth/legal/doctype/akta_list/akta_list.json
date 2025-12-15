@@ -1,13 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{nmr_akta}",
+ "autoname": "format:{nomor_akta}-{tgl_akta}",
  "creation": "2025-12-08 13:24:09.483980",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "nmr_akta",
+  "nomor_akta",
   "tgl_akta",
   "column_break_auht",
   "company",
@@ -104,15 +104,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "nmr_akta",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Nomor Akta",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "label": "Keterangan"
@@ -121,12 +112,21 @@
    "fieldname": "header_section",
    "fieldtype": "Section Break",
    "label": "Header"
+  },
+  {
+   "fieldname": "nomor_akta",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Nomor Akta",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-13 14:22:28.729595",
+ "modified": "2025-12-15 19:45:01.536772",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",
@@ -147,7 +147,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "nomor_akta"
 }

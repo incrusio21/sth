@@ -10,6 +10,7 @@
   "kegiatan",
   "employee",
   "attendance_status",
+  "position",
   "column_break_eqqk",
   "employment_type",
   "total_hari",
@@ -220,8 +221,7 @@
    "fieldname": "kmhm_ahkir",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "KM/HM Ahkir",
-   "reqd": 1
+   "label": "KM/HM Ahkir"
   },
   {
    "fieldname": "premi_heavy_equipment",
@@ -270,13 +270,19 @@
    "fieldtype": "Link",
    "label": "Divisi",
    "options": "Divisi"
+  },
+  {
+   "fieldname": "position",
+   "fieldtype": "Select",
+   "label": "Position",
+   "options": "Operator\nHelper"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-15 13:50:28.870239",
+ "modified": "2025-12-15 21:00:51.163751",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Traksi",
