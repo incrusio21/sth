@@ -108,11 +108,15 @@ def make_purchase_receipt(source_name, target_doc=None):
         return has_unit_price_items and source.qty == 0
 
     def update_item(obj, target, source_parent):
-        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
-        target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-        target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+        max_qty = obj.qty
+        if souce_parent.purchase_type in ("Borongan", "Capex"):
+            max_qty = flt(obj.qty*obj.progress_received/100)
+        
+        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(max_qty) - flt(obj.received_qty)
+        target.stock_qty = (flt(max_qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+        target.amount = (flt(max_qty) - flt(obj.received_qty)) * flt(obj.rate)
         target.base_amount = (
-            (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+            (flt(max_qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
         )
 
     doc = get_mapped_doc(
