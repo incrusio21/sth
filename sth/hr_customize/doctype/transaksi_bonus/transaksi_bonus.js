@@ -60,7 +60,7 @@ frappe.ui.form.on("Transaksi Bonus", {
     frappe.dom.freeze("Mengambil data employee...");
     const records = await frappe.db.get_list("Employee", {
       filters: {
-        custom_unit: frm.doc.unit,
+        unit: frm.doc.unit,
         company: frm.doc.company,
         grade: frm.doc.eg,
         employment_type: frm.doc.et,

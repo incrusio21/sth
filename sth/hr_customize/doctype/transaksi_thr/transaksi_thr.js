@@ -80,7 +80,7 @@ frappe.ui.form.on("Transaksi THR", {
 
     let filters = {
       company: frm.doc.company,
-      custom_unit: frm.doc.unit,
+      unit: frm.doc.unit,
     };
 
     if (frm.doc.religion_group) {
