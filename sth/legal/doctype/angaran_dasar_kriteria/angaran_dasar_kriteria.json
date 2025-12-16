@@ -8,7 +8,8 @@
  "field_order": [
   "akta",
   "column_break_xfva",
-  "kriteria_file"
+  "kriteria_file",
+  "kriteria"
  ],
  "fields": [
   {
@@ -29,13 +30,19 @@
    "fieldtype": "Attach",
    "in_list_view": 1,
    "label": "Kriteria File"
+  },
+  {
+   "fieldname": "kriteria",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kriteria"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-10 15:08:22.179210",
+ "modified": "2025-12-17 00:37:47.995486",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Angaran Dasar Kriteria",
