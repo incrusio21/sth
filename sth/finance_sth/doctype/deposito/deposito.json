@@ -32,6 +32,7 @@
   "aro_days",
   "is_redeemed",
   "redeemed",
+  "roll_overed_from",
   "section_break_flio",
   "interest_amount",
   "tax_amount",
@@ -52,6 +53,7 @@
   "payment_details_section",
   "payment_pay",
   "payment_received",
+  "grand_total_receive",
   "grand_total",
   "outstanding_amount",
   "redeemed_document",
@@ -301,12 +303,14 @@
   {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Grand Total",
    "read_only": 1
   },
   {
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Outstanding Amount",
    "read_only": 1
   },
@@ -377,13 +381,26 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "roll_overed_from",
+   "fieldtype": "Link",
+   "label": "Roll Overed From",
+   "options": "Deposito",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_receive",
+   "fieldtype": "Currency",
+   "label": "Grand Total (Receive) ",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-16 12:05:28.367398",
+ "modified": "2025-12-16 16:59:24.705465",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

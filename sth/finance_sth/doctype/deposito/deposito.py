@@ -5,7 +5,7 @@ import frappe
 import erpnext
 
 from frappe.model.document import Document
-from frappe.utils import add_months, date_diff, nowdate
+from frappe.utils import add_months, date_diff, nowdate, add_days
 from frappe.model.mapper import get_mapped_doc
 from sth.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -41,14 +41,18 @@ class Deposito(AccountsController):
 		end_date = self.value_date
 
 		deposit_amount = self.deposit_amount
+		self.interest_amount = 0
+		self.tax_amount = 0
+		self.total = 0
 		for i in range(0, int(self.tenor)):
 			end_date = add_months(end_date, 1)
 			days = date_diff(end_date, start_date)
 			deposit_amount = self.calculate_interest_permonth(start_date, end_date, days, deposit_amount)
 			start_date= end_date
 	
-		self.grand_total = deposit_amount
-		self.outstanding_amount = deposit_amount
+		self.grand_total_receive = deposit_amount
+		self.grand_total = self.deposit_amount
+		self.outstanding_amount = self.deposit_amount
 
 	def calculate_interest_permonth(self, value_date, maturity_date, days, deposit_amount):
 		interest = self.interest / 100
@@ -76,9 +80,9 @@ class Deposito(AccountsController):
 			"income_account": frappe.db.get_value("Company", self.company, "default_deposito_income_account")
 		})
 
-		self.interest_amount = self.interest_amount or 0 + interest_amount
-		self.tax_amount = self.tax_amount or 0 + tax_amount
-		self.total = self.total or 0 + total
+		self.interest_amount += interest_amount
+		self.tax_amount += tax_amount
+		self.total += total
 		if self.deposito_type == "Roll Over Pokok + Bunga":
 			deposit_amount += total
 		return deposit_amount
@@ -138,9 +142,9 @@ class Deposito(AccountsController):
 	@frappe.whitelist()
 	def make_redemeed_deposito(self):
 		company = frappe.db.get_value("Company", self.company, "*")
-		grand_total = self.grand_total
+		grand_total = self.grand_total_receive
 		if self.pinalti > 0:
-			grand_total -= self.pinalti
+			grand_total = self.grand_total - self.pinalti
 
 		values = {
 			"doctype": "Redeemed Deposito",
@@ -286,7 +290,7 @@ def make_principal_payment(source_name, target_doc=None, type=None):
 		target.append("references", {
 			"reference_doctype": doctype,
 			"reference_name": source.name,
-			"total_amount": source.grand_total,
+			"total_amount": source.outstanding_amount,
 			"outstanding_amount": source.outstanding_amount,
 			"allocated_amount": source.outstanding_amount
 		})
@@ -338,3 +342,87 @@ def make_pinalti_deposito_ledger(parent):
 		cancel=False,
 		adv_adj=False
 	)
+
+
+def deposito_roll_over():
+	query = """
+		SELECT * FROM `tabDeposito`
+		WHERE 
+			is_redeemed = "Belum" 
+			AND deposito_type IN ("Roll Over Pokok", "Roll Over Pokok + Bunga") 
+			AND DATE_ADD(maturity_date, INTERVAL aro_days DAY) <= CURDATE()
+			AND docstatus = 1 AND outstanding_amount = 0
+	"""
+	
+	result = frappe.db.sql(query, as_dict=True)
+	if not result:
+		return
+	
+	for row in result:
+		print(row.name)
+		make_new_depo_roll_over(row)
+		old_deposito = frappe.get_doc("Deposito", row.name)
+		old_deposito.is_redeemed = "Roll Overed"
+		old_deposito.db_update_all()
+		
+def make_new_depo_roll_over(data):
+	make_roll_over_gl(data)
+	maturity_aro_date = add_days(data.maturity_date, int(data.aro_days))
+	new_maturity_date = add_months(maturity_aro_date, int(data.tenor))
+	new_deposito = frappe.new_doc("Deposito")
+	new_deposito.company = data.company
+	new_deposito.unit = data.unit
+	new_deposito.bank = data.bank
+	new_deposito.bank_account = data.bank_account
+	new_deposito.currency = data.currency
+	new_deposito.value_date = maturity_aro_date
+	new_deposito.maturity_date = new_maturity_date
+	new_deposito.tenor = data.tenor
+	new_deposito.interest = data.interest
+	new_deposito.tax = data.tax
+	new_deposito.bilyet_number = data.bilyet_number
+	new_deposito.deposit_amount = data.grand_total
+	new_deposito.deposito_type = data.deposito_type
+	new_deposito.collateral_owner_name = data.collateral_owner_name
+	new_deposito.posting_date = data.posting_date
+	new_deposito.deposited_by = data.deposited_by
+	new_deposito.aro_days = data.aro_days
+	new_deposito.credit_to = data.credit_to
+	new_deposito.non_current_asset = data.non_current_asset
+	new_deposito.roll_overed_from = data.name
+	new_deposito.save()
+	new_deposito.submit()
+
+def make_roll_over_gl(data):
+	company = frappe.db.get_value("Company", data.company, "*")
+	gl_entries = [
+		frappe._dict({
+			"posting_date": nowdate(),
+			"account": company.default_deposito_nca_account,
+			"debit": data.grand_total,
+			"credit": 0,
+			"company": data.company,
+			"voucher_type": "Deposito",
+			"voucher_no": data.name,
+			"cost_center": erpnext.get_default_cost_center(data.company) if not data.cost_center else data.cost_center
+		}),
+		frappe._dict({
+			"posting_date": nowdate(),
+			"account": company.default_deposito_receivable_account,
+			"debit": 0,
+			"credit": data.grand_total,
+			"company": data.company,
+			"voucher_type": "Deposito",
+			"voucher_no": data.name,
+			"party_type": "Customer",
+			"party": frappe.db.get_single_value("Payment Settings", "receivable_customer"),
+			"cost_center": erpnext.get_default_cost_center(data.company) if not data.cost_center else data.cost_center
+		})
+	]
+
+	make_gl_entries(
+		gl_entries,
+		cancel=False,
+		adv_adj=False
+	)
+	frappe.db.commit()
