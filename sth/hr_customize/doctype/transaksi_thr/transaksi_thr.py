@@ -239,7 +239,7 @@ class TransaksiTHR(AccountsController):
 			# context untuk formula
 			context = {
 				"GP": gaji_pokok,
-				"Natura": natura_price * nat_mul,
+				"Natura": 15 * nat_mul * natura_price,
 				"Uang_Daging": uang_daging,
 				"UMR": umr,
 				"Jumlah_Bulan_Bekerja": jumlah_bulan_bekerja,
@@ -255,7 +255,7 @@ class TransaksiTHR(AccountsController):
 					"umr": umr,
 					"natura_price": natura_price,
 					"natura_multiplier": nat_mul,
-					"natura": natura_price * nat_mul,
+					"natura": 15 * nat_mul * natura_price,
 					"uang_daging": uang_daging,
 					"masa_kerja": masa_kerja,
 					"thr_rule": thr_rule,
