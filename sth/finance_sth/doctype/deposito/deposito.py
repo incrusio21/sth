@@ -6,35 +6,44 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import add_months, date_diff
 from frappe.model.mapper import get_mapped_doc
+from sth.controllers.accounts_controller import AccountsController
 
-class Deposito(Document):
-	
+class Deposito(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._party_type = "Employee"
+		self._expense_account = "non_current_asset"
+
 	def validate(self):
 		self.calculate_deposito_interest_table()
+		self.set_missing_value()
 
 	def on_submit(self):
+		self.make_gl_entry()
 		if not self.deposito_interest_table:
-			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data tdi tabel")
+			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data di tabel")
 		self.make_deposito_interest()
 
 	def on_cancel(self):
+		super().on_cancel()
+		self.make_gl_entry()
 		if not self.deposito_interest_table:
-			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data tdi tabel")
-		self.make_deposito_interest()
+			frappe.throw("Mohon lakukan perhitungan deposito dengan benar sehingga menghasilkan data di tabel")
+		self.cancel_deposito_intreset()
 
 	def calculate_deposito_interest_table(self):
 		self.deposito_interest_table = []
 		start_date = self.value_date
 		end_date = self.value_date
 
+		deposit_amount = self.deposit_amount
 		for i in range(0, int(self.tenor)):
 			end_date = add_months(end_date, 1)
 			days = date_diff(end_date, start_date)
-			self.calculate_interest_permonth(start_date, end_date, days)
+			deposit_amount = self.calculate_interest_permonth(start_date, end_date, days, deposit_amount)
 			start_date= end_date
 
-	def calculate_interest_permonth(self, value_date, maturity_date, days):
-		deposit_amount = self.deposit_amount
+	def calculate_interest_permonth(self, value_date, maturity_date, days, deposit_amount):
 		interest = self.interest / 100
 		tax = self.tax / 100
 		year_days = self.year_days
@@ -56,13 +65,16 @@ class Deposito(Document):
 			"grand_total": total,
 			"outstanding_amount": total,
 			"is_redeemed": "Belum",
-			"debit_to": frappe.db.get_value("Company", self.company, "default_deposito_debit_account"),
-			"expense_account": frappe.db.get_value("Company", self.company, "default_deposito_expense_account")
+			"debit_to": frappe.db.get_value("Company", self.company, "default_deposito_receivable_account"),
+			"income_account": frappe.db.get_value("Company", self.company, "default_deposito_income_account")
 		})
 
 		self.interest_amount = self.interest_amount or 0 + interest_amount
 		self.tax_amount = self.tax_amount or 0 + tax_amount
 		self.total = self.total or 0 + total
+		if self.deposito_type == "Roll Over Pokok + Bunga":
+			deposit_amount += total
+		return deposit_amount
 
 	def make_deposito_interest(self):
 		for row in self.deposito_interest_table:
@@ -84,7 +96,7 @@ class Deposito(Document):
 				"outstanding_amount": row.outstanding_amount,
 				"cost_center": row.cost_center,
 				"debit_to": row.debit_to,
-				"expense_account": row.expense_account,
+				"income_account": row.income_account,
 				"reference_doc": "Deposito",
 				"reference_name": self.name,
 				"reference_detail_doc": row.doctype,

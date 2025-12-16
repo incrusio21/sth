@@ -3,7 +3,8 @@
 
 import json
 import frappe
-from frappe.utils import floor, flt, get_datetime
+from frappe.utils import floor, flt
+from frappe.query_builder.functions import IfNull
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
@@ -158,6 +159,9 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		kmhm_akhir = kmhm_awal
 		for hk in self.hasil_kerja:
+			if hk.position in ["Helper"]:
+				continue
+			
 			if not hk.kmhm_ahkir or hk.kmhm_ahkir < kmhm_akhir:
 				hk.kmhm_ahkir = kmhm_akhir
 
@@ -219,7 +223,7 @@ def get_details_kegiatan(childrens, company):
 		result = (
 			frappe.qb.from_(kegiatan)
 			.select(
-				kegiatan.parent, 
+				kegiatan.parent, IfNull(kegiatan.position, "Operator"), 
 				kegiatan.account, kegiatan.volume_basis,
 				kegiatan.rupiah_basis, kegiatan.workday, kegiatan.holiday,
 				kegiatan.workday_base, kegiatan.holiday_base
@@ -230,17 +234,17 @@ def get_details_kegiatan(childrens, company):
 			)
 		).run()
 
-		return {row[0] : frappe._dict(zip([
+		return {(row[0], row[1]) : frappe._dict(zip([
 			"kegiatan_account", "volume_basis", "rupiah_basis",
 			"workday", "holiday", 
 			"ump_as_workday", "ump_as_holiday"
-		], row[1:], strict=False)) for row in result}
+		], row[2:], strict=False)) for row in result}
 	
 	kegiatan_details = _get_kegiatan_upah()
 
 	for ch in childrens:
 		# update table dengan details kegiatan
-		if kegiatan := kegiatan_details.get(ch.get("kegiatan")):
+		if kegiatan := kegiatan_details.get((ch.get("kegiatan"), ch.get("position", "Operator"))):
 			ch.update(kegiatan)
 
 	return childrens

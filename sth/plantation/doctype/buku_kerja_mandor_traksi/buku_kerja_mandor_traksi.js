@@ -17,14 +17,7 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 		})
 	},
 	company(frm){
-
-		frm.cscript.get_details_data({
-			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
-			args: {
-				childrens: frm.doc.hasil_kerja,
-				company: frm.doc.company
-			}
-		})
+		frm.cscript.get_kegiatan(frm.doc.hasil_kerja)
 	},
 	kendaraan(frm){
 		frappe.call({
@@ -35,22 +28,6 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 			}
 		})
 	}
-	// kmhm_akhir(frm){
-	// 	frm.trigger("premi_heavy_equipment")
-	// },
-	// kmhm_awal(frm){
-	// 	frm.trigger("premi_heavy_equipment")
-	// },
-	// premi_heavy_equipment(frm){
-	// 	frappe.call({
-	// 		method: "set_premi_heavy_equipment",
-	// 		doc: frm.doc,
-	// 		freeze: true,
-	// 		callback: function (data) {
-	// 			me.calculate_total(null, null, "hasil_kerja")
-	// 		}
-	// 	})
-	// }
 //   tgl_trk(frm) {
 //     frappe.db.get_value("Rencana Kerja Harian",
 //       { posting_date: frm.doc.tgl_trk },
@@ -87,19 +64,10 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 		data.blok = frm.doc.blok
 		data.batch = frm.doc.batch
 		data.project = frm.doc.project
-		frappe.model.set_value(cdt, cdn, "employee", frm.doc.default_employee)
-	},
-	kegiatan(frm, cdt, cdn){
-		let data = frappe.get_doc(cdt, cdn)
-		if(!data.kegiatan) return
-
-		frm.cscript.get_details_data({
-			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
-			args: {
-				childrens: [data],
-				company: frm.doc.company
-			}
-		})
+		data.position = frm.doc.position
+		
+		let default_employee = frm.doc[`default_${frappe.scrub(data.position)}`]
+		frappe.model.set_value(cdt, cdn, "employee", default_employee)
 	},
 	kmhm_ahkir(frm, cdt, cdn){
 		frappe.call({
@@ -136,6 +104,17 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 				me.calculate_total(cdt, cdn)
 			});
 		}
+
+		// calculate grand total lagi jika field berubah
+		for (const fieldname of ["kegiatan", "position"]) {
+			frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", fieldname, function (frm, cdt, cdn) {
+				let data = frappe.get_doc(cdt, cdn)
+				if(!data.kegiatan) return
+
+				me.get_kegiatan([data])
+			});
+		}
+
         // this.get_data_rkh_field.push("batch")
         this.hasil_kerja_update_field.push("premi_workday", "premi_holiday", "ump_bulanan", "ump_as_workday", "ump_as_holiday")
 
@@ -195,6 +174,15 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		});
    	}
 	
+	get_kegiatan(data){
+		this.get_details_data({
+			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
+			args: {
+				childrens: data,
+				company: this.frm.doc.company
+			}
+		})
+	}
 	get_details_data(opts){
 		if(opts.args.childrens.length == 0) return
 

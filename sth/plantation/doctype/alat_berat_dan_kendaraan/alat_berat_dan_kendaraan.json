@@ -21,6 +21,7 @@
   "unit",
   "no_pol",
   "operator",
+  "helper",
   "jns_bbm",
   "asset",
   "amended_from",
@@ -179,12 +180,19 @@
    "label": "Unit",
    "options": "Unit",
    "read_only": 1
+  },
+  {
+   "fieldname": "helper",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Helper",
+   "options": "Employee"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-08 11:28:21.088113",
+ "modified": "2025-12-15 21:24:01.773193",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

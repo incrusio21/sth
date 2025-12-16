@@ -30,7 +30,6 @@
   "jenis_alat",
   "bbm",
   "column_break_mujm",
-  "default_employee",
   "ump_bulanan",
   "section_break_toiw",
   "hasil_kerja_amount",
@@ -44,6 +43,10 @@
   "column_break_yztk",
   "batch",
   "project",
+  "column_break_ianz",
+  "position",
+  "default_operator",
+  "default_helper",
   "upah_section",
   "hasil_kerja",
   "more_information_tab",
@@ -147,8 +150,7 @@
    "fieldname": "mandor",
    "fieldtype": "Link",
    "label": "Mandor",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "default": "Today",
@@ -300,13 +302,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "kendaraan.operator",
-   "fieldname": "default_employee",
-   "fieldtype": "Link",
-   "label": "Default Employee",
-   "options": "Employee"
-  },
-  {
    "fieldname": "blok",
    "fieldtype": "Link",
    "label": "Blok",
@@ -338,13 +333,39 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "column_break_ianz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "position",
+   "fieldtype": "Select",
+   "label": "Position",
+   "options": "Operator\nHelper"
+  },
+  {
+   "fetch_from": "kendaraan.operator",
+   "fieldname": "default_operator",
+   "fieldtype": "Link",
+   "label": "Default Operator",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kendaraan.helper",
+   "fieldname": "default_helper",
+   "fieldtype": "Link",
+   "label": "Default Helper",
+   "options": "Employee",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 10:28:42.489501",
+ "modified": "2025-12-15 21:24:17.591876",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

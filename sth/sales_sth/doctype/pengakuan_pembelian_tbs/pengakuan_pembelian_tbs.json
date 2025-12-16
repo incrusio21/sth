@@ -18,7 +18,7 @@
   "percent",
   "column_break_vdwi",
   "bonus",
-  "subsisi_angkut",
+  "subsidi_angkut",
   "section_break_mdbx",
   "get_data",
   "items",
@@ -40,7 +40,8 @@
    "fieldname": "jarak",
    "fieldtype": "Link",
    "label": "Jarak",
-   "options": "Price List"
+   "options": "Price List",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_kiin",
@@ -58,17 +59,20 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_jits",
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "harga",
    "fieldtype": "Currency",
    "label": "Harga (kg)",
-   "precision": "3"
+   "precision": "3",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -77,6 +81,7 @@
    "label": "Beban PPH 22"
   },
   {
+   "default": "0",
    "fieldname": "percent",
    "fieldtype": "Percent",
    "label": "Percent"
@@ -86,15 +91,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "bonus",
    "fieldtype": "Currency",
    "label": "Bonus (kg)",
    "precision": "3"
-  },
-  {
-   "fieldname": "subsisi_angkut",
-   "fieldtype": "Float",
-   "label": "Subsisi Angkut (kg)"
   },
   {
    "fieldname": "amended_from",
@@ -114,7 +115,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Pengakuan Pembelian TBS Item"
+   "options": "Pengakuan Pembelian TBS Item",
+   "reqd": 1
   },
   {
    "fieldname": "document_reference",
@@ -127,13 +129,19 @@
    "fieldname": "get_data",
    "fieldtype": "Button",
    "label": "Get Data"
+  },
+  {
+   "default": "0",
+   "fieldname": "subsidi_angkut",
+   "fieldtype": "Float",
+   "label": "Subsidi Angkut (kg)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-12 17:03:16.498195",
+ "modified": "2025-12-15 15:56:39.436542",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",
