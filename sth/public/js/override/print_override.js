@@ -20,6 +20,8 @@ const patch = () => {
 
           this.print_format_selector.empty();
           this.print_format_selector.val(default_print_format);
+
+          this.refresh_print_format();
           return;
         });
     }
