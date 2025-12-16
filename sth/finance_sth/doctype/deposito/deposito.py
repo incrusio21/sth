@@ -5,7 +5,7 @@ import frappe
 import erpnext
 
 from frappe.model.document import Document
-from frappe.utils import add_months, date_diff, nowdate, add_days
+from frappe.utils import add_months, date_diff, nowdate, add_days, flt
 from frappe.model.mapper import get_mapped_doc
 from sth.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -25,6 +25,7 @@ class Deposito(AccountsController):
 		self.make_gl_entry()
 		if self.deposito_type in ("Non Roll Over", "Roll Over Pokok"):
 			self.make_deposito_interest()
+
 
 	def on_cancel(self):
 		if not self.deposito_interest_table:
@@ -154,8 +155,8 @@ class Deposito(AccountsController):
 			"unit": self.unit,
 			"customer": frappe.db.get_single_value('Payment Settings', "receivable_customer"),
 			"deposito": self.name,
-			"grand_total": grand_total,
-			"outstanding_amount": grand_total,
+			"grand_total": flt(grand_total),
+			"outstanding_amount": flt(grand_total),
 			"cost_center": self.cost_center,
 			"debit_to": company.default_deposito_receivable_account,
 			"non_current_asset": self.non_current_asset,
@@ -166,6 +167,8 @@ class Deposito(AccountsController):
 		self.redeemed_document = doc.name
 		self.is_redeemed = "Sudah"
 		self.db_update_all()
+		# if self.pinalti == 0 and self.deposito_type == "Roll Over Pokok + Bunga":
+		# 	make_roll_over_insterest_gl(self)
 
 	@frappe.whitelist()
 	def make_pinalti_deposito(self, pinalti):
@@ -267,6 +270,9 @@ def make_principal_payment(source_name, target_doc=None, type=None):
 	doctype = "Redeemed Deposito" if type == "Receive" else "Deposito"
 	account_type = "debit_to" if type == "Receive" else "credit_to"
 	paid_type = "paid_from" if type == "Receive" else "paid_to"
+	docname = frappe.db.get_value("Redeemed Deposito", {"deposito": source_name}, "name")
+	s_name = docname if type == "Receive" else source_name
+	
 	def post_process(source, target):
 		party_type = "Customer" if type == "Receive" else "Employee"
 		payment_type = "Receive" if type == "Receive" else "Pay"
@@ -297,7 +303,7 @@ def make_principal_payment(source_name, target_doc=None, type=None):
 
 	doclist = get_mapped_doc(
 		doctype,
-		source_name,
+		s_name,
 		{
 			doctype: {
 				"doctype": "Payment Entry",
@@ -381,7 +387,7 @@ def make_new_depo_roll_over(data):
 	new_deposito.interest = data.interest
 	new_deposito.tax = data.tax
 	new_deposito.bilyet_number = data.bilyet_number
-	new_deposito.deposit_amount = data.grand_total
+	new_deposito.deposit_amount = data.grand_total_receive
 	new_deposito.deposito_type = data.deposito_type
 	new_deposito.collateral_owner_name = data.collateral_owner_name
 	new_deposito.posting_date = data.posting_date
@@ -399,7 +405,7 @@ def make_roll_over_gl(data):
 		frappe._dict({
 			"posting_date": nowdate(),
 			"account": company.default_deposito_nca_account,
-			"debit": data.grand_total,
+			"debit": data.grand_total_receive,
 			"credit": 0,
 			"company": data.company,
 			"voucher_type": "Deposito",
@@ -410,7 +416,7 @@ def make_roll_over_gl(data):
 			"posting_date": nowdate(),
 			"account": company.default_deposito_receivable_account,
 			"debit": 0,
-			"credit": data.grand_total,
+			"credit": data.grand_total_receive,
 			"company": data.company,
 			"voucher_type": "Deposito",
 			"voucher_no": data.name,
@@ -425,4 +431,47 @@ def make_roll_over_gl(data):
 		cancel=False,
 		adv_adj=False
 	)
-	frappe.db.commit()
+	# frappe.db.commit()
+
+
+def make_roll_over_insterest_gl(data):
+	company = frappe.db.get_value("Company", data.company, "*")
+	gl_entries = [
+		frappe._dict({
+			"posting_date": nowdate(),
+			"account": company.default_deposito_receivable_account,
+			"debit": data.total,
+			"credit": 0,
+			"company": data.company,
+			"voucher_type": "Redeemed Deposito",
+			"voucher_no": data.redeemed_document,
+			"party_type": "Customer",
+			"party": frappe.db.get_single_value("Payment Settings", "receivable_customer"),
+			"cost_center": erpnext.get_default_cost_center(data.company) if not data.cost_center else data.cost_center,
+			"againts": data.non_current_asset,
+			"against_voucher_type": "Redeemed Deposito",
+			"against_voucher": data.redeemed_document,
+		}),
+		frappe._dict({
+			"posting_date": nowdate(),
+			"account": data.non_current_asset,
+			"debit": 0,
+			"credit": data.total,
+			"company": data.company,
+			"voucher_type": "Redeemed Deposito",
+			"voucher_no": data.redeemed_document,
+			"cost_center": erpnext.get_default_cost_center(data.company) if not data.cost_center else data.cost_center,
+		})
+	]
+
+	make_gl_entries(
+		gl_entries,
+		cancel=False,
+		adv_adj=False
+	)
+	
+	values = {
+		"outstanding_amount": data.grand_total_receive,
+		"grand_total": data.grand_total_receive
+	}
+	frappe.db.set_value("Redeemed Deposito", data.redeemed_document, values)

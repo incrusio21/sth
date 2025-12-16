@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:deposito",
+ "autoname": "format:RD-{deposito}",
  "creation": "2025-12-16 11:23:58.778905",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -20,7 +20,8 @@
   "cost_center",
   "debit_to",
   "non_current_asset",
-  "payment_entry"
+  "payment_entry",
+  "amended_from"
  ],
  "fields": [
   {
@@ -123,6 +124,16 @@
    "label": "Payment Entry",
    "options": "Payment Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Redeemed Deposito",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -130,11 +141,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-16 13:29:50.504125",
+ "modified": "2025-12-16 22:21:18.383864",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Redeemed Deposito",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
