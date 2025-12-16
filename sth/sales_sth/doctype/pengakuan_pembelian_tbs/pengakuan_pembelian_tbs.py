@@ -12,7 +12,7 @@ class PengakuanPembelianTBS(Document):
 			from `tabTimbangan` t
 			join `tabTimbangan Item` ti on ti.parent = t.name
 			where t.posting_date = %s and t.receive_type = "TBS Eksternal" and t.docstatus = 1 and supplier = %s
-		""",[today(),self.nama_supplier],as_dict=True)
+		""",[self.tanggal_timbangan,self.nama_supplier],as_dict=True)
 
 		self.items = []
 		for row in data_timbangan:

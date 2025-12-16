@@ -165,7 +165,7 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "eval:doc.docstatus==1 && cur_frm.doc.deposito_type != \"Roll Over Pokok + Bunga\"",
    "fieldname": "create_payment",
    "fieldtype": "Button",
    "label": "Create Payment"
@@ -205,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-15 16:39:47.383218",
+ "modified": "2025-12-16 15:42:44.542994",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito Interest Table",
