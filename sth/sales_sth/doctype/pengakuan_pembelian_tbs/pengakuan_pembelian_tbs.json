@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_4ntw",
   "tanggal",
+  "tanggal_timbangan",
   "jarak",
   "column_break_kiin",
   "nama_supplier",
@@ -135,13 +136,19 @@
    "fieldname": "subsidi_angkut",
    "fieldtype": "Float",
    "label": "Subsidi Angkut (kg)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_timbangan",
+   "fieldtype": "Date",
+   "label": "Tanggal Timbangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 15:56:39.436542",
+ "modified": "2025-12-16 11:37:29.997795",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",
