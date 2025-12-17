@@ -119,3 +119,7 @@ def validate_request(data):
     #     message.append("File upload is required")
     
     return message
+
+@frappe.whitelist()
+def get_doc_ignore_perm(doctype, name):
+    return frappe.get_doc(doctype, name, ignore_permissions=True)
