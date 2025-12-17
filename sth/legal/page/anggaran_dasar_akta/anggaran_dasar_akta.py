@@ -1,14 +1,21 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import datetime
+
 import frappe
 
 @frappe.whitelist()
 def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
-    if not (company and anggaran_dasar):
+    if not company:
         return
 
     akta_dict = {}
+    anggaran_dasar = [anggaran_dasar] if anggaran_dasar \
+        else frappe.get_all("Anggaran Dasar", filters={"company": company}, pluck="name")
+
+    if not anggaran_dasar:
+        return
 
     saham = frappe.qb.DocType("Detail Form Saham")
     saham_data = (
@@ -18,7 +25,7 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
             saham.qty, saham.rate,
             saham.amount, saham.npwp
         )
-        .where(saham.parent == anggaran_dasar)
+        .where(saham.parent.isin(anggaran_dasar))
     ).run()
 
     for d in saham_data:
@@ -44,7 +51,7 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
             pengurus.akta, pengurus.tanggal_akta, pengurus.employee,
             pengurus.designation, pengurus.note,
         )
-        .where(pengurus.parent == anggaran_dasar)
+        .where(pengurus.parent.isin(anggaran_dasar))
     ).run()
 
     for d in pengurus_data:
@@ -68,7 +75,7 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
         .select(
             kriteria.akta, kriteria.kriteria_file, kriteria.kriteria,
         )
-        .where(kriteria.parent == anggaran_dasar)
+        .where(kriteria.parent.isin(anggaran_dasar))
     ).run()
 
     for d in kriteria_data:
@@ -92,7 +99,7 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
     akta_data = (
         frappe.qb.from_(akta)
         .select(
-            akta.name, akta.nomor_akta, akta.tgl_akta, akta.nama_notaris,
+            akta.name, akta.tgl_akta, akta.jenis_transaksi, akta.nomor_akta, akta.nama_notaris,
             akta.nomor_sk_kehakiman, akta.tanggal_sk_kehakiman,
             akta.kedudukan, akta.alamat, akta.modal_dasar, 
             akta.modal_di_setor, akta.kegiatan_usaha, akta.bnri,
@@ -102,12 +109,19 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
     ).run()
 
     for d in akta_data:
+        akta_dict[d[0]]["tanggal_akta"] = d[1]
         akta_dict[d[0]]["details"] = frappe._dict(zip([
-            "nomor_akta", "tanggal_akta", "nama_notaris", 
+            "jenis_transaksi", "nomor_akta", "nama_notaris", 
             "nomor_sk_kehakiman", "tanggal_sk_kehakiman",
             "kedudukan", "alamat", "modal_dasar",
             "modal_di_setor", "kegiatan_usaha", "bnri",
             "tbnri", "keterangan"
-        ], d[1:], strict=False))
+        ], d[2:], strict=False))
 
-    return akta_dict
+    # Sort by tanggal_akta
+    sorted_data = dict(sorted(
+        akta_dict.items(),
+        key=lambda x: x[1].get('tanggal_akta') or datetime.min
+    ))
+
+    return sorted_data
