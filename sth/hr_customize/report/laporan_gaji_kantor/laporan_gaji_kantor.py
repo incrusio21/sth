@@ -111,6 +111,7 @@ def get_employees_with_attendance(filters, month_num, year):
 			a.docstatus = 1
 			AND MONTH(a.attendance_date) = %(month)s
 			AND YEAR(a.attendance_date) = %(year)s
+			AND a.kriteria = "Non Satuan Hasil"
 		ORDER BY 
 			a.employee
 	"""
