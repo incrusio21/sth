@@ -107,11 +107,13 @@ def get_employees_with_attendance(filters, month_num, year):
 			a.employee
 		FROM 
 			`tabAttendance` a
+		JOIN `tabEmployee` b
+			ON a.employee = b.name AND b.custom_kriteria = "Non Satuan Hasil"
 		WHERE 
 			a.docstatus = 1
 			AND MONTH(a.attendance_date) = %(month)s
 			AND YEAR(a.attendance_date) = %(year)s
-			AND a.custom_kriteria = "Non Satuan Hasil"
+			
 		ORDER BY 
 			a.employee
 	"""
