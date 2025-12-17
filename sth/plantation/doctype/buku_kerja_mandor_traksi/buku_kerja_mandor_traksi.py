@@ -3,7 +3,7 @@
 
 import json
 import frappe
-from frappe.utils import floor, flt
+from frappe.utils import floor, flt, get_datetime
 from frappe.query_builder.functions import IfNull
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
@@ -33,9 +33,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	
 	def validate(self):
 		self.set_posting_datetime()
-		self.validate_selisih_kmhm()
 		# set data emloyee
-		self.set_details_diffrence(self.kmhm_awal, self.jenis_alat)
+		self.set_details_diffrence(jenis_alat=self.jenis_alat, raise_error=True)
 		get_details_employee(self.hasil_kerja, self.posting_date)
 		get_details_kegiatan(self.hasil_kerja, self.company)
 		
@@ -44,14 +43,6 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def set_posting_datetime(self):
 		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
 	
-	def validate_selisih_kmhm(self):
-		self.kmhm_awal = frappe.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir")
-		selisih = self.kmhm_akhir - self.kmhm_awal
-		if selisih <= 0:
-			frappe.throw("KM/HM Akhir cannot less than KM/HM Awal")
-
-		self.selisih_kmhm = selisih
-
 	def on_submit(self):
 		super().on_submit()
 		self.update_kendaraan_field()
@@ -87,14 +78,14 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			return
 
 		# cek apakah terdapat future pemakaian kendaraan
-		# if future_bkm := frappe.get_value(
-		# 	"Buku Kerja Mandor Traksi", 
-		# 	{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]}, 
-		# 	"name",
-		# 	order_by="posting_datetime"
-		# ):
-		# 	status = "Submitted" if not cancel else "Canceled"
-		# 	frappe.throw(f"Document cannot be {status} because Document {future_bkm} with a future date and time already exists.")
+		if future_bkm := frappe.get_value(
+			"Buku Kerja Mandor Traksi", 
+			{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]}, 
+			"name",
+			order_by="posting_datetime"
+		):
+			status = "Submitted" if not cancel else "Canceled"
+			frappe.throw(f"Document cannot be {status} because Document {future_bkm} with a future date and time already exists.")
 		
 		# # memastikan kmhm sesuai dengan yang ada pata keendaraan
 		# if not cancel and alat_kendaraan.kmhm_akhir != self.kmhm_awal:
@@ -108,7 +99,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		rate = item.rupiah_basis
 		# set rate pegawai jika bukan dump truck
 		if self.tipe_master_kendaraan not in ("Dump Truck"):
-			rate = flt(item.base/item.total_hari, precision)
+			rate = flt((item.base or 0)/item.total_hari, precision)
 
 		item.rate = item.rate or rate
 		
@@ -138,24 +129,28 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		if not self.kendaraan:
 			return
 		
-		detail_kendaraan = frappe.get_cached_doc("Alat Berat Dan Kendaraan", self.kendaraan)
+		detail_kendaraan = frappe.get_doc("Alat Berat Dan Kendaraan", self.kendaraan)
 
 		if not self.get("hasil_kerja"):
-			self.append("hasil_kerja", {})
+			self.append("hasil_kerja", {
+				"position": self.position
+			})
 		
 		get_details_employee(self.hasil_kerja, self.posting_date, detail_kendaraan.operator)
 		self.set_details_diffrence(detail_kendaraan.kmhm_akhir, detail_kendaraan.jns_alt)
 
 	@frappe.whitelist()
-	def set_details_diffrence(self, kmhm_awal=None, jenis_alat=None):
+	def set_details_diffrence(self, kmhm_awal=None, jenis_alat=None, raise_error=False):
 		if not self.kendaraan:
 			return
 		
 		if not kmhm_awal:
-			kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir")
+			kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", for_update=self.docstatus)
 		
 		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict() \
 			if self.tipe_master_kendaraan in ("Alat Berat") else {}
+
+		self.kmhm_awal = kmhm_awal
 
 		kmhm_akhir = kmhm_awal
 		for hk in self.hasil_kerja:
@@ -174,13 +169,14 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 						break
 					
 					jumlah = premi.end_time if premi.end_time and selisih_kmhm > premi.end_time else selisih_kmhm
-					print(jumlah)
 					hk.premi_heavy_equipment += flt(premi.amount * jumlah)
 					selisih_kmhm -= jumlah
 
 			kmhm_akhir = hk.kmhm_ahkir
 
 		self.kmhm_akhir = kmhm_akhir
+		if raise_error and (self.kmhm_akhir - self.kmhm_awal) <= 0:
+			frappe.throw("KM/HM Akhir cannot less than or same with KM/HM Awal")
 
 @frappe.whitelist()
 def get_details_employee(childrens, posting_date, new_employee=None):
