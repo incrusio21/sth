@@ -21,6 +21,7 @@ function filterFields(frm) {
             filters:{
                 company: ["=", doc.company],
                 unit: ["=", doc.unit],
+                bank: ["=", doc.bank],
             }
         }
     })
