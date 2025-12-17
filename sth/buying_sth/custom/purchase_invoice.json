@@ -274,7 +274,11 @@
    "field_name": "buying_price_list",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-12-19 11:32:48.577520",
+=======
+   "modified": "2025-12-17 15:08:18.930788",
+>>>>>>> 877e57c (fix: remove property setter for taxes)
    "modified_by": "Administrator",
    "module": "Buying STH",
    "name": "Purchase Invoice-buying_price_list-hidden",
@@ -297,7 +301,11 @@
    "field_name": "ignore_pricing_rule",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-12-19 11:32:48.623678",
+=======
+   "modified": "2025-12-17 15:08:18.980551",
+>>>>>>> 877e57c (fix: remove property setter for taxes)
    "modified_by": "Administrator",
    "module": "Buying STH",
    "name": "Purchase Invoice-ignore_pricing_rule-hidden",
@@ -320,7 +328,11 @@
    "field_name": "is_subcontracted",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-12-19 11:32:48.666682",
+=======
+   "modified": "2025-12-17 15:08:19.018466",
+>>>>>>> 877e57c (fix: remove property setter for taxes)
    "modified_by": "Administrator",
    "module": "Buying STH",
    "name": "Purchase Invoice-is_subcontracted-hidden",
@@ -343,7 +355,11 @@
    "field_name": "project",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-12-19 11:32:48.720508",
+=======
+   "modified": "2025-12-17 15:08:19.044085",
+>>>>>>> 877e57c (fix: remove property setter for taxes)
    "modified_by": "Administrator",
    "module": "Buying STH",
    "name": "Purchase Invoice-project-hidden",
@@ -366,7 +382,11 @@
    "field_name": "scan_barcode",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-12-19 11:32:48.760236",
+=======
+   "modified": "2025-12-17 15:08:19.067977",
+>>>>>>> 877e57c (fix: remove property setter for taxes)
    "modified_by": "Administrator",
    "module": "Buying STH",
    "name": "Purchase Invoice-scan_barcode-hidden",
