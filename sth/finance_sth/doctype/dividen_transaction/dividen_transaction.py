@@ -12,8 +12,12 @@ class DividenTransaction(AccountsController):
 		self._expense_account = "debit_to"
 
 	def autoname(self):
-		prefix = "RDVD-{}-".format(self.company) if self.transaction_type == "Receive" else "SDVD-{}-".format(self.company)
-		self.name = getseries(prefix, 5)
+		prefix = (
+			f"RDVD-{self.company}-"
+			if self.transaction_type == "Receive"
+			else f"SDVD-{self.company}-"
+		)
+		self.name = prefix + getseries(prefix, 5)
 
 	def validate(self):
 		if self.transaction_type == "Receive":

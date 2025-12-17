@@ -19,14 +19,22 @@
   "transaction_type",
   "company_two",
   "unit_two",
+  "bank_two",
+  "bank_account_two",
   "total",
-  "amended_from",
   "accounting_details_section",
   "payable_account",
   "equity_account",
   "column_break_ktwo",
   "receivable_account",
-  "income_account"
+  "income_account",
+  "more_information_tab",
+  "dividen_transaction_payment",
+  "dividen_transaction_receive",
+  "column_break_lkyy",
+  "payment_entry_sent",
+  "payment_entry_receive",
+  "amended_from"
  ],
  "fields": [
   {
@@ -99,16 +107,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Dividen",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "unit_one",
    "fieldtype": "Link",
    "label": "Unit 1",
@@ -170,16 +168,77 @@
    "fieldname": "bank_account_one",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Nama Bank",
+   "label": "Nama Bank 1",
    "options": "Bank Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "bank_two",
+   "fieldtype": "Link",
+   "label": "Bank 2",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account_two",
+   "fieldtype": "Link",
+   "label": "Nama Bank 2",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "dividen_transaction_payment",
+   "fieldtype": "Link",
+   "label": "Dividen Transaction Payment",
+   "options": "Dividen Transaction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dividen_transaction_receive",
+   "fieldtype": "Link",
+   "label": "Dividen Transaction Receive",
+   "options": "Dividen Transaction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lkyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_entry_sent",
+   "fieldtype": "Link",
+   "label": "Payment Entry (Sent)",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry_receive",
+   "fieldtype": "Link",
+   "label": "Payment Entry (Receive)",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Dividen",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-17 16:42:17.866186",
+ "modified": "2025-12-17 21:34:01.326716",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Dividen",

@@ -9,15 +9,20 @@
   "transaction_type",
   "company",
   "unit",
+  "bank",
+  "bank_account",
+  "ref_dividen",
   "column_break_icfn",
   "employee",
   "customer",
   "grand_total",
   "outstanding_amount",
+  "payment_entry",
   "accounting_details_section",
   "credit_to",
   "debit_to",
-  "cost_center"
+  "cost_center",
+  "amended_from"
  ],
  "fields": [
   {
@@ -113,13 +118,54 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Dividen Transaction",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "ref_dividen",
+   "fieldtype": "Link",
+   "label": "Reference Dividen",
+   "options": "Dividen",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-17 15:58:04.745188",
+ "modified": "2025-12-17 21:49:16.005301",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Dividen Transaction",
