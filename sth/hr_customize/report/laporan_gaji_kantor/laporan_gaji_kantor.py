@@ -99,6 +99,10 @@ def get_employees_with_attendance(filters, month_num, year):
 	
 	# If employee filter is provided, use only that employee
 	if filters.get("employee"):
+		employee_doc = frappe.get_doc("Employee", filters.get("employee"))
+		if employee_doc.custom_kriteria == "Satuan Hasil":
+			frappe.throw(""" Employee dengan kriteria Satuan Hasil tidak boleh muncul di Laporan ini. """)
+
 		return [filters.get("employee")]
 	
 	# Otherwise, get all employees with attendance in that month
