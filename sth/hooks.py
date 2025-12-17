@@ -263,9 +263,9 @@ scheduler_events = {
 # 	"all": [
 # 		"sth.tasks.all"
 # 	],
-# 	"daily": [
-# 		"sth.tasks.daily"
-# 	],
+	"daily": [
+		"sth.finance_sth.doctype.deposito.deposito.deposito_roll_over"
+	],
 # 	"hourly": [
 # 		"sth.tasks.hourly"
 # 	],

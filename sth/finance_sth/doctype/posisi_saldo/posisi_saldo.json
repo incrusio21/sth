@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:MB-{######}",
  "creation": "2025-12-15 15:14:55.821003",
@@ -8,6 +9,7 @@
  "field_order": [
   "company",
   "unit",
+  "bank",
   "bank_account",
   "posting_date",
   "movement_balance"
@@ -48,12 +50,19 @@
    "fieldname": "movement_balance",
    "fieldtype": "Currency",
    "label": "Saldo Berjalan"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-15 15:19:09.095522",
+ "modified": "2025-12-17 11:46:42.097450",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Posisi Saldo",
