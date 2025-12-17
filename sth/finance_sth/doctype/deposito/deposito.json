@@ -32,6 +32,7 @@
   "aro_days",
   "is_redeemed",
   "redeemed",
+  "roll_overed_from",
   "section_break_flio",
   "interest_amount",
   "tax_amount",
@@ -39,6 +40,8 @@
   "total",
   "total_realization",
   "pinalti",
+  "accounting_dimension_section",
+  "cost_center",
   "bunga_deposito_tab",
   "bunga_deposito_details_section",
   "deposito_interest_table",
@@ -46,11 +49,14 @@
   "accounting_details_section",
   "credit_to",
   "non_current_asset",
+  "employee",
   "payment_details_section",
   "payment_pay",
   "payment_received",
+  "grand_total_receive",
   "grand_total",
   "outstanding_amount",
+  "redeemed_document",
   "amended_from"
  ],
  "fields": [
@@ -184,14 +190,6 @@
    "label": "Payment Details"
   },
   {
-   "default": "Belum",
-   "fieldname": "is_redeemed",
-   "fieldtype": "Select",
-   "label": "Status Dicairkan",
-   "options": "\nBelum\nSudah\nRoll Overed",
-   "read_only": 1
-  },
-  {
    "fieldname": "tax",
    "fieldtype": "Percent",
    "label": "Pajak (%)",
@@ -303,20 +301,16 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.docstatus == 1 && doc.outstanding_amount > 0",
-   "fieldname": "redeemed",
-   "fieldtype": "Button",
-   "label": "Cairkan"
-  },
-  {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Grand Total",
    "read_only": 1
   },
   {
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Outstanding Amount",
    "read_only": 1
   },
@@ -333,6 +327,52 @@
    "reqd": 1
   },
   {
+   "fieldname": "non_current_asset",
+   "fieldtype": "Link",
+   "label": "Non Current Asset",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "default": "Belum",
+   "fieldname": "is_redeemed",
+   "fieldtype": "Select",
+   "label": "Status Dicairkan",
+   "options": "\nBelum\nSudah\nRoll Overed",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 1 && doc.outstanding_amount == 0 && doc.is_redeemed == \"Belum\" && !doc.payment_received",
+   "fieldname": "redeemed",
+   "fieldtype": "Button",
+   "label": "Cairkan"
+  },
+  {
+   "fieldname": "redeemed_document",
+   "fieldtype": "Link",
+   "label": "Redeemed Document",
+   "options": "Redeemed Deposito",
+   "read_only": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -343,18 +383,24 @@
    "search_index": 1
   },
   {
-   "fieldname": "non_current_asset",
+   "fieldname": "roll_overed_from",
    "fieldtype": "Link",
-   "label": "Non Current Asset",
-   "options": "Account",
-   "reqd": 1
+   "label": "Roll Overed From",
+   "options": "Deposito",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_receive",
+   "fieldtype": "Currency",
+   "label": "Grand Total (Receive) ",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 16:59:28.312572",
+ "modified": "2025-12-16 16:59:24.705465",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

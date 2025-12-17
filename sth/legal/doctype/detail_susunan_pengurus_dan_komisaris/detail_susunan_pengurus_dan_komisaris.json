@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "akta",
+  "tanggal_akta",
   "employee",
   "column_break_szyo",
   "designation",
@@ -53,13 +54,20 @@
   {
    "fieldname": "section_break_iwbs",
    "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "akta.tgl_akta",
+   "fieldname": "tanggal_akta",
+   "fieldtype": "Date",
+   "label": "Tanggal Akta",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-08 13:32:10.591699",
+ "modified": "2025-12-17 00:09:54.034191",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Detail Susunan Pengurus dan Komisaris",
