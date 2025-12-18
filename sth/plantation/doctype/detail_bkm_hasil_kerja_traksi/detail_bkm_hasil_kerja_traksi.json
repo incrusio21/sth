@@ -7,42 +7,25 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "kegiatan",
   "employee",
+  "upah_is_zero",
+  "column_break_eqqk",
   "attendance_status",
   "position",
-  "column_break_eqqk",
+  "details_kegiatan_section",
   "employment_type",
   "total_hari",
-  "base",
+  "column_break_egmt",
   "holiday_list",
   "is_holiday",
-  "details_kegiatan_section",
-  "kegiatan_account",
-  "uom",
-  "column_break_egmt",
-  "volume_basis",
-  "rupiah_basis",
-  "premi_heavy_equipment",
   "column_break_brwr",
-  "workday",
-  "ump_as_workday",
-  "holiday",
-  "ump_as_holiday",
-  "location_details_section",
-  "divisi",
-  "blok",
-  "column_break_vydz",
-  "batch",
-  "project",
+  "base",
   "section_break_fdft",
   "hari_kerja",
-  "qty",
-  "kmhm_ahkir",
   "column_break_lvhx",
-  "rate",
-  "premi_amount",
   "amount",
+  "premi_amount",
+  "column_break_mpwj",
   "sub_total"
  ],
  "fields": [
@@ -58,15 +41,8 @@
    "columns": 1,
    "fieldname": "hari_kerja",
    "fieldtype": "Float",
-   "label": "Hari Kerja"
-  },
-  {
-   "columns": 1,
-   "fieldname": "qty",
-   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hasil Kerja",
-   "reqd": 1
+   "label": "Hari Kerja"
   },
   {
    "fieldname": "column_break_eqqk",
@@ -74,23 +50,10 @@
   },
   {
    "columns": 1,
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Upah",
-   "reqd": 1
-  },
-  {
-   "columns": 1,
    "fieldname": "premi_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Premi",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "label": "Amount",
    "read_only": 1
   },
   {
@@ -143,119 +106,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "kegiatan",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kegiatan",
-   "options": "Kegiatan",
-   "reqd": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "details_kegiatan_section",
    "fieldtype": "Section Break",
-   "label": "Details Kegiatan"
-  },
-  {
-   "fieldname": "kegiatan_account",
-   "fieldtype": "Link",
-   "label": "Kegiatan Account",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
-   "fieldname": "uom",
-   "fieldtype": "Link",
-   "label": "UOM",
-   "options": "UOM",
-   "read_only": 1
-  },
-  {
-   "fieldname": "volume_basis",
-   "fieldtype": "Float",
-   "label": "Volume Basis",
-   "read_only": 1
+   "label": "Employee Details"
   },
   {
    "fieldname": "column_break_egmt",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "rupiah_basis",
-   "fieldtype": "Currency",
-   "label": "Rupiah Basis",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_brwr",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "ump_as_workday",
-   "fieldtype": "Check",
-   "label": "UMP as Workday",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "ump_as_holiday",
-   "fieldtype": "Check",
-   "label": "UMP as Holiday",
-   "read_only": 1
-  },
-  {
-   "fieldname": "workday",
-   "fieldtype": "Currency",
-   "label": "Premi Workday",
-   "read_only": 1
-  },
-  {
-   "fieldname": "holiday",
-   "fieldtype": "Currency",
-   "label": "Premi Holiday",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "kmhm_ahkir",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "KM/HM Ahkir"
-  },
-  {
-   "fieldname": "premi_heavy_equipment",
-   "fieldtype": "Currency",
-   "label": "Premi Heavy Equipment",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "location_details_section",
-   "fieldtype": "Section Break",
-   "label": "Location Details"
-  },
-  {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "options": "Blok"
-  },
-  {
-   "fieldname": "column_break_vydz",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "batch",
-   "fieldtype": "Link",
-   "label": "Batch",
-   "options": "Batch"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   },
   {
    "columns": 1,
@@ -266,23 +128,37 @@
    "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home"
   },
   {
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "label": "Divisi",
-   "options": "Divisi"
-  },
-  {
+   "columns": 1,
    "fieldname": "position",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Position",
    "options": "Operator\nHelper"
+  },
+  {
+   "fieldname": "column_break_mpwj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upah",
+   "read_only_depends_on": "eval:parent.tipe_master_kendaraan == \"Dump Truck\""
+  },
+  {
+   "default": "0",
+   "fieldname": "upah_is_zero",
+   "fieldtype": "Check",
+   "label": "Upah is Zero"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-15 21:00:51.163751",
+ "modified": "2025-12-18 16:51:27.901080",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Traksi",

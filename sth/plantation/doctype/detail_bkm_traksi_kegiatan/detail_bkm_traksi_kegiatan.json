@@ -1,0 +1,173 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-18 09:33:42.645699",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kegiatan",
+  "column_break_bzrs",
+  "hasil_kerja",
+  "upah_hasil",
+  "amount",
+  "kegiatan_details_section",
+  "company_details",
+  "column_break_fbwh",
+  "premi_heavy_equipment",
+  "lokasi_details_section",
+  "divisi",
+  "blok",
+  "column_break_tfci",
+  "batch",
+  "project",
+  "section_break_gnxz",
+  "kmhm_awal",
+  "kmhm_akhir",
+  "column_break_pwsx",
+  "uom",
+  "keterangan"
+ ],
+ "fields": [
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bzrs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "hasil_kerja",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hasil Kerja",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_gnxz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kmhm_awal",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "KMHM Awal",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "kmhm_akhir",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "KMHM Akhir"
+  },
+  {
+   "fieldname": "column_break_pwsx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "kegiatan.uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "columns": 1,
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Keterangan"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "lokasi_details_section",
+   "fieldtype": "Section Break",
+   "label": "Lokasi Details"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "column_break_tfci",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Batch",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "kegiatan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Kegiatan Details"
+  },
+  {
+   "fieldname": "company_details",
+   "fieldtype": "JSON",
+   "label": "Company Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upah_hasil",
+   "fieldtype": "Currency",
+   "label": "Upah"
+  },
+  {
+   "fieldname": "column_break_fbwh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "premi_heavy_equipment",
+   "fieldtype": "Currency",
+   "label": "Premi Heavy Equipment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-18 14:25:17.916697",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Detail BKM Traksi Kegiatan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
