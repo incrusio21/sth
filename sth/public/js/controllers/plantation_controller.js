@@ -8,6 +8,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
         let me = this
         let doctype = doc.doctype
         this.fieldname_total = ["amount"]
+        this.skip_calculate_table = []
         this.skip_table_amount = []
         this.skip_fieldname_amount = ["outstanding_amount"]
         this.kegiatan_fetch_fieldname = []
@@ -90,6 +91,9 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
         if (!parentfield) {
             parentfield = frappe.get_doc(cdt, cdn).parentfield
         }
+        
+        // tambahan table yang tidak perlu ada kalkulasi
+        if (in_list(this.skip_calculate_table, parentfield)) return;
 
         if (parentfield) {
             this.calculate_item_values(parentfield);
@@ -113,11 +117,15 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
 
         // menghitung amount, rotasi, qty
         for (const item of data_table) {
-            // rate * qty * (rotasi jika ada)
-            this.update_rate_or_qty_value(item)
-            
-            let qty = max_qty && flt(item.qty) > this.frm.doc[max_qty] ? this.frm.doc[max_qty] : item.qty  
-            item.amount = flt(item.rate * qty, precision("amount", item));
+            if(this.custom_amount_value){
+                this.custom_amount_value(item)
+            }else{
+                // rate * qty * (rotasi jika ada)
+                this.update_rate_or_qty_value(item)
+                
+                let qty = max_qty && flt(item.qty) > this.frm.doc[max_qty] ? this.frm.doc[max_qty] : item.qty  
+                item.amount = flt(item.rate * qty, precision("amount", item));
+            }
 
             this.update_value_after_amount(item)
 

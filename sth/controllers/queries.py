@@ -47,7 +47,7 @@ def kegiatan_query(
 	
 	return frappe.db.sql(
 		"""select {fields} from `tabKegiatan`
-		join `tabKegiatan Company` on `tabKegiatan Company`.parent = `tabKegiatan`.name
+		left join `tabKegiatan Company` on `tabKegiatan Company`.parent = `tabKegiatan`.name
 		where (`tabKegiatan`.{key} like %(txt)s
 				or nm_kgt like %(txt)s)
 			{fcond} {mcond} {fcondchild}
