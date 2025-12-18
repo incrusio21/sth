@@ -243,27 +243,25 @@ class SalarySlip(SalarySlip):
 				& (DaftarBPJS.docstatus == 1)
 				& (SetUpBPJSDetailTable.employee == self.employee)
 			)
-		).run()
-
+		)
+		query = query.run()
 
 		for row in query:
-			if abs(row[3]):
-				self.add_component_custom(
-					row[1], 
-					"earnings", 
-					abs(row[3])
-				)
-				print("{}-{}".format(row[1],row[3]))
-			if abs(row[4]):
-				self.add_component_custom(
-					row[2], 
-					"earnings", 
-					abs(row[4])
-				)
-				print("{}-{}".format(row[2],row[4]))
-
-		for row in self.earnings:
-			row.db_update()
+			if row:
+				if abs(row[3]):
+					self.add_component_custom(
+						row[1], 
+						"earnings", 
+						abs(row[3])
+					)
+					print("{}-{}".format(row[1],row[3]))
+				if abs(row[4]):
+					self.add_component_custom(
+						row[2], 
+						"earnings", 
+						abs(row[4])
+					)
+					print("{}-{}".format(row[2],row[4]))
 			
 	def set_employee_payment_doc(self) -> None:
 		# get structur first
@@ -428,17 +426,19 @@ class SalarySlip(SalarySlip):
 
 	def add_component_custom(self, component, component_type, total_amount, add_struck=None):
 		struct_row = get_salary_component_data(component)
-		# struct_row.is_flexible_payment = 1
 
-		if add_struck:
-			struct_row.update(add_struck)
+		if struct_row:
+			struct_row.is_flexible_payment = 1
 
-		self.update_component_row(
-			struct_row, 
-			flt(total_amount), 
-			component_type,
-			remove_if_zero_valued=True
-		)
+			if add_struck:
+				struct_row.update(add_struck)
+
+			self.update_component_row(
+				struct_row, 
+				flt(total_amount), 
+				component_type,
+				remove_if_zero_valued=True
+			)
 
 
 	def update_component_row(
@@ -555,6 +555,5 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00060/00002")
-	doc.calculate_bpjs_component()	
-
+	doc = frappe.get_doc("Payroll Entry","HR-PRUN-2025-00017")
+	doc.create_salary_slips()	
