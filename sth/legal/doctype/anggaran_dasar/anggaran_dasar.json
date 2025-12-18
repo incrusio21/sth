@@ -15,7 +15,6 @@
   "abbr",
   "column_break_lpdk",
   "status_anggaran_dasar",
-  "jns_trk",
   "nomor_sp_ahu_perubahan_anggaran_dasar",
   "tanggal_sp_ahu",
   "nomor_sp_ahu_perubahan_data_perseroan",
@@ -195,12 +194,6 @@
    "mandatory_depends_on": "eval:doc.jns_trk == \"Perubahan Data Perseroan\""
   },
   {
-   "fieldname": "jns_trk",
-   "fieldtype": "Select",
-   "label": "Jenis Transaksi",
-   "options": "Pendirian\nPerubahan Anggaran Dasar\nPerubahan Data Perseroan\nLainnya"
-  },
-  {
    "fetch_from": "company.abbr",
    "fieldname": "abbr",
    "fieldtype": "Data",
@@ -212,7 +205,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-13 14:33:18.766216",
+ "modified": "2025-12-17 15:21:33.389382",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",

@@ -34,7 +34,14 @@ frappe.query_reports["Laporan Gaji Kantor"] = {
 			"label": __("Karyawan"),
 			"fieldtype": "Link",
 			"options": "Employee",
-			"default": ""
+			"default": "",
+			"get_query": function() {
+                return {
+                    "filters": {
+                        "custom_kriteria": "Non Satuan Hasil"
+                    }
+                };
+            }
 		}
 	]
 };

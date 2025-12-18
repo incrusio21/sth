@@ -14,6 +14,7 @@ from sth.finance_sth.doctype.cheque_number.cheque_number import update_cheque_nu
 from sth.finance_sth.doctype.cheque_book.cheque_book import update_cheque_book_pe, delete_cheque_history
 from sth.finance_sth.doctype.deposito.deposito import update_deposito_payment_entry
 from sth.finance_sth.doctype.loan_bank.loan_bank import update_loan_bank_payment_entry
+from sth.finance_sth.doctype.dividen.dividen import update_dividen_payment_entry
 
 def cek_kriteria(self,method):
 	if self.references:
@@ -85,6 +86,9 @@ def update_status_deposito(self, method):
 
 def update_status_loan_bank(self, method):
     update_loan_bank_payment_entry(self, method)
+
+def update_status_dividen(self, method):
+    update_dividen_payment_entry(self, method)
     
 
 @frappe.whitelist()

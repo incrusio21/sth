@@ -48,7 +48,6 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 			fieldname: "anggaran_dasar",
 			options: "Anggaran Dasar",
 			label: __("Anggaran Dasar"),
-			reqd: 1,
 			get_query: function() {
 				return {
 					filters: {
@@ -88,6 +87,8 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 	get_data(btn) {
 		let me = this;
 		
+		this.$layout_akta.hide();
+
 		frappe.call({
 			method: "sth.legal.page.anggaran_dasar_akta.anggaran_dasar_akta.get_anggaran_dasar_akta",
 			args: {
@@ -105,9 +106,9 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 					}else{
 						me.$message.hide();
 					}
-
-					me.render()
 				}
+
+				me.render()
 			},
 		});		
 	}
@@ -237,9 +238,9 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 				let $row = $(`
 					<tr>
 						<td class="text-center">${akta_no}</td>
-						<td class="text-center">${details.jenis_akta || ''}</td>
+						<td class="text-center">${details.jenis_transaksi || ''}</td>
 						<td class="text-center">${details.nomor_akta || ''}</td>
-						<td class="text-center">${details.tanggal_akta ? frappe.datetime.str_to_user(details.tanggal_akta) : ''}</td>
+						<td class="text-center">${akta_data.tanggal_akta ? frappe.datetime.str_to_user(akta_data.tanggal_akta) : ''}</td>
 						<td>${details.nama_notaris || ''}</td>
 						<td class="text-center">${details.nomor_sk_kehakiman || ''}</td>
 						<td class="text-center">${details.tanggal_sk_kehakiman ? frappe.datetime.str_to_user(details.tanggal_sk_kehakiman) : ''}</td>

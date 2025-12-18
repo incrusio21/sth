@@ -10,14 +10,30 @@
   "naming_series",
   "date",
   "company_one",
-  "bank_account",
-  "bank",
+  "unit_one",
+  "bank_one",
+  "bank_account_one",
   "currency",
   "status",
   "column_break_honx",
   "transaction_type",
+  "company_two",
   "unit_two",
+  "bank_two",
+  "bank_account_two",
   "total",
+  "accounting_details_section",
+  "payable_account",
+  "equity_account",
+  "column_break_ktwo",
+  "receivable_account",
+  "income_account",
+  "more_information_tab",
+  "dividen_transaction_payment",
+  "dividen_transaction_receive",
+  "column_break_lkyy",
+  "payment_entry_sent",
+  "payment_entry_receive",
   "amended_from"
  ],
  "fields": [
@@ -35,6 +51,7 @@
    "reqd": 1
   },
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -45,34 +62,18 @@
    "fieldname": "company_one",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Unit 1",
+   "label": "Company 1",
    "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fieldname": "bank_account",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Nama Bank",
-   "options": "Bank Account",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "bank_account.bank",
-   "fieldname": "bank",
-   "fieldtype": "Link",
-   "label": "Bank",
-   "options": "Bank",
-   "read_only": 1,
    "reqd": 1
   },
   {
    "fetch_from": "bank_account.currency",
    "fieldname": "currency",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Mata Uang",
    "options": "Currency",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -96,7 +97,7 @@
    "fieldname": "unit_two",
    "fieldtype": "Link",
    "label": "Unit 2",
-   "options": "Company",
+   "options": "Unit",
    "reqd": 1
   },
   {
@@ -104,6 +105,123 @@
    "fieldtype": "Currency",
    "label": "Total",
    "reqd": 1
+  },
+  {
+   "fieldname": "unit_one",
+   "fieldtype": "Link",
+   "label": "Unit 1",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company_two",
+   "fieldtype": "Link",
+   "label": "Company 2",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "payable_account",
+   "fieldtype": "Link",
+   "label": "Payable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "equity_account",
+   "fieldtype": "Link",
+   "label": "Equity Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ktwo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receivable_account",
+   "fieldtype": "Link",
+   "label": "Receivable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "Income Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_one",
+   "fieldtype": "Link",
+   "label": "Bank 1",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account_one",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Bank 1",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_two",
+   "fieldtype": "Link",
+   "label": "Bank 2",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account_two",
+   "fieldtype": "Link",
+   "label": "Nama Bank 2",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "dividen_transaction_payment",
+   "fieldtype": "Link",
+   "label": "Dividen Transaction Payment",
+   "options": "Dividen Transaction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dividen_transaction_receive",
+   "fieldtype": "Link",
+   "label": "Dividen Transaction Receive",
+   "options": "Dividen Transaction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lkyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_entry_sent",
+   "fieldtype": "Link",
+   "label": "Payment Entry (Sent)",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry_receive",
+   "fieldtype": "Link",
+   "label": "Payment Entry (Receive)",
+   "options": "Payment Entry",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -120,7 +238,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-03 11:43:08.798820",
+ "modified": "2025-12-17 21:34:01.326716",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Dividen",
