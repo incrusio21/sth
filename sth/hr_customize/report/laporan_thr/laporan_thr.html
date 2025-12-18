@@ -1,0 +1,62 @@
+<h4>Laporan THR</h4>
+
+<hr>
+
+<div>
+  {% if filters.pt %}
+  <h5>PT: {{ filters.pt }}</h5>
+  {% endif %}
+  {% if filters.unit %}
+  <h5>Unit: {{ filters.unit }}</h5>
+  {% endif %}
+  {% if filters.thr %}
+  <h5>THR: {{ filters.thr }}</h5>
+  {% endif %}
+  {% if filters.tahun %}
+  <h5>Tahun: {{ filters.tahun }}</h5>
+  {% endif %}
+</div>
+
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">No</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">PT</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">Unit</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">Tahun</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">THR</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="4">Jumlah Org</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="3">Rupiah</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;">KHT</th>
+      <th style="text-align:center; vertical-align: middle !important;">PKWT</th>
+      <th style="text-align:center; vertical-align: middle !important;">KHL</th>
+      <th style="text-align:center; vertical-align: middle !important;">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% index = 0 %}
+    {% for row in data %}
+    <tr>
+      <td style="text-align:center; vertical-align: middle !important;">{{ (index + 1) }}</td>
+      <td>{{ row.pt }}</td>
+      <td>{{ row.unit }}</td>
+      <td>{{ row.tahun }}</td>
+      <td>{{ row.thr }}</td>
+      <td>{{ row.kht }}</td>
+      <td>{{ row.pkwt }}</td>
+      <td>{{ row.khl }}</td>
+      <td>{{ row.total }}</td>
+      <td>
+        {{ row.rupiah ? "Rp " + (row.rupiah || 0).toLocaleString('id-ID') : "" }}
+      </td>
+    </tr>
+    {% index++ %}
+    {% endfor %}
+  </tbody>
+</table>
