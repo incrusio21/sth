@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.utils import flt
-from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry
+from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry, create_salary_slips_for_employees
 
 class PayrollEntry(PayrollEntry):
 	
