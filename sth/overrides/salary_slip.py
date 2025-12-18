@@ -254,14 +254,12 @@ class SalarySlip(SalarySlip):
 						"earnings", 
 						abs(row[3])
 					)
-					print("{}-{}".format(row[1],row[3]))
 				if abs(row[4]):
 					self.add_component_custom(
 						row[2], 
 						"earnings", 
 						abs(row[4])
 					)
-					print("{}-{}".format(row[2],row[4]))
 			
 	def set_employee_payment_doc(self) -> None:
 		# get structur first
