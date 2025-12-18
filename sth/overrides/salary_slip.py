@@ -428,7 +428,7 @@ class SalarySlip(SalarySlip):
 
 	def add_component_custom(self, component, component_type, total_amount, add_struck=None):
 		struct_row = get_salary_component_data(component)
-		struct_row.is_flexible_payment = 1
+		# struct_row.is_flexible_payment = 1
 
 		if add_struck:
 			struct_row.update(add_struck)
