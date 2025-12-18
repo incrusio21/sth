@@ -202,7 +202,7 @@ class SalarySlip(SalarySlip):
 		set_loan_repayment(self)
 
 		# BPJS
-		# self.calculate_bpjs_component()
+		self.calculate_bpjs_component()
 		# BPJS
 
 		self.calculate_subsidy_loan()
@@ -549,7 +549,7 @@ class SalarySlip(SalarySlip):
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
-			# if data.custom_kriteria == "Satuan Hasil" else flt(data.ump_harian * data.payment_days)
+		data.custom_kriteria = default_data.custom_kriteria = frappe.get_cached_doc("Employee", self.employee).custom_kriteria
 		
 		return data, default_data
 
