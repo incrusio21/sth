@@ -1,0 +1,64 @@
+<h4>Laporan Daftar Izin Cuti</h4>
+
+<hr>
+
+<div>
+  {% if filters.jenis_izin_cuti %}
+  <h5>Jenis izin Cuti: {{ filters.jenis_izin_cuti }}</h5>
+  {% endif %}
+  {% if filters.pt %}
+  <h5>PT: {{ filters.pt }}</h5>
+  {% endif %}
+  {% if filters.unit %}
+  <h5>Unit: {{ filters.unit }}</h5>
+  {% endif %}
+  {% if filters.golongan %}
+  <h5>Golongan: {{ filters.golongan }}</h5>
+  {% endif %}
+  {% if filters.level %}
+  <h5>Level: {{ filters.level }}</h5>
+  {% endif %}
+</div>
+
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">No</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">PT</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Unit</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Nama</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Golongan</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Level</th>
+      <th style="text-align:center; vertical-align: middle !important;" rowspan="2">Jenis Izin Cuti</th>
+      <th style="text-align:center; vertical-align: middle !important;" colspan="3">Izin Cuti</th>
+      <th style="text-align:center; vertical-align: middle !important;">Sisa Cuti</th>
+    </tr>
+    <tr>
+      <th style="text-align:center; vertical-align: middle !important;">Tgl Awal</th>
+      <th style="text-align:center; vertical-align: middle !important;">Tgl Berakhir Cuti</th>
+      <th style="text-align:center; vertical-align: middle !important;">Jumlah HK</th>
+      <th style="text-align:center; vertical-align: middle !important;">Hk</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% index = 0 %}
+    {% for row in data %}
+    <tr>
+      <td style="text-align:center; vertical-align: middle !important;">{{ (index + 1) }}</td>
+      <td>{{ row.pt }}</td>
+      <td>{{ row.unit }}</td>
+      <td>{{ row.nama }}</td>
+      <td>{{ row.golongan }}</td>
+      <td>{{ row.level }}</td>
+      <td>{{ row.jenis_izin_cuti }}</td>
+      <td>{{ row.tgl_awal }}</td>
+      <td>{{ row.tgl_berakhir_cuti }}</td>
+      <td style="text-align:center; vertical-align: middle !important;">{{ row.jumlah_hk }}</td>
+      <td style="text-align:center; vertical-align: middle !important;">{{ row.hk }}</td>
+    </tr>
+    {% index++ %}
+    {% endfor %}
+  </tbody>
+</table>

@@ -17,13 +17,18 @@ def execute(filters=None):
 		e.employee_name as nama_karyawan,
 		tr.name as no_transaksi,
 		tr.purpose_of_travel as jenis_pjd,
+		ti.travel_to as tujuan,
 		tr.custom_estimate_depart_date as tanggal_berangkat,
 		tr.custom_estimate_arrival_date as tanggal_kembali,
-		tr.custom_grand_total_costing as realisasi_biaya
+		tr.custom_grand_total_costing as kasbon,
+		ec.total_sanctioned_amount as realisasi_biaya
 		FROM `tabTravel Request` as tr
+		LEFT JOIN `tabTravel Itinerary` as ti ON ti.parent = tr.name
 		JOIN `tabEmployee` as e ON e.name = tr.employee
-		JOIN `tabDesignation` as d ON d.name = e.designation;
-  """, as_dict=True)
+		JOIN `tabDesignation` as d ON d.name = e.designation
+		LEFT JOIN `tabExpense Claim` as ec ON ec.custom_travel_request = tr.name
+		WHERE tr.company IS NOT NULL {};
+  """.format(conditions), filters, as_dict=True)
 
 	for travel in query_l_perjalanan_dinas:
 		data.append(travel)
@@ -36,14 +41,17 @@ def get_condition(filters):
 	if filters.get("from_date") and filters.get("to_date"):
 		conditions += " AND eg.date BETWEEN %(from_date)s AND %(to_date)s"
 
+	if filters.get("pt"):
+		conditions += " AND tr.company = %(pt)s"
+
 	if filters.get("unit"):
 		conditions += " AND e.unit = %(unit)s"
 
-	if filters.get("jenis_sp"):
-		conditions += " AND eg.grievance_type = %(jenis_sp)s"
+	if filters.get("golongan"):
+		conditions += " AND e.grade = %(golongan)s"
 
-	if filters.get("tipe_karyawan"):
-		conditions += " AND e.grade = %(tipe_karyawan)s"
+	if filters.get("jabatan"):
+		conditions += " AND e.designation = %(jabatan)s"
 
 	return conditions
 

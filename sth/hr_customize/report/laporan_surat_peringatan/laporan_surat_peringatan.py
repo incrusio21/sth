@@ -16,6 +16,7 @@ def execute(filters=None):
 		eg.grievance_type as jenis_sp,
 		e.grade as gol_karyawan,
 		e.employee_name as nama_karyawan,
+		e.date_of_joining as tmk,
 		eg.custom_effective_date_from as effective_date_from,
 		eg.custom_effective_date_till as effective_date_until
 		FROM `tabEmployee Grievance` as eg
@@ -29,6 +30,7 @@ def execute(filters=None):
 			"jenis_sp": grievance.jenis_sp,
 			"gol_karyawan": grievance.gol_karyawan,
 			"nama_karyawan": grievance.nama_karyawan,
+			"tmk": grievance.tmk,
 			"periode": f"{formatdate(grievance.effective_date_from, 'd MMMM yyyy')} s/d {formatdate(grievance.effective_date_until, 'd MMMM yyyy')}",
 		})
 
@@ -75,7 +77,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("TMK"),
-			"fieldtype": "Data",
+			"fieldtype": "Date",
 			"fieldname": "tmk",
 		},
 		{

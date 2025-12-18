@@ -10,20 +10,52 @@ def execute(filters=None):
 	data = []
 
 	query_l_pengajuan_training = frappe.db.sql("""
-		SELECT
-		name as no_training,
-		company as perusahaan,
-		`type` as kategori_training,
-		name as nama_training,
-		custom_posting_date as tanggal_training,
-		custom_grand_total_costing as biaya,
-		supplier as lembaga_pelatihan
-		FROM `tabTraining Event` as te
+    SELECT
+    te.name as no_training,
+    te.company as perusahaan,
+    te.type as kategori_training,
+    te.name as nama_training,
+    te.custom_posting_date as tanggal_training,
+    te.custom_grand_total_costing as biaya,
+    te.supplier as lembaga_pelatihan,
+    tee.employee as peserta_training
+    FROM `tabTraining Event` as te
+    LEFT JOIN `tabTraining Event Employee` as tee ON tee.parent = te.name
 		WHERE te.company IS NOT NULL {};
   """.format(conditions), filters, as_dict=True)
+	grouped = {}
 
-	for training in query_l_pengajuan_training:
-		data.append(training);
+	for row in query_l_pengajuan_training:
+		key = row["no_training"]
+
+		if key not in grouped:
+			grouped[key] = {
+				"no_training": row["no_training"],
+				"perusahaan": row["perusahaan"],
+				"kategori_training": row["kategori_training"],
+				"nama_training": row["nama_training"],
+				"tanggal_training": row["tanggal_training"],
+				"biaya": row["biaya"],
+				"lembaga_pelatihan": row["lembaga_pelatihan"],
+				"peserta_training": [],
+			}
+
+		if row.get("peserta_training"):
+			grouped[key]["peserta_training"].append(row["peserta_training"])
+
+	result = list(grouped.values())
+
+	for training in result:
+		data.append({
+			"no_training": training["no_training"],
+			"perusahaan": training["perusahaan"],
+			"kategori_training": training["kategori_training"],
+			"nama_training": training["nama_training"],
+			"tanggal_training": training["tanggal_training"],
+			"biaya": training["biaya"],
+			"lembaga_pelatihan": training["lembaga_pelatihan"],
+			"peserta_training": ", ".join(training["peserta_training"])
+    });
 
 	return columns, data
 
