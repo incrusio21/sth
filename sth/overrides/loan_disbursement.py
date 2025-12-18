@@ -10,8 +10,19 @@ from lending.loan_management.doctype.process_loan_interest_accrual.process_loan_
 
 from lending.loan_management.doctype.loan_disbursement.loan_disbursement import LoanDisbursement
 
-class LoanDisbursement(LoanDisbursement):
+class STHLoanDisbursement(LoanDisbursement):
     
+    def on_trash(self):
+        super(LoanDisbursement, self).on_trash()
+
+        if self.docstatus == 0 and self.is_term_loan:
+            draft_schedule = self.get_draft_schedule()
+            frappe.delete_doc("Loan Repayment Schedule", draft_schedule)
+               
+    # non aktifkan submit scheduler
+    def submit_repayment_schedule(self):
+        pass
+
     def get_schedule_details(self):
         return {
             "doctype": "Loan Repayment Schedule",
