@@ -16,10 +16,12 @@ class Project:
                 self.validate_order_adendum()
             case "on_update":
                 self.validate_and_update_project()
+                self.move_task_to_new_project()
                 self.validate_purchase_order()
                 self.create_task_by_order()
             case "on_trash":
                 self.validate_and_update_project(delete=1)
+                self.move_task_to_new_project(delete=1)
     
     def validate_proposal_type(self):
         # jika document baru tidak perlu ada pengecekan
@@ -29,7 +31,6 @@ class Project:
         
         if before_doc.proposal_type != self.doc.proposal_type:
             frappe.throw("Proposal Type cannot be change")
-
 
     def validate_order_adendum(self):
         if self.doc.project_type != "Adendum" or self.doc.proposal_type != "Transaction":
@@ -54,6 +55,19 @@ class Project:
         status = "Cancelled" if not delete else "Open"
         frappe.db.set_value("Project", self.doc.from_project, "status", status)
 
+    def move_task_to_new_project(self, delete=0):
+        if self.doc.project_type != "Adendum" or self.doc.proposal_type == "Transaction":
+            return
+        
+        if not self.doc.from_project:
+            frappe.throw("Can't make Adendum without SPK")
+
+        new_project, last_project = self.doc.name, self.doc.from_project
+        if delete:
+            new_project, last_project = last_project, new_project
+
+        frappe.db.sql(""" update `tabTask` set project = %s where project = %s """, (new_project, last_project))
+        
     def validate_purchase_order(self):
         # jika bukan untuk proposal. hapus purchase order
         if not self.doc.for_proposal:
