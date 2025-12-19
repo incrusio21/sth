@@ -37,6 +37,7 @@ doctype_js = {
 	"Employee": "public/js/employee.js",
 	"Exit Interview": "public/js/exit_interview.js",
 	"Expense Claim": "public/js/expense_claim.js",
+	"Item": "public/js/item.js",
 	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
     "Material Request": "public/js/material_request.js",
@@ -155,6 +156,7 @@ override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
 	
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
+	"Item": "sth.overrides.item.Item",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
