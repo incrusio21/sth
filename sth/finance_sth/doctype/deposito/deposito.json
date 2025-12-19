@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-12-04 22:18:36.419560",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -400,7 +401,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-16 16:59:24.705465",
+ "modified": "2025-12-19 12:24:42.435907",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

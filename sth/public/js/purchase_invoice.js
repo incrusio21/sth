@@ -31,6 +31,14 @@ frappe.ui.form.on("Purchase Invoice", {
       },
       __("Get Items From")
     );
+    if(frm.doc.purchase_type){
+      filter_purchase_type(frm)
+    }
+  },
+
+
+  purchase_type(frm){
+    filter_purchase_type(frm)
   },
 
   nomor_pembelian(frm) {
@@ -183,4 +191,17 @@ async function showTrainingEventSelector(frm) {
   }
   frm.clear_table("items");
   d.show();
+}
+
+function filter_purchase_type(frm){
+  if (frm.doc.purchase_type === "Non Voucher Match") {
+    frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+      return {
+        filters: {
+          is_stock_item: 0,
+          custom_is_expense: 1
+        }
+      };
+    });
+  }
 }
