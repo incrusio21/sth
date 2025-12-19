@@ -70,9 +70,9 @@ async function setAccountCompanyOne(frm){
 }
 
 async function setAccountCompanyTwo(frm){
-    const resCompany = await frappe.db.get_value("Company", frm.doc.company_two, ["default_dividen_receivable_account", "default_dividen_income_account"])
+    const resCompany = await frappe.db.get_value("Company", frm.doc.company_two, ["default_dividen_receivale_account", "default_dividen_income_account"])
     
-    frm.set_value("receivable_account", resCompany.message.default_dividen_receivable_account)
+    frm.set_value("receivable_account", resCompany.message.default_dividen_receivale_account)
     frm.set_value("income_account", resCompany.message.default_dividen_income_account)
     frm.refresh_field("receivable_account")
     frm.refresh_field("income_account")
