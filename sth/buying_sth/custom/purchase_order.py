@@ -109,7 +109,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 
     def update_item(obj, target, source_parent):
         max_qty = obj.qty
-        if souce_parent.purchase_type in ("Borongan", "Capex"):
+        if source_parent.purchase_type in ("Borongan", "Capex"):
             max_qty = flt(obj.qty*obj.progress_received/100)
         
         target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(max_qty) - flt(obj.received_qty)
