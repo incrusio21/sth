@@ -12,10 +12,11 @@ frappe.ui.form.on('Delivery Note', {
     refresh: function(frm) {
         set_komoditi_filter(frm);
         $.each(frm.fields_dict, function(fieldname, field) {
-            if (field.df.fieldtype === 'Currency') {
+            if (field.df.fieldtype === 'Currency' && field.df.fieldname != "ongkos_angkut") {
                 frm.set_df_property(fieldname, 'hidden', 1);
             }
         });
+        set_query_unit(frm)
     },
 
     komoditi: function(frm) {
@@ -45,6 +46,12 @@ frappe.ui.form.on('Delivery Note', {
                 }
             });
         }
+    },
+    onload: function(frm){
+        set_query_unit(frm)
+    },
+    company: function(frm){
+        set_query_unit(frm)
     }
 });
 
@@ -117,5 +124,15 @@ function validate_komoditi(frm) {
                 }
             }
         }
+    });
+}
+
+function set_query_unit(frm){
+    frm.set_query('unit', function() {
+        return {
+            filters: {
+                'company': frm.doc.company
+            }
+        };
     });
 }

@@ -36,15 +36,20 @@
   "hasil_kerja_premi_amount",
   "column_break_fkos",
   "pekerjaan_subtotal",
-  "tab_5_tab",
+  "kegiatan_tab",
   "lokasi_kerja_section",
   "divisi",
   "blok",
   "column_break_yztk",
   "batch",
-  "project",
   "column_break_ianz",
+  "project",
+  "section_break_rfba",
+  "task",
+  "tab_5_tab",
+  "operator_detail_section",
   "position",
+  "column_break_gcka",
   "default_operator",
   "default_helper",
   "upah_section",
@@ -359,13 +364,37 @@
    "label": "Default Helper",
    "options": "Employee",
    "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kegiatan"
+  },
+  {
+   "fieldname": "section_break_rfba",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "operator_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Operator Detail"
+  },
+  {
+   "fieldname": "column_break_gcka",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Table",
+   "label": "Task",
+   "options": "Detail BKM Traksi Kegiatan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 21:24:17.591876",
+ "modified": "2025-12-18 10:03:19.158131",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

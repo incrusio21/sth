@@ -22,6 +22,9 @@ frappe.ui.form.on("Loan Bank", {
     },
     new_interest(frm){
         showInterestRateDialog(frm);
+    },
+    company(frm){
+        setAccount(frm)
     }
 });
 
@@ -448,4 +451,18 @@ function recalculateGrace(frm) {
     for (const row of frm.doc.installments) {
         checkGracePrincipal(frm, row.doctype, row.name)
     }
+}
+
+async function setAccount(frm) {
+    const resCompany = await frappe.db.get_value("Company", frm.doc.company, "*")
+    frm.set_value("disbursement_debit_to", resCompany.message.default_loan_bank_disbursement_account)
+    frm.set_value("expense_account", resCompany.message.default_loan_bank_expense_account)
+    frm.set_value("installment_credit_to", resCompany.message.default_lb_installment_credit_account)
+    frm.set_value("installment_debit_to", resCompany.message.default_lb_installment_dedit_account)
+
+    frm.refresh_field("disbursement_debit_to")
+    frm.refresh_field("expense_account")
+    frm.refresh_field("installment_credit_to")
+    frm.refresh_field("installment_debit_to")
+
 }

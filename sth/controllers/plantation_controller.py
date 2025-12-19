@@ -63,8 +63,11 @@ class PlantationController(AccountsController):
             # update nilai rate atau qty sebelum perhitungan
             self.update_rate_or_qty_value(d, precision)
 
-            qty = self.get(max_qty)  if max_qty and d.qty > self.get(max_qty) else d.qty
-            d.amount = flt((d.rate or 0) * qty, precision)
+            if hasattr(self, "custom_amount_value"):
+                self.custom_amount_value(d, precision)
+            else:
+                qty = self.get(max_qty)  if max_qty and d.qty > self.get(max_qty) else d.qty
+                d.amount = flt((d.rate or 0) * qty, precision)
 
             # update nilai setelah menghitung amount
             self.update_value_after_amount(d, precision)
