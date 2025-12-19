@@ -44,7 +44,8 @@ function filterBankAccount(frm) {
         return {
             filters:{
                 company: ["=", doc.company],
-                bank: ["=", doc.bank]
+                bank: ["=", doc.bank],
+                unit: ["=", doc.unit]
             }
         }
     })
@@ -118,7 +119,7 @@ async function setAccount(frm) {
     const resCompany = await frappe.db.get_value("Company", frm.doc.company, "*");
     
     frm.set_value('credit_to', resCompany.message.default_deposito_payable_account);
-    frm.set_value('non_current_asset', resCompany.message.default_deposito_income_account);
+    frm.set_value('non_current_asset', resCompany.message.default_deposito_nca_account);
     frm.refresh_field('credit_to');
     frm.refresh_field('non_current_asset');
 }

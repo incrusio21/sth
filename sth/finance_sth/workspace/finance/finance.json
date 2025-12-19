@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Report\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}}]",
+ "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Report\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}}]",
  "creation": "2025-10-29 13:20:04.900745",
  "custom_blocks": [],
  "docstatus": 0,
@@ -213,9 +213,28 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Posisi Saldo Bank",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Posisi Saldo",
+   "link_count": 0,
+   "link_to": "Posisi Saldo",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-03 11:48:53.705217",
+ "modified": "2025-12-19 10:41:03.594876",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",

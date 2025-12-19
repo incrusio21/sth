@@ -97,8 +97,7 @@
    "fieldname": "unit_two",
    "fieldtype": "Link",
    "label": "Unit 2",
-   "options": "Unit",
-   "reqd": 1
+   "options": "Unit"
   },
   {
    "fieldname": "total",
@@ -110,8 +109,7 @@
    "fieldname": "unit_one",
    "fieldtype": "Link",
    "label": "Unit 1",
-   "options": "Unit",
-   "reqd": 1
+   "options": "Unit"
   },
   {
    "fieldname": "company_two",
@@ -238,7 +236,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-17 21:34:01.326716",
+ "modified": "2025-12-19 10:48:04.068455",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Dividen",
