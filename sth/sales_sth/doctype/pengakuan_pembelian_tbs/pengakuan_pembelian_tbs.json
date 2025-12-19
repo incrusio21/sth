@@ -12,6 +12,7 @@
   "jarak",
   "column_break_kiin",
   "nama_supplier",
+  "company",
   "unit",
   "section_break_jits",
   "harga",
@@ -142,13 +143,22 @@
    "fieldname": "tanggal_timbangan",
    "fieldtype": "Date",
    "label": "Tanggal Timbangan"
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-16 11:37:29.997795",
+ "modified": "2025-12-19 09:12:08.335497",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",

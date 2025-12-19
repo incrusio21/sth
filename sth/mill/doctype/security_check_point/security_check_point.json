@@ -50,11 +50,11 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "Q-.YY.MM.DD.-.###",
+   "default": "Rec-.DD.MM.YY.-.###",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Vehicle Queue Number",
-   "options": "Q-.YY.MM.DD.-.###"
+   "options": "Rec-.DD.MM.YY.-.###\nDis-.DD.MM.YY.-.###"
   },
   {
    "default": "Today",
@@ -304,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-17 10:17:31.389592",
+ "modified": "2025-12-18 14:07:47.924707",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

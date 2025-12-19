@@ -31,16 +31,26 @@ const patch = () => {
           return;
         }
       });
-      // frappe.db.get_doc(this.frm.doctype, this.frm.docname)
-      //   .then((res) => {
-      //     const default_print_format = res.jenis_berikat == "Ya" ? "PF SCR Berikat" : "PF SCR Non Berikat";
+    }
 
-      //     this.print_format_selector.empty();
-      //     this.print_format_selector.val(default_print_format);
+    if (this.frm.doctype == "Sales Order") {
+      frappe.call({
+        method: "sth.api.get_doc_ignore_perm",
+        args: {
+          doctype: this.frm.doctype,
+          name: this.frm.docname
+        },
+        callback: (r) => {
+          if (!r.message) return;
+          const default_print_format = r.message.jenis_berikat == "Ya" ? "PF Kontrak Kawasan Berikat" : "PF Kontrak Non Berikat";
 
-      //     this.refresh_print_format();
-      //     return;
-      //   });
+          this.print_format_selector.empty();
+          this.print_format_selector.val(default_print_format);
+
+          this.refresh_print_format();
+          return;
+        }
+      });
     }
 
     this.print_format_selector.empty();
