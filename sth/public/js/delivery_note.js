@@ -16,6 +16,7 @@ frappe.ui.form.on('Delivery Note', {
                 frm.set_df_property(fieldname, 'hidden', 1);
             }
         });
+        set_query_unit(frm)
     },
 
     komoditi: function(frm) {
@@ -45,6 +46,12 @@ frappe.ui.form.on('Delivery Note', {
                 }
             });
         }
+    },
+    onload: function(frm){
+        set_query_unit(frm)
+    },
+    company: function(frm){
+        set_query_unit(frm)
     }
 });
 
@@ -117,5 +124,15 @@ function validate_komoditi(frm) {
                 }
             }
         }
+    });
+}
+
+function set_query_unit(frm){
+    frm.set_query('unit', function() {
+        return {
+            filters: {
+                'company': frm.doc.company
+            }
+        };
     });
 }

@@ -1,20 +1,8 @@
-frappe.ui.form.on('Quotation', {
-	party_name: function(frm) {
-		set_komoditi_filter(frm);
-
-		if (frm.doc.komoditi) {
-			frm.set_value('komoditi', '');
-			frm.clear_table('keterangan_per_komoditi');
-			frm.refresh_field('keterangan_per_komoditi');
-		}
-	},
-	
+frappe.ui.form.on('Sales Invoice', {
 	refresh: function(frm) {
 		set_komoditi_filter(frm);
-		frm.set_df_property('valid_till', 'hidden', 1);
 		set_query_unit(frm)
 	},
-
 	komoditi: function(frm) {
 		if (frm.doc.komoditi && frm.doc.party_name && frm.doc.quotation_to == "Customer") {
 			validate_komoditi(frm);
@@ -49,7 +37,8 @@ frappe.ui.form.on('Quotation', {
 	company: function(frm){
 		set_query_unit(frm)
 	}
-});
+
+})
 
 function set_komoditi_filter(frm) {
 	if (frm.doc.quotation_to == "Customer" && frm.doc.party_name) {
