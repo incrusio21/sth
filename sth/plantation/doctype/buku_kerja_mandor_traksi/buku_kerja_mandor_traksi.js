@@ -114,10 +114,99 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		super.setup(doc)
 
 		let me = this
-
+		
 		this.fieldname_total.push("premi_amount")
 		this.skip_calculate_table = ["task"]
 		this.kegiatan_fetch_fieldname = []
+		
+		this.frm.fields_dict.hasil_kerja.grid.setup_add_row = function(){
+			this.wrapper.find(".grid-add-row").click(() => {
+				let grid = this
+				// Siapkan data dari child table items
+				let task = me.frm.doc.task.map((d) => {
+					return {
+						docname: d.name,
+						name: d.name,
+						kegiatan: d.kegiatan,
+						hasil_kerja: d.hasil_kerja,
+						uom: d.uom,
+					};
+				});
+				// Konfigurasi field untuk dialog table
+				const fields = [
+					{
+						fieldtype: "Data",
+						fieldname: "docname",
+						read_only: 1,
+						hidden: 1,
+					},
+					{
+						fieldtype: "Link",
+						fieldname: "kegiatan",
+						options: "Kegiatan",
+						in_list_view: 1,
+						read_only: 1,
+						disabled: 0,
+						columns: 5,
+						label: __("Kegiatan")
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "hasil_kerja",
+						in_list_view: 1,
+						read_only: 1,
+						columns: 1,
+						label: __("Hasil Kerja"),
+					},
+					{
+						fieldtype: "Link",
+						fieldname: "uom",
+						options: "UOM",
+						in_list_view: 1,
+						read_only: 1,
+						columns: 1,
+						label: __("UOM"),
+					},
+				];
+
+				// Buat dan tampilkan dialog
+				let dialog = new frappe.ui.Dialog({
+					title: __("Pick Kegiatan"),
+					size: "extra-large",
+					fields: [
+						{
+							fieldname: "trans_items",
+							fieldtype: "Table",
+							label: "Items",
+							cannot_add_rows: true,
+							cannot_delete_rows: true,
+							in_place_edit: false,
+							reqd: 1,
+							data: task,
+							get_data: () => {
+								return task;
+							},
+							fields: fields,
+						},
+					],
+					primary_action: function () {
+						let selected_items = dialog.fields_dict.trans_items.grid.get_selected_children();
+						
+						// Kirim data ke server untuk update progress
+						let new_row = grid.add_new_row(null, null, true, null, true);
+						new_row.kegiatan_list = selected_items?.map(d => d.name).join("\n") || ""
+						
+						grid.set_focus_on_row();
+						this.hide();
+					},
+					primary_action_label: __("Add Row"),
+				});
+
+				dialog.show();
+				
+				return false;
+			});
+		}
 
 		// calculate grand total lagi jika field berubah
 		for (const fieldname of ["base", "total_hari"]) {
@@ -141,6 +230,11 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
         this.hasil_kerja_update_field.push("premi_workday", "premi_holiday", "ump_bulanan", "ump_as_workday", "ump_as_holiday")
 
         this.setup_bkm(doc)
+	}
+
+	refresh() {
+		super.refresh()
+		this.show_general_ledger()
 	}
 
   	set_query_field() {
@@ -245,8 +339,16 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		let is_basic_salary = true
 		let amount = flt(item.base/item.total_hari)
 
+		let task_list = (item?.kegiatan_list ?? "")
+		.replace(/,/g, "\n")
+		.split("\n")
+		.map(s => s.trim())
+		.filter(Boolean)
+		
 		item.premi_amount = 0
 		for (const task of doc.task) {
+			if(!in_list(task_list, task.name)) continue
+
 			let kegiatan = JSON.parse(task.company_details)[item.position || "Operator"] || {}
 
 			if (!kegiatan.use_basic_salary){
