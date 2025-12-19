@@ -12,7 +12,7 @@ frappe.ui.form.on('Delivery Note', {
     refresh: function(frm) {
         set_komoditi_filter(frm);
         $.each(frm.fields_dict, function(fieldname, field) {
-            if (field.df.fieldtype === 'Currency' && field.df.fieldname != "ongkos_angkut") {
+            if (field.df.fieldtype === 'Currency' && field.df.fieldname != "ongkos_angkut" && field.df.fieldname != "ongkos_angkut_bongkar") {
                 frm.set_df_property(fieldname, 'hidden', 1);
             }
         });
