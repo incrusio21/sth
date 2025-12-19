@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:segel_no",
+ "creation": "2025-12-18 16:29:33.900212",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "segel_no",
+  "reference",
+  "is_used"
+ ],
+ "fields": [
+  {
+   "fieldname": "segel_no",
+   "fieldtype": "Data",
+   "label": "Segel No",
+   "unique": 1
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Reference"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_used",
+   "fieldtype": "Check",
+   "label": "Is Used"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-18 16:45:03.562052",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Segel Number",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
