@@ -98,6 +98,7 @@ frappe.ui.form.on("Detail BKM Hasil Kerja Traksi", {
 	},
 	employee(frm, cdt, cdn){
 		let data = frappe.get_doc(cdt, cdn)
+		data.amount = 0
 
 		frm.cscript.get_details_data({
 			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_employee",
@@ -350,8 +351,8 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			if(!in_list(task_list, task.name)) continue
 
 			let kegiatan = JSON.parse(task.company_details)[item.position || "Operator"] || {}
-
-			if (!kegiatan.use_basic_salary){
+			
+			if (task.upah_kegiatan){
 				if(is_basic_salary){
 					amount = 0
 					is_basic_salary = false
@@ -377,7 +378,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		// if (!doc.manual_hk){
 		// 	item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
         // }
-
+		
 		item.amount = is_basic_salary ? (item.amount || amount) : amount
 	}
 

@@ -67,7 +67,7 @@ class BukuKerjaMandorController(PlantationController):
 
         for emp in self.hasil_kerja:
             already_used = emp_log.get(emp.employee) or 0
-            if (emp.hari_kerja + already_used) > 1:
+            if ((emp.hari_kerja or 0) + already_used) > 1:
                 frappe.throw("Employee {} exceeds Hari Kerja".format(emp.employee))
 
     def get_plantation_setting(self):
@@ -238,6 +238,7 @@ class BukuKerjaMandorController(PlantationController):
                 frappe.msgprint("Employee {} exceeds Hari Kerja".format(emp.employee))
 
     def on_cancel(self):
+        super().on_cancel()
         # self.remove_journal()
         self.delete_payment_log()
 

@@ -46,6 +46,11 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def validate(self):
 		self.set_posting_datetime()
 		self.set_salary_account()
+		
+		# jika merupakan document baru. nama sudah d update sebelum data update
+		if self.flags.in_insert:
+			self.update_task_details_name()
+		
 		# set data emloyee
 		self.validate_upah_kegiatan()
 		self.set_details_diffrence(jenis_alat=self.jenis_alat, raise_error=True)
@@ -68,7 +73,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def validate_upah_kegiatan(self):
 		for tk in self.task:
 			tk.amount = flt(tk.hasil_kerja) * flt(tk.upah_hasil)
-
+	
 	@frappe.whitelist()
 	def set_details_diffrence(self, kmhm_awal=None, jenis_alat=None, raise_error=False):
 		if not self.kendaraan:
@@ -91,13 +96,14 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 			tk.premi_heavy_equipment = 0
 			if jenis_alat.get("premi"):
-				selisih_kmhm = floor((tk.kmhm_ahkir - kmhm_akhir)/60)
+				selisih_kmhm = floor((tk.kmhm_akhir - kmhm_akhir)/60)
 				for premi in jenis_alat.premi:
 					# hentikan jika selisih sudah lebih kecil sama dengan 0
-					if selisih_kmhm <= premi.start_time:
+					if selisih_kmhm < premi.start_time:
 						break
 					
 					jumlah = premi.end_time if premi.end_time and selisih_kmhm > premi.end_time else selisih_kmhm
+					
 					tk.premi_heavy_equipment += flt(premi.amount * jumlah)
 					selisih_kmhm -= jumlah
 
@@ -108,12 +114,12 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			frappe.throw("KM/HM Akhir cannot less than or same with KM/HM Awal")
 
 	def on_update(self):
-		self.update_task_details_name()
+		if not self.flags.in_insert:
+			self.update_task_details_name(update=1)
 
-	def update_task_details_name(self):
+	def update_task_details_name(self, update=0):
 		# Buat mapping local name ke task name
 		task_name = {tk.get("localname") or tk.name: tk.name for tk in self.task}
-		
 		for hk in self.hasil_kerja:
 			# Parse kegiatan list
 			old_kegiatan = [s.strip() for s in cstr(hk.kegiatan_list).replace(",", "\n").split("\n") if s.strip()]
@@ -121,7 +127,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			# Filter dan convert ke actual task names
 			new_kegiatan = [task_name[k] for k in old_kegiatan if k in task_name]
 			
-			hk.db_set("kegiatan_list", "\n".join(new_kegiatan))
+			hk.kegiatan_list = "\n".join(new_kegiatan)
+
+		if update:
+			self.update_child_table("hasil_kerja")
 
 	def on_submit(self):
 		super().on_submit()
@@ -243,30 +252,33 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		)
 
 	def custom_amount_value(self, item, precision):
-		is_basic_salary = True
 		# centang jika upah sudah di berikan pada transaksi sebelumny 
 		if item.upah_is_zero:
 			item.amount = 0
 			return
 		
-		amount = flt(item.base/item.total_hari)
-
+		# Hitung amount dasar
+		amount = flt((item.base or 0)/item.total_hari)
+		is_basic_salary = True
 		item.premi_amount = 0
+
 		task = [s.strip() for s in cstr(item.kegiatan_list).replace(",", "\n").split("\n") if s.strip()]
 		for t in self.get("task", {"name": ["in", task]}):
 			kegiatan = json.loads(t.company_details).get(item.position or "Operator") or {}
 
-			if not kegiatan.get("is_basic_salary"):
+			if t.upah_kegiatan:
 				if is_basic_salary:
 					amount = 0
 					is_basic_salary = False
+
+				print(t.amount)    
 
 				amount += t.amount
 
 			premi_amount = 0
 			
 			if self.tipe_master_kendaraan in ("Alat Berat"):
-				premi_amount += flt(self.premi_heavy_equipment)
+				premi_amount += flt(t.premi_heavy_equipment)
 			else:
 				premi_amount += flt((t.hasil_kerja or 0) * 
 					self.set_premi_non_heavy_equipment(item, kegiatan), 
@@ -278,10 +290,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# if not self.get("manual_hk"):
 		# 	item.hari_kerja = min(flt(item.qty / (item.volume_basis or 1)), 1)
 
-		item.amount = (item.amount or amount) if is_basic_salary else amount
-
-		if item.upah_is_zero:
-			item.amount = amount = 0			
+		item.amount = (item.amount or amount) if is_basic_salary else amount			
 
 	def set_premi_non_heavy_equipment(self, item, kegiatan):
 		fields =  "holiday" if item.is_holiday else "workday"

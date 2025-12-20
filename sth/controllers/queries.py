@@ -300,24 +300,24 @@ def get_fields(doctype, fields=None):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def unit_query(doctype, txt, searchfield, start, page_len, filters):
+def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doctype: str | None = None):
 	conditions = []
 	fields = get_fields(doctype, ["name"])
 	filters = filters or {}
 
 	user = frappe.session.user
 	employee = frappe.get_value("Employee",{"user_id":user})
-	
+
 	custom_cond = ""
 	if employee:
 		custom_cond = f"and ej.parent = '{employee}'"
-	elif doctype not in ["Employee","Employee Job"]:
+	elif reference_doctype not in ["Employee","Employee Job"]:
 		custom_cond = "and 1=0"
 
 	return frappe.db.sql(
 		"""
 			select {fields} from `tabUnit`
-			join `tabEmployee Job` ej on ej.job_unit = `tabUnit`.name
+			left join `tabEmployee Job` ej on ej.job_unit = `tabUnit`.name
 			where `tabUnit`.{key} like %(txt)s {fcond} {custom_cond}
 			order by
 				(case when locate(%(_txt)s, `tabUnit`.name) > 0 then locate(%(_txt)s, `tabUnit`.name) else 99999 end),

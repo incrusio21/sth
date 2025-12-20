@@ -157,6 +157,7 @@ override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
 	
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
+	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
 	"Item": "sth.overrides.item.Item",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",

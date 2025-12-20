@@ -6,7 +6,22 @@ frappe.ui.form.on("Purchase Invoice", {
           docstatus: 1
         }
       }
-    })
+    }),
+
+      frm.set_query("purchase_receipt", function (doc) {
+        let filters = { docstatus: 1 }
+
+        if (doc.voucher_match_type == "Purchase Order") {
+          filters["purchase_type"] = "Berita Acara"
+        } else if (doc.voucher_match_type == "SPK") {
+          filters["purchase_type"] = "BAPP"
+        }
+
+        return {
+          filters
+        }
+
+      })
   },
 
   refresh(frm) {
@@ -31,13 +46,12 @@ frappe.ui.form.on("Purchase Invoice", {
       },
       __("Get Items From")
     );
-    if(frm.doc.purchase_type){
+    if (frm.doc.purchase_type) {
       filter_purchase_type(frm)
     }
   },
 
-
-  purchase_type(frm){
+  purchase_type(frm) {
     filter_purchase_type(frm)
   },
 
@@ -193,9 +207,9 @@ async function showTrainingEventSelector(frm) {
   d.show();
 }
 
-function filter_purchase_type(frm){
+function filter_purchase_type(frm) {
   if (frm.doc.purchase_type === "Non Voucher Match") {
-    frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+    frm.set_query("item_code", "items", function (doc, cdt, cdn) {
       return {
         filters: {
           is_stock_item: 0,
