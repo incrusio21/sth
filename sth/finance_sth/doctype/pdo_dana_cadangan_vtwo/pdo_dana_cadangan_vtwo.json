@@ -9,6 +9,7 @@
   "section_break_wtzj",
   "naming_series",
   "company",
+  "unit",
   "posting_date",
   "employee",
   "pdo_dana_cadangan_vtwo",
@@ -143,6 +144,14 @@
    "label": "Posting Date",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -150,7 +159,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-01 15:41:48.250739",
+ "modified": "2025-12-20 14:37:27.973635",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Dana Cadangan Vtwo",

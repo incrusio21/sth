@@ -333,4 +333,4 @@ def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doc
 			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
-	,debug=True)
+	)

@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 
 
 class PengeluaranBarang(Document):
@@ -10,4 +11,11 @@ class PengeluaranBarang(Document):
 		self.create_ste()
 	
 	def create_ste(self):
-		pass
+		def postprocess(source,target):
+			pass
+		
+		mapper = {
+
+		}
+
+		doc = get_mapped_doc("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran,mapper,None,postprocess)

@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:TB-{DD}{MM}{YY}-{####}",
  "creation": "2025-12-10 21:41:53.954298",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -22,6 +23,7 @@
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Warehouse",
    "options": "Warehouse"
   },
@@ -43,11 +45,13 @@
   {
    "fieldname": "from_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Tanggal Mulai"
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Sampai Tanggal"
   },
   {
@@ -65,10 +69,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 21:44:05.736420",
+ "modified": "2025-12-20 13:40:52.285879",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Tutup Buku Fisik",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

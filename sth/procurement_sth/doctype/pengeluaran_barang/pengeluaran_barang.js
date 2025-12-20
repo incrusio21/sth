@@ -10,6 +10,15 @@ frappe.ui.form.on("Pengeluaran Barang", {
                 }
             }
         })
+
+        frm.set_query("gudang", function (doc) {
+            return {
+                filters: {
+                    is_group: 0,
+                    company: doc.pt_pemilik_barang
+                }
+            }
+        })
     },
     refresh(frm) {
 
