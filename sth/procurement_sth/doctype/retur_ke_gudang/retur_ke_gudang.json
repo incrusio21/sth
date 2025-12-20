@@ -1,12 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:no_dokumen",
+ "autoname": "naming_series:",
  "creation": "2025-12-10 20:49:25.222543",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "no_dokumen",
+  "naming_series",
   "tanggal",
   "column_break_ufgr",
   "no_pengeluaran",
@@ -24,14 +24,7 @@
  ],
  "fields": [
   {
-   "fieldname": "no_dokumen",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "No Dokumen Retur Ke Gudang",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
+   "default": "Today",
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "label": "Tanggal"
@@ -47,8 +40,9 @@
   },
   {
    "fieldname": "pemilik",
-   "fieldtype": "Data",
-   "label": "PT Pemilik Barang"
+   "fieldtype": "Link",
+   "label": "PT Pemilik Barang",
+   "options": "Company"
   },
   {
    "fieldname": "kode_blok",
@@ -90,7 +84,8 @@
    "fieldname": "jumlah_retur",
    "fieldtype": "Float",
    "label": "Jumlah Retur",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -105,17 +100,23 @@
   {
    "fieldname": "column_break_rkaj",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokument",
+   "options": "RI-.DD.MM.YY.-.####"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 11:23:48.217810",
+ "modified": "2025-12-20 16:05:42.319554",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Gudang",
- "naming_rule": "By fieldname",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

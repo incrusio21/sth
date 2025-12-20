@@ -1,19 +1,20 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:no_dokumen",
+ "autoname": "naming_series:",
  "creation": "2025-12-10 21:05:49.782955",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_5otp",
-  "no_dokumen",
+  "naming_series",
   "diterima_oleh",
   "no_induk_karyawan",
   "column_break_ppsn",
   "tanggal_transaksi",
   "tanggal_kirim",
   "column_break_vfsw",
+  "company",
   "gudang_asal",
   "gudang_tujuan",
   "transportasi_section",
@@ -33,14 +34,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "no_dokumen",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "No Dokumen",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
    "fieldname": "column_break_ppsn",
    "fieldtype": "Column Break"
   },
@@ -48,19 +41,26 @@
    "default": "Today",
    "fieldname": "tanggal_transaksi",
    "fieldtype": "Date",
-   "label": "Tanggal Transaksi"
+   "label": "Tanggal Transaksi",
+   "read_only": 1
   },
   {
    "default": "Today",
    "fieldname": "tanggal_kirim",
    "fieldtype": "Date",
-   "label": "Tanggal Kirim"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Tanggal Kirim",
+   "reqd": 1
   },
   {
    "fieldname": "diterima_oleh",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Diterima Oleh",
-   "options": "Employee"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "fetch_from": "diterima_oleh.custom_nip",
@@ -77,6 +77,7 @@
   {
    "fieldname": "expeditor",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Expeditor",
    "options": "Expeditor"
   },
@@ -98,14 +99,18 @@
   {
    "fieldname": "gudang_tujuan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Gudang Tujuan",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "gudang_asal",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Gudang Asal",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_vfsw",
@@ -140,17 +145,29 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokument",
+   "options": "SJ-.DD.MM.YY.-.####"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 21:38:52.245357",
+ "modified": "2025-12-20 17:15:13.984045",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan",
- "naming_rule": "By fieldname",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
