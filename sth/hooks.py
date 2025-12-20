@@ -146,6 +146,7 @@ boot_session = "sth.startup.boot.boot_session"
 standard_queries = {
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
+	"Unit": "sth.controllers.queries.unit_query",
 }
 
 # DocType Class
