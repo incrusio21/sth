@@ -155,7 +155,7 @@ standard_queries = {
 
 override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
-	
+	"Asset": "sth.overrides.asset.Asset",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
 	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
 	"Item": "sth.overrides.item.Item",
