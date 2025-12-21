@@ -4,14 +4,6 @@ frappe.ui.form.on('Item', {
             generate_item_code(frm);
         }
     },
-    
-    refresh: function(frm) {
-        if (frm.is_new()) {
-            frm.add_custom_button(__('Generate Item Code'), function() {
-                generate_item_code(frm);
-            });
-        }
-    }
 });
 
 function generate_item_code(frm) {

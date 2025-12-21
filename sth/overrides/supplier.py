@@ -1,23 +1,24 @@
 
 import frappe
-from erpnext.stock.doctype.item.item import Item
+from erpnext.buying.doctype.supplier.supplier import Supplier
 
-class Item(Item):    
+class Supplier(Supplier):    
 	def autoname(self):
-		if not self.item_code:
-			self.name = self.generate_item_code()
+		if not self.kode_supplier:
+			self.kode_supplier = self.generate_supplier_code()
+			self.name = self.kode_supplier
 		else:
-			self.name = self.item_code
+			self.name = self.kode_supplier
 	
-	def generate_item_code(self):
+	def generate_supplier_code(self):
 		from datetime import datetime
 		
 		year_month = datetime.now().strftime("%Y%m")
-		prefix = f"ITEM-{year_month}-"
+		prefix = f"SUPP-{year_month}-"
 		
 		last_item = frappe.db.sql("""
 			SELECT name 
-			FROM `tabItem` 
+			FROM `tabSupplier` 
 			WHERE name LIKE %s 
 			ORDER BY name DESC 
 			LIMIT 1
@@ -33,16 +34,15 @@ class Item(Item):
 		return f"{prefix}{new_number:05d}"
 
 @frappe.whitelist()
-def get_next_item_code():
-	"""Generate next item code without saving"""
+def get_next_supplier():
 	from datetime import datetime
-	
+		
 	year_month = datetime.now().strftime("%Y%m")
-	prefix = f"ITEM-{year_month}-"
+	prefix = f"SUPP-{year_month}-"
 	
 	last_item = frappe.db.sql("""
 		SELECT name 
-		FROM `tabItem` 
+		FROM `tabSupplier` 
 		WHERE name LIKE %s 
 		ORDER BY name DESC 
 		LIMIT 1

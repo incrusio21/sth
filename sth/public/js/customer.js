@@ -1,6 +1,10 @@
 frappe.ui.form.on("Customer", {
 	onload: function(frm) {
 
+		if (frm.is_new() && !frm.doc.kode_pelanggan) {
+            generate_kode_customer(frm);
+        }
+
 		if (frm.is_new() && frm.komoditi_editor) {
 			frm.komoditi_editor.reset();
 		}
@@ -36,3 +40,14 @@ frappe.ui.form.on("Customer", {
 		}
 	},
 });
+
+function generate_kode_customer(frm) {
+    frappe.call({
+        method: 'sth.overrides.customer.get_next_customer',
+        callback: function(r) {
+            if (r.message) {
+                frm.set_value('kode_pelanggan', r.message);
+            }
+        }
+    });
+}
