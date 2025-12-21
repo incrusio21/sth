@@ -1,5 +1,7 @@
 frappe.ui.form.on("Purchase Invoice", {
   setup(frm) {
+    frm.cscript.calculate_totals = calculate_totals
+
     frm.set_query("nomor_pembelian", function (doc) {
       return {
         filters: {
@@ -22,6 +24,15 @@ frappe.ui.form.on("Purchase Invoice", {
         }
 
       })
+  },
+
+  onload(frm) {
+    frm._default_coa = {}
+    console.log();
+
+    frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
+      frm._default_coa.ppn = res
+    })
   },
 
   refresh(frm) {
@@ -104,8 +115,76 @@ frappe.ui.form.on("Purchase Invoice", {
         })
     }
 
+  },
+
+  set_value_dpp_and_taxes(frm) {
+    frm.doc.dpp = frm.doc.net_total
+    frm.doc.pph = frm.doc.taxes_and_charges_deducted
+    for (const row of frm.doc.taxes) {
+      if (row.account_head == frm._default_coa.ppn) {
+        frm.doc.ppn = row.tax_amount
+      }
+    }
+    frm.doc.biaya_lainnya = frm.doc.taxes_and_charges_added - frm.doc.ppn
+    refresh_many(["dpp", "pph", "ppn", "biaya_lainnya"])
   }
 });
+
+
+// tambahkan trigger
+function calculate_totals() {
+  // Changing sequence can cause rounding_adjustmentng issue and on-screen discrepency
+  const me = this;
+  const tax_count = this.frm.doc.taxes?.length;
+  const grand_total_diff = this.grand_total_diff || 0;
+
+  this.frm.doc.grand_total = flt(tax_count
+    ? this.frm.doc["taxes"][tax_count - 1].total + grand_total_diff
+    : this.frm.doc.net_total);
+
+  if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
+    this.frm.doc.base_grand_total = (this.frm.doc.total_taxes_and_charges) ?
+      flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total;
+  } else {
+    // other charges added/deducted
+    this.frm.doc.taxes_and_charges_added = this.frm.doc.taxes_and_charges_deducted = 0.0;
+    if (tax_count) {
+      $.each(this.frm.doc["taxes"] || [], function (i, tax) {
+        if (["Valuation and Total", "Total"].includes(tax.category)) {
+          if (tax.add_deduct_tax == "Add") {
+            me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount_after_discount_amount);
+          } else {
+            me.frm.doc.taxes_and_charges_deducted += flt(tax.tax_amount_after_discount_amount);
+          }
+        }
+      });
+
+      frappe.model.round_floats_in(this.frm.doc,
+        ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
+    }
+
+    this.frm.doc.base_grand_total = flt((this.frm.doc.taxes_and_charges_added || this.frm.doc.taxes_and_charges_deducted) ?
+      flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total);
+
+    this.set_in_company_currency(this.frm.doc,
+      ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
+  }
+
+  this.frm.doc.total_taxes_and_charges = flt(this.frm.doc.grand_total - this.frm.doc.net_total
+    - grand_total_diff, precision("total_taxes_and_charges"));
+
+  this.set_in_company_currency(this.frm.doc, ["total_taxes_and_charges"]);
+
+  // Round grand total as per precision
+  frappe.model.round_floats_in(this.frm.doc, ["grand_total", "base_grand_total"]);
+
+  // rounded totals
+  this.set_rounded_total();
+
+  // tambahan disini
+  this.frm.trigger("set_value_dpp_and_taxes")
+}
+
 
 async function showTrainingEventSelector(frm) {
   if (!(frm.doc.supplier)) {
