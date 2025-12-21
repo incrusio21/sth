@@ -134,6 +134,8 @@ frappe.ui.form.on("Harga Beli TBS", {
         });
     },
     price_difference(frm) {
+        let rounded = Math.round(frm.doc.price_difference / 5) * 5;
+        frm.set_value("price_difference", rounded);
         frm.events.calculate_new_rate(frm);
     },
     calculate_new_rate(frm) {
@@ -142,8 +144,8 @@ frappe.ui.form.on("Harga Beli TBS", {
         frm.set_value("new_rate", current + diff);
     },
     apply_price_change(frm) {
-        if (!frm.doc.item_code || !frm.doc.unit || !frm.doc.uom || !frm.doc.supplier) {
-            frappe.msgprint("Unit, Supplier wajib diisi");
+        if (!frm.doc.item_code || !frm.doc.unit || !frm.doc.uom ) {
+            frappe.msgprint("Unit wajib diisi");
             return;
         }
 

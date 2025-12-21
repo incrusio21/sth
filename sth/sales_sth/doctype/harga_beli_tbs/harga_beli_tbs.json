@@ -1,13 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-18 10:24:09.948658",
+ "creation": "2025-12-21 20:39:32.929745",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "column_break_unhx",
   "item_name",
+  "column_break_unhx",
   "item_section",
   "column_break_ofhm",
   "unit",
@@ -148,8 +148,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Supplier",
-   "options": "Supplier",
-   "reqd": 1
+   "options": "Supplier"
   },
   {
    "fieldname": "column_break_ovsp",
@@ -160,7 +159,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-19 14:39:12.870027",
+ "modified": "2025-12-21 22:46:16.625204",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Harga Beli TBS",
@@ -178,7 +177,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

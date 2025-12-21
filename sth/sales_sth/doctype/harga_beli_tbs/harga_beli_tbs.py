@@ -203,10 +203,10 @@ def approve_price_change(ledger_name):
 
 @frappe.whitelist()
 def create_price_note_from_harga_beli_tbs(
-    item_code, unit, supplier, jarak, uom, current_rate, price_difference
+    item_code, unit, jarak, uom, current_rate, price_difference, supplier=None
 ):
-    if not item_code or not unit or not supplier:
-        frappe.throw("Item Code, Unit, dan Supplier wajib diisi")
+    if not unit :
+        frappe.throw("Unit wajib diisi.")
 
     PRICE_PRECISION = 2
 
