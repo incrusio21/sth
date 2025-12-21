@@ -5,11 +5,13 @@ frappe.ui.form.on("Purchase Receipt", {
     setup(frm) {
         sth.form.setup_fieldname_select(frm, "items")
 
-        frm.set_query("purchase_order", () => {
+        frm.set_query("purchase_order", (doc) => {
             return {
                 filters: {
                     docstatus: 1,
-                    per_received: ["<", 100]
+                    per_received: ["<", 100],
+                    unit: doc.unit,
+                    company: doc.company
                 }
             }
         })
