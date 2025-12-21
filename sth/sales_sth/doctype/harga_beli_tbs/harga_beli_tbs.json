@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-18 10:24:09.948658",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "column_break_unhx",
+  "item_name",
+  "item_section",
+  "column_break_ofhm",
+  "unit",
+  "price_list",
+  "column_break_lequ",
+  "jarak",
+  "uom",
+  "column_break_qtcu",
+  "supplier",
+  "current_price_section",
+  "current_rate",
+  "apply_price_change",
+  "column_break_mjgr",
+  "price_difference",
+  "last_update_on",
+  "column_break_ovsp",
+  "new_rate",
+  "remark",
+  "section_break_luvt",
+  "price_change_history"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "TBS",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lequ",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Price List"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "current_price_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "current_rate",
+   "fieldtype": "Float",
+   "label": "Current Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_mjgr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_update_on",
+   "fieldtype": "Date",
+   "label": "Last Update On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "price_difference",
+   "fieldtype": "Float",
+   "label": "Price Difference"
+  },
+  {
+   "fieldname": "apply_price_change",
+   "fieldtype": "Button",
+   "label": "Apply Price Change"
+  },
+  {
+   "fieldname": "new_rate",
+   "fieldtype": "Float",
+   "label": "New Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Remark"
+  },
+  {
+   "fieldname": "section_break_luvt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "price_change_history",
+   "fieldtype": "Table",
+   "label": "Price Change History",
+   "options": "Item Price Control History TBS"
+  },
+  {
+   "fieldname": "column_break_unhx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ofhm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Pabrik",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jarak",
+   "fieldtype": "Select",
+   "label": "Jarak",
+   "options": "\nRING 1\nRING 2"
+  },
+  {
+   "fieldname": "column_break_qtcu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ovsp",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-12-19 14:39:12.870027",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "Harga Beli TBS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

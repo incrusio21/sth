@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-18 13:28:08.268229",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "no_transaksi",
+  "unit",
+  "tanggal",
+  "supplier",
+  "new_price",
+  "jarak",
+  "approver",
+  "last_update",
+  "status",
+  "column_break_qvgw",
+  "effective_date",
+  "old_price",
+  "price_difference",
+  "remark",
+  "approve_btn"
+ ],
+ "fields": [
+  {
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Effective Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_price",
+   "fieldtype": "Float",
+   "label": "Old Price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "price_difference",
+   "fieldtype": "Float",
+   "label": "Price Difference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "new_price",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Harga",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Remark",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qvgw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "no_transaksi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No Transaksi",
+   "options": "Item Price Ledger TBS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kode Organisasi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Approver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_update",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Last Update",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jarak",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Jarak",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:frappe.user.has_role(\"Price Approver\") && doc.status==\"Pending\"",
+   "fieldname": "approve_btn",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Approve"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-19 13:58:30.629638",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "Item Price Control History TBS",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
