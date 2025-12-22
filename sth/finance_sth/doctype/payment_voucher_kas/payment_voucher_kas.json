@@ -1,0 +1,239 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-12-21 12:50:20.284043",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_jcz7",
+  "naming_series",
+  "company",
+  "unit",
+  "account",
+  "bank",
+  "posting_date",
+  "dibayar_dengan",
+  "description",
+  "column_break_nxff",
+  "currency",
+  "exchange_rate",
+  "transaction_type",
+  "payment_voucher_no",
+  "pay_to",
+  "payment_amount",
+  "receive_bank_account",
+  "receiver_name",
+  "reference_bank_number",
+  "accounting_details_tab",
+  "accounting_details_section",
+  "receivable_account",
+  "payable_account",
+  "accounting_dimension_section",
+  "cost_center",
+  "employee",
+  "customer"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_jcz7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "PVK-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Naming Series",
+   "options": "PVK-",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Akun Perkiraan",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Tanggal",
+   "options": "now",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Mata Uang",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Currency",
+   "label": "Kurs",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "label": "Tipe Transaksi",
+   "options": "\nKeluar\nMasuk",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_voucher_no",
+   "fieldtype": "Data",
+   "label": "Nomor Bukti Bayar"
+  },
+  {
+   "fieldname": "pay_to",
+   "fieldtype": "Data",
+   "label": "Bayar Kepada"
+  },
+  {
+   "fieldname": "payment_amount",
+   "fieldtype": "Currency",
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "default": "Cash",
+   "fieldname": "dibayar_dengan",
+   "fieldtype": "Link",
+   "label": "Dibayar Dengan",
+   "options": "Mode of Payment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "receive_bank_account",
+   "fieldtype": "Data",
+   "label": "Nomor Rekening Penerima"
+  },
+  {
+   "fieldname": "receiver_name",
+   "fieldtype": "Data",
+   "label": "Nama Penerima"
+  },
+  {
+   "fieldname": "reference_bank_number",
+   "fieldtype": "Data",
+   "label": "Nomor Bank Referensi"
+  },
+  {
+   "fieldname": "column_break_nxff",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "receivable_account",
+   "fieldtype": "Link",
+   "label": "Receivable Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "payable_account",
+   "fieldtype": "Link",
+   "label": "Payable Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Customer",
+   "options": "Customer"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-21 13:30:43.809043",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Payment Voucher Kas",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

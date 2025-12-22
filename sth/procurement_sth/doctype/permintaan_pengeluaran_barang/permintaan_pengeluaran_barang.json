@@ -13,9 +13,9 @@
   "pt_pemilik_barang",
   "kegiatan",
   "column_break_xvef",
-  "blok",
   "gudang",
   "sub_unit",
+  "blok",
   "column_break_ljmw",
   "nama_karyawan",
   "no_induk_karyawan",
@@ -64,6 +64,7 @@
    "options": "Employee"
   },
   {
+   "fetch_from": "nama_karyawan.designation",
    "fieldname": "nama_jabatan",
    "fieldtype": "Data",
    "label": "Nama Jabatan"
@@ -81,7 +82,7 @@
    "options": "Blok"
   },
   {
-   "fetch_from": "blok.unit",
+   "fetch_from": "gudang.unit",
    "fieldname": "sub_unit",
    "fieldtype": "Link",
    "label": "Sub Unit",
@@ -127,7 +128,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-20 15:00:37.880800",
+ "modified": "2025-12-21 21:30:27.082419",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
