@@ -70,7 +70,7 @@ class Attendance:
     def delete_payment_log(self):
         for epl in frappe.get_all(
             "Employee Payment Log", 
-            filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+            filters={"voucher_type": self.doc.doctype, "voucher_no": self.doc.name}, 
             pluck="name"
         ):
             frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))

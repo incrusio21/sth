@@ -37,6 +37,7 @@ doctype_js = {
 	"Employee": "public/js/employee.js",
 	"Exit Interview": "public/js/exit_interview.js",
 	"Expense Claim": "public/js/expense_claim.js",
+	"Item": "public/js/item.js",
 	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
     "Material Request": "public/js/material_request.js",
@@ -49,6 +50,7 @@ doctype_js = {
     "Request for Quotation" : "public/js/request_for_quotation.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
 	"Sales Order": "public/js/sales_order.js",
+	"Supplier": "public/js/supplier.js",
 	"Supplier Quotation": "public/js/supplier_quotation.js",
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
@@ -145,6 +147,7 @@ boot_session = "sth.startup.boot.boot_session"
 standard_queries = {
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
+	"Unit": "sth.controllers.queries.unit_query",
 }
 
 # DocType Class
@@ -153,13 +156,17 @@ standard_queries = {
 
 override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
-	
+	"Asset": "sth.overrides.asset.Asset",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
+	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
+	"Customer": "sth.overrides.customer.Customer",
+	"Item": "sth.overrides.item.Item",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
+	"Supplier": "sth.overrides.supplier.Supplier",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
 	"Bank Account": "sth.overrides.bank_account.BankAccount",
@@ -295,7 +302,8 @@ override_whitelisted_methods = {
     "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.overrides.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
     "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
-
+    "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
+    "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
 }
 #
 # each overriding function accepts a `data` argument;

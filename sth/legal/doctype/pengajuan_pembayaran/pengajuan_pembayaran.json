@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:54:31.391242",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -17,6 +18,7 @@
   "column_break_nuan",
   "company",
   "expense_account",
+  "tipe_pembayaran",
   "bank_account",
   "no_rek",
   "atas_nama_penerima",
@@ -62,19 +64,23 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "bank_account.bank_account_no",
    "fieldname": "no_rek",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Nomor Rekening",
+   "read_only": 1,
    "reqd": 1
   },
   {
+   "fetch_from": "bank_account.account_name",
    "fieldname": "atas_nama_penerima",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Atas Nama Penerima",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -218,13 +224,20 @@
    "label": "Bank Account",
    "options": "Bank Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "tipe_pembayaran",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Tipe Pembayaran",
+   "options": "Cash\nTransfer"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 16:45:12.804444",
+ "modified": "2025-12-21 20:19:01.378774",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

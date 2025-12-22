@@ -8,16 +8,20 @@
  "field_order": [
   "section_break_bapn",
   "naming_series",
+  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "unit",
   "supplier",
   "spb",
+  "purchase_order",
+  "do_no",
   "column_break_mtrn",
   "transaction_type",
   "receive_type",
   "dispatch_type",
-  "purchase_order",
+  "return_type",
   "vehicle_entry_time",
   "vehicle_exit_time",
   "qr_code_scan",
@@ -86,7 +90,8 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Transaction Type",
-   "options": "Receive\nDispatch"
+   "options": "\nReceive\nDispatch\nReturn",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_mtrn",
@@ -241,11 +246,11 @@
    "label": "Right Image"
   },
   {
-   "depends_on": "eval:doc.receive_type == \"Purchase Order\"",
+   "depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
-   "mandatory_depends_on": "eval:doc.receive_type == \"Purchase Order\"",
+   "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "options": "Purchase Order"
   },
   {
@@ -298,13 +303,40 @@
    "label": "SPB",
    "mandatory_depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "options": "Surat Pengantar Buah"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type == \"Dispatch\" || doc.transaction_type == \"Return\"",
+   "fieldname": "do_no",
+   "fieldtype": "Link",
+   "label": "DO No",
+   "mandatory_depends_on": "eval:doc.transaction_type == \"Dispatch\" || doc.transaction_type == \"Return\"",
+   "options": "Delivery Note"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type == 'Return'",
+   "fieldname": "return_type",
+   "fieldtype": "Select",
+   "label": "Return Type",
+   "options": "\nProduct\nBy Product\nLain - Lain"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 14:07:47.924707",
+ "modified": "2025-12-18 16:52:07.442612",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

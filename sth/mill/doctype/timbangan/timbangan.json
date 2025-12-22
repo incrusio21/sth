@@ -8,16 +8,19 @@
  "field_order": [
   "section_break_bz0d",
   "naming_series",
+  "company",
   "posting_date",
   "posting_time",
-  "supplier",
-  "spb",
-  "purchase_order",
   "column_break_ckwi",
   "ticket_number",
   "type",
   "receive_type",
-  "delivery_type",
+  "dispatch_type",
+  "return_type",
+  "supplier",
+  "spb",
+  "do_no",
+  "purchase_order",
   "section_break_mnhe",
   "unit",
   "divisi",
@@ -29,10 +32,9 @@
   "potongan_sortasi",
   "delivery_section",
   "delivery_order",
-  "purpose",
+  "tujuan",
   "sisa_kontrak",
   "column_break_gypo",
-  "surat_pengantar",
   "no_segel",
   "jumlah_segel",
   "column_break_fsqg",
@@ -82,7 +84,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "options": "\nReceive\nDelivery",
+   "options": "\nReceive\nDispatch\nReturn",
    "reqd": 1
   },
   {
@@ -150,10 +152,12 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.receive_type == \"TBS Eksternal\"",
    "fieldname": "potongan_sortasi",
    "fieldtype": "Percent",
    "label": "Potongan Sortasi",
-   "precision": "2"
+   "precision": "2",
+   "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   },
   {
    "fieldname": "column_break_majq",
@@ -181,7 +185,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:doc.type == 'Delivery'",
+   "depends_on": "eval:doc.type == 'Dispatch'",
    "fieldname": "delivery_section",
    "fieldtype": "Section Break",
    "label": "Delivery Detail"
@@ -192,18 +196,8 @@
    "label": "Delivery Order"
   },
   {
-   "fieldname": "purpose",
-   "fieldtype": "Data",
-   "label": "Purpose"
-  },
-  {
    "fieldname": "column_break_gypo",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "surat_pengantar",
-   "fieldtype": "Data",
-   "label": "Surat Pengantar"
   },
   {
    "fieldname": "no_segel",
@@ -246,14 +240,6 @@
    "fieldtype": "Select",
    "label": "Receive Type",
    "options": "\nTBS Internal\nTBS Eksternal\nLain - Lain"
-  },
-  {
-   "depends_on": "eval: doc.type == 'Delivery'",
-   "fetch_from": "ticket_number.dispatch_type",
-   "fieldname": "delivery_type",
-   "fieldtype": "Select",
-   "label": "Delivery Type",
-   "options": "\nProduct\nBy Product\nLain - Lain"
   },
   {
    "depends_on": "eval:doc.receive_type == 'TBS Internal'",
@@ -320,13 +306,49 @@
    "label": "Purchase Order",
    "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "options": "Purchase Order"
+  },
+  {
+   "depends_on": "eval: doc.type == 'Dispatch'",
+   "fetch_from": "ticket_number.dispatch_type",
+   "fieldname": "dispatch_type",
+   "fieldtype": "Select",
+   "label": "Dispatch Type",
+   "options": "\nProduct\nBy Product\nLain - Lain"
+  },
+  {
+   "fieldname": "tujuan",
+   "fieldtype": "Link",
+   "label": "Tujuan",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.type == \"Return\" || doc.type == \"Dispatch\"",
+   "fieldname": "do_no",
+   "fieldtype": "Link",
+   "label": "DO No",
+   "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
+   "options": "Purchase Order"
+  },
+  {
+   "depends_on": "eval: doc.type == 'Return'",
+   "fetch_from": "ticket_number.return_type",
+   "fieldname": "return_type",
+   "fieldtype": "Select",
+   "label": "Return Type",
+   "options": "\nProduct\nBy Product\nLain - Lain"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-17 10:22:22.819444",
+ "modified": "2025-12-18 16:57:05.646808",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

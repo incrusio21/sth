@@ -51,6 +51,7 @@ class PermintaanDanaOperasional(Document):
 				"employee": frappe.db.get_single_value("Payment Settings", "internal_employee"),
 				"cost_center": self.get(f"{fieldname}_cost_center"),
 				"company": self.company,
+				"unit": self.unit,
 				"posting_date": self.posting_date,
 				"required_by": self.required_by,
 			}

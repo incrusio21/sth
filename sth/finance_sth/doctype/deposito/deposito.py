@@ -397,7 +397,7 @@ def make_new_depo_roll_over(data):
 	new_deposito.non_current_asset = data.non_current_asset
 	new_deposito.roll_overed_from = data.name
 	new_deposito.save()
-	new_deposito.submit()
+	# new_deposito.submit()
 
 def make_roll_over_gl(data):
 	company = frappe.db.get_value("Company", data.company, "*")

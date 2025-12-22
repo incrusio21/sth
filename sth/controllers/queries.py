@@ -296,3 +296,41 @@ def get_fields(doctype, fields=None):
 		fields.insert(1, meta.title_field.strip())
 	
 	return unique([f"`tab{doctype}`.{f}" for f in fields])
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doctype: str | None = None):
+	conditions = []
+	fields = get_fields(doctype, ["name"])
+	filters = filters or {}
+
+	user = frappe.session.user
+	employee = frappe.get_value("Employee",{"user_id":user})
+
+	custom_cond = ""
+	if employee:
+		custom_cond = f"and ej.parent = '{employee}'"
+	elif reference_doctype not in ["Employee","Employee Job"] and user != "Administrator":
+		custom_cond = "and 1=0"
+
+	return frappe.db.sql(
+		"""
+			select {fields} from `tabUnit`
+			left join `tabEmployee Job` ej on ej.job_unit = `tabUnit`.name
+			where `tabUnit`.{key} like %(txt)s {fcond} {custom_cond}
+			order by
+				(case when locate(%(_txt)s, `tabUnit`.name) > 0 then locate(%(_txt)s, `tabUnit`.name) else 99999 end),
+				`tabUnit`.idx desc,
+				`tabUnit`.name
+			limit %(page_len)s offset %(start)s
+		""".format(
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"fcond": get_filters_cond(doctype, filters, conditions) if filters else "",
+				"custom_cond":custom_cond
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)

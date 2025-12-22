@@ -15,6 +15,7 @@
   "unit",
   "bank",
   "bank_account",
+  "currency",
   "type",
   "jenis_fasilitas",
   "loan_purpose",
@@ -74,7 +75,7 @@
   {
    "fieldname": "transaction_number",
    "fieldtype": "Data",
-   "label": "No. Peminjaman",
+   "label": "Nomor Pinjaman",
    "read_only": 1
   },
   {
@@ -368,13 +369,21 @@
    "label": "Debit To",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fetch_from": "bank_account.currency",
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Mata Uang",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 15:04:51.145559",
+ "modified": "2025-12-21 14:07:14.387043",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",

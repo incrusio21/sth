@@ -1,30 +1,25 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:no_document_permintaan",
+ "autoname": "naming_series:",
  "creation": "2025-12-10 20:02:55.879388",
  "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_lnip",
-  "no_document_permintaan",
+  "naming_series",
   "tanggal",
-  "column_break_xvef",
   "pt_pemilik_barang",
+  "kegiatan",
+  "column_break_xvef",
   "gudang",
+  "sub_unit",
+  "blok",
   "column_break_ljmw",
-  "nama_jabatan",
   "nama_karyawan",
   "no_induk_karyawan",
-  "rincian_section",
-  "blok",
-  "kendaraan",
-  "column_break_czpq",
-  "sub_unit",
-  "column_break_gnfx",
-  "kegiatan",
-  "km",
+  "nama_jabatan",
   "section_break_ubqb",
   "items",
   "amended_from"
@@ -36,9 +31,10 @@
   },
   {
    "fieldname": "pt_pemilik_barang",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "PT Pemilik Barang"
+   "label": "PT Pemilik Barang",
+   "options": "Company"
   },
   {
    "default": "Today",
@@ -61,13 +57,6 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "no_document_permintaan",
-   "fieldtype": "Data",
-   "label": "No Document Permintaan",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
    "fieldname": "nama_karyawan",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -75,6 +64,7 @@
    "options": "Employee"
   },
   {
+   "fetch_from": "nama_karyawan.designation",
    "fieldname": "nama_jabatan",
    "fieldtype": "Data",
    "label": "Nama Jabatan"
@@ -86,36 +76,17 @@
    "label": "No Induk Karyawan"
   },
   {
-   "fieldname": "rincian_section",
-   "fieldtype": "Section Break",
-   "label": "Rincian"
-  },
-  {
-   "fieldname": "kendaraan",
-   "fieldtype": "Link",
-   "label": "Kendaraan",
-   "options": "Vehicle"
-  },
-  {
-   "fieldname": "column_break_czpq",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "blok",
    "fieldtype": "Link",
    "label": "Blok",
    "options": "Blok"
   },
   {
+   "fetch_from": "gudang.unit",
    "fieldname": "sub_unit",
    "fieldtype": "Link",
    "label": "Sub Unit",
    "options": "Unit"
-  },
-  {
-   "fieldname": "km",
-   "fieldtype": "Float",
-   "label": "KM"
   },
   {
    "fieldname": "kegiatan",
@@ -147,19 +118,21 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_gnfx",
-   "fieldtype": "Column Break"
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokument",
+   "options": "PPB-.DD.MM.YY.-.####"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 11:24:53.096992",
+ "modified": "2025-12-21 21:30:27.082419",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
- "naming_rule": "By fieldname",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -179,5 +152,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

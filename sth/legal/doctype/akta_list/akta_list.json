@@ -9,9 +9,9 @@
   "header_section",
   "nomor_akta",
   "tgl_akta",
+  "jenis_transaksi",
   "column_break_auht",
   "company",
-  "jenis_transaksi",
   "section_break_yvor",
   "nama_notaris",
   "nomor_sk_kehakiman",
@@ -125,14 +125,14 @@
   {
    "fieldname": "jenis_transaksi",
    "fieldtype": "Select",
-   "label": "Jenis Transaksi",
-   "options": "Pendirian\nPerubahan Anggaran Dasar\nPerubahan Data Perseroan\nLainnya"
+   "label": "Jenis Akta",
+   "options": "Pendirian\nPerubahan Anggaran Dasar\nPerubahan Data Perseroan\nAkta Laporan Keuangan Tahunan\nLainnya"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-17 15:42:54.797930",
+ "modified": "2025-12-22 09:40:05.523792",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",

@@ -1,0 +1,146 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SG-{DD}{MM}{YY}-{#####}",
+ "creation": "2025-12-18 16:41:46.453622",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "company",
+  "vehicle",
+  "status",
+  "column_break_lmer",
+  "segel_start_no",
+  "segel_end_no",
+  "remaining_cheque_warning",
+  "segels_total",
+  "remaining_segels",
+  "segel_usage_history_tab",
+  "table_ezdi",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "width": "505"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Vehicle"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Available\nEmpty"
+  },
+  {
+   "fieldname": "column_break_lmer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "segel_start_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Segel Start Number",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "segel_end_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Segel End Number",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "remaining_cheque_warning",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Remaining Cheque Warning",
+   "reqd": 1
+  },
+  {
+   "fieldname": "segels_total",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Segels Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remaining_segels",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Remaining Segels",
+   "read_only": 1
+  },
+  {
+   "fieldname": "segel_usage_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Segel Usage History"
+  },
+  {
+   "fieldname": "table_ezdi",
+   "fieldtype": "Table",
+   "options": "Segel History Usage"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Segel",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-18 16:49:22.597598",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Segel",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

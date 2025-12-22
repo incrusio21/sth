@@ -1,0 +1,190 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-21 20:32:47.631681",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "price_list",
+  "supplier",
+  "unit",
+  "jarak",
+  "uom",
+  "old_rate",
+  "new_rate",
+  "diff",
+  "approver",
+  "last_update",
+  "reference_doctype",
+  "reference_docname",
+  "effective_date",
+  "status",
+  "event_type",
+  "remark",
+  "amended_from",
+  "applied_to_item_price",
+  "applied_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "item_code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "price_list",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "uom",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_rate",
+   "fieldtype": "Currency",
+   "label": "old_rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "new_rate",
+   "fieldtype": "Currency",
+   "label": "new_rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "diff",
+   "fieldtype": "Currency",
+   "label": "diff",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Data",
+   "label": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_docname",
+   "fieldtype": "Link",
+   "label": "reference_docname",
+   "options": "Item Price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "remark",
+   "read_only": 1
+  },
+  {
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "label": "effective_date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "event_type",
+   "fieldtype": "Data",
+   "label": "event_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Data",
+   "label": "approver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_update",
+   "fieldtype": "Data",
+   "label": "last_update",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "label": "unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "status",
+   "options": "Pending\nApproved\nRejected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jarak",
+   "fieldtype": "Data",
+   "label": "jarak",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Item Price Ledger TBS",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "applied_to_item_price",
+   "fieldtype": "Check",
+   "label": "applied_to_item_price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "applied_on",
+   "fieldtype": "Date",
+   "label": "applied_on",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-21 20:35:24.919186",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "Item Price Ledger TBS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

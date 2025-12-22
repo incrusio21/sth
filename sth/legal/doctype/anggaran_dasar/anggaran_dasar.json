@@ -22,6 +22,8 @@
   "amended_from",
   "section_break_psjl",
   "akta_saham",
+  "jenis_akta",
+  "keterangan",
   "saham",
   "section_break_sslx",
   "column_break_pojw",
@@ -101,7 +103,8 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "ADL-"
+   "options": "ADL-",
+   "width": "200px"
   },
   {
    "fieldname": "section_break_sslx",
@@ -134,19 +137,19 @@
   {
    "fieldname": "akta_saham",
    "fieldtype": "Link",
-   "label": "Akta",
+   "label": "Akta Header",
    "options": "Akta List"
   },
   {
    "fieldname": "akta_pengurus",
    "fieldtype": "Link",
-   "label": "Akta",
+   "label": "Akta Susunan Pengurus",
    "options": "Akta List"
   },
   {
    "fieldname": "akta_kriteria",
    "fieldtype": "Link",
-   "label": "Akta",
+   "label": "Akta Kriteria",
    "options": "Akta List"
   },
   {
@@ -200,12 +203,28 @@
    "hidden": 1,
    "label": "Abbr",
    "read_only": 1
+  },
+  {
+   "fetch_from": "akta_saham.jenis_transaksi",
+   "fieldname": "jenis_akta",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Jenis Akta",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "akta_saham.keterangan",
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Keterangan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-17 15:21:33.389382",
+ "modified": "2025-12-22 09:49:08.462568",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",

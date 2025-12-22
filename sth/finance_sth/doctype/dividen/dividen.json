@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-12-03 11:20:01.318718",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -13,7 +14,7 @@
   "unit_one",
   "bank_one",
   "bank_account_one",
-  "currency",
+  "currency1",
   "status",
   "column_break_honx",
   "transaction_type",
@@ -21,7 +22,9 @@
   "unit_two",
   "bank_two",
   "bank_account_two",
+  "currency2",
   "total",
+  "upload_bukti",
   "accounting_details_section",
   "payable_account",
   "equity_account",
@@ -65,15 +68,6 @@
    "label": "Company 1",
    "options": "Company",
    "reqd": 1
-  },
-  {
-   "fetch_from": "bank_account.currency",
-   "fieldname": "currency",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Mata Uang",
-   "options": "Currency",
-   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -230,13 +224,37 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "bank_account_one.currency",
+   "fieldname": "currency1",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mata Uang Bank 1",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_account_two.currency",
+   "fieldname": "currency2",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mata Uang Bank 2",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upload_bukti",
+   "fieldtype": "Attach",
+   "in_preview": 1,
+   "label": "Upload Bukti"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-19 10:48:04.068455",
+ "modified": "2025-12-21 20:09:17.912731",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Dividen",

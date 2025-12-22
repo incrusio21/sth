@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Wbl6XNpx4M\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Legal</span>\",\"col\":12}},{\"id\":\"kx_-k1ak0P\",\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"id\":\"vQ_eEv09sY\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":3}},{\"id\":\"Pac630pQUG\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Borongan dan Capex\",\"col\":5}},{\"id\":\"VRzQRuXCoc\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}}]",
+ "content": "[{\"id\":\"Wbl6XNpx4M\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Legal</span>\",\"col\":12}},{\"id\":\"kx_-k1ak0P\",\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"id\":\"ZF1xgBTJ9c\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":4}},{\"id\":\"Pac630pQUG\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Borongan dan Capex\",\"col\":4}},{\"id\":\"VRzQRuXCoc\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}}]",
  "creation": "2025-09-12 16:22:06.684546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -16,95 +16,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Transaksi",
-   "link_count": 8,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Anggaran Dasar",
-   "link_count": 0,
-   "link_to": "Anggaran Dasar",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Dokumen Perijinan",
-   "link_count": 0,
-   "link_to": "Dokumen Perijinan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sertifikat Tanah",
-   "link_count": 0,
-   "link_to": "Sertifikat Tanah",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "PAD GIS",
-   "link_count": 0,
-   "link_to": "GIS",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ganti Rugi Lahan",
-   "link_count": 0,
-   "link_to": "Ganti Rugi Lahan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pengajuan Pembayaran",
-   "link_count": 0,
-   "link_to": "Pengajuan Pembayaran",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Litigasi",
-   "link_count": 0,
-   "link_to": "Litigasi",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Surat Menyurat",
-   "link_count": 0,
-   "link_to": "Surat Menyurat",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Transaksi Borongan dan Capex",
    "link_count": 3,
    "link_type": "DocType",
@@ -116,9 +27,10 @@
    "is_query_report": 0,
    "label": "Proposal",
    "link_count": 0,
-   "link_to": "Purchase Order",
-   "link_type": "DocType",
+   "link_to": "Proposal",
+   "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Purchase Order",
    "type": "Link"
   },
   {
@@ -144,8 +56,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Project Management",
-   "link_count": 1,
+   "label": "Transaksi",
+   "link_count": 8,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -153,11 +65,89 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Project",
+   "label": "Anggaran Dasar",
    "link_count": 0,
-   "link_to": "Project",
-   "link_type": "DocType",
+   "link_to": "Anggaran Dasar",
+   "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Anggaran Dasar",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dokumen Perijinan",
+   "link_count": 0,
+   "link_to": "Dokumen Perijinan",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Dokumen Perijinan",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sertifikat Tanah",
+   "link_count": 0,
+   "link_to": "Sertifikat Tanah",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Sertifikat Tanah",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "PAD/GIS",
+   "link_count": 0,
+   "link_to": "PAD GIS",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "GIS",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ganti Rugi Lahan",
+   "link_count": 0,
+   "link_to": "Ganti Rugi Lahan",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Ganti Rugi Lahan",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengajuan Pembayaran",
+   "link_count": 0,
+   "link_to": "Pengajuan Pembayaran",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Pengajuan Pembayaran",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Litigasi",
+   "link_count": 0,
+   "link_to": "Litigasi",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Litigasi",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Surat Menyurat",
+   "link_count": 0,
+   "link_to": "Surat Menyurat",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Surat Menyurat",
    "type": "Link"
   },
   {
@@ -185,8 +175,9 @@
    "label": "Daftar Masyarakat",
    "link_count": 0,
    "link_to": "Daftar Masyarakat",
-   "link_type": "DocType",
+   "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Daftar Masyarakat",
    "type": "Link"
   },
   {
@@ -258,9 +249,29 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project Management",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project Management",
+   "link_count": 0,
+   "link_to": "Project Management",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Project",
+   "type": "Link"
   }
  ],
- "modified": "2025-12-14 05:32:34.174252",
+ "modified": "2025-12-21 21:53:41.514333",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",
