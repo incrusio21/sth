@@ -50,7 +50,7 @@ frappe.ui.form.on("Payment Entry", {
                 }
             }
         })
-        frm.ignore_doctypes_on_cancel_all = ["Deposito Interest", "Deposito", "Disbursement Loan", "Installment Loan"];
+        frm.ignore_doctypes_on_cancel_all = ["Deposito Interest", "Deposito", "Disbursement Loan", "Installment Loan", "Payment Voucher Kas"];
     },
     party_type(frm){
         frm.set_value("internal_employee", 0)
@@ -80,7 +80,7 @@ frappe.ui.form.on("Payment Entry", {
 
 			if (
 				frm.doc.party_type == "Customer" &&
-				!["Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Deposito Interest", "Disbursement Loan"].includes(row.reference_doctype)
+				!["Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Deposito Interest", "Disbursement Loan", "Payment Voucher Kas"].includes(row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
 				frappe.msgprint(
