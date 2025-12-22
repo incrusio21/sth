@@ -14,5 +14,13 @@ frappe.ui.form.on("Surat Jalan", {
                 }
             })
         });
+
+        frm.set_query("unit", function (doc) {
+            return {
+                filters: {
+                    company: doc.company
+                }
+            }
+        })
     },
 });

@@ -8,22 +8,30 @@ frappe.ui.form.on("Purchase Invoice", {
           docstatus: 1
         }
       }
-    }),
+    })
 
-      frm.set_query("purchase_receipt", function (doc) {
-        let filters = { docstatus: 1 }
-
-        if (doc.voucher_match_type == "Purchase Order") {
-          filters["purchase_type"] = "Berita Acara"
-        } else if (doc.voucher_match_type == "SPK") {
-          filters["purchase_type"] = "BAPP"
+    frm.set_query("unit", function (doc) {
+      return {
+        filters: {
+          company: doc.company
         }
+      }
+    })
 
-        return {
-          filters
-        }
+    frm.set_query("purchase_receipt", function (doc) {
+      let filters = { docstatus: 1 }
 
-      })
+      if (doc.voucher_match_type == "Purchase Order") {
+        filters["purchase_type"] = "Berita Acara"
+      } else if (doc.voucher_match_type == "SPK") {
+        filters["purchase_type"] = "BAPP"
+      }
+
+      return {
+        filters
+      }
+
+    })
   },
 
   onload(frm) {

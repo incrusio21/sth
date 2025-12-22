@@ -11,7 +11,8 @@ frappe.ui.form.on("Purchase Receipt", {
                     docstatus: 1,
                     per_received: ["<", 100],
                     unit: doc.unit,
-                    company: doc.company
+                    company: doc.company,
+                    supplier: doc.supplier
                 }
             }
         })

@@ -19,6 +19,14 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
                 }
             }
         })
+
+        frm.set_query("blok", function (doc) {
+            return {
+                filters: {
+                    unit: doc.sub_unit,
+                }
+            }
+        })
     },
 
     refresh(frm) {
@@ -29,14 +37,14 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
         if (!frm.doc.sub_unit) {
             return
         }
-        frappe.xcall("frappe.client.get_value", {
-            doctype: "Blok",
-            fieldname: ["name"],
-            filters: {
-                unit: frm.doc.sub_unit
-            }
-        }).then((res) => {
-            frm.set_value("blok", res.name)
-        })
+        // frappe.xcall("frappe.client.get_value", {
+        //     doctype: "Blok",
+        //     fieldname: ["name"],
+        //     filters: {
+        //         unit: frm.doc.sub_unit
+        //     }
+        // }).then((res) => {
+        //     frm.set_value("blok", res.name)
+        // })
     }
 });

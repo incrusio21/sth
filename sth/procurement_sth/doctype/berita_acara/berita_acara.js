@@ -8,7 +8,6 @@ frappe.ui.form.on("Berita Acara", {
     },
 
     refresh(frm) {
-
         if (frm.doc.docstatus == 1) {
             frm.add_custom_button("Material Request", function () {
                 frappe.model.open_mapped_doc({
@@ -17,6 +16,10 @@ frappe.ui.form.on("Berita Acara", {
                     run_link_triggers: 1
                 })
             }, __("Create"))
+        }
+
+        if (frm.is_new()) {
+            frm.set_value("make", frappe.session.user)
         }
     },
 
