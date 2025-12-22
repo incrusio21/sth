@@ -27,12 +27,16 @@
   "reference_bank_number",
   "accounting_details_tab",
   "accounting_details_section",
-  "receivable_account",
-  "payable_account",
+  "debit_to",
+  "credit_to",
   "accounting_dimension_section",
   "cost_center",
   "employee",
-  "customer"
+  "customer",
+  "amended_from",
+  "more_information_tab",
+  "grand_total",
+  "outstanding_amount"
  ],
  "fields": [
   {
@@ -81,10 +85,10 @@
    "reqd": 1
   },
   {
+   "default": "now",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Tanggal",
-   "options": "now",
    "reqd": 1
   },
   {
@@ -98,6 +102,7 @@
    "fieldname": "exchange_rate",
    "fieldtype": "Currency",
    "label": "Kurs",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -166,22 +171,6 @@
    "label": "Accounting Details"
   },
   {
-   "fieldname": "receivable_account",
-   "fieldtype": "Link",
-   "label": "Receivable Account",
-   "options": "Account",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "payable_account",
-   "fieldtype": "Link",
-   "label": "Payable Account",
-   "options": "Account",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "accounting_dimension_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimension"
@@ -205,13 +194,56 @@
    "hidden": 1,
    "label": "Customer",
    "options": "Customer"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Payment Voucher Kas",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Receivable Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Payable Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 13:30:43.809043",
+ "modified": "2025-12-22 13:10:09.228633",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas",
