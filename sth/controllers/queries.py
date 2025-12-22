@@ -307,10 +307,12 @@ def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doc
 
 	user = frappe.session.user
 	employee = frappe.get_value("Employee",{"user_id":user})
+	exist_jobs = frappe.db.exists("Employee Job",{"parent": employee})
 
 	custom_cond = ""
 	if employee:
-		custom_cond = f"and ej.parent = '{employee}'"
+		if exist_jobs:
+			custom_cond = f"and ej.parent = '{employee}'"
 	elif reference_doctype not in ["Employee","Employee Job"] and user != "Administrator":
 		custom_cond = "and 1=0"
 
