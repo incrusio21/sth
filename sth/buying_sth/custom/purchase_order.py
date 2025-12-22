@@ -61,7 +61,7 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
             )
 
     def validate_progress(child_item, new_data):
-        if flt(new_data.get("progress_received")) < flt(child_item.received_qty/child_item.qty*100):
+        if flt(new_data.get("progress_received")) < flt(child_item.received_qt):
             frappe.throw(_("Cannot set Progress less than received quantity"))
 
     data = json.loads(trans_items)
@@ -96,7 +96,7 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
     
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
-    has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
+    has_unit_price_items, purchase_type = frappe.db.get_value("Purchase Order", source_name, ["has_unit_price_items", "purchase_type"])
 
     def set_missing_values(source, target):
         target.purchase_type = frappe.get_value("Purchase Type", source.purchase_type, "future_type")
@@ -107,16 +107,21 @@ def make_purchase_receipt(source_name, target_doc=None):
     def is_unit_price_row(source):
         return has_unit_price_items and source.qty == 0
 
+    def max_qty(source):
+        max_qty = source.qty
+        if purchase_type in ("Borongan", "Capex"):
+            max_qty = source.progress_received
+            
+        return max_qty
+    
     def update_item(obj, target, source_parent):
-        max_qty = obj.qty
-        if source_parent.purchase_type in ("Borongan", "Capex"):
-            max_qty = flt(obj.qty*obj.progress_received/100)
-        
-        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(max_qty) - flt(obj.received_qty)
-        target.stock_qty = (flt(max_qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-        target.amount = (flt(max_qty) - flt(obj.received_qty)) * flt(obj.rate)
+        qty = max_qty(obj)
+
+        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(qty) - flt(obj.received_qty)
+        target.stock_qty = (flt(qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+        target.amount = (flt(qty) - flt(obj.received_qty)) * flt(obj.rate)
         target.base_amount = (
-            (flt(max_qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+            (flt(qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
         )
 
     doc = get_mapped_doc(
@@ -144,7 +149,7 @@ def make_purchase_receipt(source_name, target_doc=None):
                 },
                 "postprocess": update_item,
                 "condition": lambda doc: (
-                    True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
+                    True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(max_qty(doc))
                 )
                 and doc.delivered_by_supplier != 1,
             },

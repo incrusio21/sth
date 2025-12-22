@@ -65,7 +65,7 @@ def update_task_progress(self, method):
             """.format(
             frappe.db.escape(self.name),
             frappe.db.escape(item.name),
-            item.progress_received,
+            flt(item.progress_received/item.qty*100),
         )
 
         order_item.append(item.name)
