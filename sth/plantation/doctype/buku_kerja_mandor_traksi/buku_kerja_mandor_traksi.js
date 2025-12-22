@@ -239,21 +239,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
   	set_query_field() {
-		this.frm.set_query("unit", function (doc) {
-			return {
-				filters: {
-					company: ["=", doc.company]
-				}
-			};
-		});
-
-		this.frm.set_query("divisi", function (doc) {
-			return {
-				filters: {
-					unit: ["=", doc.unit]
-				}
-			};
-		});
+		super.set_query_field()
 
 		this.frm.set_query("blok", function (doc) {
 			return {

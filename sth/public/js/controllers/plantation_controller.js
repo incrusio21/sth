@@ -69,6 +69,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
 
             return {
                 filters: {
+                    plantation: 1,
                     company: doc.company
                 }
             }

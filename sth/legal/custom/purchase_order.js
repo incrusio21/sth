@@ -3,6 +3,14 @@
 
 frappe.ui.form.on("Purchase Order", {
     set_query_field(frm) {
+        frm.set_query("unit", function (doc) {
+			return {
+				filters: {
+					company: ["=", doc.company],
+				},
+			};
+		});
+
         frm.set_query("kegiatan", "items", function (doc) {
 			return {
 				filters: {
@@ -11,6 +19,14 @@ frappe.ui.form.on("Purchase Order", {
 			};
 		});
 
+        frm.set_query("blok", "items", function (doc) {
+			return {
+				filters: {
+					unit: ["=", doc.unit],
+				},
+			};
+		});
+        
         if (frm.doc.docstatus == 1 && !["Closed", "Delivered"].includes(frm.doc.status)) {
             if (
                 frm.doc.status !== "Closed" &&
