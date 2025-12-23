@@ -80,3 +80,7 @@ class SuratJalan(Document):
 		doc = get_mapped_doc("Surat Jalan",self.name,mapper,None,postprocess,True)
 		doc.insert()
 		doc.submit()
+
+@frappe.whitelist()
+def get_items_from_doctype(doctype):
+	pass
