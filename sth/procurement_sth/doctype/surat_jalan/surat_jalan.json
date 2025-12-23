@@ -7,38 +7,26 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_5otp",
   "naming_series",
-  "diterima_oleh",
-  "no_induk_karyawan",
-  "column_break_ppsn",
-  "tanggal_transaksi",
-  "tanggal_kirim",
-  "unit",
-  "column_break_vfsw",
   "company",
   "gudang_asal",
-  "gudang_tujuan",
-  "transportasi_section",
+  "tanggal_transaksi",
+  "tanggal_kirim",
   "expeditor",
-  "jenis_transportasi",
-  "kode_traksi",
-  "column_break_mfum",
   "no_polisi",
+  "jenis_transportasi",
+  "column_break_vsda",
+  "diterima_oleh",
+  "no_induk_karyawan",
+  "gudang_tujuan",
+  "kode_traksi",
+  "unit",
   "catatan",
   "section_break_omcd",
   "items",
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "section_break_5otp",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_ppsn",
-   "fieldtype": "Column Break"
-  },
   {
    "default": "Today",
    "fieldname": "tanggal_transaksi",
@@ -71,12 +59,6 @@
    "label": "No Induk Karyawan"
   },
   {
-   "collapsible": 1,
-   "fieldname": "transportasi_section",
-   "fieldtype": "Section Break",
-   "label": "Transportasi"
-  },
-  {
    "fieldname": "expeditor",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -88,10 +70,6 @@
    "fieldtype": "Link",
    "label": "Jenis Transportasi",
    "options": "Jenis Transportasi"
-  },
-  {
-   "fieldname": "column_break_mfum",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "no_polisi",
@@ -113,10 +91,6 @@
    "label": "Gudang Asal",
    "options": "Warehouse",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_vfsw",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "kode_traksi",
@@ -157,7 +131,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "label": "Company",
+   "label": "Nama Organisasi",
    "options": "Company"
   },
   {
@@ -166,13 +140,17 @@
    "in_preview": 1,
    "label": "Unit",
    "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_vsda",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 19:49:10.643602",
+ "modified": "2025-12-23 14:22:44.883772",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan",

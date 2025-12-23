@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-22 13:38:27.130483",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_njhz",
+  "tanggal",
+  "company",
+  "unit",
+  "column_break_cjnu",
+  "tipe",
+  "nomor_timbangan",
+  "upload_foto",
+  "section_break_pbuz",
+  "mentah",
+  "tandan_kosong",
+  "brondolan",
+  "potongan_sortasi",
+  "column_break_oopo",
+  "masak",
+  "terlalu_masak",
+  "restan",
+  "column_break_diah",
+  "abnormal",
+  "dimakan_tikus",
+  "sampah",
+  "amended_from",
+  "section_break_uqvp",
+  "column_break_ztgp",
+  "terlalu_masak_2",
+  "column_break_ennw",
+  "tangkai_panjang",
+  "column_break_wimj",
+  "brondolan_busuk"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_njhz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal",
+   "options": "Today"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_cjnu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "label": "Tipe",
+   "options": "\nInternal\nExternal"
+  },
+  {
+   "fieldname": "nomor_timbangan",
+   "fieldtype": "Link",
+   "label": "Nomor Timbangan",
+   "options": "Timbangan"
+  },
+  {
+   "fieldname": "upload_foto",
+   "fieldtype": "Attach",
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "section_break_pbuz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "mentah",
+   "fieldtype": "Percent",
+   "label": "Mentah"
+  },
+  {
+   "default": "0",
+   "fieldname": "tandan_kosong",
+   "fieldtype": "Percent",
+   "label": "Tandan Kosong"
+  },
+  {
+   "default": "0",
+   "fieldname": "brondolan",
+   "fieldtype": "Percent",
+   "label": "Brondolan"
+  },
+  {
+   "default": "0",
+   "fieldname": "potongan_sortasi",
+   "fieldtype": "Percent",
+   "label": "Potongan Sortasi"
+  },
+  {
+   "fieldname": "column_break_oopo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "masak",
+   "fieldtype": "Percent",
+   "label": "Masak"
+  },
+  {
+   "default": "0",
+   "fieldname": "terlalu_masak",
+   "fieldtype": "Percent",
+   "label": "Terlalu Masak"
+  },
+  {
+   "default": "0",
+   "fieldname": "restan",
+   "fieldtype": "Percent",
+   "label": "Restan"
+  },
+  {
+   "fieldname": "column_break_diah",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "abnormal",
+   "fieldtype": "Percent",
+   "label": "Abnormal"
+  },
+  {
+   "default": "0",
+   "fieldname": "dimakan_tikus",
+   "fieldtype": "Percent",
+   "label": "Dimakan Tikus"
+  },
+  {
+   "default": "0",
+   "fieldname": "sampah",
+   "fieldtype": "Percent",
+   "label": "Sampah"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sortasi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_uqvp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ztgp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ennw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tangkai_panjang",
+   "fieldtype": "Float",
+   "label": "Tangkai Panjang"
+  },
+  {
+   "fieldname": "column_break_wimj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "brondolan_busuk",
+   "fieldtype": "Float",
+   "label": "Brondolan busuk"
+  },
+  {
+   "default": "0",
+   "fieldname": "terlalu_masak_2",
+   "fieldtype": "Float",
+   "label": "Terlalu Masak"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-22 15:57:05.109854",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sortasi",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

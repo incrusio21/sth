@@ -13,6 +13,14 @@ class PengeluaranBarang(Document):
 		ste = frappe.get_doc("Stock Entry",{"references": self.no_permintaan_pengeluaran})
 		ste.cancel()
 
+	@frappe.whitelist()
+	def set_items(self):
+		self.items = []
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","jumlah","kendaraan","km","kegiatan"])
+
+		for row in items:
+			self.append("items",row)
+
 	def create_ste(self):
 		def postprocess(source,target):
 			target.stock_entry_type = "Material Issue"
