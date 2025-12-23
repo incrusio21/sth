@@ -67,6 +67,13 @@ frappe.ui.form.on("Installment Loan Bank", {
 })
 
 function filterBankAccount(frm) {
+    frm.set_query('bank', (doc)=>{
+        return{
+            filters:{
+                company: ["=", doc.company]
+            }
+        }
+    })
     frm.set_query('bank_account', () => {
         return{
             filters: {
