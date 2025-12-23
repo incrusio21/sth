@@ -75,3 +75,24 @@ def make_asset_movement(assets, purpose=None):
 
 	if asset_movement.get("assets"):
 		return asset_movement.as_dict()
+
+@frappe.whitelist()
+def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
+	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
+
+	if not matching_items:
+		frappe.throw(_(f"Selected {doctype} does not contain the Item Code {item_code}"))
+
+	first_item = matching_items[0]
+
+	return {
+		"company": purchase_doc.company,
+		"purchase_date": purchase_doc.get("bill_date") or purchase_doc.get("posting_date"),
+		"gross_purchase_amount": flt(first_item.base_net_amount / first_item.qty),
+		"asset_quantity": 1,
+		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
+		"asset_location": first_item.get("asset_location"),
+		"purchase_receipt_item": first_item.name if doctype == "Purchase Receipt" else None,
+		"purchase_invoice_item": first_item.name if doctype == "Purchase Invoice" else None,
+	}

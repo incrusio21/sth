@@ -304,6 +304,7 @@ override_whitelisted_methods = {
     "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
     "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
     "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
+	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
 }
 #
 # each overriding function accepts a `data` argument;
