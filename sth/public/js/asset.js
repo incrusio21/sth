@@ -4,6 +4,12 @@ frappe.ui.form.on('Asset', {
 			render_qr(frm);
 		}
 		set_unit_filter(frm);
+		frm.fields_dict.insurance_history.grid.cannot_add_rows = true;
+        frm.fields_dict.insurance_history.grid.cannot_delete_rows = true;
+        
+        frm.fields_dict.insurance_history.grid.update_docfield_property(
+            'policy_number', 'read_only', 1
+        );
 	},
 	company: function(frm) {
 		frm.set_value('unit', '');

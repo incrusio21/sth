@@ -185,6 +185,7 @@ doc_events = {
 	# }
 	"Asset": {
 		"validate": ["sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
 	},
     "Attendance": {
         "validate": "sth.hr_customize.custom.attendance.Attendance",
