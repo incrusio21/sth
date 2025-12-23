@@ -7,10 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "rincian_dokumen_finance",
+  "mandatory",
   "aktif"
  ],
  "fields": [
   {
+   "columns": 4,
    "fieldname": "rincian_dokumen_finance",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -18,18 +20,27 @@
    "options": "Rincian Dokumen Finance"
   },
   {
+   "columns": 1,
    "default": "1",
    "fieldname": "aktif",
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Aktif"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "mandatory",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Mandatory"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-27 11:48:01.184094",
+ "modified": "2025-12-23 16:27:17.573820",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Kriteria Satuan Dokumen Finance",
