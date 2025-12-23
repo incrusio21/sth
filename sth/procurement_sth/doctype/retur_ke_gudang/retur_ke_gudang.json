@@ -7,18 +7,19 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
-  "tanggal",
-  "column_break_ufgr",
-  "no_pengeluaran",
   "pemilik",
-  "column_break_rkaj",
-  "kode_blok",
+  "column_break_kmlq",
   "gudang",
+  "section_break_pumw",
+  "naming_series",
+  "kode_blok",
+  "column_break_ufgr",
+  "tanggal",
+  "no_pengeluaran",
   "section_break_ggxz",
   "items",
   "section_break_qtrb",
-  "catatan",
+  "column_break_nsdb",
   "column_break_rnhw",
   "jumlah_retur",
   "amended_from"
@@ -72,11 +73,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "catatan",
-   "fieldtype": "Small Text",
-   "label": "Catatan"
-  },
-  {
    "fieldname": "column_break_rnhw",
    "fieldtype": "Column Break"
   },
@@ -99,21 +95,29 @@
    "search_index": 1
   },
   {
-   "fieldname": "column_break_rkaj",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "No Dokument",
    "options": "RI-.DD.MM.YY.-.####"
+  },
+  {
+   "fieldname": "column_break_kmlq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_pumw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_nsdb",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 19:43:52.237873",
+ "modified": "2025-12-23 14:09:58.661110",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Gudang",

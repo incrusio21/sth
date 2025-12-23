@@ -21,6 +21,17 @@ frappe.ui.form.on("Pengeluaran Barang", {
         })
     },
     refresh(frm) {
-
+        frm.set_df_property("items", "cannot_add_rows", true)
     },
+
+    no_permintaan_pengeluaran(frm) {
+        if (!frm.doc.no_permintaan_pengeluaran) {
+            return
+        }
+
+        frm.call("set_items").then((res) => {
+            frappe.model.sync(res)
+            frm.refresh()
+        })
+    }
 });
