@@ -151,7 +151,7 @@ class SalarySlip(SalarySlip):
 				frappe.qb.from_(leave_type)
 				.select(leave_type.status_code)
 				.where(
-					(leave_type.is_lwp == 1)
+					(leave_type.is_lwp == 0)
 				)
 			).run()
 
