@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, today
 
 class Project:
     def __init__(self, doc, method):
@@ -12,8 +13,10 @@ class Project:
 
         match self.method:
             case "validate":
+                self.validate_status_project()
                 self.validate_proposal_type()
                 self.validate_order_adendum()
+                self.set_note()
             case "on_update":
                 self.validate_and_update_project()
                 self.move_task_to_new_project()
@@ -23,6 +26,18 @@ class Project:
                 self.validate_and_update_project(delete=1)
                 self.move_task_to_new_project(delete=1)
     
+    def validate_status_project(self):
+        # jika document baru tidak perlu ada pengecekan
+        before_doc = self.doc.get_latest()
+        if not before_doc:
+            return
+        
+        if before_doc.status == "Cancelled":
+            frappe.throw("Cant update status Project")
+
+        if self.doc.status == "Completed" and before_doc.status != self.doc.status:
+            self.doc.complete_date = today()
+
     def validate_proposal_type(self):
         # jika document baru tidak perlu ada pengecekan
         before_doc = self.doc.get_latest()
@@ -42,6 +57,37 @@ class Project:
             frappe.throw(f"Please create new Purchase Order for Project {self.doc.project_type} first")
 
         self.doc.purchase_order = new_po
+
+    def set_note(self):
+        if not self.doc.is_new() and self.doc.for_proposal and not self.doc.purchase_order:
+            return
+        
+        from frappe.utils.formatters import format_value
+        
+        po_i = frappe.qb.DocType("Purchase Order Item")
+        kegiatan = frappe.qb.DocType("Kegiatan")
+
+        query = (
+            frappe.qb.from_(po_i)
+            .inner_join(kegiatan)
+            .on(kegiatan.name == po_i.kegiatan)
+            .select(
+                kegiatan.nm_kgt.as_("kegiatan"),
+                po_i.qty,
+                po_i.uom,
+                po_i.rate,
+            ).where(po_i.parent == self.doc.purchase_order)
+        ).run(as_dict=1)
+
+        data = "<div class='ql-editor' contenteditable='true'><ol>"
+        for d in query:
+            data += '<li data-list="ordered">'
+            data += f'<span class="ql-ui" contenteditable="false"></span>{d.kegiatan} {format_value(d.qty)} {d.uom} {format_value(d.rate)}'
+            data += '</li>'
+
+        data += "</ol></div>"
+
+        self.doc.notes = data
 
     def validate_and_update_project(self, delete=0):
         # paksa status selalu menjadi cancelled ketika sudah ada yang adendum
@@ -104,7 +150,7 @@ class Project:
                 "project": self.doc.name,
                 "purchase_order": self.doc.purchase_order,
                 "purchase_order_item": item.name,
-                "progress": item.progress_received
+                "progress": flt(item.progress_received/item.qty*100)
             })
 
             task.save()

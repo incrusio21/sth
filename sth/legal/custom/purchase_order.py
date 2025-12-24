@@ -77,7 +77,7 @@ def update_task_progress(self, method):
                 progress = CASE {} END
             WHERE
                 purchase_order_item in %(po_details)s """.format(cond),
-            {"po_details": order_item}, debug=1
+            {"po_details": order_item}
         )
 
 @frappe.whitelist()
