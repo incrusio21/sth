@@ -30,6 +30,7 @@ app_include_js = "sth.bundle.js"
 # include js in doctype views
 doctype_js = {
 	"Asset": "public/js/asset.js",
+	"Attendance": "hr_customize/custom/attendance.js",
     "Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
@@ -192,6 +193,7 @@ doc_events = {
         "validate": "sth.hr_customize.custom.attendance.Attendance",
         "on_submit": "sth.hr_customize.custom.attendance.Attendance",
         "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
+        "repair_employee_payment_log": "sth.hr_customize.custom.attendance.Attendance"
 	},
 	"Delivery Note": {
 		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],

@@ -79,5 +79,18 @@ sth.form = {
             superFn?.apply(this, args)
             fn.apply(this, ...args)
         }
-    }
+    },
+    show_reset_payment_log(frm) {
+		if(frm.doc.docstatus == 1) {
+			frm.add_custom_button(__('Upah and Premi'), function() {
+				frappe.call({
+					method: "sth.hr_customize.update_payment_log",
+					args: {
+						voucher_type: frm.doc.doctype,
+						voucher_no: frm.doc.name,
+					}
+				})
+			}, __("Update"));
+		}
+	}
 }

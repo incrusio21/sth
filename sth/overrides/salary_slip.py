@@ -15,6 +15,7 @@ from hrms.payroll.doctype.payroll_period.payroll_period import (
 from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
+from sth.hr_customize import get_premi_attendance_settings
 
 LEAVE_CODE_MAP = "leave_code_map"
 
@@ -172,7 +173,7 @@ class SalarySlip(SalarySlip):
 		if not getattr(self, "_employee_payment_log", None):
 			self.set_employee_payment_doc()
 
-		# tambahan untuk tutup buku. krn jika tidak
+		# tambahan untuk tutup buku. krn tidak terhubung dengan apapun
 		self.set_addons_premi()
 
 		# hapus component against terlebih dahulu untuk d create ulang
@@ -202,7 +203,7 @@ class SalarySlip(SalarySlip):
 		set_loan_repayment(self)
 
 		# BPJS
-		self.calculate_bpjs_component()
+		# self.calculate_bpjs_component()
 		# BPJS
 
 		self.calculate_subsidy_loan()
@@ -322,11 +323,11 @@ class SalarySlip(SalarySlip):
 			if premi.company == self.company and premi.premi_type not in ("Tutup Buku"):
 				continue
 			
-			addons_premi += premi.amount or 0
+			salary_component = premi.salary_component \
+				or get_premi_attendance_settings(premi.premi_type) \
+				or designation.salary_component
 
-		# jika premi tambahan masukkan dalam employee payment log
-		if addons_premi:
-			key = (designation.salary_component, "earnings")
+			key = (salary_component, "earnings")
 			self._employee_payment.setdefault(key, {
 				"account": {},
 				"amount": 0,
