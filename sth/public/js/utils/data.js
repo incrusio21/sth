@@ -90,7 +90,7 @@ sth.form = {
 						voucher_no: frm.doc.name,
 					}
 				})
-			}, __("Update"));
+			}, __("Re-calculate"));
 		}
 	}
 }

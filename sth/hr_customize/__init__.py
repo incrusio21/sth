@@ -1,6 +1,7 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
 import frappe
 from frappe import clear_last_message
 
@@ -50,7 +51,16 @@ def get_payment_settings(key: str):
 
 
 @frappe.whitelist()
-def update_payment_log(voucher_type, voucher_no):
-	doc = frappe.get_doc(voucher_type, voucher_no)
-	doc.run_method("repair_employee_payment_log")
+def update_payment_log(voucher_type, voucher_no=None, filters=None):
+	filters = json.loads(filters or {})
+
+	if voucher_no:
+		filters["name"] = voucher_no
+
+	filters["docstatus"] = 1
+	
+	for d in frappe.get_all(voucher_type, filters=filters, pluck="name"):
+		doc = frappe.get_doc(voucher_type, d)
+		doc.run_method("repair_employee_payment_log")
+
 	frappe.msgprint(f"{voucher_type} success to update")

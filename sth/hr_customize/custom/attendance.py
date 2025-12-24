@@ -15,6 +15,9 @@ class Attendance:
                 self.validate_premi_amount_and_component()
                 self.validate_status_code()
             case "repair_employee_payment_log":
+                if self.doc.docstatus != 1:
+                    return
+                
                 self.delete_payment_log()
 
                 self.validate_attendance_is_holiday()
@@ -59,6 +62,9 @@ class Attendance:
             self.doc.premi_amount = premi.amount or 0
             
     def create_or_update_payment_log(self):
+        if self.doc.status not in ("Present"):
+            return
+        
         doc = frappe.new_doc("Employee Payment Log")
         
         if self.doc.premi_amount:
