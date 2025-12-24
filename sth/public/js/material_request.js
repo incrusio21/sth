@@ -51,10 +51,11 @@ frappe.ui.form.on("Material Request", {
                     freeze: true,
                     freeze_message: "Getting Items..."
                 }).then((res) => {
-                    let fields_update = ["unit", "sub_purchase_type", "purchase_type"]
-                    for (const field of fields_update) {
-                        frm.doc[field] = res[field]
-                    }
+                    frm.set_value({
+                        "unit": res["unit"],
+                        "sub_purchase_type": res["sub_purchase_type"],
+                        "purchase_type": res["purchase_type"]
+                    })
 
                     frm.clear_table("items")
                     for (const data of res.items) {
