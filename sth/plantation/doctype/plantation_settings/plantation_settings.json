@@ -9,6 +9,7 @@
   "bkm_traksi_component",
   "column_break_uiyl",
   "bkm_traksi_mandor",
+  "bkm_premi_traksi",
   "perawatan_default_section",
   "bkm_perawatan_component",
   "column_break_cbzs",
@@ -68,7 +69,7 @@
   {
    "fieldname": "premi_sc",
    "fieldtype": "Link",
-   "label": "Premi Salary Component",
+   "label": "BKM Premi Perawatan",
    "options": "Salary Component"
   },
   {
@@ -109,13 +110,19 @@
    "fieldtype": "Link",
    "label": "BKM Traksi Mandor",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "bkm_premi_traksi",
+   "fieldtype": "Link",
+   "label": "BKM Premi Traksi",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-08 11:54:51.519222",
+ "modified": "2025-12-24 07:38:31.358923",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

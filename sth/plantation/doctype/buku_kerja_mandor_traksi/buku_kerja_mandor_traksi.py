@@ -17,7 +17,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		self.plantation_setting_def.extend([
 			["salary_component", "bkm_traksi_component"],
-			["premi_salary_component", "premi_sc"],
+			["premi_salary_component", "bkm_premi_traksi"],
 		])
 		
 		self.kegiatan_fetch_fieldname = []
@@ -58,7 +58,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		get_details_kegiatan(self.hasil_kerja, self.company)
 		
 		super().validate()
-
+		
 	def set_posting_datetime(self):
 		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
 	
@@ -73,6 +73,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def validate_upah_kegiatan(self):
 		for tk in self.task:
 			tk.amount = flt(tk.hasil_kerja) * flt(tk.upah_hasil)
+			tk.last_name = tk.name
 	
 	@frappe.whitelist()
 	def set_details_diffrence(self, kmhm_awal=None, jenis_alat=None, raise_error=False):
@@ -96,16 +97,18 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 			tk.premi_heavy_equipment = 0
 			if jenis_alat.get("premi"):
-				selisih_kmhm = floor((tk.kmhm_akhir - kmhm_akhir)/60)
+				selisih_kmhm = tk.kmhm_akhir - kmhm_akhir
+				last_end = 0
 				for premi in jenis_alat.premi:
 					# hentikan jika selisih sudah lebih kecil sama dengan 0
-					if selisih_kmhm < premi.start_time:
+					if selisih_kmhm < (premi.start_time - last_end):
 						break
 					
 					jumlah = premi.end_time if premi.end_time and selisih_kmhm > premi.end_time else selisih_kmhm
 					
 					tk.premi_heavy_equipment += flt(premi.amount * jumlah)
 					selisih_kmhm -= jumlah
+					last_end = premi.end_time
 
 			kmhm_akhir = tk.kmhm_akhir
 
@@ -119,7 +122,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def update_task_details_name(self, update=0):
 		# Buat mapping local name ke task name
-		task_name = {tk.get("localname") or tk.name: tk.name for tk in self.task}
+		task_name = {tk.last_name or tk.get("localname") or tk.name: tk.name for tk in self.task}
 		for hk in self.hasil_kerja:
 			# Parse kegiatan list
 			old_kegiatan = [s.strip() for s in cstr(hk.kegiatan_list).replace(",", "\n").split("\n") if s.strip()]
@@ -145,6 +148,9 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self.create_or_update_mandor_premi()
 	
 	def create_or_update_mandor_premi(self):
+		if not self.mandor:
+			return
+			
 		bkm_mandor_creation_savepoint = "create_bkm_mandor"
 		try:
 			frappe.db.savepoint(bkm_mandor_creation_savepoint)
@@ -209,31 +215,32 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		if self._all_expense_account:
 			self.make_salary_gl_entry(gl_entries)
-
+		
 		return gl_entries
 
 	def make_kegiatan_gl_entry(self, gl_entries):
 		cost_center = erpnext.get_default_cost_center(self.company)
 
-		# daftar gl entry kegiatan yang memiliki upah
-		for d in self.task:
-			if not d.amount:
-				continue
+		for emp in self.hasil_kerja:
+			# daftar gl entry kegiatan yang memiliki upah
+			for t in self.get("task", {"name": ["in", emp.get_kegiatan_list()]}):
+				if not t.amount:
+					continue
 
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": d.kegiatan_account,
-						"against": self.salary_account,
-						"credit": d.amount,
-						"credit_in_account_currency": d.amount,
-						"cost_center": self.get("cost_center") or cost_center,
-					},
-					item=self,
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": t.kegiatan_account,
+							"against": self.salary_account,
+							"credit": t.amount,
+							"credit_in_account_currency": t.amount,
+							"cost_center": self.get("cost_center") or cost_center,
+						},
+						item=self,
+					)
 				)
-			)
 
-			self._all_expense_account.add(d.kegiatan_account)
+				self._all_expense_account.add(t.kegiatan_account)
 
 	def make_salary_gl_entry(self, gl_entries):
 		cost_center = erpnext.get_default_cost_center(self.company)
@@ -261,17 +268,15 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		amount = flt((item.base or 0)/item.total_hari)
 		is_basic_salary = True
 		item.premi_amount = 0
-
-		task = [s.strip() for s in cstr(item.kegiatan_list).replace(",", "\n").split("\n") if s.strip()]
-		for t in self.get("task", {"name": ["in", task]}):
+		
+		self._used_task = set()
+		for t in self.get("task", {"name": ["in", item.get_kegiatan_list()]}):
 			kegiatan = json.loads(t.company_details).get(item.position or "Operator") or {}
 
 			if t.upah_kegiatan:
 				if is_basic_salary:
 					amount = 0
 					is_basic_salary = False
-
-				print(t.amount)    
 
 				amount += t.amount
 
@@ -286,7 +291,9 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 				)
 				
 			item.premi_amount += premi_amount
+			self._used_task.add(t.name)
 		
+		# self.validate_used_task()
 		# if not self.get("manual_hk"):
 		# 	item.hari_kerja = min(flt(item.qty / (item.volume_basis or 1)), 1)
 

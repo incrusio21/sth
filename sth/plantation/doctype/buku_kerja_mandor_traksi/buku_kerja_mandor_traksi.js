@@ -334,7 +334,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		
 		item.premi_amount = 0
 		for (const task of doc.task) {
-			if(!in_list(task_list, task.name)) continue
+			if(!in_list(task_list, task.last_name || task.name)) continue
 
 			let kegiatan = JSON.parse(task.company_details)[item.position || "Operator"] || {}
 			

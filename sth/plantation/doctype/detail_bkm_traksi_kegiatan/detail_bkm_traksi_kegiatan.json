@@ -28,7 +28,8 @@
   "kmhm_akhir",
   "column_break_pwsx",
   "uom",
-  "keterangan"
+  "keterangan",
+  "last_name"
  ],
  "fields": [
   {
@@ -172,13 +173,20 @@
    "label": "Kegiatan Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Last Name",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-19 23:44:47.785239",
+ "modified": "2025-12-23 10:02:46.646272",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Traksi Kegiatan",
