@@ -52,7 +52,7 @@ def get_payment_settings(key: str):
 
 @frappe.whitelist()
 def update_payment_log(voucher_type, voucher_no=None, filters=None):
-	filters = json.loads(filters or {})
+	filters = json.loads(filters or "{}")
 
 	if voucher_no:
 		filters["name"] = voucher_no

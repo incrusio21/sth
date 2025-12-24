@@ -5,7 +5,7 @@ import frappe
 from frappe.exceptions import DoesNotExistError
 from frappe.query_builder.functions import Sum
 
-from frappe.utils import get_link_to_form
+from frappe.utils import get_first_day
 from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 from sth.controllers.plantation_controller import PlantationController
@@ -41,12 +41,12 @@ class BukuKerjaMandorController(PlantationController):
 
         self._clear_fields = []
         self._mandor_dict = [{"fieldname": "mandor"}]
+        self._mandor_premi_date_monthly = True
 
     def validate(self):
         self.clear_fields()
         self.set_payroll_date()
-        
-        self.get_plantation_setting()
+                
         # self.get_rencana_kerja_harian()
         # self.validate_previous_document()
         self.get_employee_payment_account()
@@ -54,6 +54,11 @@ class BukuKerjaMandorController(PlantationController):
         
         self.validate_emp_hari_kerja()
     
+    def calculate(self):
+        self.get_plantation_setting()
+        
+        super().calculate()
+
     def clear_fields(self):
         for field in self._clear_fields:
             self.set(field, None)
@@ -106,9 +111,9 @@ class BukuKerjaMandorController(PlantationController):
 
     def on_submit(self, update_realization=True):
         self.create_or_update_payment_log()
+        self.create_or_update_mandor_premi()
         self.make_attendance()
         self.check_emp_hari_kerja()
-
         # if update_realization:
         #     self.update_rkb_realization()
 
@@ -174,21 +179,37 @@ class BukuKerjaMandorController(PlantationController):
         for r in removed_epl:
             r.delete()
     
-    def get_mandor_details(self):
-        mandor_list = []
-        for m in self._mandor_dict:
-            mandor = self.get(m["fieldname"])
+    def create_or_update_mandor_premi(self):
+        date = get_first_day(self.posting_date) if self._mandor_premi_date_monthly else self.posting_date
+        
+        for d in self._mandor_dict:
+            mandor = self.get(d["fieldname"])
             if not mandor:
                 continue
-
-            m_dict = frappe._dict({
-                "employee": mandor,
-                "attendance_status": "Present"
-            })
             
-            mandor_list.append(m_dict)
-
-        return mandor_list
+            bkm_mandor_creation_savepoint = "create_bkm_mandor"
+            try:
+                frappe.db.savepoint(bkm_mandor_creation_savepoint)
+                bkm_obj = frappe.get_doc(
+                    doctype="Buku Kerja Mandor Premi", 
+                    employee=mandor, voucher_type=self.doctype, company=self.company, posting_date=date
+                )
+                bkm_obj.flags.ignore_permissions = 1
+                bkm_obj.flags.transaction_employee = 1
+                bkm_obj.insert()
+                print(bkm_obj)
+            except frappe.UniqueValidationError:
+                if frappe.message_log:
+                    frappe.message_log.pop()
+                frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
+                bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
+                    "employee": mandor, 
+                    "company": self.company, 
+                    "posting_date": date,
+                    "voucher_type": self.doctype
+                })
+                bkm_obj.flags.transaction_employee = 1
+                bkm_obj.save()
 
     def make_attendance(self):
         employee = self.hasil_kerja + self.get_mandor_details()
@@ -241,7 +262,7 @@ class BukuKerjaMandorController(PlantationController):
         super().on_cancel()
         # self.remove_journal()
         self.delete_payment_log()
-
+        self.create_or_update_mandor_premi()
         # self.update_rkb_realization()
                 
     def delete_payment_log(self):
@@ -252,5 +273,35 @@ class BukuKerjaMandorController(PlantationController):
         ):
             frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
+    def get_mandor_details(self):
+        mandor_list = []
+        for m in self._mandor_dict:
+            mandor = self.get(m["fieldname"])
+            if not mandor:
+                continue
+
+            m_dict = frappe._dict({
+                "employee": mandor,
+                "attendance_status": "Present"
+            })
+            
+            mandor_list.append(m_dict)
+
+        return mandor_list
+    
     def update_rkb_realization(self):
         frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
+
+    def repair_employee_payment_log(self):
+        if self.docstatus != 1:
+            return
+        
+        self.flags.re_calculate = 1
+        for hk in self.hasil_kerja:
+            hk.amount = 0
+
+        self.calculate()
+        self.db_update_all()
+
+        self.create_or_update_payment_log()
+        # self.create_or_update_mandor_premi()

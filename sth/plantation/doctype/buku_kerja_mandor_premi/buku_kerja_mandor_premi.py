@@ -91,4 +91,4 @@ class BukuKerjaMandorPremi(Document):
 		frappe.throw(msg)
 
 def on_doctype_update():
-	frappe.db.add_unique("Buku Kerja Mandor Premi", ["employee", "voucher_type", "posting_date"], constraint_name="unique_item_warehouse")
+	frappe.db.add_unique("Buku Kerja Mandor Premi", ["employee", "company", "voucher_type", "posting_date"], constraint_name="uniqe_employe_voucher")

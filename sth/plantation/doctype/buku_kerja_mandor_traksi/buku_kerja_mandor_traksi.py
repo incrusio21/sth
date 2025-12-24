@@ -42,6 +42,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
         ]
 
 		self._clear_fields = ["blok", "divisi", "batch", "project"]
+		self._mandor_premi_date_monthly = False
 		
 	def validate(self):
 		self.set_posting_datetime()
@@ -52,13 +53,18 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			self.update_task_details_name()
 		
 		# set data emloyee
-		self.validate_upah_kegiatan()
 		self.set_details_diffrence(jenis_alat=self.jenis_alat, raise_error=True)
-		get_details_employee(self.hasil_kerja, self.posting_date)
-		get_details_kegiatan(self.hasil_kerja, self.company)
-		
 		super().validate()
-		
+	
+	def calculate(self):
+		if self.flags.re_calculate:
+			self.validate_upah_kegiatan()
+	
+		get_details_kegiatan(self.task, self.company)
+		get_details_employee(self.hasil_kerja, self.posting_date)
+
+		super().calculate()
+
 	def set_posting_datetime(self):
 		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
 	
@@ -71,30 +77,14 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		)
 
 	def validate_upah_kegiatan(self):
+		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict() \
+			if self.tipe_master_kendaraan in ("Alat Berat") else {}
+		
+		kmhm_akhir = self.kmhm_awal
 		for tk in self.task:
 			tk.amount = flt(tk.hasil_kerja) * flt(tk.upah_hasil)
 			tk.last_name = tk.name
-	
-	@frappe.whitelist()
-	def set_details_diffrence(self, kmhm_awal=None, jenis_alat=None, raise_error=False):
-		if not self.kendaraan:
-			return
-		
-		if not kmhm_awal:
-			kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", for_update=self.docstatus)
-		
-		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict() \
-			if self.tipe_master_kendaraan in ("Alat Berat") else {}
-
-		self.kmhm_awal = kmhm_awal
-
-		kmhm_akhir = kmhm_awal
-		for tk in self.task:
-			tk.kmhm_awal = kmhm_akhir
-
-			if not tk.kmhm_akhir or tk.kmhm_akhir < kmhm_akhir:
-				tk.kmhm_akhir = kmhm_akhir
-
+			
 			tk.premi_heavy_equipment = 0
 			if jenis_alat.get("premi"):
 				selisih_kmhm = tk.kmhm_akhir - kmhm_akhir
@@ -110,11 +100,30 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 					selisih_kmhm -= jumlah
 					last_end = premi.end_time
 
+	@frappe.whitelist()
+	def set_details_diffrence(self, kmhm_awal=None, raise_error=False):
+		if not self.kendaraan:
+			return
+		
+		if not kmhm_awal:
+			kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", for_update=self.docstatus)
+		
+		self.kmhm_awal = kmhm_awal
+
+		kmhm_akhir = kmhm_awal
+		for tk in self.task:
+			tk.kmhm_awal = kmhm_akhir
+
+			if not tk.kmhm_akhir or tk.kmhm_akhir < kmhm_akhir:
+				tk.kmhm_akhir = kmhm_akhir
+
 			kmhm_akhir = tk.kmhm_akhir
 
 		self.kmhm_akhir = kmhm_akhir
 		if raise_error and (self.kmhm_akhir - self.kmhm_awal) <= 0:
 			frappe.throw("KM/HM Akhir cannot less than or same with KM/HM Awal")
+
+		self.validate_upah_kegiatan()
 
 	def on_update(self):
 		if not self.flags.in_insert:
@@ -139,37 +148,12 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		super().on_submit()
 		self.make_gl_entry()
 		self.update_kendaraan_field()
-		self.create_or_update_mandor_premi()
 
 	def on_cancel(self):
 		super().on_cancel()
 		self.make_gl_entry()
 		self.update_kendaraan_field(cancel=1)
-		self.create_or_update_mandor_premi()
 	
-	def create_or_update_mandor_premi(self):
-		if not self.mandor:
-			return
-			
-		bkm_mandor_creation_savepoint = "create_bkm_mandor"
-		try:
-			frappe.db.savepoint(bkm_mandor_creation_savepoint)
-			bkm_obj = frappe.get_doc(doctype="Buku Kerja Mandor Premi", employee=self.mandor, voucher_type=self.doctype, posting_date=self.posting_date)
-			bkm_obj.flags.ignore_permissions = 1
-			bkm_obj.flags.transaction_employee = 1
-			bkm_obj.insert()
-		except frappe.UniqueValidationError:
-			if frappe.message_log:
-				frappe.message_log.pop()
-			frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
-			bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
-				"employee": self.mandor, 
-				"posting_date": self.posting_date,
-				"voucher_type": self.doctype
-			})
-			bkm_obj.flags.transaction_employee = 1
-			bkm_obj.save()
-
 	def update_kendaraan_field(self, cancel=0):
 		if not self.kendaraan:
 			return
@@ -317,9 +301,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			return
 		
 		detail_kendaraan = frappe.get_doc("Alat Berat Dan Kendaraan", self.kendaraan)
-				
+		self.jenis_alat = detail_kendaraan.jns_alt
+
 		get_details_employee(self.hasil_kerja, self.posting_date, detail_kendaraan.operator)
-		self.set_details_diffrence(detail_kendaraan.kmhm_akhir, detail_kendaraan.jns_alt)
+		self.set_details_diffrence(detail_kendaraan.kmhm_akhir)
 
 @frappe.whitelist()
 def get_details_employee(childrens, posting_date, new_employee=None):
@@ -342,7 +327,7 @@ def get_details_employee(childrens, posting_date, new_employee=None):
 				"is_holiday": 1 if frappe.db.exists("Holiday", {"parent": employee.holiday_list, "holiday_date": posting_date}) else 0,
 				"total_hari": frappe.get_value("Employment Type", employee.employment_type, "hari_ump"),
 				"base": frappe.get_value("Salary Structure Assignment", {
-					"employee": employee.name, "company": employee.company, "from_date": ["<=", posting_date]
+					"employee": employee.name, "company": employee.company, "from_date": ["<=", posting_date], "docstatus": 1
 				}, "base", order_by="from_date desc"),
 			})
 
@@ -394,6 +379,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 		return ress
 	
 	kegiatan_details = _get_kegiatan_upah()
+
 	for ch in childrens:
 		upah = ch.get("upah_hasil")
 		kc = kegiatan_details.get(ch.get("kegiatan")) or {}
@@ -410,4 +396,5 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 			"company_details": json.dumps(kc.get("position", {}))
 		})
 
+	
 	return childrens
