@@ -71,5 +71,13 @@ sth.form = {
             this.doctype_setting[frm.doctype] = new_doctype_setting;
             frm.fields_dict[fields].grid.reset_grid();
         }
+    },
+    override_class_function: function(obj, func_name, fn){
+        const superFn = obj[func_name]
+
+        obj[func_name] = function (...args) {
+            superFn?.apply(this, args)
+            fn.apply(this, ...args)
+        }
     }
 }
