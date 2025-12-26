@@ -8,7 +8,6 @@
   "traksi_default_section",
   "bkm_traksi_component",
   "column_break_uiyl",
-  "bkm_traksi_mandor",
   "bkm_premi_traksi",
   "perawatan_default_section",
   "bkm_perawatan_component",
@@ -21,7 +20,9 @@
   "column_break_pxng",
   "denda_sc",
   "brondolan_sc",
-  "against_kontanan_component"
+  "against_kontanan_component",
+  "mandor_tab",
+  "mandor_premi"
  ],
  "fields": [
   {
@@ -106,23 +107,28 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bkm_traksi_mandor",
-   "fieldtype": "Link",
-   "label": "BKM Traksi Mandor",
-   "options": "Salary Component"
-  },
-  {
    "fieldname": "bkm_premi_traksi",
    "fieldtype": "Link",
    "label": "BKM Premi Traksi",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "mandor_tab",
+   "fieldtype": "Tab Break",
+   "label": "Mandor"
+  },
+  {
+   "fieldname": "mandor_premi",
+   "fieldtype": "Table",
+   "label": "Mandor Premi",
+   "options": "Plantation Mandor Setting"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-24 07:38:31.358923",
+ "modified": "2025-12-25 22:20:19.848833",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

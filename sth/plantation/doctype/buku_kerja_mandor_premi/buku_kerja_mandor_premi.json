@@ -6,14 +6,18 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "divided_by",
+  "method",
+  "multiplier",
   "column_break_wucg",
   "company",
   "posting_date",
   "amount",
+  "section_break_glak",
+  "employee_list",
   "section_break_rgmj",
   "column_break_xqos",
-  "voucher_type",
+  "buku_kerja_mandor",
+  "mandor_type",
   "column_break_xzjg",
   "grand_total",
   "more_info_tab",
@@ -24,14 +28,6 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
-   "read_only": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "divided_by",
-   "fieldtype": "Int",
-   "label": "Divided By",
-   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -94,10 +90,37 @@
    "read_only": 1
   },
   {
-   "fieldname": "voucher_type",
-   "fieldtype": "Link",
-   "label": "Voucher Type",
-   "options": "DocType",
+   "fieldname": "mandor_type",
+   "fieldtype": "Data",
+   "label": "Mandor Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "multiplier",
+   "fieldtype": "Float",
+   "label": "Multiplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Data",
+   "label": "Method",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_glak",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_list",
+   "fieldtype": "JSON",
+   "label": "Employee List",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buku_kerja_mandor",
+   "fieldtype": "Data",
+   "label": "Buku Kerja Mandor",
    "read_only": 1
   }
  ],
@@ -105,7 +128,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-25 00:12:36.439789",
+ "modified": "2025-12-27 03:47:51.523675",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Premi",

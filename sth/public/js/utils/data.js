@@ -89,6 +89,7 @@ sth.form = {
 						voucher_type: frm.doc.doctype,
 						voucher_no: frm.doc.name,
 					},
+                    freeze: true,
                     callback: (data) => {
                         frm.reload_doc()
                     }
@@ -134,7 +135,7 @@ sth.form = {
                             [field_date]: ["between", [data.from_date, data.to_date]]
                         }
                     },
-                    frezee: true,
+                    freeze: true,
                     callback: function (r) {
                         dialog.hide();
                         list_view.refresh();

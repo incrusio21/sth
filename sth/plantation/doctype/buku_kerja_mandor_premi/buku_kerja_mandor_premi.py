@@ -1,59 +1,106 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_last_day
 from frappe.exceptions import DoesNotExistError
 from frappe.query_builder.functions import Sum, Count
 
 from frappe.model.document import Document
 
+from sth.plantation import get_plantation_settings
+
+voucher_maping = {
+	"Traksi": "premi_tbs_amount",
+	"Panen": "qty",
+}
+
 class BukuKerjaMandorPremi(Document):
-	def validate(self):
-		self.get_amount_and_divided_by()
+	def before_insert(self):
 		self.set_missing_values()
-		self.calculate_grand_total()
-
-	def get_amount_and_divided_by(self):
-		# get total dari voucher type tertentu
-		Traksi = frappe.qb.DocType(self.voucher_type)
-
-		# Group by kategori tertentu
-		self.amount, self.divided_by = (
-			frappe.qb.from_(Traksi)
-			.select(
-				Sum(Traksi.hasil_kerja_premi_amount),
-				Count(Traksi.name)
-			)
-			.where(
-				(Traksi.docstatus == 1) & 
-				(Traksi.mandor == self.employee) & 
-				(Traksi.company == self.company) & 
-				(Traksi.posting_date == self.posting_date)
-			)
-		).run()[0] or [0, 0]
 
 	def set_missing_values(self):
-		from sth.plantation import get_plantation_settings
-		self.salary_component = get_plantation_settings("bkm_traksi_mandor")
+		mandor_premi = get_plantation_settings("mandor_premi")
+		have_premi = False
+		voucher_type = f"Buku Kerja Mandor {self.buku_kerja_mandor}"
+		for p in mandor_premi:
+			if p.voucher_type != voucher_type or p.employee_field != self.mandor_type:
+				continue
+			
+			have_premi = True
+			self.multiplier = p.multiplier
+			self.method = p.method
+			self.salary_component = p.salary_component
+		
+		if not have_premi:
+			frappe.throw(f"Please set Mandor Premi Setting for {self.buku_kerja_mandor} in Plantation Settings")
+	
+	def validate(self):
+		self.set_amount_employee()
+		self.calculate_grand_total()
+
+	def set_amount_employee(self):
+		# get total dari voucher type tertentu
+		bkm = frappe.qb.DocType(f"Buku Kerja Mandor {self.buku_kerja_mandor}")
+		detail_hk = frappe.qb.DocType(f"Detail BKM Hasil Kerja {self.buku_kerja_mandor}")
+		
+		fields = voucher_maping.get(self.buku_kerja_mandor)
+
+		# Group by kategori tertentu
+		self.employee_list = json.dumps(
+			frappe._dict(
+				(
+					frappe.qb.from_(bkm)
+					.inner_join(detail_hk)
+					.on(bkm.name == detail_hk.parent)
+					.select(
+						detail_hk.employee,
+						Sum(detail_hk[fields]),
+					)
+					.where(
+						(bkm.docstatus == 1) & 
+						(bkm[self.mandor_type] == self.employee) & 
+						(bkm.company == self.company) & 
+						(bkm.posting_date.between(self.posting_date, get_last_day(self.posting_date)))
+					)
+					.groupby(detail_hk.employee)
+				).run()
+			)
+		)
 
 	def calculate_grand_total(self):
-		self.grand_total = flt(1.4 * (self.amount or 0) / (self.divided_by or 1), self.precision("grand_total"))
+		employee = json.loads(self.employee_list)
+		
+		amount = total_emp = 0
+		for emp, amm in employee.items():
+			total_emp += 1
+			amount += amm
 
-	def on_update(self):
-		if not self.grand_total:
-			self.delete()
-		else:
-			self.create_or_update_payment_log()
+		if self.method == "Average":
+			amount = amount / total_emp
+
+		self.amount = amount
+		self.grand_total = flt(amount * self.multiplier, self.precision("grand_total"))
+
+	# def on_update(self):
+	# 	frappe.throw(str(self.grand_total))
+	# 	if not self.grand_total:
+	# 		self.delete()
+	# 	else:
+	# 		self.create_or_update_payment_log()
 
 	def create_or_update_payment_log(self):
+		
 		try:
 			doc = frappe.get_last_doc("Employee Payment Log", {
 				"voucher_type": self.doctype,
 				"voucher_no": self.name
 			})
 		except DoesNotExistError:
+
 			doc = frappe.new_doc("Employee Payment Log")
 		
 		# jika ada nilai atau kosong tapi tidak di hapus 
@@ -72,7 +119,7 @@ class BukuKerjaMandorPremi(Document):
 		doc.save()
 		
 	def on_trash(self):
-		self.remove_document()
+		# self.remove_document()
 
 		for epl in frappe.get_all(
 			"Employee Payment Log", 
@@ -91,4 +138,4 @@ class BukuKerjaMandorPremi(Document):
 		frappe.throw(msg)
 
 def on_doctype_update():
-	frappe.db.add_unique("Buku Kerja Mandor Premi", ["employee", "company", "voucher_type", "posting_date"], constraint_name="uniqe_employe_voucher")
+	frappe.db.add_unique("Buku Kerja Mandor Premi", ["employee", "mandor_type", "company", "buku_kerja_mandor", "posting_date"], constraint_name="uniqe_employe_voucher")

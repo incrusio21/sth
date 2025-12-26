@@ -16,6 +16,7 @@
   "kategori_kegiatan",
   "tipe_kegiatan",
   "old_parent",
+  "is_tbs",
   "column_break_lrzd",
   "tp_bbt",
   "tp_pnn",
@@ -211,13 +212,20 @@
    "fieldtype": "Check",
    "label": "Heavy Equipment ?",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "is_tbs",
+   "fieldtype": "Check",
+   "label": "TBS ?"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-18 14:12:45.342457",
+ "modified": "2025-12-26 21:52:39.589748",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

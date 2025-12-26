@@ -20,7 +20,7 @@ class BukuKerjaMandorController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.plantation_setting_def = []
-        
+        self._bkm_name = ""
         self.fieldname_total.extend([
 			"hari_kerja", "qty"
 		])
@@ -41,7 +41,6 @@ class BukuKerjaMandorController(PlantationController):
 
         self._clear_fields = []
         self._mandor_dict = [{"fieldname": "mandor"}]
-        self._mandor_premi_date_monthly = True
 
     def validate(self):
         self.clear_fields()
@@ -180,7 +179,7 @@ class BukuKerjaMandorController(PlantationController):
             r.delete()
     
     def create_or_update_mandor_premi(self):
-        date = get_first_day(self.posting_date) if self._mandor_premi_date_monthly else self.posting_date
+        date = get_first_day(self.posting_date) #if self._mandor_premi_date_monthly else self.posting_date
         
         for d in self._mandor_dict:
             mandor = self.get(d["fieldname"])
@@ -192,21 +191,24 @@ class BukuKerjaMandorController(PlantationController):
                 frappe.db.savepoint(bkm_mandor_creation_savepoint)
                 bkm_obj = frappe.get_doc(
                     doctype="Buku Kerja Mandor Premi", 
-                    employee=mandor, voucher_type=self.doctype, company=self.company, posting_date=date
+                    employee=mandor, buku_kerja_mandor=self._bkm_name, company=self.company, posting_date=date,
+                    mandor_type=d["fieldname"]
                 )
                 bkm_obj.flags.ignore_permissions = 1
                 bkm_obj.flags.transaction_employee = 1
                 bkm_obj.insert()
-                print(bkm_obj)
+
             except frappe.UniqueValidationError:
                 if frappe.message_log:
                     frappe.message_log.pop()
                 frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
+                
                 bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
-                    "employee": mandor, 
+                    "employee": mandor,
+                    "mandor_type": d["fieldname"],
                     "company": self.company, 
                     "posting_date": date,
-                    "voucher_type": self.doctype
+                    "buku_kerja_mandor": self._bkm_name
                 })
                 bkm_obj.flags.transaction_employee = 1
                 bkm_obj.save()
@@ -296,6 +298,8 @@ class BukuKerjaMandorController(PlantationController):
         if self.docstatus != 1:
             return
         
+        self.delete_payment_log()
+
         self.flags.re_calculate = 1
         for hk in self.hasil_kerja:
             hk.amount = 0
@@ -304,4 +308,4 @@ class BukuKerjaMandorController(PlantationController):
         self.db_update_all()
 
         self.create_or_update_payment_log()
-        # self.create_or_update_mandor_premi()
+        self.create_or_update_mandor_premi()

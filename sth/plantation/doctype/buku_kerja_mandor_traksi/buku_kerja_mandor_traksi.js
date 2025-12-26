@@ -116,7 +116,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 
 		let me = this
 		
-		this.fieldname_total.push("premi_amount")
+		this.fieldname_total.push("premi_amount", "premi_tbs_amount")
 		this.skip_calculate_table = ["task"]
 		this.kegiatan_fetch_fieldname = []
 		
@@ -326,6 +326,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		let is_basic_salary = true
 		let amount = flt(item.base/item.total_hari)
 
+		// split daftar kegiatan pada employee
 		let task_list = (item?.kegiatan_list ?? "")
 		.replace(/,/g, "\n")
 		.split("\n")
@@ -357,8 +358,12 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 					)
 				)
 			}
-
-			item.premi_amount += premi_amount
+			
+			if(task.is_tbs){
+				item.premi_tbs_amount += premi_amount
+			}else{
+				item.premi_amount += premi_amount
+			}
 		}
 		
 		// if (!doc.manual_hk){

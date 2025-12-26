@@ -47,6 +47,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		self._clear_fields = ["blok"]
 		self._mandor_dict.append({"fieldname": "mandor1"})
+		self._bkm_name = "Panen"
 
 	def validate(self):
 		self.reset_automated_data()

@@ -22,7 +22,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		
 		self.kegiatan_fetch_fieldname = []
 		self.skip_calculate_table = ["task"]
-		self.fieldname_total.extend(["premi_amount"])
+
+		self.fieldname_total.extend(["premi_amount", "premi_tbs_amount"])
 
 		self.payment_log_updater = [
             {
@@ -36,13 +37,19 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			{
 				"target_amount": "premi_amount",
 				"target_salary_component": "premi_salary_component",
-                "component_type": "Premi",
+                "component_type": "Premi Non TBS",
+				"removed_if_zero": True
+			},
+			{
+				"target_amount": "premi_tbs_amount",
+				"target_salary_component": "premi_salary_component",
+                "component_type": "Premi TBS",
 				"removed_if_zero": True
 			}
         ]
 
 		self._clear_fields = ["blok", "divisi", "batch", "project"]
-		self._mandor_premi_date_monthly = False
+		self._bkm_name = "Traksi"
 		
 	def validate(self):
 		self.set_posting_datetime()
@@ -251,12 +258,15 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# Hitung amount dasar
 		amount = flt((item.base or 0)/item.total_hari)
 		is_basic_salary = True
-		item.premi_amount = 0
+		item.premi_amount = item.premi_tbs_amount = 0
 		
 		self._used_task = set()
+		# looping task sesuai list yang terdaftar pada pegawai
 		for t in self.get("task", {"name": ["in", item.get_kegiatan_list()]}):
+			# ubah data string agar bsa di baca 
 			kegiatan = json.loads(t.company_details).get(item.position or "Operator") or {}
-
+			
+			# hal bodoh untuk mengecek jika kegiatan menggunakan base salary atau upah kerja
 			if t.upah_kegiatan:
 				if is_basic_salary:
 					amount = 0
@@ -264,17 +274,20 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 				amount += t.amount
 
-			premi_amount = 0
-			
+			premi_amount  = 0
 			if self.tipe_master_kendaraan in ("Alat Berat"):
 				premi_amount += flt(t.premi_heavy_equipment)
 			else:
-				premi_amount += flt((t.hasil_kerja or 0) * 
+				premi_amount = flt((t.hasil_kerja or 0) * 
 					self.set_premi_non_heavy_equipment(item, kegiatan), 
 					precision
 				)
-				
-			item.premi_amount += premi_amount
+			
+			if t.is_tbs:
+				item.premi_tbs_amount += premi_amount
+			else:
+				item.premi_amount += premi_amount
+					
 			self._used_task.add(t.name)
 		
 		# self.validate_used_task()
@@ -293,7 +306,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total + premi
-		item.sub_total = flt(item.amount + item.premi_amount, precision)
+		item.sub_total = flt(item.amount + item.premi_amount + item.premi_tbs_amount, precision)
 		
 	@frappe.whitelist()
 	def get_details_kendaraan(self):
@@ -342,38 +355,49 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 	
 	# load detail kegiatan
 	def _get_kegiatan_upah():
-		kegiatan = frappe.qb.DocType("Kegiatan Company")
+		k_company = frappe.qb.DocType("Kegiatan Company")
+		kegiatan = frappe.qb.DocType("Kegiatan")
 
 		result = (
-			frappe.qb.from_(kegiatan)
+			frappe.qb.from_(k_company)
+			.inner_join(kegiatan)
+			.on(k_company.parent == kegiatan.name)
 			.select(
-				kegiatan.parent, IfNull(kegiatan.position, "Operator"), 
-				kegiatan.account, kegiatan.use_basic_salary, kegiatan.rupiah_basis, 
-				kegiatan.volume_basis, kegiatan.workday, kegiatan.holiday,
-				kegiatan.workday_base, kegiatan.holiday_base
+				k_company.parent, IfNull(k_company.position, "Operator"), kegiatan.is_tbs,
+				k_company.account, k_company.use_basic_salary, k_company.rupiah_basis, 
+				k_company.volume_basis, k_company.workday, k_company.holiday,
+				k_company.workday_base, k_company.holiday_base
 			)
 			.where(
-				(kegiatan.company == company) &
-				(kegiatan.parent.isin([d.get("kegiatan") for d in childrens]))
+				(k_company.company == company) &
+				(k_company.parent.isin([d.get("kegiatan") for d in childrens]))
 			)
 		).run()
 
 		ress = {}
-		for row in result:
-			k = ress.setdefault(row[0], {
-				"position": {}
+		for (
+			parent, position, is_tbs, account, use_basic_salary, rupiah_basis,
+			volume_basis, workday, holiday, workday_base, holiday_base
+		) in result:
+
+			data = ress.setdefault(parent, {"position": {}})
+			
+			# jika kegiatan operator maka d anggap kegiatan utama
+			if position == "Operator":
+				data.update({
+					"is_tbs": is_tbs,
+					"kegiatan_account": account,
+					"use_basic_salary": use_basic_salary,
+					"rupiah_basis": rupiah_basis,
+				})
+
+			data["position"][position] = frappe._dict({
+				"volume_basis": volume_basis,
+				"workday": workday,
+				"holiday": holiday,
+				"ump_as_workday": workday_base,
+				"ump_as_holiday": holiday_base,
 			})
-
-			if row[1] == "Operator":
-				k["kegiatan_account"] = row[2]
-				k["use_basic_salary"] = row[3]
-				k["rupiah_basis"] = row[4]
-
-			k["position"][row[1]] = frappe._dict(zip([
-				"volume_basis",
-				"workday", "holiday", 
-				"ump_as_workday", "ump_as_holiday"
-			], row[5:], strict=False))
 
 
 		return ress
@@ -390,6 +414,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 			
 		ch.update({
 			"upah_hasil": upah,
+			"is_tbs": kc.get("is_tbs"),
 			"kegiatan_account": kc.get("kegiatan_account"),
 			"upah_kegiatan": upah_kegiatan,
 			"amount": flt(upah) * flt(ch.get("hasil_kerja")),
