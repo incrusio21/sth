@@ -268,6 +268,10 @@ doc_events = {
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
 	},
+    
+	"Request for Quotation": {
+        "before_save": "sth.custom.request_for_quotation.update_unit_in_table"
+	}
 }
 
 
