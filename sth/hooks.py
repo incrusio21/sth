@@ -181,11 +181,13 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-	# "*": {
-	# 	"on_update": "method",
-	# 	"on_cancel": "method",
-	# 	"on_trash": "method"
-	# }
+	# untuk kriteria upload
+	"*": {
+		"validate": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_setelah_insert",
+		"before_submit": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_before_submit"
+	},
+
+
 	"Asset": {
 		"validate": ["sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
 		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
@@ -221,7 +223,7 @@ doc_events = {
 	},
 	"Payment Entry":{
 		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
+			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book", "sth.finance_sth.custom.cek_kriteria_upload_pe.populate_upload_file"
 		],
 		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],

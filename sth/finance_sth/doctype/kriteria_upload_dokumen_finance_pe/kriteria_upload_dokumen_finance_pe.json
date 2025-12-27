@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-27 19:52:45.981581",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "document_no",
+  "rincian_dokumen_finance",
+  "uploaded_file"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "document_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nomor Dokumen",
+   "read_only": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "rincian_dokumen_finance",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rincian Dokumen Finance",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "uploaded_file",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Uploaded File",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "document_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tipe Dokumen",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-27 19:57:13.913848",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Kriteria Upload Dokumen Finance PE",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
