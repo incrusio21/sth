@@ -37,7 +37,7 @@
    "fieldname": "jenis_bpjs",
    "fieldtype": "Select",
    "label": "Jenis BPJS",
-   "options": "BPJS KES\nBPJS TK"
+   "options": "\nBPJS KES\nBPJS TK"
   },
   {
    "fieldname": "npp__no_bu",
@@ -60,7 +60,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-14 11:23:38.521376",
+ "modified": "2025-12-28 22:05:16.079198",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Set Up BPJS PT",
