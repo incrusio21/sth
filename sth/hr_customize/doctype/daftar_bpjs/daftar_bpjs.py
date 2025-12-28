@@ -4,7 +4,7 @@
 import json
 
 import frappe, erpnext
-from frappe import _dict, scrub, unscrub
+from frappe import _, _dict, scrub, unscrub
 
 from frappe.model.document import Document
 
