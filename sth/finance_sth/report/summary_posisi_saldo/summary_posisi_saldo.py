@@ -25,6 +25,8 @@ def get_columns(filters):
 			"fieldname": f"saldo_{d.strftime('%Y_%m_%d')}",
 			"fieldtype": "Currency"
 		})
+  
+	return columns
 
 def get_data(filters):
 	dates = get_date_range(filters.from_date, filters.to_date)
@@ -59,17 +61,17 @@ def get_data(filters):
 	rows = defaultdict(dict)
 
 	for d in data_raw:
-		key = (d.company, d.unit, d.bank, d.rekening)
+		key = (d.company, d.unit, d.bank, d.bank_account)
 
 		if not rows.get(key):
 			rows[key] = {
 				"company": d.company,
 				"unit": d.unit,
 				"bank": d.bank,
-				"rekening": d.rekening,
+				"bank_account": d.bank_account,
 			}
 
-		field = f"saldo_{d.tanggal.strftime('%Y_%m_%d')}"
+		field = f"saldo_{d.posting_date.strftime('%Y_%m_%d')}"
 		rows[key][field] = d.movement_balance
 
 	data = []
