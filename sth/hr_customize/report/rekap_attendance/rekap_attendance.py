@@ -103,6 +103,14 @@ def get_all_holidays(year, month_num, num_days):
 	
 	return holiday_map
 
+def has_presence_in_next_7_days(attendance_dict, start_day, num_days):
+	for day in range(start_day + 1, min(start_day + 8, num_days + 1)):
+		if day in attendance_dict:
+			att = attendance_dict[day]
+			if att.status == "Present" or att.status == "On Leave":
+				return True
+	return False
+
 def get_data(filters):
 	"""Get attendance data for all employees"""
 	bulan = filters.get("bulan")
@@ -198,7 +206,7 @@ def get_data(filters):
 				row["ln"] += 1
 			# Only show MG if the date has passed and it's not a national holiday
 			elif day_of_week == 6:  # Sunday
-				if current_date <= today:
+				if current_date <= today and has_presence_in_next_7_days(attendance_dict, day, num_days):
 					status = '<span style="color: red;">MG</span>'
 					row["mg"] += 1
 				# else: leave empty for future Sundays
