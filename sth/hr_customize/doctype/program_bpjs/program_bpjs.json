@@ -3,7 +3,7 @@
  "allow_rename": 1,
  "autoname": "format:{nama_program}",
  "creation": "2025-12-12 18:20:05.699646",
- "default_view": "Report",
+ "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -43,7 +43,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-12 21:45:10.704546",
+ "modified": "2025-12-29 07:51:32.354997",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Program BPJS",

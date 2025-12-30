@@ -85,12 +85,11 @@ class BukuKerjaMandorPremi(Document):
 		self.amount = amount
 		self.grand_total = flt(amount * self.multiplier, self.precision("grand_total"))
 
-	# def on_update(self):
-	# 	frappe.throw(str(self.grand_total))
-	# 	if not self.grand_total:
-	# 		self.delete()
-	# 	else:
-	# 		self.create_or_update_payment_log()
+	def on_update(self):
+		if not self.grand_total:
+			self.delete()
+		else:
+			self.create_or_update_payment_log()
 
 	def create_or_update_payment_log(self):
 		
@@ -119,7 +118,7 @@ class BukuKerjaMandorPremi(Document):
 		doc.save()
 		
 	def on_trash(self):
-		# self.remove_document()
+		self.remove_document()
 
 		for epl in frappe.get_all(
 			"Employee Payment Log", 

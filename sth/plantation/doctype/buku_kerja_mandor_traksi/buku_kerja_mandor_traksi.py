@@ -11,19 +11,28 @@ from erpnext.accounts.general_ledger import merge_similar_entries
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
+
+field_map = {
+	"Transport": "premi_trans_amount",
+	"Angkut": "premi_angkut_amount",
+	"TBS": "premi_tbs_amount",
+}
+
 class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
 		self.plantation_setting_def.extend([
 			["salary_component", "bkm_traksi_component"],
-			["premi_salary_component", "bkm_premi_traksi"],
+			["premi_tbs_sc", "bkm_premi_traksi_tbs"],
+			["premi_angkut_sc", "bkm_premi_traksi_angkut"],
+			["premi_transport_sc", "bkm_premi_traksi_transport"],
 		])
 		
 		self.kegiatan_fetch_fieldname = []
 		self.skip_calculate_table = ["task"]
 
-		self.fieldname_total.extend(["premi_amount", "premi_tbs_amount"])
+		self.fieldname_total.extend(["premi_angkut_amount", "premi_trans_amount", "premi_tbs_amount"])
 
 		self.payment_log_updater = [
             {
@@ -35,17 +44,23 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
                 "removed_if_zero": False,
             },
 			{
-				"target_amount": "premi_amount",
-				"target_salary_component": "premi_salary_component",
-                "component_type": "Premi Non TBS",
+				"target_amount": "premi_tbs_amount",
+				"target_salary_component": "premi_tbs_sc",
+                "component_type": "Premi TBS",
 				"removed_if_zero": True
 			},
 			{
-				"target_amount": "premi_tbs_amount",
-				"target_salary_component": "premi_salary_component",
-                "component_type": "Premi TBS",
+				"target_amount": "premi_angkut_amount",
+				"target_salary_component": "premi_angkut_sc",
+                "component_type": "Premi Angkut",
 				"removed_if_zero": True
-			}
+			},
+			{
+				"target_amount": "premi_trans_amount",
+				"target_salary_component": "premi_transport_sc",
+                "component_type": "Premi Transport",
+				"removed_if_zero": True
+			},
         ]
 
 		self._clear_fields = ["blok", "divisi", "batch", "project"]
@@ -258,7 +273,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# Hitung amount dasar
 		amount = flt((item.base or 0)/item.total_hari)
 		is_basic_salary = True
-		item.premi_amount = item.premi_tbs_amount = 0
+		item.premi_amount = item.premi_tbs_amount = item.premi_trans_amount = 0
 		
 		self._used_task = set()
 		# looping task sesuai list yang terdaftar pada pegawai
@@ -283,10 +298,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 					precision
 				)
 			
-			if t.is_tbs:
-				item.premi_tbs_amount += premi_amount
-			else:
-				item.premi_amount += premi_amount
+			# get field traksi_type untuk d jumlahkan
+			field = field_map.get(t.traksi_type)
+			if field:
+				item.set(field, item.get(field) + premi_amount)
 					
 			self._used_task.add(t.name)
 		
@@ -306,7 +321,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total + premi
-		item.sub_total = flt(item.amount + item.premi_amount + item.premi_tbs_amount, precision)
+		item.sub_total = flt(item.amount + item.premi_tbs_amount + item.premi_angkut_amount + item.premi_trans_amount, precision)
 		
 	@frappe.whitelist()
 	def get_details_kendaraan(self):
@@ -363,7 +378,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 			.inner_join(kegiatan)
 			.on(k_company.parent == kegiatan.name)
 			.select(
-				k_company.parent, IfNull(k_company.position, "Operator"), kegiatan.is_tbs,
+				k_company.parent, IfNull(k_company.position, "Operator"), kegiatan.traksi_type,
 				k_company.account, k_company.use_basic_salary, k_company.rupiah_basis, 
 				k_company.volume_basis, k_company.workday, k_company.holiday,
 				k_company.workday_base, k_company.holiday_base
@@ -376,7 +391,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 
 		ress = {}
 		for (
-			parent, position, is_tbs, account, use_basic_salary, rupiah_basis,
+			parent, position, traksi_type, account, use_basic_salary, rupiah_basis,
 			volume_basis, workday, holiday, workday_base, holiday_base
 		) in result:
 
@@ -385,7 +400,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 			# jika kegiatan operator maka d anggap kegiatan utama
 			if position == "Operator":
 				data.update({
-					"is_tbs": is_tbs,
+					"traksi_type": traksi_type,
 					"kegiatan_account": account,
 					"use_basic_salary": use_basic_salary,
 					"rupiah_basis": rupiah_basis,
@@ -414,7 +429,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 			
 		ch.update({
 			"upah_hasil": upah,
-			"is_tbs": kc.get("is_tbs"),
+			"traksi_type": kc.get("traksi_type"),
 			"kegiatan_account": kc.get("kegiatan_account"),
 			"upah_kegiatan": upah_kegiatan,
 			"amount": flt(upah) * flt(ch.get("hasil_kerja")),

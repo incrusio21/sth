@@ -8,7 +8,9 @@
   "traksi_default_section",
   "bkm_traksi_component",
   "column_break_uiyl",
-  "bkm_premi_traksi",
+  "bkm_premi_traksi_tbs",
+  "bkm_premi_traksi_angkut",
+  "bkm_premi_traksi_transport",
   "perawatan_default_section",
   "bkm_perawatan_component",
   "column_break_cbzs",
@@ -107,12 +109,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bkm_premi_traksi",
-   "fieldtype": "Link",
-   "label": "BKM Premi Traksi",
-   "options": "Salary Component"
-  },
-  {
    "fieldname": "mandor_tab",
    "fieldtype": "Tab Break",
    "label": "Mandor"
@@ -122,13 +118,31 @@
    "fieldtype": "Table",
    "label": "Mandor Premi",
    "options": "Plantation Mandor Setting"
+  },
+  {
+   "fieldname": "bkm_premi_traksi_tbs",
+   "fieldtype": "Link",
+   "label": "BKM Premi Traksi TBS",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "bkm_premi_traksi_angkut",
+   "fieldtype": "Link",
+   "label": "BKM Premi Traksi Angkut",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "bkm_premi_traksi_transport",
+   "fieldtype": "Link",
+   "label": "BKM Premi Traksi Transport",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-25 22:20:19.848833",
+ "modified": "2025-12-29 13:35:11.175659",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

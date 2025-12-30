@@ -52,6 +52,9 @@ frappe.ui.form.on("Payment Entry", {
         })
         frm.ignore_doctypes_on_cancel_all = ["Deposito Interest", "Deposito", "Disbursement Loan", "Installment Loan", "Payment Voucher Kas"];
     },
+	payment_type(frm){
+        frm.set_value("bank_account", "")
+    },
     party_type(frm){
         frm.set_value("internal_employee", 0)
     },

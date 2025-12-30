@@ -46,7 +46,10 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		])
 
 		self._clear_fields = ["blok"]
-		self._mandor_dict.append({"fieldname": "mandor1"})
+		self._mandor_dict.extend([
+			{"fieldname": "mandor1"},
+			{"fieldname": "kerani_panen"},
+		])
 		self._bkm_name = "Panen"
 
 	def validate(self):

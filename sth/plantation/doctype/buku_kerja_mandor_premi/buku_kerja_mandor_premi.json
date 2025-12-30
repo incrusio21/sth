@@ -26,7 +26,7 @@
  "fields": [
   {
    "fieldname": "amount",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "label": "Amount",
    "read_only": 1
   },
@@ -37,6 +37,7 @@
   {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Grand Total",
    "read_only": 1
   },
@@ -120,6 +121,8 @@
   {
    "fieldname": "buku_kerja_mandor",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Buku Kerja Mandor",
    "read_only": 1
   }
@@ -128,7 +131,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-27 03:47:51.523675",
+ "modified": "2025-12-27 18:51:11.794306",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Premi",

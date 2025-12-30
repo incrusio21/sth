@@ -318,7 +318,6 @@ class SalarySlip(SalarySlip):
 			return
 		
 		designation = frappe.get_cached_doc("Designation", self.designation)
-		addons_premi = 0
 		for premi in designation.premi:
 			if premi.company == self.company and premi.premi_type not in ("Tutup Buku"):
 				continue
@@ -333,7 +332,7 @@ class SalarySlip(SalarySlip):
 				"amount": 0,
 			})
 
-			self._employee_payment[key]["amount"] += addons_premi
+			self._employee_payment[key]["amount"] += premi.amount
 		
 	def remove_flexibel_payment(self):
 		removed_component = []
@@ -343,7 +342,7 @@ class SalarySlip(SalarySlip):
 		for d in removed_component:
 			self.remove(d)
 
-	def calculate_employee_payment(self):	
+	def calculate_employee_payment(self):
 		for (component, component_type), value in self._employee_payment.items():
 			self.add_component_custom(
 				component, 

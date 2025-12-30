@@ -8,24 +8,7 @@ sth.plantation.mandor_field = {
 
         // frm.fields_dict.reference.grid.update_docfield_property("employee_field", "options", options);
 
-        let get_select_options = function (df, parent_field) {
-            // Append parent_field name along with fieldname for child table fields
-            let select_value = parent_field ? df.fieldname + "," + parent_field : df.fieldname;
-
-            return {
-                value: select_value,
-                label: df.fieldname + " (" + __(df.label, null, df.parent) + ")",
-            };
-        };
-
-        let fields = frappe.get_doc("DocType", doctype).fields;
-        let options = $.map(fields, function (d) {
-            return d.fieldtype == "Link" && d.options == "Employee" && !d.read_only
-                ? get_select_options(d)
-                : null;
-        });
         
-        this.mandor_fields[doctype] = options
 
         return options;
     },
@@ -40,12 +23,32 @@ sth.plantation.mandor_field = {
         // get the doctype to update fields
 		if (!doctype) return;
 
-        let docfield = row?.docfields?.find((d) => d.fieldname === "employee_field");
-        if (docfield) {
-            docfield["options"] = this.mandor_fields[doctype] || await this.get_mandor_fields(doctype);
-        } else {
-            throw `field ${fieldname} not found`;
-        }
+        frappe.model.with_doctype(doctype, function () {
+            let get_select_options = function (df, parent_field) {
+                // Append parent_field name along with fieldname for child table fields
+                let select_value = parent_field ? df.fieldname + "," + parent_field : df.fieldname;
+
+                return {
+                    value: select_value,
+                    label: df.fieldname + " (" + __(df.label, null, df.parent) + ")",
+                };
+            };
+
+            let fields = frappe.get_doc("DocType", doctype).fields;
+            let options = $.map(fields, function (d) {
+                return d.fieldtype == "Link" && d.options == "Employee" && !d.read_only
+                    ? get_select_options(d)
+                    : null;
+            });
+            
+            let docfield = row?.docfields?.find((d) => d.fieldname === "employee_field");
+            if (docfield) {
+                docfield["options"] = options
+            } else {
+                throw `field ${fieldname} not found`;
+            }
+		});
+        
     }
 }
 

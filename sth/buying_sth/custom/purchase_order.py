@@ -61,8 +61,11 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
             )
 
     def validate_progress(child_item, new_data):
-        if flt(new_data.get("progress_received")) < flt(child_item.received_qt):
+        if flt(new_data.get("progress_received")) < flt(child_item.received_qty):
             frappe.throw(_("Cannot set Progress less than received quantity"))
+
+        if flt(child_item.qty) < flt(new_data.get("progress_received")):
+            frappe.throw(_("Cannot set Progress more than received quantity"))
 
     data = json.loads(trans_items)
     any_update = False

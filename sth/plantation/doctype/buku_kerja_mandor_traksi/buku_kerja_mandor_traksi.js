@@ -3,6 +3,12 @@
 
 sth.plantation.setup_bkm_controller()
 
+const field_map = {
+	"Transport": "premi_trans_amount",
+	"Angkut": "premi_angkut_amount",
+	"TBS": "premi_tbs_amount",
+}
+
 frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 	posting_date(frm){
 		frm.cscript.get_details_data({
@@ -116,7 +122,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 
 		let me = this
 		
-		this.fieldname_total.push("premi_amount", "premi_tbs_amount")
+		this.fieldname_total.push("premi_angkut_amount", "premi_trans_amount", "premi_tbs_amount")
 		this.skip_calculate_table = ["task"]
 		this.kegiatan_fetch_fieldname = []
 		
@@ -359,10 +365,10 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 				)
 			}
 			
-			if(task.is_tbs){
-				item.premi_tbs_amount += premi_amount
-			}else{
-				item.premi_amount += premi_amount
+
+			field = field_map.get(task.traksi_type)
+			if(field){
+				item[field] += premi_amount
 			}
 		}
 		
@@ -384,7 +390,9 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
 	update_value_after_amount(item) {
-        item.sub_total = flt(item.amount || 0) + flt(item.premi_amount || 0)
+        item.sub_total = flt(item.amount || 0) + 
+			flt(item.premi_tbs_amount || 0) + flt(item.premi_angkut_amount || 0) + 
+			flt(item.premi_angkut_amount || 0)
     }
 }
 
