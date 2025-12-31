@@ -63,8 +63,13 @@ class SalarySlip(SalarySlip):
 		holidays = self.get_holidays_for_employee(self.actual_start_date, self.actual_end_date)
 
 		self.holiday_days = 0
+		hari_leave = 0
 		week_start = week_end = None
 		actual_start, actual_end = getdate(self.actual_start_date), getdate(self.actual_end_date)
+
+		apakah_karyawan_tetap = 0 
+		if frappe.get_cached_doc("Employee", self.employee).employment_type == 'KARYAWAN TETAP':
+			apakah_karyawan_tetap = 1
 
 		for h in holidays:
 			# jika tidak terdapat tanggal akhir atau 
@@ -100,7 +105,13 @@ class SalarySlip(SalarySlip):
 					att_exist = True
 					# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
 					if status_code in list_status_code_lwp:
-						self.holiday_days += 1
+						if status_code == "C":
+							if apakah_karyawan_tetap == 1:
+								self.holiday_days += 1
+								
+						else:
+							self.holiday_days +=1
+							
 				
 				current_date = add_days(current_date, 1)
 			
@@ -108,9 +119,14 @@ class SalarySlip(SalarySlip):
 			# atau terdapat attendance tambahkan holidays
 			if allWeekOff:
 				self.holiday_days += current_week_holiday
+				hari_leave += current_week_holiday
 			elif att_exist :
 				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 				self.holiday_days += 1
+				hari_leave += 1
+		
+		self.payment_days = self.total_working_days - self.holiday_days + hari_leave
+
 
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
@@ -553,5 +569,5 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Payroll Entry","HR-PRUN-2025-00017")
-	doc.create_salary_slips()	
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00701/00001")
+	doc.calculate_holidays()	
