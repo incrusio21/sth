@@ -10,6 +10,7 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('default', 'Ya');
 			frm.set_value('status_bank', 'Aktif');
 		}
+		check_status_pkp(frm)
 	},
 	aktif: function(frm) {
 		if (frm.doc.aktif) {
@@ -19,7 +20,10 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('default', 'Tidak');
 			frm.set_value('status_bank', 'Tidak Aktif');
 		}
-	}
+	},
+	status_pkp: function(frm) {
+		check_status_pkp(frm)
+	},
 });
 
 function generate_kode_supplier(frm) {
@@ -31,4 +35,12 @@ function generate_kode_supplier(frm) {
 			}
 		}
 	});
+}
+
+function check_status_pkp(frm){
+	if (frm.doc.status_pkp) {
+		frm.set_df_property('no_sppkp', 'read_only', 0);
+	} else {
+		frm.set_df_property('no_sppkp', 'read_only', 1);
+	}
 }

@@ -3,6 +3,7 @@ frappe.ui.form.on('Item', {
         if (frm.is_new() && !frm.doc.item_code) {
             generate_item_code(frm);
         }
+        frm.set_df_property('item_code', 'read_only', 1);
     },
 });
 

@@ -39,6 +39,7 @@ doctype_js = {
 	"Exit Interview": "public/js/exit_interview.js",
 	"Expense Claim": "public/js/expense_claim.js",
 	"Item": "public/js/item.js",
+	"Item Group": "public/js/item_group.js",
 	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
     "Material Request": "public/js/material_request.js",
