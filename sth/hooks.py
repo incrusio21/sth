@@ -206,6 +206,12 @@ doc_events = {
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
 	},
+	"Item": {
+		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+	},
+	"Item Group": {
+		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+	},
     "Leave Type": {
 		"on_change": "sth.hr_customize.custom.leave_type.clear_cache"
 	},
