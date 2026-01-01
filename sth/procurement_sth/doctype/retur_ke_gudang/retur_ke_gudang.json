@@ -37,8 +37,9 @@
   },
   {
    "fieldname": "no_pengeluaran",
-   "fieldtype": "Data",
-   "label": "No Pengeluaran Barang"
+   "fieldtype": "Link",
+   "label": "No Pengeluaran Barang",
+   "options": "Pengeluaran Barang"
   },
   {
    "fieldname": "pemilik",
@@ -117,7 +118,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-23 14:09:58.661110",
+ "modified": "2026-01-02 04:39:21.852800",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Gudang",

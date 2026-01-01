@@ -21,7 +21,8 @@
   "nama_jabatan",
   "section_break_jtbl",
   "items",
-  "amended_from"
+  "amended_from",
+  "status"
  ],
  "fields": [
   {
@@ -112,13 +113,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Status",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-23 14:04:01.657932",
+ "modified": "2026-01-02 04:41:30.697737",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

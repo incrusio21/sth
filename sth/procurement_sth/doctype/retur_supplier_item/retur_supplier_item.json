@@ -19,6 +19,7 @@
    "in_list_view": 1,
    "label": "Kode Barang",
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -26,7 +27,8 @@
    "fieldname": "nama_barang",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama Barang"
+   "label": "Nama Barang",
+   "read_only": 1
   },
   {
    "fieldname": "jumlah",
@@ -40,7 +42,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Satuan",
-   "options": "UOM"
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_kzaq",
@@ -51,7 +54,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-30 10:43:36.033154",
+ "modified": "2026-01-01 10:49:58.110918",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Supplier Item",
