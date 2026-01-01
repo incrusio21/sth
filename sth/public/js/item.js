@@ -5,6 +5,13 @@ frappe.ui.form.on('Item', {
         }
         frm.set_df_property('item_code', 'read_only', 1);
     },
+    status: function(frm) {
+        if (frm.doc.status === 'Aktif') {
+            frm.set_value('disabled', 0);
+        } else if (frm.doc.status === 'Non Aktif') {
+            frm.set_value('disabled', 1);
+        }
+    }
 });
 
 function generate_item_code(frm) {
