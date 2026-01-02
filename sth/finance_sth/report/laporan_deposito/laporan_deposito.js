@@ -40,5 +40,16 @@ frappe.query_reports["Laporan Deposito"] = {
 				"Roll Over Pokok + Bunga",
 			],
 		},
+		{
+			"fieldname": "status_deposito",
+			"label": __("Status Deposito"),
+			"fieldtype": "Select",
+			"options": [
+				"",
+				"Belum",
+				"Sudah",
+				"Roll Overed"
+			],
+		},
 	]
 };

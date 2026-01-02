@@ -41,12 +41,35 @@ def populate_kriteria_upload(doc):
 	for idx, item in enumerate(kriteria_items, start=1):
 		upload_file = existing_uploads.get(item.rincian_dokumen_finance, None)
 		
-		doc.append("kriteria_upload_dokumen_finance", {
-			"rincian_dokumen_finance": item.rincian_dokumen_finance,
-			"upload_file": upload_file,
-			"mandatory": item.mandatory, 
-			"idx": idx
-		})
+		if doc.doctype != "Supplier":
+			doc.append("kriteria_upload_dokumen_finance", {
+				"rincian_dokumen_finance": item.rincian_dokumen_finance,
+				"upload_file": upload_file,
+				"mandatory": item.mandatory, 
+				"idx": idx
+			})
+		else:
+			if doc.badan_usaha == "Perorangan":
+				if item.rincian_dokumen_finance in ["Cover Rekening", "NPWP","KTP Pemilik", "Form Supplier"]:
+					doc.append("kriteria_upload_dokumen_finance", {
+						"rincian_dokumen_finance": item.rincian_dokumen_finance,
+						"upload_file": upload_file,
+						"mandatory": item.mandatory, 
+					})
+			elif doc.badan_usaha == "Koperasi":
+				if item.rincian_dokumen_finance in ["Akta", "Cover Rekening", "NPWP","KTP Pemilik", "Form Supplier"]:
+					doc.append("kriteria_upload_dokumen_finance", {
+						"rincian_dokumen_finance": item.rincian_dokumen_finance,
+						"upload_file": upload_file,
+						"mandatory": item.mandatory, 
+					})
+			else:
+				doc.append("kriteria_upload_dokumen_finance", {
+					"rincian_dokumen_finance": item.rincian_dokumen_finance,
+					"upload_file": upload_file,
+					"mandatory": item.mandatory, 
+					"idx": idx
+				})
 
 def validate_mandatory_documents(doc):
 

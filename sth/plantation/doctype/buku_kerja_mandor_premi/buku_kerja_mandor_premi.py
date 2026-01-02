@@ -14,7 +14,7 @@ from frappe.model.document import Document
 from sth.plantation import get_plantation_settings
 
 voucher_maping = {
-	"Traksi": "premi_tbs_amount",
+	"Traksi": "tbs_amount",
 	"Panen": "qty",
 }
 
@@ -79,10 +79,11 @@ class BukuKerjaMandorPremi(Document):
 			total_emp += 1
 			amount += amm
 
+		self.amount = amount
 		if self.method == "Average":
 			amount = amount / total_emp
-
-		self.amount = amount
+			self.average = amount
+			
 		self.grand_total = flt(amount * self.multiplier, self.precision("grand_total"))
 
 	def on_update(self):

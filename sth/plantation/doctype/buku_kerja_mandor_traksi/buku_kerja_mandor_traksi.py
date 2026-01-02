@@ -15,7 +15,6 @@ from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 field_map = {
 	"Transport": "premi_trans_amount",
 	"Angkut": "premi_angkut_amount",
-	"TBS": "premi_tbs_amount",
 }
 
 class BukuKerjaMandorTraksi(BukuKerjaMandorController):
@@ -32,7 +31,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self.kegiatan_fetch_fieldname = []
 		self.skip_calculate_table = ["task"]
 
-		self.fieldname_total.extend(["premi_angkut_amount", "premi_trans_amount", "premi_tbs_amount"])
+		self.fieldname_total.extend(["premi_angkut_amount", "premi_trans_amount"])
 
 		self.payment_log_updater = [
             {
@@ -43,12 +42,6 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
                 "hari_kerja": True,
                 "removed_if_zero": False,
             },
-			{
-				"target_amount": "premi_tbs_amount",
-				"target_salary_component": "premi_tbs_sc",
-                "component_type": "Premi TBS",
-				"removed_if_zero": True
-			},
 			{
 				"target_amount": "premi_angkut_amount",
 				"target_salary_component": "premi_angkut_sc",
@@ -73,11 +66,31 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# jika merupakan document baru. nama sudah d update sebelum data update
 		if self.flags.in_insert:
 			self.update_task_details_name()
-		
+	
 		# set data emloyee
 		self.set_details_diffrence(jenis_alat=self.jenis_alat, raise_error=True)
 		super().validate()
-	
+
+	def validate_used_task(self):
+		# cek apakah butuh perhitungan ulang krn ada kegiatan yang belum terhitung
+		re_calculate = False
+		for d in self.task:
+			if d.name in self._used_task:
+				continue
+			
+			# kegiatan tidak masuk dalam hasil kerja dan hanya ada 1 hasil kerja
+			# maka otomatis masuk ke hasil kerja tersebut dan lalukan
+			# kalkulasi ulang
+			if len(self.hasil_kerja) == 1:
+				self.hasil_kerja[0].kegiatan_list += f"\n{d.name}"
+				re_calculate = True
+				continue
+
+			frappe.throw(f"Plase include {d.kegiatan} in Row#{d.idx} for Employee")
+
+		if re_calculate:
+			self.calculate()
+
 	def calculate(self):
 		if self.flags.re_calculate:
 			self.validate_upah_kegiatan()
@@ -86,6 +99,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		get_details_employee(self.hasil_kerja, self.posting_date)
 
 		super().calculate()
+
+		self.validate_used_task()
 
 	def set_posting_datetime(self):
 		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
@@ -163,8 +178,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			
 			hk.kegiatan_list = "\n".join(new_kegiatan)
 
+
 		if update:
 			self.update_child_table("hasil_kerja")
+
 
 	def on_submit(self):
 		super().on_submit()
@@ -273,7 +290,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# Hitung amount dasar
 		amount = flt((item.base or 0)/item.total_hari)
 		is_basic_salary = True
-		item.premi_amount = item.premi_tbs_amount = item.premi_trans_amount = 0
+		item.premi_angkut_amount = item.premi_tbs_amount = \
+			item.premi_trans_amount = item.tbs_amount = 0
 		
 		self._used_task = set()
 		# looping task sesuai list yang terdaftar pada pegawai
@@ -298,6 +316,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 					precision
 				)
 			
+			item.tbs_amount += t.amount if t.traksi_type == "TBS" else 0
 			# get field traksi_type untuk d jumlahkan
 			field = field_map.get(t.traksi_type)
 			if field:
@@ -305,7 +324,6 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 					
 			self._used_task.add(t.name)
 		
-		# self.validate_used_task()
 		# if not self.get("manual_hk"):
 		# 	item.hari_kerja = min(flt(item.qty / (item.volume_basis or 1)), 1)
 

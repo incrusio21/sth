@@ -81,6 +81,32 @@ def get_data(filters):
 			field = f"saldo_{d.strftime('%Y_%m_%d')}"
 			row.setdefault(field, 0)
 		data.append(row)
+  
+	q_penerimaan = frappe.db.sql("""
+		SELECT
+		SUM(ge.debit) as total
+		FROM `tabGL Entry` as ge
+		JOIN `tabAccount` as a ON a.name = ge.account
+		WHERE a.is_group = 0 AND a.account_type = 'Direct Income' AND ge.posting_date BETWEEN %(from_date)s AND %(to_date)s;
+	""", filters, as_dict=True)
+
+	q_pengeluaran = frappe.db.sql("""
+		SELECT
+		SUM(ge.debit) as total
+		FROM `tabGL Entry` as ge
+		JOIN `tabAccount` as a ON a.name = ge.account
+		WHERE a.is_group = 0 AND a.account_type = 'Payable' AND ge.posting_date BETWEEN %(from_date)s AND %(to_date)s;
+	""", filters, as_dict=True)
+  
+	data.append({
+		"company": "ESTIMASI HARIAN DANA MASUK - PENERIMAAN DARI :",
+		f"saldo_{dates[-1].strftime('%Y_%m_%d')}": q_penerimaan[0].get("total")
+	})
+
+	data.append({
+		"company": "ESTIMASI HARIAN DANA KELUAR - PENGELUARAN UNTUK :",
+		f"saldo_{dates[-1].strftime('%Y_%m_%d')}":  q_pengeluaran[0].get("total")
+	})
 
 	return data
 

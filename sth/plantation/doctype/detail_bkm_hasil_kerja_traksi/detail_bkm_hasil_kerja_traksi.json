@@ -24,8 +24,8 @@
   "section_break_fdft",
   "hari_kerja",
   "amount",
+  "tbs_amount",
   "column_break_lvhx",
-  "premi_tbs_amount",
   "premi_angkut_amount",
   "premi_trans_amount",
   "column_break_mpwj",
@@ -156,14 +156,6 @@
   },
   {
    "columns": 1,
-   "fieldname": "premi_tbs_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Premi TBS",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
    "fieldname": "premi_angkut_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -177,13 +169,20 @@
    "in_list_view": 1,
    "label": "Premi Tranport",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "tbs_amount",
+   "fieldtype": "Currency",
+   "label": "Upah TBS",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-29 10:43:33.871949",
+ "modified": "2025-12-31 11:47:00.258792",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Traksi",

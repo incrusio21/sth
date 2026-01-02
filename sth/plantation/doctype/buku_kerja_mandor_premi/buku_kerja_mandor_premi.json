@@ -19,6 +19,7 @@
   "buku_kerja_mandor",
   "mandor_type",
   "column_break_xzjg",
+  "average",
   "grand_total",
   "more_info_tab",
   "salary_component"
@@ -125,13 +126,20 @@
    "in_standard_filter": 1,
    "label": "Buku Kerja Mandor",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.method == \"Average\"",
+   "fieldname": "average",
+   "fieldtype": "Float",
+   "label": "Average",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-27 18:51:11.794306",
+ "modified": "2025-12-31 13:09:04.036074",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Premi",

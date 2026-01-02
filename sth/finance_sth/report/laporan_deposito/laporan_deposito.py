@@ -10,25 +10,26 @@ def execute(filters=None):
 	data = []
 
 	query_l_deposito = frappe.db.sql("""
-		SELECT 
+	SELECT 
 		dit.posting_date as tgl_penempatan,
-		DATE_FORMAT(dit.posting_date, '%b') as bulan,
-		DATE_FORMAT(dit.posting_date, '%Y') as tahun,
+		DATE_FORMAT(dit.posting_date, '%%b') as bulan,
+		DATE_FORMAT(dit.posting_date, '%%Y') as tahun,
 		d.bank as nama_bank,
 		d.deposito_type as jenis_deposito,
 		d.currency as mata_uang,
 		dit.deposito_amount as nilai_pokok,
-		CONCAT(ROUND(dit.interest, 2), ' ', '%') as suku_bunga,
-		CONCAT(d.tenor, ' ', 'bulan') as jangka_waktu,
+		CONCAT(ROUND(dit.interest, 2), ' %%') as suku_bunga,
+		CONCAT(d.tenor, ' bulan') as jangka_waktu,
 		dit.maturity_date as tgl_jatuh_tempo,
 		d.docstatus as status_deposito,
 		d.interest_amount as bunga_bruto,
 		d.tax_amount as pajak,
 		d.total as bunga_neto,
 		d.is_redeemed as dicairkan
-		FROM `tabDeposito` as d
-		JOIN `tabDeposito Interest Table` as dit ON dit.parent = d.name;
-  """, as_dict=True)
+	FROM `tabDeposito` d
+	JOIN `tabDeposito Interest Table` dit ON dit.parent = d.name
+	WHERE d.company IS NOT NULL {}
+  """.format(conditions), filters, as_dict=True)
 
 	for deposito in query_l_deposito:
 		data.append(deposito)
@@ -38,8 +39,17 @@ def execute(filters=None):
 def get_condition(filters):
 	conditions = ""
 
-	if filters.get("pt"):
-		conditions += " AND et.company = %(pt)s"
+	if filters.get("bulan"):
+		conditions += " AND DATE_FORMAT(dit.posting_date, '%%b') = %(bulan)s"
+
+	if filters.get("tahun"):
+		conditions += " AND DATE_FORMAT(dit.posting_date, '%%Y') = %(tahun)s"
+
+	if filters.get("jenis_deposito"):
+		conditions += " AND d.deposito_type = %(jenis_deposito)s"
+
+	if filters.get("status_deposito"):
+		conditions += " AND d.is_redeemed = %(status_deposito)s"
 
 	return conditions
 

@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}}]",
+ "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"V89B-N5Ttm\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"nJc2GtGnTJ\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reminder</b></span>\",\"col\":12}},{\"id\":\"7P_KVcmjgi\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Event Calendar\",\"col\":3}},{\"id\":\"BSGrJQ47oB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overdue Sales Invoice\",\"col\":3}},{\"id\":\"4ao_eSX-FN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overdue Purchase Invoice\",\"col\":3}}]",
  "creation": "2025-10-29 13:20:04.900745",
  "custom_blocks": [],
  "docstatus": 0,
@@ -65,26 +65,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Posisi Saldo Bank",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Posisi Saldo",
-   "link_count": 0,
-   "link_to": "POSISI SALDO",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Posisi Saldo",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Outstanding Penjualan",
    "link_count": 1,
    "link_type": "DocType",
@@ -99,26 +79,6 @@
    "link_to": "Outstanding Penjualan",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Voucher",
-   "link_count": 0,
-   "link_to": "Payment Voucher",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Payment Entry",
    "type": "Link"
   },
   {
@@ -230,9 +190,139 @@
    "onboard": 0,
    "report_ref_doctype": "Currency Exchange",
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Voucher",
+   "link_count": 0,
+   "link_to": "Payment Voucher",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Payment Entry",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Voucher Kas",
+   "link_count": 0,
+   "link_to": "Payment Voucher Kas",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Payment Voucher Kas",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Posisi Saldo Bank",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Posisi Saldo",
+   "link_count": 0,
+   "link_to": "POSISI SALDO",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Posisi Saldo",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Summary Posisi Saldo",
+   "link_count": 0,
+   "link_to": "Summary Posisi Saldo",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Deposito",
+   "link_count": 0,
+   "link_to": "Laporan Deposito",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Permintaan Dana Operasional",
+   "link_count": 0,
+   "link_to": "Laporan Permintaan Dana Operasional",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Harian Kas dan Bank",
+   "link_count": 0,
+   "link_to": "Laporan Harian Kas dan Bank",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Pinjaman Bank",
+   "link_count": 0,
+   "link_to": "Laporan Pinjaman Bank",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Angsuran Pinjaman Bank",
+   "link_count": 0,
+   "link_to": "Laporan Angsuran Pinjaman Bank",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan List Bayar Harian",
+   "link_count": 0,
+   "link_to": "Laporan List Bayar Harian",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-21 21:53:41.853704",
+ "modified": "2026-01-02 09:05:07.579882",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",
@@ -243,6 +333,28 @@
  "quick_lists": [],
  "roles": [],
  "sequence_id": 27.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Event Calendar",
+   "type": "URL",
+   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/TEST%20CALENDAR%20EVENT"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Overdue Sales Invoice",
+   "type": "URL",
+   "url": "https://sth.digitalasiasolusindo.com/app/sales-invoice/view/calendar/Overdue%20Sales%20Invoice"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Overdue Purchase Invoice",
+   "type": "URL",
+   "url": "https://sth.digitalasiasolusindo.com/app/purchase-invoice/view/calendar/Overdue%20Purchase%20Invoice"
+  }
+ ],
  "title": "Finance"
 }
