@@ -35,7 +35,8 @@ function btn_get_material_request(frm) {
         __("Material Request"),
         function () {
             const d = erpnext.utils.map_current_doc({
-                method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
+                // method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
+                method: "sth.overrides.material_request.make_supplier_quotation",
                 source_doctype: "Material Request",
                 target: frm,
                 allow_child_item_selection: 1,
@@ -67,7 +68,8 @@ function btn_get_rfq(frm) {
                 frappe.throw({ message: __("Please select a Supplier"), title: __("Mandatory") });
             }
             erpnext.utils.map_current_doc({
-                method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
+                // method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
+                method: "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
                 source_doctype: "Request for Quotation",
                 target: frm,
                 allow_child_item_selection: 1,
