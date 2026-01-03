@@ -46,7 +46,7 @@ doctype_js = {
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": "buying_sth/custom/purchase_invoice.js",
-	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
+	"Purchase Order": "buying_sth/custom/purchase_order.js",
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
     "Request for Quotation" : "public/js/request_for_quotation.js",
@@ -164,18 +164,19 @@ override_doctype_class = {
 	"Asset": "sth.overrides.asset.Asset",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
 	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
+	"Bank Account": "sth.overrides.bank_account.BankAccount",
+	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 	"Customer": "sth.overrides.customer.Customer",
 	"Item": "sth.overrides.item.Item",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
+	"Purchase Receipt": "sth.overrides.purchase_receipt.SthPurchaseReceipt",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Supplier": "sth.overrides.supplier.Supplier",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
-	"Bank Account": "sth.overrides.bank_account.BankAccount",
-	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 }
 
 # Document Events
@@ -245,16 +246,8 @@ doc_events = {
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
-	"Purchase Order": {
-		"onload": "sth.buying_sth.custom.purchase_order.onload_order_type",
-		"validate": "sth.legal.custom.purchase_order.PurchaseOrder",
-		"on_submit": "sth.legal.custom.purchase_order.PurchaseOrder",
-		"on_cancel": "sth.legal.custom.purchase_order.PurchaseOrder",
-        "on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress",
-		"field_purchase_type": "sth.legal.custom.purchase_order.field_purchase_type",
-	},
 	"Purchase Receipt": {
-		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
+		"on_submit": "sth.legal.custom.purchase_receipt.validate_progress_received",
 	},
 	"Quotation": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
@@ -318,12 +311,12 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
-    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.overrides.purchase_receipt.make_purchase_invoice",
+    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
-    "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
     "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
     "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
 	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
+    "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
 }
 #
 # each overriding function accepts a `data` argument;

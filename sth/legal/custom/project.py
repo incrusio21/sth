@@ -20,7 +20,7 @@ class Project:
             case "on_update":
                 self.validate_and_update_project()
                 self.move_task_to_new_project()
-                self.validate_purchase_order()
+                self.validate_proposal()
                 self.create_task_by_order()
             case "on_trash":
                 self.validate_and_update_project(delete=1)
@@ -51,15 +51,15 @@ class Project:
         if self.doc.project_type != "Adendum" or self.doc.proposal_type != "Transaction":
             return
         
-        # get purchase order dari adendum
-        new_po = frappe.get_value("Purchase Order", {"from_order": self.doc.last_purchase_order, "docstatus": 1}, "name")
+        # get proposal dari adendum
+        new_po = frappe.get_value("Proposal", {"from_proposal": self.doc.last_proposal, "docstatus": 1}, "name")
         if not new_po:
-            frappe.throw(f"Please create new Purchase Order for Project {self.doc.project_type} first")
+            frappe.throw(f"Please create new Proposal for Project {self.doc.project_type} first")
 
-        self.doc.purchase_order = new_po
+        self.doc.proposal = new_po
 
     def set_note(self):
-        if not self.doc.is_new() and self.doc.for_proposal and not self.doc.purchase_order:
+        if not self.doc.is_new() and self.doc.for_proposal and not self.doc.proposal:
             return
         
         from frappe.utils.formatters import format_value
@@ -76,7 +76,7 @@ class Project:
                 po_i.qty,
                 po_i.uom,
                 po_i.rate,
-            ).where(po_i.parent == self.doc.purchase_order)
+            ).where(po_i.parent == self.doc.proposal)
         ).run(as_dict=1)
 
         data = "<div class='ql-editor' contenteditable='true'><ol>"
@@ -114,42 +114,39 @@ class Project:
 
         frappe.db.sql(""" update `tabTask` set project = %s where project = %s """, (new_project, last_project))
         
-    def validate_purchase_order(self):
+    def validate_proposal(self):
         # jika bukan untuk proposal. hapus purchase order
         if not self.doc.for_proposal:
-            self.doc.purchase_order = None
+            self.doc.proposal = None
         
         before_save = self.doc.get_latest()
         # pastikan purchase order pada project tidak boleh berubah
         if (
             before_save and 
-            before_save.purchase_order and 
-            before_save.purchase_order != self.doc.purchase_order
+            before_save.proposal and 
+            before_save.proposal != self.doc.proposal
         ):
-            frappe.throw(_("No changes allowed to Purchase Order"))
+            frappe.throw(_("No changes allowed to Proposal"))
 
     def create_task_by_order(self):
         # skip create task jika tidak terdapat data po atau task sudah ada
-        if not self.doc.purchase_order or frappe.db.exists("Task", {"purchase_order": self.doc.purchase_order}):
+        if not self.doc.proposal or frappe.db.exists("Task", {"proposal": self.doc.proposal}):
             return
         
-        po = frappe.get_doc("Purchase Order", self.doc.purchase_order)
-        # run hanya untuk ambil key onload
-        po.run_method("onload")
+        po = frappe.get_doc("Proposal", self.doc.proposal)
 
         # jika po bukan submit atau bukan merupakan check progress
-        if po.docstatus != 1 or not po.get_onload("check_progress"):
-            frappe.throw(f"Unable to create project from Purchase Order {self.doc.purchase_order}")
+        if po.docstatus != 1:
+            frappe.throw(f"Unable to create project from Proposal {self.doc.proposal}")
 
-        subject = po.get_onload("progress_benchmark")
         for item in po.items:
             task = frappe.new_doc("Task")
 
             task.update({
-                "subject": item.get(subject),
+                "subject": item.kegiatan,
                 "project": self.doc.name,
-                "purchase_order": self.doc.purchase_order,
-                "purchase_order_item": item.name,
+                "proposal": self.doc.proposal,
+                "proposal_item": item.name,
                 "progress": flt(item.progress_received/item.qty*100)
             })
 
@@ -159,7 +156,7 @@ class Project:
 def make_project_adendum(source_name, target_doc=None):
     def set_missing_values(source, target):
         target.project_type = "Adendum"
-        target.last_purchase_order = source.purchase_order or source.last_purchase_order
+        target.last_proposal = source.proposal or source.last_proposal
 
     doc = get_mapped_doc(
         "Project",
