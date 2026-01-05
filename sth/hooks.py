@@ -30,7 +30,7 @@ app_include_js = "sth.bundle.js"
 # include js in doctype views
 doctype_js = {
 	"Asset": "public/js/asset.js",
-	"Attendance": "hr_customize/custom/attendance.js",
+	"Attendance": "public/js/attendance.js",
     "Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
