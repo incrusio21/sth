@@ -30,7 +30,7 @@ app_include_js = "sth.bundle.js"
 # include js in doctype views
 doctype_js = {
 	"Asset": "public/js/asset.js",
-	"Attendance": "hr_customize/custom/attendance.js",
+	"Attendance": "public/js/attendance.js",
     "Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
@@ -151,9 +151,8 @@ standard_queries = {
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
 	"Bank": "sth.controllers.queries.get_bank_query",
-	"Unit": "sth.controllers.queries.unit_query",
-}
 	# "Unit": "sth.controllers.queries.unit_query",
+}
 
 # DocType Class
 # ---------------
@@ -189,7 +188,6 @@ doc_events = {
 		"validate": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_setelah_insert",
 		"before_submit": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_before_submit"
 	},
-
 
 	"Asset": {
 		"validate": ["sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
@@ -286,7 +284,8 @@ scheduler_events = {
 # 		"sth.tasks.all"
 # 	],
 	"daily": [
-		"sth.finance_sth.doctype.deposito.deposito.deposito_roll_over"
+		"sth.finance_sth.doctype.deposito.deposito.deposito_roll_over",
+		"sth.overrides.event.custom_send_email_digest"
 	],
 # 	"hourly": [
 # 		"sth.tasks.hourly"
