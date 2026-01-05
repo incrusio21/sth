@@ -125,7 +125,7 @@ class SalarySlip(SalarySlip):
 				self.holiday_days += 1
 				hari_leave += 1
 		
-		self.payment_days = self.total_working_days - self.holiday_days + hari_leave
+		self.payment_days = self.total_working_days - self.holiday_days + hari_leave - self.absent_days
 
 
 	def _get_not_out_attendance_days(self) -> float:
