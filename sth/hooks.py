@@ -151,9 +151,8 @@ standard_queries = {
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
 	"Bank": "sth.controllers.queries.get_bank_query",
-	"Unit": "sth.controllers.queries.unit_query",
-}
 	# "Unit": "sth.controllers.queries.unit_query",
+}
 
 # DocType Class
 # ---------------
