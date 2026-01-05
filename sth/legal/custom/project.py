@@ -64,7 +64,7 @@ class Project:
         
         from frappe.utils.formatters import format_value
         
-        po_i = frappe.qb.DocType("Purchase Order Item")
+        po_i = frappe.qb.DocType("Proposal Item")
         kegiatan = frappe.qb.DocType("Kegiatan")
 
         query = (
@@ -143,7 +143,7 @@ class Project:
             task = frappe.new_doc("Task")
 
             task.update({
-                "subject": item.kegiatan,
+                "subject": frappe.get_cached_value("Kegiatan", item.kegiatan, "nm_kgt"),
                 "project": self.doc.name,
                 "proposal": self.doc.proposal,
                 "proposal_item": item.name,
