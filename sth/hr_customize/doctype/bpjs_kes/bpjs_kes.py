@@ -11,7 +11,7 @@ from erpnext.accounts.general_ledger import merge_similar_entries
 
 from sth.controllers.accounts_controller import AccountsController
 
-class BPJSKes(AccountsController):
+class BPJSKES(AccountsController):
 
 	def validate(self):
 		self.set_missing_value()

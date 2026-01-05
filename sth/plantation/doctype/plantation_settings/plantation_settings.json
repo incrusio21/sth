@@ -8,7 +8,9 @@
   "traksi_default_section",
   "bkm_traksi_component",
   "column_break_uiyl",
-  "bkm_traksi_mandor",
+  "bkm_premi_traksi_tbs",
+  "bkm_premi_traksi_angkut",
+  "bkm_premi_traksi_transport",
   "perawatan_default_section",
   "bkm_perawatan_component",
   "column_break_cbzs",
@@ -20,7 +22,9 @@
   "column_break_pxng",
   "denda_sc",
   "brondolan_sc",
-  "against_kontanan_component"
+  "against_kontanan_component",
+  "mandor_tab",
+  "mandor_premi"
  ],
  "fields": [
   {
@@ -68,7 +72,7 @@
   {
    "fieldname": "premi_sc",
    "fieldtype": "Link",
-   "label": "Premi Salary Component",
+   "label": "BKM Premi Perawatan",
    "options": "Salary Component"
   },
   {
@@ -105,9 +109,32 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bkm_traksi_mandor",
+   "fieldname": "mandor_tab",
+   "fieldtype": "Tab Break",
+   "label": "Mandor"
+  },
+  {
+   "fieldname": "mandor_premi",
+   "fieldtype": "Table",
+   "label": "Mandor Premi",
+   "options": "Plantation Mandor Setting"
+  },
+  {
+   "fieldname": "bkm_premi_traksi_tbs",
    "fieldtype": "Link",
-   "label": "BKM Traksi Mandor",
+   "label": "BKM Premi Traksi TBS",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "bkm_premi_traksi_angkut",
+   "fieldtype": "Link",
+   "label": "BKM Premi Traksi Angkut",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "bkm_premi_traksi_transport",
+   "fieldtype": "Link",
+   "label": "BKM Premi Traksi Transport",
    "options": "Salary Component"
   }
  ],
@@ -115,7 +142,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-08 11:54:51.519222",
+ "modified": "2025-12-29 13:35:11.175659",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

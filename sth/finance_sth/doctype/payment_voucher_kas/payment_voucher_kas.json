@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-12-21 12:50:20.284043",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -25,6 +26,8 @@
   "receive_bank_account",
   "receiver_name",
   "reference_bank_number",
+  "upload_file_tab",
+  "table_whby",
   "accounting_details_tab",
   "accounting_details_section",
   "debit_to",
@@ -50,8 +53,7 @@
    "in_list_view": 1,
    "label": "Naming Series",
    "options": "PVK-",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -95,15 +97,13 @@
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Mata Uang",
-   "options": "Currency",
-   "reqd": 1
+   "options": "Currency"
   },
   {
    "fieldname": "exchange_rate",
    "fieldtype": "Currency",
    "label": "Kurs",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "transaction_type",
@@ -237,13 +237,24 @@
    "options": "Account",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "in_preview": 1,
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "table_whby",
+   "fieldtype": "Table",
+   "options": "Kriteria Upload Dokumen Finance"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-22 13:10:09.228633",
+ "modified": "2026-01-01 19:31:47.197959",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas",

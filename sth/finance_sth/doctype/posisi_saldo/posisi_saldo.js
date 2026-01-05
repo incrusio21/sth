@@ -16,6 +16,15 @@ function filterFields(frm) {
             }
         }
     })
+
+    frm.set_query('bank', (doc)=>{
+        return{
+            filters:{
+                company: ["=", doc.company]
+            }
+        }
+    })
+    
     frm.set_query('bank_account', (doc)=>{
         return{
             filters:{

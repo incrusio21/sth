@@ -23,4 +23,25 @@ frappe.ui.form.on("Surat Jalan", {
             }
         })
     },
+
+    refresh(frm) {
+        if (frm.doc.docstatus == 0) {
+            frm.add_custom_button("Purchase Order", function () {
+                frm.events.open_dialog_get_items(frm, "purchase")
+            }, __("Get Items From"))
+
+            frm.add_custom_button("Material", function () {
+                frm.events.open_dialog_get_items(frm, "material")
+            }, __("Get Items From"))
+        }
+    },
+
+    open_dialog_get_items(frm, type) {
+        const base = frappe.model.get_server_module_name(frm.doctype)
+        let method = base + ".get_items_from_doctype"
+        if (type == "purchase") {
+
+        }
+
+    }
 });

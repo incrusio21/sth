@@ -20,7 +20,6 @@ class PlantationController(AccountsController):
         self.kegiatan_fetch_if_empty_fieldname = []
 
     def validate(self):
-        self.fetch_kegiatan_data()
         self.calculate()
         super().validate()
 
@@ -41,6 +40,8 @@ class PlantationController(AccountsController):
                 )
 
     def calculate(self):
+        self.fetch_kegiatan_data()
+
         self.calculate_item_table_values()
         self.calculate_grand_total()
 

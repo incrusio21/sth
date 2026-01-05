@@ -12,6 +12,11 @@
   "jenis_transaksi",
   "column_break_auht",
   "company",
+  "section_break_jyhf",
+  "nomor_sp_ahu_perubahan_anggaran_dasar",
+  "tanggal_sp_ahu",
+  "nomor_sp_ahu_perubahan_data_perseroan",
+  "tanggal_sp_ahu_perseroan",
   "section_break_yvor",
   "nama_notaris",
   "nomor_sk_kehakiman",
@@ -127,12 +132,48 @@
    "fieldtype": "Select",
    "label": "Jenis Akta",
    "options": "Pendirian\nPerubahan Anggaran Dasar\nPerubahan Data Perseroan\nAkta Laporan Keuangan Tahunan\nLainnya"
+  },
+  {
+   "fieldname": "section_break_jyhf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\"",
+   "fieldname": "nomor_sp_ahu_perubahan_anggaran_dasar",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor SP AHU Perubahan Anggaran Dasar ",
+   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\""
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\"",
+   "fieldname": "tanggal_sp_ahu",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal SP AHU",
+   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\""
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\"",
+   "fieldname": "nomor_sp_ahu_perubahan_data_perseroan",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor SP AHU Perubahan Data Perseroan",
+   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\""
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\"",
+   "fieldname": "tanggal_sp_ahu_perseroan",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal SP AHU Perseroan",
+   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\""
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-22 09:40:05.523792",
+ "modified": "2025-12-23 17:21:13.853684",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",

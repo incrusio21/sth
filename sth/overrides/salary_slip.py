@@ -15,6 +15,7 @@ from hrms.payroll.doctype.payroll_period.payroll_period import (
 from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
+from sth.hr_customize import get_premi_attendance_settings
 
 LEAVE_CODE_MAP = "leave_code_map"
 
@@ -62,8 +63,13 @@ class SalarySlip(SalarySlip):
 		holidays = self.get_holidays_for_employee(self.actual_start_date, self.actual_end_date)
 
 		self.holiday_days = 0
+		hari_leave = 0
 		week_start = week_end = None
 		actual_start, actual_end = getdate(self.actual_start_date), getdate(self.actual_end_date)
+
+		apakah_karyawan_tetap = 0 
+		if frappe.get_cached_doc("Employee", self.employee).employment_type == 'KARYAWAN TETAP':
+			apakah_karyawan_tetap = 1
 
 		for h in holidays:
 			# jika tidak terdapat tanggal akhir atau 
@@ -99,7 +105,13 @@ class SalarySlip(SalarySlip):
 					att_exist = True
 					# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
 					if status_code in list_status_code_lwp:
-						self.holiday_days += 1
+						if status_code == "C":
+							if apakah_karyawan_tetap == 1:
+								self.holiday_days += 1
+								
+						else:
+							self.holiday_days +=1
+							
 				
 				current_date = add_days(current_date, 1)
 			
@@ -107,9 +119,14 @@ class SalarySlip(SalarySlip):
 			# atau terdapat attendance tambahkan holidays
 			if allWeekOff:
 				self.holiday_days += current_week_holiday
+				hari_leave += current_week_holiday
 			elif att_exist :
 				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 				self.holiday_days += 1
+				hari_leave += 1
+		
+		self.payment_days = self.total_working_days - self.holiday_days + hari_leave
+
 
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
@@ -150,7 +167,7 @@ class SalarySlip(SalarySlip):
 				frappe.qb.from_(leave_type)
 				.select(leave_type.status_code)
 				.where(
-					(leave_type.is_lwp == 1)
+					(leave_type.is_lwp == 0)
 				)
 			).run()
 
@@ -172,7 +189,7 @@ class SalarySlip(SalarySlip):
 		if not getattr(self, "_employee_payment_log", None):
 			self.set_employee_payment_doc()
 
-		# tambahan untuk tutup buku. krn jika tidak
+		# tambahan untuk tutup buku. krn tidak terhubung dengan apapun
 		self.set_addons_premi()
 
 		# hapus component against terlebih dahulu untuk d create ulang
@@ -202,7 +219,7 @@ class SalarySlip(SalarySlip):
 		set_loan_repayment(self)
 
 		# BPJS
-		self.calculate_bpjs_component()
+		# self.calculate_bpjs_component()
 		# BPJS
 
 		self.calculate_subsidy_loan()
@@ -317,22 +334,21 @@ class SalarySlip(SalarySlip):
 			return
 		
 		designation = frappe.get_cached_doc("Designation", self.designation)
-		addons_premi = 0
 		for premi in designation.premi:
 			if premi.company == self.company and premi.premi_type not in ("Tutup Buku"):
 				continue
 			
-			addons_premi += premi.amount or 0
+			salary_component = premi.salary_component \
+				or get_premi_attendance_settings(premi.premi_type) \
+				or designation.salary_component
 
-		# jika premi tambahan masukkan dalam employee payment log
-		if addons_premi:
-			key = (designation.salary_component, "earnings")
+			key = (salary_component, "earnings")
 			self._employee_payment.setdefault(key, {
 				"account": {},
 				"amount": 0,
 			})
 
-			self._employee_payment[key]["amount"] += addons_premi
+			self._employee_payment[key]["amount"] += premi.amount
 		
 	def remove_flexibel_payment(self):
 		removed_component = []
@@ -342,7 +358,7 @@ class SalarySlip(SalarySlip):
 		for d in removed_component:
 			self.remove(d)
 
-	def calculate_employee_payment(self):	
+	def calculate_employee_payment(self):
 		for (component, component_type), value in self._employee_payment.items():
 			self.add_component_custom(
 				component, 
@@ -553,5 +569,5 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Payroll Entry","HR-PRUN-2025-00017")
-	doc.create_salary_slips()	
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00701/00001")
+	doc.calculate_holidays()	

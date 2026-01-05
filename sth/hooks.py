@@ -30,6 +30,7 @@ app_include_js = "sth.bundle.js"
 # include js in doctype views
 doctype_js = {
 	"Asset": "public/js/asset.js",
+	"Attendance": "hr_customize/custom/attendance.js",
     "Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
@@ -38,13 +39,14 @@ doctype_js = {
 	"Exit Interview": "public/js/exit_interview.js",
 	"Expense Claim": "public/js/expense_claim.js",
 	"Item": "public/js/item.js",
+	"Item Group": "public/js/item_group.js",
 	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
     "Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
-	"Purchase Invoice": "public/js/purchase_invoice.js",
-	"Purchase Order": ["buying_sth/custom/purchase_order.js", "legal/custom/purchase_order.js"],
+	"Purchase Invoice": "buying_sth/custom/purchase_invoice.js",
+	"Purchase Order": "buying_sth/custom/purchase_order.js",
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
     "Request for Quotation" : "public/js/request_for_quotation.js",
@@ -58,7 +60,8 @@ doctype_js = {
 }
 
 doctype_list_js = {
-	"Request for Quotation" : "public/js/request_for_quotation_list.js"
+	"Attendance" : "hr_customize/custom/attendance_list.js",
+	"Request for Quotation" : "public/js/request_for_quotation_list.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -147,8 +150,10 @@ boot_session = "sth.startup.boot.boot_session"
 standard_queries = {
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
+	"Bank": "sth.controllers.queries.get_bank_query",
 	"Unit": "sth.controllers.queries.unit_query",
 }
+	# "Unit": "sth.controllers.queries.unit_query",
 
 # DocType Class
 # ---------------
@@ -159,18 +164,19 @@ override_doctype_class = {
 	"Asset": "sth.overrides.asset.Asset",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
 	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
+	"Bank Account": "sth.overrides.bank_account.BankAccount",
+	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 	"Customer": "sth.overrides.customer.Customer",
 	"Item": "sth.overrides.item.Item",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
+	"Purchase Receipt": "sth.overrides.purchase_receipt.SthPurchaseReceipt",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Supplier": "sth.overrides.supplier.Supplier",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
-	"Bank Account": "sth.overrides.bank_account.BankAccount",
-	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 }
 
 # Document Events
@@ -178,24 +184,34 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-	# "*": {
-	# 	"on_update": "method",
-	# 	"on_cancel": "method",
-	# 	"on_trash": "method"
-	# }
+	# untuk kriteria upload
+	"*": {
+		"validate": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_setelah_insert",
+		"before_submit": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_before_submit"
+	},
+
+
 	"Asset": {
 		"validate": ["sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
 	},
     "Attendance": {
         "validate": "sth.hr_customize.custom.attendance.Attendance",
         "on_submit": "sth.hr_customize.custom.attendance.Attendance",
         "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
+        "repair_employee_payment_log": "sth.hr_customize.custom.attendance.Attendance"
 	},
 	"Delivery Note": {
 		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
+	},
+	"Item": {
+		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+	},
+	"Item Group": {
+		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
 	},
     "Leave Type": {
 		"on_change": "sth.hr_customize.custom.leave_type.clear_cache"
@@ -216,7 +232,7 @@ doc_events = {
 	},
 	"Payment Entry":{
 		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
+			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book", "sth.finance_sth.custom.cek_kriteria_upload_pe.populate_upload_file"
 		],
 		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
@@ -230,16 +246,8 @@ doc_events = {
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
-	"Purchase Order": {
-		"onload": "sth.buying_sth.custom.purchase_order.onload_order_type",
-		"validate": "sth.legal.custom.purchase_order.PurchaseOrder",
-		"on_submit": "sth.legal.custom.purchase_order.PurchaseOrder",
-		"on_cancel": "sth.legal.custom.purchase_order.PurchaseOrder",
-        "on_update_after_submit": "sth.legal.custom.purchase_order.update_task_progress",
-		"field_purchase_type": "sth.legal.custom.purchase_order.field_purchase_type",
-	},
 	"Purchase Receipt": {
-		"on_submit": "sth.buying_sth.custom.purchase_receipt.validate_progress_received",
+		"on_submit": "sth.legal.custom.purchase_receipt.validate_progress_received",
 	},
 	"Quotation": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
@@ -263,6 +271,10 @@ doc_events = {
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
 	},
+    
+	"Request for Quotation": {
+        "before_save": "sth.custom.request_for_quotation.update_unit_in_table"
+	}
 }
 
 
@@ -299,11 +311,12 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
-    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.overrides.purchase_receipt.make_purchase_invoice",
+    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
-    "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
     "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
     "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
+	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
+    "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
 }
 #
 # each overriding function accepts a `data` argument;

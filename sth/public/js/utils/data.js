@@ -71,5 +71,79 @@ sth.form = {
             this.doctype_setting[frm.doctype] = new_doctype_setting;
             frm.fields_dict[fields].grid.reset_grid();
         }
+    },
+    override_class_function: function(obj, func_name, fn){
+        const superFn = obj[func_name]
+
+        obj[func_name] = function (...args) {
+            superFn?.apply(this, args)
+            fn.apply(this, ...args)
+        }
+    },
+    show_reset_payment_log(frm) {
+		if(frm.doc.docstatus == 1) {
+			frm.add_custom_button(__('Upah and Premi'), function() {
+				frappe.call({
+					method: "sth.hr_customize.update_payment_log",
+					args: {
+						voucher_type: frm.doc.doctype,
+						voucher_no: frm.doc.name,
+					},
+                    freeze: true,
+                    callback: (data) => {
+                        frm.reload_doc()
+                    }
+				})
+			}, __("Re-calculate"));
+		}
+	},
+    recalculate_payment_log(doctype, field_date){
+        let first_day_of_month = moment().startOf("month");
+
+        if (moment().toDate().getDate() === 1) {
+            first_day_of_month = first_day_of_month.subtract(1, "month");
+        }
+
+        let dialog = new frappe.ui.Dialog({
+            title: __("Re-calculate Premi"),
+            fields: [
+                {
+                    label: __("Start"),
+                    fieldtype: "Date",
+                    fieldname: "from_date",
+                    reqd: 1,
+                    default: first_day_of_month.toDate(),
+                },
+                {
+                    fieldtype: "Column Break",
+                    fieldname: "time_period_column",
+                },
+                {
+                    label: __("End"),
+                    fieldtype: "Date",
+                    fieldname: "to_date",
+                    reqd: 1,
+                    default: moment().toDate(),
+                }
+            ],
+            primary_action(data) {
+                frappe.call({
+                    method: "sth.hr_customize.update_payment_log",
+                    args: {
+                        voucher_type: doctype,
+                        filters: {
+                            [field_date]: ["between", [data.from_date, data.to_date]]
+                        }
+                    },
+                    freeze: true,
+                    callback: function (r) {
+                        dialog.hide();
+                        list_view.refresh();
+                    },
+                });
+            },
+            primary_action_label: __("Submit"),
+        });
+        dialog.show();
     }
 }

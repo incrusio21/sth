@@ -11,7 +11,7 @@ frappe.ui.form.on("Berita Acara", {
         if (frm.doc.docstatus == 1) {
             frm.add_custom_button("Material Request", function () {
                 frappe.model.open_mapped_doc({
-                    method: "sth.buying_sth.doctype.berita_acara.berita_acara.create_mr",
+                    method: frappe.model.get_server_module_name(frm.doctype) + ".create_mr",
                     frm,
                     run_link_triggers: 1
                 })

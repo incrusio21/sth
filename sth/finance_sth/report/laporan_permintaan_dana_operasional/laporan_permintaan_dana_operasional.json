@@ -1,0 +1,31 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-12-30 12:31:34.484154",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-12-30 12:31:34.484154",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Laporan Permintaan Dana Operasional",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Permintaan Dana Operasional",
+ "report_name": "Laporan Permintaan Dana Operasional",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Finance UAT"
+  },
+  {
+   "role": "Plantation Supervisor"
+  }
+ ],
+ "timeout": 0
+}

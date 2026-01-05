@@ -17,6 +17,22 @@ frappe.ui.form.on("Purchase Receipt", {
             }
         })
 
+        frm.set_query("unit", function (doc) {
+			return {
+				filters: {
+					company: ["=", doc.company],
+				},
+			};
+		});
+
+        frm.set_query("bank_account", function (doc) {
+			return {
+				filters: {
+					unit: ["=", doc.unit],
+				},
+			};
+		});
+
     },
     refresh(frm) {
         frm.set_query("purchase_type", () => {

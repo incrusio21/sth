@@ -3,6 +3,11 @@
 
 sth.plantation.setup_bkm_controller()
 
+const field_map = {
+	"Transport": "premi_trans_amount",
+	"Angkut": "premi_angkut_amount",
+}
+
 frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 	posting_date(frm){
 		frm.cscript.get_details_data({
@@ -116,7 +121,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 
 		let me = this
 		
-		this.fieldname_total.push("premi_amount")
+		this.fieldname_total.push("premi_angkut_amount", "premi_trans_amount")
 		this.skip_calculate_table = ["task"]
 		this.kegiatan_fetch_fieldname = []
 		
@@ -128,6 +133,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 					return {
 						docname: d.name,
 						name: d.name,
+						last_name: d.last_name,
 						kegiatan: d.kegiatan,
 						hasil_kerja: d.hasil_kerja,
 						uom: d.uom,
@@ -195,7 +201,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 						
 						// Kirim data ke server untuk update progress
 						let new_row = grid.add_new_row(null, null, true, null, true);
-						new_row.kegiatan_list = selected_items?.map(d => d.name).join("\n") || ""
+						new_row.kegiatan_list = selected_items?.map(d => d.last_name || d.name).join("\n") || ""
 						
 						grid.set_focus_on_row();
 						this.hide();
@@ -239,21 +245,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
   	set_query_field() {
-		this.frm.set_query("unit", function (doc) {
-			return {
-				filters: {
-					company: ["=", doc.company]
-				}
-			};
-		});
-
-		this.frm.set_query("divisi", function (doc) {
-			return {
-				filters: {
-					unit: ["=", doc.unit]
-				}
-			};
-		});
+		super.set_query_field()
 
 		this.frm.set_query("blok", function (doc) {
 			return {
@@ -340,18 +332,21 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		let is_basic_salary = true
 		let amount = flt(item.base/item.total_hari)
 
+		// split daftar kegiatan pada employee
 		let task_list = (item?.kegiatan_list ?? "")
 		.replace(/,/g, "\n")
 		.split("\n")
 		.map(s => s.trim())
 		.filter(Boolean)
 		
-		item.premi_amount = 0
+
+		item.premi_angkut_amount = item.premi_tbs_amount = item.premi_trans_amount = 0
 		for (const task of doc.task) {
-			if(!in_list(task_list, task.name)) continue
+			if(!in_list(task_list, task.last_name || task.name)) continue
 
 			let kegiatan = JSON.parse(task.company_details)[item.position || "Operator"] || {}
 			
+
 			if (task.upah_kegiatan){
 				if(is_basic_salary){
 					amount = 0
@@ -371,8 +366,11 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 					)
 				)
 			}
-
-			item.premi_amount += premi_amount
+			
+			let field = field_map[task.traksi_type]
+			if(field){
+				item[field] += premi_amount || 0
+			}
 		}
 		
 		// if (!doc.manual_hk){
@@ -393,7 +391,8 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	}
 
 	update_value_after_amount(item) {
-        item.sub_total = flt(item.amount || 0) + flt(item.premi_amount || 0)
+        item.sub_total = flt(item.amount || 0) + flt(item.premi_angkut_amount || 0) + 
+			flt(item.premi_trans_amount || 0)
     }
 }
 

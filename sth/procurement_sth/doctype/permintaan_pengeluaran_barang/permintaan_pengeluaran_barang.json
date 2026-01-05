@@ -8,18 +8,19 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_lnip",
-  "naming_series",
-  "tanggal",
   "pt_pemilik_barang",
-  "kegiatan",
   "column_break_xvef",
   "gudang",
-  "sub_unit",
-  "blok",
   "column_break_ljmw",
+  "tanggal",
+  "section_break_tysi",
+  "naming_series",
   "nama_karyawan",
+  "column_break_gvkz",
   "no_induk_karyawan",
   "nama_jabatan",
+  "column_break_gyfv",
+  "catatan",
   "section_break_ubqb",
   "items",
   "amended_from"
@@ -76,24 +77,6 @@
    "label": "No Induk Karyawan"
   },
   {
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "options": "Blok"
-  },
-  {
-   "fetch_from": "gudang.unit",
-   "fieldname": "sub_unit",
-   "fieldtype": "Link",
-   "label": "Sub Unit",
-   "options": "Unit"
-  },
-  {
-   "fieldname": "kegiatan",
-   "fieldtype": "Data",
-   "label": "Kegiatan"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -122,13 +105,30 @@
    "fieldtype": "Select",
    "label": "No Dokument",
    "options": "PPB-.DD.MM.YY.-.####"
+  },
+  {
+   "fieldname": "section_break_tysi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gvkz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_gyfv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "catatan",
+   "fieldtype": "Data",
+   "label": "Catatan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 21:30:27.082419",
+ "modified": "2025-12-23 13:34:23.753039",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",

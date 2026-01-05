@@ -6,7 +6,7 @@ sth.plantation.AccountsController = class AccountsController extends frappe.ui.f
     show_general_ledger() {
 		let me = this;
 		if(this.frm.doc.docstatus > 0) {
-			cur_frm.add_custom_button(__('Accounting Ledger'), function() {
+			this.frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
@@ -20,5 +20,4 @@ sth.plantation.AccountsController = class AccountsController extends frappe.ui.f
 			}, __("View"));
 		}
 	}
-
 }

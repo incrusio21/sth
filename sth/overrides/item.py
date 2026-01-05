@@ -1,4 +1,3 @@
-
 import frappe
 from erpnext.stock.doctype.item.item import Item
 
@@ -10,49 +9,56 @@ class Item(Item):
 			self.name = self.item_code
 	
 	def generate_item_code(self):
-		from datetime import datetime
+		if not self.item_group:
+			frappe.throw("Item Group is required to generate Item Code")
 		
-		year_month = datetime.now().strftime("%Y%m")
-		prefix = f"ITEM-{year_month}-"
+		# Get item_group name/code
+		item_group_code = self.item_group
 		
+		# Find last item with this item_group prefix
 		last_item = frappe.db.sql("""
 			SELECT name 
 			FROM `tabItem` 
 			WHERE name LIKE %s 
 			ORDER BY name DESC 
 			LIMIT 1
-		""", (prefix + "%",))
+		""", (item_group_code + "%",))
 		
 		if last_item:
 			last_code = last_item[0][0]
-			last_number = int(last_code.split('-')[-1])
+			# Extract the numeric part after the item_group code
+			last_number = int(last_code.replace(item_group_code, ''))
 			new_number = last_number + 1
 		else:
 			new_number = 1
 		
-		return f"{prefix}{new_number:05d}"
+		return f"{item_group_code}{new_number}"
 
 @frappe.whitelist()
-def get_next_item_code():
-	"""Generate next item code without saving"""
-	from datetime import datetime
+def get_next_item_code(item_group):
+	"""Generate next item code based on item_group without saving"""
+	if not item_group:
+		return ""
 	
-	year_month = datetime.now().strftime("%Y%m")
-	prefix = f"ITEM-{year_month}-"
-	
+	# Find last item with this item_group prefix
 	last_item = frappe.db.sql("""
 		SELECT name 
 		FROM `tabItem` 
 		WHERE name LIKE %s 
 		ORDER BY name DESC 
 		LIMIT 1
-	""", (prefix + "%",))
+	""", (item_group + "%",))
 	
 	if last_item:
 		last_code = last_item[0][0]
-		last_number = int(last_code.split('-')[-1])
-		new_number = last_number + 1
+		# Extract the numeric part after the item_group code
+		try:
+			last_number = int(last_code.replace(item_group, ''))
+			new_number = last_number + 1
+		except ValueError:
+			# If can't parse number, start from 1
+			new_number = 1
 	else:
 		new_number = 1
 	
-	return f"{prefix}{new_number:05d}"
+	return f"{item_group}{new_number}"

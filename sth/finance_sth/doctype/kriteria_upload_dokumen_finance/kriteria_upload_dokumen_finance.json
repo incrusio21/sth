@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-27 19:19:27.948553",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "rincian_dokumen_finance",
+  "upload_file",
+  "mandatory"
+ ],
+ "fields": [
+  {
+   "columns": 5,
+   "fieldname": "rincian_dokumen_finance",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rincian Dokumen Finance",
+   "reqd": 1
+  },
+  {
+   "columns": 5,
+   "fieldname": "upload_file",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Upload File"
+  },
+  {
+   "default": "0",
+   "fieldname": "mandatory",
+   "fieldtype": "Check",
+   "label": "Mandatory"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-27 19:31:45.536782",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Kriteria Upload Dokumen Finance",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -6,16 +6,15 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "jenis",
-  "jumlah",
-  "column_break_eime",
-  "kode_barang",
-  "satuan",
-  "section_break_eqhv",
-  "no_po",
-  "column_break_gzaq",
   "no_penerimaan",
-  "no_purchase_request"
+  "kode_barang",
+  "nama_barang",
+  "no_po",
+  "column_break_eime",
+  "no_purchase_request",
+  "jumlah",
+  "satuan",
+  "jenis"
  ],
  "fields": [
   {
@@ -26,6 +25,7 @@
    "options": "Purchase Order\nMaterial"
   },
   {
+   "columns": 1,
    "fieldname": "jumlah",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -36,6 +36,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 2,
    "fieldname": "kode_barang",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -43,6 +44,7 @@
    "options": "Item"
   },
   {
+   "columns": 1,
    "fetch_from": "kode_barang.stock_uom",
    "fieldname": "satuan",
    "fieldtype": "Link",
@@ -51,35 +53,42 @@
    "options": "UOM"
   },
   {
-   "fieldname": "section_break_eqhv",
-   "fieldtype": "Section Break"
-  },
-  {
+   "columns": 2,
    "fieldname": "no_po",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "No Purchase Order"
+   "label": "No Purchase Order",
+   "options": "Purchase Order"
   },
   {
-   "fieldname": "column_break_gzaq",
-   "fieldtype": "Column Break"
-  },
-  {
+   "columns": 2,
    "fieldname": "no_penerimaan",
-   "fieldtype": "Data",
-   "label": "No Penerimaan Barang"
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No Penerimaan Barang",
+   "options": "Purchase Receipt"
   },
   {
+   "columns": 1,
    "fieldname": "no_purchase_request",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "No Purchase Request"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "kode_barang.item_name",
+   "fieldname": "nama_barang",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Barang"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-20 17:18:10.121545",
+ "modified": "2026-01-02 04:38:01.522610",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan Item",

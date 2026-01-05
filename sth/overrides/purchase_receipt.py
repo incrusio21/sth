@@ -1,108 +1,68 @@
+# Copyright (c) 2026, DAS and Contributors
+# License: GNU General Public License v3. See license.txt
+
+import json
+
 import frappe
-from frappe.utils import flt
-from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_returned_qty_map,get_invoiced_qty_map
-from erpnext.controllers.accounts_controller import merge_taxes
+from frappe.utils import cint, flt
 
-@frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None, args=None):
-	from erpnext.accounts.party import get_payment_terms_template
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
 
-	doc = frappe.get_doc("Purchase Receipt", source_name)
-	returned_qty_map = get_returned_qty_map(source_name)
-	invoiced_qty_map = get_invoiced_qty_map(source_name)
-
-	def set_missing_values(source, target):
-		target.purchase_type = frappe.get_value("Purchase Type", source.purchase_type, "future_type") or "Voucher Match"
-
-		if len(target.get("items")) == 0:
-			frappe.throw(_("All items have already been Invoiced/Returned"))
-
-		doc = frappe.get_doc(target)
-		doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
-		doc.run_method("onload")
-		doc.run_method("set_missing_values")
-
-		if args and args.get("merge_taxes"):
-			merge_taxes(source.get("taxes") or [], doc)
-
-		doc.run_method("calculate_taxes_and_totals")
-		doc.set_payment_schedule()
-
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			target_doc.rejected_qty = 0
-		target_doc.stock_qty = flt(target_doc.qty) * flt(
-			target_doc.conversion_factor, target_doc.precision("conversion_factor")
+class SthPurchaseReceipt(PurchaseReceipt):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.status_updater.extend(
+			[
+				{
+					"target_dt": "Proposal Item",
+					"join_field": "proposal_item",
+					"target_field": "received_qty",
+					"target_parent_dt": "Proposal",
+					"target_parent_field": "per_received",
+					"target_ref_field": "qty",
+					"source_dt": "Purchase Receipt Item",
+					"source_field": "received_qty",
+					"second_source_dt": "Purchase Invoice Item",
+					"second_source_field": "received_qty",
+					"second_join_field": "po_detail",
+					"percent_join_field": "proposal",
+					"overflow_type": "receipt",
+					"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
+				},
+			]
 		)
-		returned_qty_map[source_doc.name] = returned_qty
-
-	def get_pending_qty(item_row):
-		qty = item_row.qty
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			qty = item_row.received_qty
-
-		pending_qty = qty - invoiced_qty_map.get(item_row.name, 0)
-
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			return pending_qty, 0
-
-		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
-		if item_row.rejected_qty and returned_qty:
-			returned_qty -= item_row.rejected_qty
-
-		if returned_qty:
-			if returned_qty >= pending_qty:
-				pending_qty = 0
-				returned_qty -= pending_qty
-			else:
-				pending_qty -= returned_qty
-				returned_qty = 0
-
-		return pending_qty, returned_qty
-
-	doclist = get_mapped_doc(
-		"Purchase Receipt",
-		source_name,
-		{
-			"Purchase Receipt": {
-				"doctype": "Purchase Invoice",
-				"field_map": {
-					"supplier_warehouse": "supplier_warehouse",
-					"is_return": "is_return",
-					"bill_date": "bill_date",
+	def validate_with_previous_doc(self):
+		super(PurchaseReceipt, self).validate_with_previous_doc(
+			{
+				"Purchase Order": {
+					"ref_dn_field": "purchase_order",
+					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
 				},
-				"validation": {
-					"docstatus": ["=", 1],
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="], ["uom", "="], ["item_code", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
 				},
-			},
-			"Purchase Receipt Item": {
-				"doctype": "Purchase Invoice Item",
-				"field_map": {
-					"name": "pr_detail",
-					"parent": "purchase_receipt",
-					"qty": "received_qty",
-					"purchase_order_item": "po_detail",
-					"purchase_order": "purchase_order",
-					"is_fixed_asset": "is_fixed_asset",
-					"asset_location": "asset_location",
-					"asset_category": "asset_category",
-					"wip_composite_asset": "wip_composite_asset",
+				"Proposal": {
+					"ref_dn_field": "proposal",
+					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
 				},
-				"postprocess": update_item,
-				"filter": lambda d: get_pending_qty(d)[0] <= 0
-				if not doc.get("is_return")
-				else get_pending_qty(d)[0] > 0,
-			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-				"reset_value": not (args and args.get("merge_taxes")),
-				"ignore": args.get("merge_taxes") if args else 0,
-			},
-		},
-		target_doc,
-		set_missing_values,
-	)
+				"Proposal Item": {
+					"ref_dn_field": "proposal_item",
+					"compare_fields": [["project", "="], ["uom", "="], ["item_code", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
-	return doclist
+		if (
+			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
+			and not self.is_return
+			and not self.is_internal_supplier
+		):
+			self.validate_rate_with_reference_doc(
+				[["Purchase Order", "purchase_order", "purchase_order_item"]]
+			)

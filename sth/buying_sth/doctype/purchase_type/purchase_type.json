@@ -2,11 +2,12 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "prompt",
+ "autoname": "format:{purchase_type}-{document_type}",
  "creation": "2025-11-25 11:16:43.271062",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "purchase_type",
   "document_type",
   "future_type",
   "column_break_qkip",
@@ -84,16 +85,22 @@
    "fieldname": "order_revisions",
    "fieldtype": "Check",
    "label": "Order Revisions"
+  },
+  {
+   "fieldname": "purchase_type",
+   "fieldtype": "Data",
+   "label": "Purchase Type",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-01 15:48:44.908722",
+ "modified": "2025-12-23 14:28:45.544309",
  "modified_by": "Administrator",
  "module": "Buying STH",
  "name": "Purchase Type",
- "naming_rule": "Set by user",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -110,7 +117,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "purchase_type"
 }

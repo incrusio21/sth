@@ -11,6 +11,62 @@ from frappe.utils import cint, nowdate, unique
 
 from erpnext.controllers.queries import has_ignored_field
 
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_bank_query(
+	doctype,
+	txt,
+	searchfield,
+	start,
+	page_len,
+	filters,
+	reference_doctype: str | None = None,
+	ignore_user_permissions: bool = True,
+):
+	doctype = "Bank"
+	doctype_child = "Bank Account"
+	conditions = []
+	fields = get_fields(doctype, ["name"])
+	ignore_permissions = True
+	filters = filters or {}
+	filters_child = {}
+
+	if reference_doctype and ignore_user_permissions:
+		ignore_permissions = has_ignored_field(reference_doctype, doctype) and has_permission(
+			doctype,
+			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
+		)
+
+	mcond = "" if ignore_permissions else get_match_cond(doctype)
+	if filters.get("company"):
+		filters_child["company"] = filters["company"]
+		del filters["company"]
+	
+	return frappe.db.sql(
+		"""select {fields} from `tabBank`
+		left join `tabBank Account` on `tabBank Account`.bank = `tabBank`.name
+		where (`tabBank`.{key} like %(txt)s)
+			{fcond} {mcond} {fcondchild}
+		group by `tabBank`.name
+		order by
+			(case when locate(%(_txt)s, `tabBank`.name) > 0 then locate(%(_txt)s, `tabBank`.name) else 99999 end),
+			`tabBank`.idx desc,
+			`tabBank`.name
+		
+		limit %(page_len)s offset %(start)s
+		 """.format(
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"fcond": get_filters_cond(doctype, filters, conditions) if filters else "",
+				"fcondchild": get_filters_cond(doctype_child, filters_child, conditions, ignore_permissions=True) if filters_child else "",
+				"mcond": mcond,
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)
+	
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def kegiatan_query(
@@ -307,10 +363,12 @@ def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doc
 
 	user = frappe.session.user
 	employee = frappe.get_value("Employee",{"user_id":user})
+	exist_jobs = frappe.db.exists("Employee Job",{"parent": employee})
 
 	custom_cond = ""
 	if employee:
-		custom_cond = f"and ej.parent = '{employee}'"
+		if exist_jobs:
+			custom_cond = f"and ej.parent = '{employee}'"
 	elif reference_doctype not in ["Employee","Employee Job"] and user != "Administrator":
 		custom_cond = "and 1=0"
 

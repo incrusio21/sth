@@ -14,6 +14,11 @@ sth.plantation.setup_bkm_controller = function() {
             this.hasil_kerja_update_field = ["volume_basis", "rupiah_basis"]
         }
 
+        refresh() {
+            super.refresh()
+            sth.form.show_reset_payment_log(this.frm)
+        }
+
         setup_bkm(doc){
             let me = this
 

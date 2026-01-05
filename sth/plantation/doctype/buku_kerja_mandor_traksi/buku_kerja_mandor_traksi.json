@@ -33,7 +33,10 @@
   "ump_bulanan",
   "section_break_toiw",
   "hasil_kerja_amount",
-  "hasil_kerja_premi_amount",
+  "column_break_buyd",
+  "hasil_kerja_premi_tbs_amount",
+  "hasil_kerja_premi_angkut_amount",
+  "hasil_kerja_premi_trans_amount",
   "column_break_fkos",
   "grand_total",
   "kegiatan_tab",
@@ -59,7 +62,11 @@
   "column_break_jklo",
   "salary_account",
   "section_break_knxf",
-  "salary_component"
+  "salary_component",
+  "column_break_qgxf",
+  "premi_tbs_sc",
+  "premi_angkut_sc",
+  "premi_transport_sc"
  ],
  "fields": [
   {
@@ -267,14 +274,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "hasil_kerja_premi_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Premi Total",
-   "read_only": 1
-  },
-  {
    "fetch_from": "kendaraan.jns_alt",
    "fieldname": "jenis_alat",
    "fieldtype": "Link",
@@ -393,13 +392,66 @@
    "in_preview": 1,
    "label": "Grand Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_premi_tbs_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Premi TBS Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qgxf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_buyd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hasil_kerja_premi_angkut_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Premi Angkut Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hasil_kerja_premi_trans_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Premi Tranport Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_tbs_sc",
+   "fieldtype": "Link",
+   "label": "Premi TBS Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_angkut_sc",
+   "fieldtype": "Link",
+   "label": "Premi Angkut Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
+  },
+  {
+   "fieldname": "premi_transport_sc",
+   "fieldtype": "Link",
+   "label": "Premi Transport Salary Component",
+   "options": "Salary Component",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-20 00:13:55.730317",
+ "modified": "2025-12-29 13:33:48.819144",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

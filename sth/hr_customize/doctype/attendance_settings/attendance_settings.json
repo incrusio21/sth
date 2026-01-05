@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-24 12:49:00.580147",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "premi"
+ ],
+ "fields": [
+  {
+   "fieldname": "premi",
+   "fieldtype": "Table",
+   "label": "Premi",
+   "options": "Attendace Premi Settings"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-12-24 12:55:05.138381",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Attendance Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

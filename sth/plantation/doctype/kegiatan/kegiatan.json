@@ -16,6 +16,7 @@
   "kategori_kegiatan",
   "tipe_kegiatan",
   "old_parent",
+  "traksi_type",
   "column_break_lrzd",
   "tp_bbt",
   "tp_pnn",
@@ -211,13 +212,20 @@
    "fieldtype": "Check",
    "label": "Heavy Equipment ?",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe_kegiatan == \"Traksi\"",
+   "fieldname": "traksi_type",
+   "fieldtype": "Select",
+   "label": "Traksi Type",
+   "options": "TBS\nAngkut\nTransport"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-18 14:12:45.342457",
+ "modified": "2025-12-29 12:49:16.658255",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

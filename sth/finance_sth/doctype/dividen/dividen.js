@@ -30,6 +30,13 @@ function setFilterOne(frm) {
             }
         }
     })
+    frm.set_query('bank_one', (doc)=>{
+        return{
+            filters:{
+                company: ["=", doc.company_one]
+            }
+        }
+    })
     frm.set_query("bank_account_one", (doc)=>{
         return {
             filters:{
@@ -46,6 +53,13 @@ function setFilterTwo(frm) {
         return {
             filters:{
                 company: doc.company_two
+            }
+        }
+    })
+    frm.set_query('bank_two', (doc)=>{
+        return{
+            filters:{
+                company: ["=", doc.company_two]
             }
         }
     })

@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-25 22:13:18.772764",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "employee_field",
+  "column_break_uhwk",
+  "method",
+  "multiplier",
+  "section_break_urok",
+  "salary_component"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "\nBuku Kerja Mandor Panen\nBuku Kerja Mandor Traksi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_uhwk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Method",
+   "options": "Average\nSum"
+  },
+  {
+   "fieldname": "multiplier",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Multiplier"
+  },
+  {
+   "fieldname": "section_break_urok",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "employee_field",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Employee Field"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-26 14:41:53.538413",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Plantation Mandor Setting",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

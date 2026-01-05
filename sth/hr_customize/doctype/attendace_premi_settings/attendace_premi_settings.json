@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-24 12:49:47.338882",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "premi_type",
+  "column_break_retx",
+  "salary_component"
+ ],
+ "fields": [
+  {
+   "fieldname": "premi_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Premi Type",
+   "options": "Hari Biasa\nHari Libur\nTutup Buku"
+  },
+  {
+   "fieldname": "column_break_retx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salary Component",
+   "options": "Salary Component"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-24 12:53:27.918891",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "Attendace Premi Settings",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

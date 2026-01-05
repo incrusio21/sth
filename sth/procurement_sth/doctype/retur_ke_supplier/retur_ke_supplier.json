@@ -1,0 +1,166 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-12-23 14:12:39.770053",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "column_break_nlel",
+  "tanggal",
+  "section_break_mdyk",
+  "no_dokumen_penerimaan",
+  "column_break_txqf",
+  "nama_supplier",
+  "column_break_oivq",
+  "nomor_po",
+  "section_break_jrlr",
+  "items",
+  "section_break_yuzh",
+  "jumlah_retur",
+  "prec_reference",
+  "column_break_smpc",
+  "catatan",
+  "section_break_psii",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokument Retur",
+   "options": "R-PRE-.DD.MM.YY.-.####"
+  },
+  {
+   "fieldname": "column_break_nlel",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal"
+  },
+  {
+   "fieldname": "section_break_mdyk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "no_dokumen_penerimaan",
+   "fieldtype": "Link",
+   "label": "No Dokumen Penerimaan",
+   "options": "Purchase Receipt"
+  },
+  {
+   "fieldname": "column_break_txqf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama_supplier",
+   "fieldtype": "Link",
+   "label": "Nama Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "column_break_oivq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "no_dokumen_penerimaan.purchase_order",
+   "fieldname": "nomor_po",
+   "fieldtype": "Link",
+   "label": "Nomor PO",
+   "options": "Purchase Order"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Retur Ke Supplier",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_psii",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_yuzh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_retur",
+   "fieldtype": "Float",
+   "label": "Jumlah Retur",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_jrlr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Retur Supplier Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_smpc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "catatan",
+   "fieldtype": "Small Text",
+   "label": "Catatan"
+  },
+  {
+   "fieldname": "prec_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Prec Reference",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-01 10:53:56.120738",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Retur Ke Supplier",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

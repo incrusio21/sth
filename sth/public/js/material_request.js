@@ -16,9 +16,20 @@ frappe.ui.form.on("Material Request", {
         }
     },
 
+    unit(frm) {
+        frm.trigger('set_unit_to_child')
+    },
+
     set_default_reqdate(frm) {
         const required_date = frappe.datetime.add_days(frm.doc.date, 7)
         frm.set_value("schedule_date", required_date)
+    },
+
+    set_unit_to_child(frm) {
+        frm.doc.items.forEach((row) => {
+            row.unit = frm.doc.unit
+        })
+        refresh_field("items")
     },
 
     get_berita_acara(frm) {
@@ -35,25 +46,23 @@ frappe.ui.form.on("Material Request", {
             ],
             primary_action_label: 'Get Items',
             primary_action(values) {
-                frappe.dom.freeze("Getting Items...")
-
-                frappe.xcall("frappe.client.get", {
-                    doctype: "Berita Acara",
-                    name: values.berita_acara
+                frappe.xcall("sth.procurement_sth.doctype.berita_acara.berita_acara.create_mr", {
+                    source_name: values.berita_acara,
+                    freeze: true,
+                    freeze_message: "Getting Items..."
                 }).then((res) => {
-                    frm.clear_table('items')
+                    frm.set_value({
+                        "unit": res["unit"],
+                        "sub_purchase_type": res["sub_purchase_type"],
+                        "purchase_type": res["purchase_type"]
+                    })
 
-                    res.table_klkc.forEach(row => {
-                        let item = frm.add_child('items')
-                        item.item_code = row.item_code
-                        item.qty = row.jumlah
-                        item.uom = row.uom
-                    });
+                    frm.clear_table("items")
+                    for (const data of res.items) {
+                        frm.add_child("items", data)
+                    }
 
-                    refresh_field("items");
-
-                }).finally(() => {
-                    frappe.dom.unfreeze()
+                    frm.refresh()
                 })
 
                 d.hide();
@@ -69,7 +78,7 @@ frappe.ui.form.on("Material Request Item", {
         let exist = frm.doc.items.find((data) => row.item_code == data.item_code && row.idx != data.idx)
         if (exist) {
             frappe.msgprint("Item code sudah terdaftar dalam tabel.")
-            frappe.model.clear_doc(exist.doctype, exist.name)
+            frappe.model.clear_doc(row.doctype, row.name)
             refresh_field("items")
         }
     }

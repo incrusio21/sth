@@ -3,10 +3,10 @@
 
 frappe.ui.form.on("Project", {
     refresh(frm) {
-        frm.set_query("purchase_order", () =>{
+        frm.set_query("project", () =>{
             return {
                 filters:{
-                    purchase_type: ["in", ["Borongan", "Capex"]]
+                    docstatus: 1,
                 }
             }
         })
@@ -23,5 +23,6 @@ frappe.ui.form.on("Project", {
                 __("Create")
             );
         }
-	}
+	},
+    
 });

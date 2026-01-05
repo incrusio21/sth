@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from sth.hr_customize import get_premi_attendance_settings
 
 class Attendance:
     def __init__(self, doc, method):
@@ -13,6 +14,17 @@ class Attendance:
                 self.validate_attendance_is_holiday()
                 self.validate_premi_amount_and_component()
                 self.validate_status_code()
+            case "repair_employee_payment_log":
+                if self.doc.docstatus != 1:
+                    return
+                
+                self.delete_payment_log()
+
+                self.validate_attendance_is_holiday()
+                self.validate_premi_amount_and_component()
+                self.doc.db_update()
+
+                self.create_or_update_payment_log()
             case "on_submit":
                 self.create_or_update_payment_log()
             case "on_cancel":
@@ -36,19 +48,23 @@ class Attendance:
             return
             
         designation = frappe.get_cached_doc("Designation", self.doc.designation)
-        self.doc.salary_component = designation.salary_component
         self.doc.premi_amount = 0
 
         # set nilai premi dan tipe apa saja yang bisa di dapatkan
-        pt = ["Hari Biasa" if not self.doc.is_holiday else "Hari Libur"]
-        # menentukan attendance merupakan tutup buku masih belum ada
+        pt = "Hari Biasa" if not self.doc.is_holiday else "Hari Libur"
         for premi in designation.premi:
-            if premi.company == self.doc.company and premi.premi_type not in pt:
+            if premi.company == self.doc.company and premi.premi_type != pt:
                 continue
             
-            self.doc.premi_amount += premi.amount or 0
+            self.doc.salary_component = premi.salary_component \
+                or get_premi_attendance_settings(premi.premi_type) \
+                or designation.salary_component
+            self.doc.premi_amount = premi.amount or 0
             
     def create_or_update_payment_log(self):
+        if self.doc.status not in ("Present"):
+            return
+        
         doc = frappe.new_doc("Employee Payment Log")
         
         if self.doc.premi_amount:

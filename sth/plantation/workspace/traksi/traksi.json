@@ -16,8 +16,37 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Setup",
+   "label": "BKM",
    "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mandor Traksi",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mandor Traksi",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mandor Bengkel",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mandor Bengkel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setup",
+   "link_count": 3,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -45,34 +74,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "BKM",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Buku Kerja Mandor Traksi",
+   "label": "Jenis Alat",
    "link_count": 0,
-   "link_to": "Buku Kerja Mandor Traksi",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Buku Kerja Mandor Bengkel",
-   "link_count": 0,
-   "link_to": "Buku Kerja Mandor Bengkel",
+   "link_to": "Jenis Alat",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-21 21:53:46.932493",
+ "modified": "2025-12-23 09:06:40.714925",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Traksi",
