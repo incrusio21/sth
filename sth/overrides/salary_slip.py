@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, month_diff, now
+from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -76,12 +76,13 @@ class SalarySlip(SalarySlip):
 			# holidays sudah tidak masuk dalam minggu terpilih
 			if not week_end or h > week_end:
 				# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
-				# week_start = max(get_first_day_of_week(h), actual_start)
-				# week_end = min(get_last_day_of_week(h), actual_end)
+				week_start = max(get_first_day_of_week(h), actual_start)
+				week_end = min(get_last_day_of_week(h), actual_end)
 
+				# kembalikan ke sini jika hari pertama d minggu ini balik ke senin
 				# ternyata seharusnya minggu itu dapet holiday list KALAU setelah itu ada absensi present (kecuali libur semua)
-				week_start = max(get_first_day_of_week(add_days(h,1)), actual_start)
-				week_end = min(add_days(week_start,5), actual_end)
+				# week_start = max(get_first_day_of_week(add_days(h,1)), actual_start)
+				# week_end = min(add_days(week_start,5), actual_end)
 
 			else:
 				# skip krn holidays sudah di hitung untuk minggu ini
@@ -108,7 +109,6 @@ class SalarySlip(SalarySlip):
 						if status_code == "C":
 							if apakah_karyawan_tetap == 1:
 								self.holiday_days += 1
-								
 						else:
 							self.holiday_days +=1
 							
