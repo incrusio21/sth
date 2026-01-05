@@ -3,6 +3,11 @@
 
 frappe.query_reports["Laporan Permintaan Dana Operasional"] = {
 	"filters": [
-
+		{
+			"fieldname": "unit",
+			"label": __("Unit"),
+			"fieldtype": "Link",
+			"options": "Unit",
+		},
 	]
 };

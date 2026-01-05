@@ -9,9 +9,26 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = []
 
-	data.append({
-		"customer": "Agrindo Panca Tunggal  PT"
-	})
+	q_laporan_angsuran_pinjaman_bank = frappe.db.sql("""
+		SELECT
+		sb.company as customer,
+		ilb.disbursement_number as no_pinjaman,
+		sb.type as fs,
+		sb.currency as ccy,
+		ilb.disbursement_amount as outstanding,
+		ilb.disbursement_date as from_date,
+		ilb.days as days,
+		ilb.payment_date as to_date,
+		CONCAT(ROUND(ilb.loan_interest, 2), ' %') as ir,
+		ilb.principal as pokok,
+		ilb.interest_amount as bunga,
+		ilb.payment_total as total_kewajiban
+		FROM `tabLoan Bank` as sb
+		JOIN `tabInstallment Loan Bank` as ilb ON ilb.parent = sb.name;
+  """, as_dict=True)
+
+	for loan in q_laporan_angsuran_pinjaman_bank:
+		data.append(loan)
 
 	return columns, data
 
