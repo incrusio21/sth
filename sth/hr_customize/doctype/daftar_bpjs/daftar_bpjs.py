@@ -115,7 +115,6 @@ class DaftarBPJS(Document):
 	@frappe.whitelist()
 	def get_employee(self):
 		pasang_bpjs(self)
-		self.save()
 
 def debug_bpjs():
 	doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
@@ -132,14 +131,19 @@ def pasang_bpjs(doc):
 			.on(Employee.name == SSAssignment.employee)
 			.select(
 				SSAssignment.employee, 
-				SSAssignment.base,
+
+				SSAssignment.base, 
 				Employee.employee_name,
 				Employee.no_ktp,
 				Employee.designation,
 				Employee.custom_no_bpjs_kesehatan if doc.jenis_bpjs != "BPJS TK" else Employee.custom_no_bpjs_ketenagakerjaan,
+				
 				Employee.custom_nama_ibu_kandung,
 				Employee.blood_group,
-				Employee.kelas_bpjs_kesehatan
+				Employee.kelas_bpjs_kesehatan,
+				SSAssignment.custom_tunjangan_komunikasi + SSAssignment.custom_tunjangan_daerah + SSAssignment.custom_tunjangan_perumahan,
+				Employee.grade
+				
 				)
 			.where(
 				(Employee.unit == doc.unit)
@@ -157,18 +161,27 @@ def pasang_bpjs(doc):
 	for satu_employee in list_employee:
 		list_program_employee[satu_employee[0]] = []
 		for row in susunan_bpjs.set_up_bpjs_pt_table:
+			gp_satu = satu_employee[1]
+			if satu_employee[10] != "NON STAF":
+				gp_satu = satu_employee[1] + satu_employee[9]
+
+
 			list_program_employee[satu_employee[0]].append({
 				"program" : row.nama_program,
-				"beban_karyawan": row.beban_karyawan / 100 * satu_employee[1],
-				"beban_perusahaan": row.beban_perusahaan / 100 * satu_employee[1]
+				"beban_karyawan": row.beban_karyawan / 100 * gp_satu,
+				"beban_perusahaan": row.beban_perusahaan / 100 * gp_satu
 			})
 
 	doc.set_up_bpjs_detail_table = []
 	doc.daftar_bpjs_employee = []
 
 	for row in list_employee:
+		gp_satu = row[1]
+		if row[10] != "NON STAF":
+			gp_satu = row[1] + row[9]
+
 		satu_employee = row[0]
-		gp = row[1]
+		gp = gp_satu
 		nama_employee = row[2]
 		no_ktp = row[3]
 		jabatan = row[4]
@@ -190,6 +203,8 @@ def pasang_bpjs(doc):
 					satu_row = doc.append("set_up_bpjs_detail_table")
 				
 					satu_row.employee = satu_employee
+
+					satu_row.nama_employee = nama_employee
 					satu_row.program = satu_beban.get("program")
 					satu_row.beban_karyawan = satu_beban.get("beban_karyawan")
 					satu_row.beban_perusahaan = satu_beban.get("beban_perusahaan")
@@ -202,6 +217,7 @@ def pasang_bpjs(doc):
 				satu_row = doc.append("set_up_bpjs_detail_table")
 				
 				satu_row.employee = satu_employee
+				satu_row.nama_employee = nama_employee
 				satu_row.program = satu_beban.get("program")
 				satu_row.beban_karyawan = satu_beban.get("beban_karyawan")
 				satu_row.beban_perusahaan = satu_beban.get("beban_perusahaan")
@@ -214,7 +230,7 @@ def pasang_bpjs(doc):
 		satu_row_employee = doc.append("daftar_bpjs_employee")
 		satu_row_employee.employee = satu_employee
 		satu_row_employee.nama = nama_employee
-		satu_row_employee.gp = gp
+		satu_row_employee.gp = gp_satu
 		satu_row_employee.beban_karyawan = beban_karyawan
 		satu_row_employee.beban_perusahaan = beban_perusahaan
 		satu_row_employee.jumlah = beban_perusahaan + beban_karyawan

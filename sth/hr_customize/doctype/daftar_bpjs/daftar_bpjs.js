@@ -2,7 +2,6 @@ frappe.ui.form.on('Daftar BPJS', {
     refresh: function(frm) {
     	console.log(frm.doc.daftar_bpjs_employee)
         if (frm.doc.docstatus == 0 && frm.doc.daftar_bpjs_employee.length == 0)  {
-        	console.log("TES")
             frm.add_custom_button(__('Get Employee'), function() {
                 frm.disable_save();
                 frappe.show_alert({
@@ -18,6 +17,7 @@ frappe.ui.form.on('Daftar BPJS', {
                     callback: function(r) {
                         frm.enable_save();
                         frm.refresh_fields();
+                        frm.dirty()
                         
                         if (r.message) {
                             frappe.show_alert({
