@@ -83,8 +83,7 @@
    "fieldname": "bank",
    "fieldtype": "Link",
    "label": "Bank",
-   "options": "Bank",
-   "reqd": 1
+   "options": "Bank"
   },
   {
    "default": "now",
@@ -163,6 +162,7 @@
   {
    "fieldname": "accounting_details_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Accounting Details"
   },
   {
@@ -254,7 +254,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-01 19:31:47.197959",
+ "modified": "2026-01-02 10:28:27.372064",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas",

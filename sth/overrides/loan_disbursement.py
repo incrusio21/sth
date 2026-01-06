@@ -8,6 +8,10 @@ from lending.loan_management.doctype.process_loan_interest_accrual.process_loan_
 	process_loan_interest_accrual_for_loans,
 )
 
+from lending.loan_management.doctype.loan_security_assignment.loan_security_assignment import (
+	update_loan_securities_values,
+)
+
 from lending.loan_management.doctype.loan_disbursement.loan_disbursement import LoanDisbursement
 
 class STHLoanDisbursement(LoanDisbursement):
@@ -22,6 +26,40 @@ class STHLoanDisbursement(LoanDisbursement):
     # non aktifkan submit scheduler
     def submit_repayment_schedule(self):
         pass
+    
+    def on_cancel(self):
+        self.flags.ignore_links = ["GL Entry", "Loan Repayment Schedule", "Sales Invoice", "Loan Demand"]
+
+        self.set_status_and_amounts(cancel=1)
+
+        if self.is_term_loan:
+            self.cancel_and_delete_repayment_schedule()
+
+        self.make_credit_note()
+        self.delete_security_deposit()
+
+        update_loan_securities_values(
+            self.against_loan,
+            self.disbursed_amount,
+            self.doctype,
+            on_trigger_doc_cancel=1,
+        )
+
+        # self.make_gl_entries(cancel=1)
+        self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
+        self.set_status()
+    
+    def cancel_and_delete_repayment_schedule(self):
+        filters = {
+            "loan": self.against_loan,
+            "docstatus": 1,
+            "loan_disbursement": self.name,
+        }
+        if rs_name := frappe.db.get_value("Loan Repayment Schedule", filters, "name"):
+            schedule = frappe.get_doc("Loan Repayment Schedule", rs_name)
+            schedule.reverse_interest_accruals = self.get("reverse_interest_accruals")
+            schedule.flags.ignore_links = True
+            schedule.cancel()
 
     def get_schedule_details(self):
         return {
@@ -29,7 +67,7 @@ class STHLoanDisbursement(LoanDisbursement):
             "loan": self.against_loan,
             "repayment_method": self.repayment_method,
             "repayment_start_date": self.repayment_start_date,
-            "repayment_periods": self.tenure,
+            "repayment_periods": self.tenure or 1,
             "posting_date": self.disbursement_date,
             "repayment_frequency": self.repayment_frequency,
             "disbursed_amount": self.disbursed_amount,
@@ -39,6 +77,54 @@ class STHLoanDisbursement(LoanDisbursement):
             else 0,
             "loan_disbursement": self.name,
         }
+    
+    def get_values_on_cancel(self, loan_details):
+        disbursed_amount = loan_details.disbursed_amount - self.disbursed_amount
+        total_payment = loan_details.total_payment
+        total_interest_payable = loan_details.total_interest_payable
+
+        if self.is_term_loan:
+            if rs_name := frappe.db.get_value("Loan Repayment Schedule", {"loan_disbursement": self.name, "docstatus": 1}, "name"):
+                schedule = frappe.get_doc(
+                    "Loan Repayment Schedule", rs_name
+                )
+                for data in schedule.repayment_schedule:
+                    total_payment -= data.total_payment
+                    total_interest_payable -= data.interest_amount
+        else:
+            total_payment -= self.disbursed_amount
+
+        if (
+            loan_details.disbursed_amount > loan_details.loan_amount
+            and loan_details.repayment_schedule_type != "Line of Credit"
+        ):
+            topup_amount = loan_details.disbursed_amount - loan_details.loan_amount
+            if topup_amount > self.disbursed_amount:
+                topup_amount = self.disbursed_amount
+
+            total_payment = total_payment - topup_amount
+
+        if loan_details.repayment_schedule_type == "Line of Credit":
+            status = "Active"
+        elif disbursed_amount <= 0:
+            status = "Sanctioned"
+        elif disbursed_amount >= loan_details.loan_amount:
+            status = "Disbursed"
+        else:
+            status = "Partially Disbursed"
+
+        new_available_limit_amount = loan_details.available_limit_amount + self.disbursed_amount
+
+        new_utilized_limit_amount = loan_details.utilized_limit_amount - self.disbursed_amount
+
+        return (
+            disbursed_amount,
+            status,
+            total_payment,
+            total_interest_payable,
+            new_available_limit_amount,
+            new_utilized_limit_amount,
+        )
     
     def get_values_on_submit(self, loan_details):
         precision = cint(frappe.db.get_default("currency_precision")) or 2

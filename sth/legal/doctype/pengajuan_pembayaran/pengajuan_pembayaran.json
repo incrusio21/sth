@@ -10,8 +10,8 @@
   "section_break_m4ut",
   "naming_series",
   "posting_date",
-  "unit",
   "pemesan",
+  "unit",
   "location",
   "employee",
   "bukti_pembelian",
@@ -100,10 +100,11 @@
   },
   {
    "fieldname": "pemesan",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Nama Pemesan",
+   "options": "Company",
    "reqd": 1
   },
   {
@@ -237,7 +238,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 20:19:01.378774",
+ "modified": "2026-01-05 15:23:32.267992",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

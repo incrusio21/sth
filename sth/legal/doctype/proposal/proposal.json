@@ -9,7 +9,7 @@
   "supplier_section",
   "title",
   "naming_series",
-  "purchase_type",
+  "proposal_type",
   "supplier",
   "supplier_name",
   "order_confirmation_no",
@@ -17,11 +17,11 @@
   "get_items_from_open_material_requests",
   "column_break_7",
   "transaction_date",
-  "schedule_date",
-  "from_proposal",
-  "unit",
-  "column_break1",
   "company",
+  "unit",
+  "from_proposal",
+  "column_break1",
+  "schedule_date",
   "apply_tds",
   "tax_withholding_category",
   "has_unit_price_items",
@@ -259,6 +259,7 @@
    "depends_on": "eval:doc.docstatus===1",
    "fieldname": "order_confirmation_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Order Confirmation No"
   },
   {
@@ -284,6 +285,7 @@
    "depends_on": "eval:doc.customer",
    "fieldname": "drop_ship",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Drop Ship"
   },
   {
@@ -402,6 +404,7 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Currency and Price List",
    "options": "fa fa-tag"
   },
@@ -484,6 +487,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Scan Barcode",
    "options": "Barcode"
   },
@@ -501,6 +505,7 @@
    "collapsible": 1,
    "fieldname": "section_break_48",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Pricing Rules"
   },
   {
@@ -523,6 +528,7 @@
   {
    "fieldname": "base_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -531,6 +537,7 @@
   {
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Net Total (Company Currency)",
    "no_copy": 1,
    "oldfieldname": "net_total",
@@ -546,6 +553,7 @@
   {
    "fieldname": "total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total",
    "options": "currency",
    "read_only": 1
@@ -553,6 +561,7 @@
   {
    "fieldname": "net_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Net Total",
    "oldfieldname": "net_total_import",
    "oldfieldtype": "Currency",
@@ -571,6 +580,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
@@ -599,6 +609,7 @@
   {
    "fieldname": "section_break_52",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1
   },
   {
@@ -613,6 +624,7 @@
    "collapsible": 1,
    "fieldname": "sec_tax_breakup",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Tax Breakup"
   },
   {
@@ -627,6 +639,7 @@
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
@@ -702,6 +715,7 @@
    "collapsible": 1,
    "fieldname": "discount_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Additional Discount"
   },
   {
@@ -740,6 +754,7 @@
   {
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Totals"
   },
   {
@@ -1100,6 +1115,7 @@
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Apply Tax Withholding Amount"
   },
   {
@@ -1113,6 +1129,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions "
   },
   {
@@ -1150,11 +1167,13 @@
   {
    "fieldname": "terms_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Terms"
   },
   {
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "More Info"
   },
   {
@@ -1172,6 +1191,7 @@
   {
    "fieldname": "address_and_contact_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Address & Contact"
   },
   {
@@ -1275,10 +1295,10 @@
    "options": "Unit"
   },
   {
-   "fieldname": "purchase_type",
+   "fieldname": "proposal_type",
    "fieldtype": "Select",
    "label": "Purchase Type",
-   "options": "\nCapex\nBorongan",
+   "options": "\nCapex\nBorongan\nJasa dan Lainnya\nJual Beli\nJual Beli TBS",
    "reqd": 1
   }
  ],
@@ -1286,7 +1306,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-03 13:35:36.582755",
+ "modified": "2026-01-05 12:15:19.586901",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
@@ -1340,6 +1360,5 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "supplier_name",
  "track_changes": 1
 }

@@ -69,7 +69,15 @@ class EmployeePotongan(Document):
 	@frappe.whitelist()
 	def get_employee(self):
 		jenis_potongan = frappe.get_value("Jenis Potongan", self.jenis_potongan ,'default_rate')
-		emp_list = frappe.get_all("Employee", filters={"status": "Active", "employment_type": self.employment_type}, fields=["name", "employee_name"])
+		# emp_list = frappe.get_all("Employee", filters={"status": "Active", "employment_type": self.employment_type}, fields=["name", "employee_name"])
+		emp_list = frappe.db.sql("""
+			SELECT 
+			e.name,
+			e.employee_name
+			FROM `tabEmployee` as e
+			JOIN `tabEmployee Jenis Potongan` as ejp ON ejp.parent = e.name
+			WHERE e.status = 'Active' AND e.employment_type = %(employment_type)s AND ejp.jenis_potongan = %(jenis_potongan)s;
+    """, {"employment_type": self.employment_type, "jenis_potongan": self.jenis_potongan}, as_dict=True)
 
 		self.details = []
 		for d in emp_list:

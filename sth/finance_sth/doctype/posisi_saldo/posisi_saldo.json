@@ -69,7 +69,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-19 10:41:52.407640",
+ "modified": "2026-01-02 21:09:01.731838",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Posisi Saldo",
@@ -91,6 +91,6 @@
  ],
  "row_format": "Dynamic",
  "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_order": "ASC",
  "states": []
 }

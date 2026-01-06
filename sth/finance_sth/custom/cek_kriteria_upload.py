@@ -8,6 +8,9 @@ def cek_dokumen_setelah_insert(doc, method=None):
 	populate_kriteria_upload(doc)
 
 def populate_kriteria_upload(doc):
+	if not hasattr(doc, 'kriteria_upload_dokumen_finance'):
+		return
+
 	criteria = frappe.db.get_value(
 		"Kriteria Dokumen Finance",
 		{"dokumen_finance": doc.doctype},

@@ -465,7 +465,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 				if (doc.status != "On Hold") {
 					if (flt(doc.per_received) < 100 && allow_receipt) {
 						this.frm.add_custom_button(
-							__("Purchase Receipt"),
+							__("BAPP"),
 							this.make_purchase_receipt,
 							__("Create")
 						);

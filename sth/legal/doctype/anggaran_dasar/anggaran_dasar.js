@@ -5,27 +5,29 @@ frappe.ui.form.on("Anggaran Dasar", {
 	refresh(frm) {
         for (const table of ["saham", "pengurus", "kriteria"]) {
             frm.set_df_property(table, "cannot_add_rows", true);
-
-			frm.set_query(`akta_${table}`, (doc) => {
-                return {
-                    filters: {
-                        company: ["=", doc.company]
-                    }
-                }
-            })
             
             frm.fields_dict[table].grid.add_custom_button("Add Row", () => {
-                if(!frm.doc[`akta_${table}`]){
+                if(!frm.doc[`akta_saham`]){
                     frappe.throw("Plase set Akta first.")
                 }
                 
                 frm.add_child(table, {
-                    akta: frm.doc[`akta_${table}`],
+                    akta: frm.doc[`akta_saham`],
                 });
-    
+
                 frm.refresh_fields(table)
             })
 		}
+        
+        frm.set_query(`akta_saham`, (doc) => {
+            return {
+                filters: {
+                    company: ["=", doc.company]
+                }
+            }
+        })
+        
+        
 	},
     calculate_total(frm){
         let totals = 0

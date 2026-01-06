@@ -3,7 +3,6 @@
  "allow_rename": 1,
  "creation": "2025-12-08 14:02:50.975083",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "jenis_biaya",
@@ -112,7 +111,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-10 10:44:03.009949",
+ "modified": "2026-01-05 17:28:40.766809",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan Item",

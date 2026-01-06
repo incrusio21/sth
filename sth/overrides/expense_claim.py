@@ -1,5 +1,48 @@
 import frappe
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt
+from frappe import _
+from hrms.hr.doctype.expense_claim.expense_claim import ExpenseClaim
+
+class ExpenseClaim(ExpenseClaim):
+	def validate_advances(self):
+		self.total_advance_amount = 0
+
+		for d in self.get("advances"):
+			self.round_floats_in(d)
+
+			ref_doc = frappe.db.get_value(
+				"Employee Advance",
+				d.employee_advance,
+				["posting_date", "paid_amount", "claimed_amount", "return_amount", "advance_account"],
+				as_dict=1,
+			)
+			d.posting_date = ref_doc.posting_date
+			d.advance_account = ref_doc.advance_account
+			d.advance_paid = ref_doc.paid_amount
+			d.unclaimed_amount = flt(ref_doc.paid_amount) - flt(ref_doc.claimed_amount)
+
+			# if d.allocated_amount and flt(d.allocated_amount) > (
+			# 	flt(d.unclaimed_amount) - flt(d.return_amount)
+			# ):
+			# 	frappe.throw(
+			# 		_("Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2}").format(
+			# 			d.idx, d.allocated_amount, d.unclaimed_amount
+			# 		)
+			# 	)
+
+			self.total_advance_amount += flt(d.allocated_amount)
+
+		if self.total_advance_amount:
+			self.round_floats_in(self, ["total_advance_amount"])
+			precision = self.precision("total_advance_amount")
+			amount_with_taxes = flt(
+				(flt(self.total_sanctioned_amount, precision) + flt(self.total_taxes_and_charges, precision)),
+				precision,
+			)
+
+			if flt(self.total_advance_amount, precision) > amount_with_taxes:
+				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 @frappe.whitelist()
 def get_travel_request_expenses(travel_request, company):

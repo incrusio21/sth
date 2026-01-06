@@ -16,20 +16,21 @@
   "column_break_lpdk",
   "status_anggaran_dasar",
   "amended_from",
-  "section_break_psjl",
+  "section_break_gojy",
   "akta_saham",
   "jenis_akta",
+  "column_break_ubgf",
+  "tanggal_akta",
   "keterangan",
+  "section_break_psjl",
   "saham",
   "section_break_sslx",
   "column_break_pojw",
   "column_break_alar",
   "grand_total",
   "susunan_pengurus_tab",
-  "akta_pengurus",
   "pengurus",
   "kriteria_tab_tab",
-  "akta_kriteria",
   "kriteria"
  ],
  "fields": [
@@ -133,19 +134,7 @@
   {
    "fieldname": "akta_saham",
    "fieldtype": "Link",
-   "label": "Akta Header",
-   "options": "Akta List"
-  },
-  {
-   "fieldname": "akta_pengurus",
-   "fieldtype": "Link",
-   "label": "Akta Susunan Pengurus",
-   "options": "Akta List"
-  },
-  {
-   "fieldname": "akta_kriteria",
-   "fieldtype": "Link",
-   "label": "Akta Kriteria",
+   "label": "Nomor Akta",
    "options": "Akta List"
   },
   {
@@ -183,12 +172,28 @@
    "in_preview": 1,
    "label": "Keterangan",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_gojy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ubgf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "akta_saham.tgl_akta",
+   "fieldname": "tanggal_akta",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Akta",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-23 09:49:08.462568",
+ "modified": "2026-01-06 09:45:24.847115",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",
