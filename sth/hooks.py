@@ -176,6 +176,7 @@ override_doctype_class = {
 	"Supplier": "sth.overrides.supplier.Supplier",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
+	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim"
 }
 
 # Document Events
@@ -190,7 +191,7 @@ doc_events = {
 	},
 
 	"Asset": {
-		"validate": ["sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+		"validate": ["sth.overrides.asset.validate_company","sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
 		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
 	},
     "Attendance": {
@@ -268,6 +269,7 @@ doc_events = {
 	# },
 	"Travel Request": {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
+		"on_cancel": "sth.custom.travel_request.cancel_employee_advance"
 	},
     
 	"Request for Quotation": {
@@ -316,6 +318,7 @@ override_whitelisted_methods = {
     "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
 	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
     "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
+    "hrms.overrides.employee_payment_entry.get_payment_entry_for_employee": "sth.overrides.employee_advance.get_payment_entry_for_employee"
 }
 #
 # each overriding function accepts a `data` argument;

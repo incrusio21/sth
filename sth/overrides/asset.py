@@ -160,3 +160,6 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 		"purchase_invoice_item": first_item.name if doctype == "Purchase Invoice" else None,
 	}
 	
+@frappe.whitelist()
+def validate_company(self,method):
+	self.asset_owner_company = self.company
