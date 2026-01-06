@@ -139,10 +139,10 @@ class SalarySlip(SalarySlip):
 				date_of_joining = add_days(date_of_joining, 2)
 			elif weekday == 6:
 				date_of_joining = add_days(date_of_joining, 1)
-		
 		if emp_doc.branch == "HO":
 			days_before_joining = days_diff(date_of_joining, self.start_date) + 1 # 8
 			original_days = days_diff(self.end_date, self.start_date) + 1 # 31
+			total_working_days = days_diff(self.end_date, date_of_joining) + 1 
 
 			total_sabtu_minggu = 0
 
@@ -155,13 +155,10 @@ class SalarySlip(SalarySlip):
 				
 				current_date += timedelta(days=1)
 
-			total_working_days = original_days - days_before_joining
 			self.total_working_days = total_working_days
-			self.payment_days = self.total_working_days - self.holiday_days - self.absent_days
-
-		else:
-			self.payment_days = self.total_working_days - self.holiday_days + hari_leave - self.absent_days
-
+			
+		self.payment_days = self.total_working_days - self.holiday_days - self.absent_days
+	
 
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
