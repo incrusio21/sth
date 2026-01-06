@@ -155,7 +155,7 @@ class SalarySlip(SalarySlip):
 				
 				current_date += timedelta(days=1)
 
-			total_working_days = original_days - days_before_joining - total_sabtu_minggu
+			total_working_days = original_days - days_before_joining
 			self.total_working_days = total_working_days
 			
 		self.payment_days = self.total_working_days - self.holiday_days + hari_leave - self.absent_days
@@ -620,5 +620,5 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00701/00001")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00906/00001")
 	doc.calculate_holidays()	
