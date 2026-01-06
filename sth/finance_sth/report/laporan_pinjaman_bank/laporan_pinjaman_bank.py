@@ -9,9 +9,25 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = []
 
-	data.append({
-		"est_pay_date": "2026-01-01"
-	})
+	q_laporan_pinjam_bank = frappe.db.sql("""
+		SELECT
+		dlb.disbursement_date as est_pay_date,
+		dlb.disbursement_date as act_pay_date,
+		dlb.disbursement_amount as withdrawal,
+		dlb.disbursement_total as outstanding,
+		ilb.principal + ilb.interest_amount as act_total_pay,
+		ilb.principal as principal,
+		ilb.loan_interest as interest_rate,
+		ilb.interest_amount as interest,
+		lb.loan_amount - dlb.disbursement_amount as ending_balance,
+		dlb.disbursement_amount as cumulative_interest
+		FROM `tabLoan Bank` as lb
+		JOIN `tabDisbursement Loan Bank` as dlb ON dlb.parent = lb.name
+		JOIN `tabInstallment Loan Bank` as ilb ON ilb.disbursement_number = dlb.disbursement_number;
+  """, as_dict=True)
+
+	for loan in q_laporan_pinjam_bank:
+		data.append(loan)
 
 	return columns, data
 
