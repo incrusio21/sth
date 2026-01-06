@@ -68,13 +68,15 @@
    "fetch_from": "nama_karyawan.designation",
    "fieldname": "nama_jabatan",
    "fieldtype": "Data",
-   "label": "Nama Jabatan"
+   "label": "Nama Jabatan",
+   "read_only": 1
   },
   {
    "fetch_from": "nama_karyawan.custom_nip",
    "fieldname": "no_induk_karyawan",
    "fieldtype": "Data",
-   "label": "No Induk Karyawan"
+   "label": "No Induk Karyawan",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -128,7 +130,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-23 13:34:23.753039",
+ "modified": "2026-01-06 15:01:33.536842",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
