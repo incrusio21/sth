@@ -13,7 +13,7 @@ def execute(filters=None):
 		SELECT
 		sb.company as customer,
 		ilb.disbursement_number as no_pinjaman,
-		sb.type as fs,
+		sb.type as fas,
 		sb.currency as ccy,
 		ilb.disbursement_amount as outstanding,
 		ilb.disbursement_date as from_date,

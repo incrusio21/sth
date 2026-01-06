@@ -61,6 +61,8 @@ class DaftarBPJS(Document):
 		new_doc.outstanding_amount = 0
 		new_doc.posting_date = self.end_periode
 
+		new_doc.company = self.pt
+
 		program_dict = {}
 		for emp in self.set_up_bpjs_detail_table:
 			program_dict.setdefault(emp.program, {
@@ -117,8 +119,8 @@ class DaftarBPJS(Document):
 		pasang_bpjs(self)
 
 def debug_bpjs():
-	doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
-	doc.before_submit()
+	doc = frappe.get_doc("Daftar BPJS","BPJS KES-PT. TRIMITRA LESTARI-00464")
+	pasang_bpjs(doc)
 
 def pasang_bpjs(doc):
 	# doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
@@ -142,7 +144,9 @@ def pasang_bpjs(doc):
 				Employee.blood_group,
 				Employee.kelas_bpjs_kesehatan,
 				SSAssignment.custom_tunjangan_komunikasi + SSAssignment.custom_tunjangan_daerah + SSAssignment.custom_tunjangan_perumahan,
-				Employee.grade
+				Employee.grade,
+
+				Employee.custom_kriteria
 				
 				)
 			.where(
@@ -161,24 +165,45 @@ def pasang_bpjs(doc):
 	for satu_employee in list_employee:
 		list_program_employee[satu_employee[0]] = []
 		for row in susunan_bpjs.set_up_bpjs_pt_table:
-			gp_satu = satu_employee[1]
-			if satu_employee[10] != "NON STAF":
-				gp_satu = satu_employee[1] + satu_employee[9]
+			program_doc = frappe.get_doc("Program BPJS", row.nama_program)
+			batas = 0
+			for baris_program in program_doc.program_bpjs_staff:
+				if baris_program.golongan == "Non Staff" and satu_employee[10] == "NON STAF":
+					if baris_program.kriteria == "Satuan Hasil" and satu_employee[11] == "Satuan Hasil":
+						batas = frappe.utils.flt(baris_program.batas_maksimum)
+					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[11] == "Non Satuan Hasil":
+						batas = frappe.utils.flt(baris_program.batas_maksimum)
 
+				elif baris_program.golongan == "Staf Up" and satu_employee[10] == "STAF":
+					if baris_program.kriteria == "Satuan Hasil" and satu_employee[11] == "Satuan Hasil":
+						batas = frappe.utils.flt(baris_program.batas_maksimum)
+					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[11] == "Non Satuan Hasil":
+						batas = frappe.utils.flt(baris_program.batas_maksimum)
+
+
+
+			gp_satu = satu_employee[1]
+			# if satu_employee[10] != "NON STAF":
+			# 	gp_satu = satu_employee[1] + satu_employee[9]
+
+			if batas > 0:
+				if gp_satu > batas:
+					gp_satu = batas
 
 			list_program_employee[satu_employee[0]].append({
 				"program" : row.nama_program,
 				"beban_karyawan": row.beban_karyawan / 100 * gp_satu,
 				"beban_perusahaan": row.beban_perusahaan / 100 * gp_satu
 			})
+	print(list_program_employee)
 
 	doc.set_up_bpjs_detail_table = []
 	doc.daftar_bpjs_employee = []
 
 	for row in list_employee:
 		gp_satu = row[1]
-		if row[10] != "NON STAF":
-			gp_satu = row[1] + row[9]
+		# if row[10] != "NON STAF":
+		# 	gp_satu = row[1] + row[9]
 
 		satu_employee = row[0]
 		gp = gp_satu

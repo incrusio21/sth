@@ -10,7 +10,7 @@ class AnggaranDasar(Document):
 	
 	def validate(self):
 		self.validate_mandatory_kriteria()
-		self.clear_akta_list()
+		# self.clear_akta_list()
 		self.calculate_saham()
 
 	def validate_mandatory_kriteria(self):
