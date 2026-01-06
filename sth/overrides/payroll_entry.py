@@ -103,15 +103,16 @@ class PayrollEntry(PayrollEntry):
 		self.check_permission("write")
 		employees = [emp.employee for emp in self.employees]
 
-		# cek apakah d rentang waktu masih terdapat bkm yang belum submit
-		for bkm in ["Traksi", "Panen", "Perawatan"]:
-			if frappe.db.exists(f"Buku Kerja Mandor {bkm}", {
-				"docstatus": ["<", 1], 
-				"company": self.company, 
-				"posting_date": ["between", [self.start_date, self.end_date]]
-			}):
-				frappe.throw(f"There are still documents Buku Kerja Mandor {bkm} " \
-				f"that have not been submitted for the period of {self.start_date} to {self.end_date}")
+		if self.grade == "NON STAF":
+			# cek apakah d rentang waktu masih terdapat bkm yang belum submit
+			for bkm in ["Traksi", "Panen", "Perawatan"]:
+				if frappe.db.exists(f"Buku Kerja Mandor {bkm}", {
+					"docstatus": ["<", 1], 
+					"company": self.company, 
+					"posting_date": ["between", [self.start_date, self.end_date]]
+				}):
+					frappe.throw(f"There are still documents Buku Kerja Mandor {bkm} " \
+					f"that have not been submitted for the period of {self.start_date} to {self.end_date}")
 
 		if employees:
 			args = frappe._dict(

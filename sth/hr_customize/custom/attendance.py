@@ -46,7 +46,10 @@ class Attendance:
     def validate_premi_amount_and_component(self):
         if self.doc.status not in ("Present"):
             return
-            
+
+        if not self.doc.designation:
+            frappe.throw(f"Please set Designation for employee {self.doc.employee_name}")
+
         designation = frappe.get_cached_doc("Designation", self.doc.designation)
         self.doc.premi_amount = 0
 

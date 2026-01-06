@@ -49,25 +49,30 @@ class BukuKerjaMandorPremi(Document):
 		
 		fields = voucher_maping.get(self.buku_kerja_mandor)
 
+		query = (
+			frappe.qb.from_(bkm)
+			.inner_join(detail_hk)
+			.on(bkm.name == detail_hk.parent)
+			.select(
+				detail_hk.employee,
+				Sum(detail_hk[fields]),
+			)
+			.where(
+				(bkm.docstatus == 1) & 
+				(bkm[self.mandor_type] == self.employee) & 
+				(bkm.company == self.company) & 
+				(bkm.posting_date.between(self.posting_date, get_last_day(self.posting_date)))
+			)
+			.groupby(detail_hk.employee)
+		)
+
+		if self.buku_kerja_mandor == "Traksi":
+			query = query.where(bkm.tipe_master_kendaraan == "Dump Truck")
+		
 		# Group by kategori tertentu
 		self.employee_list = json.dumps(
 			frappe._dict(
-				(
-					frappe.qb.from_(bkm)
-					.inner_join(detail_hk)
-					.on(bkm.name == detail_hk.parent)
-					.select(
-						detail_hk.employee,
-						Sum(detail_hk[fields]),
-					)
-					.where(
-						(bkm.docstatus == 1) & 
-						(bkm[self.mandor_type] == self.employee) & 
-						(bkm.company == self.company) & 
-						(bkm.posting_date.between(self.posting_date, get_last_day(self.posting_date)))
-					)
-					.groupby(detail_hk.employee)
-				).run()
+				query.run()
 			)
 		)
 

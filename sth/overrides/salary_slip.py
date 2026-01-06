@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, month_diff, now
+from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -16,6 +16,8 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 	set_loan_repayment,
 )
 from sth.hr_customize import get_premi_attendance_settings
+
+from datetime import datetime, timedelta
 
 LEAVE_CODE_MAP = "leave_code_map"
 
@@ -76,12 +78,13 @@ class SalarySlip(SalarySlip):
 			# holidays sudah tidak masuk dalam minggu terpilih
 			if not week_end or h > week_end:
 				# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
-				# week_start = max(get_first_day_of_week(h), actual_start)
-				# week_end = min(get_last_day_of_week(h), actual_end)
+				week_start = max(get_first_day_of_week(h), actual_start)
+				week_end = min(get_last_day_of_week(h), actual_end)
 
+				# kembalikan ke sini jika hari pertama d minggu ini balik ke senin
 				# ternyata seharusnya minggu itu dapet holiday list KALAU setelah itu ada absensi present (kecuali libur semua)
-				week_start = max(get_first_day_of_week(add_days(h,1)), actual_start)
-				week_end = min(add_days(week_start,5), actual_end)
+				# week_start = max(get_first_day_of_week(add_days(h,1)), actual_start)
+				# week_end = min(add_days(week_start,5), actual_end)
 
 			else:
 				# skip krn holidays sudah di hitung untuk minggu ini
@@ -108,7 +111,6 @@ class SalarySlip(SalarySlip):
 						if status_code == "C":
 							if apakah_karyawan_tetap == 1:
 								self.holiday_days += 1
-								
 						else:
 							self.holiday_days +=1
 							
@@ -124,9 +126,39 @@ class SalarySlip(SalarySlip):
 				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 				self.holiday_days += 1
 				hari_leave += 1
-		
-		self.payment_days = self.total_working_days - self.holiday_days + hari_leave
 
+		emp_doc = frappe.get_cached_doc("Employee", self.employee)
+		
+		date_of_joining = emp_doc.date_of_joining
+
+		if date_of_joining:
+			doj = getdate(date_of_joining)
+			weekday = doj.weekday()
+			
+			if weekday == 5:
+				date_of_joining = add_days(date_of_joining, 2)
+			elif weekday == 6:
+				date_of_joining = add_days(date_of_joining, 1)
+		if emp_doc.branch == "HO":
+			days_before_joining = days_diff(date_of_joining, self.start_date) + 1 # 8
+			original_days = days_diff(self.end_date, self.start_date) + 1 # 31
+			total_working_days = days_diff(self.end_date, date_of_joining) + 1 
+
+			total_sabtu_minggu = 0
+
+			current_date = date_of_joining
+			while getdate(current_date) <= getdate(self.end_date):
+				if current_date.weekday() == 5:
+					total_sabtu_minggu += 1
+				elif current_date.weekday() == 6:
+					total_sabtu_minggu += 1
+				
+				current_date += timedelta(days=1)
+
+			self.total_working_days = total_working_days
+			
+		self.payment_days = self.total_working_days - self.holiday_days - self.absent_days
+	
 
 	def _get_not_out_attendance_days(self) -> float:
 		Attendance = frappe.qb.DocType("Attendance")
@@ -555,19 +587,37 @@ class SalarySlip(SalarySlip):
 		# cek apakah hari ump based on bulan / tidak
 		employment_type = frappe.get_cached_doc("Employment Type", data.employment_type, ["hari_ump_ikut_jumlah_hari_1_bulan", "hari_ump"])
 		
-		data.total_hari = default_data.total_hari = days_diff(self.end_date, self.start_date) + 1 \
+		emp_doc = frappe.get_cached_doc("Employee", self.employee)
+		date_of_joining = emp_doc.date_of_joining
+
+		if date_of_joining:
+			doj = getdate(date_of_joining)
+			weekday = doj.weekday()
+			
+			if weekday == 5:
+				date_of_joining = add_days(date_of_joining, 2)
+			elif weekday == 6:
+				date_of_joining = add_days(date_of_joining, 1)
+		
+		base_total_hari = default_data.total_hari = days_diff(self.end_date, self.start_date) + 1 \
 			if employment_type.hari_ump_ikut_jumlah_hari_1_bulan else \
 			employment_type.hari_ump
+		
+		if getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
+			days_before_joining = days_diff(date_of_joining, self.start_date)
+			data.total_hari = default_data.total_hari = base_total_hari - days_before_joining
+		else:
+			data.total_hari = default_data.total_hari = base_total_hari
 
 		# ubah ump_harian ke gaji pokok dibagi hari
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
-		data.custom_kriteria = default_data.custom_kriteria = frappe.get_cached_doc("Employee", self.employee).custom_kriteria
+		data.custom_kriteria = default_data.custom_kriteria = emp_doc.custom_kriteria
 		
 		return data, default_data
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00701/00001")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00906/00001")
 	doc.calculate_holidays()	

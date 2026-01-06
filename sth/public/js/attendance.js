@@ -4,15 +4,15 @@
 frappe.ui.form.on('Attendance', {
     refresh: function(frm) {
 		sth.form.show_reset_payment_log(frm)
-        check_and_set_leave_type(frm);
+        // check_and_set_leave_type(frm);
     },
     
     employee: function(frm) {
-        check_and_set_leave_type(frm);
+        // check_and_set_leave_type(frm);
     },
     
     status: function(frm) {
-        check_and_set_leave_type(frm);
+        // check_and_set_leave_type(frm);
     }
 });
 
