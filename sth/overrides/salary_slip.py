@@ -124,9 +124,39 @@ class SalarySlip(SalarySlip):
 				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 				self.holiday_days += 1
 				hari_leave += 1
+
+		emp_doc = frappe.get_cached_doc("Employee", self.employee)
 		
-		# self.payment_days = self.total_working_days - self.holiday_days + hari_leave - self.absent_days
-		self.payment_days = self.total_working_days - self.holiday_days - self.absent_days
+		date_of_joining = emp_doc.date_of_joining
+
+		if date_of_joining:
+			doj = getdate(date_of_joining)
+			weekday = doj.weekday()
+			
+			if weekday == 5:
+				date_of_joining = add_days(date_of_joining, 2)
+			elif weekday == 6:
+				date_of_joining = add_days(date_of_joining, 1)
+		
+		if emp_doc.branch == "HO":
+			days_before_joining = days_diff(date_of_joining, self.start_date) + 1 # 8
+			original_days = days_diff(self.end_date, self.start_date) + 1 # 31
+
+			total_sabtu_minggu = 0
+
+			current_date = date_of_joining
+			while current_date <= self.end_date:
+				if current_date.weekday() == 5:
+					total_sabtu_minggu += 1
+				elif current_date.weekday() == 6:
+					total_sabtu_minggu += 1
+				
+				current_date += timedelta(days=1)
+
+			total_working_days = original_days - days_before_joining - total_sabtu_minggu
+			self.total_working_days = total_working_days
+			
+		self.payment_days = self.total_working_days - self.holiday_days + hari_leave - self.absent_days
 
 
 	def _get_not_out_attendance_days(self) -> float:
