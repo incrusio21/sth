@@ -17,6 +17,8 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 )
 from sth.hr_customize import get_premi_attendance_settings
 
+from datetime import datetime, timedelta
+
 LEAVE_CODE_MAP = "leave_code_map"
 
 class SalarySlip(SalarySlip):
@@ -145,7 +147,7 @@ class SalarySlip(SalarySlip):
 			total_sabtu_minggu = 0
 
 			current_date = date_of_joining
-			while current_date <= self.end_date:
+			while getdate(current_date) <= getdate(self.end_date):
 				if current_date.weekday() == 5:
 					total_sabtu_minggu += 1
 				elif current_date.weekday() == 6:
