@@ -571,7 +571,7 @@ class SalarySlip(SalarySlip):
 			if employment_type.hari_ump_ikut_jumlah_hari_1_bulan else \
 			employment_type.hari_ump
 		
-		if date_of_joining and self.start_date <= date_of_joining <= self.end_date:
+		if getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
 			days_before_joining = days_diff(date_of_joining, self.start_date)
 			data.total_hari = default_data.total_hari = base_total_hari - days_before_joining
 		else:
