@@ -1,4 +1,4 @@
-import frappe
+import frappe,json
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import getdate, nowdate
 
@@ -61,3 +61,34 @@ def set_missing_values(source, target_doc):
 		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
+
+
+@frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None, args=None):
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children",[])
+		return d.name in filtered_items
+
+	doclist = get_mapped_doc(
+		"Material Request",
+		source_name,
+		{
+			"Material Request": {
+				"doctype": "Request for Quotation",
+				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Purchase"]},
+			},
+			"Material Request Item": {
+				"doctype": "Request for Quotation Item",
+				"field_map": [
+					["name", "material_request_item"],
+					["parent", "material_request"],
+					["project", "project_name"],
+				],
+				"condition": select_item
+			},
+		},
+		target_doc,
+	)
+
+	return doclist
