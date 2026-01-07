@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"6xiwu4clhX\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":4}}]",
+ "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"6xiwu4clhX\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Proses Produksi\",\"col\":4}}]",
  "creation": "2025-11-20 15:54:30.037918",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,35 +13,6 @@
  "is_hidden": 0,
  "label": "Mill",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Transaksi",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Security Check Point",
-   "link_count": 0,
-   "link_to": "Security Check Point",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Timbangan",
-   "link_count": 0,
-   "link_to": "Timbangan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -80,9 +51,107 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Security Check Point",
+   "link_count": 0,
+   "link_to": "Security Check Point",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timbangan",
+   "link_count": 0,
+   "link_to": "Timbangan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Proses Produksi",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sterilizer Transaction",
+   "link_count": 0,
+   "link_to": "Sterilizer Transaction",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Press Cake Temperature Inspection",
+   "link_count": 0,
+   "link_to": "Press Cake Temperature Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Digester Motor Ampere Inspection",
+   "link_count": 0,
+   "link_to": "Digester Motor Ampere Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Press Hydraulic Pressure Inspection",
+   "link_count": 0,
+   "link_to": "Press Hydraulic Pressure Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Press Motor Ampere Inspection",
+   "link_count": 0,
+   "link_to": "Press Motor Ampere Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "CBC Monitoring",
+   "link_count": 0,
+   "link_to": "CBC Monitoring",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-21 21:53:38.922157",
+ "modified": "2026-01-07 11:43:52.427042",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

@@ -9,9 +9,10 @@
   "naming_series",
   "machine_name",
   "station",
+  "hour_meters",
   "column_break_tgis",
-  "unit",
   "company",
+  "unit",
   "link_asset"
  ],
  "fields": [
@@ -69,12 +70,20 @@
    "label": "Station",
    "options": "Station Master",
    "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "hour_meters",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Hour Meters"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-19 16:13:02.352614",
+ "modified": "2026-01-07 11:56:09.851037",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Machine",
@@ -97,7 +106,7 @@
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_order": "ASC",
  "states": [],
  "title_field": "machine_name"
 }

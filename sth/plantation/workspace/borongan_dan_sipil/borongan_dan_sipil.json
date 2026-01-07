@@ -16,25 +16,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Transaksi Capex Dan Pekerjaan Borongan",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Proposal & Progress Pekerjaan",
-   "link_count": 0,
-   "link_to": "Purchase Order",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Transaksi Non Capex",
    "link_count": 1,
    "link_type": "DocType",
@@ -47,12 +28,32 @@
    "label": "Berita Acara",
    "link_count": 0,
    "link_to": "Berita Acara",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Berita Acara",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi Capex Dan Pekerjaan Borongan",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Proposal & Progress Pekerjaan",
+   "link_count": 0,
+   "link_to": "Proposal",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-21 21:53:38.487973",
+ "modified": "2026-01-07 10:38:03.129539",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Borongan Dan Sipil",
