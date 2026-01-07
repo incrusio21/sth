@@ -82,5 +82,5 @@ class SuratJalan(Document):
 		doc.submit()
 
 @frappe.whitelist()
-def get_items_from_doctype(doctype):
+def get_items_from_po(doctype):
 	pass

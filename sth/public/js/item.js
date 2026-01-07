@@ -317,6 +317,17 @@ frappe.ui.form.on('Item', {
 		if (frm.is_new() && frm.doc.item_group) {
 			generate_item_code(frm);
 		}
+		if (frm.doc.item_group) {
+            frappe.db.get_value('Item Group', frm.doc.item_group, 'kelompok_asset')
+                .then(r => {
+                    if (r.message && r.message.kelompok_asset == 1) {
+                        
+                        frm.set_value('is_fixed_asset', 1);
+                    } else {
+                       	frm.set_value('is_fixed_asset', 0);
+                    }
+                });
+        }
 	}
 });
 
