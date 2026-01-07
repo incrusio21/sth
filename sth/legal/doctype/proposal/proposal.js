@@ -359,7 +359,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 ) {
 	setup() {
 		this.frm.custom_make_buttons = {
-			"Purchase Receipt": "Purchase Receipt",
+			"BAPP": "BAPP",
 			"Purchase Invoice": "Purchase Invoice",
 			"Payment Entry": "Payment",
 		};
@@ -466,7 +466,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 					if (flt(doc.per_received) < 100 && allow_receipt) {
 						this.frm.add_custom_button(
 							__("BAPP"),
-							this.make_purchase_receipt,
+							this.make_bapp,
 							__("Create")
 						);
 					}
@@ -547,11 +547,11 @@ erpnext.buying.ProposalController = class ProposalController extends (
 		});
 	}
 
-	make_purchase_receipt() {
+	make_bapp() {
 		frappe.model.open_mapped_doc({
-			method: "sth.legal.doctype.proposal.proposal.make_purchase_receipt",
+			method: "sth.legal.doctype.proposal.proposal.make_bapp",
 			frm: cur_frm,
-			freeze_message: __("Creating Purchase Receipt ..."),
+			freeze_message: __("Creating BAPP ..."),
 		});
 	}
 

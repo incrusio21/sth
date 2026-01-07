@@ -718,12 +718,10 @@ def make_proposal_revision(source_name, target_doc=None):
     return doc
 
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None):
+def make_bapp(source_name, target_doc=None):
     has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
 
     def set_missing_values(source, target):
-        target.purchase_type = "BAPP"
-
         target.run_method("set_missing_values")
         target.run_method("calculate_taxes_and_totals")
         
@@ -743,14 +741,14 @@ def make_purchase_receipt(source_name, target_doc=None):
         source_name,
         {
             "Proposal": {
-                "doctype": "Purchase Receipt",
+                "doctype": "BAPP",
                 "field_map": {"supplier_warehouse": "supplier_warehouse"},
                 "validation": {
                     "docstatus": ["=", 1],
                 },
             },
             "Proposal Item": {
-                "doctype": "Purchase Receipt Item",
+                "doctype": "BAPP Item",
                 "field_map": {
                     "name": "proposal_item",
                     "parent": "proposal",

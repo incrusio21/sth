@@ -1,5 +1,7 @@
 frappe.ui.form.on("Purchase Invoice", {
     setup(frm) {
+        sth.form.setup_fieldname_select(frm, "items")
+
         sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
             // tambahan disini
             frm.trigger("set_value_dpp_and_taxes")
@@ -16,6 +18,7 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     refresh(frm) {
+        sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
         frm.trigger("setup_queries")
         
         frm.add_custom_button(
@@ -26,22 +29,6 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     setup_queries(frm){
-        
-        frm.set_query("purchase_type", () => {
-            return {
-                filters: {
-                    document_type: frm.doctype
-                }
-            }
-        })
-
-        frm.set_query("nomor_pembelian", function (doc) {
-            return {
-                filters: {
-                    docstatus: 1
-                }
-            }
-        })
 
         frm.set_query("unit", function (doc) {
             return {
@@ -51,22 +38,19 @@ frappe.ui.form.on("Purchase Invoice", {
             }
         })
 
-        frm.set_query("purchase_receipt", function (doc) {
-            let filters = { docstatus: 1 }
-
-            if (doc.voucher_match_type == "Purchase Order") {
-                filters["purchase_type"] = "Berita Acara"
-            } else if (doc.voucher_match_type == "SPK") {
-                filters["purchase_type"] = "BAPP"
+        frm.set_query("document_no", function (doc) {
+            let filters = {
+                company: doc.company,
+                supplier: doc.supplier,
+                docstatus: 1,
+                // per_billed: ["<", 100]
             }
-
+            
             return {
-                filters
+                filters: filters
             }
-
         })
 
-        
         frm.set_query("item_code", "items", function(doc) {
             var filters = { 'supplier': doc.supplier, 'is_purchase_item': 1, 'has_variants': 0}
             if(doc.purchase_type === "Non Voucher Match"){
@@ -88,7 +72,15 @@ frappe.ui.form.on("Purchase Invoice", {
         });
     },
 
-    nomor_pembelian(frm) {
+    invoice_type(frm){
+        sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
+    },
+    document_type(frm){
+        // remove nomor document
+        frm.set_value("document_no", null)
+    },
+
+    document_no(frm) {
         function _map(data) {
         frm.set_value({
             supplier: data.nama_supplier,

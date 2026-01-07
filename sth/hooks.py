@@ -170,6 +170,7 @@ override_doctype_class = {
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
+	"Purchase Invoice": "sth.overrides.purchase_invoice.SthPurchaseInvoice",
 	"Purchase Receipt": "sth.overrides.purchase_receipt.SthPurchaseReceipt",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
@@ -244,9 +245,6 @@ doc_events = {
 	},
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
-	},
-	"Purchase Receipt": {
-		"on_submit": "sth.legal.custom.purchase_receipt.validate_progress_received",
 	},
 	"Quotation": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],

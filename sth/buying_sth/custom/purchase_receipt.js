@@ -42,10 +42,10 @@ frappe.ui.form.on("Purchase Receipt", {
                 }
             }
         })
-        sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Receipt Item")
+        sth.form.setup_column_table_items(frm, frm.doc.purchase_type, null, "Purchase Type")
     },
     purchase_type(frm) {
-        sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Receipt Item")
+        sth.form.setup_column_table_items(frm, frm.doc.purchase_type, null, "Purchase Type")
     },
 
     purchase_order(frm) {

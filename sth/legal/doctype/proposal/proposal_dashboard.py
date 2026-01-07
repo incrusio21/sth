@@ -16,7 +16,7 @@ def get_data():
 			"Project": ["items", "project"]
 		},
 		"transactions": [
-			{"label": _("Related"), "items": ["Purchase Receipt"]},
+			{"label": _("Related"), "items": ["BAPP", "Purchase Invoice"]},
 			{"label": _("Payment"), "items": ["Payment Entry", "Journal Entry", "Payment Request"]},
 			{
 				"label": _("Reference"),

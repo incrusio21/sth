@@ -42,9 +42,17 @@ sth.form = {
             }
         }
     },
-    setup_column_table_items: async function(frm, purchase_type, doctype_table, fields="items"){
+    setup_column_table_items: async function(frm, purchase_type, doctype_table=null, doctype_configure_type=null, fields="items"){
         // Simpan konfigurasi doctype lama untuk perbandingan
         const old_doctype_setting = this.doctype_setting[frm.doctype] || {};
+
+        if(!doctype_table){
+            doctype_table = `${frm.doc.doctype} Item`
+        }
+
+        if(!doctype_configure_type){
+            doctype_configure_type = `${frm.doc.doctype} Type`
+        }
 
         // Ambil konfigurasi kolom dari cache atau API jika belum ada
         if (purchase_type && !this.purchase_type_column[purchase_type]) {
@@ -54,6 +62,7 @@ sth.form = {
                     "sth.buying_sth.doctype.purchase_type.purchase_type.get_order_type_configure_column",
                     {
                         order_type: purchase_type,
+                        purchase_type: doctype_configure_type
                     }
                 )
             ).message;
@@ -67,7 +76,6 @@ sth.form = {
         // Update grid jika konfigurasi berubah
         const has_changed = JSON.stringify(old_doctype_setting) !== JSON.stringify(new_doctype_setting);
         if (has_changed) {
-            console.log("tesa")
             this.doctype_setting[frm.doctype] = new_doctype_setting;
             frm.fields_dict[fields].grid.reset_grid();
         }
