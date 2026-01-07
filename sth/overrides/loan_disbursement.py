@@ -27,36 +27,14 @@ class STHLoanDisbursement(LoanDisbursement):
     def submit_repayment_schedule(self):
         pass
     
-    def on_cancel(self):
-        self.flags.ignore_links = ["GL Entry", "Loan Repayment Schedule", "Sales Invoice", "Loan Demand"]
-
-        self.set_status_and_amounts(cancel=1)
-
-        if self.is_term_loan:
-            self.cancel_and_delete_repayment_schedule()
-
-        self.make_credit_note()
-        self.delete_security_deposit()
-
-        update_loan_securities_values(
-            self.against_loan,
-            self.disbursed_amount,
-            self.doctype,
-            on_trigger_doc_cancel=1,
-        )
-
-        # self.make_gl_entries(cancel=1)
-        self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
-        self.set_status()
-    
     def cancel_and_delete_repayment_schedule(self):
         filters = {
             "loan": self.against_loan,
             "docstatus": 1,
             "loan_disbursement": self.name,
         }
-        if rs_name := frappe.db.get_value("Loan Repayment Schedule", filters, "name"):
-            schedule = frappe.get_doc("Loan Repayment Schedule", rs_name)
+        if lps := frappe.db.get_value("Loan Repayment Schedule", filters, "name"):
+            schedule = frappe.get_doc("Loan Repayment Schedule", lps)
             schedule.reverse_interest_accruals = self.get("reverse_interest_accruals")
             schedule.flags.ignore_links = True
             schedule.cancel()
@@ -84,10 +62,8 @@ class STHLoanDisbursement(LoanDisbursement):
         total_interest_payable = loan_details.total_interest_payable
 
         if self.is_term_loan:
-            if rs_name := frappe.db.get_value("Loan Repayment Schedule", {"loan_disbursement": self.name, "docstatus": 1}, "name"):
-                schedule = frappe.get_doc(
-                    "Loan Repayment Schedule", rs_name
-                )
+            if lps := frappe.db.get_value("Loan Repayment Schedule", {"loan_disbursement": self.name, "docstatus": 1}, "name"):
+                schedule = frappe.get_doc("Loan Repayment Schedule", lps)
                 for data in schedule.repayment_schedule:
                     total_payment -= data.total_payment
                     total_interest_payable -= data.interest_amount

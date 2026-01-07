@@ -11,6 +11,10 @@ from lending.loan_management.doctype.loan_repayment_schedule.utils import (
 from lending.loan_management.doctype.loan_repayment_schedule.loan_repayment_schedule import LoanRepaymentSchedule
 
 class STHLoanRepaymentSchedule(LoanRepaymentSchedule):
+    def on_submit(self):
+        super().on_submit()
+        self.db_set("status", "Active")
+
     def make_repayment_schedule(
         self,
         schedule_field,
@@ -45,7 +49,7 @@ class STHLoanRepaymentSchedule(LoanRepaymentSchedule):
             )
 
             payment_date = self.get_next_payment_date(payment_date)
-        
+
         if not self.restructure_type and self.repayment_method != "Repay Fixed Amount per Period":
             monthly_repayment_amount = get_monthly_repayment_amount(
                 balance_amount, rate_of_interest, repayment_period, self.repayment_frequency
@@ -65,13 +69,13 @@ class STHLoanRepaymentSchedule(LoanRepaymentSchedule):
                 self.moratorium_end_date = add_months(self.repayment_start_date, self.moratorium_tenure)
                 if self.repayment_schedule_type == "Pro-rated calendar months":
                     self.moratorium_end_date = add_days(self.moratorium_end_date, -1)
-
+        
         tenure = self.get_applicable_tenure(payment_date)
-        additional_days = cint(self.broken_period_interest_days)
 
         if len(self.get(schedule_field)) > 0:
             self.broken_period_interest_days = 0
 
+        additional_days = cint(self.broken_period_interest_days)
         if additional_days < 0:
             self.broken_period_interest_days = 0
 

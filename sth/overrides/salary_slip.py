@@ -70,83 +70,87 @@ class SalarySlip(SalarySlip):
 		actual_start, actual_end = getdate(self.actual_start_date), getdate(self.actual_end_date)
 
 		apakah_karyawan_tetap = 0 
+		emp_doc = frappe.get_cached_doc("Employee", self.employee)
+		
 		if frappe.get_cached_doc("Employee", self.employee).employment_type == 'KARYAWAN TETAP':
 			apakah_karyawan_tetap = 1
 
-		for h in holidays:
-			# jika tidak terdapat tanggal akhir atau 
-			# holidays sudah tidak masuk dalam minggu terpilih
-			if not week_end or h > week_end:
-				# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
-				week_start = max(get_first_day_of_week(h), actual_start)
-				week_end = min(get_last_day_of_week(h), actual_end)
-
-				# kembalikan ke sini jika hari pertama d minggu ini balik ke senin
-				# ternyata seharusnya minggu itu dapet holiday list KALAU setelah itu ada absensi present (kecuali libur semua)
-				# week_start = max(get_first_day_of_week(add_days(h,1)), actual_start)
-				# week_end = min(add_days(week_start,5), actual_end)
-
-			else:
-				# skip krn holidays sudah di hitung untuk minggu ini
-				continue
-			
-			current_week_holiday = 0
-			att_exist = False
-			allWeekOff = True 
-			# cek tanggal pada minggu ini 
-			# ada berapa holidays dan 
-			# apakah ada att atau minggu libur
-			current_date = week_start
-			while current_date <= week_end:
-				if current_date not in holidays:
-					allWeekOff = False
+		if emp_doc.grade != "STAF":
+			for h in holidays:
+				# jika tidak terdapat tanggal akhir atau 
+				# holidays sudah tidak masuk dalam minggu terpilih
+				if not week_end or h > week_end:
+					# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
+					week_start = max(get_first_day_of_week(h), actual_start)
+					week_end = min(get_last_day_of_week(h), actual_end)
 				else:
-					current_week_holiday += 1
+					# skip krn holidays sudah di hitung untuk minggu ini
+					continue
 				
-				# jika terdapat attendance di hari tersebut
-				if status_code := list_attendance.get(current_date):
-					att_exist = True
-					# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
-					if status_code in list_status_code_lwp:
-						if status_code == "C":
-							if apakah_karyawan_tetap == 1:
-								self.holiday_days += 1
-						else:
-							self.holiday_days +=1
-							
+				current_week_holiday = 0
+				att_exist = False
+				allWeekOff = True 
+				# cek tanggal pada minggu ini 
+				# ada berapa holidays dan 
+				# apakah ada att atau minggu libur
+				current_date = week_start
+				hari_libur = 0
+				while current_date <= week_end:
+					if current_date not in holidays:
+						allWeekOff = False
+					else:
+						current_week_holiday += 1
+					
+					# jika terdapat attendance di hari tersebut
+					if status_code := list_attendance.get(current_date):
+						att_exist = True
+						# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
+						if status_code in list_status_code_lwp:
+							if status_code == "C":
+								if apakah_karyawan_tetap == 1:
+									self.holiday_days += 1
+							else:
+								self.holiday_days +=1
+					
+					current_date = add_days(current_date, 1)
 				
-				current_date = add_days(current_date, 1)
-			
-			# jika seluruh hari dalam satu minggu libur 
-			# atau terdapat attendance tambahkan holidays
-			if allWeekOff:
-				self.holiday_days += current_week_holiday
-				hari_leave += current_week_holiday
-			elif att_exist :
-				# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
-				self.holiday_days += 1
-				hari_leave += 1
+				# jika seluruh hari dalam satu minggu libur 
+				# atau terdapat attendance tambahkan holidays
+				if allWeekOff:
+					self.holiday_days += current_week_holiday
+					hari_leave += current_week_holiday
+				elif att_exist :
+					# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
+					self.holiday_days += 1
+					hari_leave += 1
 
-		emp_doc = frappe.get_cached_doc("Employee", self.employee)
+		else:
+			jumlah_libur_dari_holiday_list = 0
+			holiday_doc = frappe.get_doc("Holiday List", emp_doc.holiday_list)
+			for satu_holiday in holiday_doc.holidays:
+				for h in holidays:
+					if satu_holiday.weekly_off == 0 and satu_holiday.holiday_date == h:
+						jumlah_libur_dari_holiday_list += 1
+
+			self.holiday_days = 2
+				
+
 		
 		date_of_joining = emp_doc.date_of_joining
-
-		if date_of_joining:
-			doj = getdate(date_of_joining)
-			weekday = doj.weekday()
-			
-			if weekday == 5:
-				date_of_joining = add_days(date_of_joining, 2)
-			elif weekday == 6:
-				date_of_joining = add_days(date_of_joining, 1)
+		
 		if emp_doc.grade == "STAF":
 			days_before_joining = days_diff(date_of_joining, self.start_date) + 1 # 8
 			original_days = days_diff(self.end_date, self.start_date) + 1 # 31
-			total_working_days = days_diff(self.end_date, date_of_joining) + 1 
-
+			total_working_days = original_days
+			# print(total_working_days)
 			total_sabtu_minggu = 0
 
-			current_date = date_of_joining
+			if getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
+				total_working_days = days_diff(self.end_date, date_of_joining) + 1 
+				current_date = date_of_joining
+			else:
+				current_date = self.start_date
+			
 			while getdate(current_date) <= getdate(self.end_date):
 				if current_date.weekday() == 5:
 					total_sabtu_minggu += 1
@@ -154,10 +158,9 @@ class SalarySlip(SalarySlip):
 					total_sabtu_minggu += 1
 				
 				current_date += timedelta(days=1)
-
-			self.total_working_days = total_working_days
 			
-			self.payment_days = self.total_working_days - self.holiday_days - self.absent_days
+			self.total_working_days = original_days
+			self.payment_days = total_working_days
 		else:
 			self.payment_days = self.total_working_days - self.absent_days
 		
@@ -395,6 +398,7 @@ class SalarySlip(SalarySlip):
 
 	def calculate_employee_payment(self):
 		for (component, component_type), value in self._employee_payment.items():
+
 			self.add_component_custom(
 				component, 
 				component_type, 
@@ -461,7 +465,7 @@ class SalarySlip(SalarySlip):
 				continue
 
 			monthly_subsidy.setdefault(l.monthly_subsidy_component, 0)
-			diff = month_diff(self.end_date, l.repayment_start_date) - 1
+			diff = month_diff(self.end_date, l.repayment_start_date)
 			
 			subsidy_amount = frappe.get_value('Monthly Subsidy', 
 				{"from_month": ["<=", diff], "to_month": [">=", diff], "parent": l.loan},
@@ -469,7 +473,7 @@ class SalarySlip(SalarySlip):
 			) or 0
 
 			monthly_subsidy[l.monthly_subsidy_component] += subsidy_amount
-
+		
 		for component, total_amount in monthly_subsidy.items():
 			self.add_component_custom(component, "earnings", total_amount)
 
@@ -579,6 +583,7 @@ class SalarySlip(SalarySlip):
 		data, default_data = super().get_data_for_eval()
 
 		company = frappe.get_cached_doc("Company", self.company).as_dict()
+		berapa_hari_senin_jumat_tanpa_libur = 0
 
 		filters = { "company": self.company }
 		data.natura_rate = default_data.natura_rate = frappe.get_value("Natura Price", {
@@ -592,15 +597,6 @@ class SalarySlip(SalarySlip):
 		
 		emp_doc = frappe.get_cached_doc("Employee", self.employee)
 		date_of_joining = emp_doc.date_of_joining
-
-		if date_of_joining:
-			doj = getdate(date_of_joining)
-			weekday = doj.weekday()
-			
-			if weekday == 5:
-				date_of_joining = add_days(date_of_joining, 2)
-			elif weekday == 6:
-				date_of_joining = add_days(date_of_joining, 1)
 		
 		base_total_hari = default_data.total_hari = days_diff(self.end_date, self.start_date) + 1 \
 			if employment_type.hari_ump_ikut_jumlah_hari_1_bulan else \
@@ -612,13 +608,71 @@ class SalarySlip(SalarySlip):
 		else:
 			data.total_hari = default_data.total_hari = base_total_hari
 
+	
+		current_date = getdate(self.start_date)
+		while (current_date) <= getdate(self.end_date):
+			if (current_date).weekday() != 5 and (current_date).weekday() != 6:
+				berapa_hari_senin_jumat_tanpa_libur += 1
+				
+			current_date += timedelta(days=1)
+
 		# ubah ump_harian ke gaji pokok dibagi hari
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
 		data.custom_kriteria = default_data.custom_kriteria = emp_doc.custom_kriteria
+
+		data.berapa_hari_senin_jumat_tanpa_libur = default_data.berapa_hari_senin_jumat_tanpa_libur = berapa_hari_senin_jumat_tanpa_libur - self.holiday_days
 		
+
+
 		return data, default_data
+
+	def add_structure_component(self, struct_row, component_type):
+		if (
+			self.salary_slip_based_on_timesheet
+			and struct_row.salary_component == self._salary_structure_doc.salary_component
+		):
+			return
+
+		amount = self.eval_condition_and_formula(struct_row, self.data)
+		if struct_row.statistical_component:
+			# update statitical component amount in reference data based on payment days
+			# since row for statistical component is not added to salary slip
+
+			self.default_data[struct_row.abbr] = flt(amount)
+			if struct_row.depends_on_payment_days:
+				payment_days_amount = (
+					flt(amount) * flt(self.payment_days) / cint(self.total_working_days)
+					if self.total_working_days
+					else 0
+				)
+				self.data[struct_row.abbr] = flt(payment_days_amount, struct_row.precision("amount"))
+
+		else:
+			# default behavior, the system does not add if component amount is zero
+			# if remove_if_zero_valued is unchecked, then ask system to add component row
+			remove_if_zero_valued = frappe.get_cached_value(
+				"Salary Component", struct_row.salary_component, "remove_if_zero_valued"
+			)
+
+			default_amount = 0
+
+			if (
+				amount
+				or (struct_row.amount_based_on_formula and amount is not None)
+				or (not remove_if_zero_valued and amount is not None and not self.data[struct_row.abbr])
+			):
+				default_amount = self.eval_condition_and_formula(struct_row, self.default_data)
+				amount = round(amount,-1)
+				self.update_component_row(
+					struct_row,
+					amount,
+					component_type,
+					data=self.data,
+					default_amount=default_amount,
+					remove_if_zero_valued=remove_if_zero_valued,
+				)
 
 @frappe.whitelist()
 def debug_holiday():

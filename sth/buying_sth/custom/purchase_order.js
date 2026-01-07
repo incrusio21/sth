@@ -144,9 +144,9 @@ frappe.ui.form.on("Purchase Order", {
 		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
 	},
 
-	// onload_post_render(frm) {
-	// 	frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent('Get Items From')}"]`).remove()
-	// },
+	onload_post_render(frm) {
+		frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent('Get Items From')}"]`).remove()
+	},
 
 	purchase_type(frm) {
 		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
