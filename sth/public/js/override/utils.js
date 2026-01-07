@@ -1,4 +1,4 @@
-erpnext.utils.map_current_doc = function (opts) {
+erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
     function _map() {
         if ($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
             // remove first item row if empty
@@ -55,6 +55,8 @@ erpnext.utils.map_current_doc = function (opts) {
             }
         }
 
+        console.log(opts.source_name);
+
         return frappe.call({
             // Sometimes we hit the limit for URL length of a GET request
             // as we send the full target_doc. Hence this is a POST request.
@@ -70,12 +72,20 @@ erpnext.utils.map_current_doc = function (opts) {
             freeze_message: __("Mapping {0} ...", [opts.source_doctype]),
             callback: function (r) {
                 if (!r.exc) {
+                    // start custom
                     r.message.items = r.message.items
                         .filter((row) => !removed_row.includes(row.name))
                         .map((item, index) => ({
                             ...item,
                             idx: index + 1
                         }))
+
+                    // untuk menjalankan fungsi custom sebelum di sync
+                    if (opts_callback) {
+                        opts_callback(r.message)
+                    }
+
+                    // end custom
                     frappe.model.sync(r.message);
                     cur_frm.dirty();
                     cur_frm.refresh();
