@@ -55,6 +55,11 @@ function btn_get_material_request(frm) {
                 },
             });
 
+            setTimeout(() => {
+                // console.log(d.dialog);
+                d.dialog.set_value("allow_child_item_selection", 1)
+            }, 300);
+
         },
         __("Get Items From")
     );
@@ -67,7 +72,7 @@ function btn_get_rfq(frm) {
             if (!frm.doc.supplier) {
                 frappe.throw({ message: __("Please select a Supplier"), title: __("Mandatory") });
             }
-            erpnext.utils.map_current_doc({
+            const d = erpnext.utils.map_current_doc({
                 // method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
                 method: "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
                 source_doctype: "Request for Quotation",
@@ -87,6 +92,11 @@ function btn_get_rfq(frm) {
                 get_query_method:
                     "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier",
             });
+
+            setTimeout(() => {
+                // console.log(d.dialog);
+                d.dialog.set_value("allow_child_item_selection", 1)
+            }, 300);
         },
         __("Get Items From")
     );
