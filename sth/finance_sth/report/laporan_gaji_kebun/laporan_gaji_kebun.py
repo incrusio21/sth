@@ -64,6 +64,15 @@ def get_condition(filters):
 
 	if filters.get("unit"):
 		conditions += " AND e.unit = %(unit)s"
+  
+	if filters.get("employee"):
+		conditions += " AND e.name = %(employee)s"
+
+	if filters.get("bulan"):
+		conditions += " AND DATE_FORMAT(ss.posting_date, '%%b') = %(bulan)s"
+
+	if filters.get("tahun"):
+		conditions += " AND DATE_FORMAT(ss.posting_date, '%%Y') = %(tahun)s"
 
 	return conditions
 
@@ -112,10 +121,10 @@ def get_columns(filters):
 	]
 
 	q_column_earning = frappe.db.sql("""
-		SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Earning';
+		SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Earning' AND sc.disabled != 1 AND sc.name != 'HKnE';
   """, as_dict=True)
 	q_column_deduction = frappe.db.sql("""
-		SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Deduction';
+		SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Deduction' AND sc.disabled != 1;
   """, as_dict=True)
 
 	for earning in q_column_earning:
