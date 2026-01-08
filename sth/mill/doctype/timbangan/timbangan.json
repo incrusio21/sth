@@ -42,18 +42,19 @@
   "jenis_product",
   "kualitas_product",
   "storage",
+  "section_break_rtij",
+  "kode_barang",
+  "column_break_fcyg",
+  "nama_barang",
   "weight_data_section",
   "bruto",
   "gateweight",
-  "save",
   "column_break_nktm",
   "tara",
   "gateweight2",
   "column_break_ttdq",
   "netto",
   "gateweight3",
-  "section_break_kdub",
-  "items",
   "driver_data_tab",
   "driver_section",
   "driver_name",
@@ -76,17 +77,6 @@
   {
    "fieldname": "column_break_ckwi",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_kdub",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Items",
-   "options": "Timbangan Item",
-   "reqd": 1
   },
   {
    "fetch_from": "ticket_number.transaction_type",
@@ -374,11 +364,6 @@
    "precision": "2"
   },
   {
-   "fieldname": "save",
-   "fieldtype": "Button",
-   "label": "Save"
-  },
-  {
    "fieldname": "column_break_nktm",
    "fieldtype": "Column Break"
   },
@@ -409,13 +394,33 @@
    "fieldname": "gateweight3",
    "fieldtype": "Button",
    "label": "GateWeight"
+  },
+  {
+   "fieldname": "section_break_rtij",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kode_barang",
+   "fieldtype": "Link",
+   "label": "Kode Barang",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_fcyg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "kode_barang.item_name",
+   "fieldname": "nama_barang",
+   "fieldtype": "Data",
+   "label": "Nama Barang"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 15:00:05.581904",
+ "modified": "2026-01-08 17:05:01.280066",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
