@@ -1,4 +1,6 @@
 erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
+    var removed_row = []
+
     function _map() {
         if ($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
             // remove first item row if empty
@@ -19,8 +21,6 @@ erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
             // search in existing items if the source_name is already set and full qty fetched
             var already_set = false;
             var item_qty_map = {};
-
-            var removed_row = []
 
             $.each(cur_frm.doc.items, function (i, d) {
                 opts.source_name.forEach(function (src) {
@@ -55,8 +55,6 @@ erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
             }
         }
 
-        console.log(opts.source_name);
-
         return frappe.call({
             // Sometimes we hit the limit for URL length of a GET request
             // as we send the full target_doc. Hence this is a POST request.
@@ -72,6 +70,8 @@ erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
             freeze_message: __("Mapping {0} ...", [opts.source_doctype]),
             callback: function (r) {
                 if (!r.exc) {
+                    console.log(removed_row);
+
                     // start custom
                     r.message.items = r.message.items
                         .filter((row) => !removed_row.includes(row.name))
