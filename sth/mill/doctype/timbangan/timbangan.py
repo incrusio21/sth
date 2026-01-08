@@ -9,17 +9,16 @@ from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger
 class Timbangan(Document):
 	def on_submit(self):
 		if self.type == "Receive":
-			for row in self.items:
-				create_tbs_ledger(frappe._dict({
-					"item_code": row.item_code,
-					"posting_date": self.posting_date,
-					"posting_time" : self.posting_time,
-					"posting_datetime": get_datetime(f"{self.posting_date} {self.posting_time}"),
-					"type": self.receive_type,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"balance_qty": row.netto - (self.potongan_sortasi/100),
-				}))
+			create_tbs_ledger(frappe._dict({
+				"item_code": self.kode_barang,
+				"posting_date": self.posting_date,
+				"posting_time" : self.posting_time,
+				"posting_datetime": get_datetime(f"{self.posting_date} {self.posting_time}"),
+				"type": self.receive_type,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"balance_qty": self.netto - (self.potongan_sortasi/100),
+			}))
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -28,3 +27,15 @@ class Timbangan(Document):
 		
 		if self.type == "Receive":
 			reverse_tbs_ledger(self.name)
+
+
+@frappe.whitelist()
+def get_spb_detail(spb):
+	spb_details = frappe.db.sql("""
+		select stp.blok,b.tahun_tanam, stp.qty as jumlah_janjang, b.unit, b.divisi, stp.total_janjang 
+		from `tabSPB Timbangan Pabrik` stp
+		join `tabBlok` b on b.name = stp.blok
+		where stp.parent = %s
+	""",[spb],as_dict=True)
+
+	return spb_details

@@ -11,6 +11,7 @@
   "company",
   "posting_date",
   "posting_time",
+  "unit",
   "live_weight",
   "column_break_ckwi",
   "ticket_number",
@@ -23,14 +24,9 @@
   "do_no",
   "purchase_order",
   "section_break_mnhe",
-  "unit",
-  "divisi",
-  "jumlah_janjang",
-  "tahun_tanam",
-  "column_break_majq",
   "isi_komidel",
-  "blok",
   "potongan_sortasi",
+  "spb_detail",
   "delivery_section",
   "delivery_order",
   "tujuan",
@@ -85,6 +81,7 @@
    "in_list_view": 1,
    "label": "Type",
    "options": "\nReceive\nDispatch\nReturn",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -117,7 +114,6 @@
   },
   {
    "depends_on": "eval:doc.receive_type == 'TBS Internal'",
-   "fetch_from": "blok.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
@@ -131,24 +127,10 @@
    "label": "Transportir"
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:doc.type == 'Receive'",
    "fieldname": "section_break_mnhe",
    "fieldtype": "Section Break",
    "label": "Receive Detail"
-  },
-  {
-   "default": "0",
-   "fieldname": "jumlah_janjang",
-   "fieldtype": "Float",
-   "label": "Jumlah Janjang",
-   "precision": "2"
-  },
-  {
-   "fetch_from": "blok.tahun_tanam",
-   "fieldname": "tahun_tanam",
-   "fieldtype": "Data",
-   "label": "Tahun Tanam"
   },
   {
    "default": "0",
@@ -160,10 +142,6 @@
    "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   },
   {
-   "fieldname": "column_break_majq",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "isi_komidel",
    "fieldtype": "Float",
@@ -171,20 +149,11 @@
    "precision": "2"
   },
   {
-   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "fieldname": "blok",
-   "fieldtype": "Link",
-   "label": "Blok",
-   "mandatory_depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "options": "Blok"
-  },
-  {
    "fieldname": "driver_section",
    "fieldtype": "Section Break",
    "label": "Driver"
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:doc.type == 'Dispatch'",
    "fieldname": "delivery_section",
    "fieldtype": "Section Break",
@@ -234,20 +203,11 @@
    "label": "Storage"
   },
   {
-   "depends_on": "eval: doc.type == 'Receive'",
    "fetch_from": "ticket_number.receive_type",
    "fieldname": "receive_type",
    "fieldtype": "Select",
    "label": "Receive Type",
-   "options": "\nTBS Internal\nTBS Eksternal\nLain - Lain"
-  },
-  {
-   "depends_on": "eval:doc.receive_type == 'TBS Internal'",
-   "fetch_from": "blok.divisi",
-   "fieldname": "divisi",
-   "fieldtype": "Link",
-   "label": "Divisi",
-   "options": "Divisi",
+   "options": "\nTBS Internal\nTBS Eksternal\nLain - Lain",
    "read_only": 1
   },
   {
@@ -293,11 +253,13 @@
   },
   {
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
+   "fetch_from": "ticket_number.spb",
    "fieldname": "spb",
    "fieldtype": "Link",
    "label": "SPB",
    "mandatory_depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "options": "Surat Pengantar Buah"
+   "options": "Surat Pengantar Buah",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
@@ -308,12 +270,12 @@
    "options": "Purchase Order"
   },
   {
-   "depends_on": "eval: doc.type == 'Dispatch'",
    "fetch_from": "ticket_number.dispatch_type",
    "fieldname": "dispatch_type",
    "fieldtype": "Select",
    "label": "Dispatch Type",
-   "options": "\nProduct\nBy Product\nLain - Lain"
+   "options": "\nProduct\nBy Product\nLain - Lain",
+   "read_only": 1
   },
   {
    "fieldname": "tujuan",
@@ -330,12 +292,12 @@
    "options": "Purchase Order"
   },
   {
-   "depends_on": "eval: doc.type == 'Return'",
    "fetch_from": "ticket_number.return_type",
    "fieldname": "return_type",
    "fieldtype": "Select",
    "label": "Return Type",
-   "options": "\nProduct\nBy Product\nLain - Lain"
+   "options": "\nProduct\nBy Product\nLain - Lain",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -414,13 +376,20 @@
    "fieldname": "nama_barang",
    "fieldtype": "Data",
    "label": "Nama Barang"
+  },
+  {
+   "fieldname": "spb_detail",
+   "fieldtype": "Table",
+   "label": "SPB Detail",
+   "options": "Timbangan SPB Detail",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-08 17:05:01.280066",
+ "modified": "2026-01-08 20:57:54.123737",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

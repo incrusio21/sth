@@ -20,26 +20,22 @@ frappe.ui.form.on("Timbangan", {
         })
     },
 
-    set_netto(row) {
-        const bruto = row.bruto || 0
-        const tara = row.tara || 0
-        frappe.model.set_value(row.doctype, row.name, "netto", bruto - tara)
-    },
-
-
-});
-
-frappe.ui.form.on("Timbangan Item", {
-    bruto(frm, dt, dn) {
-        var row = locals[dt][dn]
-        frm.events.set_netto(row)
-    },
-
-    tara(frm, dt, dn) {
-        var row = locals[dt][dn]
-        frm.events.set_netto(row)
+    spb(frm) {
+        frm.clear_table('spb_detail')
+        if (!frm.doc.spb) {
+            return
+        }
+        const base = frappe.model.get_server_module_name(frm.doctype)
+        frappe.xcall(`${base}.get_spb_detail`, { spb: frm.doc.spb })
+            .then((res) => {
+                res.forEach(row => {
+                    frm.add_child('spb_detail', row)
+                });
+                frm.refresh_field('spb_detail')
+            })
     },
 });
+
 
 
 window.addEventListener("beforeunload", () => {
