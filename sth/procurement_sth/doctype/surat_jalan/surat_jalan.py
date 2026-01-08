@@ -89,9 +89,52 @@ def get_items_from_po(doctype):
 @frappe.whitelist()
 def get_stock_item(item_code,warehouse):
 	return frappe.db.sql("""
-		select i.item_code, i.item_name, sum(b.actual_qty) as stock, i.stock_uom as uom 
-		from `tabBin` b
-		join `tabItem` i on i.name = b.item_code
-		where b.warehouse = %s and i.item_code = %s
-		group by i.item_code
-	""",[warehouse,item_code],as_dict=True)
+		SELECT
+			i.item_code,
+			i.item_name,
+			COALESCE(b.actual_qty, 0) AS stock,
+			i.stock_uom AS uom
+		FROM `tabItem` i
+		LEFT JOIN `tabBin` b
+			ON b.item_code = i.item_code
+		AND b.warehouse = %s
+		WHERE i.item_code = %s;
+	""",[warehouse,item_code],as_dict=True, debug=True)
+
+@frappe.whitelist()
+def map_from_po(source_name, target_doc=None, args=None):
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children",[])
+		return d.name in filtered_items
+
+	def postprocess(source,target):
+		pass
+	
+	def update_item(source,target,source_parent):
+		target.no_po = source_parent.name
+		target.no_penerimaan = frappe.db.get_value("Purchase Receipt",{"purchase_order": source_parent.name})
+
+	doclist = get_mapped_doc(
+		"Purchase Order",
+		source_name,
+		{
+			"Purchase Order": {
+				"doctype": "Surat Jalan",
+			},
+			"Purchase Order Item": {
+				"doctype": "Surat Jalan Item",
+				"field_map": [
+					["item_code", "kode_barang"],
+					["item_name", "nama_barang"],
+					["qty", "jumlah"],
+					["uom", "satuan"],
+				],
+				"condition": select_item,
+				"postprocess": update_item
+			},
+		},
+		target_doc,postprocess=postprocess
+	)
+
+	return doclist
