@@ -9,29 +9,41 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = []
 
-	query_l_perjalanan_dinas = []
+	query_l_pengajuan_klaim_karyawan = frappe.db.sql("""
+		SELECT
+		e.company as pt,
+		e.grade as gol,
+		d.designation_name as jabatan,
+		e.employee_name as nama_karyawan,
+		ec.name as no_transaksi,
+		ec.posting_date as tanggal_pengajuan,
+		ec.total_sanctioned_amount as jumlah_pengajuan,
+		ec.total_claimed_amount as jumlah_di_setujui
+		FROM `tabExpense Claim` as ec
+		JOIN `tabEmployee` as e ON e.name = ec.employee
+		JOIN `tabDesignation` as d ON d.name = e.designation
+		WHERE e.company IS NOT NULL {};
+  """.format(conditions), filters, as_dict=True)
 
-	# for travel in query_l_perjalanan_dinas:
-	data.append({
-		"pt": "PT. TRIMITRA LESTARI"
-	})
+	for claim in query_l_pengajuan_klaim_karyawan:
+		data.append(claim)
 
 	return columns, data
 
 def get_condition(filters):
 	conditions = ""
 
-	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " AND eg.date BETWEEN %(from_date)s AND %(to_date)s"
+	if filters.get("pt"):
+		conditions += " AND e.company = %(pt)s"
 
 	if filters.get("unit"):
 		conditions += " AND e.unit = %(unit)s"
+	
+	if filters.get("golongan"):
+		conditions += " AND e.grade = %(golongan)s"
 
-	if filters.get("jenis_sp"):
-		conditions += " AND eg.grievance_type = %(jenis_sp)s"
-
-	if filters.get("tipe_karyawan"):
-		conditions += " AND e.grade = %(tipe_karyawan)s"
+	if filters.get("jabatan"):
+		conditions += " AND e.designation = %(jabatan)s"
 
 	return conditions
 
