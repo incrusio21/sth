@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now
+from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now, rounded
 from frappe.query_builder.functions import Count, IfNull
 
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
@@ -22,6 +22,10 @@ from datetime import datetime, timedelta
 LEAVE_CODE_MAP = "leave_code_map"
 
 class SalarySlip(SalarySlip):
+	# def validate(self):
+	# 	super().validate()
+	# 	self.set_net_pay()
+
 	def on_submit(self):
 		super().on_submit()
 		self.update_payment_related("Employee Payment Log", "payment_log_list")
@@ -75,7 +79,10 @@ class SalarySlip(SalarySlip):
 		if frappe.get_cached_doc("Employee", self.employee).employment_type == 'KARYAWAN TETAP':
 			apakah_karyawan_tetap = 1
 
-		if emp_doc.grade != "STAF":
+		self.total_attendance_present = self._get_present_attendance_days()
+		self.total_hari_dinas = self._get_dinas_days()
+
+		if emp_doc.grade != "STAF":			
 			for h in holidays:
 				# jika tidak terdapat tanggal akhir atau 
 				# holidays sudah tidak masuk dalam minggu terpilih
@@ -132,10 +139,9 @@ class SalarySlip(SalarySlip):
 					if satu_holiday.weekly_off == 0 and satu_holiday.holiday_date == h:
 						jumlah_libur_dari_holiday_list += 1
 
-			self.holiday_days = 2
+			self.holiday_days = jumlah_libur_dari_holiday_list
 				
 
-		
 		date_of_joining = emp_doc.date_of_joining
 		
 		if emp_doc.grade == "STAF":
@@ -162,7 +168,8 @@ class SalarySlip(SalarySlip):
 			self.total_working_days = original_days
 			self.payment_days = total_working_days
 		else:
-			self.payment_days = self.total_working_days - self.absent_days
+			# self.payment_days = self.total_working_days - self.absent_days
+			self.payment_days = self.total_attendance_present
 		
 	
 
@@ -177,6 +184,37 @@ class SalarySlip(SalarySlip):
 				& (Attendance.docstatus == 1)
 				& (Attendance.status == "Present")
 				& (Attendance.out_time.isnull())
+			)
+		)
+
+		return query.run()[0][0]
+
+	def _get_present_attendance_days(self) -> float:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.status == "Present")
+			)
+		)
+
+		return query.run()[0][0]
+
+	def _get_dinas_days(self) -> float:
+		PDinas = frappe.qb.DocType("Travel Request")
+		query = (
+			frappe.qb.from_(PDinas)
+			.select(Count("*"))
+			.where(
+				(PDinas.custom_estimate_depart_date.between(self.actual_start_date, self.actual_end_date))
+				& (PDinas.custom_estimate_arrival_date.between(self.actual_start_date, self.actual_end_date))
+				& (PDinas.employee == self.employee)
+				& (PDinas.docstatus == 1)
+				& (PDinas.purpose_of_travel == "Perjalanan Dinas")
 			)
 		)
 
@@ -214,6 +252,7 @@ class SalarySlip(SalarySlip):
 		return frappe.cache().get_value(LEAVE_CODE_MAP, _get_leave_code_map)
 	
 	def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
+		print("MASUK YANG BARU")
 		# agar payment log selalu generate ulang
 		self.payment_log_list = []
 		self.loan_repayment_list = []
@@ -266,6 +305,70 @@ class SalarySlip(SalarySlip):
 		self.set_net_pay()
 		if not skip_tax_breakup_computation:
 			self.compute_income_tax_breakup()
+
+		print("ini net {}".format(self.net_pay))
+
+	def set_net_pay(self):
+		self.total_deduction = self.get_component_totals("deductions")
+		self.base_total_deduction = flt(
+			flt(self.total_deduction) * flt(self.exchange_rate), self.precision("base_total_deduction")
+		)
+
+		gross_pay = 0
+
+		# ngitung lagi gross pay karena bpjs nda boleh include
+		for row in self.earnings:
+			check_net_pay = frappe.get_doc("Salary Component", row.salary_component).not_include_net_pay
+			if check_net_pay == 0:
+				gross_pay += row.amount
+
+		# self.net_pay = flt(self.gross_pay) - (
+		# 	flt(self.total_deduction) + flt(self.get("total_loan_repayment"))
+		# )
+
+		self.net_pay = flt(gross_pay) - (
+			flt(self.total_deduction) + flt(self.get("total_loan_repayment"))
+		)
+
+		self.rounded_total = rounded(self.net_pay)
+		self.base_net_pay = flt(flt(self.net_pay) * flt(self.exchange_rate), self.precision("base_net_pay"))
+		self.base_rounded_total = flt(rounded(self.base_net_pay), self.precision("base_net_pay"))
+		if self.hour_rate:
+			self.base_hour_rate = flt(
+				flt(self.hour_rate) * flt(self.exchange_rate), self.precision("base_hour_rate")
+			)
+		# print("INI HARUSNYA")
+		# print(self.net_pay)
+		self.set_net_total_in_words()
+
+	@frappe.whitelist()
+	def set_totals(self):
+		self.gross_pay = 0.0
+		if self.salary_slip_based_on_timesheet == 1:
+			self.calculate_total_for_salary_slip_based_on_timesheet()
+		else:
+			self.total_deduction = 0.0
+			if hasattr(self, "earnings"):
+				for earning in self.earnings:
+					self.gross_pay += flt(earning.amount, earning.precision("amount"))
+			if hasattr(self, "deductions"):
+				for deduction in self.deductions:
+					self.total_deduction += flt(deduction.amount, deduction.precision("amount"))
+
+			gross_pay = 0
+			# ngitung lagi gross pay karena bpjs nda boleh include
+			for row in self.earnings:
+				check_net_pay = frappe.get_doc("Salary Component", row.salary_component).not_include_net_pay
+				if check_net_pay == 0:
+					gross_pay += row.amount
+
+			# self.net_pay = (
+			# 	flt(self.gross_pay) - flt(self.total_deduction) - flt(self.get("total_loan_repayment"))
+			# )
+			self.net_pay = (
+				flt(gross_pay) - flt(self.total_deduction) - flt(self.get("total_loan_repayment"))
+			)
+		self.set_base_totals()
 
 	def calculate_bpjs_component(self):	
 
@@ -493,7 +596,6 @@ class SalarySlip(SalarySlip):
 				remove_if_zero_valued=True
 			)
 
-
 	def update_component_row(
 		self,
 		component_data,
@@ -677,4 +779,6 @@ class SalarySlip(SalarySlip):
 @frappe.whitelist()
 def debug_holiday():
 	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00906/00001")
-	doc.calculate_holidays()	
+	print(doc.net_pay)
+	doc.save()	
+	print(doc.net_pay)

@@ -219,6 +219,9 @@ doc_events = {
 	"Loan": {
 		"validate": "sth.hr_customize.custom.loan.Loan",
 	},
+    "Loan Product": {
+		"validate": "sth.hr_customize.custom.loan_product.LoanProduct",
+	},
 	"Loan Repayment": {
 		"on_cancel": "sth.hr_customize.custom.loan_repayment.LoanRepayment",
 	},

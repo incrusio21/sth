@@ -312,6 +312,15 @@ frappe.ui.form.on('Item', {
 				frm.set_df_property('persetujuan_2', 'read_only', 1);
 			}
 		}
+		 if (frm.doc.kelompok_barang) {
+            frm.set_query('item_group', function() {
+                return {
+                    filters: {
+                        'parent_item_group': frm.doc.kelompok_barang
+                    }
+                };
+            });
+        }
 	},
 	item_group: function(frm) {
 		if (frm.is_new() && frm.doc.item_group) {
@@ -328,7 +337,27 @@ frappe.ui.form.on('Item', {
                     }
                 });
         }
-	}
+	},
+	kelompok_barang: function(frm) {
+        if (frm.doc.kelompok_barang) {
+        	console.log("CU")
+            frm.set_query('item_group', function() {
+                return {
+                    filters: {
+                        'parent_item_group': frm.doc.kelompok_barang
+                    }
+                };
+            });
+            
+            if (frm.doc.item_group) {
+                frm.set_value('item_group', '');
+            }
+        } else {
+            frm.set_query('item_group', function() {
+                return {};
+            });
+        }
+    }
 });
 
 function generate_item_code(frm) {
