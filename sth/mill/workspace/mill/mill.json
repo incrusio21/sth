@@ -55,35 +55,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Transaksi",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Security Check Point",
-   "link_count": 0,
-   "link_to": "Security Check Point",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Timbangan",
-   "link_count": 0,
-   "link_to": "Timbangan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Proses Produksi",
    "link_count": 6,
    "link_type": "DocType",
@@ -149,9 +120,48 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Security Check Point",
+   "link_count": 0,
+   "link_to": "Security Check Point",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timbangan",
+   "link_count": 0,
+   "link_to": "Timbangan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sortasi",
+   "link_count": 0,
+   "link_to": "Sortasi",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-01-07 11:43:52.427042",
+ "modified": "2026-01-07 17:01:18.131901",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

@@ -274,13 +274,13 @@
    "is_query_report": 0,
    "label": "BAPP",
    "link_count": 0,
-   "link_to": "Purchase Receipt",
+   "link_to": "BAPP",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-01-07 09:02:52.963087",
+ "modified": "2026-01-08 10:06:47.449426",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",
