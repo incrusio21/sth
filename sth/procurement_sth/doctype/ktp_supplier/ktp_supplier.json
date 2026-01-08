@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-08 16:37:40.809293",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nik",
+  "nama_nik",
+  "alamat_ktp",
+  "rt__rw",
+  "column_break_tsci",
+  "kel__desa",
+  "kecamatan",
+  "kota_ktp",
+  "propinsi_ktp",
+  "status_ktp"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "nik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "NIK"
+  },
+  {
+   "columns": 1,
+   "fieldname": "nama_nik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama NIK"
+  },
+  {
+   "columns": 2,
+   "fieldname": "alamat_ktp",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Alamat KTP"
+  },
+  {
+   "columns": 1,
+   "fieldname": "rt__rw",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "RT / RW"
+  },
+  {
+   "fieldname": "column_break_tsci",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kel__desa",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kel / Desa"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kecamatan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kecamatan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kota_ktp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kota KTP"
+  },
+  {
+   "columns": 1,
+   "fieldname": "propinsi_ktp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Propinsi KTP"
+  },
+  {
+   "columns": 1,
+   "fieldname": "status_ktp",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status KTP"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 16:39:24.237178",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "KTP Supplier",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

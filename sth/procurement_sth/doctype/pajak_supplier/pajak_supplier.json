@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-08 16:36:12.126205",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tarif_",
+  "status_pajak"
+ ],
+ "fields": [
+  {
+   "columns": 5,
+   "fieldname": "tarif_",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tarif %"
+  },
+  {
+   "columns": 5,
+   "fieldname": "status_pajak",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Pajak",
+   "options": "Aktif\nTidak Aktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 16:42:13.952189",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Pajak Supplier",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

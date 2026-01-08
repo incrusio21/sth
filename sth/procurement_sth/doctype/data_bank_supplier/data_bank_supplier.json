@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-08 16:24:37.006537",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama_bank",
+  "atas_nama",
+  "no_rekening",
+  "cabang",
+  "column_break_iyvt",
+  "kota_bank",
+  "negara",
+  "mata_uang",
+  "default",
+  "status_bank",
+  "aktif"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "nama_bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Bank",
+   "options": "Bank"
+  },
+  {
+   "columns": 1,
+   "fieldname": "atas_nama",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Atas Nama"
+  },
+  {
+   "columns": 1,
+   "fieldname": "no_rekening",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No Rekening"
+  },
+  {
+   "columns": 1,
+   "fieldname": "cabang",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cabang"
+  },
+  {
+   "fieldname": "column_break_iyvt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kota_bank",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kota Bank"
+  },
+  {
+   "columns": 1,
+   "fieldname": "negara",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Negara",
+   "options": "Country"
+  },
+  {
+   "columns": 1,
+   "fieldname": "mata_uang",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mata Uang",
+   "options": "Currency"
+  },
+  {
+   "columns": 1,
+   "fieldname": "default",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Default",
+   "options": "Ya\nTidak"
+  },
+  {
+   "columns": 1,
+   "fieldname": "status_bank",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Bank",
+   "options": "Aktif\nTidak Aktif"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "aktif",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Aktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 16:28:06.460896",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Data Bank Supplier",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
