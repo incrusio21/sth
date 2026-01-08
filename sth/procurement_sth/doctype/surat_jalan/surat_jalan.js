@@ -38,7 +38,6 @@ frappe.ui.form.on("Surat Jalan", {
 
     open_dialog_get_items(frm, type) {
         const base = frappe.model.get_server_module_name(frm.doctype)
-        let method = base + ".get_items_from_po"
         if (type == "material") {
             const d = new frappe.ui.Dialog({
                 title: "Select Material",
@@ -50,9 +49,34 @@ frappe.ui.form.on("Surat Jalan", {
                         fieldtype: "Link",
                         options: "Item",
                         onchange: function () {
-                            if (!d.get_field("warehouse").get_value()) {
+                            const item_code = this.value
+                            const warehouse = d.get_field("warehouse").get_value()
+                            const old_items = d.get_field("items").get_value()
+                            if (!warehouse) {
                                 frappe.throw("Silahkan isi gudang terlebih dahulu")
                             }
+
+                            if (!item_code) {
+                                return
+                            }
+
+                            frappe.xcall(base + ".get_stock_item", { item_code, warehouse })
+                                .then((res) => {
+                                    // cek apakah sudah ada item code yang sama sebelumnya
+                                    if (!res) {
+                                        return
+                                    }
+                                    const is_exist_before = old_items.some(r => r.item_code == res[0].item_code)
+
+                                    if (is_exist_before) {
+                                        return
+                                    }
+
+                                    d.get_field("items").df.data = [...old_items, ...res]
+                                    d.get_field("items").refresh()
+
+                                })
+
                         }
                     },
                     {
@@ -93,7 +117,7 @@ frappe.ui.form.on("Surat Jalan", {
                                 options: "Item",
                                 read_only: 1,
                                 in_list_view: 1,
-                                columns: 3
+                                columns: 2
                             },
                             {
                                 label: "Nama Barang",
@@ -101,7 +125,7 @@ frappe.ui.form.on("Surat Jalan", {
                                 fieldtype: "Data",
                                 read_only: 1,
                                 in_list_view: 1,
-                                columns: 3
+                                columns: 2
                             },
                             {
                                 label: "Qty",
@@ -116,6 +140,15 @@ frappe.ui.form.on("Surat Jalan", {
                                 fieldtype: "Float",
                                 in_list_view: 1,
                                 read_only: 1,
+                                columns: 2
+                            },
+
+                            {
+                                label: "Satuan",
+                                fieldname: "uom",
+                                fieldtype: "Link",
+                                options: "UOM",
+                                in_list_view: 1,
                                 columns: 2
                             },
 
