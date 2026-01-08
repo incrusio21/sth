@@ -84,3 +84,14 @@ class SuratJalan(Document):
 @frappe.whitelist()
 def get_items_from_po(doctype):
 	pass
+
+
+@frappe.whitelist()
+def get_stock_item(item_code,warehouse):
+	return frappe.db.sql("""
+		select i.item_code, i.item_name, sum(b.actual_qty) as stock, i.stock_uom as uom 
+		from `tabBin` b
+		join `tabItem` i on i.name = b.item_code
+		where b.warehouse = %s and i.item_code = %s
+		group by i.item_code
+	""",[warehouse,item_code],as_dict=True)
