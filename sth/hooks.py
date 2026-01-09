@@ -95,6 +95,7 @@ doctype_list_js = {
 jinja = {
 	"methods": [
 		"sth.jinja.money_in_words_idr",
+        "sth.utils.encrypt"
 	],
 	# "filters": "sth.utils.jinja_filters"
 }
