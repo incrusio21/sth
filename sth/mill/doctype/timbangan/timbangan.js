@@ -5,6 +5,9 @@ frappe.provide("sth.utils")
 frappe.ui.form.on("Timbangan", {
     refresh(frm) {
         frm.ignore_doctypes_on_cancel_all = ["TBS Ledger Entry"]
+        frm.add_custom_button(__("Connect"), function () {
+            frm.trigger('readWeight')
+        })
     },
 
     readWeight(frm) {
@@ -13,7 +16,7 @@ frappe.ui.form.on("Timbangan", {
             frappe.scaleConnection.startReading((weight) => {
                 if (weight.includes('kg')) {
                     let weight_number = parseFloat(weight.split('kg')[0])
-                    frm.doc.live_weight = weight_number
+                    frm.doc.live_weight = weight_number || 0
                     frm.refresh_field("live_weight")
                 }
             });
@@ -33,6 +36,18 @@ frappe.ui.form.on("Timbangan", {
                 });
                 frm.refresh_field('spb_detail')
             })
+    },
+
+    gateweight(frm) {
+        frm.set_value("bruto", frm.doc.live_weight)
+    },
+
+    gateweight2(frm) {
+        frm.set_value("tara", frm.doc.live_weight)
+    },
+
+    gateweight3(frm) {
+        frm.set_value("netto", frm.doc.live_weight)
     },
 });
 
