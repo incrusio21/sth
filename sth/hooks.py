@@ -30,6 +30,7 @@ page_js = {"print" : "public/js/override/print_override.js"}
 # include js in doctype views
 doctype_js = {
 	"Asset": "public/js/asset.js",
+	"Asset Capitalization": "public/js/asset_capitalization.js",
 	"Attendance": "public/js/attendance.js",
     "Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
@@ -45,7 +46,7 @@ doctype_js = {
     "Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
-	"Purchase Invoice": "buying_sth/custom/purchase_invoice.js",
+	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js"],
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
@@ -162,6 +163,7 @@ standard_queries = {
 override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
 	"Asset": "sth.overrides.asset.Asset",
+	"Asset Capitalization": "sth.overrides.asset_capitalization.AssetCapitalization",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
 	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
 	"Bank Account": "sth.overrides.bank_account.BankAccount",
