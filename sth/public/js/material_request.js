@@ -16,6 +16,12 @@ frappe.ui.form.on("Material Request", {
         }
     },
 
+    onload: function(frm) {
+        frm.doc.items.forEach(function(item) {
+            get_stock_for_item(frm, item.doctype, item.name);
+        });
+    },
+
     unit(frm) {
         frm.trigger('set_unit_to_child')
     },
@@ -69,7 +75,8 @@ frappe.ui.form.on("Material Request", {
             }
         })
         d.show()
-    }
+    },
+
 });
 
 frappe.ui.form.on("Material Request Item", {
@@ -81,5 +88,53 @@ frappe.ui.form.on("Material Request Item", {
             frappe.model.clear_doc(row.doctype, row.name)
             refresh_field("items")
         }
+        get_stock_for_item(frm, dt, dn);
     }
 })
+
+function get_stock_for_item(frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    
+    if (!row.item_code) {
+        return;
+    }
+    
+    let company = frm.doc.company;
+    
+    if (!company) {
+        return;
+    }
+    
+    frappe.call({
+        method: 'frappe.client.get_list',
+        args: {
+            doctype: 'Warehouse',
+            filters: {
+                'company': company,
+                'unit': frm.doc.unit,
+                'central': 1
+            },
+            fields: ['name']
+        },
+        callback: function(r) {
+            if (r.message && r.message.length > 0) {
+                let warehouses = r.message.map(w => w.name);
+                
+                frappe.call({
+                    method: 'erpnext.stock.utils.get_latest_stock_qty',
+                    args: {
+                        item_code: row.item_code,
+                        warehouse: warehouses.length === 1 ? warehouses[0] : null
+                    },
+                    callback: function(stock_response) {
+                        frappe.model.set_value(cdt, cdn, 'stock', stock_response.message || 0);
+                    }
+                });
+            } else {
+                frappe.model.set_value(cdt, cdn, 'stock', 0);
+                frappe.msgprint(__('No central warehouse found for company {0}', [company]));
+            }
+        }
+    });
+}
+
