@@ -32,7 +32,7 @@ doctype_js = {
 	"Asset": "public/js/asset.js",
 	"Asset Capitalization": "public/js/asset_capitalization.js",
 	"Attendance": "public/js/attendance.js",
-    "Currency Exchange": "public/js/currency_exchange.js",
+	"Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
 	"Driver": "public/js/driver.js",
@@ -43,14 +43,14 @@ doctype_js = {
 	"Item Group": "public/js/item_group.js",
 	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
-    "Material Request": "public/js/material_request.js",
+	"Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js"],
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
-    "Request for Quotation" : "public/js/request_for_quotation.js",
+	"Request for Quotation" : "public/js/request_for_quotation.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
 	"Sales Order": "public/js/sales_order.js",
 	"Supplier": "public/js/supplier.js",
@@ -96,7 +96,7 @@ doctype_list_js = {
 jinja = {
 	"methods": [
 		"sth.jinja.money_in_words_idr",
-        "sth.utils.encrypt"
+		"sth.utils.encrypt"
 	],
 	# "filters": "sth.utils.jinja_filters"
 }
@@ -198,11 +198,11 @@ doc_events = {
 		"validate": ["sth.overrides.asset.validate_company","sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
 		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
 	},
-    "Attendance": {
-        "validate": "sth.hr_customize.custom.attendance.Attendance",
-        "on_submit": "sth.hr_customize.custom.attendance.Attendance",
-        "on_cancel": "sth.hr_customize.custom.attendance.Attendance",
-        "repair_employee_payment_log": "sth.hr_customize.custom.attendance.Attendance"
+	"Attendance": {
+		"validate": "sth.hr_customize.custom.attendance.Attendance",
+		"on_submit": "sth.hr_customize.custom.attendance.Attendance",
+		"on_cancel": "sth.hr_customize.custom.attendance.Attendance",
+		"repair_employee_payment_log": "sth.hr_customize.custom.attendance.Attendance"
 	},
 	"Delivery Note": {
 		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
@@ -210,19 +210,25 @@ doc_events = {
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
 	},
+	"Employee": {
+		"after_insert": "sth.hr_customize.custom.leave_policy.create_allocations_for_new_employee"
+	},
 	"Item": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
 	},
 	"Item Group": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
 	},
-    "Leave Type": {
+	"Leave Type": {
 		"on_change": "sth.hr_customize.custom.leave_type.clear_cache"
+	},
+	"Leave Policy": {
+		"on_submit": "sth.hr_customize.custom.leave_policy.create_annual_leave_allocations"
 	},
 	"Loan": {
 		"validate": "sth.hr_customize.custom.loan.Loan",
 	},
-    "Loan Product": {
+	"Loan Product": {
 		"validate": "sth.hr_customize.custom.loan_product.LoanProduct",
 	},
 	"Loan Repayment": {
@@ -232,9 +238,9 @@ doc_events = {
 		"on_submit": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 		"on_cancel": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 	},
-    "Material Request": {
+	"Material Request": {
 		"on_submit": "sth.custom.material_request.update_ba_reference",
-        "on_cancel": "sth.custom.material_request.update_ba_reference",
+		"on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	"Payment Entry":{
 		"validate": [
@@ -244,10 +250,10 @@ doc_events = {
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
-    "Project": {
-      	"validate": "sth.legal.custom.project.Project",
-      	"on_update": "sth.legal.custom.project.Project",
-      	"on_trash": "sth.legal.custom.project.Project",
+	"Project": {
+		"validate": "sth.legal.custom.project.Project",
+		"on_update": "sth.legal.custom.project.Project",
+		"on_trash": "sth.legal.custom.project.Project",
 	},
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
@@ -262,9 +268,9 @@ doc_events = {
 	"Sales Invoice": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
-  	"Supplier Quotation": {
+	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq",
-        "on_submit": "sth.custom.supplier_quotation.create_po_draft"
+		"on_submit": "sth.custom.supplier_quotation.create_po_draft"
 	},
 	
 	# "Training Event": {
@@ -275,9 +281,9 @@ doc_events = {
 		"on_submit": "sth.custom.travel_request.create_employee_advance",
 		"on_cancel": "sth.custom.travel_request.cancel_employee_advance"
 	},
-    
+	
 	"Request for Quotation": {
-        "before_save": "sth.custom.request_for_quotation.update_unit_in_table"
+		"before_save": "sth.custom.request_for_quotation.update_unit_in_table"
 	}
 }
 
@@ -302,6 +308,11 @@ scheduler_events = {
 	"monthly": [
 		"sth.tasks.employee.update_employee_employment_tenure"
 	],
+	"cron": {
+		"0 0 1 1 *": [  # Run at midnight on January 1st
+			"sth.hr_customize.custom.leave_policy.run_annual_allocation"
+		]
+	}
 }
 
 # Testing
@@ -316,13 +327,13 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
-    "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",
+	"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
-    "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
-    "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
+	"erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
+	"erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
 	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
-    "frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
-    "hrms.overrides.employee_payment_entry.get_payment_entry_for_employee": "sth.overrides.employee_advance.get_payment_entry_for_employee"
+	"frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
+	"hrms.overrides.employee_payment_entry.get_payment_entry_for_employee": "sth.overrides.employee_advance.get_payment_entry_for_employee"
 }
 #
 # each overriding function accepts a `data` argument;
