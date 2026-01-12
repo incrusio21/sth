@@ -1,9 +1,19 @@
 frappe.ui.form.on('Pengakuan Pembelian TBS', {
+    setup(frm) {
+        frm.set_query("unit", (doc) => {
+            return {
+                filters: {
+                    company: doc.company
+                }
+            }
+        })
+    },
     get_data: function (frm) {
         if (!frm.doc.nama_supplier) {
             frappe.msgprint(__('Please select a supplier first'));
             return;
         }
+
         frm.call("get_timbangan")
             .then((res) => {
                 frappe.model.sync(res);

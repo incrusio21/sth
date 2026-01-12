@@ -13,10 +13,9 @@
   "posting_time",
   "set_posting_time",
   "unit",
+  "divisi",
+  "no_polisi",
   "supplier",
-  "spb",
-  "purchase_order",
-  "do_no",
   "column_break_mtrn",
   "transaction_type",
   "receive_type",
@@ -25,6 +24,11 @@
   "vehicle_entry_time",
   "vehicle_exit_time",
   "qr_code_scan",
+  "exit",
+  "spb",
+  "purchase_order",
+  "do_no",
+  "items_do",
   "driver_data_tab",
   "driver_details_section",
   "driver_name",
@@ -165,7 +169,8 @@
    "fieldname": "vehicle_exit_time",
    "fieldtype": "Time",
    "in_preview": 1,
-   "label": "Vehicle Exit Time"
+   "label": "Vehicle Exit Time",
+   "read_only": 1
   },
   {
    "fetch_from": "qr_code_scan.custom_driver_image_upload",
@@ -294,7 +299,8 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "reqd": 1
   },
   {
    "fetch_from": "qr_code_scan.custom_driver_image_upload",
@@ -333,16 +339,45 @@
    "fieldtype": "Select",
    "label": "Vehicle Queue Number",
    "options": "REC-.DD.MM.YY.-.###\nDIS-.DD.MM.YY.-.###"
+  },
+  {
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
+   "fetch_from": "spb.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "exit",
+   "fieldtype": "Check",
+   "label": "Exit"
+  },
+  {
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
+   "fetch_from": "spb.no_polisi",
+   "fieldname": "no_polisi",
+   "fieldtype": "Data",
+   "label": "No Polisi"
+  },
+  {
+   "fieldname": "items_do",
+   "fieldtype": "Small Text",
+   "label": "Items DO",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-10 11:18:52.458003",
+ "modified": "2026-01-12 16:09:35.582495",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

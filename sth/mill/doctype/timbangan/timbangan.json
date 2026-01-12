@@ -14,6 +14,8 @@
   "unit",
   "live_weight",
   "column_break_ckwi",
+  "weight_in_time",
+  "weight_out_time",
   "ticket_number",
   "type",
   "receive_type",
@@ -378,13 +380,27 @@
    "label": "SPB Detail",
    "options": "Timbangan SPB Detail",
    "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "weight_in_time",
+   "fieldtype": "Time",
+   "label": "Weight In Time",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "weight_out_time",
+   "fieldtype": "Time",
+   "label": "Weight Out Time",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-12 12:16:21.384771",
+ "modified": "2026-01-12 15:08:57.450957",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

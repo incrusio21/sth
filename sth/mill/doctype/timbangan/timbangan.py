@@ -7,6 +7,9 @@ from frappe.utils import get_datetime
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger
 
 class Timbangan(Document):
+	def validate(self):
+		self.validate_ticket()
+
 	def on_submit(self):
 		if self.type == "Receive":
 			create_tbs_ledger(frappe._dict({
@@ -28,6 +31,9 @@ class Timbangan(Document):
 		if self.type == "Receive":
 			reverse_tbs_ledger(self.name)
 
+	def validate_ticket(self):
+		if frappe.db.exist("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
+			frappe.throw("Ticket has been used before")
 
 @frappe.whitelist()
 def get_spb_detail(spb):
