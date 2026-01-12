@@ -72,7 +72,8 @@
    "fieldname": "nomor_po",
    "fieldtype": "Link",
    "label": "Nomor PO",
-   "options": "Purchase Order"
+   "options": "Purchase Order",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -138,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-01 10:53:56.120738",
+ "modified": "2026-01-08 21:09:46.545624",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Supplier",

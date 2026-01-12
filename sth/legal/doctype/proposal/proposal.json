@@ -97,6 +97,15 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "term_tab",
+  "default_identification",
+  "identifications",
+  "section_break_djvh",
+  "spesifikasi_kerja",
+  "keperluan",
+  "column_break_kzez",
+  "jangka_waktu",
+  "denda",
   "address_and_contact_tab",
   "section_addresses",
   "supplier_address",
@@ -1296,16 +1305,60 @@
   {
    "fieldname": "proposal_type",
    "fieldtype": "Select",
-   "label": "Purchase Type",
+   "label": "Proposal Type",
    "options": "\nCapex\nBorongan\nJasa dan Lainnya\nJual Beli\nJual Beli TBS",
    "reqd": 1
+  },
+  {
+   "fieldname": "term_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms of Service"
+  },
+  {
+   "fieldname": "identifications",
+   "fieldtype": "Table",
+   "label": "Identifications",
+   "options": "Proposal Identification Detail"
+  },
+  {
+   "fieldname": "section_break_djvh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "spesifikasi_kerja",
+   "fieldtype": "Text Editor",
+   "label": "Spesifikasi Kerja"
+  },
+  {
+   "fieldname": "keperluan",
+   "fieldtype": "Text Editor",
+   "label": "Keperluan"
+  },
+  {
+   "fieldname": "column_break_kzez",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jangka_waktu",
+   "fieldtype": "Text Editor",
+   "label": "Jangka Waktu"
+  },
+  {
+   "fieldname": "denda",
+   "fieldtype": "Text Editor",
+   "label": "Denda yang Ditentunkan"
+  },
+  {
+   "fieldname": "default_identification",
+   "fieldtype": "Button",
+   "label": "Default Identification"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-07 11:10:48.179013",
+ "modified": "2026-01-10 15:20:50.347728",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

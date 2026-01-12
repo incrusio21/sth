@@ -192,7 +192,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-15 21:24:01.773193",
+ "modified": "2026-01-09 15:35:17.482363",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",
@@ -213,7 +213,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "no_pol"
 }

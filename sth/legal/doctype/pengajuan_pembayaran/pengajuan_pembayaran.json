@@ -17,6 +17,7 @@
   "bukti_pembelian",
   "column_break_nuan",
   "company",
+  "abbr",
   "expense_account",
   "tipe_pembayaran",
   "bank_account",
@@ -232,13 +233,20 @@
    "in_preview": 1,
    "label": "Tipe Pembayaran",
    "options": "Cash\nTransfer"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-05 15:23:32.267992",
+ "modified": "2026-01-09 16:27:19.796289",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

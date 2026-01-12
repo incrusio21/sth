@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-10 15:10:13.748205",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "identification",
+  "column_break_azpy",
+  "available",
+  "not_available"
+ ],
+ "fields": [
+  {
+   "fieldname": "identification",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Identification"
+  },
+  {
+   "fieldname": "column_break_azpy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "available",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Available"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_available",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Not Available"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-10 15:12:31.402048",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Proposal Identification Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

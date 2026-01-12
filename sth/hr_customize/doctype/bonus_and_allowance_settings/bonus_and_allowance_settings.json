@@ -16,7 +16,12 @@
   "phk_default_section",
   "earning_phk_component",
   "column_break_iplp",
-  "deduction_phk_component"
+  "deduction_phk_component",
+  "loan_subsidy_default_section",
+  "subsidy_component",
+  "against_subsidy_component",
+  "column_break_rioy",
+  "monthly_subsidy_component"
  ],
  "fields": [
   {
@@ -84,13 +89,40 @@
    "fieldtype": "Link",
    "label": "Deduction PHK Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "loan_subsidy_default_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Subsidy Default"
+  },
+  {
+   "fieldname": "subsidy_component",
+   "fieldtype": "Link",
+   "label": "Subsidy Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "against_subsidy_component",
+   "fieldtype": "Link",
+   "label": "Against Subsidy Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "column_break_rioy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_subsidy_component",
+   "fieldtype": "Link",
+   "label": "Monthly Subsidy Component",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-21 16:27:38.474850",
+ "modified": "2026-01-08 11:31:35.606591",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Bonus and Allowance Settings",
