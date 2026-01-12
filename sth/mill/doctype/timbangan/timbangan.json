@@ -50,7 +50,6 @@
   "gateweight2",
   "column_break_ttdq",
   "netto",
-  "gateweight3",
   "driver_data_tab",
   "driver_section",
   "driver_name",
@@ -353,11 +352,6 @@
    "precision": "2"
   },
   {
-   "fieldname": "gateweight3",
-   "fieldtype": "Button",
-   "label": "GateWeight"
-  },
-  {
    "fieldname": "section_break_rtij",
    "fieldtype": "Section Break"
   },
@@ -389,7 +383,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-08 20:57:54.123737",
+ "modified": "2026-01-10 11:12:04.874709",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

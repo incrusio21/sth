@@ -46,9 +46,25 @@ frappe.ui.form.on("Timbangan", {
         frm.set_value("tara", frm.doc.live_weight)
     },
 
-    gateweight3(frm) {
-        frm.set_value("netto", frm.doc.live_weight)
+    bruto(frm) {
+        frm.trigger('calculate_weight')
     },
+
+    tara(frm) {
+        frm.trigger('calculate_weight')
+    },
+
+    netto(frm) {
+        frm.trigger('calculate_weight')
+    },
+
+    calculate_weight(frm) {
+        if (frm.doc.type == "Receive") {
+            frm.set_value("netto", frm.doc.bruto - frm.doc.tara)
+        } else if (["Dispatch", "Return"].includes(frm.doc.type)) {
+            frm.set_value("bruto", frm.doc.netto - frm.doc.tara)
+        }
+    }
 });
 
 
