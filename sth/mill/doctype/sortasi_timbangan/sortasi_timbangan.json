@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:STB-{DD}{MM}{YY}-{###}",
+ "creation": "2026-01-12 13:30:24.248672",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_yfrv",
+  "ticket_number",
+  "sortasi",
+  "komidel",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_yfrv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ticket_number",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Ticket Number",
+   "options": "Security Check Point"
+  },
+  {
+   "default": "0",
+   "fieldname": "sortasi",
+   "fieldtype": "Percent",
+   "label": "Sortasi",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "fieldname": "komidel",
+   "fieldtype": "Float",
+   "label": "Komidel",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sortasi Timbangan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-12 13:35:06.442223",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sortasi Timbangan",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
