@@ -8,4 +8,5 @@ import "./controllers/komoditi_editor";
 import "./controllers/queries";
 import "./override/utils";
 import "./lib/scale_connection"
+import "./override/multi_select_dialog_override"
 // import "./override/print_override"
