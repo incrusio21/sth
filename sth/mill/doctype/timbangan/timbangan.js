@@ -60,7 +60,7 @@ frappe.ui.form.on("Timbangan", {
 
     calculate_weight(frm) {
         if (frm.doc.type == "Receive") {
-            frm.set_value("netto", frm.doc.bruto - frm.doc.tara)
+            frm.set_value("netto", frm.doc.bruto - frm.doc.tara - (frm.doc.potongan_sortasi / 100))
         } else if (["Dispatch", "Return"].includes(frm.doc.type)) {
             frm.set_value("bruto", frm.doc.netto - frm.doc.tara)
         }
