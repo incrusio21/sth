@@ -248,7 +248,8 @@
    "fieldtype": "Link",
    "label": "Supplier",
    "mandatory_depends_on": "eval:doc.receive_type == \"TBS Eksternal\"",
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
@@ -383,7 +384,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-10 11:12:04.874709",
+ "modified": "2026-01-12 12:16:21.384771",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
