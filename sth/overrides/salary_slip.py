@@ -60,6 +60,95 @@ class SalarySlip(SalarySlip):
 		self.not_check_out = self._get_not_out_attendance_days()
 		
 		self.calculate_holidays()
+		self.calculate_cuti_allocation()
+
+	def calculate_cuti_allocation(self):
+		self.total_attendance_cuti = self._get_cuti_attendance_days()
+		if self.total_attendance_cuti == 0:
+			self.total_cuti_dalam_alokasi = 0
+			self.total_cuti_diluar_alokasi = 0
+			return
+
+		leave_allocation = self._get_cuti_allocation()
+		if not leave_allocation:
+			self.total_cuti_dalam_alokasi = 0
+			self.total_cuti_diluar_alokasi = self.total_attendance_cuti
+			return
+		
+		cuti_used_before = self._get_cuti_used_before_period(
+			leave_allocation.get('from_date'),
+			leave_allocation.get('to_date')
+		)
+		
+		total_allocation = leave_allocation.get('total_leaves_allocated', 0)
+		
+		remaining_allocation = total_allocation - cuti_used_before
+		
+		if remaining_allocation >= self.total_attendance_cuti:
+			self.total_cuti_dalam_alokasi = self.total_attendance_cuti
+			self.total_cuti_diluar_alokasi = 0
+		elif remaining_allocation > 0:
+			self.total_cuti_dalam_alokasi = remaining_allocation
+			self.total_cuti_diluar_alokasi = self.total_attendance_cuti - remaining_allocation
+		else:
+			self.total_cuti_dalam_alokasi = 0
+			self.total_cuti_diluar_alokasi = self.total_attendance_cuti
+
+	def _get_cuti_attendance_days(self) -> float:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.leave_type == "Cuti")
+			)
+		)
+		
+		return query.run()[0][0] or 0
+
+	def _get_cuti_allocation(self) -> dict:
+		LeaveAllocation = frappe.qb.DocType("Leave Allocation")
+		query = (
+			frappe.qb.from_(LeaveAllocation)
+			.select(
+				LeaveAllocation.name,
+				LeaveAllocation.from_date,
+				LeaveAllocation.to_date,
+				LeaveAllocation.total_leaves_allocated
+			)
+			.where(
+				(LeaveAllocation.employee == self.employee)
+				& (LeaveAllocation.leave_type == "Cuti")
+				& (LeaveAllocation.from_date <= self.end_date)
+				& (LeaveAllocation.to_date >= self.start_date)
+				& (LeaveAllocation.docstatus == 1)
+			)
+			.orderby(LeaveAllocation.from_date, order=frappe.qb.desc)
+			.limit(1)
+		)
+		
+		result = query.run(as_dict=True)
+		return result[0] if result else None
+
+	def _get_cuti_used_before_period(self, allocation_from_date, allocation_to_date) -> float:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date >= allocation_from_date)
+				& (Attendance.attendance_date < self.start_date)
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.leave_type == "Cuti")
+			)
+		)
+		
+		return query.run()[0][0] or 0
+
 
 	def calculate_holidays(self):
 
