@@ -130,6 +130,9 @@ erpnext.utils.update_progress_received = function (opts) {
 frappe.ui.form.on("Purchase Order", {
 	setup(frm) {
 		sth.form.setup_fieldname_select(frm, "items")
+		sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
+			frm.trigger("set_value_dpp_and_taxes")
+		})
 	},
 	refresh(frm) {
 		frm.set_query("purchase_type", () => {
@@ -168,5 +171,17 @@ frappe.ui.form.on("Purchase Order", {
 				});
 			}
 		}
-	}
+	},
+
+	set_value_dpp_and_taxes(frm) {
+		frm.doc.dpp = frm.doc.net_total
+		frm.doc.pph = frm.doc.taxes_and_charges_deducted
+		for (const row of frm.doc.taxes) {
+			if (row.account_head == frm._default_coa.ppn) {
+				frm.doc.ppn = row.tax_amount
+			}
+		}
+		frm.doc.biaya_lainnya = frm.doc.taxes_and_charges_added - frm.doc.ppn
+		frm.refresh_fields()
+	},
 });
