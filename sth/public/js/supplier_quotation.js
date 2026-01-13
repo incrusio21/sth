@@ -79,6 +79,8 @@ function btn_get_material_request(frm) {
                     per_ordered: ["<", 100],
                     company: frm.doc.company,
                 },
+            }, () => {
+                frm.trigger('calculate_totals')
             });
 
             setTimeout(() => {
@@ -117,6 +119,8 @@ function btn_get_rfq(frm) {
                 },
                 get_query_method:
                     "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier",
+            }, () => {
+                frm.trigger('calculate_totals')
             });
 
             setTimeout(() => {

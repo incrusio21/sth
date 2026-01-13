@@ -24,3 +24,10 @@ frappe.ui.form.on("Berita Acara", {
     },
 
 });
+
+frappe.ui.form.on("Berita Acara Detail", {
+    form_render(frm, dt, dn) {
+        console.log("Form Terbuka");
+        frm.get_field('table_klkc').$wrapper.find(".grid-duplicate-row").off("click")
+    }
+})
