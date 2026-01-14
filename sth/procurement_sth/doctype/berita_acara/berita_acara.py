@@ -25,9 +25,9 @@ def create_mr(source_name,target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"jumlah": "qty",
-				"kendaraan": "custom_kode_kendaraan",
 				"km_hm": "custom_kmhm",
-				"satuan": "uom"
+				"satuan": "uom",
+				"note": "description"
 			}
 		},
 	}
