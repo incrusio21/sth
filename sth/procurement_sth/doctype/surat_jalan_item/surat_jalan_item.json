@@ -63,10 +63,9 @@
   {
    "columns": 2,
    "fieldname": "no_penerimaan",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "No Penerimaan Barang",
-   "options": "Purchase Receipt"
+   "label": "No Penerimaan Barang"
   },
   {
    "columns": 1,
@@ -88,7 +87,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-02 04:38:01.522610",
+ "modified": "2026-01-14 13:33:49.477424",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan Item",
