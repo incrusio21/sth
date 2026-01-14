@@ -9,13 +9,17 @@
   "section_break_a3kp",
   "naming_series",
   "unit",
-  "employment_type",
+  "employee_grade",
   "jenis_potongan",
   "get_employee",
+  "persetujuan_1",
+  "persetujuan_2",
   "column_break_dpdy",
   "company",
   "posting_date",
   "salary_component",
+  "no_rekening",
+  "bank_account",
   "amended_from",
   "section_break_josg",
   "details"
@@ -64,14 +68,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "employment_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Employment Type",
-   "options": "Employment Type",
-   "reqd": 1
-  },
-  {
    "fieldname": "jenis_potongan",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -110,13 +106,47 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "POTKAR-"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_preview": 1,
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Grade",
+   "options": "Employee Grade",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_rekening",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "No Rekening"
+  },
+  {
+   "fieldname": "persetujuan_1",
+   "fieldtype": "Link",
+   "label": "Persetujuan 1",
+   "options": "User"
+  },
+  {
+   "fieldname": "persetujuan_2",
+   "fieldtype": "Link",
+   "label": "Persetujuan 2",
+   "options": "User"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 15:03:06.140861",
+ "modified": "2026-01-13 23:36:44.141230",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Potongan",

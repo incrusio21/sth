@@ -166,6 +166,7 @@ override_doctype_class = {
 	"Asset Capitalization": "sth.overrides.asset_capitalization.AssetCapitalization",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
 	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
+	"Attendance": "sth.overrides.attendance.Attendance",
 	"Bank Account": "sth.overrides.bank_account.BankAccount",
 	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 	"Customer": "sth.overrides.customer.Customer",
@@ -195,7 +196,7 @@ doc_events = {
 	},
 
 	"Asset": {
-		"validate": ["sth.overrides.asset.validate_company","sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+		"validate": ["sth.accounting_sth.custom.asset.cek_prec_untuk_asset","sth.overrides.asset.validate_company","sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
 		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
 	},
 	"Attendance": {
@@ -212,6 +213,9 @@ doc_events = {
 	},
 	"Employee": {
 		"after_insert": "sth.hr_customize.custom.leave_policy.create_allocations_for_new_employee"
+	},
+	"Employee Potongan": {
+		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
 	},
 	"Item": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
@@ -309,8 +313,8 @@ scheduler_events = {
 		"sth.tasks.employee.update_employee_employment_tenure"
 	],
 	"cron": {
-		"0 0 1 1 *": [  # Run at midnight on January 1st
-			"sth.hr_customize.custom.leave_policy.run_annual_allocation"
+		"0 0 * * *": [
+			"sth.hr_customize.custom.leave_policy.create_daily_leave_allocations"
 		]
 	}
 }

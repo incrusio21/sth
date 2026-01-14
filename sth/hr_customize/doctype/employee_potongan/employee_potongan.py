@@ -22,7 +22,7 @@ class EmployeePotongan(Document):
 			.where(
 				(emp.name.isin(emp_list)) & 
 				( 
-					(emp.status != "Active") | (emp.employment_type != self.employment_type)
+					(emp.status != "Active") | (emp.grade != self.employee_grade)
 	 			)
 			)
 		).run(as_dict=1)
@@ -76,8 +76,8 @@ class EmployeePotongan(Document):
 			e.employee_name
 			FROM `tabEmployee` as e
 			JOIN `tabEmployee Jenis Potongan` as ejp ON ejp.parent = e.name
-			WHERE e.status = 'Active' AND e.employment_type = %(employment_type)s AND ejp.jenis_potongan = %(jenis_potongan)s;
-    """, {"employment_type": self.employment_type, "jenis_potongan": self.jenis_potongan}, as_dict=True)
+			WHERE e.status = 'Active' AND e.grade = %(grade)s AND ejp.jenis_potongan = %(jenis_potongan)s;
+    """, {"grade": self.employee_grade, "jenis_potongan": self.jenis_potongan}, as_dict=True)
 
 		self.details = []
 		for d in emp_list:

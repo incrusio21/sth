@@ -7,7 +7,16 @@ frappe.ui.form.on("Employee Potongan", {
 		frm.set_query("unit", function () {
 			return {
 				filters: {
-					company: frm.doc.company
+					company: ["=", frm.doc.company]
+				}
+			};
+		});
+
+		frm.set_query("bank_account", function () {
+			return {
+				filters: {
+					company: ["=", frm.doc.company],
+					unit: ["=", frm.doc.unit],
 				}
 			};
 		});

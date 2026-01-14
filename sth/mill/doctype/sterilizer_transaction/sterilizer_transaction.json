@@ -9,14 +9,16 @@
   "section_break_p0cs",
   "naming_series",
   "transaction_date",
-  "machine",
-  "machine_station",
+  "company",
+  "abbr",
+  "unit",
   "column_break_awov",
   "status",
-  "unit",
-  "company",
+  "machine",
+  "machine_station",
   "amended_from",
   "sterilizer_monitoring_tab",
+  "sterilizer_transaction_monitoring",
   "detail_section",
   "sp1",
   "ts1",
@@ -34,7 +36,7 @@
   "usg2",
   "usl2",
   "third_pressure_section",
-  "sterilizer_pressure_copy",
+  "sp3",
   "ts3",
   "tst3",
   "upload_pressure_photo_copy",
@@ -81,20 +83,18 @@
    "options": "Mill Machine"
   },
   {
-   "fetch_from": "machine.unit",
    "fieldname": "unit",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Unit",
-   "read_only": 1
+   "options": "Unit"
   },
   {
-   "fetch_from": "machine.company",
    "fieldname": "company",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Company",
-   "read_only": 1
+   "options": "Company"
   },
   {
    "fieldname": "column_break_awov",
@@ -103,6 +103,7 @@
   {
    "fieldname": "detail_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "First Pressure"
   },
   {
@@ -216,6 +217,7 @@
   {
    "fieldname": "seconds_pressure_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Seconds Pressure"
   },
   {
@@ -224,8 +226,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Sterilizer Pressure",
-   "reqd": 1
+   "label": "Sterilizer Pressure"
   },
   {
    "fieldname": "upp2",
@@ -280,16 +281,8 @@
   {
    "fieldname": "third_pressure_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Third Pressure"
-  },
-  {
-   "description": "Satuan dalam Kg/Cm\u00b2",
-   "fieldname": "sterilizer_pressure_copy",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Sterilizer Pressure Copy",
-   "reqd": 1
   },
   {
    "fieldname": "ts3",
@@ -326,13 +319,35 @@
    "fieldtype": "Attach Image",
    "in_preview": 1,
    "label": "Upload Sterilizer Graph Photo Copy"
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sp3",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Sterilizer Pressure"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sterilizer_transaction_monitoring",
+   "fieldtype": "Table",
+   "label": "Sterilizer Transaction Monitoring",
+   "options": "Sterilizer Transaction Monitoring"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-07 12:02:16.177029",
+ "modified": "2026-01-14 13:26:05.885316",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sterilizer Transaction",
