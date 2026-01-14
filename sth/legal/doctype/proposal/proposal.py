@@ -31,6 +31,7 @@ from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+from sth.legal import get_legal_settings
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -62,6 +63,8 @@ class Proposal(BuyingController):
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
 	def validate(self):
+		self.set_item_kegiatan_name()
+
 		super().validate()
 
 		self.set_status()
@@ -87,11 +90,24 @@ class Proposal(BuyingController):
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
+	def set_item_kegiatan_name(self):
+		legal_item = get_legal_settings("default_item_code")
+
+		for item in self.items:
+			if item.item_code:
+				continue
+
+			if item.kegiatan:
+				item.item_code = frappe.get_cached_value("Kegiatan", item.kegiatan, "item_code")
+			
+			if not item.item_code:
+				item.item_code = legal_item 
+
 	def validate_capex(self):
 		if self.proposal_type not in ["Capex"]:
 			self.asset_category = self.sub_asset_category = ""
-		elif not (self.self.asset_category and self.sub_asset_category):
-			frappe.throw("Please set Asset Category first")
+		elif not (self.asset_category and self.sub_asset_category):
+			frappe.throw("Please set Asset and Sub Asset Category first")
 
 	def set_has_unit_price_items(self):
 		"""
@@ -388,7 +404,6 @@ def close_or_unclose_purchase_orders(names, status):
 
 	frappe.local.message_log = []
 
-
 def set_missing_values(source, target):
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
@@ -557,12 +572,8 @@ def update_status(status, name):
 def get_kegiatan_item(kegiatan):
     keg_doc = frappe.get_cached_doc("Kegiatan", kegiatan)
 
-    # memastikan terdapat item pada kegiatan
-    if not keg_doc.item_code:
-        frappe.throw(_("Please set Item Code for Kegiatan first"))
-
     return {
-        "item_code": keg_doc.item_code,
+		"kegiatan_name": keg_doc.nm_kgt,
         "uom": keg_doc.uom
     }
 

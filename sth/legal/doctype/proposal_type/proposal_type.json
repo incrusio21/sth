@@ -6,7 +6,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "disabled"
+  "disabled",
+  "configure_columns_items_section",
+  "fields_html",
+  "fields",
+  "column_break_lrvf"
  ],
  "fields": [
   {
@@ -14,12 +18,33 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "configure_columns_items_section",
+   "fieldtype": "Section Break",
+   "label": "Configure Columns Items"
+  },
+  {
+   "fieldname": "fields_html",
+   "fieldtype": "HTML",
+   "label": "Fields HTML"
+  },
+  {
+   "fieldname": "column_break_lrvf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fields",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Fields Assigned",
+   "options": "Purchase Type Item Column"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-10 09:54:22.099195",
+ "modified": "2026-01-14 13:09:07.600097",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal Type",

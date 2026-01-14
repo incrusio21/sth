@@ -69,7 +69,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				},
 				"Proposal Item": {
 					"ref_dn_field": "proposal_detail",
-					"compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["uom", "="]],
+					"compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True,
 				},
@@ -79,7 +79,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				},
 				"BAPP Item": {
 					"ref_dn_field": "bapp_detail",
-					"compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["uom", "="]],
+					"compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
 					"is_child_table": True,
 				},
 			}

@@ -217,7 +217,7 @@ class BAPP(BuyingController):
 				},
 				"Proposal Item": {
 					"ref_dn_field": "proposal_item",
-					"compare_fields": [["project", "="], ["uom", "="], ["item_code", "="]],
+					"compare_fields": [["project", "="], ["uom", "="], ["kegiatan", "="], ["kegiatan_name", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True,
 				},

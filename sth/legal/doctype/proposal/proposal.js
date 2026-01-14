@@ -24,7 +24,7 @@ erpnext.utils.update_progress_received = function (opts) {
 		return {
 			docname: d.name,
 			name: d.name,
-			kegiatan: d.kegiatan,
+			kegiatan_name: d.kegiatan_name,
 			qty: d.qty,
 			uom: d.uom,
 			rate: d.rate,
@@ -41,9 +41,8 @@ erpnext.utils.update_progress_received = function (opts) {
 			hidden: 1,
 		},
 		{
-			fieldtype: "Link",
-			fieldname: "kegiatan",
-			options: "Kegiatan",
+			fieldtype: "Data",
+			fieldname: "kegiatan_name",
 			in_list_view: 1,
 			read_only: 1,
 			disabled: 0,
@@ -135,6 +134,8 @@ erpnext.utils.update_progress_received = function (opts) {
 
 frappe.ui.form.on("Proposal", {
 	setup: function (frm) {
+        sth.form.setup_fieldname_select(frm, "items")
+
 		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 		
 		frm.set_indicator_formatter("item_code", function (doc) {
@@ -204,22 +205,18 @@ frappe.ui.form.on("Proposal", {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.is_old_subcontracting_flow) {
-			frm.trigger("get_materials_from_supplier");
-
-			$("a.grey-link").each(function () {
-				var id = $(this).children(":first-child").attr("data-label");
-				if (id == "Duplicate") {
-					$(this).remove();
-					return false;
-				}
-			});
-		}
+        sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
 
 		if (frm.doc.docstatus == 0) {
 			erpnext.set_unit_price_items_note(frm);
 		}
 	},
+
+	proposal_type(frm) {
+        sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
+		frm.clear_table("items")
+		frm.refresh_fields()
+    },
 
 	supplier: function (frm) {
 		// Do not update if inter company reference is there as the details will already be updated
