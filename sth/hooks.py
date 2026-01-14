@@ -48,7 +48,7 @@ doctype_js = {
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js"],
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
-	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
+	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
 	"Request for Quotation" : "public/js/request_for_quotation.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
