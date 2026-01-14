@@ -74,12 +74,30 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
     }
 
     set_query_field() {
+        this.frm.set_query("unit", function (doc) {
+			return {
+				filters: {
+					company: ["=", doc.company]
+				}
+			};
+		});
+
 		this.frm.set_query("sppt", "items", function (doc, cdt, cdn) {
             let item = locals[cdt][cdn]
 
 			return {
 				filters: {
 					perangkat_desa: ["=", item.perangkat_desa]
+				}
+			};
+		});
+
+        this.frm.set_query("pemilik_lahan", "items", function (doc, cdt, cdn) {
+            let item = locals[cdt][cdn]
+
+			return {
+				filters: {
+					pd: ["=", item.perangkat_desa]
 				}
 			};
 		});

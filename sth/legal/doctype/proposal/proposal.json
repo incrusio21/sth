@@ -12,6 +12,8 @@
   "proposal_type",
   "supplier",
   "supplier_name",
+  "asset_category",
+  "sub_asset_category",
   "order_confirmation_no",
   "order_confirmation_date",
   "get_items_from_open_material_requests",
@@ -25,7 +27,6 @@
   "apply_tds",
   "tax_withholding_category",
   "has_unit_price_items",
-  "supplier_warehouse",
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -41,9 +42,7 @@
   "ignore_pricing_rule",
   "before_items_section",
   "scan_barcode",
-  "set_from_warehouse",
   "items_col_break",
-  "set_warehouse",
   "items_section",
   "items",
   "sb_last_purchase",
@@ -470,21 +469,6 @@
    "label": "Ignore Pricing Rule",
    "permlevel": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "set_warehouse",
-   "fieldtype": "Link",
-   "label": "Set Target Warehouse",
-   "options": "Warehouse",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:doc.is_subcontracted",
-   "fieldname": "supplier_warehouse",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Supplier Warehouse",
-   "options": "Warehouse"
   },
   {
    "fieldname": "items_section",
@@ -1166,14 +1150,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "is_internal_supplier",
-   "fieldname": "set_from_warehouse",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Set From Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "terms_tab",
    "fieldtype": "Tab Break",
    "hidden": 1,
@@ -1304,9 +1280,9 @@
   },
   {
    "fieldname": "proposal_type",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Proposal Type",
-   "options": "\nCapex\nBorongan\nJasa dan Lainnya\nJual Beli\nJual Beli TBS",
+   "options": "Proposal Type",
    "reqd": 1
   },
   {
@@ -1352,13 +1328,27 @@
    "fieldname": "default_identification",
    "fieldtype": "Button",
    "label": "Default Identification"
+  },
+  {
+   "depends_on": "eval:doc.proposal_type==\"Capex\"",
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "label": "Asset Category",
+   "options": "Asset Category"
+  },
+  {
+   "depends_on": "eval:doc.proposal_type==\"Capex\"",
+   "fieldname": "sub_asset_category",
+   "fieldtype": "Link",
+   "label": "Sub Asset Category",
+   "options": "Sub Asset Category"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-10 15:20:50.347728",
+ "modified": "2026-01-14 12:39:34.376563",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

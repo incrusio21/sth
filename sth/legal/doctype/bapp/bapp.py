@@ -927,6 +927,8 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 				"doctype": "Purchase Invoice",
 				"field_map": {
 					"bill_date": "bill_date",
+					"is_cwip": "cwip_asset",
+					"asset_category": "asset_category",
 				},
 				"validation": {
 					"docstatus": ["=", 1],

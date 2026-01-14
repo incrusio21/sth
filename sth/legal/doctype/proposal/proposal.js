@@ -174,6 +174,14 @@ frappe.ui.form.on("Proposal", {
 			};
 		});
 
+		frm.set_query("sub_asset_category", function (doc) {
+			return {
+				filters: {
+					asset_category: ["=", doc.asset_category],
+				},
+			};
+		});
+
         frm.set_query("kegiatan", "items", function (doc) {
 			return {
 				filters: {
@@ -300,6 +308,26 @@ frappe.ui.form.on("Proposal", {
 		}
 	},
 
+	default_identification: function(frm){
+		frm.clear_table("identifications")
+		let default_identification = [
+			"Akta Perusahaan",
+			"Surat Ijin Usaha Perusahaan",
+			"Tanda Daftar Perusahaan",
+			"Nomor Pokok Wajib Pajak",
+			"Pengusaha Kena Pajak",
+			"KTP Direktur",
+			"Bukti Kepemilikan alat/pajak",
+			"Proposal dari Pemilik Alat"
+		]
+		
+		for (const val of default_identification) {
+			let item = frm.add_child("identifications")
+			item.identification = val
+		}
+
+		frm.refresh_field("identifications")
+	},
 	apply_tds: function (frm) {
 		if (!frm.doc.apply_tds) {
 			frm.set_value("tax_withholding_category", "");

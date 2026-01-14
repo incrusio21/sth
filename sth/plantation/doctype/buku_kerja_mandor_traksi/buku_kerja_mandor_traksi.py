@@ -68,7 +68,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			self.update_task_details_name()
 	
 		# set data emloyee
-		self.set_details_diffrence(jenis_alat=self.jenis_alat, raise_error=True)
+		self.set_details_diffrence(raise_error=True)
 		super().validate()
 
 	def validate_used_task(self):
@@ -181,7 +181,6 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		if update:
 			self.update_child_table("hasil_kerja")
-
 
 	def on_submit(self):
 		super().on_submit()

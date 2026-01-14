@@ -35,7 +35,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
         let doctype = this.frm.fields_dict[data.parentfield].grid.fields_map.item.options;
 
         frappe.call({
-            method: "sth.controllers.plantation_controller.get_details_item",
+            method: "sth.plantation.utils.get_details_item",
             args: {
                 item: data.item,
                 doctype: doctype,

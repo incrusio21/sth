@@ -12,6 +12,8 @@
   "naming_series",
   "supplier",
   "supplier_name",
+  "asset_category",
+  "sub_asset_category",
   "column_break1",
   "posting_date",
   "posting_time",
@@ -20,6 +22,7 @@
   "company",
   "unit",
   "apply_putaway_rule",
+  "is_cwip",
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -1147,13 +1150,34 @@
    "fieldtype": "Link",
    "label": "Unit",
    "options": "Unit"
+  },
+  {
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "label": "Asset Category",
+   "options": "Asset Category",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cwip",
+   "fieldtype": "Check",
+   "label": "Is CWIP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sub_asset_category",
+   "fieldtype": "Link",
+   "label": "Sub Asset Category",
+   "options": "Sub Asset Category",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-08 16:33:59.698322",
+ "modified": "2026-01-13 14:04:53.199957",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

@@ -14,7 +14,7 @@ class Project:
         match self.method:
             case "validate":
                 self.validate_status_project()
-                self.validate_proposal_type()
+                self.validate_spk_type()
                 self.validate_order_adendum()
                 self.set_note()
             case "on_update":
@@ -38,17 +38,17 @@ class Project:
         if self.doc.status == "Completed" and before_doc.status != self.doc.status:
             self.doc.complete_date = today()
 
-    def validate_proposal_type(self):
+    def validate_spk_type(self):
         # jika document baru tidak perlu ada pengecekan
         before_doc = self.doc.get_latest()
         if not before_doc:
             return
         
-        if before_doc.proposal_type != self.doc.proposal_type:
+        if before_doc.spk_type != self.doc.spk_type:
             frappe.throw("Proposal Type cannot be change")
 
     def validate_order_adendum(self):
-        if self.doc.project_type != "Adendum" or self.doc.proposal_type != "Transaction":
+        if self.doc.project_type != "Adendum" or self.doc.spk_type != "Transaction":
             return
         
         # get proposal dari adendum
@@ -151,6 +151,20 @@ class Project:
             })
 
             task.save()
+
+
+@frappe.whitelist()
+def get_proposal_data(proposal):
+    detail_proposal = frappe.get_value("Proposal", proposal, ["spesifikasi_kerja", "keperluan", "jangka_waktu", "denda"], as_dict=1)
+
+    detail_proposal["identifications"] = frappe.get_all("Proposal Identification Detail", 
+        filters={"parent": proposal, "parenttype": "Proposal"}, 
+        fields=["identification", "available", "not_available"],
+        order_by="idx"
+    ) or {}
+
+    return detail_proposal
+
 
 @frappe.whitelist()
 def make_project_adendum(source_name, target_doc=None):
