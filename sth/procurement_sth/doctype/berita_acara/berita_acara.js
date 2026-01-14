@@ -22,12 +22,22 @@ frappe.ui.form.on("Berita Acara", {
             frm.set_value("make", frappe.session.user)
         }
     },
-
 });
 
 frappe.ui.form.on("Berita Acara Detail", {
     form_render(frm, dt, dn) {
         console.log("Form Terbuka");
         frm.get_field('table_klkc').$wrapper.find(".grid-duplicate-row").off("click")
+    },
+
+    item_code(frm, dt, dn) {
+        let row = locals[dt][dn]
+        let exist = frm.doc.table_klkc.find((data) => row.item_code == data.item_code && row.idx != data.idx)
+        if (exist) {
+            frappe.msgprint("Item code sudah terdaftar dalam tabel.")
+            frappe.model.clear_doc(row.doctype, row.name)
+            refresh_field("table_klkc")
+            frappe.dom.unfreeze()
+        }
     }
 })
