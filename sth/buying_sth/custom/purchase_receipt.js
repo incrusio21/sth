@@ -18,22 +18,34 @@ frappe.ui.form.on("Purchase Receipt", {
         })
 
         frm.set_query("unit", function (doc) {
-			return {
-				filters: {
-					company: ["=", doc.company],
-				},
-			};
-		});
+            return {
+                filters: {
+                    company: ["=", doc.company],
+                },
+            };
+        });
 
         frm.set_query("bank_account", function (doc) {
-			return {
-				filters: {
-					unit: ["=", doc.unit],
-				},
-			};
-		});
-
+            return {
+                filters: {
+                    unit: ["=", doc.unit],
+                },
+            };
+        });
     },
+
+    onload(frm) {
+        if (frm.is_new()) {
+            frm.clear_table("upload")
+            const files = ["FOTO BARANG", "SURAT JALAN"]
+            files.forEach((r) => {
+                frm.add_child("upload", {
+                    rincian_dokumen_finance: r
+                })
+            })
+        }
+    },
+
     refresh(frm) {
         frm.set_query("purchase_type", () => {
             return {
