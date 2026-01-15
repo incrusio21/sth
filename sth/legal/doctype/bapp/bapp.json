@@ -21,13 +21,10 @@
   "column_break_12",
   "company",
   "unit",
+  "project",
   "apply_putaway_rule",
   "is_cwip",
   "amended_from",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break",
-  "project",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -38,6 +35,9 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
   "section_break0",
   "total_qty",
   "total_net_weight",
@@ -817,7 +817,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
-   "label": "Project",
+   "label": "Project/SPK",
    "options": "Project"
   },
   {
@@ -1010,7 +1010,6 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
@@ -1177,7 +1176,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-13 14:04:53.199957",
+ "modified": "2026-01-15 10:57:02.354242",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

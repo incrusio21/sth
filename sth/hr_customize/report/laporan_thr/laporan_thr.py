@@ -9,10 +9,22 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = []
 
-	data.append({
-		"pt": "PT. TRIMITRA LESTARI",
-		"rupiah": 100000
-	})
+	q_laporan_thr = frappe.db.sql("""
+		SELECT
+		tt.company as pt,
+		tt.unit as unit,
+		DATE_FORMAT(tt.posting_date, '%Y') as tahun,
+		tt.religion_group as thr,
+		COUNT(dtt.employee) as jumlah,
+		SUM(dtt.subtotal) as rupiah
+		FROM `tabTransaksi THR` as tt
+		JOIN `tabDetail Transaksi THR` as dtt ON dtt.parent = tt.name
+		WHERE tt.religion_group = 'IDUL FITRI'
+		GROUP BY tt.company, tt.unit, DATE_FORMAT(tt.posting_date, '%Y'), tt.religion_group;
+  """, as_dict=True)
+ 
+	for thr in q_laporan_thr:
+		data.append(thr)
 
 	return columns, data
 

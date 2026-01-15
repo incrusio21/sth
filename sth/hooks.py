@@ -181,7 +181,9 @@ override_doctype_class = {
 	"Supplier": "sth.overrides.supplier.Supplier",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
-	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim"
+	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim",
+    "Supplier Quotation": "sth.overrides.expense_claim.ExpenseClaim",
+    "Supplier Quotation": "sth.overrides.supplier_quotation.STHSupplierQuotation",
 }
 
 # Document Events

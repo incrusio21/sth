@@ -50,7 +50,7 @@ def get_payment_settings(key: str):
 	return payment_settings.get(key)
 
 
-def get_allowance_settings(key):
+def get_allowance_settings(key=None):
 	"""Return the value associated with the given `key` from Bonus and Allowance Settings DocType."""
 	if not (allowance_settings := getattr(frappe.local, "allowance_settings", None)):
 		try:

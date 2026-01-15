@@ -302,6 +302,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
@@ -330,6 +331,7 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Currency and Price List",
    "options": "fa fa-tag"
   },
@@ -461,6 +463,7 @@
    "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Total Net Weight",
    "print_hide": 1,
    "read_only": 1
@@ -472,6 +475,7 @@
   {
    "fieldname": "base_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -480,6 +484,7 @@
   {
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Net Total (Company Currency)",
    "oldfieldname": "net_total",
    "oldfieldtype": "Currency",
@@ -496,6 +501,7 @@
   {
    "fieldname": "total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total",
    "options": "currency",
    "read_only": 1
@@ -503,6 +509,7 @@
   {
    "fieldname": "net_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Net Total",
    "options": "currency",
    "print_hide": 1,
@@ -511,6 +518,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
@@ -563,6 +571,7 @@
   {
    "fieldname": "section_break_41",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1
   },
   {
@@ -575,7 +584,8 @@
   },
   {
    "fieldname": "section_break_44",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "base_total_taxes_and_charges",
@@ -604,6 +614,7 @@
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -720,6 +731,7 @@
    "collapsible": 1,
    "fieldname": "section_break_49",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Additional Discount"
   },
   {
@@ -759,6 +771,7 @@
    "collapsible": 1,
    "fieldname": "sec_tax_breakup",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Tax Breakup"
   },
   {
@@ -776,6 +789,7 @@
    "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Packing List",
    "oldfieldtype": "Section Break",
    "options": "fa fa-suitcase",
@@ -800,6 +814,7 @@
   {
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Pricing Rules"
   },
   {
@@ -1389,7 +1404,7 @@
  "icon": "fa fa-truck",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-12 19:41:56.142705",
+ "modified": "2026-01-15 05:30:48.453259",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Delivery Order",

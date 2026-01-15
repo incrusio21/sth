@@ -23,7 +23,9 @@ def execute(filters=None):
 		FROM `tabDaftar BPJS` as db
 		JOIN `tabDaftar BPJS Employee` as dbe ON dbe.parent = db.name
 		JOIN `tabEmployee` as e ON e.name = dbe.employee
-		JOIN `tabDesignation` as d ON d.name = e.designation;
+		JOIN `tabDesignation` as d ON d.name = e.designation
+		JOIN `tabSalary Structure Assignment` as ssa ON ssa.employee = e.name
+		WHERE db.pt IS NOT NULL {}
   """.format(conditions), filters, as_dict=True)
 
 	for bpjs in q_laporan_bpjs:
@@ -45,6 +47,9 @@ def get_condition(filters):
 
 	if filters.get("bpjs_type"):
 		conditions += " AND db.jenis_bpjs = %(bpjs_type)s"
+
+	if filters.get("start_periode") and filters.get("end_periode"):
+		conditions += " AND ssa.from_date BETWEEN %(start_periode)s AND %(end_periode)s"
 
 	return conditions
 

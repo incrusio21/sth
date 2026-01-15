@@ -26,6 +26,7 @@ def execute(filters=None):
 		FROM `tabLeave Allocation` as la
 		JOIN `tabEmployee` as e ON e.name = la.employee
 		WHERE la.company IS NOT NULL
+		AND la.docstatus = 1
 		 {};
 	""".format(conditions), filters, as_dict=True)
 
@@ -118,12 +119,12 @@ def get_columns(filters):
 			"fieldname": "tgl_berakhir_cuti",
 		},
 		{
-			"label": _("Jumlah HK"),
+			"label": _("Total Cuti"),
 			"fieldtype": "Data",
 			"fieldname": "jumlah_hk",
 		},
 		{
-			"label": _("Hk"),
+			"label": _("Sisa Cuti"),
 			"fieldtype": "Data",
 			"fieldname": "hk",
 		},

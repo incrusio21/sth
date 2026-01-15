@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Y33K0W2yTv\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Borongan Dan Sipil</span>\",\"col\":12}},{\"id\":\"RC1hFLH4V1\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Non Capex\",\"col\":4}},{\"id\":\"AB_eHPBwO9\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Capex Dan Pekerjaan Borongan\",\"col\":4}}]",
+ "content": "[{\"id\":\"Y33K0W2yTv\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Borongan Dan Sipil</span>\",\"col\":12}},{\"id\":\"RC1hFLH4V1\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Non Capex\",\"col\":4}},{\"id\":\"AB_eHPBwO9\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Capex Dan Pekerjaan Borongan\",\"col\":7}}]",
  "creation": "2025-09-29 11:42:19.585150",
  "custom_blocks": [],
  "docstatus": 0,
@@ -53,7 +53,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-07 10:38:03.129539",
+ "modified": "2026-01-13 09:45:37.377822",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Borongan Dan Sipil",

@@ -12,8 +12,6 @@
   "proposal_type",
   "supplier",
   "supplier_name",
-  "asset_category",
-  "sub_asset_category",
   "order_confirmation_no",
   "order_confirmation_date",
   "get_items_from_open_material_requests",
@@ -24,9 +22,10 @@
   "from_proposal",
   "column_break1",
   "schedule_date",
-  "apply_tds",
-  "tax_withholding_category",
+  "asset_category",
+  "sub_asset_category",
   "has_unit_price_items",
+  "is_cwip",
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -1105,20 +1104,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "apply_tds",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Apply Tax Withholding Amount"
-  },
-  {
-   "depends_on": "eval: doc.apply_tds",
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -1330,25 +1315,34 @@
    "label": "Default Identification"
   },
   {
-   "depends_on": "eval:doc.proposal_type==\"Capex\"",
+   "depends_on": "eval:doc.is_cwip",
    "fieldname": "asset_category",
    "fieldtype": "Link",
    "label": "Asset Category",
    "options": "Asset Category"
   },
   {
-   "depends_on": "eval:doc.proposal_type==\"Capex\"",
+   "depends_on": "eval:doc.is_cwip",
    "fieldname": "sub_asset_category",
    "fieldtype": "Link",
    "label": "Sub Asset Category",
    "options": "Sub Asset Category"
+  },
+  {
+   "default": "0",
+   "fetch_from": "proposal_type.is_cwip",
+   "fieldname": "is_cwip",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is CWIP",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-14 12:39:34.376563",
+ "modified": "2026-01-14 22:15:24.804290",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

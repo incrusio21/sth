@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "disabled",
+  "column_break_hafu",
+  "is_cwip",
   "configure_columns_items_section",
   "fields_html",
   "fields",
@@ -39,12 +41,22 @@
    "hidden": 1,
    "label": "Fields Assigned",
    "options": "Purchase Type Item Column"
+  },
+  {
+   "fieldname": "column_break_hafu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cwip",
+   "fieldtype": "Check",
+   "label": "Is CWIP"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-14 13:09:07.600097",
+ "modified": "2026-01-14 22:13:56.506448",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal Type",

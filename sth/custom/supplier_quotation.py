@@ -5,7 +5,6 @@ def update_status_rfq(doc,method):
     if rfq:
         close_status_another_sq(rfq,doc.name)
         frappe.db.set_value("Request for Quotation",rfq,"custom_offering_status","Closed",update_modified=False)
-        frappe.db.commit()
 
 def create_po_draft(doc,method):
     from sth.overrides.supplier_quotation import make_purchase_order
@@ -23,7 +22,6 @@ def close_status_another_sq(rfq,except_name):
 
     for row in supplier_quotations:
         frappe.db.set_value("Supplier Quotation",row.name,"workflow_state","Closed")
-        frappe.db.commit()
 
 @frappe.whitelist()
 def reopen_rfq(name):

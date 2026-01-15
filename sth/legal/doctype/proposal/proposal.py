@@ -70,7 +70,7 @@ class Proposal(BuyingController):
 		self.set_status()
 
 		# apply tax withholding only if checked and applicable
-		self.set_tax_withholding()
+		# self.set_tax_withholding()
 
 		self.validate_supplier()
 		self.validate_capex()
@@ -484,8 +484,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		set_missing_values(source, target)
 
 		# set tax_withholding_category from Purchase Order
-		if source.apply_tds and source.tax_withholding_category and target.apply_tds:
-			target.tax_withholding_category = source.tax_withholding_category
+		# if source.apply_tds and source.tax_withholding_category and target.apply_tds:
+		# 	target.tax_withholding_category = source.tax_withholding_category
 
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
 		if target.get("allocate_advances_automatically"):
@@ -617,6 +617,9 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 			)
 
 	def validate_progress(child_item, new_data):
+		if flt(new_data.get("progress_received")) > flt(child_item.qty):
+			frappe.throw(_("Cannot set Progress more than quantity"))
+
 		if flt(new_data.get("progress_received")) < flt(child_item.received_qty):
 			frappe.throw(_("Cannot set Progress less than received quantity"))
 
@@ -674,71 +677,75 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 
 @frappe.whitelist()
 def make_proposal_revision(source_name, target_doc=None):
-    has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
+	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
 
-    def set_missing_values(source, target):
-        # pastikan po lama sudah memiliki project
-        if not frappe.db.exists("Project", {"proposal": source.name}):
-            frappe.throw("Please create a Project for the Proposal before making revisions")
-        
-        target.run_method("set_missing_values")
-        target.run_method("calculate_taxes_and_totals")
-        
-    def is_unit_price_row(source):
-        return has_unit_price_items and source.qty == 0
+	def set_missing_values(source, target):
+		# pastikan po lama sudah memiliki project
+		if not frappe.db.exists("Project", {"proposal": source.name}):
+			frappe.throw("Please create a Project for the Proposal before making revisions")
+		
+		target.total = 0
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		
+	def is_unit_price_row(source):
+		return has_unit_price_items and source.qty == 0
 
-    def update_item(obj, target, source_parent):
-        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
-        target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-        target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-        target.base_amount = (
-            (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-        )
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
+		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+		target.base_amount = (
+			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+		)
 
-    doc = get_mapped_doc(
-        "Proposal",
-        source_name,
-        {
-            "Proposal": {
-                "doctype": "Proposal",
-                "field_map": {
-                    "supplier_warehouse": "supplier_warehouse",
-                    "name": "from_order"
-                },
-                "validation": {
-                    "docstatus": ["=", 1],
-                },
-            },
-            "Proposal Item": {
-                "doctype": "Proposal Item",
-                "field_map": {
-                    "name": "from_order_item",
-                    "material_request": "material_request",
-                    "material_request_item": "material_request_item",
-                    "sales_order": "sales_order",
-                    "sales_order_item": "sales_order_item",
-                    "wip_composite_asset": "wip_composite_asset",
-                },
-                "postprocess": update_item,
-                "condition": lambda doc: (
-                    True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
-                )
-                and doc.delivered_by_supplier != 1,
-            },
-            "Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
-        },
-        target_doc,
-        set_missing_values,
-    )
+	doc = get_mapped_doc(
+		"Proposal",
+		source_name,
+		{
+			"Proposal": {
+				"doctype": "Proposal",
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"name": "from_order"
+				},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Proposal Item": {
+				"doctype": "Proposal Item",
+				"field_map": {
+					"name": "from_order_item",
+					"material_request": "material_request",
+					"material_request_item": "material_request_item",
+					"sales_order": "sales_order",
+					"sales_order_item": "sales_order_item",
+					"wip_composite_asset": "wip_composite_asset",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: (
+					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
+				)
+				and doc.delivered_by_supplier != 1,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		target_doc,
+		set_missing_values,
+	)
 
-    return doc
+	return doc
 
 @frappe.whitelist()
 def make_bapp(source_name, target_doc=None):
 	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
+	spk = frappe.db.get_value("Project", {"proposal": source_name, "status": ["!=", "Cancelled"]}, "name")
+	if not spk:
+		frappe.throw(f"Create SPK for {source_name} first")
 
 	def set_missing_values(source, target):
-		target.is_cwip = source.proposal_type in ["Capex"]
+		target.project = spk
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
