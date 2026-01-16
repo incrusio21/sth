@@ -46,7 +46,7 @@ doctype_js = {
 	"Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
-	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js"],
+	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js", "accounting_sth/custom/non_voucher_match.js","accounting_sth/custom/override_purchase_invoice.js"],
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",

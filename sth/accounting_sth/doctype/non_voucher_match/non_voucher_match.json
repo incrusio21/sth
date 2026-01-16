@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-16 14:50:53.816014",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "coa",
+  "column_break_expd",
+  "persen_ppn",
+  "persen_pph",
+  "section_break_ghqs",
+  "dpp",
+  "dpp_nilai_lainnya",
+  "ppn",
+  "pph",
+  "column_break_sfxb",
+  "advance_payment",
+  "total",
+  "description"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "coa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COA",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_expd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "persen_ppn",
+   "fieldtype": "Select",
+   "label": "%PPN",
+   "options": "\n11"
+  },
+  {
+   "fieldname": "persen_pph",
+   "fieldtype": "Select",
+   "label": "%PPH",
+   "options": "\n2"
+  },
+  {
+   "fieldname": "section_break_ghqs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "dpp",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "DPP"
+  },
+  {
+   "columns": 1,
+   "fieldname": "dpp_nilai_lainnya",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "DPP Nilai Lainnya"
+  },
+  {
+   "columns": 1,
+   "fieldname": "ppn",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "PPN"
+  },
+  {
+   "columns": 1,
+   "fieldname": "pph",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "PPh"
+  },
+  {
+   "fieldname": "column_break_sfxb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advance_payment",
+   "fieldtype": "Currency",
+   "label": "Advance Payment"
+  },
+  {
+   "columns": 1,
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total"
+  },
+  {
+   "columns": 2,
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-16 21:07:33.542304",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Non Voucher Match",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

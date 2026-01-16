@@ -308,3 +308,91 @@ def update_cwip_expense_accounts(doc):
 
 		for item in doc.items:
 			item.expense_account = cwip_account
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_purchase_receipt_with_po(doctype, txt, searchfield, start, page_len, filters):
+    """
+    Custom query untuk mendapatkan Purchase Receipt yang itemnya 
+    mengandung Purchase Order tertentu
+    """
+    
+    purchase_order = filters.get("purchase_order")
+    company = filters.get("company")
+    status_not_in = filters.get("status", ["Closed", "Completed", "Return Issued"])
+    
+    conditions = []
+    values = []
+    
+    # Base conditions
+    if company:
+        conditions.append("pr.company = %s")
+        values.append(company)
+    
+    conditions.append("pr.docstatus = 1")
+    conditions.append("pr.is_return = 0")
+    
+    # Status filter
+    if status_not_in:
+        placeholders = ", ".join(["%s"] * len(status_not_in))
+        conditions.append(f"pr.status NOT IN ({placeholders})")
+        values.extend(status_not_in)
+    
+    # Search filter
+    if txt:
+        conditions.append("pr.name LIKE %s")
+        values.append(f"%{txt}%")
+    
+    # Filter berdasarkan Purchase Order di items
+    po_condition = ""
+    if purchase_order:
+        po_condition = """
+        AND EXISTS (
+            SELECT 1 
+            FROM `tabPurchase Receipt Item` pri
+            WHERE pri.parent = pr.name
+            AND pri.purchase_order = %s
+        )
+        """
+        values.append(purchase_order)
+    
+    where_clause = " AND ".join(conditions) if conditions else "1=1"
+    
+    query = f"""
+        SELECT DISTINCT
+            pr.name,
+            pr.supplier,
+            pr.posting_date,
+            pr.grand_total
+        FROM 
+            `tabPurchase Receipt` pr
+        WHERE 
+            {where_clause}
+            {po_condition}
+        ORDER BY 
+            pr.posting_date DESC, pr.name DESC
+        LIMIT 
+            {start}, {page_len}
+    """
+    
+    return frappe.db.sql(query, tuple(values))
+
+
+@frappe.whitelist()
+def get_purchase_receipts_by_po(purchase_order):
+    """
+    Alternative method: Get list of Purchase Receipts containing specific PO
+    Returns list of PR names
+    """
+    
+    if not purchase_order:
+        return []
+    
+    pr_list = frappe.db.sql("""
+        SELECT DISTINCT parent
+        FROM `tabPurchase Receipt Item`
+        WHERE purchase_order = %s
+        AND docstatus = 1
+    """, purchase_order, as_dict=1)
+    
+    return [pr.parent for pr in pr_list]
