@@ -261,6 +261,9 @@ doc_events = {
 		"on_update": "sth.legal.custom.project.Project",
 		"on_trash": "sth.legal.custom.project.Project",
 	},
+	"Purchase Receipt": {
+		"validate": "sth.custom.purchase_receipt.set_purchase_order_if_exist"
+	},
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
