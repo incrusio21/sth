@@ -2,6 +2,23 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Cheque Book", {
+    refresh(frm){
+        frm.set_query("unit", function(doc){
+            return {
+                filters: {
+                    company: ["=", doc.company]
+                }
+            }
+        })
+
+        frm.set_query("bank_account", function(doc){
+            return {
+                filters: {
+                    unit: ["=", doc.unit]
+                }
+            }
+        })
+    },
     cheque_start_no(frm){
         numberInput(frm,"cheque_start_no");
     },

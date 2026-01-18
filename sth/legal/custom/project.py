@@ -65,14 +65,11 @@ class Project:
         from frappe.utils.formatters import format_value
         
         po_i = frappe.qb.DocType("Proposal Item")
-        kegiatan = frappe.qb.DocType("Kegiatan")
 
         query = (
             frappe.qb.from_(po_i)
-            .inner_join(kegiatan)
-            .on(kegiatan.name == po_i.kegiatan)
             .select(
-                kegiatan.nm_kgt.as_("kegiatan"),
+                po_i.kegiatan_name,
                 po_i.qty,
                 po_i.uom,
                 po_i.rate,
@@ -82,7 +79,7 @@ class Project:
         data = "<div class='ql-editor' contenteditable='true'><ol>"
         for d in query:
             data += '<li data-list="ordered">'
-            data += f'<span class="ql-ui" contenteditable="false"></span>{d.kegiatan} {format_value(d.qty)} {d.uom} {format_value(d.rate)}'
+            data += f'<span class="ql-ui" contenteditable="false"></span>{d.kegiatan_name} {format_value(d.qty)} {d.uom} {format_value(d.rate)}'
             data += '</li>'
 
         data += "</ol></div>"
@@ -143,7 +140,7 @@ class Project:
             task = frappe.new_doc("Task")
 
             task.update({
-                "subject": frappe.get_cached_value("Kegiatan", item.kegiatan, "nm_kgt"),
+                "subject": item.kegiatan_name,
                 "project": self.doc.name,
                 "proposal": self.doc.proposal,
                 "proposal_item": item.name,

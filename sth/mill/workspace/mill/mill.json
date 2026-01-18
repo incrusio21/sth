@@ -16,45 +16,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Master",
-   "link_count": 3,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pabrik",
-   "link_count": 0,
-   "link_to": "Mill Master",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Station Master",
-   "link_count": 0,
-   "link_to": "Station Master",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mill Machine",
-   "link_count": 0,
-   "link_to": "Mill Machine",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Proses Produksi",
    "link_count": 6,
    "link_type": "DocType",
@@ -159,9 +120,58 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pabrik",
+   "link_count": 0,
+   "link_to": "Mill Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Station Master",
+   "link_count": 0,
+   "link_to": "Station Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mill Machine",
+   "link_count": 0,
+   "link_to": "Mill Machine",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Alat Berat Dan Kendaraan",
+   "link_count": 0,
+   "link_to": "Alat Berat Dan Kendaraan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-01-07 17:01:18.131901",
+ "modified": "2026-01-13 16:26:09.269003",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

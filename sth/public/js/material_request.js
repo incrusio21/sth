@@ -1,12 +1,19 @@
 frappe.provide("sth.queries")
-
+frappe.provide("sth.form")
 frappe.ui.form.on("Material Request", {
+    setup(frm) {
+
+    },
+
     refresh(frm) {
         if (frm.is_new()) {
             frm.trigger('set_default_reqdate')
         }
 
-        frm.set_query("item_code", "items", sth.queries.item_by_subtype)
+        sth.form.override_class_function(frm.cscript, "onload", () => {
+            frm.set_query("item_code", "items", sth.queries.item_by_subtype)
+        })
+
         frm.set_query("divisi", sth.queries.divisi)
 
         if (frm.doc.docstatus == 0) {
@@ -16,8 +23,8 @@ frappe.ui.form.on("Material Request", {
         }
     },
 
-    onload: function(frm) {
-        frm.doc.items.forEach(function(item) {
+    onload: function (frm) {
+        frm.doc.items.forEach(function (item) {
             get_stock_for_item(frm, item.doctype, item.name);
         });
     },
@@ -65,7 +72,8 @@ frappe.ui.form.on("Material Request", {
 
                     frm.clear_table("items")
                     for (const data of res.items) {
-                        frm.add_child("items", data)
+                        let child_item = frm.add_child("items", data)
+                        get_stock_for_item(frm, child_item.doctype, child_item.name)
                     }
 
                     frm.refresh()
@@ -94,17 +102,17 @@ frappe.ui.form.on("Material Request Item", {
 
 function get_stock_for_item(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
-    
+
     if (!row.item_code) {
         return;
     }
-    
+
     let company = frm.doc.company;
-    
+
     if (!company) {
         return;
     }
-    
+
     frappe.call({
         method: 'frappe.client.get_list',
         args: {
@@ -116,17 +124,19 @@ function get_stock_for_item(frm, cdt, cdn) {
             },
             fields: ['name']
         },
-        callback: function(r) {
+        callback: function (r) {
+            console.log(r);
+
             if (r.message && r.message.length > 0) {
                 let warehouses = r.message.map(w => w.name);
-                
+
                 frappe.call({
                     method: 'erpnext.stock.utils.get_latest_stock_qty',
                     args: {
                         item_code: row.item_code,
                         warehouse: warehouses.length === 1 ? warehouses[0] : null
                     },
-                    callback: function(stock_response) {
+                    callback: function (stock_response) {
                         frappe.model.set_value(cdt, cdn, 'stock', stock_response.message || 0);
                     }
                 });

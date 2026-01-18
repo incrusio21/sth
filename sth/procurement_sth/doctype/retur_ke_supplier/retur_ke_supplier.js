@@ -7,7 +7,6 @@ frappe.ui.form.on("Retur Ke Supplier", {
             return {
                 filters: {
                     company: doc.company,
-                    supplier: doc.nama_supplier,
                     docstatus: 1,
                     status: ["not in", ["Return", "Return Issued"]]
                 }

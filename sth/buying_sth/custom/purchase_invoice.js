@@ -132,13 +132,32 @@ frappe.ui.form.on("Purchase Invoice", {
 
     set_value_dpp_and_taxes(frm) {
         frm.doc.dpp = frm.doc.net_total
-        frm.doc.pph = frm.doc.taxes_and_charges_deducted
+        
+        let total_ppn = 0
+        let total_pph = 0 
+        let total_lainnya = 0 
         for (const row of frm.doc.taxes) {
-            if (row.account_head == frm._default_coa.ppn) {
-                frm.doc.ppn = row.tax_amount
+            if(row.tipe_pajak == "PPN"){
+                total_ppn += row.tax_amount
+            }
+            else if (row.tipe_pajak == "PPH"){
+                total_pph += row.tax_amount
+            }
+            else{
+                total_lainnya += row.tax_amount
             }
         }
-        frm.doc.biaya_lainnya = frm.doc.taxes_and_charges_added - frm.doc.ppn
+        // frm.doc.pph = frm.doc.taxes_and_charges_deducted
+        // for (const row of frm.doc.taxes) {
+        //  if (row.account_head == frm._default_coa.ppn) {
+        //      frm.doc.ppn = row.tax_amount
+        //  }
+        // }
+
+        frm.doc.ppn = total_ppn
+        frm.doc.pph = total_pph
+        // frm.doc.biaya_lainnya = frm.doc.taxes_and_charges_added - frm.doc.ppn
+        frm.doc.biaya_lainnya = total_lainnya
         frm.refresh_fields()
     }
 });

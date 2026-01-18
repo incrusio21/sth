@@ -5,6 +5,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import get_datetime
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger
+from frappe import _
+from frappe.model.mapper import get_mapped_doc
 
 class Timbangan(Document):
 	def validate(self):
@@ -32,7 +34,7 @@ class Timbangan(Document):
 			reverse_tbs_ledger(self.name)
 
 	def validate_ticket(self):
-		if frappe.db.exist("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
+		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
 			frappe.throw("Ticket has been used before")
 
 @frappe.whitelist()
@@ -45,3 +47,92 @@ def get_spb_detail(spb):
 	""",[spb],as_dict=True)
 
 	return spb_details
+
+@frappe.whitelist()
+def make_delivery_note(source_name, target_doc=None):
+	
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		if source.driver_name:
+			# Cari driver berdasarkan driver_name
+			driver = frappe.db.get_value('Driver', {'full_name': source.driver_name}, 'name')
+			if driver:
+				target.driver = driver
+				target.driver_name = source.driver_name
+		
+		if source.transportir:
+			# Cari transporter berdasarkan transportir
+			transporter = frappe.db.get_value('Supplier', {'supplier_name': source.transportir, 'is_transporter': 1}, 'name')
+			if transporter:
+				target.transporter = transporter
+				target.transporter_name = source.transportir
+	
+	def update_item(source, target, source_parent):
+		target.timbangan = source_parent.name
+	
+	doclist = get_mapped_doc(
+		"Timbangan",
+		source_name,
+		{
+			"Timbangan": {
+				"doctype": "Delivery Note",
+				"field_map": {
+					"name": "timbangan_ref",
+					"company": "company",
+					"driver_name": "driver_name",
+					"transportir": "transporter_name",
+					"license_number": "lr_no", 
+				}
+			},
+		},
+		target_doc,
+		set_missing_values
+	)
+
+	source_doc = frappe.get_doc("Timbangan", source_name)
+	
+	if source_doc.kode_barang and source_doc.netto:
+		doclist.append('items', {
+			'item_code': source_doc.kode_barang,
+			'qty': source_doc.netto - (source_doc.potongan_sortasi / 100),
+			'timbangan': source_doc.name
+		})
+	
+	return doclist
+
+@frappe.whitelist()
+def make_purchase_receipt(source_name, target_doc=None):
+	
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+	
+	doclist = get_mapped_doc(
+		"Timbangan",
+		source_name,
+		{
+			"Timbangan": {
+				"doctype": "Purchase Receipt",
+				"field_map": {
+					"name": "timbangan_ref", 
+					"company": "company",
+					"transportir": "transporter_name",
+					"license_number": "lr_no",
+				}
+			},
+		},
+		target_doc,
+		set_missing_values
+	)
+	
+	source_doc = frappe.get_doc("Timbangan", source_name)
+	
+	if source_doc.kode_barang and source_doc.netto:
+		doclist.append('items', {
+			'item_code': source_doc.kode_barang,
+			'qty': source_doc.netto - (source_doc.potongan_sortasi / 100),
+			'timbangan': source_doc.name
+		})
+	
+	return doclist

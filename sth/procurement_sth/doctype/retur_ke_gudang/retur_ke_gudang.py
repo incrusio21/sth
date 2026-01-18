@@ -13,6 +13,15 @@ class ReturKeGudang(Document):
 		ste = frappe.get_doc("Stock Entry",{"references": self.name})
 		ste.cancel()
 
+	@frappe.whitelist()
+	def set_items(self):
+		self.items = []
+		items = frappe.get_all("Pengeluaran Barang Item",{"parent":self.no_pengeluaran},["kode_barang","satuan","jumlah","blok as kode_blok"])
+
+		for row in items:
+			self.append("items",row)
+
+
 	def create_ste(self):
 		def postprocess(source,target):
 			target.stock_entry_type = "Material Receipt"

@@ -16,106 +16,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Master Data",
-   "link_count": 9,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jenis Biaya Ganti Rugi Lahan",
-   "link_count": 0,
-   "link_to": "Jenis Biaya Ganti Rugi Lahan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Daftar Masyarakat",
-   "link_count": 0,
-   "link_to": "Daftar Masyarakat",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Daftar Masyarakat",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Desa Lingkungan",
-   "link_count": 0,
-   "link_to": "Desa Lingkungan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jenis Sertifikat",
-   "link_count": 0,
-   "link_to": "Jenis Sertifikat",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Nama Perijinan",
-   "link_count": 0,
-   "link_to": "Nama Perijinan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kategori Perijinan",
-   "link_count": 0,
-   "link_to": "Kategori Perijinan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Status Anggaran Dasar",
-   "link_count": 0,
-   "link_to": "Status Anggaran Dasar",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Territory",
-   "link_count": 0,
-   "link_to": "Territory",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Akta List",
-   "link_count": 0,
-   "link_to": "Akta List",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Project Management",
    "link_count": 1,
    "link_type": "DocType",
@@ -278,9 +178,120 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Data",
+   "link_count": 10,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jenis Biaya Ganti Rugi Lahan",
+   "link_count": 0,
+   "link_to": "Jenis Biaya Ganti Rugi Lahan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Daftar Masyarakat",
+   "link_count": 0,
+   "link_to": "Daftar Masyarakat",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Daftar Masyarakat",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Desa Lingkungan",
+   "link_count": 0,
+   "link_to": "Desa Lingkungan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jenis Sertifikat",
+   "link_count": 0,
+   "link_to": "Jenis Sertifikat",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Nama Perijinan",
+   "link_count": 0,
+   "link_to": "Nama Perijinan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kategori Perijinan",
+   "link_count": 0,
+   "link_to": "Kategori Perijinan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Status Anggaran Dasar",
+   "link_count": 0,
+   "link_to": "Status Anggaran Dasar",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Territory",
+   "link_count": 0,
+   "link_to": "Territory",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Akta List",
+   "link_count": 0,
+   "link_to": "Akta List",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supplier",
+   "link_count": 0,
+   "link_to": "Supplier",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Supplier",
+   "type": "Link"
   }
  ],
- "modified": "2026-01-08 10:06:47.449426",
+ "modified": "2026-01-13 09:34:45.966904",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",

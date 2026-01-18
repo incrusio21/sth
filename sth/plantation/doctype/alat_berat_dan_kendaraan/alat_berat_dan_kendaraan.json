@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kode_item",
  "creation": "2025-07-04 13:16:49.680103",
@@ -17,8 +18,8 @@
   "jns_alt",
   "kap_kg",
   "column_break_vypn",
-  "divisi",
   "unit",
+  "divisi",
   "no_pol",
   "operator",
   "helper",
@@ -70,8 +71,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Divisi",
-   "options": "Divisi",
-   "reqd": 1
+   "options": "Divisi"
   },
   {
    "fieldname": "basis_rpkg",
@@ -89,8 +89,7 @@
   {
    "fieldname": "kap_kg",
    "fieldtype": "Float",
-   "label": "Kap Kg",
-   "reqd": 1
+   "label": "Kap Kg"
   },
   {
    "fieldname": "kmhm_akhir",
@@ -113,14 +112,12 @@
   {
    "fieldname": "per_prm",
    "fieldtype": "Percent",
-   "label": "Persentase Premi",
-   "reqd": 1
+   "label": "Persentase Premi"
   },
   {
    "fieldname": "rp_prm",
    "fieldtype": "Currency",
-   "label": "Rupiah Premi",
-   "reqd": 1
+   "label": "Rupiah Premi"
   },
   {
    "fieldname": "asset",
@@ -141,7 +138,7 @@
    "fieldname": "tipe_master",
    "fieldtype": "Select",
    "label": "Tipe Master",
-   "options": "Alat Berat\nKendaraan Umum\nDump Truck",
+   "options": "Alat Berat\nKendaraan Umum\nDump Truck\nMesin & Peralatan Workshop",
    "reqd": 1
   },
   {
@@ -179,7 +176,8 @@
    "in_list_view": 1,
    "label": "Unit",
    "options": "Unit",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "helper",
@@ -192,7 +190,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-09 15:35:17.482363",
+ "modified": "2026-01-13 16:50:41.590111",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

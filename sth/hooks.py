@@ -46,9 +46,9 @@ doctype_js = {
 	"Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
-	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js"],
+	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js", "accounting_sth/custom/non_voucher_match.js","accounting_sth/custom/override_purchase_invoice.js"],
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
-	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js"],
+	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
 	"Request for Quotation" : "public/js/request_for_quotation.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
@@ -183,6 +183,7 @@ override_doctype_class = {
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Supplier": "sth.overrides.supplier.Supplier",
+    "Supplier Quotation": "sth.overrides.supplier_quotation.STHSupplierQuotation",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
 }
 
@@ -260,6 +261,9 @@ doc_events = {
 		"validate": "sth.legal.custom.project.Project",
 		"on_update": "sth.legal.custom.project.Project",
 		"on_trash": "sth.legal.custom.project.Project",
+	},
+	"Purchase Receipt": {
+		"validate": "sth.custom.purchase_receipt.set_purchase_order_if_exist"
 	},
 	"Purchase Invoice": {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"

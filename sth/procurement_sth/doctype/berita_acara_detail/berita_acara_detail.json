@@ -69,24 +69,22 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Kendaraan",
-   "options": "Asset",
-   "reqd": 1
+   "label": "Asset",
+   "options": "Alat Berat Dan Kendaraan"
   },
   {
    "fieldname": "km_hm",
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "KM / HM",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-14 12:00:16.720311",
+ "modified": "2026-01-15 14:30:12.486014",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara Detail",

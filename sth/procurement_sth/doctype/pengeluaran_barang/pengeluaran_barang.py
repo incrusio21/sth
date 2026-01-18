@@ -16,7 +16,7 @@ class PengeluaranBarang(Document):
 	@frappe.whitelist()
 	def set_items(self):
 		self.items = []
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","jumlah","kendaraan","km","kegiatan"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","jumlah","kendaraan","km","kegiatan","sub_unit","blok"])
 
 		for row in items:
 			self.append("items",row)
