@@ -170,6 +170,10 @@ override_doctype_class = {
 	"Bank Account": "sth.overrides.bank_account.BankAccount",
 	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 	"Customer": "sth.overrides.customer.Customer",
+	"Employee Promotion": "sth.overrides.employee_promotion.STHEmployeePromotion",
+	"Employee Transfer": "sth.overrides.employee_transfer.STHEmployeeTransfer",
+	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
+	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim",
 	"Item": "sth.overrides.item.Item",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
 	"Loan Repayment Schedule": "sth.overrides.loan_repayment_schedule.STHLoanRepaymentSchedule",
@@ -180,8 +184,6 @@ override_doctype_class = {
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Supplier": "sth.overrides.supplier.Supplier",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
-	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
-	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim"
 }
 
 # Document Events
@@ -302,6 +304,9 @@ scheduler_events = {
 	"daily": [
 		"sth.finance_sth.doctype.deposito.deposito.deposito_roll_over",
 		"sth.overrides.event.custom_send_email_digest"
+	],
+    "daily_long": [
+		"sth.hr_customize.doctype.employee_update_log.employee_update_log.repost_entries",
 	],
 # 	"hourly": [
 # 		"sth.tasks.hourly"
