@@ -128,3 +128,66 @@ def validate_request(data):
 @frappe.whitelist()
 def get_doc_ignore_perm(doctype, name):
     return frappe.get_doc(doctype, name, ignore_permissions=True)
+
+@frappe.whitelist()
+def get_table_data(rfq):
+    query = frappe.db.sql("""
+        SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`
+        FROM `tabSupplier Quotation` sq
+        JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
+        JOIN `tabItem` i ON i.`name` = sqi.`item_code`
+        WHERE sq.workflow_state = 'Open' AND sqi.`request_for_quotation` = %s
+        ORDER BY sqi.`item_code`,sq.`supplier`,sq.`name`;
+    """,[rfq],as_dict=True)
+
+    static_fields = ["idx","kode_barang","nama_barang","satuan","harga_terakhir"]
+    supplier_fields = ["merk","country","spesifikasi","jumlah","harga","sub_total","doc_no"]
+    result = []
+    item_code = ""
+    for data in query:
+        title = "".join(kata[0].lower() for kata in data.supplier.split())
+        dict_data = frappe._dict({})
+        if item_code == data.kode_barang:
+            index = None
+            for idx,d in enumerate(result):
+                if not getattr(d,f"{title}_spesifikasi",None) and d.mark == data.kode_barang:
+                    index = idx
+                    break
+            if index is not None:
+                for sup_field in supplier_fields:
+                    result[index][f"{title}_{sup_field}"] = data[sup_field]
+            else:
+                for st_field in static_fields:
+                    dict_data[st_field] = ""
+            
+                # field mapping untuk colgroup supplier
+                for sup_field in supplier_fields:
+                    dict_data[f"{title}_{sup_field}"] = data[sup_field]                
+                
+                dict_data.mark = data.kode_barang
+                result.append(dict_data)
+        else:
+            for st_field in static_fields:
+                dict_data[st_field] = data[st_field]
+            
+            # field mapping untuk colgroup supplier
+            for sup_field in supplier_fields:
+                dict_data[f"{title}_{sup_field}"] = data[sup_field]
+
+            dict_data.mark = data.kode_barang
+
+            result.append(dict_data)
+        item_code = data.kode_barang
+        # print(result)
+        # print("==========================================================================")
+        # print("==========================================================================")
+
+    return {
+        "suppliers": set([r.supplier for r in query]),
+        "data": result,
+    }
+
+@frappe.whitelist()
+def submit_sq(name):
+    doc = get_doc_ignore_perm("Supplier Quotation",name)
+    doc.submit()
