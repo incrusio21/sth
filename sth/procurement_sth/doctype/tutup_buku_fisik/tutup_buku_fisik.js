@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Tutup Buku Fisik", {
     setup(frm) {
-        frm.set_query("warehouse", (doc) => {
+        frm.set_query("warehouse", "list_gudang", (doc) => {
             return {
                 filters: {
                     company: doc.company,
@@ -11,6 +11,10 @@ frappe.ui.form.on("Tutup Buku Fisik", {
                 }
             }
         })
+    },
+
+    refresh(frm) {
+
     },
 
     periode(frm) {
@@ -35,7 +39,5 @@ frappe.ui.form.on("Tutup Buku Fisik", {
         }
     },
 
-    refresh(frm) {
-
-    },
 });
+

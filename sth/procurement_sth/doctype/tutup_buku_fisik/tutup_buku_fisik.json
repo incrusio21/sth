@@ -7,30 +7,24 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "warehouse",
+  "column_break_froj",
   "column_break_zflv",
   "tanggal_dibuat",
   "section_break_ems3",
-  "company",
   "nama_unit",
+  "company",
   "column_break_jvgw",
   "periode",
   "from_date",
   "to_date",
-  "amended_from"
+  "amended_from",
+  "section_break_ypbp",
+  "list_gudang"
  ],
  "fields": [
   {
    "fieldname": "section_break_ems3",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Gudang",
-   "options": "Warehouse",
-   "reqd": 1
   },
   {
    "fieldname": "column_break_jvgw",
@@ -92,13 +86,28 @@
   {
    "fieldname": "column_break_zflv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ypbp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "list_gudang",
+   "fieldtype": "Table",
+   "label": "List gudang",
+   "options": "Tutup Buku Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_froj",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-30 09:47:25.242755",
+ "modified": "2026-01-14 16:45:24.174706",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Tutup Buku Fisik",
