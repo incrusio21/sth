@@ -79,7 +79,7 @@ class LemburList(Document):
 		natura_multiplier = frappe.get_value("Natura Multiplier", {
             "company": self.company, 
 			"pkp": self.pkp_status, 
-			"employment_type": self.employment_type }, "multiplier") or 0
+			"employment_type": self.employment_type }, "employee_multiplier") or 0
 		
 		date = getdate(self.posting_date)
 

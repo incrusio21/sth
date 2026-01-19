@@ -11,6 +11,9 @@
   "employment_type",
   "column_break_mgkk",
   "company",
+  "employee_multiplier",
+  "partner_multiplier",
+  "child_multiplier",
   "multiplier"
  ],
  "fields": [
@@ -43,20 +46,41 @@
   {
    "fieldname": "multiplier",
    "fieldtype": "Float",
-   "label": "Multiplier",
-   "non_negative": 1
+   "label": "Total Multiplier",
+   "non_negative": 1,
+   "read_only": 1
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
    "options": "NM-"
+  },
+  {
+   "fieldname": "employee_multiplier",
+   "fieldtype": "Float",
+   "label": "Employee Multiplier",
+   "non_negative": 1
+  },
+  {
+   "depends_on": "eval:!in_list(doc.pkp, \"T\")",
+   "fieldname": "partner_multiplier",
+   "fieldtype": "Float",
+   "label": "Partner Multiplier",
+   "non_negative": 1
+  },
+  {
+   "depends_on": "eval:!in_list(doc.pkp, \"0\")",
+   "fieldname": "child_multiplier",
+   "fieldtype": "Float",
+   "label": "Child Multiplier",
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 13:25:28.951521",
+ "modified": "2026-01-19 14:16:05.697187",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Natura Multiplier",

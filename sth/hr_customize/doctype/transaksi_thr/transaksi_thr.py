@@ -186,12 +186,11 @@ class TransaksiTHR(AccountsController):
 
 		# ambil semua natura multiplier
 		natura_multiplier_map = {
-			row["pkp"]: row["multiplier"]
+			row.pkp: row.employee_multiplier
 			for row in frappe.get_all(
 				"Natura Multiplier",
 				filters={"company": self.company},
-				fields=["pkp", "multiplier"],
-				as_list=False,
+				fields=["pkp", "employee_multiplier"],
 			)
 		}
 
