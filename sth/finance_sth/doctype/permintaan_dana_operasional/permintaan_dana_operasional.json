@@ -66,7 +66,7 @@
   {
    "fieldname": "headers_tab",
    "fieldtype": "Tab Break",
-   "label": "HEADERS"
+   "label": "Headers"
   },
   {
    "default": "PDO-",
@@ -88,22 +88,22 @@
   {
    "fieldname": "bahan_bakar_tab",
    "fieldtype": "Tab Break",
-   "label": "BAHAN BAKAR"
+   "label": "Bahan Bakar"
   },
   {
    "fieldname": "perjalanan_dinas_tab",
    "fieldtype": "Tab Break",
-   "label": "PERJALANAN DINAS"
+   "label": "Perjalanan Dinas"
   },
   {
    "fieldname": "kas_tab",
    "fieldtype": "Tab Break",
-   "label": "KAS"
+   "label": "Kas"
   },
   {
    "fieldname": "dana_cadangan_tab",
    "fieldtype": "Tab Break",
-   "label": "DANA CADANGAN"
+   "label": "Dana Cadangan"
   },
   {
    "fieldname": "months",
@@ -334,7 +334,7 @@
   {
    "fieldname": "pdo_non_pdo_tab",
    "fieldtype": "Tab Break",
-   "label": "NON PDO"
+   "label": "Non PDO"
   },
   {
    "fieldname": "outstanding_amount_non_pdo",
@@ -399,7 +399,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-19 12:25:36.788445",
+ "modified": "2026-01-07 10:35:41.826266",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

@@ -217,7 +217,7 @@ class BAPP(BuyingController):
 				},
 				"Proposal Item": {
 					"ref_dn_field": "proposal_item",
-					"compare_fields": [["project", "="], ["uom", "="], ["item_code", "="]],
+					"compare_fields": [["project", "="], ["uom", "="], ["kegiatan", "="], ["kegiatan_name", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True,
 				},
@@ -927,6 +927,8 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 				"doctype": "Purchase Invoice",
 				"field_map": {
 					"bill_date": "bill_date",
+					"is_cwip": "cwip_asset",
+					"asset_category": "asset_category",
 				},
 				"validation": {
 					"docstatus": ["=", 1],

@@ -12,9 +12,14 @@ erpnext.buying.setup_buying_controller();
 frappe.ui.form.on("BAPP", {
 	setup: (frm) => {
 		frm.custom_make_buttons = {
-			"Stock Entry": "Return",
 			"Purchase Invoice": "Purchase Invoice",
 		};
+
+		frm.set_query("unit", function () {
+			return {
+				filters: { company: ["=", frm.doc.company] },
+			};
+		});
 
 		frm.set_query("expense_account", "items", function () {
 			return {
@@ -32,15 +37,6 @@ frappe.ui.form.on("BAPP", {
 		frm.set_query("taxes_and_charges", function () {
 			return {
 				filters: { company: frm.doc.company },
-			};
-		});
-
-		frm.set_query("subcontracting_receipt", function () {
-			return {
-				filters: {
-					docstatus: 1,
-					supplier: frm.doc.supplier,
-				},
 			};
 		});
 	},

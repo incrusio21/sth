@@ -24,6 +24,11 @@ def create_sq():
     doc_sq.custom_material_request = doc_sq.items[0].material_request
     doc_sq.items = []
 
+    doc_sq.append("upload_file_penawaran",{
+        "file_upload": f"/private/files/{data.file_url}"
+    })
+
+
     for idx,item in enumerate(items_data.get("item_code")):
         item_details = get_item_details({"item_code":item,"company": doc_sq.company,"doctype": doc_sq.doctype,"conversion_rate":doc_sq.conversion_rate})
 

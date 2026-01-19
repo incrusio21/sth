@@ -7,7 +7,6 @@ frappe.ui.form.on("Retur Ke Supplier", {
             return {
                 filters: {
                     company: doc.company,
-                    supplier: doc.nama_supplier,
                     docstatus: 1,
                     status: ["not in", ["Return", "Return Issued"]]
                 }
@@ -19,6 +18,10 @@ frappe.ui.form.on("Retur Ke Supplier", {
     },
 
     no_dokumen_penerimaan(frm) {
+        if (!frm.doc.no_dokumen_penerimaan) {
+            return
+        }
+
         frm.call("get_items", { freeze: true, freeze_message: "Getting data..." }).then((res) => {
             frappe.model.sync(res)
             frm.refresh()

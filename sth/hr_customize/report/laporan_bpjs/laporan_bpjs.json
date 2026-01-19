@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-01-07 10:13:47.744552",
+ "modified": "2026-01-09 14:37:16.581535",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan BPJS",
@@ -22,6 +22,12 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
   }
  ],
  "timeout": 0

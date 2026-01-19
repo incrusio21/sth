@@ -50,6 +50,20 @@ def get_payment_settings(key: str):
 	return payment_settings.get(key)
 
 
+def get_allowance_settings(key=None):
+	"""Return the value associated with the given `key` from Bonus and Allowance Settings DocType."""
+	if not (allowance_settings := getattr(frappe.local, "allowance_settings", None)):
+		try:
+			frappe.local.allowance_settings = allowance_settings = frappe.get_cached_doc("Bonus and Allowance Settings")
+		except frappe.DoesNotExistError:  # possible during new install
+			clear_last_message()
+			return
+
+	if key:
+		return allowance_settings.get(key)
+	
+	return allowance_settings
+
 @frappe.whitelist()
 def update_payment_log(voucher_type, voucher_no=None, filters=None):
 	filters = json.loads(filters or "{}")

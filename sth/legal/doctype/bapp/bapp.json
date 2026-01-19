@@ -12,18 +12,19 @@
   "naming_series",
   "supplier",
   "supplier_name",
+  "asset_category",
+  "sub_asset_category",
   "column_break1",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "column_break_12",
   "company",
-  "apply_putaway_rule",
-  "amended_from",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break",
+  "unit",
   "project",
+  "apply_putaway_rule",
+  "is_cwip",
+  "amended_from",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -34,6 +35,9 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
   "section_break0",
   "total_qty",
   "total_net_weight",
@@ -321,6 +325,7 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Currency and Price List",
    "options": "fa fa-tag"
   },
@@ -478,6 +483,7 @@
   {
    "fieldname": "taxes_charges_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break"
@@ -485,6 +491,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category",
    "print_hide": 1
@@ -496,12 +503,14 @@
   {
    "fieldname": "shipping_rule",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shipping Rule",
    "options": "Shipping Rule"
   },
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1
   },
   {
@@ -808,7 +817,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
-   "label": "Project",
+   "label": "Project/SPK",
    "options": "Project"
   },
   {
@@ -975,6 +984,7 @@
    "default": "0",
    "fieldname": "apply_putaway_rule",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Apply Putaway Rule"
   },
   {
@@ -1091,6 +1101,7 @@
   {
    "fieldname": "incoterm",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Incoterm",
    "options": "Incoterm"
   },
@@ -1098,6 +1109,7 @@
    "depends_on": "incoterm",
    "fieldname": "named_place",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Named Place"
   },
   {
@@ -1131,13 +1143,40 @@
    "label": "Dispatch Address",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "label": "Asset Category",
+   "options": "Asset Category",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cwip",
+   "fieldtype": "Check",
+   "label": "Is CWIP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sub_asset_category",
+   "fieldtype": "Link",
+   "label": "Sub Asset Category",
+   "options": "Sub Asset Category",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-07 09:38:53.649072",
+ "modified": "2026-01-15 10:57:02.354242",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

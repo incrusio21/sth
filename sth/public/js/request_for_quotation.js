@@ -37,7 +37,7 @@ frappe.ui.form.on('Request for Quotation', {
                     setTimeout(() => {
                         // console.log(d.dialog);
                         d.dialog.set_value("allow_child_item_selection", 1)
-                    }, 300);
+                    }, 500);
 
                 },
                 __("Get Items From")

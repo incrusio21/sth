@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-14 13:18:47.941459",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sterilizer_pressure",
+  "time_start",
+  "time_stop",
+  "upload_pressure_photo",
+  "column_break_fhgj",
+  "upload_sterilizer_graph_photo",
+  "upload_sterilizer_log__record_photo"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sterilizer_pressure",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Sterilizer Pressure",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "time_start",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Time Start"
+  },
+  {
+   "columns": 2,
+   "fieldname": "time_stop",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Time Stop"
+  },
+  {
+   "columns": 1,
+   "fieldname": "upload_pressure_photo",
+   "fieldtype": "Attach Image",
+   "label": "Upload Pressure Photo"
+  },
+  {
+   "columns": 1,
+   "fieldname": "upload_sterilizer_graph_photo",
+   "fieldtype": "Attach Image",
+   "label": "Upload Sterilizer Graph Photo"
+  },
+  {
+   "columns": 1,
+   "fieldname": "upload_sterilizer_log__record_photo",
+   "fieldtype": "Attach Image",
+   "label": "Upload Sterilizer Log / Record Photo"
+  },
+  {
+   "fieldname": "column_break_fhgj",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-14 13:23:27.873631",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sterilizer Transaction Monitoring",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

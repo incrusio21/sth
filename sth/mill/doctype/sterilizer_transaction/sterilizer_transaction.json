@@ -9,26 +9,40 @@
   "section_break_p0cs",
   "naming_series",
   "transaction_date",
-  "machine",
-  "machine_station",
+  "company",
+  "abbr",
+  "unit",
   "column_break_awov",
   "status",
-  "unit",
-  "company",
+  "machine",
+  "machine_station",
   "amended_from",
   "sterilizer_monitoring_tab",
+  "sterilizer_transaction_monitoring",
   "detail_section",
   "sp1",
+  "ts1",
+  "tst1",
   "upp1",
   "column_break_zwan",
   "usg1",
   "usl1",
   "seconds_pressure_section",
   "sp2",
+  "ts2",
+  "tst2",
   "upp2",
   "column_break_mjgl",
   "usg2",
   "usl2",
+  "third_pressure_section",
+  "sp3",
+  "ts3",
+  "tst3",
+  "upload_pressure_photo_copy",
+  "column_break_zzqp",
+  "upload_sterilizer_logrecord_photo_copy",
+  "upload_sterilizer_graph_photo_copy",
   "tbs_process_tab",
   "unit_type",
   "quantity_to_process",
@@ -49,7 +63,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Sterilizer Station",
+   "options": "Sterilizer Transaction",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -69,20 +83,18 @@
    "options": "Mill Machine"
   },
   {
-   "fetch_from": "machine.unit",
    "fieldname": "unit",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Unit",
-   "read_only": 1
+   "options": "Unit"
   },
   {
-   "fetch_from": "machine.company",
    "fieldname": "company",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Company",
-   "read_only": 1
+   "options": "Company"
   },
   {
    "fieldname": "column_break_awov",
@@ -91,6 +103,7 @@
   {
    "fieldname": "detail_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "First Pressure"
   },
   {
@@ -204,6 +217,7 @@
   {
    "fieldname": "seconds_pressure_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Seconds Pressure"
   },
   {
@@ -212,8 +226,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Sterilizer Pressure",
-   "reqd": 1
+   "label": "Sterilizer Pressure"
   },
   {
    "fieldname": "upp2",
@@ -236,13 +249,105 @@
    "fieldtype": "Attach Image",
    "in_preview": 1,
    "label": "Upload Sterilizer Log/Record Photo"
+  },
+  {
+   "fieldname": "ts1",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Time Start"
+  },
+  {
+   "fieldname": "tst1",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Time Stop"
+  },
+  {
+   "fieldname": "ts2",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Time Start"
+  },
+  {
+   "fieldname": "tst2",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Time Stop"
+  },
+  {
+   "fieldname": "third_pressure_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Third Pressure"
+  },
+  {
+   "fieldname": "ts3",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Time Start"
+  },
+  {
+   "fieldname": "tst3",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Time Stop"
+  },
+  {
+   "fieldname": "upload_pressure_photo_copy",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Pressure Photo Copy"
+  },
+  {
+   "fieldname": "column_break_zzqp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upload_sterilizer_logrecord_photo_copy",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Log/Record Photo Copy"
+  },
+  {
+   "fieldname": "upload_sterilizer_graph_photo_copy",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Sterilizer Graph Photo Copy"
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "sp3",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Sterilizer Pressure"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sterilizer_transaction_monitoring",
+   "fieldtype": "Table",
+   "label": "Sterilizer Transaction Monitoring",
+   "options": "Sterilizer Transaction Monitoring"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-20 13:03:49.417804",
+ "modified": "2026-01-14 13:26:05.885316",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sterilizer Transaction",

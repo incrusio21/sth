@@ -179,7 +179,7 @@ sth.ConfigureColumn.Controller = class {
 							<div class='col-4' style='padding-top: 2px; margin-top:-2px;' title='${__("Columns")}'>
 								<input class='form-control column-width my-1 input-xs text-right'
 								style='height: 24px; max-width: 80px; background: var(--bg-color);'
-									value='${docfield.columns || cint(d.columns)}'
+									value='${cint(d.columns) || docfield.columns}'
 									data-fieldname='${docfield.fieldname}' style='background-color: var(--modal-bg); display: inline'>
 							</div>
 							<div class='col-1' style='padding-top: 3px;'>
@@ -229,7 +229,7 @@ sth.ConfigureColumn.Controller = class {
 
 				this.frm.doc[this.fields].forEach((row) => {
 					if (row.fieldname === event.target.dataset.fieldname) {
-						frappe.model.set_value(row.doctype, row.name, "colums", cint(event.target.value))
+						frappe.model.set_value(row.doctype, row.name, "columns", cint(event.target.value))
 						event.target.defaultValue = cint(event.target.value);
 					}
 				});

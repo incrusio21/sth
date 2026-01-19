@@ -120,18 +120,56 @@ def get_columns(filters):
 		},
 	]
 
-	q_column_earning = frappe.db.sql("""
-		SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Earning' AND sc.disabled != 1 AND sc.name != 'HKnE';
-  """, as_dict=True)
-	q_column_deduction = frappe.db.sql("""
-		SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Deduction' AND sc.disabled != 1;
-  """, as_dict=True)
+	# q_column_earning = frappe.db.sql("""
+	# 	SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Earning' AND sc.disabled != 1 AND sc.name != 'HKnE';
+  # """, as_dict=True)
+	q_column_earning = [
+		{"label": "Gaji Pokok", "key": "gaji_pokok"},
+		{"label": "Lembur", "key": "lembur"},
+		{"label": "HKNe", "key": "hkne"},
+		{"label": "Premi Panen", "key": "premi_panen_kontanan"},
+		{"label": "Premi Kehadiran", "key": "premi_kehadiran"},
+		{"label": "Premi Brondolan", "key": "upah_brondolan"},
+		{"label": "Catu Beras", "key": "natura"},
+		{"label": "Premi", "key": "premi"},
+		{"label": "Premi Perawatan", "key": "premi_perawatan"},
+		{"label": "Premi Transport", "key": "premi_transport"},
+		{"label": "Premi bmtbs", "key": "premi_tbs"},
+		{"label": "Premi Angkut", "key": "premi_angkut"},
+		{"label": "Premi Pengawasan", "key": "premi_pengawas"},
+	]
+  
+	# q_column_deduction = frappe.db.sql("""
+	# 	SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Deduction' AND sc.disabled != 1;
+  # """, as_dict=True)
+	q_column_deduction = [
+		{"label": "Penalti", "key": "penalti"},
+		{"label": "Potongan HK", "key": "potongan_hk"},
+		{"label": "BPJS Kesehatan (-)", "key": "bpjs_kesehatan_karyawan"},
+		{"label": "Potongan Basis HK", "key": "potongan_basis_hk"},
+		{"label": "BPJS JHT (-)", "key": "bpjs_tk_jht_karyawan"},
+		{"label": "Potongan Koperasi", "key": "potongan_koperasi"},
+		{"label": "Potongan Uang Sekolah", "key": "potongan_uang_sekolah"},
+		{"label": "BPJS Pensiun (-)", "key": "bpjs_pensiun"},
+		{"label": "Potongan SBSI", "key": "potongan_sp_sbsi"},
+		{"label": "Potongan SPSI", "key": "potongan_spsi"},
+		{"label": "Potongan HO", "key": "potongan_ho"},
+		{"label": "Potongan KSBSI", "key": "potongan_ksbsi"},
+		{"label": "Potongan Serbuk", "key": "potongan_serbuk"},
+	]
 
 	for earning in q_column_earning:
+		# columns.append({
+		# 	"label": earning.name,
+		# 	"fieldtype": "Currency",
+		# 	"fieldname": frappe.scrub(earning.name),
+		#   "width": 150
+		# })
 		columns.append({
-			"label": earning.name,
+			"label": earning["label"],
 			"fieldtype": "Currency",
-			"fieldname": frappe.scrub(earning.name),
+			"fieldname": frappe.scrub(earning["key"]),
+   		"width": 150
 		})
   
 	columns.append({
@@ -141,10 +179,17 @@ def get_columns(filters):
 	})
 
 	for deduction in q_column_deduction:
+		# columns.append({
+		# 	"label": deduction.name,
+		# 	"fieldtype": "Currency",
+		# 	"fieldname": frappe.scrub(deduction.name),
+		# 	"width": 150
+		# })
 		columns.append({
-			"label": deduction.name,
+			"label": deduction["label"],
 			"fieldtype": "Currency",
-			"fieldname": frappe.scrub(deduction.name),
+			"fieldname": frappe.scrub(deduction["key"]),
+   		"width": 150
 		})
 
 	columns.append({

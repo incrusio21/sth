@@ -21,12 +21,13 @@
  ],
  "fields": [
   {
+   "depends_on": "eval:doc.perangkat_desa != \"Ya\"",
    "fieldname": "sppt",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "No SPPT/SHM",
-   "options": "GIS",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.perangkat_desa != \"Ya\"",
+   "options": "GIS"
   },
   {
    "fieldname": "column_break_ppdh",
@@ -42,11 +43,12 @@
   },
   {
    "columns": 1,
+   "depends_on": "eval:doc.perangkat_desa != \"Ya\"",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate / Ha",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.perangkat_desa != \"Ya\""
   },
   {
    "fieldname": "biaya_surat",
@@ -54,11 +56,12 @@
    "label": "Biaya Pembuatan Surat"
   },
   {
+   "depends_on": "eval:doc.perangkat_desa == \"Ya\"",
    "fieldname": "pemilik_lahan",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Pemilik Lahan",
-   "read_only": 1
+   "options": "Daftar Masyarakat"
   },
   {
    "fieldname": "amount",
@@ -111,7 +114,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-05 17:28:40.766809",
+ "modified": "2026-01-08 14:19:11.748091",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan Item",

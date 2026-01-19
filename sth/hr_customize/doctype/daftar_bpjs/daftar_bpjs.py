@@ -119,7 +119,7 @@ class DaftarBPJS(Document):
 		pasang_bpjs(self)
 
 def debug_bpjs():
-	doc = frappe.get_doc("Daftar BPJS","BPJS KES-PT. TRIMITRA LESTARI-00464")
+	doc = frappe.get_doc("Daftar BPJS","BPJS KES-PT. TRIMITRA LESTARI-00468")
 	pasang_bpjs(doc)
 
 def pasang_bpjs(doc):
@@ -158,6 +158,7 @@ def pasang_bpjs(doc):
 			)
 		)
 
+	print(query)
 	list_employee = query.run()
 		
 	list_program_employee = {}

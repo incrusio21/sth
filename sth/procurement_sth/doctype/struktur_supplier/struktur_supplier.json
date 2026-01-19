@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-08 16:18:49.972737",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama_pemilik",
+  "nama_dewan_direktur",
+  "nama_penanggung_jawab",
+  "jabatan",
+  "column_break_bzlp",
+  "user_email",
+  "tender",
+  "status_supplier",
+  "jenis_usaha"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "nama_pemilik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Pemilik"
+  },
+  {
+   "columns": 2,
+   "fieldname": "nama_dewan_direktur",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Dewan Direktur"
+  },
+  {
+   "columns": 1,
+   "fieldname": "nama_penanggung_jawab",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Penanggung Jawab"
+  },
+  {
+   "columns": 1,
+   "fieldname": "jabatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jabatan",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "column_break_bzlp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "user_email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "User Email"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "tender",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Tender"
+  },
+  {
+   "columns": 1,
+   "fieldname": "status_supplier",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Supplier",
+   "options": "Aktif\nNon Aktif\nRegister / Boleh Diupdate\nBlacklist"
+  },
+  {
+   "columns": 1,
+   "fieldname": "jenis_usaha",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jenis Usaha",
+   "options": "Item Group"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 16:23:56.086915",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Struktur Supplier",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

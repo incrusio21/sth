@@ -6,7 +6,7 @@ frappe.provide("sth.legal")
 frappe.pages['anggaran-dasar-akta'].on_page_load = function(wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Aggaran Dasar Akta',
+		title: 'Anggaran Dasar Akta',
 		single_column: true
 	});
 
@@ -233,8 +233,9 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 			let akta_data = data[nomor_akta];
 			
 			// Render Akta table
+			let details = akta_data.details;
+			
 			if (akta_data.details && Object.keys(akta_data.details).length > 0) {
-				let details = akta_data.details;
 				let $row = $(`
 					<tr>
 						<td class="text-center">${akta_no}</td>
@@ -271,7 +272,7 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 					let $row = $(`
 						<tr>
 							<td class="text-center">${saham_no}</td>
-							<td class="text-center">${nomor_akta}</td>
+							<td class="text-center">${akta_data.details.nomor_akta}</td>
 							<td class="text-center">${saham.tanggal_akta ? frappe.datetime.str_to_user(saham.tanggal_akta) : ''}</td>
 							<td>${saham.nama || ''}</td>
 							<td class="text-right">${saham.lembar_saham ? format_number(saham.lembar_saham) : ''}</td>
@@ -291,7 +292,7 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 					let $row = $(`
 						<tr>
 							<td class="text-center">${pengurus_no}</td>
-							<td class="text-center">${nomor_akta}</td>
+							<td class="text-center">${akta_data.details.nomor_akta}</td>
 							<td class="text-center">${pengurus.tanggal_akta ? frappe.datetime.str_to_user(pengurus.tanggal_akta) : ''}</td>
 							<td>${pengurus.nama || ''}</td>
 							<td>${pengurus.designation || ''}</td>

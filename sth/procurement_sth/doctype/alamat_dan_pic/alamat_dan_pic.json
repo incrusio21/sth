@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-08 16:32:25.151281",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "alamat_pic",
+  "kota_pic",
+  "propinsi_pic",
+  "negara_pic",
+  "column_break_asag",
+  "telepon",
+  "fax",
+  "kontak_person",
+  "jabatan_pic",
+  "telepon_genggam",
+  "email_koresponden",
+  "email_konfirmasi_pembayaran",
+  "status_pic"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "alamat_pic",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Alamat PIC"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kota_pic",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kota PIC"
+  },
+  {
+   "columns": 1,
+   "fieldname": "propinsi_pic",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Propinsi PIC"
+  },
+  {
+   "columns": 1,
+   "fieldname": "negara_pic",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Negara PIC"
+  },
+  {
+   "fieldname": "column_break_asag",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "telepon",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telepon"
+  },
+  {
+   "fieldname": "fax",
+   "fieldtype": "Data",
+   "label": "Fax"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kontak_person",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kontak Person"
+  },
+  {
+   "columns": 1,
+   "fieldname": "jabatan_pic",
+   "fieldtype": "Link",
+   "label": "Jabatan PIC",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "telepon_genggam",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telepon Genggam"
+  },
+  {
+   "columns": 1,
+   "fieldname": "email_koresponden",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email Koresponden"
+  },
+  {
+   "columns": 1,
+   "fieldname": "email_konfirmasi_pembayaran",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email Konfirmasi Pembayaran"
+  },
+  {
+   "columns": 1,
+   "fieldname": "status_pic",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status PIC",
+   "options": "Aktif\nTidak Aktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 16:35:01.411213",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Alamat dan PIC",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

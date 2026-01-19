@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2026-01-10 09:54:06.024274",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "disabled",
+  "column_break_hafu",
+  "is_cwip",
+  "configure_columns_items_section",
+  "fields_html",
+  "fields",
+  "column_break_lrvf"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "configure_columns_items_section",
+   "fieldtype": "Section Break",
+   "label": "Configure Columns Items"
+  },
+  {
+   "fieldname": "fields_html",
+   "fieldtype": "HTML",
+   "label": "Fields HTML"
+  },
+  {
+   "fieldname": "column_break_lrvf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fields",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Fields Assigned",
+   "options": "Purchase Type Item Column"
+  },
+  {
+   "fieldname": "column_break_hafu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cwip",
+   "fieldtype": "Check",
+   "label": "Is CWIP"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-14 22:13:56.506448",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Proposal Type",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-11-19 15:38:42.106726",
@@ -9,9 +10,14 @@
   "naming_series",
   "machine_name",
   "station",
+  "quantity",
+  "satuan",
+  "hour_meters",
   "column_break_tgis",
-  "unit",
   "company",
+  "abbr",
+  "unit",
+  "spesification",
   "link_asset"
  ],
  "fields": [
@@ -49,8 +55,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Machine Code",
-   "options": "MC-",
-   "reqd": 1
+   "options": "MC-"
   },
   {
    "fieldname": "column_break_tgis",
@@ -69,12 +74,46 @@
    "label": "Station",
    "options": "Station Master",
    "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "hour_meters",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Hour Meters"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Machine Quantity"
+  },
+  {
+   "fieldname": "satuan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Machine UOM",
+   "options": "UOM"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr"
+  },
+  {
+   "fieldname": "spesification",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Spesification"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-19 16:13:02.352614",
+ "modified": "2026-01-13 14:58:01.903197",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Machine",
@@ -97,7 +136,7 @@
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_order": "ASC",
  "states": [],
  "title_field": "machine_name"
 }

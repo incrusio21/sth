@@ -21,7 +21,7 @@ def execute(filters=None):
 		pkp.grand_total as pesangon_kompensasi
 		FROM `tabPerhitungan Kompensasi PHK` as pkp
 		JOIN `tabEmployee` as ee ON ee.name = pkp.employee
-		JOIN `tabEmployee` as eilb ON eilb.name = pkp.ilb;
+		LEFT JOIN `tabEmployee` as eilb ON eilb.name = pkp.ilb;
   """, as_dict=True)
 
 	for emp in query_l_phk:

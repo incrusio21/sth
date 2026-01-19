@@ -12,7 +12,7 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
             }
         })
 
-        frm.set_query("sub_unit", function (doc) {
+        frm.set_query("sub_unit", "items", function (doc) {
             return {
                 filters: {
                     company: doc.pt_pemilik_barang,
@@ -20,10 +20,12 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
             }
         })
 
-        frm.set_query("blok", function (doc) {
+        frm.set_query("blok", "items", function (doc, dt, dn) {
+            const child = locals[dt][dn]
+
             return {
                 filters: {
-                    unit: doc.sub_unit,
+                    unit: child.sub_unit,
                 }
             }
         })

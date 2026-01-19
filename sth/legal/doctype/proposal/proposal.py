@@ -19,18 +19,19 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 	get_party_tax_withholding_details,
 )
 from erpnext.accounts.party import get_party_account, get_party_account_currency
-from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_item_and_get_basic_data
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+from sth.legal import get_legal_settings
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -62,14 +63,17 @@ class Proposal(BuyingController):
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
 	def validate(self):
+		self.set_item_kegiatan_name()
+
 		super().validate()
 
 		self.set_status()
 
 		# apply tax withholding only if checked and applicable
-		self.set_tax_withholding()
+		# self.set_tax_withholding()
 
 		self.validate_supplier()
+		self.validate_capex()
 		self.validate_schedule_date()
 		validate_for_items(self)
 		self.check_on_hold_or_closed_status()
@@ -85,6 +89,25 @@ class Proposal(BuyingController):
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+	def set_item_kegiatan_name(self):
+		legal_item = get_legal_settings("default_item_code")
+
+		for item in self.items:
+			if item.item_code:
+				continue
+
+			if item.kegiatan:
+				item.item_code = frappe.get_cached_value("Kegiatan", item.kegiatan, "item_code")
+			
+			if not item.item_code:
+				item.item_code = legal_item 
+
+	def validate_capex(self):
+		if self.proposal_type not in ["Capex"]:
+			self.asset_category = self.sub_asset_category = ""
+		elif not (self.asset_category and self.sub_asset_category):
+			frappe.throw("Please set Asset and Sub Asset Category first")
 
 	def set_has_unit_price_items(self):
 		"""
@@ -251,21 +274,6 @@ class Proposal(BuyingController):
 				check_list.append(d.material_request)
 				check_on_hold_or_closed_status("Material Request", d.material_request)
 
-	def update_ordered_qty(self, po_item_rows=None):
-		"""update requested qty (before ordered_qty is updated)"""
-		item_wh_list = []
-		for d in self.get("items"):
-			if (
-				(not po_item_rows or d.name in po_item_rows)
-				and [d.item_code, d.warehouse] not in item_wh_list
-				and frappe.get_cached_value("Item", d.item_code, "is_stock_item")
-				and d.warehouse
-				and not d.delivered_by_supplier
-			):
-				item_wh_list.append([d.item_code, d.warehouse])
-		for item_code, warehouse in item_wh_list:
-			update_bin_qty(item_code, warehouse, {"ordered_qty": get_ordered_qty(item_code, warehouse)})
-
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabProposal` where name = %s", self.name)
 		date_diff = frappe.db.sql(f"select '{mod_db[0][0]}' - '{cstr(self.modified)}' ")
@@ -280,7 +288,6 @@ class Proposal(BuyingController):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
-		self.update_ordered_qty()
 		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -290,7 +297,6 @@ class Proposal(BuyingController):
 
 		self.update_prevdoc_status()
 
-		self.update_ordered_qty()
 		self.validate_budget()
 
 		frappe.get_doc("Authorization Control").validate_approving_authority(
@@ -362,6 +368,21 @@ class Proposal(BuyingController):
 
 		super().set_missing_values(for_validate)
 
+def validate_for_items(doc) -> None:
+	items = []
+	for d in doc.get("items"):
+		item = validate_item_and_get_basic_data(row=d)
+		validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
+
+		items.append(cstr(d.item_code))
+
+	if (
+		items
+		and len(items) != len(set(items))
+		and not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0)
+	):
+		frappe.throw(_("Same item cannot be entered multiple times."))
+
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):
@@ -382,7 +403,6 @@ def close_or_unclose_purchase_orders(names, status):
 			po.update_blanket_order()
 
 	frappe.local.message_log = []
-
 
 def set_missing_values(source, target):
 	target.run_method("set_missing_values")
@@ -464,8 +484,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		set_missing_values(source, target)
 
 		# set tax_withholding_category from Purchase Order
-		if source.apply_tds and source.tax_withholding_category and target.apply_tds:
-			target.tax_withholding_category = source.tax_withholding_category
+		# if source.apply_tds and source.tax_withholding_category and target.apply_tds:
+		# 	target.tax_withholding_category = source.tax_withholding_category
 
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
 		if target.get("allocate_advances_automatically"):
@@ -552,12 +572,8 @@ def update_status(status, name):
 def get_kegiatan_item(kegiatan):
     keg_doc = frappe.get_cached_doc("Kegiatan", kegiatan)
 
-    # memastikan terdapat item pada kegiatan
-    if not keg_doc.item_code:
-        frappe.throw(_("Please set Item Code for Kegiatan first"))
-
     return {
-        "item_code": keg_doc.item_code,
+		"kegiatan_name": keg_doc.nm_kgt,
         "uom": keg_doc.uom
     }
 
@@ -601,6 +617,9 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 			)
 
 	def validate_progress(child_item, new_data):
+		if flt(new_data.get("progress_received")) > flt(child_item.qty):
+			frappe.throw(_("Cannot set Progress more than quantity"))
+
 		if flt(new_data.get("progress_received")) < flt(child_item.received_qty):
 			frappe.throw(_("Cannot set Progress less than received quantity"))
 
@@ -658,111 +677,117 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 
 @frappe.whitelist()
 def make_proposal_revision(source_name, target_doc=None):
-    has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
+	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
 
-    def set_missing_values(source, target):
-        # pastikan po lama sudah memiliki project
-        if not frappe.db.exists("Project", {"proposal": source.name}):
-            frappe.throw("Please create a Project for the Proposal before making revisions")
-        
-        target.run_method("set_missing_values")
-        target.run_method("calculate_taxes_and_totals")
-        
-    def is_unit_price_row(source):
-        return has_unit_price_items and source.qty == 0
+	def set_missing_values(source, target):
+		# pastikan po lama sudah memiliki project
+		if not frappe.db.exists("Project", {"proposal": source.name}):
+			frappe.throw("Please create a Project for the Proposal before making revisions")
+		
+		target.total = 0
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		
+	def is_unit_price_row(source):
+		return has_unit_price_items and source.qty == 0
 
-    def update_item(obj, target, source_parent):
-        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
-        target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-        target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-        target.base_amount = (
-            (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-        )
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
+		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+		target.base_amount = (
+			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+		)
 
-    doc = get_mapped_doc(
-        "Proposal",
-        source_name,
-        {
-            "Proposal": {
-                "doctype": "Proposal",
-                "field_map": {
-                    "supplier_warehouse": "supplier_warehouse",
-                    "name": "from_order"
-                },
-                "validation": {
-                    "docstatus": ["=", 1],
-                },
-            },
-            "Proposal Item": {
-                "doctype": "Proposal Item",
-                "field_map": {
-                    "name": "from_order_item",
-                    "material_request": "material_request",
-                    "material_request_item": "material_request_item",
-                    "sales_order": "sales_order",
-                    "sales_order_item": "sales_order_item",
-                    "wip_composite_asset": "wip_composite_asset",
-                },
-                "postprocess": update_item,
-                "condition": lambda doc: (
-                    True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
-                )
-                and doc.delivered_by_supplier != 1,
-            },
-            "Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
-        },
-        target_doc,
-        set_missing_values,
-    )
+	doc = get_mapped_doc(
+		"Proposal",
+		source_name,
+		{
+			"Proposal": {
+				"doctype": "Proposal",
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"name": "from_order"
+				},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Proposal Item": {
+				"doctype": "Proposal Item",
+				"field_map": {
+					"name": "from_order_item",
+					"material_request": "material_request",
+					"material_request_item": "material_request_item",
+					"sales_order": "sales_order",
+					"sales_order_item": "sales_order_item",
+					"wip_composite_asset": "wip_composite_asset",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: (
+					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
+				)
+				and doc.delivered_by_supplier != 1,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		target_doc,
+		set_missing_values,
+	)
 
-    return doc
+	return doc
 
 @frappe.whitelist()
 def make_bapp(source_name, target_doc=None):
-    has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
+	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
+	spk = frappe.db.get_value("Project", {"proposal": source_name, "status": ["!=", "Cancelled"]}, "name")
+	if not spk:
+		frappe.throw(f"Create SPK for {source_name} first")
 
-    def set_missing_values(source, target):
-        target.run_method("set_missing_values")
-        target.run_method("calculate_taxes_and_totals")
-        
-    def is_unit_price_row(source):
-        return has_unit_price_items and source.qty == 0
-    
-    def update_item(obj, target, source_parent):
-        target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.progress_received) - flt(obj.received_qty)
-        target.stock_qty = (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-        target.amount = (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.rate)
-        target.base_amount = (
-            (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-        )
+	def set_missing_values(source, target):
+		target.project = spk
 
-    doc = get_mapped_doc(
-        "Proposal",
-        source_name,
-        {
-            "Proposal": {
-                "doctype": "BAPP",
-                "field_map": {"supplier_warehouse": "supplier_warehouse"},
-                "validation": {
-                    "docstatus": ["=", 1],
-                },
-            },
-            "Proposal Item": {
-                "doctype": "BAPP Item",
-                "field_map": {
-                    "name": "proposal_item",
-                    "parent": "proposal",
-                },
-                "postprocess": update_item,
-                "condition": lambda doc: (
-                    True if is_unit_price_row(doc) else abs(doc.received_qty) < doc.progress_received
-                )
-                and doc.delivered_by_supplier != 1,
-            },
-            "Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
-        },
-        target_doc,
-        set_missing_values,
-    )
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		
+	def is_unit_price_row(source):
+		return has_unit_price_items and source.qty == 0
 
-    return doc
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.progress_received) - flt(obj.received_qty)
+		target.stock_qty = (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+		target.amount = (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.rate)
+		target.base_amount = (
+			(flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+		)
+
+	doc = get_mapped_doc(
+		"Proposal",
+		source_name,
+		{
+			"Proposal": {
+				"doctype": "BAPP",
+				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Proposal Item": {
+				"doctype": "BAPP Item",
+				"field_map": {
+					"name": "proposal_item",
+					"parent": "proposal",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: (
+					True if is_unit_price_row(doc) else abs(doc.received_qty) < doc.progress_received
+				)
+				and doc.delivered_by_supplier != 1,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	return doc

@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-08 16:29:21.165734",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status_pkp",
+  "no_sppkp",
+  "no_npwp",
+  "nama_npwp",
+  "column_break_uzsw",
+  "alamat_npwp",
+  "status_npwp"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "status_pkp",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Status PKP"
+  },
+  {
+   "columns": 2,
+   "fieldname": "no_sppkp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No SPPKP"
+  },
+  {
+   "columns": 2,
+   "fieldname": "no_npwp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No NPWP"
+  },
+  {
+   "columns": 2,
+   "fieldname": "nama_npwp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama NPWP"
+  },
+  {
+   "fieldname": "column_break_uzsw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "alamat_npwp",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Alamat NPWP"
+  },
+  {
+   "columns": 1,
+   "fieldname": "status_npwp",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status NPWP",
+   "options": "Aktif\nTidak Aktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-08 16:31:42.975048",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "NPWP dan SPPKP Supplier",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from hrms.hr.doctype.leave_application.leave_application import get_leave_allocation_records
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, getdate, nowdate, get_last_day, add_days
 
 def execute(filters=None):
 	conditions = get_condition(filters)
@@ -25,12 +25,21 @@ def execute(filters=None):
 		la.employee
 		FROM `tabLeave Allocation` as la
 		JOIN `tabEmployee` as e ON e.name = la.employee
-		WHERE la.company IS NOT NULL {};
-  """.format(conditions), filters, as_dict=True)
+		WHERE la.company IS NOT NULL
+		AND la.docstatus = 1
+		 {};
+	""".format(conditions), filters, as_dict=True)
 
 	for leave in query_l_daftar_izin_cuti:
-		leave_details = get_leave_details_unrestricted(employee=leave.employee,date=frappe.utils.today())
-  
+
+		# leave_details = get_leave_details_unrestricted(employee=leave.employee,date=frappe.utils.today())
+		leave_details = get_leave_details_unrestricted(employee=leave.employee,date=leave.tgl_berakhir_cuti)
+
+		sisa = 0
+		if leave.jenis_izin_cuti in leave_details["leave_allocation"]:
+			sisa = leave_details["leave_allocation"][leave.jenis_izin_cuti]["remaining_leaves"]
+
+
 		data.append({
 			"pt": leave.pt,
 			"unit": leave.unit,
@@ -41,7 +50,7 @@ def execute(filters=None):
 			"tgl_awal": leave.tgl_awal,
 			"tgl_berakhir_cuti": leave.tgl_berakhir_cuti,
 			"jumlah_hk": leave.jumlah_hk,
-			"hk": leave_details["leave_allocation"][leave.jenis_izin_cuti]["remaining_leaves"]
+			"hk": sisa
 		})
 
 	return columns, data
@@ -82,6 +91,7 @@ def get_columns(filters):
 			"label": _("Nama"),
 			"fieldtype": "Data",
 			"fieldname": "nama",
+			"width": 300
 		},
 		{
 			"label": _("Golongan"),
@@ -109,12 +119,12 @@ def get_columns(filters):
 			"fieldname": "tgl_berakhir_cuti",
 		},
 		{
-			"label": _("Jumlah HK"),
+			"label": _("Total Cuti"),
 			"fieldtype": "Data",
 			"fieldname": "jumlah_hk",
 		},
 		{
-			"label": _("Hk"),
+			"label": _("Sisa Cuti"),
 			"fieldtype": "Data",
 			"fieldname": "hk",
 		},
@@ -124,61 +134,80 @@ def get_columns(filters):
 
 @frappe.whitelist()
 def get_leave_details_unrestricted(employee, date, for_salary_slip=False):
-  allocation_records = get_leave_allocation_records(employee, date)
-  leave_allocation = {}
-  precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 2
 
-  for d in allocation_records:
-    allocation = allocation_records.get(d, frappe._dict())
-    to_date = date if for_salary_slip else allocation.to_date
+	allocation_records = get_leave_allocation_records(employee, date)
+	leave_allocation = {}
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 2
 
-    remaining_leaves = frappe.call(
-      "hrms.hr.doctype.leave_application.leave_application.get_leave_balance_on",
-      employee=employee,
-      leave_type=d,
-      date=date,
-      to_date=to_date,
-      consider_all_leaves_in_the_allocation_period=not for_salary_slip
-    )
+	for d in allocation_records:
+		allocation = allocation_records.get(d, frappe._dict())
+		to_date = date if for_salary_slip else allocation.to_date
 
-    leaves_taken = frappe.call(
-      "hrms.hr.doctype.leave_application.leave_application.get_leaves_for_period",
-      employee=employee,
-      leave_type=d,
-      from_date=allocation.from_date,
-      to_date=to_date
-    ) * -1
+		remaining_leaves = frappe.call(
+			"hrms.hr.doctype.leave_application.leave_application.get_leave_balance_on",
+			employee=employee,
+			leave_type=d,
+			date=date,
+			to_date=to_date,
+			consider_all_leaves_in_the_allocation_period=not for_salary_slip
+		)
 
-    leaves_pending = frappe.call(
-      "hrms.hr.doctype.leave_application.leave_application.get_leaves_pending_approval_for_period",
-      employee=employee,
-      leave_type=d,
-      from_date=allocation.from_date,
-      to_date=to_date
-    )
+		leaves_taken = frappe.call(
+			"hrms.hr.doctype.leave_application.leave_application.get_leaves_for_period",
+			employee=employee,
+			leave_type=d,
+			from_date=allocation.from_date,
+			to_date=to_date
+		) * -1
 
-    expired_leaves = allocation.total_leaves_allocated - (remaining_leaves + leaves_taken)
+		leaves_pending = frappe.call(
+			"hrms.hr.doctype.leave_application.leave_application.get_leaves_pending_approval_for_period",
+			employee=employee,
+			leave_type=d,
+			from_date=allocation.from_date,
+			to_date=to_date
+		)
 
-    leave_allocation[d] = {
-      "total_leaves": flt(allocation.total_leaves_allocated, precision),
-      "expired_leaves": flt(expired_leaves, precision) if expired_leaves > 0 else 0,
-      "leaves_taken": flt(leaves_taken, precision),
-      "leaves_pending_approval": flt(leaves_pending, precision),
-      "remaining_leaves": flt(remaining_leaves, precision),
-    }
+		expired_leaves = allocation.total_leaves_allocated - (remaining_leaves + leaves_taken)
 
-  lwp = frappe.db.get_list(
-    "Leave Type",
-    filters={"is_lwp": 1},
-    pluck="name",
-    ignore_permissions=True,
-  )
+		leave_allocation[d] = {
+			"total_leaves": flt(allocation.total_leaves_allocated, precision),
+			"expired_leaves": flt(expired_leaves, precision) if expired_leaves > 0 else 0,
+			"leaves_taken": flt(leaves_taken, precision),
+			"leaves_pending_approval": flt(leaves_pending, precision),
+			"remaining_leaves": flt(remaining_leaves, precision),
+		}
 
-  return {
-    "leave_allocation": leave_allocation,
-    "leave_approver": frappe.call(
-      "hrms.hr.doctype.leave_application.leave_application.get_leave_approver",
-      employee=employee
-    ),
-    "lwps": lwp,
-  }
+	lwp = frappe.db.get_list(
+		"Leave Type",
+		filters={"is_lwp": 1},
+		pluck="name",
+		ignore_permissions=True,
+	)
+
+	return {
+		"leave_allocation": leave_allocation,
+		"leave_approver": frappe.call(
+			"hrms.hr.doctype.leave_application.leave_application.get_leave_approver",
+			employee=employee
+		),
+		"lwps": lwp,
+	}
+
+def get_effective_date(filters):
+    
+    today = getdate(nowdate())
+    
+    if filters.get("periode"):
+        fiscal_year = frappe.get_doc("Fiscal Year", filters.get("periode"))
+        fiscal_year_end = getdate(fiscal_year.year_end_date)
+        
+        # If today is greater than fiscal year end, use fiscal year end date
+        if today > fiscal_year_end:
+            return fiscal_year_end
+        else:
+            return today
+
+@frappe.whitelist()
+def debug():
+	get_leave_details_unrestricted("HR-EMP-00701","2025-12-31")

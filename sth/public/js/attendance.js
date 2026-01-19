@@ -5,6 +5,12 @@ frappe.ui.form.on('Attendance', {
     refresh: function(frm) {
 		sth.form.show_reset_payment_log(frm)
         // check_and_set_leave_type(frm);
+        frm.set_df_property('status', 'options', [
+            'Present',
+            'Absent',
+            'Work From Home',
+            '7th Day Off'
+        ].join('\n'));
     },
     
     employee: function(frm) {

@@ -3,6 +3,7 @@ frappe.ui.form.on('Supplier', {
 		if (frm.is_new() && !frm.doc.kode_supplier) {
 			generate_kode_supplier(frm);
 		}
+		hide_details(frm)
 	},
 	refresh: function(frm) {
 		if (frm.is_new()) {
@@ -11,6 +12,7 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('status_bank', 'Aktif');
 		}
 		check_status_pkp(frm)
+		hide_details(frm)
 	},
 	aktif: function(frm) {
 		if (frm.doc.aktif) {
@@ -43,4 +45,14 @@ function check_status_pkp(frm){
 	} else {
 		frm.set_df_property('no_sppkp', 'read_only', 1);
 	}
+}
+
+function hide_details(frm){
+	frm.set_df_property('section_break_vmze3', 'hidden', 1);
+	frm.set_df_property('section_break_d3qta', 'hidden', 1);
+	frm.set_df_property('section_break_1lvsu', 'hidden', 1);
+	frm.set_df_property('section_break_vrfr5', 'hidden', 1);
+	frm.set_df_property('pajak_label', 'hidden', 1);
+	frm.set_df_property('section_break_6doas', 'hidden', 1);
+	
 }

@@ -28,7 +28,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			}
 		])
 
-		self._mandor_dict.append({"fieldname": "mandor1"})
+		self._mandor_dict = []
 
 	def validate(self):
 		self.validate_hasil_kerja_harian()

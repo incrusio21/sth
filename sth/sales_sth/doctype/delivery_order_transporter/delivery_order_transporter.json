@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-14 23:06:02.402144",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transporter",
+  "transporter_name",
+  "driver",
+  "driver_name",
+  "column_break_qxgm",
+  "transport_receipt_no",
+  "vehicle_no",
+  "transport_receipt_date"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Transporter",
+   "link_filters": "[[\"Supplier\",\"is_transporter\",\"=\",1]]",
+   "options": "Supplier"
+  },
+  {
+   "fetch_from": "transporter.supplier_name",
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "label": "Transporter Name",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Driver"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "driver.full_name",
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Driver Name"
+  },
+  {
+   "columns": 1,
+   "fieldname": "transport_receipt_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Transport Receipt No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vehicle No"
+  },
+  {
+   "columns": 2,
+   "fieldname": "transport_receipt_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transport Receipt Date"
+  },
+  {
+   "fieldname": "column_break_qxgm",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-14 23:09:38.738949",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "Delivery Order Transporter",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

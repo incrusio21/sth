@@ -59,7 +59,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-07 14:29:02.636938",
+ "modified": "2026-01-14 14:47:02.522638",
  "modified_by": "Administrator",
  "module": "Buying STH",
  "name": "Purchase Invoice Type",
@@ -79,7 +79,6 @@
    "write": 1
   }
  ],
- "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

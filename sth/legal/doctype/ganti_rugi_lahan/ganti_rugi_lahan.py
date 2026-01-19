@@ -21,6 +21,9 @@ class GantiRugiLahan(AccountsController):
 	def validate_duplicate_sppt(self):
 		sppt = []
 		for i in self.items:
+			if i.perangkat_desa == "Ya":
+				continue
+			
 			if i.sppt in sppt:
 				frappe.throw(f"No SPPT {i.sppt} already used")
 
