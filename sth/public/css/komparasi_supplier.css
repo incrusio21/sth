@@ -1,0 +1,17 @@
+#page-komparasi-penawaran-supplier .title-text{
+    max-width: 30vw;
+}
+
+#supplier-comparasion .tabulator-col-title, #supplier-comparasion .tabulator-cell{
+    white-space: normal;
+    word-break: break-all;
+}
+
+#supplier-comparasion .tabulator{
+    background-color: white;
+}
+
+#supplier-comparasion .tabulator-col{
+    background-color: #365f81;
+    color: white;
+}
