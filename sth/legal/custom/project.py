@@ -1,6 +1,7 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -185,3 +186,22 @@ def make_project_adendum(source_name, target_doc=None):
     )
 
     return doc
+
+@frappe.whitelist()
+def get_contract_template(template_name, doc):
+    if isinstance(doc, str):
+        doc = json.loads(doc)
+
+    contract_template = frappe.get_doc("Contract Template", template_name)
+    contract_terms = None
+
+    context = {
+        "project": doc,
+        "proposal": frappe.get_value("Proposal", doc["proposal"], "*", as_dict=1) if doc.get("proposal") else {},
+
+    }
+
+    if contract_template.contract_terms:
+        contract_terms = frappe.render_template(contract_template.contract_terms, context)
+
+    return {"contract_template": contract_template, "contract_terms": contract_terms}

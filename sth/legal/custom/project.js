@@ -4,7 +4,6 @@
 frappe.ui.form.on("Project", {
     setup(frm){
         frm.add_fetch("project_type", "default_department", "department");
-        frm.add_fetch("contract_template", "contract_terms", "contract_term");
     },
     refresh(frm) {
         frm.set_query("project", () =>{
@@ -55,5 +54,32 @@ frappe.ui.form.on("Project", {
                 }
             }
         })
-    }
+    },
+    contract_template: function (frm) {
+		if (frm.doc.contract_template) {
+			frappe.call({
+				method: "sth.legal.custom.project.get_contract_template",
+				args: {
+					template_name: frm.doc.contract_template,
+					doc: frm.doc,
+				},
+				callback: function (r) {
+					if (r && r.message) {
+						let contract_template = r.message.contract_template;
+						frm.set_value("contract_term", r.message.contract_terms);
+						// frm.set_value("requires_fulfilment", contract_template.requires_fulfilment);
+
+						// if (frm.doc.requires_fulfilment) {
+						// 	// Populate the fulfilment terms table from a contract template, if any
+						// 	r.message.contract_template.fulfilment_terms.forEach((element) => {
+						// 		let d = frm.add_child("fulfilment_terms");
+						// 		d.requirement = element.requirement;
+						// 	});
+						// 	frm.refresh_field("fulfilment_terms");
+						// }
+					}
+				},
+			});
+		}
+	}
 });
