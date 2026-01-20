@@ -30,7 +30,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "No Dokument Retur",
+   "label": "No. Dokumen Retur Ke Supplier",
    "options": "R-PRE-.DD.MM.YY.-.####"
   },
   {
@@ -61,8 +61,10 @@
    "fetch_from": "no_dokumen_penerimaan.supplier",
    "fieldname": "nama_supplier",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Nama Supplier",
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_oivq",
@@ -140,7 +142,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 13:22:30.661125",
+ "modified": "2026-01-20 11:12:39.319717",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Supplier",

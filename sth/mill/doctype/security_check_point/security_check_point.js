@@ -57,5 +57,24 @@ frappe.ui.form.on("Security Check Point", {
     exit(frm) {
         const time = frm.doc.exit ? moment().format("HH:mm:ss") : "00:00:00"
         frm.set_value("vehicle_exit_time", time)
+    },
+    do_no: function(frm) {
+        if (frm.doc.do_no) {
+            frappe.call({
+                method: 'frappe.client.get',
+                args: {
+                    doctype: 'Delivery Order',
+                    name: frm.doc.do_no
+                },
+                callback: function(r) {
+                    if (r.message && r.message.items) {
+                        let item_codes = r.message.items.map(item => item.item_name);
+                        frm.set_value('items_do', item_codes.join(', '));
+                    }
+                }
+            });
+        } else {
+            frm.set_value('items_do', '');
+        }
     }
 });

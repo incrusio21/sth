@@ -18,6 +18,8 @@ from sth.legal.doctype.bapp.bapp import (
 	update_billed_amount_based_on_proposal,
 )
 
+form_grid_templates = {"items": "/home/frappe/frappe-bench/apps/sth/sth/templates/form_grid/custom_item_grid.html","non_voucher_match": "templates/form_grid/non_voucher_grid.html"}
+
 class SthPurchaseInvoice(PurchaseInvoice):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

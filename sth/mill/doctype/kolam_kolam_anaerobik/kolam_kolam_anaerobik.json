@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 11:41:31.899099",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tanggal_pengecekan",
+  "unit_pabrik",
+  "hasil_pengukuran_ph",
+  "hasil_temperatur_suhu_kolam",
+  "upload_foto"
+ ],
+ "fields": [
+  {
+   "fieldname": "tanggal_pengecekan",
+   "fieldtype": "Date",
+   "label": "Tanggal Pengecekan"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Data",
+   "label": "Unit Pabrik"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph",
+   "fieldtype": "Data",
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_temperatur_suhu_kolam",
+   "fieldtype": "Data",
+   "label": "Hasil Temperatur Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:51:29.234991",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kolam Kolam Anaerobik",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

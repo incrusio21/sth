@@ -191,3 +191,14 @@ def get_table_data(rfq):
 def submit_sq(name):
     doc = get_doc_ignore_perm("Supplier Quotation",name)
     doc.submit()
+
+@frappe.whitelist()
+def return_status_absensi():
+
+    status_attendance = ["Present", "Absent", "Work From Home", "7th Day Off"]
+
+    lis = frappe.db.sql(""" SELECT name FROM `tabLeave Type` """)
+    for row in lis:
+        status_attendance.append(row[0])
+
+    return status_attendance

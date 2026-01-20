@@ -1,0 +1,183 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 10:15:46.482423",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "unit_pabrik",
+  "column_break_vtxm",
+  "tahun_budget",
+  "estimasi_kenaikan_upah_",
+  "dalam_setahun_section",
+  "jumlah_hari_kerja_efektif",
+  "jumlah_hari_kerja_biasa",
+  "jumlah_hari_kerja_biasa_sabtu",
+  "column_break_xyeu",
+  "jumlah_hari_libur_nasional",
+  "jumlah_hari_libur_minggu",
+  "harga_natura",
+  "section_break_fzpj",
+  "department",
+  "nik",
+  "karyawan",
+  "nama_karyawan",
+  "golongan_darah",
+  "column_break_oeqg",
+  "data_tanggungan",
+  "gaji_pokok",
+  "jam_lembur",
+  "premi_tetap"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Link",
+   "label": "Unit Pabrik",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_vtxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tahun_budget",
+   "fieldtype": "Link",
+   "label": "Tahun Budget",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "estimasi_kenaikan_upah_",
+   "fieldtype": "Float",
+   "label": "Estimasi Kenaikan Upah %"
+  },
+  {
+   "fieldname": "dalam_setahun_section",
+   "fieldtype": "Section Break",
+   "label": "Dalam Setahun"
+  },
+  {
+   "fieldname": "jumlah_hari_kerja_efektif",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Kerja Efektif"
+  },
+  {
+   "fieldname": "jumlah_hari_kerja_biasa",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Kerja Biasa"
+  },
+  {
+   "fieldname": "jumlah_hari_kerja_biasa_sabtu",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Kerja Biasa Sabtu"
+  },
+  {
+   "fieldname": "jumlah_hari_libur_nasional",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Libur Nasional"
+  },
+  {
+   "fieldname": "jumlah_hari_libur_minggu",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Libur Minggu"
+  },
+  {
+   "fieldname": "column_break_xyeu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "harga_natura",
+   "fieldtype": "Currency",
+   "label": "Harga Natura"
+  },
+  {
+   "fieldname": "section_break_fzpj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "nik",
+   "fieldtype": "Data",
+   "label": "NIK"
+  },
+  {
+   "fieldname": "karyawan",
+   "fieldtype": "Link",
+   "label": "Karyawan",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "nama_karyawan",
+   "fieldtype": "Data",
+   "label": "Nama Karyawan"
+  },
+  {
+   "fieldname": "column_break_oeqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "karyawan.blood_group",
+   "fieldname": "golongan_darah",
+   "fieldtype": "Data",
+   "label": "Golongan Darah"
+  },
+  {
+   "fieldname": "data_tanggungan",
+   "fieldtype": "Data",
+   "label": "Data Tanggungan"
+  },
+  {
+   "fieldname": "gaji_pokok",
+   "fieldtype": "Currency",
+   "label": "Gaji Pokok"
+  },
+  {
+   "fieldname": "jam_lembur",
+   "fieldtype": "Time",
+   "label": "Jam Lembur"
+  },
+  {
+   "fieldname": "premi_tetap",
+   "fieldtype": "Currency",
+   "label": "Premi Tetap"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 10:28:48.021508",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Budget Produksi dan Tenaga Kerja",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

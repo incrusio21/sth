@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 11:23:34.472342",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "foto",
+  "video",
+  "no_transaksi",
+  "unit",
+  "nama_unit",
+  "column_break_vbhx",
+  "ukuran_hasil_sounding",
+  "hasil_suhu",
+  "stock_bst",
+  "pengiriman_cpo"
+ ],
+ "fields": [
+  {
+   "fieldname": "foto",
+   "fieldtype": "Attach Image",
+   "label": "Foto"
+  },
+  {
+   "fieldname": "video",
+   "fieldtype": "Attach",
+   "label": "Video"
+  },
+  {
+   "fieldname": "no_transaksi",
+   "fieldtype": "Data",
+   "label": "No Transaksi"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "nama_unit",
+   "fieldtype": "Data",
+   "label": "Nama Unit"
+  },
+  {
+   "fieldname": "column_break_vbhx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ukuran_hasil_sounding",
+   "fieldtype": "Data",
+   "label": "Ukuran Hasil Sounding"
+  },
+  {
+   "fieldname": "hasil_suhu",
+   "fieldtype": "Data",
+   "label": "Hasil Suhu"
+  },
+  {
+   "fieldname": "stock_bst",
+   "fieldtype": "Int",
+   "label": "Stock BST"
+  },
+  {
+   "fieldname": "pengiriman_cpo",
+   "fieldtype": "Data",
+   "label": "Pengiriman CPO"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:27:07.699037",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sounding Stock CPO di BST",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

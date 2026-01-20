@@ -140,6 +140,7 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_preview": 1,
    "label": "Unit",
    "options": "Unit"
@@ -153,7 +154,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-14 14:38:15.143922",
+ "modified": "2026-01-20 11:13:52.036266",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan",

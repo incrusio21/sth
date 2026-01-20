@@ -144,7 +144,7 @@ def get_data(filters):
 	
 	employees = frappe.get_all("Employee", 
 		filters=employee_filters,
-		fields=["name", "employee_name", "employment_type", "holiday_list"],
+		fields=["name", "employee_name", "employment_type", "holiday_list", "designation"],
 		order_by="employee_name"
 	)
 	
@@ -222,8 +222,18 @@ def get_data(filters):
 				)
 
 				if (current_date <= today and has_presence_in_next_7_days(attendance_dict, day, num_days)) or (is_last_sunday_of_the_month and adakah_attendance_di_bulan_ini == 1):
-					status = '<span style="color: red;">MG</span>'
-					row["mg"] += 1
+					if emp.designation != "NS30" :
+						# kalau bukan satpam
+						status = '<span style="color: red;">MG</span>'
+						row["mg"] += 1
+
+					else:
+						# else kalau satpam
+						status = '<span style="color: red;">L</span>'
+						row["mg"] += 1
+
+
+
 				# else: leave empty for future Sundays
 			elif day in attendance_dict:
 				att = attendance_dict[day]

@@ -25,10 +25,12 @@
   },
   {
    "columns": 2,
+   "depends_on": "eval:doc.status_pkp == 1",
    "fieldname": "no_sppkp",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "No SPPKP"
+   "label": "No SPPKP",
+   "read_only_depends_on": "eval:doc.status_pkp == 0"
   },
   {
    "columns": 2,
@@ -68,7 +70,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-08 16:31:42.975048",
+ "modified": "2026-01-19 15:47:16.045642",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "NPWP dan SPPKP Supplier",

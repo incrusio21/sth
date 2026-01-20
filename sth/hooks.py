@@ -281,6 +281,9 @@ doc_events = {
 	"Sales Invoice": {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
+	"Supplier": {
+		"validate": ["sth.overrides.supplier.validate_supplier_name"],
+	},
 	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq",
 		"on_submit": "sth.custom.supplier_quotation.create_po_draft"

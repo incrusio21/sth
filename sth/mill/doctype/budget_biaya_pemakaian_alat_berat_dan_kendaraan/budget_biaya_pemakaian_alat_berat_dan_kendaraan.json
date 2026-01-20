@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 11:42:27.532183",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pengisian_budget_biaya_bbm_dan_pelumas_section",
+  "company",
+  "unit",
+  "tahun_budget",
+  "estimasi_kenaikan_harga_barang_",
+  "column_break_adds",
+  "kode_barang",
+  "nama_barang",
+  "satuan_barang",
+  "qty_barang",
+  "harga_satuan",
+  "total_harga_barang"
+ ],
+ "fields": [
+  {
+   "fieldname": "pengisian_budget_biaya_bbm_dan_pelumas_section",
+   "fieldtype": "Section Break",
+   "label": "Pengisian Budget Biaya BBM dan Pelumas"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "tahun_budget",
+   "fieldtype": "Link",
+   "label": "Tahun Budget",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "estimasi_kenaikan_harga_barang_",
+   "fieldtype": "Float",
+   "label": "Estimasi Kenaikan Harga Barang %"
+  },
+  {
+   "fieldname": "kode_barang",
+   "fieldtype": "Link",
+   "label": "Kode Barang",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "kode_barang.item_name",
+   "fieldname": "nama_barang",
+   "fieldtype": "Data",
+   "label": "Nama Barang"
+  },
+  {
+   "fieldname": "column_break_adds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "kode_barang.stock_uom",
+   "fieldname": "satuan_barang",
+   "fieldtype": "Link",
+   "label": "Satuan Barang",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "qty_barang",
+   "fieldtype": "Float",
+   "label": "Qty Barang"
+  },
+  {
+   "fieldname": "harga_satuan",
+   "fieldtype": "Currency",
+   "label": "Harga Satuan"
+  },
+  {
+   "fieldname": "total_harga_barang",
+   "fieldtype": "Currency",
+   "label": "Total Harga Barang"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:47:52.543993",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

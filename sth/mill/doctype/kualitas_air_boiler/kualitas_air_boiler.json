@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 11:19:49.440863",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ph",
+  "conductivity_boiler",
+  "sulfit",
+  "silica",
+  "phospate",
+  "column_break_hjgw",
+  "p_alkanlinity",
+  "c_alkalinity",
+  "m_alkalinity",
+  "total_hardness",
+  "total_disolved_solid",
+  "fe"
+ ],
+ "fields": [
+  {
+   "fieldname": "ph",
+   "fieldtype": "Int",
+   "label": "PH"
+  },
+  {
+   "fieldname": "total_hardness",
+   "fieldtype": "Data",
+   "label": "Total Hardness (TH)"
+  },
+  {
+   "fieldname": "p_alkanlinity",
+   "fieldtype": "Data",
+   "label": "P Alkanlinity"
+  },
+  {
+   "fieldname": "c_alkalinity",
+   "fieldtype": "Data",
+   "label": "C Alkalinity"
+  },
+  {
+   "fieldname": "column_break_hjgw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "silica",
+   "fieldtype": "Data",
+   "label": "Silica (SiO2)"
+  },
+  {
+   "fieldname": "sulfit",
+   "fieldtype": "Data",
+   "label": "Sulfit"
+  },
+  {
+   "fieldname": "phospate",
+   "fieldtype": "Data",
+   "label": "Phospate"
+  },
+  {
+   "fieldname": "total_disolved_solid",
+   "fieldtype": "Data",
+   "label": "Total Disolved Solid (TDS)"
+  },
+  {
+   "fieldname": "conductivity_boiler",
+   "fieldtype": "Data",
+   "label": "Conductivity Boiler"
+  },
+  {
+   "fieldname": "m_alkalinity",
+   "fieldtype": "Data",
+   "label": "M Alkalinity"
+  },
+  {
+   "fieldname": "fe",
+   "fieldtype": "Data",
+   "label": "Fe"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:22:01.693332",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kualitas Air Boiler",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

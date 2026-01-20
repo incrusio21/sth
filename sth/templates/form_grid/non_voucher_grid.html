@@ -1,0 +1,27 @@
+<style>
+.grid-heading-row .filter-row {
+    display: none;
+}
+</style>
+
+{% var visible_columns = row.get_visible_columns(["coa","dpp","dpp_nilai_lainnya", "ppn", "pph", "total", "description"]); %}
+
+{% if(!doc) { %}
+	<div class="row">
+		<div class="col-sm-2 ">{%= __("COA") %}</div>
+		<div class="col-sm-5 ">{%= __("DPP") %}</div>
+		<div class="col-sm-1 ">{%= __("DPP Nilai Lainnya") %}</div>
+		<div class="col-sm-1 ">{%= __("PPN") %}</div>
+		<div class="col-sm-2 ">{%= __("PPH") %}</div>
+	</div>
+{% } else { %}
+	{% var visible_column_fieldnames = $.map(visible_columns, function(x, i) {return x.fieldname}); %}
+	<div class="row">
+		<div class="col-sm-2 ">{%= doc.coa %}</div>
+		<div class="col-sm-5 ">{%= doc.dpp %}</div>
+		<div class="col-sm-1 ">{%= doc.dpp_nilai_lainnya %}</div>
+		<div class="col-sm-1 ">{%= doc.ppn %}</div>
+		<div class="col-sm-2 ">{%= doc.pph %}</div>
+		
+	</div>
+{% } %}

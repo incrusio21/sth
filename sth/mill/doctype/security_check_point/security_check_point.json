@@ -280,7 +280,7 @@
    "fieldtype": "Link",
    "label": "DO No",
    "mandatory_depends_on": "eval:doc.transaction_type == \"Dispatch\" || doc.transaction_type == \"Return\"",
-   "options": "Delivery Note"
+   "options": "Delivery Order"
   },
   {
    "depends_on": "eval:doc.transaction_type == 'Return'",
@@ -373,7 +373,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-12 16:09:35.582495",
+ "modified": "2026-01-19 23:13:38.039265",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

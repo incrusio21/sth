@@ -14,7 +14,7 @@ class NaturaMultiplier(Document):
 			self.partner_multiplier = 0
 
 		if "0" in self.pkp:
-			self.partner_multiplier = 0
+			self.child_multiplier = 0
 
 		self.multiplier = flt(
 			self.employee_multiplier +

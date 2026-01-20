@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{component_type}-{#####}",
  "creation": "2025-09-10 11:34:49.600559",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -181,10 +182,11 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-31 10:55:58.642773",
+ "modified": "2026-01-19 15:31:33.021103",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Payment Log",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -203,6 +205,5 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "title_field": "employee"
+ "states": []
 }

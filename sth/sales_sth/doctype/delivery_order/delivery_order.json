@@ -62,8 +62,12 @@
   "taxes",
   "section_break_44",
   "base_total_taxes_and_charges",
+  "taxes_and_charges_added",
+  "taxes_and_charges_deducted",
   "column_break_47",
   "total_taxes_and_charges",
+  "base_taxes_and_charges_added",
+  "base_taxes_and_charges_deducted",
   "totals",
   "base_grand_total",
   "base_rounding_adjustment",
@@ -1399,12 +1403,35 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "taxes_and_charges_added",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Taxes and Charges Added"
+  },
+  {
+   "fieldname": "taxes_and_charges_deducted",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Taxes and Charges Deducted"
+  },
+  {
+   "fieldname": "base_taxes_and_charges_added",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Taxes and Charges Added"
+  },
+  {
+   "fieldname": "base_taxes_and_charges_deducted",
+   "fieldtype": "Currency",
+   "label": "Base Taxes and Charges Deducted"
   }
  ],
  "icon": "fa fa-truck",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 05:30:48.453259",
+ "modified": "2026-01-18 22:37:55.942102",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Delivery Order",

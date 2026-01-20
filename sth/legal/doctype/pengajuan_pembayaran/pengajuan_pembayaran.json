@@ -188,8 +188,10 @@
   {
    "fieldname": "credit_to",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Credit To",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -246,7 +248,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-09 16:27:19.796289",
+ "modified": "2026-01-19 13:31:18.556954",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 11:33:02.503163",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "foto",
+  "video",
+  "no_transaksi",
+  "tanggal_sounding",
+  "unit",
+  "nama_unit",
+  "column_break_wnay",
+  "no_bunker",
+  "hasil_sounding",
+  "berat_jenis_kernel",
+  "stock_pk",
+  "data_pengiriman_pk"
+ ],
+ "fields": [
+  {
+   "fieldname": "foto",
+   "fieldtype": "Attach Image",
+   "label": "Foto"
+  },
+  {
+   "fieldname": "video",
+   "fieldtype": "Attach",
+   "label": "Video"
+  },
+  {
+   "fieldname": "no_transaksi",
+   "fieldtype": "Data",
+   "label": "No Transaksi"
+  },
+  {
+   "fieldname": "tanggal_sounding",
+   "fieldtype": "Date",
+   "label": "Tanggal Sounding"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fetch_from": "unit.unit",
+   "fieldname": "nama_unit",
+   "fieldtype": "Data",
+   "label": "Nama Unit"
+  },
+  {
+   "fieldname": "column_break_wnay",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_bunker",
+   "fieldtype": "Data",
+   "label": "No Bunker"
+  },
+  {
+   "fieldname": "hasil_sounding",
+   "fieldtype": "Data",
+   "label": "Hasil Sounding"
+  },
+  {
+   "fieldname": "berat_jenis_kernel",
+   "fieldtype": "Data",
+   "label": "Berat Jenis Kernel"
+  },
+  {
+   "fieldname": "stock_pk",
+   "fieldtype": "Data",
+   "label": "Stock PK"
+  },
+  {
+   "fieldname": "data_pengiriman_pk",
+   "fieldtype": "Data",
+   "label": "Data Pengiriman PK"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:34:55.584802",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sounding Stock Palm Kernel di Bunker Kernel",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

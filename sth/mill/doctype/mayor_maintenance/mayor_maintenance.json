@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 10:48:13.291351",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "tahun_budget",
+  "section_break_dppq",
+  "table_mgxe"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "tahun_budget",
+   "fieldtype": "Link",
+   "label": "Tahun Budget",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "section_break_dppq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "table_mgxe",
+   "fieldtype": "Table",
+   "options": "Table Material"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 10:54:01.348189",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Mayor Maintenance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

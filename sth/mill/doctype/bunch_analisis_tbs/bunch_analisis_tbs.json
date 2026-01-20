@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 10:02:45.356147",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "foto_sampel_tbs",
+  "nama_sumber",
+  "potensi_oer_"
+ ],
+ "fields": [
+  {
+   "fieldname": "foto_sampel_tbs",
+   "fieldtype": "Attach Image",
+   "label": "Foto Sampel TBS"
+  },
+  {
+   "fieldname": "nama_sumber",
+   "fieldtype": "Data",
+   "label": "Nama Sumber"
+  },
+  {
+   "fieldname": "potensi_oer_",
+   "fieldtype": "Float",
+   "label": "Potensi OER %"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 10:03:52.148899",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Bunch Analisis TBS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

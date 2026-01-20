@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 10:57:17.544315",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "unit",
+  "nama_unit",
+  "periode",
+  "nama_stasiun",
+  "nama_izin_dan_alat",
+  "column_break_lazg",
+  "nomor_izin",
+  "tanggal_dikeluarkan",
+  "tanggal_pemeriksaan",
+  "tanggal_jt_pemeriksaan_ulang",
+  "tenggang_waktu_pemeriksaan_ulang",
+  "foto"
+ ],
+ "fields": [
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fetch_from": "unit.unit",
+   "fieldname": "nama_unit",
+   "fieldtype": "Data",
+   "label": "Nama Unit"
+  },
+  {
+   "fieldname": "periode",
+   "fieldtype": "Data",
+   "label": "Periode"
+  },
+  {
+   "fieldname": "nama_stasiun",
+   "fieldtype": "Data",
+   "label": "Nama Stasiun"
+  },
+  {
+   "fieldname": "nama_izin_dan_alat",
+   "fieldtype": "Data",
+   "label": "Nama Izin dan Alat"
+  },
+  {
+   "fieldname": "column_break_lazg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nomor_izin",
+   "fieldtype": "Data",
+   "label": "Nomor Izin"
+  },
+  {
+   "fieldname": "tanggal_dikeluarkan",
+   "fieldtype": "Date",
+   "label": "Tanggal Dikeluarkan"
+  },
+  {
+   "fieldname": "tanggal_pemeriksaan",
+   "fieldtype": "Date",
+   "label": "Tanggal Pemeriksaan"
+  },
+  {
+   "fieldname": "tanggal_jt_pemeriksaan_ulang",
+   "fieldtype": "Date",
+   "label": "Tanggal JT Pemeriksaan Ulang"
+  },
+  {
+   "fieldname": "tenggang_waktu_pemeriksaan_ulang",
+   "fieldtype": "Data",
+   "label": "Tenggang Waktu Pemeriksaan Ulang"
+  },
+  {
+   "fieldname": "foto",
+   "fieldtype": "Attach Image",
+   "label": "Foto"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:00:03.708601",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Izin Pabrik",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

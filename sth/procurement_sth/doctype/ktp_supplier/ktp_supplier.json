@@ -30,14 +30,14 @@
    "fieldname": "nama_nik",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama NIK"
+   "label": "Nama"
   },
   {
    "columns": 2,
    "fieldname": "alamat_ktp",
    "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "Alamat KTP"
+   "label": "Alamat"
   },
   {
    "columns": 1,
@@ -69,28 +69,28 @@
    "fieldname": "kota_ktp",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Kota KTP"
+   "label": "Kota"
   },
   {
    "columns": 1,
    "fieldname": "propinsi_ktp",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Propinsi KTP"
+   "label": "Propinsi"
   },
   {
    "columns": 1,
    "fieldname": "status_ktp",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Status KTP"
+   "label": "Status"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-08 16:39:24.237178",
+ "modified": "2026-01-20 09:06:51.838766",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "KTP Supplier",

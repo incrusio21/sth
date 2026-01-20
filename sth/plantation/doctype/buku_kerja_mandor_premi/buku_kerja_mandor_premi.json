@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{mandor_type}-{#####}",
  "creation": "2025-12-03 12:47:20.166838",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -139,10 +140,11 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-31 13:09:04.036074",
+ "modified": "2026-01-19 15:31:49.098177",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Premi",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

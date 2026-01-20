@@ -67,12 +67,36 @@ def populate_kriteria_upload(doc):
 						"mandatory": item.mandatory, 
 					})
 			else:
-				doc.append("kriteria_upload_dokumen_finance", {
-					"rincian_dokumen_finance": item.rincian_dokumen_finance,
-					"upload_file": upload_file,
-					"mandatory": item.mandatory, 
-					"idx": idx
-				})
+				cek_sppkp = 0
+
+				if doc.npwp_dan_sppkp_supplier:
+					for row in doc.npwp_dan_sppkp_supplier:
+						if row.status_pkp == 1:
+							cek_sppkp = 1
+
+				if cek_sppkp == 1 and item.rincian_dokumen_finance == "SPPKP":
+					doc.append("kriteria_upload_dokumen_finance", {
+						"rincian_dokumen_finance": item.rincian_dokumen_finance,
+						"upload_file": upload_file,
+						"mandatory": item.mandatory, 
+						"idx": idx
+					})
+				elif cek_sppkp == 0 and item.rincian_dokumen_finance != "SPPKP":
+					doc.append("kriteria_upload_dokumen_finance", {
+						"rincian_dokumen_finance": item.rincian_dokumen_finance,
+						"upload_file": upload_file,
+						"mandatory": item.mandatory, 
+						"idx": idx
+					})
+
+				else:
+					doc.append("kriteria_upload_dokumen_finance", {
+						"rincian_dokumen_finance": item.rincian_dokumen_finance,
+						"upload_file": upload_file,
+						"mandatory": item.mandatory, 
+						"idx": idx
+					})
+
 
 def validate_mandatory_documents(doc):
 

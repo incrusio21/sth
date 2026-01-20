@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 10:45:19.230645",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "unit_pabrik",
+  "nama_stasiun",
+  "tahun_budget",
+  "estimasi_kenaikan_harga_barang_",
+  "column_break_made",
+  "kode_barang",
+  "nama_barang",
+  "satuan_barang",
+  "qty_barang",
+  "harga_satuan",
+  "total_harga_barang"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Link",
+   "label": "Unit Pabrik",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "tahun_budget",
+   "fieldtype": "Link",
+   "label": "Tahun Budget",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "estimasi_kenaikan_harga_barang_",
+   "fieldtype": "Float",
+   "label": "Estimasi Kenaikan Harga Barang %"
+  },
+  {
+   "fieldname": "kode_barang",
+   "fieldtype": "Link",
+   "label": "Kode Barang",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "kode_barang.item_name",
+   "fieldname": "nama_barang",
+   "fieldtype": "Data",
+   "label": "Nama Barang"
+  },
+  {
+   "fieldname": "column_break_made",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "satuan_barang",
+   "fieldtype": "Link",
+   "label": "Satuan Barang",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "qty_barang",
+   "fieldtype": "Float",
+   "label": "Qty Barang"
+  },
+  {
+   "fieldname": "harga_satuan",
+   "fieldtype": "Currency",
+   "label": "Harga Satuan"
+  },
+  {
+   "fieldname": "total_harga_barang",
+   "fieldtype": "Currency",
+   "label": "Total Harga Barang"
+  },
+  {
+   "fieldname": "nama_stasiun",
+   "fieldtype": "Data",
+   "label": "Nama Stasiun"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 10:46:28.183343",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Budget Biaya Service and Maintenance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

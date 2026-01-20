@@ -18,6 +18,7 @@
   "nama_karyawan",
   "column_break_gvkz",
   "no_induk_karyawan",
+  "kode_jabatan",
   "nama_jabatan",
   "column_break_gyfv",
   "catatan",
@@ -65,7 +66,7 @@
    "options": "Employee"
   },
   {
-   "fetch_from": "nama_karyawan.designation",
+   "fetch_from": "kode_jabatan.designation_name",
    "fieldname": "nama_jabatan",
    "fieldtype": "Data",
    "label": "Nama Jabatan",
@@ -124,13 +125,22 @@
    "fieldname": "catatan",
    "fieldtype": "Data",
    "label": "Catatan"
+  },
+  {
+   "fetch_from": "nama_karyawan.designation",
+   "fieldname": "kode_jabatan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Kode Jabatan",
+   "options": "Designation",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 15:01:33.536842",
+ "modified": "2026-01-20 11:17:56.018268",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",

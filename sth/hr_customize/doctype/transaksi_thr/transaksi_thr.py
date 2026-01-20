@@ -117,7 +117,7 @@ class TransaksiTHR(AccountsController):
 		if not date_of_joining:
 			return 0
 
-		today_date = getdate(today())
+		today_date = getdate(self.posting_date)
 		doj = getdate(date_of_joining)
 		months = (today_date.year - doj.year) * 12 + (today_date.month - doj.month)
 		return max(0, months)
@@ -220,7 +220,7 @@ class TransaksiTHR(AccountsController):
 			nat_mul = natura_multiplier_map.get(emp.pkp_status, 0)
 
 			# hitung masa kerja
-			days = date_diff(today(), getdate(emp.date_of_joining)) if emp.date_of_joining else 0
+			days = date_diff(getdate(self.posting_date), getdate(emp.date_of_joining)) if emp.date_of_joining else 0
 			masa_kerja = "> 1 Tahun" if days / 365 > 1 else "< 1 Tahun"
 
 			# jumlah bulan bekerja

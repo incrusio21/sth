@@ -13,15 +13,23 @@ def execute(filters=None):
 		SELECT
 		tt.company as pt,
 		tt.unit as unit,
-		DATE_FORMAT(tt.posting_date, '%Y') as tahun,
-		tt.religion_group as thr,
-		COUNT(dtt.employee) as jumlah,
-		SUM(dtt.subtotal) as rupiah
+		DATE_FORMAT(tt.posting_date, '%%Y') as tahun,
+		COUNT(CASE WHEN dtt.employment_type = 'KHT' THEN 1 END) AS kht,
+		COUNT(CASE WHEN dtt.employment_type = 'PKWT' THEN 1 END) AS pkwt,
+		COUNT(CASE WHEN dtt.employment_type = 'KHL' THEN 1 END) AS khl,
+		COUNT(CASE WHEN dtt.employment_type IN ('KHT','PKWT','KHL') THEN 1 END) AS total,
+		SUM(
+				CASE 
+						WHEN dtt.employment_type IN ('KHT','PKWT','KHL') 
+						THEN dtt.subtotal 
+						ELSE 0 
+				END
+		) AS rupiah
 		FROM `tabTransaksi THR` as tt
 		JOIN `tabDetail Transaksi THR` as dtt ON dtt.parent = tt.name
-		WHERE tt.religion_group = 'IDUL FITRI'
-		GROUP BY tt.company, tt.unit, DATE_FORMAT(tt.posting_date, '%Y'), tt.religion_group;
-  """, as_dict=True)
+		WHERE tt.company IS NOT NULL {}
+		GROUP BY tt.company, tt.unit, DATE_FORMAT(tt.posting_date, '%%Y');
+  """.format(conditions), filters, as_dict=True)
  
 	for thr in q_laporan_thr:
 		data.append(thr)
@@ -31,17 +39,17 @@ def execute(filters=None):
 def get_condition(filters):
 	conditions = ""
 
-	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " AND eg.date BETWEEN %(from_date)s AND %(to_date)s"
+	if filters.get("pt"):
+		conditions += " AND tt.company = %(pt)s"
 
 	if filters.get("unit"):
-		conditions += " AND e.unit = %(unit)s"
+		conditions += " AND tt.unit = %(unit)s"
 
-	if filters.get("jenis_sp"):
-		conditions += " AND eg.grievance_type = %(jenis_sp)s"
+	if filters.get("thr"):
+		conditions += " AND tt.religion_group = %(thr)s"
 
-	if filters.get("tipe_karyawan"):
-		conditions += " AND e.grade = %(tipe_karyawan)s"
+	if filters.get("tahun"):
+		conditions += " AND DATE_FORMAT(tt.posting_date, '%%Y') = %(tahun)s"
 
 	return conditions
 
@@ -61,11 +69,6 @@ def get_columns(filters):
 			"label": _("Tahun"),
 			"fieldtype": "Data",
 			"fieldname": "tahun",
-		},
-		{
-			"label": _("THR"),
-			"fieldtype": "Data",
-			"fieldname": "thr",
 		},
 		{
 			"label": _("KHT"),

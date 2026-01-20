@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-17 11:01:14.192815",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tanggal_laporan",
+  "unit",
+  "nama_unit",
+  "section_break_xief",
+  "jumlah_tbs_restan",
+  "jumlah_tbs_diterima",
+  "grand_total_tbs",
+  "jumlah_lori",
+  "jumlah_lori_restan",
+  "column_break_rdlu",
+  "berat_rata_rata_tbs",
+  "tbs_olah",
+  "tbs_restan"
+ ],
+ "fields": [
+  {
+   "fieldname": "tanggal_laporan",
+   "fieldtype": "Date",
+   "label": "Tanggal Laporan"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "nama_unit",
+   "fieldtype": "Data",
+   "label": "Nama Unit"
+  },
+  {
+   "fieldname": "section_break_xief",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "jumlah_tbs_restan",
+   "fieldtype": "Int",
+   "label": "Jumlah TBS Restan"
+  },
+  {
+   "fieldname": "jumlah_tbs_diterima",
+   "fieldtype": "Int",
+   "label": "Jumlah TBS Diterima"
+  },
+  {
+   "fieldname": "grand_total_tbs",
+   "fieldtype": "Int",
+   "label": "Grand Total TBS"
+  },
+  {
+   "fieldname": "jumlah_lori",
+   "fieldtype": "Int",
+   "label": "Jumlah Lori"
+  },
+  {
+   "fieldname": "jumlah_lori_restan",
+   "fieldtype": "Int",
+   "label": "Jumlah Lori Restan"
+  },
+  {
+   "fieldname": "column_break_rdlu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "berat_rata_rata_tbs",
+   "fieldtype": "Int",
+   "label": "Berat Rata-rata TBS"
+  },
+  {
+   "fieldname": "tbs_olah",
+   "fieldtype": "Data",
+   "label": "TBS Olah"
+  },
+  {
+   "fieldname": "tbs_restan",
+   "fieldtype": "Data",
+   "label": "TBS Restan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-17 11:15:02.738799",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Data TBS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

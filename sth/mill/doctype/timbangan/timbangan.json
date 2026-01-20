@@ -361,10 +361,12 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "TBS",
    "fieldname": "kode_barang",
    "fieldtype": "Link",
    "label": "Kode Barang",
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -418,7 +420,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 09:07:14.883659",
+ "modified": "2026-01-19 02:56:17.159512",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

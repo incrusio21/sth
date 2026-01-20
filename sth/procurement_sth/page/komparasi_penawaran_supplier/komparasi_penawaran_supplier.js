@@ -124,7 +124,7 @@ class SupplierComparasion {
 	async initTable() {
 		const columns = this.generateColumns()
 		this.table = new Tabulator("#table-comparasion", {
-			layout: "fitDataStretch",
+			// layout: "fitDataStretch",
 			selectable: true,
 			columnHeaderVertAlign: "middle",
 			maxHeight: "80vh",

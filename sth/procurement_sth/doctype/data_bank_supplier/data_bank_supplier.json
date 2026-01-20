@@ -15,8 +15,7 @@
   "negara",
   "mata_uang",
   "default",
-  "status_bank",
-  "aktif"
+  "status_bank"
  ],
  "fields": [
   {
@@ -88,23 +87,15 @@
    "fieldname": "status_bank",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Status Bank",
+   "label": "Status",
    "options": "Aktif\nTidak Aktif"
-  },
-  {
-   "columns": 1,
-   "default": "0",
-   "fieldname": "aktif",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-08 16:28:06.460896",
+ "modified": "2026-01-19 15:44:05.719578",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Data Bank Supplier",

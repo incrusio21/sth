@@ -13,6 +13,7 @@ frappe.ui.form.on('Supplier', {
 		}
 		check_status_pkp(frm)
 		hide_details(frm)
+		supplier_get_query(frm)
 	},
 	aktif: function(frm) {
 		if (frm.doc.aktif) {
@@ -55,4 +56,15 @@ function hide_details(frm){
 	frm.set_df_property('pajak_label', 'hidden', 1);
 	frm.set_df_property('section_break_6doas', 'hidden', 1);
 	
+}
+
+function supplier_get_query(frm){
+	 frm.set_query('jenis_usaha', 'struktur_supplier', function() {
+		return {
+			filters: {
+				'is_group': 1
+			},
+			page_length: 999 
+		};
+	});
 }
