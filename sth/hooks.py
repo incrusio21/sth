@@ -35,6 +35,7 @@ doctype_js = {
 	"Asset": "public/js/asset.js",
 	"Asset Capitalization": "public/js/asset_capitalization.js",
 	"Attendance": "public/js/attendance.js",
+	"Contract Template": "public/js/contract_template.js",
 	"Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",
@@ -171,6 +172,7 @@ override_doctype_class = {
 	"Asset Movement": "sth.overrides.asset_movement.AssetMovement",
 	"Attendance": "sth.overrides.attendance.Attendance",
 	"Bank Account": "sth.overrides.bank_account.BankAccount",
+	"Contract Template": "sth.overrides.contract_template.ContractTemplate",
 	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 	"Customer": "sth.overrides.customer.Customer",
 	"Employee Promotion": "sth.overrides.employee_promotion.STHEmployeePromotion",
@@ -224,7 +226,7 @@ doc_events = {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
 	},
 	"Item": {
-		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name"],
 	},
 	"Item Group": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
