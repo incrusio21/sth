@@ -71,6 +71,16 @@ class SupplierComparasion {
 				me.refresh_table()
 			},
 		})
+
+		this.page.add_field({
+			fieldtype: "Data",
+			fieldname: "item_name",
+			label: __("Nama Barang"),
+			change: function () {
+				me.item_name = this.value
+				me.refresh_table()
+			},
+		})
 	}
 
 	setupCustomField() {
@@ -142,9 +152,13 @@ class SupplierComparasion {
 	}
 
 	getTableData() {
+		const args = {
+			pr_sr: this.pr_sr,
+			item_name: this.item_name
+		}
 		return new Promise((resolve, reject) => {
 			frappe
-				.xcall("sth.api.get_table_data", { pr_sr: this.pr_sr || "", freeze: true, freeze_message: "Fetching Data" })
+				.xcall("sth.api.get_table_data", { args, freeze: true, freeze_message: "Fetching Data" })
 				.then((res) => {
 					resolve(res)
 				})
@@ -204,7 +218,6 @@ class SupplierComparasion {
 	refresh_table() {
 		var me = this
 		this.getTableData().then((res) => {
-			console.log(res);
 
 			this.data = res.data
 			this.suppliers = res.suppliers

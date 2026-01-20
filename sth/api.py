@@ -130,15 +130,29 @@ def get_doc_ignore_perm(doctype, name):
     return frappe.get_doc(doctype, name, ignore_permissions=True)
 
 @frappe.whitelist()
-def get_table_data(pr_sr):
-    query = frappe.db.sql("""
+def get_table_data(args):
+    args = frappe._dict(json.loads(args) or '{}')
+    if not args.pr_sr:
+        return {
+            "suppliers": [],
+            "data": [],
+        }
+
+    where_clause = "WHERE sq.workflow_state = 'Open' AND (sqi.`request_for_quotation` = %(pr_sr)s OR sq.custom_material_request = %(pr_sr)s) "
+    filters = {"pr_sr":args.pr_sr}
+    
+    if args.item_name:
+        where_clause += " AND sqi.item_name LIKE %(item_name)s"
+        filters["item_name"] = f"%{args.item_name}%"
+
+    query = frappe.db.sql(f"""
         SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`
         FROM `tabSupplier Quotation` sq
         JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
         JOIN `tabItem` i ON i.`name` = sqi.`item_code`
-        WHERE sq.workflow_state = 'Open' AND (sqi.`request_for_quotation` = %(pr_sr)s OR sq.custom_material_request = %(pr_sr)s)
+        {where_clause}
         ORDER BY sqi.`item_code`,sq.`supplier`,sq.`name`;
-    """,{"pr_sr":pr_sr},as_dict=True)
+    """,filters,as_dict=True)
 
     static_fields = ["idx","kode_barang","nama_barang","satuan","harga_terakhir"]
     supplier_fields = ["merk","country","spesifikasi","jumlah","harga","sub_total","doc_no"]
