@@ -56,19 +56,18 @@ class SupplierComparasion {
 
 		this.page.add_field({
 			fieldtype: "Link",
-			fieldname: "rfq",
-			options: "Request for Quotation",
-			label: __("RFQ Number"),
+			fieldname: "pr_sr",
+			options: "Material Request",
+			label: __("PR/SR"),
 			get_query: function () {
 				return {
 					filters: {
 						"company": me.company,
-						"custom_offering_status": "Open"
 					}
 				};
 			},
 			change: function () {
-				me.rfq = this.value
+				me.pr_sr = this.value
 				me.refresh_table()
 			},
 		})
@@ -145,7 +144,7 @@ class SupplierComparasion {
 	getTableData() {
 		return new Promise((resolve, reject) => {
 			frappe
-				.xcall("sth.api.get_table_data", { rfq: this.rfq || "", freeze: true, freeze_message: "Fetching Data" })
+				.xcall("sth.api.get_table_data", { pr_sr: this.pr_sr || "", freeze: true, freeze_message: "Fetching Data" })
 				.then((res) => {
 					resolve(res)
 				})
