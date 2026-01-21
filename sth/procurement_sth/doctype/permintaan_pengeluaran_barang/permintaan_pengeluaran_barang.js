@@ -32,7 +32,13 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
     },
 
     refresh(frm) {
-
+        if (frm.doc.docstatus == 1 && frm.doc.status != "Barang Telah Dikeluarkan") {
+            frm.add_custom_button("Closed", function () {
+                if (frm.doc.status == "Closed") {
+                    return
+                }
+            })
+        }
     },
 
     sub_unit(frm) {

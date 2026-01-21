@@ -24,7 +24,10 @@
   "catatan",
   "section_break_ubqb",
   "items",
-  "amended_from"
+  "section_break_jnmv",
+  "amended_from",
+  "status",
+  "outgoing"
  ],
  "fields": [
   {
@@ -134,13 +137,32 @@
    "label": "Kode Jabatan",
    "options": "Designation",
    "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Status",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_break_jnmv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "outgoing",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Outgoing",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 11:17:56.018268",
+ "modified": "2026-01-20 15:55:50.345099",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",

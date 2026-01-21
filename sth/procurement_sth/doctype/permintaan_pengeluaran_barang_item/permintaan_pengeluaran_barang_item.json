@@ -14,7 +14,8 @@
   "column_break_lfrt",
   "kendaraan",
   "km",
-  "kegiatan"
+  "kegiatan",
+  "jumlah_keluar"
  ],
  "fields": [
   {
@@ -87,13 +88,22 @@
    "in_list_view": 1,
    "label": "Kegiatan",
    "options": "Kegiatan"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_keluar",
+   "fieldtype": "Float",
+   "label": "Jumlah Keluar",
+   "no_copy": 1,
+   "precision": "2",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-20 11:07:15.982850",
+ "modified": "2026-01-20 15:52:34.870113",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",
