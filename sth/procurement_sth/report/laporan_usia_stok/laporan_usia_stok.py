@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint
+from frappe.utils import cint,getdate
 
 def execute(filters):
 	columns = get_columns()
@@ -20,6 +20,12 @@ def get_columns():
 			'fieldtype': 'Link',
 			'options': 'Item',
 			'width' : 150,
+		},
+		{
+			'fieldname': 'periode',
+			'label': _('Periode'),
+			'fieldtype': 'Data',
+			'width' : 250,
 		},
 		{
 			'fieldname': 'nama_barang',
@@ -120,6 +126,8 @@ def get_data(filters):
 
 	total = 0
 	for row in query:
+		row.periode = getdate(filters.from_date).strftime("%d-%m-%Y") + " s/d " + getdate(filters.to_date).strftime("%d-%m-%Y")
+
 		row.total = cint(row.qty) + total
 		total = row.total
 
