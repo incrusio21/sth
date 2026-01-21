@@ -6,9 +6,18 @@ frappe.ui.form.on("Retur Ke Supplier", {
         frm.set_query("no_dokumen_penerimaan", (doc) => {
             return {
                 filters: {
-                    company: doc.company,
+                    set_warehouse: doc.gudang,
                     docstatus: 1,
-                    status: ["not in", ["Return", "Return Issued"]]
+                    status: ["not in", ["Return", "Return Issued"]],
+
+                }
+            }
+        })
+
+        frm.set_query("gudang", (doc) => {
+            return {
+                filters: {
+                    is_group: 0,
                 }
             }
         })
