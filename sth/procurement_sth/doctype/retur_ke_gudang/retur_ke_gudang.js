@@ -20,6 +20,17 @@ frappe.ui.form.on("Retur Ke Gudang", {
             jumlah += row.jumlah
         })
         frm.set_value("jumlah_retur", jumlah)
+    },
+
+    no_pengeluaran(frm) {
+        if (!frm.doc.no_pengeluaran) {
+            return
+        }
+
+        frm.call("set_items").then((res) => {
+            frappe.model.sync(res)
+            frm.refresh()
+        })
     }
 });
 

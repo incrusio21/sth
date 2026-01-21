@@ -19,8 +19,8 @@ class ReturKeGudang(Document):
 		items = frappe.get_all("Pengeluaran Barang Item",{"parent":self.no_pengeluaran},["kode_barang","satuan","jumlah","blok as kode_blok"])
 
 		for row in items:
-			self.append("items",row)
-
+			child = self.append("items",row)
+			child.nama_barang = frappe.db.get_value("Item",row.kode_barang,"item_name")
 
 	def create_ste(self):
 		def postprocess(source,target):
