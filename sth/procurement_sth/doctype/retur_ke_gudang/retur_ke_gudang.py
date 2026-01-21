@@ -6,17 +6,37 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 class ReturKeGudang(Document):
+	def validate(self):
+		self.validate_qty()
+
 	def on_submit(self):
 		self.create_ste()
+		self.update_items_return(method="submit")
 	
 	def on_cancel(self):
 		ste = frappe.get_doc("Stock Entry",{"references": self.name})
+		self.update_items_return(method="cancel")
 		ste.cancel()
+
+
+	def validate_qty(self):
+		for row in self.items:
+			if row.jumlah > row.jumlah_maksimal:
+				frappe.throw(f"Jumlah barang melebihi maksimal yang dikembalikan")
+
+	def update_items_return(self,method):
+		for row in self.items:
+			jumlah_retur = frappe.db.get_value("Pengeluaran Barang Item",row.reference,"jumlah_retur")
+			
+			jumlah_retur = jumlah_retur + row.jumlah if method == "submit" else jumlah_retur - row.jumlah
+			frappe.db.set_value("Pengeluaran Barang Item",row.reference,"jumlah_retur",jumlah_retur,update_modified=False)
+		
+		frappe.get_doc("Pengeluaran Barang",self.no_pengeluaran).update_return_percentage()
 
 	@frappe.whitelist()
 	def set_items(self):
 		self.items = []
-		items = frappe.get_all("Pengeluaran Barang Item",{"parent":self.no_pengeluaran},["kode_barang","satuan","jumlah","blok as kode_blok"])
+		items = frappe.get_all("Pengeluaran Barang Item",{"parent":self.no_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_retur) as jumlah","(jumlah - jumlah_retur) as jumlah_maksimal","blok as kode_blok","name as reference"])
 
 		for row in items:
 			child = self.append("items",row)

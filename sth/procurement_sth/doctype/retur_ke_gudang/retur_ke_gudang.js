@@ -3,11 +3,11 @@
 
 frappe.ui.form.on("Retur Ke Gudang", {
     setup(frm) {
-        frm.set_query("gudang", function (doc) {
+        frm.set_query("no_pengeluaran", function (doc) {
             return {
                 filters: {
-                    is_group: 0,
-                    company: doc.pemilik
+                    return_percentage: ["<", "100"],
+                    pt_pemilik_barang: doc.pemilik
                 }
             }
         })
@@ -29,6 +29,7 @@ frappe.ui.form.on("Retur Ke Gudang", {
 
         frm.call("set_items").then((res) => {
             frappe.model.sync(res)
+            frm.trigger('calculate_retur')
             frm.refresh()
         })
     }

@@ -8,10 +8,12 @@
  "field_order": [
   "kode_barang",
   "nama_barang",
+  "jumlah_maksimal",
   "column_break_tuko",
   "jumlah",
   "satuan",
-  "kode_blok"
+  "kode_blok",
+  "reference"
  ],
  "fields": [
   {
@@ -56,13 +58,30 @@
    "in_list_view": 1,
    "label": "Kode Blok",
    "options": "Blok"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_maksimal",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Jumlah Maksimal",
+   "no_copy": 1,
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-14 14:29:43.189963",
+ "modified": "2026-01-21 10:13:16.207968",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Items",
