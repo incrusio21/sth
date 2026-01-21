@@ -10,6 +10,7 @@
   "company",
   "column_break_nlel",
   "tanggal",
+  "gudang",
   "section_break_mdyk",
   "no_dokumen_penerimaan",
   "column_break_txqf",
@@ -81,8 +82,10 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -136,13 +139,20 @@
    "hidden": 1,
    "label": "Prec Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "gudang",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Gudang",
+   "options": "Warehouse"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 11:12:39.319717",
+ "modified": "2026-01-21 10:38:30.677017",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Supplier",
