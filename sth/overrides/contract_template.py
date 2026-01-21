@@ -1,29 +1,46 @@
 # 1. contract_template.py (in your app's doctype folder)
+import base64
+import contextlib
+import io
+import mimetypes
+import os
+import subprocess
+from urllib.parse import parse_qs, urlparse
+from packaging.version import Version
+
+from bs4 import BeautifulSoup
 
 import frappe
 from frappe import _
-from frappe.utils.pdf import get_pdf
+from frappe.utils import cstr, scrub_urls
+from frappe.utils.pdf import (
+	PDF_CONTENT_ERRORS,
+	cleanup,
+	get_wkhtmltopdf_version,
+	get_file_data_from_writer,
+	prepare_options,
+)
 from frappe.model.document import Document
+from frappe.website.serve import get_response_without_exception_handling
+
+from frappe.www.printview import get_print_format, get_print_style
+
+import pdfkit
+from pypdf import PdfReader, PdfWriter
 
 # requirement
 # bench pip install PyPDF2 reportlab
-from io import BytesIO
-from PyPDF2 import PdfReader, PdfWriter
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
-from reportlab.platypus import Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.lib.colors import HexColor
+# from io import BytesIO
+# from PyPDF2 import PdfReader, PdfWriter
+# from reportlab.pdfgen import canvas
+# from reportlab.lib.pagesizes import A4
+# from reportlab.lib.units import mm
+# from reportlab.platypus import Table, TableStyle, Paragraph
+# from reportlab.lib.styles import getSampleStyleSheet
+# from reportlab.lib import colors
+# from reportlab.lib.colors import HexColor
 
 class ContractTemplate(Document):
-	def generate_pdf(self):
-		html = self.get_pdf_html()
-		pdf = get_pdf(html, {"margin-bottom": "20mm"})
-		
-		pdf_with_pages = self.add_page_numbers(pdf)
-		return pdf_with_pages
 	
 	def add_page_numbers(self, pdf_content):
 		
@@ -114,36 +131,105 @@ class ContractTemplate(Document):
 		
 		return output.read()
 	
-	def get_pdf_html(self):
-		content = self.contract_terms or ""
-		
-		html = f"""
-		<!DOCTYPE html>
-		<html>
-		<head>
-			<meta charset="utf-8">
-			<style>
-				body {{
-					font-family: Arial, sans-serif;
-					padding: 20px;
-					line-height: 1.6;
-				}}
-			</style>
-		</head>
-		<body>
-			{content}
-		</body>
+def get_pdf(html, cover, options=None, output: PdfWriter | None = None):
+	html = scrub_urls(html)
+	html, options = prepare_options(html, options)
+
+	options.update({"disable-javascript": "", "disable-local-file-access": ""})
+
+	filedata = ""
+	if Version(get_wkhtmltopdf_version()) > Version("0.12.3"):
+		options.update({"disable-smart-shrinking": ""})
+
+	try:
+		# Set filename property to false, so no file is actually created
+		filedata = pdfkit.from_string(html, options=options or {}, cover=cover, cover_first=True, verbose=True)
+
+		# create in-memory binary streams from filedata and create a PdfReader object
+		reader = PdfReader(io.BytesIO(filedata))
+	except OSError as e:
+		if any([error in str(e) for error in PDF_CONTENT_ERRORS]):
+			if not filedata:
+				print(html, options)
+				frappe.throw(_("PDF generation failed because of broken image links"))
+
+			# allow pdfs with missing images if file got created
+			if output:
+				output.append_pages_from_reader(reader)
+		else:
+			raise
+	finally:
+		cleanup(options)
+
+	if "password" in options:
+		password = options["password"]
+
+	if output:
+		output.append_pages_from_reader(reader)
+		return output
+
+	writer = PdfWriter()
+	writer.append_pages_from_reader(reader)
+
+	if "password" in options:
+		writer.encrypt(password)
+
+	filedata = get_file_data_from_writer(writer)
+
+	return filedata
+
+def generate_pdf(doc, print_format):
+	html = get_pdf_html(doc, print_format)
+	cover = get_cover(doc.contract_cover)
+
+	pdf = get_pdf(html, cover)
+	
+	# pdf_with_pages = self.add_page_numbers(pdf)
+	return pdf
+
+def get_pdf_html(doc, print_format_name):
+	print_format = frappe.get_doc("Print Format", print_format_name)
+	jenv = frappe.get_jenv()
+	
+	body = jenv.from_string(get_print_format(doc.doctype, print_format)).render({"doc": doc})
+	
+	html = jenv.get_template("legal/pdfview.html").render({
+		"body": body,
+		"print_style": get_print_style(None, print_format),
+	})
+	
+	return html
+
+def get_cover(html):
+	soup = BeautifulSoup(html, "html.parser")
+	text = soup.get_text(strip=True)
+
+	if not text:
+		return None
+	
+	wrapper = soup.find("div", class_="ql-editor")
+	if wrapper:
+		wrapper.unwrap()   # HAPUS TAG, ISI TETAP
+
+	html = f"""<html>
+			<body>
+				{soup}
+			</div>
 		</html>
-		"""
-		return html
-
-
+	"""
+	# create temp file
+	fname = os.path.join("/tmp", f"frappe-pdf-{frappe.generate_hash()}.html")
+	with open(fname, "wb") as f:
+		f.write(html.encode("utf-8"))
+	
+	return fname
+	
 @frappe.whitelist()
-def download_contract_pdf(docname):
-	doc = frappe.get_doc('Contract Template', docname)
-	pdf = doc.generate_pdf()
+def download_contract_pdf(doctype, docname, print_format):
+	doc = frappe.get_doc(doctype, docname)
+	pdf = generate_pdf(doc, print_format)
 	
 	frappe.local.response.filename = f"{docname}.pdf"
 	frappe.local.response.filecontent = pdf
-	frappe.local.response.type = "download"
+	frappe.local.response.type = "pdf"
 

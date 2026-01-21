@@ -193,15 +193,31 @@ def get_contract_template(template_name, doc):
         doc = json.loads(doc)
 
     contract_template = frappe.get_doc("Contract Template", template_name)
-    contract_terms = None
+    contract_terms = contract_cover = None
 
     context = {
         "project": doc,
         "proposal": frappe.get_value("Proposal", doc["proposal"], "*", as_dict=1) if doc.get("proposal") else {},
-
     }
+
+    if contract_template.contract_terms:
+        contract_cover = frappe.render_template(contract_template.contract_cover, context)
 
     if contract_template.contract_terms:
         contract_terms = frappe.render_template(contract_template.contract_terms, context)
 
-    return {"contract_template": contract_template, "contract_terms": contract_terms}
+    return {
+        "contract_template": contract_template, 
+        "contract_cover": contract_cover,
+        "contract_terms": contract_terms,
+        "contract_footer": contract_template.contract_footer
+    }
+
+@frappe.whitelist()
+def download_contract_pdf(docname):
+	doc = frappe.get_doc('Project', docname)
+	pdf = doc.generate_pdf()
+	
+	frappe.local.response.filename = f"{docname}.pdf"
+	frappe.local.response.filecontent = pdf
+	frappe.local.response.type = "pdf"

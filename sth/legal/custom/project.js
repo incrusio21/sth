@@ -35,6 +35,12 @@ frappe.ui.form.on("Project", {
                 __("Create")
             );
         }
+
+        if (!frm.is_new()) {
+            frm.add_custom_button(__('Download PDF'), function() {
+                frm.trigger("download_pdf")
+            })
+        }
 	},
     proposal(frm){
         if(!frm.doc.proposal) return
@@ -67,6 +73,8 @@ frappe.ui.form.on("Project", {
 					if (r && r.message) {
 						let contract_template = r.message.contract_template;
 						frm.set_value("contract_term", r.message.contract_terms);
+						frm.set_value("contract_cover", r.message.contract_cover);
+						frm.set_value("contract_footer", r.message.contract_footer);
 						// frm.set_value("requires_fulfilment", contract_template.requires_fulfilment);
 
 						// if (frm.doc.requires_fulfilment) {
@@ -81,5 +89,17 @@ frappe.ui.form.on("Project", {
 				},
 			});
 		}
-	}
+	},
+    download_pdf(frm){
+        // Use window.open to download PDF
+        var url = `/api/method/sth.overrides.contract_template.download_contract_pdf`;
+        url += `?doctype=${encodeURIComponent(frm.doc.doctype)}&docname=${encodeURIComponent(frm.doc.name)}&print_format=${encodeURIComponent("Project Contract Term")}`
+
+        window.open(url, '_blank');
+        
+        frappe.show_alert({
+            message: __('Downloading PDF...'),
+            indicator: 'green'
+        });
+    }
 });
