@@ -36,11 +36,21 @@ class ReturKeGudang(Document):
 	@frappe.whitelist()
 	def set_items(self):
 		self.items = []
+
+		if not self.validate_document_pengeluaran():
+			return
+
 		items = frappe.get_all("Pengeluaran Barang Item",{"parent":self.no_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_retur) as jumlah","(jumlah - jumlah_retur) as jumlah_maksimal","blok as kode_blok","name as reference"])
 
 		for row in items:
 			child = self.append("items",row)
 			child.nama_barang = frappe.db.get_value("Item",row.kode_barang,"item_name")
+
+	def validate_document_pengeluaran(self):
+		company,status,return_percent = frappe.db.get_value("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran, ["pt_pemilik_barang","status","return_percentage"])
+		if company != self.pt_pemilik_barang or status == "Closed" or return_percent == 100:
+			return False
+		return True
 
 	def create_ste(self):
 		def postprocess(source,target):
