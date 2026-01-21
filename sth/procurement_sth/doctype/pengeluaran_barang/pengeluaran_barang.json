@@ -59,7 +59,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "No Permintaan Pengeluaran",
-   "options": "Permintaan Pengeluaran Barang"
+   "options": "Permintaan Pengeluaran Barang",
+   "reqd": 1
   },
   {
    "fetch_from": "no_permintaan_pengeluaran.gudang",
@@ -130,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 11:19:18.974834",
+ "modified": "2026-01-20 14:41:07.899701",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

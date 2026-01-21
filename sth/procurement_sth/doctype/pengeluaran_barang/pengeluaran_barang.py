@@ -6,17 +6,33 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 class PengeluaranBarang(Document):
+	def validate(self):
+		self.validate_qty()
+
 	def on_submit(self):
 		self.create_ste()
+		self.update_items_out()
 	
 	def on_cancel(self):
 		ste = frappe.get_doc("Stock Entry",{"references": self.no_permintaan_pengeluaran})
 		ste.cancel()
 
+	def validate_qty(self):
+		for row in self.items:
+			if row.jumlah > row.jumlah_maksimal:
+				frappe.throw(f"Jumlah barang melebihi maksimal permintaan")
+
+	def update_items_out(self):
+		for row in self.items:
+			jumlah_keluar = frappe.db.get_value("Permintaan Pengeluaran Barang Item",row.reference,"jumlah_keluar")
+			frappe.db.set_value("Permintaan Pengeluaran Barang Item",row.reference,"jumlah_keluar",jumlah_keluar + row.jumlah,update_modified=False)
+		
+		frappe.get_doc("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran).update_status()
+
 	@frappe.whitelist()
 	def set_items(self):
 		self.items = []
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","jumlah","kendaraan","km","kegiatan","sub_unit","blok"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","(jumlah - jumlah_keluar) as jumlah_maksimal","kendaraan","km","kegiatan","sub_unit","blok","name as reference"])
 
 		for row in items:
 			self.append("items",row)

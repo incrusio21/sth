@@ -6,10 +6,13 @@ frappe.ui.form.on("Pengeluaran Barang", {
         frm.set_query("no_permintaan_pengeluaran", function (doc) {
             return {
                 filters: {
-                    pt_pemilik_barang: doc.pt_pemilik_barang
+                    pt_pemilik_barang: doc.pt_pemilik_barang,
+                    docstatus: 1,
+                    outgoing: ["<", 100]
                 }
             }
         })
+
 
         frm.set_query("gudang", function (doc) {
             return {
