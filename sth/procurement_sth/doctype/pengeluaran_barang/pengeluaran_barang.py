@@ -29,6 +29,19 @@ class PengeluaranBarang(Document):
 		
 		frappe.get_doc("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran).update_status()
 
+
+	def update_return_percentage(self):
+		qty = 0
+		return_qty = 0
+
+		for row in self.items:
+			qty += row.jumlah
+			return_qty += row.jumlah_retur
+		
+		return_percent = return_qty/qty * 100
+
+		self.db_set("return_percentage",return_percent)
+
 	@frappe.whitelist()
 	def set_items(self):
 		self.items = []

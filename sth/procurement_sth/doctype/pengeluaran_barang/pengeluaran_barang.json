@@ -22,7 +22,8 @@
   "section_break_jtbl",
   "items",
   "amended_from",
-  "status"
+  "status",
+  "return_percentage"
  ],
  "fields": [
   {
@@ -125,13 +126,22 @@
    "hidden": 1,
    "label": "Status",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "return_percentage",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Return Percentage",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 11:33:02.733014",
+ "modified": "2026-01-21 09:48:06.964837",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",
