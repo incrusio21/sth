@@ -364,8 +364,9 @@
   },
   {
    "fieldname": "items_do",
-   "fieldtype": "Small Text",
+   "fieldtype": "Link",
    "label": "Items DO",
+   "options": "Item",
    "read_only": 1
   }
  ],
@@ -373,7 +374,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-19 23:13:38.039265",
+ "modified": "2026-01-20 11:52:45.175971",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
