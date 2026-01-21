@@ -1,5 +1,6 @@
 import frappe
 from erpnext.stock.doctype.item.item import Item
+from frappe import _
 
 class Item(Item):    
 	def autoname(self):
@@ -62,3 +63,25 @@ def get_next_item_code(item_group):
 		new_number = 1
 	
 	return f"{item_group}{new_number}"
+
+
+def validate_item_name(doc, method):
+
+	if not doc.item_name:
+		return
+	
+	existing_items = frappe.db.sql("""
+		SELECT name 
+		FROM `tabItem` 
+		WHERE LOWER(item_name) = LOWER(%s) 
+		AND name != %s
+	""", (doc.item_name, doc.name or ''))
+	
+	if existing_items:
+		frappe.throw(
+			_("Item with name '{0}' already exists: {1}").format(
+				doc.item_name, 
+				existing_items[0][0]
+			),
+			title=_("Duplicate Item Name")
+		)
