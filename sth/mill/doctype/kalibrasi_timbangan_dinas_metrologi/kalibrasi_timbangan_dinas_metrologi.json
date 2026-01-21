@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-21 09:10:40.521752",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_egur",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "berlaku_dari_tanggal",
+  "berlaku_sampai_tanggal",
+  "tanggal_kalibrasi_selanjutnya",
+  "upload",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_egur",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Kalibrasi Timbangan Dinas Metrologi",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Datetime",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "berlaku_dari_tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Berlaku Dari Tanggal"
+  },
+  {
+   "fieldname": "berlaku_sampai_tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Berlaku Sampai Tanggal"
+  },
+  {
+   "fieldname": "tanggal_kalibrasi_selanjutnya",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Kalibrasi Selanjutnya"
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Attach",
+   "label": "Dokumen Surat Keterangan Hasil Tera Timbangan dari Dinas Metrologi"
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-21 09:21:15.376611",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kalibrasi Timbangan Dinas Metrologi",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

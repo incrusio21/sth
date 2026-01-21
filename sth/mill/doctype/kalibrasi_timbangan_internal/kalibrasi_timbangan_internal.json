@@ -1,0 +1,183 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:KLBR-INT-{#####}",
+ "creation": "2026-01-21 09:02:35.658861",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_r54a",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_fhox",
+  "beban_berat_1",
+  "foto_kalibrasi_1",
+  "beban_berat_2",
+  "foto_kalibrasi_2",
+  "beban_berat_3",
+  "foto_kalibrasi_3",
+  "beban_berat_4",
+  "foto_kalibrasi_4",
+  "beban_berat_5",
+  "foto_kalibrasi_5",
+  "beban_berat_6",
+  "foto_kalibrasi_6",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_r54a",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Kalibrasi Timbangan Internal",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_fhox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "(Satuan Kg)",
+   "fieldname": "beban_berat_1",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Beban Berat 1"
+  },
+  {
+   "description": "(Satuan Kg)",
+   "fieldname": "beban_berat_2",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Beban Berat 2"
+  },
+  {
+   "description": "(Satuan Kg)",
+   "fieldname": "beban_berat_3",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Beban Berat 3"
+  },
+  {
+   "description": "(Satuan Kg)",
+   "fieldname": "beban_berat_4",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Beban Berat 4"
+  },
+  {
+   "description": "(Satuan Kg)",
+   "fieldname": "beban_berat_5",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Beban Berat 5"
+  },
+  {
+   "description": "(Satuan Kg)",
+   "fieldname": "beban_berat_6",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Beban Berat 6"
+  },
+  {
+   "fieldname": "foto_kalibrasi_1",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kalibrasi 1"
+  },
+  {
+   "fieldname": "foto_kalibrasi_2",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kalibrasi 2"
+  },
+  {
+   "fieldname": "foto_kalibrasi_3",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kalibrasi 3"
+  },
+  {
+   "fieldname": "foto_kalibrasi_4",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kalibrasi 4"
+  },
+  {
+   "fieldname": "foto_kalibrasi_5",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kalibrasi 5"
+  },
+  {
+   "fieldname": "foto_kalibrasi_6",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kalibrasi 6"
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-21 09:23:10.413078",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kalibrasi Timbangan Internal",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
