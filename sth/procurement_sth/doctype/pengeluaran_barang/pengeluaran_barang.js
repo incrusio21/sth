@@ -8,7 +8,8 @@ frappe.ui.form.on("Pengeluaran Barang", {
                 filters: {
                     pt_pemilik_barang: doc.pt_pemilik_barang,
                     docstatus: 1,
-                    outgoing: ["<", 100]
+                    outgoing: ["<", 100],
+                    status: ["!=", "Closed"]
                 }
             }
         })

@@ -32,11 +32,23 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
     },
 
     refresh(frm) {
-        if (frm.doc.docstatus == 1 && frm.doc.status != "Barang Telah Dikeluarkan") {
+        if (frm.doc.docstatus == 1 && !["Barang Telah Dikeluarkan", "Closed"].includes(frm.doc.status)) {
             frm.add_custom_button("Closed", function () {
-                if (frm.doc.status == "Closed") {
-                    return
-                }
+
+                frappe.confirm(
+                    'Apakah anda yakin ingin menutup dokumen ini?',
+                    () => {
+                        const method = frappe.model.get_server_module_name(frm.doctype) + ".close_status"
+                        frappe.xcall(method, { name: frm.docname }).then(() => {
+                            frm.reload_doc()
+                            frappe.show_alert({
+                                message: __('Document has been closed'),
+                                indicator: 'green'
+                            });
+                        })
+                    },
+                    null
+                );
             })
         }
     },

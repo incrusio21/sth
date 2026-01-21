@@ -30,3 +30,6 @@ class PermintaanPengeluaranBarang(Document):
 		elif self.outgoing > 0:
 			self.db_set("status","Sebagian di Keluarkan")
 		
+@frappe.whitelist()
+def close_status(name):
+	frappe.db.set_value("Permintaan Pengeluaran Barang",name,"status","Closed")

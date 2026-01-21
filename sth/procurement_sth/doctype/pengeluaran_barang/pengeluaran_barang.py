@@ -45,10 +45,19 @@ class PengeluaranBarang(Document):
 	@frappe.whitelist()
 	def set_items(self):
 		self.items = []
+		if not self.validate_document_permintaan():
+			return
+
 		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","(jumlah - jumlah_keluar) as jumlah_maksimal","kendaraan","km","kegiatan","sub_unit","blok","name as reference"])
 
 		for row in items:
 			self.append("items",row)
+
+	def validate_document_permintaan(self):
+		company,status,outgoing = frappe.db.get_value("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran, ["pt_pemilik_barang","status","outgoing"])
+		if company != self.pt_pemilik_barang or status == "Closed" or outgoing == 100:
+			return False
+		return True
 
 	def create_ste(self):
 		def postprocess(source,target):
