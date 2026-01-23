@@ -22,3 +22,7 @@ def create_tutup_buku(from_date,to_date):
 
 	doc.save()
 	doc.submit()
+
+@frappe.whitelist()
+def open_doc(name):
+	frappe.db.set_value("Tutup Buku Fisik",name,"docstatus",0)

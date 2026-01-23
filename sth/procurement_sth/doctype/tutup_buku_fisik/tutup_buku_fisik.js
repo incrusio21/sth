@@ -14,7 +14,19 @@ frappe.ui.form.on("Tutup Buku Fisik", {
     },
 
     refresh(frm) {
+        if (frm.doc.docstatus == 1) {
+            frm.add_custom_button("Open", function () {
+                const method = frappe.model.get_server_module_name(frm.doctype) + ".open_doc"
 
+                frappe.confirm("Apakah anda yakin ingin membuka document ini ? ",
+                    () => {
+                        frappe.xcall(method, { name: frm.docname }).then(() => {
+                            frm.reload_doc()
+                        })
+                    }
+                )
+            })
+        }
     },
 
     periode(frm) {
