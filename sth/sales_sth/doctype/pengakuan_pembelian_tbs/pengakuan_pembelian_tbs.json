@@ -3,22 +3,22 @@
  "allow_rename": 1,
  "autoname": "format:{YYYY}{MM}{DD}/{unit}/{###}",
  "creation": "2025-12-09 11:42:17.877354",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_4ntw",
   "tanggal",
   "tanggal_timbangan",
+  "company",
+  "nama_supplier",
+  "unit",
+  "jarak_ring",
   "jarak",
   "column_break_kiin",
-  "nama_supplier",
-  "company",
-  "unit",
-  "section_break_jits",
   "harga",
   "beban_pph_22",
   "percent",
-  "column_break_vdwi",
   "bonus",
   "subsidi_angkut",
   "section_break_mdbx",
@@ -41,9 +41,9 @@
   {
    "fieldname": "jarak",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Jarak",
-   "options": "Price List",
-   "reqd": 1
+   "options": "Price List"
   },
   {
    "fieldname": "column_break_kiin",
@@ -61,12 +61,9 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
+   "link_filters": "[[\"Unit\",\"mill\",\"=\",1]]",
    "options": "Unit",
    "reqd": 1
-  },
-  {
-   "fieldname": "section_break_jits",
-   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -87,10 +84,6 @@
    "fieldname": "percent",
    "fieldtype": "Percent",
    "label": "Percent"
-  },
-  {
-   "fieldname": "column_break_vdwi",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -145,11 +138,19 @@
    "label": "Tanggal Timbangan"
   },
   {
+   "fetch_from": "unit.company",
    "fieldname": "company",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_preview": 1,
    "label": "Company",
-   "options": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "jarak_ring",
+   "fieldtype": "Select",
+   "label": "Jarak",
+   "options": "\nRING 1\nRING 2",
    "reqd": 1
   }
  ],
@@ -157,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-12 16:00:01.144055",
+ "modified": "2026-01-22 09:24:22.914877",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",
