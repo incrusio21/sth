@@ -1,5 +1,6 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
+const jenisTransaksi = ["Seluruhnya", "Mutasi Dalam Perjalanan", "Penerimaan", "Pengembalian Pengeluaran", "Penerimaan Mutasi", "Adjustment Masuk", "Pengeluaran", "Pengeluaran Alokasi", "Pengembalian Penerimaan", "Pengeluaran Mutasi", "Adjustment Keluar"];
 
 frappe.query_reports["Laporan Transaksi Gudang"] = {
 	"filters": [
@@ -7,7 +8,9 @@ frappe.query_reports["Laporan Transaksi Gudang"] = {
 			fieldname: "company",
 			label: __("Perusahaan"),
 			fieldtype: "Link",
-			options: "Company"
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1
 		},
 		{
 			fieldname: "unit",
@@ -32,6 +35,12 @@ frappe.query_reports["Laporan Transaksi Gudang"] = {
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
+		},
+		{
+			fieldname: "tipe_transaksi",
+			label: __("Tipe Transaksi"),
+			fieldtype: "Autocomplete",
+			options: jenisTransaksi.join("\n"),
 		},
 		{
 			fieldname: "item_code",
