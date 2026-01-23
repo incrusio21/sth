@@ -10,45 +10,48 @@ let stringMonths = months.join("\n")
 
 frappe.query_reports["History Pemakaian Barang"] = {
 	"filters": [
-		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_default("company"),
-		},
+		// {
+		// 	fieldname: "company",
+		// 	label: __("Company"),
+		// 	fieldtype: "Link",
+		// 	options: "Company",
+		// 	default: frappe.defaults.get_default("company"),
+		// },
 		{
 			fieldname: "vehicle_code",
 			label: __("Kode Kendaraan"),
 			fieldtype: "Link",
-			options: "Vehicle",
+			options: "Alat Berat Dan Kendaraan",
 		},
 		{
 			fieldname: "driver",
 			label: __("Nama Sopir"),
 			fieldtype: "Link",
-			options: "Driver",
+			options: "Employee",
 		},
 		{
 			fieldname: "year",
 			label: __("Tahun"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: new Date().getFullYear()
+			default: new Date().getFullYear(),
+			reqd: 1
 		},
 		{
 			fieldname: "from_month",
 			label: __("Dari Bulan"),
 			fieldtype: "Autocomplete",
 			options: stringMonths,
-			default: months[new Date().getMonth() - 3]
+			default: months[new Date().getMonth() - 3],
+			reqd: 1
 		},
 		{
 			fieldname: "to_month",
 			label: __("Sampai Bulan"),
 			fieldtype: "Autocomplete",
 			options: stringMonths,
-			default: months[new Date().getMonth()]
+			default: months[new Date().getMonth()],
+			reqd: 1
 		},
 	]
 };
