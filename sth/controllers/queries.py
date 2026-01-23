@@ -392,3 +392,24 @@ def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doc
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_berita_acara(doctype, txt, searchfield, start, page_len, filters):
+
+	conditions = []
+	fields = ", ".join(get_fields(doctype, ["name"]))
+	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
+	return frappe.db.sql(
+		f"""
+			select {fields} from `tabBerita Acara`
+			where `tabBerita Acara`.{searchfield} like %(txt)s {fcond}
+			order by
+				(case when locate(%(_txt)s, `tabBerita Acara`.name) > 0 then locate(%(_txt)s, `tabBerita Acara`.name) else 99999 end),
+				`tabBerita Acara`.creation desc,
+				`tabBerita Acara`.name
+			limit %(page_len)s offset %(start)s
+		""",
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)

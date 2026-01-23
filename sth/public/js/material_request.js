@@ -54,6 +54,11 @@ frappe.ui.form.on("Material Request", {
                     fieldname: 'berita_acara',
                     fieldtype: 'Link',
                     options: "Berita Acara",
+                    get_query: function () {
+                        return {
+                            query: "sth.controllers.queries.get_berita_acara"
+                        }
+                    },
                     reqd: 1
                 },
             ],
