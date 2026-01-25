@@ -16,12 +16,15 @@
   "section_break_tysi",
   "naming_series",
   "nama_karyawan",
+  "kontraktor",
   "column_break_gvkz",
   "no_induk_karyawan",
   "kode_jabatan",
   "nama_jabatan",
   "column_break_gyfv",
   "catatan",
+  "persetujuan_1",
+  "persetujuan_2",
   "section_break_ubqb",
   "items",
   "section_break_jnmv",
@@ -156,13 +159,31 @@
    "label": "Outgoing",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "kontraktor",
+   "fieldtype": "Link",
+   "label": "Kontraktor",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "persetujuan_1",
+   "fieldtype": "Link",
+   "label": "Persetujuan 1",
+   "options": "User"
+  },
+  {
+   "fieldname": "persetujuan_2",
+   "fieldtype": "Link",
+   "label": "Persetujuan 2",
+   "options": "User"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 15:55:50.345099",
+ "modified": "2026-01-26 00:20:44.941630",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",

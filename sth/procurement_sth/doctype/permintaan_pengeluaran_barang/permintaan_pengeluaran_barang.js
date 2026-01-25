@@ -52,6 +52,24 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
                 );
             })
         }
+        if(!frm.is_new()){
+            if(frm.doc.persetujuan_1){
+                frm.set_df_property('persetujuan_1', 'read_only', 1);
+            }
+            if(frm.doc.persetujuan_2){
+                frm.set_df_property('persetujuan_2', 'read_only', 1);
+            }
+        }
+    },
+    onload(frm){
+        if(!frm.is_new()){
+            if(frm.doc.persetujuan_1){
+                frm.set_df_property('persetujuan_1', 'read_only', 1);
+            }
+            if(frm.doc.persetujuan_2){
+                frm.set_df_property('persetujuan_2', 'read_only', 1);
+            }
+        }
     },
 
     sub_unit(frm) {

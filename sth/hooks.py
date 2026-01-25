@@ -267,6 +267,9 @@ doc_events = {
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
+	"Permintaan Pengeluaran Barang": {
+		"validate": ["sth.procurement_sth.custom.item.check_persetujuan"],
+	},
 	"Project": {
 		"validate": "sth.legal.custom.project.Project",
 		"on_update": "sth.legal.custom.project.Project",
