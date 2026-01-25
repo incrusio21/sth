@@ -27,10 +27,23 @@ def get_columns():
 			"align": "left"
 		},
 		{
+			"label": _("ID Karyawan"),
+			"fieldname": "id_karyawan",
+			"fieldtype": "Link",
+			"width": 150,
+			"options": "Employee"
+		},
+		{
 			"label": _("Nama Karyawan"),
 			"fieldname": "nama_karyawan",
 			"fieldtype": "Data",
 			"width": 350
+		},
+		{
+			"label": _("Nomor Rekening"),
+			"fieldname": "norek_karyawan",
+			"fieldtype": "Data",
+			"width": 150
 		},
 		{
 			"label": _("Tanggal"),
@@ -235,7 +248,9 @@ def process_employee(employee_id, filters, month_num, year):
 		result.append({
 			"no_transaksi": no_transaksi,
 			"divisi": employee.custom_divisi or "",
+			"id_karyawan": employee.name,
 			"nama_karyawan": employee.employee_name,
+			"norek_karyawan": employee.bank_ac_no,
 			"tanggal": date,
 			"kegiatan": "7111102-UPAH (NON-STAF) - KANTOR, UMUM DAN KEAMANAN",
 			"absensi": absensi,
@@ -252,7 +267,9 @@ def process_employee(employee_id, filters, month_num, year):
 	result.append({
 		"no_transaksi": "",
 		"divisi": "",
+		"id_karyawan": "",
 		"nama_karyawan": f"<b>Total {employee.employee_name}</b>",
+		"norek_karyawan": "",
 		"tanggal": "",
 		"kegiatan": "",
 		"absensi": "",

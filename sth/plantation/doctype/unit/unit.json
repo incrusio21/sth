@@ -12,6 +12,7 @@
   "column_break_fyry",
   "company",
   "cost_center",
+  "address",
   "modul_list_section",
   "plantation",
   "mill"
@@ -72,12 +73,17 @@
    "fieldname": "mill",
    "fieldtype": "Check",
    "label": "Mill"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-22 15:57:57.423012",
+ "modified": "2026-01-23 09:26:33.833746",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

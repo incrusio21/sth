@@ -61,8 +61,8 @@ frappe.ui.form.on("Payment Entry", {
     unit(frm){
         if(!frm.doc.unit) return
         
-        frm.clear_table("references")
-        frm.refresh_field("references")
+        // frm.clear_table("references")
+        // frm.refresh_field("references")
     },
     internal_employee(frm){
         if(!frm.doc.internal_employee) return

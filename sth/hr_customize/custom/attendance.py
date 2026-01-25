@@ -37,6 +37,8 @@ class Attendance:
             self.doc.status_code = frappe.get_value("Leave Type", self.doc.leave_type, "status_code")
         elif self.doc.status == "Absent":
             self.doc.status_code = "M"
+        elif self.doc.status == "7th Day Off":
+            self.doc.status_code = "L"
 
     def validate_attendance_is_holiday(self):
         self.doc.is_holiday = 0

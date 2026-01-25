@@ -41,6 +41,25 @@ from pypdf import PdfReader, PdfWriter
 # from reportlab.lib.colors import HexColor
 
 class ContractTemplate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from erpnext.crm.doctype.contract_template_fulfilment_terms.contract_template_fulfilment_terms import ContractTemplateFulfilmentTerms
+		from frappe.types import DF
+
+		contract_terms: DF.TextEditor | None
+		fulfilment_terms: DF.Table[ContractTemplateFulfilmentTerms]
+		is_group: DF.Check
+		lft: DF.Int
+		old_parent: DF.Link | None
+		parent_contract_template: DF.Link | None
+		requires_fulfilment: DF.Check
+		rgt: DF.Int
+		title: DF.Data | None
+	# end: auto-generated types
 	
 	def add_page_numbers(self, pdf_content):
 		
@@ -201,6 +220,9 @@ def get_pdf_html(doc, print_format_name):
 	return html
 
 def get_cover(html):
+	if not html:
+		return None
+	
 	soup = BeautifulSoup(html, "html.parser")
 	text = soup.get_text(strip=True)
 

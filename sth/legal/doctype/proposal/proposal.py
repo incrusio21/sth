@@ -61,7 +61,7 @@ class Proposal(BuyingController):
 	def before_validate(self):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
-
+	
 	def validate(self):
 		self.set_item_kegiatan_name()
 
@@ -366,6 +366,7 @@ class Proposal(BuyingController):
 		if tds_category and not for_validate:
 			self.set_onload("supplier_tds", tds_category)
 
+		self.supplier_address_active = frappe.db.get_value("Alamat dan PIC", {"parent": self.supplier, "status": "Aktif"}, "alamat_pic")
 		super().set_missing_values(for_validate)
 
 def validate_for_items(doc) -> None:

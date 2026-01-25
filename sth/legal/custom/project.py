@@ -17,6 +17,7 @@ class Project:
                 self.validate_status_project()
                 self.validate_spk_type()
                 self.validate_order_adendum()
+                self.set_missing_value()
                 self.set_note()
             case "on_update":
                 self.validate_and_update_project()
@@ -58,6 +59,11 @@ class Project:
             frappe.throw(f"Please create new Proposal for Project {self.doc.project_type} first")
 
         self.doc.proposal = new_po
+
+    def set_missing_value(self):
+        if self.doc.supplier:
+           self.doc.telepon = frappe.db.get_value("Alamat dan PIC", {"parent": self.doc.supplier, "status": "Aktif"}, "telepon")
+           self.doc.user_email = frappe.db.get_value("Struktur Supplier", {"parent": self.doc.supplier, "status": "Aktif"}, "user_email")
 
     def set_note(self):
         if not self.doc.is_new() and self.doc.for_proposal and not self.doc.proposal:
@@ -195,9 +201,28 @@ def get_contract_template(template_name, doc):
     contract_template = frappe.get_doc("Contract Template", template_name)
     contract_terms = contract_cover = None
 
+    from sth.legal.utils import (
+        file_image,
+        get_date_number, 
+        get_days_name, get_date_text, 
+        get_month_number, get_month_name, 
+        get_year_number, get_year_text, 
+        money_to_text
+    )
+
     context = {
         "project": doc,
-        "proposal": frappe.get_value("Proposal", doc["proposal"], "*", as_dict=1) if doc.get("proposal") else {},
+        "proposal": frappe.get_doc("Proposal", doc["proposal"]) if doc.get("proposal") else {},
+        "unit": frappe.get_doc("Unit", doc["unit"]) if doc.get("unit") else {},
+        "day_name": get_days_name,
+        "date_number": get_date_number,
+        "date_text": get_date_text,
+        "month_number": get_month_number,
+        "month_name": get_month_name,
+        "year_number": get_year_number,
+        "year_text": get_year_text,
+        "money_to_text": money_to_text,
+        "file_image": file_image
     }
 
     if contract_template.contract_terms:

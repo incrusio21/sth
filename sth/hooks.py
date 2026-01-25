@@ -50,7 +50,7 @@ doctype_js = {
 	"Material Request": "public/js/material_request.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
-	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js", "accounting_sth/custom/non_voucher_match.js","accounting_sth/custom/override_purchase_invoice.js"],
+	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js", "accounting_sth/custom/non_voucher_match.js","accounting_sth/custom/override_purchase_invoice.js","public/js/purchase_invoice.js"],
 	"Purchase Order": "buying_sth/custom/purchase_order.js",
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
@@ -177,6 +177,7 @@ override_doctype_class = {
 	"Customer": "sth.overrides.customer.Customer",
 	"Employee Promotion": "sth.overrides.employee_promotion.STHEmployeePromotion",
 	"Employee Transfer": "sth.overrides.employee_transfer.STHEmployeeTransfer",
+	"Event": "sth.overrides.event.Event",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
 	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim",
 	"Item": "sth.overrides.item.Item",
@@ -224,6 +225,10 @@ doc_events = {
 	},
 	"Employee Potongan": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+	},
+	"Event": {
+		"validate": ["sth.overrides.event.before_save"],
+		"on_update": "sth.overrides.event.on_update"
 	},
 	"Item": {
 		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name"],
@@ -284,7 +289,7 @@ doc_events = {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Supplier": {
-		"validate": ["sth.overrides.supplier.validate_supplier_name"],
+		"validate": ["sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
 	},
 	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq",

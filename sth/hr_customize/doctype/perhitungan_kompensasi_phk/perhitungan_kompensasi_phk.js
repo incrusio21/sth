@@ -5,7 +5,7 @@ frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm){
         frm.ignore_doctypes_on_cancel_all = ["Exit Interview"]
         filterExitInterview(frm)
-        setDefaultAccount(frm)
+        setDefaultData(frm)
         setDefaultSalaryComponent(frm)
         createPayment(frm)
     },
@@ -60,17 +60,8 @@ function filterExitInterview(frm) {
     });
 }
 
-function setDefaultAccount(frm) {  
-    frm.call('fetch_default_account', { throw_if_missing: true })
-    .then(r => {
-        if (r.message) {
-            let linked_doc = r.message;
-        }
-    })
-}
-
-function setDefaultSalaryComponent(frm) {  
-    frm.call('fetch_default_salary_component', { throw_if_missing: true })
+function setDefaultData(frm) {  
+    frm.call('fetch_default_data', { throw_if_missing: true })
     .then(r => {
         if (r.message) {
             let linked_doc = r.message;

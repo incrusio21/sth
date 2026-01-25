@@ -38,13 +38,24 @@ frappe.ui.form.on("Purchase Invoice", {
         })
 
         frm.set_query("document_no", function (doc) {
-            let filters = {
-                company: doc.company,
-                supplier: doc.supplier,
-                docstatus: 1,
-                // per_billed: ["<", 100]
-            }
+            if(doc.invoice_type == "Pengakuan Pembelian TBS"){
+                let filters = {
+                    company: doc.company,
+                    nama_supplier: doc.supplier,
+                    docstatus: 1,
+                    // per_billed: ["<", 100]
+                }
 
+            }
+            else{
+                let filters = {
+                    company: doc.company,
+                    supplier: doc.supplier,
+                    docstatus: 1,
+                    // per_billed: ["<", 100]
+                }
+            }
+            
             return {
                 filters: filters
             }

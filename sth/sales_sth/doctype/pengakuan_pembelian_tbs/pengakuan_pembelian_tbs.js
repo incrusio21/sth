@@ -8,6 +8,21 @@ frappe.ui.form.on('Pengakuan Pembelian TBS', {
 			}
 		})
 	},
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Download PDF"), function () {
+				const url =
+					"/printview"
+					+ "?doctype=" + encodeURIComponent(frm.doc.doctype)
+					+ "&name=" + encodeURIComponent(frm.doc.name)
+					+ "&format=" + encodeURIComponent("PF Pengakuan Pembelian TBS")
+					+ "&trigger_print=1"
+					+ "&no_letterhead=1";
+
+				window.open(url, "_blank");
+			});
+		}
+	},
 	get_data: function (frm) {
 		if (!frm.doc.nama_supplier) {
 			frappe.msgprint(__('Please select a supplier first'));
@@ -37,11 +52,11 @@ frappe.ui.form.on('Pengakuan Pembelian TBS', {
 		frm.set_value("harga", frm.doc.harga + frm.doc.subsidi_angkut)
 	},
 
-	jarak_ring: function(frm) {
+	jarak_ring: function (frm) {
 		set_jarak_price_list(frm);
 	},
-	
-	unit: function(frm) {
+
+	unit: function (frm) {
 		set_jarak_price_list(frm);
 	}
 });
@@ -50,10 +65,10 @@ function set_jarak_price_list(frm) {
 	if (frm.doc.unit && frm.doc.jarak_ring) {
 		// Format: unit - jarak_ring
 		let price_list_name = `${frm.doc.unit} - ${frm.doc.jarak_ring}`;
-		
+
 		// Set jarak field with the price list name
 		frm.set_value('jarak', price_list_name);
-		
+
 		// Check if price list exists
 		frappe.call({
 			method: 'frappe.client.get_value',
@@ -62,7 +77,7 @@ function set_jarak_price_list(frm) {
 				filters: { name: price_list_name },
 				fieldname: 'name'
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (!r.message) {
 					// Price list doesn't exist, create it
 					create_price_list(frm, price_list_name);
@@ -85,7 +100,7 @@ function create_price_list(frm, price_list_name) {
 				currency: frappe.defaults.get_default('currency') || 'IDR'
 			}
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (r.message) {
 				// frappe.show_alert({
 				// 	message: __('Price List "{0}" created successfully', [price_list_name]),

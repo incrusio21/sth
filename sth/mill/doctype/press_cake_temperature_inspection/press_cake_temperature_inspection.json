@@ -11,18 +11,19 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "reference_document",
+  "company",
+  "unit",
   "column_break_zhml",
-  "machine",
-  "machine_station",
-  "inspection_result",
-  "image_upload",
-  "amended_from"
+  "sp",
+  "amended_from",
+  "section_break_zdpo",
+  "table_gwui"
  ],
  "fields": [
   {
    "fieldname": "section_break_bapn",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
    "fieldname": "amended_from",
@@ -45,7 +46,7 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Posting Date",
+   "label": "Tanggal",
    "no_copy": 1,
    "read_only_depends_on": "eval:!doc.set_posting_time",
    "search_index": 1
@@ -55,7 +56,7 @@
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "in_preview": 1,
-   "label": "Posting Time",
+   "label": "Jam",
    "read_only_depends_on": "eval:!doc.set_posting_time"
   },
   {
@@ -65,55 +66,50 @@
    "label": "Edit Posting Date and Time"
   },
   {
-   "fieldname": "reference_document",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Reference Document",
-   "options": "Sterilizer Transaction",
-   "reqd": 1
-  },
-  {
-   "fieldname": "machine",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Machine",
-   "options": "Mill Machine",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "machine.station",
-   "fieldname": "machine_station",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Machine Station",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_zhml",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Satuan dalam \u00b0C",
-   "fieldname": "inspection_result",
-   "fieldtype": "Float",
+   "fieldname": "sp",
+   "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
-   "label": "Inspection Result",
+   "label": "Shift Proses",
+   "options": "Proses Stasiun Sterilizer",
    "reqd": 1
   },
   {
-   "fieldname": "image_upload",
-   "fieldtype": "Attach Image",
-   "label": "Image Upload",
-   "reqd": 1
+   "fetch_from": "sp.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "sp.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_zdpo",
+   "fieldtype": "Section Break",
+   "label": "Hasil Proses"
+  },
+  {
+   "fieldname": "table_gwui",
+   "fieldtype": "Table",
+   "options": "Press Cake Temperature Inspection Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-16 13:23:34.529751",
+ "modified": "2026-01-21 10:28:10.424355",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Press Cake Temperature Inspection",

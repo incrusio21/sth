@@ -27,6 +27,9 @@
   "has_unit_price_items",
   "is_cwip",
   "amended_from",
+  "section_break_fghk",
+  "supplier_address_active",
+  "column_break_bqcj",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -96,6 +99,10 @@
   "sec_tax_breakup",
   "other_charges_calculation",
   "term_tab",
+  "appendix",
+  "column_break_zedg",
+  "cara_pembayaran",
+  "section_break_yjvw",
   "default_identification",
   "identifications",
   "section_break_djvh",
@@ -746,12 +753,12 @@
   {
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Totals"
   },
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Grand Total (Company Currency)",
    "no_copy": 1,
    "oldfieldname": "grand_total",
@@ -764,6 +771,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounding Adjustment (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -773,6 +781,7 @@
   {
    "fieldname": "base_in_words",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "In Words (Company Currency)",
    "length": 240,
    "oldfieldname": "in_words",
@@ -783,6 +792,7 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounded Total (Company Currency)",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
@@ -809,6 +819,7 @@
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "currency",
@@ -818,6 +829,7 @@
   {
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounded Total",
    "options": "currency",
    "read_only": 1
@@ -826,6 +838,7 @@
    "default": "0",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Disable Rounded Total"
   },
   {
@@ -841,6 +854,7 @@
   {
    "fieldname": "advance_paid",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Advance Paid",
    "no_copy": 1,
    "options": "party_account_currency",
@@ -1336,13 +1350,47 @@
    "hidden": 1,
    "label": "Is CWIP",
    "no_copy": 1
+  },
+  {
+   "fieldname": "supplier_address_active",
+   "fieldtype": "Small Text",
+   "label": "Supplier Address Active",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fghk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_bqcj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appendix",
+   "fieldtype": "Table",
+   "label": "File Upload",
+   "options": "Appendix"
+  },
+  {
+   "fieldname": "column_break_zedg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cara_pembayaran",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Cara Pembayaran"
+  },
+  {
+   "fieldname": "section_break_yjvw",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-14 22:15:24.804290",
+ "modified": "2026-01-23 13:09:44.529305",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

@@ -37,10 +37,10 @@ def get_columns(filters):
 	for day in range(1, num_days + 1):
 		date_obj = datetime(int(tahun), month_num, day)
 		
-		if date_obj.weekday() == 6:  # Sunday
-			label = f'<span style="color: red;">{day}</span>'
-		else:
-			label = str(day)
+		# if date_obj.weekday() == 6:  # Sunday
+		# 	label = f'<span style="color: red;">{day}</span>'
+		# else:
+		label = str(day)
 		
 		columns.append({
 			"fieldname": f"day_{day}",
@@ -211,7 +211,7 @@ def get_data(filters):
 				status = '<span style="color: red;">LN</span>'
 				row["ln"] += 1
 			# Only show MG if the date has passed and it's not a national holiday
-			elif day_of_week == 6:  # Sunday
+			elif day_of_week == 6 and emp.designation != "NS30" :  # Sunday
 
 				end_date = getdate(current_date)
 				last_day_of_month = monthrange(year, month_num)[1]
@@ -221,18 +221,10 @@ def get_data(filters):
 					end_date.weekday() == 6  # Sunday = 6
 				)
 
-				if (current_date <= today and has_presence_in_next_7_days(attendance_dict, day, num_days)) or (is_last_sunday_of_the_month and adakah_attendance_di_bulan_ini == 1):
-					if emp.designation != "NS30" :
-						# kalau bukan satpam
-						status = '<span style="color: red;">MG</span>'
-						row["mg"] += 1
-
-					else:
-						# else kalau satpam
-						status = '<span style="color: red;">L</span>'
-						row["mg"] += 1
-
-
+				if (current_date <= today and has_presence_in_next_7_days(attendance_dict, day, num_days)) or (is_last_sunday_of_the_month and adakah_attendance_di_bulan_ini == 1):	
+					# kalau bukan satpam
+					status = '<span style="color: red;">MG</span>'
+					row["mg"] += 1
 
 				# else: leave empty for future Sundays
 			elif day in attendance_dict:
@@ -256,7 +248,7 @@ def get_data(filters):
 					row["m"] += 1
 
 				elif att.status == "7th Day Off":
-					status = "L"
+					status = '<span style="color: red;">L</span>'
 					row["l"] += 1
 			
 			row[f"day_{day}"] = status

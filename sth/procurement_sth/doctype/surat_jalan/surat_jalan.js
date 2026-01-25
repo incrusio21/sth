@@ -202,5 +202,34 @@ frappe.ui.form.on("Surat Jalan", {
             // console.log(d.dialog);
             d.dialog.set_value("allow_child_item_selection", 1)
         }, 500);
+    },
+
+    open_dialog_permintaan_pengeluaran(frm) {
+        const base = frappe.model.get_server_module_name(frm.doctype)
+        const d = erpnext.utils.map_current_doc({
+            method: base + ".map_from_po",
+            source_doctype: "Purchase Order",
+            target: frm,
+            allow_child_item_selection: 1,
+            child_fieldname: "items",
+            child_columns: ["item_code", "item_name", "qty", "uom"],
+            size: "extra-large",
+            setters: {
+                purchase_type: undefined,
+                unit: undefined,
+                transaction_date: undefined,
+            },
+            get_query_filters: {
+                docstatus: 1,
+                company: frm.doc.company,
+            },
+        }, (res) => {
+            console.log(res);
+        });
+
+        setTimeout(() => {
+            // console.log(d.dialog);
+            d.dialog.set_value("allow_child_item_selection", 1)
+        }, 500);
     }
 });

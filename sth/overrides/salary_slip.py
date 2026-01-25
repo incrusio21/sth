@@ -262,19 +262,23 @@ class SalarySlip(SalarySlip):
 							else:
 								self.holiday_days +=1
 					
+					if emp_doc.designation == "NS30":
+						print(list_attendance.get(current_date))
+
 					current_date = add_days(current_date, 1)
 				
 				# jika seluruh hari dalam satu minggu libur 
 				# atau terdapat attendance tambahkan holidays
 				if allWeekOff:
-					# print(week_start)
-					self.holiday_days += current_week_holiday
-					hari_leave += current_week_holiday
+					if emp_doc.designation != "NS30":
+						self.holiday_days += current_week_holiday
+						hari_leave += current_week_holiday
 				elif att_exist :
 					# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
 					# print(week_start)
-					self.holiday_days += 1
-					hari_leave += 1
+					if emp_doc.designation != "NS30":
+						self.holiday_days += 1
+						hari_leave += 1
 		else:
 			jumlah_libur_dari_holiday_list = 0
 			holiday_doc = frappe.get_doc("Holiday List", emp_doc.holiday_list)
@@ -381,9 +385,13 @@ class SalarySlip(SalarySlip):
 				(Attendance.attendance_date.between(self.start_date, self.actual_end_date))
 				& (Attendance.employee == self.employee)
 				& (Attendance.docstatus == 1)
-				& ((Attendance.status.isin(["Present"])) | (IfNull(LeaveType.status_code, Attendance.status_code).isin(list_lwp)))
-			)
-		).run()
+				& ((Attendance.status.isin(["Present","7th Day Off"])) | (IfNull(LeaveType.status_code, Attendance.status_code).isin(list_lwp))
+			))
+		)
+
+		print(query)
+
+		query = query.run()
 		
 		return {row[0]: row[1] for row in query}
 
@@ -930,5 +938,5 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00701/00004")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00730/00001")
 	doc.calculate_holidays()

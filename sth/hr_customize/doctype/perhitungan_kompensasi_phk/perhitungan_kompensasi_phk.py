@@ -12,7 +12,7 @@ from sth.controllers.accounts_controller import AccountsController
 
 class PerhitunganKompensasiPHK(AccountsController):
 	def validate(self):
-		self.fetch_default_salary_component()
+		self.fetch_default_data()
 		
 	def on_submit(self):
 		self.make_employee_payment_log()
@@ -122,17 +122,16 @@ class PerhitunganKompensasiPHK(AccountsController):
 		self.ssa = ssa[0].name
   
 	@frappe.whitelist()
-	def fetch_default_account(self):
+	def fetch_default_data(self):
 		company = frappe.db.get_value("Company", self.company, "*")
 		self.salary_account = company.custom_default_phk_salary_account
 		self.credit_to = company.custom_default_phk_account
 
-	@frappe.whitelist()
-	def fetch_default_salary_component(self):
 		earning_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "earning_phk_component")
 		deduction_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "deduction_phk_component")
 		self.earning_phk_component = earning_phk
 		self.deduction_phk_component = deduction_phk
+
 
 def get_cuti_balance(leave_type, date, employee):
 	result = get_leave_balance_on(employee, leave_type, date)

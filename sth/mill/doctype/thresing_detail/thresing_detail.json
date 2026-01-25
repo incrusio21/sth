@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-21 10:13:03.679217",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "hasil_inspeksi",
+  "foto_hasil_inspeksi"
+ ],
+ "fields": [
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "hasil_inspeksi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hasil Inspeksi",
+   "reqd": 1
+  },
+  {
+   "description": "Satuan dalam Kg/Cm\u00b2",
+   "fieldname": "foto_hasil_inspeksi",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Inspeksi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-21 10:14:34.761496",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Thresing Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

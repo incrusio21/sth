@@ -8,7 +8,8 @@
  "field_order": [
   "section_break_p0cs",
   "naming_series",
-  "transaction_date",
+  "tgl",
+  "shift_proses",
   "company",
   "abbr",
   "unit",
@@ -69,32 +70,29 @@
    "search_index": 1
   },
   {
-   "default": "Today",
-   "fieldname": "transaction_date",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Transaction Date"
-  },
-  {
    "fieldname": "machine",
    "fieldtype": "Link",
    "in_preview": 1,
-   "label": "Machine",
+   "label": "Mesin",
    "options": "Mill Machine"
   },
   {
+   "fetch_from": "shift_proses.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "read_only": 1
   },
   {
+   "fetch_from": "shift_proses.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_awov",
@@ -115,7 +113,7 @@
    "fieldname": "machine_station",
    "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Machine Station",
+   "label": "Stasiun",
    "read_only": 1
   },
   {
@@ -131,7 +129,7 @@
   {
    "fieldname": "unit_type",
    "fieldtype": "Select",
-   "label": "Unit Type",
+   "label": "Unit Tipe",
    "options": "Lorry\nCycle"
   },
   {
@@ -193,8 +191,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Sterilizer Pressure",
-   "reqd": 1
+   "label": "Sterilizer Pressure"
   },
   {
    "fieldname": "upp1",
@@ -341,13 +338,28 @@
    "fieldtype": "Table",
    "label": "Sterilizer Transaction Monitoring",
    "options": "Sterilizer Transaction Monitoring"
+  },
+  {
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Proses Stasiun Sterilizer",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-14 13:26:05.885316",
+ "modified": "2026-01-21 10:07:06.451767",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sterilizer Transaction",

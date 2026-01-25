@@ -11,18 +11,18 @@
   "naming_series",
   "employee",
   "employee_name",
+  "l_date",
   "ssa",
   "nik",
   "eg",
-  "exit_interview",
   "exit_interview_attach",
   "column_break_yiil",
   "company",
   "posting_date",
-  "l_date",
   "ilb",
-  "document_attach",
+  "exit_interview",
   "dphk",
+  "document_attach",
   "amended_from",
   "accounting_dimension_section",
   "cost_center",
@@ -88,7 +88,8 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Relieving Date"
+   "label": "Relieving Date",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -151,7 +152,7 @@
   {
    "fieldname": "salary_account",
    "fieldtype": "Link",
-   "label": "Salary Account",
+   "label": "COA Biaya",
    "options": "Account",
    "reqd": 1
   },
@@ -259,7 +260,6 @@
    "fieldtype": "Link",
    "label": "Earning PHK Component",
    "options": "Salary Component",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -267,7 +267,6 @@
    "fieldtype": "Link",
    "label": "Deduction PHK Component",
    "options": "Salary Component",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -287,7 +286,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 15:04:01.480929",
+ "modified": "2026-01-24 14:17:03.865035",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",

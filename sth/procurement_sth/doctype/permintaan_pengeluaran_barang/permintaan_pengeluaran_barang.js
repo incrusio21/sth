@@ -8,6 +8,7 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
                 filters: {
                     is_group: 0,
                     company: doc.pt_pemilik_barang,
+                    central: true
                 }
             }
         })
@@ -66,5 +67,34 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
         // }).then((res) => {
         //     frm.set_value("blok", res.name)
         // })
+    }
+});
+
+frappe.ui.form.on('Permintaan Pengeluaran Barang Item', {
+    kode_barang: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (frm.doc.gudang && row.kode_barang) {
+            frappe.call({
+                method: 'frappe.client.get_value',
+                args: {
+                    doctype: 'Bin',
+                    filters: {
+                        'warehouse': frm.doc.gudang,
+                        'item_code': row.kode_barang
+                    },
+                    fieldname: ['actual_qty']
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.model.set_value(cdt, cdn, 'jumlah_saat_ini', r.message.actual_qty || 0);
+                    } else {
+                        frappe.model.set_value(cdt, cdn, 'jumlah_saat_ini', 0);
+                    }
+                }
+            });
+        } else if (!frm.doc.gudang) {
+            frappe.msgprint(__('Please select Gudang first'));
+            frappe.model.set_value(cdt, cdn, 'kode_gudang', '');
+        }
     }
 });

@@ -13,9 +13,8 @@ frappe.ui.form.on("Supplier Quotation", {
 
         frm._default_coa = {}
 
-        frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
-            frm._default_coa.ppn = res
-        })
+        frm.trigger("company")
+
     },
     refresh(frm) {
         frm.page.btn_secondary.hide()
@@ -32,6 +31,15 @@ frappe.ui.form.on("Supplier Quotation", {
         } else {
             frm.remove_custom_button(__("Re open"))
         }
+    },
+
+    company(frm) {
+        if (frm.doc.company && !frm._default_coa.ppn) {
+            frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
+                frm._default_coa.ppn = res
+            })
+        }
+
     },
 
     set_value_dpp_and_taxes(frm) {

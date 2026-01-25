@@ -16,18 +16,16 @@ def get_data(conditions, filters):
 	slips = frappe.db.sql("""
 		SELECT
 			ss.name AS slip,
+			e.name as id_karyawan,
+			e.employee_name as nama,
+			e.bank_ac_no as no_rekening,
 			e.divisi,
-			e.name AS nik,
-			e.employee_name AS nama_karyawan,
-			e.employment_type AS jabatan,
-			e.grade AS tipe_karyawan,
-			e.pkp_status AS status_pajak,
-			e.bank_ac_no AS no_rekening,
-			ss.gross_pay AS total_pendapatan,
-			ss.total_deduction AS total_potongan,
+			d.designation_name AS jabatan,
+			ss.total_deduction AS pemotong,
 			ss.net_pay AS gaji_bersih
 		FROM `tabSalary Slip` ss
 		INNER JOIN `tabEmployee` e ON e.name = ss.employee
+		JOIN `tabDesignation` d ON d.name = e.designation
 		WHERE ss.company IS NOT NULL {}
 	""".format(conditions), filters, as_dict=True)
 
@@ -44,17 +42,38 @@ def get_data(conditions, filters):
 		GROUP BY employee
 	""", as_dict=True)
 
+	GAJI_KOTOR_KEYS = {
+		"gaji_pokok",
+		"upah_panen",
+		"upah_perawatan",
+		"upah_traksi",
+		"hkne",
+		"lembur",
+		"natura",
+		"premi_brondolan",
+		"premi_kehadiran",
+		"premi_tutup_buku",
+		"premi_angkut",
+		"premi_supervisi",
+	}
+
 	detail_map = {}
+	gaji_kotor_map = {}
 	for d in details:
 		detail_map.setdefault(d.parent, {})[frappe.scrub(d.salary_component)] = d.amount
+
+		if frappe.scrub(d.salary_component) in GAJI_KOTOR_KEYS:
+			gaji_kotor_map[d.parent] = gaji_kotor_map.get(d.parent, 0) + (d.amount or 0)
   
 	lembur_map = {
 		l.employee: l.total_jam_lembur
 		for l in lembur_map
 	}
 
-	for s in slips:
+	for i, s in enumerate(slips):
 		s.update(detail_map.get(s.slip, {}))
+		s["nomer_urut"] = (i + 1)
+		s["gaji_kotor"] = gaji_kotor_map.get(s.slip, 0)
 		s["total_jam_lembur"] = lembur_map.get(s.nik, 0)
 
 	return slips
@@ -62,11 +81,26 @@ def get_data(conditions, filters):
 def get_condition(filters):
 	conditions = ""
 
+	if filters.get("company"):
+		conditions += " AND e.company = %(company)s"
+  
 	if filters.get("unit"):
 		conditions += " AND e.unit = %(unit)s"
+
+	if filters.get("divisi"):
+		conditions += " AND e.divisi = %(divisi)s"
+
+	if filters.get("designation"):
+		conditions += " AND e.designation = %(designation)s"
   
 	if filters.get("employee"):
 		conditions += " AND e.name = %(employee)s"
+
+	if filters.get("grade"):
+		conditions += " AND e.grade = %(grade)s"
+	
+	if filters.get("employment_type"):
+		conditions += " AND e.employment_type = %(employment_type)s"
 
 	if filters.get("bulan"):
 		conditions += " AND DATE_FORMAT(ss.posting_date, '%%b') = %(bulan)s"
@@ -79,44 +113,35 @@ def get_condition(filters):
 def get_columns(filters):
 	columns = [
 		{
-			"label": _("Divisi"),
+			"label": _("NOMER URUT"),
 			"fieldtype": "Data",
-			"fieldname": "divisi",
+			"fieldname": "nomer_urut",
+			"width": 130
 		},
 		{
-			"label": _("NIK"),
+			"label": _("ID KARYAWAN"),
 			"fieldtype": "Data",
-			"fieldname": "nik",
+			"fieldname": "id_karyawan",
 		},
 		{
-			"label": _("Nama Karyawan"),
+			"label": _("NAMA"),
 			"fieldtype": "Data",
-			"fieldname": "nama_karyawan",
+			"fieldname": "nama",
 		},
 		{
-			"label": _("Jabatan"),
-			"fieldtype": "Data",
-			"fieldname": "jabatan",
-		},
-		{
-			"label": _("Tipe Karyawan"),
-			"fieldtype": "Data",
-			"fieldname": "tipe_karyawan",
-		},
-		{
-			"label": _("Status Pajak"),
-			"fieldtype": "Data",
-			"fieldname": "status_pajak",
-		},
-		{
-			"label": _("No. Rekening"),
+			"label": _("NO REKENING"),
 			"fieldtype": "Data",
 			"fieldname": "no_rekening",
 		},
 		{
-			"label": _("Total Jam Lembur"),
+			"label": _("DIVISI"),
 			"fieldtype": "Data",
-			"fieldname": "total_jam_lembur",
+			"fieldname": "divisi",
+		},
+		{
+			"label": _("JABATAN"),
+			"fieldtype": "Data",
+			"fieldname": "jabatan",
 		},
 	]
 
@@ -124,38 +149,58 @@ def get_columns(filters):
 	# 	SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Earning' AND sc.disabled != 1 AND sc.name != 'HKnE';
   # """, as_dict=True)
 	q_column_earning = [
-		{"label": "Gaji Pokok", "key": "gaji_pokok"},
-		{"label": "Lembur", "key": "lembur"},
-		{"label": "HKNe", "key": "hkne"},
-		{"label": "Premi Panen", "key": "premi_panen_kontanan"},
-		{"label": "Premi Kehadiran", "key": "premi_kehadiran"},
-		{"label": "Premi Brondolan", "key": "upah_brondolan"},
-		{"label": "Catu Beras", "key": "natura"},
-		{"label": "Premi", "key": "premi"},
-		{"label": "Premi Perawatan", "key": "premi_perawatan"},
-		{"label": "Premi Transport", "key": "premi_transport"},
-		{"label": "Premi bmtbs", "key": "premi_tbs"},
-		{"label": "Premi Angkut", "key": "premi_angkut"},
-		{"label": "Premi Pengawasan", "key": "premi_pengawas"},
+		{"label": "GAJI POKOK", "key": "gaji_pokok"},
+		{"label": "UPAH PANEN", "key": "upah_panen"},
+		{"label": "UPAH PERAWATAN", "key": "upah_perawatan"},
+		{"label": "UPAH TRAKSI", "key": "upah_traksi"},
+		{"label": "HKNE", "key": "hkne"},
+		{"label": "LEMBUR", "key": "lembur"},
+		{"label": "NATURA", "key": "natura"},
+		{"label": "PREMI BRONDOLAN", "key": "premi_brondolan"},
+		{"label": "PREMI KEHADIRAN", "key": "premi_kehadiran"},
+		{"label": "PREMI TUTUP BUKU", "key": "premi_tutup_buku"},
+		{"label": "PREMI ANGKUT", "key": "premi_angkut"},
+		{"label": "PREMI SUPERVISI", "key": "premi_supervisi"},
+		# {"label": "Lembur", "key": "lembur"},
+		# {"label": "HKNe", "key": "hkne"},
+		# {"label": "Premi Panen", "key": "premi_panen_kontanan"},
+		# {"label": "Premi Kehadiran", "key": "premi_kehadiran"},
+		# {"label": "Premi Brondolan", "key": "upah_brondolan"},
+		# {"label": "Catu Beras", "key": "natura"},
+		# {"label": "Premi", "key": "premi"},
+		# {"label": "Premi Perawatan", "key": "premi_perawatan"},
+		# {"label": "Premi Transport", "key": "premi_transport"},
+		# {"label": "Premi bmtbs", "key": "premi_tbs"},
+		# {"label": "Premi Angkut", "key": "premi_angkut"},
+		# {"label": "Premi Pengawasan", "key": "premi_pengawas"},
 	]
   
 	# q_column_deduction = frappe.db.sql("""
 	# 	SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Deduction' AND sc.disabled != 1;
   # """, as_dict=True)
 	q_column_deduction = [
-		{"label": "Penalti", "key": "penalti"},
-		{"label": "Potongan HK", "key": "potongan_hk"},
-		{"label": "BPJS Kesehatan (-)", "key": "bpjs_kesehatan_karyawan"},
-		{"label": "Potongan Basis HK", "key": "potongan_basis_hk"},
-		{"label": "BPJS JHT (-)", "key": "bpjs_tk_jht_karyawan"},
-		{"label": "Potongan Koperasi", "key": "potongan_koperasi"},
-		{"label": "Potongan Uang Sekolah", "key": "potongan_uang_sekolah"},
-		{"label": "BPJS Pensiun (-)", "key": "bpjs_pensiun"},
-		{"label": "Potongan SBSI", "key": "potongan_sp_sbsi"},
-		{"label": "Potongan SPSI", "key": "potongan_spsi"},
-		{"label": "Potongan HO", "key": "potongan_ho"},
-		{"label": "Potongan KSBSI", "key": "potongan_ksbsi"},
-		{"label": "Potongan Serbuk", "key": "potongan_serbuk"},
+		{"label": "JHT 2%", "key": "bpjs_tk___jht_(karyawan)"},
+		{"label": "JP 1%", "key": "bpjs_tk___jp_(karyawan)"},
+		{"label": "BPJS KES 1%", "key": "bpjs_kesehatan_(karyawan)"},
+		{"label": "PINALTI DENDA PANEN", "key": "denda_panen"},
+		{"label": "POTONGAN KOPERASI", "key": "potongan_koperasi"},
+		{"label": "POTONGAN SPSI", "key": "potongan_spsi"},
+		{"label": "POTONGAN SBSI", "key": "potongan_sp_sbsi"},
+		{"label": "POTONGAN KSBSI", "key": "potongan_ksbsi"},
+		{"label": "POTONGAN SERBUK", "key": "potongan_serbuk"},
+		{"label": "POTONGAN UANG SEKOLAH", "key": "potongan_uang_sekolah"},
+		# {"label": "Potongan HK", "key": "potongan_hk"},
+		# {"label": "BPJS Kesehatan (-)", "key": "bpjs_kesehatan_karyawan"},
+		# {"label": "Potongan Basis HK", "key": "potongan_basis_hk"},
+		# {"label": "BPJS JHT (-)", "key": "bpjs_tk_jht_karyawan"},
+		# {"label": "Potongan Koperasi", "key": "potongan_koperasi"},
+		# {"label": "Potongan Uang Sekolah", "key": "potongan_uang_sekolah"},
+		# {"label": "BPJS Pensiun (-)", "key": "bpjs_pensiun"},
+		# {"label": "Potongan SBSI", "key": "potongan_sp_sbsi"},
+		# {"label": "Potongan SPSI", "key": "potongan_spsi"},
+		# {"label": "Potongan HO", "key": "potongan_ho"},
+		# {"label": "Potongan KSBSI", "key": "potongan_ksbsi"},
+		# {"label": "Potongan Serbuk", "key": "potongan_serbuk"},
 	]
 
 	for earning in q_column_earning:
@@ -173,9 +218,9 @@ def get_columns(filters):
 		})
   
 	columns.append({
-		"label": _("TOTAL PENDAPATAN"),
+		"label": _("GAJI KOTOR"),
 		"fieldtype": "Currency",
-		"fieldname": "total_pendapatan",
+		"fieldname": "gaji_kotor",
 	})
 
 	for deduction in q_column_deduction:
@@ -193,9 +238,9 @@ def get_columns(filters):
 		})
 
 	columns.append({
-		"label": _("Total Potongan"),
+		"label": _("PEMOTONG"),
 		"fieldtype": "Currency",
-		"fieldname": "total_potongan",
+		"fieldname": "pemotong",
 	})
 
 	columns.append({

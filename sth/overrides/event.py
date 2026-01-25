@@ -1,28 +1,148 @@
 
 import frappe
 from frappe.desk.doctype.event.event import Event
-
+from frappe.desk.reportview import get_filters_cond
 from frappe.utils.user import get_enabled_system_users
 from frappe.desk.doctype.notification_settings.notification_settings import (
 	is_email_notifications_enabled_for_type,
 )
 
-from datetime import date, datetime
-from frappe.desk.reportview import get_filters_cond
 from frappe.utils import (
-	add_days,
-	add_months,
-	add_years,
-	format_datetime,
-	get_fullname,
-	getdate,
-	month_diff,
-	now_datetime,
-	nowdate,
+	nowdate, get_datetime, formatdate, add_days, 
+	add_months, add_years, getdate, date_diff, format_datetime, 
+	get_fullname, month_diff, now_datetime
 )
+from datetime import date, datetime
+
 
 weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
+class Event(Event):
+	def autoname(self):
+		if not self.event_date:
+			frappe.throw("Event Date is required for naming")
+		
+		date_part = formatdate(self.event_date, "yyMMdd")
+		reminder_prefix = self.reminder_type or "EVT"
+		prefix = f"{reminder_prefix}{date_part}"
+		
+		existing = frappe.get_all(
+			"Event",
+			filters={
+				"name": ["like", f"{prefix}%"]
+			},
+			pluck="name",
+			order_by="name desc",
+			limit=1
+		)
+		
+		if existing:
+			last_number = int(existing[0][-3:])
+			new_number = last_number + 1
+		else:
+			new_number = 1
+		
+		self.name = f"{prefix}{new_number:03d}"
+
+	def create_repeat_events(self):
+		if not self.repeat_this_reminder or not self.repeat_reminder_till:
+			return
+		
+		if getdate(self.repeat_reminder_till) <= getdate(self.event_date):
+			frappe.throw("Repeat Reminder Till date must be after Event Date")
+		
+		max_occurrences = self.get_max_occurrences()
+		existing_repeats = self.get_existing_repeat_events()
+		
+		created_count = 0
+		current_date = getdate(self.event_date)
+		occurrence_count = 0
+		
+		while current_date < getdate(self.repeat_reminder_till) and occurrence_count < max_occurrences:
+			current_date = self.get_next_occurrence_date(current_date)
+			
+			if current_date > getdate(self.repeat_reminder_till):
+				break
+			
+			occurrence_count += 1
+			
+			if current_date in existing_repeats:
+				continue
+			
+			self.create_single_repeat_event(current_date)
+			created_count += 1
+		
+		if created_count > 0:
+			frappe.msgprint(f"Created {created_count} repeat events successfully")
+
+	def get_max_occurrences(self):
+		limits = {
+			"Daily": 365,
+			"Weekly": 104,
+			"Monthly": 60,
+			"Yearly": 10
+		}
+		return limits.get(self.repeat_reminder_on, 365)
+
+	def get_existing_repeat_events(self):
+		existing = frappe.get_all(
+			"Event",
+			filters={
+				"parent_event": self.name,
+				"is_repeat_event": 1
+			},
+			pluck="event_date"
+		)
+		return set(existing)
+
+	def get_next_occurrence_date(self, current_date):
+		if self.repeat_reminder_on == "Daily":
+			return add_days(current_date, 1)
+		elif self.repeat_reminder_on == "Weekly":
+			return add_days(current_date, 7)
+		elif self.repeat_reminder_on == "Monthly":
+			return add_months(current_date, 1)
+		elif self.repeat_reminder_on == "Yearly":
+			return add_years(current_date, 1)
+		else:
+			frappe.throw(f"Invalid repeat frequency: {self.repeat_reminder_on}")
+
+	def create_single_repeat_event(self, new_date):
+		repeat_event = frappe.get_doc({
+			"doctype": "Event",
+			"event_date": new_date,
+			"subject": self.subject,
+			"description": self.description,
+			"reminder_type": self.reminder_type,
+			"event_category": self.event_category,
+			"event_type": self.event_type,
+			"color": self.color,
+			"is_repeat_event": 1,
+			"parent_event": self.name,
+			"repeat_this_reminder": 0, 
+		})
+		
+		if hasattr(self, 'event_participants'):
+			for participant in self.event_participants:
+				repeat_event.append('event_participants', {
+					'reference_doctype': participant.reference_doctype,
+					'reference_docname': participant.reference_docname
+				})
+		
+		repeat_event.insert(ignore_permissions=True)
+		return repeat_event
+
+
+def before_save(doc, method=None):
+	if doc.event_date:
+		from frappe.utils import get_datetime
+		event_datetime = get_datetime(doc.event_date)
+		doc.starts_on = event_datetime.replace(hour=0, minute=0, second=0)
+		doc.ends_on = event_datetime.replace(hour=23, minute=59, second=0)
+
+def on_update(doc,method):
+	if doc.repeat_this_reminder and not doc.is_repeat_event:
+		doc.create_repeat_events()
 
 def custom_send_email_digest():
 	today = getdate()
@@ -35,7 +155,6 @@ def custom_send_email_digest():
 				e.starts_on = "All Day"
 
 			if e.send_reminder_to_participant == 1:
-				# get doc event
 				event_doc = frappe.get_cached_doc("Event", e.name)
 				for row in event_doc.event_participants:
 					frappe.sendmail(
@@ -44,6 +163,7 @@ def custom_send_email_digest():
 						message=e.description,
 						header=[frappe._("Events in Today's Calendar"), "blue"],
 					)
+
 
 @frappe.whitelist()
 def custom_get_events(

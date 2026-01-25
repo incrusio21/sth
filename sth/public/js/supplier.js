@@ -13,7 +13,6 @@ frappe.ui.form.on('Supplier', {
 		}
 		check_status_pkp(frm)
 		hide_details(frm)
-		supplier_get_query(frm)
 	},
 	aktif: function(frm) {
 		if (frm.doc.aktif) {
@@ -58,13 +57,57 @@ function hide_details(frm){
 	
 }
 
-function supplier_get_query(frm){
-	 frm.set_query('jenis_usaha', 'struktur_supplier', function() {
-		return {
-			filters: {
-				'is_group': 1
-			},
-			page_length: 999 
-		};
-	});
-}
+frappe.ui.form.on('Struktur Supplier', {
+	add_jenis_usaha: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		
+		let d = new frappe.ui.Dialog({
+			title: __('Select Item Groups'),
+			fields: [
+				{
+					fieldname: 'item_groups',
+					fieldtype: 'MultiSelectList',
+					label: __('Item Groups'),
+					options: [],
+					get_data: function() {
+						return frappe.call({
+							method: 'frappe.client.get_list',
+							args: {
+								doctype: 'Item Group',
+								filters: {
+									is_group: 1
+								},
+								fields: ['item_group_name','name'],
+								order_by: 'name asc',
+								limit_page_length: 0
+							}
+						}).then(r => {
+							return r.message.map(item => ({
+								value: item.item_group_name,
+								description: item.name
+							}));
+						});
+					}
+				}
+			],
+			primary_action_label: __('Select'),
+			primary_action: function(values) {
+				if (values.item_groups && values.item_groups.length > 0) {
+					let selected_groups = values.item_groups.join(', ');
+					
+					frappe.model.set_value(cdt, cdn, 'jenis_usaha', selected_groups);
+					
+					frm.refresh_field('struktur_supplier');
+				}
+				d.hide();
+			}
+		});
+		
+		if (row.jenis_usaha) {
+			let existing_values = row.jenis_usaha.split(',').map(v => v.trim());
+			d.fields_dict.item_groups.df.default = existing_values;
+		}
+		
+		d.show();
+	}
+});

@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"6xiwu4clhX\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Proses Produksi\",\"col\":4}}]",
+ "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"6xiwu4clhX\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Sterilizer Proses\",\"col\":4}}]",
  "creation": "2025-11-20 15:54:30.037918",
  "custom_blocks": [],
  "docstatus": 0,
@@ -55,8 +55,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Master",
-   "link_count": 4,
+   "label": "Kalibrasi Timbangan",
+   "link_count": 2,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -64,9 +64,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Pabrik",
+   "label": "Kalibrasi Timbangan Internal",
    "link_count": 0,
-   "link_to": "Mill Master",
+   "link_to": "Kalibrasi Timbangan Internal",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -74,9 +74,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Station Master",
+   "label": "Kalibrasi Timbangan Dinas Metrologi",
    "link_count": 0,
-   "link_to": "Station Master",
+   "link_to": "Kalibrasi Timbangan Dinas Metrologi",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -84,31 +84,21 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Mill Machine",
-   "link_count": 0,
-   "link_to": "Mill Machine",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Alat Berat Dan Kendaraan",
-   "link_count": 0,
-   "link_to": "Alat Berat Dan Kendaraan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Proses Produksi",
-   "link_count": 7,
+   "label": "Sterilizer Proses",
+   "link_count": 8,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Proses Stasiun Sterilizer",
+   "link_count": 0,
+   "link_to": "Proses Stasiun Sterilizer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -183,8 +173,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Kalibrasi Timbangan",
-   "link_count": 2,
+   "label": "Master",
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -192,9 +182,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Kalibrasi Timbangan Internal",
+   "label": "Pabrik",
    "link_count": 0,
-   "link_to": "Kalibrasi Timbangan Internal",
+   "link_to": "Mill Master",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -202,15 +192,35 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Kalibrasi Timbangan Dinas Metrologi",
+   "label": "Master Stasiun",
    "link_count": 0,
-   "link_to": "Kalibrasi Timbangan Dinas Metrologi",
+   "link_to": "Station Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Mesin",
+   "link_count": 0,
+   "link_to": "Mill Machine",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Alat Berat Dan Kendaraan",
+   "link_count": 0,
+   "link_to": "Alat Berat Dan Kendaraan",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-01-21 09:16:16.294891",
+ "modified": "2026-01-21 13:29:03.404907",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

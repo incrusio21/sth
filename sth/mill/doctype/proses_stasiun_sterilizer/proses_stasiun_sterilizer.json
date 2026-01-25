@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SHIFT-STRL-{tgl}-{#####}",
+ "creation": "2026-01-21 09:43:43.762570",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_usb4",
+  "tgl",
+  "jam",
+  "shift",
+  "amended_from",
+  "column_break_unfy",
+  "company",
+  "abbr",
+  "unit"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_usb4",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Proses Stasiun Sterilizer",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type"
+  },
+  {
+   "fieldname": "column_break_unfy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-21 09:54:09.873911",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Proses Stasiun Sterilizer",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

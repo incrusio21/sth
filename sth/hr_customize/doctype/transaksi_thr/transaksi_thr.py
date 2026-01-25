@@ -3,8 +3,10 @@
 
 import frappe
 from frappe.utils import flt, nowdate, today, date_diff, getdate
+import calendar
 
 from sth.controllers.accounts_controller import AccountsController
+from sth.hr_customize import get_allowance_settings
 
 class TransaksiTHR(AccountsController):
 	def validate(self):
@@ -18,6 +20,7 @@ class TransaksiTHR(AccountsController):
 			grand_total += row.subtotal
 
 		self.grand_total = flt(grand_total)
+
 
 	def on_submit(self):
 		for emp in self.table_employee:
@@ -235,10 +238,14 @@ class TransaksiTHR(AccountsController):
 				masa_kerja,
 			)
 
+			# jumlah hari dalam bulan
+			posting_date = getdate(today())
+			days_in_month = calendar.monthrange(posting_date.year, posting_date.month)[1]
+
 			# context untuk formula
 			context = {
 				"GP": gaji_pokok,
-				"Natura": 15 * nat_mul * natura_price,
+				"Natura": days_in_month * nat_mul * natura_price,
 				"Uang_Daging": uang_daging,
 				"UMR": umr,
 				"Jumlah_Bulan_Bekerja": jumlah_bulan_bekerja,
@@ -254,7 +261,7 @@ class TransaksiTHR(AccountsController):
 					"umr": umr,
 					"natura_price": natura_price,
 					"natura_multiplier": nat_mul,
-					"natura": 15 * nat_mul * natura_price,
+					"natura": days_in_month * nat_mul * natura_price,
 					"uang_daging": uang_daging,
 					"masa_kerja": masa_kerja,
 					"thr_rule": thr_rule,
@@ -443,6 +450,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.posting_date = nowdate()
 	pe.party_type = "Employee"
 	pe.internal_employee = 1
+	pe.unit = doc.unit
 	pe.party = payment_settings.internal_employee
 	pe.party_name = payment_settings.internal_employee
 	pe.bank_account = bank_account.name

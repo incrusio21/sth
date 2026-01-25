@@ -83,14 +83,15 @@
    "fieldname": "status_ktp",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Status"
+   "label": "Status",
+   "options": "Aktif\nNon Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-20 09:06:51.838766",
+ "modified": "2026-01-23 07:53:42.560077",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "KTP Supplier",

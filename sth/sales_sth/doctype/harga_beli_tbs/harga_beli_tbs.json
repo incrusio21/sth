@@ -130,6 +130,7 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Pabrik",
+   "link_filters": "[[\"Unit\",\"mill\",\"=\",1]]",
    "options": "Unit",
    "reqd": 1
   },
@@ -159,7 +160,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-21 22:46:16.625204",
+ "modified": "2026-01-21 12:41:55.325721",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Harga Beli TBS",

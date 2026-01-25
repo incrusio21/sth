@@ -8,22 +8,20 @@
  "field_order": [
   "section_break_p0cs",
   "naming_series",
-  "transaction_date",
+  "tgl",
   "posting_time",
+  "company",
+  "unit",
+  "column_break_awov",
+  "shift_proses",
   "machine",
   "machine_station",
-  "column_break_awov",
-  "unit",
-  "company",
   "sterilizer_monitoring_tab",
-  "detail_section",
-  "inspection_result",
-  "inspection_photo_upload",
+  "table_vjjc",
   "tbs_process_tab",
-  "sterilizer_reference",
   "unit_type",
-  "column_break_hdny",
   "quantity_to_process",
+  "column_break_hdny",
   "total_weight_process",
   "pending_quantity",
   "total_weight_pending_process",
@@ -43,18 +41,10 @@
    "options": "SST-"
   },
   {
-   "default": "Today",
-   "fieldname": "transaction_date",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Transaction Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "machine",
    "fieldtype": "Link",
    "in_preview": 1,
-   "label": "Machine",
+   "label": "Mesin",
    "options": "Mill Machine"
   },
   {
@@ -62,7 +52,7 @@
    "fieldname": "machine_station",
    "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Machine Station",
+   "label": "Stasiun",
    "read_only": 1
   },
   {
@@ -70,7 +60,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "machine.unit",
+   "fetch_from": "shift_proses.unit",
    "fieldname": "unit",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -78,7 +68,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "machine.company",
+   "fetch_from": "shift_proses.company",
    "fieldname": "company",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -89,10 +79,6 @@
    "fieldname": "sterilizer_monitoring_tab",
    "fieldtype": "Tab Break",
    "label": "Threshing Monitoring"
-  },
-  {
-   "fieldname": "detail_section",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "tbs_process_tab",
@@ -139,33 +125,11 @@
    "read_only": 1
   },
   {
-   "description": "Satuan dalam Kg/Cm\u00b2",
-   "fieldname": "inspection_result",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Inspection Result",
-   "reqd": 1
-  },
-  {
-   "fieldname": "inspection_photo_upload",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Inspection Photo Upload"
-  },
-  {
-   "fieldname": "sterilizer_reference",
-   "fieldtype": "Link",
-   "label": "Document Reference",
-   "options": "Sterilizer Transaction",
-   "reqd": 1
-  },
-  {
    "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "in_preview": 1,
-   "label": "Posting Time",
+   "label": "Jam",
    "read_only": 1
   },
   {
@@ -177,13 +141,33 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tgl",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Proses Stasiun Sterilizer"
+  },
+  {
+   "fieldname": "table_vjjc",
+   "fieldtype": "Table",
+   "options": "Thresing Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 16:16:52.457452",
+ "modified": "2026-01-21 10:15:02.623859",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Threshing Transaction",

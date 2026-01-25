@@ -33,3 +33,8 @@ def create_mr(source_name,target_doc=None):
 	}
 
 	return get_mapped_doc("Berita Acara",source_name,mapper,target_doc,postprocess)
+
+@frappe.whitelist()
+def get_stock_item(item_code,unit):
+	central_warehouse = frappe.db.get_value("Warehouse",{"unit": unit,"central": 1})
+	return frappe.db.get_value("Bin",{"item_code":item_code,"warehouse":central_warehouse},["actual_qty"]) or 0

@@ -179,6 +179,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.posting_date = nowdate()
 	pe.party_type = "Employee"
 	pe.internal_employee = 1
+	pe.unit = doc.unit
 	pe.party = payment_settings.internal_employee
 	pe.party_name = payment_settings.internal_employee
 	pe.bank_account = bank_account.name

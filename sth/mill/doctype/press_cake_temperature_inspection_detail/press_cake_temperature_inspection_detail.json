@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-21 10:16:14.420804",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mesin",
+  "stasiun",
+  "hasil_inspeksi",
+  "foto_upload"
+ ],
+ "fields": [
+  {
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "description": "Satuan dalam \u00b0C",
+   "fieldname": "hasil_inspeksi",
+   "fieldtype": "Float",
+   "label": "Hasil Inspeksi"
+  },
+  {
+   "fetch_from": "mesin.station",
+   "fieldname": "stasiun",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Stasiun",
+   "read_only": 1
+  },
+  {
+   "fieldname": "foto_upload",
+   "fieldtype": "Attach Image",
+   "label": "Foto Upload"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-21 10:24:22.864565",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Press Cake Temperature Inspection Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

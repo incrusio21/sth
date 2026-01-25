@@ -11,6 +11,7 @@
   "pt_pemilik_barang",
   "column_break_gdnc",
   "gudang",
+  "unit",
   "section_break_vyni",
   "naming_series",
   "no_permintaan_pengeluaran",
@@ -19,6 +20,7 @@
   "nama_karyawan",
   "no_induk_karyawan",
   "nama_jabatan",
+  "nama_penerima",
   "section_break_jtbl",
   "items",
   "amended_from",
@@ -76,7 +78,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Nama Karyawan",
-   "options": "Employee"
+   "options": "Employee",
+   "read_only": 1
   },
   {
    "fetch_from": "no_permintaan_pengeluaran.no_induk_karyawan",
@@ -135,13 +138,29 @@
    "label": "Return Percentage",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "nama_penerima",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Nama Penerima",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "gudang.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 09:48:06.964837",
+ "modified": "2026-01-22 14:05:13.120536",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

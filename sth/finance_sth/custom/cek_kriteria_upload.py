@@ -88,8 +88,7 @@ def populate_kriteria_upload(doc):
 						"mandatory": item.mandatory, 
 						"idx": idx
 					})
-
-				else:
+				elif cek_sppkp == 1 and item.rincian_dokumen_finance != "SPPKP":
 					doc.append("kriteria_upload_dokumen_finance", {
 						"rincian_dokumen_finance": item.rincian_dokumen_finance,
 						"upload_file": upload_file,

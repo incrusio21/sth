@@ -129,3 +129,100 @@ def validate_supplier_name(doc, method):
 			),
 			title=_("Duplicate Supplier Name")
 		)
+
+def validate_no_rekening(doc,method):
+	if not doc.data_bank_supplier:
+		return
+
+	list_sppkp  = frappe.db.sql("""
+		SELECT no_rekening, name, parent
+		FROM `tabData Bank Supplier` 
+		WHERE no_rekening IS NOT NULL and no_rekening != ""
+	""",)		
+
+	for row in doc.data_bank_supplier:
+		if row.no_rekening:
+			for satu_sppkp in list_sppkp:
+				if satu_sppkp[0] == row.no_rekening and row.name != satu_sppkp[1]:
+					frappe.throw(
+						_("Supplier with No Rekening '{0}' already exists: {1}").format(
+							row.no_rekening, 
+							satu_sppkp[2]
+						),
+						title=_("Duplicate Rekening Name")
+					)
+
+
+def validate_sppkp_name(doc, method):
+
+	if not doc.npwp_dan_sppkp_supplier:
+		return
+
+	list_sppkp  = frappe.db.sql("""
+		SELECT no_sppkp, parent
+		FROM `tabNPWP dan SPPKP Supplier` 
+		WHERE no_sppkp IS NOT NULL and no_sppkp != "" and parent != %s
+	""", (doc.name or ''))		
+
+	for row in doc.npwp_dan_sppkp_supplier:
+		if row.no_sppkp:
+			for satu_sppkp in list_sppkp:
+				if satu_sppkp[0] == row.no_sppkp:
+					frappe.throw(
+						_("Supplier with SPPKP '{0}' already exists: {1}").format(
+							row.no_sppkp, 
+							satu_sppkp[1]
+						),
+						title=_("Duplicate SPPKP Name")
+					)
+
+def non_aktifkan_table(doc,method):
+	aktif_rows = []
+	
+	for idx, row in enumerate(doc.struktur_supplier):
+		if row.status_supplier == "Aktif":
+			aktif_rows.append(idx)
+	
+	if len(aktif_rows) > 1:
+		for idx in aktif_rows[:-1]:
+			doc.struktur_supplier[idx].status_supplier = "Non Aktif"
+
+	aktif_rows = []
+	
+	for idx, row in enumerate(doc.data_bank_supplier):
+		if row.status_bank == "Aktif":
+			aktif_rows.append(idx)
+	
+	if len(aktif_rows) > 1:
+		for idx in aktif_rows[:-1]:
+			doc.data_bank_supplier[idx].status_bank = "Non Aktif"
+
+	aktif_rows = []
+	
+	for idx, row in enumerate(doc.npwp_dan_sppkp_supplier):
+		if row.status_npwp == "Aktif":
+			aktif_rows.append(idx)
+	
+	if len(aktif_rows) > 1:
+		for idx in aktif_rows[:-1]:
+			doc.npwp_dan_sppkp_supplier[idx].status_npwp = "Non Aktif"
+
+	aktif_rows = []
+	
+	for idx, row in enumerate(doc.alamat_dan_pic_supplier):
+		if row.status_pic == "Aktif":
+			aktif_rows.append(idx)
+	
+	if len(aktif_rows) > 1:
+		for idx in aktif_rows[:-1]:
+			doc.alamat_dan_pic_supplier[idx].status_pic = "Non Aktif"
+
+	aktif_rows = []
+	
+	for idx, row in enumerate(doc.ktp_supplier):
+		if row.status_ktp == "Aktif":
+			aktif_rows.append(idx)
+	
+	if len(aktif_rows) > 1:
+		for idx in aktif_rows[:-1]:
+			doc.ktp_supplier[idx].status_ktp = "Non Aktif"

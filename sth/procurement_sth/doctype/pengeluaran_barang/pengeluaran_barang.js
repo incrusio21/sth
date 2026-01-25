@@ -23,6 +23,14 @@ frappe.ui.form.on("Pengeluaran Barang", {
                 }
             }
         })
+
+        frm.set_query("nama_penerima", function (doc) {
+            return {
+                filters: {
+                    unit: doc.unit,
+                }
+            }
+        })
     },
     refresh(frm) {
         frm.set_df_property("items", "cannot_add_rows", true)
@@ -34,7 +42,8 @@ frappe.ui.form.on("Pengeluaran Barang", {
         }
 
         frm.call("set_items").then((res) => {
-            frappe.model.sync(res)
+            frm.doc.items = res.docs[0].items
+            // frappe.model.sync(res)
             frm.refresh()
         })
     }

@@ -1,0 +1,112 @@
+{%- set timbangan = frappe.db.get_value(
+"Timbangan",
+{"posting_date": doc.tanggal_timbangan, "receive_type": "TBS Eksternal"},
+"*"
+) -%}
+
+<div class="page-break">
+  <h4 class="text-center">PEMBELIAN TBS</h4>
+  <table class="content">
+    <tr>
+      <td rowspan="2">No.</td>
+      <td rowspan="2">No Tiket</td>
+      <td rowspan="2">Kendaraan</td>
+      <td rowspan="2">Bruto</td>
+      <td rowspan="2">Tarra</td>
+      <td rowspan="2">Netto</td>
+      <td rowspan="2">Pot(Kg)</td>
+      <td rowspan="2">Terima</td>
+      <td rowspan="2">Harga/Kg</td>
+      <td rowspan="2">Bonus/Kg</td>
+      <td rowspan="2">Subsidi Angkut/Kg</td>
+      <td rowspan="2">Total Pembayaran Ke Supplier</td>
+      <td rowspan="2">Total Pembayaran Bonus Ke Supplier</td>
+      <td colspan=3>Beban Pajak PPh 22</td>
+      <td rowspan="2">Total Seluruhnya</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Persen</td>
+      <td>Rupiah</td>
+    </tr>
+
+    <tr>
+      <td>1</td>
+      <td>{{timbangan.ticket_number}}</td>
+      <td>{{timbangan.no_polisi}}</td>
+      <td>{{timbangan.bruto}}</td>
+      <td>{{timbangan.tara}}</td>
+      <td>{{timbangan.netto}}</td>
+      <td>{{(timbangan.potongan_sortasi/100) * timbangan.netto}}</td>
+      <td>
+        {{timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)}}
+      </td>
+      <td>{{doc.get_formatted("harga")}}</td>
+      <td>{{doc.get_formatted("bonus")}}</td>
+      <td>{{doc.get_formatted("subsidi_angkut")}}</td>
+      <td>{{doc.items[0].get_formatted("total", doc)}}</td>
+      <td>
+        {{ frappe.format_value(doc.bonus * (timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)),
+        {"fieldtype": "Currency", "options": "IDR"}) }}
+      </td>
+      <td>{{"Ya" if doc.beban_pph_22 == 1 else "Tidak"}}</td>
+      <td>{{"0.25" if doc.beban_pph_22 == 1 else ""}}</td>
+      <td>
+        {{frappe.format_value(0.25 * doc.items[0].total, {"fieldtype": "Currency", "options": "IDR"})}}
+      </td>
+      <td>
+        {{frappe.format_value(doc.items[0].total + (0.25 * doc.items[0].total), {"fieldtype": "Currency", "options":
+        "IDR"})}}
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" style="text-align: left">Tanggal : {{doc.get_formatted("tanggal")}}</td>
+      <td>{{timbangan.bruto}}</td>
+      <td>{{timbangan.tara}}</td>
+      <td>{{timbangan.netto}}</td>
+      <td>{{(timbangan.potongan_sortasi/100) * timbangan.netto}}</td>
+      <td>
+        {{timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)}}
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>{{doc.items[0].get_formatted("total", doc)}}</td>
+      <td>
+        {{frappe.format_value(doc.bonus * (timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)),
+        {"fieldtype": "Currency", "options": "IDR"})}}
+      </td>
+      <td></td>
+      <td></td>
+      <td>
+        {{frappe.format_value(0.25 * doc.items[0].total, {"fieldtype": "Currency", "options": "IDR"})}}
+      </td>
+      <td>
+        {{frappe.format_value(doc.items[0].total + (0.25 * doc.items[0].total), {"fieldtype": "Currency", "options":
+        "IDR"})}}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="17" style="text-align: left">Supplier : {{doc.nama_supplier}}</td>
+    </tr>
+  </table>
+  <table class="mt-5">
+    <tr>
+      <td style="padding-bottom: 0!important; padding-left: 0!important;">Note</td>
+      <td style="padding-bottom: 0!important;">:</td>
+      <td style="padding-bottom: 0!important;">Nilai bonus diberikan agar supplier TBS tidak kirim buah ke tempat lain.
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-bottom: 0!important; padding-left: 0!important;">Print Time</td>
+      <td>:</td>
+      <td>{{frappe.utils.now_datetime().strftime("%H:%M:%S, %d/%m/%Y")}}</td>
+    </tr>
+    <tr>
+      <td style="padding-bottom: 0!important; padding-left: 0!important;">By</td>
+      <td style="padding-bottom: 0!important;">:</td>
+      <td style="padding-bottom: 0!important;">DIANNA</td>
+    </tr>
+  </table>
+</div>

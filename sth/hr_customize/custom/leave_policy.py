@@ -289,7 +289,7 @@ def create_allocations_for_new_employee(doc, method=None):
 	
 	leave_policies = frappe.get_all(
 		"Leave Policy",
-		filters={"create_leave_allocation_annually": 1, docstatus : 1},
+		filters={"create_leave_allocation_annually": 1, "docstatus" : 1},
 		fields=["name"]
 	)
 	

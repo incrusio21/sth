@@ -11,6 +11,13 @@ frappe.ui.form.on("Timbangan", {
 
 		// buat tombol untuk create transaksi
 		make_transaction_button(frm)
+		set_field_visibility(frm)
+	},
+
+	receive_type(frm) {
+		if (frm.doc.receive_type == "TBS Internal" || frm.doc.receive_type == "TBS Eksternal") {
+			frm.set_value("kode_barang", "TBS")
+		}
 	},
 
 	readWeight(frm) {
@@ -65,18 +72,19 @@ frappe.ui.form.on("Timbangan", {
 		frm.trigger('calculate_weight')
 	},
 
-	netto(frm) {
-		frm.trigger('calculate_weight')
+	type(frm) {
+		set_field_visibility(frm)
+	},
+
+	after_save(frm) {
+		set_field_visibility(frm)
 	},
 
 	calculate_weight(frm) {
-		if (frm.doc.type == "Receive") {
-			frm.set_value("netto", frm.doc.bruto - frm.doc.tara - (frm.doc.potongan_sortasi / 100))
-		} else if (["Dispatch", "Return"].includes(frm.doc.type)) {
-			frm.set_value("bruto", frm.doc.netto - frm.doc.tara)
-		}
+		frm.set_value("netto", frm.doc.bruto - frm.doc.tara - (frm.doc.potongan_sortasi / 100))
 	}
-});
+})
+
 
 
 
@@ -124,6 +132,65 @@ function make_transaction_button(frm) {
 					}
 				});
 			}, __('Create'));
+		}
+	}
+}
+
+function set_field_visibility(frm) {
+	if (frm.is_new()) {
+		if (frm.doc.type == "Dispatch") {
+			frm.set_df_property('bruto', 'hidden', 1);
+			frm.set_df_property('gateweight', 'hidden', 1);
+			frm.set_df_property('tara', 'hidden', 0);
+			frm.set_df_property('gateweight2', 'hidden', 0);
+			frm.set_df_property('netto', 'hidden', 1);
+		}
+		else if (frm.doc.type == "Receive" || frm.doc.type == "Return") {
+			frm.set_df_property('tara', 'hidden', 1);
+			frm.set_df_property('gateweight2', 'hidden', 1);
+			frm.set_df_property('bruto', 'hidden', 0);
+			frm.set_df_property('gateweight', 'hidden', 0);
+			frm.set_df_property('netto', 'hidden', 1);
+		}
+		else {
+			frm.set_df_property('bruto', 'hidden', 1);
+			frm.set_df_property('gateweight', 'hidden', 1);
+			frm.set_df_property('tara', 'hidden', 1);
+			frm.set_df_property('gateweight2', 'hidden', 1);
+			frm.set_df_property('netto', 'hidden', 1);
+		}
+
+	}
+	else {
+		// When saved document
+		if (frm.doc.type == "Dispatch" && frm.doc.tara) {
+			frm.set_df_property('bruto', 'hidden', 0);
+			frm.set_df_property('gateweight', 'hidden', 0);
+			frm.set_df_property('tara', 'hidden', 0);
+			frm.set_df_property('gateweight2', 'hidden', 0);
+			frm.set_df_property('netto', 'hidden', 0);
+		}
+		else if (frm.doc.type == "Dispatch") {
+			frm.set_df_property('bruto', 'hidden', 1);
+			frm.set_df_property('gateweight', 'hidden', 1);
+			frm.set_df_property('tara', 'hidden', 0);
+			frm.set_df_property('gateweight2', 'hidden', 0);
+			frm.set_df_property('netto', 'hidden', 1);
+		}
+
+		else if ((frm.doc.type == "Receive" || frm.doc.type === "Return") && frm.doc.bruto) {
+			frm.set_df_property('bruto', 'hidden', 0);
+			frm.set_df_property('gateweight', 'hidden', 0);
+			frm.set_df_property('tara', 'hidden', 0);
+			frm.set_df_property('gateweight2', 'hidden', 0);
+			frm.set_df_property('netto', 'hidden', 0);
+		}
+		else if (frm.doc.type == "Receive" || frm.doc.type === "Return") {
+			frm.set_df_property('bruto', 'hidden', 0);
+			frm.set_df_property('gateweight', 'hidden', 0);
+			frm.set_df_property('tara', 'hidden', 1);
+			frm.set_df_property('gateweight2', 'hidden', 1);
+			frm.set_df_property('netto', 'hidden', 1);
 		}
 	}
 }

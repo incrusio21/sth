@@ -32,12 +32,11 @@ def get_columns(filters):
 			"align": "left"
 		},
 		{
-			"label": _("Karyawan"),
+			"label": _("ID Karyawan"),
 			"fieldname": "employee",
 			"fieldtype": "Link",
 			"options": "Employee",
-			"width": 200,
-			"hidden": 1,
+			"width": 150,
 			"align": "left"
 		},
 		{
@@ -45,6 +44,13 @@ def get_columns(filters):
 			"fieldname": "employee_name",
 			"fieldtype": "Data",			
 			"width": 280,
+			"align": "left"
+		},
+		{
+			"label": _("Nomor Rekening"),
+			"fieldname": "norek_karyawan",
+			"fieldtype": "Data",			
+			"width": 150,
 			"align": "left"
 		},
 		{
@@ -217,6 +223,7 @@ def get_data(filters):
 			'blok': voucher_doc.get('blok', ''),
 			'nik': employee_doc.get('no_ktp', ''),
 			'employee': voucher_data['employee'],
+			'norek_karyawan': employee_doc.get('bank_ac_no', ''),
 			'employee_name': employee_doc.get('employee_name', ''),
 			'posting_date': voucher_data['posting_date'],
 			'kegiatan': voucher_doc.get('kegiatan_account', ''),

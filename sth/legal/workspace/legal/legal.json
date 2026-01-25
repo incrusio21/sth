@@ -183,7 +183,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Master Data",
-   "link_count": 10,
+   "link_count": 11,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -289,9 +289,19 @@
    "onboard": 0,
    "report_ref_doctype": "Supplier",
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Contract Template",
+   "link_count": 0,
+   "link_to": "Contract Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-01-13 09:34:45.966904",
+ "modified": "2026-01-23 09:46:15.039123",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",
