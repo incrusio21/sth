@@ -81,6 +81,35 @@ class SupplierComparasion {
 				me.refresh_table()
 			},
 		})
+
+		this.page.add_field({
+			fieldtype: "MultiSelectList",
+			fieldname: "filter_sq",
+			label: __("Supplier Quotation"),
+			get_data: function () {
+				return frappe.call({
+					method: 'frappe.client.get_list',
+					args: {
+						doctype: 'Supplier Quotation',
+						filters: {
+							company: me.company
+						},
+						fields: ['name', "supplier"],
+						order_by: 'name asc',
+						limit_page_length: 0
+					}
+				}).then(r => {
+					return r.message.map(item => ({
+						value: item.name,
+						description: item.supplier
+					}));
+				});
+			},
+			change: frappe.utils.debounce(function () {
+				me.filter_sq = this._selected_values.map((r) => r.value)
+				me.refresh_table()
+			}, 1000)
+		})
 	}
 
 	setupCustomField() {
@@ -154,7 +183,8 @@ class SupplierComparasion {
 	getTableData() {
 		const args = {
 			pr_sr: this.pr_sr,
-			item_name: this.item_name
+			item_name: this.item_name,
+			list_sq: this.filter_sq
 		}
 		return new Promise((resolve, reject) => {
 			frappe
@@ -163,6 +193,7 @@ class SupplierComparasion {
 					resolve(res)
 				})
 		})
+
 	}
 
 	generateColumns() {

@@ -145,6 +145,10 @@ def get_table_data(args):
         where_clause += " AND sqi.item_name LIKE %(item_name)s"
         filters["item_name"] = f"%{args.item_name}%"
 
+    if args.list_sq:
+        where_clause += " AND sq.name IN %(supplier_quotation)s"
+        filters["supplier_quotation"] = args.list_sq
+
     query = frappe.db.sql(f"""
         SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`
         FROM `tabSupplier Quotation` sq
