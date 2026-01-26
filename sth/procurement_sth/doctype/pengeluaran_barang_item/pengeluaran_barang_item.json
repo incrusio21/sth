@@ -55,7 +55,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sub Unit",
-   "options": "Unit"
+   "options": "Divisi"
   },
   {
    "columns": 1,
@@ -124,7 +124,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-22 13:37:50.766696",
+ "modified": "2026-01-26 13:18:46.552893",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang Item",

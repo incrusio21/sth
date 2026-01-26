@@ -14,9 +14,11 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
         })
 
         frm.set_query("sub_unit", "items", function (doc) {
+            const query = frappe.model.get_server_module_name(doc.doctype) + ".filter_divisi"
             return {
+                query,
                 filters: {
-                    company: doc.pt_pemilik_barang,
+                    warehouse: doc.gudang,
                 }
             }
         })
@@ -26,7 +28,7 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
 
             return {
                 filters: {
-                    unit: child.sub_unit,
+                    divisi: child.sub_unit,
                 }
             }
         })
@@ -52,21 +54,21 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
                 );
             })
         }
-        if(!frm.is_new()){
-            if(frm.doc.persetujuan_1){
+        if (!frm.is_new()) {
+            if (frm.doc.persetujuan_1) {
                 frm.set_df_property('persetujuan_1', 'read_only', 1);
             }
-            if(frm.doc.persetujuan_2){
+            if (frm.doc.persetujuan_2) {
                 frm.set_df_property('persetujuan_2', 'read_only', 1);
             }
         }
     },
-    onload(frm){
-        if(!frm.is_new()){
-            if(frm.doc.persetujuan_1){
+    onload(frm) {
+        if (!frm.is_new()) {
+            if (frm.doc.persetujuan_1) {
                 frm.set_df_property('persetujuan_1', 'read_only', 1);
             }
-            if(frm.doc.persetujuan_2){
+            if (frm.doc.persetujuan_2) {
                 frm.set_df_property('persetujuan_2', 'read_only', 1);
             }
         }
@@ -89,7 +91,7 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
 });
 
 frappe.ui.form.on('Permintaan Pengeluaran Barang Item', {
-    kode_barang: function(frm, cdt, cdn) {
+    kode_barang: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
         if (frm.doc.gudang && row.kode_barang) {
             frappe.call({
@@ -102,7 +104,7 @@ frappe.ui.form.on('Permintaan Pengeluaran Barang Item', {
                     },
                     fieldname: ['actual_qty']
                 },
-                callback: function(r) {
+                callback: function (r) {
                     if (r.message) {
                         frappe.model.set_value(cdt, cdn, 'jumlah_saat_ini', r.message.actual_qty || 0);
                     } else {
