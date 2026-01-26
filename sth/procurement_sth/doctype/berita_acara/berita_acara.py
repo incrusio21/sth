@@ -12,6 +12,10 @@ class BeritaAcara(Document):
 def create_mr(source_name,target_doc=None):
 	def postprocess(source,target):
 		target.purchase_type = "Berita Acara"
+		target.company = frappe.db.get_value("Unit",target.unit,["company"])
+	
+	def update_item(source,target,source_parent):
+		target.stock = get_stock_item(target.item_code,source_parent.unit)
 
 	mapper = {
 		"Berita Acara": {
@@ -28,7 +32,8 @@ def create_mr(source_name,target_doc=None):
 				"km_hm": "custom_kmhm",
 				"satuan": "uom",
 				"note": "description"
-			}
+			},
+			"postprocess": update_item
 		},
 	}
 
