@@ -19,8 +19,10 @@ class PengeluaranBarang(Document):
 
 	def validate_qty(self):
 		for row in self.items:
-			if row.jumlah > row.jumlah_maksimal:
-				frappe.throw(f"Jumlah barang melebihi maksimal permintaan")
+			jumlah_permintaan,jumlah_keluar = frappe.db.get_value("Permintaan Pengeluaran Barang Item",row.reference,["jumlah","jumlah_keluar"])
+			qty = row.jumlah - (jumlah_permintaan - jumlah_keluar)
+			if qty < 0:
+				frappe.throw(f"Jumlah barang melebihi maksimal permintaan: {qty}")
 
 	def update_items_out(self):
 		for row in self.items:
@@ -48,7 +50,7 @@ class PengeluaranBarang(Document):
 		if not self.validate_document_permintaan():
 			return
 
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","(jumlah - jumlah_keluar) as jumlah_maksimal","kendaraan","km","kegiatan","sub_unit","blok","name as reference"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","kendaraan","km","kegiatan","sub_unit","blok","name as reference"])
 
 		for row in items:
 			self.append("items",row)
