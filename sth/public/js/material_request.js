@@ -2,8 +2,16 @@ frappe.provide("sth.queries")
 frappe.provide("sth.form")
 frappe.ui.form.on("Material Request", {
     setup(frm) {
-
+        sth.form.override_class_function(frm.cscript, "refresh", () => {
+            frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent('Get Items From')}"]`).remove()
+            if (frm.doc.docstatus == 0) {
+                frm.add_custom_button("Berita Acara", function () {
+                    frm.trigger('get_berita_acara')
+                }, __("Get Items From"))
+            }
+        })
     },
+
 
     refresh(frm) {
         if (frm.is_new()) {
@@ -16,11 +24,6 @@ frappe.ui.form.on("Material Request", {
 
         frm.set_query("divisi", sth.queries.divisi)
 
-        if (frm.doc.docstatus == 0) {
-            frm.add_custom_button("Berita Acara", function () {
-                frm.trigger('get_berita_acara')
-            }, __("Get Items From"))
-        }
     },
 
     onload: function (frm) {
@@ -43,6 +46,18 @@ frappe.ui.form.on("Material Request", {
             row.unit = frm.doc.unit
         })
         refresh_field("items")
+    },
+
+    set_read_only_fields(frm) {
+        const fields = ["material_request_type", "purchase_type", "sub_purchase_type", "company", "unit", "schedule_date", ["items", "item_code"], ["items", "qty"], ["items", "uom"], ["items", "kendaraan"]]
+
+        for (const field of fields) {
+            if (typeof field == "string") {
+                frm.set_df_property(field, "read_only", 1)
+            } else {
+                frm.get_field(field[0]).grid.update_docfield_property(field[1], 'read_only', 1)
+            }
+        }
     },
 
     get_berita_acara(frm) {
@@ -71,16 +86,17 @@ frappe.ui.form.on("Material Request", {
                 }).then((res) => {
                     frm.set_value({
                         "unit": res["unit"],
+                        "company": res.company,
                         "sub_purchase_type": res["sub_purchase_type"],
                         "purchase_type": res["purchase_type"]
                     })
 
                     frm.clear_table("items")
                     for (const data of res.items) {
-                        let child_item = frm.add_child("items", data)
-                        get_stock_for_item(frm, child_item.doctype, child_item.name)
+                        frm.add_child("items", data)
+                        // get_stock_for_item(frm, child_item.doctype, child_item.name)
                     }
-
+                    frm.trigger('set_read_only_fields')
                     frm.refresh()
                 })
 
