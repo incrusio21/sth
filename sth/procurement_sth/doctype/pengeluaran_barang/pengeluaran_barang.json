@@ -16,6 +16,7 @@
   "naming_series",
   "no_permintaan_pengeluaran",
   "tanggal",
+  "type",
   "column_break_bpnj",
   "nama_karyawan",
   "no_induk_karyawan",
@@ -154,13 +155,19 @@
    "in_preview": 1,
    "label": "Unit",
    "options": "Unit"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nMutasi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-22 14:05:13.120536",
+ "modified": "2026-01-26 13:14:22.890344",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",
