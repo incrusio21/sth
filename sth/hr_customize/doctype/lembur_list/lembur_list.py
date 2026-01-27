@@ -69,6 +69,11 @@ class LemburList(Document):
 			frappe.throw("Posting Date does not match the period of {}".format(self.month_period))
 
 	def set_natura_price(self):
+		self.natura_price = 0
+		
+		if self.unit in [x.unit for x in get_overtime_settings("no_natura_unit")]:
+			return 
+		
 		import calendar
 
 		natura_rate = frappe.get_value("Natura Price", {
@@ -95,9 +100,6 @@ class LemburList(Document):
 	def calculate_total_overtime(self):
 		# cari child sesuai dengan nama
 		overtime_settings = sorted(get_overtime_settings("roundings"), key=lambda x: x.end_time, reverse=True)
-
-		# frappe.get_all("Overtime Rounding Settings", 
-		# 	filters={'parent' : "Overtime Settings"}, fields=['start_time', 'end_time', 'rounding_time'], order_by="rounding_time desc")
 
 		tidak_lembur = ''
 

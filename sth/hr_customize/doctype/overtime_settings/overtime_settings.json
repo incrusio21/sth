@@ -10,7 +10,9 @@
   "column_break_yzlq",
   "default_salary_component",
   "section_break_izvq",
-  "roundings"
+  "roundings",
+  "column_break_hrmp",
+  "no_natura_unit"
  ],
  "fields": [
   {
@@ -44,13 +46,23 @@
    "fieldname": "overtime_for_selected_staff",
    "fieldtype": "Check",
    "label": "Overtime for Selected Staff"
+  },
+  {
+   "fieldname": "column_break_hrmp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_natura_unit",
+   "fieldtype": "Table",
+   "label": "Unit without Natura",
+   "options": "Overtime Natura Setting"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-07 17:00:21.062578",
+ "modified": "2026-01-27 13:31:16.637539",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Overtime Settings",
