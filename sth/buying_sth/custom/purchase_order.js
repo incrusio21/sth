@@ -130,9 +130,9 @@ erpnext.utils.update_progress_received = function (opts) {
 frappe.ui.form.on("Purchase Order", {
 	setup(frm) {
 		sth.form.setup_fieldname_select(frm, "items")
-		sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
-			frm.trigger("set_value_dpp_and_taxes")
-		})
+		// sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
+		// 	frm.trigger("set_value_dpp_and_taxes")
+		// })
 	},
 	refresh(frm) {
 		frm.set_query("purchase_type", () => {
@@ -175,18 +175,18 @@ frappe.ui.form.on("Purchase Order", {
 
 	set_value_dpp_and_taxes(frm) {
 		frm.doc.dpp = frm.doc.net_total
-		
+
 		let total_ppn = 0
-		let total_pph = 0 
-		let total_lainnya = 0 
+		let total_pph = 0
+		let total_lainnya = 0
 		for (const row of frm.doc.taxes) {
-			if(row.tipe_pajak == "PPN"){
+			if (row.tipe_pajak == "PPN") {
 				total_ppn += row.tax_amount
 			}
-			else if (row.tipe_pajak == "PPH"){
+			else if (row.tipe_pajak == "PPH") {
 				total_pph += row.tax_amount
 			}
-			else{
+			else {
 				total_lainnya += row.tax_amount
 			}
 		}
