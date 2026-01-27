@@ -9,6 +9,10 @@ from sth.controllers.accounts_controller import AccountsController
 from sth.hr_customize import get_allowance_settings
 
 class TransaksiTHR(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._allowance_settings = get_allowance_settings()
+
 	def validate(self):
 		self.calculate()
 		self.set_missing_value()
@@ -178,24 +182,20 @@ class TransaksiTHR(AccountsController):
 				salary_map[row.employee] = row.base
 
 		# ambil 1 natura price
-		natura_price_doc = frappe.get_all(
-			"Natura Price",
-			filters={"company": self.company},
-			fields=["harga_beras"],
-			order_by="valid_from desc",
-			limit=1,
-		)
-		natura_price = natura_price_doc[0].harga_beras if natura_price_doc else 0
-
+		natura_price = frappe.get_value("Natura Price", {"company": self.company}, "harga_beras", order_by="valid_from desc") or 0
+		
 		# ambil semua natura multiplier
-		natura_multiplier_map = {
-			row.pkp: row.employee_multiplier
-			for row in frappe.get_all(
+		natura_multiplier_map = frappe._dict(
+			frappe.get_all(
 				"Natura Multiplier",
 				filters={"company": self.company},
-				fields=["pkp", "employee_multiplier"],
+				fields=[
+					"pkp", 
+					self._allowance_settings.get_natura_setting(self.unit)
+				],
+				as_list=1
 			)
-		}
+		)
 
 		# ambil konfigurasi company
 		company = frappe.get_doc("Company", self.company)

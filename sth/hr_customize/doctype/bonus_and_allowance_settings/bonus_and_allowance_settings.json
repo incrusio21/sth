@@ -11,8 +11,9 @@
   "deduction_bonus_component",
   "thr_default_section",
   "earning_thr_component",
-  "column_break_frao",
   "deduction_thr_component",
+  "column_break_frao",
+  "thr_natura_settings",
   "phk_default_section",
   "earning_phk_component",
   "column_break_iplp",
@@ -116,13 +117,19 @@
    "fieldtype": "Link",
    "label": "Monthly Subsidy Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "thr_natura_settings",
+   "fieldtype": "Table",
+   "label": "THR Natura Settings",
+   "options": "THR Natura Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-08 11:31:35.606591",
+ "modified": "2026-01-27 13:45:00.251403",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Bonus and Allowance Settings",
