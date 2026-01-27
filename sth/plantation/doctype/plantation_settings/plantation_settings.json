@@ -24,7 +24,13 @@
   "brondolan_sc",
   "against_kontanan_component",
   "mandor_tab",
-  "mandor_premi"
+  "mandor_premi",
+  "tarif_tab",
+  "sc_incentive_absent",
+  "incentive_absent",
+  "column_break_pbyq",
+  "sc_incentive_output",
+  "incentive_output"
  ],
  "fields": [
   {
@@ -136,13 +142,46 @@
    "fieldtype": "Link",
    "label": "BKM Premi Traksi Transport",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "tarif_tab",
+   "fieldtype": "Tab Break",
+   "label": "Harvest Incentive"
+  },
+  {
+   "fieldname": "incentive_absent",
+   "fieldtype": "Table",
+   "label": "Incentive Absent",
+   "options": "Plantation Incentive Absent"
+  },
+  {
+   "fieldname": "incentive_output",
+   "fieldtype": "Table",
+   "label": "Incentive Output",
+   "options": "Plantation Incentive Output"
+  },
+  {
+   "fieldname": "column_break_pbyq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sc_incentive_absent",
+   "fieldtype": "Link",
+   "label": "Salary Component Incentive Absent",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "sc_incentive_output",
+   "fieldtype": "Link",
+   "label": "Salary Component Incentive Output",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-29 13:35:11.175659",
+ "modified": "2026-01-26 13:08:13.020408",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

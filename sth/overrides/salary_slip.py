@@ -2,12 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from collections import Counter
 
 import frappe
 from frappe import _, scrub
 from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now, rounded
-from frappe.query_builder.functions import Count, IfNull
+from frappe.query_builder.functions import Count, IfNull, Sum
 
+from frappe.utils.data import date_diff
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
 from hrms.payroll.doctype.payroll_period.payroll_period import (
 	get_period_factor,
@@ -289,7 +291,6 @@ class SalarySlip(SalarySlip):
 
 			self.holiday_days = jumlah_libur_dari_holiday_list
 				
-		print("HOLIDAY LIST : {}".format(self.holiday_days))
 		date_of_joining = emp_doc.date_of_joining
 		
 		if emp_doc.grade == "STAF":
@@ -412,7 +413,6 @@ class SalarySlip(SalarySlip):
 		return frappe.cache().get_value(LEAVE_CODE_MAP, _get_leave_code_map)
 	
 	def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
-		print("MASUK YANG BARU")
 		# agar payment log selalu generate ulang
 		self.payment_log_list = []
 		self.loan_repayment_list = []
@@ -428,6 +428,7 @@ class SalarySlip(SalarySlip):
 
 		# tambahan untuk tutup buku. krn tidak terhubung dengan apapun
 		self.set_addons_premi()
+		self.set_harvest_incentive()
 
 		# hapus component against terlebih dahulu untuk d create ulang
 		self.remove_flexibel_payment()
@@ -650,6 +651,139 @@ class SalarySlip(SalarySlip):
 			})
 
 			self._employee_payment[key]["amount"] += premi.amount
+	
+	def set_harvest_incentive(self):
+		from sth.plantation import get_plantation_settings
+
+		plant_settings = get_plantation_settings()
+		
+		# check jumlah qty panen di tanggal terpilih
+		detail_table = frappe.qb.DocType('Detail BKM Hasil Kerja Panen')
+		parent_table = frappe.qb.DocType('Buku Kerja Mandor Panen')
+		
+		# check absensi bkm panen jika terdapat aturan incentive absent
+		absent = plant_settings.get_incentive_absent()
+		if absent.unit:
+			self.absent_harvest_incentive(absent.unit, absent.salary_component, detail_table, parent_table)
+
+		# check output bkm panen jika terdapat aturan incentive output
+		output = plant_settings.get_incentive_output()
+		if output.unit:
+			self.output_harvest_incentive(output.unit, output.salary_component, detail_table, parent_table)
+	
+	def absent_harvest_incentive(self, unit_absent, salary_component, detail_table, parent_table):
+		query = (
+			frappe.qb.from_(detail_table)
+			.inner_join(parent_table)
+			.on(detail_table.parent == parent_table.name)
+			.select(parent_table.unit)
+			.where(
+				(detail_table.employee == self.employee)
+				& (parent_table.posting_date.between(self.start_date, self.end_date))
+				& (parent_table.unit.isin(list(unit_absent.keys())))
+				& (parent_table.docstatus == 1)  # Only submitted documents
+			)
+			.groupby(parent_table.unit, parent_table.posting_date)
+		)
+		
+		harvested_unit = query.run()
+		# skip jika pegawai tidak memiliki panen
+		if not harvested_unit:
+			return
+		
+		# dapatkan jumlah hari kerja setelah di kurangi hari libur
+		payment_days = date_diff(self.actual_end_date, self.actual_start_date) + 1
+		holidays = self.get_holidays_for_employee(self.actual_start_date, self.actual_end_date)
+		payment_days -= len(holidays)
+
+		unit_hk = Counter(unit[0] for unit in harvested_unit)
+		incentive_value = 0
+
+		# cari criteria sesuai unit
+		for unit, criteria in unit_absent.items():
+			absent = unit_hk.get(unit)
+			if not absent:
+				continue
+
+			# soting_criteria berdasarkan max absent terkecil terlebih dahulu
+			criteria.sort(key=lambda x: x["max_absent"])
+			# check apah qty di tanggal terpilih telah memenuhi berat minimum
+			for d in criteria:
+				if absent < (payment_days - d["max_absent"]):
+					continue
+
+				incentive_value += d["value"]
+				break
+
+		# jika ada nilai insentif masukkan dalam pendapatan
+		if not incentive_value:
+			return
+
+		if not salary_component:
+			frappe.throw("Please set Salary Component for Incentive Absent first")
+
+		key = (salary_component, "earnings")
+		self._employee_payment.setdefault(key, {
+			"account": {},
+			"amount": 0,
+		})
+
+		self._employee_payment[key]["amount"] += incentive_value
+
+	def output_harvest_incentive(self, unit_output, salary_component, detail_table, parent_table):
+		query = (
+			frappe.qb.from_(detail_table)
+			.inner_join(parent_table)
+			.on(detail_table.parent == parent_table.name)
+			.select(parent_table.unit, Sum(detail_table.qty))
+			.where(
+				(detail_table.employee == self.employee)
+				& (parent_table.posting_date.between(self.start_date, self.end_date))
+				& (parent_table.tipe_panen == "Manual")
+				& (parent_table.unit.isin(list(unit_output.keys())))
+				& (parent_table.docstatus == 1)  # Only submitted documents
+			)
+			.groupby(parent_table.unit)
+		)
+		
+		harvested_unit = frappe._dict(query.run())
+		
+		# skip jika pegawai tidak memiliki panen
+		if not harvested_unit:
+			return
+		
+		incentive_value = 0
+
+		# cari criteria sesuai unit
+		for unit, output in harvested_unit.items():
+			criteria = unit_output.get(unit)
+			if not criteria:
+				continue
+			
+			criteria.sort(key=lambda x: x["min_output"], reverse=True)
+			# check apah qty di tanggal terpilih telah memenuhi berat minimum
+			for d in criteria:
+				print(output, d["min_output"]) 
+				if flt(output, 2) < d["min_output"]:
+					continue
+
+				incentive_value += d["value"]
+				break
+		
+		# jika ada nilai insentif masukkan dalam pendapatan
+		if not incentive_value:
+			return
+
+		if not salary_component:
+			frappe.throw("Please set Salary Component for Incentive Output first")
+
+		key = (salary_component, "earnings")
+		self._employee_payment.setdefault(key, {
+			"account": {},
+			"amount": 0,
+		})
+
+		self._employee_payment[key]["amount"] += incentive_value
 		
 	def remove_flexibel_payment(self):
 		removed_component = []

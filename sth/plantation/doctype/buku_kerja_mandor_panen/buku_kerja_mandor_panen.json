@@ -29,6 +29,7 @@
   "detail_bkm_section",
   "kegiatan_account",
   "volume_basis",
+  "tipe_panen",
   "column_break_bngb",
   "rupiah_basis",
   "upah_brondolan",
@@ -495,13 +496,21 @@
    "fieldtype": "Link",
    "label": "Kerani Panen",
    "options": "Employee"
+  },
+  {
+   "fetch_from": "kegiatan.tp_pnn",
+   "fieldname": "tipe_panen",
+   "fieldtype": "Select",
+   "label": "Tipe Panen",
+   "options": "\nMekanis\nManual",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-13 22:21:49.571721",
+ "modified": "2026-01-27 11:08:53.783176",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

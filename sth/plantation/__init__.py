@@ -4,7 +4,7 @@
 import frappe
 from frappe import clear_last_message
 
-def get_plantation_settings(key: str):
+def get_plantation_settings(key=None):
 	"""Return the value associated with the given `key` from Plantation Settings DocType."""
 	if not (plantation_settings := getattr(frappe.local, "plantation_settings", None)):
 		try:
@@ -13,4 +13,7 @@ def get_plantation_settings(key: str):
 			clear_last_message()
 			return
 
-	return plantation_settings.get(key)
+	if key:
+		return plantation_settings.get(key)
+
+	return plantation_settings
