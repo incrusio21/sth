@@ -2,18 +2,18 @@ frappe.ui.form.on("Purchase Invoice", {
     setup(frm) {
         sth.form.setup_fieldname_select(frm, "items")
 
-        sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
-            // tambahan disini
-            frm.trigger("set_value_dpp_and_taxes")
-        })
+        // sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
+        //     // tambahan disini
+        //     frm.trigger("set_value_dpp_and_taxes")
+        // })
     },
 
     onload(frm) {
-        frm._default_coa = {}
+        // frm._default_coa = {}
 
-        frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
-            frm._default_coa.ppn = res
-        })
+        // frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
+        //     frm._default_coa.ppn = res
+        // })
     },
 
     refresh(frm) {
@@ -38,7 +38,7 @@ frappe.ui.form.on("Purchase Invoice", {
         })
 
         frm.set_query("document_no", function (doc) {
-            if(doc.invoice_type == "Pengakuan Pembelian TBS"){
+            if (doc.invoice_type == "Pengakuan Pembelian TBS") {
                 let filters = {
                     company: doc.company,
                     nama_supplier: doc.supplier,
@@ -47,7 +47,7 @@ frappe.ui.form.on("Purchase Invoice", {
                 }
 
             }
-            else{
+            else {
                 let filters = {
                     company: doc.company,
                     supplier: doc.supplier,
@@ -55,7 +55,7 @@ frappe.ui.form.on("Purchase Invoice", {
                     // per_billed: ["<", 100]
                 }
             }
-            
+
             return {
                 filters: filters
             }
@@ -143,18 +143,18 @@ frappe.ui.form.on("Purchase Invoice", {
 
     set_value_dpp_and_taxes(frm) {
         frm.doc.dpp = frm.doc.net_total
-        
+
         let total_ppn = 0
-        let total_pph = 0 
-        let total_lainnya = 0 
+        let total_pph = 0
+        let total_lainnya = 0
         for (const row of frm.doc.taxes) {
-            if(row.tipe_pajak == "PPN"){
+            if (row.tipe_pajak == "PPN") {
                 total_ppn += row.tax_amount
             }
-            else if (row.tipe_pajak == "PPH"){
+            else if (row.tipe_pajak == "PPH") {
                 total_pph += row.tax_amount
             }
-            else{
+            else {
                 total_lainnya += row.tax_amount
             }
         }

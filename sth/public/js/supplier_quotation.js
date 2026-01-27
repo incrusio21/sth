@@ -1,8 +1,8 @@
 frappe.ui.form.on("Supplier Quotation", {
     setup(frm) {
-        sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
-            frm.trigger("set_value_dpp_and_taxes")
-        })
+        // sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
+        //     frm.trigger("set_value_dpp_and_taxes")
+        // })
 
         sth.form.override_class_function(frm.cscript, "refresh", () => {
             frm.trigger("create_custom_buttons")
@@ -35,9 +35,9 @@ frappe.ui.form.on("Supplier Quotation", {
 
     company(frm) {
         if (frm.doc.company && !frm._default_coa.ppn) {
-            frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
-                frm._default_coa.ppn = res
-            })
+            // frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
+            //     frm._default_coa.ppn = res
+            // })
         }
 
     },
