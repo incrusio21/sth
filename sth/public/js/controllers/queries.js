@@ -14,6 +14,7 @@ sth.queries = {
         }
 
         return {
+            query: "sth.controllers.queries.get_items_query",
             filters
         }
     },
