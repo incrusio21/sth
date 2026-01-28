@@ -134,6 +134,20 @@ def validate_no_rekening(doc,method):
 	if not doc.data_bank_supplier:
 		return
 
+	# cek yang baru - baru
+	lokal_list = []
+	for row in doc.data_bank_supplier:
+		if row.no_rekening not in lokal_list:
+			lokal_list.append(row.no_rekening)
+		else:
+			frappe.throw(
+				_("Supplier with No Rekening '{0}' already exists: {1}").format(
+					row.no_rekening, 
+					doc.kode_supplier
+				),
+				title=_("Duplicate Rekening Name")
+			)
+
 	list_sppkp  = frappe.db.sql("""
 		SELECT no_rekening, name, parent
 		FROM `tabData Bank Supplier` 
@@ -158,6 +172,20 @@ def validate_sppkp_name(doc, method):
 	if not doc.npwp_dan_sppkp_supplier:
 		return
 
+	# cek yang baru - baru
+	lokal_list = []
+	for row in doc.npwp_dan_sppkp_supplier:
+		if row.no_sppkp not in lokal_list:
+			lokal_list.append(row.no_sppkp)
+		else:
+			frappe.throw(
+				_("Supplier with SPPKP Name '{0}' already exists: {1}").format(
+					row.no_sppkp, 
+					doc.kode_supplier
+				),
+				title=_("Duplicate SPPKP Name")
+			)
+
 	list_sppkp  = frappe.db.sql("""
 		SELECT no_sppkp, parent
 		FROM `tabNPWP dan SPPKP Supplier` 
@@ -175,6 +203,43 @@ def validate_sppkp_name(doc, method):
 						),
 						title=_("Duplicate SPPKP Name")
 					)
+
+def validate_ktp_name(doc, method):
+	if not doc.ktp_supplier:
+		return
+
+	# cek yang baru - baru
+	lokal_list = []
+	for row in doc.ktp_supplier:
+		if row.nik not in lokal_list:
+			lokal_list.append(row.nik)
+		else:
+			frappe.throw(
+				_("Supplier with NIK '{0}' already exists: {1}").format(
+					row.nik, 
+					doc.kode_supplier
+				),
+				title=_("Duplicate NIK KTP")
+			)
+
+	list_ktp  = frappe.db.sql("""
+		SELECT nik, name, parent
+		FROM `tabKTP Supplier` 
+		WHERE nik IS NOT NULL and nik != ""
+	""",)		
+
+	for row in doc.ktp_supplier:
+		if row.nik:
+			for satu_ktp in list_ktp:
+				if satu_ktp[0] == row.nik and row.name != satu_ktp[1]:
+					frappe.throw(
+						_("Supplier with NIK '{0}' already exists: {1}").format(
+							row.nik, 
+							satu_ktp[2]
+						),
+						title=_("Duplicate NIK KTP")
+					)
+					
 
 def non_aktifkan_table(doc,method):
 	aktif_rows = []
@@ -195,7 +260,7 @@ def non_aktifkan_table(doc,method):
 	
 	if len(aktif_rows) > 1:
 		for idx in aktif_rows[:-1]:
-			doc.data_bank_supplier[idx].status_bank = "Non Aktif"
+			doc.data_bank_supplier[idx].status_bank = "Tidak Aktif"
 
 	aktif_rows = []
 	
@@ -205,7 +270,7 @@ def non_aktifkan_table(doc,method):
 	
 	if len(aktif_rows) > 1:
 		for idx in aktif_rows[:-1]:
-			doc.npwp_dan_sppkp_supplier[idx].status_npwp = "Non Aktif"
+			doc.npwp_dan_sppkp_supplier[idx].status_npwp = "Tidak Aktif"
 
 	aktif_rows = []
 	
@@ -215,7 +280,7 @@ def non_aktifkan_table(doc,method):
 	
 	if len(aktif_rows) > 1:
 		for idx in aktif_rows[:-1]:
-			doc.alamat_dan_pic_supplier[idx].status_pic = "Non Aktif"
+			doc.alamat_dan_pic_supplier[idx].status_pic = "Tidak Aktif"
 
 	aktif_rows = []
 	
@@ -226,3 +291,20 @@ def non_aktifkan_table(doc,method):
 	if len(aktif_rows) > 1:
 		for idx in aktif_rows[:-1]:
 			doc.ktp_supplier[idx].status_ktp = "Non Aktif"
+
+	aktif_rows = []
+	
+	for idx, row in enumerate(doc.pajak_supplier):
+		if row.status_pajak == "Aktif":
+			aktif_rows.append(idx)
+	
+	if len(aktif_rows) > 1:
+		for idx in aktif_rows[:-1]:
+			doc.pajak_supplier[idx].status_pajak = "Tidak Aktif"
+
+	pajak_list = []
+	for row in doc.pajak_supplier:
+		if row.pajak:
+			if row.pajak in pajak_list:
+				frappe.throw(_("Row #{0}: Pajak '{1}' already exists in the table.").format(row.idx, row.pajak))
+			pajak_list.append(row.pajak)
