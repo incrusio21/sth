@@ -419,7 +419,7 @@ def get_berita_acara(doctype, txt, searchfield, start, page_len, filters):
 def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 	frappe.errprint(searchfield)
 	conditions = []
-	fields = ", ".join(get_fields(doctype))
+	fields = ", ".join(get_fields(doctype,["name"]))
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
 
 	searchfields = frappe.get_meta(doctype).get_search_fields()
@@ -428,7 +428,7 @@ def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(
 		f"""
 			select {fields} from `tabItem`
-			where {searchfields} {fcond}
+			where ({searchfields}) {fcond}
 			order by
 				(case when locate(%(_txt)s, `tabItem`.name) > 0 then locate(%(_txt)s, `tabItem`.name) else 99999 end),
 				`tabItem`.name

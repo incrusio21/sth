@@ -50,17 +50,21 @@
    "in_list_view": 1,
    "label": "Organisasi",
    "options": "Unit",
+   "read_only_depends_on": "eval:doc.unit",
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.Sub_Purchase_Type !== \"0\"",
    "fieldname": "detail_section",
    "fieldtype": "Section Break",
    "label": "Detail"
   },
   {
+   "depends_on": "eval:doc.sub_purchase_type",
    "fieldname": "table_klkc",
    "fieldtype": "Table",
-   "options": "Berita Acara Detail"
+   "options": "Berita Acara Detail",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -87,11 +91,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.unit",
    "fieldname": "sub_purchase_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Sub Purchase Type",
    "options": "\nPurchase Request\nService Request",
+   "read_only_depends_on": "eval:doc.sub_purchase_type",
    "reqd": 1
   },
   {
@@ -105,7 +111,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-24 10:01:55.605120",
+ "modified": "2026-01-27 13:51:45.492904",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara",
