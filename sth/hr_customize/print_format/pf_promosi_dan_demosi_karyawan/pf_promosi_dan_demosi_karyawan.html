@@ -68,7 +68,7 @@
       <td>:</td>
       <td>{{employee.name or '-'}}</td>
     </tr>
-    {% for row in doc.transfer_details %}
+    {% for row in doc.promotion_details %}
     {% if row.property in ["Designation", "Grade", "Unit", "Divisi", "Company", "Department"] %}
     <tr>
       <td style="width: 5%; font-weight: bold; padding-left: 0!important;"></td>
@@ -111,7 +111,7 @@
       <td></td>
       <td colspan="3"><span style="text-decoration: underline;">Ditetapkan</span> menjadi,</td>
     </tr>
-    {% for row in doc.transfer_details %}
+    {% for row in doc.promotion_details %}
     {% if row.property in ["Designation", "Grade", "Unit", "Divisi", "Company", "Department"] %}
     <tr>
       <td style="width: 5%; font-weight: bold; padding-left: 0!important;"></td>
@@ -154,7 +154,7 @@
       <td>:</td>
       <td colspan="3">
         Surat Keputusan ini mulai berlaku efektif sejak tanggal
-        {{ frappe.utils.formatdate(doc.transfer_date, "dd MMMM yyyy") }}
+        {{ frappe.utils.formatdate(doc.promotion_date, "dd MMMM yyyy") }}
       </td>
     </tr>
   </table>
@@ -170,7 +170,7 @@
 <div class="section-break">
   <p class="text-center mt-5">
     Ditetapkan di: Jakarta <br>
-    Pada tanggal: {{ frappe.utils.formatdate(doc.transfer_date, "dd MMMM yyyy") }}
+    Pada tanggal: {{ frappe.utils.formatdate(doc.promotion_date, "dd MMMM yyyy") }}
   </p>
   <p class="text-center" style="margin-top: 5rem;">
     <span style="text-decoration: underline;">Rino Guntur</span> <br>
