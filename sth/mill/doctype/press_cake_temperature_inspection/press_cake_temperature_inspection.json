@@ -75,7 +75,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Shift Proses",
-   "options": "Proses Stasiun Sterilizer",
+   "options": "Monitoring Proses Control",
    "reqd": 1
   },
   {
@@ -109,7 +109,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 10:28:10.424355",
+ "modified": "2026-01-26 14:50:16.662306",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Press Cake Temperature Inspection",

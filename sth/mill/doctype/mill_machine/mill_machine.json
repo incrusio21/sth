@@ -113,7 +113,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-13 14:58:01.903197",
+ "modified": "2026-01-26 14:56:50.885754",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Machine",
@@ -134,9 +134,7 @@
   }
  ],
  "row_format": "Dynamic",
- "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
- "states": [],
- "title_field": "machine_name"
+ "states": []
 }

@@ -11,6 +11,9 @@ from frappe.model.mapper import get_mapped_doc
 class Timbangan(Document):
 	def validate(self):
 		self.validate_ticket()
+		if self.do_no and not self.storage:
+			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
+
 
 	def on_submit(self):
 		if self.type == "Receive":
@@ -24,6 +27,19 @@ class Timbangan(Document):
 				"voucher_no": self.name,
 				"balance_qty": self.netto - (self.potongan_sortasi/100),
 			}))
+
+		elif self.type == "Dispatch":
+			delivery_note = make_delivery_note(self.name)
+			delivery_note.insert()
+			delivery_note.submit()
+			
+			self.db_set('delivery_note', delivery_note.name)
+			
+			frappe.msgprint(
+				msg=f"Delivery Note {delivery_note.name} has been created and submitted",
+				title="Delivery Note Created",
+				indicator="green"
+			)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -67,6 +83,25 @@ def make_delivery_note(source_name, target_doc=None):
 			if transporter:
 				target.transporter = transporter
 				target.transporter_name = source.transportir
+		
+		# Set values from Delivery Order if do_no exists
+		if source.do_no:
+			do_doc = frappe.get_doc("Delivery Order", source.do_no)
+			target.customer = do_doc.customer
+			target.penandatangan = do_doc.penandatangan
+			target.jabatan_penandatangan = do_doc.jabatan_penandatangan
+			target.unit = do_doc.unit
+			target.komoditi = do_doc.komoditi
+			target.tempat_penyerahan = do_doc.tempat_penyerahan
+			target.jenis_berikat = do_doc.jenis_berikat
+			
+			# Copy child table keterangan_per_komoditi
+			if do_doc.keterangan_per_komoditi:
+				for row in do_doc.keterangan_per_komoditi:
+					target.append('keterangan_per_komoditi', {
+						'parameter': row.parameter,
+						'keterangan': row.keterangan
+					})
 	
 	def update_item(source, target, source_parent):
 		target.timbangan = source_parent.name
@@ -89,7 +124,6 @@ def make_delivery_note(source_name, target_doc=None):
 		target_doc,
 		set_missing_values
 	)
-
 	source_doc = frappe.get_doc("Timbangan", source_name)
 	
 	if source_doc.kode_barang and source_doc.netto:
@@ -100,7 +134,6 @@ def make_delivery_note(source_name, target_doc=None):
 		})
 	
 	return doclist
-
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
 	

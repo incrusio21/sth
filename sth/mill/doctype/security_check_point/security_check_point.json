@@ -22,9 +22,10 @@
   "dispatch_type",
   "return_type",
   "vehicle_entry_time",
-  "vehicle_exit_time",
-  "qr_code_scan",
   "exit",
+  "vehicle_exit_time",
+  "no_pol_tidak_terdaftar",
+  "qr_code_scan",
   "spb",
   "purchase_order",
   "do_no",
@@ -100,6 +101,7 @@
    "label": "Driver Data"
   },
   {
+   "depends_on": "eval:doc.no_pol_tidak_terdaftar == \"0\"",
    "fieldname": "qr_code_scan",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -368,13 +370,20 @@
    "label": "Items DO",
    "options": "Item",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "no_pol_tidak_terdaftar",
+   "fieldtype": "Check",
+   "label": "No Pol Tidak Terdaftar"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 11:52:45.175971",
+ "modified": "2026-01-26 13:46:26.177989",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

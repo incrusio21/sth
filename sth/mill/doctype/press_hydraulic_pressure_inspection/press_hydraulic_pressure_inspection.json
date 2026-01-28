@@ -11,13 +11,11 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "reference_document",
   "column_break_zhml",
-  "machine",
-  "machine_station",
-  "inspection_result",
-  "image_upload",
-  "amended_from"
+  "shift",
+  "amended_from",
+  "section_break_lsfg",
+  "table_mexj"
  ],
  "fields": [
   {
@@ -55,75 +53,53 @@
    "label": "Edit Posting Date and Time"
   },
   {
-   "fieldname": "reference_document",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Reference Document",
-   "options": "Sterilizer Transaction",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_zhml",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "machine",
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Press Hydraulic Pressure Inspection",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Press Hydraulic Pressure Inspection",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "shift",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Machine",
-   "options": "Mill Machine",
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
    "reqd": 1
   },
   {
-   "fetch_from": "machine.station",
-   "fieldname": "machine_station",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Machine Station",
-   "read_only": 1
+   "fieldname": "section_break_lsfg",
+   "fieldtype": "Section Break"
   },
   {
-   "description": "Satuan dalam Kg/Cm\u00b2",
-   "fieldname": "inspection_result",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Inspection Result",
-   "reqd": 1
-  },
-  {
-   "fieldname": "image_upload",
-   "fieldtype": "Attach Image",
-   "label": "Image Upload",
-   "reqd": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Press Hydraulic Pressure Inspection",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Press Hydraulic Pressure Inspection",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "fieldname": "table_mexj",
+   "fieldtype": "Table",
+   "options": "Press Hydraulic Pressure Inspection Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-13 16:22:56.735598",
+ "modified": "2026-01-27 11:08:47.434521",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Press Hydraulic Pressure Inspection",

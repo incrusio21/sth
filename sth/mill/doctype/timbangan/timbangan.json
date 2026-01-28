@@ -166,7 +166,9 @@
   {
    "fieldname": "delivery_order",
    "fieldtype": "Data",
-   "label": "Delivery Order"
+   "in_preview": 1,
+   "label": "Delivery Order",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_gypo",
@@ -183,6 +185,8 @@
    "label": "Jumlah Segel"
   },
   {
+   "fetch_from": "do_no.komoditi",
+   "fetch_if_empty": 1,
    "fieldname": "jenis_product",
    "fieldtype": "Data",
    "label": "Jenis Product"
@@ -203,8 +207,9 @@
   },
   {
    "fieldname": "storage",
-   "fieldtype": "Data",
-   "label": "Storage"
+   "fieldtype": "Link",
+   "label": "Storage",
+   "options": "Warehouse"
   },
   {
    "fetch_from": "ticket_number.receive_type",
@@ -270,7 +275,7 @@
    "depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "fieldname": "purchase_order",
    "fieldtype": "Link",
-   "label": "Purchase Order",
+   "label": "Purchase Order No",
    "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "options": "Purchase Order"
   },
@@ -293,7 +298,7 @@
    "fetch_from": "ticket_number.do_no",
    "fieldname": "do_no",
    "fieldtype": "Link",
-   "label": "DO No",
+   "label": "Delivery Order No",
    "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "options": "Delivery Order"
   },
@@ -430,7 +435,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 15:35:06.441050",
+ "modified": "2026-01-26 22:52:54.028823",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

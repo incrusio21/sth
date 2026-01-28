@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-27 10:59:34.250793",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mesin",
+  "hasil_pemeriksaan",
+  "foto_upload"
+ ],
+ "fields": [
+  {
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "fieldname": "hasil_pemeriksaan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Hasil Pemeriksaan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "foto_upload",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Upload"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-27 11:02:32.955831",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Digester Motor Ampere Inspection Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

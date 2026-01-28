@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class ProsesStasiunSterilizer(Document):
+class PressHydraulicPressureInspectionDetail(Document):
 	pass

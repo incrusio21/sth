@@ -24,6 +24,7 @@ frappe.ui.form.on("Timbangan", {
 		frappe.scaleConnection = frappe.scaleConnection || new sth.utils.scale_connection();
 		frappe.scaleConnection.connect().then(() => {
 			frappe.scaleConnection.startReading((weight) => {
+				console.log(weight);
 				if (weight.includes('kg')) {
 					let weight_number = parseFloat(weight.split('kg')[0])
 					frm.doc.live_weight = weight_number || 0
@@ -54,6 +55,7 @@ frappe.ui.form.on("Timbangan", {
 		}
 
 		frm.set_value("bruto", frm.doc.live_weight)
+		frm.set_value("weight_out_time", frappe.datetime.now_time())
 	},
 
 	gateweight2(frm) {
@@ -62,6 +64,7 @@ frappe.ui.form.on("Timbangan", {
 		}
 
 		frm.set_value("tara", frm.doc.live_weight)
+		frm.set_value("weight_out_time", frappe.datetime.now_time())
 	},
 
 	bruto(frm) {

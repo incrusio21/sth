@@ -155,7 +155,7 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Shift Proses",
-   "options": "Proses Stasiun Sterilizer"
+   "options": "Monitoring Proses Control"
   },
   {
    "fieldname": "table_vjjc",
@@ -167,7 +167,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 10:15:02.623859",
+ "modified": "2026-01-26 14:50:15.266736",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Threshing Transaction",

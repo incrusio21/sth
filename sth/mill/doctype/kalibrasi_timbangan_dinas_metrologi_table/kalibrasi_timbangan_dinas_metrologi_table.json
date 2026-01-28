@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-26 14:26:01.146896",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "timbangan",
+  "berlaku_dari_tanggal",
+  "berlaku_sampai_tanggal",
+  "tanggal_kalibrasi_selanjutnya",
+  "dokumen"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "timbangan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Timbangan",
+   "options": "Timbangan 1\nTimbangan 2"
+  },
+  {
+   "columns": 2,
+   "fieldname": "berlaku_dari_tanggal",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Berlaku Dari Tanggal"
+  },
+  {
+   "columns": 2,
+   "fieldname": "berlaku_sampai_tanggal",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Berlaku Sampai Tanggal"
+  },
+  {
+   "columns": 2,
+   "fieldname": "dokumen",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Dokumen Surat Keterangan Hasil Tera Timbangan dari Dinas Metrologi"
+  },
+  {
+   "columns": 2,
+   "fieldname": "tanggal_kalibrasi_selanjutnya",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Kalibrasi Selanjutnya"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-26 14:28:16.554115",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kalibrasi Timbangan Dinas Metrologi Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

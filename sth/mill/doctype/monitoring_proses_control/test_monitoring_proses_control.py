@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestProsesStasiunSterilizer(FrappeTestCase):
+class TestMonitoringProsesControl(FrappeTestCase):
 	pass

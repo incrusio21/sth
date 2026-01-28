@@ -11,20 +11,33 @@
   "jam",
   "company",
   "unit",
+  "live_weight",
+  "section_break_rfsa",
   "column_break_fhox",
   "beban_berat_1",
   "foto_kalibrasi_1",
+  "gateweight",
+  "column_break_tyww",
   "beban_berat_2",
   "foto_kalibrasi_2",
+  "gateweight2",
+  "column_break_lmdc",
   "beban_berat_3",
   "foto_kalibrasi_3",
+  "gateweight3",
+  "section_break_bvuo",
   "beban_berat_4",
   "foto_kalibrasi_4",
+  "gateweight4",
+  "amended_from",
+  "column_break_ktnl",
   "beban_berat_5",
   "foto_kalibrasi_5",
+  "gateweight5",
+  "column_break_naxi",
   "beban_berat_6",
   "foto_kalibrasi_6",
-  "amended_from"
+  "gateweight6"
  ],
  "fields": [
   {
@@ -149,13 +162,75 @@
    "in_preview": 1,
    "label": "Jam",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "live_weight",
+   "fieldtype": "Float",
+   "label": "Live Weight",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rfsa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gateweight",
+   "fieldtype": "Button",
+   "label": "GateWeight"
+  },
+  {
+   "fieldname": "column_break_tyww",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lmdc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_bvuo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ktnl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_naxi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gateweight2",
+   "fieldtype": "Button",
+   "label": "GateWeight"
+  },
+  {
+   "fieldname": "gateweight3",
+   "fieldtype": "Button",
+   "label": "GateWeight"
+  },
+  {
+   "fieldname": "gateweight4",
+   "fieldtype": "Button",
+   "label": "GateWeight"
+  },
+  {
+   "fieldname": "gateweight5",
+   "fieldtype": "Button",
+   "label": "GateWeight"
+  },
+  {
+   "fieldname": "gateweight6",
+   "fieldtype": "Button",
+   "label": "GateWeight"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 09:23:10.413078",
+ "modified": "2026-01-26 14:12:59.256939",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kalibrasi Timbangan Internal",

@@ -1,7 +1,7 @@
 // Copyright (c) 2026, DAS and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Proses Stasiun Sterilizer", {
+// frappe.ui.form.on("Monitoring Proses Control", {
 // 	refresh(frm) {
 
 // 	},

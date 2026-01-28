@@ -10,10 +10,7 @@
   "jam",
   "company",
   "unit",
-  "berlaku_dari_tanggal",
-  "berlaku_sampai_tanggal",
-  "tanggal_kalibrasi_selanjutnya",
-  "upload",
+  "kalibrasi_timbangan_dinas_metrologi_table",
   "amended_from"
  ],
  "fields": [
@@ -54,42 +51,25 @@
    "options": "Unit"
   },
   {
-   "fieldname": "berlaku_dari_tanggal",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Berlaku Dari Tanggal"
-  },
-  {
-   "fieldname": "berlaku_sampai_tanggal",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Berlaku Sampai Tanggal"
-  },
-  {
-   "fieldname": "tanggal_kalibrasi_selanjutnya",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Tanggal Kalibrasi Selanjutnya"
-  },
-  {
-   "fieldname": "upload",
-   "fieldtype": "Attach",
-   "label": "Dokumen Surat Keterangan Hasil Tera Timbangan dari Dinas Metrologi"
-  },
-  {
    "default": "Now",
    "fieldname": "jam",
    "fieldtype": "Time",
    "in_preview": 1,
    "label": "Jam",
    "read_only": 1
+  },
+  {
+   "fieldname": "kalibrasi_timbangan_dinas_metrologi_table",
+   "fieldtype": "Table",
+   "label": "Timbangan",
+   "options": "Kalibrasi Timbangan Dinas Metrologi Table"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 09:23:40.165519",
+ "modified": "2026-01-26 14:29:30.350147",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kalibrasi Timbangan Dinas Metrologi",
