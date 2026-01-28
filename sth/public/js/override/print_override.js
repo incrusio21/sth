@@ -48,7 +48,7 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
     });
   }
 
-  if (this.frm.doctype == "Delivery Note") {
+  if (this.frm.doctype == "Delivery Order") {
     frappe.call({
       method: "sth.api.get_doc_ignore_perm",
       args: {
