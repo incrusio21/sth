@@ -204,8 +204,67 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Report",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Kantor",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Kantor",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Perawatan",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Perawatan",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Traksi",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Traksi",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rekap Attendance",
+   "link_count": 0,
+   "link_to": "Rekap Attendance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Gaji Kebun",
+   "link_count": 0,
+   "link_to": "Laporan Gaji Kebun",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Setup",
-   "link_count": 6,
+   "link_count": 7,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -273,64 +332,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Report",
-   "link_count": 5,
+   "label": "Plantation Settings",
+   "link_count": 0,
+   "link_to": "Plantation Settings",
    "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Laporan Gaji Kantor",
-   "link_count": 0,
-   "link_to": "Laporan Gaji Kantor",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Laporan Gaji Perawatan",
-   "link_count": 0,
-   "link_to": "Laporan Gaji Perawatan",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Laporan Gaji Traksi",
-   "link_count": 0,
-   "link_to": "Laporan Gaji Traksi",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Rekap Attendance",
-   "link_count": 0,
-   "link_to": "Rekap Attendance",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Laporan Gaji Kebun",
-   "link_count": 0,
-   "link_to": "Laporan Gaji Kebun",
-   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-01-07 09:45:08.612157",
+ "modified": "2026-01-27 11:45:58.308772",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "BKM",

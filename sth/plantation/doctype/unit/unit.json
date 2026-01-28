@@ -9,6 +9,7 @@
   "section_break_njnv",
   "unit",
   "npwp",
+  "bank_account",
   "column_break_fyry",
   "company",
   "cost_center",
@@ -78,12 +79,18 @@
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-23 09:26:33.833746",
+ "modified": "2026-01-27 11:43:16.334838",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

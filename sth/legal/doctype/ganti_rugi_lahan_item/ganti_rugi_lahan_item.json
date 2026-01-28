@@ -8,6 +8,7 @@
   "jenis_biaya",
   "perangkat_desa",
   "sppt",
+  "no_pbb",
   "pemilik_lahan",
   "column_break_ppdh",
   "qty",
@@ -108,13 +109,22 @@
    "label": "Perangkat Desa",
    "options": "Ya\nTidak",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.perangkat_desa != \"Ya\"",
+   "fetch_from": "sppt.no_pbb",
+   "fieldname": "no_pbb",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No. PBB",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-08 14:19:11.748091",
+ "modified": "2026-01-27 15:43:54.113637",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan Item",
