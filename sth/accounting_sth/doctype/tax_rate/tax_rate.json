@@ -7,9 +7,11 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "is_default_pph_22",
   "type",
   "rate",
-  "keterangan"
+  "keterangan",
+  "tax_rate_account"
  ],
  "fields": [
   {
@@ -33,12 +35,24 @@
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "fieldname": "tax_rate_account",
+   "fieldtype": "Table",
+   "label": "Tax Rate Account",
+   "options": "Tax Rate Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default_pph_22",
+   "fieldtype": "Check",
+   "label": "Is Default PPh 22"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-19 23:07:33.715273",
+ "modified": "2026-01-28 11:16:01.419630",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Tax Rate",
