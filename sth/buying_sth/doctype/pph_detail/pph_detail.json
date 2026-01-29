@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-27 11:52:07.854990",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "percentage",
+  "amount",
+  "column_break_eikz",
+  "account",
+  "ref_child_doc",
+  "ref_child_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Tax Rate",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "type.rate",
+   "fieldname": "percentage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Percentage",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_eikz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Data",
+   "label": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ref_child_doc",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Ref Child Doc"
+  },
+  {
+   "fieldname": "ref_child_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Ref Child Name"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-29 11:16:23.032592",
+ "modified_by": "Administrator",
+ "module": "Buying STH",
+ "name": "PPH Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
