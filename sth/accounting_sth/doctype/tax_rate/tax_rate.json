@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:title",
  "creation": "2026-01-19 23:01:48.867333",
@@ -52,7 +53,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-28 11:16:01.419630",
+ "modified": "2026-01-27 16:35:26.625611",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Tax Rate",
