@@ -8,12 +8,16 @@ frappe.ui.form.on("Supplier Quotation", {
             frm.trigger("create_custom_buttons")
         })
 
+        frm.set_query("type", "pph_lainnya", function (doc) {
+            return {
+                filters: {
+                    name: ["like", "%PPh%"]
+                }
+            }
+        })
+
     },
     onload(frm) {
-
-        frm._default_coa = {}
-
-        frm.trigger("company")
 
     },
     refresh(frm) {
@@ -27,19 +31,32 @@ frappe.ui.form.on("Supplier Quotation", {
                         frm.reload_doc()
                     })
             })
-
         } else {
             frm.remove_custom_button(__("Re open"))
         }
     },
 
     company(frm) {
-        if (frm.doc.company && !frm._default_coa.ppn) {
-            // frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { type: "ppn", company: frm.doc.company }).then((res) => {
-            //     frm._default_coa.ppn = res
-            // })
-        }
+        console.log("Oke");
+    },
 
+    ppn_biaya_ongkos(frm) {
+        frm.trigger('calculate_biaya_angkot')
+    },
+
+    is_ppn_ongkos(frm) {
+        frm.trigger('calculate_biaya_angkot')
+    },
+
+    biaya_ongkos(frm) {
+        frm.trigger('calculate_biaya_angkot')
+    },
+
+    calculate_biaya_angkot(frm) {
+        const ppn_biaya = frm.doc.ppn_biaya_ongkos
+        const is_ppn = frm.doc.is_ppn_ongkos
+        const biaya_ongkos = is_ppn ? (ppn_biaya / 100 * frm.doc.biaya_ongkos) + frm.doc.biaya_ongkos : frm.doc.biaya_ongkos
+        frm.set_value("total_biaya_ongkos_angkut", biaya_ongkos)
     },
 
     set_value_dpp_and_taxes(frm) {
@@ -63,6 +80,30 @@ frappe.ui.form.on("Supplier Quotation", {
         }
     }
 })
+
+
+frappe.ui.form.on("PPH Detail", {
+    pph_lainnya_add(frm, dt, dn) {
+        let row = locals[dt][dn]
+        const tax = frm.add_child("taxes")
+        frappe.model.set_value(dt, dn, {
+            "ref_child_doc": tax.doctype,
+            "ref_child_name": tax.name
+        })
+
+    },
+
+    before_pph_lainnya_remove(frm, dt, dn) {
+        let row = locals[dt][dn]
+        frappe.model.clear_doc(row.ref_child_doc, row.ref_child_name)
+    },
+
+    percentage(frm, dt, dn) {
+        let row = locals[dt][dn]
+        frappe.model.set_value(dt, dn, "amount", frm.doc.total * row.percentage)
+    }
+})
+
 
 function btn_get_material_request(frm) {
     frm.add_custom_button(

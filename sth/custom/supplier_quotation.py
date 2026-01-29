@@ -43,3 +43,9 @@ def reopen_rfq(name):
             "docstatus": 0
         },update_modified=False)
         frappe.db.commit()
+    
+
+@frappe.whitelist()
+def get_taxes_template(company):
+    data = frappe.db.get_all("Procurement Settings Account",{"company": company})
+    return data
