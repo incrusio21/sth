@@ -2,11 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
-    refresh(frm){
+    refresh(frm) {
         frm.ignore_doctypes_on_cancel_all = ["Exit Interview"]
         filterExitInterview(frm)
         setDefaultData(frm)
-        setDefaultSalaryComponent(frm)
+        // setDefaultSalaryComponent(frm)
         createPayment(frm)
     },
     employee(frm) {
@@ -42,40 +42,40 @@ function fetchSSA(frm) {
         return
     }
     frm.call('fetch_ssa', { throw_if_missing: true })
-    .then(r => {
-        if (r.message) {
-            let linked_doc = r.message;
-        }
-    })
+        .then(r => {
+            if (r.message) {
+                let linked_doc = r.message;
+            }
+        })
 }
 
 function filterExitInterview(frm) {
-    frm.set_query('exit_interview', ()=>{
+    frm.set_query('exit_interview', () => {
         return {
             query: "sth.hr_customize.doctype.perhitungan_kompensasi_phk.perhitungan_kompensasi_phk.filter_exit_interview",
             filters: {
-                employee : frm.doc.employee
+                employee: frm.doc.employee
             }
         }
     });
 }
 
-function setDefaultData(frm) {  
+function setDefaultData(frm) {
     frm.call('fetch_default_data', { throw_if_missing: true })
-    .then(r => {
-        if (r.message) {
-            let linked_doc = r.message;
-        }
-    })
+        .then(r => {
+            if (r.message) {
+                let linked_doc = r.message;
+            }
+        })
 }
 
 function createPayment(frm) {
     if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
         frm.add_custom_button('Payment', () => {
-        frappe.model.open_mapped_doc({
-            method: "sth.hr_customize.doctype.perhitungan_kompensasi_phk.perhitungan_kompensasi_phk.make_payment_entry",
-            frm: frm,
-        })
+            frappe.model.open_mapped_doc({
+                method: "sth.hr_customize.doctype.perhitungan_kompensasi_phk.perhitungan_kompensasi_phk.make_payment_entry",
+                frm: frm,
+            })
         }, 'Create');
     }
 }

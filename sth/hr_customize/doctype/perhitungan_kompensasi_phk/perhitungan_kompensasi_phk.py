@@ -57,7 +57,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 			perhitungan_component = {
 				"nm": row.nm,
 				"fp": row.fp if row and row.fp else 0,
-				"gaji_pokok": base
+				"gaji_pokok": base,
 			}
 			cond = {
 				"parent": row.nm,
@@ -71,6 +71,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 			if setup_komponen_phk[0].is_cuti:
 				remaining_leave = get_cuti_balance(setup_komponen_phk[0].tipe_cuti, self.l_date, self.employee)
 				result = remaining_leave / 30 * base
+				perhitungan_component.update({"sisa_cuti": remaining_leave})
 			if detail_setup_komponen and detail_setup_komponen.maximum > 0  and result > detail_setup_komponen.maximum:
 				result = detail_setup_komponen.maximum
 			grand_total += result
