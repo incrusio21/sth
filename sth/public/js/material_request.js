@@ -23,6 +23,7 @@ frappe.ui.form.on("Material Request", {
         })
 
         frm.set_query("divisi", sth.queries.divisi)
+        frm.trigger('refresh_read_only_fields')
 
     },
 
@@ -48,17 +49,19 @@ frappe.ui.form.on("Material Request", {
         refresh_field("items")
     },
 
-    set_read_only_fields(frm) {
+    refresh_read_only_fields(frm) {
         const fields = ["material_request_type", "purchase_type", "sub_purchase_type", "company", "unit", "schedule_date", ["items", "item_code"], ["items", "qty"], ["items", "uom"], ["items", "kendaraan"]]
 
         for (const field of fields) {
             if (typeof field == "string") {
-                frm.set_df_property(field, "read_only", 1)
+                frm.set_df_property(field, "read_only", frm.doc.__load_after_mapping || false)
             } else {
-                frm.get_field(field[0]).grid.update_docfield_property(field[1], 'read_only', 1)
+                frm.get_field(field[0]).grid.update_docfield_property(field[1], 'read_only', frm.doc.__load_after_mapping || false)
             }
         }
     },
+
+
 
     get_berita_acara(frm) {
         const d = new frappe.ui.Dialog({
@@ -96,7 +99,7 @@ frappe.ui.form.on("Material Request", {
                         frm.add_child("items", data)
                         // get_stock_for_item(frm, child_item.doctype, child_item.name)
                     }
-                    frm.trigger('set_read_only_fields')
+                    frm.doc.__load_after_mapping = 1
                     frm.refresh()
                 })
 
@@ -169,3 +172,6 @@ function get_stock_for_item(frm, cdt, cdn) {
     });
 }
 
+frappe.form.link_formatters['Item'] = function (value, doc) {
+    return doc.item_name || doc.item_code
+}
