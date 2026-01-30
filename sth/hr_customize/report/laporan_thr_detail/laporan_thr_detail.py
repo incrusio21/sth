@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import getdate
 
 def execute(filters=None):
 	conditions = get_condition(filters)
@@ -15,11 +16,11 @@ def execute(filters=None):
 		dtt.employee_name as nama,
 		e.company as pt,
 		e.unit as unit,
+		tt.posting_date as posting_date,
 		e.date_of_joining as tmk,
 		dtt.masa_kerja as masa_kerja,
 		e.bank_ac_no as no_rek,
 		e.bank_name as bank,
-		dtt.jumlah_bulan_bekerja as jumlah_bulan_kerja,
 		CONCAT(e.grade, '-', e.employment_type) as level_status,
 		dtt.subtotal - dtt.uang_daging - dtt.natura as rp,
 		dtt.uang_daging as uang_daging,
@@ -32,6 +33,7 @@ def execute(filters=None):
   """.format(conditions), filters, as_dict=True)
  
 	for thr in q_laporan_thr_detail:
+		thr["jumlah_bulan_kerja"] = get_jumlah_bulan_bekerja(thr.get("posting_date"), thr.get("tmk"))
 		data.append(thr)
 
 	return columns, data
@@ -137,3 +139,12 @@ def get_columns(filters):
 	]
 
 	return columns
+
+def get_jumlah_bulan_bekerja(posting_date, date_of_joining):
+	if not date_of_joining:
+		return 0
+
+	today_date = getdate(posting_date)
+	doj = getdate(date_of_joining)
+	months = (today_date.year - doj.year) * 12 + (today_date.month - doj.month)
+	return max(0, months)
