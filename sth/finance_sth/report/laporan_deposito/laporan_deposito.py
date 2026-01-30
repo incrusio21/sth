@@ -25,10 +25,12 @@ def execute(filters=None):
 		d.interest_amount as bunga_bruto,
 		d.tax_amount as pajak,
 		d.total as bunga_neto,
-		d.is_redeemed as dicairkan
+		d.is_redeemed as dicairkan,
+		d.company
 	FROM `tabDeposito` d
 	JOIN `tabDeposito Interest Table` dit ON dit.parent = d.name
 	WHERE d.company IS NOT NULL {}
+
   """.format(conditions), filters, as_dict=True)
 
 	for deposito in query_l_deposito:
@@ -50,6 +52,9 @@ def get_condition(filters):
 
 	if filters.get("status_deposito"):
 		conditions += " AND d.is_redeemed = %(status_deposito)s"
+
+	if filters.get("company"):
+		conditions += " AND d.company = %(company)s"
 
 	return conditions
 
@@ -129,6 +134,12 @@ def get_columns(filters):
 			"label": _("Dicairkan?"),
 			"fieldtype": "Data",
 			"fieldname": "dicairkan",
+		},
+		{
+			"label": _("Company"),
+			"fieldtype": "Link",
+			"fieldname": "company",
+			"options": "Company"
 		},
 	]
 

@@ -205,8 +205,8 @@ def get_data(filters):
 			voucher_dict[key]['p_premi'] = row.amount
 
 		if row.voucher_type == 'Buku Kerja Mandor Perawatan':
-			voucher_detail_doc = frappe.get_doc("Detail BKM Hasil Kerja Perawatan", row.voucher_detail_no)
-			voucher_dict[key]['total_tonase'] = voucher_detail_doc.get('qty', 0)
+			# voucher_detail_doc = frappe.get_doc("Detail BKM Hasil Kerja Perawatan", row.voucher_detail_no)
+			voucher_dict[key]['total_tonase'] = 0
 		elif row.voucher_type == 'Buku Kerja Mandor Panen':
 			voucher_detail_doc = frappe.get_doc("Detail BKM Hasil Kerja Panen", row.voucher_detail_no)
 			voucher_dict[key]['total_tonase'] = voucher_detail_doc.get('qty', 0)
@@ -268,7 +268,9 @@ def get_data(filters):
 				'total': 0
 			}
 		
+		employee_totals[employee]['voucher_type'] = row['voucher_type']
 		employee_totals[employee]['total_tonase'] += row['total_tonase']
+		employee_totals[employee]['satuan'] = row['satuan']
 		employee_totals[employee]['p_upah'] += row['p_upah']
 		employee_totals[employee]['p_premi'] += row['p_premi']
 		employee_totals[employee]['total'] += row['total']
@@ -290,13 +292,13 @@ def get_data(filters):
 					'kegiatan': '',
 					'hasil_kerja_qty': None,
 					'brondolan': None,
-					'satuan': '',
+					'satuan': '' if employee_totals[current_employee]['voucher_type'] == "Buku Kerja Mandor Perawatan" else employee_totals[current_employee]['satuan'],
 					'basis': None,
 					'rupiah_satuan': None,
 					'rp_premi': None,
 					'kondisi': '',
 					'tipe': '',
-					'total_tonase': employee_totals[current_employee]['total_tonase'],
+					'total_tonase': None if employee_totals[current_employee]['voucher_type'] == "Buku Kerja Mandor Perawatan" else employee_totals[current_employee]['total_tonase'],
 					'p_upah': employee_totals[current_employee]['p_upah'],
 					'p_premi': employee_totals[current_employee]['p_premi'], 
 					'total': employee_totals[current_employee]['total'], 
@@ -316,13 +318,13 @@ def get_data(filters):
 			'kegiatan': '',
 			'hasil_kerja_qty': None,
 			'brondolan': None,
-			'satuan': '',
+			'satuan': '' if employee_totals[current_employee]['voucher_type'] == "Buku Kerja Mandor Perawatan" else employee_totals[current_employee]['satuan'],
 			'basis': None,
 			'rupiah_satuan': None,
 			'rp_premi': None,
 			'kondisi': '',
 			'tipe': '',
-			'total_tonase': employee_totals[current_employee]['total_tonase'],
+			'total_tonase': None if employee_totals[current_employee]['voucher_type'] == "Buku Kerja Mandor Perawatan" else employee_totals[current_employee]['total_tonase'],
 			'p_upah': employee_totals[current_employee]['p_upah'],
 			'p_premi': employee_totals[current_employee]['p_premi'], 
 			'total': employee_totals[current_employee]['total'], 

@@ -22,6 +22,28 @@ frappe.query_reports["Laporan THR Detail"] = {
 			"options": "Religion Group",
 		},
 		{
+			"fieldname": "grade",
+			"label": __("Grade"),
+			"fieldtype": "Link",
+			"options": "Employee Grade",
+		},
+		{
+			"fieldname": "employment_type",
+			"label": __("Employment Type"),
+			"fieldtype": "Link",
+			"options": "Employment Type",
+		},
+		{
+			"fieldname": "start_periode",
+			"label": __("Start Periode"),
+			"fieldtype": "Date",
+		},
+		{
+			"fieldname": "end_periode",
+			"label": __("End Periode"),
+			"fieldtype": "Date",
+		},
+		{
 			"fieldname": "tahun",
 			"label": __("Tahun"),
 			"fieldtype": "Link",

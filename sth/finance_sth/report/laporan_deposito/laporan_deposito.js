@@ -4,6 +4,12 @@
 frappe.query_reports["Laporan Deposito"] = {
 	"filters": [
 		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+		},
+		{
 			"fieldname": "bulan",
 			"label": __("Bulan"),
 			"fieldtype": "Select",

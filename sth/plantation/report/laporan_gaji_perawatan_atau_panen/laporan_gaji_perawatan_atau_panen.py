@@ -188,7 +188,7 @@ def get_data(filters):
 	
 	voucher_dict = {}
 	for row in epl_data:
-		key = row.voucher_no
+		key = (row.employee, row.voucher_no)
 		if key not in voucher_dict:
 			voucher_dict[key] = {
 				'voucher_no': row.voucher_no,
@@ -214,7 +214,8 @@ def get_data(filters):
 	data = []
 	employee_totals = {}
 	
-	for voucher_no, voucher_data in voucher_dict.items():
+	for key, voucher_data in voucher_dict.items():
+		employee, voucher_no = key
 		
 		if not voucher_data.get('voucher_type') or not voucher_no:
 			continue

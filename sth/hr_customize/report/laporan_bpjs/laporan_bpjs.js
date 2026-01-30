@@ -28,6 +28,11 @@ frappe.query_reports["Laporan BPJS"] = {
 			"options": ["BPJS KES", "BPJS TK"],
 		},
 		{
+			"fieldname": "npp_no_bu",
+			"label": __("NPP / No BU"),
+			"fieldtype": "Data",
+		},
+		{
 			"fieldname": "start_periode",
 			"label": __("Start Periode"),
 			"fieldtype": "Date",
