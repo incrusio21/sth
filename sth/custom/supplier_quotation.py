@@ -47,5 +47,9 @@ def reopen_rfq(name):
 
 @frappe.whitelist()
 def get_taxes_template(company):
-    data = frappe.db.get_all("Procurement Settings Account",{"company": company})
+    data = frappe.db.get_all("Procurement Settings Account",{"company": company},["company","account","type"])
     return data
+
+@frappe.whitelist()
+def get_account_tax_rate(name,company):
+    return frappe.db.get_value("Tax Rate Account",{"parent":name,"company": company},["account"])

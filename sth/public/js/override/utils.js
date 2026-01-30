@@ -87,6 +87,7 @@ erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
 
                     // end custom
                     frappe.model.sync(r.message);
+                    cur_frm.doc.__after_get_data = 1
                     cur_frm.dirty();
                     cur_frm.refresh();
                 }
