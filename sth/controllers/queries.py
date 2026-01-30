@@ -417,22 +417,25 @@ def get_berita_acara(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_items_query(doctype, txt, searchfield, start, page_len, filters):
-	frappe.errprint(searchfield)
 	conditions = []
-	fields = ", ".join(get_fields(doctype,["name"]))
+	fields = ", ".join(["`tabItem`.name", "`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description"])
+	# fields = ", ".join(get_fields(doctype,["name"]))
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
 
 	searchfields = frappe.get_meta(doctype).get_search_fields()
-	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
+	searchfields = " or ".join(f"`tab{doctype}`.{field} like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql(
 		f"""
 			select {fields} from `tabItem`
+			left join `tabItem Group` ig1 on ig1.name = `tabItem`.item_group
+			left join `tabItem Group` ig2 on ig2.name = `tabItem`.kelompok_barang
 			where ({searchfields}) {fcond}
 			order by
 				(case when locate(%(_txt)s, `tabItem`.name) > 0 then locate(%(_txt)s, `tabItem`.name) else 99999 end),
 				`tabItem`.name
 			limit %(page_len)s offset %(start)s
 		""",
-		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+		debug=True
 	)

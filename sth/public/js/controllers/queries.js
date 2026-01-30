@@ -9,7 +9,8 @@ sth.queries = {
             }
         } else if (doc.sub_purchase_type == "Service Request") {
             filters = {
-                is_stock_item: 0
+                is_stock_item: 0,
+                is_fixed_asset: 0
             }
         }
 
