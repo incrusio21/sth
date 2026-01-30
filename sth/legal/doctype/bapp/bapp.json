@@ -49,6 +49,14 @@
   "net_total",
   "tax_withholding_net_total",
   "base_tax_withholding_net_total",
+  "ppn_section",
+  "ppn",
+  "ppn_rate",
+  "ppn_account",
+  "column_break_iyta",
+  "ppn_amount",
+  "pph_section",
+  "pph_details",
   "taxes_charges_section",
   "tax_category",
   "taxes_and_charges",
@@ -1170,13 +1178,58 @@
    "label": "Sub Asset Category",
    "options": "Sub Asset Category",
    "read_only": 1
+  },
+  {
+   "fieldname": "ppn_section",
+   "fieldtype": "Section Break",
+   "label": "PPN"
+  },
+  {
+   "fieldname": "ppn",
+   "fieldtype": "Link",
+   "label": "PPN",
+   "options": "Tax Rate"
+  },
+  {
+   "fieldname": "ppn_rate",
+   "fieldtype": "Float",
+   "label": "PPN Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ppn_account",
+   "fieldtype": "Link",
+   "label": "PPN Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_iyta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ppn_amount",
+   "fieldtype": "Currency",
+   "label": "PPN Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pph_section",
+   "fieldtype": "Section Break",
+   "label": "PPH"
+  },
+  {
+   "fieldname": "pph_details",
+   "fieldtype": "Table",
+   "label": "PPH Details",
+   "options": "PPH Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 10:57:02.354242",
+ "modified": "2026-01-30 13:25:35.492220",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",
