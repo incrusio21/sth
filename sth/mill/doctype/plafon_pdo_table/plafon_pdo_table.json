@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-29 21:47:36.721922",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tipe",
+  "jenis_plafon",
+  "nilai",
+  "kategori"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "jenis_plafon",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Jenis Plafon",
+   "options": "tipe"
+  },
+  {
+   "columns": 2,
+   "fieldname": "nilai",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Nilai"
+  },
+  {
+   "columns": 2,
+   "fieldname": "kategori",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Kategori",
+   "options": "/HARI/ORANG\n/HARI\n/BULAN"
+  },
+  {
+   "columns": 2,
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tipe",
+   "options": "\nDesignation\nExpense Claim Type"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-30 00:52:27.238126",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Plafon PDO Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -112,6 +112,7 @@ frappe.ui.form.on("Transaksi THR", {
       freeze_message: "Mengambil data employee...",
     });
 
+    console.log(records.message);
     if (!records?.message.length) {
       frappe.msgprint(__("Tidak ada data karyawan yang ditemukan."));
       return;
