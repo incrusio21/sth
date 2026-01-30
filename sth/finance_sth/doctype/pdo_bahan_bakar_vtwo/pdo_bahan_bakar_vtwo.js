@@ -4,7 +4,7 @@ frappe.provide('sth.finance_sth');
 
 frappe.ui.form.on("PDO Bahan Bakar Vtwo", {
 	refresh(frm) {
-        frm.disable_save();
+        // frm.disable_save();
 	},
 });
 

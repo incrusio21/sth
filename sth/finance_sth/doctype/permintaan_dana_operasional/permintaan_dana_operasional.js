@@ -8,9 +8,11 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
         frm.ignore_doctypes_on_cancel_all = ["PDO Bahan Bakar Vtwo", "PDO Perjalanan Dinas Vtwo", "PDO Kas Vtwo", "PDO Dana Cadangan Vtwo", "PDO NON PDO Vtwo"];
     },
 	refresh(frm) {
+        filterDebitTo(frm)
         filterCreditTo(frm)
         processFilterSubDetail(frm)
         filterFundType(frm)
+        frm.fields_dict['pdo_dana_cadangan'].grid.refresh();
 	},
 });
 
@@ -109,6 +111,15 @@ frappe.ui.form.on("PDO Dana Cadangan Table", {
     revised_amount(frm) {
         calculateGrandTotal(frm)
     },
+    jenis: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        set_field_properties(frm, cdt, cdn, row.jenis);
+    },
+    
+    pdo_dana_cadangan_add: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        set_field_properties(frm, cdt, cdn, row.jenis);
+    }
 });
 
 function filterCreditTo(frm) {
@@ -118,6 +129,19 @@ function filterCreditTo(frm) {
             return {
                 filters: {
                     "account_type": "Payable",
+                    "company": frm.doc.company
+                }
+            }
+        })
+    }
+}
+
+function filterDebitTo(frm) {
+    for (const pdo of pdoCategories) {
+        const fieldname = pdo.toLocaleLowerCase().replaceAll(" ", "_")
+        frm.set_query(`${fieldname}_debit_to`, () => {
+            return {
+                filters: {
                     "company": frm.doc.company
                 }
             }
@@ -298,4 +322,31 @@ function filterFundType(frm) {
             }
         }
     }
+}
+
+function set_field_properties(frm, cdt, cdn, jenis) {
+    let grid_row = frm.fields_dict['pdo_dana_cadangan'].grid.grid_rows_by_docname[cdn];
+    
+    if (!grid_row) return;
+    
+    if (jenis == 'Kas' || jenis == 'Bank') {
+        grid_row.toggle_editable('amount', true);
+        grid_row.toggle_editable('revised_amount', true);
+        grid_row.toggle_editable('cash_bank_balance_adjustment', false);
+        
+        frappe.model.set_df_property(cdt, 'amount', 'read_only', 0, cdn);
+        frappe.model.set_df_property(cdt, 'revised_amount', 'read_only', 0, cdn);
+        frappe.model.set_df_property(cdt, 'cash_bank_balance_adjustment', 'read_only', 1, cdn);
+        
+    } else if (jenis === 'Saldo') {
+        grid_row.toggle_editable('amount', false);
+        grid_row.toggle_editable('revised_amount', false);
+        grid_row.toggle_editable('cash_bank_balance_adjustment', true);
+        
+        frappe.model.set_df_property(cdt, 'amount', 'read_only', 1, cdn);
+        frappe.model.set_df_property(cdt, 'revised_amount', 'read_only', 1, cdn);
+        frappe.model.set_df_property(cdt, 'cash_bank_balance_adjustment', 'read_only', 0, cdn);
+    }
+    
+    grid_row.refresh();
 }
