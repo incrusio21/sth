@@ -48,6 +48,7 @@ frappe.ui.form.on("Expense Claim Detail", {
   async amount(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
 
+    calculate_selisih_detail(frm, cdt, cdn);
     if (row.custom_is_auto_fill) {
       const costing = await frappe.call({
         method: "sth.overrides.expense_claim.get_travel_request_costing",
@@ -64,11 +65,26 @@ frappe.ui.form.on("Expense Claim Detail", {
       }
     }
   },
+  sanctioned_amount(frm, cdt, cdn) {
+    calculate_selisih_detail(frm, cdt, cdn);
+  },
   expenses_add(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
     frappe.model.set_value(cdt, cdn, "custom_travel_request", frm.doc.custom_travel_request);
   }
-})
+});
+
+function calculate_selisih_detail(frm, cdt, cdn) {
+  let row = locals[cdt][cdn];
+  const selisih_field = row.sanctioned_amount < row.amount ? "kurang_bayar" : "lebih_bayar";
+
+  frappe.model.set_value(cdt, cdn, "kurang_bayar", null);
+  frappe.model.set_value(cdt, cdn, "lebih_bayar", null);
+
+  if (row.amount != row.sanctioned_amount) {
+    frappe.model.set_value(cdt, cdn, selisih_field, Math.abs(row.amount - row.sanctioned_amount));
+  }
+}
 
 async function show_expense_selector(frm) {
   const fields = [
