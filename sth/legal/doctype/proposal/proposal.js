@@ -10,6 +10,8 @@ erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Proposal");
 erpnext.buying.setup_buying_controller();
 
+{% include 'sth/legal/custom/tax_validation.js' %}
+
 /**
  * Fungsi untuk membuka dialog update progress penerimaan barang
  * @param {Object} opts - Options berisi frm, child_doctype, dan child_docname
@@ -264,31 +266,6 @@ frappe.ui.form.on("Proposal", {
 				}
 			});
 		}
-
-		if (po_details && po_details.length) {
-			frm.add_custom_button(
-				__("Return of Components"),
-				() => {
-					frm.call({
-						method: "erpnext.controllers.subcontracting_controller.get_materials_from_supplier",
-						freeze: true,
-						freeze_message: __("Creating Stock Entry"),
-						args: {
-							subcontract_order: frm.doc.name,
-							rm_details: po_details,
-							order_doctype: cur_frm.doc.doctype,
-						},
-						callback: function (r) {
-							if (r && r.message) {
-								const doc = frappe.model.sync(r.message);
-								frappe.set_route("Form", doc[0].doctype, doc[0].name);
-							}
-						},
-					});
-				},
-				__("Create")
-			);
-		}
 	},
 
 	onload: function (frm) {
@@ -343,24 +320,24 @@ frappe.ui.form.on("Proposal", {
 			frm.set_value("tax_withholding_category", frm.supplier_tds);
 		}
 	},
-
-	get_subcontracting_boms_for_finished_goods: function (fg_item) {
-		return frappe.call({
-			method: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.get_subcontracting_boms_for_finished_goods",
+	ppn: function (frm) {
+		frappe.call({
+			method: "sth.utils.data.tax_rate",
 			args: {
-				fg_items: fg_item,
+				tax_name: frm.doc.ppn,
+				company: frm.doc.company,
+				type: "Masukan",
 			},
-		});
-	},
-
-	get_subcontracting_boms_for_service_item: function (service_item) {
-		return frappe.call({
-			method: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.get_subcontracting_boms_for_service_item",
-			args: {
-				service_item: service_item,
-			},
-		});
-	},
+			callback: function(r){
+				if(r.message){
+					frm.doc.ppn_rate = r.message.rate
+					frm.doc.ppn_account = r.message.account
+					frm.doc.ppn_amount = flt(frm.doc.net_total * frm.doc.ppn_rate);
+				}
+				recreate_tax_table(frm)
+			}
+		})
+	}
 });
 
 frappe.ui.form.on("Proposal Item", {
@@ -725,7 +702,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 	tc_name() {
 		this.get_terms();
 	}
-
+	
 	items_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		if (doc.schedule_date) {
@@ -816,20 +793,6 @@ cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc
 		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
 	};
 };
-
-if (cur_frm.doc.is_old_subcontracting_flow) {
-	cur_frm.fields_dict["items"].grid.get_field("bom").get_query = function (doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		return {
-			filters: [
-				["BOM", "item", "=", d.item_code],
-				["BOM", "is_active", "=", "1"],
-				["BOM", "docstatus", "=", "1"],
-				["BOM", "company", "=", doc.company],
-			],
-		};
-	};
-}
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {

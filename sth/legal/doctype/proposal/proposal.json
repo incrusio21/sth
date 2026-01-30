@@ -68,6 +68,14 @@
   "column_break_50",
   "incoterm",
   "named_place",
+  "ppn_section",
+  "ppn",
+  "ppn_rate",
+  "ppn_account",
+  "column_break_uomw",
+  "ppn_amount",
+  "pph_section",
+  "pph_details",
   "section_break_52",
   "taxes",
   "totals",
@@ -1384,13 +1392,58 @@
   {
    "fieldname": "section_break_yjvw",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ppn_section",
+   "fieldtype": "Section Break",
+   "label": "PPN"
+  },
+  {
+   "fieldname": "ppn",
+   "fieldtype": "Link",
+   "label": "PPN",
+   "options": "Tax Rate"
+  },
+  {
+   "fieldname": "column_break_uomw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ppn_amount",
+   "fieldtype": "Currency",
+   "label": "PPN Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ppn_rate",
+   "fieldtype": "Float",
+   "label": "PPN Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ppn_account",
+   "fieldtype": "Link",
+   "label": "PPN Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pph_section",
+   "fieldtype": "Section Break",
+   "label": "PPH"
+  },
+  {
+   "fieldname": "pph_details",
+   "fieldtype": "Table",
+   "label": "PPH Details",
+   "options": "PPH Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-23 13:09:44.529305",
+ "modified": "2026-01-30 11:14:30.049159",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
