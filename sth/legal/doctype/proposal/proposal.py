@@ -89,7 +89,7 @@ class Proposal(BuyingController):
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-
+		
 	def set_item_kegiatan_name(self):
 		legal_item = get_legal_settings("default_item_code")
 

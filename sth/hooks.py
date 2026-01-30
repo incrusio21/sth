@@ -311,6 +311,10 @@ doc_events = {
 	"Request for Quotation": {
 		"before_save": "sth.custom.request_for_quotation.update_unit_in_table"
 	}
+	,
+    "Proposal": {
+        "before_validate": "sth.legal.custom.tax_validation.validate_custom_tax"
+	}
 }
 
 
