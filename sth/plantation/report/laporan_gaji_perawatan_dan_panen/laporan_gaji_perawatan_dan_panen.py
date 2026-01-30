@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils import getdate
+import json
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -185,10 +186,11 @@ def get_data(filters):
 	""".format(conditions=conditions,debug=1)
 	
 	epl_data = frappe.db.sql(query, filters, as_dict=1)
-	
+
 	voucher_dict = {}
 	for row in epl_data:
-		key = row.voucher_no
+		# key = row.voucher_no
+		key = f"{row.voucher_no}-{row.employee}"
 		if key not in voucher_dict:
 			voucher_dict[key] = {
 				'voucher_no': row.voucher_no,
@@ -216,10 +218,10 @@ def get_data(filters):
 	
 	for voucher_no, voucher_data in voucher_dict.items():
 		
-		if not voucher_data.get('voucher_type') or not voucher_no:
+		if not voucher_data.get('voucher_type') or not voucher_data.get('voucher_no'):
 			continue
 			
-		voucher_doc = frappe.get_doc(voucher_data.get('voucher_type'), voucher_no)
+		voucher_doc = frappe.get_doc(voucher_data.get('voucher_type'), voucher_data.get('voucher_no'))
 		
 		if not voucher_data.get('employee'):
 			continue
@@ -234,7 +236,7 @@ def get_data(filters):
 				kegiatan_doc = None
 		
 		row = {
-			'voucher_no': voucher_no,
+			'voucher_no': voucher_data.get('voucher_no'),
 			'blok': voucher_doc.get('blok', ''),
 			'nik': employee_doc.get('no_ktp', ''),
 			'employee': voucher_data['employee'],
@@ -280,7 +282,7 @@ def get_data(filters):
 	current_employee = None
 	current_employee_name = ""
 	
-	for row in data:
+	for row in sorted(data, key=lambda x: x['employee']):
 		if current_employee != row['employee']:
 			if current_employee:
 				final_data.append({
