@@ -41,6 +41,12 @@ class Project:
             self.doc.complete_date = today()
 
     def validate_spk_type(self):
+        # proposal jika spk_type po/so dan sebalikny
+        if self.doc.spk_type in ["PO/SO"]:
+            self.purchase_order = ""
+        else:
+            self.proposal_type = self.proposal = ""
+
         # jika document baru tidak perlu ada pengecekan
         before_doc = self.doc.get_latest()
         if not before_doc:

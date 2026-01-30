@@ -26,8 +26,9 @@
   "receive_bank_account",
   "receiver_name",
   "reference_bank_number",
-  "section_break_lutx",
-  "payment_voucher_kas_pdo",
+  "pdo_section",
+  "pdo_no",
+  "tipe_pdo",
   "upload_file_tab",
   "table_whby",
   "accounting_details_tab",
@@ -252,21 +253,28 @@
    "options": "Kriteria Upload Dokumen Finance"
   },
   {
-   "fieldname": "section_break_lutx",
-   "fieldtype": "Section Break"
+   "fieldname": "pdo_section",
+   "fieldtype": "Section Break",
+   "label": "PDO"
   },
   {
-   "fieldname": "payment_voucher_kas_pdo",
-   "fieldtype": "Table",
-   "label": "Payment Voucher Kas PDO",
-   "options": "Payment Voucher Kas PDO"
+   "fieldname": "pdo_no",
+   "fieldtype": "Link",
+   "label": "PDO No",
+   "options": "Permintaan Dana Operasional"
+  },
+  {
+   "fieldname": "tipe_pdo",
+   "fieldtype": "Select",
+   "label": "Tipe PDO",
+   "options": "Bahan Bakar\nPerjalanan Dinas\nKas\nDana Cadangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 11:15:40.775917",
+ "modified": "2026-01-30 11:49:41.101265",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas",

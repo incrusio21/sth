@@ -12,12 +12,12 @@ class PDOPerjalananDinasVtwo(AccountsController):
 		super().__init__(*args, **kwargs)
 		self._expense_account = "debit_to"
 
-	def on_submit(self):
-		self.make_gl_entry()
+	# def on_submit(self):
+	# 	self.make_gl_entry()
 
-	def on_cancel(self):
-		super().on_cancel()
-		self.make_gl_entry()
+	# def on_cancel(self):
+	# 	super().on_cancel()
+	# 	self.make_gl_entry()
 
 	def get_gl_entries(self):
 		gl_entries = []

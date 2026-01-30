@@ -26,7 +26,7 @@ class PermintaanDanaOperasional(Document):
 	def on_update(self):
 		self.process_data_to_insert_vtwo()
 
-	def on_submit(self):
+	def before_submit(self):
 		self.submit_pdo_vtwo()
 
 	def before_cancel(self):

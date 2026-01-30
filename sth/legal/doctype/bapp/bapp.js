@@ -9,6 +9,8 @@ erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("BAPP");
 erpnext.buying.setup_buying_controller();
 
+{% include 'sth/legal/custom/tax_validation.js' %}
+
 frappe.ui.form.on("BAPP", {
 	setup: (frm) => {
 		frm.custom_make_buttons = {
@@ -84,6 +86,44 @@ frappe.ui.form.on("BAPP", {
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);
 	},
 });
+
+frappe.ui.form.on("BAPP", {
+	refresh: function (frm) {
+        frm.set_query("ppn",(doc) => {
+			return {
+				filters: {
+					"type": "PPN"
+				}
+			}
+		})
+
+		frm.set_query("type", "pph_details",(doc) => {
+			return {
+				filters: {
+					"type": "PPh"
+				}
+			}
+		})
+	},
+	ppn: function (frm) {
+		frappe.call({
+			method: "sth.utils.data.tax_rate",
+			args: {
+				tax_name: frm.doc.ppn,
+				company: frm.doc.company,
+				type: "Masukan",
+			},
+			callback: function(r){
+				if(r.message){
+					frm.doc.ppn_rate = r.message.rate
+					frm.doc.ppn_account = r.message.account
+					frm.doc.ppn_amount = flt(frm.doc.net_total * (frm.doc.ppn_rate / 100));
+				}
+				recreate_tax_table(frm)
+			}
+		})
+	}
+})
 
 erpnext.stock.BAPPController = class BAPPController extends (
 	erpnext.buying.BuyingController

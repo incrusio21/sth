@@ -10,12 +10,12 @@ class PDOBahanBakarVtwo(AccountsController):
 		super().__init__(*args, **kwargs)
 		self._expense_account = "debit_to"
 
-	def on_submit(self):
-		self.make_gl_entry()
+	# def on_submit(self):
+	# 	self.make_gl_entry()
 
-	def on_cancel(self):
-		super().on_cancel()
-		self.make_gl_entry()
+	# def on_cancel(self):
+	# 	super().on_cancel()
+	# 	self.make_gl_entry()
 
 def process_pdo_bahan_bakar(data, childs):
 	pdo_bahan_bakar = frappe.db.get_value("PDO Bahan Bakar Vtwo", {

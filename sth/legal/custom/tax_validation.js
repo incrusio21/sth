@@ -9,12 +9,13 @@ frappe.ui.form.on("PPH Detail", {
 			args: {
 				tax_name: item.type,
 				company: frm.doc.company,
+				type: "PPh",
 			},
 			callback: function(r){
 				if(r.message){
 					item.percentage = r.message.rate
 					item.account = r.message.account
-					item.amount = flt(frm.doc.net_total * item.percentage);
+					item.amount = flt(frm.doc.net_total * (item.percentage / 100));
 				}
 				
                 recreate_tax_table(frm)

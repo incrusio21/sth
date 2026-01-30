@@ -8,6 +8,7 @@
  "field_order": [
   "nm",
   "fp",
+  "sisa_cuti",
   "column_break_ugre",
   "fps",
   "gaji_pokok",
@@ -56,13 +57,19 @@
    "in_preview": 1,
    "label": "Subtotal",
    "read_only": 1
+  },
+  {
+   "fieldname": "sisa_cuti",
+   "fieldtype": "Data",
+   "label": "Sisa Cuti",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-18 10:54:26.279055",
+ "modified": "2026-01-30 14:04:34.280920",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Perhitungan Kompensasi PHK",

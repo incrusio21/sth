@@ -27,7 +27,7 @@ def get_data(conditions, filters):
 		FROM `tabSalary Slip` ss
 		INNER JOIN `tabEmployee` e ON e.name = ss.employee
 		JOIN `tabDesignation` d ON d.name = e.designation
-  	JOIN `tabSalary Slip Loan` ssll ON ssll.parent = ss.name
+  	LEFT JOIN `tabSalary Slip Loan` ssll ON ssll.parent = ss.name
 		WHERE ss.company IS NOT NULL {}
 		GROUP BY
 		ss.name,

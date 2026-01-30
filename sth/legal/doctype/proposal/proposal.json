@@ -1373,6 +1373,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "appendix",
    "fieldtype": "Table",
    "label": "File Upload",

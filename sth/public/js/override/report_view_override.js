@@ -73,7 +73,11 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 		if (excludedDoctypes.includes(doctype) && excludedFields.includes(fieldname)) {
 			return;
 		}
-		
+		else if (fieldname == "workflow_state"){
+			return;
+		}
+
+
 		if (!docfield) {            
 			docfield = frappe.model.get_std_field(fieldname, true);
 

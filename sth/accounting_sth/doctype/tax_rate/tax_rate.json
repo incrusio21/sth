@@ -25,7 +25,7 @@
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "PPh 21\nPPh 22\nPPh 23\nPPh 4{2}\nPPh 25\nPPh 29\nPPN"
+   "options": "PPh\nPPN"
   },
   {
    "fieldname": "rate",
@@ -53,7 +53,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-27 16:35:26.625611",
+ "modified": "2026-01-30 13:11:09.999252",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Tax Rate",

@@ -23,7 +23,10 @@ class DaftarBPJS(Document):
 		
 		for idx in sorted(rows_to_remove, reverse=True):
 			self.set_up_bpjs_detail_table.pop(idx)
-		
+
+		for idx, detail_row in enumerate(self.set_up_bpjs_detail_table):
+			detail_row.idx = idx + 1
+			
 		self.set_missing_value()
 
 	def set_missing_value(self):

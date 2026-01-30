@@ -319,6 +319,26 @@ frappe.ui.form.on("Proposal", {
 		} else {
 			frm.set_value("tax_withholding_category", frm.supplier_tds);
 		}
+	}
+});
+
+frappe.ui.form.on("Proposal", {
+	refresh: function (frm) {
+        frm.set_query("ppn",(doc) => {
+			return {
+				filters: {
+					"type": "PPN"
+				}
+			}
+		})
+
+		frm.set_query("type", "pph_details",(doc) => {
+			return {
+				filters: {
+					"type": "PPh"
+				}
+			}
+		})
 	},
 	ppn: function (frm) {
 		frappe.call({
@@ -332,13 +352,13 @@ frappe.ui.form.on("Proposal", {
 				if(r.message){
 					frm.doc.ppn_rate = r.message.rate
 					frm.doc.ppn_account = r.message.account
-					frm.doc.ppn_amount = flt(frm.doc.net_total * frm.doc.ppn_rate);
+					frm.doc.ppn_amount = flt(frm.doc.net_total * (frm.doc.ppn_rate / 100));
 				}
 				recreate_tax_table(frm)
 			}
 		})
 	}
-});
+})
 
 frappe.ui.form.on("Proposal Item", {
 	schedule_date: function (frm, cdt, cdn) {
