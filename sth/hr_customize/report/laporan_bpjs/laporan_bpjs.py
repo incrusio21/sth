@@ -18,6 +18,8 @@ def execute(filters=None):
 		dbe.beban_karyawan as beban_karyawan,
 		dbe.beban_perusahaan as beban_perusahaan,
 		dbe.jumlah as jumlah,
+		e.custom_no_bpjs_ketenagakerjaan as bpjs_tk,
+		e.custom_no_bpjs_kesehatan as bpjs_kes,
 		e.custom_nama_ibu_kandung as nama_ibu_kandung,
 		e.blood_group as gol_darah
 		FROM `tabDaftar BPJS` as db
@@ -26,10 +28,31 @@ def execute(filters=None):
 		JOIN `tabDesignation` as d ON d.name = e.designation
 		JOIN `tabSalary Structure Assignment` as ssa ON ssa.employee = e.name
 		WHERE db.pt IS NOT NULL {}
+		GROUP BY db.name, dbe.employee;
   """.format(conditions), filters, as_dict=True)
 
 	for bpjs in q_laporan_bpjs:
-		data.append(bpjs)
+		row = {
+			"nama": bpjs.get("nama"),
+			"no_ktp": bpjs.get("no_ktp"),
+			"jabatan": bpjs.get("jabatan"),
+			"gp": bpjs.get("gp"),
+			"beban_karyawan": bpjs.get("beban_karyawan"),
+			"beban_perusahaan": bpjs.get("beban_perusahaan"),
+			"jumlah": bpjs.get("jumlah"),
+			"nama_ibu_kandung": bpjs.get("nama_ibu_kandung"),
+			"gol_darah": bpjs.get("gol_darah"),
+		}
+  
+		if filters.get("bpjs_type"):
+			if filters.get("bpjs_type") == "BPJS KES":
+				row["no_bpjs_tk_kes"] = bpjs.get("bpjs_kes")
+			elif filters.get("bpjs_type") == "BPJS TK":
+				row["no_bpjs_tk_kes"] = bpjs.get("bpjs_tk")
+			else:
+				row["no_bpjs_tk_kes"] = "testing"
+
+		data.append(row)
 
 	return columns, data
 
@@ -48,8 +71,11 @@ def get_condition(filters):
 	if filters.get("bpjs_type"):
 		conditions += " AND db.jenis_bpjs = %(bpjs_type)s"
 
+	if filters.get("npp_no_bu"):
+		conditions += " AND db.npp__no_bu = %(npp_no_bu)s"
+
 	if filters.get("start_periode") and filters.get("end_periode"):
-		conditions += " AND ssa.from_date BETWEEN %(start_periode)s AND %(end_periode)s"
+		conditions += " AND db.start_periode = %(start_periode)s AND db.end_periode = %(end_periode)s"
 
 	return conditions
 

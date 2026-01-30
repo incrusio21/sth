@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "jenis",
   "fund_type",
   "amount",
   "revised_amount",
@@ -14,6 +15,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "fund_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -21,6 +23,7 @@
    "options": "Account"
   },
   {
+   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -28,6 +31,7 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "revised_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -39,16 +43,26 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 2,
    "fieldname": "cash_bank_balance_adjustment",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Penyesuaian Saldo Cash/bank"
+  },
+  {
+   "columns": 2,
+   "fieldname": "jenis",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Jenis",
+   "options": "\nKas\nBank\nSaldo"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-30 13:53:28.891764",
+ "modified": "2026-01-29 11:39:03.726875",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Dana Cadangan Table",

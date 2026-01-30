@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-28 13:26:25.967017",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "travel_from",
+  "travel_to",
+  "mode_of_travel",
+  "column_break_ills",
+  "departure_date",
+  "arrival_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "travel_from",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Travel From"
+  },
+  {
+   "fieldname": "travel_to",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Travel To"
+  },
+  {
+   "fieldname": "mode_of_travel",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Mode Of Travel",
+   "options": "\nFlight\nTrain\nTaxi\nRented Car"
+  },
+  {
+   "fieldname": "column_break_ills",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "departure_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Departure Datetime"
+  },
+  {
+   "fieldname": "arrival_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Arrival Datetime"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-28 13:35:32.700392",
+ "modified_by": "Administrator",
+ "module": "HR Customize",
+ "name": "PPD Travel Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

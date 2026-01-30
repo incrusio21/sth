@@ -82,6 +82,13 @@ def get_columns(filters):
 			"align": "right"
 		},
 		{
+			"label": _("Total Tonase"),
+			"fieldname": "total_tonase",
+			"fieldtype": "Float",
+			"width": 150,
+			"align": "right"
+		},
+		{
 			"label": _("Satuan"),
 			"fieldname": "satuan",
 			"fieldtype": "Data",
@@ -162,6 +169,7 @@ def get_data(filters):
 		SELECT 
 			epl.voucher_no,
 			epl.voucher_type,
+			epl.voucher_detail_no,
 			epl.employee,
 			epl.posting_date,
 			epl.component_type,
@@ -195,6 +203,13 @@ def get_data(filters):
 			voucher_dict[key]['p_upah'] = row.amount
 		elif row.component_type == 'Premi':
 			voucher_dict[key]['p_premi'] = row.amount
+
+		if row.voucher_type == 'Buku Kerja Mandor Perawatan':
+			voucher_detail_doc = frappe.get_doc("Detail BKM Hasil Kerja Perawatan", row.voucher_detail_no)
+			voucher_dict[key]['total_tonase'] = voucher_detail_doc.get('qty', 0)
+		elif row.voucher_type == 'Buku Kerja Mandor Panen':
+			voucher_detail_doc = frappe.get_doc("Detail BKM Hasil Kerja Panen", row.voucher_detail_no)
+			voucher_dict[key]['total_tonase'] = voucher_detail_doc.get('qty', 0)
 	
 	data = []
 	employee_totals = {}
@@ -229,6 +244,7 @@ def get_data(filters):
 			'kegiatan': voucher_doc.get('kegiatan_account', ''),
 			'hasil_kerja_qty': voucher_doc.get('hasil_kerja_qty', 0) if voucher_data['voucher_type'] == 'Buku Kerja Mandor Perawatan' else voucher_doc.get('weight_total', 0) ,
 			'brondolan': voucher_doc.get('hasil_kerja_qty_brondolan', 0) if voucher_data['voucher_type'] == 'Buku Kerja Mandor Panen' else 0,
+			'total_tonase': voucher_data['total_tonase'],
 			'satuan': kegiatan_doc.get('uom', '') if kegiatan_doc else '',
 			'basis': voucher_doc.get('volume_basis', 0),
 			'rupiah_satuan': voucher_doc.get('rupiah_basis', 0),
@@ -246,11 +262,13 @@ def get_data(filters):
 		employee = voucher_data['employee']
 		if employee not in employee_totals:
 			employee_totals[employee] = {
+				'total_tonase': 0,
 				'p_upah': 0,
 				'p_premi': 0,
 				'total': 0
 			}
 		
+		employee_totals[employee]['total_tonase'] += row['total_tonase']
 		employee_totals[employee]['p_upah'] += row['p_upah']
 		employee_totals[employee]['p_premi'] += row['p_premi']
 		employee_totals[employee]['total'] += row['total']
@@ -278,6 +296,7 @@ def get_data(filters):
 					'rp_premi': None,
 					'kondisi': '',
 					'tipe': '',
+					'total_tonase': employee_totals[current_employee]['total_tonase'],
 					'p_upah': employee_totals[current_employee]['p_upah'],
 					'p_premi': employee_totals[current_employee]['p_premi'], 
 					'total': employee_totals[current_employee]['total'], 
@@ -303,6 +322,7 @@ def get_data(filters):
 			'rp_premi': None,
 			'kondisi': '',
 			'tipe': '',
+			'total_tonase': employee_totals[current_employee]['total_tonase'],
 			'p_upah': employee_totals[current_employee]['p_upah'],
 			'p_premi': employee_totals[current_employee]['p_premi'], 
 			'total': employee_totals[current_employee]['total'], 

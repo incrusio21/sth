@@ -21,12 +21,23 @@ def get_data(conditions, filters):
 			e.bank_ac_no as no_rekening,
 			e.divisi,
 			d.designation_name AS jabatan,
-			ss.total_deduction AS pemotong,
+   		COALESCE(SUM(ssll.principal_amount), 0) AS cicilan,
+			ss.total_deduction + COALESCE(SUM(ssll.principal_amount), 0) AS pemotong,
 			ss.net_pay AS gaji_bersih
 		FROM `tabSalary Slip` ss
 		INNER JOIN `tabEmployee` e ON e.name = ss.employee
 		JOIN `tabDesignation` d ON d.name = e.designation
+  	JOIN `tabSalary Slip Loan` ssll ON ssll.parent = ss.name
 		WHERE ss.company IS NOT NULL {}
+		GROUP BY
+		ss.name,
+		e.name,
+		e.employee_name,
+		e.bank_ac_no,
+		e.divisi,
+		d.designation_name,
+		ss.total_deduction,
+		ss.net_pay;
 	""".format(conditions), filters, as_dict=True)
 
 	details = frappe.db.sql("""
@@ -55,6 +66,9 @@ def get_data(conditions, filters):
 		"premi_tutup_buku",
 		"premi_angkut",
 		"premi_supervisi",
+		"incentif_hke_panen",
+		"incentif_output",
+		"subsidi_tambahan",
 	}
 
 	detail_map = {}
@@ -161,6 +175,9 @@ def get_columns(filters):
 		{"label": "PREMI TUTUP BUKU", "key": "premi_tutup_buku"},
 		{"label": "PREMI ANGKUT", "key": "premi_angkut"},
 		{"label": "PREMI SUPERVISI", "key": "premi_supervisi"},
+		{"label": "INCENTIF HKE PANEN", "key": "incentif_hke_panen"},
+		{"label": "INCENTIF OUTPUT", "key": "incentif_output"},
+		{"label": "Subsidi Tambahan", "key": "subsidi_tambahan"},
 		# {"label": "Lembur", "key": "lembur"},
 		# {"label": "HKNe", "key": "hkne"},
 		# {"label": "Premi Panen", "key": "premi_panen_kontanan"},
@@ -237,6 +254,12 @@ def get_columns(filters):
    		"width": 150
 		})
 
+	columns.append({
+		"label": _("CICILAN"),
+		"fieldtype": "Currency",
+		"fieldname": "cicilan",
+	})
+ 
 	columns.append({
 		"label": _("PEMOTONG"),
 		"fieldtype": "Currency",

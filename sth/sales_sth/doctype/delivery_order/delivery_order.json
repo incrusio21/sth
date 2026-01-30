@@ -12,6 +12,7 @@
   "customer",
   "tax_id",
   "customer_name",
+  "sales_order",
   "column_break1",
   "posting_date",
   "posting_time",
@@ -239,6 +240,7 @@
    "width": "100px"
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1426,12 +1428,19 @@
    "fieldname": "base_taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Base Taxes and Charges Deducted"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-18 22:37:55.942102",
+ "modified": "2026-01-28 12:22:28.075351",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Delivery Order",

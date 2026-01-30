@@ -1,12 +1,13 @@
 {%- set employee = frappe.get_doc("Employee", doc.employee) -%}
 {%- set company = frappe.get_doc("Company", doc.company) -%}
+{% set website_settings = frappe.get_doc("Website Settings") %}
 
 <div class="page-break">
   <table style="width: 100%!important;">
     <tr>
       <!-- Kolom gambar kiri -->
       <td style="width: 20%; text-align: left; vertical-align: middle;">
-        <img src="/files/logo-sth-print-format.jpg" style="height: 5rem; object-fit: contain;" />
+        <img src="{{ website_settings.app_logo }}" style="height: 5rem; object-fit: contain;" />
       </td>
 
       <!-- Kolom teks kanan -->
@@ -30,19 +31,12 @@
     <tr>
       <td style="font-weight: bold; padding-left: 0!important;">Menimbang</td>
       <td>:</td>
-      <td>
-        1. Bahwa dalam rangka memperlancar kegiatan operasional perusahaan, dipandang perlu untuk melakukan perubahan
-        status karyawan <br>
-        2. Bahwa dalam rangka tertib administrasi, maka perubahan status tersebut perlu dituangkan dalam Surat Keputusan
-      </td>
+      <td>{{ doc.get_formatted("menimbang") }}</td>
     </tr>
     <tr>
       <td style="font-weight: bold; padding-left: 0!important;">Mengingat</td>
       <td>:</td>
-      <td>
-        1. Kebijakan dan Prosedur Mutasi/Promosi <br>
-        2. Struktur Organisasi dan Standard Tenaga Kerja
-      </td>
+      <td>{{ doc.get_formatted("mengingat") }}</td>
     </tr>
   </table>
   <h4 class="text-center" style="font-weight: bold; margin-bottom: 0;">MEMUTUSKAN</h4>

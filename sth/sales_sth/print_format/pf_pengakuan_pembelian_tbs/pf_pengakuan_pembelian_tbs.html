@@ -52,11 +52,18 @@
       <td>{{"Ya" if doc.beban_pph_22 == 1 else "Tidak"}}</td>
       <td>{{"0.25" if doc.beban_pph_22 == 1 else ""}}</td>
       <td>
+        {% if doc.beban_pph_22 -%}
         {{frappe.format_value(0.25 * doc.items[0].total, {"fieldtype": "Currency", "options": "IDR"})}}
+        {%- endif %}
       </td>
       <td>
+        {% if doc.beban_pph_22 -%}
         {{frappe.format_value(doc.items[0].total + (0.25 * doc.items[0].total), {"fieldtype": "Currency", "options":
         "IDR"})}}
+        {%- else -%}
+        {{frappe.format_value(doc.items[0].total, {"fieldtype": "Currency", "options":
+        "IDR"})}}
+        {%- endif %}
       </td>
     </tr>
 
@@ -80,11 +87,18 @@
       <td></td>
       <td></td>
       <td>
+        {% if doc.beban_pph_22 -%}
         {{frappe.format_value(0.25 * doc.items[0].total, {"fieldtype": "Currency", "options": "IDR"})}}
+        {%- endif %}
       </td>
       <td>
+        {% if doc.beban_pph_22 -%}
         {{frappe.format_value(doc.items[0].total + (0.25 * doc.items[0].total), {"fieldtype": "Currency", "options":
         "IDR"})}}
+        {%- else -%}
+        {{frappe.format_value(doc.items[0].total, {"fieldtype": "Currency", "options":
+        "IDR"})}}
+        {%- endif %}
       </td>
     </tr>
     <tr>

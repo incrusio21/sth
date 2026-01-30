@@ -11,6 +11,19 @@ from frappe.model.document import Document
 class DaftarBPJS(Document):
 
 	def validate(self):
+		current_employees = set()
+		for row in self.daftar_bpjs_employee:
+			if row.employee:
+				current_employees.add(row.employee)
+		
+		rows_to_remove = []
+		for idx, detail_row in enumerate(self.set_up_bpjs_detail_table):
+			if detail_row.employee not in current_employees:
+				rows_to_remove.append(idx)
+		
+		for idx in sorted(rows_to_remove, reverse=True):
+			self.set_up_bpjs_detail_table.pop(idx)
+		
 		self.set_missing_value()
 
 	def set_missing_value(self):

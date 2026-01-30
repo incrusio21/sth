@@ -37,7 +37,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Driver",
+   "label": "Plate Number",
    "options": "Driver"
   },
   {
@@ -46,7 +46,8 @@
    "fieldname": "driver_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Driver Name"
+   "label": "Driver Name",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -59,6 +60,7 @@
    "columns": 1,
    "fieldname": "vehicle_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Vehicle No"
   },
@@ -78,7 +80,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-14 23:09:38.738949",
+ "modified": "2026-01-30 09:23:01.290033",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Delivery Order Transporter",

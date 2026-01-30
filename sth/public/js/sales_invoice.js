@@ -36,7 +36,15 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 	company: function(frm){
 		set_query_unit(frm)
-	}
+	},
+	jenis_berikat: function(frm) {
+		if (frm.doc.jenis_berikat == "Ya") {
+			frm.set_value('kode_faktur', '07');
+			frm.set_df_property('kode_faktur', 'read_only', 1);
+		} else {
+			frm.set_df_property('kode_faktur', 'read_only', 0);
+		}
+	},
 
 })
 

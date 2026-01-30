@@ -73,19 +73,19 @@ def get_columns():
 		{
 			"fieldname": "netto",
 			"label": _("Berat Bersih"),
-			"fieldtype": "Float",
+			"fieldtype": "Int",
 			"width": 120
 		},
 		{
 			"fieldname": "potongan",
 			"label": _("Potongan (kg)"),
-			"fieldtype": "Float",
+			"fieldtype": "Int",
 			"width": 120
 		},
 		{
 			"fieldname": "berat_normal",
 			"label": _("Berat Normal"),
-			"fieldtype": "Float",
+			"fieldtype": "Int",
 			"width": 120
 		},
 		{
@@ -119,7 +119,7 @@ def get_data(filters):
 			`tabTimbangan`
 		WHERE
 			receive_type IN ('TBS Internal', 'TBS Eksternal')
-			AND docstatus < 2
+			AND docstatus = 1
 			{conditions}
 		ORDER BY
 			posting_date, weight_in_time
@@ -218,7 +218,7 @@ def get_rekap_data(filters):
 			`tabTimbangan`
 		WHERE
 			receive_type = 'TBS Internal'
-			AND docstatus < 2
+			AND docstatus = 1
 			AND posting_date BETWEEN %s AND %s
 		GROUP BY
 			driver_name, DAY(posting_date)
@@ -236,7 +236,7 @@ def get_rekap_data(filters):
 			`tabTimbangan`
 		WHERE
 			receive_type = 'TBS Eksternal'
-			AND docstatus < 2
+			AND docstatus = 1 
 			AND posting_date BETWEEN %s AND %s
 		GROUP BY
 			driver_name, DAY(posting_date)

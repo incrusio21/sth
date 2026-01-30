@@ -44,6 +44,40 @@ class ExpenseClaim(ExpenseClaim):
 			if flt(self.total_advance_amount, precision) > amount_with_taxes:
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
+	def validate_sanctioned_amount(self):
+			return
+		# for d in self.get("expenses"):
+			# if flt(d.sanctioned_amount) > flt(d.amount):
+			# 	frappe.throw(
+			# 		_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx)
+			# 	)
+
+	def calculate_total_amount(self):
+		self.total_claimed_amount = 0
+		self.total_sanctioned_amount = 0
+
+		for d in self.get("expenses"):
+			self.round_floats_in(d)
+
+			if self.approval_status == "Rejected":
+				d.sanctioned_amount = 0.0
+
+			self.total_claimed_amount += flt(d.amount)
+			self.total_sanctioned_amount += flt(d.sanctioned_amount)
+
+		tsa = self.total_sanctioned_amount or 0
+		tca = self.total_claimed_amount or 0
+
+		if tsa < tca:
+			self.status_selisih = "Kurang Bayar"
+		elif tsa > tca:
+			self.status_selisih = "Lebih Bayar"
+		else:
+			self.status_selisih = "Tidak Ada Selisih"
+
+		self.total_selisih = abs(self.total_claimed_amount - self.total_sanctioned_amount)
+		self.round_floats_in(self, ["total_claimed_amount", "total_sanctioned_amount"])
+
 @frappe.whitelist()
 def get_travel_request_expenses(travel_request, company):
   return frappe.db.sql("""

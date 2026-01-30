@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:kode_vendor",
+ "creation": "2026-01-28 11:24:26.000146",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kode_vendor",
+  "nama_vendor",
+  "badan_usaha"
+ ],
+ "fields": [
+  {
+   "fieldname": "kode_vendor",
+   "fieldtype": "Data",
+   "label": "Kode Vendor",
+   "unique": 1
+  },
+  {
+   "fieldname": "nama_vendor",
+   "fieldtype": "Data",
+   "label": "Nama Vendor"
+  },
+  {
+   "fieldname": "badan_usaha",
+   "fieldtype": "Select",
+   "label": "Badan Usaha",
+   "options": "PT\nCV\nPerorangan\nKoperasi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-28 11:25:40.494320",
+ "modified_by": "Administrator",
+ "module": "Procurement STH",
+ "name": "Vendor",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

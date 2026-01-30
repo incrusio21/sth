@@ -273,36 +273,69 @@ class TransaksiTHR(AccountsController):
 		return results
 
 	def find_thr_rule_cached(self, all_rules, employee_grade, employment_type, kriteria, masa_kerja):
-		priority_filters = []
+		# 1️⃣ PRIORITAS TERTINGGI: exact match SEMUA field
+		for rule in all_rules:
+			if (
+				rule.employee_grade == employee_grade
+				and rule.employment_type == employment_type
+				and rule.kriteria == kriteria
+				and rule.masa_kerja == masa_kerja
+			):
+				return rule.formula
 
-		# KHL case
-		if employment_type == "KHL" and masa_kerja:
-			priority_filters.extend([
-				(employee_grade, employment_type, kriteria, masa_kerja),
-				(employee_grade, employment_type, None, masa_kerja),
-				(employee_grade, None, kriteria, masa_kerja),
-				(employee_grade, None, None, masa_kerja),
-			])
+		# 2️⃣ PRIORITAS KEDUA: grade + masa kerja saja
+		for rule in all_rules:
+			if (
+				rule.employee_grade == employee_grade
+				and not rule.employment_type
+				and not rule.kriteria
+				and rule.masa_kerja == masa_kerja
+			):
+				return rule.formula
 
-		# default priority
-		priority_filters.extend([
-			(employee_grade, employment_type, kriteria, None),
-			(employee_grade, employment_type, None, None),
-			(employee_grade, None, kriteria, None),
-			(employee_grade, None, None, None),
-		])
-
-		for grade, emp_type, crit, masa in priority_filters:
-			for rule in all_rules:
-				if (
-					rule.employee_grade == grade
-					and (rule.employment_type == emp_type or emp_type is None)
-					and (rule.kriteria == crit or crit is None)
-					and (rule.masa_kerja == masa or masa is None)
-				):
-					return rule.formula
+		# 3️⃣ PRIORITAS KETIGA: rule TANPA masa kerja (fallback)
+		for rule in all_rules:
+			if (
+				rule.employee_grade == employee_grade
+				and not rule.employment_type
+				and not rule.kriteria
+				and not rule.masa_kerja
+			):
+				return rule.formula
 
 		return None
+
+	# def find_thr_rule_cached(self, all_rules, employee_grade, employment_type, kriteria, masa_kerja):
+	# 	priority_filters = []
+
+	# 	# KHL case
+	# 	if employment_type == "KHL" and masa_kerja:
+	# 		priority_filters.extend([
+	# 			(employee_grade, employment_type, kriteria, masa_kerja),
+	# 			(employee_grade, employment_type, None, masa_kerja),
+	# 			(employee_grade, None, kriteria, masa_kerja),
+	# 			(employee_grade, None, None, masa_kerja),
+	# 		])
+
+	# 	# default priority
+	# 	priority_filters.extend([
+	# 		(employee_grade, employment_type, kriteria, None),
+	# 		(employee_grade, employment_type, None, None),
+	# 		(employee_grade, None, kriteria, None),
+	# 		(employee_grade, None, None, None),
+	# 	])
+
+	# 	for grade, emp_type, crit, masa in priority_filters:
+	# 		for rule in all_rules:
+	# 			if (
+	# 				rule.employee_grade == grade
+	# 				and (rule.employment_type == emp_type or emp_type is None)
+	# 				and (rule.kriteria == crit or crit is None)
+	# 				and (rule.masa_kerja == masa or masa is None)
+	# 			):
+	# 				return rule.formula
+
+	# 	return None
 
 	# @frappe.whitelist()
 	# def get_all_employee(self, filters):

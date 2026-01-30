@@ -19,10 +19,12 @@ def execute(filters=None):
 		dtt.masa_kerja as masa_kerja,
 		e.bank_ac_no as no_rek,
 		e.bank_name as bank,
+		dtt.jumlah_bulan_bekerja as jumlah_bulan_kerja,
 		CONCAT(e.grade, '-', e.employment_type) as level_status,
-		dtt.subtotal - dtt.uang_daging as rp,
+		dtt.subtotal - dtt.uang_daging - dtt.natura as rp,
 		dtt.uang_daging as uang_daging,
-		(dtt.subtotal - dtt.uang_daging) + dtt.uang_daging as jumlah
+		dtt.natura as natura,
+		(dtt.subtotal - dtt.uang_daging - dtt.natura) + dtt.uang_daging + dtt.natura as jumlah
 		FROM `tabDetail Transaksi THR` as dtt
 		JOIN `tabEmployee` as e ON e.name = dtt.employee
   	JOIN `tabTransaksi THR` as tt ON tt.name = dtt.parent
@@ -45,6 +47,15 @@ def get_condition(filters):
 
 	if filters.get("thr"):
 		conditions += " AND tt.religion_group = %(thr)s"
+
+	if filters.get("grade"):
+		conditions += " AND e.grade = %(grade)s"
+
+	if filters.get("employment_type"):
+		conditions += " AND e.employment_type = %(employment_type)s"
+
+	if filters.get("start_periode") and filters.get("end_periode"):
+		conditions += " AND tt.posting_date BETWEEN %(start_periode)s AND %(end_periode)s"
 
 	if filters.get("tahun"):
 		conditions += " AND DATE_FORMAT(tt.posting_date, '%%Y') = %(tahun)s"
@@ -94,6 +105,11 @@ def get_columns(filters):
 			"fieldname": "bank",
 		},
 		{
+			"label": _("Jumlah Bulan Kerja"),
+			"fieldtype": "Data",
+			"fieldname": "jumlah_bulan_kerja",
+		},
+		{
 			"label": _("Level-Status"),
 			"fieldtype": "Data",
 			"fieldname": "level_status",
@@ -107,6 +123,11 @@ def get_columns(filters):
 			"label": _("THR Uang Daging"),
 			"fieldtype": "Currency",
 			"fieldname": "uang_daging",
+		},
+		{
+			"label": _("THR Natura"),
+			"fieldtype": "Currency",
+			"fieldname": "natura",
 		},
 		{
 			"label": _("THR Jumlah"),

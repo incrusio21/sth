@@ -18,6 +18,7 @@
  ],
  "fields": [
   {
+   "columns": 1,
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -26,6 +27,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fetch_from": "employee.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
@@ -35,6 +37,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "plafon",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -42,6 +45,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "unit_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -49,6 +53,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "revised_plafon",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -56,6 +61,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "revised_unit_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -63,12 +69,14 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "needs",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Kebutuhan"
   },
   {
+   "columns": 1,
    "fieldname": "price_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -77,6 +85,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "revised_price_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -89,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-30 13:51:47.972255",
+ "modified": "2026-01-30 00:42:41.746242",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Bahan Bakar Table",

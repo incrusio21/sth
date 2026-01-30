@@ -1,5 +1,5 @@
 frappe.ui.form.on('Quotation', {
-	party_name: function(frm) {
+	party_name: function (frm) {
 		set_komoditi_filter(frm);
 
 		if (frm.doc.komoditi) {
@@ -8,46 +8,51 @@ frappe.ui.form.on('Quotation', {
 			frm.refresh_field('keterangan_per_komoditi');
 		}
 	},
-	
-	refresh: function(frm) {
+	refresh: function (frm) {
 		set_komoditi_filter(frm);
 		frm.set_df_property('valid_till', 'hidden', 1);
 		set_query_unit(frm)
 	},
-
-	komoditi: function(frm) {
+	komoditi: function (frm) {
 		if (frm.doc.komoditi && frm.doc.party_name && frm.doc.quotation_to == "Customer") {
 			validate_komoditi(frm);
 		}
 
 		if (frm.doc.komoditi) {
 			frm.clear_table('keterangan_per_komoditi');
-			
+
 			frappe.call({
 				method: 'frappe.client.get',
 				args: {
 					doctype: 'Komoditi',
 					name: frm.doc.komoditi
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message && r.message.keterangan_per_komoditi) {
-						r.message.keterangan_per_komoditi.forEach(function(row) {
+						r.message.keterangan_per_komoditi.forEach(function (row) {
 							let child_row = frm.add_child('keterangan_per_komoditi');
 							child_row.keterangan = row.keterangan;
 							child_row.parameter = row.parameter;
 						});
-						
+
 						frm.refresh_field('keterangan_per_komoditi');
 					}
 				}
 			});
 		}
 	},
-	onload: function(frm){
+	onload: function (frm) {
 		set_query_unit(frm)
 	},
-	company: function(frm){
+	company: function (frm) {
 		set_query_unit(frm)
+	},
+	unit: function (frm) {
+		frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
+			const catatan = `CPO yang dijual adalah produksi perusahaan kami yang berasal dari ${frm.doc.company} dan lokasi ${doc.address}`;
+			frm.set_value("catatan", doc.address ? catatan : "");
+			frm.refresh_field("catatan");
+		})
 	}
 });
 
@@ -59,14 +64,14 @@ function set_komoditi_filter(frm) {
 				doctype: 'Customer',
 				name: frm.doc.party_name
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message && r.message.custom_customer_komoditi) {
-					let komoditi_list = r.message.custom_customer_komoditi.map(function(row) {
+					let komoditi_list = r.message.custom_customer_komoditi.map(function (row) {
 						return row.komoditi;
 					});
-				
+
 					if (komoditi_list.length > 0) {
-						frm.set_query('komoditi', function() {
+						frm.set_query('komoditi', function () {
 							return {
 								filters: {
 									'name': ['in', komoditi_list]
@@ -74,7 +79,7 @@ function set_komoditi_filter(frm) {
 							};
 						});
 					} else {
-						frm.set_query('komoditi', function() {
+						frm.set_query('komoditi', function () {
 							return {
 								filters: {
 									'name': ['in', []]
@@ -86,7 +91,7 @@ function set_komoditi_filter(frm) {
 			}
 		});
 	} else {
-		frm.set_query('komoditi', function() {
+		frm.set_query('komoditi', function () {
 			return {};
 		});
 	}
@@ -100,19 +105,19 @@ function validate_komoditi(frm) {
 	if (!frm.doc.party_name) {
 		return;
 	}
-	
+
 	frappe.call({
 		method: 'frappe.client.get',
 		args: {
 			doctype: 'Customer',
 			name: frm.doc.party_name
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (r.message && r.message.custom_customer_komoditi) {
-				let komoditi_list = r.message.custom_customer_komoditi.map(function(row) {
+				let komoditi_list = r.message.custom_customer_komoditi.map(function (row) {
 					return row.komoditi;
 				});
-				
+
 				if (!komoditi_list.includes(frm.doc.komoditi)) {
 					frappe.msgprint({
 						title: __('Invalid Komoditi'),
@@ -127,8 +132,8 @@ function validate_komoditi(frm) {
 }
 
 
-function set_query_unit(frm){
-	frm.set_query('unit', function() {
+function set_query_unit(frm) {
+	frm.set_query('unit', function () {
 		return {
 			filters: {
 				'company': frm.doc.company
