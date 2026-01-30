@@ -366,7 +366,7 @@ class Proposal(BuyingController):
 		if tds_category and not for_validate:
 			self.set_onload("supplier_tds", tds_category)
 
-		self.supplier_address_active = frappe.db.get_value("Alamat dan PIC", {"parent": self.supplier, "status": "Aktif"}, "alamat_pic")
+		self.supplier_address_active = frappe.db.get_value("Alamat dan PIC", {"parent": self.supplier, "status_pic": "Aktif"}, "alamat_pic")
 		super().set_missing_values(for_validate)
 
 def validate_for_items(doc) -> None:

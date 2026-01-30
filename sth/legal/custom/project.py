@@ -62,8 +62,8 @@ class Project:
 
     def set_missing_value(self):
         if self.doc.supplier:
-           self.doc.telepon = frappe.db.get_value("Alamat dan PIC", {"parent": self.doc.supplier, "status": "Aktif"}, "telepon")
-           self.doc.user_email = frappe.db.get_value("Struktur Supplier", {"parent": self.doc.supplier, "status": "Aktif"}, "user_email")
+            self.doc.supplier_address, self.doc.telepon = frappe.db.get_value("Alamat dan PIC", {"parent": self.doc.supplier, "status_pic": "Aktif"}, ["alamat_pic", "telepon"])
+            self.doc.user_email = frappe.db.get_value("Struktur Supplier", {"parent": self.doc.supplier, "status_supplier": "Aktif"}, "user_email")
 
     def set_note(self):
         if not self.doc.is_new() and self.doc.for_proposal and not self.doc.proposal:

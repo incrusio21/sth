@@ -222,7 +222,6 @@
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
-   "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "options": "Purchase Order"
   },
   {
@@ -383,7 +382,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 13:46:26.177989",
+ "modified": "2026-01-28 17:31:12.047509",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

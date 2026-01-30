@@ -11,12 +11,13 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.realization_doctype = "Buku Kerja Mandor Perawatan"
+		self.kegiatan_fetch_fieldname = ["volume_basis", "rupiah_basis"]
 
 	def calculate_item_table_values(self):
 		super().calculate_item_table_values()
 		
 		self.jumlah_tenaga_kerja = flt(self.qty / self.volume_basis) if self.volume_basis else 0
-		self.tenaga_kerja_amount = flt(self.qty * self.rupiah_basis) + flt(self.premi)
+		self.tenaga_kerja_amount = flt(self.qty) * flt(self.rupiah_basis) + flt(self.premi)
 		# self.tenaga_kerja_amount = flt(self.jumlah_tenaga_kerja * self.upah_per_basis) + flt(self.premi)
 
 	def calculate_used_and_realized(self):

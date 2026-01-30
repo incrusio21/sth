@@ -10,7 +10,8 @@ class RencanaKerjaBulananPanen(RencanaKerjaController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.realization_doctype = "Buku Kerja Mandor Panen"
-	
+		self.kegiatan_fetch_fieldname = ["volume_basis", "rupiah_basis"]
+
 	def validate(self):
 		super().validate()
 		self.check_pengangkutan_and_supervisi()

@@ -257,7 +257,6 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
-   "mandatory_depends_on": "eval:doc.receive_type == \"TBS Eksternal\"",
    "options": "Supplier",
    "read_only": 1
   },
@@ -362,7 +361,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Netto",
-   "precision": "2",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -375,8 +374,7 @@
    "fieldtype": "Link",
    "label": "Kode Barang",
    "options": "Item",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_fcyg",
@@ -435,7 +433,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 22:52:54.028823",
+ "modified": "2026-01-29 14:45:55.165895",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

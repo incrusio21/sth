@@ -8,8 +8,8 @@ from frappe.utils.nestedset import NestedSet
 
 class Kegiatan(NestedSet):
 	
-	def autoname(self):
-		self.name = get_autoname_with_number(self.kd_kgt, self.nm_kgt)
+	# def autoname(self):
+	# 	self.name = get_autoname_with_number(self.kd_kgt, self.nm_kgt)
 
 	def validate(self):
 		self.validate_items_company()
