@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-29 11:14:06.761658",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "no_pdo",
+  "penerima"
+ ],
+ "fields": [
+  {
+   "columns": 5,
+   "fieldname": "no_pdo",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No PDO",
+   "link_filters": "[[\"Permintaan Dana Operasional\",\"docstatus\",\"=\",\"1\"]]",
+   "options": "Permintaan Dana Operasional"
+  },
+  {
+   "columns": 5,
+   "fieldname": "penerima",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Penerima",
+   "options": "Employee"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-29 21:59:25.884092",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Payment Voucher Kas PDO",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

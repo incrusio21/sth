@@ -73,7 +73,7 @@ function filterAccount(frm) {
             filters: {
                 company: doc.company,
                 is_group: 0,
-                account_type: "Expense Account"
+                account_type: "Indirect Expense"
             }
         }
     })
