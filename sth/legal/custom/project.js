@@ -4,9 +4,9 @@
 frappe.ui.form.on("Project", {
     setup(frm){
         frm.add_fetch("project_type", "default_department", "department");
-        frm.add_fetch("proposal", "company", "company");
-        frm.add_fetch("proposal", "supplier", "supplier");
-        frm.add_fetch("proposal", "supplier_address_active", "supplier_address");
+        // frm.add_fetch("proposal", "company", "company");
+        // frm.add_fetch("proposal", "supplier", "supplier");
+        // frm.add_fetch("proposal", "supplier_address_active", "supplier_address");
     },
     refresh(frm) {
         frm.set_query("project", () =>{
@@ -21,6 +21,15 @@ frappe.ui.form.on("Project", {
             return {
                 filters:{
                     proposal_type: ["=", doc.proposal_type],
+                    // docstatus: 1,
+                }
+            }
+        })
+
+        frm.set_query("purchase_order", (doc) =>{
+            return {
+                filters:{
+                    need_project: ["=", 1],
                     // docstatus: 1,
                 }
             }
@@ -46,12 +55,17 @@ frappe.ui.form.on("Project", {
         }
 	},
     proposal(frm){
-        if(!frm.doc.proposal) return
-
+        frm.events.get_details_data(frm, "Proposal", frm.doc.proposal)
+    },
+    purchase_order(frm){
+        frm.events.get_details_data(frm, "Purchase Order", frm.doc.purchase_order)
+    },
+    get_details_data(frm, doctype, docname){
         frappe.call({
             method: "sth.legal.custom.project.get_proposal_data",
             args: {
-                proposal: frm.doc.proposal
+                doctype: doctype,
+                docname: docname
             },
             callback: (r) => {
                 if(r.message){
@@ -64,6 +78,7 @@ frappe.ui.form.on("Project", {
             }
         })
     },
+
     contract_template: function (frm) {
 		if (frm.doc.contract_template) {
 			frappe.call({
@@ -93,6 +108,7 @@ frappe.ui.form.on("Project", {
 			});
 		}
 	},
+
     download_pdf(frm){
         // Use window.open to download PDF
         var url = `/api/method/sth.overrides.contract_template.download_contract_pdf`;

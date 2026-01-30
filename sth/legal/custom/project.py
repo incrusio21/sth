@@ -62,31 +62,44 @@ class Project:
 
     def set_missing_value(self):
         if self.doc.supplier:
-            self.doc.supplier_address, self.doc.telepon = frappe.db.get_value("Alamat dan PIC", {"parent": self.doc.supplier, "status_pic": "Aktif"}, ["alamat_pic", "telepon"])
-            self.doc.user_email = frappe.db.get_value("Struktur Supplier", {"parent": self.doc.supplier, "status_supplier": "Aktif"}, "user_email")
+            # get data alamat dari table alamat pic
+            self.doc.supplier_address, self.doc.telepon = frappe.db.get_value("Alamat dan PIC", {
+                "parent": self.doc.supplier, "status_pic": "Aktif"}, ["alamat_pic", "telepon"]) or ["", ""]
+
+             # get data user email dari table structur supplier
+            self.doc.user_email = frappe.db.get_value("Struktur Supplier", {
+                "parent": self.doc.supplier, "status_supplier": "Aktif"}, "user_email") or""
 
     def set_note(self):
-        if not self.doc.is_new() and self.doc.for_proposal and not self.doc.proposal:
+        if not self.doc.is_new():
             return
         
         from frappe.utils.formatters import format_value
+
+        doctype_name, document_name = "Proposal", self.doc.proposal
+        if self.doc.spk_type == "PO/SO":
+            doctype_name, document_name = "Purchase Order", self.doc.purchase_order
+
+        po_i = frappe.qb.DocType(f"{doctype_name} Item")
         
-        po_i = frappe.qb.DocType("Proposal Item")
+        fields = [
+            po_i.kegiatan_name if doctype_name == "Proposal" else po_i.item_name,
+            po_i.qty,
+            po_i.uom,
+            po_i.rate,
+        ]
 
         query = (
             frappe.qb.from_(po_i)
             .select(
-                po_i.kegiatan_name,
-                po_i.qty,
-                po_i.uom,
-                po_i.rate,
-            ).where(po_i.parent == self.doc.proposal)
-        ).run(as_dict=1)
+                *fields
+            ).where(po_i.parent == document_name)
+        ).run()
 
         data = "<div class='ql-editor' contenteditable='true'><ol>"
         for d in query:
             data += '<li data-list="ordered">'
-            data += f'<span class="ql-ui" contenteditable="false"></span>{d.kegiatan_name} {format_value(d.qty)} {d.uom} {format_value(d.rate)}'
+            data += f'<span class="ql-ui" contenteditable="false"></span>{d[0]} {format_value(d[1])} {d[2]} {format_value(d[3])}'
             data += '</li>'
 
         data += "</ol></div>"
@@ -156,16 +169,32 @@ class Project:
 
             task.save()
 
-
 @frappe.whitelist()
-def get_proposal_data(proposal):
-    detail_proposal = frappe.get_value("Proposal", proposal, ["spesifikasi_kerja", "keperluan", "jangka_waktu", "denda"], as_dict=1)
+def get_proposal_data(doctype, docname=None):
+    detail_proposal = {
+        "company": "",
+        "spesifikasi_kerja": "",
+        "keperluan": "", 
+        "jangka_waktu": "", 
+        "denda": "",
+        "identifications": {}
+    }
 
-    detail_proposal["identifications"] = frappe.get_all("Proposal Identification Detail", 
-        filters={"parent": proposal, "parenttype": "Proposal"}, 
-        fields=["identification", "available", "not_available"],
-        order_by="idx"
-    ) or {}
+    if docname:
+        fieldname = ["company", "supplier"]
+        if doctype == "Proposal":
+            fieldname.append(["spesifikasi_kerja", "keperluan", "jangka_waktu", "denda"])
+
+        detail_proposal.update(
+            frappe.get_value(doctype, docname, fieldname, as_dict=1)
+        )
+
+        if doctype == "Proposal":
+            detail_proposal["identifications"] = frappe.get_all(f"{doctype} Identification Detail", 
+                filters={"parent": docname, "parenttype": "Proposal"}, 
+                fields=["identification", "available", "not_available"],
+                order_by="idx"
+            ) or {}
 
     return detail_proposal
 
