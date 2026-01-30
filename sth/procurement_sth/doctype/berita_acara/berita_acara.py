@@ -15,6 +15,7 @@ def create_mr(source_name,target_doc=None):
 		target.company = frappe.db.get_value("Unit",target.unit,["company"])
 	
 	def update_item(source,target,source_parent):
+		target.item_name = frappe.db.get_value("Item",target.item_code,"item_name")
 		target.stock = get_stock_item(target.item_code,source_parent.unit)
 
 	mapper = {
