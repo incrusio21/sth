@@ -210,3 +210,48 @@ def get_reference_details_by_payment_settings(reference_doctype, reference_name,
 			"exchange_rate": flt(exchange_rate),
 		}
 	)
+
+def on_submit_pdo(self,method):
+	if self.permintaan_dana_operasional:
+		update_permintaan_dana_operasional(self)
+
+def on_cancel_pdo(self,method):
+	if self.permintaan_dana_operasional:
+		clear_permintaan_dana_operasional(self)
+
+def update_permintaan_dana_operasional(self):
+	try:
+		pdo = frappe.get_doc("Permintaan Dana Operasional", self.permintaan_dana_operasional)
+		
+		if pdo.payment_voucher and pdo.payment_voucher != self.name:
+			frappe.throw(_(
+				"Permintaan Dana Operasional {0} is already linked to Payment Voucher {1}"
+			).format(pdo.name, pdo.payment_voucher))
+		
+		pdo.db_set("payment_voucher", self.name)
+		
+		frappe.msgprint(_(
+			"Permintaan Dana Operasional {0} updated successfully"
+		).format(pdo.name))
+		
+	except Exception as e:
+		frappe.log_error(
+			message=frappe.get_traceback(),
+			title=f"Error updating PDO {self.permintaan_dana_operasional}"
+		)
+		frappe.throw(_("Failed to update Permintaan Dana Operasional: {0}").format(str(e)))
+
+def clear_permintaan_dana_operasional(self):
+	try:
+		pdo = frappe.get_doc("Permintaan Dana Operasional", self.permintaan_dana_operasional)
+		pdo.db_set("payment_voucher", None)
+		
+		frappe.msgprint(_(
+			"Permintaan Dana Operasional {0} cleared successfully"
+		).format(pdo.name))
+		
+	except Exception as e:
+		frappe.log_error(
+			message=frappe.get_traceback(),
+			title=f"Error clearing PDO {self.permintaan_dana_operasional}"
+		)

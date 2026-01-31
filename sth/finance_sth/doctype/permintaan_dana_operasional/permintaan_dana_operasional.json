@@ -16,6 +16,9 @@
   "company",
   "posting_date",
   "required_by",
+  "payment_voucher",
+  "section_break_evxe",
+  "realisasi_pdo",
   "bahan_bakar_tab",
   "bahan_bakar_details_section",
   "bahan_bakar_transaction_number",
@@ -263,15 +266,13 @@
    "fieldname": "bahan_bakar_debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "bahan_bakar_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
@@ -289,8 +290,7 @@
    "fieldname": "perjalanan_dinas_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
@@ -302,8 +302,7 @@
    "fieldname": "kas_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
@@ -315,8 +314,7 @@
    "fieldname": "dana_cadangan_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
@@ -328,8 +326,7 @@
    "fieldname": "non_pdo_credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "pdo_non_pdo_tab",
@@ -393,13 +390,30 @@
    "fieldtype": "Date",
    "label": "Required By",
    "reqd": 1
+  },
+  {
+   "fieldname": "payment_voucher",
+   "fieldtype": "Link",
+   "label": "Payment Voucher",
+   "options": "Payment Entry"
+  },
+  {
+   "fieldname": "section_break_evxe",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "realisasi_pdo",
+   "fieldtype": "Table",
+   "label": "Realisasi PDO",
+   "options": "Realisasi PDO",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-07 10:35:41.826266",
+ "modified": "2026-01-30 23:40:42.286881",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

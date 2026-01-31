@@ -11,6 +11,7 @@
   "unit",
   "employee_grade",
   "jenis_potongan",
+  "employee",
   "get_employee",
   "persetujuan_1",
   "persetujuan_2",
@@ -21,8 +22,17 @@
   "no_rekening",
   "bank_account",
   "amended_from",
+  "accounting_dimension_section",
+  "cost_center",
   "section_break_josg",
-  "details"
+  "details",
+  "section_break_rlmn",
+  "status",
+  "column_break_toxk",
+  "grand_total",
+  "outstanding_amount",
+  "more_info_tab",
+  "credit_to"
  ],
  "fields": [
   {
@@ -140,13 +150,69 @@
    "fieldtype": "Link",
    "label": "Persetujuan 2",
    "options": "User"
+  },
+  {
+   "fieldname": "section_break_rlmn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total"
+  },
+  {
+   "fieldname": "column_break_toxk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Person in Charge",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nUnpaid\nPartialy Paid\nPaid"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-13 23:36:44.141230",
+ "modified": "2026-01-30 16:43:22.950402",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Potongan",

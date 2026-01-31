@@ -263,8 +263,8 @@ doc_events = {
 		"validate": [
 			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book", "sth.finance_sth.custom.cek_kriteria_upload_pe.populate_upload_file"
 		],
-		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
-		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen"],
+		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_submit_pdo"],
+		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_cancel_pdo"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
 	"Permintaan Pengeluaran Barang": {

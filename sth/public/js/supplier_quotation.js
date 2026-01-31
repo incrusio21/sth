@@ -138,7 +138,7 @@ frappe.ui.form.on("Supplier Quotation", {
 })
 
 
-frappe.ui.form.on("PPH Detail", {
+frappe.ui.form.on("VAT Detail", {
     pph_lainnya_add(frm, dt, dn) {
         let row = locals[dt][dn]
         const tax = frm.add_child("taxes")

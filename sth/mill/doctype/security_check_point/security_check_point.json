@@ -101,7 +101,7 @@
    "label": "Driver Data"
   },
   {
-   "depends_on": "eval:doc.no_pol_tidak_terdaftar == \"0\"",
+   "depends_on": "eval:doc.no_pol_tidak_terdaftar == \"0\" && doc.receive_type !== \"TBS Internal\"",
    "fieldname": "qr_code_scan",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -297,6 +297,7 @@
    "options": "Company"
   },
   {
+   "fetch_from": "qr_code_scan.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
@@ -347,7 +348,8 @@
    "fieldname": "divisi",
    "fieldtype": "Link",
    "label": "Divisi",
-   "options": "Divisi"
+   "options": "Divisi",
+   "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   },
   {
    "allow_on_submit": 1,
@@ -361,7 +363,8 @@
    "fetch_from": "spb.no_polisi",
    "fieldname": "no_polisi",
    "fieldtype": "Data",
-   "label": "No Polisi"
+   "label": "No Polisi",
+   "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   },
   {
    "fieldname": "items_do",
@@ -373,6 +376,7 @@
   {
    "allow_on_submit": 1,
    "default": "0",
+   "depends_on": "eval:doc.receive_type !== \"TBS Internal\"",
    "fieldname": "no_pol_tidak_terdaftar",
    "fieldtype": "Check",
    "label": "No Pol Tidak Terdaftar"
@@ -382,7 +386,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-28 17:31:12.047509",
+ "modified": "2026-01-31 09:36:15.576134",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

@@ -3,6 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe import _
+from frappe.model.mapper import get_mapped_doc
 
 from sth.finance_sth.doctype.pdo_bahan_bakar_vtwo.pdo_bahan_bakar_vtwo import process_pdo_bahan_bakar
 from sth.finance_sth.doctype.pdo_perjalanan_dinas_vtwo.pdo_perjalanan_dinas_vtwo import process_pdo_perjalanan_dinas
@@ -21,7 +23,13 @@ pdo_categories = ["Bahan Bakar", "Perjalanan Dinas", "Kas", "Dana Cadangan", "NO
 
 class PermintaanDanaOperasional(Document):
 	def validate(self):
+		self.update_pdo_default_account()
 		self.validate_child_tables()
+
+	def update_pdo_default_account(self):
+		if not self.bahan_bakar_debit_to:
+			self.bahan_bakar_debit_to = frappe.get_doc("Company", self.company).default_pdo_bahan_bakar_account
+
 		
 	def on_update(self):
 		self.process_data_to_insert_vtwo()
@@ -140,12 +148,12 @@ def filter_type(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_expense_account(company, parent):
-    default_account = frappe.db.get_value("Expense Claim Account", {
+	default_account = frappe.db.get_value("Expense Claim Account", {
 		"company": company,
 		"parent": parent
 	}, "default_account")
-    
-    return default_account
+	
+	return default_account
 
 @frappe.whitelist()
 def filter_fund_type(doctype, txt, searchfield, start, page_len, filters):
@@ -161,3 +169,166 @@ def filter_fund_type(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 	return query.run()
+
+@frappe.whitelist()
+def create_payment_voucher(source_name, target_doc=None):
+	
+	def validate_source(source):
+		if source.payment_voucher:
+			frappe.throw(_("Payment Voucher already created: {0}").format(source.payment_voucher))
+	
+	def set_missing_values(source, target):
+		unit_doc = frappe.get_doc("Unit", source.unit)
+		if not unit_doc.bank_account:
+			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
+		
+		target.paid_to = unit_doc.bank_account
+		target.payment_type = "Internal Transfer"
+		target.paid_from = "1111001 - KAS HO - TML"
+		
+		total_amount = (
+			(source.grand_total_bahan_bakar or 0) +
+			(source.grand_total_perjalanan_dinas or 0) +
+			(source.grand_total_kas or 0) +
+			(source.grand_total_dana_cadangan or 0) +
+			(source.grand_total_non_pdo or 0)
+		)
+		
+		if total_amount <= 0:
+			frappe.throw(_("Total amount must be greater than zero"))
+		
+		target.paid_amount = total_amount
+		target.received_amount = total_amount
+		target.posting_date = frappe.utils.today()
+		target.source_exchange_rate = 1
+		target.paid_from_account_currency = "IDR"
+		target.paid_to_account_currency = "IDR"
+		target.remarks = _("Payment for Permintaan Dana Operasional {0}").format(source.name)
+	
+	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	validate_source(source_doc)
+	
+	doclist = get_mapped_doc(
+		"Permintaan Dana Operasional",
+		source_name,
+		{
+			"Permintaan Dana Operasional": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"name": "permintaan_dana_operasional",
+					"unit": "unit",
+					"company": "company"
+				}
+			}
+		},
+		target_doc,
+		set_missing_values
+	)
+	
+	return doclist
+
+@frappe.whitelist()
+def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
+	"""Create Payment Voucher Kas from Permintaan Dana Operasional"""
+	
+	# Map tipe_pdo to child table and field mappings
+	tipe_mapping = {
+		'Bahan Bakar': {
+			'child_table': 'pdo_bahan_bakar',
+			'account_field': 'bahan_bakar_debit_to',
+			'employee_field': 'employee',
+			'amount_field': 'revised_price_total'
+		},
+		'Perjalanan Dinas': {
+			'child_table': 'pdo_perjalanan_dinas',
+			'account_field': 'perjalanan_dinas_debit_to',
+			'employee_field': 'employee',
+			'amount_field': 'revised_price_total'
+		},
+		'Kas': {
+			'child_table': 'pdo_kas',
+			'account_field': 'kas_debit_to',
+			'employee_field': 'employee',
+			'amount_field': 'revised_price_total'
+		},
+		'Dana Cadangan': {
+			'child_table': 'pdo_dana_cadangan',
+			'account_field': 'dana_cadangan_debit_to',
+			'employee_field': 'employee',
+			'amount_field': 'revised_price_total'
+		}
+	}
+	
+	if tipe_pdo not in tipe_mapping:
+		frappe.throw(_("Invalid Tipe PDO selected"))
+	
+	mapping = tipe_mapping[tipe_pdo]
+	child_table_name = mapping['child_table']
+	account_field = mapping['account_field']
+	employee_field = mapping['employee_field']
+	amount_field = mapping['amount_field']
+	
+	def set_missing_values(source, target):
+		# Get Payment Voucher to fetch paid_to account
+		if not source.payment_voucher:
+			frappe.throw(_("Payment Voucher not found for this PDO"))
+		
+		payment_voucher = frappe.get_doc("Payment Entry", source.payment_voucher)
+		
+		# Set basic fields
+		target.company = source.company
+		target.unit = source.unit
+		target.currency = "IDR"
+		target.exchange_rate = 1
+		target.transaction_type = "Keluar"
+		
+		# Set account from source based on tipe_pdo
+		if hasattr(source, account_field) and getattr(source, account_field):
+			target.account = getattr(source, account_field)
+		else:
+			frappe.throw(_("Account field {0} not found in source document").format(account_field))
+		
+		# Set credit_to from Payment Voucher's paid_to
+		target.credit_to = payment_voucher.paid_to
+		
+		# Clear any existing child table rows
+		target.payment_voucher_kas_pdo = []
+		
+		# Get child table data
+		child_data = getattr(source, child_table_name, [])
+		
+		if not child_data:
+			frappe.throw(_("No data found in {0} table").format(tipe_pdo))
+		
+		# Add rows to payment_voucher_kas_pdo table
+		for row in child_data:
+			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
+			amount = getattr(row, amount_field, 0) if hasattr(row, amount_field) else 0
+			
+			target.append('payment_voucher_kas_pdo', {
+				'no_pdo': source.name,
+				'tipe_pdo': tipe_pdo,
+				'penerima': employee,
+				'total': amount,
+				'pdo_child_name': row.name
+			})
+	
+	# Map document
+	doclist = get_mapped_doc(
+		"Permintaan Dana Operasional",
+		source_name,
+		{
+			"Permintaan Dana Operasional": {
+				"doctype": "Payment Voucher Kas",
+				"field_map": {
+					"name": "permintaan_dana_operasional",
+					"company": "company",
+					"unit": "unit"
+				}
+			}
+		},
+		target_doc,
+		set_missing_values
+	)
+	
+	return doclist

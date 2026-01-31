@@ -1,7 +1,7 @@
 // Copyright (c) 2026, DAS and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("PPH Detail", {
+frappe.ui.form.on("VAT Detail", {
     type(frm, cdt, cdn){
         let item = locals[cdt][cdn]
         frappe.call({

@@ -135,6 +135,7 @@ frappe.ui.form.on("Purchase Order", {
 		// })
 	},
 	refresh(frm) {
+		frm.page.sidebar.hide()
 		frm.set_query("purchase_type", () => {
 			return {
 				filters: {

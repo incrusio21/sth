@@ -1436,14 +1436,14 @@
    "fieldname": "pph_details",
    "fieldtype": "Table",
    "label": "PPH Details",
-   "options": "PPH Detail"
+   "options": "VAT Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-30 11:14:30.049159",
+ "modified": "2026-01-31 12:37:42.342789",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

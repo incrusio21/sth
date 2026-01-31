@@ -418,7 +418,7 @@ def get_berita_acara(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
-	fields = ", ".join(["`tabItem`.name", "`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description"])
+	fields = ", ".join(["`tabItem`.name", "`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description","`tabItem`.stock_uom"])
 	# fields = ", ".join(get_fields(doctype,["name"]))
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
 

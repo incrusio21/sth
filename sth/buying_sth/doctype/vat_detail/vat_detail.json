@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-01-27 11:52:07.854990",
+ "creation": "2026-01-31 12:32:37.949265",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -10,8 +10,8 @@
   "percentage",
   "amount",
   "column_break_eikz",
-  "ref_child_doc",
   "ref_child_name",
+  "ref_child_doc",
   "tax_type"
  ],
  "fields": [
@@ -24,6 +24,14 @@
    "reqd": 1
   },
   {
+   "fetch_from": "type.rate",
+   "fieldname": "percentage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Percentage",
+   "read_only": 1
+  },
+  {
    "default": "0",
    "fieldname": "amount",
    "fieldtype": "Currency",
@@ -33,28 +41,20 @@
    "read_only": 1
   },
   {
-   "fetch_from": "type.rate",
-   "fieldname": "percentage",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Percentage",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_eikz",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "ref_child_doc",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Ref Child Doc"
   },
   {
    "fieldname": "ref_child_name",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Ref Child Name"
+  },
+  {
+   "fieldname": "ref_child_doc",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Ref Child Doc"
   },
   {
    "fieldname": "tax_type",
@@ -67,10 +67,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-31 12:29:41.649591",
+ "modified": "2026-01-31 12:32:37.949265",
  "modified_by": "Administrator",
  "module": "Buying STH",
- "name": "PPH Detail",
+ "name": "VAT Detail",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
