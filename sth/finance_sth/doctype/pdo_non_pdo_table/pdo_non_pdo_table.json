@@ -25,6 +25,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -33,6 +34,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fetch_from": "employee.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
@@ -44,23 +46,20 @@
   {
    "fieldname": "type",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Jenis",
-   "options": "Expense Claim Type",
-   "reqd": 1
+   "options": "Expense Claim Type"
   },
   {
+   "columns": 1,
    "fieldname": "item_code",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Item Barang",
-   "options": "Item"
+   "label": "Item Barang"
   },
   {
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
   },
@@ -68,11 +67,11 @@
    "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Satuan",
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -80,6 +79,7 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "price",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -107,6 +107,7 @@
    "label": "Kebutuhan"
   },
   {
+   "columns": 2,
    "fieldname": "total",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -125,21 +126,19 @@
   {
    "fieldname": "sub_detail",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Sub Detail",
-   "options": "PDO Type",
-   "reqd": 1
+   "options": "PDO Type"
   },
   {
    "fieldname": "routine_type",
    "fieldtype": "Select",
    "label": "Tipe Rutin",
-   "options": "\nRutin\nTidak Rutin",
-   "reqd": 1
+   "options": "\nRutin\nTidak Rutin"
   },
   {
    "fieldname": "debit_to",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Debit To",
    "options": "Account",
    "read_only": 1,
@@ -150,7 +149,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-01 11:09:09.905501",
+ "modified": "2026-02-01 22:38:08.613796",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO NON PDO Table",

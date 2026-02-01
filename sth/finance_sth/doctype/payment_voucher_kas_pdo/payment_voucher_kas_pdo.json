@@ -10,11 +10,13 @@
   "tipe_pdo",
   "penerima",
   "total",
-  "pdo_child_name"
+  "item_barang",
+  "pdo_child_name",
+  "debit_to"
  ],
  "fields": [
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "no_pdo",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -24,7 +26,7 @@
    "reqd": 1
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "penerima",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -54,13 +56,26 @@
    "hidden": 1,
    "label": "PDO Child Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit To",
+   "options": "Account"
+  },
+  {
+   "columns": 2,
+   "fieldname": "item_barang",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Barang"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-30 23:37:17.779607",
+ "modified": "2026-02-01 22:03:02.114007",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas PDO",

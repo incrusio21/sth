@@ -11,13 +11,17 @@ cur_frm.script_manager.make(sth.finance_sth.PaymentVoucherKas);
 
 frappe.ui.form.on("Payment Voucher Kas", {
 	refresh(frm) {
-        setDefaultAccount(frm)
-        defaultInternal(frm)
+        if(!frm.doc.payment_voucher_kas_pdo){
+            setDefaultAccount(frm)
+            defaultInternal(frm)
+        }
         filterUnit(frm)
         filterAccount(frm)
 	},
     company(frm){
-        setDefaultAccount(frm)
+        if(!frm.doc.payment_voucher_kas_pdo){
+            setDefaultAccount(frm)
+        }
         filterUnit(frm)
         filterAccount(frm)
     },

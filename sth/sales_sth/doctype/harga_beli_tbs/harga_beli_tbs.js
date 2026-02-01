@@ -10,6 +10,14 @@ frappe.ui.form.on("Harga Beli TBS", {
             };
         });
 
+        frm.set_query("supplier", () => {
+            return {
+                filters: {
+                    is_supplier_tbs: 1
+                }
+            };
+        });
+
         frappe.db.get_value("Item", frm.doc.item_code, "stock_uom")
         .then(r => {
             if (r.message?.stock_uom && !frm.doc.uom) {

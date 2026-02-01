@@ -4,6 +4,13 @@ frappe.ui.form.on('Driver', {
         if (frm.doc.qr) {
             render_qr(frm);
         }
+        frm.set_query("supplier", () => {
+            return {
+                filters: {
+                    is_supplier_tbs: 1
+                }
+            };
+        });
     },
     transporter: function (frm, cdt, cdn) {
 		// // this assumes that supplier's address has same title as supplier's name

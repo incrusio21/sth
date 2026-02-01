@@ -78,8 +78,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Akun Perkiraan",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "bank",
@@ -164,7 +163,6 @@
   {
    "fieldname": "accounting_details_tab",
    "fieldtype": "Tab Break",
-   "hidden": 1,
    "label": "Accounting Details"
   },
   {
@@ -228,16 +226,13 @@
    "fieldname": "debit_to",
    "fieldtype": "Link",
    "label": "Receivable Account",
-   "options": "Account",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Payable Account",
    "options": "Account",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -267,7 +262,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-31 12:37:58.550156",
+ "modified": "2026-01-31 14:36:30.245064",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas",

@@ -33,6 +33,9 @@ frappe.ui.form.on("PDO Bahan Bakar Table", {
 	},
 	revised_unit_price(frm, cdt, cdn) {
 		processBahanBakar(frm, cdt, cdn);
+	},
+	designation(frm, cdt, cdn){
+		get_plafon_pdo_bb(frm, cdt, cdn)
 	}
 });
 
@@ -55,6 +58,7 @@ frappe.ui.form.on("PDO Perjalanan Dinas Table", {
 	type(frm, cdt, cdn){
 		const curRow = locals[cdt][cdn]
 		getExpenseAccount(frm, curRow, cdt, cdn)
+		get_plafon_pdo(frm, cdt, cdn)
 	}
 });
 
@@ -123,6 +127,98 @@ frappe.ui.form.on("PDO Dana Cadangan Table", {
 		set_field_properties(frm, cdt, cdn, row.jenis);
 	}
 });
+
+function get_plafon_pdo(frm, cdt, cdn){
+	let row = locals[cdt][cdn];
+        
+    if (row.type) {
+        frappe.call({
+            method: 'frappe.client.get_list',
+            args: {
+                doctype: 'Plafon PDO',
+                filters: {
+                    'name': 'PERJALANAN DINAS'
+                },
+                fields: ['name']
+            },
+            callback: function(r) {
+                if (r.message && r.message.length > 0) {
+                    frappe.call({
+                        method: 'frappe.client.get',
+                        args: {
+                            doctype: 'Plafon PDO',
+                            name: r.message[0].name
+                        },
+                        callback: function(response) {
+                            if (response.message) {
+                                let plafon_pdo = response.message;
+                                
+                                let incentif_row = plafon_pdo.plafon_pdo_table.find(
+                                    item => item.jenis_plafon == row.type
+                                );
+                                
+                                if (incentif_row && incentif_row.nilai) {
+
+                                    frappe.model.set_value(cdt, cdn, 'plafon', incentif_row.nilai);
+                                    frappe.model.set_value(cdt, cdn, 'revised_plafon', incentif_row.nilai);
+                                    
+                                    frm.refresh_field('pdo_perjalanan_dinas');
+                                } else {
+                                    frappe.msgprint(__('INCENTIF not found in Plafon PDO'));
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    frappe.msgprint(__('Plafon PDO "PERJALANAN DINAS" not found'));
+                }
+            }
+        });
+    }
+}
+
+function get_plafon_pdo_bb(frm, cdt, cdn){
+	let row = locals[cdt][cdn];
+	if (row.designation) {
+		console.log(row.designation)
+		fetch_plafon_value('UANG PEMBANTU', row.designation, 'jenis_plafon', cdt, cdn, frm, 'pdo_bahan_bakar'); 
+	}       
+}
+
+function fetch_plafon_value(plafon_name, filter_value, filter_field, cdt, cdn, frm, table_fieldname) {
+    frappe.call({
+        method: 'frappe.client.get',
+        args: {
+            doctype: 'Plafon PDO',
+            name: plafon_name
+        },
+        callback: function(response) {
+            if (response.message) {
+                let plafon_pdo = response.message;
+
+                let matching_row = plafon_pdo.plafon_pdo_table.find(
+                    item => item[filter_field] === filter_value
+                );
+
+                console.log(plafon_pdo)
+                
+                if (matching_row && matching_row.nilai) {
+                    frappe.model.set_value(cdt, cdn, 'plafon', matching_row.nilai);
+                    if (table_fieldname === 'pdo_bahan_bakar') {
+                        frappe.model.set_value(cdt, cdn, 'revised_plafon', matching_row.nilai);
+                    } else {
+                        frappe.model.set_value(cdt, cdn, 'revised_plafon', matching_row.nilai);
+                    }
+                    frm.refresh_field(table_fieldname);
+                } else {
+
+                }
+            } else {
+
+            }
+        }
+    });
+}
 
 function filterCreditTo(frm) {
 	for (const pdo of pdoCategories) {
@@ -296,7 +392,6 @@ function filterType(frm, childTable) {
 			query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_type',
 			filters : {
 				routine_type: locals[cdt][cdn].routine_type,
-				pdo_type: locals[cdt][cdn].sub_detail,
 				company: frm.doc.company
 			}
 		}
@@ -373,48 +468,67 @@ function make_realisasi_pdo(frm){
 }
 
 function show_realisasi_dialog(frm) {
-    let dialog = new frappe.ui.Dialog({
-        title: __('Realisasi PDO'),
-        fields: [
-            {
-                fieldname: 'tipe_pdo',
-                label: __('Pilih Tipe PDO'),
-                fieldtype: 'Select',
-                options: [
-                    '',
-                    'Bahan Bakar',
-                    'Perjalanan Dinas',
-                    'Kas',
-                    'Dana Cadangan'
-                ],
-                reqd: 1
-            }
-        ],
-        primary_action_label: __('Create Payment Voucher Kas'),
-        primary_action: function(values) {
-            if (!values.tipe_pdo) {
-                frappe.msgprint(__('Please select a type'));
+    // Get available types first
+    frappe.call({
+        method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_available_tipe_pdo',
+        args: {
+            source_name: frm.doc.name
+        },
+        callback: function(r) {
+            if (!r.message || r.message.length === 0) {
+                frappe.msgprint(__('All types have been fully paid'));
                 return;
             }
             
-            dialog.hide();
+            // Build options string for select field
+            let options = [''];
+            let option_labels = {};
             
-           frappe.call({
-                method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_kas',
-                args: {
-                    source_name: frm.doc.name,
-                    tipe_pdo: values.tipe_pdo
-                },
-                callback: function(r) {
-                    if (r.message) {
-                        // Open the created document
-                        frappe.model.sync(r.message);
-                        frappe.set_route('Form', r.message.doctype, r.message.name);
+            r.message.forEach(function(item) {
+                options.push(item.value);
+                option_labels[item.value] = item.label;
+            });
+            
+            let dialog = new frappe.ui.Dialog({
+                title: __('Realisasi PDO'),
+                fields: [
+                    {
+                        fieldname: 'tipe_pdo',
+                        label: __('Pilih Tipe PDO'),
+                        fieldtype: 'Select',
+                        options: options.join('\n'),
+                        reqd: 1,
+                        description: __('Only types with outstanding amounts are shown')
                     }
+                ],
+                primary_action_label: __('Create Payment Voucher Kas'),
+                primary_action: function(values) {
+                    if (!values.tipe_pdo) {
+                        frappe.msgprint(__('Please select a type'));
+                        return;
+                    }
+                    
+                    dialog.hide();
+                    
+                    // Call the method with tipe_pdo parameter
+                    frappe.call({
+                        method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_kas',
+                        args: {
+                            source_name: frm.doc.name,
+                            tipe_pdo: values.tipe_pdo
+                        },
+                        callback: function(r) {
+                            if (r.message) {
+                                // Open the created document
+                                frappe.model.sync(r.message);
+                                frappe.set_route('Form', r.message.doctype, r.message.name);
+                            }
+                        }
+                    });
                 }
             });
+            
+            dialog.show();
         }
     });
-    
-    dialog.show();
 }

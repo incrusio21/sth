@@ -31,8 +31,8 @@ class PermintaanDanaOperasional(Document):
 			self.bahan_bakar_debit_to = frappe.get_doc("Company", self.company).default_pdo_bahan_bakar_account
 
 		
-	def on_update(self):
-		self.process_data_to_insert_vtwo()
+	# def on_update(self):
+	# 	self.process_data_to_insert_vtwo()
 
 	def before_submit(self):
 		self.submit_pdo_vtwo()
@@ -49,7 +49,10 @@ class PermintaanDanaOperasional(Document):
 
 			if not self.get(f"pdo_{fieldname}") and not self.get(f"{fieldname}_transaction_number"):
 				continue
-				
+			
+			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number"):
+				continue
+
 			data = {
 				"grand_total": self.get(f"grand_total_{fieldname}"),
 				"outstanding_amount": self.get(f"outstanding_amount_{fieldname}"),
@@ -78,6 +81,7 @@ class PermintaanDanaOperasional(Document):
 			fieldname = pdo.lower().replace(" ", "_")
 
 			if self.get(f"pdo_{fieldname}") and self.get(f"{fieldname}_transaction_number") and self.get(f"grand_total_{fieldname}") > 0:
+				print(str(pdo))
 				doctype_vtwo = f"PDO {pdo} Vtwo"
 				docname_vtwo = self.get(f"{fieldname}_transaction_number")
 				doc = frappe.get_doc(doctype_vtwo, docname_vtwo)
@@ -135,14 +139,15 @@ def filter_type(doctype, txt, searchfield, start, page_len, filters):
 		.inner_join(eca)
 		.on(
 			(ect.name == eca.parent) &
-			(ect.custom_routine_type == filters.get('routine_type')) &
-			(ect.custom_pdo_type == filters.get('pdo_type'))
+			(ect.custom_routine_type == filters.get('routine_type')) 
 		)
 		.where(
 			(eca.company == filters.get('company')) &
-			(ect.name.like(f'%{txt}%'))
+			(ect.name.like(f"%{txt}%"))  
 		)
 	)
+
+	# frappe.throw(str(query))
 
 	return query.run()
 
@@ -164,7 +169,9 @@ def filter_fund_type(doctype, txt, searchfield, start, page_len, filters):
 		.select(account.name.as_('value'))
 		.where(
 			(account.company == filters.get('company')) &
-			(account.account_type.isin(account_type))
+			(account.disabled == 0) &
+			(account.account_type.isin(account_type)) &
+			(account.name.like(f"%{txt}%"))  
 		)
 	)
 
@@ -235,27 +242,39 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 	tipe_mapping = {
 		'Bahan Bakar': {
 			'child_table': 'pdo_bahan_bakar',
-			'account_field': 'bahan_bakar_debit_to',
+			'debit_account_field': None,  # Uses header field instead
+			'header_debit_field': 'bahan_bakar_debit_to',  # Account at header level
 			'employee_field': 'employee',
-			'amount_field': 'revised_price_total'
+			'amount_field': 'revised_price_total',
+			'grand_total_field': 'grand_total_bahan_bakar',
+			'outstanding_field': 'outstanding_amount_bahan_bakar'
 		},
 		'Perjalanan Dinas': {
 			'child_table': 'pdo_perjalanan_dinas',
-			'account_field': 'perjalanan_dinas_debit_to',
+			'debit_account_field': 'debit_to',  # Field in child table
+			'header_debit_field': None,  # No header field
 			'employee_field': 'employee',
-			'amount_field': 'revised_price_total'
+			'amount_field': 'revised_total',
+			'grand_total_field': 'grand_total_perjalanan_dinas',
+			'outstanding_field': 'outstanding_amount_perjalanan_dinas'
 		},
 		'Kas': {
 			'child_table': 'pdo_kas',
-			'account_field': 'kas_debit_to',
+			'debit_account_field': 'debit_to',  # Field in child table
+			'header_debit_field': None,
 			'employee_field': 'employee',
-			'amount_field': 'revised_price_total'
+			'amount_field': 'revised_total',
+			'grand_total_field': 'grand_total_kas',
+			'outstanding_field': 'outstanding_amount_kas'
 		},
 		'Dana Cadangan': {
 			'child_table': 'pdo_dana_cadangan',
-			'account_field': 'dana_cadangan_debit_to',
+			'debit_account_field': 'fund_type',  # Field in child table
+			'header_debit_field': None,
 			'employee_field': 'employee',
-			'amount_field': 'revised_price_total'
+			'amount_field': 'revised_amount',
+			'grand_total_field': 'grand_total_dana_cadangan',
+			'outstanding_field': 'outstanding_amount_dana_cadangan'
 		}
 	}
 	
@@ -264,9 +283,20 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 	
 	mapping = tipe_mapping[tipe_pdo]
 	child_table_name = mapping['child_table']
-	account_field = mapping['account_field']
+	debit_account_field = mapping['debit_account_field']
+	header_debit_field = mapping['header_debit_field']
 	employee_field = mapping['employee_field']
 	amount_field = mapping['amount_field']
+	outstanding_field = mapping['outstanding_field']
+
+	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	outstanding_amount = getattr(source_doc, outstanding_field, 0)
+	
+	if outstanding_amount <= 0:
+		frappe.throw(_("{0} has been fully paid. Outstanding amount: {1}").format(
+			tipe_pdo, 
+			frappe.format_value(outstanding_amount, {'fieldtype': 'Currency'})
+		))
 	
 	def set_missing_values(source, target):
 		# Get Payment Voucher to fetch paid_to account
@@ -281,14 +311,9 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 		target.currency = "IDR"
 		target.exchange_rate = 1
 		target.transaction_type = "Keluar"
+		target.naming_series = "PVK-"
 		
-		# Set account from source based on tipe_pdo
-		if hasattr(source, account_field) and getattr(source, account_field):
-			target.account = getattr(source, account_field)
-		else:
-			frappe.throw(_("Account field {0} not found in source document").format(account_field))
-		
-		# Set credit_to from Payment Voucher's paid_to
+		# Set credit_to from Payment Voucher's paid_to (this is the bank account)
 		target.credit_to = payment_voucher.paid_to
 		
 		# Clear any existing child table rows
@@ -300,16 +325,33 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 		if not child_data:
 			frappe.throw(_("No data found in {0} table").format(tipe_pdo))
 		
+		# For Bahan Bakar, get debit account from header
+		if header_debit_field:
+			header_debit_account = getattr(source, header_debit_field, None)
+			if not header_debit_account:
+				frappe.throw(_("Debit account field {0} not found in source document").format(header_debit_field))
+		
 		# Add rows to payment_voucher_kas_pdo table
 		for row in child_data:
 			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
 			amount = getattr(row, amount_field, 0) if hasattr(row, amount_field) else 0
+			
+			# Determine debit account
+			if header_debit_field:
+				# Use header field (for Bahan Bakar)
+				debit_account = header_debit_account
+			else:
+				# Use child table field (for other types)
+				debit_account = getattr(row, debit_account_field, None) if hasattr(row, debit_account_field) else None
+				if not debit_account:
+					frappe.throw(_("Debit account not found for row {0} in {1}").format(row.idx, tipe_pdo))
 			
 			target.append('payment_voucher_kas_pdo', {
 				'no_pdo': source.name,
 				'tipe_pdo': tipe_pdo,
 				'penerima': employee,
 				'total': amount,
+				'debit_to': debit_account,  # Add debit account
 				'pdo_child_name': row.name
 			})
 	
@@ -331,4 +373,40 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 		set_missing_values
 	)
 	
+	total = 0
+	for row in doclist.payment_voucher_kas_pdo:
+		total += row.total
+
+	doclist.payment_amount = total
+	doclist.grand_total = total
+	doclist.outstanding_amount = total
+
 	return doclist
+
+@frappe.whitelist()
+def get_available_tipe_pdo(source_name):
+	"""Get list of tipe_pdo that still have outstanding amounts"""
+	
+	doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	
+	available_types = []
+	
+	tipe_checks = [
+		('Bahan Bakar', 'outstanding_amount_bahan_bakar', 'grand_total_bahan_bakar'),
+		('Perjalanan Dinas', 'outstanding_amount_perjalanan_dinas', 'grand_total_perjalanan_dinas'),
+		('Kas', 'outstanding_amount_kas', 'grand_total_kas'),
+		('Dana Cadangan', 'outstanding_amount_dana_cadangan', 'grand_total_dana_cadangan')
+	]
+	
+	for tipe, outstanding_field, grand_total_field in tipe_checks:
+		outstanding = getattr(doc, outstanding_field, 0) or 0
+		grand_total = getattr(doc, grand_total_field, 0) or 0
+		
+		# Show option if there's a grand total and outstanding amount > 0
+		if grand_total > 0 and outstanding > 0:
+			available_types.append({
+				'value': tipe,
+				'label': f'{tipe} (Outstanding: {frappe.format_value(outstanding, {"fieldtype": "Currency"})})'
+			})
+	
+	return available_types
