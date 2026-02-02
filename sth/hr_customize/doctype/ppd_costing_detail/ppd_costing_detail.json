@@ -35,14 +35,15 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Jumlah Pengajuan"
+   "label": "Jumlah Pengajuan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-28 14:20:04.324382",
+ "modified": "2026-02-02 13:55:20.192745",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "PPD Costing Detail",

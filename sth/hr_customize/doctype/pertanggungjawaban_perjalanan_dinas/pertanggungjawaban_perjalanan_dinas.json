@@ -26,6 +26,14 @@
   "costings",
   "upload_file_section",
   "kriteria_upload_dokumen_finance",
+  "section_break_pqjx",
+  "total_claimed_amount",
+  "total_sanctioned_amount",
+  "total_down_amount",
+  "selisih_section",
+  "status_selisih",
+  "column_break_abxc",
+  "total_selisih",
   "section_break_63wn",
   "amended_from"
  ],
@@ -157,13 +165,55 @@
    "fieldtype": "Link",
    "label": "Persetujuan 4",
    "options": "User"
+  },
+  {
+   "fieldname": "section_break_pqjx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_claimed_amount",
+   "fieldtype": "Currency",
+   "label": "Total Realisasi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_sanctioned_amount",
+   "fieldtype": "Currency",
+   "label": "Total Disetujui"
+  },
+  {
+   "fieldname": "total_down_amount",
+   "fieldtype": "Currency",
+   "label": "Uang Muka",
+   "read_only": 1
+  },
+  {
+   "fieldname": "selisih_section",
+   "fieldtype": "Section Break",
+   "label": "Selisih"
+  },
+  {
+   "fieldname": "status_selisih",
+   "fieldtype": "Data",
+   "label": "Status Selisih",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_abxc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_selisih",
+   "fieldtype": "Currency",
+   "label": "Total Selisih",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 14:16:41.154830",
+ "modified": "2026-02-02 13:46:19.321443",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",

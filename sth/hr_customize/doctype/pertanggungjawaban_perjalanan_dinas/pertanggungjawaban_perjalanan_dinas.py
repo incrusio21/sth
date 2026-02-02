@@ -6,9 +6,26 @@ from frappe.model.document import Document
 import frappe
 
 class PertanggungjawabanPerjalananDinas(Document):
+	def before_save(self):
+		self.set_status_selisih()
+	
+	def set_status_selisih(self):
+		tda = self.total_down_amount or 0
+		tsa = self.total_sanctioned_amount or 0
+
+		if tsa < tda:
+			self.status_selisih = "Kurang Bayar"
+		elif tsa > tda:
+			self.status_selisih = "Lebih Bayar"
+		else:
+			self.status_selisih = "Tidak Ada Selisih"
+
+		self.total_selisih = abs(tsa - tda)
+
 	@frappe.whitelist()
 	def get_data_perjalanan_dinas(self):
 		travel = frappe.get_doc("Travel Request", self.no_spd)
+		emp_advance = frappe.get_doc("Employee Advance", travel.get("custom_employee_advance"))
 
 		self.get_data_employee(travel)
 		self.itinerary = travel.itinerary
@@ -20,6 +37,8 @@ class PertanggungjawabanPerjalananDinas(Document):
 				"amount": costing.total_amount,
 				"sanctioned_amount": 0
 			})
+
+		self.total_down_amount = emp_advance.get("advance_amount", 0) if emp_advance else 0
   
 	def get_data_employee(self, travel):
 		employee = frappe.get_doc("Employee", travel.get("employee"))
