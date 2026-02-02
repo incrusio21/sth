@@ -313,6 +313,9 @@ doc_events = {
 	},
     ("Proposal", "BAPP"): {
         "before_validate": "sth.legal.custom.tax_validation.validate_custom_tax"
+	},
+    ("Delivery Note","Sales Invoice","Purchase Receipt","Purchase Invoice","Stock Entry"): {
+        "validate": "sth.custom.stock_ledger.validate_posting_date"
 	}
 }
 
