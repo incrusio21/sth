@@ -2,14 +2,26 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
-from frappe.utils import get_link_to_form
+from frappe.utils import flt, get_link_to_form
 
+from sth.controllers.accounts_controller import AccountsController
 
-class EmployeePotongan(Document):
+class EmployeePotongan(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._expense_account = "expense_account"
+
 	def validate(self):
+		self.set_missing_value()
 		self.check_employee_status()
 
+	def calculate_total(self):
+		totals = 0
+		for d in self.details:
+			totals += flt(d.rate)
+		
+		self.grand_total = flt(totals, self.precision("grand_total"))
+		
 	def check_employee_status(self):
 		emp_list = [d.employee for d in self.details]
 
@@ -38,6 +50,7 @@ class EmployeePotongan(Document):
 
 	def on_submit(self):
 		self.create_additional_salary()
+		self.make_gl_entry()
 
 	def create_additional_salary(self):
 		for d in self.details:
@@ -54,7 +67,10 @@ class EmployeePotongan(Document):
 			d.db_set("additional_salary", add_sal.name)
 
 	def on_cancel(self):
+		super().on_cancel()
+
 		self.remove_additional_salary()
+		self.make_gl_entry()
 	
 	def remove_additional_salary(self):
 		for d in self.get("details", {"additional_salary": True}):
@@ -86,3 +102,11 @@ class EmployeePotongan(Document):
 				"employee_name": d.employee_name,
 				"rate": jenis_potongan
 			})
+
+@frappe.whitelist()
+def fetch_company_account(company):
+	accounts_dict = {
+		"credit_to": frappe.get_cached_value("Company", company, "pengajuan_pembayaran_account"),
+	}
+
+	return accounts_dict

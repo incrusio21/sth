@@ -107,7 +107,7 @@
   "sec_tax_breakup",
   "other_charges_calculation",
   "term_tab",
-  "appendix",
+  "kriteria_upload_dokumen_finance",
   "column_break_zedg",
   "cara_pembayaran",
   "section_break_yjvw",
@@ -1373,13 +1373,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "appendix",
-   "fieldtype": "Table",
-   "label": "File Upload",
-   "options": "Appendix"
-  },
-  {
    "fieldname": "column_break_zedg",
    "fieldtype": "Column Break"
   },
@@ -1437,13 +1430,20 @@
    "fieldtype": "Table",
    "label": "PPH Details",
    "options": "VAT Detail"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "kriteria_upload_dokumen_finance",
+   "fieldtype": "Table",
+   "label": "File Upload",
+   "options": "Kriteria Upload Dokumen Finance"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-31 12:37:42.342789",
+ "modified": "2026-02-02 11:47:42.374715",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
