@@ -76,14 +76,14 @@ def make_purchase_order(source_name, target_doc=None):
 			target.purchase_type = "Non Capex"
 			target.sub_purchase_type = data_type.sub_purchase_type
 
-		tax_template_name = frappe.get_value("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":target.company}, pluck="name") or ""
-		target.taxes_and_charges = tax_template_name
+		# tax_template_name = frappe.get_value("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":target.company}, pluck="name") or ""
+		# target.taxes_and_charges = tax_template_name
 
-		list_taxes = [r.account_head for r in target.taxes]
-		unassign_tax = fetch_unassigned_taxes(tax_template_name,list_taxes)
-		for data in unassign_tax:
-			tax = target.append('taxes')
-			tax.update(data)
+		# list_taxes = [r.account_head for r in target.taxes]
+		# unassign_tax = fetch_unassigned_taxes(tax_template_name,list_taxes)
+		# for data in unassign_tax:
+		# 	tax = target.append('taxes')
+		# 	tax.update(data)
 
 		for row in target.items:
 			row.schedule_date = source.custom_required_by or add_days(today(),7)

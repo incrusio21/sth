@@ -46,7 +46,7 @@ frappe.ui.form.on("Supplier Quotation", {
             for (const row of res) {
                 let taxes = frm.add_child('taxes')
                 taxes.account_head = row.account
-                taxes.add_deduct_tax = row.type == "PPH 22" ? "Deduct" : "Add"
+                taxes.add_deduct_tax = "Add"
                 taxes.charge_type = "Actual"
                 frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
                 frappe.refererence.__ref_tax[row.type] = row
@@ -142,7 +142,7 @@ frappe.ui.form.on("VAT Detail", {
     pph_lainnya_add(frm, dt, dn) {
         let row = locals[dt][dn]
         const tax = frm.add_child("taxes")
-        tax.add_deduct_tax = "Deduct"
+        tax.add_deduct_tax = "Add"
         tax.charge_type = "Actual"
 
         frappe.model.set_value(dt, dn, {

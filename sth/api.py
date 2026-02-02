@@ -3,6 +3,7 @@ from frappe.utils import now,flt,cint
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation_from_rfq
 from erpnext.stock.get_item_details import get_item_details
 from sth.utils import decrypt
+from sth.custom.supplier_quotation import get_taxes_template
 
 @frappe.whitelist(allow_guest=True)
 def create_sq():
@@ -12,6 +13,14 @@ def create_sq():
 		frappe.local.response["http_status_code"] = 422
 		return invalidMessage
 	
+	map_tax = {
+		"Ongkos Angkut":"ongkos_angkut",
+		"PPH 22":"pph_22",
+		"PBBKB":"pbbkb"
+	}
+
+	charges_and_discount = json.loads(data.get("charges_and_discount"))
+
 	rfq_name = decrypt(data.get("rfq"))
 	items_data = json.loads(data.get("items"))
 
@@ -40,34 +49,41 @@ def create_sq():
 		child.rate = items_data["rate"][idx]
 		child.qty = items_data["qty"][idx]
 		child.request_for_quotation = rfq_name
-	
+
+	doc_sq.biaya_ongkos = charges_and_discount.get('ongkos_angkut')
+	doc_sq.ppn_biaya_ongkos = charges_and_discount.get('ppn_ongkos_angkut')
+	doc_sq.is_ppn_ongkos = True if doc_sq.ppn_biaya_ongkos > 0 else False
+	doc_sq.total_biaya_ongkos_angkut = doc_sq.biaya_ongkos + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
+	doc_sq.is_pph_22 = True
+	doc_sq.pph_22 = charges_and_discount.get('pph_22')
+	doc_sq.pbbkb = charges_and_discount.get('pbbkb')
+
 	doc_sq.taxes = []
-	charges_and_discount = json.loads(data.get("charges_and_discount"))
+	tax_template = get_taxes_template(doc_sq.company)
+	for row in tax_template:
+		field_name = map_tax[row.type]
 
+		taxes  = doc_sq.append("taxes")
+		taxes.account_head = row.account
+		taxes.add_deduct_tax = "Add"
+		taxes.charge_type = "Actual"
+		taxes.description = frappe.get_cached_value("Account", row.account, "account_name")
+		if field_name != "ongkos_angkut":
+			taxes.tax_amount = charges_and_discount.get(field_name)
+		else:
+			taxes.tax_amount = doc_sq.biaya_ongkos + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
 
-	taxes_template = frappe.get_doc("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":doc_sq.company})
-	list_tax = taxes_template.taxes
-	for tax in list_tax:
-		if "VAT" not in tax.account_head:
-			child  = doc_sq.append("taxes")
-			child.charge_type = tax.charge_type
-			child.account_head = tax.account_head
-			child.description = tax.description
-			if "6511003" in tax.account_head:
-				child.tax_amount = charges_and_discount.get('ongkos_angkut')
+	doc_sq.biaya_ongkos = charges_and_discount.get('ongkos_angkut')
+	doc_sq.ppn_biaya_ongkos = charges_and_discount.get('ppn_ongkos_angkut')
+	doc_sq.is_ppn_ongkos = True if doc_sq.ppn_biaya_ongkos > 0 else False
+	doc_sq.total_biaya_ongkos_angkut = doc_sq.biaya_ongkos + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
+	doc_sq.is_pph_22 = True
+	doc_sq.pph_22 = charges_and_discount.get('pph_22')
+	doc_sq.pbbkb = charges_and_discount.get('pbbkb')
 
-			elif "2132001" in tax.account_head:
-				child.rate = charges_and_discount.get('ppn_ongkos_angkut')
-				child.row_id = cint(tax.row_id) - 1
-			elif "2139001" in tax.account_head:
-				child.tax_amount = charges_and_discount.get('pbbkb')
-
-			elif "2131002" in tax.account_head:
-				child.tax_amount = charges_and_discount.get('pph_22')
-		
 	doc_sq.apply_discount_on = "Net Total"
 	doc_sq.additional_discount_percentage = flt(charges_and_discount.get('discount'))
-
+	
 	doc_sq.insert()
 	frappe.db.commit()
 	return {
@@ -75,31 +91,6 @@ def create_sq():
 		"docname": doc_sq.name,
 	}
 
-
-def debug_taxes():
-	doc_sq = frappe.new_doc("Supplier Quotation")
-	doc_sq.company = "PT. TRIMITRA LESTARI"
-	taxes_template = frappe.get_doc("Purchase Taxes and Charges Template",{"title":"STH TAX AND CHARGE", "company":doc_sq.company})
-	list_tax = taxes_template.taxes
-
-	for tax in list_tax:
-		if "VAT" not in tax.account_head:
-			child  = doc_sq.append("taxes")
-			child.charge_type = tax.charge_type
-			child.account_head = tax.account_head
-			if "6511003" in tax.account_head:
-				child.tax_amount = ""
-
-			elif "2132001" in tax.account_head:
-				child.rate = ""
-				child.row_id = tax.row_id
-			elif "2139001" in tax.account_head:
-				child.tax_amount = ""
-
-			elif "2131002" in tax.account_head:
-				child.tax_amount = ""
-
-	return doc_sq
 
 def validate_request(data):
 	message = []
