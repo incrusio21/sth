@@ -21,7 +21,7 @@ frappe.ui.form.on("Supplier Quotation", {
         frm.set_value("apply_discount_on", "Net Total")
     },
     refresh(frm) {
-        frappe.provide('frappe.refererence.__ref_tax')
+        frm.trigger('get_tax_template')
         frm.page.btn_secondary.hide()
         if (frm.doc.workflow_state == "Approved") {
             frm.add_custom_button(__("Re open"), function () {
@@ -38,20 +38,7 @@ frappe.ui.form.on("Supplier Quotation", {
     },
 
     company(frm) {
-        if (!frm.doc.company) {
-            return
-        }
-
-        frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
-            for (const row of res) {
-                let taxes = frm.add_child('taxes')
-                taxes.account_head = row.account
-                taxes.add_deduct_tax = "Add"
-                taxes.charge_type = "Actual"
-                frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
-                frappe.refererence.__ref_tax[row.type] = row
-            }
-        })
+        frm.trigger('get_tax_template')
     },
 
     ppn_biaya_ongkos(frm) {
@@ -96,6 +83,26 @@ frappe.ui.form.on("Supplier Quotation", {
                 frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.pbbkb)
                 frm.trigger('calculate_taxes_and_totals')
             }
+        }
+    },
+
+    get_tax_template(frm) {
+        frappe.provide('frappe.refererence.__ref_tax')
+        if (Object.keys(frappe.refererence.__ref_tax).length === 0) {
+            if (!frm.doc.company) {
+                return
+            }
+
+            frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
+                for (const row of res) {
+                    let taxes = frm.add_child('taxes')
+                    taxes.account_head = row.account
+                    taxes.add_deduct_tax = "Add"
+                    taxes.charge_type = "Actual"
+                    frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
+                    frappe.refererence.__ref_tax[row.type] = row
+                }
+            })
         }
     },
 
