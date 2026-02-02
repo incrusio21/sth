@@ -1,6 +1,13 @@
 {%- set employee = frappe.get_doc("Employee", doc.employee) -%}
+{%- set ttd_by = frappe.get_doc("Employee", doc.tanda_tangan_by) -%}
 {%- set company = frappe.get_doc("Company", doc.company) -%}
 {% set website_settings = frappe.get_doc("Website Settings") %}
+
+{%- if ttd_by.designation -%}
+{%- set designation = frappe.get_doc('Designation', ttd_by.designation) -%}
+{%- else -%}
+{%- set designation = None -%}
+{%- endif -%}
 
 <div class="page-break">
   <table style="width: 100%!important;">
@@ -169,13 +176,9 @@
     Pada tanggal: {{ frappe.utils.formatdate(doc.promotion_date, "dd MMMM yyyy") }}
   </p>
   <p class="text-center" style="margin-top: 5rem;">
-    <span style="text-decoration: underline;">Rino Guntur</span> <br>
-    Dept Sumberdaya Manusia
+    <span style="text-decoration: underline;">{{ttd_by.employee_name or ''}}</span> <br>
+    {{designation.designation_name if ttd_by.designation else ''}}
   </p>
   <p class="mt-5" style="text-decoration: underline; font-weight: bold;">Salinan dari SK ini disampaikan kepada:</p>
-  <ol style="padding-left: 1.2rem;">
-    <li>...</li>
-    <li>...</li>
-    <li>...</li>
-  </ol>
+  <div>{{ doc.get_formatted("salinan_sk_ini_di_sampaikan_kepada") }}</div>
 </div>
