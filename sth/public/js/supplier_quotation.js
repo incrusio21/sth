@@ -46,6 +46,10 @@ frappe.ui.form.on("Supplier Quotation", {
     },
 
     is_ppn_ongkos(frm) {
+        if (!frm.doc.is_ppn_ongkos) {
+            frm.doc.ppn_biaya_ongkos = 0
+        }
+
         frm.trigger('calculate_total_biaya_angkut')
     },
 
@@ -61,6 +65,12 @@ frappe.ui.form.on("Supplier Quotation", {
                 frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.total_biaya_ongkos_angkut)
                 frm.trigger('calculate_taxes_and_totals')
             }
+        }
+    },
+
+    is_pph_22(frm) {
+        if (!frm.doc.is_pph_22) {
+            frm.set_value('pph_22', 0)
         }
     },
 
