@@ -10,12 +10,12 @@ def validate_posting_date(self,method):
     list_tutup_buku = frappe.db.sql("""
         select tb.company ,month(from_date) as bulan,group_concat(tbd.warehouse  separator ',') as `warehouse` from `tabTutup Buku Fisik` tb
         join `tabTutup Buku Detail` tbd on tb.name = tbd.parent
+        where tb.docstatus = 1
         group by tb.name
     """,as_dict=True)
 
     for tutup_buku in list_tutup_buku:
         dateformat = getdate(self.posting_date)
-        
         if (
           dateformat.month == cint(tutup_buku.bulan) and 
           self.company == tutup_buku.company and
