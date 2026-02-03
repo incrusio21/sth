@@ -2,6 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
+  refresh(frm) {
+    frm.set_query("no_spd", function () {
+      return {
+        filters: {
+          custom_employee_advance: ["is", "set"]
+        }
+      };
+    });
+  },
   no_spd(frm) {
     frm.disable_save();
     frappe.show_alert({
