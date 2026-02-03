@@ -24,12 +24,16 @@ frappe.ui.form.on("Timbangan", {
 		frappe.scaleConnection = frappe.scaleConnection || new sth.utils.scale_connection();
 		frappe.scaleConnection.connect().then(() => {
 			frappe.scaleConnection.startReading((weight) => {
-				console.log(weight);
-				if (weight.includes('kg')) {
-					let weight_number = parseFloat(weight.split('kg')[0])
-					frm.doc.live_weight = weight_number || 0
-					frm.refresh_field("live_weight")
-				}
+				const match = weight.match(/([+-]?\d+)\s*kg/i);
+				const weight_number = match ? Number(match[1]) : null;
+				frm.doc.live_weight = weight_number || 0
+				frm.refresh_field("live_weight")
+
+				// if (weight.includes('kg')) {
+				// 	let weight_number = parseFloat(weight.split('kg')[0])
+				// 	frm.doc.live_weight = weight_number || 0
+				// 	frm.refresh_field("live_weight")
+				// }
 			});
 		})
 	},

@@ -53,7 +53,13 @@ sth.utils.scale_connection = class ScaleConnection {
 
             // Membuka koneksi ke port
             console.log('Membuka port');
-            await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 8, parity: "none", stopBits: 1 });
+            console.log(this.port);
+            let portDetail = this.port.getInfo()
+            if (portDetail.usbProductId == 9123 && portDetail.usbVendorId == 1659) {
+                await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 7, parity: "even", stopBits: 1 });
+            } else {
+                await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 8, parity: "none", stopBits: 1 });
+            }
 
             this.isConnected = true;
             console.log('Terhubung ke timbangan');
@@ -74,24 +80,57 @@ sth.utils.scale_connection = class ScaleConnection {
         console.log('Memulai pembacaan');
         this.keepReading = true;
         while (this.port.readable && this.keepReading) {
+            // try {
+            //     this.reader = this.port.readable.getReader();
+            //     while (true) {
+            //         const { value, done } = await this.reader.read();
+            //         if (done || !this.keepReading) {
+            //             console.log('Pembacaan selesai atau dihentikan');
+            //             break;
+            //         }
+            //         // Mengubah data yang diterima menjadi string dan menghapus whitespace
+            //         const weight = new TextDecoder().decode(value, { stream: true }).trim();
+            //         if (callback) callback(weight);
+            //     }
+            // } catch (error) {
+            //     console.error('Error saat membaca:', error);
+            // } finally {
+            //     // Selalu lepaskan reader setelah selesai atau jika terjadi error
+            //     this.reader.releaseLock();
+            // }
+
             try {
                 this.reader = this.port.readable.getReader();
+
+                const decoder = new TextDecoder(); // ✅ SEKALI
+                let buffer = "";                   // ✅ BUFFER
+
                 while (true) {
                     const { value, done } = await this.reader.read();
                     if (done || !this.keepReading) {
                         console.log('Pembacaan selesai atau dihentikan');
                         break;
                     }
-                    // Mengubah data yang diterima menjadi string dan menghapus whitespace
-                    const weight = new TextDecoder().decode(value).trim();
-                    if (callback) callback(weight);
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // kalau device kirim newline
+                    if (buffer.includes("\n")) {
+                        const lines = buffer.split("\n");
+                        buffer = lines.pop(); // sisa disimpan
+
+                        lines.forEach(line => {
+                            const clean = line.replace(/[\r\n]/g, "").trim();
+                            if (clean && callback) callback(clean);
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error saat membaca:', error);
             } finally {
-                // Selalu lepaskan reader setelah selesai atau jika terjadi error
-                this.reader.releaseLock();
+                this.reader?.releaseLock();
             }
+
             // Jeda singkat sebelum mencoba membaca lagi jika terjadi error
             await new Promise(resolve => setTimeout(resolve, 100));
         }
