@@ -20,6 +20,7 @@ erpnext.utils.update_progress_received = function (opts) {
 	const frm = opts.frm;
 	const child_meta = frappe.get_meta(opts.child_doctype);
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
+	const lm_bapp = frm.doc.__onload.lm_bapp || {}
 
 	// Siapkan data dari child table items
 	this.data = frm.doc[opts.child_docname].map((d) => {
@@ -30,6 +31,7 @@ erpnext.utils.update_progress_received = function (opts) {
 			qty: d.qty,
 			uom: d.uom,
 			rate: d.rate,
+			lm_received: lm_bapp[d.name],
 			progress_received: d.progress_received,
 			received_qty: d.received_qty,
 		};
@@ -49,7 +51,7 @@ erpnext.utils.update_progress_received = function (opts) {
 			in_list_view: 1,
 			read_only: 1,
 			disabled: 0,
-			columns: 4,
+			columns: 3,
 			label: __("Kegiatan")
 		},
 		{
@@ -81,12 +83,12 @@ erpnext.utils.update_progress_received = function (opts) {
 		},
 		{
 			fieldtype: "Float",
-			fieldname: "received_qty",
+			fieldname: "lm_received",
 			default: 0,
 			read_only: 1,
 			in_list_view: 1,
 			columns: 1,
-			label: __("BAPP Received"),
+			label: __("Last Month BAPP Received"),
 			precision: get_precision("received_qty"),
 		},
 		{
@@ -98,6 +100,16 @@ erpnext.utils.update_progress_received = function (opts) {
 			columns: 1,
 			label: __("Progress"),
 			precision: get_precision("progress_received"),
+		},
+		{
+			fieldtype: "Float",
+			fieldname: "received_qty",
+			default: 0,
+			read_only: 1,
+			in_list_view: 1,
+			columns: 1,
+			label: __("BAPP Received"),
+			precision: get_precision("received_qty"),
 		},
 	];
 
