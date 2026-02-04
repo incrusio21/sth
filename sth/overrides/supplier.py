@@ -252,15 +252,25 @@ def non_aktifkan_table(doc,method):
 		for idx in aktif_rows[:-1]:
 			doc.struktur_supplier[idx].status_supplier = "Non Aktif"
 
+	# aktif_rows = []
+	
+	# for idx, row in enumerate(doc.data_bank_supplier):
+	# 	if row.status_bank == "Aktif":
+	# 		aktif_rows.append(idx)
+	
+	# if len(aktif_rows) > 1:
+	# 	for idx in aktif_rows[:-1]:
+	# 		doc.data_bank_supplier[idx].status_bank = "Tidak Aktif"
+
 	aktif_rows = []
 	
 	for idx, row in enumerate(doc.data_bank_supplier):
-		if row.status_bank == "Aktif":
+		if row.default == "Ya":
 			aktif_rows.append(idx)
 	
 	if len(aktif_rows) > 1:
 		for idx in aktif_rows[:-1]:
-			doc.data_bank_supplier[idx].status_bank = "Tidak Aktif"
+			doc.data_bank_supplier[idx].default = "Tidak"
 
 	aktif_rows = []
 	
