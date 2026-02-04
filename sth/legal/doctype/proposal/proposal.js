@@ -20,7 +20,7 @@ erpnext.utils.update_progress_received = function (opts) {
 	const frm = opts.frm;
 	const child_meta = frappe.get_meta(opts.child_doctype);
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
-	const lm_bapp = frm.doc.__onload.lm_bapp || {}
+	// const lm_bapp = frm.doc.__onload.lm_bapp || {}
 
 	// Siapkan data dari child table items
 	this.data = frm.doc[opts.child_docname].map((d) => {
@@ -31,9 +31,10 @@ erpnext.utils.update_progress_received = function (opts) {
 			qty: d.qty,
 			uom: d.uom,
 			rate: d.rate,
-			lm_received: lm_bapp[d.name],
-			progress_received: d.progress_received,
+			// lm_received: lm_bapp[d.name],
 			received_qty: d.received_qty,
+			progress_received: d.progress_received,
+			real_received: flt(d.received_qty + d.progress_received),
 		};
 	});
 
@@ -81,14 +82,24 @@ erpnext.utils.update_progress_received = function (opts) {
 			label: __("Rate"),
 			precision: get_precision("rate"),
 		},
+		// {
+		// 	fieldtype: "Float",
+		// 	fieldname: "lm_received",
+		// 	default: 0,
+		// 	read_only: 1,
+		// 	in_list_view: 1,
+		// 	columns: 1,
+		// 	label: __("Last Month BAPP Received"),
+		// 	precision: get_precision("received_qty"),
+		// },
 		{
 			fieldtype: "Float",
-			fieldname: "lm_received",
+			fieldname: "received_qty",
 			default: 0,
 			read_only: 1,
 			in_list_view: 1,
 			columns: 1,
-			label: __("Last Month BAPP Received"),
+			label: __("BAPP Received"),
 			precision: get_precision("received_qty"),
 		},
 		{
@@ -100,15 +111,43 @@ erpnext.utils.update_progress_received = function (opts) {
 			columns: 1,
 			label: __("Progress"),
 			precision: get_precision("progress_received"),
+			onchange: function () {
+				const docname = this.doc.docname;
+				dialog.fields_dict.trans_items.df.data.some((doc) => {
+					if (doc.docname == docname) {
+						doc.real_received = flt(this.value + received_qty);
+						dialog.fields_dict.trans_items.grid.refresh();
+						return true;
+					}
+				});
+				// frappe.call({
+				// 	method: "erpnext.stock.get_item_details.get_conversion_factor",
+				// 	args: { item_code: this.doc.item_code, uom: this.value },
+				// 	callback: (r) => {
+				// 		if (!r.exc) {
+				// 			if (this.doc.conversion_factor == r.message.conversion_factor) return;
+
+				// 			const docname = this.doc.docname;
+				// 			dialog.fields_dict.trans_items.df.data.some((doc) => {
+				// 				if (doc.docname == docname) {
+				// 					doc.conversion_factor = r.message.conversion_factor;
+				// 					dialog.fields_dict.trans_items.grid.refresh();
+				// 					return true;
+				// 				}
+				// 			});
+				// 		}
+				// 	},
+				// });
+			},
 		},
 		{
 			fieldtype: "Float",
-			fieldname: "received_qty",
+			fieldname: "real_received",
 			default: 0,
 			read_only: 1,
 			in_list_view: 1,
 			columns: 1,
-			label: __("BAPP Received"),
+			label: __("Real Received Qty"),
 			precision: get_precision("received_qty"),
 		},
 	];

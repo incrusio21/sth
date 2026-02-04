@@ -58,7 +58,7 @@ class Proposal(BuyingController):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 		self.set_onload("can_update_items", True)
-		self.lm_processed_bapp()
+		# self.lm_processed_bapp()
 	
 	def lm_processed_bapp(self):
 		from frappe.query_builder import functions as fn
@@ -74,7 +74,7 @@ class Proposal(BuyingController):
 			.on(bapp.name == bapp_item.parent)
 			.select(
 				bapp_item.proposal_item,
-				Sum(bapp_item.qty)
+				bapp_item.qty
 			)
 			.where(bapp_item.proposal == self.name)
 			.where(fn.Extract("month", bapp.posting_date) == (getdate().month - 1))
@@ -435,60 +435,6 @@ def set_missing_values(source, target):
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 
-
-@frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None):
-	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
-
-	def is_unit_price_row(source):
-		return has_unit_price_items and source.qty == 0
-
-	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (
-			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
-
-	doc = get_mapped_doc(
-		"Proposal",
-		source_name,
-		{
-			"Proposal": {
-				"doctype": "Purchase Receipt",
-				"field_map": {"supplier_warehouse": "supplier_warehouse"},
-				"validation": {
-					"docstatus": ["=", 1],
-				},
-			},
-			"Proposal Item": {
-				"doctype": "Purchase Receipt Item",
-				"field_map": {
-					"name": "purchase_order_item",
-					"parent": "purchase_order",
-					"bom": "bom",
-					"material_request": "material_request",
-					"material_request_item": "material_request_item",
-					"sales_order": "sales_order",
-					"sales_order_item": "sales_order_item",
-					"wip_composite_asset": "wip_composite_asset",
-				},
-				"postprocess": update_item,
-				"condition": lambda doc: (
-					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
-				)
-				and doc.delivered_by_supplier != 1,
-			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
-		},
-		target_doc,
-		set_missing_values,
-	)
-
-	return doc
-
-
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	return get_mapped_purchase_invoice(source_name, target_doc)
@@ -644,11 +590,9 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 			)
 
 	def validate_progress(child_item, new_data):
-		if flt(new_data.get("progress_received")) > flt(child_item.qty):
+		real_progress = new_data.get("progress_received") + child_item.received_qty
+		if flt(real_progress) > flt(child_item.qty):
 			frappe.throw(_("Cannot set Progress more than quantity"))
-
-		if flt(new_data.get("progress_received")) < flt(child_item.received_qty):
-			frappe.throw(_("Cannot set Progress less than received quantity"))
 
 	data = json.loads(trans_items)
 	any_update = False
@@ -683,11 +627,13 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 	# update percentase task
 	order_item, cond = [], ""   
 	for item in parent.items:
+		real_progress = item.progress_received + child_item.received_qty
+
 		cond += """ WHEN (proposal = {} and proposal_item = {}) THEN {}
 			""".format(
 			frappe.db.escape(parent.name),
 			frappe.db.escape(item.name),
-			flt(item.progress_received/item.qty*100),
+			flt(real_progress/item.qty*100),
 		)
 
 		order_item.append(item.name)
@@ -776,16 +722,13 @@ def make_bapp(source_name, target_doc=None):
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-		
-	def is_unit_price_row(source):
-		return has_unit_price_items and source.qty == 0
-
+	
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.progress_received) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.rate)
+		target.qty = flt(obj.progress_received)
+		target.stock_qty = flt(obj.progress_received) * flt(obj.conversion_factor)
+		target.amount = flt(obj.progress_received) * flt(obj.rate)
 		target.base_amount = (
-			(flt(obj.progress_received) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+			flt(obj.progress_received) * flt(obj.rate) * flt(source_parent.conversion_rate)
 		)
 
 	doc = get_mapped_doc(
@@ -806,9 +749,7 @@ def make_bapp(source_name, target_doc=None):
 					"parent": "proposal",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: (
-					True if is_unit_price_row(doc) else abs(doc.received_qty) < doc.progress_received
-				)
+				"condition": lambda doc: doc.progress_received > 0
 				and doc.delivered_by_supplier != 1,
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
