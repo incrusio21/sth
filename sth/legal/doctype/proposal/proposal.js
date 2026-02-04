@@ -115,7 +115,7 @@ erpnext.utils.update_progress_received = function (opts) {
 				const docname = this.doc.docname;
 				dialog.fields_dict.trans_items.df.data.some((doc) => {
 					if (doc.docname == docname) {
-						doc.real_received = flt(this.value + received_qty);
+						doc.real_received = flt(this.value + doc.received_qty);
 						dialog.fields_dict.trans_items.grid.refresh();
 						return true;
 					}
