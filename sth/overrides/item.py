@@ -85,3 +85,17 @@ def validate_item_name(doc, method):
 			),
 			title=_("Duplicate Item Name")
 		)
+
+def cek_status(self,method):
+
+	if not self.is_new():
+		old_doc = self.get_doc_before_save()
+		old_state = old_doc.get("workflow_state") if old_doc else None
+		new_state = self.get("workflow_state")
+			
+		if self.get("disabled") == 1:
+			if "Approved" in old_state and old_state != new_state and "Disabled" in new_state:
+				self.status = "Non Aktif"
+		else:
+			self.status = "Aktif"
+

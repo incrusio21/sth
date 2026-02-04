@@ -60,9 +60,8 @@ def get_data(filters):
 	
 	if data:
 		data.append({
-			'unit': '<b>Total</b>',
+			'unit': 'Total',
 			'currency': '',
 			'deposit_amount': total
 		})
-	
 	return data

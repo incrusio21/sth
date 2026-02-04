@@ -1,13 +1,13 @@
 {
- "charts": [],
- "content": "[{\"id\":\"bfH3FbAVKN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance Dashboard</span>\",\"col\":12}},{\"id\":\"jMZkoRuRw5\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Deposito Report\",\"col\":12}}]",
- "creation": "2025-12-17 10:12:22.700647",
- "custom_blocks": [
+ "charts": [
   {
-   "custom_block_name": "Deposito Report",
-   "label": "Deposito Report"
+   "chart_name": "Laporan Deposito",
+   "label": "Laporan Deposito"
   }
  ],
+ "content": "[{\"id\":\"o7Mtmg9MPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reminder Invoice</b></span>\",\"col\":12}},{\"id\":\"oJThZVlPPT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tagihan Listrik\",\"col\":3}},{\"id\":\"60AkX3vc6u\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tagihan IPL\",\"col\":3}},{\"id\":\"u-qm06TGWU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BPJS\",\"col\":3}},{\"id\":\"qGs1Z7KpJg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pajak\",\"col\":3}},{\"id\":\"1ZR7m9P9xV\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overdue Sales Invoice\",\"col\":3}},{\"id\":\"azDNQoFXee\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overdue Purchase Invoice\",\"col\":3}},{\"id\":\"6Yre_t1igb\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reminder Non Invoice</b></span>\",\"col\":12}},{\"id\":\"qKcjB4s00I\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Leasing\",\"col\":3}},{\"id\":\"ZB-k7VN_RM\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asuransi BOD\",\"col\":3}},{\"id\":\"Q5paYtJ8gJ\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Laporan Deposito\",\"col\":12}}]",
+ "creation": "2025-12-17 10:12:22.700647",
+ "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
@@ -18,7 +18,7 @@
  "is_hidden": 0,
  "label": "Finance Dashboard",
  "links": [],
- "modified": "2026-01-07 09:02:56.407293",
+ "modified": "2026-02-04 13:06:51.246813",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance Dashboard",
@@ -28,7 +28,76 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 43.0,
- "shortcuts": [],
+ "sequence_id": 27.0,
+ "shortcuts": [
+  {
+   "color": "Red",
+   "doc_view": "Calendar",
+   "format": "{}",
+   "label": "Tagihan IPL",
+   "link_to": "Event",
+   "stats_filter": "[[\"Event\",\"status\",\"=\",\"Open\",false],[\"Event\",\"reminder_type\",\"=\",\"Tagihan IPL\",false],[\"Event\",\"event_date\",\"Timespan\",\"this month\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "Calendar",
+   "format": "{}",
+   "label": "Tagihan Listrik",
+   "link_to": "Event",
+   "stats_filter": "[[\"Event\",\"reminder_type\",\"=\",\"Tagihan Listrik\",false],[\"Event\",\"status\",\"=\",\"Open\",false],[\"Event\",\"event_date\",\"Timespan\",\"this month\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "Calendar",
+   "format": "{}",
+   "label": "BPJS",
+   "link_to": "Event",
+   "stats_filter": "[[\"Event\",\"status\",\"=\",\"Open\",false],[\"Event\",\"reminder_type\",\"=\",\"BPJS\",false],[\"Event\",\"event_date\",\"Timespan\",\"this month\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "Calendar",
+   "format": "{}",
+   "label": "Leasing",
+   "link_to": "Event",
+   "stats_filter": "[[\"Event\",\"event_date\",\"Timespan\",\"this month\",false],[\"Event\",\"status\",\"=\",\"Open\",false],[\"Event\",\"reminder_type\",\"=\",\"Leasing\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Overdue Sales Invoice",
+   "type": "URL",
+   "url": "https://sth.digitalasiasolusindo.com/app/sales-invoice/view/calendar/Overdue%20Sales%20Invoice"
+  },
+  {
+   "color": "Red",
+   "doc_view": "Calendar",
+   "format": "{}",
+   "label": "Pajak",
+   "link_to": "Event",
+   "stats_filter": "[[\"Event\",\"status\",\"=\",\"Open\",false],[\"Event\",\"reminder_type\",\"=\",\"Pajak\",false],[\"Event\",\"event_date\",\"Timespan\",\"this month\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "Calendar",
+   "format": "{}",
+   "label": "Asuransi BOD",
+   "link_to": "Event",
+   "stats_filter": "[[\"Event\",\"status\",\"=\",\"Open\",false],[\"Event\",\"reminder_type\",\"=\",\"Asuransi BOD\",false],[\"Event\",\"event_date\",\"Timespan\",\"this month\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Overdue Purchase Invoice",
+   "type": "URL",
+   "url": "https://sth.digitalasiasolusindo.com/app/purchase-invoice/view/calendar/Overdue%20Purchase%20Invoice"
+  }
+ ],
  "title": "Finance Dashboard"
 }

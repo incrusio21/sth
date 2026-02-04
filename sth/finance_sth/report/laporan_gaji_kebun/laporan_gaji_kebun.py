@@ -99,7 +99,7 @@ def get_condition(filters):
 		conditions += " AND e.company = %(company)s"
   
 	if filters.get("unit"):
-		conditions += " AND e.unit = %(unit)s"
+		conditions += " AND ss.unit = %(unit)s"
 
 	if filters.get("divisi"):
 		conditions += " AND e.divisi = %(divisi)s"

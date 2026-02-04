@@ -15,3 +15,8 @@ def check_persetujuan(self, method):
 			if "Persetujuan 2" in old_state and old_state != new_state:
 				if frappe.session.user != self.get("persetujuan_2"):
 					frappe.throw("User {} yang hanya boleh approve ketika butuh Persetujuan 2".format(self.get("persetujuan_2")))
+
+	if self.status == "Non Aktif":
+		self.disabled = 1
+	else:
+		self.disabled = 0

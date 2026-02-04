@@ -123,10 +123,11 @@ class PermintaanDanaOperasional(Document):
 				continue
 			for row in self.get(f"pdo_{fieldname}"):
 				for valid in validation_map[f"pdo_{fieldname}"]:
-					if row.get(valid) > 0:
-						continue
-					msg = f"Pada Tabel {pdo} baris ke {row.idx} field currency atau angka harus lebih besar dari 0"
-					frappe.throw(msg)
+					if row.get(valid):
+						if row.get(valid) > 0:
+							continue
+						msg = f"Pada Tabel {pdo} baris ke {row.idx} field currency atau angka harus lebih besar dari 0"
+						frappe.throw(msg)
 
 @frappe.whitelist()
 def filter_type(doctype, txt, searchfield, start, page_len, filters):

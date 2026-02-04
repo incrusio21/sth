@@ -22,6 +22,7 @@ class SupplierComparasion {
 
 		this.suppliers = []
 		this.data = []
+		this.selected_items = []
 
 		// console.log(this.page);
 		this.content_wrapper = $(`
@@ -147,7 +148,14 @@ class SupplierComparasion {
 			btn_class: "btn-success"
 		})
 
+		this.btn_chosen_items = this.page.add_button("Choosen items", () => {
+			console.log("Oke");
+
+		}, {
+			btn_class: "btn-default"
+		})
 		this.page.page_form.append(this.btn_approve)
+		this.page.page_form.append(this.btn_chosen_items)
 
 		this.sq_field.$wrapper.css({
 			"margin-left": "auto"
@@ -155,6 +163,11 @@ class SupplierComparasion {
 
 		this.btn_approve.css({
 			"align-self": "center"
+		})
+
+		this.btn_chosen_items.css({
+			"align-self": "center",
+			"margin-left": "10px"
 		})
 
 	}
@@ -197,6 +210,7 @@ class SupplierComparasion {
 	}
 
 	generateColumns() {
+		const me = this
 		let column_suppliers = this.suppliers.map((name) => {
 			const initials = this.initials(name)
 			return {
@@ -216,6 +230,29 @@ class SupplierComparasion {
 							target: "_blank"
 						}
 					},
+					{
+						title: "",
+						width: 60,
+						formatter: function (cell, formatterParams) {
+							const row = cell.getRow().getData()
+							if (!row[`${initials}_child_name`]) {
+								return ""
+							} else {
+								return "<i class='fa fa-plus' style='color: #0b680b'></i>";
+							}
+						},
+						headerSort: false, hozAlign: "center",
+						cellClick: function name(e, cell) {
+							const row = cell.getRow().getData();
+							if (row[`${initials}_child_name`]) {
+								me.selected_items.push(row[`${initials}_child_name`])
+								frappe.show_alert({
+									message: "Item has been selected",
+									indicator: 'green'
+								})
+							}
+						}
+					}
 				],
 			}
 		})
@@ -249,6 +286,7 @@ class SupplierComparasion {
 	refresh_table() {
 		var me = this
 		this.getTableData().then((res) => {
+			console.log(res);
 
 			this.data = res.data
 			this.suppliers = res.suppliers

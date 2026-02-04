@@ -10,10 +10,11 @@
   "designation",
   "plafon",
   "unit_price",
+  "price_total",
+  "needs",
+  "column_break_xxgx",
   "revised_plafon",
   "revised_unit_price",
-  "needs",
-  "price_total",
   "revised_price_total"
  ],
  "fields": [
@@ -57,16 +58,14 @@
    "fieldname": "revised_plafon",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Plafon Revisi",
-   "reqd": 1
+   "label": "Plafon Revisi"
   },
   {
    "columns": 1,
    "fieldname": "revised_unit_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Harga Unit Revisi",
-   "reqd": 1
+   "label": "Harga Unit Revisi"
   },
   {
    "columns": 1,
@@ -81,8 +80,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Harga",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -90,15 +88,18 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Harga Revisi",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_xxgx",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-30 00:42:41.746242",
+ "modified": "2026-02-02 10:45:32.485504",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Bahan Bakar Table",

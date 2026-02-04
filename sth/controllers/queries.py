@@ -416,6 +416,25 @@ def get_berita_acara(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+def customer_query(doctype, txt, searchfield, start, page_len, filters):
+
+	conditions = []
+	fields = ", ".join(get_fields(doctype, ["name", "customer_name"]))
+	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
+	return frappe.db.sql(
+		f"""
+			select {fields} from `tabCustomer`
+			where `tabCustomer`.{searchfield} like %(txt)s {fcond}
+			order by
+				(case when locate(%(_txt)s, `tabCustomer`.name) > 0 then locate(%(_txt)s, `tabCustomer`.name) else 99999 end),
+				`tabCustomer`.name
+			limit %(page_len)s offset %(start)s
+		""",
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": 999999}
+	)
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	fields = ", ".join(["`tabItem`.name", "`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description","`tabItem`.stock_uom"])

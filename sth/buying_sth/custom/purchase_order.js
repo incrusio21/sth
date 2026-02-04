@@ -236,7 +236,7 @@ frappe.ui.form.on("Purchase Order", {
 
 	get_tax_template(frm) {
 		frappe.provide('frappe.refererence.__ref_tax')
-		if (Object.keys(frappe.refererence.__ref_tax).length === 0) {
+		if (Object.keys(frappe.refererence.__ref_tax).length === 0 && frm.doc.docstatus == 0) {
 			if (!frm.doc.company) {
 				return
 			}
@@ -268,6 +268,15 @@ frappe.ui.form.on("Purchase Order", {
 		}
 
 		frm.set_value("total_pph_lainnya", total)
+	},
+
+	calculate_total_ppn(frm) {
+		let total = 0
+		for (const row of frm.doc.ppn) {
+			total += row.amount
+		}
+
+		frm.set_value("total_ppn", total)
 	},
 
 	set_value_dpp_and_taxes(frm) {
@@ -355,6 +364,7 @@ frappe.ui.form.on("VAT Detail", {
 		frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
 		frappe.model.set_value(dt, dn, "amount", amount)
 		frm.trigger('calculate_total_pph_lainnya')
+		frm.trigger('calculate_total_ppn')
 		frm.trigger('calculate_taxes_and_totals')
 	}
 })

@@ -13,6 +13,14 @@
  ],
  "fields": [
   {
+   "columns": 2,
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tipe",
+   "options": "\nDesignation\nExpense Claim Type"
+  },
+  {
    "columns": 3,
    "fieldname": "jenis_plafon",
    "fieldtype": "Dynamic Link",
@@ -34,23 +42,15 @@
    "in_list_view": 1,
    "label": "Kategori",
    "options": "/HARI/ORANG\n/HARI\n/BULAN\nLITER"
-  },
-  {
-   "columns": 2,
-   "fieldname": "tipe",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Tipe",
-   "options": "\nDesignation\nExpense Claim Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-02 10:47:17.337529",
+ "modified": "2026-02-02 10:51:23.993202",
  "modified_by": "Administrator",
- "module": "Mill",
+ "module": "Finance STH",
  "name": "Plafon PDO Table",
  "owner": "Administrator",
  "permissions": [],

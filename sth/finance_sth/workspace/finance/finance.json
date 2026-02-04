@@ -1,11 +1,6 @@
 {
- "charts": [
-  {
-   "chart_name": "Laporan Deposito",
-   "label": "Laporan Deposito"
-  }
- ],
- "content": "[{\"id\":\"nJc2GtGnTJ\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reminder Invoice</b></span>\",\"col\":12}},{\"id\":\"VCEkIA5X-C\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tagihan Listrik\",\"col\":3}},{\"id\":\"pP8ND0gbsn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tagihan IPL\",\"col\":3}},{\"id\":\"D9gSFbRDvC\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BPJS\",\"col\":3}},{\"id\":\"rULr1KZG10\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pajak\",\"col\":3}},{\"id\":\"BSGrJQ47oB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overdue Sales Invoice\",\"col\":3}},{\"id\":\"4ao_eSX-FN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overdue Purchase Invoice\",\"col\":3}},{\"id\":\"QXZZyVlY0Q\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reminder Non Invoice</b></span>\",\"col\":12}},{\"id\":\"ovJHFUeWKJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Leasing\",\"col\":3}},{\"id\":\"iL041TiObs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asuransi BOD\",\"col\":3}},{\"id\":\"f2kLkX8x_f\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Laporan Deposito\",\"col\":12}},{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"NX_aDgfi_Q\",\"type\":\"card\",\"data\":{\"card_name\":\"Import Data\",\"col\":4}},{\"id\":\"V89B-N5Ttm\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"21jqLt3KFf\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Laporan Dashboard</b></span>\",\"col\":12}}]",
+ "charts": [],
+ "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"NX_aDgfi_Q\",\"type\":\"card\",\"data\":{\"card_name\":\"Import Data\",\"col\":4}},{\"id\":\"7OYR7t1yeL\",\"type\":\"card\",\"data\":{\"card_name\":\"Event Calendar Setting\",\"col\":4}},{\"id\":\"V89B-N5Ttm\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"21jqLt3KFf\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Laporan Dashboard</b></span>\",\"col\":12}}]",
  "creation": "2025-10-29 13:20:04.900745",
  "custom_blocks": [],
  "docstatus": 0,
@@ -18,25 +13,6 @@
  "is_hidden": 0,
  "label": "Finance",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "PDO",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Permintaan Dana Operasional",
-   "link_count": 0,
-   "link_to": "Permintaan Dana Operasional",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -344,9 +320,57 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "PDO",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Plafon PDO",
+   "link_count": 0,
+   "link_to": "Plafon PDO",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Permintaan Dana Operasional",
+   "link_count": 0,
+   "link_to": "Permintaan Dana Operasional",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Event Calendar Setting",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Event",
+   "link_count": 0,
+   "link_to": "Event",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-01-30 08:55:39.648973",
+ "modified": "2026-02-04 13:06:51.374569",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",
@@ -356,64 +380,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 27.0,
- "shortcuts": [
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Overdue Sales Invoice",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/sales-invoice/view/calendar/Overdue%20Sales%20Invoice"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Overdue Purchase Invoice",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/purchase-invoice/view/calendar/Overdue%20Purchase%20Invoice"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Tagihan Listrik",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/default?status=Open&reminder_type=Tagihan+Listrik"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Tagihan IPL",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/default?status=Open&reminder_type=Tagihan+IPL"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "BPJS",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/default?status=Open&reminder_type=BPJS"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Pajak",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/default?status=Open&reminder_type=Pajak"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Leasing",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/default?status=Open&reminder_type=Leasing"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Asuransi BOD",
-   "type": "URL",
-   "url": "https://sth.digitalasiasolusindo.com/app/event/view/calendar/default?status=Open&reminder_type=Asuransi+BOD"
-  }
- ],
+ "sequence_id": 28.0,
+ "shortcuts": [],
  "title": "Finance"
 }

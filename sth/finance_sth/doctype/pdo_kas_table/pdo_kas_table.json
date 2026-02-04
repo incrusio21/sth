@@ -11,7 +11,6 @@
   "sub_detail",
   "routine_type",
   "type",
-  "debit_to",
   "item_code",
   "item_name",
   "uom",
@@ -139,22 +138,13 @@
    "label": "Tipe Rutin",
    "options": "\nRutin\nTidak Rutin",
    "reqd": 1
-  },
-  {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Debit To",
-   "options": "Account",
-   "read_only": 1,
-   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-31 23:04:59.367467",
+ "modified": "2026-02-02 15:00:32.272816",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Table",

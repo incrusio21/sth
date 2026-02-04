@@ -33,6 +33,19 @@ frappe.ui.form.on('Delivery Order', {
 				}, __('Create'));
 			}
 		}
+        
+        frm.set_query('driver', 'delivery_order_transporter', function(doc, cdt, cdn) {
+            let row = locals[cdt][cdn];
+            if (row.transporter) {
+                return {
+                    filters: {
+                        'transporter': row.transporter
+
+                    }
+                };
+            }
+        });
+
 	}
 });
 
@@ -146,3 +159,20 @@ function create_delivery_note(frm, transporter_data) {
         }
     });
 }
+
+frappe.ui.form.on('Delivery Order Transporter', {
+    transporter: function(frm, cdt, cdn) {
+        frm.set_query('driver', 'delivery_order_transporter', function(doc, cdt, cdn) {
+            let row = locals[cdt][cdn];
+            if (row.transporter) {
+                return {
+                    filters: {
+                        'transporter': row.transporter
+                        
+                    }
+                };
+            }
+        });
+    }
+});
+

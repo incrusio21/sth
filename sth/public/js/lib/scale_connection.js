@@ -53,12 +53,12 @@ sth.utils.scale_connection = class ScaleConnection {
 
             // Membuka koneksi ke port
             console.log('Membuka port');
-            console.log(this.port);
+            console.log(this.port.getInfo());
             let portDetail = this.port.getInfo()
             if (portDetail.usbProductId == 9123 && portDetail.usbVendorId == 1659) {
                 await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 7, parity: "even", stopBits: 1 });
             } else {
-                await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 8, parity: "none", stopBits: 1 });
+                await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 7, parity: "none", stopBits: 1, flowControl: "none" });
             }
 
             this.isConnected = true;
@@ -100,19 +100,25 @@ sth.utils.scale_connection = class ScaleConnection {
             // }
 
             try {
+                console.log("masuk1");
+
                 this.reader = this.port.readable.getReader();
 
                 const decoder = new TextDecoder(); // ✅ SEKALI
                 let buffer = "";                   // ✅ BUFFER
 
                 while (true) {
+                    console.log("masuk2");
+
                     const { value, done } = await this.reader.read();
+                    console.log(value);
                     if (done || !this.keepReading) {
                         console.log('Pembacaan selesai atau dihentikan');
                         break;
                     }
 
                     buffer += decoder.decode(value, { stream: true });
+                    console.log(buffer);
 
                     // kalau device kirim newline
                     if (buffer.includes("\n")) {

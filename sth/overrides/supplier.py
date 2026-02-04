@@ -239,7 +239,19 @@ def validate_ktp_name(doc, method):
 						),
 						title=_("Duplicate NIK KTP")
 					)
-					
+
+
+def cek_upload(self, method):
+	if not self.is_new():
+		old_doc = self.get_doc_before_save()
+		old_state = old_doc.get("status_supplier") if old_doc else None
+		new_state = self.get("status_supplier")
+
+		if "Calon Supplier" in old_state and old_state != new_state:
+			# cek upload
+			for row in self.kriteria_upload_dokumen_finance:
+				if not row.upload_file:
+					frappe.throw("Upload File harus lengkap untuk Calon Supplier menjadi Supplier.")
 
 def non_aktifkan_table(doc,method):
 	aktif_rows = []
@@ -252,15 +264,25 @@ def non_aktifkan_table(doc,method):
 		for idx in aktif_rows[:-1]:
 			doc.struktur_supplier[idx].status_supplier = "Non Aktif"
 
+	# aktif_rows = []
+	
+	# for idx, row in enumerate(doc.data_bank_supplier):
+	# 	if row.status_bank == "Aktif":
+	# 		aktif_rows.append(idx)
+	
+	# if len(aktif_rows) > 1:
+	# 	for idx in aktif_rows[:-1]:
+	# 		doc.data_bank_supplier[idx].status_bank = "Tidak Aktif"
+
 	aktif_rows = []
 	
 	for idx, row in enumerate(doc.data_bank_supplier):
-		if row.status_bank == "Aktif":
+		if row.default == "Ya":
 			aktif_rows.append(idx)
 	
 	if len(aktif_rows) > 1:
 		for idx in aktif_rows[:-1]:
-			doc.data_bank_supplier[idx].status_bank = "Tidak Aktif"
+			doc.data_bank_supplier[idx].default = "Tidak"
 
 	aktif_rows = []
 	

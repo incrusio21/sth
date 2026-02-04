@@ -141,7 +141,7 @@ def get_table_data(args):
 		filters["supplier_quotation"] = args.list_sq
 
 	query = frappe.db.sql(f"""
-		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`
+		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
 		FROM `tabSupplier Quotation` sq
 		JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
 		JOIN `tabItem` i ON i.`name` = sqi.`item_code`
@@ -150,7 +150,7 @@ def get_table_data(args):
 	""",filters,as_dict=True)
 
 	static_fields = ["idx","kode_barang","nama_barang","satuan","harga_terakhir"]
-	supplier_fields = ["merk","country","spesifikasi","jumlah","harga","sub_total","doc_no"]
+	supplier_fields = ["merk","country","spesifikasi","jumlah","harga","sub_total","doc_no","child_name"]
 	result = []
 	item_code = ""
 	for data in query:

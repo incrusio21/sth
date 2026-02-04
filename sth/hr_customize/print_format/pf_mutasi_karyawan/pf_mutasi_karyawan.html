@@ -69,8 +69,15 @@
       <td>:</td>
       <td>{{employee.name or '-'}}</td>
     </tr>
+    <tr>
+      <td style="width: 5%; font-weight: bold; padding-left: 0!important;"></td>
+      <td></td>
+      <td>PT Lama</td>
+      <td>:</td>
+      <td>{{doc.company}}</td>
+    </tr>
     {% for row in doc.transfer_details %}
-    {% if row.property in ["Designation", "Grade", "Unit", "Divisi", "Company", "Department"] %}
+    {% if row.property in ["Designation", "Grade", "Unit", "Divisi", "Department"] %}
     <tr>
       <td style="width: 5%; font-weight: bold; padding-left: 0!important;"></td>
       <td></td>
@@ -112,8 +119,15 @@
       <td></td>
       <td colspan="3"><span style="text-decoration: underline;">Ditetapkan</span> menjadi,</td>
     </tr>
+    <tr>
+      <td style="width: 5%; font-weight: bold; padding-left: 0!important;"></td>
+      <td></td>
+      <td>PT Baru</td>
+      <td>:</td>
+      <td>{{doc.new_company}}</td>
+    </tr>
     {% for row in doc.transfer_details %}
-    {% if row.property in ["Designation", "Grade", "Unit", "Divisi", "Company", "Department"] %}
+    {% if row.property in ["Designation", "Grade", "Unit", "Divisi", "Department"] %}
     <tr>
       <td style="width: 5%; font-weight: bold; padding-left: 0!important;"></td>
       <td></td>

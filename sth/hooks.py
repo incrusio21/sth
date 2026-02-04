@@ -155,6 +155,7 @@ boot_session = "sth.startup.boot.boot_session"
 
 standard_queries = {
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
+	"Customer": "sth.controllers.queries.customer_query",
 	"Months": "sth.controllers.queries.month_query",
 	"Bank": "sth.controllers.queries.get_bank_query",
 	# "Unit": "sth.controllers.queries.unit_query",
@@ -231,7 +232,7 @@ doc_events = {
 		"on_update": "sth.overrides.event.on_update"
 	},
 	"Item": {
-		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name"],
+		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"]
 	},
 	"Item Group": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",

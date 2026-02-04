@@ -660,6 +660,7 @@ def make_proposal_revision(source_name, target_doc=None):
 		target.total = 0
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
+
 		
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
@@ -712,6 +713,8 @@ def make_proposal_revision(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_bapp(source_name, target_doc=None):
+	from sth.legal.custom.tax_validation import validate_custom_tax
+
 	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
 	spk = frappe.db.get_value("Project", {"proposal": source_name, "status": ["!=", "Cancelled"]}, "name")
 	if not spk:
@@ -722,7 +725,8 @@ def make_bapp(source_name, target_doc=None):
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-	
+		validate_custom_tax(target)
+		
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.progress_received)
 		target.stock_qty = flt(obj.progress_received) * flt(obj.conversion_factor)

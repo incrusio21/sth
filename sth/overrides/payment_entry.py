@@ -52,7 +52,7 @@ class PaymentEntry(EmployeePaymentEntry):
 				# memastika pembayaran sesuai dengan unit yang di pilih
 				if self.unit and self.unit != ref_doc.get("unit"):
 					frappe.throw(
-						_("{0} {1} is not associated with Unit {3}").format(
+						_("{0} {1} is not associated with Unit {2}").format(
 							_(d.reference_doctype), d.reference_name, self.unit
 						)
 					)
