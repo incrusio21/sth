@@ -16,7 +16,8 @@
   "address",
   "modul_list_section",
   "plantation",
-  "mill"
+  "mill",
+  "ho"
  ],
  "fields": [
   {
@@ -85,12 +86,18 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "ho",
+   "fieldtype": "Check",
+   "label": "HO"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-27 11:43:16.334838",
+ "modified": "2026-02-02 23:20:57.037539",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

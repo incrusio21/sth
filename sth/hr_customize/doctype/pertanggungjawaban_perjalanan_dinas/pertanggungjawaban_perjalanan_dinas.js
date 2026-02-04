@@ -51,3 +51,11 @@ function calculate_realisasi(frm, cdt, cdn) {
   frm.set_value("total_claimed_amount", total_realisasi);
   frm.refresh_field("total_claimed_amount");
 }
+
+sth.plantation.PertanggungjawabanPerjalananDinas = class PertanggungjawabanPerjalananDinas extends sth.plantation.AccountsController {
+  refresh() {
+    this.show_general_ledger()
+  }
+}
+
+cur_frm.script_manager.make(sth.plantation.PertanggungjawabanPerjalananDinas);

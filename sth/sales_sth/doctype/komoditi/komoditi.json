@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:nama_komoditi",
  "creation": "2025-11-25 13:37:15.319055",
@@ -33,7 +34,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-25 13:45:15.485091",
+ "modified": "2026-02-03 16:03:03.616024",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Komoditi",
@@ -54,7 +55,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

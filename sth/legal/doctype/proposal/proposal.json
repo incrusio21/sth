@@ -616,6 +616,7 @@
   {
    "fieldname": "section_break_52",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1
   },
   {
@@ -1443,7 +1444,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-02 11:47:42.374715",
+ "modified": "2026-02-02 14:01:37.911217",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
