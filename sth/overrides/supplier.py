@@ -239,7 +239,19 @@ def validate_ktp_name(doc, method):
 						),
 						title=_("Duplicate NIK KTP")
 					)
-					
+
+
+def cek_upload(self, method):
+	if not self.is_new():
+		old_doc = self.get_doc_before_save()
+		old_state = old_doc.get("status_supplier") if old_doc else None
+		new_state = self.get("status_supplier")
+
+		if "Calon Supplier" in old_state and old_state != new_state:
+			# cek upload
+			for row in self.kriteria_upload_dokumen_finance:
+				if not row.upload_file:
+					frappe.throw("Upload File harus lengkap untuk Calon Supplier menjadi Supplier.")
 
 def non_aktifkan_table(doc,method):
 	aktif_rows = []

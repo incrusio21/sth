@@ -232,7 +232,7 @@ doc_events = {
 		"on_update": "sth.overrides.event.on_update"
 	},
 	"Item": {
-		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name"],
+		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"]
 	},
 	"Item Group": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",

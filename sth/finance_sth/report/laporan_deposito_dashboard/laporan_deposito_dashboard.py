@@ -58,5 +58,10 @@ def get_data(filters):
 	for row in data:
 		total += row.get('deposit_amount', 0)
 	
-	
+	if data:
+		data.append({
+			'unit': 'Total',
+			'currency': '',
+			'deposit_amount': total
+		})
 	return data
