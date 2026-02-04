@@ -9,7 +9,8 @@ from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
-from frappe.utils import cint, cstr, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, getdate, get_link_to_form
+from frappe.query_builder.functions import Sum
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
@@ -57,7 +58,32 @@ class Proposal(BuyingController):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 		self.set_onload("can_update_items", True)
+		self.lm_processed_bapp()
+	
+	def lm_processed_bapp(self):
+		from frappe.query_builder import functions as fn
 
+		# Define DocTypes
+		bapp_item = frappe.qb.DocType("BAPP Item")
+		bapp = frappe.qb.DocType("BAPP")
+
+		# Build query
+		query = (
+			frappe.qb.from_(bapp_item)
+			.inner_join(bapp)
+			.on(bapp.name == bapp_item.parent)
+			.select(
+				bapp_item.proposal_item,
+				Sum(bapp_item.qty)
+			)
+			.where(bapp_item.proposal == self.name)
+			.where(fn.Extract("month", bapp.posting_date) == (getdate().month - 1))
+			.groupby(bapp_item.proposal_item)
+		)
+
+		# Execute and convert to dict
+		self.set_onload("lm_bapp", frappe._dict(query.run())) 
+		
 	def before_validate(self):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
