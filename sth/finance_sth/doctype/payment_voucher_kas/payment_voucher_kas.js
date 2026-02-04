@@ -77,11 +77,13 @@ function filterAccount(frm) {
             filters: {
                 company: doc.company,
                 is_group: 0,
-                account_type: "Indirect Expense"
+                account_type: ["in", ["Indirect Expense", "Direct Expense", "Expense Account"]]
             }
         }
     })
 }
+
+
 
 function setCurrencyExchange(frm) {
     if (!frm.doc.currency) {

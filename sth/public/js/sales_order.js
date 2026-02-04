@@ -46,6 +46,7 @@ frappe.ui.form.on('Sales Order', {
 	},
 	company: function (frm) {
 		set_query_unit(frm)
+		set_rekening_filter(frm)
 	},
 	unit: function (frm) {
 		frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
@@ -53,8 +54,21 @@ frappe.ui.form.on('Sales Order', {
 			frm.set_value("catatan", doc.address ? catatan : "");
 			frm.refresh_field("catatan");
 		})
+		set_rekening_filter(frm)
 	}
 });
+
+function set_rekening_filter(frm){
+	frm.set_query('no_rekening_tujuan', function () {
+		return {
+			filters: {
+				'company': ['=', frm.doc.company],
+				'unit': ['=', frm.doc.unit],
+
+			}
+		};
+	});
+}
 
 function set_komoditi_filter(frm) {
 	if (frm.doc.customer) {

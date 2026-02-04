@@ -151,7 +151,7 @@ class AccountsController(Document):
 		credit_or_debit = "credit" if self._party_account_field == "credit_to" else "debit"
 
 		# custom chandra
-		if len(self.payment_voucher_kas_pdo) > 0:
+		if len(self.get("payment_voucher_kas_pdo") or []) > 0:
 			self.make_debit_entries_from_child_table(gl_entries)
 		else:
 			gl_entries.append(
@@ -202,7 +202,12 @@ class AccountsController(Document):
 		cost_center = erpnext.get_default_cost_center(self.company)
 		credit_or_debit = "credit" if self._party_account_field != "credit_to" else "debit"
 
-		if len(self.payment_voucher_kas_pdo) > 0:
+		cek_pdo = 0
+
+		if self.get("payment_voucher_kas_pdo"):
+			cek_pdo = 1
+
+		if cek_pdo == 1:
 			gl_entries.append(
 				self.get_gl_dict(
 					{

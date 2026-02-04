@@ -15,6 +15,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		frm.fields_dict['pdo_dana_cadangan'].grid.refresh();
 		make_payment_voucher(frm)
 		make_realisasi_pdo(frm)
+		hide_revisi_field(frm)
 	},
 });
 
@@ -181,7 +182,7 @@ function get_plafon_pdo_bb(frm, cdt, cdn){
 	let row = locals[cdt][cdn];
 	if (row.designation) {
 		console.log(row.designation)
-		fetch_plafon_value('UANG PEMBANTU', row.designation, 'jenis_plafon', cdt, cdn, frm, 'pdo_bahan_bakar'); 
+		fetch_plafon_value('BAHAN BAKAR', row.designation, 'jenis_plafon', cdt, cdn, frm, 'pdo_bahan_bakar'); 
 	}       
 }
 
@@ -531,4 +532,76 @@ function show_realisasi_dialog(frm) {
             dialog.show();
         }
     });
+}
+
+function hide_revisi_field(frm){
+	if (frm.doc.workflow_state === "Waiting For Assisten Approval" || frm.doc.workflow_state === "Waiting For Director Approval") {
+            
+        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+            'revised_plafon', 'read_only', 0
+        );
+        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+            'revised_unit_price', 'read_only', 0
+        );
+        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+            'revised_price_total', 'read_only', 0
+        );
+        
+        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+            'revised_duty_day', 'read_only', 0
+        );
+        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+            'revised_plafon', 'read_only', 0
+        );
+        
+        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+            'revised_qty', 'read_only', 0
+        );
+        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+            'revised_price', 'read_only', 0
+        );
+        
+        frm.fields_dict['pdo_dana_cadangan'].grid.update_docfield_property(
+            'revised_amount', 'read_only', 0
+        );
+        
+        frm.refresh_field('pdo_bahan_bakar');
+        frm.refresh_field('pdo_perjalanan_dinas');
+        frm.refresh_field('pdo_kas');
+        frm.refresh_field('pdo_dana_cadangan');
+    }
+    else{
+    	frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+            'revised_plafon', 'read_only', 1
+        );
+        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+            'revised_unit_price', 'read_only', 1
+        );
+        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+            'revised_price_total', 'read_only', 1
+        );
+        
+        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+            'revised_duty_day', 'read_only', 1
+        );
+        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+            'revised_plafon', 'read_only', 1
+        );
+        
+        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+            'revised_qty', 'read_only', 1
+        );
+        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+            'revised_price', 'read_only', 1
+        );
+        
+        frm.fields_dict['pdo_dana_cadangan'].grid.update_docfield_property(
+            'revised_amount', 'read_only', 1
+        );
+        
+        frm.refresh_field('pdo_bahan_bakar');
+        frm.refresh_field('pdo_perjalanan_dinas');
+        frm.refresh_field('pdo_kas');
+        frm.refresh_field('pdo_dana_cadangan');
+    }
 }

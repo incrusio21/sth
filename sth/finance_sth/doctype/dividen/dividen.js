@@ -26,7 +26,8 @@ function setFilterOne(frm) {
     frm.set_query("unit_one", (doc)=>{
         return {
             filters:{
-                company: doc.company_one
+                company: doc.company_one,
+                ho: 1
             }
         }
     })
@@ -52,7 +53,8 @@ function setFilterTwo(frm) {
     frm.set_query("unit_two", (doc)=>{
         return {
             filters:{
-                company: doc.company_two
+                company: doc.company_two,
+                ho: 1
             }
         }
     })

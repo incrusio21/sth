@@ -12,6 +12,7 @@ frappe.ui.form.on('Quotation', {
 		set_komoditi_filter(frm);
 		frm.set_df_property('valid_till', 'hidden', 1);
 		set_query_unit(frm)
+		set_rekening_filter(frm)
 	},
 	komoditi: function (frm) {
 		if (frm.doc.komoditi && frm.doc.party_name && frm.doc.quotation_to == "Customer") {
@@ -46,6 +47,7 @@ frappe.ui.form.on('Quotation', {
 	},
 	company: function (frm) {
 		set_query_unit(frm)
+		set_rekening_filter(frm)
 	},
 	unit: function (frm) {
 		frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
@@ -53,8 +55,21 @@ frappe.ui.form.on('Quotation', {
 			frm.set_value("catatan", doc.address ? catatan : "");
 			frm.refresh_field("catatan");
 		})
+		set_rekening_filter(frm)
 	}
 });
+
+function set_rekening_filter(frm){
+	frm.set_query('no_rekening_tujuan', function () {
+		return {
+			filters: {
+				'company': ['=', frm.doc.company],
+				'unit': ['=', frm.doc.unit],
+
+			}
+		};
+	});
+}
 
 function set_komoditi_filter(frm) {
 	if (frm.doc.quotation_to == "Customer" && frm.doc.party_name) {
