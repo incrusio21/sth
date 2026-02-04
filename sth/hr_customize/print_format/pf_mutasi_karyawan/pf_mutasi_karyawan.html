@@ -184,7 +184,7 @@
 
 <div class="section-break">
   <p class="text-center mt-5">
-    Ditetapkan di: Jakarta <br>
+    Ditetapkan di: {{doc.ditetapkan_di or ''}} <br>
     Pada tanggal: {{ frappe.utils.formatdate(doc.transfer_date, "dd MMMM yyyy") }}
   </p>
   <p class="text-center" style="margin-top: 5rem;">

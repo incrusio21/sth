@@ -112,6 +112,21 @@ class PerhitunganKompensasiPHK(AccountsController):
 		):
 			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
+	def get_jumlah_bulan_bekerja(self, date_of_joining, relieving_date):
+		if not date_of_joining or not relieving_date:
+			return 0
+
+		doj = getdate(date_of_joining)
+		r_date = getdate(relieving_date)
+
+		months = (r_date.year - doj.year) * 12 + (r_date.month - doj.month)
+
+		# kalau tanggal keluar < tanggal join, kurangi 1 bulan
+		if r_date.day < doj.day:
+			months -= 1
+
+		return max(0, months)
+
 	@frappe.whitelist()
 	def fetch_ssa(self):
 		employee = frappe.db.get_value("Employee", self.employee, "*")
@@ -121,6 +136,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 		if not ssa:
 			frappe.throw(f"Salary Structure Assignment <b> {self.employee} : {self.employee_name}</b>")
 		self.ssa = ssa[0].name
+		self.masa_kerja = self.get_jumlah_bulan_bekerja(employee.get("date_of_joining"), employee.get("relieving_date"))
   
 	@frappe.whitelist()
 	def fetch_default_data(self):

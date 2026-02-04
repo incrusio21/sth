@@ -14,10 +14,7 @@ def execute(filters=None):
 		et.employee_name as nama,
 		"Mutasi" as type,
 		et.transfer_date as tanggal,
-		CASE
-			WHEN eph.property = "Company" THEN eph.current
-			ELSE null
-		END as pt_lama,
+		et.company as pt_lama,
 		CASE
 			WHEN eph.property = "Unit" THEN eph.current
 			ELSE null
@@ -30,10 +27,7 @@ def execute(filters=None):
 			WHEN eph.property = "Employment Type" THEN eph.current
 			ELSE null
 		END as level_lama,
-		CASE
-			WHEN eph.property = "Company" THEN eph.new
-			ELSE null
-		END as pt_baru,
+		et.new_company as pt_baru,
 		CASE
 			WHEN eph.property = "Unit" THEN eph.new
 			ELSE null

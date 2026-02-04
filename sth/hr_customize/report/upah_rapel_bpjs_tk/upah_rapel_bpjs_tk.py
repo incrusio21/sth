@@ -10,15 +10,29 @@ def execute(filters=None):
 	conditions = get_condition(filters)
 
 	query_kbt = frappe.db.sql("""
-		SELECT
-		e.no_ktp as nik,
-		e.custom_nip as id_pegawai,
-		e.custom_no_bpjs_ketenagakerjaan as kode_tk,
-		e.employee_name as nama_lengkap,
-		DATE_FORMAT(e.date_of_birth, '%%d-%%m-%%Y') as tgl_lahir,
-		e.ctc as upah
-		FROM `tabEmployee` as e
-		WHERE e.relieving_date IS NULL {};
+		SELECT 
+				e.name AS nik,
+				e.custom_nip AS id_pegawai,
+				e.custom_no_bpjs_ketenagakerjaan AS kode_tk,
+				e.employee_name AS nama_lengkap,
+				DATE_FORMAT(e.date_of_birth, '%%d-%%m-%%Y') AS tgl_lahir,
+				ssa.base AS upah,
+				a.amount as rapel,
+				a.payroll_date as blth,
+				a.npp as npp
+		FROM `tabAdditional Salary` a
+		JOIN `tabEmployee` e 
+				ON e.name = a.employee
+		JOIN `tabSalary Structure Assignment` ssa
+				ON ssa.employee = a.employee
+		JOIN (
+				SELECT employee, MAX(from_date) AS max_from_date
+				FROM `tabSalary Structure Assignment`
+				GROUP BY employee
+		) latest_ssa
+				ON latest_ssa.employee = ssa.employee
+				AND latest_ssa.max_from_date = ssa.from_date
+ 		WHERE a.company IS NOT NULL {};
 	""".format(conditions), filters, as_dict=True)
 
 	for item in query_kbt:
@@ -30,7 +44,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_condition(filters):
-	conditions = "AND e.company = %(company)s"
+	conditions = "AND a.company = %(company)s"
 
 	if filters.get("employee_grade"):
 		conditions += " AND e.grade = %(employee_grade)s"
@@ -69,17 +83,17 @@ def get_columns(filters):
 		},
 		{
 			"label": _("UPAH"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "upah",
 		},
 		{
 			"label": _("RAPEL"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "rapel",
 		},
 		{
 			"label": _("BLTH"),
-			"fieldtype": "Data",
+			"fieldtype": "Date",
 			"fieldname": "blth",
 		},
 		{

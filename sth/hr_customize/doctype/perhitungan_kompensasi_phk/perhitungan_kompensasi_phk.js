@@ -3,6 +3,14 @@
 
 frappe.ui.form.on("Perhitungan Kompensasi PHK", {
     refresh(frm) {
+        frm.set_query("employee", function () {
+            return {
+                filters: {
+                    relieving_date: ["is", "set"]
+                }
+            };
+        });
+
         frm.ignore_doctypes_on_cancel_all = ["Exit Interview"]
         filterExitInterview(frm)
         setDefaultData(frm)
