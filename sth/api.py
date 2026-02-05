@@ -219,3 +219,17 @@ def return_status_absensi():
 		})
 	
 	return status_attendance
+
+@frappe.whitelist()
+def get_sq_item_details(names):
+	names = json.loads(names)
+
+	if not names:
+		return []
+
+	return frappe.db.sql("""
+		select sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.supplier
+		from `tabSupplier Quotation Item` sqi
+		join `tabSupplier Quotation` sq on sq.name = sqi.parent
+		where sqi.name in %(names)s
+	""",{"names":names},as_dict=True)

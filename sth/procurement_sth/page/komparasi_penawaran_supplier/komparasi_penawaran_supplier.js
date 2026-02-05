@@ -149,8 +149,9 @@ class SupplierComparasion {
 		})
 
 		this.btn_chosen_items = this.page.add_button("Choosen items", () => {
-			console.log("Oke");
-
+			frappe.xcall("sth.api.get_sq_item_details", { names: [...new Set(this.selected_items)] }).then((res) => {
+				me.showDialog(res)
+			})
 		}, {
 			btn_class: "btn-default"
 		})
@@ -267,6 +268,98 @@ class SupplierComparasion {
 		]
 
 		return columns
+	}
+
+	showDialog(data = []) {
+		var me = this
+		this.dialog = new frappe.ui.Dialog({
+			title: "Selected Items",
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					label: "Items",
+					cannot_add_rows: true,
+					in_place_edit: true,
+					data,
+					fields: [
+						{
+							fieldtype: "Data",
+							fieldname: "item_name",
+							label: "Kode Barang",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 2
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "merek",
+							label: "Merek",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "country",
+							label: "Negara Buatan",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "description",
+							label: "Spesifikasi",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 2
+						},
+						{
+							fieldtype: "Float",
+							fieldname: "qty",
+							label: "Jumlah",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1
+						},
+						{
+							fieldtype: "Currency",
+							fieldname: "rate",
+							label: "Harga",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1
+						},
+						{
+							fieldtype: "Currency",
+							fieldname: "amount",
+							label: "Sub Total",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 2
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "supplier",
+							label: "Supplier",
+							hidden: 1,
+						},
+					]
+				}
+			],
+			primary_action_label: "Create SQ",
+			primary_action(values) {
+				if (!values.items.length) {
+					frappe.throw('Items tidak boleh kosong')
+				}
+				console.log(values.items);
+				me.dialog.hide();
+			}
+		})
+
+		this.dialog.show()
 	}
 
 	initials(text) {

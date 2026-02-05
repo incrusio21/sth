@@ -25,8 +25,10 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-
 		return child_filter
+
+	def update_item(source, target,source_parent):
+		target.custom_country = "Indonesia"
 
 	doclist = get_mapped_doc(
 		"Material Request",
@@ -35,9 +37,9 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 			"Material Request": {
 				"doctype": "Supplier Quotation",
 				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Purchase"]},
-								"field_map":{
-											"name": "custom_material_request"
-								}
+				"field_map":{
+					"name": "custom_material_request"
+				}
 			},
 			"Material Request Item": {
 				"doctype": "Supplier Quotation Item",
@@ -47,6 +49,7 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 					"sales_order": "sales_order",
 				},
 				"condition": select_item,
+				"postprocess":update_item
 			},
 		},
 		target_doc,

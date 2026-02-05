@@ -18,7 +18,9 @@ frappe.ui.form.on("Supplier Quotation", {
 
     },
     onload(frm) {
-        frm.set_value("apply_discount_on", "Net Total")
+        if (frm.is_new()) {
+            frm.set_value("apply_discount_on", "Net Total")
+        }
     },
     refresh(frm) {
         frm.trigger('get_tax_template')
@@ -103,13 +105,19 @@ frappe.ui.form.on("Supplier Quotation", {
                 return
             }
 
+            console.log("masuk");
+
+
             frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
                 for (const row of res) {
-                    let taxes = frm.add_child('taxes')
-                    taxes.account_head = row.account
-                    taxes.add_deduct_tax = "Add"
-                    taxes.charge_type = "Actual"
-                    frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
+                    if (frm.is_new()) {
+                        let taxes = frm.add_child('taxes')
+                        taxes.account_head = row.account
+                        taxes.add_deduct_tax = "Add"
+                        taxes.charge_type = "Actual"
+                        frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
+                    }
+
                     frappe.refererence.__ref_tax[row.type] = row
                 }
             })
@@ -274,3 +282,10 @@ function btn_get_rfq(frm) {
         __("Get Items From")
     );
 }
+
+
+frappe.form.link_formatters['Item'] = function (value, doc) {
+    return doc.item_name || doc.item_code
+}
+
+

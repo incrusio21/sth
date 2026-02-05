@@ -73,12 +73,12 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 		if (excludedDoctypes.includes(doctype) && excludedFields.includes(fieldname)) {
 			return;
 		}
-		else if (fieldname == "workflow_state"){
+		else if (fieldname == "workflow_state") {
 			return;
 		}
 
 
-		if (!docfield) {            
+		if (!docfield) {
 			docfield = frappe.model.get_std_field(fieldname, true);
 
 			if (docfield) {
@@ -97,7 +97,7 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 					docfield.fieldtype = "Data";
 					docfield.name = "status";
 				}
-			   
+
 			}
 		}
 		if (!docfield || docfield.report_hide) return;
@@ -145,7 +145,7 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 				return [+cellValue, +keywordValue];
 			};
 		}
-		
+
 		const fieldTypeOverrides = {
 			"Customer": {
 				"kode_pelanggan": { fieldtype: "Link", options: this.doctype }
@@ -170,7 +170,7 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 			docfield.read_only = 1;
 			fineditable = false
 		}
-		console.log(fieldname)
+		// console.log(fieldname)
 		return {
 			id: id,
 			field: fieldname,
