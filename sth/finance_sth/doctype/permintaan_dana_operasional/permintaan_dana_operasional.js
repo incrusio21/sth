@@ -83,6 +83,7 @@ frappe.ui.form.on("PDO Kas Table", {
 	type(frm, cdt, cdn){
 		const curRow = locals[cdt][cdn]
 		getExpenseAccount(frm, curRow, cdt, cdn)
+		set_field_properties_kas(frm, cdt, cdn, curRow.type);
 	}
 });
 
@@ -129,6 +130,8 @@ frappe.ui.form.on("PDO Dana Cadangan Table", {
 	}
 });
 
+
+
 function get_plafon_pdo(frm, cdt, cdn){
 	let row = locals[cdt][cdn];
         
@@ -165,7 +168,7 @@ function get_plafon_pdo(frm, cdt, cdn){
                                     
                                     frm.refresh_field('pdo_perjalanan_dinas');
                                 } else {
-                                    frappe.msgprint(__('INCENTIF not found in Plafon PDO'));
+
                                 }
                             }
                         }
@@ -389,13 +392,33 @@ function filterSubDetail(frm, childTable, category) {
 
 function filterType(frm, childTable) { 
 	frm.fields_dict[childTable].grid.get_field('type').get_query = function (doc, cdt, cdn) {
-		return {
-			query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_type',
-			filters : {
-				routine_type: locals[cdt][cdn].routine_type,
-				company: frm.doc.company
+		// return {
+		// 	query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_type',
+		// 	filters : {
+		// 		routine_type: locals[cdt][cdn].routine_type,
+		// 		company: frm.doc.company
+		// 	}
+		// }
+
+		if(childTable == "pdo_perjalanan_dinas"){
+			return {
+				query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_type',
+				filters : {
+					company: frm.doc.company,
+					pdo_type : "PERJALANAN DINAS"
+				}
 			}
 		}
+		else{
+			return {
+				query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.filter_type',
+				filters : {
+					company: frm.doc.company
+				}
+			}
+		}
+
+		
 	}
 }
 
@@ -448,6 +471,30 @@ function set_field_properties(frm, cdt, cdn, jenis) {
 	
 	grid_row.refresh();
 }
+
+function set_field_properties_kas(frm, cdt, cdn, jenis) {
+	let grid_row = frm.fields_dict['pdo_kas'].grid.grid_rows_by_docname[cdn];
+	
+	if (!grid_row) return;
+	
+	if (jenis == 'Tunjangan Pembantu') {
+		grid_row.toggle_editable('employee', true);
+		grid_row.toggle_editable('item_code', false);
+		
+		frappe.model.set_df_property(cdt, 'employee', 'read_only', 0, cdn);
+		frappe.model.set_df_property(cdt, 'item_code', 'read_only', 1, cdn);
+		
+	} else if (jenis == 'Konsumsi Kantor') {
+		grid_row.toggle_editable('employee', false);
+		grid_row.toggle_editable('item_code', true);
+		
+		frappe.model.set_df_property(cdt, 'employee', 'read_only', 1, cdn);
+		frappe.model.set_df_property(cdt, 'item_code', 'read_only', 0, cdn);
+	}
+	
+	grid_row.refresh();
+}
+
 
 function make_payment_voucher(frm){
 	if (frm.doc.docstatus == 1 && !frm.doc.payment_voucher) {

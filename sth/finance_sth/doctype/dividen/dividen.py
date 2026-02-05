@@ -65,7 +65,7 @@ def make_payment_entry(source_name, target_doc=None, type=None):
 	
 	def post_process(source, target):
 		party_type = "Customer" if type == "Receive" else "Employee"
-		payment_type = "Receive" if type == "Receive" else "Pay"
+		payment_type = "Receive" if type == "Receive" else "Internal Transfer"
 		field_default_party_type = "receivable_customer" if party_type == "Customer" else "internal_employee"
 		default_party = frappe.db.get_single_value("Payment Settings", field_default_party_type)
 		field_party_name = "customer_name" if party_type == "Customer" else "employee_name"
@@ -82,6 +82,11 @@ def make_payment_entry(source_name, target_doc=None, type=None):
 		target.bank_account = source.bank_account
 		target.paid_from_account_currency = account_currency
 		target.paid_to_account_currency = company.default_currency
+
+		if type == "Sent":
+			target.paid_to = source.credit_to
+			target.paid_from = frappe.get_doc("Unit", source.unit).bank_account
+
 		target.internal_employee = 1 if party_type == "Employee" else 0
 		target.append("references", {
 			"reference_doctype": "Dividen Transaction",

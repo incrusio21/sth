@@ -134,21 +134,46 @@ def filter_type(doctype, txt, searchfield, start, page_len, filters):
 	ect = frappe.qb.DocType("Expense Claim Type")
 	eca = frappe.qb.DocType("Expense Claim Account")
 	
-	query = (
-		frappe.qb.from_(ect)
-		.select(ect.name.as_('value'))
-		.inner_join(eca)
-		.on(
-			(ect.name == eca.parent) &
-			(ect.custom_routine_type == filters.get('routine_type')) 
+	# query = (
+	# 	frappe.qb.from_(ect)
+	# 	.select(ect.name.as_('value'))
+	# 	.inner_join(eca)
+	# 	.on(
+	# 		(ect.name == eca.parent) &
+	# 		(ect.custom_routine_type == filters.get('routine_type')) 
+	# 	)
+	# 	.where(
+	# 		(eca.company == filters.get('company')) &
+	# 		(ect.name.like(f"%{txt}%"))  
+	# 	)
+	# )
+	if filters.get("pdo_type"):
+		query = (
+			frappe.qb.from_(ect)
+			.select(ect.name.as_('value'))
+			.inner_join(eca)
+			.on(
+				(ect.name == eca.parent) 
+			)
+			.where(
+				(eca.company == filters.get('company')) &
+				(ect.name.like(f"%{txt}%"))  &
+				(ect.custom_pdo_type == filters.get("pdo_type"))  
+			)
 		)
-		.where(
-			(eca.company == filters.get('company')) &
-			(ect.name.like(f"%{txt}%"))  
+	else:
+		query = (
+			frappe.qb.from_(ect)
+			.select(ect.name.as_('value'))
+			.inner_join(eca)
+			.on(
+				(ect.name == eca.parent) 
+			)
+			.where(
+				(eca.company == filters.get('company')) &
+				(ect.name.like(f"%{txt}%"))  
+			)
 		)
-	)
-
-	# frappe.throw(str(query))
 
 	return query.run()
 

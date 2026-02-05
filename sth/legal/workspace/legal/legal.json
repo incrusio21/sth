@@ -143,45 +143,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Transaksi Borongan dan Capex",
-   "link_count": 3,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Proposal",
-   "link_count": 0,
-   "link_to": "Proposal",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "SPK",
-   "link_count": 0,
-   "link_to": "Project",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "BAPP",
-   "link_count": 0,
-   "link_to": "BAPP",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Master Data",
    "link_count": 11,
    "link_type": "DocType",
@@ -299,9 +260,49 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaksi Borongan dan Capex",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Proposal",
+   "link_count": 0,
+   "link_to": "Proposal",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SPK",
+   "link_count": 0,
+   "link_to": "SPK",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Project",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "BAPP",
+   "link_count": 0,
+   "link_to": "BAPP",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-01-23 09:46:15.039123",
+ "modified": "2026-02-04 15:53:24.060688",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Legal",

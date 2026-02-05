@@ -75,13 +75,15 @@ function load_kriteria_dokumen_finance(frm){
 					if (kriteria_doc.kriteria_dokumen_finance && kriteria_doc.kriteria_dokumen_finance.length > 0) {
 
 						kriteria_doc.kriteria_dokumen_finance.forEach(function(row) {
-							let new_row = frm.add_child('kriteria_upload_dokumen_finance');
+							if(row["rincian_dokumen_finance"] != "SPPKP"){
+								let new_row = frm.add_child('kriteria_upload_dokumen_finance');
 							
-							Object.keys(row).forEach(function(key) {
-								if (['rincian_dokumen_finance'].includes(key)) {
-									new_row["rincian_dokumen_finance"] = row["rincian_dokumen_finance"];
-								}
-							});
+								Object.keys(row).forEach(function(key) {
+									if (['rincian_dokumen_finance'].includes(key)) {
+										new_row["rincian_dokumen_finance"] = row["rincian_dokumen_finance"];
+									}
+								});
+							}
 						});
 						
 						frm.refresh_field('kriteria_upload_dokumen_finance');

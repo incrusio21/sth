@@ -154,10 +154,10 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 				"kode_supplier": { fieldtype: "Link", options: this.doctype }
 			},
 			"Item": {
-				"item_code": { fieldtype: "LinkAwal", options: this.doctype }
+				"item_code": { fieldtype: "Data", options: "URL" }
 			},
 			"Item Group": {
-				"custom_item_group_code": { fieldtype: "LinkAwal", options: this.doctype }
+				"custom_item_group_code": { fieldtype: "Data", options: "URL" }
 			}
 		};
 

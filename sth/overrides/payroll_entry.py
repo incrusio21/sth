@@ -54,7 +54,7 @@ class PayrollEntry(PayrollEntry):
 
 				for cost_center, percentage in employee_cost_centers.items():
 
-					acc_dict = json.loads(item.account_list_rate)
+					acc_dict = json.loads(item.account_list_rate or "{}")
 					for acc, value in acc_dict.items():
 						accounting_key = (acc, cost_center)
 						acc_against_cost_center = flt(value) * percentage / 100

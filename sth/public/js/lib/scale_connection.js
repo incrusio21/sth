@@ -116,9 +116,10 @@ sth.utils.scale_connection = class ScaleConnection {
                         console.log('Pembacaan selesai atau dihentikan');
                         break;
                     }
-
+                    const cleaned = value.map(byte => byte & 0x7F).filter(byte => byte !== 0);
+                    let d = decoder.decode(cleaned, { stream: true });
+                    console.log(d);
                     buffer += decoder.decode(value, { stream: true });
-                    console.log(buffer);
 
                     // kalau device kirim newline
                     if (buffer.includes("\n")) {

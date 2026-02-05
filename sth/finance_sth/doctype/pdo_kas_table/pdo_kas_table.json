@@ -6,16 +6,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "type",
+  "routine_type",
   "employee",
   "designation",
   "sub_detail",
-  "routine_type",
-  "type",
   "item_code",
   "item_name",
   "uom",
   "qty",
   "price",
+  "column_break_swyv",
   "revised_qty",
   "revised_price",
   "needs",
@@ -72,8 +73,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty",
-   "reqd": 1
+   "label": "Qty"
   },
   {
    "columns": 1,
@@ -95,8 +95,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -104,24 +103,21 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Revisi",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "revised_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty Revisi",
-   "reqd": 1
+   "label": "Qty Revisi"
   },
   {
    "columns": 1,
    "fieldname": "revised_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Harga Revisi",
-   "reqd": 1
+   "label": "Harga Revisi"
   },
   {
    "fieldname": "sub_detail",
@@ -132,19 +128,23 @@
   },
   {
    "columns": 1,
+   "fetch_from": "type.custom_routine_type",
    "fieldname": "routine_type",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Tipe Rutin",
-   "options": "\nRutin\nTidak Rutin",
-   "reqd": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_swyv",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-02 15:00:32.272816",
+ "modified": "2026-02-05 13:00:25.730273",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Table",

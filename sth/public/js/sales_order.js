@@ -63,7 +63,7 @@ function set_rekening_filter(frm){
 		return {
 			filters: {
 				'company': ['=', frm.doc.company],
-				'unit': ['=', frm.doc.unit],
+				// 'unit': ['=', frm.doc.unit],
 
 			}
 		};

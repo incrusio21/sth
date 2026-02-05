@@ -69,6 +69,7 @@ def get_data(conditions, filters):
 		"incentif_hke_panen",
 		"incentif_output",
 		"subsidi_tambahan",
+		"rapel",
 	}
 
 	detail_map = {}
@@ -178,6 +179,7 @@ def get_columns(filters):
 		{"label": "INCENTIF HKE PANEN", "key": "incentif_hke_panen"},
 		{"label": "INCENTIF OUTPUT", "key": "incentif_output"},
 		{"label": "Subsidi Tambahan", "key": "subsidi_tambahan"},
+		{"label": "Rapel", "key": "rapel"},
 		# {"label": "Lembur", "key": "lembur"},
 		# {"label": "HKNe", "key": "hkne"},
 		# {"label": "Premi Panen", "key": "premi_panen_kontanan"},

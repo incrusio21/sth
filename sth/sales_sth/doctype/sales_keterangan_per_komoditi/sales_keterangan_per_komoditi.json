@@ -8,7 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "parameter",
-  "keterangan"
+  "keterangan",
+  "min_or_max"
  ],
  "fields": [
   {
@@ -22,21 +23,28 @@
    "fieldname": "keterangan",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Keterangan"
+   "label": "Nilai"
+  },
+  {
+   "fieldname": "min_or_max",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Min Or Max",
+   "options": "Min\nMax"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-26 10:30:18.186399",
+ "modified": "2026-02-05 10:38:44.646951",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Sales Keterangan Per Komoditi",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

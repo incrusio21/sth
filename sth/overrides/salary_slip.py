@@ -40,6 +40,9 @@ class SalarySlip(SalarySlip):
 		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
 
 	def update_payment_related(self, doctype, list_field, cancel=0):
+		if not self.get(list_field):
+			return
+		
 		dt = frappe.qb.DocType(doctype)
 
 		query = (
@@ -50,7 +53,7 @@ class SalarySlip(SalarySlip):
 			.set(dt.modified_by, frappe.session.user)
 			.where(
 				(dt.salary_slip == self.name) if cancel
-				else (dt.name.isin(getattr(self, list_field)))
+				else (dt.name.isin(self.get(list_field)))
 			)
 		)
 
@@ -1017,6 +1020,7 @@ class SalarySlip(SalarySlip):
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
 		data.custom_kriteria = default_data.custom_kriteria = emp_doc.custom_kriteria
+		data.unit = emp_doc.unit
 
 		data.berapa_hari_senin_jumat_tanpa_libur = default_data.berapa_hari_senin_jumat_tanpa_libur = berapa_hari_senin_jumat_tanpa_libur - self.holiday_days
 		

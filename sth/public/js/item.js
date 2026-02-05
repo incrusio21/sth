@@ -295,8 +295,10 @@ frappe.ui.form.on('Item', {
 			if(frm.doc.persetujuan_2){
 				frm.set_df_property('persetujuan_2', 'read_only', 1);
 			}
+			frm.set_df_property('status', 'read_only', 1);
 		}
 		frm.set_df_property('item_code', 'read_only', 1);
+		frm.set_value("item_code", "-");
 
 		if(frm.doc.disabled == 1){
 			frm.set_value('status', 'Non Aktif');

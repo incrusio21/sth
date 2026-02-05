@@ -232,7 +232,8 @@ doc_events = {
 		"on_update": "sth.overrides.event.on_update"
 	},
 	"Item": {
-		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"]
+		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"],
+		"after_insert": "sth.procurement_sth.custom.item.cek_status_awal"
 	},
 	"Item Group": {
 		"validate": "sth.procurement_sth.custom.item.check_persetujuan",

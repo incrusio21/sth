@@ -11,4 +11,6 @@ import "./override/utils";
 // import "./override/multi_select_dialog_override";
 import "./override/report_view_override";
 import "./override/formatter_override";
+import "./override/file_uploader";
+
 // import "./override/print_override"

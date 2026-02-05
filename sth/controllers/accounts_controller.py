@@ -154,22 +154,39 @@ class AccountsController(Document):
 		if len(self.get("payment_voucher_kas_pdo") or []) > 0:
 			self.make_debit_entries_from_child_table(gl_entries)
 		else:
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": self.get(self._party_account_field),
-						"against": self.get(self._expense_account),
-						credit_or_debit: self.grand_total,
-						f"{credit_or_debit}_in_account_currency": self.grand_total,
-						"cost_center": self.cost_center,
-						"party_type": self._party_type,
-						"party": self.get(scrub(self._party_type)),
-						"against_voucher": self.name,
-						"against_voucher_type": self.doctype,	
-					},
-					item=self,
+			if frappe.get_doc("Account",self.get(self._party_account_field)).account_type == "Receivable" or frappe.get_doc("Account",self.get(self._party_account_field)).account_type == "Payable": 
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": self.get(self._party_account_field),
+							"against": self.get(self._expense_account),
+							credit_or_debit: self.grand_total,
+							f"{credit_or_debit}_in_account_currency": self.grand_total,
+							"cost_center": self.cost_center,
+							"party_type": self._party_type,
+							"party": self.get(scrub(self._party_type)),
+							"against_voucher": self.name,
+							"against_voucher_type": self.doctype,	
+						},
+						item=self,
+					)
 				)
-			)
+			else:
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": self.get(self._party_account_field),
+							"against": self.get(self._expense_account),
+							credit_or_debit: self.grand_total,
+							f"{credit_or_debit}_in_account_currency": self.grand_total,
+							"cost_center": self.cost_center,
+							"against_voucher": self.name,
+							"against_voucher_type": self.doctype,	
+						},
+						item=self,
+					)
+				)
+
 
 	def make_debit_entries_from_child_table(self, gl_entries):
 		account_totals = {}

@@ -27,5 +27,14 @@ frappe.query_reports["Laporan Daftar Karyawan"] = {
 			"fieldtype": "Link",
 			"options": "Employment Type",
 		},
-	]
+	],
+	formatter: function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (column.fieldname === "pas_foto") {
+			value = `<img src="${value}"/>`;
+		}
+
+		return value;
+	}
 };

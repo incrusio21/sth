@@ -8,7 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "nama",
-  "jabatan"
+  "jabatan",
+  "is_customer",
+  "customer"
  ],
  "fields": [
   {
@@ -21,12 +23,27 @@
    "fieldname": "jabatan",
    "fieldtype": "Data",
    "label": "Jabatan"
+  },
+  {
+   "depends_on": "eval:doc.is_customer == 1",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_customer",
+   "fieldtype": "Check",
+   "in_preview": 1,
+   "label": "Is Customer ?"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-03 16:15:31.822795",
+ "modified": "2026-02-05 11:39:19.295339",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Penandatanganan",
