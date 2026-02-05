@@ -437,7 +437,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
-	fields = ", ".join(["`tabItem`.name", "`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description","`tabItem`.stock_uom"])
+	fields = ", ".join(["`tabItem`.name","`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description","`tabItem`.stock_uom","COALESCE(FORMAT(bin.total_qty, 2), '0.00')"])
 	# fields = ", ".join(get_fields(doctype,["name"]))
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
 
@@ -449,6 +449,10 @@ def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 			select {fields} from `tabItem`
 			left join `tabItem Group` ig1 on ig1.name = `tabItem`.item_group
 			left join `tabItem Group` ig2 on ig2.name = `tabItem`.kelompok_barang
+			left join (
+				select sum(b.actual_qty) as total_qty , b.item_code from `tabBin` b
+				group by b.item_code 
+			) bin on bin.item_code = `tabItem`.name
 			where ({searchfields}) {fcond}
 			order by
 				(case when locate(%(_txt)s, `tabItem`.name) > 0 then locate(%(_txt)s, `tabItem`.name) else 99999 end),
