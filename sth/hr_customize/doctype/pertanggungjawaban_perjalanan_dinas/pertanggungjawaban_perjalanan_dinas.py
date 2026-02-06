@@ -4,8 +4,20 @@
 # import frappe
 from frappe.model.document import Document
 import frappe
+from sth.controllers.accounts_controller import AccountsController
 
-class PertanggungjawabanPerjalananDinas(Document):
+class PertanggungjawabanPerjalananDinas(AccountsController):
+	def validate(self):
+		self.set_missing_value()
+		super().validate()
+
+	def on_submit(self):
+		self.make_gl_entry()
+
+	def on_cancel(self):
+		super().on_cancel()
+		self.make_gl_entry()
+
 	def before_save(self):
 		self.set_status_selisih()
 	
@@ -21,6 +33,8 @@ class PertanggungjawabanPerjalananDinas(Document):
 			self.status_selisih = "Tidak Ada Selisih"
 
 		self.total_selisih = abs(tsa - tda)
+		self.grand_total = self.total_selisih
+		self.outstanding_amount = self.total_selisih
 
 	@frappe.whitelist()
 	def get_data_perjalanan_dinas(self):

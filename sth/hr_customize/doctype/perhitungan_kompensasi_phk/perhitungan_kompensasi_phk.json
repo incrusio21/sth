@@ -30,6 +30,8 @@
   "section_break_atts",
   "column_break_ybbb",
   "column_break_wbmt",
+  "subtotal",
+  "natura",
   "grand_total",
   "outstanding_amount",
   "perhitungan_tab",
@@ -287,13 +289,29 @@
    "fieldtype": "Data",
    "label": "Masa Kerja",
    "read_only": 1
+  },
+  {
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "natura",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Natura",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-04 13:53:06.094486",
+ "modified": "2026-02-06 09:53:05.191782",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",

@@ -14,6 +14,7 @@
   "designation",
   "department",
   "company",
+  "posting_date",
   "section_break_revf",
   "persetujuan_1",
   "persetujuan_2",
@@ -34,8 +35,19 @@
   "status_selisih",
   "column_break_abxc",
   "total_selisih",
+  "section_break_dyhy",
+  "column_break_hkom",
+  "column_break_rbye",
+  "grand_total",
+  "outstanding_amount",
+  "accounting_dimensions_section",
+  "cost_center",
   "section_break_63wn",
-  "amended_from"
+  "amended_from",
+  "more_information_tab",
+  "accounts_details_section",
+  "salary_account",
+  "credit_to"
  ],
  "fields": [
   {
@@ -179,7 +191,8 @@
   {
    "fieldname": "total_sanctioned_amount",
    "fieldtype": "Currency",
-   "label": "Total Disetujui"
+   "label": "Total Disetujui",
+   "read_only": 1
   },
   {
    "fieldname": "total_down_amount",
@@ -207,13 +220,79 @@
    "fieldtype": "Currency",
    "label": "Total Selisih",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_dyhy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hkom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rbye",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "accounts_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Details"
+  },
+  {
+   "fieldname": "salary_account",
+   "fieldtype": "Link",
+   "label": "Salary Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-02 13:46:19.321443",
+ "modified": "2026-02-06 14:16:05.937910",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",

@@ -9,8 +9,13 @@ from frappe.model.mapper import get_mapped_doc
 
 from hrms.hr.doctype.leave_application.leave_application import get_leave_balance_on
 from sth.controllers.accounts_controller import AccountsController
+from sth.hr_customize import get_allowance_settings
 
 class PerhitunganKompensasiPHK(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._allowance_settings = get_allowance_settings()
+
 	def validate(self):
 		self.fetch_default_data()
 		
@@ -31,6 +36,24 @@ class PerhitunganKompensasiPHK(AccountsController):
 		self.table_seym = []
 		grand_total = 0
 		base = 0
+		
+  	# ambil 1 natura price
+		natura_price = frappe.get_value("Natura Price", {"company": self.company}, "harga_beras", order_by="valid_from desc") or 0
+		natura_multiplier_map = frappe._dict(
+			frappe.get_all(
+				"Natura Multiplier",
+				filters={"company": self.company},
+				fields=[
+					"pkp", 
+					self._allowance_settings.get_natura_setting(employee.get("unit"))
+				],
+				as_list=1
+			)
+		)
+		nat_mul = natura_multiplier_map.get(employee.get("pkp_status"), 0)
+		relieving_date = getdate(employee.get("relieving_date"))
+		days_in_month = calendar.monthrange(relieving_date.year, relieving_date.month)[1]
+  
 		if employee.grade == "NON STAF" and employee.custom_kriteria == "Satuan Hasil":
 			# ump_harian = frappe.db.get_value("Company", self.company, "custom_ump_harian")
 			# l_date = getdate(self.l_date)
@@ -78,8 +101,11 @@ class PerhitunganKompensasiPHK(AccountsController):
 			perhitungan_component.update({"sbttl": result})
 			self.append("table_seym", perhitungan_component)
 
-		self.grand_total = grand_total
-		self.outstanding_amount = grand_total
+		self.subtotal =  grand_total
+		self.natura =  days_in_month * nat_mul * natura_price
+		
+		self.grand_total = self.subtotal + self.natura
+		self.outstanding_amount = self.subtotal + self.natura
 
 	def update_exit_interview(self):
 		updated = {
