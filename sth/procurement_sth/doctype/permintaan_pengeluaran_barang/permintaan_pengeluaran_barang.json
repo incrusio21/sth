@@ -17,7 +17,6 @@
   "naming_series",
   "nama_karyawan",
   "kontraktor",
-  "type",
   "column_break_gvkz",
   "no_induk_karyawan",
   "kode_jabatan",
@@ -178,19 +177,13 @@
    "fieldtype": "Link",
    "label": "Persetujuan 2",
    "options": "User"
-  },
-  {
-   "fieldname": "type",
-   "fieldtype": "Select",
-   "label": "Type",
-   "options": "\nMutasi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 13:13:16.544852",
+ "modified": "2026-02-06 11:15:14.901835",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
