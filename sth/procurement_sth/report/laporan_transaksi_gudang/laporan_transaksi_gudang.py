@@ -69,7 +69,7 @@ def get_columns():
 		{
 			'fieldname': 'saldo',
 			'label': _('Saldo'),
-			'fieldtype': 'Currency',
+			'fieldtype': 'Float',
 			'width' : 150,
 		},
 		{
@@ -115,7 +115,7 @@ def get_data(filters=None):
 			WHEN sle.actual_qty < 0 THEN ABS(sle.actual_qty)
 			ELSE 0
 		END as keluar,
-		COALESCE(sle.stock_value,0) as saldo, sle.warehouse as tujuan,"" as kode_kegiatan, sle.voucher_no as no_transaksi
+		COALESCE(sle.qty_after_transaction,0) as saldo, sle.warehouse as tujuan,"" as kode_kegiatan, sle.voucher_no as no_transaksi
 		FROM `tabStock Ledger Entry` sle
 		JOIN `tabItem` i on i.name = sle.item_code
 		{where_clause}

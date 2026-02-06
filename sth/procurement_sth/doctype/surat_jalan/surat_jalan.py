@@ -129,6 +129,7 @@ def map_from_po(source_name, target_doc=None, args=None):
 					["item_name", "nama_barang"],
 					["qty", "jumlah"],
 					["uom", "satuan"],
+					["material_request","no_purchase_request"]
 				],
 				"condition": select_item,
 				"postprocess": update_item

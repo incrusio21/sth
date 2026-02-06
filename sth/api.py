@@ -28,7 +28,9 @@ def create_sq():
 	doc_sq.custom_file_upload = f"/private/files/{data.file_url}"
 	doc_sq.valid_till = data.get('valid_date')
 	doc_sq.terms = data.get('terms')
+	doc_sq.keterangan = data.get('keterangan')
 	doc_sq.custom_required_by = data.get('estimated_date')
+	doc_sq.alamat = frappe.db.get_value("Unit",doc_sq.lokasi_pengiriman,"address")
 
 	doc_sq.custom_material_request = doc_sq.items[0].material_request
 	doc_sq.items = []

@@ -249,7 +249,6 @@ class FormSupplier {
             formData.append("file_url", file_upload ? file_upload?.name : "")
 
             let serialize = $(this).serializeArray()
-            // console.log(serialize)
             for (let field of serialize) {
                 if (field.name.includes("[]")) {
                     let title = field.name.replaceAll("[]", "")
