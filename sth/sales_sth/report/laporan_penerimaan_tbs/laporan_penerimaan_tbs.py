@@ -145,6 +145,9 @@ def get_conditions(filters):
 	
 	if filters.get("tanggal_sampai"):
 		conditions.append("AND posting_date <= %(tanggal_sampai)s")
+
+	if filters.get("company"):
+		conditions.append("AND company = %(company)s")
 	
 	return " ".join(conditions)
 

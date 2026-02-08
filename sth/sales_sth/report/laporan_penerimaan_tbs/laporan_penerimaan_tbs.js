@@ -77,7 +77,6 @@ frappe.query_reports["Laporan Penerimaan TBS"] = {
             "options": "Company",
             "default": frappe.defaults.get_user_default("Company"),
             "reqd": 0,
-            "hidden": 1
         },
         {
             "fieldname": "tanggal",
@@ -134,7 +133,7 @@ frappe.query_reports["Laporan Penerimaan TBS"] = {
             report.get_filter('company').toggle(true);
             report.get_filter('tanggal').toggle(true);
         } else {
-            report.get_filter('company').toggle(false);
+            // report.get_filter('company').toggle(false);
             report.get_filter('tanggal').toggle(false);
         }
     }

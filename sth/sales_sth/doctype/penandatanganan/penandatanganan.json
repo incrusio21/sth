@@ -9,8 +9,7 @@
  "field_order": [
   "nama",
   "jabatan",
-  "is_customer",
-  "customer"
+  "is_customer"
  ],
  "fields": [
   {
@@ -25,25 +24,17 @@
    "label": "Jabatan"
   },
   {
-   "depends_on": "eval:doc.is_customer == 1",
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Customer",
-   "options": "Customer"
-  },
-  {
    "default": "0",
    "fieldname": "is_customer",
    "fieldtype": "Check",
    "in_preview": 1,
-   "label": "Is Customer ?"
+   "label": "Is Internal Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-05 11:39:19.295339",
+ "modified": "2026-02-07 10:16:37.003507",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Penandatanganan",

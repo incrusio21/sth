@@ -36,8 +36,11 @@ frappe.form.formatters = {
 	Data: function (value, df) {
 		if (df && df.options == "URL") {
 			if (!value) return;
-			if(df.fieldname == "item_code" || df.fieldname == "custom_item_group_code"){
+			if(df.fieldname == "item_code"){
 				return `<a href="/app/item/${value}" onclick="frappe.set_route('Form', 'Item', '${value}'); return false;">${value}</a>`;
+			}
+			else if(df.fieldname == "custom_item_group_code"){
+				return `<a href="/app/item-group/${value}" onclick="frappe.set_route('Form', 'Item Group', '${value}'); return false;">${value}</a>`;
 			}
 			return `<a href="${value}" title="Open Link" target="_blank">${value}</a>`;
 		}

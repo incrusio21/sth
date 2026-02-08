@@ -7,6 +7,14 @@ frappe.ui.form.on('Quotation', {
 			frm.clear_table('keterangan_per_komoditi');
 			frm.refresh_field('keterangan_per_komoditi');
 		}
+
+		frappe.db.get_doc('Customer', frm.doc.party_name).then((res) => {
+			frm.set_value('penandatangan_buyer', res.penandatangan);
+			frm.set_value('jabatan_buyer', res.jabatan_penandatangan);
+
+			frm.refresh_field('penandatangan_buyer');
+			frm.refresh_field('jabatan_buyer');
+		});
 	},
 	refresh: function (frm) {
 		set_komoditi_filter(frm);
@@ -59,7 +67,7 @@ frappe.ui.form.on('Quotation', {
 	}
 });
 
-function set_rekening_filter(frm){
+function set_rekening_filter(frm) {
 	frm.set_query('no_rekening_tujuan', function () {
 		return {
 			filters: {
