@@ -20,6 +20,7 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
 from sth.hr_customize import get_premi_attendance_settings
 
 from datetime import datetime, timedelta
+from frappe.model.mapper import get_mapped_doc
 
 LEAVE_CODE_MAP = "leave_code_map"
 
@@ -1078,3 +1079,74 @@ class SalarySlip(SalarySlip):
 def debug_holiday():
 	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00730/00001")
 	doc.calculate_holidays()
+
+@frappe.whitelist()
+def make_payment_entry(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		payroll_entry = frappe.db.get_value(
+			"Salary Slip",
+			source_name,
+			"payroll_entry"
+		)
+		
+		if payroll_entry:
+			payroll_payable_account = frappe.db.get_value(
+				"Payroll Entry",
+				payroll_entry,
+				"payroll_payable_account"
+			)
+			payment_account = frappe.db.get_value(
+				"Payroll Entry",
+				payroll_entry,
+				"payment_account"
+			)
+			target.paid_to = payroll_payable_account
+
+			target.paid_from = payment_account
+		else:
+			# Fallback to default payroll payable account from company
+			company = frappe.db.get_value("Salary Slip", source_name, "company")
+			default_payroll_payable_account = frappe.db.get_value(
+				"Company",
+				company,
+				"default_payroll_payable_account"
+			)
+			target.paid_to = default_payroll_payable_account
+		
+		target.payment_type = "Internal Transfer"
+		target.source_exchange_rate = 1
+		target.paid_amount = source.net_pay
+		target.received_amount = source.net_pay
+		target.reference_no = source.name
+		target.reference_date = source.posting_date
+		target.paid_from_account_currency = "IDR"
+		target.paid_to_account_currency = "IDR"
+
+		target.append("payment_voucher_salary_slip", {
+			"salary_slip": source.name,
+			"employee": source.employee,
+			"employee_name": source.employee_name,
+			"net_pay": source.net_pay
+		})
+	
+	doclist = get_mapped_doc(
+		"Salary Slip",
+		source_name,
+		{
+			"Salary Slip": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"name": "reference_no",
+					"posting_date": "posting_date",
+					"company": "company",
+					"net_pay": "paid_amount"
+				},
+			}
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	doclist.tipe_transfer = "Salary Slip"
+	
+	return doclist

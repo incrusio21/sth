@@ -2,7 +2,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import comma_or, flt
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details, add_regional_gl_entries
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -13,6 +13,19 @@ from hrms.overrides.employee_payment_entry import (
 
 from sth.controllers.accounts_controller import update_voucher_outstanding
 from sth.hr_customize import get_payment_settings
+
+from erpnext.accounts.utils import (
+	cancel_exchange_gain_loss_journal,
+	get_account_currency,
+	get_balance_on,
+	get_outstanding_invoices,
+)
+
+from erpnext.accounts.general_ledger import (
+	make_gl_entries,
+	make_reverse_gl_entries,
+	process_gl_map,
+)
 
 class PaymentEntry(EmployeePaymentEntry):
 	# begin: auto-generated types
@@ -248,7 +261,152 @@ class PaymentEntry(EmployeePaymentEntry):
 		# if bank_account_type == "Bank":
 		# 	if not self.reference_no or not self.reference_date:
 		# 		frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
-						
+
+	def build_gl_map(self):
+		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
+			self.setup_party_account_field()
+		self.set_transaction_currency_and_rate()
+
+		gl_entries = []
+		self.add_party_gl_entries(gl_entries)
+
+		self.add_bank_gl_entries(gl_entries)
+		print(gl_entries)
+
+		self.add_deductions_gl_entries(gl_entries)
+		self.add_tax_gl_entries(gl_entries)
+		add_regional_gl_entries(gl_entries, self)
+		return gl_entries
+
+	def make_gl_entries(self, cancel=0, adv_adj=0):
+		gl_entries = self.build_gl_map()
+		gl_entries = process_gl_map(gl_entries)
+		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+		if cancel:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+		else:
+			self.make_exchange_gain_loss_journal()
+
+		self.make_advance_gl_entries(cancel=cancel)
+
+	def add_bank_gl_entries(self, gl_entries):
+		if self.payment_type in ("Pay", "Internal Transfer"):
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.paid_from,
+						"account_currency": self.paid_from_account_currency,
+						"against": self.party if self.payment_type == "Pay" else self.paid_to,
+						"credit_in_account_currency": self.paid_amount,
+						"credit_in_transaction_currency": self.paid_amount
+						if self.paid_from_account_currency == self.transaction_currency
+						else self.base_paid_amount / self.transaction_exchange_rate,
+						"credit": self.base_paid_amount,
+						"cost_center": self.cost_center,
+						"post_net_value": True,
+					},
+					item=self,
+				)
+			)
+		if self.payment_type in ("Receive", "Internal Transfer"):
+
+			if self.payment_type == "Internal Transfer" and not self.tipe_transfer:
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": self.paid_to,
+							"account_currency": self.paid_to_account_currency,
+							"against": self.party if self.payment_type == "Receive" else self.paid_from,
+							"debit_in_account_currency": self.received_amount,
+							"debit_in_transaction_currency": self.received_amount
+							if self.paid_to_account_currency == self.transaction_currency
+							else self.base_received_amount / self.transaction_exchange_rate,
+							"debit": self.base_received_amount,
+							"cost_center": self.cost_center,
+						},
+						item=self,
+					)
+				)
+			elif self.tipe_transfer == "Salary Slip":
+				# mulai iterasi untuk ambil semua punya salary component
+				for baris_ss in self.payment_voucher_salary_slip:
+					ss_doc = frappe.get_doc("Salary Slip", baris_ss.salary_slip)
+					for ear in ss_doc.earnings:
+						com = frappe.get_doc("Salary Component", ear.salary_component)
+						if com.not_include_net_pay == 0:
+							# baru masuk
+							company = self.company
+							account = ""
+							for acc in com.accounts:
+								if acc.company == company:
+									account = acc.account
+
+							if not account:
+								frappe.throw("Account for Component {} Company {} is not found.".format(ear.salary_component, self.company))
+							else:
+								gl_entries.append(
+									self.get_gl_dict(
+										{
+											"account": account,
+											"account_currency": self.paid_to_account_currency,
+											"against": self.party if self.payment_type == "Receive" else self.paid_from,
+											"debit_in_account_currency": ear.amount,
+											"debit_in_transaction_currency": ear.amount,
+											"debit": ear.amount,
+											"cost_center": self.cost_center or frappe.get_doc("Company", self.company).cost_center,
+										},
+										item=self,
+									)
+								)
+
+					for ear in ss_doc.deductions:
+						com = frappe.get_doc("Salary Component", ear.salary_component)
+						if com.not_include_net_pay == 0:
+							# baru masuk
+							company = self.company
+							account = ""
+							for acc in com.accounts:
+								if acc.company == company:
+									account = acc.account
+
+							if not account:
+								frappe.throw("Account for Component {} Company {} is not found.".format(ear.salary_component, self.company))
+							else:
+								gl_entries.append(
+									self.get_gl_dict(
+										{
+											"account": account,
+											"account_currency": self.paid_to_account_currency,
+											"against": self.party if self.payment_type == "Receive" else self.paid_from,
+											"credit_in_account_currency": ear.amount,
+											"credit_in_transaction_currency": ear.amount,
+											"credit": ear.amount,
+											"cost_center": self.cost_center or frappe.get_doc("Company", self.company).cost_center,
+										},
+										item=self,
+									)
+								)
+
+			elif self.tipe_transfer == "PDO":
+				for satu_pdo in self.payment_voucher_kas_pdo:
+					gl_entries.append(
+						self.get_gl_dict(
+							{
+								"account": satu_pdo.debit_to,
+								"account_currency": self.paid_to_account_currency,
+								"against": self.party if self.payment_type == "Receive" else self.paid_from,
+								"debit_in_account_currency": satu_pdo.total,
+								"debit_in_transaction_currency": satu_pdo.total,
+								"debit": satu_pdo.total,
+								"cost_center": self.cost_center or frappe.get_doc("Company", self.company).cost_center,
+							},
+							item=self,
+						)
+					)
+
+
+
+
 @frappe.whitelist()
 def get_payment_reference_details(
 	reference_doctype, reference_name, party_account_currency, party_type=None, party=None
