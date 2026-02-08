@@ -38,8 +38,9 @@ frappe.ui.form.on("Purchase Invoice", {
         })
 
         frm.set_query("document_no", function (doc) {
+            let filters = {}
             if (doc.invoice_type == "Pengakuan Pembelian TBS") {
-                let filters = {
+                filters = {
                     company: doc.company,
                     nama_supplier: doc.supplier,
                     docstatus: 1,
@@ -48,7 +49,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
             }
             else {
-                let filters = {
+                filters = {
                     company: doc.company,
                     supplier: doc.supplier,
                     docstatus: 1,
@@ -57,7 +58,7 @@ frappe.ui.form.on("Purchase Invoice", {
             }
 
             return {
-                filters: filters
+                filters
             }
         })
 
@@ -91,54 +92,62 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     document_no(frm) {
-        function _map(data) {
-            frm.set_value({
-                supplier: data.nama_supplier,
-                unit: data.unit,
-                buying_price_list: data.jarak
-            })
+        if (!frm.doc.document_no) return
 
-            frm.clear_table("items")
-
-            for (const row of data.items) {
-                let item = frm.add_child("items")
-                item.item_code = row.item_code
-                item.qty = row.qty
-                item.rate = row.rate
-                item.amount = row.total
-                frm.script_manager.trigger("item_code", item.doctype, item.name)
-            }
-
-            if (data.beban_pph_22) {
-                frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { company: frm.doc.company, type: "PPH 22" }).then((res) => {
-                    if (!res) {
-                        return
-                    }
-                    frm.clear_table("taxes")
-                    let item = frm.add_child("taxes")
-                    item.charge_type = "On Net Total"
-                    item.account_head = res
-                    item.rate = data.percent
-                    // frm.script_manager.trigger("rate", item.doctype, item.name)
-
-                })
-            }
-
-            refresh_field("items")
-            refresh_field("taxes")
-        }
-
-        if (frm.doc.nomor_pembelian) {
+        if (frm.doc.invoice_type == "Pengakuan Pembelian TBS") {
             frappe.dom.freeze("Mapping Data...")
-            frappe.xcall("frappe.client.get", { doctype: "Pengakuan Pembelian TBS", name: frm.doc.nomor_pembelian })
+            frappe.xcall("frappe.client.get", { doctype: "Pengakuan Pembelian TBS", name: frm.doc.document_no })
                 .then((res) => {
                     frappe.run_serially([
-                        () => _map(res),
+                        () => frm.events.tbs_map(frm, res),
                         () => frappe.dom.unfreeze()
                     ])
                 })
+                .finally(() => {
+                    frappe.dom.unfreeze()
+                })
+
         }
 
+    },
+
+    tbs_map(frm, data) {
+        console.log(this);
+
+        frm.set_value({
+            supplier: data.nama_supplier,
+            unit: data.unit,
+            buying_price_list: data.jarak
+        })
+
+        frm.clear_table("items")
+
+        for (const row of data.items) {
+            let item = frm.add_child("items")
+            item.item_code = row.item_code
+            item.qty = row.qty
+            item.rate = row.rate
+            item.amount = row.total
+            frm.script_manager.trigger("item_code", item.doctype, item.name)
+        }
+
+        // if (data.beban_pph_22) {
+        //     frappe.xcall("sth.custom.purchase_invoice.get_default_coa", { company: frm.doc.company, type: "PPH 22" }).then((res) => {
+        //         if (!res) {
+        //             return
+        //         }
+        //         frm.clear_table("taxes")
+        //         let item = frm.add_child("taxes")
+        //         item.charge_type = "On Net Total"
+        //         item.account_head = res
+        //         item.rate = data.percent
+        //         // frm.script_manager.trigger("rate", item.doctype, item.name)
+
+        //     })
+        // }
+
+        refresh_field("items")
+        refresh_field("taxes")
     },
 
     set_value_dpp_and_taxes(frm) {

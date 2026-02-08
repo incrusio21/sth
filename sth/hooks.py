@@ -48,6 +48,7 @@ doctype_js = {
 	"Item Price": "public/js/item_price.js",
 	"Loan": "hr_customize/custom/loan.js",
 	"Material Request": "public/js/material_request.js",
+	"Payroll Entry": "hr_customize/custom/payroll_entry.js",
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js", "accounting_sth/custom/non_voucher_match.js","accounting_sth/custom/override_purchase_invoice.js","public/js/purchase_invoice.js"],
@@ -55,6 +56,7 @@ doctype_js = {
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
 	"Request for Quotation" : "public/js/request_for_quotation.js",
+	"Salary Slip": "hr_customize/custom/salary_slip.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
 	"Sales Order": "public/js/sales_order.js",
 	"Supplier": "public/js/supplier.js",
@@ -284,7 +286,7 @@ doc_events = {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
 	"Quotation": {
-		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.procurement_sth.custom.item.check_persetujuan"],
 	},
 	"Sales Order": {
 		"validate": ["sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],

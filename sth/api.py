@@ -1,5 +1,5 @@
 import frappe,json
-from frappe.utils import now,flt,cint
+from frappe.utils import now,flt,cint,today
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation_from_rfq
 from erpnext.stock.get_item_details import get_item_details
 from sth.utils import decrypt
@@ -122,6 +122,7 @@ def validate_request(data):
 def get_doc_ignore_perm(doctype, name):
 	return frappe.get_doc(doctype, name, ignore_permissions=True)
 
+# Method for komparasi penawaran harga
 @frappe.whitelist()
 def get_table_data(args):
 	args = frappe._dict(json.loads(args) or '{}')
@@ -199,9 +200,32 @@ def get_table_data(args):
 	}
 
 @frappe.whitelist()
+def get_sq_item_details(names):
+	names = json.loads(names)
+
+	if not names:
+		return []
+
+	return frappe.db.sql("""
+		select sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.supplier
+		from `tabSupplier Quotation Item` sqi
+		join `tabSupplier Quotation` sq on sq.name = sqi.parent
+		where sqi.name in %(names)s
+	""",{"names":names},as_dict=True)
+
+@frappe.whitelist()
 def submit_sq(name):
 	doc = get_doc_ignore_perm("Supplier Quotation",name)
 	doc.submit()
+
+@frappe.whitelist()
+def create_sq(items):
+    data = frappe._dict(data)
+    
+    doc = frappe.new_doc('Supplier Quotation')
+    doc.transaction_date = today()
+	
+# End
 
 @frappe.whitelist()
 def return_status_absensi():
@@ -221,17 +245,3 @@ def return_status_absensi():
 		})
 	
 	return status_attendance
-
-@frappe.whitelist()
-def get_sq_item_details(names):
-	names = json.loads(names)
-
-	if not names:
-		return []
-
-	return frappe.db.sql("""
-		select sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.supplier
-		from `tabSupplier Quotation Item` sqi
-		join `tabSupplier Quotation` sq on sq.name = sqi.parent
-		where sqi.name in %(names)s
-	""",{"names":names},as_dict=True)

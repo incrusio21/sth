@@ -560,7 +560,7 @@ function show_realisasi_dialog(frm) {
                     
                     // Call the method with tipe_pdo parameter
                     frappe.call({
-                        method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_kas',
+                        method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
                         args: {
                             source_name: frm.doc.name,
                             tipe_pdo: values.tipe_pdo

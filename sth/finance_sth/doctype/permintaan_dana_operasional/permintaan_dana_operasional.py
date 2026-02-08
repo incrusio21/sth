@@ -236,6 +236,7 @@ def create_payment_voucher(source_name, target_doc=None):
 		target.source_exchange_rate = 1
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
+		target.tipe_transfer = ""
 		target.remarks = _("Payment for Permintaan Dana Operasional {0}").format(source.name)
 	
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
@@ -260,6 +261,7 @@ def create_payment_voucher(source_name, target_doc=None):
 	
 	return doclist
 
+# deprecated
 @frappe.whitelist()
 def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 	"""Create Payment Voucher Kas from Permintaan Dana Operasional"""
@@ -387,7 +389,7 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 		source_name,
 		{
 			"Permintaan Dana Operasional": {
-				"doctype": "Payment Voucher Kas",
+				"doctype": "Payment Entry",
 				"field_map": {
 					"name": "permintaan_dana_operasional",
 					"company": "company",
@@ -406,6 +408,157 @@ def create_payment_voucher_kas(source_name, tipe_pdo, target_doc=None):
 	doclist.payment_amount = total
 	doclist.grand_total = total
 	doclist.outstanding_amount = total
+
+	return doclist
+
+@frappe.whitelist()
+def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
+	"""Create Payment Voucher Kas from Permintaan Dana Operasional"""
+	
+	# Map tipe_pdo to child table and field mappings
+	tipe_mapping = {
+		'Bahan Bakar': {
+			'child_table': 'pdo_bahan_bakar',
+			'debit_account_field': None,  # Uses header field instead
+			'header_debit_field': 'bahan_bakar_debit_to',  # Account at header level
+			'employee_field': 'employee',
+			'amount_field': 'revised_price_total',
+			'grand_total_field': 'grand_total_bahan_bakar',
+			'outstanding_field': 'outstanding_amount_bahan_bakar'
+		},
+		'Perjalanan Dinas': {
+			'child_table': 'pdo_perjalanan_dinas',
+			'debit_account_field': 'debit_to',  # Field in child table
+			'header_debit_field': None,  # No header field
+			'employee_field': 'employee',
+			'amount_field': 'revised_total',
+			'grand_total_field': 'grand_total_perjalanan_dinas',
+			'outstanding_field': 'outstanding_amount_perjalanan_dinas'
+		},
+		'Kas': {
+			'child_table': 'pdo_kas',
+			'debit_account_field': 'debit_to',  # Field in child table
+			'header_debit_field': None,
+			'employee_field': 'employee',
+			'amount_field': 'revised_total',
+			'grand_total_field': 'grand_total_kas',
+			'outstanding_field': 'outstanding_amount_kas'
+		},
+		'Dana Cadangan': {
+			'child_table': 'pdo_dana_cadangan',
+			'debit_account_field': 'fund_type',  # Field in child table
+			'header_debit_field': None,
+			'employee_field': 'employee',
+			'amount_field': 'revised_amount',
+			'grand_total_field': 'grand_total_dana_cadangan',
+			'outstanding_field': 'outstanding_amount_dana_cadangan'
+		}
+	}
+	
+	if tipe_pdo not in tipe_mapping:
+		frappe.throw(_("Invalid Tipe PDO selected"))
+	
+	mapping = tipe_mapping[tipe_pdo]
+	child_table_name = mapping['child_table']
+	debit_account_field = mapping['debit_account_field']
+	header_debit_field = mapping['header_debit_field']
+	employee_field = mapping['employee_field']
+	amount_field = mapping['amount_field']
+	outstanding_field = mapping['outstanding_field']
+
+	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	outstanding_amount = getattr(source_doc, outstanding_field, 0)
+	
+	if outstanding_amount <= 0:
+		frappe.throw(_("{0} has been fully paid. Outstanding amount: {1}").format(
+			tipe_pdo, 
+			frappe.format_value(outstanding_amount, {'fieldtype': 'Currency'})
+		))
+	
+	def set_missing_values(source, target):
+		# Get Payment Voucher to fetch paid_to account
+		if not source.payment_voucher:
+			frappe.throw(_("Payment Voucher not found for this PDO"))
+		
+		payment_voucher = frappe.get_doc("Payment Entry", source.payment_voucher)
+		
+		# Set basic fields
+		target.payment_type = "Internal Transfer"
+		target.source_exchange_rate = 1
+		target.paid_amount = amount_field
+		target.received_amount = amount_field
+		target.paid_from_account_currency = "IDR"
+		target.paid_to_account_currency = "IDR"
+
+		target.payment_voucher_kas_pdo = []
+
+		target.paid_from = payment_voucher.paid_to
+		
+		# Get child table data
+		child_data = getattr(source, child_table_name, [])
+		
+		if not child_data:
+			frappe.throw(_("No data found in {0} table").format(tipe_pdo))
+		
+		# For Bahan Bakar, get debit account from header
+		if header_debit_field:
+			header_debit_account = getattr(source, header_debit_field, None)
+			if not header_debit_account:
+				frappe.throw(_("Debit account field {0} not found in source document").format(header_debit_field))
+		
+		# Add rows to payment_voucher_kas_pdo table
+		for row in child_data:
+			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
+			amount = getattr(row, amount_field, 0) if hasattr(row, amount_field) else 0
+			
+			# Determine debit account
+			if header_debit_field:
+				# Use header field (for Bahan Bakar)
+				debit_account = header_debit_account
+				if not target.paid_to:
+					target.paid_to = debit_account
+			else:
+				# Use child table field (for other types)
+				debit_account = getattr(row, debit_account_field, None) if hasattr(row, debit_account_field) else None
+				if not debit_account:
+					frappe.throw(_("Debit account not found for row {0} in {1}").format(row.idx, tipe_pdo))
+
+				if not target.paid_to:
+					target.paid_to = debit_account
+			
+			target.append('payment_voucher_kas_pdo', {
+				'no_pdo': source.name,
+				'tipe_pdo': tipe_pdo,
+				'penerima': employee,
+				'total': amount,
+				'debit_to': debit_account,  # Add debit account
+				'pdo_child_name': row.name
+			})
+	
+	# Map document
+	doclist = get_mapped_doc(
+		"Permintaan Dana Operasional",
+		source_name,
+		{
+			"Permintaan Dana Operasional": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"company": "company",
+					"unit": "unit"
+				}
+			}
+		},
+		target_doc,
+		set_missing_values
+	)
+	
+	total = 0
+	for row in doclist.payment_voucher_kas_pdo:
+		total += row.total
+
+	doclist.paid_amount = total
+	doclist.received_amount = total
+	doclist.permintaan_dana_operasional = ""
 
 	return doclist
 
