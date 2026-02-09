@@ -8,8 +8,9 @@ from frappe.desk.reportview import get_filters_cond
 
 class PermintaanPengeluaranBarang(Document):
 	def validate(self):
-		if len(self.items) > 1:
-			frappe.throw("Pengeluaran lebih dari 1 jenis barang tidak diperbolehkan.")
+		pass
+		# if len(self.items) > 1:
+		# 	frappe.throw("Pengeluaran lebih dari 1 jenis barang tidak diperbolehkan.")
 
 	def on_submit(self):
 		self.db_set("status","Submitted")
