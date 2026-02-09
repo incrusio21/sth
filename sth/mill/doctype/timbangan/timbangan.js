@@ -5,9 +5,18 @@ frappe.provide("sth.utils")
 frappe.ui.form.on("Timbangan", {
 	refresh(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["TBS Ledger Entry"]
-		frm.add_custom_button(__("Connect"), function () {
-			frm.trigger('readWeight')
-		})
+		// frm.add_custom_button(__("Connect"), function () {
+		// 	frm.trigger('readWeight')
+		// })
+
+		navigator.serial.getPorts().then((port) => {
+			if (!port.length) {
+				frm.trigger('selectLocationDialog')
+			} else {
+				frm.trigger('readWeight')
+			}
+
+		});
 
 		// buat tombol untuk create transaksi
 		make_transaction_button(frm)
@@ -20,8 +29,33 @@ frappe.ui.form.on("Timbangan", {
 		}
 	},
 
-	readWeight(frm) {
-		frappe.scaleConnection = frappe.scaleConnection || new sth.utils.scale_connection();
+	selectLocationDialog(frm) {
+		const method = frappe.model.get_server_module_name(frm.doctype) + '.get_timbangan_settings'
+		frappe.xcall(method).then((res) => {
+			const locations = res.map((d) => d.location)
+			let dialog = new frappe.ui.Dialog({
+				title: "Select Location",
+				fields: [{
+					label: "Lokasi Timbangan",
+					fieldname: "location",
+					fieldtype: "Select",
+					options: locations.join("\n"),
+					reqd: 1
+				}],
+				primary_action_label: "Connect",
+				primary_action(values) {
+					dialog.hide()
+					frm.events.readWeight(frm, values.location)
+				}
+			})
+
+			dialog.show()
+		})
+
+	},
+
+	readWeight(frm, location = "") {
+		frappe.scaleConnection = frappe.scaleConnection || new sth.utils.scale_connection(location);
 		frappe.scaleConnection.connect().then(() => {
 			frappe.scaleConnection.startReading((weight) => {
 				const match = weight.match(/([+-]?\d+)\s*kg/i);

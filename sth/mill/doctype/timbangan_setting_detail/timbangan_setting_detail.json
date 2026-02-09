@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-09 14:04:26.301815",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "location",
+  "baudrate",
+  "databits",
+  "parity",
+  "stopbits",
+  "column_break_ztac",
+  "port"
+ ],
+ "fields": [
+  {
+   "fieldname": "location",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Location",
+   "options": "\nABAM Timbangan 1\nABAM Timbangan 2\nTPRM Timbangan 1\nTPRM Timbangan 2\nASRM Timbangan 1\nASRM Timbangan 2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "baudrate",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Baudrate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "databits",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Databits",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Parity",
+   "options": "none\neven\nodd",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "stopbits",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Stopbits",
+   "reqd": 1
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Data",
+   "label": "Port"
+  },
+  {
+   "fieldname": "column_break_ztac",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-09 14:48:33.700608",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Timbangan Setting Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

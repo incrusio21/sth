@@ -8,11 +8,12 @@ sth.utils.scale_connection = class ScaleConnection {
      * Konstruktor untuk membuat instance ScaleConnection baru.
      * @param {number} baudRate - Baud rate untuk komunikasi serial (default: 57600).
      */
-    constructor() {
+    constructor(location) {
         this.port = null; // Menyimpan objek port serial
         this.reader = null; // Menyimpan objek reader untuk membaca data dari port
         this.keepReading = false; // Flag untuk mengontrol loop pembacaan
         this.isConnected = false; // Status koneksi timbangan
+        this.location = location
     }
 
     /**
@@ -52,13 +53,17 @@ sth.utils.scale_connection = class ScaleConnection {
 
             // Membuka koneksi ke port
             console.log('Membuka port');
-            console.log(this.port.getInfo());
-            let portDetail = this.port.getInfo()
-            if (portDetail.usbProductId == 9123 && portDetail.usbVendorId == 1659) {
-                await this.port.open({ baudRate: 9600, dataBits: 7, parity: "even", stopBits: 1 });
-            } else {
-                await this.port.open({ baudRate: 9600, dataBits: 7, parity: "none", stopBits: 1 });
-            }
+
+            const settings = await frappe.xcall('sth.mill.doctype.timbangan.timbangan.get_timbangan_settings')
+            const port_setting = settings.find((row) => row.location == this.location) || {}
+            await this.port.open({ baudRate: port_setting.baudrate, dataBits: port_setting.databits, parity: port_setting.parity, stopBits: port_setting.stopbits });
+
+            // let portDetail = this.port.getInfo()
+            // if (portDetail.usbProductId == 9123 && portDetail.usbVendorId == 1659) {
+            //     await this.port.open({ baudRate: 9600, dataBits: 7, parity: "even", stopBits: 1 });
+            // } else {
+            //     await this.port.open({ baudRate: 9600, dataBits: 7, parity: "none", stopBits: 1 });
+            // }
 
             this.isConnected = true;
             console.log('Terhubung ke timbangan');
@@ -99,25 +104,20 @@ sth.utils.scale_connection = class ScaleConnection {
             // }
 
             try {
-                console.log("masuk1");
 
                 this.reader = this.port.readable.getReader();
 
-                const decoder = new TextDecoder(); // ✅ SEKALI
-                let buffer = "";                   // ✅ BUFFER
+                const decoder = new TextDecoder();
+                let buffer = "";
 
                 while (true) {
-                    console.log("masuk2");
-
                     const { value, done } = await this.reader.read();
-                    console.log(value);
+
                     if (done || !this.keepReading) {
                         console.log('Pembacaan selesai atau dihentikan');
                         break;
                     }
-                    const cleaned = value.map(byte => byte & 0x7F).filter(byte => byte !== 0);
-                    let d = decoder.decode(cleaned, { stream: true });
-                    console.log(d);
+
                     buffer += decoder.decode(value, { stream: true });
 
                     // kalau device kirim newline

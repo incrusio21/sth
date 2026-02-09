@@ -175,3 +175,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 		})
 	
 	return doclist
+
+@frappe.whitelist()
+def get_timbangan_settings():
+	return frappe.db.get_all('Timbangan Setting Detail',['location','baudrate','baudrate','databits','parity','stopbits'])
