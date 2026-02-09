@@ -8,12 +8,11 @@ sth.utils.scale_connection = class ScaleConnection {
      * Konstruktor untuk membuat instance ScaleConnection baru.
      * @param {number} baudRate - Baud rate untuk komunikasi serial (default: 57600).
      */
-    constructor(baudRate = 9600) {
+    constructor() {
         this.port = null; // Menyimpan objek port serial
         this.reader = null; // Menyimpan objek reader untuk membaca data dari port
         this.keepReading = false; // Flag untuk mengontrol loop pembacaan
         this.isConnected = false; // Status koneksi timbangan
-        this.BAUD_RATE = baudRate; // Baud rate untuk komunikasi serial
     }
 
     /**
@@ -56,9 +55,9 @@ sth.utils.scale_connection = class ScaleConnection {
             console.log(this.port.getInfo());
             let portDetail = this.port.getInfo()
             if (portDetail.usbProductId == 9123 && portDetail.usbVendorId == 1659) {
-                await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 7, parity: "even", stopBits: 1 });
+                await this.port.open({ baudRate: 9600, dataBits: 7, parity: "even", stopBits: 1 });
             } else {
-                await this.port.open({ baudRate: this.BAUD_RATE, dataBits: 7, parity: "none", stopBits: 1, flowControl: "none" });
+                await this.port.open({ baudRate: 9600, dataBits: 7, parity: "none", stopBits: 1 });
             }
 
             this.isConnected = true;

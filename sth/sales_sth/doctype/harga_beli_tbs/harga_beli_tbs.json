@@ -138,8 +138,7 @@
    "fieldname": "jarak",
    "fieldtype": "Select",
    "label": "Jarak",
-   "options": "\nRING 1\nRING 2",
-   "reqd": 1
+   "options": "\nRING 1\nRING 2"
   },
   {
    "fieldname": "column_break_qtcu",
@@ -161,7 +160,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-07 10:28:34.229721",
+ "modified": "2026-02-09 09:58:41.493400",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Harga Beli TBS",

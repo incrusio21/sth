@@ -207,7 +207,7 @@ def get_sq_item_details(names):
 		return []
 
 	return frappe.db.sql("""
-		select sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.supplier
+		select sqi.item_code, sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.name as doc_no
 		from `tabSupplier Quotation Item` sqi
 		join `tabSupplier Quotation` sq on sq.name = sqi.parent
 		where sqi.name in %(names)s
@@ -218,13 +218,33 @@ def submit_sq(name):
 	doc = get_doc_ignore_perm("Supplier Quotation",name)
 	doc.submit()
 
+# create sq from comparasion
 @frappe.whitelist()
-def create_sq(items):
-    data = frappe._dict(data)
-    
-    doc = frappe.new_doc('Supplier Quotation')
-    doc.transaction_date = today()
-	
+def comparasion_create_sq(items):
+	items = json.loads(items)
+	doc_sq = frappe.get_doc('Supplier Quotation',items[0]["doc_no"])
+	warehouse = doc_sq.items[0].warehouse
+
+	copy_doc = frappe.copy_doc(doc_sq)
+	copy_doc.transaction_date = today()
+	copy_doc.valid_till = today()
+	copy_doc.status = "Draft"
+	copy_doc.items = []
+	for item in items:
+		item_details = get_item_details({"item_code":item['item_code'],"company": copy_doc.company,"doctype": copy_doc.doctype,"conversion_rate":copy_doc.conversion_rate})
+
+		child = copy_doc.append("items")
+		child.update(item_details)
+		child.description = item["description"]
+		child.custom_country = item["country"]
+		child.custom_merk = item["merek"]
+		child.rate = item["rate"]
+		child.qty = item["qty"]
+		child.warehouse = warehouse
+		child.material_request = copy_doc.custom_material_request
+
+	copy_doc.insert()
+	return copy_doc.name
 # End
 
 @frappe.whitelist()

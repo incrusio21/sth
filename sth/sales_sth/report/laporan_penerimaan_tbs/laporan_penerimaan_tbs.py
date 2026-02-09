@@ -148,6 +148,9 @@ def get_conditions(filters):
 
 	if filters.get("company"):
 		conditions.append("AND company = %(company)s")
+
+	if filters.get("unit"):
+		conditions.append("AND unit = %(unit)s")
 	
 	return " ".join(conditions)
 

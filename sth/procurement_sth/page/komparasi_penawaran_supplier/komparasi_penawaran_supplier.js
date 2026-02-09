@@ -23,6 +23,7 @@ class SupplierComparasion {
 		this.suppliers = []
 		this.data = []
 		this.selected_items = []
+		this.selected_suppliers = ""
 
 		// console.log(this.page);
 		this.content_wrapper = $(`
@@ -149,7 +150,7 @@ class SupplierComparasion {
 		})
 
 		this.btn_chosen_items = this.page.add_button("Choosen items", () => {
-			frappe.xcall("sth.api.get_sq_item_details", { names: [...new Set(this.selected_items)] }).then((res) => {
+			frappe.xcall("sth.api.get_sq_item_details", { names: [...new Set(this.selected_items.map(r => r.child_name))] }).then((res) => {
 				me.showDialog(res)
 			})
 		}, {
@@ -243,10 +244,16 @@ class SupplierComparasion {
 							}
 						},
 						headerSort: false, hozAlign: "center",
-						cellClick: function name(e, cell) {
+						cellClick: function (e, cell) {
 							const row = cell.getRow().getData();
 							if (row[`${initials}_child_name`]) {
-								me.selected_items.push(row[`${initials}_child_name`])
+								me.validateSelectedData(row, name)
+
+								me.selected_suppliers = name
+								me.selected_items.push({
+									child_name: row[`${initials}_child_name`],
+									item_name: row.mark,
+								})
 								frappe.show_alert({
 									message: "Item has been selected",
 									indicator: 'green'
@@ -270,12 +277,33 @@ class SupplierComparasion {
 		return columns
 	}
 
+	validateSelectedData(data, supplier) {
+		let is_selected_before = this.selected_items.find(r => r.item_name == data.mark)
+
+		if (this.selected_suppliers && this.selected_suppliers != supplier) {
+			frappe.throw('Hanya diperbolehkan memilih penawaran dari 1 supplier')
+		} else if (is_selected_before) {
+			frappe.throw('Item sudah dipilih sebelumnya')
+		}
+	}
+
 	showDialog(data = []) {
 		var me = this
+		let grand_total = 0
+
+		data.forEach((row) => { grand_total += row.amount })
+
 		this.dialog = new frappe.ui.Dialog({
 			title: "Selected Items",
 			size: "extra-large",
 			fields: [
+				{
+					fieldname: "supplier",
+					label: "Supplier",
+					fieldtype: "Link",
+					options: "Supplier",
+					default: me.selected_suppliers
+				},
 				{
 					fieldname: "items",
 					fieldtype: "Table",
@@ -286,11 +314,16 @@ class SupplierComparasion {
 					fields: [
 						{
 							fieldtype: "Data",
+							fieldname: "item_code",
+							hidden: 1
+						},
+						{
+							fieldtype: "Data",
 							fieldname: "item_name",
 							label: "Kode Barang",
 							in_list_view: 1,
 							read_only: 1,
-							columns: 2
+							columns: 1
 						},
 						{
 							fieldtype: "Data",
@@ -330,7 +363,7 @@ class SupplierComparasion {
 							label: "Harga",
 							in_list_view: 1,
 							read_only: 1,
-							columns: 1
+							columns: 2
 						},
 						{
 							fieldtype: "Currency",
@@ -342,19 +375,34 @@ class SupplierComparasion {
 						},
 						{
 							fieldtype: "Data",
-							fieldname: "supplier",
-							label: "Supplier",
+							fieldname: "doc_no",
+							label: "Doc Number",
 							hidden: 1,
 						},
 					]
-				}
+				},
+
+				{
+					label: "Grand Total",
+					fieldname: "grand_total",
+					fieldtype: "Currency",
+					read_only: 1,
+					default: grand_total
+				},
 			],
-			primary_action_label: "Create SQ",
+			primary_action_label: "Approve",
 			primary_action(values) {
 				if (!values.items.length) {
 					frappe.throw('Items tidak boleh kosong')
 				}
-				console.log(values.items);
+				console.log(values);
+				frappe.xcall("sth.api.comparasion_create_sq", { items: values.items, freeze: true, freeze_message: "Approving..." }).then((res) => {
+					frappe.show_alert({
+						message: __(`Document ${res} successfully approved`),
+						indicator: 'green'
+					}, 5);
+				})
+
 				me.dialog.hide();
 			}
 		})

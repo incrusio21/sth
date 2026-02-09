@@ -4,25 +4,25 @@
 frappe.provide("sth.hr_customize")
 
 frappe.ui.form.on("Employee Potongan", {
-	refresh(frm) {
-		frm.set_df_property("details", "cannot_add_rows", true);
-		frm.set_query("unit", function () {
-			return {
-				filters: {
-					company: ["=", frm.doc.company]
-				}
-			};
-		});
+    refresh(frm) {
+        frm.set_df_property("details", "cannot_add_rows", true);
+        frm.set_query("unit", function () {
+            return {
+                filters: {
+                    company: ["=", frm.doc.company]
+                }
+            };
+        });
 
-		frm.set_query("bank_account", function () {
-			return {
-				filters: {
-					company: ["=", frm.doc.company],
-					unit: ["=", frm.doc.unit],
-				}
-			};
-		});
-	},
+        frm.set_query("bank_account", function () {
+            return {
+                filters: {
+                    company: ["=", frm.doc.company],
+                    unit: ["=", frm.doc.unit],
+                }
+            };
+        });
+    },
 });
 
 sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantation.AccountsController {
@@ -35,7 +35,7 @@ sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantatio
             });
         }
     }
-    
+
     refresh() {
         this.show_general_ledger()
         this.set_query_field()
@@ -69,7 +69,7 @@ sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantatio
         })
     }
 
-    get_accounts(){
+    get_accounts() {
         let me = this
 
         frappe.call({
@@ -77,15 +77,15 @@ sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantatio
             args: {
                 company: me.frm.doc.company
             },
-            callback: function(r) {
-                if(!r.exc && r.message) {
+            callback: function (r) {
+                if (!r.exc && r.message) {
                     me.frm.set_value(r.message);
                 }
             }
         });
     }
 
-    calculate_total(){
+    calculate_total() {
         let totals = 0
         for (const item of this.frm.doc.details || []) {
             totals += flt(item.rate)

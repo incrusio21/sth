@@ -31,7 +31,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
-   "precision": "5"
+   "precision": "0"
   },
   {
    "fieldname": "rate",
@@ -50,7 +50,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-12 16:59:19.920041",
+ "modified": "2026-02-09 05:46:46.777290",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS Item",

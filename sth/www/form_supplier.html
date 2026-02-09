@@ -133,10 +133,10 @@
                                         </td>
                                         <td data-field="merk">
                                             <input type="text" name="merk[]" class="form-control form-control-sm"
-                                                style="width: 100%;">
+                                                style="width: 100%;" required>
                                         </td>
                                         <td data-field="country">
-                                            <select class="form-select" name="country[]">
+                                            <select class="form-select" name="country[]" required>
                                                 {% for data in country %}
                                                 <option value="{{ data }}">{{ data }}</option>
                                                 {% endfor %}

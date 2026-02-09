@@ -933,7 +933,7 @@
    "is_virtual": 0,
    "label": "Penandatangan",
    "length": 0,
-   "link_filters": null,
+   "link_filters": "[[\"Penandatanganan\",\"is_customer\",\"=\",1]]",
    "mandatory_depends_on": null,
    "modified": "2025-12-17 15:37:46.566824",
    "modified_by": "Administrator",

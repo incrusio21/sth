@@ -16,8 +16,9 @@
   "thr_natura_settings",
   "phk_default_section",
   "earning_phk_component",
-  "column_break_iplp",
   "deduction_phk_component",
+  "column_break_iplp",
+  "phk_natura_settings",
   "loan_subsidy_default_section",
   "subsidy_component",
   "against_subsidy_component",
@@ -123,13 +124,19 @@
    "fieldtype": "Table",
    "label": "THR Natura Settings",
    "options": "THR Natura Settings"
+  },
+  {
+   "fieldname": "phk_natura_settings",
+   "fieldtype": "Table",
+   "label": "PHK Natura Settings",
+   "options": "PHK Natura Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-27 13:45:00.251403",
+ "modified": "2026-02-09 11:49:49.777633",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Bonus and Allowance Settings",

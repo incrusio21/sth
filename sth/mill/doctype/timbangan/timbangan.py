@@ -14,6 +14,12 @@ class Timbangan(Document):
 		if self.do_no and not self.storage:
 			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
 
+		if self.company:
+			unit = frappe.db.sql(""" SELECT name, company FROM `tabUnit` WHERE mill = 1 """,as_dict=1)
+			for row in unit:
+				if row.company == self.company:
+					self.unit = row.name
+
 
 	def on_submit(self):
 		if self.type == "Receive":

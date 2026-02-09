@@ -296,7 +296,7 @@ doc_events = {
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Supplier": {
-		"validate": ["sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
+		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
 	},
 	"Supplier Quotation": {
 		"before_submit": "sth.custom.supplier_quotation.update_status_rfq",

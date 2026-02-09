@@ -79,6 +79,29 @@ frappe.query_reports["Laporan Penerimaan TBS"] = {
             "reqd": 0,
         },
         {
+            "fieldname": "unit",
+            "label": __("Unit"),
+            "fieldtype": "Link",
+            "options": "Unit",  // Replace with your actual doctype name
+            "reqd": 0,
+            "get_query": function() {
+                let company = frappe.query_report.get_filter_value('company');
+                let filters = {
+                    "mill": 1
+                };
+                
+                if (company) {
+                    filters["company"] = company;
+                }
+                
+                return {
+                    "filters": filters
+                }
+            }
+
+        },
+
+        {
             "fieldname": "tanggal",
             "label": __("Tanggal"),
             "fieldtype": "Date",

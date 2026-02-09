@@ -14,6 +14,7 @@
   "set_posting_time",
   "unit",
   "divisi",
+  "tanggal_panen",
   "no_polisi",
   "supplier",
   "column_break_mtrn",
@@ -380,13 +381,21 @@
    "fieldname": "no_pol_tidak_terdaftar",
    "fieldtype": "Check",
    "label": "No Pol Tidak Terdaftar"
+  },
+  {
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
+   "fetch_from": "spb.posting_date",
+   "fieldname": "tanggal_panen",
+   "fieldtype": "Date",
+   "label": "Tanggal Panen",
+   "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-31 09:36:15.576134",
+ "modified": "2026-02-08 15:50:52.166197",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

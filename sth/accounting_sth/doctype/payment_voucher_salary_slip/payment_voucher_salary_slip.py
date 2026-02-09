@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SortasiTimbangan(Document):
+class PaymentVoucherSalarySlip(Document):
 	pass

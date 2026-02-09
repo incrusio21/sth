@@ -6,6 +6,7 @@ import calendar
 
 from frappe.utils import month_diff, getdate
 from frappe.model.mapper import get_mapped_doc
+from datetime import date
 
 from hrms.hr.doctype.leave_application.leave_application import get_leave_balance_on
 from sth.controllers.accounts_controller import AccountsController
@@ -153,6 +154,23 @@ class PerhitunganKompensasiPHK(AccountsController):
 
 		return max(0, months)
 
+	def get_month_difference_between(self, start_date, end_date):
+		if not start_date or not end_date:
+			return "0 Tahun 0 Bulan"
+
+		start = getdate(start_date)
+		end = getdate(end_date)
+
+		total_months = (end.year - start.year) * 12 + (end.month - start.month)
+
+		if end.day < start.day:
+			total_months -= 1
+
+		tahun = total_months // 12
+		bulan = total_months % 12
+
+		return f"{tahun} Tahun {bulan} Bulan"
+
 	@frappe.whitelist()
 	def fetch_ssa(self):
 		employee = frappe.db.get_value("Employee", self.employee, "*")
@@ -162,7 +180,11 @@ class PerhitunganKompensasiPHK(AccountsController):
 		if not ssa:
 			frappe.throw(f"Salary Structure Assignment <b> {self.employee} : {self.employee_name}</b>")
 		self.ssa = ssa[0].name
-		self.masa_kerja = self.get_jumlah_bulan_bekerja(employee.get("date_of_joining"), employee.get("relieving_date"))
+		self.masa_kerja = self.get_month_difference_between(
+			employee.get("date_of_joining"),
+			employee.get("relieving_date")
+		)
+		# self.masa_kerja = self.get_jumlah_bulan_bekerja(employee.get("date_of_joining"), employee.get("relieving_date"))
   
 	@frappe.whitelist()
 	def fetch_default_data(self):

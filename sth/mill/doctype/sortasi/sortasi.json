@@ -1,62 +1,162 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "SORT-.#####",
  "creation": "2025-12-22 13:38:27.130483",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_njhz",
   "tanggal",
+  "tipe",
+  "nomor_tiket",
+  "no_timbangan",
+  "no_spb",
+  "column_break_cjnu",
   "company",
   "unit",
-  "column_break_cjnu",
-  "tipe",
-  "nomor_timbangan",
-  "upload_foto",
+  "keterangan",
+  "amended_from",
+  "informasi_data_section",
+  "tanggal_panen",
+  "kebun",
+  "divisi",
+  "blok",
+  "thn_tnm",
+  "nama_assisten",
+  "krani_buah",
+  "column_break_jfcr",
+  "supplier",
+  "jam_masuk",
+  "no_polisi",
+  "nama_supir",
+  "netto",
+  "nama_penyortir",
   "section_break_pbuz",
   "mentah",
-  "tandan_kosong",
-  "brondolan",
-  "potongan_sortasi",
-  "column_break_oopo",
   "masak",
   "terlalu_masak",
-  "restan",
+  "tandan_kosong",
+  "abn",
+  "tpi",
+  "column_break_oopo",
+  "p_mth",
+  "p_msk",
+  "p_tmsk",
+  "p_tk",
+  "p_abn",
+  "p_tp",
   "column_break_diah",
-  "abnormal",
-  "dimakan_tikus",
-  "sampah",
-  "amended_from",
+  "std_mnt",
+  "std_msk",
+  "std_tmsk",
+  "std_tk",
+  "std_abn",
+  "std_tp",
+  "column_break_gqdr",
+  "b_mnt",
+  "b_msk",
+  "b_tmsk",
+  "b_tk",
+  "b_abnormal",
+  "b_tp",
+  "column_break_cdpx",
+  "n_mnt",
+  "n_msk",
+  "n_tmsk",
+  "n_tk",
+  "n_abn",
+  "n_tp",
+  "section_break_eexf",
+  "r_dmg",
+  "column_break_zblo",
+  "p_dmg",
+  "column_break_vvjh",
+  "column_break_tqug",
+  "column_break_dspy",
+  "section_break_bwaa",
+  "brondolan",
+  "restan",
+  "column_break_upjg",
+  "p_brd",
+  "p_rst",
+  "column_break_aqio",
+  "std_brd",
+  "column_break_aayo",
+  "b_brd",
+  "column_break_ejlu",
+  "n_brd",
+  "section_break_pind",
+  "spi",
+  "column_break_wpbr",
+  "p_smph",
+  "column_break_yzjp",
+  "column_break_zbjh",
+  "column_break_idcf",
+  "n_smph",
+  "total_potongan_sortasi_internal_section",
+  "total_tbs_internal",
+  "column_break_pybr",
+  "nilai_panen",
+  "potongan_sortasi_internal",
   "section_break_uqvp",
   "column_break_ztgp",
-  "terlalu_masak_2",
+  "tnr",
+  "tenera_kg",
+  "dura",
+  "dura_kg",
   "column_break_ennw",
-  "tangkai_panjang",
+  "bm_e",
+  "tp_e",
+  "kp",
+  "br",
+  "tm_e",
+  "tbs",
+  "brd_e",
   "column_break_wimj",
-  "brondolan_busuk"
+  "buah_mengkal_kg",
+  "kg_tp",
+  "kg_kp",
+  "kg_br",
+  "buah_restan_kg",
+  "kg_mk",
+  "kg_brd",
+  "section_break_rmuu",
+  "column_break_ogaz",
+  "column_break_mbgz",
+  "potongan_sortasi_external",
+  "column_break_rmpx",
+  "file_upload_tab",
+  "table_pwcx"
  ],
  "fields": [
   {
    "fieldname": "section_break_njhz",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Header"
   },
   {
+   "default": "Today",
    "fieldname": "tanggal",
    "fieldtype": "Date",
-   "label": "Tanggal",
-   "options": "Today"
+   "label": "Tanggal Sortasi"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
+   "fetch_from": "nomor_tiket.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_cjnu",
@@ -65,47 +165,40 @@
   {
    "fieldname": "tipe",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Tipe",
-   "options": "\nInternal\nExternal"
+   "options": "\nInternal\nExternal",
+   "reqd": 1
   },
   {
-   "fieldname": "nomor_timbangan",
-   "fieldtype": "Link",
-   "label": "Nomor Timbangan",
-   "options": "Timbangan"
-  },
-  {
-   "fieldname": "upload_foto",
-   "fieldtype": "Attach",
-   "label": "Upload Foto"
-  },
-  {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
    "fieldname": "section_break_pbuz",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Sortasi Internal"
   },
   {
    "default": "0",
+   "description": "Dalam Satuan Janjang",
    "fieldname": "mentah",
-   "fieldtype": "Percent",
+   "fieldtype": "Int",
+   "in_preview": 1,
    "label": "Mentah"
   },
   {
    "default": "0",
+   "description": "Dalam Satuan Janjang",
    "fieldname": "tandan_kosong",
-   "fieldtype": "Percent",
+   "fieldtype": "Int",
+   "in_preview": 1,
    "label": "Tandan Kosong"
   },
   {
    "default": "0",
+   "description": "Dalam Satuan KG",
    "fieldname": "brondolan",
-   "fieldtype": "Percent",
+   "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Brondolan"
-  },
-  {
-   "default": "0",
-   "fieldname": "potongan_sortasi",
-   "fieldtype": "Percent",
-   "label": "Potongan Sortasi"
   },
   {
    "fieldname": "column_break_oopo",
@@ -113,43 +206,31 @@
   },
   {
    "default": "0",
+   "description": "Dalam Satuan Janjang",
    "fieldname": "masak",
-   "fieldtype": "Percent",
+   "fieldtype": "Int",
+   "in_preview": 1,
    "label": "Masak"
   },
   {
    "default": "0",
+   "description": "Dalam Satuan Janjang",
    "fieldname": "terlalu_masak",
-   "fieldtype": "Percent",
+   "fieldtype": "Int",
+   "in_preview": 1,
    "label": "Terlalu Masak"
   },
   {
    "default": "0",
+   "description": "Dalam Satuan Janjang",
    "fieldname": "restan",
-   "fieldtype": "Percent",
+   "fieldtype": "Int",
+   "in_preview": 1,
    "label": "Restan"
   },
   {
    "fieldname": "column_break_diah",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "abnormal",
-   "fieldtype": "Percent",
-   "label": "Abnormal"
-  },
-  {
-   "default": "0",
-   "fieldname": "dimakan_tikus",
-   "fieldtype": "Percent",
-   "label": "Dimakan Tikus"
-  },
-  {
-   "default": "0",
-   "fieldname": "sampah",
-   "fieldtype": "Percent",
-   "label": "Sampah"
   },
   {
    "fieldname": "amended_from",
@@ -162,8 +243,10 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.tipe == \"External\"",
    "fieldname": "section_break_uqvp",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Sortasi External"
   },
   {
    "fieldname": "column_break_ztgp",
@@ -174,34 +257,738 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tangkai_panjang",
-   "fieldtype": "Float",
-   "label": "Tangkai Panjang"
-  },
-  {
    "fieldname": "column_break_wimj",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "brondolan_busuk",
-   "fieldtype": "Float",
-   "label": "Brondolan busuk"
+   "fieldname": "file_upload_tab",
+   "fieldtype": "Tab Break",
+   "label": "File Upload"
+  },
+  {
+   "fieldname": "table_pwcx",
+   "fieldtype": "Table",
+   "options": "Kriteria Upload Dokumen Finance"
   },
   {
    "default": "0",
-   "fieldname": "terlalu_masak_2",
+   "description": "Dalam Satuan Janjang",
+   "fieldname": "tpi",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Tangkai Panjang"
+  },
+  {
+   "default": "0",
+   "description": "Dalam Satuan KG",
+   "fieldname": "spi",
    "fieldtype": "Float",
-   "label": "Terlalu Masak"
+   "in_preview": 1,
+   "label": "Sampah"
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_mth",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Mentah",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_msk",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Masak",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_tmsk",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Terlalu Masak",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_tk",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Tandan Kosong",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_abn",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Abnormal",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_tp",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Tangkai Panjang",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_dmg",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "R. Damage",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_rst",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Restan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_brd",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Brondolan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "p_smph",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Sampah",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nomor_tiket",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nomor Tiket",
+   "options": "Security Check Point",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Standart %",
+   "fieldname": "std_mnt",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Mentah",
+   "read_only": 1
+  },
+  {
+   "default": "95.01-100",
+   "description": "Standart %",
+   "fieldname": "std_msk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Masak",
+   "read_only": 1
+  },
+  {
+   "default": "0.00-1.00",
+   "description": "Standart %",
+   "fieldname": "std_tmsk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Terlalu Masak",
+   "read_only": 1
+  },
+  {
+   "default": "0.00-1.00",
+   "description": "Standart %",
+   "fieldname": "std_tk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tandan Kosong",
+   "read_only": 1
+  },
+  {
+   "default": "0.00-2.00",
+   "description": "Standart %",
+   "fieldname": "std_abn",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Abnormal",
+   "read_only": 1
+  },
+  {
+   "default": "0.00-1.00",
+   "description": " Standart %",
+   "fieldname": "std_tp",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tangkai Panjang",
+   "read_only": 1
+  },
+  {
+   "default": ">10,00",
+   "description": "Standart %",
+   "fieldname": "std_brd",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Brondolan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_gqdr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "40",
+   "description": "Bobot",
+   "fieldname": "b_mnt",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Mentah",
+   "read_only": 1
+  },
+  {
+   "default": "20",
+   "description": "Bobot",
+   "fieldname": "b_msk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Masak",
+   "read_only": 1
+  },
+  {
+   "default": "10",
+   "description": "Bobot",
+   "fieldname": "b_tmsk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Terlalu Masak",
+   "read_only": 1
+  },
+  {
+   "default": "10",
+   "description": "Bobot",
+   "fieldname": "b_tk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tandan Kosong",
+   "read_only": 1
+  },
+  {
+   "default": "5",
+   "description": "Bobot",
+   "fieldname": "b_abnormal",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Abnormal",
+   "read_only": 1
+  },
+  {
+   "default": "10",
+   "description": "Bobot",
+   "fieldname": "b_tp",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tangkai Panjang",
+   "read_only": 1
+  },
+  {
+   "default": "5",
+   "description": "Bobot",
+   "fieldname": "b_brd",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Brondolan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cdpx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Nilai Panen",
+   "fieldname": "n_mnt",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Mentah",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Nilai Panen",
+   "fieldname": "n_msk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Masak",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Nilai Panen",
+   "fieldname": "n_tmsk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Terlalu Masak",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Nilai Panen",
+   "fieldname": "n_tk",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tandan Kosong",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Nilai Panen",
+   "fieldname": "n_abn",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Abnormal",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Nilai Panen",
+   "fieldname": "n_tp",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tangkai Panjang",
+   "read_only": 1
+  },
+  {
+   "description": "Nilai Panen",
+   "fieldname": "n_brd",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Brondolan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Dalam Satuan Janjang",
+   "fieldname": "abn",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Abnormal"
+  },
+  {
+   "default": "0",
+   "description": "Dalam Satuan Janjang",
+   "fieldname": "r_dmg",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "R. Damage"
+  },
+  {
+   "default": "0",
+   "fieldname": "tnr",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Tenera"
+  },
+  {
+   "default": "0",
+   "fieldname": "tenera_kg",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Tenera Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "dura",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Dura"
+  },
+  {
+   "default": "0",
+   "fieldname": "dura_kg",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Dura Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "bm_e",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Buah Mengkal"
+  },
+  {
+   "default": "0",
+   "fieldname": "tp_e",
+   "fieldtype": "Percent",
+   "label": "Tangkai Panjang"
+  },
+  {
+   "default": "0",
+   "fieldname": "kp",
+   "fieldtype": "Percent",
+   "label": "Kotoran/Pasir"
+  },
+  {
+   "default": "0",
+   "fieldname": "tm_e",
+   "fieldtype": "Float",
+   "label": "Buah Restan"
+  },
+  {
+   "default": "0",
+   "fieldname": "brd_e",
+   "fieldtype": "Float",
+   "label": "Berondolan"
+  },
+  {
+   "default": "0",
+   "fieldname": "buah_mengkal_kg",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Buah Mengkal Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kg_tp",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Tangkai Panjang Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kg_kp",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Kotoran/Pasir Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kg_br",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Buah Basah/Air Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "buah_restan_kg",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Buah Restan Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kg_mk",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Buah TBS Masak Kecil Kg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kg_brd",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Berondolan Kg",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "depends_on": "eval:doc.tipe == \"External\"",
+   "fieldname": "potongan_sortasi_external",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Potongan Sortasi External",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
+   "fieldname": "total_potongan_sortasi_internal_section",
+   "fieldtype": "Section Break",
+   "label": "Total Potongan Sortasi Internal"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "total_tbs_internal",
+   "fieldtype": "Int",
+   "label": "Total TBS Internal"
+  },
+  {
+   "fieldname": "column_break_pybr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "nilai_panen",
+   "fieldtype": "Int",
+   "label": "Nilai Panen"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "potongan_sortasi_internal",
+   "fieldtype": "Int",
+   "label": "Potongan Sortasi Internal"
+  },
+  {
+   "fieldname": "informasi_data_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Data"
+  },
+  {
+   "fetch_from": "nomor_tiket.unit",
+   "fieldname": "kebun",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Kebun",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "nomor_tiket.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Divisi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Blok",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "no_spb.posting_date",
+   "fieldname": "tanggal_panen",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nama_assisten",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Assisten",
+   "read_only": 1
+  },
+  {
+   "fieldname": "krani_buah",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Krani Buah",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jfcr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fetch_from": "nomor_tiket.vehicle_entry_time",
+   "fieldname": "jam_masuk",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam Masuk",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "nomor_tiket.no_polisi",
+   "fieldname": "no_polisi",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "No Polisi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "nomor_tiket.driver_name",
+   "fieldname": "nama_supir",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Supir",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nama_penyortir",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Penyortir",
+   "read_only": 1
+  },
+  {
+   "fieldname": "no_timbangan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "No Timbangan",
+   "options": "Timbangan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "no_timbangan.spb",
+   "fieldname": "no_spb",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "No SPB",
+   "options": "Surat Pengantar Buah",
+   "read_only": 1
+  },
+  {
+   "fieldname": "thn_tnm",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "no_timbangan.netto",
+   "fieldname": "netto",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Netto",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "nomor_tiket.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Supplier",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
+   "fieldname": "section_break_eexf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_zblo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_vvjh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_tqug",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dspy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
+   "fieldname": "section_break_bwaa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_upjg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_aqio",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_aayo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ejlu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
+   "fieldname": "section_break_pind",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wpbr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yzjp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zbjh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_idcf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Nilai Panen",
+   "fieldname": "n_smph",
+   "fieldtype": "Data",
+   "label": "Sampah"
+  },
+  {
+   "fieldname": "br",
+   "fieldtype": "Percent",
+   "label": "Buah Basah/Air"
+  },
+  {
+   "fieldname": "tbs",
+   "fieldtype": "Percent",
+   "label": "Buah TBS Masak Kecil"
+  },
+  {
+   "fieldname": "section_break_rmuu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ogaz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mbgz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rmpx",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-22 15:57:05.109854",
+ "modified": "2026-02-09 05:55:38.081559",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

@@ -16,9 +16,6 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
         frm.set_query("kode_barang", "items", function (doc) {
             return {
                 query: "sth.controllers.queries.get_items_query",
-                filters: {
-                    warehouse: doc.gudang,
-                }
             }
         })
 

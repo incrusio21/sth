@@ -18,6 +18,7 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "termin",
   "column_break_12",
   "company",
   "unit",
@@ -96,6 +97,8 @@
   "other_charges_calculation",
   "pricing_rule_details",
   "pricing_rules",
+  "file_upload_tab",
+  "file_upload_bapp",
   "address_and_contact_tab",
   "section_addresses",
   "supplier_address",
@@ -1223,13 +1226,30 @@
    "fieldtype": "Table",
    "label": "PPH Details",
    "options": "VAT Detail"
+  },
+  {
+   "fieldname": "termin",
+   "fieldtype": "Link",
+   "label": "Termin",
+   "options": "Termin"
+  },
+  {
+   "fieldname": "file_upload_tab",
+   "fieldtype": "Tab Break",
+   "label": "File Upload"
+  },
+  {
+   "fieldname": "file_upload_bapp",
+   "fieldtype": "Table",
+   "label": "File Upload BAPP",
+   "options": "Kriteria Upload Dokumen Finance"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-04 15:46:52.909597",
+ "modified": "2026-02-06 14:40:54.977278",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

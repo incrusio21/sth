@@ -97,7 +97,7 @@
    "label": "KM/HM Akhir"
   },
   {
-   "depends_on": "eval:doc.tipe_master == \"Kendaraan\"",
+   "depends_on": "eval:doc.tipe_master == \"Kendaraan Umum\"",
    "fieldname": "no_pol",
    "fieldtype": "Data",
    "label": "No Polisi"
@@ -190,7 +190,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-13 16:50:41.590111",
+ "modified": "2026-02-06 16:07:16.527322",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

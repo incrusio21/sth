@@ -14,6 +14,7 @@ class EmployeePotongan(AccountsController):
 	def validate(self):
 		self.set_missing_value()
 		self.check_employee_status()
+		self.calculate_total()
 
 	def calculate_total(self):
 		totals = 0
@@ -21,6 +22,7 @@ class EmployeePotongan(AccountsController):
 			totals += flt(d.rate)
 		
 		self.grand_total = flt(totals, self.precision("grand_total"))
+		self.outstanding_amount = flt(totals, self.precision("grand_total"))
 		
 	def check_employee_status(self):
 		emp_list = [d.employee for d in self.details]
@@ -107,6 +109,7 @@ class EmployeePotongan(AccountsController):
 def fetch_company_account(company):
 	accounts_dict = {
 		"credit_to": frappe.get_cached_value("Company", company, "pengajuan_pembayaran_account"),
+		"expense_account": frappe.get_cached_value("Company", company, "pengajuan_pembayaran_account"),
 	}
 
 	return accounts_dict
