@@ -10,10 +10,10 @@ frappe.ui.form.on("Timbangan", {
 		// })
 
 		navigator.serial.getPorts().then((port) => {
-			if (!port.length) {
+			if (!port.length || !localStorage.getItem('location')) {
 				frm.trigger('selectLocationDialog')
 			} else {
-				frm.trigger('readWeight')
+				frm.events.readWeight(frm, localStorage.getItem('location'))
 			}
 
 		});
@@ -55,7 +55,11 @@ frappe.ui.form.on("Timbangan", {
 	},
 
 	readWeight(frm, location = "") {
-		frappe.scaleConnection = frappe.scaleConnection || new sth.utils.scale_connection(location);
+		console.log(location);
+		frappe.scaleConnection = new sth.utils.scale_connection(location);
+		if (location) {
+			localStorage.setItem('location', location)
+		}
 		frappe.scaleConnection.connect().then(() => {
 			frappe.scaleConnection.startReading((weight) => {
 				const match = weight.match(/([+-]?\d+)\s*kg/i);

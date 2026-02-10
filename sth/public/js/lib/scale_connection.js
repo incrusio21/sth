@@ -31,31 +31,34 @@ sth.utils.scale_connection = class ScaleConnection {
             }
 
             // Mencoba mendapatkan port yang tersimpan sebelumnya
-            const storedPortInfo = JSON.parse(localStorage.getItem('lastUsedPort'));
-            if (storedPortInfo) {
-                console.log('Mencoba menggunakan port terakhir yang digunakan');
-                const availablePorts = await navigator.serial.getPorts();
-                this.port = availablePorts.find(p => p.getInfo().usbVendorId === storedPortInfo.usbVendorId &&
-                    p.getInfo().usbProductId === storedPortInfo.usbProductId);
-            }
+            // const storedPortInfo = JSON.parse(localStorage.getItem('lastUsedPort'));
+            // if (storedPortInfo) {
+            //     console.log('Mencoba menggunakan port terakhir yang digunakan');
+            //     const availablePorts = await navigator.serial.getPorts();
+            //     this.port = availablePorts.find(p => p.getInfo().usbVendorId === storedPortInfo.usbVendorId &&
+            //         p.getInfo().usbProductId === storedPortInfo.usbProductId);
+            // }
 
-            // Jika tidak ada port tersimpan atau port tidak ditemukan, minta pengguna memilih
-            if (!this.port) {
-                console.log('Meminta pengguna memilih port');
-                this.port = await navigator.serial.requestPort();
-                const portInfo = this.port.getInfo();
-                // Simpan informasi port untuk penggunaan berikutnya
-                localStorage.setItem('lastUsedPort', JSON.stringify({
-                    usbVendorId: portInfo.usbVendorId,
-                    usbProductId: portInfo.usbProductId
-                }));
-            }
+            // // Jika tidak ada port tersimpan atau port tidak ditemukan, minta pengguna memilih
+            // if (!this.port) {
+            //     console.log('Meminta pengguna memilih port');
+            //     this.port = await navigator.serial.requestPort();
+            //     const portInfo = this.port.getInfo();
+            //     // Simpan informasi port untuk penggunaan berikutnya
+            //     localStorage.setItem('lastUsedPort', JSON.stringify({
+            //         usbVendorId: portInfo.usbVendorId,
+            //         usbProductId: portInfo.usbProductId
+            //     }));
+            // }
+            console.log('Meminta pengguna memilih port');
+            this.port = await navigator.serial.requestPort();
 
-            // Membuka koneksi ke port
+            // Membuka koneksi ke port     
             console.log('Membuka port');
 
             const settings = await frappe.xcall('sth.mill.doctype.timbangan.timbangan.get_timbangan_settings')
             const port_setting = settings.find((row) => row.location == this.location) || {}
+            console.log(port_setting);
             await this.port.open({ baudRate: port_setting.baudrate, dataBits: port_setting.databits, parity: port_setting.parity, stopBits: port_setting.stopbits });
 
             // let portDetail = this.port.getInfo()

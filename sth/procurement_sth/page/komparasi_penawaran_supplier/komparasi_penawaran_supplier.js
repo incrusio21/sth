@@ -298,13 +298,6 @@ class SupplierComparasion {
 			size: "extra-large",
 			fields: [
 				{
-					fieldname: "supplier",
-					label: "Supplier",
-					fieldtype: "Link",
-					options: "Supplier",
-					default: me.selected_suppliers
-				},
-				{
 					fieldname: "items",
 					fieldtype: "Table",
 					label: "Items",
@@ -363,7 +356,7 @@ class SupplierComparasion {
 							label: "Harga",
 							in_list_view: 1,
 							read_only: 1,
-							columns: 2
+							columns: 1
 						},
 						{
 							fieldtype: "Currency",
@@ -372,6 +365,15 @@ class SupplierComparasion {
 							in_list_view: 1,
 							read_only: 1,
 							columns: 2
+						},
+						{
+							fieldname: "supplier",
+							label: "Supplier",
+							fieldtype: "Link",
+							options: "Supplier",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1
 						},
 						{
 							fieldtype: "Data",
@@ -396,12 +398,12 @@ class SupplierComparasion {
 					frappe.throw('Items tidak boleh kosong')
 				}
 				console.log(values);
-				frappe.xcall("sth.api.comparasion_create_sq", { items: values.items, freeze: true, freeze_message: "Approving..." }).then((res) => {
-					frappe.show_alert({
-						message: __(`Document ${res} successfully approved`),
-						indicator: 'green'
-					}, 5);
-				})
+				// frappe.xcall("sth.api.comparasion_create_sq", { items: values.items, freeze: true, freeze_message: "Approving..." }).then((res) => {
+				// 	frappe.show_alert({
+				// 		message: __(`Document ${res} successfully approved`),
+				// 		indicator: 'green'
+				// 	}, 5);
+				// })
 
 				me.dialog.hide();
 			}
