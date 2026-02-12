@@ -3,7 +3,7 @@ from frappe.utils import now,flt,cint,today
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation_from_rfq
 from erpnext.stock.get_item_details import get_item_details
 from sth.utils import decrypt
-from sth.custom.supplier_quotation import get_taxes_template
+from sth.custom.supplier_quotation import get_taxes_template,close_status_another_sq,close_rfq
 
 @frappe.whitelist(allow_guest=True)
 def create_sq():
@@ -221,20 +221,35 @@ def submit_sq(name):
 
 # create sq from comparasion
 @frappe.whitelist()
-def comparasion_create_sq(items):
+def comparasion_create_sq(pr_sr,items):
 	items = json.loads(items)
-	doc_sq = frappe.get_doc('Supplier Quotation',items[0]["doc_no"])
-	warehouse = doc_sq.items[0].warehouse
+	if not items:
+		return
+	
+	except_name = []
 
-	copy_doc = frappe.copy_doc(doc_sq)
-	copy_doc.transaction_date = today()
-	copy_doc.valid_till = today()
-	copy_doc.status = "Draft"
-	copy_doc.items = []
-	for item in items:
-		item_details = get_item_details({"item_code":item['item_code'],"company": copy_doc.company,"doctype": copy_doc.doctype,"conversion_rate":copy_doc.conversion_rate})
+	def init_new_doc(name):
+		doc_sq = frappe.get_doc('Supplier Quotation',name)
+		warehouse = doc_sq.items[0].warehouse
+		copy_doc = frappe.copy_doc(doc_sq)
+		copy_doc.transaction_date = today()
+		copy_doc.valid_till = today()
+		copy_doc.status = "Draft"
+		copy_doc.items = []
+		
+		return copy_doc,warehouse,name
 
-		child = copy_doc.append("items")
+	new_doc,warehouse,ref_name = init_new_doc(items[0]["doc_no"])
+	for idx,item in enumerate(items):
+		if ref_name != item['doc_no'] :
+			new_doc.insert()
+			new_doc.submit()
+			except_name.append(new_doc.name)
+			new_doc,warehouse,ref_name = init_new_doc(item['doc_no'])
+
+		item_details = get_item_details({"item_code":item['item_code'],"company": new_doc.company,"doctype": new_doc.doctype,"conversion_rate":new_doc.conversion_rate})
+		
+		child = new_doc.append("items")
 		child.update(item_details)
 		child.description = item["description"]
 		child.custom_country = item["country"]
@@ -242,10 +257,52 @@ def comparasion_create_sq(items):
 		child.rate = item["rate"]
 		child.qty = item["qty"]
 		child.warehouse = warehouse
-		child.material_request = copy_doc.custom_material_request
+		child.material_request = new_doc.custom_material_request
 
-	copy_doc.insert()
-	return copy_doc.name
+	new_doc.insert()
+	new_doc.submit()
+	except_name.append(new_doc.name)
+
+	close_status_another_sq([pr_sr],except_name)
+
+	rfq = frappe.db.get_all("Request for Quotation Item",{"material_request": pr_sr},["parent"],group_by='parent',pluck='parent')
+	for row in rfq :
+		close_rfq(row)
+	return new_doc.name
+
+def debug_create_po():
+	pr_sr = "MAT-MR-2025-00006"
+	items = [
+		{
+			"amount": 300000,
+			"country": "Indonesia",
+			"description": "KUNCI PAS",
+			"doc_no": "PUR-SQTN-2025-00005",
+			"idx": 1,
+			"item_code": "KUNCI PAS",
+			"item_name": "KUNCI PAS",
+			"merek": "ABC",
+			"qty": 200,
+			"rate": 1500,
+			"supplier": "PT. Bibit Sawit Indonesia"
+		},
+		{
+			"amount": 5000000,
+			"country": "Indonesia",
+			"description": "Grease",
+			"doc_no": "PUR-SQTN-2025-00007",
+			"idx": 2,
+			"item_code": "Grease",
+			"item_name": "Grease",
+			"merek": "aswww",
+			"qty": 2000,
+			"rate": 2500,
+			"supplier": "PT. Spindo Steel"
+		}
+	]
+
+	comparasion_create_sq(pr_sr,items)
+
 # End
 
 @frappe.whitelist()

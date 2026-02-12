@@ -16,6 +16,14 @@ frappe.ui.form.on("Supplier Quotation", {
             }
         })
 
+        frm.set_query("lokasi_pengiriman", function (doc) {
+            return {
+                filters: {
+                    company: doc.company
+                }
+            }
+        })
+
     },
     onload(frm) {
         if (frm.is_new()) {
@@ -229,9 +237,12 @@ function btn_get_material_request(frm) {
                     per_ordered: ["<", 100],
                     company: frm.doc.company,
                 },
-            }, () => {
+            }, (doc) => {
                 frm.trigger('calculate_totals')
                 frm.doc.__after_get_data = 1
+                doc.items.forEach(row => {
+                    row.description = row.item_name
+                });
             });
 
             setTimeout(() => {
@@ -270,8 +281,11 @@ function btn_get_rfq(frm) {
                 },
                 get_query_method:
                     "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier",
-            }, () => {
+            }, (doc) => {
                 frm.trigger('calculate_totals')
+                doc.items.forEach(row => {
+                    row.description = row.item_name
+                });
             });
 
             setTimeout(() => {

@@ -130,6 +130,13 @@ erpnext.utils.update_progress_received = function (opts) {
 frappe.ui.form.on("Purchase Order", {
 	setup(frm) {
 		sth.form.setup_fieldname_select(frm, "items")
+		frm.set_query("lokasi_pengiriman", function (doc) {
+			return {
+				filters: {
+					company: doc.company
+				}
+			}
+		})
 		// sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
 		// 	frm.trigger("set_value_dpp_and_taxes")
 		// })
@@ -177,6 +184,12 @@ frappe.ui.form.on("Purchase Order", {
 
 	company(frm) {
 		frm.trigger('get_tax_template')
+	},
+
+
+	waktu_penyerahan(frm) {
+		const day = frm.doc.waktu_penyerahan ? frm.doc.waktu_penyerahan.split(' ')[0] : 0
+		frm.set_value('accept_day', parseInt(day))
 	},
 
 	ppn_biaya_ongkos(frm) {

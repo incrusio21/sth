@@ -12,6 +12,14 @@ frappe.ui.form.on("Material Request", {
         })
     },
 
+    onload: function (frm) {
+        if (frm.doc.docstatus == 0) {
+            frm.doc.items.forEach(function (item) {
+                get_stock_for_item(frm, item.doctype, item.name);
+            });
+        }
+    },
+
 
     refresh(frm) {
         if (frm.is_new()) {
@@ -25,12 +33,6 @@ frappe.ui.form.on("Material Request", {
         frm.set_query("divisi", sth.queries.divisi)
         frm.trigger('refresh_read_only_fields')
 
-    },
-
-    onload: function (frm) {
-        frm.doc.items.forEach(function (item) {
-            get_stock_for_item(frm, item.doctype, item.name);
-        });
     },
 
     unit(frm) {

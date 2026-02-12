@@ -107,6 +107,20 @@ frappe.ui.form.on("Purchase Invoice", {
                     frappe.dom.unfreeze()
                 })
 
+        } else if (frm.doc.invoice_type == "Purchase Order") {
+            frappe.dom.freeze("Mapping Data...")
+            frappe.xcall("sth.buying_sth.custom.purchase_receipt.make_purchase_invoice", { source_name: frm.doc.document_no })
+                .then((res) => {
+                    res.name = frm.docname
+                    res.invoice_type = frm.doc.invoice_type
+                    res.document_type = frm.doc.document_type
+                    res.document_no = frm.doc.document_no
+                    frappe.model.sync(res)
+                    frm.refresh()
+                })
+                .finally(() => {
+                    frappe.dom.unfreeze()
+                })
         }
 
     },

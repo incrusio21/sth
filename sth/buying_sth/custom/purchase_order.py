@@ -65,3 +65,34 @@ def make_purchase_receipt(source_name, target_doc=None):
     )
 
     return doc
+
+
+@frappe.whitelist()
+def check_uang_muka_payment_entry(purchase_order):
+    """Check if Purchase Order has GL Entry for Uang Muka with Payment Entry"""
+    
+    gl_entries = frappe.db.sql("""
+        SELECT 
+            ge.name, 
+            ge.voucher_no, 
+            ge.voucher_type,
+            ge.account
+        FROM `tabGL Entry` ge
+        WHERE ge.against_voucher = %(po_name)s
+            AND ge.against_voucher_type = 'Purchase Order'
+            AND ge.account LIKE %(account_pattern)s
+            AND is_cancelled = 0
+    """, {
+        'po_name': purchase_order,
+        'account_pattern': '%UANG MUKA%'
+    }, as_dict=1,debug=1)
+    
+    has_payment_entry = any(
+        entry.get('voucher_type') == 'Payment Entry' 
+        for entry in gl_entries
+    )
+    
+    return {
+        'has_uang_muka': len(gl_entries) > 0,
+        'has_payment_entry': has_payment_entry
+    }

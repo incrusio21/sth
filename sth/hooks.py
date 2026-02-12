@@ -10,7 +10,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-app_include_css = ["/assets/sth/css/lib/tabulator.min.css"]
+app_include_css = ["/assets/sth/css/lib/tabulator.min.css","sth.bundle.css"]
 app_include_js = [
     "/assets/sth/js/lib/tabulator.min.js",
     "sth.bundle.js"
@@ -52,13 +52,14 @@ doctype_js = {
 	"Payment Entry": "hr_customize/custom/payment_entry.js",
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": ["buying_sth/custom/purchase_invoice.js", "legal/custom/purchase_invoice.js", "accounting_sth/custom/non_voucher_match.js","accounting_sth/custom/override_purchase_invoice.js","public/js/purchase_invoice.js"],
-	"Purchase Order": "buying_sth/custom/purchase_order.js",
+	"Purchase Order": ["buying_sth/custom/purchase_order.js","public/js/purchase_order.js"],
 	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
 	"Request for Quotation" : "public/js/request_for_quotation.js",
 	"Salary Slip": "hr_customize/custom/salary_slip.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
 	"Sales Order": "public/js/sales_order.js",
+	"Stock Reconciliation": "public/js/stock_reconciliation.js",
 	"Supplier": "public/js/supplier.js",
 	"Supplier Quotation": "public/js/supplier_quotation.js",
 	"Training Event": "public/js/training_event.js",
@@ -156,10 +157,13 @@ boot_session = "sth.startup.boot.boot_session"
 # }
 
 standard_queries = {
-	"Kegiatan": "sth.controllers.queries.kegiatan_query",
-	"Customer": "sth.controllers.queries.customer_query",
-	"Months": "sth.controllers.queries.month_query",
+
 	"Bank": "sth.controllers.queries.get_bank_query",
+	"Customer": "sth.controllers.queries.customer_query",
+	"Expense Claim Type": "sth.controllers.queries.get_expense_claim_type",
+	"Item Group": "sth.controllers.queries.item_group_query",
+	"Kegiatan": "sth.controllers.queries.kegiatan_query",
+	"Months": "sth.controllers.queries.month_query",
 	# "Unit": "sth.controllers.queries.unit_query",
 }
 
@@ -283,6 +287,7 @@ doc_events = {
 		"validate": "sth.custom.purchase_receipt.set_purchase_order_if_exist"
 	},
 	"Purchase Invoice": {
+		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim"],
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
 	"Quotation": {
@@ -298,8 +303,11 @@ doc_events = {
 	"Supplier": {
 		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
 	},
+	"Stock Reconciliation": {
+		"validate": ["sth.custom.stock_reconciliation.validate_retain_amount"],
+	},
 	"Supplier Quotation": {
-		"before_submit": "sth.custom.supplier_quotation.update_status_rfq",
+		# "before_submit": "sth.custom.supplier_quotation.update_status_rfq",
 		"on_submit": "sth.custom.supplier_quotation.create_po_draft"
 	},
 	
