@@ -133,7 +133,7 @@
                                         </td>
                                         <td data-field="merk">
                                             <input type="text" name="merk[]" class="form-control form-control-sm"
-                                                style="width: 100%;" required>
+                                                style="width: 100%;" value="{{ item.merek }}" required>
                                         </td>
                                         <td data-field="country">
                                             <select class="form-select" name="country[]" required>
@@ -144,7 +144,7 @@
                                         </td>
                                         <td data-field="desc">
                                             <textarea class="form-control form-control-sm" name="desc[]"
-                                                rows="1">{{ item.description }}</textarea>
+                                                rows="1"></textarea>
                                         </td>
                                         <td data-field="qty">
                                             <input type="number" min="1" name="qty[]"
