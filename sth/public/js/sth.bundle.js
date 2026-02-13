@@ -12,5 +12,5 @@ import "./override/utils";
 import "./override/report_view_override";
 import "./override/formatter_override";
 import "./override/file_uploader";
-
+import "./override/link_selector";
 // import "./override/print_override"
