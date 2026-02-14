@@ -18,6 +18,7 @@ frappe.ui.form.on("Training Event", {
         __("Create"),
       );
     }
+    filter_jenis_ex_type(frm)
   },
   make_purchase_invoice: function (frm) {
     let method = "sth.overrides.training_event.get_purchase_invoice";
@@ -65,4 +66,14 @@ function calculate_total_costing(frm) {
   });
   frm.set_value("custom_grand_total_costing", total);
   frm.refresh_field("custom_grand_total_costing");
+}
+
+function filter_jenis_ex_type(frm){
+  frm.set_query('expense_type', 'custom_costing', () => {
+    return {
+      filters: {
+        is_hrd: 1
+      }
+    }
+  });
 }

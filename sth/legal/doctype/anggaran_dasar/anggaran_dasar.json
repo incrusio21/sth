@@ -26,6 +26,7 @@
   "saham",
   "section_break_sslx",
   "column_break_pojw",
+  "total_lembar_saham",
   "column_break_alar",
   "grand_total",
   "susunan_pengurus_tab",
@@ -188,12 +189,18 @@
    "in_preview": 1,
    "label": "Tanggal Akta",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_lembar_saham",
+   "fieldtype": "Float",
+   "label": "\u03a3 Lembar Saham",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-06 09:45:24.847115",
+ "modified": "2026-02-11 09:33:51.250402",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Anggaran Dasar",

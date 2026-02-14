@@ -285,7 +285,7 @@ def create_allocations_for_new_employee(doc, method=None):
 	if doc.is_new() or not doc.employment_type or not doc.grade:
 		return
 	
-	current_date = today()
+	current_date = getdate()
 	
 	leave_policies = frappe.get_all(
 		"Leave Policy",

@@ -469,18 +469,19 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
         callback: function(r) {
         	
             if (r.message && r.message.has_payment_entry) {
-                frappe.confirm(
-                    'This Purchase Order has a GL Entry for Uang Muka with Payment Entry. Are you sure you want to close it?',
-                    function() {
-                        cur_frm.cscript.update_status("Close", "Closed");
-                    },
-                    function() {
-                        frappe.show_alert({
-                            message: __('Close Purchase Order cancelled'),
-                            indicator: 'info'
-                        });
-                    }
-                );
+                frappe.throw(
+                    'This Purchase Order has a GL Entry for Uang Muka with Payment Entry. Purchase Order cannot be closed.',
+                )
+                //     function() {
+                //         cur_frm.cscript.update_status("Close", "Closed");
+                //     },
+                //     function() {
+                //         frappe.show_alert({
+                //             message: __('Close Purchase Order cancelled'),
+                //             indicator: 'info'
+                //         });
+                //     }
+                // );
             } else {
                 cur_frm.cscript.update_status("Close", "Closed");
             }

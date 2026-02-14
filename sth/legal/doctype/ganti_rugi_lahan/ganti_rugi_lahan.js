@@ -4,9 +4,11 @@
 frappe.provide("sth.legal");
 
 frappe.ui.form.on("Ganti Rugi Lahan", {
-	// refresh(frm) {
-
-	// },
+	refresh(frm) {
+        // if(frm.doc.docstatus == 1){
+        //     frm.set_df_property("kriteria_upload_dokumen_finance", "cannot_delete_rows", true);
+        // }
+	},
     
     company(frm) {
         frm.cscript.get_details_account({

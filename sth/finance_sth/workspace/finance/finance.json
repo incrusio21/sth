@@ -175,37 +175,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Payment",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Voucher",
-   "link_count": 0,
-   "link_to": "Payment Voucher",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Payment Entry",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Voucher Kas",
-   "link_count": 0,
-   "link_to": "Payment Voucher Kas",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Payment Voucher Kas",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Posisi Saldo Bank",
    "link_count": 2,
    "link_type": "DocType",
@@ -324,8 +293,27 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Event Calendar Setting",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Event",
+   "link_count": 0,
+   "link_to": "Event",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "PDO",
-   "link_count": 2,
+   "link_count": 3,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -343,6 +331,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Jenis PDO",
+   "link_count": 0,
+   "link_to": "Expense Claim Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Permintaan Dana Operasional",
    "link_count": 0,
    "link_to": "Permintaan Dana Operasional",
@@ -353,7 +351,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Event Calendar Setting",
+   "label": "Payment",
    "link_count": 1,
    "link_type": "DocType",
    "onboard": 0,
@@ -362,15 +360,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Event",
+   "label": "Payment Voucher",
    "link_count": 0,
-   "link_to": "Event",
-   "link_type": "DocType",
+   "link_to": "Payment Voucher",
+   "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Payment Entry",
    "type": "Link"
   }
  ],
- "modified": "2026-02-04 13:06:51.374569",
+ "modified": "2026-02-12 10:55:24.223415",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",

@@ -16,6 +16,7 @@
   "nik",
   "eg",
   "unit",
+  "lokasi",
   "column_break_yiil",
   "company",
   "posting_date",
@@ -26,13 +27,17 @@
   "amended_from",
   "ssa",
   "exit_interview_attach",
+  "section_break_xxek",
+  "persetujuan_1",
+  "persetujuan_2",
+  "column_break_tvin",
+  "persetujuan_3",
+  "persetujuan_4",
   "accounting_dimension_section",
   "cost_center",
   "section_break_atts",
   "column_break_ybbb",
   "column_break_wbmt",
-  "subtotal",
-  "natura",
   "grand_total",
   "outstanding_amount",
   "perhitungan_tab",
@@ -292,35 +297,56 @@
    "read_only": 1
   },
   {
-   "fieldname": "subtotal",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Subtotal",
-   "read_only": 1
-  },
-  {
-   "fieldname": "natura",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Natura",
-   "read_only": 1
-  },
-  {
    "fetch_from": "employee.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
    "options": "Unit",
    "read_only": 1
+  },
+  {
+   "fieldname": "lokasi",
+   "fieldtype": "Data",
+   "label": "Lokasi"
+  },
+  {
+   "fieldname": "section_break_xxek",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "persetujuan_1",
+   "fieldtype": "Link",
+   "label": "Persetujuan 1",
+   "options": "User"
+  },
+  {
+   "fieldname": "persetujuan_2",
+   "fieldtype": "Link",
+   "label": "Persetujuan 2",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_tvin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "persetujuan_3",
+   "fieldtype": "Link",
+   "label": "Persetujuan 3",
+   "options": "User"
+  },
+  {
+   "fieldname": "persetujuan_4",
+   "fieldtype": "Link",
+   "label": "Persetujuan 4",
+   "options": "User"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-09 11:47:39.287544",
+ "modified": "2026-02-13 15:13:12.127831",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Perhitungan Kompensasi PHK",
@@ -342,6 +368,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

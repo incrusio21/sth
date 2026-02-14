@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"6xiwu4clhX\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}}]",
+ "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Post Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}}]",
  "creation": "2025-11-20 15:54:30.037918",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,45 +13,6 @@
  "is_hidden": 0,
  "label": "Mill",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Transaksi",
-   "link_count": 3,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Security Check Point",
-   "link_count": 0,
-   "link_to": "Security Check Point",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Timbangan",
-   "link_count": 0,
-   "link_to": "Timbangan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sortasi",
-   "link_count": 0,
-   "link_to": "Sortasi",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -137,25 +98,6 @@
    "link_count": 0,
    "link_to": "Driver",
    "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Report Timbangan",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Laporan Penerimaan TBS",
-   "link_count": 0,
-   "link_to": "Laporan Penerimaan TBS",
-   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
@@ -274,9 +216,793 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Klarifikasi",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Temperatur Tangki- Tangki",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Temperatur Tangki- Tangki",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Kernel",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Effisiensi Ripple Mill",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Effisiensi Ripple Mill",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Temperatur Kernel Silo",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Temperatur Kernel Silo",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Power House",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Mesin Turbin",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Mesin Turbin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Mesin Genset",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Mesin Genset",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Boiler",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Boiler",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Water Treatment",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemakaian Air",
+   "link_count": 0,
+   "link_to": "Pemakaian Air",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemakaian Kimia",
+   "link_count": 0,
+   "link_to": "Pemakaian Kimia",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Effluent Treatment (Limbah)",
+   "link_count": 10,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Debit Air Limbah",
+   "link_count": 0,
+   "link_to": "Debit Air Limbah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
+   "link_count": 0,
+   "link_to": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ketebalan Padatan Kolam Anaerobik",
+   "link_count": 0,
+   "link_to": "Ketebalan Padatan Kolam Anaerobik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengutipan Minyak Kolam Limbah",
+   "link_count": 0,
+   "link_to": "Pengutipan Minyak Kolam Limbah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Warna Air Kolam Aerobik",
+   "link_count": 0,
+   "link_to": "Warna Air Kolam Aerobik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kolam Pendingin",
+   "link_count": 0,
+   "link_to": "Kolam Pendingin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kolam Pengasaman",
+   "link_count": 0,
+   "link_to": "Kolam Pengasaman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kolam Kolam Aerobik",
+   "link_count": 0,
+   "link_to": "Kolam Kolam Aerobik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kolam Kolam Anaerobik",
+   "link_count": 0,
+   "link_to": "Kolam Kolam Anaerobik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kolam Kolam Pembuangan  Akhir",
+   "link_count": 0,
+   "link_to": "Kolam Kolam Pembuangan  Akhir",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Harian (RKH)",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Olah TBS",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Olah TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kegiatan Kerja",
+   "link_count": 0,
+   "link_to": "Rencana Kegiatan Kerja",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rencana Kerja Harian Pemeliharaan Mesin-Mesin",
+   "link_count": 0,
+   "link_to": "Rencana Kerja Harian Pemeliharaan Mesin-Mesin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Laboratorium",
+   "link_count": 18,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mass Balance",
+   "link_count": 0,
+   "link_to": "Mass Balance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Oil Losess On Sampel",
+   "link_count": 0,
+   "link_to": "Oil Losess On Sampel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kernel Losess on Sampel",
+   "link_count": 0,
+   "link_to": "Kernel Losess on Sampel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Oil Content",
+   "link_count": 0,
+   "link_to": "Analisa Oil Content",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Press Cake",
+   "link_count": 0,
+   "link_to": "Analisa Press Cake",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mass Passing Digester Analysis",
+   "link_count": 0,
+   "link_to": "Mass Passing Digester Analysis",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Size Faktor",
+   "link_count": 0,
+   "link_to": "Size Faktor",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO Produksi Harian di POT",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO Produksi Harian di POT",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Kernel Produks",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Kernel Produks",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO di BST-1",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO di BST-1",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO di BST-2",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO di BST-2",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Kernel di Bunker Kernel",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Kernel di Bunker Kernel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO  Pengiriman",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO  Pengiriman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Palm Kernel  Pengiriman",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Palm Kernel  Pengiriman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bunch Analisis TBS",
+   "link_count": 0,
+   "link_to": "Bunch Analisis TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Demint Plant",
+   "link_count": 0,
+   "link_to": "Kualitas Air Demint Plant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Softener",
+   "link_count": 0,
+   "link_to": "Kualitas Air Softener",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Boiler",
+   "link_count": 0,
+   "link_to": "Kualitas Air Boiler",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bengkel",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Preventive Maintenance",
+   "link_count": 0,
+   "link_to": "Preventive Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jadwal dan realisasi service Rutin External",
+   "link_count": 0,
+   "link_to": "Jadwal dan realisasi service Rutin External",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mekanik",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mekanik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pencatatan Vibrasi Mesin",
+   "link_count": 0,
+   "link_to": "Pencatatan Vibrasi Mesin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pencatatan HM Mesin",
+   "link_count": 0,
+   "link_to": "Pencatatan HM Mesin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Berita Acara Pemeliharaan ",
+   "link_count": 0,
+   "link_to": "Berita Acara Pemeliharaan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Pemakaian Bahan Penolong",
+   "link_count": 0,
+   "link_to": "Budget Pemakaian Bahan Penolong",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Biaya Service and Maintenance",
+   "link_count": 0,
+   "link_to": "Budget Biaya Service and Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Produksi dan Tenaga Kerja",
+   "link_count": 0,
+   "link_to": "Budget Produksi dan Tenaga Kerja",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Pemakaian Sparepart ",
+   "link_count": 0,
+   "link_to": "Budget Pemakaian Sparepart",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mayor Maintenance ",
+   "link_count": 0,
+   "link_to": "Mayor Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Izin Pabrik",
+   "link_count": 0,
+   "link_to": "Izin Pabrik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Temuan Lainnya",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kebersihan Pabrik",
+   "link_count": 0,
+   "link_to": "Kebersihan Pabrik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Post Security",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Security Check Point",
+   "link_count": 0,
+   "link_to": "Security Check Point",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timbangan",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timbangan",
+   "link_count": 0,
+   "link_to": "Timbangan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sortasi",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sortasi",
+   "link_count": 0,
+   "link_to": "Sortasi",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Laporan Harian Produksi (LHP)",
+   "link_count": 7,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data TBS",
+   "link_count": 0,
+   "link_to": "Data TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock CPO di BST",
+   "link_count": 0,
+   "link_to": "Sounding Stock CPO di BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_count": 0,
+   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Penginputan Stock By Product",
+   "link_count": 0,
+   "link_to": "Penginputan Stock By Product",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jam Olah Pabrik",
+   "link_count": 0,
+   "link_to": "Jam Olah Pabrik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Curah Hujan",
+   "link_count": 0,
+   "link_to": "Curah Hujan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Penginputan Data Level Air Waduk",
+   "link_count": 0,
+   "link_to": "Penginputan Data Level Air Waduk",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Gudang Mill",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Warehouse",
+   "link_count": 0,
+   "link_to": "Warehouse",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Report Timbangan",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Penerimaan TBS Mill",
+   "link_count": 0,
+   "link_to": "Laporan Penerimaan TBS Mill",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-02-04 13:06:48.686747",
+ "modified": "2026-02-11 12:31:30.093172",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

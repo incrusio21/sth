@@ -93,9 +93,24 @@ def cek_status(self,method):
 		old_state = old_doc.get("workflow_state") if old_doc else None
 		new_state = self.get("workflow_state")
 			
-		if self.get("disabled") == 1:
-			if "Approved" in old_state and old_state != new_state and "Disabled" in new_state:
-				self.status = "Non Aktif"
+		if self.get("status") == "Non Aktif":
+			self.disabled = 1
+			if self.get("workflow_state") == "Approved":
+				self.workflow_state = "Butuh Persetujuan 1"
 		else:
-			self.status = "Aktif"
+			self.disabled = 0 
+
+	seen_companies = set()
+	to_remove = []
+	
+	for idx, row in enumerate(self.item_defaults):
+		if row.company in seen_companies:
+			to_remove.append(idx)
+		else:
+			seen_companies.add(row.company)
+	
+	for idx in reversed(to_remove):
+		self.item_defaults.remove(self.item_defaults[idx])
+
+
 

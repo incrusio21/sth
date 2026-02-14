@@ -20,10 +20,40 @@ def execute(filters=None):
 		e.unit as lokasi_tugas,
 		e.company as perusahaan,
 		e.no_ktp as no_ktp,
+		e.custom_foto_ktp as dok_ktp,
 		e.custom_no_kartu_keluarga as no_kk,
+		e.custom_foto_kk as dok_kk,
 		e.npwp as no_npwp,
+		e.custom_foto_npwp as dok_npwp,
 		e.bank_name as nama_bank,
-		e.bank_ac_no as no_rek
+		e.bank_ac_no as no_rek,
+		e.custom_bank_book_document as dok_bank,
+		e.passport_number as no_paspor,
+		e.custom_passport_document_upload as dok_paspor,
+		e.custom_no_bpjs_ketenagakerjaan as no_bpjs_jht_jkk_jkm,
+		e.custom_foto_bpjs_ketenagakerjaan as dok_bpjs_tk,
+		e.custom_no_bpjs_kesehatan as no_bpjs_kes,
+		e.custom_document_health_insurance as dok_bpjs_kes,
+		(SELECT ee.school_univ FROM `tabEmployee Education` as ee WHERE ee.parent = e.name LIMIT 1) as pendidikan,
+		e.pkp_status as status_pajak,
+		e.marital_status as status_perkawinan,
+  	e.date_of_joining as tanggal_masuk,
+		e.custom_employment_tenure as masa_kerja,
+		e.date_of_birth as tanggal_lahir,
+		e.custom_nationality as warga_negara,
+		e.gender as jenis_kelamin,
+		e.custom_religion as agama,
+		e.custom_religion_group as agama_group_thr,
+		e.custom_suku as suku,
+		e.current_address as alamat_aktif,
+		e.cell_number as no_hp,
+		e.custom_nama_ibu_kandung as ibu_kandung,
+		e.relieving_date as tanggal_keluar,
+		e.custom_cv as cv,
+		e.custom_aplikasi_form as aplikasi_form,
+		e.custom_fotocopy_ijasah as ijazah,
+		e.custom_surat_keterangan_kerja as surat_ket_kerja,
+		e.custom_pelatihan_lainnya as pelatihan_lainnya
 		FROM `tabEmployee` as e
 		JOIN `tabDesignation` as d ON d.name = e.designation
   	WHERE e.company IS NOT NULL {};
@@ -91,6 +121,15 @@ def get_condition(filters):
 	if filters.get("status_level"):
 		conditions += " AND e.employment_type = %(status_level)s"
 
+	if filters.get("divisi"):
+		conditions += " AND e.divisi = %(divisi)s"
+
+	if filters.get("golongan"):
+		conditions += " AND e.designation = %(golongan)s"
+
+	if filters.get("status_karyawan"):
+		conditions += " AND e.status = %(status_karyawan)s"
+
 	return conditions
 
 def get_columns(filters):
@@ -107,7 +146,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Pas Photo"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "pas_foto",
 		},
 		{
@@ -142,7 +181,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok KTP"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_ktp",
 		},
 		{
@@ -152,7 +191,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok KK"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_kk",
 		},
 		{
@@ -162,7 +201,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok NPWP"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_npwp",
 		},
 		{
@@ -177,7 +216,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok Bank"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_bank",
 		},
 		{
@@ -187,7 +226,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok Paspor"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_paspor",
 		},
 		{
@@ -202,7 +241,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok BPJS TK"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_bpjs_tk",
 		},
 		{
@@ -212,7 +251,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Dok BPJS Kes"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "dok_bpjs_kes",
 		},
 		{
@@ -327,27 +366,27 @@ def get_columns(filters):
 		},
 		{
 			"label": _("CV"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "cv",
 		},
 		{
 			"label": _("Aplikasi Form"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "aplikasi_form",
 		},
 		{
 			"label": _("Ijazah"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "ijazah",
 		},
 		{
 			"label": _("Surat Ket Kerja"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "surat_ket_kerja",
 		},
 		{
 			"label": _("Pelatihan Lainnya"),
-			"fieldtype": "Data",
+			"fieldtype": "Attach Image",
 			"fieldname": "pelatihan_lainnya",
 		},
 	]

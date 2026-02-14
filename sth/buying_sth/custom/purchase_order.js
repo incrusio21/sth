@@ -256,11 +256,13 @@ frappe.ui.form.on("Purchase Order", {
 
 			frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
 				for (const row of res) {
-					let taxes = frm.add_child('taxes')
-					taxes.account_head = row.account
-					taxes.add_deduct_tax = "Add"
-					taxes.charge_type = "Actual"
-					frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
+					if (frm.is_new()) {
+						let taxes = frm.add_child('taxes')
+						taxes.account_head = row.account
+						taxes.add_deduct_tax = "Add"
+						taxes.charge_type = "Actual"
+						frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
+					}
 					frappe.refererence.__ref_tax[row.type] = row
 				}
 			})
@@ -353,6 +355,16 @@ frappe.ui.form.on("VAT Detail", {
 
 	},
 
+	before_pph_lainnya_remove(frm, dt, dn) {
+		let row = locals[dt][dn]
+		frappe.model.clear_doc(row.ref_child_doc, row.ref_child_name)
+	},
+
+	before_ppn_remove(frm, dt, dn) {
+		let row = locals[dt][dn]
+		frappe.model.clear_doc(row.ref_child_doc, row.ref_child_name)
+	},
+
 	type(frm, dt, dn) {
 		let row = locals[dt][dn]
 
@@ -363,11 +375,6 @@ frappe.ui.form.on("VAT Detail", {
 			frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "account_head", res)
 			frm.script_manager.trigger(row.ref_child_doc, row.ref_child_name, "account_head")
 		})
-	},
-
-	before_pph_lainnya_remove(frm, dt, dn) {
-		let row = locals[dt][dn]
-		frappe.model.clear_doc(row.ref_child_doc, row.ref_child_name)
 	},
 
 	percentage(frm, dt, dn) {

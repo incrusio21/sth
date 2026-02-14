@@ -117,6 +117,7 @@ frappe.ui.form.on("Purchase Invoice", {
                     res.document_no = frm.doc.document_no
                     frappe.model.sync(res)
                     frm.refresh()
+                    frm.trigger('set_due_date')
                 })
                 .finally(() => {
                     frappe.dom.unfreeze()

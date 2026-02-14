@@ -30,13 +30,17 @@ frappe.ui.form.on("Anggaran Dasar", {
         
 	},
     calculate_total(frm){
-        let totals = 0
+        let totals = lembar_total = 0
         for (const item of frm.doc.saham || []) {
-            item.amount = flt(item.rate) * flt(item.qty)
+            let agio_amount = flt(item.agio_rate) * flt(item.qty)
+            let saham_amount = flt(item.rate) * flt(item.qty)
+            item.amount = saham_amount + agio_amount
             totals += flt(item.amount)
+            lembar_total += flt(item.qty)
         }
 
         frm.set_value("grand_total", totals)
+        frm.set_value("total_lembar_saham", lembar_total)
     }
 });
 
@@ -46,6 +50,9 @@ frappe.ui.form.on("Detail Form Saham", {
         frm.trigger("calculate_total")
     },
     rate(frm){
+        frm.trigger("calculate_total")
+    },
+    agio_rate(frm){
         frm.trigger("calculate_total")
     }
 });

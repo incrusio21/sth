@@ -78,7 +78,8 @@ function filterBankAccount(frm) {
         return{
             filters: {
                 bank: frm.doc.bank,
-                company: frm.doc.company
+                company: frm.doc.company,
+                unit: frm.doc.unit
             }
         }
     })

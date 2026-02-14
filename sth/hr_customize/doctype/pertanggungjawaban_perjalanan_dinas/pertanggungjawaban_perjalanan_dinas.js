@@ -13,6 +13,23 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       });
       fetchAccount(frm);
     }
+
+    console.log(frm.doc.workflow_state, frm.is_new());
+    if (frm.is_new()) {
+      frm.fields_dict["costings"].grid.update_docfield_property(
+        "jumlah_verifikasi_hrd",
+        "read_only",
+        1
+      );
+    }
+    if (frm.doc.workflow_state != "Butuh Persetujuan 1" && frm.doc.workflow_state != "Butuh Persetujuan 2") {
+      frm.fields_dict["costings"].grid.update_docfield_property(
+        "jumlah_verifikasi_hrd",
+        "read_only",
+        1
+      );
+    }
+    createPayment(frm);
   },
   no_spd(frm) {
     // frm.call("get_data_perjalanan_dinas", { throw_if_missing: true })
@@ -57,6 +74,25 @@ frappe.ui.form.on("PPD Costing Detail", {
   },
 });
 
+function createPayment(frm) {
+  if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
+    if (frm.doc.status_selisih == "Tidak Ada Selisih") {
+      frappe.show_alert({
+        message: __('Tidak Ada Selisih'),
+        indicator: 'red'
+      }, 5);
+      return;
+    }
+
+    frm.add_custom_button('Payment', () => {
+      frappe.model.open_mapped_doc({
+        method: "sth.hr_customize.doctype.pertanggungjawaban_perjalanan_dinas.pertanggungjawaban_perjalanan_dinas.make_payment_entry",
+        frm: frm,
+      })
+    }, 'Create');
+  }
+}
+
 function calculate_realisasi_and_disetujui(frm, cdt, cdn) {
   total_realisasi = frm.doc.costings.reduce((sum, { sanctioned_amount = 0 }) => sum + sanctioned_amount, 0);
   total_disetujui = frm.doc.costings.reduce((sum, { jumlah_verifikasi_hrd = 0 }) => sum + jumlah_verifikasi_hrd, 0);
@@ -84,3 +120,13 @@ sth.plantation.PertanggungjawabanPerjalananDinas = class PertanggungjawabanPerja
 }
 
 cur_frm.script_manager.make(sth.plantation.PertanggungjawabanPerjalananDinas);
+
+function filter_jenis_ex_type(frm){
+  frm.set_query('expense_type', 'costings', () => {
+    return {
+      filters: {
+        is_hrd: 1
+      }
+    }
+  });
+}

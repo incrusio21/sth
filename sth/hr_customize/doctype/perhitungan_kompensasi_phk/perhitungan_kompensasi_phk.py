@@ -38,7 +38,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 		grand_total = 0
 		base = 0
 		
-  	# ambil 1 natura price
+		# ambil 1 natura price
 		natura_price = frappe.get_value("Natura Price", {"company": self.company}, "harga_beras", order_by="valid_from desc") or 0
 		natura_multiplier_map = frappe._dict(
 			frappe.get_all(
@@ -46,7 +46,7 @@ class PerhitunganKompensasiPHK(AccountsController):
 				filters={"company": self.company},
 				fields=[
 					"pkp", 
-					self._allowance_settings.get_natura_setting(employee.get("unit"))
+					self._allowance_settings.get_natura_setting_phk(employee.get("unit"))
 				],
 				as_list=1
 			)
@@ -91,22 +91,24 @@ class PerhitunganKompensasiPHK(AccountsController):
 			detail_setup_komponen = frappe.db.get_value("Detail Setup Komponen PHK", cond, "*")
 
 			perhitungan_component.update({"fps": (detail_setup_komponen.pengkali if detail_setup_komponen and detail_setup_komponen.pengkali else 0)})
-			result = perhitungan_component["fp"] * perhitungan_component["fps"] * base
+			result = perhitungan_component["fp"] * perhitungan_component["fps"] * (base + (days_in_month * nat_mul * natura_price))
 			if setup_komponen_phk[0].is_cuti:
 				remaining_leave = get_cuti_balance(setup_komponen_phk[0].tipe_cuti, self.l_date, self.employee)
-				result = remaining_leave / 30 * base
+				result = remaining_leave / 30 * (base + (days_in_month * nat_mul * natura_price))
 				perhitungan_component.update({"sisa_cuti": remaining_leave})
 			if detail_setup_komponen and detail_setup_komponen.maximum > 0  and result > detail_setup_komponen.maximum:
 				result = detail_setup_komponen.maximum
 			grand_total += result
+
+			perhitungan_component.update({"natura": days_in_month * nat_mul * natura_price})
 			perhitungan_component.update({"sbttl": result})
 			self.append("table_seym", perhitungan_component)
 
-		self.subtotal =  grand_total
-		self.natura =  days_in_month * nat_mul * natura_price
+		# self.subtotal =  grand_total
+		# self.natura =  days_in_month * nat_mul * natura_price
 		
-		self.grand_total = self.subtotal + self.natura
-		self.outstanding_amount = self.subtotal + self.natura
+		self.grand_total = grand_total
+		self.outstanding_amount = grand_total
 
 	def update_exit_interview(self):
 		updated = {
@@ -246,8 +248,9 @@ def make_payment_entry(source_name, target_doc=None):
 				}
 			}
 		},
-  		target_doc,
+		target_doc,
 		post_process,
 	)
- 
+	doclist.paid_from_account_currency="IDR"
+	doclist.paid_to_account_currency="IDR"
 	return doclist	

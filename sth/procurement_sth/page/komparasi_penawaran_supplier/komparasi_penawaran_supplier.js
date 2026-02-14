@@ -271,6 +271,7 @@ class SupplierComparasion {
 			{ title: "Nama Barang", field: "nama_barang", headerSort: false, frozen: true, width: 120, headerHozAlign: "center", },
 			{ title: "Satuan", field: "satuan", headerSort: false, frozen: true, headerHozAlign: "center", },
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
+			{ title: "Notes", field: "notes", headerSort: false, frozen: true, width: 120, headerHozAlign: "center", },
 			...column_suppliers
 		]
 
@@ -280,9 +281,11 @@ class SupplierComparasion {
 	validateSelectedData(data, supplier) {
 		let is_selected_before = this.selected_items.find(r => r.item_name == data.mark)
 
-		if (this.selected_suppliers && this.selected_suppliers != supplier) {
-			frappe.throw('Hanya diperbolehkan memilih penawaran dari 1 supplier')
-		} else if (is_selected_before) {
+		// if (this.selected_suppliers && this.selected_suppliers != supplier) {
+		// 	frappe.throw('Hanya diperbolehkan memilih penawaran dari 1 supplier')
+		// }
+
+		if (is_selected_before) {
 			frappe.throw('Item sudah dipilih sebelumnya')
 		}
 	}
@@ -297,6 +300,13 @@ class SupplierComparasion {
 			title: "Selected Items",
 			size: "extra-large",
 			fields: [
+				{
+					fieldname: "pr_sr",
+					fieldtype: "Data",
+					hidden: 1,
+					default: me.pr_sr
+				},
+
 				{
 					fieldname: "items",
 					fieldtype: "Table",
@@ -340,7 +350,7 @@ class SupplierComparasion {
 							label: "Spesifikasi",
 							in_list_view: 1,
 							read_only: 1,
-							columns: 2
+							columns: 1
 						},
 						{
 							fieldtype: "Float",
@@ -356,7 +366,7 @@ class SupplierComparasion {
 							label: "Harga",
 							in_list_view: 1,
 							read_only: 1,
-							columns: 1
+							columns: 2
 						},
 						{
 							fieldtype: "Currency",
@@ -397,13 +407,16 @@ class SupplierComparasion {
 				if (!values.items.length) {
 					frappe.throw('Items tidak boleh kosong')
 				}
+				frappe.dom.freeze('Approving...')
 				console.log(values);
-				// frappe.xcall("sth.api.comparasion_create_sq", { items: values.items, freeze: true, freeze_message: "Approving..." }).then((res) => {
-				// 	frappe.show_alert({
-				// 		message: __(`Document ${res} successfully approved`),
-				// 		indicator: 'green'
-				// 	}, 5);
-				// })
+				frappe.xcall("sth.api.comparasion_create_sq", { items: values.items, pr_sr: values.pr_sr }).then((res) => {
+					frappe.show_alert({
+						message: __(`Document successfully approved`),
+						indicator: 'green'
+					}, 5);
+				}).finally(() => {
+					frappe.dom.unfreeze()
+				})
 
 				me.dialog.hide();
 			}

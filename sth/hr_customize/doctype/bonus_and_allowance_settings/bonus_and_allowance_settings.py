@@ -12,3 +12,8 @@ class BonusandAllowanceSettings(Document):
 		unit_setting = self.get("thr_natura_settings", {"unit": unit}) or [{}]
 		
 		return scrub(unit_setting[0].get("fields") or "Employee Multiplier")
+
+	def get_natura_setting_phk(self, unit):
+		unit_setting = self.get("phk_natura_settings", {"unit": unit}) or [{}]
+		
+		return scrub(unit_setting[0].get("fields") or "Employee Multiplier")

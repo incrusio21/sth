@@ -71,7 +71,7 @@ def make_request_for_quotation(source_name, target_doc=None, args=None):
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children",[])
-		return d.name in filtered_items
+		return d.name in filtered_items if filtered_items else True
 
 	doclist = get_mapped_doc(
 		"Material Request",

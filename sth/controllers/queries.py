@@ -422,12 +422,44 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = ", ".join(get_fields(doctype, ["name", "customer_name"]))
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
 	return frappe.db.sql(
+			f"""
+					select {fields}
+					from `tabCustomer`
+					where (
+							`tabCustomer`.name like %(txt)s
+							or `tabCustomer`.customer_name like %(txt)s
+					) {fcond}
+					order by
+							(case
+									when locate(%(_txt)s, `tabCustomer`.name) > 0
+									then locate(%(_txt)s, `tabCustomer`.name)
+									else 99999
+							end),
+							`tabCustomer`.name
+					limit %(page_len)s offset %(start)s
+			""",
+			{
+					"txt": f"%{txt}%",
+					"_txt": txt.replace("%", ""),
+					"start": start,
+					"page_len": page_len
+			}
+	)
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def item_group_query(doctype, txt, searchfield, start, page_len, filters):
+
+	conditions = []
+	fields = ", ".join(get_fields(doctype, ["name", "item_group_name", "parent_item_group"]))
+	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
+	return frappe.db.sql(
 		f"""
-			select {fields} from `tabCustomer`
-			where `tabCustomer`.{searchfield} like %(txt)s {fcond}
+			select {fields} from `tabItem Group`
+			where `tabItem Group`.{searchfield} like %(txt)s {fcond}
 			order by
-				(case when locate(%(_txt)s, `tabCustomer`.name) > 0 then locate(%(_txt)s, `tabCustomer`.name) else 99999 end),
-				`tabCustomer`.name
+				(case when locate(%(_txt)s, `tabItem Group`.name) > 0 then locate(%(_txt)s, `tabItem Group`.name) else 99999 end),
+				`tabItem Group`.name
 			limit %(page_len)s offset %(start)s
 		""",
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": 999999}
@@ -455,10 +487,41 @@ def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 			) bin on bin.item_code = `tabItem`.name
 			where ({searchfields}) {fcond}
 			order by
-				(case when locate(%(_txt)s, `tabItem`.name) > 0 then locate(%(_txt)s, `tabItem`.name) else 99999 end),
-				`tabItem`.name
+				(case when locate(%(_txt)s, `tabItem`.item_name) > 0 then locate(%(_txt)s, `tabItem`.item_name) else 99999 end),
+				`tabItem`.item_name, `tabItem`.name
 			limit %(page_len)s offset %(start)s
 		""",
-		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
-		debug=True
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
 	)
+ 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_expense_claim_type(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		SELECT name
+		FROM `tabExpense Claim Type`
+		WHERE is_hrd = 1
+		AND name LIKE %(txt)s
+		LIMIT %(start)s, %(page_len)s
+	""", {
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len
+	})
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_expense_claim_type_kas(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		SELECT ect.name
+		FROM `tabExpense Claim Type` ect 
+		JOIN `tabPDO Type` pdo ON ect.custom_pdo_type = pdo.name
+		JOIN `tabPDO Category Type Table` pdot ON pdot.parent = pdo.name AND pdot.category = "Kas"
+		WHERE ect.name LIKE %(txt)s
+		ORDER BY name
+		LIMIT %(start)s, %(page_len)s
+	""", {
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len
+	})

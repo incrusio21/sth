@@ -105,4 +105,22 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		set_missing_values,
 	)
 
+	for row in doclist.items:
+		if row.po_detail:
+			get_detail = frappe.db.sql(""" SELECT count(parent) FROM `tabPurchase Invoice Item` WHERE po_detail = "{}" and docstatus = 1 """.format(row.po_detail))
+			jumlah_termin = int(get_detail[0][0])
+
+			cek_persen = 0
+			
+			so_doc = frappe.get_doc("Purchase Order",row.purchase_order)
+			if so_doc.payment_schedule:
+				if jumlah_termin == 0:
+					cek_persen = so_doc.payment_schedule[jumlah_termin].invoice_portion
+					row.qty = cek_persen / 100 * row.qty
+					doclist.run_method("calculate_taxes_and_totals")
+				elif jumlah_termin == 1:
+					cek_persen = so_doc.payment_schedule[jumlah_termin].invoice_portion
+					row.qty = cek_persen / 100 * row.qty
+					doclist.run_method("calculate_taxes_and_totals")
+
 	return doclist

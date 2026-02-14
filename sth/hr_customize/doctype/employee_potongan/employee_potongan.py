@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import flt, get_link_to_form
+from frappe.model.mapper import get_mapped_doc
 
 from sth.controllers.accounts_controller import AccountsController
 
@@ -106,10 +107,56 @@ class EmployeePotongan(AccountsController):
 			})
 
 @frappe.whitelist()
-def fetch_company_account(company):
+def fetch_company_account(company, jenis_potongan):
+	jenis_potongan = frappe.db.sql("""
+		SELECT jpa.expense_account FROM `tabJenis Potongan` as jp
+		JOIN `tabJenis Potongan Accounts` as jpa ON jpa.parent = jp.name
+		WHERE jp.name = %(jenis_potongan)s AND jpa.company = %(company)s
+		LIMIT 1
+	""", {"company": company, "jenis_potongan": jenis_potongan}, as_dict=True)
+  
 	accounts_dict = {
 		"credit_to": frappe.get_cached_value("Company", company, "pengajuan_pembayaran_account"),
-		"expense_account": frappe.get_cached_value("Company", company, "pengajuan_pembayaran_account"),
+		"expense_account": jenis_potongan[0].get("expense_account") if jenis_potongan else None
 	}
 
 	return accounts_dict
+
+@frappe.whitelist()
+def make_payment_entry(source_name, target_doc=None):
+	def post_process(source, target):
+		employee = frappe.db.get_value("Employee", source.employee, "*")
+		company = frappe.db.get_value("Company", source.company, "*")
+
+		target.payment_type = "Pay"
+		target.party_type = "Employee"
+		target.party = employee.name
+		target.party_name = employee.employee_name
+		target.paid_amount = source.outstanding_amount
+		target.no_rekening_tujuan = source.no_rekening
+		target.paid_from_account_currency = "IDR"
+		target.paid_to_account_currency = "IDR"
+		target.append("references", {
+			"reference_doctype": "Employee Potongan",
+			"reference_name": source.name,
+			"total_amount": source.grand_total,
+			"outstanding_amount": source.outstanding_amount,
+			"allocated_amount": source.outstanding_amount
+		})
+	doclist = get_mapped_doc(
+		"Employee Potongan",
+		source_name,
+		{
+			"Employee Potongan": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"expense_account": "paid_from",
+					"credit_to": "paid_to"
+				}
+			}
+		},
+  		target_doc,
+		post_process,
+	)
+ 
+	return doclist

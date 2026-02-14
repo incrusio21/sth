@@ -27,7 +27,7 @@ def create_sq():
 	doc_sq = make_supplier_quotation_from_rfq(rfq_name,for_supplier=data.get("supplier"))
 	doc_sq.custom_file_upload = f"/private/files/{data.file_url}"
 	doc_sq.valid_till = data.get('valid_date')
-	doc_sq.terms = data.get('terms')
+	doc_sq.syarat_pembayaran = data.get('syarat_pembayaran')
 	doc_sq.keterangan = data.get('keterangan')
 	doc_sq.custom_required_by = data.get('estimated_date')
 	doc_sq.alamat = frappe.db.get_value("Unit",doc_sq.lokasi_pengiriman,"address")
@@ -86,7 +86,7 @@ def create_sq():
 	doc_sq.apply_discount_on = "Net Total"
 	doc_sq.additional_discount_percentage = flt(charges_and_discount.get('discount'))
 	
-	doc_sq.insert()
+	doc_sq.insert(ignore_mandatory=True)
 	frappe.db.commit()
 	return {
 		"doctype": doc_sq.doctype,
@@ -144,7 +144,7 @@ def get_table_data(args):
 		filters["supplier_quotation"] = args.list_sq
 
 	query = frappe.db.sql(f"""
-		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
+		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes ,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
 		FROM `tabSupplier Quotation` sq
 		JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
 		JOIN `tabItem` i ON i.`name` = sqi.`item_code`
@@ -268,6 +268,7 @@ def comparasion_create_sq(pr_sr,items):
 	rfq = frappe.db.get_all("Request for Quotation Item",{"material_request": pr_sr},["parent"],group_by='parent',pluck='parent')
 	for row in rfq :
 		close_rfq(row)
+		
 	return new_doc.name
 
 def debug_create_po():

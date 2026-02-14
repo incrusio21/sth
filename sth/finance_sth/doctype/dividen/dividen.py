@@ -78,7 +78,7 @@ def make_payment_entry(source_name, target_doc=None, type=None):
 		target.party_type = party_type
 		target.party = default_party
 		target.party_name = party_name
-		target.paid_amount = source.outstanding_amount
+		target.paid_amount = source.grand_total
 		target.bank_account = source.bank_account
 		target.paid_from_account_currency = account_currency
 		target.paid_to_account_currency = company.default_currency
@@ -91,9 +91,9 @@ def make_payment_entry(source_name, target_doc=None, type=None):
 		target.append("references", {
 			"reference_doctype": "Dividen Transaction",
 			"reference_name": source.name,
-			"total_amount": source.outstanding_amount,
+			"total_amount": source.grand_total,
 			"outstanding_amount": source.outstanding_amount,
-			"allocated_amount": source.outstanding_amount
+			"allocated_amount": source.grand_total
 		})
 
 	doclist = get_mapped_doc(

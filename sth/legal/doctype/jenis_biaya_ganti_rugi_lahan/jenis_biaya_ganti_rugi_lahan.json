@@ -55,7 +55,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-09 16:17:16.253589",
+ "modified": "2026-02-12 10:13:26.021093",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Jenis Biaya Ganti Rugi Lahan",
@@ -76,6 +76,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "ket",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

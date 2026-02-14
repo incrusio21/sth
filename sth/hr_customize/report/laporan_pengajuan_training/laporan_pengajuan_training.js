@@ -8,8 +8,6 @@ frappe.query_reports["Laporan Pengajuan Training"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company"),
-			"reqd": 1,
 		},
 		{
 			"fieldname": "kategori_training",

@@ -49,16 +49,18 @@ frappe.ui.form.on('Sales Order', {
 		set_rekening_filter(frm)
 	},
 	unit: function (frm) {
+		set_rekening_filter(frm)
+	},
+	komoditi: function (frm) {
 		frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
-			const catatan = `CPO yang dijual adalah produksi perusahaan kami yang berasal dari ${frm.doc.company} dan lokasi ${doc.address}`;
+			const catatan = `${frm.doc.komoditi} yang dijual adalah produksi perusahaan kami yang berasal dari ${frm.doc.company} dan lokasi ${doc.address}`;
 			frm.set_value("catatan", doc.address ? catatan : "");
 			frm.refresh_field("catatan");
 		})
-		set_rekening_filter(frm)
 	}
 });
 
-function set_rekening_filter(frm){
+function set_rekening_filter(frm) {
 	frm.set_query('no_rekening_tujuan', function () {
 		return {
 			filters: {

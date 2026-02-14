@@ -1,5 +1,6 @@
 frappe.ui.form.on("Travel Request", {
   refresh(frm) {
+    filter_jenis_ex_type(frm)
   }
 });
 
@@ -19,4 +20,14 @@ function calculate_total_costing(frm) {
   });
   frm.set_value("custom_grand_total_costing", total);
   frm.refresh_field("custom_grand_total_costing");
+}
+
+function filter_jenis_ex_type(frm){
+  frm.set_query('expense_type', 'costings', () => {
+    return {
+      filters: {
+        is_hrd: 1
+      }
+    }
+  });
 }

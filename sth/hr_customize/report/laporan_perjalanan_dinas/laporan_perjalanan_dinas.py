@@ -38,9 +38,6 @@ def execute(filters=None):
 def get_condition(filters):
 	conditions = ""
 
-	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " AND eg.date BETWEEN %(from_date)s AND %(to_date)s"
-
 	if filters.get("pt"):
 		conditions += " AND tr.company = %(pt)s"
 
@@ -52,6 +49,12 @@ def get_condition(filters):
 
 	if filters.get("jabatan"):
 		conditions += " AND e.designation = %(jabatan)s"
+
+	if filters.get("jenis_pjd"):
+		conditions += " AND tr.purpose_of_travel = %(jenis_pjd)s"
+
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " AND tr.custom_posting_date BETWEEN %(from_date)s AND %(to_date)s"
 
 	return conditions
 

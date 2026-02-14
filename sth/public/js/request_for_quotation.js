@@ -43,9 +43,14 @@ frappe.ui.form.on('Request for Quotation', {
                 __("Get Items From")
             );
         }
-    },
 
-    refresh(frm) {
+        frm.set_query("lokasi_pengiriman", function (doc) {
+            return {
+                filters: {
+                    company: doc.company
+                }
+            }
+        })
     },
 
     onload_post_render(frm) {
@@ -102,3 +107,7 @@ frappe.ui.form.on('Request for Quotation', {
         dialog.show();
     },
 })
+
+frappe.form.link_formatters['Item'] = function (value, doc) {
+    return doc.item_name || doc.item_code
+}

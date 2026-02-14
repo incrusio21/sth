@@ -18,7 +18,7 @@ def execute(filters=None):
     te.custom_posting_date as tanggal_training,
     te.custom_grand_total_costing as biaya,
     te.supplier as lembaga_pelatihan,
-    tee.employee as peserta_training
+    tee.employee_name as peserta_training
     FROM `tabTraining Event` as te
     LEFT JOIN `tabTraining Event Employee` as tee ON tee.parent = te.name
 		WHERE te.company IS NOT NULL {};
@@ -60,7 +60,10 @@ def execute(filters=None):
 	return columns, data
 
 def get_condition(filters):
-	conditions = "AND te.company = %(company)s"
+	conditions = ""
+
+	if filters.get("company"):
+		conditions += " AND te.company = %(company)s"
 
 	if filters.get("kategori_training"):
 		conditions += " AND te.type = %(kategori_training)s"

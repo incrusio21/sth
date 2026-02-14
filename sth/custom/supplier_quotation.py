@@ -1,24 +1,24 @@
-import frappe
+import frappe,json
 
-def update_status_rfq(doc,method):
-    rfq = doc.items[0].request_for_quotation
-    if rfq:
-        close_status_another_sq(rfq,doc.name)
-        frappe.db.set_value("Request for Quotation",rfq,"custom_offering_status","Closed",update_modified=False)
+@frappe.whitelist()
+def close_rfq(rfq):
+    frappe.db.set_value("Request for Quotation",rfq,"custom_offering_status","Closed",update_modified=False)
+
 
 def create_po_draft(doc,method):
     from sth.overrides.supplier_quotation import make_purchase_order
     po = make_purchase_order(doc.name)
     po.insert()
 
-def close_status_another_sq(rfq,except_name):
+@frappe.whitelist()
+def close_status_another_sq(reference,except_name):
     supplier_quotations = frappe.db.sql("""
         select sq.name from `tabSupplier Quotation` sq
         join `tabSupplier Quotation Item` sqi on sqi.parent = sq.name
-        where sq.workflow_state = "Open" and sqi.request_for_quotation = %s 
-        and sq.name <> %s
+        where sq.workflow_state = "Open" and (sqi.request_for_quotation in %(reference)s or sq.custom_material_request in %(reference)s
+        and sq.name not in %(except_name)s
         group by sq.name
-    """,[rfq,except_name],as_dict=True)
+    """,{"reference":reference,"except_name":except_name},as_dict=True)
 
     for row in supplier_quotations:
         frappe.db.set_value("Supplier Quotation",row.name,"workflow_state","Closed")

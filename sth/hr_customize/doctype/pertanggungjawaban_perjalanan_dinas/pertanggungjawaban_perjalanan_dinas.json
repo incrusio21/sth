@@ -7,7 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "no_spd",
+  "travel_for",
   "employee",
+  "nk",
   "nik",
   "grade",
   "column_break_zdwy",
@@ -21,6 +23,8 @@
   "column_break_guuu",
   "persetujuan_3",
   "persetujuan_4",
+  "guest_detail_section",
+  "guests",
   "travel_itinerary_section",
   "itinerary",
   "costing_details_section",
@@ -74,8 +78,9 @@
   },
   {
    "fieldname": "employee",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Nama",
+   "options": "Employee",
    "read_only": 1
   },
   {
@@ -286,13 +291,37 @@
    "fieldtype": "Date",
    "label": "Posting Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "travel_for",
+   "fieldtype": "Data",
+   "label": "Travel For",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.travel_for == \"Guest\"",
+   "fieldname": "guest_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Guest Detail"
+  },
+  {
+   "fieldname": "guests",
+   "fieldtype": "Table",
+   "options": "PPD Guest Detail"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "nk",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Nama Karyawan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 14:16:05.937910",
+ "modified": "2026-02-12 10:19:21.146647",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",
@@ -314,6 +343,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "nk",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

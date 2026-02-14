@@ -295,16 +295,21 @@ frappe.ui.form.on('Item', {
 			if(frm.doc.persetujuan_2){
 				frm.set_df_property('persetujuan_2', 'read_only', 1);
 			}
-			frm.set_df_property('status', 'read_only', 1);
+		}
+		else{
+			frm.set_value("item_code", "-");
+
 		}
 		frm.set_df_property('item_code', 'read_only', 1);
-		frm.set_value("item_code", "-");
 
 		if(frm.doc.disabled == 1){
 			frm.set_value('status', 'Non Aktif');
 		}
 		else if(frm.doc.disabled == 0){
 			frm.set_value('status', 'Aktif');
+		}
+		if(frm.doc.workflow_state != "Approved"){
+			frm.set_df_property('status', 'read_only', 1);
 		}
 	},
 	refresh: function(frm){
@@ -325,6 +330,9 @@ frappe.ui.form.on('Item', {
                 };
             });
         }
+        if(frm.doc.workflow_state != "Approved"){
+			frm.set_df_property('status', 'read_only', 1);
+		}
 	},
 	item_group: function(frm) {
 		if (frm.is_new() && frm.doc.item_group) {

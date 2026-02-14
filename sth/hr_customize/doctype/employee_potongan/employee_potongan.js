@@ -22,8 +22,20 @@ frappe.ui.form.on("Employee Potongan", {
                 }
             };
         });
+        createPayment(frm);
     },
 });
+
+function createPayment(frm) {
+    if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
+        frm.add_custom_button('Payment', () => {
+            frappe.model.open_mapped_doc({
+                method: "sth.hr_customize.doctype.employee_potongan.employee_potongan.make_payment_entry",
+                frm: frm,
+            })
+        }, 'Create');
+    }
+}
 
 sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantation.AccountsController {
     setup() {
@@ -41,7 +53,11 @@ sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantatio
         this.set_query_field()
     }
 
-    company() {
+    // company() {
+    //     this.get_accounts()
+    // }
+
+    jenis_potongan() {
         this.get_accounts()
     }
 
@@ -75,11 +91,15 @@ sth.hr_customize.EmployeePotongan = class EmployeePotongan extends sth.plantatio
         frappe.call({
             method: "sth.hr_customize.doctype.employee_potongan.employee_potongan.fetch_company_account",
             args: {
-                company: me.frm.doc.company
+                company: me.frm.doc.company,
+                jenis_potongan: me.frm.doc.jenis_potongan,
             },
             callback: function (r) {
+                console.log(r.message);
                 if (!r.exc && r.message) {
                     me.frm.set_value(r.message);
+                    me.frm.refresh_fields("credit_to");
+                    me.frm.refresh_fields("expense_account");
                 }
             }
         });

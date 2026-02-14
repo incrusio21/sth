@@ -160,7 +160,7 @@ standard_queries = {
 
 	"Bank": "sth.controllers.queries.get_bank_query",
 	"Customer": "sth.controllers.queries.customer_query",
-	"Expense Claim Type": "sth.controllers.queries.get_expense_claim_type",
+	# "Expense Claim Type": "sth.controllers.queries.get_expense_claim_type",
 	"Item Group": "sth.controllers.queries.item_group_query",
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
@@ -208,7 +208,7 @@ doc_events = {
 	# untuk kriteria upload
 	"*": {
 		"validate": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_setelah_insert",
-		"before_submit": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_before_submit"
+		"before_submit": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_before_submit",
 	},
 
 	"Asset": {
@@ -282,6 +282,9 @@ doc_events = {
 		"validate": "sth.legal.custom.project.Project",
 		"on_update": "sth.legal.custom.project.Project",
 		"on_trash": "sth.legal.custom.project.Project",
+	},
+    "Purchase Order": {
+		"before_save": "sth.buying_sth.custom.purchase_order.set_accept_day"
 	},
 	"Purchase Receipt": {
 		"validate": "sth.custom.purchase_receipt.set_purchase_order_if_exist"

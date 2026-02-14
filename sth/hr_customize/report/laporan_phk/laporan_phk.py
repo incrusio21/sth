@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
+	conditions = get_condition(filters)
 	columns = get_columns(filters)
 	data = []
 
@@ -18,17 +19,41 @@ def execute(filters=None):
 		ee.company as pt,
 		pkp.dphk as dasar_phk,
 		eilb.employee_name as yang_mengeluarkan_surat,
-		pkp.grand_total as pesangon_kompensasi
+		pkp.grand_total as pesangon_kompensasi,
+		pkp.persetujuan_1 as pers_1,
+		pkp.persetujuan_2 as pers_2,
+		pkp.persetujuan_3 as pers_3,
+		pkp.persetujuan_4 as pers_4
 		FROM `tabPerhitungan Kompensasi PHK` as pkp
 		JOIN `tabEmployee` as ee ON ee.name = pkp.employee
-		LEFT JOIN `tabEmployee` as eilb ON eilb.name = pkp.ilb;
-  """, as_dict=True)
+		LEFT JOIN `tabEmployee` as eilb ON eilb.name = pkp.ilb
+		WHERE pkp.company IS NOT NULL {}
+  """.format(conditions), filters, as_dict=True)
 
 	for emp in query_l_phk:
 		data.append(emp)
 
 	return columns, data
 
+def get_condition(filters):
+	conditions = ""
+
+	if filters.get("pt"):
+		conditions += " AND pkp.company = %(pt)s"
+
+	if filters.get("unit"):
+		conditions += " AND pkp.unit = %(unit)s"
+
+	if filters.get("golongan"):
+		conditions += " AND ee.grade = %(golongan)s"
+
+	if filters.get("jabatan"):
+		conditions += " AND ee.designation = %(jabatan)s"
+  
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " AND pkp.posting_date BETWEEN %(from_date)s AND %(to_date)s"
+
+	return conditions
 
 def get_columns(filters):
 	columns = [

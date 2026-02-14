@@ -27,5 +27,21 @@ frappe.query_reports["Laporan Perjalanan Dinas"] = {
 			"fieldtype": "Link",
 			"options": "Designation",
 		},
+		{
+			"fieldname": "jenis_pjd",
+			"label": __("Jenis PJD"),
+			"fieldtype": "Link",
+			"options": "Purpose of Travel",
+		},
+		{
+			"fieldname": "from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+		},
+		{
+			"fieldname": "to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+		},
 	]
 };

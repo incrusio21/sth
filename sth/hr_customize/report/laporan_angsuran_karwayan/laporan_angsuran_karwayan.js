@@ -31,5 +31,27 @@ frappe.query_reports["Laporan Angsuran Karwayan"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 		},
+		{
+			"fieldname": "jenis_angsuran",
+			"label": __("Jenis Angsuran"),
+			"fieldtype": "Link",
+			"options": "Loan Product",
+		},
+		{
+			"fieldname": "status",
+			"label": __("Status"),
+			"fieldtype": "Select",
+			"options": [
+				"Draft",
+				"Sanctioned",
+				"Partially Disbursed",
+				"Disbursed",
+				"Active",
+				"Loan Closure Requested",
+				"Closed",
+				"Written Off",
+				"Settled",
+			],
+		},
 	]
 };

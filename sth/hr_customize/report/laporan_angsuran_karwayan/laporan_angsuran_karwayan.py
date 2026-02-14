@@ -16,10 +16,16 @@ def execute(filters=None):
 		e.unit as unit,
 		e.employee_name as nama,
 		lp.product_name as jenis_angsuran,
-		l.loan_amount as total_nilai_hutang
+		l.loan_amount as total_nilai_hutang,
+		lrs.repayment_start_date as bulan_awal,
+		lrs.maturity_date as sampai,
+		lrs.repayment_periods as jumlah_bulan,
+		lrs.monthly_repayment_amount as potongan_per_bulan,
+		lrs.total_installments_paid * lrs.monthly_repayment_amount as jumlah_potongan_berjalan
 		FROM `tabLoan` as l
 		JOIN `tabEmployee` as e ON e.name = l.applicant
 		JOIN `tabLoan Product` as lp ON lp.name = l.loan_product
+		JOIN `tabLoan Repayment Schedule` as lrs ON lrs.loan = l.name
 		WHERE l.company IS NOT NULL {};
   """.format(conditions), filters, as_dict=True)
 
@@ -42,6 +48,15 @@ def get_condition(filters):
 
 	if filters.get("company"):
 		conditions += " AND l.company = %(company)s"
+
+	if filters.get("jenis_angsuran"):
+		conditions += " AND l.loan_product = %(jenis_angsuran)s"
+
+	if filters.get("jenis_angsuran"):
+		conditions += " AND l.loan_product = %(jenis_angsuran)s"
+
+	if filters.get("status"):
+		conditions += " AND l.status = %(status)s"
 
 	return conditions
 

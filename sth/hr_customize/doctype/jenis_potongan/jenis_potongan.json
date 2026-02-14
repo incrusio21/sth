@@ -9,7 +9,9 @@
   "salary_component",
   "default_rate",
   "column_break_evzb",
-  "disabled"
+  "disabled",
+  "section_break_imaw",
+  "potongan_accounts"
  ],
  "fields": [
   {
@@ -32,12 +34,22 @@
    "fieldtype": "Link",
    "label": "Salary Component",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "section_break_imaw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "potongan_accounts",
+   "fieldtype": "Table",
+   "label": "Potongan Accounts",
+   "options": "Jenis Potongan Accounts"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-10 14:08:44.417454",
+ "modified": "2026-02-10 11:49:00.383565",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Jenis Potongan",

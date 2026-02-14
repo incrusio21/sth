@@ -54,6 +54,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
+   "mandatory_depends_on": "eval:doc.sub_unit == \"TRAKSI\"",
    "options": "Alat Berat Dan Kendaraan"
   },
   {
@@ -67,7 +68,6 @@
   },
   {
    "columns": 1,
-   "fetch_from": "kendaraan.unit",
    "fieldname": "sub_unit",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -80,6 +80,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Blok",
+   "mandatory_depends_on": "eval:doc.sub_unit == \"1\"",
    "options": "Blok"
   },
   {
@@ -112,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-26 13:37:09.010012",
+ "modified": "2026-02-13 14:31:07.376973",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

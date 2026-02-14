@@ -16,7 +16,23 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		make_payment_voucher(frm)
 		make_realisasi_pdo(frm)
 		hide_revisi_field(frm)
+		filter_jenis_kas(frm)
 	},
+	jenis_kas(frm){
+		 if (frm.doc.jenis_kas) {
+			frappe.db.get_value('Expense Claim Type', frm.doc.jenis_kas, 'custom_pdo_type')
+				.then(r => {
+					if (r.message && r.message.custom_pdo_type) {
+						frappe.db.get_value('PDO Type', r.message.custom_pdo_type, 'employee_atau_barang')
+							.then(result => {
+								if (result.message && result.message.employee_atau_barang) {
+									show_popup(frm, result.message.employee_atau_barang);
+								}
+							});
+					}
+				});
+		}
+	}
 });
 
 frappe.ui.form.on("PDO Bahan Bakar Table", {
@@ -134,94 +150,92 @@ frappe.ui.form.on("PDO Dana Cadangan Table", {
 
 function get_plafon_pdo(frm, cdt, cdn){
 	let row = locals[cdt][cdn];
-        
-    if (row.type) {
-        frappe.call({
-            method: 'frappe.client.get_list',
-            args: {
-                doctype: 'Plafon PDO',
-                filters: {
-                    'name': 'PERJALANAN DINAS'
-                },
-                fields: ['name']
-            },
-            callback: function(r) {
-                if (r.message && r.message.length > 0) {
-                    frappe.call({
-                        method: 'frappe.client.get',
-                        args: {
-                            doctype: 'Plafon PDO',
-                            name: r.message[0].name
-                        },
-                        callback: function(response) {
-                            if (response.message) {
-                                let plafon_pdo = response.message;
-                                
-                                let incentif_row = plafon_pdo.plafon_pdo_table.find(
-                                    item => item.jenis_plafon == row.type
-                                );
-                                
-                                if (incentif_row && incentif_row.nilai) {
+		
+	if (row.type) {
+		frappe.call({
+			method: 'frappe.client.get_list',
+			args: {
+				doctype: 'Plafon PDO',
+				filters: {
+					'name': 'PERJALANAN DINAS'
+				},
+				fields: ['name']
+			},
+			callback: function(r) {
+				if (r.message && r.message.length > 0) {
+					frappe.call({
+						method: 'frappe.client.get',
+						args: {
+							doctype: 'Plafon PDO',
+							name: r.message[0].name
+						},
+						callback: function(response) {
+							if (response.message) {
+								let plafon_pdo = response.message;
+								
+								let incentif_row = plafon_pdo.plafon_pdo_table.find(
+									item => item.jenis_plafon == row.type
+								);
+								
+								if (incentif_row && incentif_row.nilai) {
 
-                                    frappe.model.set_value(cdt, cdn, 'plafon', incentif_row.nilai);
-                                    frappe.model.set_value(cdt, cdn, 'revised_plafon', incentif_row.nilai);
-                                    
-                                    frm.refresh_field('pdo_perjalanan_dinas');
-                                } else {
+									frappe.model.set_value(cdt, cdn, 'plafon', incentif_row.nilai);
+									frappe.model.set_value(cdt, cdn, 'revised_plafon', incentif_row.nilai);
+									
+									frm.refresh_field('pdo_perjalanan_dinas');
+								} else {
 
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    frappe.msgprint(__('Plafon PDO "PERJALANAN DINAS" not found'));
-                }
-            }
-        });
-    }
+								}
+							}
+						}
+					});
+				} else {
+					frappe.msgprint(__('Plafon PDO "PERJALANAN DINAS" not found'));
+				}
+			}
+		});
+	}
 }
 
 function get_plafon_pdo_bb(frm, cdt, cdn){
 	let row = locals[cdt][cdn];
 	if (row.designation) {
-		console.log(row.designation)
 		fetch_plafon_value('BAHAN BAKAR', row.designation, 'jenis_plafon', cdt, cdn, frm, 'pdo_bahan_bakar'); 
 	}       
 }
 
 function fetch_plafon_value(plafon_name, filter_value, filter_field, cdt, cdn, frm, table_fieldname) {
-    frappe.call({
-        method: 'frappe.client.get',
-        args: {
-            doctype: 'Plafon PDO',
-            name: plafon_name
-        },
-        callback: function(response) {
-            if (response.message) {
-                let plafon_pdo = response.message;
+	frappe.call({
+		method: 'frappe.client.get',
+		args: {
+			doctype: 'Plafon PDO',
+			name: plafon_name
+		},
+		callback: function(response) {
+			if (response.message) {
+				let plafon_pdo = response.message;
 
-                let matching_row = plafon_pdo.plafon_pdo_table.find(
-                    item => item[filter_field] === filter_value
-                );
+				let matching_row = plafon_pdo.plafon_pdo_table.find(
+					item => item[filter_field] === filter_value
+				);
 
-                console.log(plafon_pdo)
-                
-                if (matching_row && matching_row.nilai) {
-                    frappe.model.set_value(cdt, cdn, 'plafon', matching_row.nilai);
-                    if (table_fieldname === 'pdo_bahan_bakar') {
-                        frappe.model.set_value(cdt, cdn, 'revised_plafon', matching_row.nilai);
-                    } else {
-                        frappe.model.set_value(cdt, cdn, 'revised_plafon', matching_row.nilai);
-                    }
-                    frm.refresh_field(table_fieldname);
-                } else {
+				
+				if (matching_row && matching_row.nilai) {
+					frappe.model.set_value(cdt, cdn, 'plafon', matching_row.nilai);
+					if (table_fieldname === 'pdo_bahan_bakar') {
+						frappe.model.set_value(cdt, cdn, 'revised_plafon', matching_row.nilai);
+					} else {
+						frappe.model.set_value(cdt, cdn, 'revised_plafon', matching_row.nilai);
+					}
+					frm.refresh_field(table_fieldname);
+				} else {
 
-                }
-            } else {
+				}
+			} else {
 
-            }
-        }
-    });
+			}
+		}
+	});
 }
 
 function filterCreditTo(frm) {
@@ -250,6 +264,19 @@ function filterDebitTo(frm) {
 		})
 	}
 }
+
+function filter_jenis_kas(frm) {
+	frm.set_query(`jenis_kas`, () => {
+		return {
+
+			query: 'sth.controllers.queries.get_expense_claim_type_kas',
+			
+		}
+	})
+	
+}
+
+
 
 function calculateRowTotal(frm, curRow, cdt, cdn, config) {
 	const {
@@ -509,146 +536,271 @@ function make_payment_voucher(frm){
 
 function make_realisasi_pdo(frm){
 	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher) {
-	 	frm.add_custom_button(__('Realisasi PDO'), function() {
-            show_realisasi_dialog(frm);
-        });    
+		frm.add_custom_button(__('Realisasi PDO'), function() {
+			show_realisasi_dialog(frm);
+		});    
 	}	
 }
 
 function show_realisasi_dialog(frm) {
-    // Get available types first
-    frappe.call({
-        method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_available_tipe_pdo',
-        args: {
-            source_name: frm.doc.name
-        },
-        callback: function(r) {
-            if (!r.message || r.message.length === 0) {
-                frappe.msgprint(__('All types have been fully paid'));
-                return;
-            }
-            
-            // Build options string for select field
-            let options = [''];
-            let option_labels = {};
-            
-            r.message.forEach(function(item) {
-                options.push(item.value);
-                option_labels[item.value] = item.label;
-            });
-            
-            let dialog = new frappe.ui.Dialog({
-                title: __('Realisasi PDO'),
-                fields: [
-                    {
-                        fieldname: 'tipe_pdo',
-                        label: __('Pilih Tipe PDO'),
-                        fieldtype: 'Select',
-                        options: options.join('\n'),
-                        reqd: 1,
-                        description: __('Only types with outstanding amounts are shown')
-                    }
-                ],
-                primary_action_label: __('Create Payment Voucher Kas'),
-                primary_action: function(values) {
-                    if (!values.tipe_pdo) {
-                        frappe.msgprint(__('Please select a type'));
-                        return;
-                    }
-                    
-                    dialog.hide();
-                    
-                    // Call the method with tipe_pdo parameter
-                    frappe.call({
-                        method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
-                        args: {
-                            source_name: frm.doc.name,
-                            tipe_pdo: values.tipe_pdo
-                        },
-                        callback: function(r) {
-                            if (r.message) {
-                                // Open the created document
-                                frappe.model.sync(r.message);
-                                frappe.set_route('Form', r.message.doctype, r.message.name);
-                            }
-                        }
-                    });
-                }
-            });
-            
-            dialog.show();
-        }
-    });
+	// Get available types first
+	frappe.call({
+		method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_available_tipe_pdo',
+		args: {
+			source_name: frm.doc.name
+		},
+		callback: function(r) {
+			if (!r.message || r.message.length === 0) {
+				frappe.msgprint(__('All types have been fully paid'));
+				return;
+			}
+			
+			// Build options string for select field
+			let options = [''];
+			let option_labels = {};
+			
+			r.message.forEach(function(item) {
+				options.push(item.value);
+				option_labels[item.value] = item.label;
+			});
+			
+			let dialog = new frappe.ui.Dialog({
+				title: __('Realisasi PDO'),
+				fields: [
+					{
+						fieldname: 'tipe_pdo',
+						label: __('Pilih Tipe PDO'),
+						fieldtype: 'Select',
+						options: options.join('\n'),
+						reqd: 1,
+						description: __('Only types with outstanding amounts are shown')
+					}
+				],
+				primary_action_label: __('Create Payment Voucher Kas'),
+				primary_action: function(values) {
+					if (!values.tipe_pdo) {
+						frappe.msgprint(__('Please select a type'));
+						return;
+					}
+					
+					dialog.hide();
+					
+					// Call the method with tipe_pdo parameter
+					frappe.call({
+						method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
+						args: {
+							source_name: frm.doc.name,
+							tipe_pdo: values.tipe_pdo
+						},
+						callback: function(r) {
+							if (r.message) {
+								// Open the created document
+								frappe.model.sync(r.message);
+								frappe.set_route('Form', r.message.doctype, r.message.name);
+							}
+						}
+					});
+				}
+			});
+			
+			dialog.show();
+		}
+	});
 }
 
 function hide_revisi_field(frm){
 	if (frm.doc.workflow_state === "Waiting For Assisten Approval" || frm.doc.workflow_state === "Waiting For Director Approval") {
-            
-        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
-            'revised_plafon', 'read_only', 0
-        );
-        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
-            'revised_unit_price', 'read_only', 0
-        );
-        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
-            'revised_price_total', 'read_only', 0
-        );
-        
-        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
-            'revised_duty_day', 'read_only', 0
-        );
-        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
-            'revised_plafon', 'read_only', 0
-        );
-        
-        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
-            'revised_qty', 'read_only', 0
-        );
-        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
-            'revised_price', 'read_only', 0
-        );
-        
-        frm.fields_dict['pdo_dana_cadangan'].grid.update_docfield_property(
-            'revised_amount', 'read_only', 0
-        );
-        
-        frm.refresh_field('pdo_bahan_bakar');
-        frm.refresh_field('pdo_perjalanan_dinas');
-        frm.refresh_field('pdo_kas');
-        frm.refresh_field('pdo_dana_cadangan');
-    }
-    else{
-    	frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
-            'revised_plafon', 'read_only', 1
-        );
-        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
-            'revised_unit_price', 'read_only', 1
-        );
-        frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
-            'revised_price_total', 'read_only', 1
-        );
-        
-        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
-            'revised_duty_day', 'read_only', 1
-        );
-        frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
-            'revised_plafon', 'read_only', 1
-        );
-        
-        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
-            'revised_qty', 'read_only', 1
-        );
-        frm.fields_dict['pdo_kas'].grid.update_docfield_property(
-            'revised_price', 'read_only', 1
-        );
-        
-        frm.fields_dict['pdo_dana_cadangan'].grid.update_docfield_property(
-            'revised_amount', 'read_only', 1
-        );
-        
-        frm.refresh_field('pdo_bahan_bakar');
-        frm.refresh_field('pdo_perjalanan_dinas');
-        frm.refresh_field('pdo_kas');
-        frm.refresh_field('pdo_dana_cadangan');
-    }
+			
+		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+			'revised_plafon', 'read_only', 0
+		);
+		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+			'revised_unit_price', 'read_only', 0
+		);
+		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+			'revised_price_total', 'read_only', 0
+		);
+		
+		frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+			'revised_duty_day', 'read_only', 0
+		);
+		frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+			'revised_plafon', 'read_only', 0
+		);
+		
+		frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+			'revised_qty', 'read_only', 0
+		);
+		frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+			'revised_price', 'read_only', 0
+		);
+		
+		frm.fields_dict['pdo_dana_cadangan'].grid.update_docfield_property(
+			'revised_amount', 'read_only', 0
+		);
+		
+		frm.refresh_field('pdo_bahan_bakar');
+		frm.refresh_field('pdo_perjalanan_dinas');
+		frm.refresh_field('pdo_kas');
+		frm.refresh_field('pdo_dana_cadangan');
+	}
+	else{
+		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+			'revised_plafon', 'read_only', 1
+		);
+		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+			'revised_unit_price', 'read_only', 1
+		);
+		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
+			'revised_price_total', 'read_only', 1
+		);
+		
+		frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+			'revised_duty_day', 'read_only', 1
+		);
+		frm.fields_dict['pdo_perjalanan_dinas'].grid.update_docfield_property(
+			'revised_plafon', 'read_only', 1
+		);
+		
+		frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+			'revised_qty', 'read_only', 1
+		);
+		frm.fields_dict['pdo_kas'].grid.update_docfield_property(
+			'revised_price', 'read_only', 1
+		);
+		
+		frm.fields_dict['pdo_dana_cadangan'].grid.update_docfield_property(
+			'revised_amount', 'read_only', 1
+		);
+		
+		frm.refresh_field('pdo_bahan_bakar');
+		frm.refresh_field('pdo_perjalanan_dinas');
+		frm.refresh_field('pdo_kas');
+		frm.refresh_field('pdo_dana_cadangan');
+	}
+}
+
+function show_popup(frm, employee_atau_barang) {
+	// Fetch routine_type from Expense Claim Type
+	frappe.db.get_value('Expense Claim Type', frm.doc.jenis_kas, 'custom_routine_type')
+		.then(r => {
+			let routine_type = r.message ? r.message.custom_routine_type : '';
+			
+			let fields = [];
+			
+			if (employee_atau_barang === 'Employee') {
+				fields = [
+					{
+						fieldname: 'employee',
+						label: __('Pengguna'),
+						fieldtype: 'Link',
+						options: 'Employee',
+						reqd: 1
+					},
+					{
+						fieldname: 'routine_type',
+						label: __('Tipe Rutin'),
+						fieldtype: 'Data',
+						default: routine_type,
+						read_only: 1
+					},
+					{
+						fieldname: 'type',
+						label: __('Jenis'),
+						fieldtype: 'Data',
+						default: frm.doc.jenis_kas,
+						read_only: 1
+					},
+					{
+						fieldname: 'qty',
+						label: __('Qty'),
+						fieldtype: 'Float',
+						reqd: 1
+					},
+					{
+						fieldname: 'price',
+						label: __('Harga'),
+						fieldtype: 'Currency',
+						reqd: 1
+					}
+				];
+			} else if (employee_atau_barang === 'Barang') {
+				fields = [
+					{
+						fieldname: 'routine_type',
+						label: __('Tipe Rutin'),
+						fieldtype: 'Data',
+						default: routine_type,
+						read_only: 1
+					},
+					{
+						fieldname: 'type',
+						label: __('Jenis'),
+						fieldtype: 'Data',
+						default: frm.doc.jenis_kas,
+						read_only: 1
+					},
+					{
+						fieldname: 'item_code',
+						label: __('Item Barang'),
+						fieldtype: 'Data',
+						reqd: 1
+					},
+					{
+						fieldname: 'uom',
+						label: __('Satuan'),
+						fieldtype: 'Data',
+						reqd: 1
+					},
+					{
+						fieldname: 'qty',
+						label: __('Qty'),
+						fieldtype: 'Float',
+						reqd: 1
+					},
+					{
+						fieldname: 'price',
+						label: __('Harga'),
+						fieldtype: 'Currency',
+						reqd: 1
+					}
+				];
+			}
+			
+			// Show dialog popup
+			let d = new frappe.ui.Dialog({
+				title: __('Tambah Item PDO Kas'),
+				fields: fields,
+				size: 'small',
+				primary_action_label: __('Tambah'),
+				primary_action(values) {
+					// Add row to pdo_kas child table
+					let child = frm.add_child('pdo_kas');
+					
+					if (employee_atau_barang === 'Employee') {
+						child.employee = values.employee;
+						child.routine_type = values.routine_type;
+						child.type = values.type;
+						child.qty = values.qty;
+						child.price = values.price;
+					} else if (employee_atau_barang === 'Barang') {
+						child.routine_type = values.routine_type;
+						child.type = values.type;
+						child.item_code = values.item_code;
+						child.uom = values.uom;
+						child.qty = values.qty;
+						child.price = values.price;
+					}
+					
+					// Refresh the child table
+					frm.set_value('jenis_kas', "")
+					frm.refresh_field('pdo_kas');
+					calculateGrandTotal(frm)
+					
+					d.hide();
+				}
+			});
+			
+			d.show();
+		});
 }

@@ -27,14 +27,32 @@ frappe.query_reports["Laporan Daftar Karyawan"] = {
 			"fieldtype": "Link",
 			"options": "Employment Type",
 		},
+		{
+			"fieldname": "divisi",
+			"label": __("Divisi"),
+			"fieldtype": "Link",
+			"options": "Divisi",
+		},
+		{
+			"fieldname": "jabatan",
+			"label": __("Jabatan"),
+			"fieldtype": "Link",
+			"options": "Designation",
+		},
+		{
+			"fieldname": "status_karyawan",
+			"label": __("Status Karyawan"),
+			"fieldtype": "Select",
+			"options": ["", "Active", "Inactive", "Suspended", "Left",],
+		},
 	],
-	formatter: function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+	// formatter: function (value, row, column, data, default_formatter) {
+	// 	value = default_formatter(value, row, column, data);
 
-		if (column.fieldname === "pas_foto") {
-			value = `<img src="${value}"/>`;
-		}
+	// 	if (column.fieldname === "pas_foto") {
+	// 		value = `<img src="${value}"/>`;
+	// 	}
 
-		return value;
-	}
+	// 	return value;
+	// }
 };

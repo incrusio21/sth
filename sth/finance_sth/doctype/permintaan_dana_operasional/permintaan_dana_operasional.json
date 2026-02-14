@@ -41,6 +41,7 @@
   "kas_tab",
   "kas_details_section",
   "kas_transaction_number",
+  "jenis_kas",
   "pdo_kas",
   "grand_total_kas",
   "outstanding_amount_kas",
@@ -422,13 +423,19 @@
    "label": "Realisasi PDO",
    "options": "Realisasi PDO",
    "read_only": 1
+  },
+  {
+   "fieldname": "jenis_kas",
+   "fieldtype": "Link",
+   "label": "Jenis Kas",
+   "options": "Expense Claim Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-02 10:18:43.953879",
+ "modified": "2026-02-10 11:41:05.968610",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

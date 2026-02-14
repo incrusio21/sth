@@ -231,14 +231,13 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "No. PBB",
-   "reqd": 1
+   "label": "No. PBB"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-27 15:40:44.640465",
+ "modified": "2026-02-11 16:33:50.967767",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "GIS",

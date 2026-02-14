@@ -17,7 +17,18 @@ frappe.ui.form.on("Expense Claim", {
           frm.clear_table("advances");
           show_expense_selector(frm);
         });
+
+      // frm.set_query('expense_type', 'expenses', function (doc, cdt, cdn) {
+      //   let row = locals[cdt][cdn];
+
+      //   return {
+      //     filters: {
+      //       is_hrd: ['is', 'set']
+      //     }
+      //   };
+      // });
     }
+    filter_jenis_ex_type(frm)
   },
   async custom_get_travel_request_expense(frm) {
     if (!(frm.doc.employee)) {
@@ -216,4 +227,14 @@ async function show_expense_selector(frm) {
     d.fields_dict.expenses.refresh();
   }
   d.show();
+}
+
+function filter_jenis_ex_type(frm){
+  frm.set_query('expense_type', 'expenses', () => {
+    return {
+      filters: {
+        is_hrd: 1
+      }
+    }
+  });
 }

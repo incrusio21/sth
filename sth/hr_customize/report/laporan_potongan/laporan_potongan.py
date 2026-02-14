@@ -13,7 +13,9 @@ def execute(filters=None):
 		SELECT
 		epd.employee as `id`,
 		epd.employee_name as nama,
-		epd.rate as jumlah_potongan
+		epd.rate as jumlah_potongan,
+		ep.persetujuan_1 as persetujuan_1,
+		ep.persetujuan_2 as persetujuan_2
 		FROM `tabEmployee Potongan` as ep
 		JOIN `tabEmployee Potongan Details` as epd ON epd.parent = ep.name
 		JOIN `tabEmployee` as e ON e.name = epd.employee
@@ -61,6 +63,16 @@ def get_columns(filters):
 			"label": _("Jumlah Potongan"),
 			"fieldtype": "Currency",
 			"fieldname": "jumlah_potongan",
+		},
+		{
+			"label": _("Persetujuan 1"),
+			"fieldty2": "Data",
+			"fieldname": "persetujuan_1",
+		},
+		{
+			"label": _("Persetujuan 2"),
+			"fieldtype": "Data",
+			"fieldname": "persetujuan_2",
 		},
 	]
 

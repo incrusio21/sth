@@ -15,6 +15,11 @@ class PermintaanPengeluaranBarang(Document):
 	def on_submit(self):
 		self.db_set("status","Submitted")
 	
+	def validate_stock(self):
+		for row in self.items:
+			if row.jumlah > row.jumlah_saat_ini:
+				frappe.throw(f'Barang {row.kode_barang} tidak cukup stock untuk dikeluarkan')
+
 	def update_outgoing_percentage(self):
 		qty = 0
 		out_qty = 0

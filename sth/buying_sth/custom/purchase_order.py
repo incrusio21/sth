@@ -96,3 +96,6 @@ def check_uang_muka_payment_entry(purchase_order):
         'has_uang_muka': len(gl_entries) > 0,
         'has_payment_entry': has_payment_entry
     }
+
+def set_accept_day(doc,method):
+    doc.accept_day = int(doc.waktu_penyerahan.split(' ')[0]) if doc.waktu_penyerahan else 0

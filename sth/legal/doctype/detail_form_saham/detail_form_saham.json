@@ -13,7 +13,9 @@
   "column_break_gizj",
   "qty",
   "rate",
-  "amount"
+  "agio_rate",
+  "amount",
+  "per_ownership_saham"
  ],
  "fields": [
   {
@@ -79,13 +81,27 @@
    "fieldtype": "Date",
    "label": "Tanggal Akta",
    "read_only": 1
+  },
+  {
+   "fieldname": "per_ownership_saham",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Ownership Saham",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agio_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "\u03a3 Agio Saham "
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-17 00:09:20.452162",
+ "modified": "2026-02-11 10:14:07.993796",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Detail Form Saham",
