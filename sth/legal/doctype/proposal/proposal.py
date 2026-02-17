@@ -7,9 +7,9 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
-from frappe.model.mapper import get_mapped_doc
+from frappe.model.mapper import get_mapped_doc, map_docs
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
-from frappe.utils import cint, cstr, flt, getdate, get_link_to_form
+from frappe.utils import cint, cstr, flt, getdate, get_link_to_form, nowdate
 from frappe.query_builder.functions import Sum
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -19,7 +19,8 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
-from erpnext.accounts.party import get_party_account, get_party_account_currency
+from erpnext.accounts.party import complete_contact_details, get_party_account, get_party_account_currency, get_party_bank_account
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_bank_cash_account, set_paid_amount_and_received_amount, set_party_account, set_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_item_and_get_basic_data
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -648,6 +649,137 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 			{"po_details": order_item}
 		)
 
+def get_proposal_invoice(document_no, as_dict=True):
+	
+	parent = frappe.qb.DocType("Purchase Invoice")
+	child = frappe.qb.DocType("Purchase Invoice Item")
+
+	inv_out = (
+		frappe.qb.from_(parent)
+		.inner_join(child)
+		.on(parent.name == child.parent)
+		.select(
+			parent.name,
+			parent.grand_total,
+			parent.outstanding_amount,
+			parent.retensi_amount,
+			parent.credit_to,
+			parent.cost_center,
+
+		)
+		.where(
+			(child.proposal == document_no) &
+			(parent.docstatus == 1)
+		)
+		.groupby(parent.name)
+		.for_update()
+	).run(as_dict=as_dict)
+
+	return inv_out
+
+@frappe.whitelist()
+def update_retensi_status(document_no, status):
+	retensi_paid = 1 if status == "Approve" else 0
+	frappe.db.set_value("Proposal", document_no, "retensi_paid", retensi_paid)
+
+	inv_list = []
+	for inv in get_proposal_invoice(document_no):
+		if inv.outstanding_amount < inv.retensi_amount:
+			frappe.throw(f"Can't update Retensi status. because Outstanding already less than Retensi Amount")
+
+		inv_list.append(inv.name)
+
+	frappe.db.set_value("Purchase Invoice", {"name": ["in", inv_list]}, "retensi_paid", retensi_paid)
+
+@frappe.whitelist()
+def get_payment_entry(document_no):
+	doc = frappe.get_doc("Proposal", document_no)
+
+	in_list = get_proposal_invoice(document_no)
+	
+	pe = frappe.new_doc("Payment Entry")
+
+	# set reference first
+	outstanding_amount = 0
+	for inv in in_list:
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Purchase Invoice",
+				"reference_name": inv.name,
+				"bill_no": doc.get("bill_no"),
+				"due_date": doc.get("due_date"),
+				"total_amount": inv.grand_total,
+				"outstanding_amount": inv.outstanding_amount,
+				"allocated_amount": inv.outstanding_amount,
+			},
+		)
+
+		outstanding_amount += inv.outstanding_amount
+		party_account = inv.credit_to
+	
+	party_account_currency = set_party_account_currency("Proposal", party_account, doc)
+
+	bank = get_bank_cash_account(doc, None)
+
+	paid_amount, received_amount = set_paid_amount_and_received_amount(
+		"Purchase Invoice", party_account_currency, bank, outstanding_amount, "Pay", None, doc
+	)
+	
+	pe.payment_type = "Pay"
+	pe.company = doc.company
+	# pe.cost_center = doc.get("cost_center")
+	pe.posting_date = nowdate()
+	pe.reference_date = getdate(None)
+	pe.party_type = "Supplier"
+	pe.party = doc.supplier
+	pe.contact_person = doc.get("contact_person")
+	complete_contact_details(pe)
+	pe.ensure_supplier_is_not_blocked()
+
+	pe.paid_from = bank.account
+	pe.paid_to = party_account
+	pe.paid_from_account_currency = (
+		bank.account_currency
+	)
+	pe.paid_to_account_currency = party_account_currency
+	pe.paid_from_account_type = frappe.db.get_value("Account", pe.paid_from, "account_type")
+	pe.paid_to_account_type = frappe.db.get_value("Account", pe.paid_to, "account_type")
+	pe.paid_amount = paid_amount
+	pe.received_amount = received_amount
+	pe.letter_head = doc.get("letter_head")
+	pe.bank_account = frappe.db.get_value(
+		"Bank Account", {"is_company_account": 1, "is_default": 1, "company": doc.company}, "name"
+	)
+	# get first non-empty project from items
+
+	if pe.party_type in ["Customer", "Supplier"]:
+		bank_account = get_party_bank_account(pe.party_type, pe.party)
+		pe.set("party_bank_account", bank_account)
+		pe.set_bank_account_data()
+
+
+	pe.setup_party_account_field()
+	pe.set_missing_values()
+	pe.set_missing_ref_details()
+
+	# update_accounting_dimensions(pe, doc)
+
+	# if party_account and bank:
+	# 	if discount_amount:
+	# 		base_total_discount_loss = 0
+	# 		if frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss"):
+	# 			base_total_discount_loss = split_early_payment_discount_loss(pe, doc, valid_discounts)
+
+	# 		set_pending_discount_loss(
+	# 			pe, doc, discount_amount, base_total_discount_loss, party_account_currency
+	# 		)
+
+	# 	pe.set_exchange_rate(ref_doc=doc)
+	# 	pe.set_amounts()
+
+	return pe
+
 @frappe.whitelist()
 def make_proposal_revision(source_name, target_doc=None):
 	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
@@ -741,7 +873,10 @@ def make_bapp(source_name, target_doc=None):
 		{
 			"Proposal": {
 				"doctype": "BAPP",
-				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"retensi": "retensi"
+				},
 				"validation": {
 					"docstatus": ["=", 1],
 				},

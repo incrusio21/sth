@@ -911,6 +911,14 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 
+		doc.ppn = []
+		if source.ppn:
+			doc.append("ppn", {
+				"type": source.ppn,
+				"account": source.ppn_account,
+				"percentage": source.ppn_rate
+			})
+			
 		if args and args.get("merge_taxes"):
 			merge_taxes(source.get("taxes") or [], doc)
 
@@ -936,6 +944,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 					"bill_date": "bill_date",
 					"is_cwip": "cwip_asset",
 					"asset_category": "asset_category",
+					"retensi": "retensi"
 				},
 				"validation": {
 					"docstatus": ["=", 1],

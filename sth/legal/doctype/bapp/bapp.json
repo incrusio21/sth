@@ -25,6 +25,7 @@
   "project",
   "apply_putaway_rule",
   "is_cwip",
+  "retensi",
   "amended_from",
   "currency_and_price_list",
   "currency",
@@ -1243,13 +1244,20 @@
    "fieldtype": "Table",
    "label": "File Upload BAPP",
    "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "retensi",
+   "fieldtype": "Percent",
+   "label": "Retensi",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 14:40:54.977278",
+ "modified": "2026-02-17 19:32:59.214026",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

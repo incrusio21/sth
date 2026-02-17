@@ -373,44 +373,6 @@ frappe.ui.form.on("Proposal", {
 	}
 });
 
-frappe.ui.form.on("Proposal", {
-	refresh: function (frm) {
-        frm.set_query("ppn",(doc) => {
-			return {
-				filters: {
-					"type": "PPN"
-				}
-			}
-		})
-
-		frm.set_query("type", "pph_details",(doc) => {
-			return {
-				filters: {
-					"type": "PPh"
-				}
-			}
-		})
-	},
-	ppn: function (frm) {
-		frappe.call({
-			method: "sth.utils.data.tax_rate",
-			args: {
-				tax_name: frm.doc.ppn,
-				company: frm.doc.company,
-				type: "Masukan",
-			},
-			callback: function(r){
-				if(r.message){
-					frm.doc.ppn_rate = r.message.rate
-					frm.doc.ppn_account = r.message.account
-					frm.doc.ppn_amount = flt(frm.doc.net_total * (frm.doc.ppn_rate / 100));
-				}
-				recreate_tax_table(frm)
-			}
-		})
-	}
-})
-
 frappe.ui.form.on("Proposal Item", {
 	schedule_date: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
@@ -585,6 +547,43 @@ erpnext.buying.ProposalController = class ProposalController extends (
 			}
 		} else if (doc.docstatus === 0) {
 			cur_frm.cscript.add_from_mappers();
+		}
+
+		if(this.frm.doc.is_bapp_retensi && this.frm.doc.per_billed == 100){
+			let label = "Approve"
+			if(this.frm.doc.retensi_paid){
+				label = "Cancel"
+				this.frm.add_custom_button(__(`Payment Remaining Invoice`), () => {
+					frappe.call({
+						method: "sth.legal.doctype.proposal.proposal.get_payment_entry",
+						args: {
+							document_no: this.frm.doc.name
+						},
+						callback: function(r) {
+							var doclist = frappe.model.sync(r.message);
+							frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+						}
+					});
+				}, __("Create"));
+			}
+
+			this.frm.add_custom_button(__(`${label} Retensi`), () => {
+				frappe.confirm(
+					__("Are you sure to {0} Retensi?", [label]),
+					() => {
+						frappe.call({
+							method: "sth.legal.doctype.proposal.proposal.update_retensi_status",
+							args: {
+								document_no: this.frm.doc.name,
+								status: label
+							},
+							callback: function (r) {
+								me.frm.reload_doc()
+							},
+						});
+					},
+				);
+			});
 		}
 	}
 
