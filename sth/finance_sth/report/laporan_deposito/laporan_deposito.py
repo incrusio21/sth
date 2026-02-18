@@ -56,6 +56,13 @@ def get_condition(filters):
 	if filters.get("company"):
 		conditions += " AND d.company = %(company)s"
 
+	if filters.get("from_date"):
+		conditions += """ AND dit.posting_date >= "{}" """.format(filters.get("from_date"))
+
+	if filters.get("to_date"):
+		conditions += """ AND dit.posting_date <= "{}" """.format(filters.get("to_date"))
+
+
 	return conditions
 
 def get_columns(filters):

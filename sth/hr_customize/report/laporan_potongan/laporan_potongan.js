@@ -1,13 +1,5 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
-
-let months = [
-	"Januari", "Februari", "Maret", "April", "Mei", "Juni",
-	"Juli", "Agustus", "September", "Oktober", "November", "Desember"
-];
-
-let stringMonths = months.join("\n")
-
 frappe.query_reports["Laporan Potongan"] = {
 	"filters": [
 		{
@@ -47,10 +39,24 @@ frappe.query_reports["Laporan Potongan"] = {
 			"options": "Jenis Potongan",
 		},
 		{
-			fieldname: "periode_bulan",
-			label: __("Periode Bulan"),
-			fieldtype: "Autocomplete",
-			options: stringMonths,
+			"fieldname": "bulan",
+			"label": __("Bulan"),
+			"fieldtype": "Select",
+			"options": [
+				"",
+				"Jan",
+				"Feb",
+				"Mar",
+				"Apr",
+				"May",
+				"Jun",
+				"Jul",
+				"Aug",
+				"Sep",
+				"Oct",
+				"Nov",
+				"Dec"
+			],
 		},
 	]
 };

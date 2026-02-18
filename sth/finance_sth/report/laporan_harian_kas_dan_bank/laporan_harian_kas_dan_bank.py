@@ -28,8 +28,11 @@ def execute(filters=None):
 		pe.reference_no as no_ref_bank,
 		ba.account as account
 		FROM `tabPayment Entry` as pe
-		JOIN `tabBank Account` as ba ON ba.name = pe.bank_account;
-  """, as_dict=True)
+		JOIN `tabBank Account` as ba ON ba.name = pe.bank_account
+		WHERE 1 = 1
+		{}
+		;
+  """.format(conditions), as_dict=True, debug=1)
 
 	for payment_entry in query_l_harian_kas_dan_bank:
 		pe = payment_entry
@@ -54,17 +57,34 @@ def execute(filters=None):
 def get_condition(filters):
 	conditions = ""
 
-	if filters.get("bulan"):
-		conditions += " AND DATE_FORMAT(dit.posting_date, '%%b') = %(bulan)s"
+	# if filters.get("bulan"):
+	# 	conditions += " AND DATE_FORMAT(dit.posting_date, '%%b') = %(bulan)s"
 
-	if filters.get("tahun"):
-		conditions += " AND DATE_FORMAT(dit.posting_date, '%%Y') = %(tahun)s"
+	# if filters.get("tahun"):
+	# 	conditions += " AND DATE_FORMAT(dit.posting_date, '%%Y') = %(tahun)s"
 
-	if filters.get("jenis_deposito"):
-		conditions += " AND d.deposito_type = %(jenis_deposito)s"
+	# if filters.get("jenis_deposito"):
+	# 	conditions += " AND d.deposito_type = %(jenis_deposito)s"
 
-	if filters.get("status_deposito"):
-		conditions += " AND d.is_redeemed = %(status_deposito)s"
+	# if filters.get("status_deposito"):
+	# 	conditions += " AND d.is_redeemed = %(status_deposito)s"
+
+	if filters.get("company"):
+		conditions += """ AND pe.company = "{}" """.format(filters.get("company"))
+
+	if filters.get("unit"):
+		conditions += """ AND pe.unit = "{}" """.format(filters.get("unit"))
+
+	if filters.get("kas_bank") == "Kas":
+		conditions += """ AND pe.mode_of_payment = 'Cash' """
+	elif filters.get("kas_bank") == "Bank":
+		conditions += """ AND pe.mode_of_payment = 'Bank Draft' """
+
+	if filters.get("from_date"):
+		conditions += """ AND pe.posting_date >= "{}" """.format(filters.get("from_date"))
+
+	if filters.get("to_date"):
+		conditions += """ AND pe.posting_date <= "{}" """.format(filters.get("to_date"))
 
 	return conditions
 

@@ -33,6 +33,9 @@ def get_condition(filters):
 	if filters.get("no_transaksi"):
 		conditions += " AND ep.name = %(no_transaksi)s"
 
+	if filters.get("tahun"):
+		conditions += " AND DATE_FORMAT(ep.posting_date, '%%Y') = %(tahun)s"
+
 	if filters.get("pt"):
 		conditions += " AND ep.company = %(pt)s"
 
@@ -44,6 +47,9 @@ def get_condition(filters):
 
 	if filters.get("potongan"):
 		conditions += " AND ep.jenis_potongan = %(potongan)s"
+
+	if filters.get("bulan"):
+		conditions += " AND DATE_FORMAT(ep.posting_date, '%%b') = %(bulan)s"
 
 	return conditions
 

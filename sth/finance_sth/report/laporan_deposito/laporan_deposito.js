@@ -57,5 +57,15 @@ frappe.query_reports["Laporan Deposito"] = {
 				"Roll Overed"
 			],
 		},
+		{
+			"fieldname": "from_date",
+			"label": __("Dari"),
+			"fieldtype": "Date"
+		},
+		{
+			"fieldname": "to_date",
+			"label": __("Sampai"),
+			"fieldtype": "Date"
+		},
 	]
 };

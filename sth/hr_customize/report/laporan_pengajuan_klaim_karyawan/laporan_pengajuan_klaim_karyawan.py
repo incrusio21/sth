@@ -16,10 +16,12 @@ def execute(filters=None):
 		d.designation_name as jabatan,
 		e.employee_name as nama_karyawan,
 		ec.name as no_transaksi,
+  	ecd.expense_type as jenis,
 		ec.posting_date as tanggal_pengajuan,
-		ec.total_sanctioned_amount as jumlah_pengajuan,
-		ec.total_claimed_amount as jumlah_di_setujui
+		ecd.amount as jumlah_pengajuan,
+		ecd.sanctioned_amount as jumlah_di_setujui
 		FROM `tabExpense Claim` as ec
+		JOIN `tabExpense Claim Detail` as ecd ON ecd.parent = ec.name
 		JOIN `tabEmployee` as e ON e.name = ec.employee
 		JOIN `tabDesignation` as d ON d.name = e.designation
 		WHERE e.company IS NOT NULL {};
@@ -44,6 +46,12 @@ def get_condition(filters):
 
 	if filters.get("jabatan"):
 		conditions += " AND e.designation = %(jabatan)s"
+
+	if filters.get("jenis_klaim"):
+		conditions += " AND ecd.expense_type = %(jenis_klaim)s"
+  
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " AND ec.posting_date BETWEEN %(from_date)s AND %(to_date)s"
 
 	return conditions
 

@@ -27,5 +27,21 @@ frappe.query_reports["Laporan Pengajuan Klaim Karyawan"] = {
 			"fieldtype": "Link",
 			"options": "Designation",
 		},
+		{
+			"fieldname": "jenis_klaim",
+			"label": __("Jenis Klaim"),
+			"fieldtype": "Link",
+			"options": "Expense Claim Type",
+		},
+		{
+			"fieldname": "from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+		},
+		{
+			"fieldname": "to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+		},
 	]
 };
