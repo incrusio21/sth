@@ -76,7 +76,6 @@ frappe.ui.form.on("Item", {
 			frm.trigger("set_asset_naming_series");
 		}
 		
-		load_kriteria_dokumen_finance(frm)
 	},
 
 	refresh: function (frm) {
@@ -392,39 +391,3 @@ function generate_item_code(frm) {
 	});
 }
 
-function load_kriteria_dokumen_finance(frm){
-	if (frm.is_new()) {
-		frappe.call({
-			method: 'frappe.client.get',
-			args: {
-				doctype: 'Kriteria Dokumen Finance',
-				name: 'Item'
-			},
-			callback: function(r) {
-				if (r.message) {
-					let kriteria_doc = r.message;
-					// Clear existing rows in the target table (if any)
-					frm.clear_table('kriteria_upload_dokumen_finance');
-					if (kriteria_doc.kriteria_dokumen_finance && kriteria_doc.kriteria_dokumen_finance.length > 0) {
-
-						kriteria_doc.kriteria_dokumen_finance.forEach(function(row) {
-							let new_row = frm.add_child('kriteria_upload_dokumen_finance');
-							
-							Object.keys(row).forEach(function(key) {
-								if (['rincian_dokumen_finance'].includes(key)) {
-									new_row["rincian_dokumen_finance"] = row["rincian_dokumen_finance"];
-								}
-							});
-						});
-						
-						frm.refresh_field('kriteria_upload_dokumen_finance');
-						
-					} else {
-						
-					}
-				} else {
-				}
-			}
-		});
-	}
-}

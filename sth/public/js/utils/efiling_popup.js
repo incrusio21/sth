@@ -4,11 +4,11 @@
 frappe.provide("sth.utils")
 
 sth.utils.EfillingSelector = class EfillingSelector {
-    constructor(frm, document_type, submited, callback) {
+    constructor(frm, document_type, submited=null, callback) {
 		this.frm = frm;
 		this.callback = callback;
         this.document_type = document_type
-        this.submited = submited || this.frm.doc.docstatus > 0
+        this.submited = submited != null ? submited : this.frm.doc.docstatus > 0
 
 		this.render_data();
 	}

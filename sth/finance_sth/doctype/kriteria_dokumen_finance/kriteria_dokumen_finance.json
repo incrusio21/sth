@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:dokumen_finance",
  "creation": "2025-11-27 11:42:51.324670",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -23,8 +22,7 @@
    "fieldname": "dokumen_finance",
    "fieldtype": "Link",
    "label": "Dokumen Finance",
-   "options": "DocType",
-   "unique": 1
+   "options": "DocType"
   },
   {
    "fieldname": "column_break_moib",
@@ -43,11 +41,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-16 14:04:05.947545",
+ "modified": "2026-02-18 16:27:35.330691",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Kriteria Dokumen Finance",
- "naming_rule": "By fieldname",
+ "naming_rule": "By script",
  "owner": "Administrator",
  "permissions": [
   {

@@ -207,11 +207,8 @@ override_doctype_class = {
 doc_events = {
 	# untuk kriteria upload
 	"*": {
-		"validate": "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_setelah_insert",
-		"before_submit": [
-            "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document",
-            "sth.finance_sth.custom.cek_kriteria_upload.cek_dokumen_before_submit"
-        ]
+		# "validate": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_document",
+		"before_submit": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document"
 	},
 
 	"Asset": {

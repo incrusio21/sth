@@ -13,7 +13,6 @@ frappe.ui.form.on('Supplier', {
 			generate_kode_supplier(frm);
 		}
 		hide_details(frm)
-		load_kriteria_dokumen_finance(frm)
 
 	},
 	refresh: function (frm) {
@@ -21,6 +20,10 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('aktif', 1); // Set checkbox checked by default
 			frm.set_value('default', 'Ya');
 			frm.set_value('status_bank', 'Aktif');
+		}
+		else{
+			setup_upload_button(frm)
+			buat_html_upload(frm)
 		}
 		check_status_pkp(frm)
 		hide_details(frm)
@@ -66,45 +69,8 @@ function hide_details(frm) {
 	frm.set_df_property('pajak_label', 'hidden', 1);
 	frm.set_df_property('section_break_6doas', 'hidden', 1);
 
-}
+	frm.set_df_property('kode_supplier', 'read_only', 1);
 
-function load_kriteria_dokumen_finance(frm) {
-	if (frm.is_new()) {
-		frappe.call({
-			method: 'frappe.client.get',
-			args: {
-				doctype: 'Kriteria Dokumen Finance',
-				name: 'Supplier'
-			},
-			callback: function (r) {
-				if (r.message) {
-					let kriteria_doc = r.message;
-					// Clear existing rows in the target table (if any)
-					frm.clear_table('kriteria_upload_dokumen_finance');
-					if (kriteria_doc.kriteria_dokumen_finance && kriteria_doc.kriteria_dokumen_finance.length > 0) {
-
-						kriteria_doc.kriteria_dokumen_finance.forEach(function (row) {
-							if (row["rincian_dokumen_finance"] != "SPPKP") {
-								let new_row = frm.add_child('kriteria_upload_dokumen_finance');
-
-								Object.keys(row).forEach(function (key) {
-									if (['rincian_dokumen_finance'].includes(key)) {
-										new_row["rincian_dokumen_finance"] = row["rincian_dokumen_finance"];
-									}
-								});
-							}
-						});
-
-						frm.refresh_field('kriteria_upload_dokumen_finance');
-
-					} else {
-
-					}
-				} else {
-				}
-			}
-		});
-	}
 }
 
 frappe.ui.form.on('Struktur Supplier', {
@@ -161,3 +127,25 @@ frappe.ui.form.on('Struktur Supplier', {
 		d.show();
 	}
 });
+
+function setup_upload_button(frm){
+	frm.add_custom_button(__('Upload/View File'), function() {		
+		let submited_condition = false
+		let skip_sppkp = "Not SPPKP"
+		let badan_usaha = "Non Koperasi"
+
+		if ((frm.doc.npwp_dan_sppkp_supplier || []).some(row => row.status_pkp)) {
+            skip_sppkp = "SPPKP";
+        }
+        if(frm.doc.badan_usaha == "Koperasi"){
+        	badan_usaha = "Koperasi"
+        }
+		new sth.utils.EfillingSelector(frm, badan_usaha+"-"+skip_sppkp, submited_condition, (r) => {
+			
+		});
+	});
+}
+
+function buat_html_upload(frm) {
+	
+}

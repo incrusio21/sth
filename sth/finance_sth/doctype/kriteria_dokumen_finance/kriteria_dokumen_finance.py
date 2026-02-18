@@ -15,6 +15,8 @@ class KriteriaDokumenFinance(Document):
 			self.name += "-" + self.criteria_type
 
 def validate_mandatory_document(self, method):
+	# perlu ganti untuk semua nya dulu
+	return
 	# menghindari error sebelum doctype lain d update
 	if self.doctype not in ["Ganti Rugi Lahan"]:
 		return
@@ -50,8 +52,6 @@ def validate_mandatory_document(self, method):
 			),
 			title=_("Mandatory Document")
 		)
-
-	frappe.throw("Tns")
 	
 @frappe.whitelist()
 def add_criteria(entries, document_no, doc, do_not_save=False):
@@ -70,7 +70,7 @@ def add_criteria(entries, document_no, doc, do_not_save=False):
 
 	return sb_doc
 
-def update_kriteria_document(document_no, entries):
+def update_kriteria_document(document_no, entries, doc):
 	doc = frappe.get_doc("Kriteria Upload Document", document_no)
 	doc.set("entries", [])
 
@@ -92,6 +92,10 @@ def update_kriteria_document(document_no, entries):
 	return doc
 
 def create_kriteria_document(entries, doc, do_not_save=False):
+
+	if not doc.doctype:
+		return
+
 	doc = frappe.get_doc(
 		{
 			"doctype": "Kriteria Upload Document",
@@ -138,12 +142,13 @@ def get_criteria(voucher_type, voucher_no, doucment_type=None):
 			.where(
 				(parent.dokumen_finance == voucher_type)
 			)
+			.orderby(child.idx)
 		)
 
 		if doucment_type:
 			kriteria = kriteria.where(parent.criteria_type == doucment_type)
 
-		kriteria = kriteria.run(as_dict=True)
+		kriteria = kriteria.run(as_dict=True, debug=1)
 	else:
 		kriteria = frappe.get_all("Kriteria Upload Dokumen Finance", 
 			filters={"parent": kriteria_doc}, 

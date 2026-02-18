@@ -17,7 +17,7 @@
    "field_name": "allow_zero_valuation_rate",
    "idx": 0,
    "is_system_generated": 0,
-   "modified": "2026-01-14 15:30:51.859884",
+   "modified": "2026-02-18 14:01:34.666064",
    "modified_by": "Administrator",
    "module": "Sales STH",
    "name": "Delivery Order Item-allow_zero_valuation_rate-default",

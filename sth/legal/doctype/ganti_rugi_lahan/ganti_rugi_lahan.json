@@ -29,8 +29,6 @@
   "column_break_xqce",
   "grand_total",
   "outstanding_amount",
-  "file_upload_tab",
-  "kriteria_upload_dokumen_finance",
   "more_information_tab",
   "accounts_details_section",
   "employee",
@@ -189,18 +187,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "file_upload_tab",
-   "fieldtype": "Tab Break",
-   "label": "File Upload"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "kriteria_upload_dokumen_finance",
-   "fieldtype": "Table",
-   "label": "Kriteria Upload Dokumen Finance",
-   "options": "Kriteria Upload Dokumen Finance"
-  },
-  {
    "default": "Incomplete",
    "fieldname": "document_status",
    "fieldtype": "Select",
@@ -219,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 13:17:20.618099",
+ "modified": "2026-02-18 17:07:59.916696",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

@@ -30,7 +30,7 @@
   "costing_details_section",
   "costings",
   "upload_file_section",
-  "kriteria_upload_dokumen_finance",
+  "kriteria_upload_html",
   "section_break_pqjx",
   "total_claimed_amount",
   "total_sanctioned_amount",
@@ -144,12 +144,6 @@
    "fieldname": "upload_file_section",
    "fieldtype": "Section Break",
    "label": "Upload File"
-  },
-  {
-   "fieldname": "kriteria_upload_dokumen_finance",
-   "fieldtype": "Table",
-   "label": "Kriteria Upload Dokumen Finance",
-   "options": "Kriteria Upload Dokumen Finance"
   },
   {
    "fieldname": "section_break_revf",
@@ -315,13 +309,18 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Nama Karyawan"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-12 10:19:21.146647",
+ "modified": "2026-02-18 22:58:54.960880",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",

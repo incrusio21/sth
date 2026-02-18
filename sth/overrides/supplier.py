@@ -249,7 +249,8 @@ def cek_upload(self, method):
 
 		if "Calon Supplier" in old_state and old_state != new_state:
 			# cek upload
-			for row in self.kriteria_upload_dokumen_finance:
+			doc_upload = frappe.get_doc("Kriteria Upload Document",{"voucher_type":"Supplier","voucher_no":self.name})
+			for row in doc_upload.file_upload:
 				if not row.upload_file:
 					frappe.throw("Upload File harus lengkap untuk Calon Supplier menjadi Supplier.")
 
