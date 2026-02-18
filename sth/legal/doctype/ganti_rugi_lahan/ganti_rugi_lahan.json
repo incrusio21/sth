@@ -12,7 +12,8 @@
   "naming_series",
   "unit",
   "pembayaran_lahan",
-  "dp",
+  "jenis_biaya",
+  "document_status",
   "column_break_usul",
   "company",
   "abbr",
@@ -53,11 +54,6 @@
   {
    "fieldname": "column_break_usul",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "dp",
-   "fieldtype": "Attach",
-   "label": "Dokumen Pendukung"
   },
   {
    "fieldname": "unit",
@@ -203,13 +199,27 @@
    "fieldtype": "Table",
    "label": "Kriteria Upload Dokumen Finance",
    "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "default": "Incomplete",
+   "fieldname": "document_status",
+   "fieldtype": "Select",
+   "label": "Document Status",
+   "options": "Incomplete\nComplete",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jenis_biaya",
+   "fieldtype": "Link",
+   "label": "Jenis Biaya",
+   "options": "Jenis Biaya Ganti Rugi Lahan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-12 09:35:40.294368",
+ "modified": "2026-02-18 13:17:20.618099",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

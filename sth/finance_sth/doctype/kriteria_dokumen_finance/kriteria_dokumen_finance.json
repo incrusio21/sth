@@ -7,6 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "dokumen_finance",
+  "column_break_moib",
+  "criteria_type",
+  "section_break_mgke",
   "kriteria_dokumen_finance"
  ],
  "fields": [
@@ -22,12 +25,25 @@
    "label": "Dokumen Finance",
    "options": "DocType",
    "unique": 1
+  },
+  {
+   "fieldname": "column_break_moib",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "criteria_type",
+   "fieldtype": "Data",
+   "label": "Criteria Type"
+  },
+  {
+   "fieldname": "section_break_mgke",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-27 11:45:24.644352",
+ "modified": "2026-02-16 14:04:05.947545",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Kriteria Dokumen Finance",
@@ -48,7 +64,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

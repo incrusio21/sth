@@ -5,11 +5,33 @@ frappe.provide("sth.legal");
 
 frappe.ui.form.on("Ganti Rugi Lahan", {
 	refresh(frm) {
-        // if(frm.doc.docstatus == 1){
-        //     frm.set_df_property("kriteria_upload_dokumen_finance", "cannot_delete_rows", true);
-        // }
+        if(!frm.is_new()){
+            frm.add_custom_button(__('Upload/View File'), function() {
+                let submited_condition = frm.doc.docstatus > 0
+                if(frm.doc.jenis_biaya == "GRLTT"){
+                    submited_condition = frm.doc.docstatus > 1
+                }
+                new sth.utils.EfillingSelector(frm, frm.doc.jenis_biaya, submited_condition, (r) => {
+                    // if (r) {
+                    //     let update_values = {
+                    //         serial_and_batch_bundle: r.name,
+                    //         qty: Math.abs(r.total_qty),
+                    //     };
+
+                    //     if (!warehouse_field) {
+                    //         warehouse_field = "warehouse";
+                    //     }
+
+                    //     if (r.warehouse) {
+                    //         update_values[warehouse_field] = r.warehouse;
+                    //     }
+
+                    //     frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+                    // }
+                });
+            });
+        }
 	},
-    
     company(frm) {
         frm.cscript.get_details_account({
             method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.fetch_company_account",
