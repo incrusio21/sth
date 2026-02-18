@@ -173,6 +173,7 @@ class SupplierComparasion {
 			"align-self": "center",
 			"margin-left": "auto"
 		})
+		// "margin-left": "10px", jika nanti btn approve tidak di hide 
 
 	}
 
