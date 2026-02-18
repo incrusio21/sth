@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Post Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}}]",
+ "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Pos Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}}]",
  "creation": "2025-11-20 15:54:30.037918",
  "custom_blocks": [],
  "docstatus": 0,
@@ -830,25 +830,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Post Security",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Security Check Point",
-   "link_count": 0,
-   "link_to": "Security Check Point",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Timbangan",
    "link_count": 1,
    "link_type": "DocType",
@@ -1000,9 +981,28 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pos Security",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Security Check Point",
+   "link_count": 0,
+   "link_to": "Security Check Point",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-02-11 12:31:30.093172",
+ "modified": "2026-02-16 06:20:01.703169",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

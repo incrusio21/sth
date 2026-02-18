@@ -231,7 +231,7 @@ def approve_price_change(ledger_name):
 
 @frappe.whitelist()
 def create_price_note_from_harga_beli_tbs(
-	item_code, unit, jarak, uom, current_rate, price_difference, supplier=None
+	item_code, unit, jarak, uom, current_rate, price_difference, tanggal, supplier=None
 ):
 	if not unit :
 		frappe.throw("Unit wajib diisi.")
@@ -280,7 +280,7 @@ def create_price_note_from_harga_beli_tbs(
 
 		"status": "Pending",
 		"last_update": frappe.session.user,
-		"effective_date": now(),
+		"effective_date": tanggal or now(),
 	}).insert(ignore_permissions=True)
 
 	return {

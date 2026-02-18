@@ -1,4 +1,10 @@
 frappe.listview_settings["Permintaan Dana Operasional"] = {
+	onload: function(listview) {
+        listview.page.add_inner_button("Preview", function() {
+            preview_dialog();
+        });
+    },
+
 	primary_action: function () {
 		this.new_doctype_dialog();
 	},
@@ -74,3 +80,34 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 		new_d.show();
 	},
 };
+
+
+function preview_dialog() {
+
+    const PDO_PRINT_FORMAT = "Standard";   
+
+    let d = new frappe.ui.Dialog({
+        title: __("Preview Permintaan Dana Operasional"),
+        fields: [
+            {
+                label: __("PDO ID"),
+                fieldname: "pdo_id",
+                fieldtype: "Link",
+                options: "Permintaan Dana Operasional",
+                reqd: 1
+            }
+        ],
+
+        primary_action_label: __("Preview Print"),
+        primary_action(values) {
+
+            let print_url = `${window.location.origin}/printview?doctype=Permintaan Dana Operasional&name=${values.pdo_id}&format=${encodeURIComponent(PDO_PRINT_FORMAT)}&no_letterhead=0&trigger_print=0`;
+
+            window.open(print_url, "_blank");
+
+            d.hide();
+        }
+    });
+
+    d.show();
+}

@@ -3,7 +3,18 @@
 
 frappe.ui.form.on("Sortasi", {
 	refresh(frm) {
-
+		frm.set_query('no_timbangan', function() {
+            if (frm.doc.nomor_tiket) {
+                return {
+                    filters: {
+                        'ticket_number': frm.doc.nomor_tiket
+                    }
+                };
+            }
+        });
+	},
+	tipe(frm){
+		filter_no_tiket(frm)
 	},
 	mentah(frm){
 		kalkulasi_tbs(frm)
@@ -90,13 +101,48 @@ frappe.ui.form.on("Sortasi", {
 	brd_e(frm){
 		frm.set_value("kg_brd", frm.doc.netto * frm.doc.brd_e / 100)
 		kalkulasi_pot_sortasi(frm)
-	}
+	},
+	nomor_tiket: function(frm) {
+        frm.set_query('no_timbangan', function() {
+            return {
+                filters: {
+                    'ticket_number': frm.doc.nomor_tiket
+                }
+            };
+        });
+        
+        if (frm.doc.nomor_tiket) {
+            frappe.call({
+                method: 'frappe.client.get_list',
+                args: {
+                    doctype: 'Timbangan',
+                    filters: {
+                        'ticket_number': frm.doc.nomor_tiket
+                    },
+                    fields: ['name'],
+                    limit: 1,
+                    order_by: 'creation asc'
+                },
+                callback: function(r) {
+                    if (r.message && r.message.length > 0) {
+                        frm.set_value('no_timbangan', r.message[0].name);
+                    } else {
+                        frm.set_value('no_timbangan', '');
+                        frappe.msgprint(__('Tidak ada timbangan yang terdaftar di Nomor Tiket ini.'));
+                    }
+                }
+            });
+        } else {
+            // Clear no_timbangan if nomor_tiket is cleared
+            frm.set_value('no_timbangan', '');
+        }
+    },
 
 
 });
 
 function kalkulasi_pot_sortasi(frm){
-	frm.set_value("potongan_sortasi_external", frm.doc.bm_e+frm.doc.tp_e+frm.doc.kp+frm.doc.br+frm.doc.tm_e+frm.doc.tbs+frm.doc.brd_e)
+	frm.set_value("potongan_sortasi_external", flt(frm.doc.bm_e)+flt(frm.doc.tp_e)+flt(frm.doc.kp)+flt(frm.doc.br)+flt(frm.doc.tm_e)+flt(frm.doc.tbs)+flt(frm.doc.brd_e))
 }
 
 function kalkulasi_tbs(frm){
@@ -332,5 +378,25 @@ function kalkulasi_nilai_panen(frm){
 	if(frm.doc.tipe == "Internal"){
 		let total = flt(frm.doc.n_mnt) + flt(frm.doc.n_msk) + flt(frm.doc.n_tmsk) + flt(frm.doc.n_tk) + flt(frm.doc.n_abn) + flt(frm.doc.n_tp) + flt(frm.doc.n_brd);
 		frm.set_value("nilai_panen", total)
+	}
+}
+function filter_no_tiket(frm){
+	if (frm.doc.tipe == "External"){
+		frm.set_query('nomor_tiket', (doc) => {
+	        return {
+	            filters: {
+	                "receive_type": ["=", "TBS Eksternal"]
+	            }
+	        }
+	    })
+	}
+	else if (frm.doc.tipe == "Internal"){
+		frm.set_query('nomor_tiket', (doc) => {
+	        return {
+	            filters: {
+	                "receive_type": ["=", "TBS Internal"]
+	            }
+	        }
+	    })
 	}
 }

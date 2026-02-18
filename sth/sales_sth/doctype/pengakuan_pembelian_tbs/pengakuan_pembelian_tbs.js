@@ -33,6 +33,7 @@ frappe.ui.form.on('Pengakuan Pembelian TBS', {
 			.then((res) => {
 				frappe.model.sync(res);
 				frm.refresh();
+				frm.dirty()
 			})
 	},
 

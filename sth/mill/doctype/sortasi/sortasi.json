@@ -67,6 +67,13 @@
   "n_tk",
   "n_abn",
   "n_tp",
+  "column_break_ktyc",
+  "f_mentah",
+  "f_masak",
+  "f_tm",
+  "f_tk",
+  "f_abn",
+  "f_tp",
   "section_break_eexf",
   "r_dmg",
   "column_break_zblo",
@@ -74,6 +81,7 @@
   "column_break_vvjh",
   "column_break_tqug",
   "column_break_dspy",
+  "f_rd",
   "section_break_bwaa",
   "brondolan",
   "restan",
@@ -86,19 +94,23 @@
   "b_brd",
   "column_break_ejlu",
   "n_brd",
+  "column_break_gdpi",
+  "f_brd",
   "section_break_pind",
   "spi",
+  "total_tbs_internal",
   "column_break_wpbr",
   "p_smph",
   "column_break_yzjp",
   "column_break_zbjh",
   "column_break_idcf",
   "n_smph",
-  "total_potongan_sortasi_internal_section",
-  "total_tbs_internal",
-  "column_break_pybr",
   "nilai_panen",
+  "column_break_crwv",
+  "f_smph",
+  "total_potongan_sortasi_internal_section",
   "potongan_sortasi_internal",
+  "column_break_pybr",
   "section_break_uqvp",
   "column_break_ztgp",
   "tnr",
@@ -121,13 +133,19 @@
   "buah_restan_kg",
   "kg_mk",
   "kg_brd",
+  "column_break_wbnt",
+  "f_bm",
+  "f_tpe",
+  "f_kp",
+  "f_bb",
+  "f_br",
+  "f_tbsk",
+  "f_brde",
   "section_break_rmuu",
   "column_break_ogaz",
   "column_break_mbgz",
   "potongan_sortasi_external",
-  "column_break_rmpx",
-  "file_upload_tab",
-  "table_pwcx"
+  "column_break_rmpx"
  ],
  "fields": [
   {
@@ -259,16 +277,6 @@
   {
    "fieldname": "column_break_wimj",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "file_upload_tab",
-   "fieldtype": "Tab Break",
-   "label": "File Upload"
-  },
-  {
-   "fieldname": "table_pwcx",
-   "fieldtype": "Table",
-   "options": "Kriteria Upload Dokumen Finance"
   },
   {
    "default": "0",
@@ -721,6 +729,7 @@
    "fieldtype": "Percent",
    "in_preview": 1,
    "label": "Potongan Sortasi External",
+   "precision": "1",
    "read_only": 1
   },
   {
@@ -732,6 +741,7 @@
   {
    "bold": 1,
    "default": "0",
+   "description": "Satuan Janjang",
    "fieldname": "total_tbs_internal",
    "fieldtype": "Int",
    "label": "Total TBS Internal"
@@ -745,14 +755,15 @@
    "default": "0",
    "fieldname": "nilai_panen",
    "fieldtype": "Int",
-   "label": "Nilai Panen"
+   "label": "Total Nilai Panen"
   },
   {
    "bold": 1,
    "default": "0",
    "fieldname": "potongan_sortasi_internal",
-   "fieldtype": "Int",
-   "label": "Potongan Sortasi Internal"
+   "fieldtype": "Percent",
+   "label": "Potongan Sortasi Internal",
+   "precision": "1"
   },
   {
    "fieldname": "informasi_data_section",
@@ -954,11 +965,13 @@
    "label": "Sampah"
   },
   {
+   "default": "0",
    "fieldname": "br",
    "fieldtype": "Percent",
    "label": "Buah Basah/Air"
   },
   {
+   "default": "0",
    "fieldname": "tbs",
    "fieldtype": "Percent",
    "label": "Buah TBS Masak Kecil"
@@ -978,13 +991,134 @@
   {
    "fieldname": "column_break_rmpx",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ktyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_mentah",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Mentah"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_masak",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Masak"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_tm",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Terlalu Masak"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_tk",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Tandan Kosong"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_abn",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Abnormal"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_tp",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Tangkai Panjang"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_rd",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto R. Damage"
+  },
+  {
+   "fieldname": "column_break_gdpi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_brd",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Brondolan"
+  },
+  {
+   "fieldname": "column_break_crwv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Upload",
+   "fieldname": "f_smph",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Sampah"
+  },
+  {
+   "fieldname": "column_break_wbnt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "f_bm",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Buah Mengkal"
+  },
+  {
+   "fieldname": "f_tpe",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Tangkai Panjang"
+  },
+  {
+   "fieldname": "f_kp",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Kotoran Pasir"
+  },
+  {
+   "fieldname": "f_bb",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Buah Basah"
+  },
+  {
+   "fieldname": "f_br",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Buah Restan"
+  },
+  {
+   "fieldname": "f_tbsk",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Buah TBS Masak Kecil"
+  },
+  {
+   "fieldname": "f_brde",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Brondolan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-09 05:55:38.081559",
+ "modified": "2026-02-18 09:06:00.240350",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",

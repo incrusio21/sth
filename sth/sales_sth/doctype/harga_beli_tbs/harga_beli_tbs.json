@@ -8,6 +8,7 @@
   "item_code",
   "item_name",
   "column_break_unhx",
+  "tanggal",
   "item_section",
   "column_break_ofhm",
   "unit",
@@ -154,13 +155,19 @@
   {
    "fieldname": "column_break_ovsp",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-09 09:58:41.493400",
+ "modified": "2026-02-15 21:49:47.827361",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Harga Beli TBS",

@@ -14,13 +14,14 @@
   "column_break_lfrt",
   "blok",
   "kendaraan",
+  "project",
   "km",
   "kegiatan",
   "jumlah_keluar"
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "kode_barang",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -80,7 +81,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Blok",
-   "mandatory_depends_on": "eval:doc.sub_unit == \"1\"",
+   "mandatory_depends_on": "eval:doc.sub_unit",
    "options": "Blok"
   },
   {
@@ -107,13 +108,21 @@
    "in_list_view": 1,
    "label": "Jumlah Saat Ini",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-13 14:31:07.376973",
+ "modified": "2026-02-18 10:48:27.275173",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

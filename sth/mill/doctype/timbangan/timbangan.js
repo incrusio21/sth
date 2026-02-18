@@ -126,7 +126,11 @@ frappe.ui.form.on("Timbangan", {
 	},
 
 	calculate_weight(frm) {
-		frm.set_value("netto", frm.doc.bruto - frm.doc.tara - (frm.doc.potongan_sortasi / 100))
+		frm.set_value("netto", frm.doc.bruto - frm.doc.tara)
+		frm.set_value("netto_2", frm.doc.bruto - frm.doc.tara - ((frm.doc.bruto - frm.doc.tara) * frm.doc.potongan_sortasi / 100))
+	},
+	potongan_sortasi(frm){
+		frm.trigger('calculate_weight')
 	}
 })
 

@@ -212,7 +212,7 @@ function calculateInterestAmount(frm, cdt, cdn) {
     if (!curRow.loan_interest || !curRow.days) {
         return
     }
-    let interestAmount = curRow.disbursement_total * curRow.loan_interest * curRow.days / frm.doc.days_in_year
+    let interestAmount = curRow.disbursement_total * curRow.loan_interest / 100 * curRow.days / frm.doc.days_in_year
     let paymentTotal = curRow.principal + interestAmount
     frappe.model.set_value(cdt, cdn, 'interest_amount', interestAmount)
     frappe.model.set_value(cdt, cdn, 'payment_total', paymentTotal)

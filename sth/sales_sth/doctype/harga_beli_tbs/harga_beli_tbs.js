@@ -28,7 +28,7 @@ frappe.ui.form.on("Harga Beli TBS", {
 	refresh(frm){
 		frm.disable_save();
 		frm.events.load_price_history(frm);
-
+		 frm.set_value('tanggal', frappe.datetime.get_today());
 
 		const grid = frm.fields_dict.price_change_history.grid;
 
@@ -178,7 +178,8 @@ frappe.ui.form.on("Harga Beli TBS", {
 						uom: frm.doc.uom,
 						current_rate: frm.doc.current_rate,
 						price_difference: frm.doc.price_difference,
-						remark: frm.doc.remark
+						remark: frm.doc.remark,
+						tanggal: frm.doc.tanggal
 					},
 					freeze: true,
 					callback(r) {

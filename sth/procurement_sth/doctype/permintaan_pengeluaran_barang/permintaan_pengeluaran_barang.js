@@ -19,6 +19,14 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
             }
         })
 
+        frm.set_query("project", "items", function (doc) {
+            return {
+                filters: {
+                    supplier: doc.kontraktor
+                }
+            }
+        })
+
         frm.set_query("sub_unit", "items", function (doc) {
             const query = frappe.model.get_server_module_name(doc.doctype) + ".filter_divisi"
             return {

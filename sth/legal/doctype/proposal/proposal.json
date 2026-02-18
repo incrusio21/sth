@@ -111,8 +111,7 @@
   "sec_tax_breakup",
   "other_charges_calculation",
   "term_tab",
-  "kriteria_upload_dokumen_finance",
-  "column_break_zedg",
+  "column_break_murt",
   "cara_pembayaran",
   "section_break_yjvw",
   "default_identification",
@@ -1433,13 +1432,6 @@
    "options": "VAT Detail"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "kriteria_upload_dokumen_finance",
-   "fieldtype": "Table",
-   "label": "File Upload",
-   "options": "Kriteria Upload Dokumen Finance"
-  },
-  {
    "default": "1",
    "fieldname": "is_bapp_retensi",
    "fieldtype": "Check",
@@ -1451,10 +1443,6 @@
    "fieldname": "retensi",
    "fieldtype": "Percent",
    "label": "Retensi"
-  },
-  {
-   "fieldname": "column_break_zedg",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -1470,6 +1458,10 @@
    "fieldtype": "Data",
    "label": "Project Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_murt",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,

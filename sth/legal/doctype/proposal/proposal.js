@@ -99,7 +99,7 @@ erpnext.utils.update_progress_received = function (opts) {
 			read_only: 1,
 			in_list_view: 1,
 			columns: 1,
-			label: __("BAPP Received"),
+			label: __("Progress Bulan Lalu"),
 			precision: get_precision("received_qty"),
 		},
 		{
@@ -109,7 +109,7 @@ erpnext.utils.update_progress_received = function (opts) {
 			read_only: 0,
 			in_list_view: 1,
 			columns: 1,
-			label: __("Progress"),
+			label: __("Progress Bulan Ini"),
 			precision: get_precision("progress_received"),
 			onchange: function () {
 				const docname = this.doc.docname;
@@ -147,7 +147,7 @@ erpnext.utils.update_progress_received = function (opts) {
 			read_only: 1,
 			in_list_view: 1,
 			columns: 1,
-			label: __("Real Received Qty"),
+			label: __("Progress s/d bulan ini"),
 			precision: get_precision("received_qty"),
 		},
 	];
@@ -372,6 +372,44 @@ frappe.ui.form.on("Proposal", {
 		}
 	}
 });
+
+frappe.ui.form.on("Proposal", {
+	refresh: function (frm) {
+        frm.set_query("ppn",(doc) => {
+			return {
+				filters: {
+					"type": "PPN"
+				}
+			}
+		})
+
+		frm.set_query("type", "pph_details",(doc) => {
+			return {
+				filters: {
+					"type": "PPh"
+				}
+			}
+		})
+	},
+	ppn: function (frm) {
+		frappe.call({
+			method: "sth.utils.data.tax_rate",
+			args: {
+				tax_name: frm.doc.ppn,
+				company: frm.doc.company,
+				type: "Masukan",
+			},
+			callback: function(r){
+				if(r.message){
+					frm.doc.ppn_rate = r.message.rate
+					frm.doc.ppn_account = r.message.account
+					frm.doc.ppn_amount = flt(frm.doc.net_total * (frm.doc.ppn_rate / 100));
+				}
+				recreate_tax_table(frm)
+			}
+		})
+	}
+})
 
 frappe.ui.form.on("Proposal Item", {
 	schedule_date: function (frm, cdt, cdn) {

@@ -121,7 +121,7 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 	return doc
 
 @frappe.whitelist()
-def get_criteria(voucher_type, voucher_no, type_document=None):
+def get_criteria(voucher_type, voucher_no, doucment_type=None):
 	kriteria_doc = frappe.db.get_value("Kriteria Upload Document", {"voucher_type": voucher_type, "voucher_no": voucher_no}, "name")
 	if not kriteria_doc:
 		parent = frappe.qb.DocType("Kriteria Dokumen Finance")
@@ -140,8 +140,8 @@ def get_criteria(voucher_type, voucher_no, type_document=None):
 			)
 		)
 
-		if type_document:
-			kriteria = kriteria.where(parent.criteria_type == type_document)
+		if doucment_type:
+			kriteria = kriteria.where(parent.criteria_type == doucment_type)
 
 		kriteria = kriteria.run(as_dict=True)
 	else:

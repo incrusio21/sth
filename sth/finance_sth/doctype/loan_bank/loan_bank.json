@@ -110,6 +110,7 @@
   {
    "fieldname": "loan_term",
    "fieldtype": "Date",
+   "in_filter": 1,
    "label": "Jangka Waktu"
   },
   {
@@ -231,6 +232,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -315,6 +317,7 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_filter": 1,
    "label": "Unit",
    "options": "Unit",
    "reqd": 1
@@ -383,7 +386,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 14:07:14.387043",
+ "modified": "2026-02-18 11:20:06.547947",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",

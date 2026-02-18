@@ -54,6 +54,7 @@
   "gateweight2",
   "column_break_ttdq",
   "netto",
+  "netto_2",
   "driver_data_tab",
   "driver_section",
   "driver_name",
@@ -143,6 +144,7 @@
    "fieldtype": "Percent",
    "label": "Potongan Sortasi",
    "precision": "2",
+   "read_only": 1,
    "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   },
   {
@@ -427,13 +429,20 @@
    "fieldname": "no_polisi",
    "fieldtype": "Data",
    "label": "No Polisi"
+  },
+  {
+   "fieldname": "netto_2",
+   "fieldtype": "Float",
+   "label": "Netto 2",
+   "precision": "0",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-09 08:48:40.612358",
+ "modified": "2026-02-18 09:54:24.094694",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

@@ -8,7 +8,7 @@ from frappe.desk.reportview import get_filters_cond
 
 class PermintaanPengeluaranBarang(Document):
 	def validate(self):
-		pass
+		self.validate_stock()
 		# if len(self.items) > 1:
 		# 	frappe.throw("Pengeluaran lebih dari 1 jenis barang tidak diperbolehkan.")
 

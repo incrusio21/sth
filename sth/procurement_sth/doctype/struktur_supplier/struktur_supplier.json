@@ -53,9 +53,10 @@
   {
    "columns": 1,
    "fieldname": "user_email",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "User Email"
+   "label": "User Email",
+   "options": "Supplier Email"
   },
   {
    "columns": 1,
@@ -91,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-23 09:31:43.142602",
+ "modified": "2026-02-16 11:39:49.396068",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Struktur Supplier",

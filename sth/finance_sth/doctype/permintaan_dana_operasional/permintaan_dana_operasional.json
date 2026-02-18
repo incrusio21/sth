@@ -40,8 +40,12 @@
   "perjalanan_dinas_cost_center",
   "kas_tab",
   "kas_details_section",
-  "kas_transaction_number",
   "jenis_kas",
+  "tambah_item",
+  "column_break_ycua",
+  "column_break_ctdc",
+  "section_break_rlrb",
+  "kas_transaction_number",
   "pdo_kas",
   "grand_total_kas",
   "outstanding_amount_kas",
@@ -428,14 +432,31 @@
    "fieldname": "jenis_kas",
    "fieldtype": "Link",
    "label": "Jenis Kas",
-   "options": "Expense Claim Type"
+   "options": "PDO Type"
+  },
+  {
+   "fieldname": "tambah_item",
+   "fieldtype": "Button",
+   "label": "Tambah Item"
+  },
+  {
+   "fieldname": "column_break_ycua",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ctdc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rlrb",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-10 11:41:05.968610",
+ "modified": "2026-02-14 14:50:11.238621",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

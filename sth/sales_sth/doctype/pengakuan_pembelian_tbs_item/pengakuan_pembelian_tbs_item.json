@@ -6,31 +6,43 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "column_break_vdzr",
+  "no_tiket",
+  "kendaraan",
+  "bruto",
+  "tarra",
+  "netto",
+  "pot",
+  "terima",
+  "rate",
+  "bonus",
+  "subsidi_angkut",
+  "total",
+  "total_pembayaran_bonus_ke_supplier",
+  "status_pajak_pph_22",
+  "percent_pajak_pph_22",
+  "rupiah_pajak_pph_22",
   "item_code",
   "item_name",
   "qty",
-  "rate",
-  "total",
-  "insentif"
+  "insentif",
+  "total_seluruhnya"
  ],
  "fields": [
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Item Code",
    "options": "Item"
   },
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Item Name"
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Qty",
    "precision": "0"
   },
@@ -38,25 +50,126 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Harga"
+   "label": "Harga",
+   "read_only": 1
   },
   {
    "fieldname": "total",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Total"
+   "label": "Total Pembayaran ke Supplier",
+   "read_only": 1
   },
   {
    "fieldname": "insentif",
    "fieldtype": "Currency",
    "label": "Insentif"
+  },
+  {
+   "fieldname": "no_tiket",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No Tiket",
+   "options": "Timbangan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kendaraan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kendaraan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bruto",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Bruto",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tarra",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tarra",
+   "read_only": 1
+  },
+  {
+   "fieldname": "netto",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Netto",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pot",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Pot",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terima",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Terima",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Bonus",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subsidi_angkut",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Subsidi Angkut",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_pembayaran_bonus_ke_supplier",
+   "fieldtype": "Currency",
+   "label": "Total Pembayaran bonus ke Supplier"
+  },
+  {
+   "fieldname": "column_break_vdzr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_pajak_pph_22",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status Pajak PPH 22",
+   "options": "Tidak\nIya"
+  },
+  {
+   "default": "0.25",
+   "fieldname": "percent_pajak_pph_22",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Percent Pajak PPH 22"
+  },
+  {
+   "fieldname": "total_seluruhnya",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Seluruhnya"
+  },
+  {
+   "fieldname": "rupiah_pajak_pph_22",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rupiah Pajak PPH 22"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-10 10:51:35.765575",
+ "modified": "2026-02-15 22:25:30.183008",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS Item",
