@@ -330,3 +330,14 @@ def non_aktifkan_table(doc,method):
 			if row.pajak in pajak_list:
 				frappe.throw(_("Row #{0}: Pajak '{1}' already exists in the table.").format(row.idx, row.pajak))
 			pajak_list.append(row.pajak)
+
+def update_supplier_email(doc,method):
+	frappe.db.delete("Supplier Email",{"supplier": doc.name})
+
+	for row in doc.struktur_supplier:
+		frappe.get_doc({
+			"doctype": "Supplier Email",
+			"supplier": doc.name,
+			"email": row.user_email
+		}).insert()
+			

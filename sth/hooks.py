@@ -308,6 +308,7 @@ doc_events = {
 	},
 	"Supplier": {
 		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
+		"before_save": "sth.overrides.supplier.update_supplier_email",
 	},
 	"Stock Reconciliation": {
 		"validate": ["sth.custom.stock_reconciliation.validate_retain_amount"],

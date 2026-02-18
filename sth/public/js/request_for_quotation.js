@@ -51,6 +51,22 @@ frappe.ui.form.on('Request for Quotation', {
                 }
             }
         })
+
+        frm.set_query("email", "suppliers", function (doc, dt, dn) {
+            let row = locals[dt][dn]
+            return {
+                filters: {
+                    supplier: row.supplier
+                }
+            }
+        })
+
+    },
+
+    onload(frm) {
+        if (frm.is_new()) {
+            frm.set_value("schedule_date", frappe.datetime.add_days(frm.doc.transaction_date, 7))
+        }
     },
 
     onload_post_render(frm) {
@@ -106,6 +122,13 @@ frappe.ui.form.on('Request for Quotation', {
 
         dialog.show();
     },
+})
+
+frappe.ui.form.on("Request for Quotation Supplier", {
+    email: function (frm, dt, dn) {
+        const row = locals[dt][dn]
+        frappe.model.set_value(dt, dn, "email_id", row.email)
+    }
 })
 
 frappe.form.link_formatters['Item'] = function (value, doc) {
