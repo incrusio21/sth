@@ -15,11 +15,10 @@ class KriteriaDokumenFinance(Document):
 			self.name += "-" + self.criteria_type
 
 def validate_mandatory_document(self, method):
-	# perlu ganti untuk semua nya dulu
-	return
+
 	# menghindari error sebelum doctype lain d update
-	if self.doctype not in ["Ganti Rugi Lahan"]:
-		return
+	# if self.doctype not in ["Ganti Rugi Lahan"]:
+		# return
 
 	# skip jika doctype tidak memiliki document kriteria
 	if not frappe.db.exists("Kriteria Dokumen Finance", {"dokumen_finance": self.doctype}):

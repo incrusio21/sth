@@ -32,7 +32,9 @@
   "more_information_tab",
   "accounts_details_section",
   "employee",
-  "credit_to"
+  "credit_to",
+  "upload_file_tab",
+  "kriteria_upload_html"
  ],
  "fields": [
   {
@@ -199,13 +201,23 @@
    "fieldtype": "Link",
    "label": "Jenis Biaya",
    "options": "Jenis Biaya Ganti Rugi Lahan"
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 17:07:59.916696",
+ "modified": "2026-02-18 23:25:13.965078",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

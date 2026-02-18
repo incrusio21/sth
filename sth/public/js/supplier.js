@@ -21,10 +21,7 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('default', 'Ya');
 			frm.set_value('status_bank', 'Aktif');
 		}
-		else{
-			setup_upload_button(frm)
-			buat_html_upload(frm)
-		}
+		
 		check_status_pkp(frm)
 		hide_details(frm)
 	},
@@ -127,25 +124,3 @@ frappe.ui.form.on('Struktur Supplier', {
 		d.show();
 	}
 });
-
-function setup_upload_button(frm){
-	frm.add_custom_button(__('Upload/View File'), function() {		
-		let submited_condition = false
-		let skip_sppkp = "Not SPPKP"
-		let badan_usaha = "Non Koperasi"
-
-		if ((frm.doc.npwp_dan_sppkp_supplier || []).some(row => row.status_pkp)) {
-            skip_sppkp = "SPPKP";
-        }
-        if(frm.doc.badan_usaha == "Koperasi"){
-        	badan_usaha = "Koperasi"
-        }
-		new sth.utils.EfillingSelector(frm, badan_usaha+"-"+skip_sppkp, submited_condition, (r) => {
-			
-		});
-	});
-}
-
-function buat_html_upload(frm) {
-	
-}

@@ -269,11 +269,12 @@ doc_events = {
 	},
 	"Payment Entry":{
 		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book", "sth.finance_sth.custom.cek_kriteria_upload_pe.populate_upload_file"
+			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book", "sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment"
 		],
 		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_submit_pdo"],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_cancel_pdo"],
-		"on_trash": "sth.custom.payment_entry.update_check_book"
+		"on_trash": "sth.custom.payment_entry.update_check_book",
+		"after_insert": "sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment"
 	},
 	"Permintaan Pengeluaran Barang": {
 		"validate": ["sth.procurement_sth.custom.item.check_persetujuan"],

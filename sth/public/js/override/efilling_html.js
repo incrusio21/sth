@@ -6,6 +6,7 @@ $(document).on('form-refresh', function(e, frm) {
 	// Only proceed if this doctype has the sentinel field
 	if (!frm.fields_dict['kriteria_upload_html']) return;
 
+	bikin_tombol_upload(frm);
 	render_kriteria_upload(frm);
 });
 
@@ -147,4 +148,47 @@ function file_icon() {
 				<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
 				<polyline points="14 2 14 8 20 8"/>
 			</svg>`;
+}
+
+function bikin_tombol_upload(frm){
+	if(!frm.is_new()){
+		frm.add_custom_button(__('Upload/Views File'), function() {		
+			let submited_condition = false
+			if(frm.doc.doctype == "Supplier"){
+				let skip_sppkp = "Not SPPKP"
+				let badan_usaha = "Non Koperasi"
+
+				if ((frm.doc.npwp_dan_sppkp_supplier || []).some(row => row.status_pkp)) {
+					skip_sppkp = "SPPKP";
+				}
+				if(frm.doc.badan_usaha == "Koperasi"){
+					badan_usaha = "Koperasi"
+				}
+				new sth.utils.EfillingSelector(frm, badan_usaha+"-"+skip_sppkp, submited_condition, (r) => {
+					
+				});
+			}
+			else if (frm.doc.doctype == "Ganti Rugi Lahan"){
+				let submited_condition = frm.doc.docstatus > 0
+				if(frm.doc.jenis_biaya == "GRLTT" || !frm.doc.jenis_biaya){
+					submited_condition = frm.doc.docstatus > 1
+				}
+				if(!frm.doc.jenis_biaya){
+					jenis_biaya = "GRLTT"
+				}
+				else{
+					jenis_biaya = frm.doc.jenis_biaya
+				}
+				new sth.utils.EfillingSelector(frm, jenis_biaya, submited_condition, (r) => {
+				});
+			}
+			else{
+				let submited_condition = frm.doc.docstatus > 0
+				new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => {
+					
+				});
+			}
+			
+		});
+	}
 }

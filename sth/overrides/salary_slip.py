@@ -285,15 +285,16 @@ class SalarySlip(SalarySlip):
 					if emp_doc.designation != "NS30":
 						self.holiday_days += 1
 						hari_leave += 1
-		else:
-			jumlah_libur_dari_holiday_list = 0
-			holiday_doc = frappe.get_doc("Holiday List", emp_doc.holiday_list)
-			for satu_holiday in holiday_doc.holidays:
-				for h in holidays:
-					if satu_holiday.weekly_off == 0 and satu_holiday.holiday_date == h:
-						jumlah_libur_dari_holiday_list += 1
+		# else:
+		jumlah_libur_dari_holiday_list = 0
+		holiday_doc = frappe.get_doc("Holiday List", emp_doc.holiday_list)
+		for satu_holiday in holiday_doc.holidays:
+			print("A")
+			for h in holidays:
+				if satu_holiday.weekly_off == 0 and satu_holiday.holiday_date == h:
+					jumlah_libur_dari_holiday_list += 1
 
-			self.holiday_days = jumlah_libur_dari_holiday_list
+		self.holiday_days += jumlah_libur_dari_holiday_list
 				
 		date_of_joining = emp_doc.date_of_joining
 		
@@ -393,8 +394,6 @@ class SalarySlip(SalarySlip):
 				& ((Attendance.status.isin(["Present","7th Day Off"])) | (IfNull(LeaveType.status_code, Attendance.status_code).isin(list_lwp))
 			))
 		)
-
-		print(query)
 
 		query = query.run()
 		
@@ -1077,7 +1076,7 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00730/00001")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00919/00001")
 	doc.calculate_holidays()
 
 @frappe.whitelist()

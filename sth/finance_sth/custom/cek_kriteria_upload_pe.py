@@ -1,253 +1,106 @@
 import frappe
-from frappe import _
 
-def populate_upload_file(doc, method=None):
-	populate_linked_documents(doc)
-
-def populate_linked_documents(doc):
-	all_uploads = []
-	processed_docs = set() 
+def generate_kriteria_upload_payment(doc, method=None):
+	if doc.is_new():
+		return
 	
 	if not doc.references:
 		return
-	
+
+	all_rows = []
+
 	for ref in doc.references:
-		if ref.reference_doctype == "Sales Invoice" and ref.reference_name:
-			collect_uploads_from_chain(
-				ref.reference_name, 
-				all_uploads, 
-				processed_docs
-			)
-	
-	doc.kriteria_upload_dokumen_finance_pe = []
-	
-	for upload in all_uploads:
-		doc.append("kriteria_upload_dokumen_finance_pe", {
-			"document_type": upload["document_type"],
-			"document_no": upload["document_no"],
-			"rincian_dokumen_finance": upload["rincian_dokumen_finance"],
-			"uploaded_file": upload["uploaded_file"]
-		})
+		rows = get_kriteria_rows_for_reference(ref.reference_doctype, ref.reference_name)
+		all_rows.extend(rows)
 
-def collect_uploads_from_chain(sales_invoice_name, all_uploads, processed_docs):
-	collect_uploads_from_doc(
-		"Sales Invoice", 
-		sales_invoice_name, 
-		all_uploads, 
-		processed_docs
+	if not all_rows:
+		return  
+
+	existing = frappe.db.get_value(
+		"Kriteria Upload Payment",
+		{"voucher_type": "Payment Entry", "voucher_no": doc.name},
+		"name"
 	)
-	
-	linked_docs = get_linked_docs_from_sales_invoice(sales_invoice_name)
-	
-	for so_name in linked_docs.get("sales_orders", []):
-		if so_name not in processed_docs:
-			collect_uploads_from_doc(
-				"Sales Order", 
-				so_name, 
-				all_uploads, 
-				processed_docs
-			)
-			
-			quotations = get_quotations_from_sales_order(so_name)
-			for quot_name in quotations:
-				if quot_name not in processed_docs:
-					collect_uploads_from_doc(
-						"Quotation", 
-						quot_name, 
-						all_uploads, 
-						processed_docs
-					)
-	
-	for dn_name in linked_docs.get("delivery_notes", []):
-		if dn_name not in processed_docs:
-			collect_uploads_from_doc(
-				"Delivery Note", 
-				dn_name, 
-				all_uploads, 
-				processed_docs
-			)
-			
-			sales_orders = get_sales_orders_from_delivery_note(dn_name)
-			for so_name in sales_orders:
-				if so_name not in processed_docs:
-					collect_uploads_from_doc(
-						"Sales Order", 
-						so_name, 
-						all_uploads, 
-						processed_docs
-					)
-					
-					quotations = get_quotations_from_sales_order(so_name)
-					for quot_name in quotations:
-						if quot_name not in processed_docs:
-							collect_uploads_from_doc(
-								"Quotation", 
-								quot_name, 
-								all_uploads, 
-								processed_docs
-							)
 
-def collect_uploads_from_doc(doctype, docname, all_uploads, processed_docs):
-	if docname in processed_docs:
-		return
-	
-	processed_docs.add(docname)
-	doc = frappe.get_doc(doctype, docname)
-	
-	if not hasattr(doc, 'kriteria_upload_dokumen_finance'):
-		return
-	
-	for row in doc.kriteria_upload_dokumen_finance:
-		all_uploads.append({
-			"document_type": doctype, 
-			"document_no": docname,
-			"rincian_dokumen_finance": row.rincian_dokumen_finance,
-			"uploaded_file": row.upload_file
-		})
+	if existing:
+		kup = frappe.get_doc("Kriteria Upload Payment", existing)
+		kup.file_upload = []
+		for row in all_rows:
+			kup.append("file_upload", row)
+		kup.save(ignore_permissions=True)
+	else:
+		kup = frappe.new_doc("Kriteria Upload Payment")
+		kup.voucher_type = "Payment Entry"
+		kup.voucher_no   = doc.name
+		for row in all_rows:
+			kup.append("file_upload", row)
+		kup.insert(ignore_permissions=True)
 
-def get_linked_docs_from_sales_invoice(sales_invoice_name):
-	items = frappe.get_all(
+	frappe.db.commit()
+
+
+def get_kriteria_rows_for_reference(reference_doctype, reference_name):
+	rows = []
+
+	if reference_doctype == "Sales Invoice":
+		# Special case: pull from Sales Order, Delivery Note, and Sales Invoice itself
+		linked = get_sales_invoice_links(reference_name)
+
+		for so_name in linked["sales_orders"]:
+			rows.extend(get_file_upload_rows("Sales Order", so_name))
+
+		for dn_name in linked["delivery_notes"]:
+			rows.extend(get_file_upload_rows("Delivery Note", dn_name))
+
+		rows.extend(get_file_upload_rows("Sales Invoice", reference_name))
+
+	else:
+		rows.extend(get_file_upload_rows(reference_doctype, reference_name))
+
+	return rows
+
+
+def get_sales_invoice_links(sales_invoice_name):
+	"""
+	Get unique Sales Orders and Delivery Notes linked to a Sales Invoice
+	via its items table.
+	"""
+	si_items = frappe.get_all(
 		"Sales Invoice Item",
 		filters={"parent": sales_invoice_name},
 		fields=["sales_order", "delivery_note"]
 	)
-	
-	sales_orders = set()
-	delivery_notes = set()
-	
-	for item in items:
-		if item.sales_order:
-			sales_orders.add(item.sales_order)
-		if item.delivery_note:
-			delivery_notes.add(item.delivery_note)
-	
-	return {
-		"sales_orders": list(sales_orders),
-		"delivery_notes": list(delivery_notes)
-	}
 
-def get_quotations_from_sales_order(sales_order_name):
-	items = frappe.get_all(
-		"Sales Order Item",
-		filters={"parent": sales_order_name},
-		fields=["prevdoc_docname"]
+	sales_orders   = list({r.sales_order   for r in si_items if r.sales_order})
+	delivery_notes = list({r.delivery_note for r in si_items if r.delivery_note})
+
+	return {"sales_orders": sales_orders, "delivery_notes": delivery_notes}
+
+
+def get_file_upload_rows(voucher_type, voucher_no):
+	"""
+	Find the Kriteria Upload Document for a given voucher_type + voucher_no
+	and return its file_upload rows mapped to Kriteria Upload Payment structure.
+	"""
+	doc_name = frappe.db.get_value(
+		"Kriteria Upload Document",
+		{"voucher_type": voucher_type, "voucher_no": voucher_no},
+		"name"
 	)
-	
-	quotations = set()
-	for item in items:
-		if item.prevdoc_docname:
-			quotations.add(item.prevdoc_docname)
-	
-	return list(quotations)
 
-def get_sales_orders_from_delivery_note(delivery_note_name):
-	items = frappe.get_all(
-		"Delivery Note Item",
-		filters={"parent": delivery_note_name},
-		fields=["against_sales_order"]
-	)
-	
-	sales_orders = set()
-	for item in items:
-		if item.against_sales_order:
-			sales_orders.add(item.against_sales_order)
-	
-	return list(sales_orders)
+	if not doc_name:
+		return []
 
+	doc  = frappe.get_doc("Kriteria Upload Document", doc_name)
+	rows = []
 
-# Alternative: More efficient query-based approach
-def populate_linked_documents_optimized(doc):
-	all_uploads = []
-	
-	sales_invoices = [
-		ref.reference_name 
-		for ref in doc.references 
-		if ref.reference_doctype == "Sales Invoice" and ref.reference_name
-	]
-	
-	if not sales_invoices:
-		doc.kriteria_upload_dokumen_finance_pe = []
-		return
-	
-	document_chain = build_document_chain_sql(sales_invoices)
-	
-	for doctype, docnames in document_chain.items():
-		if docnames:
-			uploads = get_uploads_from_documents(doctype, docnames)
-			all_uploads.extend(uploads)
-	
-	doc.kriteria_upload_dokumen_finance_pe = []
-	for upload in all_uploads:
-		doc.append("kriteria_upload_dokumen_finance_pe", upload)
+	for row in doc.file_upload:
+		rows.append({
+			"doctype":                 "Kriteria Upload Payment Item",  # adjust to your child doctype name
+			"document_type":           voucher_type,
+			"document_no":             voucher_no,
+			"rincian_dokumen_finance": row.rincian_dokumen_finance,
+			"uploaded_file":           row.upload_file,
+		})
 
-def build_document_chain_sql(sales_invoices):
-	chain = {
-		"Sales Invoice": sales_invoices,
-		"Sales Order": [],
-		"Delivery Note": [],
-		"Quotation": []
-	}
-	
-	si_links = frappe.db.sql("""
-		SELECT DISTINCT 
-			sales_order, 
-			delivery_note
-		FROM `tabSales Invoice Item`
-		WHERE parent IN %(invoices)s
-			AND (sales_order IS NOT NULL OR delivery_note IS NOT NULL)
-	""", {"invoices": sales_invoices}, as_dict=1)
-	
-	for link in si_links:
-		if link.sales_order:
-			chain["Sales Order"].append(link.sales_order)
-		if link.delivery_note:
-			chain["Delivery Note"].append(link.delivery_note)
-	
-	if chain["Delivery Note"]:
-		dn_so = frappe.db.sql("""
-			SELECT DISTINCT against_sales_order
-			FROM `tabDelivery Note Item`
-			WHERE parent IN %(dn)s
-				AND against_sales_order IS NOT NULL
-		""", {"dn": chain["Delivery Note"]}, as_dict=1)
-		
-		for row in dn_so:
-			if row.against_sales_order not in chain["Sales Order"]:
-				chain["Sales Order"].append(row.against_sales_order)
-				
-	if chain["Sales Order"]:
-		so_quot = frappe.db.sql("""
-			SELECT DISTINCT prevdoc_docname
-			FROM `tabSales Order Item`
-			WHERE parent IN %(so)s
-				AND prevdoc_docname IS NOT NULL
-		""", {"so": chain["Sales Order"]}, as_dict=1)
-		
-		for row in so_quot:
-			if row.prevdoc_docname:
-				chain["Quotation"].append(row.prevdoc_docname)
-	
-	return chain
-
-def get_uploads_from_documents(doctype, docnames):
-	doctype_map = {
-		"Sales Invoice": "Sales Invoice",
-		"Sales Order": "Sales Order",
-		"Delivery Note": "Delivery Note",
-		"Quotation": "Quotation"
-	}
-	
-	uploads = frappe.db.sql("""
-		SELECT 
-			parent as document_no,
-			rincian_dokumen_finance,
-			upload_file as uploaded_file
-		FROM `tabKriteria Upload Dokumen Finance`
-		WHERE parent IN %(docs)s
-			AND parenttype = %(doctype)s
-			AND upload_file IS NOT NULL
-			AND upload_file != ''
-		ORDER BY parent, idx
-	""", {"docs": docnames, "doctype": doctype_map[doctype]}, as_dict=1)
-	
-	return uploads
+	return rows
