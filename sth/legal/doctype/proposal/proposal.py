@@ -282,6 +282,13 @@ class Proposal(BuyingController):
 					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
 				)
 
+	def set_project_name(self):
+		if not self.is_cwip:
+			self.project_name = self.asset_category = self.sub_asset_category = ""
+			return
+		
+		self.project_name = f"{self.asset_category}-{self.sub_asset_category}"
+		
 	def get_schedule_dates(self):
 		for d in self.get("items"):
 			if d.material_request_item and not d.schedule_date:

@@ -24,6 +24,7 @@
   "schedule_date",
   "asset_category",
   "sub_asset_category",
+  "project_name",
   "has_unit_price_items",
   "is_cwip",
   "is_bapp_retensi",
@@ -1463,13 +1464,19 @@
    "label": "Retensi Paid ?",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "label": "Project Name",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-17 16:39:11.040740",
+ "modified": "2026-02-18 13:27:25.934921",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

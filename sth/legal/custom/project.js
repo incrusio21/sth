@@ -4,6 +4,7 @@
 frappe.ui.form.on("Project", {
     setup(frm){
         frm.add_fetch("project_type", "default_department", "department");
+        frm.add_fetch("proposal", "project_name", "project_name");
         // frm.add_fetch("proposal", "company", "company");
         // frm.add_fetch("proposal", "supplier", "supplier");
         // frm.add_fetch("proposal", "supplier_address_active", "supplier_address");
