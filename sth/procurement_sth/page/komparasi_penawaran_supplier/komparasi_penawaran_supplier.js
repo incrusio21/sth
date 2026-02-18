@@ -126,7 +126,7 @@ class SupplierComparasion {
 				return {
 					filters: {
 						"company": me.company,
-						"workflow_state": "Open"
+						"workflow_state": "Need To Compare"
 					}
 				};
 			},
@@ -160,16 +160,18 @@ class SupplierComparasion {
 		this.page.page_form.append(this.btn_chosen_items)
 
 		this.sq_field.$wrapper.css({
-			"margin-left": "auto"
+			"margin-left": "auto",
+			"display": "none"
 		})
 
 		this.btn_approve.css({
-			"align-self": "center"
+			"align-self": "center",
+			"display": "none"
 		})
 
 		this.btn_chosen_items.css({
 			"align-self": "center",
-			"margin-left": "10px"
+			"margin-left": "auto"
 		})
 
 	}
@@ -271,7 +273,8 @@ class SupplierComparasion {
 			{ title: "Nama Barang", field: "nama_barang", headerSort: false, frozen: true, width: 120, headerHozAlign: "center", },
 			{ title: "Satuan", field: "satuan", headerSort: false, frozen: true, headerHozAlign: "center", },
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
-			{ title: "Notes", field: "notes", headerSort: false, frozen: true, width: 120, headerHozAlign: "center", },
+			{ title: "Notes SQ", field: "notes_sq", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
+			{ title: "Notes PR/SR", field: "notes_pr_sr", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
 			...column_suppliers
 		]
 
@@ -423,6 +426,13 @@ class SupplierComparasion {
 		})
 
 		this.dialog.show()
+		const delete_button = this.dialog.get_field('items').grid.remove_rows_button
+		delete_button
+			.off("click.myMarker")
+			.on("click.myMarker", function () {
+				const data = me.dialog.get_field('items').df.data.map((r) => r.item_code)
+				me.selected_items = me.selected_items.filter((r) => data.includes(r))
+			});
 	}
 
 	initials(text) {

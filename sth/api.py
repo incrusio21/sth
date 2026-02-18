@@ -31,7 +31,6 @@ def create_sq():
 	doc_sq.keterangan = data.get('keterangan')
 	doc_sq.custom_required_by = data.get('estimated_date')
 	doc_sq.alamat = frappe.db.get_value("Unit",doc_sq.lokasi_pengiriman,"address")
-
 	doc_sq.custom_material_request = doc_sq.items[0].material_request
 	doc_sq.items = []
 
@@ -87,6 +86,7 @@ def create_sq():
 	doc_sq.additional_discount_percentage = flt(charges_and_discount.get('discount'))
 	
 	doc_sq.insert(ignore_mandatory=True)
+	frappe.db.set_value(doc_sq.doctype,doc_sq.name,"workflow_state","Need To Compare")
 	frappe.db.commit()
 	return {
 		"doctype": doc_sq.doctype,
@@ -132,7 +132,7 @@ def get_table_data(args):
 			"data": [],
 		}
 
-	where_clause = "WHERE sq.workflow_state = 'Open' AND (sqi.`request_for_quotation` = %(pr_sr)s OR sq.custom_material_request = %(pr_sr)s) "
+	where_clause = "WHERE sq.workflow_state = 'Need To Compare' AND sq.custom_material_request = %(pr_sr)s "
 	filters = {"pr_sr":args.pr_sr}
 	
 	if args.item_name:
@@ -144,7 +144,7 @@ def get_table_data(args):
 		filters["supplier_quotation"] = args.list_sq
 
 	query = frappe.db.sql(f"""
-		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes ,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
+		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes as notes_sq,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
 		FROM `tabSupplier Quotation` sq
 		JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
 		JOIN `tabItem` i ON i.`name` = sqi.`item_code`
@@ -176,6 +176,7 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
+				dict_data.notes_pr_sr = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},"notes")
 				dict_data.mark = data.kode_barang
 				result.append(dict_data)
 		else:
@@ -186,6 +187,7 @@ def get_table_data(args):
 			for sup_field in supplier_fields:
 				dict_data[f"{title}_{sup_field}"] = data[sup_field]
 
+			dict_data.notes_pr_sr = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},"notes")
 			dict_data.mark = data.kode_barang
 
 			result.append(dict_data)
@@ -207,8 +209,8 @@ def get_sq_item_details(names):
 		return []
 
 	return frappe.db.sql("""
-		select sqi.item_code, sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.name as doc_no,
-		sq.supplier
+		select sqi.item_code, sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, 
+		sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.name as doc_no,sq.supplier
 		from `tabSupplier Quotation Item` sqi
 		join `tabSupplier Quotation` sq on sq.name = sqi.parent
 		where sqi.name in %(names)s
