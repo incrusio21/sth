@@ -13,7 +13,7 @@ frappe.ui.form.on("Timbangan", {
 			if (!port.length || !localStorage.getItem('location')) {
 				frm.trigger('selectLocationDialog')
 			} else {
-				frm.events.readWeight(frm, localStorage.getItem('location'))
+				frm.events.readWeight(frm, localStorage.getItem('location'), port[0])
 			}
 
 		});
@@ -54,9 +54,9 @@ frappe.ui.form.on("Timbangan", {
 
 	},
 
-	readWeight(frm, location = "") {
+	readWeight(frm, location = "", port = null) {
 		console.log(location);
-		frappe.scaleConnection = new sth.utils.scale_connection(location);
+		frappe.scaleConnection = new sth.utils.scale_connection(location, port);
 		if (location) {
 			localStorage.setItem('location', location)
 		}
@@ -129,7 +129,7 @@ frappe.ui.form.on("Timbangan", {
 		frm.set_value("netto", frm.doc.bruto - frm.doc.tara)
 		frm.set_value("netto_2", frm.doc.bruto - frm.doc.tara - ((frm.doc.bruto - frm.doc.tara) * frm.doc.potongan_sortasi / 100))
 	},
-	potongan_sortasi(frm){
+	potongan_sortasi(frm) {
 		frm.trigger('calculate_weight')
 	}
 })

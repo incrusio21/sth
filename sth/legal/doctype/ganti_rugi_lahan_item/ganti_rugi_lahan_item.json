@@ -100,6 +100,7 @@
    "fieldtype": "Link",
    "label": "Expense Account",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -124,7 +125,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-27 15:43:54.113637",
+ "modified": "2026-02-19 13:43:55.111064",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan Item",

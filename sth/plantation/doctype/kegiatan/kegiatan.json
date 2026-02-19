@@ -136,6 +136,7 @@
    "fieldname": "kd_kgt",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Kode Kegiatan",
    "reqd": 1,
    "unique": 1
@@ -226,7 +227,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-01-28 10:20:10.286912",
+ "modified": "2026-02-19 09:20:55.498331",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

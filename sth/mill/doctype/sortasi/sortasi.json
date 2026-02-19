@@ -164,8 +164,7 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Company",
-   "options": "Company",
-   "read_only": 1
+   "options": "Company"
   },
   {
    "fetch_from": "nomor_tiket.unit",
@@ -1118,7 +1117,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 09:06:00.240350",
+ "modified": "2026-02-19 14:41:20.462996",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",

@@ -141,6 +141,8 @@ def get_data(filters):
 	employee_filters = {"status": "Active"}
 	if employee:
 		employee_filters["name"] = employee
+	if filters.get("unit"):
+		employee_filters["unit"] = filters.get("unit")
 	
 	employees = frappe.get_all("Employee", 
 		filters=employee_filters,

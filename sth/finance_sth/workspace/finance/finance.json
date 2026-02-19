@@ -312,8 +312,28 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Payment",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Voucher",
+   "link_count": 0,
+   "link_to": "Payment Voucher",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Payment Entry",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "PDO",
-   "link_count": 3,
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -350,26 +370,16 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Voucher",
+   "is_query_report": 1,
+   "label": "Laporan Permintaan Dana Operasional",
    "link_count": 0,
-   "link_to": "Payment Voucher",
+   "link_to": "Laporan Permintaan Dana Operasional",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Payment Entry",
    "type": "Link"
   }
  ],
- "modified": "2026-02-12 10:55:24.223415",
+ "modified": "2026-02-19 10:06:14.946135",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",

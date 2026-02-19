@@ -144,7 +144,7 @@ def get_table_data(args):
 		filters["supplier_quotation"] = args.list_sq
 
 	query = frappe.db.sql(f"""
-		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes as notes_sq,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
+		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sq.status, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes as notes_sq,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
 		FROM `tabSupplier Quotation` sq
 		JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
 		JOIN `tabItem` i ON i.`name` = sqi.`item_code`
@@ -177,6 +177,8 @@ def get_table_data(args):
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
 				dict_data.notes_pr_sr = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},"notes")
+				dict_data.notes_sq = data.notes_sq
+				dict_data.status = data.status
 				dict_data.mark = data.kode_barang
 				result.append(dict_data)
 		else:
@@ -188,6 +190,8 @@ def get_table_data(args):
 				dict_data[f"{title}_{sup_field}"] = data[sup_field]
 
 			dict_data.notes_pr_sr = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},"notes")
+			dict_data.notes_sq = data.notes_sq
+			dict_data.status = data.status
 			dict_data.mark = data.kode_barang
 
 			result.append(dict_data)
