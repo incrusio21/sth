@@ -15,7 +15,7 @@ class KriteriaDokumenFinance(Document):
 			self.name += "-" + self.criteria_type
 
 def create_kriteria_upload_document(self, method):
-	if frappe.db.exists("Kriteria Upload Document", {"voucher_type": self.doctype, "voucher_no": self.name}):
+	if self.doctype == "DocType" or frappe.db.exists("Kriteria Upload Document", {"voucher_type": self.doctype, "voucher_no": self.name}):
 		return
 	
 	kriteria_type = self.run_method("document_kriteria")
@@ -23,6 +23,15 @@ def create_kriteria_upload_document(self, method):
 	entries = get_criteria(self.doctype, self.name, kriteria_type, True)
 	if entries:
 		create_kriteria_document(entries, self)
+
+def delete_kriteria_upload_document(self, method):
+	kud_list = frappe.get_all(
+		"Kriteria Upload Document",
+		filters={"voucher_type": self.doctype, "voucher_no": self.name},
+	)
+	
+	for kud in kud_list:
+		frappe.delete_doc("Kriteria Upload Document", kud.name)
 
 def validate_mandatory_document(self, method):
 	# skip jika doctype tidak memiliki document kriteria
@@ -44,7 +53,7 @@ def validate_mandatory_document(self, method):
 			(parent.voucher_type == self.doctype) &
 			(parent.voucher_no == self.name) &
 			(child.mandatory == 1) &
-			(IfNull(child.upload_file, "") != "")
+			(IfNull(child.upload_file, "") == "")
 		)
 		.for_update()
 	).run()		
@@ -109,8 +118,7 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 	)
 
 	for row in entries:
-		if not isinstance(row, dict):
-			row = frappe._dict(row)
+		row = frappe._dict(row)
 		
 		doc.append(
 			"file_upload",
@@ -154,7 +162,7 @@ def get_criteria(voucher_type, voucher_no, doucment_type=None, only_kriteria=Fal
 		if doucment_type:
 			kriteria = kriteria.where(parent.criteria_type == doucment_type)
 
-		kriteria = kriteria.run(as_dict=True, debug=1)
+		kriteria = kriteria.run(as_dict=True)
 	else:
 		kriteria = frappe.get_all("Kriteria Upload Dokumen Finance", 
 			filters={"parent": kriteria_doc}, 
