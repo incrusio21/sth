@@ -14,16 +14,21 @@ class KriteriaDokumenFinance(Document):
 		if self.criteria_type:
 			self.name += "-" + self.criteria_type
 
+def create_kriteria_upload_document(self, method):
+	if frappe.db.exists("Kriteria Upload Document", {"voucher_type": self.doctype, "voucher_no": self.name}):
+		return
+	
+	kriteria_type = self.run_method("document_kriteria")
+	
+	entries = get_criteria(self.doctype, self.name, kriteria_type, True)
+	if entries:
+		create_kriteria_document(entries, self)
+
 def validate_mandatory_document(self, method):
-
-	# menghindari error sebelum doctype lain d update
-	# if self.doctype not in ["Ganti Rugi Lahan"]:
-		# return
-
 	# skip jika doctype tidak memiliki document kriteria
 	if not frappe.db.exists("Kriteria Dokumen Finance", {"dokumen_finance": self.doctype}):
 		return
-
+	
 	parent = frappe.qb.DocType("Kriteria Upload Document")
 	child = frappe.qb.DocType("Kriteria Upload Dokumen Finance")
 
@@ -71,7 +76,7 @@ def add_criteria(entries, document_no, doc, do_not_save=False):
 
 def update_kriteria_document(document_no, entries, doc):
 	doc = frappe.get_doc("Kriteria Upload Document", document_no)
-	doc.set("entries", [])
+	doc.set("file_upload", [])
 
 	for row in entries:
 		row = frappe._dict(row)
@@ -104,7 +109,9 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 	)
 
 	for row in entries:
-		row = frappe._dict(row)
+		if not isinstance(row, dict):
+			row = frappe._dict(row)
+		
 		doc.append(
 			"file_upload",
 			{
@@ -124,7 +131,7 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 	return doc
 
 @frappe.whitelist()
-def get_criteria(voucher_type, voucher_no, doucment_type=None):
+def get_criteria(voucher_type, voucher_no, doucment_type=None, only_kriteria=False):
 	kriteria_doc = frappe.db.get_value("Kriteria Upload Document", {"voucher_type": voucher_type, "voucher_no": voucher_no}, "name")
 	if not kriteria_doc:
 		parent = frappe.qb.DocType("Kriteria Dokumen Finance")
@@ -154,5 +161,8 @@ def get_criteria(voucher_type, voucher_no, doucment_type=None):
 			fields=["name", "rincian_dokumen_finance", "upload_file", "mandatory"],
 			order_by="idx"
 		)
+
+	if only_kriteria:
+		return kriteria
 
 	return {"document_no": kriteria_doc, "kriteria": kriteria}

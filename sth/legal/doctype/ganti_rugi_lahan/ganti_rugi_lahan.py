@@ -12,6 +12,9 @@ from erpnext.accounts.general_ledger import merge_similar_entries
 from sth.controllers.accounts_controller import AccountsController
 
 class GantiRugiLahan(AccountsController):
+	def document_kriteria(self):
+		return self.jenis_biaya or "GRLTT"
+	
 	def validate(self):
 		self.set_missing_value()
 		self.validate_duplicate_sppt()

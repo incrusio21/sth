@@ -207,7 +207,7 @@ override_doctype_class = {
 doc_events = {
 	# untuk kriteria upload
 	"*": {
-		# "validate": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_document",
+		"validate": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_upload_document",
 		"before_submit": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document"
 	},
 

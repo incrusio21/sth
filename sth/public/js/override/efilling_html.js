@@ -152,8 +152,10 @@ function file_icon() {
 
 function bikin_tombol_upload(frm){
 	if(!frm.is_new()){
-		frm.add_custom_button(__('Upload/Views File'), function() {		
+		frm.add_custom_button(__('Upload File'), function() {		
 			let submited_condition = false
+			let kriteria_type = null
+
 			if(frm.doc.doctype == "Supplier"){
 				let skip_sppkp = "Not SPPKP"
 				let badan_usaha = "Non Koperasi"
@@ -164,30 +166,20 @@ function bikin_tombol_upload(frm){
 				if(frm.doc.badan_usaha == "Koperasi"){
 					badan_usaha = "Koperasi"
 				}
-				new sth.utils.EfillingSelector(frm, badan_usaha+"-"+skip_sppkp, submited_condition, (r) => {
-					
-				});
+				kriteria_type = badan_usaha+"-"+skip_sppkp
 			}
 			else if (frm.doc.doctype == "Ganti Rugi Lahan"){
 				let submited_condition = frm.doc.docstatus > 0
 				if(frm.doc.jenis_biaya == "GRLTT" || !frm.doc.jenis_biaya){
 					submited_condition = frm.doc.docstatus > 1
 				}
-				if(!frm.doc.jenis_biaya){
-					jenis_biaya = "GRLTT"
-				}
-				else{
-					jenis_biaya = frm.doc.jenis_biaya
-				}
-				new sth.utils.EfillingSelector(frm, jenis_biaya, submited_condition, (r) => {
-				});
+				
+				kriteria_type = frm.doc.jenis_biaya || "GRLTT"
 			}
-			else{
-				let submited_condition = frm.doc.docstatus > 0
-				new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => {
-					
-				});
-			}
+
+			new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => {
+				
+			});
 			
 		});
 	}
