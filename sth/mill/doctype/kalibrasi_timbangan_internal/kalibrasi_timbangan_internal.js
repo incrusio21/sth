@@ -5,23 +5,63 @@ frappe.provide("sth.utils")
 
 frappe.ui.form.on("Kalibrasi Timbangan Internal", {
 	refresh(frm) {
-		frm.add_custom_button(__("Connect"), function () {
-			frm.trigger('readWeight')
-		})
-		
+		navigator.serial.getPorts().then((port) => {
+			if (!port.length || !localStorage.getItem('location')) {
+				frm.trigger('selectLocationDialog')
+			} else {
+				frm.events.readWeight(frm, localStorage.getItem('location'))
+			}
+
+		});
+
 	},
-	readWeight(frm) {
-		frappe.scaleConnection = frappe.scaleConnection || new sth.utils.scale_connection();
+	selectLocationDialog(frm) {
+		const method = frappe.model.get_server_module_name(frm.doctype) + '.get_timbangan_settings'
+		frappe.xcall(method).then((res) => {
+			const locations = res.map((d) => d.location)
+			let dialog = new frappe.ui.Dialog({
+				title: "Select Location",
+				fields: [{
+					label: "Lokasi Timbangan",
+					fieldname: "location",
+					fieldtype: "Select",
+					options: locations.join("\n"),
+					reqd: 1
+				}],
+				primary_action_label: "Connect",
+				primary_action(values) {
+					dialog.hide()
+					frm.events.readWeight(frm, values.location)
+				}
+			})
+
+			dialog.show()
+		})
+
+	},
+
+	readWeight(frm, location = "") {
+		console.log(location);
+		frappe.scaleConnection = new sth.utils.scale_connection(location);
+		if (location) {
+			localStorage.setItem('location', location)
+		}
 		frappe.scaleConnection.connect().then(() => {
 			frappe.scaleConnection.startReading((weight) => {
-				if (weight.includes('kg')) {
-					let weight_number = parseFloat(weight.split('kg')[0])
-					frm.doc.live_weight = weight_number || 0
-					frm.refresh_field("live_weight")
-				}
+				const match = weight.match(/([+-]?\d+)\s*kg/i);
+				const weight_number = match ? Number(match[1]) : null;
+				frm.doc.live_weight = weight_number || 0
+				frm.refresh_field("live_weight")
+
+				// if (weight.includes('kg')) {
+				// 	let weight_number = parseFloat(weight.split('kg')[0])
+				// 	frm.doc.live_weight = weight_number || 0
+				// 	frm.refresh_field("live_weight")
+				// }
 			});
 		})
 	},
+
 	gateweight(frm) {
 		if (!frm.doc.docstatus == 0) {
 			return

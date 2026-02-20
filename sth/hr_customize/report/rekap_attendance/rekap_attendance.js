@@ -28,6 +28,12 @@ frappe.query_reports["Rekap Attendance"] = {
             "options": "Fiscal Year",
             "default": new Date().getFullYear(),
             "reqd": 1
+        },
+        {
+            "fieldname": "unit",
+            "label": __("Unit"),
+            "fieldtype": "Link",
+            "options": "Unit"
         }
     ]
 };

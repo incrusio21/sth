@@ -73,7 +73,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sub Unit",
-   "options": "Divisi"
+   "options": "Divisi",
+   "reqd": 1
   },
   {
    "columns": 1,
@@ -122,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-18 10:48:27.275173",
+ "modified": "2026-02-19 14:34:57.822460",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

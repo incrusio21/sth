@@ -291,6 +291,8 @@ class SupplierComparasion {
 
 		if (is_selected_before) {
 			frappe.throw('Item sudah dipilih sebelumnya')
+		} else if (data.status == "Expired") {
+			frappe.throw('Penawaran sudah expired, silahkan pilih penawaran lainnya')
 		}
 	}
 

@@ -8,8 +8,8 @@ sth.utils.scale_connection = class ScaleConnection {
      * Konstruktor untuk membuat instance ScaleConnection baru.
      * @param {number} baudRate - Baud rate untuk komunikasi serial (default: 57600).
      */
-    constructor(location) {
-        this.port = null; // Menyimpan objek port serial
+    constructor(location, port = null) {
+        this.port = port; // Menyimpan objek port serial
         this.reader = null; // Menyimpan objek reader untuk membaca data dari port
         this.keepReading = false; // Flag untuk mengontrol loop pembacaan
         this.isConnected = false; // Status koneksi timbangan
@@ -51,7 +51,10 @@ sth.utils.scale_connection = class ScaleConnection {
             //     }));
             // }
             console.log('Meminta pengguna memilih port');
-            this.port = await navigator.serial.requestPort();
+            if (!this.port) {
+                this.port = await navigator.serial.requestPort();
+            }
+            console.log(this.port);
 
             // Membuka koneksi ke port     
             console.log('Membuka port');
