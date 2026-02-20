@@ -19,6 +19,8 @@ def create_kriteria_upload_document(self, method):
 		return
 	
 	kriteria_type = self.run_method("document_kriteria")
+	if not isinstance(kriteria_type, str):
+		kriteria_type = None
 	
 	entries = get_criteria(self.doctype, self.name, kriteria_type, True)
 	if entries:

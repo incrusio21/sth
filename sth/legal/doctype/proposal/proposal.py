@@ -91,7 +91,7 @@ class Proposal(BuyingController):
 	
 	def validate(self):
 		self.set_item_kegiatan_name()
-
+		
 		super().validate()
 
 		self.set_status()
@@ -116,6 +116,9 @@ class Proposal(BuyingController):
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+		self.set_project_name()
+		self.set_retensi_or_term_value()
 		
 	def set_item_kegiatan_name(self):
 		legal_item = get_legal_settings("default_item_code")
@@ -288,7 +291,13 @@ class Proposal(BuyingController):
 			return
 		
 		self.project_name = f"{self.asset_category}-{self.sub_asset_category}"
-		
+	
+	def set_retensi_or_term_value(self):
+		if not self.is_bapp_retensi:
+			self.retensi = 0
+		else:
+			self.payment_schedule = []
+
 	def get_schedule_dates(self):
 		for d in self.get("items"):
 			if d.material_request_item and not d.schedule_date:
@@ -460,6 +469,8 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 
 
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
+	term = frappe.flags.args.term
+	portion = frappe.db.get_value("Payment Schedule", term, "invoice_portion")
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
@@ -471,16 +482,16 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
-
+		
+		target.invoice_type = "SPK"
+		target.term_detail = term
 		target.set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
 	def update_item(obj, target, source_parent):
-		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.qty = flt(obj.qty * portion / 100)
+		target.amount = flt(obj.rate) * flt(target.qty)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = (
-			target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
-		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -506,8 +517,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		"Proposal Item": {
 			"doctype": "Purchase Invoice Item",
 			"field_map": {
-				"name": "po_detail",
-				"parent": "purchase_order",
+				"name": "proposal_detail",
+				"parent": "proposal",
 				"material_request": "material_request",
 				"material_request_item": "material_request_item",
 				"wip_composite_asset": "wip_composite_asset",
@@ -882,7 +893,65 @@ def make_bapp(source_name, target_doc=None):
 				"doctype": "BAPP",
 				"field_map": {
 					"supplier_warehouse": "supplier_warehouse",
-					"retensi": "retensi"
+					"retensi": "retensi",
+					"is_bapp_retensi": "is_bapp_retensi"
+				},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Proposal Item": {
+				"doctype": "BAPP Item",
+				"field_map": {
+					"name": "proposal_item",
+					"parent": "proposal",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.progress_received > 0
+				and doc.delivered_by_supplier != 1,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	return doc
+
+@frappe.whitelist()
+def make_invoice(source_name, target_doc=None):
+	from sth.legal.custom.tax_validation import validate_custom_tax
+
+	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
+	spk = frappe.db.get_value("Project", {"proposal": source_name, "status": ["!=", "Cancelled"]}, "name")
+	if not spk:
+		frappe.throw(f"Create SPK for {source_name} first")
+
+	def set_missing_values(source, target):
+		target.project = spk
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		validate_custom_tax(target)
+		
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.progress_received)
+		target.stock_qty = flt(obj.progress_received) * flt(obj.conversion_factor)
+		target.amount = flt(obj.progress_received) * flt(obj.rate)
+		target.base_amount = (
+			flt(obj.progress_received) * flt(obj.rate) * flt(source_parent.conversion_rate)
+		)
+
+	doc = get_mapped_doc(
+		"Proposal",
+		source_name,
+		{
+			"Proposal": {
+				"doctype": "BAPP",
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"retensi": "retensi",
+					"is_bapp_retensi": "is_bapp_retensi"
 				},
 				"validation": {
 					"docstatus": ["=", 1],

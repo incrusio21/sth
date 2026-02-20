@@ -746,7 +746,6 @@ def update_billed_amount_based_on_proposal(proposal_details, update_modified=Tru
 
 	pr_items = [bapp_detail.name for bapp_detail in bapp_details]
 	pr_items_billed_amount = get_billed_amount_against_pr(pr_items)
-
 	updated_pr = []
 	for pr_item in bapp_details:
 		billed_against_po = flt(po_billed_amt_details.get(pr_item.proposal_item))

@@ -25,6 +25,7 @@
   "project",
   "apply_putaway_rule",
   "is_cwip",
+  "is_bapp_retensi",
   "retensi",
   "amended_from",
   "currency_and_price_list",
@@ -1251,13 +1252,21 @@
    "label": "Retensi",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_bapp_retensi",
+   "fieldtype": "Check",
+   "label": " Retensi by Bapp ?",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-17 19:32:59.214026",
+ "modified": "2026-02-19 11:59:58.424039",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

@@ -554,13 +554,13 @@ erpnext.buying.ProposalController = class ProposalController extends (
 							__("Create")
 						);
 					}
-					// // Please do not add precision in the below flt function
-					// if (flt(doc.per_billed) < 100)
-					// 	this.frm.add_custom_button(
-					// 		__("Purchase Invoice"),
-					// 		this.make_purchase_invoice,
-					// 		__("Create")
-					// 	);
+					// Please do not add precision in the below flt function
+					if (!doc.is_bapp_retensi && flt(doc.per_billed) < 100)
+						this.frm.add_custom_button(
+							__("Purchase Invoice"),
+							this.make_purchase_invoice,
+							__("Create")
+						);
 
 					// if (flt(doc.per_billed) < 100 && doc.status != "Delivered") {
 					// 	this.frm.add_custom_button(
@@ -677,10 +677,37 @@ erpnext.buying.ProposalController = class ProposalController extends (
 	}
 
 	make_purchase_invoice() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
-			frm: cur_frm,
+		let term = cur_frm.doc.payment_schedule
+			.filter((d) => !d.term_used)
+			.map((d) => {
+				return {
+					"value": d.name, "label": d.payment_term
+				}
+			})
+
+		var d = new frappe.ui.Dialog({
+			title: __("Payment Term"),
+			fields: [
+				{
+					fieldname: "term",
+					label: __("Term"),
+					fieldtype: "Select",
+					options: term,
+					reqd: 1,
+				},
+			],
+			primary_action: function () {
+				var data = d.get_values()
+				frappe.model.open_mapped_doc({
+					method: "sth.legal.doctype.proposal.proposal.make_purchase_invoice",
+					frm: cur_frm,
+					args: data,
+					freeze_message: __("Creating Purchase Invoice ..."),
+				});
+			},
 		});
+		d.show();
+		
 	}
 
 	add_from_mappers() {

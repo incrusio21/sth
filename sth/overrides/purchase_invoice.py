@@ -46,7 +46,8 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		update_cwip_expense_accounts(self)
 		super().validate()
 		self.set_retensi_amount()
-
+		self.validate_term()
+		
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc(
 			{
@@ -260,6 +261,28 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 	def set_retensi_amount(self):
 		self.retensi_amount = flt(self.net_total * self.retensi/100, self.precision("retensi_amount"))
+
+	def validate_term(self):
+		if not self.term_detail:
+			return
+		
+		term, payment_term = frappe.db.get_value("Payment Schedule", self.term_detail, ["term_used", "payment_term"], for_update=1)
+		if term:
+			frappe.throw(f"Term {payment_term} already used")
+
+	def on_submit(self):
+		super().on_submit()
+		self.update_term_used()
+
+	def on_cancel(self):
+		super().on_cancel()
+		self.update_term_used(cancel=1)
+
+	def update_term_used(self, cancel=0):
+		if not self.term_detail:
+			return
+			
+		frappe.db.set_value("Payment Schedule", self.term_detail, "term_used", not cancel)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
