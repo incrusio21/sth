@@ -262,6 +262,22 @@ frappe.ui.form.on("Proposal", {
 				},
 			};
 		});
+
+		frm.set_query("payment_terms_template", function (doc) {
+			return {
+				filters: {
+					for_proposal: 1,
+				},
+			};
+		});
+
+		frm.set_query("payment_term", "payment_schedule", function (doc) {
+			return {
+				filters: {
+					for_proposal: 1,
+				},
+			};
+		});
 	},
 
 	company: function (frm) {
