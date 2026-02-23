@@ -873,8 +873,12 @@ def make_bapp(source_name, target_doc=None):
 	if not spk:
 		frappe.throw(f"Create SPK for {source_name} first")
 
+	payment_term = frappe.db.get_value("Payment Schedule", frappe.flags.args.term, "payment_term") if frappe.flags.args.term else ""
+
 	def set_missing_values(source, target):
 		target.project = spk
+		target.termin = payment_term 
+		target.term_detail = frappe.flags.args.term 
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")

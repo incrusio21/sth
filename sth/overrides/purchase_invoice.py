@@ -201,7 +201,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					update_modified=update_modified,
 				)
 				updated_pr.append(d.purchase_receipt)
-			elif d.bapp_detail:
+			elif d.bapp_detail and not d.proposal_detail:
 				frappe.db.set_value(
 					"BAPP Item",
 					d.bapp_detail,

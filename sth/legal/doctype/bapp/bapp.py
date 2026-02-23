@@ -898,6 +898,8 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("BAPP", source_name)
+	
+	portion = frappe.db.get_value("Payment Schedule", doc.term_detail, "invoice_portion") if doc.term_detail else 0
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -906,6 +908,8 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		
 		doc = frappe.get_doc(target)
 		doc.invoice_type = "SPK"
+		doc.term_detail = source.term_detail
+
 		doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
@@ -925,10 +929,22 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		doc.set_payment_schedule()
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = get_pending_qty(source_doc)
-		target_doc.stock_qty = flt(target_doc.qty) * flt(
-			target_doc.conversion_factor, target_doc.precision("conversion_factor")
-		)
+		if portion:
+			qty = frappe.get_value("Proposal Item", source_doc.proposal_item, "qty")
+			target_doc.qty = flt(qty * portion / 100)
+			target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
+			target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+		else:
+			target_doc.amount = flt(source_doc.amount) - flt(source_doc.billed_amt)
+			target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+			target_doc.qty = (
+				target_doc.amount / flt(source_doc.rate) if (flt(source_doc.rate) and flt(source_doc.billed_amt)) else flt(source_doc.qty)
+			)
+
+			target_doc.qty = get_pending_qty(source_doc)
+			target_doc.stock_qty = flt(target_doc.qty) * flt(
+				target_doc.conversion_factor, target_doc.precision("conversion_factor")
+			)
 
 	def get_pending_qty(item_row):
 		return item_row.qty - invoiced_qty_map.get(item_row.name, 0)

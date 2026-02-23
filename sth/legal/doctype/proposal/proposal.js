@@ -685,11 +685,45 @@ erpnext.buying.ProposalController = class ProposalController extends (
 	}
 
 	make_bapp() {
-		frappe.model.open_mapped_doc({
-			method: "sth.legal.doctype.proposal.proposal.make_bapp",
-			frm: cur_frm,
-			freeze_message: __("Creating BAPP ..."),
-		});
+		if(cur_frm.doc.is_bapp_retensi){
+			frappe.model.open_mapped_doc({
+				method: "sth.legal.doctype.proposal.proposal.make_bapp",
+				frm: cur_frm,
+				args: data,
+				freeze_message: __("Creating BAPP ..."),
+			});
+		}else{
+			let term = cur_frm.doc.payment_schedule
+				.filter((d) => !d.term_used)
+				.map((d) => {
+					return {
+						"value": d.name, "label": d.payment_term
+					}
+				})
+	
+			var d = new frappe.ui.Dialog({
+				title: __("Payment Term"),
+				fields: [
+					{
+						fieldname: "term",
+						label: __("Term"),
+						fieldtype: "Select",
+						options: term,
+						reqd: 1,
+					},
+				],
+				primary_action: function () {
+					var data = d.get_values()
+					frappe.model.open_mapped_doc({
+						method: "sth.legal.doctype.proposal.proposal.make_bapp",
+						frm: cur_frm,
+						args: data,
+						freeze_message: __("Creating BAPP ..."),
+					});
+				},
+			});
+			d.show();
+		}
 	}
 
 	make_purchase_invoice() {
