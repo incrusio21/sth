@@ -453,7 +453,10 @@ def set_missing_values(source, target):
 	target.run_method("calculate_taxes_and_totals")
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None):
+def make_purchase_invoice(source_name, target_doc=None, args=None):
+	if args:
+		frappe.flags.args = frappe._dict(args)
+	
 	return get_mapped_purchase_invoice(source_name, target_doc)
 
 
@@ -863,63 +866,6 @@ def make_proposal_revision(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_bapp(source_name, target_doc=None):
-	from sth.legal.custom.tax_validation import validate_custom_tax
-
-	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
-	spk = frappe.db.get_value("Project", {"proposal": source_name, "status": ["!=", "Cancelled"]}, "name")
-	if not spk:
-		frappe.throw(f"Create SPK for {source_name} first")
-
-	def set_missing_values(source, target):
-		target.project = spk
-
-		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
-		validate_custom_tax(target)
-		
-	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.progress_received)
-		target.stock_qty = flt(obj.progress_received) * flt(obj.conversion_factor)
-		target.amount = flt(obj.progress_received) * flt(obj.rate)
-		target.base_amount = (
-			flt(obj.progress_received) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
-
-	doc = get_mapped_doc(
-		"Proposal",
-		source_name,
-		{
-			"Proposal": {
-				"doctype": "BAPP",
-				"field_map": {
-					"supplier_warehouse": "supplier_warehouse",
-					"retensi": "retensi",
-					"is_bapp_retensi": "is_bapp_retensi"
-				},
-				"validation": {
-					"docstatus": ["=", 1],
-				},
-			},
-			"Proposal Item": {
-				"doctype": "BAPP Item",
-				"field_map": {
-					"name": "proposal_item",
-					"parent": "proposal",
-				},
-				"postprocess": update_item,
-				"condition": lambda doc: doc.progress_received > 0
-				and doc.delivered_by_supplier != 1,
-			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
-		},
-		target_doc,
-		set_missing_values,
-	)
-
-	return doc
-
-@frappe.whitelist()
-def make_invoice(source_name, target_doc=None):
 	from sth.legal.custom.tax_validation import validate_custom_tax
 
 	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
