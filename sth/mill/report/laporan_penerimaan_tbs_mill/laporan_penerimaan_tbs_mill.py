@@ -192,7 +192,7 @@ def get_data_external(filters):
 			FORMAT(t.tara, 2) as tara,
 			FORMAT(t.netto, 2) as netto_1,
 			FORMAT(t.netto * (t.potongan_sortasi / 100), 2) as sort,
-			FORMAT(0, 2) as netto_2,
+			FORMAT(t.netto_2, 2) as netto_2,
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
@@ -234,7 +234,7 @@ def get_data_internal(filters):
 			FORMAT(t.tara, 2) as tara,
 			FORMAT(t.netto, 2) as netto_1,
 			FORMAT(t.netto * (t.potongan_sortasi / 100), 2) as sort,
-			FORMAT(0, 2) as netto_2,
+			FORMAT(t.netto_2, 2) as netto_2,
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t

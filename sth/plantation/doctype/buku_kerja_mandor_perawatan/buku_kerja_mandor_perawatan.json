@@ -16,6 +16,7 @@
   "uom",
   "blok",
   "batch",
+  "kebun",
   "column_break_souy",
   "company",
   "posting_date",
@@ -25,6 +26,7 @@
   "kerani",
   "manual_hk",
   "amended_from",
+  "kemandoran",
   "section_break_wzob",
   "kegiatan_account",
   "volume_basis",
@@ -406,13 +408,24 @@
    "fieldtype": "Check",
    "label": "Have Premi",
    "read_only": 1
+  },
+  {
+   "fieldname": "kemandoran",
+   "fieldtype": "Link",
+   "label": "Kemandoran",
+   "options": "Kemandoran"
+  },
+  {
+   "fieldname": "kebun",
+   "fieldtype": "Data",
+   "label": "Kebun"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-15 16:31:37.255566",
+ "modified": "2026-02-20 00:47:24.823789",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

@@ -54,8 +54,8 @@
   "installments",
   "amended_from",
   "angsuran_accounting_details_section",
-  "installment_credit_to",
-  "installment_debit_to"
+  "installment_debit_to",
+  "installment_credit_to"
  ],
  "fields": [
   {
@@ -164,7 +164,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Jenis",
-   "options": "\nKISI",
+   "options": "\nKISI\nKRK/KMK",
    "reqd": 1
   },
   {
@@ -342,15 +342,17 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
-   "label": "Expense Account",
+   "label": "Credit Account",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "disbursement_debit_to",
    "fieldtype": "Link",
-   "label": "Debit To",
+   "label": "Debit Account",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -364,6 +366,7 @@
    "fieldtype": "Link",
    "label": "Credit To",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -371,6 +374,7 @@
    "fieldtype": "Link",
    "label": "Debit To",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -386,7 +390,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 11:20:06.547947",
+ "modified": "2026-02-20 15:54:49.275461",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",

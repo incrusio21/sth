@@ -26,6 +26,9 @@
   "jns_bbm",
   "asset",
   "amended_from",
+  "deskripsi",
+  "api_status",
+  "qr_code",
   "section_break_nzwb",
   "basis_rpkg",
   "column_break_lphp",
@@ -185,12 +188,29 @@
    "in_list_view": 1,
    "label": "Helper",
    "options": "Employee"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif\nNon Aktif"
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Data",
+   "label": "QR Code"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-06 16:07:16.527322",
+ "modified": "2026-02-23 18:53:22.205111",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

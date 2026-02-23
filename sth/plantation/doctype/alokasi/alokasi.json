@@ -1,51 +1,60 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:gang_allocation_code",
+ "autoname": "field:kode_alokasi",
  "creation": "2026-02-19 16:00:32.714422",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "gang_allocation_code",
-  "estate_code",
-  "division_code",
-  "gang_code",
-  "status_code"
+  "kode_alokasi",
+  "unit",
+  "divisi",
+  "kemandoran",
+  "total_karyawan",
+  "status"
  ],
  "fields": [
   {
-   "fieldname": "gang_allocation_code",
+   "default": "Aktif",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Aktif\nNon Aktif"
+  },
+  {
+   "fieldname": "kode_alokasi",
    "fieldtype": "Data",
-   "label": "Gang Allocation Code",
+   "label": "Kode Alokasi",
    "unique": 1
   },
   {
-   "fieldname": "estate_code",
+   "fieldname": "unit",
    "fieldtype": "Link",
-   "label": "Estate Code",
+   "label": "Unit",
    "options": "Unit"
   },
   {
-   "fieldname": "division_code",
+   "fieldname": "divisi",
    "fieldtype": "Link",
-   "label": "Division Code",
+   "label": "Divisi",
    "options": "Divisi"
   },
   {
-   "fieldname": "gang_code",
-   "fieldtype": "Data",
-   "label": "Gang Code"
+   "fieldname": "kemandoran",
+   "fieldtype": "Link",
+   "label": "Kemandoran",
+   "options": "Kemandoran"
   },
   {
-   "fieldname": "status_code",
-   "fieldtype": "Data",
-   "label": "Status Code"
+   "fieldname": "total_karyawan",
+   "fieldtype": "Int",
+   "label": "Total Karyawan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-19 16:07:24.358838",
+ "modified": "2026-02-23 19:32:27.133656",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alokasi",

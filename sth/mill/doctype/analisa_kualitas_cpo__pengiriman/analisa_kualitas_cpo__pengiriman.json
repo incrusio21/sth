@@ -1,10 +1,21 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-01-17 09:39:44.931267",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_fmdz",
+  "status",
+  "shift",
+  "section_break_irhy",
   "ticket_number",
   "no_polisi",
   "nama_supir",
@@ -63,12 +74,77 @@
    "fieldname": "input_kualitas_ffa_",
    "fieldtype": "Float",
    "label": "Input Kualitas FFA %"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "AKCP-.####"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_fmdz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_irhy",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-17 10:01:53.956205",
+ "modified": "2026-02-21 16:32:55.189492",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO  Pengiriman",

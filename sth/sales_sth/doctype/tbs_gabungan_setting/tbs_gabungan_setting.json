@@ -6,7 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "tbs_gabungan_supplier"
+  "tbs_gabungan_supplier",
+  "tonase_untuk_dapat_insentif",
+  "insentif"
  ],
  "fields": [
   {
@@ -14,12 +16,26 @@
    "fieldtype": "Table",
    "label": "TBS Gabungan Supplier",
    "options": "TBS Gabungan Supplier"
+  },
+  {
+   "description": "Dalam Satuan Kg",
+   "fieldname": "tonase_untuk_dapat_insentif",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Tonase Untuk Dapat Insentif"
+  },
+  {
+   "description": "Dalam Satuan Rupiah",
+   "fieldname": "insentif",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Insentif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-17 22:43:58.704282",
+ "modified": "2026-02-23 05:07:49.928042",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "TBS Gabungan Setting",

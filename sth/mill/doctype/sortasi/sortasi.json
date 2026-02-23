@@ -12,6 +12,7 @@
   "nomor_tiket",
   "no_timbangan",
   "no_spb",
+  "isi_komidel",
   "column_break_cjnu",
   "company",
   "unit",
@@ -387,6 +388,7 @@
    "fieldname": "nomor_tiket",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Nomor Tiket",
    "options": "Security Check Point",
    "reqd": 1
@@ -858,6 +860,7 @@
    "fieldname": "no_timbangan",
    "fieldtype": "Link",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "No Timbangan",
    "options": "Timbangan",
    "reqd": 1
@@ -1111,13 +1114,19 @@
    "fieldtype": "Attach Image",
    "in_preview": 1,
    "label": "Foto Brondolan"
+  },
+  {
+   "fieldname": "isi_komidel",
+   "fieldtype": "Float",
+   "label": "Isi Komidel",
+   "precision": "2"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-19 14:41:20.462996",
+ "modified": "2026-02-23 23:37:08.200027",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",

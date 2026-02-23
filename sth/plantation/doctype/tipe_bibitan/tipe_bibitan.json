@@ -8,6 +8,7 @@
  "field_order": [
   "header_section",
   "tp_bbt",
+  "nama",
   "column_break_scxh"
  ],
  "fields": [
@@ -20,19 +21,24 @@
    "fieldname": "tp_bbt",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama Tipe bibitan",
+   "label": "Kode",
    "reqd": 1,
    "unique": 1
   },
   {
    "fieldname": "column_break_scxh",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "label": "Nama"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-23 11:52:03.461923",
+ "modified": "2026-02-23 00:24:43.805255",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Bibitan",

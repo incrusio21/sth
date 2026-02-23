@@ -15,8 +15,8 @@
   "unit",
   "column_break_awov",
   "status",
-  "machine",
   "machine_station",
+  "machine",
   "amended_from",
   "sterilizer_monitoring_tab",
   "sterilizer_transaction_monitoring",
@@ -109,11 +109,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "machine.station",
+   "default": "SM-00002",
    "fieldname": "machine_station",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Stasiun",
+   "options": "Station Master",
    "read_only": 1
   },
   {
@@ -359,7 +360,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 14:50:13.764038",
+ "modified": "2026-02-23 05:14:52.591788",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sterilizer Transaction",

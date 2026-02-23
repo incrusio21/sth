@@ -11,7 +11,7 @@ class PengakuanPembelianTBS(Document):
 
 		gabungan = frappe.db.sql("""
 			SELECT 
-				gs.supplier
+				gs.supplier, g.tonase_untuk_dapat_insentif, g.insentif
 			FROM `tabTBS Gabungan Setting` g
 			JOIN `tabTBS Gabungan Supplier` gs ON gs.parent = g.name
 			WHERE g.name = (
@@ -24,8 +24,12 @@ class PengakuanPembelianTBS(Document):
 
 		if gabungan:
 			supplier_list = tuple(row.supplier for row in gabungan)
+			tonase_target = gabungan[0].tonase_untuk_dapat_insentif
+			insentif = gabungan[0].insentif
 		else:
 			supplier_list = (self.nama_supplier,)
+			tonase_target = 0
+			insentif = 0
 
 		data_timbangan = frappe.db.sql("""
 			select 
@@ -39,7 +43,6 @@ class PengakuanPembelianTBS(Document):
 			t.tara as tarra,
 			t.netto as netto,
 			t.netto - (t.netto * (t.potongan_sortasi / 100) ) as terima,
-			10 as subsidi_angkut,
 			"Tidak" as status_pajak_pph_22,
 			0.25 as percent_pajak_pph_22
 
@@ -49,14 +52,17 @@ class PengakuanPembelianTBS(Document):
 			and t.receive_type = "TBS Eksternal"
 			and t.docstatus = 1 
 			AND t.supplier IN %s
-		""", [self.tanggal_timbangan,supplier_list], as_dict=True, debug=1)
+		""", [self.tanggal_timbangan,supplier_list], as_dict=True)
+
+		total_terima = sum(flt(row.terima) for row in data_timbangan)
+		subsidi_angkut = insentif if total_terima >= tonase_target else 0
 
 		self.items = []
 		for row in data_timbangan:
 			child = self.append("items")
 			child.update(row)
+			child.subsidi_angkut = subsidi_angkut
 			child.rate = flt(self.harga)
-
 			child.total_seluruhnya = (flt(child.terima) * flt(child.rate)) + (child.subsidi_angkut * child.terima)
 			child.rupiah_pajak_pph_22 = child.total_seluruhnya * child.percent_pajak_pph_22 / 100
 			child.total = child.total_seluruhnya - child.rupiah_pajak_pph_22

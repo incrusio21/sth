@@ -8,9 +8,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		frm.ignore_doctypes_on_cancel_all = ["PDO Bahan Bakar Vtwo", "PDO Perjalanan Dinas Vtwo", "PDO Kas Vtwo", "PDO Dana Cadangan Vtwo", "PDO NON PDO Vtwo"];
 	},
 	refresh(frm) {
-		if (frm.is_new()) {
-            make_pdo_kas_readonly(frm);
-        }
+		make_pdo_kas_readonly(frm);
 		filterDebitTo(frm)
 		filterCreditTo(frm)
 		processFilterSubDetail(frm)
@@ -372,6 +370,9 @@ function calculateGrandTotal(frm) {
 		"Dana Cadangan": "amount",
 		"NON PDO": "total",
 	}
+
+	let grandTotalPdo = 0;
+
 	for (const pdo of pdoCategories) {
 		const fieldname = pdo.toLocaleLowerCase().replaceAll(" ", "_");
 		
@@ -384,10 +385,14 @@ function calculateGrandTotal(frm) {
 				revisedTotal += row[`revised_${totalField}`]
 			}
 		}
+		grandTotalPdo += revisedTotal;
+
 		frappe.run_serially([
 			() => frm.set_value(`grand_total_${fieldname}`, revisedTotal),
 			() => frm.set_value(`outstanding_amount_${fieldname}`, revisedTotal),
 		])
+
+		frm.set_value("grand_total_pdo", grandTotalPdo);
 	}
 }
 
@@ -478,12 +483,19 @@ function set_field_properties(frm, cdt, cdn, jenis) {
 	
 	if (jenis == 'Kas' || jenis == 'Bank') {
 		grid_row.toggle_editable('amount', true);
-		grid_row.toggle_editable('revised_amount', true);
 		grid_row.toggle_editable('cash_bank_balance_adjustment', false);
 		
 		frappe.model.set_df_property(cdt, 'amount', 'read_only', 0, cdn);
-		frappe.model.set_df_property(cdt, 'revised_amount', 'read_only', 0, cdn);
 		frappe.model.set_df_property(cdt, 'cash_bank_balance_adjustment', 'read_only', 1, cdn);
+
+		if (frm.doc.workflow_state == "Waiting For Assisten Approval" || frm.doc.workflow_state == "Waiting For Director Approval") {
+			grid_row.toggle_editable('revised_amount', true);
+			frappe.model.set_df_property(cdt, 'revised_amount', 'read_only', 0, cdn);
+		}
+		else{
+			grid_row.toggle_editable('revised_amount', true);
+			frappe.model.set_df_property(cdt, 'revised_amount', 'read_only', 0, cdn);
+		}
 		
 	} else if (jenis === 'Saldo') {
 		grid_row.toggle_editable('amount', false);
@@ -608,7 +620,7 @@ function show_realisasi_dialog(frm) {
 }
 
 function hide_revisi_field(frm){
-	if (frm.doc.workflow_state === "Waiting For Assisten Approval" || frm.doc.workflow_state === "Waiting For Director Approval") {
+	if (frm.doc.workflow_state == "Waiting For Assisten Approval" || frm.doc.workflow_state == "Waiting For Director Approval") {
 			
 		frm.fields_dict['pdo_bahan_bakar'].grid.update_docfield_property(
 			'revised_plafon', 'read_only', 0

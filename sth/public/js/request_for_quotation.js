@@ -66,6 +66,9 @@ frappe.ui.form.on('Request for Quotation', {
     onload(frm) {
         if (frm.is_new()) {
             frm.set_value("schedule_date", frappe.datetime.add_days(frm.doc.transaction_date, 7))
+            if (!frm.doc.__onload?.load_after_mapping) {
+                frm.clear_table('items')
+            }
         }
     },
 
@@ -122,6 +125,13 @@ frappe.ui.form.on('Request for Quotation', {
 
         dialog.show();
     },
+})
+
+frappe.ui.form.on('Request for Quotation Item', {
+    items_add: function (frm, dt, dn) {
+        let row = locals[dt][dn]
+        frappe.model.set_value(dt, dn, "country", "")
+    }
 })
 
 frappe.ui.form.on("Request for Quotation Supplier", {

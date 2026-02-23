@@ -123,84 +123,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Stasiun Thressing",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Threshing Transaction",
-   "link_count": 0,
-   "link_to": "Threshing Transaction",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stasiun Press",
-   "link_count": 5,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Press Cake Temperature Inspection",
-   "link_count": 0,
-   "link_to": "Press Cake Temperature Inspection",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Digester Motor Ampere Inspection",
-   "link_count": 0,
-   "link_to": "Digester Motor Ampere Inspection",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Press Hydraulic Pressure Inspection",
-   "link_count": 0,
-   "link_to": "Press Hydraulic Pressure Inspection",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Press Motor Ampere Inspection",
-   "link_count": 0,
-   "link_to": "Press Motor Ampere Inspection",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "CBC Monitoring",
-   "link_count": 0,
-   "link_to": "CBC Monitoring",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Monitoring Proses Control",
    "link_count": 1,
    "link_type": "DocType",
@@ -1000,9 +922,57 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Thressing",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Threshing",
+   "link_count": 0,
+   "link_to": "Stasiun Threshing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Press",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Press",
+   "link_count": 0,
+   "link_to": "Stasiun Press",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "CBC Monitoring",
+   "link_count": 0,
+   "link_to": "CBC Monitoring",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-02-16 06:20:01.703169",
+ "modified": "2026-02-23 04:38:09.085523",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

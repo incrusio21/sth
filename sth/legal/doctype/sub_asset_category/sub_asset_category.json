@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "disabled",
-  "asset_category"
+  "asset_category",
+  "asset_code"
  ],
  "fields": [
   {
@@ -21,12 +22,19 @@
    "fieldtype": "Link",
    "label": "Asset Category",
    "options": "Asset Category"
+  },
+  {
+   "fieldname": "asset_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Asset Code",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-13 13:36:36.145455",
+ "modified": "2026-02-22 14:57:47.297180",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sub Asset Category",

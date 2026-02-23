@@ -17,6 +17,8 @@
   "tanggal_panen",
   "no_polisi",
   "supplier",
+  "lokasi_pos",
+  "catatan",
   "column_break_mtrn",
   "transaction_type",
   "receive_type",
@@ -389,13 +391,23 @@
    "fieldtype": "Date",
    "label": "Tanggal Panen",
    "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
+  },
+  {
+   "fieldname": "lokasi_pos",
+   "fieldtype": "Data",
+   "label": "Lokasi POS"
+  },
+  {
+   "fieldname": "catatan",
+   "fieldtype": "Small Text",
+   "label": "Catatan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-08 15:50:52.166197",
+ "modified": "2026-02-19 23:48:19.891582",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

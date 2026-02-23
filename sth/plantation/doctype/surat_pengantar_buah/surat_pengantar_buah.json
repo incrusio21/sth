@@ -13,12 +13,15 @@
   "divisi",
   "kendaraan",
   "no_polisi",
+  "kerani_panen",
   "column_break_bvfg",
   "posting_date",
   "company",
   "pabrik",
   "pabrik_type",
   "amended_from",
+  "tujuan_pks",
+  "blok",
   "section_break_xfoy",
   "column_break_dwtw",
   "in_time",
@@ -35,6 +38,7 @@
   "details",
   "section_break_blue",
   "total_janjang",
+  "total_brondolan",
   "column_break_ndhg",
   "total_weight_internal",
   "bjr_internal",
@@ -276,13 +280,35 @@
    "label": "Series",
    "options": "SPB-",
    "reqd": 1
+  },
+  {
+   "fieldname": "kerani_panen",
+   "fieldtype": "Link",
+   "label": "Kerani Panen",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "tujuan_pks",
+   "fieldtype": "Data",
+   "label": "Tujuan PKS"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "label": "Blok",
+   "options": "Blok"
+  },
+  {
+   "fieldname": "total_brondolan",
+   "fieldtype": "Float",
+   "label": "Total Brondolan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:00:41.200282",
+ "modified": "2026-02-20 01:41:08.316096",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

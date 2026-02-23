@@ -9,10 +9,14 @@ class Sortasi(Document):
 	def before_submit(self):
 		tim_doc = frappe.get_doc("Timbangan", self.no_timbangan)
 		if self.tipe == "External":
-			potongan_sortasi = self.potongan_sortasi_external
+			potongan_sortasi = frappe.utils.flt(self.potongan_sortasi_external)
 		else:
-			potongan_sortasi = self.potongan_sortasi_internal
+			potongan_sortasi = frappe.utils.flt(self.potongan_sortasi_internal)
 
+		tim_doc.isi_komidel = self.isi_komidel
 		tim_doc.potongan_sortasi = potongan_sortasi
+		if tim_doc.isi_komidel:
+			tim_doc.jumlah_janjang = tim_doc.netto / tim_doc.isi_komidel
+			
 		tim_doc.netto_2 = tim_doc.netto - (tim_doc.netto * tim_doc.potongan_sortasi / 100)
 		tim_doc.db_update()

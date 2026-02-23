@@ -1,5 +1,27 @@
+{% set gl_entries = frappe.db.sql("""
+SELECT
+a.account_number,
+gle.account,
+gle.debit,
+gle.credit
+FROM `tabGL Entry` as gle
+JOIN `tabAccount` as a ON a.name = gle.account
+WHERE gle.voucher_type = 'Payment Entry'
+AND gle.voucher_no = %s
+""", (doc.name,), as_dict=1) %}
+{% set bank_account = frappe.get_doc("Bank Account", doc.bank_account) %}
+{% set submit_time = frappe.db.sql("""
+SELECT creation
+FROM `tabVersion`
+WHERE ref_doctype = 'Payment Entry'
+AND docname = %s
+AND data LIKE '%%docstatus%%0,1%%'
+ORDER BY creation ASC
+LIMIT 1
+""", (doc.name,), as_dict=1) %}
+
 <div class="page-break">
-  <p>PT. TRIMITRA LESTARI</p>
+  <p>{{ doc.company or '' }}</p>
   <p>JAKARTA UTARA</p>
 
   <div style="background-color: #dcdcdc; border: 1px solid #000; text-align: center;">
@@ -10,33 +32,33 @@
     <tr>
       <td style="padding-bottom: 0!important;">NO. VOUCHER</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">20260211/TJHO/KK/00002</td>
+      <td style="padding-bottom: 0!important;">{{ doc.name or '' }}</td>
       <td style="padding-bottom: 0!important;">DITERIMA DARI</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">PT. KURNIA TUNGGAL NUGRAHA</td>
+      <td style="padding-bottom: 0!important;">{{ doc.party_name or '' }}</td>
     </tr>
     <tr>
       <td style="padding-bottom: 0!important;">TGL. BAYAR</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;"></td>
+      <td style="padding-bottom: 0!important;">{{ doc.get_formatted("reference_date") }}</td>
       <td style="padding-bottom: 0!important;">JUMLAH</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">37,700.00</td>
+      <td style="padding-bottom: 0!important;">{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Float"}) }}</td>
     </tr>
     <tr>
       <td style="padding-bottom: 0!important;">NAMA BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;" colspan="4"></td>
+      <td style="padding-bottom: 0!important;" colspan="4">{{ bank_account.bank or '' }}</td>
     </tr>
     <tr>
       <td style="padding-bottom: 0!important;">NO REK</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;" colspan="4"></td>
+      <td style="padding-bottom: 0!important;" colspan="4">{{ bank_account.bank_account_no or '' }}</td>
     </tr>
     <tr>
       <td style="padding-bottom: 0!important;">ATAS NAMA</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;" colspan="4"></td>
+      <td style="padding-bottom: 0!important;" colspan="4">{{ bank_account.account_name or '' }}</td>
     </tr>
   </table>
 
@@ -49,39 +71,29 @@
       <th>Debet</th>
       <th>Kredit</th>
     </tr>
+    {% for row in gl_entries %}
     <tr>
-      <td>1</td>
-      <td>8213602</td>
+      <td>{{ loop.index }}</td>
+      <td>{{ row.account_number }}</td>
       <td>
-        PUBLIKASI DAN BERLANGGANAN <br>
-        No. Invoice :
+        {{ row.account }} <br>
       </td>
       <td>10910</td>
-      <td>37,700.00</td>
-      <td>0.00</td>
+      <td>{{ frappe.format_value(row.debit, {"fieldtype": "Float"}) }}</td>
+      <td>{{ frappe.format_value(row.credit, {"fieldtype": "Float"}) }}</td>
     </tr>
-    <tr>
-      <td>2</td>
-      <td>1112101</td>
-      <td>
-        KAS
-      </td>
-      <td></td>
-      <td>0.00</td>
-      <td>37,700.00</td>
-    </tr>
+    {% endfor %}
     <tr>
       <td colspan="4" style="font-weight: bold; text-align: center;">Total</td>
-      <td>37,700.00</td>
-      <td>37,700.00</td>
+      <td>{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Float"}) }}</td>
+      <td>{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Float"}) }}</td>
     </tr>
   </table>
 
   <p style="margin-bottom: 0; margin-top: 1rem; font-weight: bold;">
-    Catatan : MAISHARHA - PEMBELIAN PAKET LANGGANAN PREMIUM ZOOM MEETING
-    PERIODE FEBRUARI 2026
+    Catatan : {{ doc.note or '' }}
   </p>
-  <p>Mata Uang : IDR,Kurs :1</p>
+  <p>Mata Uang : {{ doc.paid_from_account_currency or '' }},Kurs :1</p>
 
   <table class="table_ttd" style="margin-top: 1rem;">
     <tr>
@@ -91,14 +103,18 @@
       <th style="width: 25%!important;">Di Terima Dari</th>
     </tr>
     <tr>
-      <td style="padding-top: 5rem!important;">RISMA. D. Y SAMOSI</td>
+      <td style="padding-top: 5rem!important;">{{ doc.owner or '' }}</td>
       <td style="padding-top: 5rem!important;"></td>
       <td style="padding-top: 5rem!important;"></td>
-      <td style="padding-top: 5rem!important;">MAISHARHA</td>
+      <td style="padding-top: 5rem!important;">{{ doc.party_name or '' }}</td>
     </tr>
     <tr>
-      <td>11-02-2026 11:52</td>
-      <td>00-00-0000 00:00</td>
+      <td>{{ frappe.utils.format_datetime(doc.creation, "dd-MM-yyyy HH:mm") }}</td>
+      <td>
+        {% if submit_time %}
+        {{ frappe.utils.format_datetime(submit_time[0].creation, "dd-MM-yyyy HH:mm") }}
+        {% endif %}
+      </td>
       <td></td>
       <td></td>
     </tr>

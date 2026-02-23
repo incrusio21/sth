@@ -1,5 +1,6 @@
 frappe.provide("sth.queries")
 frappe.provide("sth.form")
+frappe.ui.form.off("Material Request", "make_request_for_quotation")
 frappe.ui.form.on("Material Request", {
     setup(frm) {
         sth.form.override_class_function(frm.cscript, "refresh", () => {
@@ -32,7 +33,19 @@ frappe.ui.form.on("Material Request", {
 
         frm.set_query("divisi", sth.queries.divisi)
         frm.trigger('refresh_read_only_fields')
+        if (frm.doc.docstatus == 1) {
+            frm.remove_custom_button("Purchase Order", "Create")
+            // frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent("Create")}"]`).remove()
+        }
 
+    },
+
+    make_request_for_quotation: function (frm) {
+        frappe.model.open_mapped_doc({
+            method: "sth.overrides.material_request.make_request_for_quotation",
+            frm: frm,
+            run_link_triggers: true,
+        });
     },
 
     unit(frm) {
@@ -123,6 +136,21 @@ frappe.ui.form.on("Material Request Item", {
             refresh_field("items")
         }
         get_stock_for_item(frm, dt, dn);
+    },
+
+    kendaraan(frm, dt, dn) {
+        let row = locals[dt][dn]
+        if (!frm.doc.ho && row.kendaraan) {
+            frappe.xcall("frappe.client.get_value", {
+                doctype: "Alat Berat Dan Kendaraan",
+                filters: row.kendaraan,
+                fieldname: ["kmhm_akhir"]
+            }).then((res) => {
+                frappe.model.set_value(dt, dn, "km_hm", res.kmhm_akhir)
+            })
+        } else {
+            frappe.model.set_value(dt, dn, "km_hm", "")
+        }
     }
 })
 

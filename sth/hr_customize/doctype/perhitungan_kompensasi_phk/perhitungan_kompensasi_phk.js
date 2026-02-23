@@ -13,12 +13,13 @@ frappe.ui.form.on("Perhitungan Kompensasi PHK", {
 
         frm.ignore_doctypes_on_cancel_all = ["Exit Interview"]
         filterExitInterview(frm)
-        setDefaultData(frm)
         // setDefaultSalaryComponent(frm)
         createPayment(frm)
     },
     employee(frm) {
         fetchSSA(frm);
+        fetchAccountAndSalaryAccount(frm);
+        // setDefaultData(frm)
     },
     dphk(frm) {
         fetchTableSeym(frm);
@@ -75,6 +76,27 @@ function setDefaultData(frm) {
                 let linked_doc = r.message;
             }
         })
+}
+
+async function fetchAccountAndSalaryAccount(frm) {
+    const unit = await frappe.db.get_doc("Unit", frm.doc.unit);
+    const salarySettings = await frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Bonus and Allowance Settings",
+            name: "Bonus and Allowance Settings"
+        }
+    });
+
+    if (unit) {
+        frm.set_value("salary_account", unit.default_phk_salary_account);
+        frm.set_value("credit_to", unit.default_phk_account);
+    }
+
+    if (salarySettings.message) {
+        frm.set_value("earning_phk_component", salarySettings.message.earning_phk_component);
+        frm.set_value("deduction_phk_component", salarySettings.message.deduction_phk_component);
+    }
 }
 
 function createPayment(frm) {

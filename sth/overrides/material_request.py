@@ -27,8 +27,6 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 		child_filter = d.name in filtered_items if filtered_items else True
 		return child_filter
 
-	def update_item(source, target,source_parent):
-		target.custom_country = "Indonesia"
 
 	doclist = get_mapped_doc(
 		"Material Request",
@@ -49,7 +47,6 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 					"sales_order": "sales_order",
 				},
 				"condition": select_item,
-				"postprocess":update_item
 			},
 		},
 		target_doc,
@@ -70,9 +67,12 @@ def set_missing_values(source, target_doc):
 def make_request_for_quotation(source_name, target_doc=None, args=None):
 
 	def select_item(d):
-		filtered_items = args.get("filtered_children",[])
+		filtered_items = args.get("filtered_children",[]) if args else None
 		return d.name in filtered_items if filtered_items else True
 
+	def update_item(source,target,source_parent):
+		target.country = ""
+	
 	doclist = get_mapped_doc(
 		"Material Request",
 		source_name,
@@ -88,7 +88,8 @@ def make_request_for_quotation(source_name, target_doc=None, args=None):
 					["parent", "material_request"],
 					["project", "project_name"],
 				],
-				"condition": select_item
+				"condition": select_item,
+				"postprocess": update_item
 			},
 		},
 		target_doc,

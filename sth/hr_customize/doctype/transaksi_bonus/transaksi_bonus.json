@@ -7,8 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "header_section",
-  "unit",
   "company",
+  "unit",
   "employee",
   "column_break_qhdv",
   "posting_date",
@@ -210,7 +210,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 10:06:25.051700",
+ "modified": "2026-02-20 14:16:51.085256",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi Bonus",
@@ -231,7 +231,6 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

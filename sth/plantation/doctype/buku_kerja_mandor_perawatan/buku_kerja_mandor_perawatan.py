@@ -72,6 +72,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			
 	def create_ste_issue(self):
 		ste = frappe.new_doc("Stock Entry")
+		ste.company = self.company
 		ste.stock_entry_type = "Material Used"
 		ste.posting_date = self.posting_date
 		ste.set_purpose_for_stock_entry()

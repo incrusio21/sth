@@ -30,7 +30,6 @@ def create_mr(source_name,target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"jumlah": "qty",
-				"km_hm": "custom_kmhm",
 				"satuan": "uom",
 				"note": "description"
 			},

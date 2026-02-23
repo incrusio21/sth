@@ -27,8 +27,9 @@ class PermintaanDanaOperasional(Document):
 		self.validate_child_tables()
 
 	def update_pdo_default_account(self):
-		if not self.bahan_bakar_debit_to:
-			self.bahan_bakar_debit_to = frappe.get_doc("Company", self.company).default_pdo_bahan_bakar_account
+		pass
+		# if not self.bahan_bakar_debit_to:
+		# 	self.bahan_bakar_debit_to = frappe.get_doc("Company", self.company).default_pdo_bahan_bakar_account
 
 		
 	# def on_update(self):

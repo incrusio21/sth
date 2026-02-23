@@ -15,6 +15,8 @@
   "kegiatan",
   "uom",
   "is_rekap",
+  "kebun",
+  "kemandoran",
   "column_break_souy",
   "company",
   "payroll_date",
@@ -504,13 +506,24 @@
    "label": "Tipe Panen",
    "options": "\nMekanis\nManual",
    "read_only": 1
+  },
+  {
+   "fieldname": "kebun",
+   "fieldtype": "Data",
+   "label": "Kebun"
+  },
+  {
+   "fieldname": "kemandoran",
+   "fieldtype": "Link",
+   "label": "Kemandoran",
+   "options": "Kemandoran"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-27 11:08:53.783176",
+ "modified": "2026-02-20 01:18:27.197482",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

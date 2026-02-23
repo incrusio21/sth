@@ -1,10 +1,20 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-01-17 10:43:03.691851",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "unit",
+  "column_break_wxgr",
+  "status",
+  "shift",
+  "section_break_usei",
   "company",
   "unit_pabrik",
   "tahun_budget",
@@ -90,12 +100,70 @@
    "fieldname": "bulan_periode",
    "fieldtype": "Data",
    "label": "Bulan / Periode"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_wxgr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_usei",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "BPS-.####"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-17 10:43:03.691851",
+ "modified": "2026-02-22 08:21:11.875870",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Pemakaian Sparepart",

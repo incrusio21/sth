@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "add_translate_data": 0,
  "columns": [],
  "creation": "2026-01-05 09:25:23.195271",
@@ -11,7 +11,7 @@
  "is_standard": "Yes",
  "json": "{}",
  "letterhead": null,
- "modified": "2026-02-09 05:50:20.418611",
+ "modified": "2026-02-23 13:07:55.901624",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Laporan Gaji Kebun",
