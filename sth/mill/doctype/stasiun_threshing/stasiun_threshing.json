@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-11-19 17:01:50.526356",
+ "creation": "2026-02-23 04:04:57.257644",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -14,16 +14,20 @@
   "unit",
   "column_break_awov",
   "shift_proses",
-  "machine",
   "machine_station",
+  "machine",
   "sterilizer_monitoring_tab",
   "table_vjjc",
+  "section_break_npsx",
+  "foto_hasil_pemeriksaan",
   "tbs_process_tab",
   "unit_type",
-  "quantity_to_process",
+  "tbs_mentah",
+  "tbs_masak",
+  "tbs_olah",
+  "total_jam",
   "column_break_hdny",
   "total_weight_process",
-  "pending_quantity",
   "total_weight_pending_process",
   "amended_from"
  ],
@@ -41,87 +45,11 @@
    "options": "SST-"
   },
   {
-   "fieldname": "machine",
-   "fieldtype": "Link",
+   "default": "Today",
+   "fieldname": "tgl",
+   "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Mesin",
-   "options": "Mill Machine"
-  },
-  {
-   "fetch_from": "machine.station",
-   "fieldname": "machine_station",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Stasiun",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_awov",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "shift_proses.unit",
-   "fieldname": "unit",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Unit",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "shift_proses.company",
-   "fieldname": "company",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Company",
-   "read_only": 1
-  },
-  {
-   "fieldname": "sterilizer_monitoring_tab",
-   "fieldtype": "Tab Break",
-   "label": "Threshing Monitoring"
-  },
-  {
-   "fieldname": "tbs_process_tab",
-   "fieldtype": "Tab Break",
-   "label": "TBS Threshing Process"
-  },
-  {
-   "fetch_from": "sterilizer_reference.unit_type",
-   "fieldname": "unit_type",
-   "fieldtype": "Select",
-   "label": "Unit Type",
-   "options": "Lorry\nCycle"
-  },
-  {
-   "description": "Qty in Unit Type",
-   "fieldname": "quantity_to_process",
-   "fieldtype": "Float",
-   "label": "Quantity To Threshing Process"
-  },
-  {
-   "fieldname": "total_weight_process",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Total Weight Threshing Process",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_hdny",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Qty in Unit Type",
-   "fieldname": "pending_quantity",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Pending Threshing Quantity",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_weight_pending_process",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Total Weight Pending Threshing Process",
+   "label": "Tanggal",
    "read_only": 1
   },
   {
@@ -133,22 +61,24 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Threshing Transaction",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "fetch_from": "shift_proses.company",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Company",
+   "read_only": 1
   },
   {
-   "default": "Today",
-   "fieldname": "tgl",
-   "fieldtype": "Date",
+   "fetch_from": "shift_proses.unit",
+   "fieldname": "unit",
+   "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Tanggal",
+   "label": "Unit",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_awov",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "shift_proses",
@@ -158,19 +88,122 @@
    "options": "Monitoring Proses Control"
   },
   {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "default": "SM-00003",
+   "fieldname": "machine_station",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sterilizer_monitoring_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transaksi Kontrol Proses"
+  },
+  {
    "fieldname": "table_vjjc",
    "fieldtype": "Table",
+   "label": "Pemeriksaan Ampere Main Motor",
    "options": "Thresing Detail"
+  },
+  {
+   "fieldname": "tbs_process_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transaksi Input LHP"
+  },
+  {
+   "fetch_from": "sterilizer_reference.unit_type",
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "label": "Unit Type",
+   "options": "Lorry\nCycle"
+  },
+  {
+   "fieldname": "total_jam",
+   "fieldtype": "Float",
+   "label": "Total Input Jam Breakdown"
+  },
+  {
+   "fieldname": "column_break_hdny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_weight_process",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Weight Threshing Process",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight_pending_process",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Weight Pending Threshing Process",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stasiun Threshing",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stasiun Threshing",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_npsx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "foto_hasil_pemeriksaan",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Pemeriksaan"
+  },
+  {
+   "fieldname": "tbs_mentah",
+   "fieldtype": "Float",
+   "label": "Jumlah Restan TBS Mentah"
+  },
+  {
+   "fieldname": "tbs_masak",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah Restan TBS Masak",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tbs_olah",
+   "fieldtype": "Float",
+   "label": "Jumlah Restan TBS yang Sudah di Olah"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 14:50:15.266736",
+ "modified": "2026-02-23 05:15:30.518972",
  "modified_by": "Administrator",
  "module": "Mill",
- "name": "Threshing Transaction",
+ "name": "Stasiun Threshing",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
