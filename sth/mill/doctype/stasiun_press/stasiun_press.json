@@ -1,0 +1,161 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-23 04:14:03.856355",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_tab",
+  "series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_ivha",
+  "status",
+  "shift",
+  "pemeriksaan_temperature_press_cake_tab",
+  "mesin_press",
+  "pemeriksaan_temperatur_dan_level_digester_tab",
+  "digester",
+  "pemeriksaan_tekanan_hidrolik_mesin_press_tab",
+  "hidrolik_mesin_press",
+  "pemeriksaan_ampere_elektromotor_mesin_press_tab",
+  "ampere_mesin_press",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_tab",
+   "fieldtype": "Tab Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "APC-.####"
+  },
+  {
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal"
+  },
+  {
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_ivha",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pemeriksaan_temperature_press_cake_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pemeriksaan Temperature Press Cake"
+  },
+  {
+   "fieldname": "mesin_press",
+   "fieldtype": "Table",
+   "label": "Mesin Press",
+   "options": "Press Cake Temperature Inspection Detail"
+  },
+  {
+   "fieldname": "pemeriksaan_temperatur_dan_level_digester_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pemeriksaan Temperatur dan Level Digester"
+  },
+  {
+   "fieldname": "digester",
+   "fieldtype": "Table",
+   "label": "DIgester",
+   "options": "Digester Motor Ampere Inspection Detail"
+  },
+  {
+   "fieldname": "pemeriksaan_tekanan_hidrolik_mesin_press_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pemeriksaan Tekanan Hidrolik Mesin Press"
+  },
+  {
+   "fieldname": "hidrolik_mesin_press",
+   "fieldtype": "Table",
+   "label": "Hidrolik Mesin Press",
+   "options": "Press Hydraulic Pressure Inspection Detail"
+  },
+  {
+   "fieldname": "pemeriksaan_ampere_elektromotor_mesin_press_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pemeriksaan Ampere Elektromotor Mesin Press"
+  },
+  {
+   "fieldname": "ampere_mesin_press",
+   "fieldtype": "Table",
+   "label": "Ampere Mesin Press",
+   "options": "Press Motor Ampere Inspection Detail"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stasiun Press",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-02-23 04:40:57.724013",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Stasiun Press",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

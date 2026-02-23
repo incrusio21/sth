@@ -73,7 +73,7 @@
                                 required>
                         </div>
                         <div class="col-xl-3 col-md-6 mb-2">
-                            <label for="file-upload" class="form-label">File Upload</label>
+                            <label for="file-upload" class="form-label">Upload Penawaran Harga</label>
                             <input class="form-control form-control-sm" type="file" id="file-upload" accept=".pdf"
                                 required>
                         </div>
@@ -133,7 +133,7 @@
                                         </td>
                                         <td data-field="merk">
                                             <input type="text" name="merk[]" class="form-control form-control-sm"
-                                                style="width: 100%;" value="{{ item.merek }}" required>
+                                                style="width: 100%;" value="{{ item.merek or '' }}" required>
                                         </td>
                                         <td data-field="country">
                                             <select class="form-select" name="country[]" required>
@@ -149,7 +149,7 @@
                                         <td data-field="qty">
                                             <input type="number" min="1" name="qty[]"
                                                 class="form-control form-control-sm" value="{{ item.qty | int }}"
-                                                style="width: 100%;">
+                                                style="width: 100%;" readonly>
                                         </td>
                                         <td data-field="rate">
                                             <input type="text" name="rate[]"
@@ -254,6 +254,17 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
+                            <label>Lokasi Pengiriman</label>
+                            <select class="form-select" name="lokasi_pengiriman" required>
+                                <option value="" disabled selected>--Pilih--</option>
+                                {% for data in lokasi_pengiriman %}
+                                <option value="{{ data }}">{{ data }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-12">
                             <label>Keterangan</label>
                             <textarea name="keterangan" class="form-control form-control-sm" rows="3"></textarea>
                         </div>
