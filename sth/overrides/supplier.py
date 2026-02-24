@@ -54,6 +54,21 @@ class Supplier(Supplier):
 		warn_rfqs: DF.Check
 		website: DF.Data | None
 	# end: auto-generated types
+
+	def document_kriteria(self):
+		skip_sppkp = "Not SPPKP"
+		badan_usaha = "Non Koperasi"
+
+		for row in self.npwp_dan_sppkp_supplier:
+			if row.status_pkp == 1:
+				skip_sppkp = "SPPKP"
+		
+		if self.badan_usaha == "Koperasi" :
+			badan_usaha = "Koperasi"
+		
+		kriteria_type = badan_usaha+"-"+skip_sppkp
+		return kriteria_type
+
 	def autoname(self):
 		if not self.kode_supplier:
 			self.kode_supplier = self.generate_supplier_code()
@@ -333,12 +348,6 @@ def non_aktifkan_table(doc,method):
 			pajak_list.append(row.pajak)
 
 def update_supplier_email(doc,method):
-	frappe.db.delete("Supplier Email",{"supplier": doc.name})
-
 	for row in doc.struktur_supplier:
-		frappe.get_doc({
-			"doctype": "Supplier Email",
-			"supplier": doc.name,
-			"email": row.user_email
-		}).insert()
+		frappe.db.set_value("Supplier Email",row.user_email,"supplier",doc.name)
 			

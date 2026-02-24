@@ -8,8 +8,11 @@
  "field_order": [
   "section_break_njnv",
   "unit",
+  "nama",
+  "deskripsi",
   "npwp",
   "bank_account",
+  "api_status",
   "column_break_fyry",
   "company",
   "cost_center",
@@ -17,7 +20,15 @@
   "modul_list_section",
   "plantation",
   "mill",
-  "ho"
+  "ho",
+  "accounts_section",
+  "default_bonus_account",
+  "default_thr_account",
+  "default_phk_account",
+  "column_break_lymx",
+  "default_bonus_salary_account",
+  "default_thr_salary_account",
+  "default_phk_salary_account"
  ],
  "fields": [
   {
@@ -42,7 +53,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Unit Name",
+   "label": "Kode",
    "reqd": 1,
    "unique": 1
   },
@@ -91,13 +102,74 @@
    "default": "0",
    "fieldname": "ho",
    "fieldtype": "Check",
-   "label": "HO"
+   "label": "HO/RO"
+  },
+  {
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "default_bonus_account",
+   "fieldtype": "Link",
+   "label": "Default Bonus Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_thr_account",
+   "fieldtype": "Link",
+   "label": "Default THR Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_phk_account",
+   "fieldtype": "Link",
+   "label": "Default PHK Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_lymx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_bonus_salary_account",
+   "fieldtype": "Link",
+   "label": "Default Bonus Salary Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_thr_salary_account",
+   "fieldtype": "Link",
+   "label": "Default THR Salary Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_phk_salary_account",
+   "fieldtype": "Link",
+   "label": "Default PHK Salary Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "label": "Nama"
+  },
+  {
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-02 23:20:57.037539",
+ "modified": "2026-02-23 19:24:48.395609",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

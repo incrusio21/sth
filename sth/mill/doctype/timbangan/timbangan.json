@@ -15,6 +15,10 @@
   "live_weight",
   "reference_doctype",
   "reference_name",
+  "kebun",
+  "tujuan_pks",
+  "total_janjang",
+  "total_brondolan",
   "column_break_ckwi",
   "weight_in_time",
   "weight_out_time",
@@ -29,6 +33,7 @@
   "purchase_order",
   "section_break_mnhe",
   "isi_komidel",
+  "jumlah_janjang",
   "potongan_sortasi",
   "spb_detail",
   "delivery_section",
@@ -436,13 +441,38 @@
    "label": "Netto 2",
    "precision": "0",
    "read_only": 1
+  },
+  {
+   "fieldname": "kebun",
+   "fieldtype": "Data",
+   "label": "Kebun"
+  },
+  {
+   "fieldname": "tujuan_pks",
+   "fieldtype": "Data",
+   "label": "Tujuan PKS"
+  },
+  {
+   "fieldname": "total_janjang",
+   "fieldtype": "Float",
+   "label": "Total Janjang"
+  },
+  {
+   "fieldname": "total_brondolan",
+   "fieldtype": "Float",
+   "label": "Total Brondolan"
+  },
+  {
+   "fieldname": "jumlah_janjang",
+   "fieldtype": "Float",
+   "label": "Jumlah Janjang"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 09:54:24.094694",
+ "modified": "2026-02-23 23:38:24.588118",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

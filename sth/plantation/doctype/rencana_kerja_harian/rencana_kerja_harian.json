@@ -20,6 +20,7 @@
   "mandor1",
   "column_break_mfum",
   "kerani",
+  "gang_code",
   "section_break_wnju",
   "kegiatan_amount",
   "column_break_ztur",
@@ -375,13 +376,19 @@
    "label": "Series",
    "options": "RKH-.DD.MM.YYYY-.#####",
    "reqd": 1
+  },
+  {
+   "fieldname": "gang_code",
+   "fieldtype": "Link",
+   "label": "Kemandoran",
+   "options": "Kemandoran"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-13 12:59:23.967239",
+ "modified": "2026-02-21 01:42:29.241071",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",

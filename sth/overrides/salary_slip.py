@@ -205,10 +205,10 @@ class SalarySlip(SalarySlip):
 		from calendar import monthrange
 		list_status_code_lwp = self.get_status_code_lwp()
 		list_attendance = self._get_attendance_days(list_status_code_lwp)
-
 		holidays = self.get_holidays_for_employee(self.actual_start_date, self.actual_end_date)
 
 		self.holiday_days = 0
+		self.total_kerja_di_hari_libur = 0
 		hari_leave = 0
 		week_start = week_end = None
 		actual_start, actual_end = getdate(self.actual_start_date), getdate(self.actual_end_date)
@@ -229,6 +229,20 @@ class SalarySlip(SalarySlip):
 			end_date.weekday() == 6  # Sunday = 6
 		)
 
+		for row in list_attendance:
+			current_date = row
+			# jika terdapat attendance di hari tersebut
+			if status_code := list_attendance.get(current_date):
+				att_exist = True
+				# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
+				if status_code in list_status_code_lwp:
+					if status_code == "C":
+						if apakah_karyawan_tetap == 1:
+							self.holiday_days += 1
+					else:
+						self.holiday_days +=1
+
+
 
 		if emp_doc.grade != "STAF":			
 			for h in holidays:
@@ -237,7 +251,7 @@ class SalarySlip(SalarySlip):
 				if not week_end or h > week_end:
 					# cek agar waktu mulai dan berakhir tidam melampaui bulan ini
 					week_start = max(get_first_day_of_week(h), actual_start)
-
+					
 					week_end = min(get_last_day_of_week(h), actual_end)
 				else:
 					# skip krn holidays sudah di hitung untuk minggu ini
@@ -257,21 +271,9 @@ class SalarySlip(SalarySlip):
 					else:
 						current_week_holiday += 1
 					
-					# jika terdapat attendance di hari tersebut
+					current_date = add_days(current_date, 1)
 					if status_code := list_attendance.get(current_date):
 						att_exist = True
-						# jika status code termasuk dalam lwp maka tambahkan sebagai hari libur
-						if status_code in list_status_code_lwp:
-							if status_code == "C":
-								if apakah_karyawan_tetap == 1:
-									self.holiday_days += 1
-							else:
-								self.holiday_days +=1
-					
-					if emp_doc.designation == "NS30":
-						print(list_attendance.get(current_date))
-
-					current_date = add_days(current_date, 1)
 				
 				# jika seluruh hari dalam satu minggu libur 
 				# atau terdapat attendance tambahkan holidays
@@ -281,7 +283,6 @@ class SalarySlip(SalarySlip):
 						hari_leave += current_week_holiday
 				elif att_exist :
 					# untuk hari biasa yang membuat minggu kemarinnya menjadi holiday list
-					# print(week_start)
 					if emp_doc.designation != "NS30":
 						self.holiday_days += 1
 						hari_leave += 1
@@ -289,11 +290,18 @@ class SalarySlip(SalarySlip):
 		jumlah_libur_dari_holiday_list = 0
 		holiday_doc = frappe.get_doc("Holiday List", emp_doc.holiday_list)
 		for satu_holiday in holiday_doc.holidays:
-			print("A")
 			for h in holidays:
 				if satu_holiday.weekly_off == 0 and satu_holiday.holiday_date == h:
 					jumlah_libur_dari_holiday_list += 1
 
+					if status_code := list_attendance.get(satu_holiday.holiday_date):
+						if status_code == "H":
+							self.total_attendance_present -= 1
+							self.total_kerja_di_hari_libur += 1
+
+
+
+		print(jumlah_libur_dari_holiday_list)
 		self.holiday_days += jumlah_libur_dari_holiday_list
 				
 		date_of_joining = emp_doc.date_of_joining
@@ -1076,7 +1084,7 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00919/00001")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00944/00001")
 	doc.calculate_holidays()
 
 @frappe.whitelist()

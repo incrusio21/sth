@@ -190,9 +190,9 @@ class PerhitunganKompensasiPHK(AccountsController):
   
 	@frappe.whitelist()
 	def fetch_default_data(self):
-		company = frappe.db.get_value("Company", self.company, "*")
-		self.salary_account = company.custom_default_phk_salary_account
-		self.credit_to = company.custom_default_phk_account
+		unit = frappe.get_doc("Unit", self.unit)
+		self.salary_account = unit.get("default_phk_salary_account")
+		self.credit_to = unit.get("default_phk_account")
 
 		earning_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "earning_phk_component")
 		deduction_phk = frappe.db.get_single_value("Bonus and Allowance Settings", "deduction_phk_component")

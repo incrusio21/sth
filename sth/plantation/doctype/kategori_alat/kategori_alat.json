@@ -7,8 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_1gui",
+  "kode",
   "nm_ktg",
-  "amended_from"
+  "deskripsi",
+  "tipe_transport",
+  "amended_from",
+  "api_status"
  ],
  "fields": [
   {
@@ -30,15 +34,37 @@
    "fieldname": "nm_ktg",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama Kategori",
+   "label": "Nama",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "kode",
+   "fieldtype": "Data",
+   "label": "Kode"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "fieldname": "tipe_transport",
+   "fieldtype": "Data",
+   "label": "Tipe Transport"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif\nNon Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-24 10:24:14.892256",
+ "modified": "2026-02-23 18:48:28.664468",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kategori Alat",

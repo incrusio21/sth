@@ -167,6 +167,8 @@ function bikin_tombol_upload(frm){
 					badan_usaha = "Koperasi"
 				}
 				kriteria_type = badan_usaha+"-"+skip_sppkp
+
+				new sth.utils.EfillingSelector(frm, kriteria_type, submited_condition, (r) => {});
 			}
 			else if (frm.doc.doctype == "Ganti Rugi Lahan"){
 				let submited_condition = frm.doc.docstatus > 0
@@ -175,12 +177,14 @@ function bikin_tombol_upload(frm){
 				}
 				
 				kriteria_type = frm.doc.jenis_biaya || "GRLTT"
-			}
+				new sth.utils.EfillingSelector(frm, kriteria_type, submited_condition, (r) => {});
 
-			new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => {
-				
-			});
-			
+			}
+			else{
+				new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => {});
+
+			}
+						
 		});
 	}
 }

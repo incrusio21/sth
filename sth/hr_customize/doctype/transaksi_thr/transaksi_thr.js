@@ -5,7 +5,6 @@ frappe.ui.form.on("Transaksi THR", {
   refresh(frm) {
     if (frm.doc.docstatus === 0 || frm.is_new()) {
       cur_frm.toggle_display("get_employee_data", true);
-      fetchAccountAndSalaryAccount(frm);
     } else {
       cur_frm.toggle_display("get_employee_data", false);
     }
@@ -45,7 +44,7 @@ frappe.ui.form.on("Transaksi THR", {
     frm.refresh_field("table_employee");
     frm.set_df_property("table_employee", "cannot_add_rows", true);
   },
-  make_payment_entry: function (frm) {
+  make_payment_entry(frm) {
     let method = "sth.hr_customize.doctype.transaksi_thr.transaksi_thr.get_payment_entry";
     return frappe.call({
       method: method,
@@ -68,6 +67,8 @@ frappe.ui.form.on("Transaksi THR", {
     if (result?.message?.name) {
       frm.set_value("setup_thr", result.message.name);
     }
+
+    fetchAccountAndSalaryAccount(frm);
   },
   async get_employee_data(frm) {
     if (!(frm.doc.unit && frm.doc.company && frm.doc.setup_thr)) {
@@ -194,7 +195,7 @@ frappe.ui.form.on("Transaksi THR", {
 });
 
 async function fetchAccountAndSalaryAccount(frm) {
-  const company = await frappe.db.get_doc("Company", frm.doc.company);
+  const unit = await frappe.db.get_doc("Unit", frm.doc.unit);
   const salarySettings = await frappe.call({
     method: "frappe.client.get",
     args: {
@@ -203,9 +204,9 @@ async function fetchAccountAndSalaryAccount(frm) {
     }
   });
 
-  if (company) {
-    frm.set_value("salary_account", company.custom_default_bonus_salary_account);
-    frm.set_value("credit_to", company.custom_default_bonus_account);
+  if (unit) {
+    frm.set_value("salary_account", unit.default_thr_salary_account);
+    frm.set_value("credit_to", unit.default_thr_account);
   }
 
   if (salarySettings.message) {

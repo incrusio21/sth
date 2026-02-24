@@ -222,9 +222,9 @@ class SupplierComparasion {
 				title: name,
 				headerHozAlign: "center",
 				columns: [
-					{ title: "Merek", field: `${initials}_merk`, headerSort: false, headerHozAlign: "center", },
-					{ title: "Negara<br> Buatan", field: `${initials}_country`, headerSort: false, headerHozAlign: "center", },
-					{ title: "Spesifikasi <br>(Tipe/Model/Ukuran)", field: `${initials}_spesifikasi`, headerSort: false, headerHozAlign: "center", },
+					{ title: "Merek", field: `${initials}_merk`, headerSort: false, minWidth: 120, headerHozAlign: "center", },
+					{ title: "Negara<br> Buatan", field: `${initials}_country`, headerSort: false, minWidth: 120, headerHozAlign: "center", },
+					{ title: "Spesifikasi <br>(Tipe/Model/Ukuran)", field: `${initials}_spesifikasi`, headerSort: false, minWidth: 220, headerHozAlign: "center", },
 					{ title: "Jumlah", field: `${initials}_jumlah`, headerSort: false, headerHozAlign: "center", },
 					{ title: "Harga", field: `${initials}_harga`, formatter: "money", headerSort: false, headerHozAlign: "center", },
 					{ title: "Sub <br> Total", field: `${initials}_sub_total`, formatter: "money", headerSort: false, headerHozAlign: "center", },
@@ -276,6 +276,7 @@ class SupplierComparasion {
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
 			{ title: "Notes SQ", field: "notes_sq", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
 			{ title: "Notes PR/SR", field: "notes_pr_sr", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
+			{ title: "Asset", field: "asset", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
 			...column_suppliers
 		]
 

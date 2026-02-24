@@ -69,7 +69,8 @@ doctype_js = {
 
 doctype_list_js = {
 	"Attendance" : "hr_customize/custom/attendance_list.js",
-	"Request for Quotation" : "public/js/request_for_quotation_list.js",
+	"Request for Quotation" : "public/js/listview/request_for_quotation_list.js",
+    "Material Request" : "public/js/listview/material_request_list.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -270,7 +271,7 @@ doc_events = {
 	},
 	"Payment Entry":{
 		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book", "sth.finance_sth.custom.cek_kriteria_upload_pe.populate_upload_file"
+			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
 		],
 		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_submit_pdo"],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_cancel_pdo"],
@@ -280,6 +281,7 @@ doc_events = {
 		"validate": ["sth.procurement_sth.custom.item.check_persetujuan"],
 	},
 	"Project": {
+		"before_insert": "sth.legal.custom.project.Project",
 		"validate": "sth.legal.custom.project.Project",
 		"on_update": "sth.legal.custom.project.Project",
 		"on_trash": "sth.legal.custom.project.Project",

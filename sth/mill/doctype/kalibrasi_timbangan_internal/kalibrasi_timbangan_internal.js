@@ -16,7 +16,7 @@ frappe.ui.form.on("Kalibrasi Timbangan Internal", {
 
 	},
 	selectLocationDialog(frm) {
-		const method = frappe.model.get_server_module_name(frm.doctype) + '.get_timbangan_settings'
+		const method = 'sth.mill.doctype.timbangan.timbangan.get_timbangan_settings'
 		frappe.xcall(method).then((res) => {
 			const locations = res.map((d) => d.location)
 			let dialog = new frappe.ui.Dialog({

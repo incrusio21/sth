@@ -20,7 +20,11 @@
   "section_break_trza",
   "total_janjang",
   "column_break_mxsp",
-  "total_weight"
+  "total_weight",
+  "section_break_dgvg",
+  "janjang_sisa",
+  "brondolan_terkirim",
+  "brondolan_sisa"
  ],
  "fields": [
   {
@@ -110,13 +114,32 @@
    "label": "Recap Panen Restan",
    "options": "Recap Panen by Blok",
    "read_only": 1
+  },
+  {
+   "fieldname": "janjang_sisa",
+   "fieldtype": "Float",
+   "label": "Janjang Sisa"
+  },
+  {
+   "fieldname": "section_break_dgvg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "brondolan_terkirim",
+   "fieldtype": "Float",
+   "label": "Brondolan Terkirim"
+  },
+  {
+   "fieldname": "brondolan_sisa",
+   "fieldtype": "Float",
+   "label": "Brondolan Sisa"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-13 22:29:09.659886",
+ "modified": "2026-02-20 01:40:18.893909",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "SPB Timbangan Pabrik",

@@ -5,6 +5,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.model.naming import NamingSeries
 from frappe.utils import flt, today
 
 class Project:
@@ -13,6 +14,8 @@ class Project:
         self.method = method
 
         match self.method:
+            case "before_insert":
+                self.set_capex_serial_no()
             case "validate":
                 self.validate_status_project()
                 self.validate_spk_type()
@@ -28,6 +31,12 @@ class Project:
                 self.validate_and_update_project(delete=1)
                 self.move_task_to_new_project(delete=1)
     
+    def set_capex_serial_no(self):
+        if self.doc.proposal_type in ("Capex"):
+            proposal_series = frappe.get_value("Proposal", self.doc.proposal, "project_name")
+            series = NamingSeries(proposal_series + "_.#####")
+            self.doc.project_name = series.generate_next_name(self.doc, ignore_validate=True)
+
     def validate_status_project(self):
         # jika document baru tidak perlu ada pengecekan
         before_doc = self.doc.get_latest()

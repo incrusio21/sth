@@ -10,9 +10,16 @@
   "section_break_bugr",
   "column_break_yjct",
   "divisi",
-  "unit",
+  "nama",
+  "deskripsi",
+  "api_status",
   "column_break_zvjq",
-  "cost_center"
+  "unit",
+  "company",
+  "cost_center",
+  "setting_coa_default_section",
+  "account_default_divisi",
+  "column_break_mnfw"
  ],
  "fields": [
   {
@@ -45,15 +52,55 @@
   {
    "fieldname": "divisi",
    "fieldtype": "Data",
-   "label": "Nama Divisi",
+   "label": "Kode",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "label": "Nama"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "setting_coa_default_section",
+   "fieldtype": "Section Break",
+   "label": "Setting Coa Default"
+  },
+  {
+   "fieldname": "account_default_divisi",
+   "fieldtype": "Link",
+   "label": "Account Default Divisi",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_mnfw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif\nNon Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-21 10:22:46.883445",
+ "modified": "2026-02-23 19:23:05.486737",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Divisi",

@@ -82,7 +82,8 @@ def fetch_price_history(item_code, uom):
 			"supplier",
 			"status",
 			"approver",
-			"jarak"
+			"jarak",
+			"nama_supplier"
 		],
 		order_by="creation desc",
 		limit_page_length=100  
@@ -100,7 +101,8 @@ def fetch_price_history(item_code, uom):
 			"unit": r.unit,
 			"supplier": r.supplier,
 			"approver": r.approver,
-			"jarak": r.jarak
+			"jarak": r.jarak,
+			"nama_supplier": r.nama_supplier
 		}
 		for r in rows
 	]
@@ -207,7 +209,7 @@ def apply_price_change(item_code, price_list, uom, price_difference, remark=None
 @frappe.whitelist()
 def approve_price_change(ledger_name):
 	
-	if "Administrator" not in frappe.get_roles():
+	if "Price Approver" not in frappe.get_roles():
 		frappe.throw("Anda tidak memiliki hak approve harga")
 
 	if not ledger_name:
@@ -263,12 +265,16 @@ def create_price_note_from_harga_beli_tbs(
 		]
 
 	price_list_value = ", ".join(target_price_lists)
+	nama_supplier = ""
+	if supplier:
+		nama_supplier = frappe.get_cached_doc("Supplier", supplier).supplier_name
 
 	frappe.get_doc({
 		"doctype": "Item Price Ledger TBS",
 		"item_code": item_code,
 		"unit": unit,
 		"supplier": supplier,
+		"nama_supplier":nama_supplier,
 		"uom": uom,
 
 		"jarak": jarak or None,        

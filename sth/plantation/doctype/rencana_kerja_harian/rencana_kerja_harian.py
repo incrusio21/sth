@@ -24,7 +24,7 @@ class RencanaKerjaHarian(PlantationController):
 
 		# self.get_rencana_kerja_bulanan()
 		self.validate_duplicate_rkh()
-		self.validate_previous_document()
+		# self.validate_previous_document()
 		self.calculate_kegiatan_amount()
 
 		super().validate()
@@ -66,6 +66,14 @@ class RencanaKerjaHarian(PlantationController):
 
 	# def update_rkb_used(self):
 	# 	frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
+
+@frappe.whitelist()
+def get_material(kode_kegiatan):
+	item_kegiatan = frappe.get_all("Kegiatan Material", filters={
+		"parent": kode_kegiatan
+	}, fields=["item_code as item", "item_group", "uom"])
+
+	return {"material": item_kegiatan}
 
 @frappe.whitelist()
 def get_rencana_kerja_bulanan(kode_kegiatan, tipe_kegiatan, divisi, blok, posting_date, is_bibitan=False):

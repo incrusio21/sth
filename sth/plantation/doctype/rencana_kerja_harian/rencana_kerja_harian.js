@@ -13,6 +13,19 @@ frappe.ui.form.on("Rencana Kerja Harian", {
     kegiatan(frm) {
         frm.set_value("blok", "")
         frm.set_value("batch", "")
+        
+        if(frm.doc.kegiatan){
+            frappe.call({
+                method: "sth.plantation.doctype.rencana_kerja_harian.rencana_kerja_harian.get_material",
+                args: {
+                    kode_kegiatan: frm.doc.kegiatan,
+                },
+                freeze: true,
+                callback: function (data) {
+                    frm.set_value(data.message)
+                }
+            })
+        }
     }
 });
 

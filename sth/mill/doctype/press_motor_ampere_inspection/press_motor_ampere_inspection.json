@@ -96,10 +96,11 @@
   }
  ],
  "grid_page_length": 50,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-27 11:10:17.287446",
+ "modified": "2026-02-23 04:40:32.654380",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Press Motor Ampere Inspection",
@@ -120,6 +121,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

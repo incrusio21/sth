@@ -290,7 +290,9 @@ class Proposal(BuyingController):
 			self.project_name = self.asset_category = self.sub_asset_category = ""
 			return
 		
-		self.project_name = f"{self.asset_category}-{self.sub_asset_category}"
+		catergory_kode = frappe.get_cached_value("Asset Category", self.asset_category, "asset_code")
+		sub_catergory_kode = frappe.get_cached_value("Sub Asset Category", self.sub_asset_category, "asset_code")
+		self.project_name = f"{catergory_kode}_{sub_catergory_kode}"
 	
 	def set_retensi_or_term_value(self):
 		if not self.is_bapp_retensi:

@@ -13,11 +13,13 @@
   "kd_kgt",
   "nm_kgt",
   "uom",
+  "deskripsi",
   "column_break_exsm",
   "kategori_kegiatan",
   "tipe_kegiatan",
   "old_parent",
   "traksi_type",
+  "api_status",
   "column_break_lrzd",
   "tp_bbt",
   "tp_pnn",
@@ -221,13 +223,25 @@
    "fieldtype": "Select",
    "label": "Traksi Type",
    "options": "TBS\nAngkut\nTransport"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif\nNon Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-02-19 09:20:55.498331",
+ "modified": "2026-02-23 18:56:30.521810",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

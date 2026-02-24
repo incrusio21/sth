@@ -136,6 +136,7 @@ frappe.ui.form.on("Harga Beli TBS", {
 					d.supplier = row.supplier;
 					d.approver = row.approver;
 					d.jarak = row.jarak;
+					d.nama_supplier = row.nama_supplier;
 				});
 
 				frm.refresh_field("price_change_history");

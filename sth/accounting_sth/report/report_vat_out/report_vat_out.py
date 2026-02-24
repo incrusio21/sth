@@ -11,16 +11,14 @@ def execute(filters=None):
 
 	query_l_ppn_masukan = frappe.db.sql("""
 		SELECT 
-		pi.no_fp as nomor_faktur_pajak,
-		pi.tanggal_faktur_pajak as tanggal_faktur_pajak,
-		pi.supplier as customer,
-		pi.bill_no as nomor_invoice,
-		pi.bill_date as tanggal_invoice,
-		pi.keterangan as keterangan,
+		si.customer_name as customer,
+		si.name as nomor_invoice,
+		si.posting_date as tanggal_invoice,
+		si.keterangan as keterangan,
 		0 as dpp,
-		pi.total_ppn as ppn
-		FROM `tabPurchase Invoice` as pi 
-  	WHERE pi.company IS NOT NULL {};
+		0 as ppn
+		FROM `tabSales Invoice` as si
+  	WHERE si.company IS NOT NULL {};
   """.format(conditions), filters, as_dict=True)
 
 	for invoice in query_l_ppn_masukan:
@@ -32,28 +30,18 @@ def get_condition(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND pi.company = %(company)s"
+		conditions += " AND si.company = %(company)s"
 
 	if filters.get("unit"):
-		conditions += " AND pi.unit = %(unit)s"
+		conditions += " AND si.unit = %(unit)s"
 
 	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " AND pi.posting_date BETWEEN %(from_date)s AND %(to_date)s"
+		conditions += " AND si.posting_date BETWEEN %(from_date)s AND %(to_date)s"
 
 	return conditions
 
 def get_columns(filters):
 	columns = [
-		{
-			"label": _("Nomor faktur pajak"),
-			"fieldtype": "Data",
-			"fieldname": "nomor_faktur_pajak",
-		},
-		{
-			"label": _("Tanggal faktur pajak"),
-			"fieldtype": "Date",
-			"fieldname": "tanggal_faktur_pajak",
-		},
 		{
 			"label": _("Customer"),
 			"fieldtype": "Data",

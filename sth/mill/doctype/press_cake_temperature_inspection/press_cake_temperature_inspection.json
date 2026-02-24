@@ -106,10 +106,11 @@
   }
  ],
  "grid_page_length": 50,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 14:50:16.662306",
+ "modified": "2026-02-23 04:40:49.082632",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Press Cake Temperature Inspection",
@@ -130,6 +131,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

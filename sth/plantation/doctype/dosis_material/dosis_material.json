@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "DM-.######",
+ "creation": "2026-02-23 18:28:23.717934",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kategori_kegiatan",
+  "kegiatan",
+  "kategori_material",
+  "material",
+  "total",
+  "satuan_material",
+  "satuan_kegiatan",
+  "api_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "kategori_kegiatan",
+   "fieldtype": "Link",
+   "label": "Kategori Kegiatan",
+   "options": "Kategori Kegiatan"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "kategori_material",
+   "fieldtype": "Link",
+   "label": "Kategori Material",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Link",
+   "label": "Material",
+   "options": "Item"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Float",
+   "label": "Total"
+  },
+  {
+   "fieldname": "satuan_material",
+   "fieldtype": "Link",
+   "label": "Satuan Material",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "satuan_kegiatan",
+   "fieldtype": "Link",
+   "label": "Satuan Kegiatan",
+   "options": "UOM"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif\nNon Aktif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-02-23 18:34:15.058251",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Dosis Material",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

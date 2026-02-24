@@ -12,6 +12,7 @@
   "unit",
   "months",
   "fiscal_year",
+  "grand_total_pdo",
   "column_break_izgh",
   "company",
   "posting_date",
@@ -450,13 +451,19 @@
   {
    "fieldname": "section_break_rlrb",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "grand_total_pdo",
+   "fieldtype": "Currency",
+   "label": "Grand Total PDO",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-14 14:50:11.238621",
+ "modified": "2026-02-21 17:46:40.108423",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

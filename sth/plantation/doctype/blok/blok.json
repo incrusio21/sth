@@ -12,13 +12,28 @@
   "divisi",
   "unit",
   "cost_center",
+  "nama",
+  "deskripsi",
+  "api_status",
   "column_break_yfnz",
   "luas_areal",
   "tahun_tanam",
   "sph",
   "jumlah_pokok",
+  "jenis",
+  "varietas",
+  "type",
   "section_break_xxdp",
-  "last_bjr"
+  "periode_bjr",
+  "last_bjr",
+  "section_break_ofgm",
+  "hectare_balance",
+  "is_pusingan",
+  "pusingan",
+  "is_akp",
+  "akp_at",
+  "total_male",
+  "total_female"
  ],
  "fields": [
   {
@@ -101,12 +116,90 @@
    "fieldname": "last_bjr",
    "fieldtype": "Float",
    "label": "Last BJR"
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "label": "Nama"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "fieldname": "jenis",
+   "fieldtype": "Data",
+   "label": "Jenis"
+  },
+  {
+   "fieldname": "varietas",
+   "fieldtype": "Data",
+   "label": "Varietas"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "periode_bjr",
+   "fieldtype": "Data",
+   "label": "Periode BJR"
+  },
+  {
+   "fieldname": "section_break_ofgm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "hectare_balance",
+   "fieldtype": "Data",
+   "label": "Hectare Balance"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_pusingan",
+   "fieldtype": "Check",
+   "label": "Is Pusingan"
+  },
+  {
+   "fieldname": "pusingan",
+   "fieldtype": "Data",
+   "label": "Pusingan"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_akp",
+   "fieldtype": "Check",
+   "label": "Is AKP"
+  },
+  {
+   "fieldname": "akp_at",
+   "fieldtype": "Data",
+   "label": "AKP At"
+  },
+  {
+   "fieldname": "total_male",
+   "fieldtype": "Data",
+   "label": "Total Male"
+  },
+  {
+   "fieldname": "total_female",
+   "fieldtype": "Data",
+   "label": "Total Female"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif\nNon Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 16:30:26.967684",
+ "modified": "2026-02-23 19:21:08.592814",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

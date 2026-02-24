@@ -11,7 +11,8 @@
   "rating",
   "rating_persetujuan",
   "supervisi",
-  "deskripsi"
+  "deskripsi",
+  "api_status"
  ],
  "fields": [
   {
@@ -44,12 +45,19 @@
    "fieldname": "deskripsi",
    "fieldtype": "Data",
    "label": "Deskripsi"
+  },
+  {
+   "default": "Aktif",
+   "fieldname": "api_status",
+   "fieldtype": "Select",
+   "label": "API Status",
+   "options": "Aktif"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 00:51:13.181424",
+ "modified": "2026-02-23 19:03:55.313272",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Kelompok Jabatan",

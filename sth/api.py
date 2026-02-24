@@ -176,7 +176,7 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
-				dict_data.notes_pr_sr = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},"notes")
+				dict_data.notes_pr_sr, dict_data.asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
 				dict_data.notes_sq = data.notes_sq
 				dict_data.status = data.status
 				dict_data.mark = data.kode_barang
@@ -189,7 +189,7 @@ def get_table_data(args):
 			for sup_field in supplier_fields:
 				dict_data[f"{title}_{sup_field}"] = data[sup_field]
 
-			dict_data.notes_pr_sr = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},"notes")
+			dict_data.notes_pr_sr, dict_data.asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
 			dict_data.notes_sq = data.notes_sq
 			dict_data.status = data.status
 			dict_data.mark = data.kode_barang
@@ -315,18 +315,27 @@ def debug_create_po():
 @frappe.whitelist()
 def return_status_absensi():
 	status_attendance = [
-		{"name": "Present", "status_code": "H"},
-		{"name": "Absent", "status_code": "M"},
-		{"name": "Work From Home", "status_code": "WFH"},
-		{"name": "7th Day Off", "status_code": "L"}
+		{"name": "Present", "status_code": "H", "deskripsi": "Present", "jenis": "DIBAYAR", "jumlah_hk": 1, "is_penalty": 0, "status": "Aktif", "owner" : "Administrator", "creation": "01-01-2026 00:00:00", "modified_by" : "Administrator", "modified": "01-01-2026 00:00:00"},
+		{"name": "Absent", "status_code": "M", "deskripsi": "Absent", "jenis": "TIDAK_DIBAYAR", "jumlah_hk": 0, "is_penalty": 1, "status": "Aktif", "owner" : "Administrator", "creation": "01-01-2026 00:00:00", "modified_by" : "Administrator", "modified": "01-01-2026 00:00:00"},
+		{"name": "Work From Home", "status_code": "WFH", "deskripsi": "Work From Home", "jenis": "DIBAYAR", "jumlah_hk": 1, "is_penalty": 0, "status": "Aktif", "owner" : "Administrator", "creation": "01-01-2026 00:00:00", "modified_by" : "Administrator", "modified": "01-01-2026 00:00:00"},
+		{"name": "7th Day Off", "status_code": "L", "deskripsi": "7th Day Off", "jenis": "TIDAK_DIBAYAR", "jumlah_hk": 0, "is_penalty": 1, "status": "Aktif", "owner" : "Administrator", "creation": "01-01-2026 00:00:00", "modified_by" : "Administrator", "modified": "01-01-2026 00:00:00"}
 	]
 	
-	lis = frappe.db.sql(""" SELECT name, status_code FROM `tabLeave Type` """, as_dict=True)
+	lis = frappe.db.sql(""" SELECT name, status_code, deskripsi, is_lwp, owner, creation, modified_by, modified FROM `tabLeave Type` """, as_dict=True)
 	
 	for row in lis:
 		status_attendance.append({
 			"name": row.name,
-			"status_code": row.status_code
+			"status_code": row.status_code,
+			"deskripsi": row.deskripsi,
+			"jenis": "TIDAK_DIBAYAR" if row.is_lwp == 1 else "DIBAYAR",
+			"jumlah_hk": 0,
+			"is_penalty": 1 if row.is_lwp == 1 else 0,
+			"status": "Aktif",
+			"owner": row.owner,
+			"creation": row.creation,
+			"modified_by": row.modified_by,
+			"modified": row.modified
 		})
 	
 	return status_attendance

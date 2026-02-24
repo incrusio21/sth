@@ -29,9 +29,9 @@
   },
   {
    "fieldname": "kelompok",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Kelompok",
-   "options": "Umum\nRawat\nBibitan\nLand Clearing\nTraksi\nPanen"
+   "options": "Kelompok Kemandoran"
   },
   {
    "fieldname": "kode",
@@ -59,7 +59,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-19 15:50:40.731015",
+ "modified": "2026-02-21 00:34:26.539760",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kemandoran",

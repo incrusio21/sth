@@ -16,13 +16,14 @@
   "amended_from",
   "sterilizer_monitoring_tab",
   "cbc_operating_hours_start__till_stop_section",
-  "cbc_machine",
   "machine_station",
+  "cbc_machine",
   "column_break_fecv",
   "starting_hour_meter",
+  "start_upload",
   "ending_hour_meter",
-  "total_hour_meter",
-  "utp5"
+  "end_upload",
+  "total_hour_meter"
  ],
  "fields": [
   {
@@ -88,12 +89,6 @@
    "label": "CBC Operating Hours (Start  Till Stop)"
   },
   {
-   "fieldname": "utp5",
-   "fieldtype": "Attach Image",
-   "in_preview": 1,
-   "label": "Image Upload"
-  },
-  {
    "fieldname": "document_reference",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -129,6 +124,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "total_hour_meter",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -137,13 +133,12 @@
    "read_only": 1
   },
   {
-   "fetch_from": "cbc_machine.station",
    "fieldname": "machine_station",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Machine Station",
-   "read_only": 1
+   "options": "Station Master"
   },
   {
    "default": "Today",
@@ -151,13 +146,23 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Posting Date"
+  },
+  {
+   "fieldname": "start_upload",
+   "fieldtype": "Attach Image",
+   "label": "Start Upload"
+  },
+  {
+   "fieldname": "end_upload",
+   "fieldtype": "Attach Image",
+   "label": "End Upload"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-13 16:24:40.712253",
+ "modified": "2026-02-23 05:10:57.804234",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "CBC Monitoring",

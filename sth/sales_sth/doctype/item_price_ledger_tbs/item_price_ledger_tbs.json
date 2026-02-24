@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-21 20:32:47.631681",
+ "creation": "2025-12-21 20:35:31.299757",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -24,7 +24,8 @@
   "remark",
   "amended_from",
   "applied_to_item_price",
-  "applied_on"
+  "applied_on",
+  "nama_supplier"
  ],
  "fields": [
   {
@@ -158,13 +159,18 @@
    "fieldtype": "Date",
    "label": "applied_on",
    "read_only": 1
+  },
+  {
+   "fieldname": "nama_supplier",
+   "fieldtype": "Data",
+   "label": "nama_supplier"
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-21 20:35:24.919186",
+ "modified": "2026-02-20 08:39:03.533666",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Item Price Ledger TBS",
