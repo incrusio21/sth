@@ -867,7 +867,10 @@ def make_proposal_revision(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def make_bapp(source_name, target_doc=None):
+def make_bapp(source_name, target_doc=None, args=None):
+	if args:
+		frappe.flags.args = frappe._dict(args)
+		
 	from sth.legal.custom.tax_validation import validate_custom_tax
 
 	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
