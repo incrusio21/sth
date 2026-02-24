@@ -176,21 +176,92 @@ erpnext.stock.BAPPController = class BAPPController extends (
 								message: __("Please Select a Supplier"),
 							});
 						}
-						erpnext.utils.map_current_doc({
-							method: "sth.legal.doctype.proposal.proposal.make_bapp",
-							source_doctype: "Proposal",
-							target: me.frm,
-							setters: {
-								supplier: me.frm.doc.supplier,
-								schedule_date: undefined,
-							},
-							get_query_filters: {
-								docstatus: 1,
-								status: ["not in", ["Closed", "On Hold"]],
-								per_received: ["<", 99.99],
-								company: me.frm.doc.company,
-							},
+
+						let d = new frappe.ui.Dialog({
+							title: 'Get Proposal',
+							fields: [
+								{
+									label: 'Supplier',
+									fieldname: 'supplier',
+									fieldtype: 'Link',
+									options: 'Supplier',
+									default: me.frm.doc.supplier,
+									onchange: function () {
+										d.set_value("proposal", "")
+									}
+								},
+								{
+									label: 'Proposal',
+									fieldname: 'proposal',
+									fieldtype: 'Link',
+									options: 'Proposal',
+									reqd: 1,
+									get_query: () => {
+										let filters = {                                        
+											docstatus: 1,
+											status: ["not in", ["Closed", "On Hold"]],
+											per_received: ["<", 99.99],
+											company: me.frm.doc.company
+										}
+										if (d.get_value("supplier")){
+											filters["supplier"] = d.get_value("supplier")
+										}
+										return {
+											filters: filters
+										};
+									},
+									onchange: function () {
+										frappe.call({
+											method: "sth.legal.custom.purchase_invoice.get_proposal_termin",
+											args: { proposal: this.value },
+											callback: (r) => {
+												if (!r.exc) {
+													d.set_value("termin", "")
+													d.fields_dict.termin.df.options = r.message
+													d.fields_dict.termin.set_options()
+												}
+											},
+										});
+									}
+								},
+								{
+									label: 'Termin',
+									fieldname: 'termin',
+									fieldtype: 'Select',
+								}
+							],
+							primary_action_label: 'Get Items',
+							primary_action(values) {
+								cur_frm.doc.items = []
+								
+								frappe.call({
+									// Sometimes we hit the limit for URL length of a GET request
+									// as we send the full target_doc. Hence this is a POST request.
+									type: "POST",
+									method: "frappe.model.mapper.map_docs",
+									args: {
+										method: "sth.legal.doctype.proposal.proposal.make_bapp",
+										source_names: [values.proposal],
+										target_doc: cur_frm.doc,
+										args: {
+											term: values.termin
+										},
+									},
+									freeze: true,
+									freeze_message: __("Mapping {0} ...", ["Proposal"]),
+									callback: function (r) {
+										if (!r.exc) {
+											frappe.model.sync(r.message);
+											cur_frm.dirty();
+											cur_frm.refresh();
+										}
+									},
+								});
+								d.hide();
+							}
 						});
+
+						d.show()
 					},
 					__("Get Items From")
 				);
