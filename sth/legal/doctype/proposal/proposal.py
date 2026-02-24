@@ -370,7 +370,7 @@ class Proposal(BuyingController):
 
 		self.update_prevdoc_status()
 
-		self.update_ordered_qty()
+		# self.update_ordered_qty()
 
 		self.update_blanket_order()
 
@@ -475,7 +475,7 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
 	term = frappe.flags.args.term
-	portion = frappe.db.get_value("Payment Schedule", term, "invoice_portion")
+	portion = frappe.db.get_value("Proposal Schedule", term, "invoice_portion")
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
@@ -870,7 +870,7 @@ def make_proposal_revision(source_name, target_doc=None):
 def make_bapp(source_name, target_doc=None, args=None):
 	if args:
 		frappe.flags.args = frappe._dict(args)
-		
+
 	from sth.legal.custom.tax_validation import validate_custom_tax
 
 	has_unit_price_items = frappe.db.get_value("Proposal", source_name, "has_unit_price_items")
@@ -878,7 +878,7 @@ def make_bapp(source_name, target_doc=None, args=None):
 	if not spk:
 		frappe.throw(f"Create SPK for {source_name} first")
 
-	payment_term = frappe.db.get_value("Payment Schedule", frappe.flags.args.term, "payment_term") if frappe.flags.args.term else ""
+	payment_term = frappe.db.get_value("Proposal Schedule", frappe.flags.args.term, "payment_term") if frappe.flags.args.get("term") else ""
 
 	def set_missing_values(source, target):
 		target.project = spk

@@ -266,7 +266,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		if not self.term_detail:
 			return
 		
-		term, payment_term = frappe.db.get_value("Payment Schedule", self.term_detail, ["term_used", "payment_term"], for_update=1)
+		term, payment_term = frappe.db.get_value("Proposal Schedule", self.term_detail, ["term_used", "payment_term"], for_update=1)
 		if term:
 			frappe.throw(f"Term {payment_term} already used")
 

@@ -888,7 +888,7 @@
    "fieldtype": "Table",
    "label": "Payment Schedule",
    "no_copy": 1,
-   "options": "Payment Schedule",
+   "options": "Proposal Schedule",
    "print_hide": 1
   },
   {
@@ -1468,7 +1468,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 13:27:25.934921",
+ "modified": "2026-02-24 13:01:01.336077",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
