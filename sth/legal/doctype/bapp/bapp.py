@@ -178,6 +178,8 @@ class BAPP(BuyingController):
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 		
+		self.validate_terms()
+
 	def validate_uom_is_integer(self):
 		super().validate_uom_is_integer("uom", ["qty", "received_qty"], "BAPP Item")
 		super().validate_uom_is_integer("stock_uom", "stock_qty", "BAPP Item")
@@ -249,6 +251,13 @@ class BAPP(BuyingController):
 					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Item Code
 						{frappe.bold(item.item_code)}."""
 					frappe.throw(_(msg))
+
+	def validate_terms(self):
+		if self.is_bapp_retensi:
+			return
+		
+		if not self.term_detail:
+			frappe.throw("document must have reference Term from Proposal")
 
 	def get_already_received_qty(self, po, proposal_detail):
 		qty = frappe.db.sql(
