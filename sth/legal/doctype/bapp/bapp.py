@@ -908,100 +908,108 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 
 	doc = frappe.get_doc("BAPP", source_name)
 	
-	portion = frappe.db.get_value("Payment Schedule", doc.term_detail, "invoice_portion") if doc.term_detail else 0
-	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	if doc.items:
+		portion = frappe.db.get_value("Proposal Schedule", doc.term_detail, "invoice_portion") if doc.term_detail else 0
+		invoiced_qty_map = get_invoiced_qty_map(source_name)
 
-	def set_missing_values(source, target):
-		if len(target.get("items")) == 0:
-			frappe.throw(_("All items have already been Invoiced/Returned"))
-		
-		doc = frappe.get_doc(target)
-		doc.invoice_type = "SPK"
-		doc.term_detail = source.term_detail
-
-		doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
-		doc.run_method("onload")
-		doc.run_method("set_missing_values")
-
-		doc.ppn = []
-		if source.ppn:
-			doc.append("ppn", {
-				"type": source.ppn,
-				"account": source.ppn_account,
-				"percentage": source.ppn_rate
-			})
+		def set_missing_values(source, target):
+			if len(target.get("items")) == 0:
+				frappe.throw(_("All items have already been Invoiced/Returned"))
 			
-		if args and args.get("merge_taxes"):
-			merge_taxes(source.get("taxes") or [], doc)
+			doc = frappe.get_doc(target)
+			doc.invoice_type = "SPK"
+			doc.document_no = source_name
+			doc.term_detail = source.term_detail
 
-		doc.run_method("calculate_taxes_and_totals")
-		doc.set_payment_schedule()
+			doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
+			doc.run_method("onload")
+			doc.run_method("set_missing_values")
 
-	def update_item(source_doc, target_doc, source_parent):
-		if portion:
-			qty = frappe.get_value("Proposal Item", source_doc.proposal_item, "qty")
-			target_doc.qty = flt(qty * portion / 100)
-			target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
-			target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
-		else:
-			target_doc.amount = flt(source_doc.amount) - flt(source_doc.billed_amt)
-			target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
-			target_doc.qty = (
-				target_doc.amount / flt(source_doc.rate) if (flt(source_doc.rate) and flt(source_doc.billed_amt)) else flt(source_doc.qty)
-			)
+			doc.ppn = []
+			if source.ppn:
+				doc.append("ppn", {
+					"type": source.ppn,
+					"account": source.ppn_account,
+					"percentage": source.ppn_rate
+				})
+				
+			if args and args.get("merge_taxes"):
+				merge_taxes(source.get("taxes") or [], doc)
 
-			target_doc.qty = get_pending_qty(source_doc)
-			target_doc.stock_qty = flt(target_doc.qty) * flt(
-				target_doc.conversion_factor, target_doc.precision("conversion_factor")
-			)
+			doc.run_method("calculate_taxes_and_totals")
+			doc.set_payment_schedule()
 
-	def get_pending_qty(item_row):
-		return item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+		def update_item(source_doc, target_doc, source_parent):
+			if portion:
+				qty = frappe.get_value("Proposal Item", source_doc.proposal_item, "qty")
+				target_doc.qty = flt(qty * portion / 100)
+				target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
+				target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+			else:
+				target_doc.amount = flt(source_doc.amount) - flt(source_doc.billed_amt)
+				target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+				target_doc.qty = (
+					target_doc.amount / flt(source_doc.rate) if (flt(source_doc.rate) and flt(source_doc.billed_amt)) else flt(source_doc.qty)
+				)
 
-	doclist = get_mapped_doc(
-		"BAPP",
-		source_name,
-		{
-			"BAPP": {
-				"doctype": "Purchase Invoice",
-				"field_map": {
-					"bill_date": "bill_date",
-					"is_cwip": "cwip_asset",
-					"asset_category": "asset_category",
-					"retensi": "retensi"
+				target_doc.qty = get_pending_qty(source_doc)
+				target_doc.stock_qty = flt(target_doc.qty) * flt(
+					target_doc.conversion_factor, target_doc.precision("conversion_factor")
+				)
+
+		def get_pending_qty(item_row):
+			return item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+
+		doclist = get_mapped_doc(
+			"BAPP",
+			source_name,
+			{
+				"BAPP": {
+					"doctype": "Purchase Invoice",
+					"field_map": {
+						"bill_date": "bill_date",
+						"is_cwip": "cwip_asset",
+						"asset_category": "asset_category",
+						"retensi": "retensi"
+					},
+					"validation": {
+						"docstatus": ["=", 1],
+					},
 				},
-				"validation": {
-					"docstatus": ["=", 1],
+				"BAPP Item": {
+					"doctype": "Purchase Invoice Item",
+					"field_map": {
+						"name": "bapp_detail",
+						"parent": "bapp",
+						"qty": "received_qty",
+						"proposal_item": "proposal_detail",
+						"proposal": "proposal",
+						"is_fixed_asset": "is_fixed_asset",
+						"asset_location": "asset_location",
+						"asset_category": "asset_category",
+						"wip_composite_asset": "wip_composite_asset",
+					},
+					"postprocess": update_item,
+					"filter": lambda d: get_pending_qty(d) <= 0,
+				},
+				"Purchase Taxes and Charges": {
+					"doctype": "Purchase Taxes and Charges",
+					"reset_value": not (args and args.get("merge_taxes")),
+					"ignore": args.get("merge_taxes") if args else 0,
 				},
 			},
-			"BAPP Item": {
-				"doctype": "Purchase Invoice Item",
-				"field_map": {
-					"name": "bapp_detail",
-					"parent": "bapp",
-					"qty": "received_qty",
-					"proposal_item": "proposal_detail",
-					"proposal": "proposal",
-					"is_fixed_asset": "is_fixed_asset",
-					"asset_location": "asset_location",
-					"asset_category": "asset_category",
-					"wip_composite_asset": "wip_composite_asset",
-				},
-				"postprocess": update_item,
-				"filter": lambda d: get_pending_qty(d) <= 0,
-			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-				"reset_value": not (args and args.get("merge_taxes")),
-				"ignore": args.get("merge_taxes") if args else 0,
-			},
-		},
-		target_doc,
-		set_missing_values,
-	)
+			target_doc,
+			set_missing_values,
+		)
 
-	return doclist
+		return doclist
+	else:
+		from sth.legal.doctype.proposal.proposal import make_purchase_invoice
 
+		doclist = make_purchase_invoice(doc.proposal, target_doc, {"term": doc.term_detail})
+		doclist.document_no = source_name
+
+		return doclist
 
 def get_invoiced_qty_map(bapp):
 	"""returns a map: {bapp_detail: invoiced_qty}"""

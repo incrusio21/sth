@@ -27,7 +27,7 @@ form_grid_templates = {"items": "/home/frappe/frappe-bench/apps/sth/sth/template
 class SthPurchaseInvoice(PurchaseInvoice):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.status_updater = [
+		self.status_updater.append(
 			{
 				"source_dt": "Purchase Invoice Item",
 				"target_dt": "Proposal Item",
@@ -40,7 +40,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				"percent_join_field": "proposal",
 				"overflow_type": "billing",
 			}
-		]
+		)
 
 	def validate(self):
 		update_cwip_expense_accounts(self)
@@ -240,6 +240,14 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			update_billing_percentage(
 				bapp_doc, update_modified=update_modified
 			)
+
+		if self.invoice_type == "SPK" and self.document_no not in updated_bapp:
+			bapp_doc = frappe.get_doc("BAPP", self.document_no)
+			bapp_doc.db_set("per_billed", 100 if self.docstatus == 1 else 0)
+
+			if update_modified:
+				bapp_doc.set_status(update=True)
+				bapp_doc.notify_update()
 
 	def get_bapp_details_billed_amt(self):
 		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice

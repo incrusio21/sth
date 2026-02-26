@@ -20,6 +20,7 @@
   "set_posting_time",
   "termin",
   "term_detail",
+  "proposal",
   "column_break_12",
   "company",
   "unit",
@@ -417,8 +418,7 @@
    "label": "Items",
    "oldfieldname": "purchase_receipt_details",
    "oldfieldtype": "Table",
-   "options": "BAPP Item",
-   "reqd": 1
+   "options": "BAPP Item"
   },
   {
    "collapsible": 1,
@@ -1269,13 +1269,20 @@
    "hidden": 1,
    "label": "Term Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "proposal",
+   "fieldtype": "Link",
+   "label": "Proposal",
+   "options": "Proposal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-23 14:31:09.927543",
+ "modified": "2026-02-26 10:17:41.479600",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

@@ -34,7 +34,7 @@ status_updater.status_map["BAPP"] = [
 	["Partly Billed", "eval:self.per_billed > 0 and self.per_billed < 100 and self.docstatus == 1"],
 	[
 		"Completed",
-		"eval:(self.per_billed == 100 and self.docstatus == 1) or (self.docstatus == 1 and self.grand_total == 0)",
+		"eval:(self.per_billed == 100 and self.docstatus == 1)",
 	],
 	["Cancelled", "eval:self.docstatus==2"],
 	["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
