@@ -50,8 +50,12 @@ class Project:
             self.doc.complete_date = today()
 
     def validate_spk_type(self):
+        if not self.doc.for_proposal:
+            self.purchase_order = self.proposal_type = self.proposal = ""
+            return
+        
         # proposal jika spk_type po/so dan sebalikny
-        if self.doc.spk_type in ["PO/SO"]:
+        if self.doc.spk_type not in ["PO/SO"]:
             self.purchase_order = ""
         else:
             self.proposal_type = self.proposal = ""

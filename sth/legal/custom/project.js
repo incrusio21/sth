@@ -5,6 +5,7 @@ frappe.ui.form.on("Project", {
     setup(frm){
         frm.add_fetch("project_type", "default_department", "department");
         frm.add_fetch("proposal", "project_name", "project_name");
+
         // frm.add_fetch("proposal", "company", "company");
         // frm.add_fetch("proposal", "supplier", "supplier");
         // frm.add_fetch("proposal", "supplier_address_active", "supplier_address");
@@ -54,13 +55,22 @@ frappe.ui.form.on("Project", {
                 frm.trigger("download_pdf")
             })
         }
+
+        frm.trigger("set_dynamic_labels")
 	},
+
+    project_type(frm){
+        frm.trigger("set_dynamic_labels")
+    },
+    
     proposal(frm){
         frm.events.get_details_data(frm, "Proposal", frm.doc.proposal)
     },
+
     purchase_order(frm){
         frm.events.get_details_data(frm, "Purchase Order", frm.doc.purchase_order)
     },
+
     get_details_data(frm, doctype, docname){
         frappe.call({
             method: "sth.legal.custom.project.get_proposal_data",
@@ -121,5 +131,15 @@ frappe.ui.form.on("Project", {
             message: __('Downloading PDF...'),
             indicator: 'green'
         });
-    }
+    },
+
+    set_dynamic_labels(frm) {
+        let label = "Pihak Pertama"
+        if(in_list(["Perijinan", "Sertifikasi"], frm.doc.project_type)){
+            label = "Perusahaan"
+        }
+
+        frm.fields_dict.company.set_label(label)
+		this.frm.refresh_fields();
+	}
 });
