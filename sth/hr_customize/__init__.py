@@ -38,7 +38,7 @@ def get_overtime_settings(key: str):
 
 	return overtime_settings.get(key)
 
-def get_payment_settings(key: str):
+def get_payment_settings(key=None):
 	"""Return the value associated with the given `key` from Payment Settings DocType."""
 	if not (payment_settings := getattr(frappe.local, "payment_settings", None)):
 		try:
@@ -47,7 +47,10 @@ def get_payment_settings(key: str):
 			clear_last_message()
 			return
 
-	return payment_settings.get(key)
+	if key:
+		return payment_settings.get(key)
+	
+	return payment_settings
 
 
 def get_allowance_settings(key=None):

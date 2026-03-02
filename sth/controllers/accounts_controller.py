@@ -34,6 +34,50 @@ class AccountsController(Document):
 	def validate(self):
 		self.validate_credit_to_acc()
 		self.set_outstanding_amount()
+		
+		self.set_payment_schedule()
+
+	def set_payment_schedule(self):
+		if not self.meta.has_field("payment_schedule"):
+			return
+		
+		grand_total = self.get("rounded_total") or self.grand_total
+
+		if not self.get("payment_schedule"):
+			data = dict(
+				invoice_portion=100,
+				# payment_amount=grand_total,
+				# base_payment_amount=base_grand_total,
+			)
+			self.append("payment_schedule", data)
+
+		grand_total_schedule = 0
+		used_payment_term = []
+		for d in self.get("payment_schedule"):
+			if d.payment_term in used_payment_term:
+				frappe.throw("Can't have multiple Schedule with same Payment Term")
+			
+			used_payment_term.append(d.payment_term)
+
+			if d.invoice_portion:
+				d.payment_amount = flt(
+					grand_total * flt(d.invoice_portion) / 100, d.precision("payment_amount")
+				)
+				d.base_payment_amount = flt(
+					grand_total * self.get("conversion_rate") * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
+				)
+				d.outstanding = d.payment_amount
+				d.base_outstanding = d.base_payment_amount
+			elif not d.invoice_portion:
+				d.base_payment_amount = flt(
+					d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
+				)
+				d.base_outstanding = d.base_payment_amount
+
+			grand_total_schedule += d.payment_amount
+		
+		if grand_total_schedule < grand_total:
+			frappe.throw("Total in Schedule an Grand Total not match")
 
 	def validate_credit_to_acc(self):
 		if not self.meta.has_field(self._party_account_field):

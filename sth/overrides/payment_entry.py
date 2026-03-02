@@ -1,6 +1,7 @@
 import frappe
 from frappe import _, scrub
-from frappe.utils import comma_or, flt
+from frappe.model.meta import get_field_precision
+from frappe.utils import comma_or, flt, fmt_money
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details, add_regional_gl_entries
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
@@ -106,10 +107,15 @@ class PaymentEntry(EmployeePaymentEntry):
 		total_taxes_and_charges: DF.Currency
 		unallocated_amount: DF.Currency
 	# end: auto-generated types
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._payment_settings = get_payment_settings()
+
 	def get_valid_reference_doctypes(self):
 		
 		doc_ref = []
-		for d in get_payment_settings("reference"):
+		for d in self._payment_settings.get("reference"):
 			if d.party_type != self.party_type:
 				continue
 			
@@ -193,12 +199,153 @@ class PaymentEntry(EmployeePaymentEntry):
 						_("{0} {1} must be submitted").format(_(d.reference_doctype), d.reference_name)
 					)
 
+	def validate_allocated_amount(self):
+		if self.payment_type == "Internal Transfer":
+			return
+
+		self.validate_allocated_amount_as_per_payment_request()
+
+		if self.party_type in ("Customer", "Supplier"):
+			self.validate_allocated_amount_with_latest_data()
+			return
+
+		custom_doctype = self._payment_settings.get_outstanding_doctype()
+		fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
+		for d in self.get("references"):
+			if custom_doctype and d.reference_doctype in custom_doctype \
+				and not d.payment_term \
+				and frappe.db.exists("Proposal Schedule", {"parent": d.reference_name, "parenttype": d.reference_doctype, "payment_term": ["is", "set"]}):
+				frappe.throw(_(f"Row #{d.idx}: Please select a Payment Term"))
+
+			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(d.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
+
+			# Check for negative outstanding invoices as well
+			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
+		
+	def update_payment_schedule(self, cancel=0):
+		invoice_payment_amount_map = {}
+		invoice_paid_amount_map = {}
+
+		custom_doctype = self._payment_settings.get_outstanding_doctype()
+		for ref in self.get("references"):
+			if not ref.payment_term or not ref.reference_name:
+				continue
+
+			schedule_doctype = "Proposal Schedule" if ref.reference_doctype in custom_doctype else "Payment Schedule"
+			key = (ref.payment_term, ref.reference_name, ref.reference_doctype, schedule_doctype)
+			invoice_payment_amount_map.setdefault(key, 0.0)
+			invoice_payment_amount_map[key] += ref.allocated_amount
+
+			if not invoice_paid_amount_map.get(key):
+				payment_schedule = frappe.get_all(
+					schedule_doctype,
+					filters={"parent": ref.reference_name},
+					fields=[
+						"paid_amount",
+						"payment_amount",
+						"payment_term",
+						"discount",
+						"outstanding",
+						"discount_type",
+					],
+				)
+				for term in payment_schedule:
+					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype, schedule_doctype)
+					invoice_paid_amount_map.setdefault(invoice_key, {})
+					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
+					if not (term.discount_type and term.discount):
+						continue
+
+					if term.discount_type == "Percentage":
+						invoice_paid_amount_map[invoice_key]["discounted_amt"] = ref.total_amount * (
+							term.discount / 100
+						)
+					else:
+						invoice_paid_amount_map[invoice_key]["discounted_amt"] = term.discount
+
+		for idx, (key, allocated_amount) in enumerate(invoice_payment_amount_map.items(), 1):
+			if not invoice_paid_amount_map.get(key):
+				frappe.throw(_("Payment term {0} not used in {1}").format(key[0], key[1]))
+
+			allocated_amount = self.get_allocated_amount_in_transaction_currency(
+				allocated_amount, key[2], key[1]
+			)
+
+			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
+			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
+
+			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
+			base_paid_amount_precision = get_field_precision(
+				frappe.get_meta(schedule_doctype).get_field("base_paid_amount")
+			)
+			base_outstanding_precision = get_field_precision(
+				frappe.get_meta(schedule_doctype).get_field("base_outstanding")
+			)
+
+			base_paid_amount = flt(
+				(allocated_amount - discounted_amt) * conversion_rate, base_paid_amount_precision
+			)
+			base_outstanding = flt(allocated_amount * conversion_rate, base_outstanding_precision)
+
+			if cancel:
+				frappe.db.sql(
+					"""
+					UPDATE `tab{}`
+					SET
+						paid_amount = `paid_amount` - %s,
+						base_paid_amount = `base_paid_amount` - %s,
+						discounted_amount = `discounted_amount` - %s,
+						outstanding = `outstanding` + %s,
+						base_outstanding = `base_outstanding` - %s
+					WHERE parent = %s and payment_term = %s""".format(key[3]),
+					(
+						allocated_amount - discounted_amt,
+						base_paid_amount,
+						discounted_amt,
+						allocated_amount,
+						base_outstanding,
+						key[1],
+						key[0],
+					),
+				)
+			else:
+				if allocated_amount > outstanding:
+					frappe.throw(
+						_("Row #{0}: Cannot allocate more than {1} against payment term {2}").format(
+							idx, fmt_money(outstanding), key[0]
+						)
+					)
+
+				if allocated_amount and outstanding:
+					frappe.db.sql(
+						"""
+						UPDATE `tab{}`
+						SET
+							paid_amount = `paid_amount` + %s,
+							base_paid_amount = `base_paid_amount` + %s,
+							discounted_amount = `discounted_amount` + %s,
+							outstanding = `outstanding` - %s,
+							base_outstanding = `base_outstanding` - %s
+						WHERE parent = %s and payment_term = %s""".format(key[3]),
+						(
+							allocated_amount - discounted_amt,
+							base_paid_amount,
+							discounted_amt,
+							allocated_amount,
+							base_outstanding,
+							key[1],
+							key[0],
+						),
+					)
+					
 	def update_outstanding_amounts(self):
-		custom_doctype = get_payment_settings("outstanding_doctype")
+		custom_doctype = self._payment_settings.get_outstanding_doctype()
 
 		for d in self.get("references"):
 			# check field pada payment settings
-			if custom_doctype and d.reference_doctype in custom_doctype.split("\n"):
+			if custom_doctype and d.reference_doctype in custom_doctype:
 				update_voucher_outstanding(
 					d.reference_doctype,
 					d.reference_name,

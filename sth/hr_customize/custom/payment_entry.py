@@ -11,6 +11,18 @@ from sth.controllers.queries import get_fields
 from sth.hr_customize import get_payment_settings
 
 @frappe.whitelist()
+def get_payment_term_outstanding(doctype, reference, payment_term=None):
+	outstanding = 0
+	if payment_term:
+		outstanding = frappe.db.get_value(
+			"Proposal Schedule", 
+			{"parenttype": doctype, "parent": reference, "payment_term": payment_term},
+			"outstanding"
+		)
+
+	return outstanding
+
+@frappe.whitelist()
 def get_internal_employee():
 	return get_payment_settings("internal_employee") or ""
 

@@ -22,6 +22,9 @@
   "amended_from",
   "accounting_dimension_section",
   "cost_center",
+  "currency_and_price_list_section",
+  "currency",
+  "conversion_rate",
   "section_break_lhry",
   "items",
   "section_break_ukcq",
@@ -29,6 +32,8 @@
   "column_break_xqce",
   "grand_total",
   "outstanding_amount",
+  "term_tab",
+  "payment_schedule",
   "more_information_tab",
   "accounts_details_section",
   "employee",
@@ -211,13 +216,42 @@
    "fieldname": "kriteria_upload_html",
    "fieldtype": "HTML",
    "label": "Kriteria Upload HTML"
+  },
+  {
+   "fieldname": "term_tab",
+   "fieldtype": "Tab Break",
+   "label": "Term"
+  },
+  {
+   "fieldname": "payment_schedule",
+   "fieldtype": "Table",
+   "label": "Payment Schedule",
+   "options": "Proposal Schedule"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "currency_and_price_list_section",
+   "fieldtype": "Section Break",
+   "label": "Currency and Price List"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 23:25:13.965078",
+ "modified": "2026-03-02 14:57:40.915699",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

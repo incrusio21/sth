@@ -20,7 +20,7 @@ class GantiRugiLahan(AccountsController):
 		self.validate_duplicate_sppt()
 		self.calculate_total()
 		super().validate()
-
+	
 	def validate_duplicate_sppt(self):
 		sppt = []
 		for i in self.items:
@@ -57,7 +57,7 @@ class GantiRugiLahan(AccountsController):
 		self.make_salary_gl_entry(gl_entries)
 
 		gl_entries = merge_similar_entries(gl_entries)
-
+		
 		return gl_entries
 	
 	def make_salary_gl_entry(self, gl_entries):

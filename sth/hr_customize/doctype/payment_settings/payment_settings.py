@@ -6,4 +6,10 @@ from frappe.model.document import Document
 
 
 class PaymentSettings(Document):
-	pass
+	
+	def get_outstanding_doctype(self):
+		if not getattr(self, "_outstanding_doctype", None):
+			self._outstanding_doctype = self.outstanding_doctype.split("\n")
+
+		return self._outstanding_doctype
+	 

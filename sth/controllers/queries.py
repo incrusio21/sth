@@ -300,6 +300,20 @@ def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibit
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len, filters) -> list:
+	terms = []
+	if filters:
+		terms = frappe.db.get_all(
+			"Proposal Schedule",
+			filters={"parent": filters.get("reference")},
+			fields=["payment_term"],
+			limit=page_len,
+			as_list=1,
+		)
+	return terms
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def month_query(
 	doctype,
 	txt,

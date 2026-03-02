@@ -95,6 +95,7 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
     refresh() {
         this.show_general_ledger()
         this.set_query_field()
+        this.set_dynamic_labels();
     }
 
     set_query_field() {
@@ -175,6 +176,46 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
 
         this.frm.refresh_fields()
     }
+
+    payment_term(doc, cdt, cdn) {
+		const me = this;
+		var row = locals[cdt][cdn];
+		if(row.payment_term) {
+			frappe.call({
+				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
+				args: {
+					term: row.payment_term,
+					posting_date: this.frm.doc.posting_date,
+					grand_total: this.frm.doc.grand_total
+				},
+				callback: function(r) {
+					if(r.message && !r.exc) {
+						for (var d in r.message) {
+							frappe.model.set_value(cdt, cdn, d, r.message[d]);
+                            const company_currency = me.get_company_currency();
+							me.update_payment_schedule_grid_labels(company_currency);
+						}
+					}
+				}
+			})
+		}
+	}
+
+    update_payment_schedule_grid_labels(company_currency) {
+		const me = this;
+		if (this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length > 0) {
+			this.frm.set_currency_labels(["base_payment_amount", "base_outstanding", "base_paid_amount"],
+				company_currency, "payment_schedule");
+			this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
+				this.frm.doc.currency, "payment_schedule");
+
+			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
+			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function(i, fname) {
+				if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
+					schedule_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
+			});
+		}
+	}
 }
 
 cur_frm.script_manager.make(sth.legal.GantiRugiLahan);

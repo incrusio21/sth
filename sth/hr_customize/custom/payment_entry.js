@@ -120,20 +120,73 @@ frappe.ui.form.on("Payment Entry", {
 				}
 			}
 		})
+
+		frm.set_query("payment_term", "references", function (frm, cdt, cdn) {
+			const child = locals[cdt][cdn];
+            let query = "sth.controllers.queries.get_payment_terms_for_references"
+			if (
+				["Purchase Invoice", "Sales Invoice"].includes(child.reference_doctype) &&
+				child.reference_name
+			) {
+                query = "erpnext.controllers.queries.get_payment_terms_for_references"
+            }
+            return {
+                query: query,
+                filters: {
+                    reference: child.reference_name,
+                },
+            };
+		});
+
+		frm.set_query('reference_name', "references", function(doc, cdt, cdn) {
+			let row = locals[cdt][cdn];
+			
+			if (row.reference_doctype) {
+				let filters = {
+					docstatus: 1,
+					company: doc.company
+				};
+				
+				if (row.reference_doctype === "Purchase Invoice" || row.reference_doctype === "Purchase Order") {
+					if (doc.party_type === "Supplier" && doc.party) {
+						filters.supplier = doc.party;
+					}
+				}
+				else if (row.reference_doctype === "Sales Invoice" || row.reference_doctype === "Sales Order") {
+					if (doc.party_type === "Customer" && doc.party) {
+						filters.customer = doc.party;
+					}
+				}
+				else if (row.reference_doctype === "Journal Entry") {
+					if (doc.party_type && doc.party) {
+						filters.pay_to_recd_from = doc.party;
+					}
+				}
+				
+				return {
+					filters: filters
+				};
+			}
+		});
+
 		frm.ignore_doctypes_on_cancel_all = ["Deposito Interest", "Deposito", "Disbursement Loan", "Installment Loan", "Payment Voucher Kas"];
 	},
+
 	payment_type(frm) {
 		frm.set_value("bank_account", "")
 		filter_bank_accounts(frm);
 	},
+
 	party_type(frm) {
 		frm.set_value("internal_employee", 0)
 	},
+
 	unit(frm) {
 		if (!frm.doc.unit) return
 		filter_bank_accounts(frm);
 
 	},
+
 	internal_employee(frm) {
 		if (!frm.doc.internal_employee) return
 
@@ -300,72 +353,24 @@ frappe.ui.form.on("Payment Entry", {
 	},
 });
 
-frappe.ui.form.on("Payment Entry References", {
-	refresh(frm,cdt,cdn){
-		frm.set_query('reference_name', "references", function(doc, cdt, cdn) {
-			let row = locals[cdt][cdn];
-			
-			if (row.reference_doctype) {
-				let filters = {
-					docstatus: 1,
-					company: doc.company
-				};
-				
-				if (row.reference_doctype === "Purchase Invoice" || row.reference_doctype === "Purchase Order") {
-					if (doc.party_type === "Supplier" && doc.party) {
-						filters.supplier = doc.party;
-					}
+frappe.ui.form.on("Payment Entry Reference", {
+	payment_term(frm, cdt, cdn){
+		let row = locals[cdt][cdn];
+
+		frappe.call({
+			method: "sth.hr_customize.custom.payment_entry.get_payment_term_outstanding",
+			args: {
+				doctype: row.reference_doctype,
+				reference: row.reference_name,
+				payment_term: row.payment_term,
+			},
+			callback: function (r) {
+				if (r.message) {
+					frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message)
 				}
-				else if (row.reference_doctype === "Sales Invoice" || row.reference_doctype === "Sales Order") {
-					if (doc.party_type === "Customer" && doc.party) {
-						filters.customer = doc.party;
-					}
-				}
-				else if (row.reference_doctype === "Journal Entry") {
-					if (doc.party_type && doc.party) {
-						filters.pay_to_recd_from = doc.party;
-					}
-				}
-				
-				return {
-					filters: filters
-				};
-			}
-		});
-	},
-	reference_doctype(frm,cdt,cdn){
-		frm.set_query('reference_name', "references", function(doc, cdt, cdn) {
-			let row = locals[cdt][cdn];
-			
-			if (row.reference_doctype) {
-				let filters = {
-					docstatus: 1,
-					company: doc.company
-				};
-				
-				if (row.reference_doctype === "Purchase Invoice" || row.reference_doctype === "Purchase Order") {
-					if (doc.party_type === "Supplier" && doc.party) {
-						filters.supplier = doc.party;
-					}
-				}
-				else if (row.reference_doctype === "Sales Invoice" || row.reference_doctype === "Sales Order") {
-					if (doc.party_type === "Customer" && doc.party) {
-						filters.customer = doc.party;
-					}
-				}
-				else if (row.reference_doctype === "Journal Entry") {
-					if (doc.party_type && doc.party) {
-						filters.pay_to_recd_from = doc.party;
-					}
-				}
-				
-				return {
-					filters: filters
-				};
-			}
+			},
 		});
 	}
-	
 })
 
 
