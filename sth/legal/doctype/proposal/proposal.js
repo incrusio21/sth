@@ -603,7 +603,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 			cur_frm.cscript.add_from_mappers();
 		}
 
-		if(this.frm.doc.is_bapp_retensi && this.frm.doc.per_billed == 100){
+		if(this.frm.doc.per_billed == 100){
 			let label = "Approve"
 			if(this.frm.doc.retensi_paid){
 				label = "Cancel"

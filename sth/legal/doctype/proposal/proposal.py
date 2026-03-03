@@ -672,7 +672,7 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 			{"po_details": order_item}
 		)
 
-def get_proposal_invoice(document_no, as_dict=True):
+def get_retensi_invoice(document_no, as_dict=True):
 	
 	parent = frappe.qb.DocType("Purchase Invoice")
 	child = frappe.qb.DocType("Purchase Invoice Item")
@@ -692,6 +692,7 @@ def get_proposal_invoice(document_no, as_dict=True):
 		)
 		.where(
 			(child.proposal == document_no) &
+			(child.retensi_amount > 0) &
 			(parent.docstatus == 1)
 		)
 		.groupby(parent.name)
@@ -706,7 +707,7 @@ def update_retensi_status(document_no, status):
 	frappe.db.set_value("Proposal", document_no, "retensi_paid", retensi_paid)
 
 	inv_list = []
-	for inv in get_proposal_invoice(document_no):
+	for inv in get_retensi_invoice(document_no):
 		if inv.outstanding_amount < inv.retensi_amount:
 			frappe.throw(f"Can't update Retensi status. because Outstanding already less than Retensi Amount")
 
@@ -718,7 +719,7 @@ def update_retensi_status(document_no, status):
 def get_payment_entry(document_no):
 	doc = frappe.get_doc("Proposal", document_no)
 
-	in_list = get_proposal_invoice(document_no)
+	in_list = get_retensi_invoice(document_no)
 	
 	pe = frappe.new_doc("Payment Entry")
 
