@@ -98,4 +98,22 @@ def check_uang_muka_payment_entry(purchase_order):
     }
 
 def set_accept_day(doc,method):
-    doc.accept_day = int(doc.waktu_penyerahan.split(' ')[0]) if doc.waktu_penyerahan else 0
+    doc.accept_day = int(doc.syarat_pembayaran.split(' ')[0]) if doc.syarat_pembayaran else 0
+
+@frappe.whitelist()
+def get_history_purchase_item(nama_barang):
+    from erpnext.accounts.utils import get_fiscal_year
+    today = frappe.utils.today()
+    fiscal_year = get_fiscal_year(date=today,boolean=True)
+    start_year = fiscal_year[1]
+
+    return frappe.db.sql("""
+        SELECT poi.item_code, poi.item_name, po.name as no_po, po.transaction_date as tanggal_po, poi.qty, poi.custom_merk as merk, 
+        poi.custom_country as country,poi.description, po.currency, poi.rate, poi.amount, s.supplier_name, poi.material_request, po.keterangan, 
+        mr.transaction_date as tanggal_pr_sr
+        FROM `tabPurchase Order` po 
+        JOIN `tabSupplier` s on s.name = po.supplier
+        JOIN `tabPurchase Order Item` poi on poi.parent = po.name
+        JOIN `tabMaterial Request` mr on mr.name = poi.material_request
+        WHERE po.docstatus = 1 AND poi.item_name = %s AND mr.transaction_date BETWEEN %s AND %s
+    """,(nama_barang,start_year,today),as_dict=True)

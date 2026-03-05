@@ -196,7 +196,7 @@ function get_stock_for_item(frm, cdt, cdn) {
                 });
             } else {
                 frappe.model.set_value(cdt, cdn, 'stock', 0);
-                frappe.msgprint(__('No central warehouse found for company {0}', [company]));
+                frappe.msgprint(__('No central warehouse found for company {0} and unit {1}', [company, frm.doc.unit]));
             }
         }
     });

@@ -37,6 +37,7 @@ class PermintaanDanaOperasional(Document):
 
 	def before_submit(self):
 		self.submit_pdo_vtwo()
+		self.outstanding_amount = self.grand_total_pdo
 
 	def before_cancel(self):
 		self.cancel_pdo_vtwo()

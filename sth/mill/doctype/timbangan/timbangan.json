@@ -39,7 +39,7 @@
   "delivery_section",
   "delivery_order",
   "tujuan",
-  "sisa_kontrak",
+  "sisa_do",
   "column_break_gypo",
   "no_segel",
   "jumlah_segel",
@@ -147,6 +147,7 @@
    "depends_on": "eval:doc.receive_type == \"TBS Eksternal\"",
    "fieldname": "potongan_sortasi",
    "fieldtype": "Percent",
+   "in_preview": 1,
    "label": "Potongan Sortasi",
    "precision": "2",
    "read_only": 1,
@@ -156,8 +157,10 @@
    "default": "0",
    "fieldname": "isi_komidel",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Isi Komidel",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "driver_section",
@@ -197,11 +200,6 @@
    "fieldname": "jenis_product",
    "fieldtype": "Data",
    "label": "Jenis Product"
-  },
-  {
-   "fieldname": "sisa_kontrak",
-   "fieldtype": "Data",
-   "label": "Sisa Kontrak"
   },
   {
    "fieldname": "column_break_fsqg",
@@ -455,24 +453,35 @@
   {
    "fieldname": "total_janjang",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Total Janjang"
   },
   {
    "fieldname": "total_brondolan",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Total Brondolan"
   },
   {
+   "default": "0",
    "fieldname": "jumlah_janjang",
    "fieldtype": "Float",
-   "label": "Jumlah Janjang"
+   "in_preview": 1,
+   "label": "Jumlah Janjang",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sisa_do",
+   "fieldtype": "Data",
+   "label": "Sisa DO"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-23 23:38:24.588118",
+ "modified": "2026-03-02 09:16:31.230344",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

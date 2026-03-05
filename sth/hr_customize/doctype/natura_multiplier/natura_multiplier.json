@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-10-09 12:33:58.564791",
@@ -80,7 +81,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-19 14:16:05.697187",
+ "modified": "2026-02-27 10:47:33.646666",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Natura Multiplier",

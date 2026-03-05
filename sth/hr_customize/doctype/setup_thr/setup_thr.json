@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-02 13:53:42.299848",
@@ -84,7 +85,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-24 09:49:34.274479",
+ "modified": "2026-02-27 09:59:23.713280",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup THR",

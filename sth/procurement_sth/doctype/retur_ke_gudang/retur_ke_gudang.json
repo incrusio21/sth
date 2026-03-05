@@ -21,7 +21,6 @@
   "column_break_nsdb",
   "amended_from",
   "column_break_rnhw",
-  "jumlah_retur",
   "catatan"
  ],
  "fields": [
@@ -76,14 +75,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "jumlah_retur",
-   "fieldtype": "Float",
-   "label": "Jumlah Retur",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -121,7 +112,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 10:07:23.227079",
+ "modified": "2026-03-04 13:14:06.784221",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Gudang",

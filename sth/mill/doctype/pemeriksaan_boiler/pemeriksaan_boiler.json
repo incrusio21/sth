@@ -1,0 +1,237 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-16 22:23:32.659719",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_qemh",
+  "status",
+  "shift",
+  "machine",
+  "tekanan_boiler_section",
+  "tekanan_boiler",
+  "foto_hasil_tekanan_boiler",
+  "steam_flow_section",
+  "tekanan_steam_flow",
+  "foto_hasil_tekanan_steam_flow",
+  "water_flow_section",
+  "tekanan_water_flow",
+  "foto_hasil_tekanan_water_flow",
+  "shoot_blowing_boiler_section",
+  "upload_video",
+  "column_break_eexk",
+  "upload_video_shoot_blowing_boiler_2",
+  "column_break_uuxs",
+  "upload_video_shoot_blowing_boiler_3",
+  "korek_dapur_boiler_section",
+  "upload_foto",
+  "drain_air_boiler_manual__blowdown_section",
+  "hasil_analisa_laboratorium",
+  "upload_video_manual_blowdown"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PMK-BLR-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_qemh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "fieldname": "tekanan_boiler_section",
+   "fieldtype": "Section Break",
+   "label": "Tekanan Boiler"
+  },
+  {
+   "description": "(Satuan dalam Kg/Cm\u00b2)",
+   "fieldname": "tekanan_boiler",
+   "fieldtype": "Data",
+   "label": "Tekanan Boiler"
+  },
+  {
+   "fieldname": "foto_hasil_tekanan_boiler",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Tekanan Boiler"
+  },
+  {
+   "fieldname": "steam_flow_section",
+   "fieldtype": "Section Break",
+   "label": "Steam Flow"
+  },
+  {
+   "description": "(Satuan dalam M\u00b3)",
+   "fieldname": "tekanan_steam_flow",
+   "fieldtype": "Data",
+   "label": "Tekanan Steam Flow"
+  },
+  {
+   "fieldname": "foto_hasil_tekanan_steam_flow",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Tekanan Steam Flow"
+  },
+  {
+   "fieldname": "water_flow_section",
+   "fieldtype": "Section Break",
+   "label": "Water Flow"
+  },
+  {
+   "description": "(Satuan dalam M\u00b3)",
+   "fieldname": "tekanan_water_flow",
+   "fieldtype": "Data",
+   "label": "Tekanan Water Flow"
+  },
+  {
+   "fieldname": "foto_hasil_tekanan_water_flow",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Tekanan Water Flow"
+  },
+  {
+   "fieldname": "shoot_blowing_boiler_section",
+   "fieldtype": "Section Break",
+   "label": "Shoot Blowing Boiler"
+  },
+  {
+   "fieldname": "upload_video",
+   "fieldtype": "Attach",
+   "label": "Upload Video Shoot Blowing Boiler 1"
+  },
+  {
+   "fieldname": "column_break_eexk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upload_video_shoot_blowing_boiler_2",
+   "fieldtype": "Attach",
+   "label": "Upload Video Shoot Blowing Boiler 2"
+  },
+  {
+   "fieldname": "column_break_uuxs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upload_video_shoot_blowing_boiler_3",
+   "fieldtype": "Attach",
+   "label": "Upload Video Shoot Blowing Boiler 3"
+  },
+  {
+   "fieldname": "korek_dapur_boiler_section",
+   "fieldtype": "Section Break",
+   "label": "Korek Dapur Boiler"
+  },
+  {
+   "fieldname": "upload_foto",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "drain_air_boiler_manual__blowdown_section",
+   "fieldtype": "Section Break",
+   "label": "Drain Air Boiler (Manual  Blowdown)"
+  },
+  {
+   "fieldname": "hasil_analisa_laboratorium",
+   "fieldtype": "Text",
+   "label": "Hasil Analisa Laboratorium"
+  },
+  {
+   "fieldname": "upload_video_manual_blowdown",
+   "fieldtype": "Attach",
+   "label": "Upload Video Manual Blowdown"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 11:24:32.798889",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Boiler",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

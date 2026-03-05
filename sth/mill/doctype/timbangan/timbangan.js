@@ -114,7 +114,10 @@ frappe.ui.form.on("Timbangan", {
 	},
 
 	tara(frm) {
-		frm.trigger('calculate_weight')
+		frappe.run_serially([
+			() => frm.trigger('calculate_weight'),
+			() => frm.set_value("jumlah_janjang", frm.doc.netto / frm.doc.isi_komidel)
+		])
 	},
 
 	type(frm) {

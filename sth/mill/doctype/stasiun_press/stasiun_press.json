@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-02-23 04:14:03.856355",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
-  "series",
+  "naming_series",
   "tanggal",
   "jam",
   "company",
@@ -14,6 +15,8 @@
   "column_break_ivha",
   "status",
   "shift",
+  "mesin",
+  "stasiun",
   "pemeriksaan_temperature_press_cake_tab",
   "mesin_press",
   "pemeriksaan_temperatur_dan_level_digester_tab",
@@ -29,12 +32,6 @@
    "fieldname": "header_tab",
    "fieldtype": "Tab Break",
    "label": "Header"
-  },
-  {
-   "fieldname": "series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "APC-.####"
   },
   {
    "fieldname": "tanggal",
@@ -129,16 +126,39 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "APC-.####"
+  },
+  {
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mesin.station",
+   "fieldname": "stasiun",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Stasiun",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-23 04:40:57.724013",
+ "modified": "2026-02-24 14:04:31.207858",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Stasiun Press",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

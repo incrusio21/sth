@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:{nomor_akta}-{tgl_akta}",
  "creation": "2025-12-08 13:24:09.483980",
@@ -173,7 +174,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-23 17:21:13.853684",
+ "modified": "2026-02-27 10:46:47.485636",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",

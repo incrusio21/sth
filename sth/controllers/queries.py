@@ -539,3 +539,31 @@ def get_expense_claim_type_kas(doctype, txt, searchfield, start, page_len, filte
 		"start": start,
 		"page_len": page_len
 	})
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_wh_prec(doctype, txt, searchfield, start, page_len, filters):
+	params = {
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len
+	}
+	fcond = ""
+	if filters:
+		if filters.get("company"):
+			fcond += " AND w.company = %(company)s"
+			params["company"] = filters.get("company")
+
+		if filters.get("unit"):
+			fcond += " AND u.name = %(unit)s"
+			params["unit"] = filters.get("unit")
+
+	return frappe.db.sql(f"""
+		SELECT w.name
+		FROM `tabWarehouse` w 
+		JOIN `tabUnit` u ON w.unit = u.name
+		WHERE w.name LIKE %(txt)s AND w.is_group = 0 AND w.central = 1 AND u.ho = 1 {fcond}
+		ORDER BY name
+		LIMIT %(start)s, %(page_len)s
+	""", params)

@@ -7,6 +7,14 @@ frappe.ui.form.on('Supplier', {
 				}
 			}
 		})
+
+		frm.set_query("kontak_person", "alamat_dan_pic_supplier", (doc) => {
+			return {
+				filters: {
+					supplier: doc.name
+				}
+			}
+		})
 	},
 	onload: function (frm) {
 		if (frm.is_new() && !frm.doc.kode_supplier) {
@@ -21,7 +29,7 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('default', 'Ya');
 			frm.set_value('status_bank', 'Aktif');
 		}
-		
+
 		check_status_pkp(frm)
 		hide_details(frm)
 	},

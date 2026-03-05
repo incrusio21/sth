@@ -18,6 +18,7 @@
   "posting_date",
   "required_by",
   "payment_voucher",
+  "outstanding_amount",
   "section_break_evxe",
   "realisasi_pdo",
   "bahan_bakar_tab",
@@ -457,13 +458,19 @@
    "fieldtype": "Currency",
    "label": "Grand Total PDO",
    "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-21 17:46:40.108423",
+ "modified": "2026-02-27 14:05:53.625539",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

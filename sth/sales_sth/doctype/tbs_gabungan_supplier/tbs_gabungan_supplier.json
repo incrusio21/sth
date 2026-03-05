@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "creation": "2026-02-17 22:42:16.483882",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "supplier"
@@ -20,7 +21,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-17 22:43:32.972369",
+ "modified": "2026-02-25 13:29:59.000690",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "TBS Gabungan Supplier",

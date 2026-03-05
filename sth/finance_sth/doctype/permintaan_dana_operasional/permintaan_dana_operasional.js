@@ -17,7 +17,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		make_payment_voucher(frm)
 		make_realisasi_pdo(frm)
 		hide_revisi_field(frm)
-		filter_jenis_kas(frm)
+		
 	},
 	jenis_kas(frm){
 		 if (frm.doc.jenis_kas) {
@@ -31,17 +31,17 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 	},
 	tambah_item(frm){
 		if (!frm.doc.jenis_kas) {
-            frappe.msgprint(__('Silakan pilih Jenis Kas terlebih dahulu'));
-            return;
-        }
-        else{
-        	frappe.db.get_value('PDO Type', frm.doc.jenis_kas, 'employee_atau_barang')
+			frappe.msgprint(__('Silakan pilih Jenis Kas terlebih dahulu'));
+			return;
+		}
+		else{
+			frappe.db.get_value('PDO Type', frm.doc.jenis_kas, 'employee_atau_barang')
 			.then(result => {
 				if (result.message && result.message.employee_atau_barang) {
 					show_popup(frm, result.message.employee_atau_barang);
 				}
 			});
-        }
+		}
 	}
 });
 
@@ -82,11 +82,54 @@ frappe.ui.form.on("PDO Perjalanan Dinas Table", {
 	revised_duty_day(frm, cdt, cdn) {
 		processPerjalananDinas(frm, cdt, cdn);
 	},
-	type(frm, cdt, cdn){
-		const curRow = locals[cdt][cdn]
-		getExpenseAccount(frm, curRow, cdt, cdn)
-		get_plafon_pdo(frm, cdt, cdn)
-	}
+	// type(frm, cdt, cdn){
+	// 	const curRow = locals[cdt][cdn]
+	// 	getExpenseAccount(frm, curRow, cdt, cdn)
+	// 	get_plafon_pdo(frm, cdt, cdn)
+	// }
+	type: async function (frm, cdt, cdn) {
+		const curRow = locals[cdt][cdn];
+		// Existing functions
+		getExpenseAccount(frm, curRow, cdt, cdn);
+		get_plafon_pdo(frm, cdt, cdn);
+		// New: check 'pengguna' in Expense Claim Type
+		if (!curRow.type) return;
+
+		const result = await frappe.db.get_value(
+			"Expense Claim Type",
+			curRow.type,
+			"pengguna"
+		);
+		const pengguna = result?.message?.pengguna;
+
+		if (!pengguna || pengguna === "Free Text") return;
+		if (pengguna == "Link") {
+
+			const dialog = new frappe.ui.Dialog({
+				title: __("Pilih Pengguna"),
+				fields: [
+					{
+						fieldtype: "Link",
+						fieldname: "pengguna",
+						label: __("Pengguna"),
+						options: "Employee",
+						reqd: 1,
+					},
+				],
+				primary_action_label: __("Pilih"),
+				primary_action(values) {
+					frappe.model.set_value(cdt, cdn, "employee", values.pengguna);
+					dialog.hide();
+				},
+				secondary_action_label: __("Batal"),
+				secondary_action() {
+					dialog.hide();
+				},
+			});
+
+			dialog.show();
+		}
+	},
 });
 
 
@@ -214,6 +257,7 @@ function get_plafon_pdo_bb(frm, cdt, cdn){
 	}       
 }
 
+
 function fetch_plafon_value(plafon_name, filter_value, filter_field, cdt, cdn, frm, table_fieldname) {
 	frappe.call({
 		method: 'frappe.client.get',
@@ -247,6 +291,8 @@ function fetch_plafon_value(plafon_name, filter_value, filter_field, cdt, cdn, f
 		}
 	});
 }
+
+
 
 function filterCreditTo(frm) {
 	for (const pdo of pdoCategories) {
@@ -383,10 +429,15 @@ function calculateGrandTotal(frm) {
 		if (frm.doc[`pdo_${fieldname}`]) {
 			for (const row of childs) {
 				revisedTotal += row[`revised_${totalField}`]
+				if(row[`revised_${totalField}`]){
+					grandTotalPdo += row[`revised_${totalField}`]	
+				}
+				else{
+					grandTotalPdo += row[`${totalField}`]	
+				}
 			}
 		}
-		grandTotalPdo += revisedTotal;
-
+		
 		frappe.run_serially([
 			() => frm.set_value(`grand_total_${fieldname}`, revisedTotal),
 			() => frm.set_value(`outstanding_amount_${fieldname}`, revisedTotal),
@@ -515,14 +566,14 @@ function set_field_properties_kas(frm, cdt, cdn, jenis) {
 	
 	if (!grid_row) return;
 	
-	if (jenis == 'Tunjangan Pembantu') {
+	if (jenis == 'TUNJANGAN PEMBANTU') {
 		grid_row.toggle_editable('employee', true);
 		grid_row.toggle_editable('item_code', false);
 		
 		frappe.model.set_df_property(cdt, 'employee', 'read_only', 0, cdn);
 		frappe.model.set_df_property(cdt, 'item_code', 'read_only', 1, cdn);
 		
-	} else if (jenis == 'Konsumsi Kantor') {
+	} else if (jenis == 'KONSUMSI KANTOR') {
 		grid_row.toggle_editable('employee', false);
 		grid_row.toggle_editable('item_code', true);
 		
@@ -693,175 +744,309 @@ function hide_revisi_field(frm){
 
 
 function show_popup(frm, employee_atau_barang) {
-    let fields = [];
-    
-    if (employee_atau_barang === 'Employee') {
-        fields = [
-            {
-                fieldname: 'employee',
-                label: __('Pengguna'),
-                fieldtype: 'Link',
-                options: 'Employee',
-                reqd: 1
-            },
-            {
-                fieldname: 'type',
-                label: __('Jenis'),
-                fieldtype: 'Link',
-                options: 'Expense Claim Type',
-                reqd: 1,
-                get_query: function() {
-                    return {
-                        filters: {
-                            'custom_pdo_type': frm.doc.jenis_kas
-                        }
-                    };
-                },
-                onchange: function() {
-                    let selected_type = d.get_value('type');
-                    if (selected_type) {
-                        // Fetch routine_type when jenis is selected
-                        frappe.db.get_value('Expense Claim Type', selected_type, 'custom_routine_type')
-                            .then(r => {
-                                if (r.message) {
-                                    d.set_value('routine_type', r.message.custom_routine_type || '');
-                                }
-                            });
-                    }
-                }
-            },
-            {
-                fieldname: 'routine_type',
-                label: __('Tipe Rutin'),
-                fieldtype: 'Data',
-                read_only: 1
-            },
-            {
-                fieldname: 'qty',
-                label: __('Qty'),
-                fieldtype: 'Float',
-                reqd: 1
-            },
-            {
-                fieldname: 'price',
-                label: __('Harga'),
-                fieldtype: 'Currency',
-                reqd: 1
-            }
-        ];
-    } else if (employee_atau_barang === 'Barang') {
-        fields = [
-            {
-                fieldname: 'type',
-                label: __('Jenis'),
-                fieldtype: 'Link',
-                options: 'Expense Claim Type',
-                reqd: 1,
-                get_query: function() {
-                    return {
-                        filters: {
-                            'custom_pdo_type': frm.doc.jenis_kas
-                        }
-                    };
-                },
-                onchange: function() {
-                    let selected_type = d.get_value('type');
-                    if (selected_type) {
-                        // Fetch routine_type when jenis is selected
-                        frappe.db.get_value('Expense Claim Type', selected_type, 'custom_routine_type')
-                            .then(r => {
-                                if (r.message) {
-                                    d.set_value('routine_type', r.message.custom_routine_type || '');
-                                }
-                            });
-                    }
-                }
-            },
-            {
-                fieldname: 'routine_type',
-                label: __('Tipe Rutin'),
-                fieldtype: 'Data',
-                read_only: 1
-            },
-            {
-                fieldname: 'item_code',
-                label: __('Item Barang'),
-                fieldtype: 'Data',
-                reqd: 1
-            },
-            {
-                fieldname: 'uom',
-                label: __('Satuan'),
-                fieldtype: 'Data',
-                reqd: 1
-            },
-            {
-                fieldname: 'qty',
-                label: __('Qty'),
-                fieldtype: 'Float',
-                reqd: 1
-            },
-            {
-                fieldname: 'price',
-                label: __('Harga'),
-                fieldtype: 'Currency',
-                reqd: 1
-            }
-        ];
-    }
-    
-    // Show dialog popup
-    let d = new frappe.ui.Dialog({
-        title: __('Tambah Item PDO Kas'),
-        fields: fields,
-        size: 'small',
-        primary_action_label: __('Tambah'),
-        primary_action(values) {
-            // Add row to pdo_kas child table
-            let child = frm.add_child('pdo_kas');
-            
-            if (employee_atau_barang === 'Employee') {
-                child.employee = values.employee;
-                child.routine_type = values.routine_type;
-                child.type = values.type;
-                child.qty = values.qty;
-                child.price = values.price;
-            } else if (employee_atau_barang === 'Barang') {
-                child.routine_type = values.routine_type;
-                child.type = values.type;
-                child.item_code = values.item_code;
-                child.uom = values.uom;
-                child.qty = values.qty;
-                child.price = values.price;
-            }
-            
-            // Clear jenis_kas and refresh
-            frm.refresh_field('pdo_kas');
-            
-            // Calculate grand total if function exists
-            if (typeof calculateGrandTotal === 'function') {
-                calculateGrandTotal(frm);
-            }
-            
-            d.hide();
-        }
-    });
-    
-    d.show();
+	let fields = [];
+	if (employee_atau_barang === 'Employee' && frm.doc.jenis_kas == "TUNJANGAN PEMBANTU") {
+		
+		fields = [
+			{
+				fieldname: 'employee',
+				label: __('Pengguna'),
+				fieldtype: 'Link',
+				options: 'Employee',
+				reqd: 1,
+				onchange: function() {
+					let employee = dialog.get_value('employee');
+					if (employee) {
+						frappe.db.get_value('Employee', employee, 'designation', (r) => {
+							if (r && r.designation) {
+								dialog.set_value('jabatan', r.designation);
+							}
+						});
+					} else {
+						dialog.set_value('jabatan', '');
+					}
+				}
+			},
+			{
+				fieldname: 'jabatan',
+				label: __('Jabatan'),
+				fieldtype: 'Link',
+				options: "Designation",
+				reqd: 1
+			},
+			{
+				fieldname: 'type',
+				label: __('Jenis'),
+				fieldtype: 'Link',
+				options: 'Expense Claim Type',
+				read_only: 1,
+				default: "TUNJANGAN PEMBANTU"
+			},
+			{
+				fieldname: 'routine_type',
+				label: __('Tipe Rutin'),
+				fieldtype: 'Data',
+				read_only: 1,
+				default: "Rutin"
+			},
+			{
+				fieldname: 'price',
+				label: __('Harga'),
+				fieldtype: 'Currency',
+				reqd: 1
+			},
+			{
+				fieldname: 'needs',
+				label: __('Kebutuhan'),
+				fieldtype: 'Data'
+			}
+		];
+		
+		// Store dialog reference to use inside callback
+		let dialog = new frappe.ui.Dialog({
+			title: __('Tambah Item'),
+			fields: fields,
+			primary_action_label: __('Add'),
+			primary_action(values) {
+				// your existing add logic here
+				dialog.hide();
+			}
+		});
+
+		// Set defaults
+		dialog.set_value('type', 'TUNJANGAN PEMBANTU');
+		dialog.set_value('routine_type', 'Rutin');
+
+		// Hook into jabatan field change
+		dialog.fields_dict['jabatan'].df.onchange = function() {
+			const jabatan_value = dialog.get_value('jabatan');
+
+			if (!jabatan_value) {
+				dialog.set_value('price', 0);
+				return;
+			}
+
+			frappe.call({
+				method: 'frappe.client.get',
+				args: {
+					doctype: 'Plafon PDO',
+					name: 'TUNJANGAN PEMBANTU'
+				},
+				callback: function(r) {
+					if (r.exc || !r.message) {
+						frappe.msgprint(__('Plafon PDO "TUNJANGAN PEMBANTU" tidak ditemukan.'));
+						return;
+					}
+
+					const plafon_doc = r.message;
+					const table = plafon_doc.plafon_pdo_table || [];
+
+					// Find matching row where jenis_plafon === jabatan
+					const matched_row = table.find(row => row.jenis_plafon === jabatan_value);
+
+					if (matched_row) {
+						dialog.set_value('price', matched_row.nilai);
+					} else {
+						dialog.set_value('price', 0);
+						frappe.msgprint(
+							__('Tidak ada plafon untuk jabatan: ') + jabatan_value
+						);
+					}
+				}
+			});
+		};
+
+		dialog.show();
+	}
+	
+	else {
+
+		if (employee_atau_barang === 'Employee') {
+			fields = [
+				{
+					fieldname: 'employee',
+					label: __('Pengguna'),
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					fieldname: 'type',
+					label: __('Subjenis'),
+					fieldtype: 'Link',
+					options: 'Expense Claim Type',
+					get_query: function() {
+						return {
+							filters: {
+								'custom_pdo_type': frm.doc.jenis_kas
+							}
+						};
+					},
+					onchange: function() {
+						let selected_type = d.get_value('type');
+						if (selected_type) {
+							// Fetch routine_type when jenis is selected
+							frappe.db.get_value('Expense Claim Type', selected_type, 'custom_routine_type')
+								.then(r => {
+									if (r.message) {
+										d.set_value('routine_type', r.message.custom_routine_type || '');
+									}
+								});
+						}
+					}
+				},
+				{
+					fieldname: 'routine_type',
+					label: __('Tipe Rutin'),
+					fieldtype: 'Data',
+					read_only: 1
+				},
+				{
+					fieldname: 'qty',
+					label: __('Qty'),
+					fieldtype: 'Float',
+					reqd: 1
+				},
+				{
+					fieldname: 'price',
+					label: __('Harga'),
+					fieldtype: 'Currency',
+					reqd: 1
+				},
+				{
+					fieldname: 'needs',
+					label: __('Kebutuhan'),
+					fieldtype: 'Data'
+				}
+			];
+		} else if (employee_atau_barang === 'Barang') {
+			fields = [
+				{
+					fieldname: 'type',
+					label: __('Subjenis'),
+					fieldtype: 'Link',
+					options: 'Expense Claim Type',
+					reqd: 1,
+					get_query: function() {
+						return {
+							filters: {
+								'custom_pdo_type': frm.doc.jenis_kas
+							}
+						};
+					},
+					onchange: function() {
+						let selected_type = d.get_value('type');
+						if (selected_type) {
+							// Fetch routine_type when jenis is selected
+							frappe.db.get_value('Expense Claim Type', selected_type, 'custom_routine_type')
+								.then(r => {
+									if (r.message) {
+										d.set_value('routine_type', r.message.custom_routine_type || '');
+									}
+								});
+						}
+					}
+				},
+				{
+					fieldname: 'routine_type',
+					label: __('Tipe Rutin'),
+					fieldtype: 'Data',
+					read_only: 1
+				},
+				{
+					fieldname: 'item_code',
+					label: __('Item Barang'),
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					fieldname: 'uom',
+					label: __('Satuan'),
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					fieldname: 'qty',
+					label: __('Qty'),
+					fieldtype: 'Float',
+					reqd: 1
+				},
+				{
+					fieldname: 'price',
+					label: __('Harga'),
+					fieldtype: 'Currency',
+					reqd: 1
+				},
+				{
+					fieldname: 'needs',
+					label: __('Kebutuhan'),
+					fieldtype: 'Data'
+				}
+			];
+		}
+		
+		// Show dialog popup
+		let d = new frappe.ui.Dialog({
+			title: __('Tambah Item PDO Kas'),
+			fields: fields,
+			size: 'small',
+			primary_action_label: __('Tambah'),
+			primary_action(values) {
+				// Add row to pdo_kas child table
+				let child = frm.add_child('pdo_kas');
+				
+				if (employee_atau_barang === 'Employee' && frm.doc.jenis_kas == "TUNJANGAN PEMBANTU") {
+					child.employee = values.employee;
+					child.routine_type = values.routine_type;
+					child.type = values.type;
+					child.price = values.price;
+					child.needs = values.needs;
+					child.designation = values.jabatan;
+				}
+				else if (employee_atau_barang === 'Employee') {
+					child.employee = values.employee;
+					child.routine_type = values.routine_type;
+					child.type = values.type;
+					child.qty = values.qty;
+					child.price = values.price;
+					child.needs = values.needs;
+				} else if (employee_atau_barang === 'Barang') {
+					child.routine_type = values.routine_type;
+					child.type = values.type;
+					child.item_code = values.item_code;
+					child.uom = values.uom;
+					child.qty = values.qty;
+					child.price = values.price;
+					child.needs = values.needs;
+				}
+				
+				// Clear jenis_kas and refresh
+				frm.refresh_field('pdo_kas');
+				
+				// Calculate grand total if function exists
+				if (typeof calculateGrandTotal === 'function') {
+					calculateGrandTotal(frm);
+				}
+				
+				d.hide();
+			}
+		});
+		
+		d.show();
+	}
 }
 
 function make_pdo_kas_readonly(frm) {
-    frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-add-row').hide();
-    
-    frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-row .grid-duplicate-row').hide();
-    frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-row .grid-insert-row').hide();
-    frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-row .grid-insert-row-below').hide();
-       
-    frm.fields_dict['pdo_kas'].grid.docfields.forEach(function(df) {
-        df.read_only = 1;
-    });
-    
-    frm.fields_dict['pdo_kas'].grid.cannot_add_rows = true;
-    
-    frm.refresh_field('pdo_kas');
+	frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-add-row').hide();
+	
+	frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-row .grid-duplicate-row').hide();
+	frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-row .grid-insert-row').hide();
+	frm.fields_dict['pdo_kas'].grid.wrapper.find('.grid-row .grid-insert-row-below').hide();
+	   
+	frm.fields_dict['pdo_kas'].grid.docfields.forEach(function(df) {
+		df.read_only = 1;
+	});
+	
+	frm.fields_dict['pdo_kas'].grid.cannot_add_rows = true;
+	
+	frm.refresh_field('pdo_kas');
 }

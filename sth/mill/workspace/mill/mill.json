@@ -229,144 +229,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Stasiun Water Treatment",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pemakaian Air",
-   "link_count": 0,
-   "link_to": "Pemakaian Air",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pemakaian Kimia",
-   "link_count": 0,
-   "link_to": "Pemakaian Kimia",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stasiun Effluent Treatment (Limbah)",
-   "link_count": 10,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Debit Air Limbah",
-   "link_count": 0,
-   "link_to": "Debit Air Limbah",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
-   "link_count": 0,
-   "link_to": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ketebalan Padatan Kolam Anaerobik",
-   "link_count": 0,
-   "link_to": "Ketebalan Padatan Kolam Anaerobik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pengutipan Minyak Kolam Limbah",
-   "link_count": 0,
-   "link_to": "Pengutipan Minyak Kolam Limbah",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Warna Air Kolam Aerobik",
-   "link_count": 0,
-   "link_to": "Warna Air Kolam Aerobik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kolam Pendingin",
-   "link_count": 0,
-   "link_to": "Kolam Pendingin",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kolam Pengasaman",
-   "link_count": 0,
-   "link_to": "Kolam Pengasaman",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kolam Kolam Aerobik",
-   "link_count": 0,
-   "link_to": "Kolam Kolam Aerobik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kolam Kolam Anaerobik",
-   "link_count": 0,
-   "link_to": "Kolam Kolam Anaerobik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kolam Kolam Pembuangan  Akhir",
-   "link_count": 0,
-   "link_to": "Kolam Kolam Pembuangan  Akhir",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Rencana Kerja Harian (RKH)",
    "link_count": 3,
    "link_type": "DocType",
@@ -595,75 +457,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bengkel",
-   "link_count": 6,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Preventive Maintenance",
-   "link_count": 0,
-   "link_to": "Preventive Maintenance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jadwal dan realisasi service Rutin External",
-   "link_count": 0,
-   "link_to": "Jadwal dan realisasi service Rutin External",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Buku Kerja Mekanik",
-   "link_count": 0,
-   "link_to": "Buku Kerja Mekanik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pencatatan Vibrasi Mesin",
-   "link_count": 0,
-   "link_to": "Pencatatan Vibrasi Mesin",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pencatatan HM Mesin",
-   "link_count": 0,
-   "link_to": "Pencatatan HM Mesin",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Berita Acara Pemeliharaan ",
-   "link_count": 0,
-   "link_to": "Berita Acara Pemeliharaan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Budget",
    "link_count": 6,
    "link_type": "DocType",
@@ -745,25 +538,6 @@
    "label": "Kebersihan Pabrik",
    "link_count": 0,
    "link_to": "Kebersihan Pabrik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Timbangan",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Timbangan",
-   "link_count": 0,
-   "link_to": "Timbangan",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -926,25 +700,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Stasiun Thressing",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stasiun Threshing",
-   "link_count": 0,
-   "link_to": "Stasiun Threshing",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Stasiun Press",
    "link_count": 2,
    "link_type": "DocType",
@@ -970,9 +725,234 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Effluent Treatment (Limbah)",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Debit Air Limbah",
+   "link_count": 0,
+   "link_to": "Debit Air Limbah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
+   "link_count": 0,
+   "link_to": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ketebalan Padatan Kolam Anaerobik",
+   "link_count": 0,
+   "link_to": "Ketebalan Padatan Kolam Anaerobik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengutipan Minyak Kolam Limbah",
+   "link_count": 0,
+   "link_to": "Pengutipan Minyak Kolam Limbah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Warna Air Kolam Aerobik",
+   "link_count": 0,
+   "link_to": "Warna Air Kolam Aerobik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengukuran PH dan Temprature kolam limbah",
+   "link_count": 0,
+   "link_to": "Pengukuran PH dan Temprature kolam limbah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Water Treatment",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "External Treatment",
+   "link_count": 0,
+   "link_to": "External Treatment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemakaian Air",
+   "link_count": 0,
+   "link_to": "Pemakaian Air",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemakaian Kimia",
+   "link_count": 0,
+   "link_to": "Pemakaian Kimia",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bengkel",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Preventive Maintenance",
+   "link_count": 0,
+   "link_to": "Preventive Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jadwal dan realisasi service Rutin External",
+   "link_count": 0,
+   "link_to": "Jadwal dan realisasi service Rutin External",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mekanik",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mekanik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pencatatan Vibrasi Mesin",
+   "link_count": 0,
+   "link_to": "Pencatatan Vibrasi Mesin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pencatatan HM Mesin",
+   "link_count": 0,
+   "link_to": "Pencatatan HM Mesin",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Berita Acara",
+   "link_count": 0,
+   "link_to": "Berita Acara",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timbangan",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Timbangan",
+   "link_count": 0,
+   "link_to": "Timbangan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stasiun Thressing",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Monitoring TBS Olah",
+   "link_count": 0,
+   "link_to": "Monitoring TBS Olah",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pemeriksaan Ampere Motor",
+   "link_count": 0,
+   "link_to": "Pemeriksaan Ampere Motor",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-02-23 04:38:09.085523",
+ "modified": "2026-03-03 15:30:24.216773",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

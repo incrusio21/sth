@@ -1,0 +1,223 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-16 15:29:40.017382",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_arad",
+  "status",
+  "shift",
+  "crude_oil_tank__cot__section",
+  "temperatur_cot",
+  "foto_hasil_temperatur_cot",
+  "sand_trap_tank_section",
+  "temperatur_stt",
+  "foto_hasil_temperatur_stt",
+  "pure_oil_tank__pot__section",
+  "temperatur_pot",
+  "foto_hasil_temperatur",
+  "sludge_tank_section",
+  "temperatur_st",
+  "foto_hasil_temperatur_st",
+  "continuous_settling_tank__cst__section",
+  "temperatur_cst",
+  "ketebalan_minyak",
+  "foto_hasil_temperatur_cst",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PMK-TANG-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_arad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "crude_oil_tank__cot__section",
+   "fieldtype": "Section Break",
+   "label": "Crude Oil Tank ( COT )"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_cot",
+   "fieldtype": "Data",
+   "label": "Temperatur (COT)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_cot",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (COT)"
+  },
+  {
+   "fieldname": "sand_trap_tank_section",
+   "fieldtype": "Section Break",
+   "label": "Sand Trap Tank"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_stt",
+   "fieldtype": "Data",
+   "label": "Temperatur (STT)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_stt",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (STT)"
+  },
+  {
+   "fieldname": "pure_oil_tank__pot__section",
+   "fieldtype": "Section Break",
+   "label": "Pure Oil Tank ( POT )"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_pot",
+   "fieldtype": "Data",
+   "label": "Temperatur (POT)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur"
+  },
+  {
+   "fieldname": "sludge_tank_section",
+   "fieldtype": "Section Break",
+   "label": "Sludge Tank"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_st",
+   "fieldtype": "Data",
+   "label": "Temperatur (ST)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_st",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (ST)"
+  },
+  {
+   "fieldname": "continuous_settling_tank__cst__section",
+   "fieldtype": "Section Break",
+   "label": "Continuous Settling Tank ( CST )"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_cst",
+   "fieldtype": "Data",
+   "label": "Temperatur (CST)"
+  },
+  {
+   "description": "(Satuan dalam Cm) dilakukan setiap 1 x 1 jam",
+   "fieldname": "ketebalan_minyak",
+   "fieldtype": "Data",
+   "label": "Ketebalan Minyak"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_cst",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (CST)"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pemeriksaan Temperatur Tangki- Tangki",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-02 11:59:54.162491",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Temperatur Tangki- Tangki",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

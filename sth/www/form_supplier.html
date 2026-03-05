@@ -67,11 +67,11 @@
                             <input type="text" class="form-control form-control-sm datepicker" name="valid_date"
                                 required>
                         </div>
-                        <div class="col-xl-3 col-md-6 mb-2">
+                        <!-- <div class="col-xl-3 col-md-6 mb-2">
                             <label class="form-label">Estimated Delivery</label>
                             <input type="text" class="form-control form-control-sm datepicker" name="estimated_date"
                                 required>
-                        </div>
+                        </div> -->
                         <div class="col-xl-3 col-md-6 mb-2">
                             <label for="file-upload" class="form-label">Upload Penawaran Harga</label>
                             <input class="form-control form-control-sm" type="file" id="file-upload" accept=".pdf"
@@ -245,8 +245,8 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-12 col-md-6">
-                            <label>Syarat Pembayaran</label>
-                            <select class="form-select" name="syarat_pembayaran" required>
+                            <label class="form-label">Syarat Pembayaran</label>
+                            <select class="form-select form-select-sm" name="syarat_pembayaran" required>
                                 <option value="" disabled selected>--Pilih--</option>
                                 {% for data in payment_terms %}
                                 <option value="{{ data }}">{{ data }}</option>
@@ -254,18 +254,20 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label>Lokasi Pengiriman</label>
-                            <select class="form-select" name="lokasi_pengiriman" required>
+                            <label class="form-label">Lokasi Pengiriman</label>
+                            <input type="text" name="lokasi_pengiriman" value="{{ lokasi_pengiriman }}"
+                                class="form-control form-control-sm" readonly>
+                            <!-- <select class="form-select" name="lokasi_pengiriman" required>
                                 <option value="" disabled selected>--Pilih--</option>
-                                {% for data in lokasi_pengiriman %}
+                                {% for data in list_lokasi_pengiriman %}
                                 <option value="{{ data }}">{{ data }}</option>
                                 {% endfor %}
-                            </select>
+                            </select> -->
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <div class="col-12">
-                            <label>Keterangan</label>
+                            <label class="form-label">Keterangan</label>
                             <textarea name="keterangan" class="form-control form-control-sm" rows="3"></textarea>
                         </div>
                     </div>

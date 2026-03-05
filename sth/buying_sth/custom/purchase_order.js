@@ -137,6 +137,22 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			}
 		})
+
+		frm.set_query("type", "pph_lainnya", function (doc) {
+			return {
+				filters: {
+					name: ["like", "%PPh%"]
+				}
+			}
+		})
+
+		frm.set_query("type", "ppn", function (doc) {
+			return {
+				filters: {
+					name: ["like", "%PPN%"]
+				}
+			}
+		})
 		// sth.form.override_class_function(frm.cscript, "calculate_totals", () => {
 		// 	frm.trigger("set_value_dpp_and_taxes")
 		// })
@@ -242,6 +258,25 @@ frappe.ui.form.on("Purchase Order", {
 			let tax = frm.doc.taxes.find((r) => r.account_head == coa)
 			if (tax) {
 				frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.pbbkb)
+				frm.trigger('calculate_taxes_and_totals')
+			}
+		}
+	},
+
+	cost(frm) {
+		if (frappe.refererence.__ref_tax["Cost"]) {
+			let coa = frappe.refererence.__ref_tax["Cost"].account
+			let tax = frm.doc.taxes.find((r) => r.account_head == coa)
+			if (tax) {
+				frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.cost)
+				frm.trigger('calculate_taxes_and_totals')
+			} else {
+				let taxes = frm.add_child('taxes')
+				taxes.account_head = coa
+				taxes.add_deduct_tax = "Add"
+				taxes.charge_type = "Actual"
+				taxes.tax_amount = frm.doc.cost
+				frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
 				frm.trigger('calculate_taxes_and_totals')
 			}
 		}
@@ -388,3 +423,8 @@ frappe.ui.form.on("VAT Detail", {
 		frm.trigger('calculate_taxes_and_totals')
 	}
 })
+
+
+frappe.form.link_formatters['Item'] = function (value, doc) {
+	return value
+}

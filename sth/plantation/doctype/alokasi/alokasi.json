@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kode_alokasi",
  "creation": "2026-02-19 16:00:32.714422",
@@ -54,7 +55,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 19:32:27.133656",
+ "modified": "2026-02-27 11:39:38.619235",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alokasi",

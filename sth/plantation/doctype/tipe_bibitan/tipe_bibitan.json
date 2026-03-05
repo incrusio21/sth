@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:tp_bbt",
  "creation": "2025-07-23 11:49:23.216699",
@@ -38,7 +39,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 00:24:43.805255",
+ "modified": "2026-02-27 11:03:29.972774",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Bibitan",

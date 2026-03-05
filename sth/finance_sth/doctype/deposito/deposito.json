@@ -14,7 +14,7 @@
   "bank",
   "bank_account",
   "year_days",
-  "currency",
+  "bank_currency",
   "bilyet_number",
   "upload_bilyet",
   "value_date",
@@ -176,14 +176,6 @@
    "options": "\n1\n3\n6\n12\n24",
    "precision": "0",
    "reqd": 1
-  },
-  {
-   "fetch_from": "bank_account.currency",
-   "fieldname": "currency",
-   "fieldtype": "Link",
-   "label": "Mata Uang",
-   "options": "Currency",
-   "read_only": 1
   },
   {
    "fieldname": "payment_details_section",
@@ -395,13 +387,21 @@
    "fieldtype": "Currency",
    "label": "Grand Total (Receive) ",
    "read_only": 1
+  },
+  {
+   "fetch_from": "bank_account.currency",
+   "fieldname": "bank_currency",
+   "fieldtype": "Link",
+   "label": "Mata Uang",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-19 12:24:42.435907",
+ "modified": "2026-03-03 11:39:35.988356",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Deposito",

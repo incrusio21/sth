@@ -359,12 +359,12 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 
 									frappe.msgprint(
 										"Assigning " +
-											d.mr_name +
-											" to " +
-											d.item_code +
-											" (row " +
-											me.frm.doc.items[i].idx +
-											")"
+										d.mr_name +
+										" to " +
+										d.item_code +
+										" (row " +
+										me.frm.doc.items[i].idx +
+										")"
 									);
 									if (qty > 0) {
 										frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
@@ -460,33 +460,33 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 	// }
 
 	close_purchase_order() {
-	    // Check for Uang Muka GL Entry with Payment Entry
-	    frappe.call({
-        method: 'sth.buying_sth.custom.purchase_order.check_uang_muka_payment_entry',
-        args: {
-            purchase_order: cur_frm.doc.name
-        },
-        callback: function(r) {
-        	
-            if (r.message && r.message.has_payment_entry) {
-                frappe.throw(
-                    'This Purchase Order has a GL Entry for Uang Muka with Payment Entry. Purchase Order cannot be closed.',
-                )
-                //     function() {
-                //         cur_frm.cscript.update_status("Close", "Closed");
-                //     },
-                //     function() {
-                //         frappe.show_alert({
-                //             message: __('Close Purchase Order cancelled'),
-                //             indicator: 'info'
-                //         });
-                //     }
-                // );
-            } else {
-                cur_frm.cscript.update_status("Close", "Closed");
-            }
-        }
-    });
+		// Check for Uang Muka GL Entry with Payment Entry
+		frappe.call({
+			method: 'sth.buying_sth.custom.purchase_order.check_uang_muka_payment_entry',
+			args: {
+				purchase_order: cur_frm.doc.name
+			},
+			callback: function (r) {
+
+				if (r.message && r.message.has_payment_entry) {
+					frappe.throw(
+						'This Purchase Order has a GL Entry for Uang Muka with Payment Entry. Purchase Order cannot be closed.',
+					)
+					//     function() {
+					//         cur_frm.cscript.update_status("Close", "Closed");
+					//     },
+					//     function() {
+					//         frappe.show_alert({
+					//             message: __('Close Purchase Order cancelled'),
+					//             indicator: 'info'
+					//         });
+					//     }
+					// );
+				} else {
+					cur_frm.cscript.update_status("Close", "Closed");
+				}
+			}
+		});
 	}
 
 	delivered_by_supplier() {
@@ -504,3 +504,4 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 
 // for backward compatibility: combine new and previous states
 extend_cscript(cur_frm.cscript, new erpnext.buying.PurchaseOrderControllerCustom({ frm: cur_frm }));
+

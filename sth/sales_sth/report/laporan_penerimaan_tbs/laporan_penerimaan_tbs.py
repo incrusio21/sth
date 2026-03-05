@@ -112,8 +112,8 @@ def get_data(filters):
 			bruto,
 			tara,
 			netto,
-			potongan_sortasi * netto / 100 as potongan,
-			netto - (potongan_sortasi * netto / 100) as berat_normal,
+			ROUND(potongan_sortasi * netto / 100, 0) as potongan,
+			netto - ROUND(netto * (potongan_sortasi / 100), 0) as berat_normal,
 			driver_name
 		FROM
 			`tabTimbangan`

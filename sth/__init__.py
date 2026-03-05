@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import frappe
 from frappe import _
+from frappe.query_builder import Tuple
 
 from erpnext.controllers import status_updater
 
@@ -114,3 +115,54 @@ def _get_loan_details(doc: "SalarySlip") -> dict[str, Any]:
 
 salary_slip_loan_utils.set_loan_repayment = set_loan_repayment
 salary_slip_loan_utils._get_loan_details = _get_loan_details
+
+from erpnext.accounts.doctype.payment_entry import payment_entry
+
+def get_references_outstanding_amount(references=None):
+	"""
+	Fetch accurate outstanding amount of `References`.\n
+	    - If `Payment Term` is set, then fetch outstanding amount from `Payment Schedule`.
+	    - If `Payment Term` is not set, then fetch outstanding amount from `References` it self.
+
+	Example: {(reference_doctype, reference_name, payment_term): outstanding_amount, ...}
+	"""
+	if not references:
+		return
+
+	refs_with_payment_term = payment_entry.get_outstanding_of_references_with_payment_term(references) or {}
+	refs_with_proposal_payment_term = get_outstanding_of_references_with_proposal_payment_term(references) or {}
+	refs_without_payment_term = payment_entry.get_outstanding_of_references_with_no_payment_term(references) or {}
+
+	return {**refs_with_payment_term, **refs_with_proposal_payment_term, **refs_without_payment_term}
+
+def get_outstanding_of_references_with_proposal_payment_term(references=None):
+	"""
+	Fetch outstanding amount of `References` which have `Payment Term` set.\n
+	Example: {(reference_doctype, reference_name, payment_term): outstanding_amount, ...}
+	"""
+	if not references:
+		return
+
+	refs = {
+		(row.reference_doctype, row.reference_name, row.payment_term)
+		for row in references
+		if row.reference_doctype and row.reference_name and row.payment_term
+	}
+
+	if not refs:
+		return
+	
+	PS = frappe.qb.DocType("Proposal Schedule")
+
+	response = (
+		frappe.qb.from_(PS)
+		.select(PS.parenttype, PS.parent, PS.payment_term, PS.outstanding)
+		.where(Tuple(PS.parenttype, PS.parent, PS.payment_term).isin(refs))
+	).run(as_dict=True)
+
+	if not response:
+		return
+
+	return {(row.parenttype, row.parent, row.payment_term): row.outstanding for row in response}
+
+payment_entry.get_references_outstanding_amount = get_references_outstanding_amount

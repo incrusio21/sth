@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kode",
  "creation": "2026-02-19 15:54:32.364054",
@@ -66,7 +67,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 00:15:11.984015",
+ "modified": "2026-02-27 11:33:07.016210",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "TPH",

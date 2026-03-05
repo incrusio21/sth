@@ -1,10 +1,7 @@
-{%- set timbangan = frappe.db.get_value(
-"Timbangan",
-{"posting_date": doc.tanggal_timbangan, "receive_type": "TBS Eksternal"},
-"*"
-) -%}
+{% set supplier = frappe.get_doc("Supplier", doc.nama_supplier) %}
+{% set user = frappe.get_doc("User", doc.owner) %}
 
-<div class="page-break">
+<div>
   <h4 class="text-center">PEMBELIAN TBS</h4>
   <table class="content">
     <tr>
@@ -19,10 +16,10 @@
       <td rowspan="2">Harga/Kg</td>
       <td rowspan="2">Bonus/Kg</td>
       <td rowspan="2">Subsidi Angkut/Kg</td>
-      <td rowspan="2">Total Pembayaran Ke Supplier</td>
+      <td rowspan="2">Total Seluruhnya</td>
       <td rowspan="2">Total Pembayaran Bonus Ke Supplier</td>
       <td colspan=3>Beban Pajak PPh 22</td>
-      <td rowspan="2">Total Seluruhnya</td>
+      <td rowspan="2">Total Pembayaran Ke Supplier</td>
     </tr>
     <tr>
       <td>Status</td>
@@ -30,97 +27,65 @@
       <td>Rupiah</td>
     </tr>
 
+    {% for row in doc.items %}
     <tr>
-      <td>1</td>
-      <td>{{timbangan.ticket_number}}</td>
-      <td>{{timbangan.no_polisi}}</td>
-      <td>{{timbangan.bruto}}</td>
-      <td>{{timbangan.tara}}</td>
-      <td>{{timbangan.netto}}</td>
-      <td>{{(timbangan.potongan_sortasi/100) * timbangan.netto}}</td>
-      <td>
-        {{timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)}}
-      </td>
-      <td>{{doc.get_formatted("harga")}}</td>
-      <td>{{doc.get_formatted("bonus")}}</td>
-      <td>{{doc.get_formatted("subsidi_angkut")}}</td>
-      <td>{{doc.items[0].get_formatted("total", doc)}}</td>
-      <td>
-        {{ frappe.format_value(doc.bonus * (timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)),
-        {"fieldtype": "Currency", "options": "IDR"}) }}
-      </td>
-      <td>{{"Ya" if doc.beban_pph_22 == 1 else "Tidak"}}</td>
-      <td>{{"0.25" if doc.beban_pph_22 == 1 else ""}}</td>
-      <td>
-        {% if doc.beban_pph_22 -%}
-        {{frappe.format_value(0.25 * doc.items[0].total, {"fieldtype": "Currency", "options": "IDR"})}}
-        {%- endif %}
-      </td>
-      <td>
-        {% if doc.beban_pph_22 -%}
-        {{frappe.format_value(doc.items[0].total + (0.25 * doc.items[0].total), {"fieldtype": "Currency", "options":
-        "IDR"})}}
-        {%- else -%}
-        {{frappe.format_value(doc.items[0].total, {"fieldtype": "Currency", "options":
-        "IDR"})}}
-        {%- endif %}
-      </td>
+      <td>{{ row.idx }}</td>
+      <td>{{ row.no_tiket }}</td>
+      <td>{{ row.kendaraan }}</td>
+      <td>{{ row.get_formatted("bruto", doc) }}</td>
+      <td>{{ row.get_formatted("tarra", doc) }}</td>
+      <td>{{ row.get_formatted("netto", doc) }}</td>
+      <td>{{ row.get_formatted("pot", doc) }}</td>
+      <td>{{ row.get_formatted("terima", doc) }}</td>
+      <td>{{ row.get_formatted("rate", doc) }}</td>
+      <td>{{ row.get_formatted("bonus", doc) }}</td>
+      <td>{{ row.get_formatted("subsidi_angkut", doc) }}</td>
+      <td>{{ row.get_formatted("total_seluruhnya", doc) }}</td>
+      <td>{{ row.get_formatted("total_pembayaran_bonus_ke_supplier", doc) }}</td>
+      <td>{{ row.status_pajak_pph_22 }}</td>
+      <td>{{ row.percent_pajak_pph_22 }}</td>
+      <td>{{ row.get_formatted("rupiah_pajak_pph_22", doc) }}</td>
+      <td>{{ row.get_formatted("total", doc) }}</td>
     </tr>
+    {% endfor %}
 
     <tr>
       <td colspan="3" style="text-align: left">Tanggal : {{doc.get_formatted("tanggal")}}</td>
-      <td>{{timbangan.bruto}}</td>
-      <td>{{timbangan.tara}}</td>
-      <td>{{timbangan.netto}}</td>
-      <td>{{(timbangan.potongan_sortasi/100) * timbangan.netto}}</td>
-      <td>
-        {{timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)}}
-      </td>
+      <td>{{ doc.get_formatted("total_bruto") }}</td>
+      <td>{{ doc.get_formatted("total_tarra") }}</td>
+      <td>{{ doc.get_formatted("total_netto") }}</td>
+      <td>{{ doc.get_formatted("total_potkg") }}</td>
+      <td>{{ doc.get_formatted("total_terima") }}</td>
+      <td></td>
+      <td>{{ doc.get_formatted("total_bonus") }}</td>
+      <td></td>
+      <td>{{ doc.get_formatted("total_pembayaran_ke_supplier") }}</td>
       <td></td>
       <td></td>
       <td></td>
-      <td>{{doc.items[0].get_formatted("total", doc)}}</td>
-      <td>
-        {{frappe.format_value(doc.bonus * (timbangan.netto - ((timbangan.potongan_sortasi/100) * timbangan.netto)),
-        {"fieldtype": "Currency", "options": "IDR"})}}
-      </td>
-      <td></td>
-      <td></td>
-      <td>
-        {% if doc.beban_pph_22 -%}
-        {{frappe.format_value(0.25 * doc.items[0].total, {"fieldtype": "Currency", "options": "IDR"})}}
-        {%- endif %}
-      </td>
-      <td>
-        {% if doc.beban_pph_22 -%}
-        {{frappe.format_value(doc.items[0].total + (0.25 * doc.items[0].total), {"fieldtype": "Currency", "options":
-        "IDR"})}}
-        {%- else -%}
-        {{frappe.format_value(doc.items[0].total, {"fieldtype": "Currency", "options":
-        "IDR"})}}
-        {%- endif %}
-      </td>
+      <td>{{ doc.get_formatted("total_pajak_pph_22") }}</td>
+      <td>{{ doc.get_formatted("total_seluruhnya") }}</td>
     </tr>
     <tr>
-      <td colspan="17" style="text-align: left">Supplier : {{doc.nama_supplier}}</td>
+      <td colspan="17" style="text-align: left">Supplier : {{ supplier.supplier_name or '' }}</td>
     </tr>
   </table>
   <table class="mt-5">
     <tr>
-      <td style="padding-bottom: 0!important; padding-left: 0!important;">Note</td>
-      <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">Nilai bonus diberikan agar supplier TBS tidak kirim buah ke tempat lain.
-      </td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important; padding-left: 0!important;">Note</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important;">:</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important;">{{ doc.keterangan or '' }}</td>
     </tr>
     <tr>
-      <td style="padding-bottom: 0!important; padding-left: 0!important;">Print Time</td>
-      <td>:</td>
-      <td>{{frappe.utils.now_datetime().strftime("%H:%M:%S, %d/%m/%Y")}}</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important; padding-left: 0!important;">Print Time</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important;">:</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important;">
+        {{frappe.utils.now_datetime().strftime("%H:%M:%S, %d/%m/%Y")}}</td>
     </tr>
     <tr>
-      <td style="padding-bottom: 0!important; padding-left: 0!important;">By</td>
-      <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">DIANNA</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important; padding-left: 0!important;">By</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important;">:</td>
+      <td style="padding-top: 0!important; padding-bottom: 0!important;">{{ user.full_name or '' }}</td>
     </tr>
   </table>
 </div>

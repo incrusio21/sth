@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Sterilizer Transaction", {
+	
 	setup(frm) {
 		frm.set_query("machine", (doc) => {
 			return {
@@ -19,5 +20,7 @@ frappe.ui.form.on("Sterilizer Transaction", {
 				}
 			}
 		})
-	},
+	}
+	
 });
+

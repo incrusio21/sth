@@ -1,0 +1,288 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-16 21:59:01.944892",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_gwxx",
+  "status",
+  "shift",
+  "mesin",
+  "section_break_druq",
+  "tekanan_inlet",
+  "foto_tekanan_inlet",
+  "tekanan_exhaust",
+  "foto_tekanan_exhaust",
+  "tekanan_bpv",
+  "foto_tekanan_bpv",
+  "tekanan_oil_turbin",
+  "foto_tekanan_oil_turbin",
+  "temperatur_cooler_turbin",
+  "foto_temperatur_cooler_turbin",
+  "tegangan_r_s_t_turbin",
+  "foto_tegangan_r_s_t_turbin",
+  "column_break_whjn",
+  "frekwensi_turbin",
+  "foto_frekwensi_turbin",
+  "ampere_turbin",
+  "foto_ampere_turbin",
+  "kw_turbin",
+  "foto_kw_turbin",
+  "kwh_turbin",
+  "foto_kwh_turbin",
+  "hm_awal_turbin",
+  "foto_hm_awal_turbin",
+  "hm_akhir_turbin",
+  "foto_hm_akhir_turbin",
+  "total_hm_turbin"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PMK-MSN-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_gwxx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "fieldname": "section_break_druq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "(Satuan dalam Kg/Cm\u00b2)",
+   "fieldname": "tekanan_inlet",
+   "fieldtype": "Data",
+   "label": "Tekanan Inlet"
+  },
+  {
+   "fieldname": "foto_tekanan_inlet",
+   "fieldtype": "Attach Image",
+   "label": "Foto Tekanan Inlet"
+  },
+  {
+   "description": "(Satuan dalam Kg/Cm\u00b2)",
+   "fieldname": "tekanan_exhaust",
+   "fieldtype": "Data",
+   "label": "Tekanan Exhaust"
+  },
+  {
+   "fieldname": "foto_tekanan_exhaust",
+   "fieldtype": "Attach Image",
+   "label": "Foto Tekanan Exhaust"
+  },
+  {
+   "description": "(Satuan dalam Kg/Cm\u00b2)",
+   "fieldname": "tekanan_bpv",
+   "fieldtype": "Data",
+   "label": "Tekanan BPV"
+  },
+  {
+   "fieldname": "foto_tekanan_bpv",
+   "fieldtype": "Attach Image",
+   "label": "Foto Tekanan BPV"
+  },
+  {
+   "description": "(Satuan dalam Kg/Cm\u00b2)",
+   "fieldname": "tekanan_oil_turbin",
+   "fieldtype": "Data",
+   "label": "Tekanan Oil Turbin"
+  },
+  {
+   "fieldname": "foto_tekanan_oil_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Tekanan Oil Turbin"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_cooler_turbin",
+   "fieldtype": "Data",
+   "label": "Temperatur Cooler Turbin"
+  },
+  {
+   "fieldname": "foto_temperatur_cooler_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Temperatur Cooler Turbin"
+  },
+  {
+   "description": "(Satuan dalam Volt)",
+   "fieldname": "tegangan_r_s_t_turbin",
+   "fieldtype": "Data",
+   "label": "Tegangan R S T Turbin"
+  },
+  {
+   "fieldname": "foto_tegangan_r_s_t_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Tegangan R S T Turbin"
+  },
+  {
+   "fieldname": "column_break_whjn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "(Satuan dalam Hz)",
+   "fieldname": "frekwensi_turbin",
+   "fieldtype": "Data",
+   "label": "Frekwensi Turbin"
+  },
+  {
+   "fieldname": "foto_frekwensi_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Frekwensi Turbin"
+  },
+  {
+   "description": "(Satuan dalam Ampere)",
+   "fieldname": "ampere_turbin",
+   "fieldtype": "Data",
+   "label": "Ampere Turbin"
+  },
+  {
+   "fieldname": "foto_ampere_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Ampere Turbin"
+  },
+  {
+   "description": "(Satuan dalam Kw)",
+   "fieldname": "kw_turbin",
+   "fieldtype": "Data",
+   "label": "Kw Turbin"
+  },
+  {
+   "fieldname": "foto_kw_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Kw Turbin"
+  },
+  {
+   "description": "(Satuan dalam Kwh)",
+   "fieldname": "kwh_turbin",
+   "fieldtype": "Data",
+   "label": "Kwh Turbin"
+  },
+  {
+   "fieldname": "foto_kwh_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto Kwh Turbin"
+  },
+  {
+   "description": "(Total HM otomatis dan dalam satuan HM)",
+   "fieldname": "hm_awal_turbin",
+   "fieldtype": "Float",
+   "label": "HM Awal Turbin"
+  },
+  {
+   "fieldname": "foto_hm_awal_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto HM Awal Turbin"
+  },
+  {
+   "description": "(Total HM otomatis dan dalam satuan HM)",
+   "fieldname": "hm_akhir_turbin",
+   "fieldtype": "Float",
+   "label": "HM Akhir Turbin"
+  },
+  {
+   "fieldname": "foto_hm_akhir_turbin",
+   "fieldtype": "Attach Image",
+   "label": "Foto HM Akhir Turbin"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "description": "(Total HM otomatis dan dalam satuan HM)",
+   "fieldname": "total_hm_turbin",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total HM Turbin",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 11:49:08.713223",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Mesin Turbin",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

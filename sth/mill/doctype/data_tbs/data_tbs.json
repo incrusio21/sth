@@ -10,13 +10,10 @@
   "tanggal",
   "jam",
   "company",
+  "unit",
   "column_break_pykt",
   "status",
   "shift",
-  "section_break_keua",
-  "tanggal_laporan",
-  "unit",
-  "nama_unit",
   "section_break_xief",
   "jumlah_tbs_restan",
   "jumlah_tbs_diterima",
@@ -30,20 +27,10 @@
  ],
  "fields": [
   {
-   "fieldname": "tanggal_laporan",
-   "fieldtype": "Date",
-   "label": "Tanggal Laporan"
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
    "options": "Unit"
-  },
-  {
-   "fieldname": "nama_unit",
-   "fieldtype": "Data",
-   "label": "Nama Unit"
   },
   {
    "fieldname": "section_break_xief",
@@ -133,10 +120,6 @@
    "label": "Status"
   },
   {
-   "fieldname": "section_break_keua",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "shift",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -149,7 +132,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:29:29.378885",
+ "modified": "2026-03-02 10:55:35.903542",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

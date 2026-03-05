@@ -2,16 +2,16 @@
     max-width: 30vw;
 }
 
-#supplier-comparasion .tabulator-col-title, #supplier-comparasion .tabulator-cell{
+.komparasion-style .tabulator-col-title, .komparasion-style .tabulator-cell{
     white-space: normal;
     word-break: break-all;
 }
 
-#supplier-comparasion .tabulator{
+.komparasion-style .tabulator,.komparasion-style .tabulator-placeholder{
     background-color: white;
 }
 
-#supplier-comparasion .tabulator-col{
+.komparasion-style #table-comparasion .tabulator-col,.modal .komparasion-style .tabulator-col{
     background-color: #365f81;
     color: white;
 }

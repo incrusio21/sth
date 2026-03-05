@@ -216,7 +216,8 @@ doc_events = {
 	"*": {
 		"on_update": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_upload_document",
 		"before_submit": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document",
-        "on_trash": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.delete_kriteria_upload_document"
+        "on_trash": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.delete_kriteria_upload_document",
+        "on_submit":"sth.custom.payment_entry.check_payment_notification"
 	},
 
 	"Asset": {
@@ -238,20 +239,21 @@ doc_events = {
 	"Employee": {
 		"after_insert": "sth.hr_customize.custom.leave_policy.create_allocations_for_new_employee"
 	},
-	"Employee Potongan": {
-		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
-	},
+	# "Employee Potongan": {
+	# 	"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+	# },
 	"Event": {
 		"validate": ["sth.overrides.event.before_save"],
 		"on_update": "sth.overrides.event.on_update"
 	},
 	"Item": {
-		"validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"],
+		# "validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"],
+		"validate": ["sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"],
 		"after_insert": "sth.procurement_sth.custom.item.cek_status_awal"
 	},
-	"Item Group": {
-		"validate": "sth.procurement_sth.custom.item.check_persetujuan",
-	},
+	# "Item Group": {
+	# 	"validate": "sth.procurement_sth.custom.item.check_persetujuan",
+	# },
 	"Leave Type": {
 		"on_change": "sth.hr_customize.custom.leave_type.clear_cache"
 	},
@@ -279,13 +281,18 @@ doc_events = {
 		"validate": [
 			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
 		],
-		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_submit_pdo"],
+		"on_submit": ["sth.custom.payment_entry.update_check_book", 
+                "sth.custom.payment_entry.update_status_deposito", 
+                "sth.custom.payment_entry.update_status_loan_bank", 
+                "sth.custom.payment_entry.update_status_dividen", 
+                "sth.overrides.payment_entry.on_submit_pdo",
+                "sth.custom.payment_entry.payment_entry_notification"],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_cancel_pdo"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
-	"Permintaan Pengeluaran Barang": {
-		"validate": ["sth.procurement_sth.custom.item.check_persetujuan"],
-	},
+	# "Permintaan Pengeluaran Barang": {
+	# 	"validate": ["sth.procurement_sth.custom.item.check_persetujuan"],
+	# },
 	"Project": {
 		"before_insert": "sth.legal.custom.project.Project",
 		"validate": "sth.legal.custom.project.Project",
@@ -303,7 +310,8 @@ doc_events = {
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
 	"Quotation": {
-		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.procurement_sth.custom.item.check_persetujuan"],
+		# "validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.procurement_sth.custom.item.check_persetujuan"],
+		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Sales Order": {
 		"validate": ["sth.sales_sth.custom.sales_order.check_dn_pending","sth.sales_sth.custom.sales_order.validate_price_list"],
@@ -314,7 +322,7 @@ doc_events = {
 	},
 	"Supplier": {
 		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
-		"before_save": "sth.overrides.supplier.update_supplier_email",
+		"before_save": ["sth.overrides.supplier.update_supplier_email","sth.overrides.supplier.update_supplier_contact"],
 	},
 	"Stock Reconciliation": {
 		"validate": ["sth.custom.stock_reconciliation.validate_retain_amount"],

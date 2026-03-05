@@ -26,6 +26,8 @@ sth.plantation.AccountsController = class AccountsController extends frappe.ui.f
 	}
     
     currency() {
+		if (!this.frm.get_docfield("conversion_rate")) return;
+		
 		// The transaction date be either transaction_date (from orders) or posting_date (from invoices)
 		let transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
 		let inter_company_reference = this.frm.doc.inter_company_order_reference || this.frm.doc.inter_company_invoice_reference;

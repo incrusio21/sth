@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 09:13:14.746554",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_mfgh",
+  "status",
+  "shift",
+  "section_break_uzuf",
+  "pemakaian_air_yang_diolah",
+  "pemakaian_air_domestik",
+  "pemakaian_air_softener",
+  "pemakaian_air_boiler",
+  "pemakaian_air_untuk_proses"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PMK-AIR-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_mfgh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_uzuf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "(Satuan m\u00b3)",
+   "fieldname": "pemakaian_air_yang_diolah",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pemakaian Air yang Diolah"
+  },
+  {
+   "description": "(Satuan m\u00b3)",
+   "fieldname": "pemakaian_air_domestik",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pemakaian Air Domestik"
+  },
+  {
+   "description": "(Satuan m\u00b3)",
+   "fieldname": "pemakaian_air_softener",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pemakaian Air Softener"
+  },
+  {
+   "description": "(Satuan m\u00b3)",
+   "fieldname": "pemakaian_air_boiler",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pemakaian Air Boiler "
+  },
+  {
+   "description": "(Satuan m\u00b3)",
+   "fieldname": "pemakaian_air_untuk_proses",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Pemakaian Air untuk Proses"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 11:43:50.089454",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemakaian Air",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

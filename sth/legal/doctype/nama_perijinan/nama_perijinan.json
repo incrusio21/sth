@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:np",
  "creation": "2025-09-10 13:17:39.033866",
@@ -47,7 +48,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 13:19:09.598308",
+ "modified": "2026-02-27 11:20:08.672803",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Nama Perijinan",

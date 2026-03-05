@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:blok",
  "creation": "2025-06-24 10:58:20.394446",
@@ -199,7 +200,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 19:21:08.592814",
+ "modified": "2026-02-26 11:54:29.782425",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:jenis",
  "creation": "2025-12-10 21:13:47.810544",
@@ -21,7 +22,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-10 21:14:23.941243",
+ "modified": "2026-02-27 11:37:19.514244",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Jenis Transportasi",

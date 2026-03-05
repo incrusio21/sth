@@ -8,14 +8,14 @@ def close_rfq(rfq):
 def create_po_draft(doc,method):
     from sth.overrides.supplier_quotation import make_purchase_order
     po = make_purchase_order(doc.name)
-    po.insert()
+    po.insert(ignore_mandatory=True)
 
 @frappe.whitelist()
 def close_status_another_sq(reference,except_name):
     supplier_quotations = frappe.db.sql("""
         select sq.name from `tabSupplier Quotation` sq
         join `tabSupplier Quotation Item` sqi on sqi.parent = sq.name
-        where sq.workflow_state = "Open" and (sqi.request_for_quotation in %(reference)s or sq.custom_material_request in %(reference)s
+        where sq.workflow_state = "Need To Compare" and (sqi.request_for_quotation in %(reference)s or sq.custom_material_request in %(reference)s)
         and sq.name not in %(except_name)s
         group by sq.name
     """,{"reference":reference,"except_name":except_name},as_dict=True)

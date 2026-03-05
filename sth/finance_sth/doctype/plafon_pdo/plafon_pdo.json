@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:nama",
  "creation": "2026-01-29 21:48:32.275132",
@@ -26,7 +27,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-02 10:51:16.403270",
+ "modified": "2026-02-27 10:24:08.802957",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Plafon PDO",

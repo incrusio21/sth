@@ -1,0 +1,175 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-16 15:50:11.046462",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_riku",
+  "status",
+  "shift",
+  "machine",
+  "kernel_silo_no1_section",
+  "temperatur_ks_1",
+  "foto_hasil_temperatur_ks_1",
+  "kernel_silo_no2_section",
+  "temperatur_ks_2",
+  "foto_hasil_temperatur_ks_2",
+  "kernel_silo_no3_section",
+  "temperatur_ks_3",
+  "foto_hasil_temperatur_ks_3"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PMK-KRL-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_riku",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "fieldname": "kernel_silo_no1_section",
+   "fieldtype": "Section Break",
+   "label": "Kernel Silo No.1"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_ks_1",
+   "fieldtype": "Data",
+   "label": "Temperatur (KS 1)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_ks_1",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (KS 1)"
+  },
+  {
+   "fieldname": "kernel_silo_no2_section",
+   "fieldtype": "Section Break",
+   "label": "Kernel Silo No.2"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_ks_2",
+   "fieldtype": "Data",
+   "label": "Temperatur (KS 2)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_ks_2",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (KS 2)"
+  },
+  {
+   "fieldname": "kernel_silo_no3_section",
+   "fieldtype": "Section Break",
+   "label": "Kernel Silo No.3"
+  },
+  {
+   "description": "(Satuan dalam \u00b0C)",
+   "fieldname": "temperatur_ks_3",
+   "fieldtype": "Data",
+   "label": "Temperatur (KS 3)"
+  },
+  {
+   "fieldname": "foto_hasil_temperatur_ks_3",
+   "fieldtype": "Attach Image",
+   "label": "Foto Hasil Temperatur (KS 3)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 12:00:36.812774",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Temperatur Kernel Silo",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

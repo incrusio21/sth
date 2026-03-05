@@ -32,15 +32,35 @@ class TransaksiBonus(AccountsController):
 		super().on_cancel()
 		self.remove_employee_payment_log(self.table_employee)
 		self.make_gl_entry()
-		
+
+	@frappe.whitelist()
+	def get_employees(self):
+		return frappe.get_all(
+			"Employee",
+			filters={
+				"unit": self.unit,
+				"company": self.company,
+				"grade": self.eg,
+				"employment_type": self.et,
+			},
+			fields=[
+				"name",
+				"employee_name",
+				"date_of_joining",
+				"employment_type",
+				"custom_kriteria",
+				"bank_ac_no",
+			],
+		)
+
 	def make_employee_payment_log(self, emp):
 		doc = frappe.new_doc("Employee Payment Log")
-		doc.employee = self.employee
+		doc.employee = emp.employee
 		doc.company = self.company
 		doc.posting_date = self.posting_date
 		doc.payroll_date = self.posting_date
 		
-		doc.amount = self.grand_total
+		doc.amount = flt(emp.total_bonus)
 		doc.salary_component = self.earning_bonus_component
 		doc.against_salary_component = self.deduction_bonus_component
 

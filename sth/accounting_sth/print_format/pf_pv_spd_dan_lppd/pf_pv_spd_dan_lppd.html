@@ -20,7 +20,7 @@ ORDER BY creation ASC
 LIMIT 1
 """, (doc.name,), as_dict=1) %}
 
-<div class="page-break">
+<div>
   <p>{{ doc.company or '' }}</p>
   <p>JAKARTA UTARA</p>
 
@@ -51,7 +51,7 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">{{ bank_account.bank or '' }}</td>
       <td style="padding-bottom: 0!important;">NO REF BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">{{ doc.no_rekening_tujuan or '' }}</td>
+      <td style="padding-bottom: 0!important;">{{ doc.reference_no or '' }}</td>
     </tr>
     <tr>
       <td style="padding-bottom: 0!important;">NO REK</td>

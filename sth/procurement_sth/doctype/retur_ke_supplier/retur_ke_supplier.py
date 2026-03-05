@@ -17,15 +17,16 @@ class ReturKeSupplier(Document):
 		self.cancel_all_prec_return()
 
 	@frappe.whitelist()
-	def get_items(self):
+	def get_data(self):
 		self.items = []
 		self.validate_status_prec()
-
-		prec_items = frappe.get_doc("Purchase Receipt",self.no_dokumen_penerimaan).items
-		for item in prec_items:
+		prec = frappe.get_doc("Purchase Receipt",self.no_dokumen_penerimaan)
+		self.nama_supplier = frappe.get_cached_value("Supplier",prec.supplier,"supplier_name")
+		for item in prec.items:
 			child_item = self.append("items")
 			child_item.kode_barang = item.item_code
 			child_item.nama_barang = item.item_name
+			child_item.jumlah_penerimaan = item.qty
 			child_item.jumlah = item.qty - item.returned_qty
 			child_item.satuan = item.uom
 
@@ -53,6 +54,7 @@ class ReturKeSupplier(Document):
 		
 		# sync item prec
 		doc.items = [ r for r in doc.items if r not in deleted_items ]
+		frappe.flags.skip_validate_file = 1
 		doc.save()
 		doc.submit()
 		self.prec_reference = doc.name if not self.prec_reference else self.prec_reference + f",{doc.name}"

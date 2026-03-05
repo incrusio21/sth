@@ -24,6 +24,9 @@ class PengeluaranBarang(Document):
 			if qty < 0:
 				frappe.throw(f"Jumlah barang melebihi maksimal permintaan: {qty}")
 
+			if row.jumlah > jumlah_permintaan:
+				frappe.throw((f"Jumlah barang melebihi permintaan: {row.jumlah}"))
+
 	def update_items_out(self):
 		for row in self.items:
 			jumlah_keluar = frappe.db.get_value("Permintaan Pengeluaran Barang Item",row.reference,"jumlah_keluar")
@@ -50,10 +53,11 @@ class PengeluaranBarang(Document):
 		if not self.validate_document_permintaan():
 			return
 
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","kendaraan","km","kegiatan","sub_unit","blok","name as reference"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","blok","name as reference"])
 
 		for row in items:
-			self.append("items",row)
+			child = self.append("items",row)
+			child.item_name = frappe.get_cached_value("Item",row.kode_barang,"item_name")
 
 	def validate_document_permintaan(self):
 		company,status,outgoing = frappe.db.get_value("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran, ["pt_pemilik_barang","status","outgoing"])
@@ -131,3 +135,22 @@ class PengeluaranBarang(Document):
 		doc.insert()
 		doc.submit()
 		
+
+@frappe.whitelist()
+def get_report_pemakaian_material(nama_barang):
+	from erpnext.accounts.utils import get_fiscal_year
+	today = frappe.utils.today()
+	fiscal_year = get_fiscal_year(date=today,boolean=True)
+	start_year = fiscal_year[0][1]
+
+	return frappe.db.sql("""
+		SELECT pb.name as no_transaksi, pb.tanggal , pb.gudang, pbi.sub_unit ,"" as alokasi, pbi.kendaraan ,"" as pengguna,
+		pbi.kode_barang, pbi.item_name as nama_barang,pbi.km ,pbi.jumlah ,i.kode_kelompok_barang ,i.kode_sub_kelompok_barang ,
+		i.nama_sub_kelompok_barang ,ig.item_group_name as kelompok_barang
+		FROM `tabPengeluaran Barang` pb
+		JOIN `tabPengeluaran Barang Item` pbi on pbi.parent  = pb.name 
+		JOIN `tabItem` i on i.name = pbi.kode_barang 
+		JOIN `tabItem Group` ig on i.kelompok_barang = ig.name
+		where pb.docstatus = 1 and pbi.item_name = %s AND pb.tanggal BETWEEN %s AND %s
+		order by pb.tanggal,pb.name
+	""",(nama_barang,start_year,today),as_dict=True)

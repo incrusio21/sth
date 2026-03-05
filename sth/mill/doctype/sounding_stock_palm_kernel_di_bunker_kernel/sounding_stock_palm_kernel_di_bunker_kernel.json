@@ -11,16 +11,13 @@
   "tanggal",
   "jam",
   "company",
+  "unit",
   "column_break_bbxq",
   "status",
   "shift",
   "section_break_obbx",
   "foto",
   "video",
-  "no_transaksi",
-  "tanggal_sounding",
-  "unit",
-  "nama_unit",
   "column_break_wnay",
   "no_bunker",
   "hasil_sounding",
@@ -40,26 +37,10 @@
    "label": "Video"
   },
   {
-   "fieldname": "no_transaksi",
-   "fieldtype": "Data",
-   "label": "No Transaksi"
-  },
-  {
-   "fieldname": "tanggal_sounding",
-   "fieldtype": "Date",
-   "label": "Tanggal Sounding"
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
    "options": "Unit"
-  },
-  {
-   "fetch_from": "unit.unit",
-   "fieldname": "nama_unit",
-   "fieldtype": "Data",
-   "label": "Nama Unit"
   },
   {
    "fieldname": "column_break_wnay",
@@ -151,7 +132,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:37:05.441665",
+ "modified": "2026-03-02 10:57:36.658503",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:rn",
  "creation": "2025-09-16 14:11:25.243356",
@@ -43,7 +44,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-16 14:22:26.995874",
+ "modified": "2026-02-27 10:52:27.018325",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Religion",

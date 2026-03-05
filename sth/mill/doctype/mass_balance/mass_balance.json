@@ -1,0 +1,244 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 10:31:19.585099",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "date",
+  "jam",
+  "company",
+  "unit",
+  "column_break_zxvd",
+  "status",
+  "shift",
+  "section_break_rwcy",
+  "tanggal",
+  "column_break_qvri",
+  "unit_pabrik",
+  "section_break_qtus",
+  "fibertbs",
+  "nuttbs",
+  "fiber_bunch_presstbs",
+  "lumpur_separatortbs",
+  "sludge_centrifugetbs",
+  "sludge_decantertbs",
+  "solid_decantertbs",
+  "air_rebusantbs",
+  "column_break_tkcn",
+  "brondolanusb",
+  "minyakbrondolan",
+  "empty_bunchtbs",
+  "ltds_1nut",
+  "ltds_2nut",
+  "wet_shellnut",
+  "kerneltbs",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "MB-.####"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_zxvd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_rwcy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal"
+  },
+  {
+   "fieldname": "column_break_qvri",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Data",
+   "label": "Unit Pabrik"
+  },
+  {
+   "fieldname": "section_break_qtus",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fibertbs",
+   "fieldtype": "Percent",
+   "label": "Fiber/TBS (%)"
+  },
+  {
+   "fieldname": "nuttbs",
+   "fieldtype": "Percent",
+   "label": "Nut/TBS (%)"
+  },
+  {
+   "fieldname": "fiber_bunch_presstbs",
+   "fieldtype": "Percent",
+   "label": "Fiber Bunch Press/TBS (%)"
+  },
+  {
+   "fieldname": "lumpur_separatortbs",
+   "fieldtype": "Percent",
+   "label": "Lumpur Separator/TBS (%)"
+  },
+  {
+   "fieldname": "sludge_centrifugetbs",
+   "fieldtype": "Percent",
+   "label": "Sludge Centrifuge/TBS (%)"
+  },
+  {
+   "fieldname": "sludge_decantertbs",
+   "fieldtype": "Percent",
+   "label": "Sludge Decanter/TBS (%)"
+  },
+  {
+   "fieldname": "solid_decantertbs",
+   "fieldtype": "Percent",
+   "label": "Solid Decanter/TBS (%)"
+  },
+  {
+   "fieldname": "air_rebusantbs",
+   "fieldtype": "Percent",
+   "label": "Air Rebusan/TBS (%)"
+  },
+  {
+   "fieldname": "column_break_tkcn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "brondolanusb",
+   "fieldtype": "Percent",
+   "label": "Brondolan/USB (%)"
+  },
+  {
+   "fieldname": "minyakbrondolan",
+   "fieldtype": "Percent",
+   "label": "Minyak/Brondolan (%)"
+  },
+  {
+   "fieldname": "empty_bunchtbs",
+   "fieldtype": "Percent",
+   "label": "Empty Bunch/TBS (%)"
+  },
+  {
+   "fieldname": "ltds_1nut",
+   "fieldtype": "Percent",
+   "label": "LTDS 1/NUT (%)"
+  },
+  {
+   "fieldname": "ltds_2nut",
+   "fieldtype": "Percent",
+   "label": "LTDS 2/NUT (%)"
+  },
+  {
+   "fieldname": "wet_shellnut",
+   "fieldtype": "Percent",
+   "label": "Wet Shell/Nut (%)"
+  },
+  {
+   "fieldname": "kerneltbs",
+   "fieldtype": "Percent",
+   "label": "Kernel/TBS (%)"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mass Balance",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-02 11:44:35.507909",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Mass Balance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

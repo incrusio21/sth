@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:njs",
  "creation": "2025-09-10 13:19:24.815156",
@@ -38,7 +39,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 13:20:27.935715",
+ "modified": "2026-02-27 11:15:29.197305",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Jenis Sertifikat",

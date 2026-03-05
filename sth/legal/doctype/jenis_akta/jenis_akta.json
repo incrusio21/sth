@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:ja",
  "creation": "2025-09-11 10:50:23.429116",
@@ -21,7 +22,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-11 10:50:55.458061",
+ "modified": "2026-02-27 11:10:27.984313",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Jenis Akta",

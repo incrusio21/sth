@@ -27,7 +27,7 @@ class SupplierComparasion {
 
 		// console.log(this.page);
 		this.content_wrapper = $(`
-			<div id="supplier-comparasion">
+			<div id="supplier-comparasion" class='komparasion-style'>
 				<div id="table-comparasion">
 				</div>
 			</div>
@@ -94,7 +94,8 @@ class SupplierComparasion {
 					args: {
 						doctype: 'Supplier Quotation',
 						filters: {
-							company: me.company
+							company: me.company,
+							custom_material_request: me.pr_sr
 						},
 						fields: ['name', "supplier"],
 						order_by: 'name asc',
@@ -151,7 +152,7 @@ class SupplierComparasion {
 
 		this.btn_chosen_items = this.page.add_button("Choosen items", () => {
 			frappe.xcall("sth.api.get_sq_item_details", { names: [...new Set(this.selected_items.map(r => r.child_name))] }).then((res) => {
-				me.showDialog(res)
+				me.showSelectedItem(res)
 			})
 		}, {
 			btn_class: "btn-default"
@@ -177,7 +178,7 @@ class SupplierComparasion {
 
 	}
 
-	async initTable() {
+	initTable() {
 		const columns = this.generateColumns()
 		this.table = new Tabulator("#table-comparasion", {
 			// layout: "fitDataStretch",
@@ -196,6 +197,81 @@ class SupplierComparasion {
 		// this.setTableEvent()
 		this.refresh_view()
 		// window.pageData = this
+	}
+
+	initTablePamakaianMaterial(el, data = []) {
+		let options = {
+			// layout: "fitDataStretch",
+			selectable: true,
+			data,
+			columnHeaderVertAlign: "middle",
+			maxHeight: "80vh",
+			renderHorizontal: "virtual",
+			columns: [
+				{ title: "No", formatter: "rownum", headerSort: false, hozAlign: "center", headerHozAlign: "center", resizable: false, },
+				{ title: "No Transaksi", field: "no_transaksi", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Tanggal", field: "tanggal", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Gudang", field: "gudang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Sub Unit", field: "sub_unit", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Alokasi", field: "alokasi", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Kendaraan", field: "kendaraan", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Pengguna", field: "pengguna", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Kode Barang", field: "kode_barang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Nama Barang", field: "nama_barang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Kode <br> Kelompok <br> Barang", field: "kode_kelompok_barang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Kelompok <br> Barang", field: "kelompok_barang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Kode Sub <br> Kelompok <br> Barang", field: "kode_sub_kelompok_barang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Sub <br> Kelompok <br> Barang", field: "nama_sub_kelompok_barang", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "KM/HM", field: "km", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Jumlah", field: "jumlah", headerSort: false, width: 120, headerHozAlign: "center", },
+			]
+		}
+
+		if (!data.length) {
+			Object.assign(options, {
+				minHeight: "20vh",
+				placeholder: "No Data"
+			})
+		}
+
+		this.table_history = new Tabulator(el, options);
+	}
+
+	initTablePembelianMaterial(el, data = []) {
+		let options = {
+			// layout: "fitDataStretch",
+			selectable: true,
+			data,
+			columnHeaderVertAlign: "middle",
+			maxHeight: "80vh",
+			renderHorizontal: "virtual",
+			columns: [
+				{ title: "Kode Barang", field: "item_code", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Nama Barang", field: "item_name", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "No PO/SO", field: "no_po", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Tanggal", field: "tanggal_po", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Jumlah Dipesan", field: "qty", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Merk", field: "merk", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Negara Buatan", field: "country", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Spesifikasi <br> (Tipe/Model/ <br> Ukuran)", field: "description", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Mata Uang", field: "currency", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Harga Satuan", field: "rate", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Total", field: "amount", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Nama Supplier", field: "supplier_name", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "No. PR/SR", field: "material_request", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Keterangan", field: "keterangan", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Tanggal PR/SR", field: "tanggal_pr_sr", headerSort: false, width: 120, headerHozAlign: "center", },
+			]
+		}
+
+		if (!data.length) {
+			Object.assign(options, {
+				minHeight: "20vh",
+				placeholder: "No Data"
+			})
+		}
+
+		this.table_history = new Tabulator(el, options);
 	}
 
 	getTableData() {
@@ -224,7 +300,7 @@ class SupplierComparasion {
 				columns: [
 					{ title: "Merek", field: `${initials}_merk`, headerSort: false, minWidth: 120, headerHozAlign: "center", },
 					{ title: "Negara<br> Buatan", field: `${initials}_country`, headerSort: false, minWidth: 120, headerHozAlign: "center", },
-					{ title: "Spesifikasi <br>(Tipe/Model/Ukuran)", field: `${initials}_spesifikasi`, headerSort: false, minWidth: 220, headerHozAlign: "center", },
+					{ title: "Spesifikasi <br>(Tipe/Model/Ukuran)", field: `${initials}_spesifikasi`, headerSort: false, minWidth: 220, headerHozAlign: "center", formatter: "html" },
 					{ title: "Jumlah", field: `${initials}_jumlah`, headerSort: false, headerHozAlign: "center", },
 					{ title: "Harga", field: `${initials}_harga`, formatter: "money", headerSort: false, headerHozAlign: "center", },
 					{ title: "Sub <br> Total", field: `${initials}_sub_total`, formatter: "money", headerSort: false, headerHozAlign: "center", },
@@ -240,7 +316,7 @@ class SupplierComparasion {
 						width: 60,
 						formatter: function (cell, formatterParams) {
 							const row = cell.getRow().getData()
-							if (!row[`${initials}_child_name`]) {
+							if (!row[`${initials}_child_name`] || row[`${initials}_workflow_state`] == "Draft") {
 								return ""
 							} else {
 								return "<i class='fa fa-plus' style='color: #0b680b'></i>";
@@ -249,8 +325,8 @@ class SupplierComparasion {
 						headerSort: false, hozAlign: "center",
 						cellClick: function (e, cell) {
 							const row = cell.getRow().getData();
-							if (row[`${initials}_child_name`]) {
-								me.validateSelectedData(row, name)
+							if (row[`${initials}_child_name`] && row[`${initials}_workflow_state`] != "Draft") {
+								me.validateSelectedData(row, initials)
 
 								me.selected_suppliers = name
 								me.selected_items.push({
@@ -270,7 +346,19 @@ class SupplierComparasion {
 
 		let columns = [
 			{ title: "No", field: "idx", formatter: "number", headerSort: false, headerHozAlign: "center", hozAlign: "center", resizable: false, frozen: true },
-			{ title: "Kode Barang", field: "kode_barang", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
+			{
+				title: "Kode Barang", field: "kode_barang", headerSort: false, frozen: true, width: 100, headerHozAlign: "center",
+				cellClick: function (e, cell) {
+					const row = cell.getRow().getData();
+					if (row.kode_barang) {
+						frappe.xcall("sth.procurement_sth.doctype.pengeluaran_barang.pengeluaran_barang.get_report_pemakaian_material",
+							{ nama_barang: row.kode_barang })
+							.then((res) => {
+								me.showHistory(res, "out")
+							})
+					}
+				}
+			},
 			{ title: "Nama Barang", field: "nama_barang", headerSort: false, frozen: true, width: 120, headerHozAlign: "center", },
 			{ title: "Satuan", field: "satuan", headerSort: false, frozen: true, headerHozAlign: "center", },
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
@@ -292,12 +380,12 @@ class SupplierComparasion {
 
 		if (is_selected_before) {
 			frappe.throw('Item sudah dipilih sebelumnya')
-		} else if (data.status == "Expired") {
+		} else if (data[`${supplier}_status`] == "Expired") {
 			frappe.throw('Penawaran sudah expired, silahkan pilih penawaran lainnya')
 		}
 	}
 
-	showDialog(data = []) {
+	showSelectedItem(data = []) {
 		var me = this
 		let grand_total = 0
 
@@ -437,6 +525,47 @@ class SupplierComparasion {
 				const data = me.dialog.get_field('items').df.data.map((r) => r.item_code)
 				me.selected_items = me.selected_items.filter((r) => data.includes(r))
 			});
+	}
+
+	showHistory(data, type) {
+		let func = null
+		let title = ""
+		if ("out") {
+			title = "Pemakaian Material"
+			func = this.initTablePamakaianMaterial.bind(this)
+		} else if ("purchase") {
+			title = "Pembelian Terakhir"
+			func = this.initTablePembelianMaterial.bind(this)
+		} else if ("asset") {
+
+		}
+
+		if (!func) {
+			return
+		}
+
+
+		const d = new frappe.ui.Dialog({
+			title: title,
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "data",
+					fieldtype: "HTML"
+				}
+			]
+		})
+
+		d.show()
+		const wrapper = d.get_field('data').$wrapper
+		if (!wrapper.find("#table-history").length) {
+			wrapper.append(`<div id="table-history" class='komparasion-style'></div>`)
+			if (this.table_history) {
+				this.table_history.destroy()
+			}
+
+			func(wrapper.find('#table-history')[0], data)
+		}
 	}
 
 	initials(text) {

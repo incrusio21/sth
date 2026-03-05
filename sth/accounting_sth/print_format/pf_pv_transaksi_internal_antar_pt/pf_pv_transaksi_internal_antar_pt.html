@@ -20,7 +20,7 @@ ORDER BY creation ASC
 LIMIT 1
 """, (doc.name,), as_dict=1) %}
 
-<div class="page-break">
+<div>
   <p>{{ doc.company or '' }}</p>
   <p>JAKARTA UTARA</p>
 
@@ -64,10 +64,10 @@ LIMIT 1
     <tr>
       <td style="padding-bottom: 0!important;">ATAS NAMA</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;"></td>
+      <td style="padding-bottom: 0!important;">{{ bank_account.account_name or '' }}</td>
       <td style="padding-bottom: 0!important;">NO REF BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">202602111047973851</td>
+      <td style="padding-bottom: 0!important;">{{ doc.reference_no or '' }}</td>
     </tr>
   </table>
 
@@ -86,6 +86,9 @@ LIMIT 1
       <td>{{ row.account_number }}</td>
       <td>
         {{ row.account }} <br>
+        {% if row.debit > 0 and doc.references[0] %}
+        No. Invoice : {{ doc.references[0].reference_name or '' }}
+        {% endif %}
       </td>
       <td>10910</td>
       <td>{{ frappe.format_value(row.debit, {"fieldtype": "Float"}) }}</td>

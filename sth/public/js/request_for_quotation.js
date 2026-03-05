@@ -32,6 +32,12 @@ frappe.ui.form.on('Request for Quotation', {
                         },
                     }, (res) => {
                         console.log(res);
+                        res.items = res.items.map(d => {
+                            return {
+                                ...d,
+                                description: ""
+                            }
+                        })
                     });
 
                     setTimeout(() => {
@@ -53,6 +59,15 @@ frappe.ui.form.on('Request for Quotation', {
         })
 
         frm.set_query("email", "suppliers", function (doc, dt, dn) {
+            let row = locals[dt][dn]
+            return {
+                filters: {
+                    supplier: row.supplier
+                }
+            }
+        })
+
+        frm.set_query("contact_person", "suppliers", function (doc, dt, dn) {
             let row = locals[dt][dn]
             return {
                 filters: {

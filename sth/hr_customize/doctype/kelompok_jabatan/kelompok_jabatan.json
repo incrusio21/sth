@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kode",
  "creation": "2026-02-21 00:50:21.197205",
@@ -57,7 +58,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 19:03:55.313272",
+ "modified": "2026-02-27 10:44:19.254536",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Kelompok Jabatan",

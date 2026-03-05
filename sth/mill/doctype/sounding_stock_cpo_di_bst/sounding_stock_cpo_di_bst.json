@@ -11,15 +11,13 @@
   "tanggal",
   "jam",
   "company",
+  "unit",
   "column_break_eokt",
   "status",
   "shift",
   "section_break_oecm",
   "foto",
   "video",
-  "no_transaksi",
-  "unit",
-  "nama_unit",
   "column_break_vbhx",
   "ukuran_hasil_sounding",
   "hasil_suhu",
@@ -38,20 +36,10 @@
    "label": "Video"
   },
   {
-   "fieldname": "no_transaksi",
-   "fieldtype": "Data",
-   "label": "No Transaksi"
-  },
-  {
    "fieldname": "unit",
    "fieldtype": "Link",
    "label": "Unit",
    "options": "Unit"
-  },
-  {
-   "fieldname": "nama_unit",
-   "fieldtype": "Data",
-   "label": "Nama Unit"
   },
   {
    "fieldname": "column_break_vbhx",
@@ -139,7 +127,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:33:33.370229",
+ "modified": "2026-03-02 10:57:02.709198",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

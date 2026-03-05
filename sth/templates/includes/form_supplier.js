@@ -3,6 +3,7 @@
 class FormSupplier {
     constructor() {
         this.initData()
+        this.initDefValue()
         this.initEvent()
         this.initAction()
     }
@@ -27,11 +28,15 @@ class FormSupplier {
         this.dt = {}
     }
 
+    initDefValue() {
+        $("select[name='lokasi_pengiriman']").val('{{ lokasi_pengiriman }}')
+    }
+
     initEvent() {
 
         $('.datepicker').each((idx, el) => {
             this.dt[$(el).attr('name')] = new AirDatepicker(el, {
-                selectedDates: [new Date()],
+                selectedDates: [''],
                 autoClose: true,
                 dateFormat: 'yyyy-MM-dd',
                 locale: this.getLocale()
@@ -50,7 +55,7 @@ class FormSupplier {
             dropdownParent: $('body'),
             width: '100%'
         })
-        $("select[name='country[]']").val("Indonesia").trigger("change")
+        $("select[name='country[]']").val("").trigger("change")
     }
 
     initMoney(el) {

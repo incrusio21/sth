@@ -20,12 +20,13 @@
   "section_break_jrlr",
   "items",
   "section_break_yuzh",
-  "jumlah_retur",
   "prec_reference",
   "column_break_smpc",
   "catatan",
   "section_break_psii",
-  "amended_from"
+  "amended_from",
+  "upload_file_tab",
+  "kriteria_upload_html"
  ],
  "fields": [
   {
@@ -59,12 +60,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "no_dokumen_penerimaan.supplier",
    "fieldname": "nama_supplier",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_preview": 1,
    "label": "Nama Supplier",
-   "options": "Supplier",
    "read_only": 1
   },
   {
@@ -106,14 +105,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "0",
-   "fieldname": "jumlah_retur",
-   "fieldtype": "Float",
-   "label": "Jumlah Retur",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_jrlr",
    "fieldtype": "Section Break"
   },
@@ -141,18 +132,29 @@
    "read_only": 1
   },
   {
+   "fetch_from": "no_dokumen_penerimaan.set_warehouse",
    "fieldname": "gudang",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Gudang",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Html"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-21 10:38:30.677017",
+ "modified": "2026-03-05 11:03:27.461515",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Retur Ke Supplier",

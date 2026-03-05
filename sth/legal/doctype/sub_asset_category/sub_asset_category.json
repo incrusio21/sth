@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2026-01-13 13:14:05.784997",
@@ -34,7 +35,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 14:57:47.297180",
+ "modified": "2026-02-27 11:23:07.210421",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sub Asset Category",

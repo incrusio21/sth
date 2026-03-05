@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2025-08-11 10:50:41.256230",
@@ -37,7 +38,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-07 13:47:54.815913",
+ "modified": "2026-02-27 10:02:02.640664",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Jenis Alat",

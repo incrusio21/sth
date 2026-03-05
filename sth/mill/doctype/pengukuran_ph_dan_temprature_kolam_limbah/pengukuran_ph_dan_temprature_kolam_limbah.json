@@ -1,0 +1,249 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 09:43:43.555346",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "home_tab",
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_dvda",
+  "status",
+  "shift",
+  "kolam_pendingin_tab",
+  "hasil_pengukuran_ph_klm_pdgn",
+  "hasil_pengukuran_suhu_kolam_pdgn",
+  "upload_foto_klm_pdgn",
+  "kolam_pengasaman_tab",
+  "hasil_pengukuran_ph_klm_pgsm",
+  "hasil_pengukuran_suhu_kolam_pgsm",
+  "upload_foto_klm_pgsm",
+  "kolam_anaerobik_tab",
+  "hasil_pengukuran_ph_klm_anaerobik",
+  "hasil_pengukuran_suhu_kolam_anaerobik",
+  "upload_foto_klm_anaerobik",
+  "kolam_aerobik_tab",
+  "hasil_pengukuran_ph_klm_aerobik",
+  "hasil_pengukuran_suhu_kolam_aerobik",
+  "upload_foto_klm_aerobik",
+  "kolam_pembuangan_akhir_tab",
+  "hasil_pengukuran_ph_klm_pa",
+  "hasil_pengukuran_suhu_kolam_pa",
+  "upload_foto_klm_pa"
+ ],
+ "fields": [
+  {
+   "fieldname": "home_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "KPD-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_dvda",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control"
+  },
+  {
+   "fieldname": "kolam_pendingin_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kolam Pendingin"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph_klm_pdgn",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_pengukuran_suhu_kolam_pdgn",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto_klm_pdgn",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "kolam_pengasaman_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kolam Pengasaman"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph_klm_pgsm",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_pengukuran_suhu_kolam_pgsm",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto_klm_pgsm",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "kolam_anaerobik_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kolam Anaerobik"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph_klm_anaerobik",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_pengukuran_suhu_kolam_anaerobik",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto_klm_anaerobik",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "kolam_aerobik_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kolam Aerobik"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph_klm_aerobik",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_pengukuran_suhu_kolam_aerobik",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto_klm_aerobik",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "kolam_pembuangan_akhir_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kolam Pembuangan Akhir"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph_klm_pa",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_pengukuran_suhu_kolam_pa",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Hasil Pengukuran Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto_klm_pa",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Upload Foto"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 11:24:21.227582",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pengukuran PH dan Temprature kolam limbah",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -150,7 +150,7 @@ class Deposito(AccountsController):
 		values = {
 			"doctype": "Redeemed Deposito",
 			"company": self.company,
-			"currency": self.currency,
+			"currency": self.bank_currency,
 			"posting_date": nowdate(),
 			"unit": self.unit,
 			"customer": frappe.db.get_single_value('Payment Settings', "receivable_customer"),
@@ -380,7 +380,7 @@ def make_new_depo_roll_over(data):
 	new_deposito.unit = data.unit
 	new_deposito.bank = data.bank
 	new_deposito.bank_account = data.bank_account
-	new_deposito.currency = data.currency
+	new_deposito.bank_currency = data.currency
 	new_deposito.value_date = maturity_aro_date
 	new_deposito.maturity_date = new_maturity_date
 	new_deposito.tenor = data.tenor

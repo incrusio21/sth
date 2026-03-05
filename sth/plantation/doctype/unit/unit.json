@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:unit",
  "creation": "2025-06-24 12:02:05.033709",
@@ -22,13 +23,13 @@
   "mill",
   "ho",
   "accounts_section",
-  "default_bonus_account",
-  "default_thr_account",
-  "default_phk_account",
-  "column_break_lymx",
   "default_bonus_salary_account",
   "default_thr_salary_account",
-  "default_phk_salary_account"
+  "default_phk_salary_account",
+  "column_break_lymx",
+  "default_bonus_account",
+  "default_thr_account",
+  "default_phk_account"
  ],
  "fields": [
   {
@@ -40,6 +41,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -112,19 +114,19 @@
   {
    "fieldname": "default_bonus_account",
    "fieldtype": "Link",
-   "label": "Default Bonus Account",
+   "label": "Default Bonus Account Credit",
    "options": "Account"
   },
   {
    "fieldname": "default_thr_account",
    "fieldtype": "Link",
-   "label": "Default THR Account",
+   "label": "Default THR Account Credit",
    "options": "Account"
   },
   {
    "fieldname": "default_phk_account",
    "fieldtype": "Link",
-   "label": "Default PHK Account",
+   "label": "Default PHK Account Credit",
    "options": "Account"
   },
   {
@@ -134,19 +136,19 @@
   {
    "fieldname": "default_bonus_salary_account",
    "fieldtype": "Link",
-   "label": "Default Bonus Salary Account",
+   "label": "Default Bonus Account Debit",
    "options": "Account"
   },
   {
    "fieldname": "default_thr_salary_account",
    "fieldtype": "Link",
-   "label": "Default THR Salary Account",
+   "label": "Default THR Account Debit",
    "options": "Account"
   },
   {
    "fieldname": "default_phk_salary_account",
    "fieldtype": "Link",
-   "label": "Default PHK Salary Account",
+   "label": "Default PHK Account Debit",
    "options": "Account"
   },
   {
@@ -169,7 +171,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 19:24:48.395609",
+ "modified": "2026-03-03 08:44:42.099773",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

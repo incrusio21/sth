@@ -37,7 +37,8 @@ def get_context(context):
         context.is_exist_sq = frappe.db.exists("Supplier Quotation Item",{"request_for_quotation": rfq_name})
         context.required_date = doc.schedule_date
         context.payment_terms = payment_terms
-        context.lokasi_pengiriman = frappe.get_all("Unit",{"company": doc.company},pluck="name")
+        context.lokasi_pengiriman = doc.lokasi_pengiriman
+        context.list_lokasi_pengiriman = frappe.get_all("Unit",{"company": doc.company},pluck="name")
         
     return context
 

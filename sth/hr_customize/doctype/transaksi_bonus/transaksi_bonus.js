@@ -60,31 +60,35 @@ frappe.ui.form.on("Transaksi Bonus", {
     }
 
     frappe.dom.freeze("Mengambil data employee...");
-    const records = await frappe.db.get_list("Employee", {
-      filters: {
-        unit: frm.doc.unit,
-        company: frm.doc.company,
-        grade: frm.doc.eg,
-        employment_type: frm.doc.et,
-      },
-      fields: [
-        "name",
-        "employee_name",
-        "date_of_joining",
-        "employment_type",
-        "custom_kriteria",
-        "bank_ac_no",
-      ],
+    const records = await frappe.call({
+      method: "get_employees",
+      doc: frm.doc,
     });
+    // const records = await frappe.db.get_list("Employee", {
+    //   filters: {
+    //     unit: frm.doc.unit,
+    //     company: frm.doc.company,
+    //     grade: frm.doc.eg,
+    //     employment_type: frm.doc.et,
+    //   },
+    //   fields: [
+    //     "name",
+    //     "employee_name",
+    //     "date_of_joining",
+    //     "employment_type",
+    //     "custom_kriteria",
+    //     "bank_ac_no",
+    //   ],
+    // });
 
-    if (!records?.length) {
+    if (!records.message?.length) {
       frappe.msgprint(__("Tidak ada data karyawan yang ditemukan."));
       return;
     }
 
     frm.clear_table("table_employee");
 
-    for (const emp of records) {
+    for (const emp of records.message) {
       frm.add_child("table_employee", {
         employee: emp.name,
         employee_name: emp.employee_name,

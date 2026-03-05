@@ -1,0 +1,174 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 09:58:45.935372",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_fbxe",
+  "status",
+  "section_break_lrjm",
+  "nik",
+  "nama_karyawan",
+  "jabatan_karyawan",
+  "nama_unit_mesin_yang_diperbaiki",
+  "lokasi_statsiun",
+  "jenis_perbaikan",
+  "jam_mulai",
+  "jam_selesai",
+  "total_jam",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "BKM-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Date",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_fbxe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "section_break_lrjm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nik",
+   "fieldtype": "Data",
+   "label": "NIK"
+  },
+  {
+   "fieldname": "nama_karyawan",
+   "fieldtype": "Data",
+   "label": "Nama Karyawan"
+  },
+  {
+   "fieldname": "jabatan_karyawan",
+   "fieldtype": "Data",
+   "label": "Jabatan Karyawan"
+  },
+  {
+   "fieldname": "nama_unit_mesin_yang_diperbaiki",
+   "fieldtype": "Link",
+   "label": "Nama Unit Mesin yang Diperbaiki",
+   "options": "Mesin"
+  },
+  {
+   "fieldname": "lokasi_statsiun",
+   "fieldtype": "Link",
+   "label": "Lokasi Statsiun",
+   "options": "Station Master"
+  },
+  {
+   "fieldname": "jenis_perbaikan",
+   "fieldtype": "Select",
+   "label": "Jenis Perbaikan",
+   "options": "\nBreakdown\nPreventive Maintenance"
+  },
+  {
+   "fieldname": "jam_mulai",
+   "fieldtype": "Time",
+   "label": "Jam Mulai"
+  },
+  {
+   "fieldname": "jam_selesai",
+   "fieldtype": "Time",
+   "label": "Jam Selesai"
+  },
+  {
+   "fieldname": "total_jam",
+   "fieldtype": "Time",
+   "label": "Total Jam"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Buku Kerja Mekanik",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-02 14:27:16.176308",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Buku Kerja Mekanik",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

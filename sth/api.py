@@ -27,9 +27,8 @@ def create_sq():
 	doc_sq = make_supplier_quotation_from_rfq(rfq_name,for_supplier=data.get("supplier"))
 	doc_sq.custom_file_upload = f"/private/files/{data.file_url}"
 	doc_sq.valid_till = data.get('valid_date')
-	doc_sq.syarat_pembayaran = data.get('syarat_pembayaran')
-	doc_sq.keterangan = data.get('keterangan')
-	doc_sq.custom_required_by = data.get('estimated_date')
+	doc_sq.syarat_pembayaran = data.get("syarat_pembayaran")
+	# doc_sq.custom_required_by = data.get('estimated_date')
 	doc_sq.alamat = frappe.db.get_value("Unit",doc_sq.lokasi_pengiriman,"address")
 	doc_sq.custom_material_request = doc_sq.items[0].material_request
 	doc_sq.items = []
@@ -102,19 +101,10 @@ def validate_request(data):
 	for row in req_data:
 		if not data.get(row):
 			message.append("{} is required".format(title_alias[row] or row.replace('_'," ").capitalize()))    
-
-	# if not data.get("rfq"):
-	#     message.append("RFQ is required")
-
-	# if not data.get("supplier"):
-	#     message.append("Supplier is required")
-		
 	
 	if not json.loads(data.get("items")):
 		message.append("Items is required")
-	
-	# if not data.get("file_url"):
-	#     message.append("File upload is required")
+
 	
 	return message
 
@@ -132,7 +122,7 @@ def get_table_data(args):
 			"data": [],
 		}
 
-	where_clause = "WHERE sq.workflow_state = 'Need To Compare' AND sq.custom_material_request = %(pr_sr)s "
+	where_clause = "WHERE sq.workflow_state NOT IN ('Approved','Closed') AND sq.custom_material_request = %(pr_sr)s "
 	filters = {"pr_sr":args.pr_sr}
 	
 	if args.item_name:
@@ -144,9 +134,10 @@ def get_table_data(args):
 		filters["supplier_quotation"] = args.list_sq
 
 	query = frappe.db.sql(f"""
-		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sq.status, sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes as notes_sq,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, sq.`supplier`,sqi.name as child_name
+		SELECT DENSE_RANK() OVER (ORDER BY sqi.item_code) AS idx, sq.name AS doc_no, sq.status, sq.workflow_state ,sqi.name as item_id ,sqi.item_code as kode_barang, sqi.item_name nama_barang, i.`last_purchase_rate` AS harga_terakhir,i.`stock_uom` as satuan, sqi.notes as notes_sq,sqi.`custom_merk` as merk, sqi.`custom_country` as country,sqi.`description` as spesifikasi,sqi.`qty` as jumlah, sqi.`rate` as harga, sqi.`amount` as sub_total, s.supplier_name as supplier ,sqi.name as child_name
 		FROM `tabSupplier Quotation` sq
 		JOIN `tabSupplier Quotation Item` sqi ON sqi.parent = sq.name
+		JOIN `tabSupplier` s on s.name = sq.supplier
 		JOIN `tabItem` i ON i.`name` = sqi.`item_code`
 		{where_clause}
 		ORDER BY sqi.`item_code`,sq.`supplier`,sq.`name`;
@@ -168,6 +159,9 @@ def get_table_data(args):
 			if index is not None:
 				for sup_field in supplier_fields:
 					result[index][f"{title}_{sup_field}"] = data[sup_field]
+				
+				result[index][f"{title}_status"] = data.status
+				result[index][f"{title}_workflow_state"] = data.workflow_state
 			else:
 				for st_field in static_fields:
 					dict_data[st_field] = ""
@@ -177,8 +171,10 @@ def get_table_data(args):
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
 				dict_data.notes_pr_sr, dict_data.asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
+				dict_data[f"{title}_status"] = data.status
+				dict_data[f"{title}_workflow_state"] = data.workflow_state
+
 				dict_data.notes_sq = data.notes_sq
-				dict_data.status = data.status
 				dict_data.mark = data.kode_barang
 				result.append(dict_data)
 		else:
@@ -191,7 +187,9 @@ def get_table_data(args):
 
 			dict_data.notes_pr_sr, dict_data.asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
 			dict_data.notes_sq = data.notes_sq
-			dict_data.status = data.status
+			dict_data[f"{title}_status"] = data.status
+			dict_data[f"{title}_workflow_state"] = data.workflow_state
+
 			dict_data.mark = data.kode_barang
 
 			result.append(dict_data)
@@ -225,7 +223,6 @@ def submit_sq(name):
 	doc = get_doc_ignore_perm("Supplier Quotation",name)
 	doc.submit()
 
-# create sq from comparasion
 @frappe.whitelist()
 def comparasion_create_sq(pr_sr,items):
 	items = json.loads(items)
@@ -242,6 +239,7 @@ def comparasion_create_sq(pr_sr,items):
 		copy_doc.valid_till = today()
 		copy_doc.status = "Draft"
 		copy_doc.items = []
+		copy_doc.workflow_state = "Draft"
 		
 		return copy_doc,warehouse,name
 
@@ -250,6 +248,7 @@ def comparasion_create_sq(pr_sr,items):
 		if ref_name != item['doc_no'] :
 			new_doc.insert()
 			new_doc.submit()
+			frappe.db.set_value(new_doc.doctype,new_doc.name,"workflow_state","Approved")
 			except_name.append(new_doc.name)
 			new_doc,warehouse,ref_name = init_new_doc(item['doc_no'])
 
@@ -265,7 +264,7 @@ def comparasion_create_sq(pr_sr,items):
 		child.warehouse = warehouse
 		child.material_request = new_doc.custom_material_request
 
-	new_doc.insert()
+	new_doc.insert(ignore_mandatory=True)
 	new_doc.submit()
 	except_name.append(new_doc.name)
 
@@ -308,9 +307,9 @@ def debug_create_po():
 		}
 	]
 
-	comparasion_create_sq(pr_sr,items)
+	comparasion_create_sq(pr_sr,json.dumps(items))
 
-# End
+# End Method for komparasi
 
 @frappe.whitelist()
 def return_status_absensi():
@@ -339,3 +338,8 @@ def return_status_absensi():
 		})
 	
 	return status_attendance
+
+
+@frappe.whitelist()
+def get_stock_item(item_code,warehouse):
+	return frappe.db.get_value("Bin",{"warehouse":warehouse,"item_code":item_code},"actual_qty")
