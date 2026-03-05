@@ -214,12 +214,23 @@ def create_payment_voucher(source_name, target_doc=None):
 	
 	def set_missing_values(source, target):
 		unit_doc = frappe.get_doc("Unit", source.unit)
-		if not unit_doc.bank_account:
-			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
+		# if not unit_doc.bank_account:
+		# 	frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
+		# target.paid_to = unit_doc.bank_account
 		
-		target.paid_to = unit_doc.bank_account
 		target.payment_type = "Internal Transfer"
-		target.paid_from = "1111001 - KAS HO - TML"
+		# target.paid_to = unit_doc.bank_account
+		# target.paid_from = "1111001 - KAS HO - TML"
+
+		settings = frappe.get_doc("PDO Account Settings")
+		account_row = next(
+			(row for row in settings.pdo_account_settings_table if row.company == target.company),
+			None
+		)	
+
+		target.paid_from = account_row.kas_ho_account
+		target.paid_to = account_row.kas_dan_bank_dalam_perjalanan
+		
 		
 		total_amount = (
 			(source.grand_total_bahan_bakar or 0) +
@@ -238,7 +249,7 @@ def create_payment_voucher(source_name, target_doc=None):
 		target.source_exchange_rate = 1
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
-		target.tipe_transfer = ""
+		target.tipe_transfer = "PDO"
 		target.remarks = _("Payment for Permintaan Dana Operasional {0}").format(source.name)
 	
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
@@ -491,10 +502,15 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		target.received_amount = amount_field
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
-
+		target.tipe_transfer = "PDO"
 		target.payment_voucher_kas_pdo = []
 
 		target.paid_from = payment_voucher.paid_to
+
+		unit_doc = frappe.get_doc("Unit", source.unit)
+		if not unit_doc.bank_account:
+			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
+		target.paid_to = unit_doc.bank_account
 		
 		# Get child table data
 		child_data = getattr(source, child_table_name, [])
@@ -508,25 +524,34 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 			if not header_debit_account:
 				frappe.throw(_("Debit account field {0} not found in source document").format(header_debit_field))
 		
+		settings = frappe.get_doc("PDO Account Settings")
+		account_row = next(
+			(row for row in settings.pdo_account_settings_table if row.company == target.company),
+			None
+		)	
+
 		# Add rows to payment_voucher_kas_pdo table
 		for row in child_data:
 			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
 			amount = getattr(row, amount_field, 0) if hasattr(row, amount_field) else 0
 			
-			# Determine debit account
-			if header_debit_field:
-				# Use header field (for Bahan Bakar)
-				debit_account = header_debit_account
-				if not target.paid_to:
-					target.paid_to = debit_account
-			else:
-				# Use child table field (for other types)
-				debit_account = getattr(row, debit_account_field, None) if hasattr(row, debit_account_field) else None
-				if not debit_account:
-					frappe.throw(_("Debit account not found for row {0} in {1}").format(row.idx, tipe_pdo))
+			debit_account = account_row.kas_dan_bank_dalam_perjalanan
 
-				if not target.paid_to:
-					target.paid_to = debit_account
+			# # Determine debit account
+			# if header_debit_field:
+			# 	# Use header field (for Bahan Bakar)
+			# 	debit_account = header_debit_account
+			# 	if not target.paid_to:
+			# 		target.paid_to = debit_account
+			# else:
+			# 	# Use child table field (for other types)
+			# 	debit_account = getattr(row, debit_account_field, None) if hasattr(row, debit_account_field) else None
+
+			# 	if not debit_account:
+			# 		frappe.throw(_("Debit account not found for row {0} in {1}").format(row.idx, tipe_pdo))
+
+			# 	if not target.paid_to:
+			# 		target.paid_to = debit_account
 			
 			target.append('payment_voucher_kas_pdo', {
 				'no_pdo': source.name,

@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "creation": "2026-03-05 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled_companies_section",
+  "enabled_companies"
+ ],
+ "fields": [
+  {
+   "fieldname": "enabled_companies_section",
+   "fieldtype": "Section Break",
+   "label": "Enabled Companies"
+  },
+  {
+   "fieldname": "enabled_companies",
+   "fieldtype": "Table",
+   "label": "Enabled Companies",
+   "options": "Procurement Valuation Company"
+  }
+ ],
+ "is_single": 1,
+ "issingle": 1,
+ "label": "Procurement Valuation Rate Settings",
+ "module": "Procurement STH",
+ "name": "Procurement Valuation Rate Settings",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

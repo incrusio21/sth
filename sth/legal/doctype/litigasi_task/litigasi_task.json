@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "tanggal",
   "task",
   "subject",
   "progress"
@@ -32,13 +33,21 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Progress"
+  },
+  {
+   "default": "Now",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Tanggal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-04 14:08:03.513863",
+ "modified": "2026-03-05 16:18:58.172745",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Litigasi Task",

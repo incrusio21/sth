@@ -105,7 +105,7 @@ def get_history_purchase_item(nama_barang):
     from erpnext.accounts.utils import get_fiscal_year
     today = frappe.utils.today()
     fiscal_year = get_fiscal_year(date=today,boolean=True)
-    start_year = fiscal_year[1]
+    start_year = fiscal_year[0][1]
 
     return frappe.db.sql("""
         SELECT poi.item_code, poi.item_name, po.name as no_po, po.transaction_date as tanggal_po, poi.qty, poi.custom_merk as merk, 

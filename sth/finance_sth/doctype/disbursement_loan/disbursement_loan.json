@@ -29,6 +29,7 @@
   "reference_name",
   "reference_doc_detail",
   "reference_name_detail",
+  "payment_voucher",
   "amended_from"
  ],
  "fields": [
@@ -57,29 +58,25 @@
   },
   {
    "fieldname": "reference_doc",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Reference Document",
-   "options": "DocType",
    "read_only": 1
   },
   {
    "fieldname": "reference_name",
-   "fieldtype": "Dynamic Link",
+   "fieldtype": "Data",
    "label": "Reference Name",
-   "options": "reference_doc",
    "read_only": 1
   },
   {
    "fieldname": "reference_doc_detail",
-   "fieldtype": "Link",
-   "label": "Reference Document Detail",
-   "options": "DocType"
+   "fieldtype": "Data",
+   "label": "Reference Document Detail"
   },
   {
    "fieldname": "reference_name_detail",
-   "fieldtype": "Dynamic Link",
+   "fieldtype": "Data",
    "label": "Reference Name Detail",
-   "options": "reference_doc_detail",
    "read_only": 1
   },
   {
@@ -188,13 +185,18 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "payment_voucher",
+   "fieldtype": "Data",
+   "label": "Payment Voucher"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 14:05:04.106322",
+ "modified": "2026-03-06 00:25:34.478200",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Disbursement Loan",

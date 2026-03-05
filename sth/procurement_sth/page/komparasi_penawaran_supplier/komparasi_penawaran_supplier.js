@@ -352,14 +352,26 @@ class SupplierComparasion {
 					const row = cell.getRow().getData();
 					if (row.kode_barang) {
 						frappe.xcall("sth.procurement_sth.doctype.pengeluaran_barang.pengeluaran_barang.get_report_pemakaian_material",
-							{ nama_barang: row.kode_barang })
+							{ kode_barang: row.kode_barang })
 							.then((res) => {
 								me.showHistory(res, "out")
 							})
 					}
 				}
 			},
-			{ title: "Nama Barang", field: "nama_barang", headerSort: false, frozen: true, width: 120, headerHozAlign: "center", },
+			{
+				title: "Nama Barang", field: "nama_barang", headerSort: false, frozen: true, width: 120, headerHozAlign: "center",
+				cellClick: function (e, cell) {
+					const row = cell.getRow().getData();
+					if (row.nama_barang) {
+						frappe.xcall("sth.buying_sth.custom.purchase_order.get_history_purchase_item",
+							{ nama_barang: row.nama_barang })
+							.then((res) => {
+								me.showHistory(res, "purchase")
+							})
+					}
+				}
+			},
 			{ title: "Satuan", field: "satuan", headerSort: false, frozen: true, headerHozAlign: "center", },
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
 			{ title: "Notes SQ", field: "notes_sq", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
@@ -530,13 +542,13 @@ class SupplierComparasion {
 	showHistory(data, type) {
 		let func = null
 		let title = ""
-		if ("out") {
+		if (type == "out") {
 			title = "Pemakaian Material"
 			func = this.initTablePamakaianMaterial.bind(this)
-		} else if ("purchase") {
+		} else if (type == "purchase") {
 			title = "Pembelian Terakhir"
 			func = this.initTablePembelianMaterial.bind(this)
-		} else if ("asset") {
+		} else if (type == "asset") {
 
 		}
 
@@ -560,12 +572,13 @@ class SupplierComparasion {
 		const wrapper = d.get_field('data').$wrapper
 		if (!wrapper.find("#table-history").length) {
 			wrapper.append(`<div id="table-history" class='komparasion-style'></div>`)
-			if (this.table_history) {
-				this.table_history.destroy()
-			}
-
-			func(wrapper.find('#table-history')[0], data)
 		}
+
+		if (this.table_history) {
+			this.table_history.destroy()
+		}
+
+		func(wrapper.find('#table-history')[0], data)
 	}
 
 	initials(text) {

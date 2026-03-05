@@ -227,6 +227,7 @@
    "fieldname": "disbursements",
    "fieldtype": "Table",
    "label": "List Pencairan",
+   "no_copy": 1,
    "options": "Disbursement Loan Bank"
   },
   {
@@ -242,6 +243,7 @@
    "fieldname": "installments",
    "fieldtype": "Table",
    "label": "List Angsuran",
+   "no_copy": 1,
    "options": "Installment Loan Bank"
   },
   {
@@ -390,7 +392,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-20 15:54:49.275461",
+ "modified": "2026-03-06 00:10:34.272328",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Loan Bank",

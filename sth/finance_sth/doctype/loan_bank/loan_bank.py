@@ -60,17 +60,19 @@ class LoanBank(Document):
 			doc = frappe.get_doc("Disbursement Loan", row.disbursement_number)
 			doc.submit()
 
-		for row in self.disbursements:
+		for row in self.installments:
 			doc = frappe.get_doc("Installment Loan", row.disbursement_number)
 			doc.submit()
 
 	def process_child_cancel(self):
 		for row in self.disbursements:
 			doc = frappe.get_doc("Disbursement Loan", row.disbursement_number)
+			doc.flags.ignore_links = True
 			doc.cancel()
 
-		for row in self.disbursements:
+		for row in self.installments:
 			doc = frappe.get_doc("Installment Loan", row.disbursement_number)
+			doc.flags.ignore_links = True
 			doc.cancel()
 
 def create_disbursement(parent, loan_bank, submit=False):

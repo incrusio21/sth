@@ -137,7 +137,7 @@ class PengeluaranBarang(Document):
 		
 
 @frappe.whitelist()
-def get_report_pemakaian_material(nama_barang):
+def get_report_pemakaian_material(kode_barang):
 	from erpnext.accounts.utils import get_fiscal_year
 	today = frappe.utils.today()
 	fiscal_year = get_fiscal_year(date=today,boolean=True)
@@ -151,6 +151,6 @@ def get_report_pemakaian_material(nama_barang):
 		JOIN `tabPengeluaran Barang Item` pbi on pbi.parent  = pb.name 
 		JOIN `tabItem` i on i.name = pbi.kode_barang 
 		JOIN `tabItem Group` ig on i.kelompok_barang = ig.name
-		where pb.docstatus = 1 and pbi.item_name = %s AND pb.tanggal BETWEEN %s AND %s
+		where pb.docstatus = 1 and pbi.kode_barang = %s AND pb.tanggal BETWEEN %s AND %s
 		order by pb.tanggal,pb.name
 	""",(nama_barang,start_year,today),as_dict=True)

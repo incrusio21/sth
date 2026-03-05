@@ -303,7 +303,8 @@ doc_events = {
 		"before_save": "sth.buying_sth.custom.purchase_order.set_accept_day"
 	},
 	"Purchase Receipt": {
-		"validate": "sth.custom.purchase_receipt.set_purchase_order_if_exist"
+		"validate": ["sth.custom.purchase_receipt.set_purchase_order_if_exist","sth.custom.purchase_receipt.validate_val_proc"],
+		"before_submit": ["sth.custom.purchase_receipt.validate_val_proc"],
 	},
 	"Purchase Invoice": {
 		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim"],
