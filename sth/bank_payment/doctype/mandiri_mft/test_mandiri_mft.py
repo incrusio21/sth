@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestPaymenttoExcel(FrappeTestCase):
+class TestMandiriMFT(FrappeTestCase):
 	pass

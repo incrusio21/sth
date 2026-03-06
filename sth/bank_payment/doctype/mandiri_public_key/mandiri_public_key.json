@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2026-03-05 12:29:25.240304",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default",
+  "mft_server",
+  "recipient_email",
+  "recipient_name",
+  "fingerprint",
+  "column_break_cbpt",
+  "public_key"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "default",
+   "fieldtype": "Check",
+   "label": "Default"
+  },
+  {
+   "fieldname": "public_key",
+   "fieldtype": "Text",
+   "label": "Public Key"
+  },
+  {
+   "fieldname": "column_break_cbpt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recipient_email",
+   "fieldtype": "Data",
+   "label": "Recipient Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recipient_name",
+   "fieldtype": "Data",
+   "label": "Recipient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fingerprint",
+   "fieldtype": "Data",
+   "label": "Fingerprint",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mft_server",
+   "fieldtype": "Link",
+   "label": "MFT Server",
+   "options": "Mandiri MFT"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-05 15:01:16.780085",
+ "modified_by": "Administrator",
+ "module": "Bank Payment",
+ "name": "Mandiri Public Key",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -279,7 +279,14 @@ doc_events = {
 		"validate": [
 			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
 		],
-		"on_submit": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_submit_pdo"],
+		"on_submit": [
+            "sth.custom.payment_entry.update_check_book", 
+            "sth.custom.payment_entry.update_status_deposito", 
+            "sth.custom.payment_entry.update_status_loan_bank", 
+            "sth.custom.payment_entry.update_status_dividen", 
+            "sth.overrides.payment_entry.on_submit_pdo",
+            # "sth.bank_payment.custom.payment_entry.make_entry"
+        ],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_cancel_pdo"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},

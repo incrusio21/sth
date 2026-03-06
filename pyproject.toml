@@ -10,7 +10,9 @@ dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
     "pandas~=2.3.3",
-    "reportlab~=4.4.9"
+    "reportlab~=4.4.9",
+    "python-gnupg~=0.5.6",
+    "paramiko~=4.0.0",
 ]
 
 [build-system]
