@@ -143,6 +143,10 @@ def get_data(filters):
 		employee_filters["name"] = employee
 	if filters.get("unit"):
 		employee_filters["unit"] = filters.get("unit")
+	if filters.get("grade"):
+		employee_filters["grade"] = filters.get("grade")
+	if filters.get("designation"):
+		employee_filters["designation"] = filters.get("designation")
 	
 	employees = frappe.get_all("Employee", 
 		filters=employee_filters,

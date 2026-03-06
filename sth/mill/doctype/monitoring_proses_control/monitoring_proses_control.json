@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:SHIFT-STRL-{tgl}-{#####}",
  "creation": "2026-01-21 09:43:43.762570",
@@ -85,7 +86,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-29 14:59:38.387481",
+ "modified": "2026-02-27 11:31:28.913646",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring Proses Control",

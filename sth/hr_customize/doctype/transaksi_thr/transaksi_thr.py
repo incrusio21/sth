@@ -41,13 +41,13 @@ class TransaksiTHR(AccountsController):
 
 	def make_employee_payment_log(self, emp):
 		doc = frappe.new_doc("Employee Payment Log")
-		doc.employee = self.employee
+		doc.employee = emp.employee
 		doc.company = self.company
 		doc.posting_date = self.posting_date
 		doc.payroll_date = self.posting_date
 		doc.hari_kerja = 0
 		doc.status = "Approved"
-		doc.amount = self.grand_total
+		doc.amount = flt(emp.subtotal)
 		doc.salary_component = self.earning_thr_component
 		doc.against_salary_component = self.deduction_thr_component
 
@@ -239,7 +239,7 @@ class TransaksiTHR(AccountsController):
 			)
 
 			# jumlah hari dalam bulan
-			posting_date = getdate(today())
+			posting_date = getdate(self.posting_date)
 			days_in_month = calendar.monthrange(posting_date.year, posting_date.month)[1]
 
 			# context untuk formula

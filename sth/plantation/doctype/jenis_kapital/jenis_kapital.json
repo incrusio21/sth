@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:jenis_kapital",
  "creation": "2025-07-17 11:18:00.709365",
@@ -26,7 +27,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-18 11:49:32.071249",
+ "modified": "2026-02-27 10:04:17.321642",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Jenis Kapital",

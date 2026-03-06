@@ -18,6 +18,7 @@ frappe.ui.form.on("Retur Ke Supplier", {
             return {
                 filters: {
                     is_group: 0,
+                    central: 1
                 }
             }
         })
@@ -31,20 +32,38 @@ frappe.ui.form.on("Retur Ke Supplier", {
             return
         }
 
-        frm.call("get_items", { freeze: true, freeze_message: "Getting data..." }).then((res) => {
-            frappe.model.sync(res)
-            frm.refresh()
-            frm.trigger('calculate_jumlah_retur')
+        frm.call("get_data", { freeze: true, freeze_message: "Getting data..." }).then((res) => {
+            frappe.run_serially([
+                () => frm.refresh(),
+                () => frm.trigger('set_available_stock'),
+            ])
         })
     },
 
-    calculate_jumlah_retur(frm) {
-        let jumlah = 0
-        for (const row of frm.doc.items) {
-            jumlah += row.jumlah
+    gudang(frm) {
+        frm.trigger('set_available_stock')
+    },
+
+    set_available_stock(frm) {
+        for (const item of frm.doc.items) {
+            if (!frm.doc.gudang || !item.kode_barang) {
+                frappe.model.set_value(item.doctype, item.name, "stock_saat_ini", 0)
+            } else {
+                frappe.xcall("sth.api.get_stock_item", { item_code: item.kode_barang, warehouse: frm.doc.gudang })
+                    .then((res) => {
+                        frappe.model.set_value(item.doctype, item.name, "stock_saat_ini", res)
+                    })
+            }
         }
-        frm.set_value("jumlah_retur", jumlah)
     }
+
+    // calculate_jumlah_retur(frm) {
+    //     let jumlah = 0
+    //     for (const row of frm.doc.items) {
+    //         jumlah += row.jumlah
+    //     }
+    //     frm.set_value("jumlah_retur", jumlah)
+    // }
 });
 
 
@@ -54,3 +73,8 @@ frappe.ui.form.on("Retur Supplier Item", {
         frm.trigger('calculate_jumlah_retur')
     }
 })
+
+
+frappe.form.link_formatters['Item'] = function (value, doc) {
+    return doc.kode_barang || doc.nama_barang
+}

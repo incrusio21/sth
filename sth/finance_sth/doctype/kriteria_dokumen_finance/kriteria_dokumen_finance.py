@@ -37,7 +37,7 @@ def delete_kriteria_upload_document(self, method):
 
 def validate_mandatory_document(self, method):
 	# skip jika doctype tidak memiliki document kriteria
-	if not frappe.db.exists("Kriteria Dokumen Finance", {"dokumen_finance": self.doctype}):
+	if not frappe.db.exists("Kriteria Dokumen Finance", {"dokumen_finance": self.doctype}) or frappe.flags.skip_validate_file:
 		return
 	
 	parent = frappe.qb.DocType("Kriteria Upload Document")

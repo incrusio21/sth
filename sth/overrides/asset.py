@@ -76,6 +76,20 @@ class Asset(Asset):
 		total_number_of_depreciations: DF.Int
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
+
+	def validate(self):
+		super().validate()
+
+		if self.asset_category:
+			create_vra_progress = frappe.get_cached_value(
+				"Asset Category",
+				self.asset_category,
+				"create_vra_progress"
+			)
+
+			if create_vra_progress and not self.operator:
+				frappe.throw("Asset Category membuat VRA Progress. Operator wajib diisi")
+				
 	def make_asset_movement(self):
 		reference_doctype = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
 		reference_docname = self.purchase_receipt or self.purchase_invoice

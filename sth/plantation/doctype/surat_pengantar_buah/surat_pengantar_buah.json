@@ -11,17 +11,22 @@
   "naming_series",
   "unit",
   "divisi",
-  "kendaraan",
-  "no_polisi",
   "kerani_panen",
   "column_break_bvfg",
   "posting_date",
   "company",
   "pabrik",
   "pabrik_type",
-  "amended_from",
   "tujuan_pks",
   "blok",
+  "amended_from",
+  "section_break_soyq",
+  "tipe_kendaraan",
+  "kendaraan",
+  "kendaraan_eksternal",
+  "driver_eksternal",
+  "column_break_lcgj",
+  "no_polisi",
   "section_break_xfoy",
   "column_break_dwtw",
   "in_time",
@@ -87,7 +92,7 @@
    "fieldname": "pabrik_type",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Pabrik Type",
+   "label": "Tipe Pabrik",
    "read_only": 1
   },
   {
@@ -105,12 +110,13 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.tipe_kendaraan == \"Internal\"",
    "fieldname": "kendaraan",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kendaraan",
-   "options": "Alat Berat Dan Kendaraan",
-   "reqd": 1
+   "in_preview": 1,
+   "label": "Kendaraan Internal",
+   "options": "Alat Berat Dan Kendaraan"
   },
   {
    "fieldname": "unit",
@@ -188,11 +194,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "kendaraan.no_pol",
    "fieldname": "no_polisi",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "No Polisi"
+   "label": "No Polisi",
+   "read_only": 1
   },
   {
    "fieldname": "total_weight",
@@ -290,11 +296,13 @@
   {
    "fieldname": "tujuan_pks",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tujuan PKS"
   },
   {
    "fieldname": "blok",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Blok",
    "options": "Blok"
   },
@@ -302,13 +310,44 @@
    "fieldname": "total_brondolan",
    "fieldtype": "Float",
    "label": "Total Brondolan"
+  },
+  {
+   "fieldname": "tipe_kendaraan",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Tipe Kendaraan",
+   "options": "Internal\nEksternal"
+  },
+  {
+   "depends_on": "eval:doc.tipe_kendaraan == \"Eksternal\"",
+   "fieldname": "kendaraan_eksternal",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kendaraan Eksternal",
+   "options": "Driver"
+  },
+  {
+   "fetch_from": "kendaraan_eksternal.full_name",
+   "fieldname": "driver_eksternal",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Driver Eksternal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_soyq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lcgj",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-20 01:41:08.316096",
+ "modified": "2026-03-05 10:56:34.757398",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

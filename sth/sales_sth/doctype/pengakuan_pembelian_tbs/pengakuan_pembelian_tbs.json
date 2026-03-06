@@ -21,11 +21,25 @@
   "percent",
   "bonus",
   "subsidi_angkut",
+  "keterangan",
   "section_break_mdbx",
   "get_data",
   "items",
   "document_reference",
-  "amended_from"
+  "amended_from",
+  "section_break_eofa",
+  "total_bruto",
+  "total_terima",
+  "total_pembayaran_ke_supplier",
+  "column_break_imqg",
+  "total_tarra",
+  "total_bonus",
+  "column_break_ybsa",
+  "total_netto",
+  "total_seluruhnya",
+  "column_break_owad",
+  "total_potkg",
+  "total_pajak_pph_22"
  ],
  "fields": [
   {
@@ -131,9 +145,8 @@
   {
    "default": "0",
    "fieldname": "subsidi_angkut",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Subsidi Angkut (kg)"
+   "fieldtype": "Currency",
+   "label": "Subsidi Angkut (rupiah)"
   },
   {
    "default": "Today",
@@ -154,15 +167,90 @@
    "fieldname": "jarak_ring",
    "fieldtype": "Select",
    "label": "Jarak",
-   "options": "\nRING 1\nRING 2",
-   "reqd": 1
+   "options": "\nRING 1\nRING 2"
+  },
+  {
+   "fieldname": "section_break_eofa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_bruto",
+   "fieldtype": "Float",
+   "label": "Total Bruto",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_imqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tarra",
+   "fieldtype": "Float",
+   "label": "Total Tarra",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ybsa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_netto",
+   "fieldtype": "Float",
+   "label": "Total Netto",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_owad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_potkg",
+   "fieldtype": "Float",
+   "label": "Total POT(KG)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_terima",
+   "fieldtype": "Float",
+   "label": "Total Terima",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_pembayaran_ke_supplier",
+   "fieldtype": "Currency",
+   "label": "Total Pembayaran Ke Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_bonus",
+   "fieldtype": "Currency",
+   "label": "Total Bonus",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_seluruhnya",
+   "fieldtype": "Currency",
+   "label": "Total Seluruhnya",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_pajak_pph_22",
+   "fieldtype": "Currency",
+   "label": "Total Pajak PPH 22",
+   "read_only": 1
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-15 22:06:07.235046",
+ "modified": "2026-03-04 11:31:50.984584",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",

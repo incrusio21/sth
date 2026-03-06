@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:nk",
  "creation": "2025-09-12 15:49:12.347348",
@@ -22,7 +23,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-12 15:49:20.523405",
+ "modified": "2026-02-27 11:18:13.357649",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Kecamatan",

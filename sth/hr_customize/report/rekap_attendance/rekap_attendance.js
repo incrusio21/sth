@@ -34,6 +34,18 @@ frappe.query_reports["Rekap Attendance"] = {
             "label": __("Unit"),
             "fieldtype": "Link",
             "options": "Unit"
-        }
+        },
+        {
+            "fieldname": "grade",
+            "label": __("Golongan"),
+            "fieldtype": "Link",
+            "options": "Employee Grade",
+        },
+        {
+            "fieldname": "designation",
+            "label": __("Jabatan"),
+            "fieldtype": "Link",
+            "options": "Designation",
+        },
     ]
 };

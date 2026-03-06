@@ -3,7 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-09-10 13:54:47.401911",
- "default_view": "Report",
+ "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -25,7 +25,9 @@
   "tgl_ptsn",
   "ket",
   "amar_putusan",
-  "file_dokumen"
+  "file_dokumen",
+  "task_tab",
+  "litigasi_task"
  ],
  "fields": [
   {
@@ -138,12 +140,23 @@
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Lokasi"
+  },
+  {
+   "fieldname": "task_tab",
+   "fieldtype": "Tab Break",
+   "label": "Task"
+  },
+  {
+   "fieldname": "litigasi_task",
+   "fieldtype": "Table",
+   "label": "Litigasi Task",
+   "options": "Litigasi Task"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-09 16:37:59.460823",
+ "modified": "2026-03-04 15:29:59.505144",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Litigasi",

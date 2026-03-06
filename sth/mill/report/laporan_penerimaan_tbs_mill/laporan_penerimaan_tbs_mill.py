@@ -196,7 +196,7 @@ def get_data_external(filters):
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
-		JOIN `tabSupplier` s ON s.name = t.supplier
+		LEFT JOIN `tabSupplier` s ON s.name = t.supplier
 		WHERE t.receive_type = "TBS Eksternal" AND t.supplier IS NOT NULL {};
 	""".format(conditions), filters, as_dict=True)
 
@@ -238,7 +238,7 @@ def get_data_internal(filters):
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
-		JOIN `tabSurat Pengantar Buah` as spb ON spb.name = t.spb
+		LEFT JOIN `tabSurat Pengantar Buah` as spb ON spb.name = t.spb
 		WHERE t.receive_type = "TBS Internal" AND t.spb IS NOT NULL {};
 	""".format(conditions), filters, as_dict=True)
 

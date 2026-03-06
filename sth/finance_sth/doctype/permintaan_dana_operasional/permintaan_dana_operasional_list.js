@@ -84,7 +84,7 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 
 function preview_dialog() {
 
-    const PDO_PRINT_FORMAT = "Standard";   
+    const PDO_PRINT_FORMAT = "PF Preview PDO";   
 
     let d = new frappe.ui.Dialog({
         title: __("Preview Permintaan Dana Operasional"),

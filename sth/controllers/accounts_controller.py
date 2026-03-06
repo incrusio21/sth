@@ -82,6 +82,9 @@ class AccountsController(Document):
 	def validate_credit_to_acc(self):
 		if not self.meta.has_field(self._party_account_field):
 			return
+
+		if self.doctype == "Disbursement Loan":
+			return
 		
 		# if not self.credit_to:
 		#     self.credit_to = get_party_account("Supplier", self.supplier, self.company)

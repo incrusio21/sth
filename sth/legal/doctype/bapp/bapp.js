@@ -41,6 +41,14 @@ frappe.ui.form.on("BAPP", {
 				filters: { company: frm.doc.company },
 			};
 		});
+
+		frm.set_query("termin", function (doc) {
+			return {
+				filters: {
+					for_proposal: 1,
+				},
+			};
+		});
 	},
 	onload: function (frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {

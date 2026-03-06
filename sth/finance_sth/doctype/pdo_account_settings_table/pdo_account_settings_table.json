@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-05 21:46:08.124588",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "kas_ho_account",
+  "kas_dan_bank_dalam_perjalanan"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "kas_ho_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kas HO Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "kas_dan_bank_dalam_perjalanan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kas Dan Bank Dalam Perjalanan",
+   "options": "Account"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-05 21:47:46.085108",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "PDO Account Settings Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kd_item_bgt",
  "creation": "2025-07-24 10:11:58.327438",
@@ -79,7 +80,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-25 14:34:48.805704",
+ "modified": "2026-02-27 11:28:29.510151",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Item Budget",

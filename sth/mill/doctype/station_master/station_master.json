@@ -10,7 +10,9 @@
   "header_section",
   "naming_series",
   "machine_name",
-  "column_break_uknw"
+  "column_break_uknw",
+  "qr",
+  "qr_preview"
  ],
  "fields": [
   {
@@ -39,12 +41,23 @@
   {
    "fieldname": "column_break_uknw",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qr",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "QR"
+  },
+  {
+   "fieldname": "qr_preview",
+   "fieldtype": "HTML",
+   "label": "QR Preview"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-13 15:39:15.052958",
+ "modified": "2026-03-02 12:12:05.525546",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Station Master",

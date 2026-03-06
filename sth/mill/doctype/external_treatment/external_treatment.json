@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-02-25 13:37:03.735445",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_xffr",
+  "status",
+  "shift",
+  "section_break_npbh",
+  "operasi_pompa_injeksi_flowrate",
+  "level_air_water_basin",
+  "level_air_tower_tank",
+  "kejernihan_air_di_clarifier",
+  "back_wash_sand_filter",
+  "upload_foto_pressure_gauge",
+  "analisa_ph_air_ex_clarifier",
+  "analisa_conductivity_air_ex_clarifier"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "ET-.####"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_xffr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_npbh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "(Dalam satuan Kg/Jam)",
+   "fieldname": "operasi_pompa_injeksi_flowrate",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Operasi Pompa Injeksi Flowrate"
+  },
+  {
+   "fieldname": "level_air_water_basin",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Level Air Water Basin",
+   "options": "0\n1/4\n1/2\n3/4\nFull"
+  },
+  {
+   "fieldname": "level_air_tower_tank",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Level Air Tower Tank",
+   "options": "0\n1/4\n1/2\n3/4\nFull"
+  },
+  {
+   "fieldname": "kejernihan_air_di_clarifier",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Kejernihan Air di Clarifier",
+   "options": "Jernih\nTidak Jernih"
+  },
+  {
+   "description": " Tekanan Inlet dan Outlet dalam Satuan Barg",
+   "fieldname": "back_wash_sand_filter",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Back Wash Sand Filter"
+  },
+  {
+   "fieldname": "upload_foto_pressure_gauge",
+   "fieldtype": "Attach",
+   "in_preview": 1,
+   "label": "Upload Foto Pressure Gauge"
+  },
+  {
+   "description": "(Dalam Satuan Ph)",
+   "fieldname": "analisa_ph_air_ex_clarifier",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Analisa pH Air Ex. Clarifier"
+  },
+  {
+   "description": "(Dalam Satuan um)",
+   "fieldname": "analisa_conductivity_air_ex_clarifier",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Analisa Conductivity Air Ex. Clarifier "
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-02-25 13:51:28.412719",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "External Treatment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

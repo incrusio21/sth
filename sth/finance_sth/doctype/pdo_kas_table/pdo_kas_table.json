@@ -25,10 +25,8 @@
  "fields": [
   {
    "fieldname": "employee",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Pengguna",
-   "options": "Employee"
+   "fieldtype": "Data",
+   "label": "Pengguna"
   },
   {
    "fetch_from": "employee.designation",
@@ -143,7 +141,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-14 14:40:38.172500",
+ "modified": "2026-02-24 22:48:44.175381",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Table",

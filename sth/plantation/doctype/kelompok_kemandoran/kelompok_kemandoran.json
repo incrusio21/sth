@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kode",
  "creation": "2026-02-21 00:32:15.884150",
@@ -38,7 +39,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 00:33:11.685553",
+ "modified": "2026-02-27 10:41:33.464732",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kelompok Kemandoran",

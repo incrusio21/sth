@@ -261,3 +261,155 @@ def get_outstanding_reference_documents(args, validate=False):
 			del data[i]
 
 	return data
+
+def payment_entry_notification(doc, method):
+
+    for ref in doc.references:
+
+        if not ref.reference_doctype or not ref.reference_name:
+            continue
+
+        owner = frappe.db.get_value(
+            ref.reference_doctype,
+            ref.reference_name,
+            "owner"
+        )
+
+        if not owner:
+            continue
+
+        notification = frappe.get_doc({
+            "doctype": "Notification Log",
+            "subject": f"{ref.reference_doctype} {ref.reference_name} telah dibayarkan melalui {doc.name}",
+            "for_user": owner,
+            "type": "Alert",
+            "document_type": ref.reference_doctype,
+            "document_name": ref.reference_name
+        }).insert(ignore_permissions=True)
+
+        notification.notify_update()
+
+        frappe.publish_realtime(
+            event="notification",
+            message={"type": "Alert"},
+            user=owner
+        )
+
+
+def check_payment_notification(doc, method):
+
+	print("=== CHECK PAYMENT NOTIFICATION ===")
+	print("DocType:", doc.doctype)
+	print("DocName:", doc.name)
+
+	settings = frappe.get_all(
+		"Payment Notification Settings",
+		filters={"document_name": doc.doctype},
+		pluck="name"
+	)
+
+	print("Settings ditemukan:", settings)
+
+	if not settings:
+		print("STOP: Tidak ada setting")
+		return
+
+	meta = frappe.get_meta(doc.doctype)
+
+	print("Cek field outstanding_amount")
+
+	if not meta.has_field("outstanding_amount"):
+		print("STOP: Tidak ada field outstanding_amount di doctype")
+		return
+
+	outstanding = doc.get("outstanding_amount")
+
+	print("Outstanding Amount:", outstanding)
+
+	if not outstanding or outstanding <= 0:
+		print("STOP: Outstanding kosong atau <= 0")
+		return
+
+	roles = frappe.get_all(
+		"Payment Notification Roles",
+		filters={"parent": ["in", settings]},
+		pluck="role"
+	)
+
+	print("Roles ditemukan:", roles)
+
+	if not roles:
+		print("STOP: Tidak ada role")
+		return
+
+	users = frappe.get_all(
+		"Has Role",
+		filters={
+			"role": ["in", roles],
+			"parenttype": "User"
+		},
+		pluck="parent"
+	)
+
+	print("Users dari role:", users)
+
+	if not users:
+		print("STOP: Tidak ada user")
+		return
+
+	users = list(set(users))
+
+	print("Users final:", users)
+
+	for user in users:
+
+		enabled = frappe.db.get_value("User", user, "enabled")
+
+		print(f"User {user} enabled:", enabled)
+
+		if not enabled:
+			continue
+
+		exists = frappe.db.exists(
+			"Notification Log",
+			{
+				"for_user": user,
+				"document_type": doc.doctype,
+				"document_name": doc.name
+			}
+		)
+
+		if exists:
+			print("Notif sudah ada untuk:", user)
+			continue
+
+		print("Membuat notification untuk:", user)
+
+		notification = frappe.get_doc({
+			"doctype": "Notification Log",
+			"subject": f"{doc.doctype} {doc.name} memiliki outstanding belum di bayar",
+			"for_user": user,
+			"type": "Alert",
+			"document_type": doc.doctype,
+			"document_name": doc.name
+		}).insert(ignore_permissions=True)
+
+		print("Notification dibuat:", notification.name)
+
+		notification.notify_update()
+
+		frappe.publish_realtime(
+			event="notification",
+			message={"type": "Alert"},
+			user=user
+		)
+
+
+
+def test_check_payment_notification():
+	pass
+	# doc = frappe.get_doc("Purchase Invoice", "ACC-PINV-2026-00040")
+
+	# check_payment_notification(doc, "on_submit")
+
+	# print("TEST SELESAI")

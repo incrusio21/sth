@@ -17,6 +17,7 @@
   "project",
   "km",
   "kegiatan",
+  "nama_kegiatan",
   "jumlah_keluar"
  ],
  "fields": [
@@ -116,13 +117,22 @@
    "in_list_view": 1,
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "kegiatan.nm_kgt",
+   "fieldname": "nama_kegiatan",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Nama Kegiatan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-23 14:43:11.272647",
+ "modified": "2026-03-03 13:13:14.579916",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

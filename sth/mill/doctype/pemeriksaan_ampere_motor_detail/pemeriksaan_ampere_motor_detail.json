@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-03 15:27:04.642494",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "empty_bunch_press",
+  "hasil_inspeksi",
+  "foto_upload"
+ ],
+ "fields": [
+  {
+   "description": "Satuan dalam Ampere",
+   "fieldname": "hasil_inspeksi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Hasil Inspeksi"
+  },
+  {
+   "fieldname": "foto_upload",
+   "fieldtype": "Attach Image",
+   "label": "Foto Upload"
+  },
+  {
+   "fieldname": "empty_bunch_press",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Empty Bunch Press",
+   "options": "Mill Machine"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-03 15:28:30.945356",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Ampere Motor Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -15,8 +15,10 @@ class Sortasi(Document):
 
 		tim_doc.isi_komidel = self.isi_komidel
 		tim_doc.potongan_sortasi = potongan_sortasi
-		if tim_doc.isi_komidel:
-			tim_doc.jumlah_janjang = tim_doc.netto / tim_doc.isi_komidel
+
+		# dihitung ketika get tara
+		# if tim_doc.isi_komidel:
+		# 	tim_doc.jumlah_janjang = tim_doc.netto / tim_doc.isi_komidel
 			
 		tim_doc.netto_2 = tim_doc.netto - (tim_doc.netto * tim_doc.potongan_sortasi / 100)
 		tim_doc.db_update()

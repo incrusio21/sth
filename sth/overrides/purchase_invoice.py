@@ -267,6 +267,9 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 		return bapp_details_billed_amt
 
+	# def set_retensi_amount(self):
+	# 	self.retensi_amount = flt(self.net_total * self.retensi/100, self.precision("retensi_amount"))
+
 	def set_retensi_amount(self):
 		self.retensi_amount = flt(self.rounded_total or self.grand_total) \
 			if self.term_detail and self.payment_term in ("Retensi") \

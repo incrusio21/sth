@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 09:48:54.035477",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_eubw",
+  "status",
+  "tipe_service",
+  "section_break_gehm",
+  "nama_mesin",
+  "nama_stasiun",
+  "rencana_periode_service",
+  "periode_realisasi_service",
+  "hasil_service_yang_telah_dilakukan",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "JRSR-EXTN-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_eubw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "section_break_gehm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nama_mesin",
+   "fieldtype": "Link",
+   "label": "Nama Mesin",
+   "options": "Mesin"
+  },
+  {
+   "fieldname": "nama_stasiun",
+   "fieldtype": "Link",
+   "label": "Nama Stasiun",
+   "options": "Station Master"
+  },
+  {
+   "fieldname": "rencana_periode_service",
+   "fieldtype": "Date",
+   "label": "Rencana Periode Service"
+  },
+  {
+   "fieldname": "periode_realisasi_service",
+   "fieldtype": "Date",
+   "label": "Periode Realisasi Service"
+  },
+  {
+   "fieldname": "hasil_service_yang_telah_dilakukan",
+   "fieldtype": "Small Text",
+   "label": "Hasil Service yang Telah Dilakukan"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Jadwal dan realisasi service Rutin External",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tipe_service",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Tipe Service",
+   "options": "Internal\nEksternal"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-02 14:10:02.120794",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Jadwal dan realisasi service Rutin External",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

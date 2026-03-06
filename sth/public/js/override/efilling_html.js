@@ -1,5 +1,5 @@
 
-$(document).on('form-refresh', function(e, frm) {
+$(document).on('form-refresh', function (e, frm) {
 	// Skip unsaved docs
 	if (frm.is_new()) return;
 
@@ -12,9 +12,9 @@ $(document).on('form-refresh', function(e, frm) {
 
 
 async function render_kriteria_upload(frm) {
-	const $wrapper     = $(frm.fields_dict['kriteria_upload_html'].wrapper);
+	const $wrapper = $(frm.fields_dict['kriteria_upload_html'].wrapper);
 	const voucher_type = frm.doctype;
-	const voucher_no   = frm.doc.name;
+	const voucher_no = frm.doc.name;
 
 	$wrapper.html(`
 		<div style="padding:10px 0; color:#8D99AE; font-size:12px; font-family:monospace;">
@@ -26,7 +26,7 @@ async function render_kriteria_upload(frm) {
 		const result = await frappe.db.get_list('Kriteria Upload Document', {
 			filters: {
 				voucher_type: voucher_type,
-				voucher_no:   voucher_no
+				voucher_no: voucher_no
 			},
 			fields: ['name'],
 			limit: 1
@@ -45,8 +45,8 @@ async function render_kriteria_upload(frm) {
 		}
 
 		const doc_name = result[0].name;
-		const doc      = await frappe.db.get_doc('Kriteria Upload Document', doc_name);
-		const rows     = doc.file_upload || [];
+		const doc = await frappe.db.get_doc('Kriteria Upload Document', doc_name);
+		const rows = doc.file_upload || [];
 
 		if (rows.length === 0) {
 			$wrapper.html(`
@@ -62,7 +62,7 @@ async function render_kriteria_upload(frm) {
 
 		$wrapper.html(build_table_html(doc_name, rows));
 
-	} catch(err) {
+	} catch (err) {
 		$wrapper.html(`
 			<div style="
 				background:#FFF5F5; border:1px solid #FFC5C5; border-radius:6px;
@@ -78,7 +78,7 @@ async function render_kriteria_upload(frm) {
 
 function build_table_html(doc_name, rows) {
 	const rows_html = rows.map((row, idx) => {
-		const file_url  = resolve_file_url(row.upload_file);
+		const file_url = resolve_file_url(row.upload_file);
 		const file_cell = file_url
 			? `<a href="${file_url}" target="_blank" rel="noopener noreferrer" style="
 					display:inline-flex; align-items:center; gap:5px;
@@ -150,41 +150,41 @@ function file_icon() {
 			</svg>`;
 }
 
-function bikin_tombol_upload(frm){
-	if(!frm.is_new()){
-		frm.add_custom_button(__('Upload File'), function() {		
+function bikin_tombol_upload(frm) {
+	if (!frm.is_new()) {
+		frm.add_custom_button(__('Upload File'), function () {
 			let submited_condition = false
 			let kriteria_type = null
 
-			if(frm.doc.doctype == "Supplier"){
+			if (frm.doc.doctype == "Supplier") {
 				let skip_sppkp = "Not SPPKP"
 				let badan_usaha = "Non Koperasi"
 
 				if ((frm.doc.npwp_dan_sppkp_supplier || []).some(row => row.status_pkp)) {
 					skip_sppkp = "SPPKP";
 				}
-				if(frm.doc.badan_usaha == "Koperasi"){
+				if (frm.doc.badan_usaha == "Koperasi") {
 					badan_usaha = "Koperasi"
 				}
-				kriteria_type = badan_usaha+"-"+skip_sppkp
+				kriteria_type = badan_usaha + "-" + skip_sppkp
 
-				new sth.utils.EfillingSelector(frm, kriteria_type, submited_condition, (r) => {});
+				new sth.utils.EfillingSelector(frm, kriteria_type, submited_condition, (r) => { });
 			}
-			else if (frm.doc.doctype == "Ganti Rugi Lahan"){
+			else if (frm.doc.doctype == "Ganti Rugi Lahan") {
 				let submited_condition = frm.doc.docstatus > 0
-				if(frm.doc.jenis_biaya == "GRLTT" || !frm.doc.jenis_biaya){
+				if (frm.doc.jenis_biaya == "GRLTT" || !frm.doc.jenis_biaya) {
 					submited_condition = frm.doc.docstatus > 1
 				}
-				
+
 				kriteria_type = frm.doc.jenis_biaya || "GRLTT"
-				new sth.utils.EfillingSelector(frm, kriteria_type, submited_condition, (r) => {});
+				new sth.utils.EfillingSelector(frm, kriteria_type, submited_condition, (r) => { });
 
 			}
-			else{
-				new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => {});
+			else {
+				new sth.utils.EfillingSelector(frm, "", submited_condition, (r) => { });
 
 			}
-						
+
 		});
 	}
 }

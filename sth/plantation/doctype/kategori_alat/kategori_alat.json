@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:nm_ktg",
  "creation": "2025-07-04 13:27:04.067417",
@@ -64,7 +65,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 18:48:28.664468",
+ "modified": "2026-02-27 10:07:04.697938",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kategori Alat",

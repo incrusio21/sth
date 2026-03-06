@@ -127,20 +127,22 @@ def get_current_price(item_code, uom, price_list=None, supplier=None):
 	price = frappe.db.get_all(
 		"Item Price",
 		filters=filters,
-		fields=["price_list_rate", "modified"],
-		order_by="valid_from desc, modified desc",
+		fields=["name","price_list_rate", "modified"],
+		order_by="modified desc",
 		limit=1
 	)
 
 	if price:
 		return {
 			"rate": price[0].price_list_rate,
-			"modified": price[0].modified
+			"modified": price[0].modified,
+			"pl_name": price[0].name
 		}
 
 	return {
 		"rate": 0,
-		"modified": None
+		"modified": None,
+		"pl_name": None
 	}
 
 
@@ -256,13 +258,20 @@ def create_price_note_from_harga_beli_tbs(
 
 	jarak = (jarak or "").strip()
 
+	# if jarak:
+	# 	target_price_lists = [f"{unit} - {jarak}"]
+	# else:
+	# 	target_price_lists = [
+	# 		f"{unit} - RING 1",
+	# 		f"{unit} - RING 2"
+	# 	]
+
+	jarak = (jarak or "").strip()
+
 	if jarak:
 		target_price_lists = [f"{unit} - {jarak}"]
 	else:
-		target_price_lists = [
-			f"{unit} - RING 1",
-			f"{unit} - RING 2"
-		]
+		target_price_lists = [f"{unit} - TANPA RING"]
 
 	price_list_value = ", ".join(target_price_lists)
 	nama_supplier = ""

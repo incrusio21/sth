@@ -7,20 +7,21 @@ frappe.ui.form.on("Retur Ke Gudang", {
             return {
                 filters: {
                     return_percentage: ["<", "100"],
-                    pt_pemilik_barang: doc.pemilik
+                    pt_pemilik_barang: doc.pemilik,
+                    docstatus: 1
                 }
             }
         })
     },
 
-    calculate_retur(frm) {
-        let jumlah = 0
+    // calculate_retur(frm) {
+    //     let jumlah = 0
 
-        frm.doc.items.forEach((row) => {
-            jumlah += row.jumlah
-        })
-        frm.set_value("jumlah_retur", jumlah)
-    },
+    //     frm.doc.items.forEach((row) => {
+    //         jumlah += row.jumlah
+    //     })
+    //     frm.set_value("jumlah_retur", jumlah)
+    // },
 
     no_pengeluaran(frm) {
         if (!frm.doc.no_pengeluaran) {
@@ -29,7 +30,7 @@ frappe.ui.form.on("Retur Ke Gudang", {
 
         frm.call("set_items").then((res) => {
             frappe.model.sync(res)
-            frm.trigger('calculate_retur')
+            // frm.trigger('calculate_retur')
             frm.refresh()
         })
     }

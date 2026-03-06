@@ -69,9 +69,10 @@
   {
    "columns": 1,
    "fieldname": "kontak_person",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kontak Person"
+   "label": "Kontak Person",
+   "options": "Supplier Contact"
   },
   {
    "columns": 1,
@@ -117,7 +118,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-09 13:11:44.503731",
+ "modified": "2026-02-24 08:40:58.098816",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Alamat dan PIC",

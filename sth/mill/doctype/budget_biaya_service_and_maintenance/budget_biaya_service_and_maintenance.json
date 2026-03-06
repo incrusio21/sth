@@ -10,13 +10,12 @@
   "naming_series",
   "tanggal",
   "jam",
+  "company",
   "unit",
   "column_break_ydbf",
   "status",
   "shift",
   "section_break_zlnn",
-  "company",
-  "unit_pabrik",
   "nama_stasiun",
   "tahun_budget",
   "estimasi_kenaikan_harga_barang_",
@@ -34,12 +33,6 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
-  },
-  {
-   "fieldname": "unit_pabrik",
-   "fieldtype": "Link",
-   "label": "Unit Pabrik",
-   "options": "Unit"
   },
   {
    "fieldname": "tahun_budget",
@@ -155,7 +148,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:10:19.682223",
+ "modified": "2026-03-02 10:59:43.072569",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Biaya Service and Maintenance",

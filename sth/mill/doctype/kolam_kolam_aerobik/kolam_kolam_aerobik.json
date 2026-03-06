@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 11:43:27.803300",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_nbrx",
+  "status",
+  "shift",
+  "section_break_hevn",
+  "tanggal_pengecekan",
+  "unit_pabrik",
+  "hasil_pengukuran_ph",
+  "hasil_pengukuran_suhu_kolam",
+  "upload_foto"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "KAB-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_nbrx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_hevn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tanggal_pengecekan",
+   "fieldtype": "Date",
+   "label": "Tanggal Pengecekan"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Data",
+   "label": "Unit Pabrik"
+  },
+  {
+   "fieldname": "hasil_pengukuran_ph",
+   "fieldtype": "Data",
+   "label": "Hasil Pengukuran Ph"
+  },
+  {
+   "fieldname": "hasil_pengukuran_suhu_kolam",
+   "fieldtype": "Data",
+   "label": "Hasil Pengukuran Suhu Kolam"
+  },
+  {
+   "fieldname": "upload_foto",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 11:45:11.961100",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kolam Kolam Aerobik",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

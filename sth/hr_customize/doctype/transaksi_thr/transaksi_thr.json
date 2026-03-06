@@ -158,15 +158,19 @@
   {
    "fieldname": "salary_account",
    "fieldtype": "Link",
-   "label": "Salary Account",
+   "in_preview": 1,
+   "label": "Debit To",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "credit_to",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Credit To",
    "options": "Account",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -207,6 +211,7 @@
   {
    "fieldname": "earning_thr_component",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Earning THR Component",
    "options": "Salary Component",
    "read_only": 1
@@ -214,6 +219,7 @@
   {
    "fieldname": "deduction_thr_component",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Deduction THR Component",
    "options": "Salary Component",
    "read_only": 1
@@ -223,7 +229,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 10:08:10.078358",
+ "modified": "2026-02-28 09:12:48.900206",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Transaksi THR",

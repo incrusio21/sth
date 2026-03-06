@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-20 10:06:57.373190",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "column_break_mcww",
+  "company",
+  "unit",
+  "section_break_ypoc",
+  "jenis_pilihan_preventive_maintenance",
+  "periode_minggu",
+  "jenis_pemeriksaan_pilihan",
+  "lokasi_stasiun_pilihan",
+  "lokasi_mesin_pilihan",
+  "nama_dan_jenis_pekerjaan",
+  "nama_karyawan_dan_jabatan",
+  "nama_mesin_yang_diperbaiki",
+  "jam_kerja_section",
+  "jam_mulai",
+  "jam_selesai",
+  "total_jam",
+  "status_pekerjaan_section",
+  "hasil_pekerjaan"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PVT-MTN-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_ypoc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "jenis_pilihan_preventive_maintenance",
+   "fieldtype": "Select",
+   "label": "Jenis Pilihan Preventive Maintenance",
+   "options": "Mingguan\nBulanan"
+  },
+  {
+   "fieldname": "periode_minggu",
+   "fieldtype": "Select",
+   "label": "Periode Minggu",
+   "options": "\n1\n2\n3\n4"
+  },
+  {
+   "fieldname": "nama_karyawan_dan_jabatan",
+   "fieldtype": "Data",
+   "label": "Nama Karyawan dan Jabatan "
+  },
+  {
+   "fieldname": "nama_dan_jenis_pekerjaan",
+   "fieldtype": "Small Text",
+   "label": "Nama dan Jenis Pekerjaan"
+  },
+  {
+   "fieldname": "nama_mesin_yang_diperbaiki",
+   "fieldtype": "Data",
+   "label": "Nama Mesin yang Diperbaiki"
+  },
+  {
+   "fieldname": "lokasi_stasiun_pilihan",
+   "fieldtype": "Data",
+   "label": "Lokasi Stasiun Pilihan"
+  },
+  {
+   "fieldname": "lokasi_mesin_pilihan",
+   "fieldtype": "Data",
+   "label": "Lokasi Mesin Pilihan"
+  },
+  {
+   "fieldname": "jenis_pemeriksaan_pilihan",
+   "fieldtype": "Select",
+   "label": "Jenis Pemeriksaan Pilihan",
+   "options": "\nPreventif Maintenance\nMajor Maintenance\nCorrective Maintenance"
+  },
+  {
+   "fieldname": "jam_kerja_section",
+   "fieldtype": "Section Break",
+   "label": "Jam Kerja"
+  },
+  {
+   "fieldname": "jam_mulai",
+   "fieldtype": "Time",
+   "label": "Jam Mulai"
+  },
+  {
+   "fieldname": "jam_selesai",
+   "fieldtype": "Time",
+   "label": "Jam Selesai"
+  },
+  {
+   "fieldname": "total_jam",
+   "fieldtype": "Data",
+   "label": "Total Jam"
+  },
+  {
+   "fieldname": "status_pekerjaan_section",
+   "fieldtype": "Section Break",
+   "label": "Status Pekerjaan"
+  },
+  {
+   "default": "-",
+   "fieldname": "hasil_pekerjaan",
+   "fieldtype": "Select",
+   "label": "Hasil Pekerjaan",
+   "options": "-\nPending\nSelesai"
+  },
+  {
+   "fieldname": "column_break_mcww",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 14:32:38.641186",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Preventive Maintenance",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

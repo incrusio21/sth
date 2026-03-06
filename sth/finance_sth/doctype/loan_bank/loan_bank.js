@@ -10,6 +10,9 @@ frappe.ui.form.on("Loan Bank", {
             () => filterAccounting(frm),
             () => hideShowAngsuran(frm),
         ])
+        if(frm.is_new()){
+            setAccount(frm)
+        }
 	},
     availability_period(frm){
         calculateScheduleLoan(frm);
@@ -25,6 +28,9 @@ frappe.ui.form.on("Loan Bank", {
     },
     company(frm){
         setAccount(frm)
+    },
+    validate(frm){
+        return setAccount(frm)
     }
 });
 
@@ -420,15 +426,15 @@ function filterAccounting(frm) {
             }
         }
     })
-    frm.set_query('disbursement_debit_to', (doc) => {
-        return {
-            filters: {
-                account_type: "Receivable",
-                company: ["=", doc.company],
-                is_group: 0
-            }
-        }
-    })
+    // frm.set_query('disbursement_debit_to', (doc) => {
+    //     return {
+    //         filters: {
+    //             account_type: "Receivable",
+    //             company: ["=", doc.company],
+    //             is_group: 0
+    //         }
+    //     }
+    // })
     frm.set_query('installment_debit_to', (doc) => {
         return {
             filters: {
@@ -463,8 +469,14 @@ function recalculateGrace(frm) {
 
 async function setAccount(frm) {
     const resCompany = await frappe.db.get_value("Company", frm.doc.company, "*")
-    frm.set_value("disbursement_debit_to", resCompany.message.default_loan_bank_disbursement_account)
-    frm.set_value("expense_account", resCompany.message.default_loan_bank_expense_account)
+    const resBankAccount = await frappe.db.get_value(
+        "Bank Account", 
+        frm.doc.bank_account,
+        "account"
+    )
+
+    frm.set_value("disbursement_debit_to", resBankAccount.message.account)
+    frm.set_value("expense_account", resCompany.message.default_loan_bank_disbursement_account)
     frm.set_value("installment_credit_to", resCompany.message.default_lb_installment_credit_account)
     frm.set_value("installment_debit_to", resCompany.message.default_lb_installment_dedit_account)
 

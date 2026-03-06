@@ -6,4 +6,6 @@ from frappe.model.document import Document
 
 
 class StationMaster(Document):
-	pass
+	def validate(self):
+		from sth.utils.qr_generator import generate_qr_for_doc
+		generate_qr_for_doc(self,1)

@@ -1,17 +1,21 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "TBG.#####",
+ "autoname": "SET-INS-.#####",
  "creation": "2026-02-17 22:42:52.746883",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "unit",
+  "all_supplier",
   "tbs_gabungan_supplier",
+  "tbs_gabungan_insentif",
   "tonase_untuk_dapat_insentif",
   "insentif"
  ],
  "fields": [
   {
+   "depends_on": "eval:!doc.all_supplier",
    "fieldname": "tbs_gabungan_supplier",
    "fieldtype": "Table",
    "label": "TBS Gabungan Supplier",
@@ -21,21 +25,43 @@
    "description": "Dalam Satuan Kg",
    "fieldname": "tonase_untuk_dapat_insentif",
    "fieldtype": "Float",
-   "in_preview": 1,
+   "hidden": 1,
    "label": "Tonase Untuk Dapat Insentif"
   },
   {
    "description": "Dalam Satuan Rupiah",
    "fieldname": "insentif",
    "fieldtype": "Currency",
-   "in_preview": 1,
+   "hidden": 1,
    "label": "Insentif"
+  },
+  {
+   "fieldname": "tbs_gabungan_insentif",
+   "fieldtype": "Table",
+   "label": "TBS Gabungan Insentif",
+   "options": "TBS Gabungan Insentif"
+  },
+  {
+   "default": "0",
+   "fieldname": "all_supplier",
+   "fieldtype": "Check",
+   "label": "All Supplier"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Unit",
+   "link_filters": "[[\"Unit\",\"mill\",\"=\",1]]",
+   "options": "Unit",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 05:07:49.928042",
+ "modified": "2026-02-26 09:14:39.176099",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "TBS Gabungan Setting",

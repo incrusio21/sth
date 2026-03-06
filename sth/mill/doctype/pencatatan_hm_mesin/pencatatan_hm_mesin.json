@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-17 10:17:20.276666",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_nghe",
+  "status",
+  "shift",
+  "section_break_ctos",
+  "hari_tanggal",
+  "unit_pabrik",
+  "nama_stasiun",
+  "nama_mesin",
+  "hm_mesin_awal",
+  "hm_mesin_akhir",
+  "keterangan",
+  "upload_foto",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PHMM-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_nghe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_ctos",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "hari_tanggal",
+   "fieldtype": "Date",
+   "label": "Hari Tanggal"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Data",
+   "label": "Unit Pabrik"
+  },
+  {
+   "fieldname": "nama_stasiun",
+   "fieldtype": "Link",
+   "label": "Nama Stasiun",
+   "options": "Station Master"
+  },
+  {
+   "fieldname": "nama_mesin",
+   "fieldtype": "Link",
+   "label": "Nama Mesin",
+   "options": "Mesin"
+  },
+  {
+   "description": "(Satuan Jam)",
+   "fieldname": "hm_mesin_awal",
+   "fieldtype": "Data",
+   "label": "HM Mesin Awal"
+  },
+  {
+   "description": "(Satuan HM)",
+   "fieldname": "hm_mesin_akhir",
+   "fieldtype": "Data",
+   "label": "HM Mesin Akhir"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "upload_foto",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pencatatan HM Mesin",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-02 11:45:01.247076",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pencatatan HM Mesin",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,446 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-16 22:09:46.499852",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "tanggal",
+  "jam",
+  "company",
+  "unit",
+  "column_break_dgsu",
+  "status",
+  "shift",
+  "machine",
+  "section_break_igtk",
+  "genset_no_1_column",
+  "daya_genset_1",
+  "upload_foto_daya_genset_1",
+  "kwh_genset_1",
+  "upload_foto_kwh_genset_1",
+  "ampere_genset_1",
+  "upload_foto_ampere_genset_1",
+  "frekwensi_genset_1",
+  "upload_foto_frekwensi_genset_1",
+  "tegangan_r_s_t_genset_1",
+  "upload_foto_tegangan_rst_genset_1",
+  "jam_operasional_genset_1",
+  "upload_foto_jam_operasional_genset_1",
+  "temperatur_oil_genset_1",
+  "upload_foto_temperatur_oil_genset_1",
+  "pressure_oil_genset_1",
+  "upload_foto_pressure_oil_genset_1",
+  "genset_no_2_column",
+  "daya_genset_2",
+  "upload_foto_daya_genset_2",
+  "kwh_genset_2",
+  "upload_foto_kwh_genset_2",
+  "ampere_genset_2",
+  "upload_foto_ampere_genset_2",
+  "frekwensi_genset_2",
+  "upload_foto_frekwensi_genset_2",
+  "tegangan_r_s_t_genset_2",
+  "upload_foto_tegangan_rst_genset_2",
+  "jam_operasional_genset_2",
+  "upload_foto_jam_operasional_genset_2",
+  "temperatur_oil_genset_2",
+  "upload_foto_temperatur_oil_genset_2",
+  "pressure_oil_genset_2",
+  "upload_foto_pressure_oil_genset_2",
+  "genset_3_column",
+  "daya_genset_3",
+  "upload_foto_daya_genset_3",
+  "kwh_genset_3",
+  "upload_foto_kwh_genset_3",
+  "ampere_genset_3",
+  "upload_foto_ampere_genset_3",
+  "frekwensi_genset_3",
+  "upload_foto_frekwensi_genset_3",
+  "tegangan_r_s_t_genset_3",
+  "upload_foto_tegangan_rst_genset_3",
+  "jam_operasional_genset_3",
+  "upload_foto_jam_operasional_genset_3",
+  "temperatur_oil_genset_3",
+  "upload_foto_temperatur_oil_genset_3",
+  "pressure_oil_genset_3",
+  "upload_foto_pressure_oil_genset_3"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "PMK-GST-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_dgsu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine"
+  },
+  {
+   "fieldname": "section_break_igtk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "genset_no_1_column",
+   "fieldtype": "Column Break",
+   "label": "Genset No 1"
+  },
+  {
+   "description": "(Dalam satuan KW)",
+   "fieldname": "daya_genset_1",
+   "fieldtype": "Data",
+   "label": "Daya Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_daya_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Daya Genset 1"
+  },
+  {
+   "description": "(Dalam satuan KwH)",
+   "fieldname": "kwh_genset_1",
+   "fieldtype": "Data",
+   "label": "Kwh Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_kwh_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Kwh Genset 1"
+  },
+  {
+   "description": "(Dalam satuan Ampere)",
+   "fieldname": "ampere_genset_1",
+   "fieldtype": "Data",
+   "label": "Ampere Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_ampere_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Ampere Genset 1"
+  },
+  {
+   "description": "(Dalam satuan Hz)",
+   "fieldname": "frekwensi_genset_1",
+   "fieldtype": "Data",
+   "label": "Frekwensi Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_frekwensi_genset_1",
+   "fieldtype": "Attach",
+   "label": "Upload Foto Frekwensi Genset 1"
+  },
+  {
+   "description": "(Dalam satuan Volt)",
+   "fieldname": "tegangan_r_s_t_genset_1",
+   "fieldtype": "Data",
+   "label": "Tegangan R S T Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_tegangan_rst_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Tegangan RST Genset 1"
+  },
+  {
+   "description": "(Dalam satuan HM)",
+   "fieldname": "jam_operasional_genset_1",
+   "fieldtype": "Data",
+   "label": "Jam Operasional Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_jam_operasional_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Jam Operasional Genset 1"
+  },
+  {
+   "description": "(Dalam satuan \u00b0C)",
+   "fieldname": "temperatur_oil_genset_1",
+   "fieldtype": "Data",
+   "label": "Temperatur Oil Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_temperatur_oil_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Temperatur Oil Genset 1"
+  },
+  {
+   "description": "(Dalam satuan Psi)",
+   "fieldname": "pressure_oil_genset_1",
+   "fieldtype": "Data",
+   "label": "Pressure Oil Genset 1"
+  },
+  {
+   "fieldname": "upload_foto_pressure_oil_genset_1",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Pressure Oil Genset 1"
+  },
+  {
+   "fieldname": "genset_no_2_column",
+   "fieldtype": "Column Break",
+   "label": "Genset No 2"
+  },
+  {
+   "description": "(Dalam satuan KW)",
+   "fieldname": "daya_genset_2",
+   "fieldtype": "Data",
+   "label": "Daya Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_daya_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Daya Genset 2"
+  },
+  {
+   "description": "(Dalam satuan KwH)",
+   "fieldname": "kwh_genset_2",
+   "fieldtype": "Data",
+   "label": "Kwh Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_kwh_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Kwh Genset 2"
+  },
+  {
+   "description": "(Dalam satuan Ampere)",
+   "fieldname": "ampere_genset_2",
+   "fieldtype": "Data",
+   "label": "Ampere Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_ampere_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Ampere Genset 2"
+  },
+  {
+   "description": "(Dalam satuan Hz)",
+   "fieldname": "frekwensi_genset_2",
+   "fieldtype": "Data",
+   "label": "Frekwensi Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_frekwensi_genset_2",
+   "fieldtype": "Attach",
+   "label": "Upload Foto Frekwensi Genset 2"
+  },
+  {
+   "description": "(Dalam satuan Volt)",
+   "fieldname": "tegangan_r_s_t_genset_2",
+   "fieldtype": "Data",
+   "label": "Tegangan R S T Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_tegangan_rst_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Tegangan RST Genset 2"
+  },
+  {
+   "description": "(Dalam satuan HM)",
+   "fieldname": "jam_operasional_genset_2",
+   "fieldtype": "Data",
+   "label": "Jam Operasional Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_jam_operasional_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Jam Operasional Genset 2"
+  },
+  {
+   "description": "(Dalam satuan \u00b0C)",
+   "fieldname": "temperatur_oil_genset_2",
+   "fieldtype": "Data",
+   "label": "Temperatur Oil Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_temperatur_oil_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Temperatur Oil Genset 2"
+  },
+  {
+   "description": "(Dalam satuan Psi)",
+   "fieldname": "pressure_oil_genset_2",
+   "fieldtype": "Data",
+   "label": "Pressure Oil Genset 2"
+  },
+  {
+   "fieldname": "upload_foto_pressure_oil_genset_2",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Pressure Oil Genset 2"
+  },
+  {
+   "fieldname": "genset_3_column",
+   "fieldtype": "Column Break",
+   "label": "Genset 3"
+  },
+  {
+   "description": "(Dalam satuan KW)",
+   "fieldname": "daya_genset_3",
+   "fieldtype": "Data",
+   "label": "Daya Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_daya_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Daya Genset 3"
+  },
+  {
+   "description": "(Dalam satuan KwH)",
+   "fieldname": "kwh_genset_3",
+   "fieldtype": "Data",
+   "label": "Kwh Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_kwh_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Kwh Genset 3"
+  },
+  {
+   "description": "(Dalam satuan Ampere)",
+   "fieldname": "ampere_genset_3",
+   "fieldtype": "Data",
+   "label": "Ampere Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_ampere_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Ampere Genset 3"
+  },
+  {
+   "description": "(Dalam satuan Hz)",
+   "fieldname": "frekwensi_genset_3",
+   "fieldtype": "Data",
+   "label": "Frekwensi Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_frekwensi_genset_3",
+   "fieldtype": "Attach",
+   "label": "Upload Foto Frekwensi Genset 3"
+  },
+  {
+   "description": "(Dalam satuan Volt)",
+   "fieldname": "tegangan_r_s_t_genset_3",
+   "fieldtype": "Data",
+   "label": "Tegangan R S T Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_tegangan_rst_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Tegangan RST Genset 3"
+  },
+  {
+   "description": "(Dalam satuan HM)",
+   "fieldname": "jam_operasional_genset_3",
+   "fieldtype": "Data",
+   "label": "Jam Operasional Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_jam_operasional_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Jam Operasional Genset 3"
+  },
+  {
+   "description": "(Dalam satuan \u00b0C)",
+   "fieldname": "temperatur_oil_genset_3",
+   "fieldtype": "Data",
+   "label": "Temperatur Oil Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_temperatur_oil_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Temperatur Oil Genset 3"
+  },
+  {
+   "description": "(Dalam satuan Psi)",
+   "fieldname": "pressure_oil_genset_3",
+   "fieldtype": "Data",
+   "label": "Pressure Oil Genset 3"
+  },
+  {
+   "fieldname": "upload_foto_pressure_oil_genset_3",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Pressure Oil Genset 3"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-02 11:24:26.342567",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Mesin Genset",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

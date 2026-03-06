@@ -109,8 +109,7 @@
    "fieldname": "jns_bbm",
    "fieldtype": "Select",
    "label": "Jenis BBM",
-   "options": "Solar\nPertalite\nPertamax\nShell",
-   "reqd": 1
+   "options": "Solar\nPertalite\nPertamax\nShell"
   },
   {
    "fieldname": "per_prm",
@@ -141,7 +140,7 @@
    "fieldname": "tipe_master",
    "fieldtype": "Select",
    "label": "Tipe Master",
-   "options": "Alat Berat\nKendaraan Umum\nDump Truck\nMesin & Peralatan Workshop",
+   "options": "\nAlat Berat\nKendaraan Umum\nDump Truck\nMesin & Peralatan Workshop",
    "reqd": 1
   },
   {
@@ -210,7 +209,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 18:53:22.205111",
+ "modified": "2026-03-05 15:06:59.017852",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

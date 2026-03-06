@@ -350,4 +350,8 @@ def non_aktifkan_table(doc,method):
 def update_supplier_email(doc,method):
 	for row in doc.struktur_supplier:
 		frappe.db.set_value("Supplier Email",row.user_email,"supplier",doc.name)
+
+def update_supplier_contact(doc,method):
+	for row in doc.alamat_dan_pic_supplier:
+		frappe.db.set_value("Supplier Contact",row.kontak_person,"supplier",doc.name)
 			

@@ -40,6 +40,9 @@ class SuratPengantarBuah(Document):
 				if detail.get(target_field) is None or target_field in force_item_fields:
 					detail.set(target_field, value)
 
+		doctype, fieldname, nopol = ["Driver", "kendaraan_eksternal", "custom_license_plate"]if self.tipe_kendaraan == "External" else ["Alat Berat Dan Kendaraan", "kendaraan", "no_pol"] 
+		self.no_polisi = frappe.get_value(doctype, self.get(fieldname), nopol)
+
 		for d in self.details:
 			_apply_recap(d)
 

@@ -31,7 +31,8 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
     "Quotation",
     "Sales Order",
     "Delivery Order",
-    "Payment Entry"
+    "Payment Entry",
+    "Timbangan"
   ];
 
   if (!doctypesNeedServer.includes(doctype)) {
@@ -94,6 +95,18 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
           };
 
           format = paymentTypeMap[doc.payment_type];
+          break;
+
+        case "Timbangan":
+          if (doc.receive_type == "TBS Internal" || doc.receive_type == "TBS Eksternal") {
+            format = doc.receive_type == "TBS Internal" ? "PF Slip Penerimaan TBS Internal" : "PF Slip Penerimaan TBS External";
+          }
+
+          if (doc.type == "Dispatch" && doc.dispatch_type == "Product") {
+            if (doc.kode_barang == "CPO") format = "Slip Pengiriman CPO Product";
+            if (doc.kode_barang == "40000002") format = "Slip Pengiriman Palm Kernel Product";
+          }
+
           break;
       }
 

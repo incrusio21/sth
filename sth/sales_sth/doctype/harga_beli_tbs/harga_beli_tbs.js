@@ -97,6 +97,7 @@ frappe.ui.form.on("Harga Beli TBS", {
 				uom: frm.doc.uom
 			},
 			callback(r) {
+				console.log(r.message);
 				frm.set_value("current_rate", r.message?.rate || 0);
 				frm.set_value("last_update_on", r.message?.modified || "");
 				frm.events.calculate_new_rate(frm);
@@ -204,11 +205,20 @@ frappe.ui.form.on("Harga Beli TBS", {
 
 });
 
+// function resolve_price_list(frm) {
+// 	if (!frm.doc.unit) return "";
+
+// 	const jarak = frm.doc.jarak || "RING 1";
+// 	return `${frm.doc.unit} - ${jarak}`;
+// }
+
 function resolve_price_list(frm) {
 	if (!frm.doc.unit) return "";
 
-	const jarak = frm.doc.jarak || "RING 1";
-	return `${frm.doc.unit} - ${jarak}`;
+	const jarak = (frm.doc.jarak || "").trim();
+	const finalJarak = jarak ? jarak : "TANPA RING";
+
+	return `${frm.doc.unit} - ${finalJarak}`;
 }
 
 

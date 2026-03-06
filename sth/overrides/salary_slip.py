@@ -6,17 +6,26 @@ from collections import Counter
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now, rounded
+from frappe.utils import add_days, days_diff, flt, getdate, get_first_day_of_week, get_last_day_of_week, month_diff, now, rounded, formatdate, get_first_day, cint
+from erpnext.accounts.utils import get_fiscal_year
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Count, IfNull, Sum
 
 from frappe.utils.data import date_diff
+from hrms.hr.utils import validate_active_employee
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip, get_salary_component_data
+from hrms.payroll.doctype.payroll_entry.payroll_entry import get_salary_withholdings, get_start_end_dates
 from hrms.payroll.doctype.payroll_period.payroll_period import (
 	get_period_factor,
 )
-from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (\
+from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (
+	cancel_loan_repayment_entry,
+	make_loan_repayment_entry,
+	process_loan_interest_accrual_and_demand,
 	set_loan_repayment,
 )
+
+from hrms.payroll.utils import sanitize_expression
 from sth.hr_customize import get_premi_attendance_settings
 
 from datetime import datetime, timedelta
@@ -29,16 +38,433 @@ class SalarySlip(SalarySlip):
 	# 	super().validate()
 	# 	self.set_net_pay()
 
+	def validate(self):
+		self.check_salary_withholding()
+		self.status = self.get_status()
+		validate_active_employee(self.employee)
+		self.validate_dates_custom()
+		self.check_existing()
+
+		if self.payroll_frequency:
+			self.get_date_details()
+
+		if not (len(self.get("earnings")) or len(self.get("deductions"))):
+			self.get_emp_and_working_day_details()
+		else:
+			self.get_working_days_details(lwp=self.leave_without_pay)
+
+		self.set_salary_structure_assignment()
+		self.calculate_net_pay()
+
+		self.set_pesangon_amount_from_periode()
+
+		self.compute_year_to_date()
+		self.compute_month_to_date()
+		self.compute_component_wise_year_to_date()
+
+		self.add_leave_balances()
+
+		max_working_hours = frappe.db.get_single_value(
+			"Payroll Settings", "max_working_hours_against_timesheet"
+		)
+		if max_working_hours:
+			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
+				frappe.msgprint(
+					_("Total working hours should not be greater than max working hours {0}").format(
+						max_working_hours
+					),
+					alert=True,
+				)
+
 	def on_submit(self):
 		super().on_submit()
 		self.update_payment_related("Employee Payment Log", "payment_log_list")
 		self.update_payment_related("Loan Repayment", "loan_repayment_list")
+		self.update_pesangon_payment_status(True)
 		
 	def on_cancel(self):
-		super().on_submit()
+		# super().on_submit()
+		super().on_cancel()
 
 		self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
 		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
+		self.update_pesangon_payment_status(False)
+
+	def set_pesangon_amount_from_periode(self):
+		if self.tipe_salary != "Pesangon":
+			return
+
+		if not self.pesangon_doc:
+			frappe.throw("Pesangon Document tidak ada")
+
+		pesangon = frappe.get_doc("Pesangon", self.pesangon_doc)
+
+		periode_slip = getdate(self.start_date).replace(day=1)
+
+		row_match = None
+
+		for row in pesangon.pesangon_periode:
+			if getdate(row.periode) == periode_slip and not row.is_paid:
+				row_match = row
+				break
+
+		if not row_match:
+			frappe.throw(
+				f"Tidak ada periode Pesangon yang belum dibayar untuk {periode_slip}"
+			)
+
+		self.earnings = []
+		self.deductions = []
+
+		self.append("earnings", {
+			"salary_component": "Pesangon",
+			"amount": row_match.amount
+		})
+
+		self.pesangon_amount = row_match.amount
+
+		self.calculate_net_pay()
+
+	def update_pesangon_payment_status(self, paid: bool):
+
+		if self.tipe_salary != "Pesangon" or not self.pesangon_doc:
+			return
+
+		pesangon = frappe.get_doc("Pesangon", self.pesangon_doc)
+		periode_slip = getdate(self.start_date).replace(day=1)
+
+		total_unpaid = 0
+
+		for row in pesangon.pesangon_periode:
+
+			current_paid_status = row.is_paid
+
+			if getdate(row.periode) == periode_slip:
+				new_status = 1 if paid else 0
+				row.db_set("is_paid", new_status)
+				current_paid_status = new_status  
+
+				if new_status == 1:
+					row.db_set("salary_slip", self.name)
+				else:
+					row.db_set("salary_slip", None)
+
+			if not current_paid_status:
+				total_unpaid += row.amount or 0
+
+		pesangon.db_set("outstanding_amount", total_unpaid)
+
+	def validate_dates_custom(self):
+		self.validate_from_to_dates("start_date", "end_date")
+
+		if not self.joining_date:
+			frappe.throw(
+				_("Please set the Date Of Joining for employee {0}").format(
+					frappe.bold(self.employee_name)
+				)
+			)
+
+		if date_diff(self.end_date, self.joining_date) < 0:
+			frappe.throw(_("Cannot create Salary Slip for Employee joining after Payroll Period"))
+
+		#Skip validasi ini kalau tipe_salary = Pesangon
+		if (
+			self.tipe_salary != "Pesangon"
+			and self.relieving_date
+			and date_diff(self.relieving_date, self.start_date) < 0
+		):
+			frappe.throw(
+				_("Cannot create Salary Slip for Employee who has left before Payroll Period")
+			)
+
+	def compute_year_to_date(self):
+		year_to_date = 0
+		period_start_date, period_end_date = self.get_year_to_date_period()
+
+		salary_slip_sum = frappe.get_list(
+			"Salary Slip",
+			fields=["sum(net_pay) as net_sum", "sum(gross_pay) as gross_sum"],
+			filters={
+				"employee": self.employee,
+				"start_date": [">=", period_start_date],
+				"end_date": ["<", period_end_date],
+				"name": ["!=", self.name],
+				"docstatus": 1,
+			},
+		)
+
+		year_to_date = flt(salary_slip_sum[0].net_sum) if salary_slip_sum else 0.0
+		gross_year_to_date = flt(salary_slip_sum[0].gross_sum) if salary_slip_sum else 0.0
+
+		year_to_date += self.net_pay
+		gross_year_to_date += self.gross_pay
+		self.year_to_date = year_to_date
+		self.gross_year_to_date = gross_year_to_date
+
+	def compute_month_to_date(self):
+		month_to_date = 0
+		first_day_of_the_month = get_first_day(self.start_date)
+		salary_slip_sum = frappe.get_list(
+			"Salary Slip",
+			fields=["sum(net_pay) as sum"],
+			filters={
+				"employee": self.employee,
+				"start_date": [">=", first_day_of_the_month],
+				"end_date": ["<", self.start_date],
+				"name": ["!=", self.name],
+				"docstatus": 1,
+			},
+		)
+
+		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+
+		month_to_date += self.net_pay
+		self.month_to_date = month_to_date
+
+	def compute_component_wise_year_to_date(self):
+		period_start_date, period_end_date = self.get_year_to_date_period()
+
+		ss = frappe.qb.DocType("Salary Slip")
+		sd = frappe.qb.DocType("Salary Detail")
+
+		for key in ("earnings", "deductions"):
+			for component in self.get(key):
+				year_to_date = 0
+				component_sum = (
+					frappe.qb.from_(sd)
+					.inner_join(ss)
+					.on(sd.parent == ss.name)
+					.select(Sum(sd.amount).as_("sum"))
+					.where(
+						(ss.employee == self.employee)
+						& (sd.salary_component == component.salary_component)
+						& (ss.start_date >= period_start_date)
+						& (ss.end_date < period_end_date)
+						& (ss.name != self.name)
+						& (ss.docstatus == 1)
+					)
+				).run()
+
+				year_to_date = flt(component_sum[0][0]) if component_sum else 0.0
+				year_to_date += component.amount
+				component.year_to_date = year_to_date
+
+	def get_year_to_date_period(self):
+		if self.payroll_period:
+			period_start_date = self.payroll_period.start_date
+			period_end_date = self.payroll_period.end_date
+		else:
+			# get dates based on fiscal year if no payroll period exists
+			fiscal_year = get_fiscal_year(date=self.start_date, company=self.company, as_dict=1)
+			period_start_date = fiscal_year.year_start_date
+			period_end_date = fiscal_year.year_end_date
+
+		return period_start_date, period_end_date
+	
+	def add_leave_balances(self):
+		self.set("leave_details", [])
+
+		if frappe.db.get_single_value("Payroll Settings", "show_leave_balances_in_salary_slip"):
+			from hrms.hr.doctype.leave_application.leave_application import get_leave_details
+
+			leave_details = get_leave_details(self.employee, self.end_date, True)
+
+			for leave_type, leave_values in leave_details["leave_allocation"].items():
+				self.append(
+					"leave_details",
+					{
+						"leave_type": leave_type,
+						"total_allocated_leaves": flt(leave_values.get("total_leaves")),
+						"expired_leaves": flt(leave_values.get("expired_leaves")),
+						"used_leaves": flt(leave_values.get("leaves_taken")),
+						"pending_leaves": flt(leave_values.get("leaves_pending_approval")),
+						"available_leaves": flt(leave_values.get("remaining_leaves")),
+					},
+				)
+
+	def check_existing(self):
+		#custom chek exixsting untuk pesangon
+		if not self.salary_slip_based_on_timesheet:
+
+			ss = frappe.qb.DocType("Salary Slip")
+
+			query = (
+				frappe.qb.from_(ss)
+				.select(ss.name)
+				.where(
+					(ss.start_date == self.start_date)
+					& (ss.end_date == self.end_date)
+					& (ss.docstatus != 2)
+					& (ss.employee == self.employee)
+					& (ss.name != self.name)
+				)
+			)
+
+			if hasattr(self, "tipe_salary") and self.tipe_salary:
+				query = query.where(ss.tipe_salary == self.tipe_salary)
+			else:
+				query = query.where(
+					(ss.tipe_salary.isnull()) | (ss.tipe_salary == "")
+				)
+
+			if self.payroll_entry:
+				query = query.where(ss.payroll_entry == self.payroll_entry)
+
+			existing = query.run()
+
+			if existing:
+				frappe.throw(
+					_("Salary Slip tipe {0} untuk employee {1} sudah ada pada periode {2} s.d {3}")
+					.format(
+						self.tipe_salary or "Normal",
+						self.employee,
+						self.start_date,
+						self.end_date,
+					)
+				)
+
+		else:
+			for data in self.timesheets:
+				if frappe.db.get_value("Timesheet", data.time_sheet, "status") == "Payrolled":
+					frappe.throw(
+						_("Salary Slip of employee {0} already created for time sheet {1}")
+						.format(self.employee, data.time_sheet)
+					)
+
+	def get_date_details(self):
+		if not self.end_date:
+			date_details = get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date)
+			self.start_date = date_details.start_date
+			self.end_date = date_details.end_date
+
+	@frappe.whitelist()
+	def get_emp_and_working_day_details(self):
+		"""First time, load all the components from salary structure"""
+		if self.employee:
+			self.set("earnings", [])
+			self.set("deductions", [])
+			if hasattr(self, "loans"):
+				self.set("loans", [])
+
+			if self.payroll_frequency:
+				self.get_date_details()
+
+			self.validate_dates_custom()
+
+			# getin leave details
+			self.get_working_days_details()
+			struct = self.check_sal_struct()
+
+			if struct:
+				self.set_salary_structure_doc()
+				self.salary_slip_based_on_timesheet = (
+					self._salary_structure_doc.salary_slip_based_on_timesheet or 0
+				)
+				self.set_time_sheet()
+				self.pull_sal_struct()
+
+			process_loan_interest_accrual_and_demand(self)
+
+	def set_time_sheet(self):
+		if self.salary_slip_based_on_timesheet:
+			self.set("timesheets", [])
+
+			Timesheet = frappe.qb.DocType("Timesheet")
+			timesheets = (
+				frappe.qb.from_(Timesheet)
+				.select(Timesheet.star)
+				.where(
+					(Timesheet.employee == self.employee)
+					& (Timesheet.start_date.between(self.start_date, self.end_date))
+					& ((Timesheet.status == "Submitted") | (Timesheet.status == "Billed"))
+				)
+			).run(as_dict=1)
+
+			for data in timesheets:
+				self.append("timesheets", {"time_sheet": data.name, "working_hours": data.total_hours})
+
+	def check_sal_struct(self):
+
+		#custom pakai structure khusus pesangon
+		if self.tipe_salary == "Pesangon":
+
+			struct_name = "PESANGON"
+
+			if not frappe.db.exists("Salary Structure", struct_name):
+				frappe.throw("Salary Structure Pesangon belum dibuat")
+
+			self.salary_structure = struct_name
+			return struct_name
+
+		#selain pesangon pakai logic asli
+		return super().check_sal_struct()
+
+	def pull_sal_struct(self):
+		from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
+
+		if self.salary_slip_based_on_timesheet:
+			self.salary_structure = self._salary_structure_doc.name
+			self.hour_rate = self._salary_structure_doc.hour_rate
+			self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
+			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
+			wages_amount = self.hour_rate * self.total_working_hours
+
+			self.add_earning_for_hourly_wages(self, self._salary_structure_doc.salary_component, wages_amount)
+
+		make_salary_slip(self._salary_structure_doc.name, self)
+
+	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
+		row_exists = False
+		for row in doc.earnings:
+			if row.salary_component == salary_component:
+				row.amount = amount
+				row_exists = True
+				break
+
+		if not row_exists:
+			wages_row = {
+				"salary_component": salary_component,
+				"abbr": frappe.db.get_value(
+					"Salary Component", salary_component, "salary_component_abbr", cache=True
+				),
+				"amount": self.hour_rate * self.total_working_hours,
+				"default_amount": 0.0,
+				"additional_amount": 0.0,
+			}
+			doc.append("earnings", wages_row)
+
+	def set_salary_structure_assignment(self):
+		self._salary_structure_assignment = frappe.db.get_value(
+			"Salary Structure Assignment",
+			{
+				"employee": self.employee,
+				"salary_structure": self.salary_structure,
+				"from_date": ("<=", self.actual_start_date),
+				"docstatus": 1,
+			},
+			"*",
+			order_by="from_date desc",
+			as_dict=True,
+		)
+
+		if not self._salary_structure_assignment:
+			frappe.throw(
+				_(
+					"Please assign a Salary Structure for Employee {0} applicable from or before {1} first"
+				).format(
+					frappe.bold(self.employee_name),
+					frappe.bold(formatdate(self.actual_start_date)),
+				)
+			)
+
+
+	def check_salary_withholding(self):
+		withholding = get_salary_withholdings(self.start_date, self.end_date, self.employee)
+		if withholding:
+			self.salary_withholding = withholding[0].salary_withholding
+			self.salary_withholding_cycle = withholding[0].salary_withholding_cycle
+		else:
+			self.salary_withholding = None
 
 	def update_payment_related(self, doctype, list_field, cancel=0):
 		if not self.get(list_field):
@@ -70,6 +496,27 @@ class SalarySlip(SalarySlip):
 		emp_doc = frappe.get_cached_doc("Employee", self.employee)
 		if emp_doc.custom_kriteria == "Satuan Hasil":
 			self.calculate_hari_kegiatan()
+
+	def get_payment_days(self, include_holidays_in_total_working_days):
+		#custom get payment days untuk pesangon
+		if self.tipe_salary == "Pesangon":
+
+			if self.joining_date and self.joining_date > getdate(self.end_date):
+				return 0
+
+			payment_days = date_diff(self.actual_end_date, self.actual_start_date) + 1
+
+			if not cint(include_holidays_in_total_working_days):
+				holidays = self.get_holidays_for_employee(
+					self.actual_start_date,
+					self.actual_end_date
+				)
+				payment_days -= len(holidays)
+
+			return payment_days
+
+		# selain Pesangon pakai logic asli
+		return super().get_payment_days(include_holidays_in_total_working_days)
 
 	def calculate_hari_kegiatan(self):
 		unique_dates = set()
@@ -287,6 +734,8 @@ class SalarySlip(SalarySlip):
 						self.holiday_days += 1
 						hari_leave += 1
 		# else:
+
+		self.total_attendance_present_non_libur = self.total_attendance_present
 		jumlah_libur_dari_holiday_list = 0
 		holiday_doc = frappe.get_doc("Holiday List", emp_doc.holiday_list)
 		for satu_holiday in holiday_doc.holidays:
@@ -296,12 +745,14 @@ class SalarySlip(SalarySlip):
 
 					if status_code := list_attendance.get(satu_holiday.holiday_date):
 						if status_code == "H":
-							self.total_attendance_present -= 1
 							self.total_kerja_di_hari_libur += 1
+							self.total_attendance_present_non_libur -= 1
+				elif satu_holiday.holiday_date == h:
+					if status_code := list_attendance.get(satu_holiday.holiday_date):
+						if status_code == "H":
+							self.total_kerja_di_hari_libur += 1
+							self.total_attendance_present_non_libur -= 1
 
-
-
-		print(jumlah_libur_dari_holiday_list)
 		self.holiday_days += jumlah_libur_dari_holiday_list
 				
 		date_of_joining = emp_doc.date_of_joining
@@ -477,7 +928,7 @@ class SalarySlip(SalarySlip):
 		self.set_net_pay()
 		if not skip_tax_breakup_computation:
 			self.compute_income_tax_breakup()
-
+	
 		print("ini net {}".format(self.net_pay))
 
 	def set_net_pay(self):
@@ -512,6 +963,14 @@ class SalarySlip(SalarySlip):
 		# print("INI HARUSNYA")
 		# print(self.net_pay)
 		self.set_net_total_in_words()
+
+	def set_salary_structure_doc(self) -> None:
+		self._salary_structure_doc = frappe.get_cached_doc("Salary Structure", self.salary_structure)
+		# sanitize condition and formula fields
+		for table in ("earnings", "deductions"):
+			for row in self._salary_structure_doc.get(table):
+				row.condition = sanitize_expression(row.condition)
+				row.formula = sanitize_expression(row.formula)
 
 	@frappe.whitelist()
 	def set_totals(self):
@@ -1084,7 +1543,7 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00944/00001")
+	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00924/00001")
 	doc.calculate_holidays()
 
 @frappe.whitelist()

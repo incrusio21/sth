@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-25 10:53:33.892292",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tonase_untuk_dapat_insentif",
+  "ring",
+  "insentif"
+ ],
+ "fields": [
+  {
+   "description": "Dalam Satuan Kg",
+   "fieldname": "tonase_untuk_dapat_insentif",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Tonase Untuk Dapat Insentif (Kg)",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "ring",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Ring",
+   "options": "\nRING 1\nRING 2"
+  },
+  {
+   "fieldname": "insentif",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rupiah Insentif"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-26 08:44:15.317971",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "TBS Gabungan Insentif",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

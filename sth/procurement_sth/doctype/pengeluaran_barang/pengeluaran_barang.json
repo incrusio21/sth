@@ -74,26 +74,25 @@
    "read_only": 1
   },
   {
-   "fetch_from": "no_permintaan_pengeluaran.nama_karyawan",
+   "fetch_from": "no_permintaan_pengeluaran.karyawan_full_name",
    "fieldname": "nama_karyawan",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_standard_filter": 1,
-   "label": "Nama Karyawan",
-   "options": "Employee",
+   "label": "Nama Karyawan Peminta",
    "read_only": 1
   },
   {
    "fetch_from": "no_permintaan_pengeluaran.no_induk_karyawan",
    "fieldname": "no_induk_karyawan",
    "fieldtype": "Data",
-   "label": "No Induk Karyawan ",
+   "label": "No Induk Karyawan Peminta ",
    "read_only": 1
   },
   {
    "fetch_from": "no_permintaan_pengeluaran.nama_jabatan",
    "fieldname": "nama_jabatan",
    "fieldtype": "Data",
-   "label": "Nama Jabatan",
+   "label": "Nama Jabatan Peminta",
    "read_only": 1
   },
   {
@@ -161,7 +160,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 15:23:35.275568",
+ "modified": "2026-03-03 08:37:50.957622",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

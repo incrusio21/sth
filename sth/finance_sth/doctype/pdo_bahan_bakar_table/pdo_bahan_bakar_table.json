@@ -21,10 +21,9 @@
   {
    "columns": 1,
    "fieldname": "employee",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Pengguna",
-   "options": "Employee",
    "reqd": 1
   },
   {
@@ -99,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-02 10:45:32.485504",
+ "modified": "2026-02-24 22:55:48.490243",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Bahan Bakar Table",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:n_tipe",
  "creation": "2025-07-04 15:22:50.710081",
@@ -62,7 +63,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-06 16:04:12.258606",
+ "modified": "2026-02-27 11:30:11.855941",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Kegiatan",

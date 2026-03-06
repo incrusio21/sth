@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:nm_kap",
  "creation": "2025-07-24 10:01:30.518241",
@@ -65,7 +66,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-18 11:59:09.942061",
+ "modified": "2026-02-27 09:58:05.091585",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Kapital",

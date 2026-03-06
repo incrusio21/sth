@@ -29,7 +29,7 @@ def generate_qr_for_doc(doc, dont_save=0):
 		data = doc.get("custom_license_plate")
 	elif doc.doctype == "Asset":
 		data = doc.get("asset_name")
-
+	
 	qr_svg_b64 = get_qr_svg(data)
 
 	if hasattr(doc, "qr"):
@@ -37,4 +37,11 @@ def generate_qr_for_doc(doc, dont_save=0):
 		if dont_save == 0:
 			doc.save(ignore_permissions=True)
 
+	return qr_svg_b64
+
+
+@frappe.whitelist()
+def debug_qr_for_doc():
+	data = "SM-00002"
+	qr_svg_b64 = get_qr_svg(data)
 	return qr_svg_b64

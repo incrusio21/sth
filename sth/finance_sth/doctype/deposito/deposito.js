@@ -175,6 +175,7 @@ function makeRedeemedDeposito(frm) {
 
 
 }
+
 let d = new frappe.ui.Dialog({
     title: 'Masukkan Jumlah Pinalti',
     fields: [

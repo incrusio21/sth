@@ -46,6 +46,20 @@ class Timbangan(Document):
 				title="Delivery Note Created",
 				indicator="green"
 			)
+		if self.receive_type == "TBS Internal":
+			if self.spb:
+				spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
+				spb_doc.in_weight = self.bruto
+				spb_doc.out_weight = self.tara
+				spb_doc.total_weight = self.netto
+				spb_doc.in_time = self.weight_in_time
+				spb_doc.out_time = self.weight_out_time
+				spb_doc.workflow_state = "Weighed"
+				spb_doc.bjr = spb_doc.total_weight / spb_doc.total_janjang
+				for row in spb_doc.details:
+					row.total_weight = self.netto
+					row.db_update()
+				spb_doc.db_update()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:SETPK-{#####}",
  "creation": "2025-09-01 09:58:34.498366",
@@ -59,7 +60,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-02 09:07:17.687400",
+ "modified": "2026-02-27 09:47:34.062444",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Setup Jenis Potongan",
