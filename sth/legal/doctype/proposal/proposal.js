@@ -563,13 +563,14 @@ erpnext.buying.ProposalController = class ProposalController extends (
 			}
 			if (doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-					if (flt(doc.per_received) < 100 && allow_receipt) {
+					if (flt(doc.is_bapp_retensi ? doc.per_received : doc.per_billed) < 100 && allow_receipt) {
 						this.frm.add_custom_button(
 							__("BAPP"),
 							this.make_bapp,
 							__("Create")
 						);
 					}
+					
 					// Please do not add precision in the below flt function
 					if (!doc.is_bapp_retensi && flt(doc.per_billed) < 100)
 						this.frm.add_custom_button(
