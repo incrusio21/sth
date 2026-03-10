@@ -90,6 +90,8 @@ class Proposal(BuyingController):
 		self.flags.allow_zero_qty = self.has_unit_price_items
 	
 	def validate(self):
+		self.validate_terms()
+
 		self.set_item_kegiatan_name()
 		
 		super().validate()
@@ -119,7 +121,12 @@ class Proposal(BuyingController):
 
 		self.set_project_name()
 		self.set_retensi_or_term_value()
-		
+	
+	def validate_terms(self):
+		for row in self.payment_schedule:
+			if row.invoice_portion:
+				row.payment_amount = row.invoice_portion * self.grand_total
+				
 	def set_item_kegiatan_name(self):
 		legal_item = get_legal_settings("default_item_code")
 
@@ -567,12 +574,12 @@ def update_status(status, name):
 
 @frappe.whitelist()
 def get_kegiatan_item(kegiatan):
-    keg_doc = frappe.get_cached_doc("Kegiatan", kegiatan)
+	keg_doc = frappe.get_cached_doc("Kegiatan", kegiatan)
 
-    return {
+	return {
 		"kegiatan_name": keg_doc.nm_kgt,
-        "uom": keg_doc.uom
-    }
+		"uom": keg_doc.uom
+	}
 
 @frappe.whitelist()
 def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
