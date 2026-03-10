@@ -888,12 +888,13 @@ def make_bapp(source_name, target_doc=None, args=None):
 
 	term_detail = frappe.flags.args.term if frappe.flags.args and frappe.flags.args.get("term") else ""
 	payment_term = frappe.db.get_value("Proposal Schedule", frappe.flags.args.term, "payment_term") if term_detail else ""
-
+	
 	def set_missing_values(source, target):
 		target.project = spk
 		target.termin = payment_term 
 		target.term_detail = term_detail 
-
+		target.is_cwip = frappe.get_cached_value("Proposal Type", source.proposal_type, "is_cwip")
+		
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 		validate_custom_tax(target)

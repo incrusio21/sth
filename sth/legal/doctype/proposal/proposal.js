@@ -689,7 +689,6 @@ erpnext.buying.ProposalController = class ProposalController extends (
 			frappe.model.open_mapped_doc({
 				method: "sth.legal.doctype.proposal.proposal.make_bapp",
 				frm: cur_frm,
-				args: data,
 				freeze_message: __("Creating BAPP ..."),
 			});
 		}else{
