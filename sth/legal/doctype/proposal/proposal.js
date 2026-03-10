@@ -198,7 +198,7 @@ erpnext.utils.update_progress_received = function (opts) {
 
 frappe.ui.form.on("Proposal", {
 	setup: function (frm) {
-        sth.form.setup_fieldname_select(frm, "items")
+		sth.form.setup_fieldname_select(frm, "items")
 
 		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 		
@@ -247,7 +247,7 @@ frappe.ui.form.on("Proposal", {
 			};
 		});
 
-        frm.set_query("kegiatan", "items", function (doc) {
+		frm.set_query("kegiatan", "items", function (doc) {
 			return {
 				filters: {
 					is_group: 0,
@@ -255,7 +255,7 @@ frappe.ui.form.on("Proposal", {
 			};
 		});
 
-        frm.set_query("blok", "items", function (doc) {
+		frm.set_query("blok", "items", function (doc) {
 			return {
 				filters: {
 					unit: ["=", doc.unit],
@@ -285,7 +285,7 @@ frappe.ui.form.on("Proposal", {
 	},
 
 	refresh: function (frm) {
-        sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
+		sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
 
 		if (frm.doc.docstatus == 0) {
 			erpnext.set_unit_price_items_note(frm);
@@ -293,10 +293,10 @@ frappe.ui.form.on("Proposal", {
 	},
 
 	proposal_type(frm) {
-        sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
+		sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
 		frm.clear_table("items")
 		frm.refresh_fields()
-    },
+	},
 
 	supplier: function (frm) {
 		// Do not update if inter company reference is there as the details will already be updated
@@ -391,7 +391,7 @@ frappe.ui.form.on("Proposal", {
 
 frappe.ui.form.on("Proposal", {
 	refresh: function (frm) {
-        frm.set_query("ppn",(doc) => {
+		frm.set_query("ppn",(doc) => {
 			return {
 				filters: {
 					"type": "PPN"
@@ -440,18 +440,18 @@ frappe.ui.form.on("Proposal Item", {
 	},
 
 	kegiatan(frm, cdt, cdn){
-        let item = locals[cdt][cdn]
+		let item = locals[cdt][cdn]
 
-        frappe.call({
-            method: "sth.legal.doctype.proposal.proposal.get_kegiatan_item",
-            args: {
-                "kegiatan": item.kegiatan
-            },
-            callback: function (r) {
-                frappe.model.set_value(cdt, cdn, r.message)
-            }
-        })
-    },
+		frappe.call({
+			method: "sth.legal.doctype.proposal.proposal.get_kegiatan_item",
+			args: {
+				"kegiatan": item.kegiatan
+			},
+			callback: function (r) {
+				frappe.model.set_value(cdt, cdn, r.message)
+			}
+		})
+	},
 });
 
 erpnext.buying.ProposalController = class ProposalController extends (
@@ -992,3 +992,14 @@ function set_schedule_date(frm) {
 }
 
 frappe.provide("erpnext.buying");
+
+
+frappe.ui.form.on("Proposal Schedule", {
+	invoice_portion: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn]
+		if(row.invoice_portion){
+			frappe.model.set_value(cdt, cdn, "payment_amount", row.invoice_portion * frm.doc.grand_total);
+			frm.refresh_field("payment_schedule");
+		}
+	}
+})
