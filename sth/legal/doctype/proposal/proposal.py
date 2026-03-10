@@ -125,7 +125,7 @@ class Proposal(BuyingController):
 	def validate_terms(self):
 		for row in self.payment_schedule:
 			if row.invoice_portion:
-				row.payment_amount = row.invoice_portion * self.grand_total
+				row.payment_amount = row.invoice_portion * self.grand_total / 100
 				
 	def set_item_kegiatan_name(self):
 		legal_item = get_legal_settings("default_item_code")

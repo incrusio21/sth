@@ -998,7 +998,7 @@ frappe.ui.form.on("Proposal Schedule", {
 	invoice_portion: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn]
 		if(row.invoice_portion){
-			frappe.model.set_value(cdt, cdn, "payment_amount", row.invoice_portion * frm.doc.grand_total);
+			frappe.model.set_value(cdt, cdn, "payment_amount", row.invoice_portion * frm.doc.grand_total / 100);
 			frm.refresh_field("payment_schedule");
 		}
 	}
