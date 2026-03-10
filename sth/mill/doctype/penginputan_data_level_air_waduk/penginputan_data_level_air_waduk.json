@@ -10,13 +10,14 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_ofhd",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_uywd",
   "ketinggian_level_air_waduk",
+  "column_break_ttgn",
   "volume_air_waduk"
  ],
  "fields": [
@@ -95,13 +96,18 @@
   },
   {
    "fieldname": "section_break_uywd",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "column_break_ttgn",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:47:41.673853",
+ "modified": "2026-03-09 11:44:27.855520",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Data Level Air Waduk",

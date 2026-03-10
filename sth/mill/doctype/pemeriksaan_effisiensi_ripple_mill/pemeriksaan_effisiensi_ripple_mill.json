@@ -10,15 +10,16 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_aljh",
   "status",
-  "shift",
+  "company",
+  "unit",
   "machine",
   "section_break_aseh",
   "angka_effisiensi",
-  "attach_image_dcxk",
+  "column_break_jary",
+  "uf",
   "amended_from"
  ],
  "fields": [
@@ -98,12 +99,9 @@
   {
    "description": "(Satuan dalam %)",
    "fieldname": "angka_effisiensi",
-   "fieldtype": "Data",
+   "fieldtype": "Percent",
+   "in_preview": 1,
    "label": "Angka Effisiensi"
-  },
-  {
-   "fieldname": "attach_image_dcxk",
-   "fieldtype": "Attach Image"
   },
   {
    "fieldname": "amended_from",
@@ -114,13 +112,22 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_jary",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uf",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 12:00:23.544212",
+ "modified": "2026-03-09 11:01:42.305188",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Effisiensi Ripple Mill",

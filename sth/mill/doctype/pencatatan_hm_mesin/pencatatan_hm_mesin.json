@@ -15,16 +15,17 @@
   "column_break_nghe",
   "status",
   "shift",
-  "section_break_ctos",
-  "hari_tanggal",
-  "unit_pabrik",
   "nama_stasiun",
   "nama_mesin",
-  "hm_mesin_awal",
-  "hm_mesin_akhir",
   "keterangan",
-  "upload_foto",
-  "amended_from"
+  "section_break_ctos",
+  "hm_mesin_awal",
+  "column_break_tczf",
+  "hm_mesin_akhir",
+  "amended_from",
+  "column_break_lzwq",
+  "total_hm_mesin",
+  "upload_foto"
  ],
  "fields": [
   {
@@ -90,17 +91,8 @@
   },
   {
    "fieldname": "section_break_ctos",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "hari_tanggal",
-   "fieldtype": "Date",
-   "label": "Hari Tanggal"
-  },
-  {
-   "fieldname": "unit_pabrik",
-   "fieldtype": "Data",
-   "label": "Unit Pabrik"
+   "fieldtype": "Section Break",
+   "label": "Pencatatan HM Mesin"
   },
   {
    "fieldname": "nama_stasiun",
@@ -112,7 +104,7 @@
    "fieldname": "nama_mesin",
    "fieldtype": "Link",
    "label": "Nama Mesin",
-   "options": "Mesin"
+   "options": "Mill Machine"
   },
   {
    "description": "(Satuan Jam)",
@@ -145,16 +137,34 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_tczf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "(Satuan HM)",
+   "fieldname": "total_hm_mesin",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Total HM Mesin",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lzwq",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:45:01.247076",
+ "modified": "2026-03-09 10:13:55.320230",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pencatatan HM Mesin",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

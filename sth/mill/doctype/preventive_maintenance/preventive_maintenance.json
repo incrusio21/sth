@@ -13,21 +13,24 @@
   "column_break_mcww",
   "company",
   "unit",
+  "status_pekerjaan",
   "section_break_ypoc",
   "jenis_pilihan_preventive_maintenance",
+  "periode_bulanan",
   "periode_minggu",
   "jenis_pemeriksaan_pilihan",
+  "nama_dan_jenis_pekerjaan",
+  "column_break_efgc",
   "lokasi_stasiun_pilihan",
   "lokasi_mesin_pilihan",
-  "nama_dan_jenis_pekerjaan",
-  "nama_karyawan_dan_jabatan",
   "nama_mesin_yang_diperbaiki",
   "jam_kerja_section",
   "jam_mulai",
   "jam_selesai",
+  "column_break_apih",
   "total_jam",
-  "status_pekerjaan_section",
-  "hasil_pekerjaan"
+  "list_karyawan_tab",
+  "list_karyawan"
  ],
  "fields": [
   {
@@ -73,7 +76,8 @@
   },
   {
    "fieldname": "section_break_ypoc",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "jenis_pilihan_preventive_maintenance",
@@ -82,15 +86,11 @@
    "options": "Mingguan\nBulanan"
   },
   {
+   "depends_on": "eval:doc.jenis_pilihan_preventive_maintenance == \"Mingguan\"",
    "fieldname": "periode_minggu",
    "fieldtype": "Select",
    "label": "Periode Minggu",
-   "options": "\n1\n2\n3\n4"
-  },
-  {
-   "fieldname": "nama_karyawan_dan_jabatan",
-   "fieldtype": "Data",
-   "label": "Nama Karyawan dan Jabatan "
+   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48"
   },
   {
    "fieldname": "nama_dan_jenis_pekerjaan",
@@ -99,18 +99,21 @@
   },
   {
    "fieldname": "nama_mesin_yang_diperbaiki",
-   "fieldtype": "Data",
-   "label": "Nama Mesin yang Diperbaiki"
+   "fieldtype": "Link",
+   "label": "Nama Mesin yang Diperbaiki",
+   "options": "Mill Machine"
   },
   {
    "fieldname": "lokasi_stasiun_pilihan",
-   "fieldtype": "Data",
-   "label": "Lokasi Stasiun Pilihan"
+   "fieldtype": "Link",
+   "label": "Lokasi Stasiun Pilihan",
+   "options": "Station Master"
   },
   {
    "fieldname": "lokasi_mesin_pilihan",
-   "fieldtype": "Data",
-   "label": "Lokasi Mesin Pilihan"
+   "fieldtype": "Link",
+   "label": "Lokasi Mesin Pilihan",
+   "options": "Mill Machine"
   },
   {
    "fieldname": "jenis_pemeriksaan_pilihan",
@@ -124,6 +127,7 @@
    "label": "Jam Kerja"
   },
   {
+   "default": "Now",
    "fieldname": "jam_mulai",
    "fieldtype": "Time",
    "label": "Jam Mulai"
@@ -134,31 +138,55 @@
    "label": "Jam Selesai"
   },
   {
+   "default": "0",
    "fieldname": "total_jam",
    "fieldtype": "Data",
-   "label": "Total Jam"
-  },
-  {
-   "fieldname": "status_pekerjaan_section",
-   "fieldtype": "Section Break",
-   "label": "Status Pekerjaan"
-  },
-  {
-   "default": "-",
-   "fieldname": "hasil_pekerjaan",
-   "fieldtype": "Select",
-   "label": "Hasil Pekerjaan",
-   "options": "-\nPending\nSelesai"
+   "in_preview": 1,
+   "label": "Total Jam",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_mcww",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_efgc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_apih",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.jenis_pilihan_preventive_maintenance == \"Bulanan\"",
+   "fieldname": "periode_bulanan",
+   "fieldtype": "Select",
+   "label": "Periode Bulanan",
+   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12"
+  },
+  {
+   "fieldname": "list_karyawan_tab",
+   "fieldtype": "Tab Break",
+   "label": "List Karyawan"
+  },
+  {
+   "fieldname": "list_karyawan",
+   "fieldtype": "Table",
+   "label": "List Karyawan",
+   "options": "Employee Detail Mill"
+  },
+  {
+   "default": "-",
+   "fieldname": "status_pekerjaan",
+   "fieldtype": "Select",
+   "label": "Status Pekerjaan",
+   "options": "-\nPending\nSelesai"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 14:32:38.641186",
+ "modified": "2026-03-09 10:12:12.310551",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Preventive Maintenance",

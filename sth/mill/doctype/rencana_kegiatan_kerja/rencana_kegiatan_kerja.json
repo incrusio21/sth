@@ -10,17 +10,21 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
   "column_break_jxji",
   "status",
+  "company",
+  "unit",
   "section_break_hthp",
-  "nama_karyawan_dan_jabatan",
-  "jenis_pekerjaan",
   "lokasi_kerja",
-  "jenis_bahan_material_yang_digunakan",
-  "jenis_alat_kerja_yang_digunakan",
-  "rencana_waktu_pekerjaan"
+  "jenis_pekerjaan",
+  "column_break_tvee",
+  "rencana_waktu_pekerjaan",
+  "list_karyawan_tab",
+  "table_fqdw",
+  "bahan_material_tab",
+  "table_ebcs",
+  "alat_kerja_tab",
+  "table_hryu"
  ],
  "fields": [
   {
@@ -69,18 +73,13 @@
   },
   {
    "fieldname": "section_break_hthp",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "label": "Tanggal"
-  },
-  {
-   "fieldname": "nama_karyawan_dan_jabatan",
-   "fieldtype": "Link",
-   "label": "Nama Karyawan dan Jabatan",
-   "options": "Employee"
   },
   {
    "fieldname": "jenis_pekerjaan",
@@ -94,25 +93,49 @@
    "options": "Station Master"
   },
   {
-   "fieldname": "jenis_bahan_material_yang_digunakan",
-   "fieldtype": "Data",
-   "label": "Jenis Bahan Material yang Digunakan"
-  },
-  {
-   "fieldname": "jenis_alat_kerja_yang_digunakan",
-   "fieldtype": "Data",
-   "label": "Jenis Alat Kerja yang Digunakan"
-  },
-  {
    "fieldname": "rencana_waktu_pekerjaan",
    "fieldtype": "Data",
    "label": "Rencana Waktu Pekerjaan"
+  },
+  {
+   "fieldname": "list_karyawan_tab",
+   "fieldtype": "Tab Break",
+   "label": "List Karyawan"
+  },
+  {
+   "fieldname": "table_fqdw",
+   "fieldtype": "Table",
+   "options": "Employee Detail Mill"
+  },
+  {
+   "fieldname": "column_break_tvee",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bahan_material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bahan Material"
+  },
+  {
+   "fieldname": "table_ebcs",
+   "fieldtype": "Table",
+   "options": "list item detail"
+  },
+  {
+   "fieldname": "alat_kerja_tab",
+   "fieldtype": "Tab Break",
+   "label": "Alat Kerja"
+  },
+  {
+   "fieldname": "table_hryu",
+   "fieldtype": "Table",
+   "options": "list item detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 13:57:12.864949",
+ "modified": "2026-03-09 11:14:00.342237",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Rencana Kegiatan Kerja",

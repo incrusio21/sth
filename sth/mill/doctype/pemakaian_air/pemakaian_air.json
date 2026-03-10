@@ -10,16 +10,18 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_mfgh",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_uzuf",
   "pemakaian_air_yang_diolah",
   "pemakaian_air_domestik",
+  "column_break_magv",
   "pemakaian_air_softener",
   "pemakaian_air_boiler",
+  "column_break_pasl",
   "pemakaian_air_untuk_proses"
  ],
  "fields": [
@@ -86,7 +88,8 @@
   },
   {
    "fieldname": "section_break_uzuf",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "description": "(Satuan m\u00b3)",
@@ -122,12 +125,20 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Pemakaian Air untuk Proses"
+  },
+  {
+   "fieldname": "column_break_magv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pasl",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:43:50.089454",
+ "modified": "2026-03-09 11:04:21.873025",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemakaian Air",

@@ -170,7 +170,8 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
-				dict_data.notes_pr_sr, dict_data.asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
+				dict_data.notes_pr_sr, asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
+				dict_data.asset = frappe.get_cached_value("Alat Berat Dan Kendaraan",asset,"no_pol")
 				dict_data[f"{title}_status"] = data.status
 				dict_data[f"{title}_workflow_state"] = data.workflow_state
 
@@ -185,7 +186,8 @@ def get_table_data(args):
 			for sup_field in supplier_fields:
 				dict_data[f"{title}_{sup_field}"] = data[sup_field]
 
-			dict_data.notes_pr_sr, dict_data.asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
+			dict_data.notes_pr_sr, asset = frappe.get_cached_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
+			dict_data.asset = frappe.get_cached_value("Alat Berat Dan Kendaraan",asset,"no_pol")
 			dict_data.notes_sq = data.notes_sq
 			dict_data[f"{title}_status"] = data.status
 			dict_data[f"{title}_workflow_state"] = data.workflow_state

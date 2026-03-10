@@ -14,7 +14,7 @@ frappe.ui.form.on("Perhitungan Kompensasi PHK", {
         frm.ignore_doctypes_on_cancel_all = ["Exit Interview"]
         filterExitInterview(frm)
         // setDefaultSalaryComponent(frm)
-        createPayment(frm)
+        // createPayment(frm)
     },
     employee(frm) {
         fetchSSA(frm);
@@ -32,7 +32,7 @@ sth.plantation.PerhitunganKaryawanPHK = class PerhitunganKaryawanPHK extends sth
     }
 }
 
-cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);
+//cur_frm.script_manager.make(sth.plantation.PerhitunganKaryawanPHK);
 
 function fetchTableSeym(frm) {
     if (!frm.doc.dphk || !frm.doc.employee || !frm.doc.l_date || !frm.doc.exit_interview) {

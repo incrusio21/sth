@@ -10,16 +10,18 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_flyo",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_nyty",
   "stock_awal",
   "produksi",
+  "column_break_szsk",
   "pengiriman",
   "input_dipakai_pabrik",
+  "column_break_jjbi",
   "stock_akhir"
  ],
  "fields": [
@@ -111,13 +113,22 @@
   },
   {
    "fieldname": "section_break_nyty",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "column_break_szsk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jjbi",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:40:22.967787",
+ "modified": "2026-03-09 11:42:58.277889",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Stock By Product",

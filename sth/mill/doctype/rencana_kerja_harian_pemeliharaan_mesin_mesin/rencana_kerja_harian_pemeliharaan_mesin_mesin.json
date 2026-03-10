@@ -10,17 +10,21 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
   "column_break_qdrs",
   "status",
+  "company",
+  "unit",
   "section_break_mwto",
-  "nama_karyawan_dan_jabatan",
-  "jenis_pekerjaan_perbaikan",
   "lokasi_kerja",
   "jenis_mesin_yang_diperbaiki",
-  "jenis_bahan_material_yang_digunakan",
-  "jenis_alat_kerja_yang_digunakan"
+  "column_break_fmoz",
+  "jenis_pekerjaan_perbaikan",
+  "list_karyawan_tab",
+  "list_karyawan",
+  "bahan_material_tab",
+  "list_bahan_material",
+  "alat_kerja_tab",
+  "list_alat_kerja"
  ],
  "fields": [
   {
@@ -69,17 +73,16 @@
   },
   {
    "fieldname": "section_break_mwto",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
+   "default": "Today",
    "fieldname": "tanggal",
    "fieldtype": "Date",
-   "label": "Tanggal"
-  },
-  {
-   "fieldname": "nama_karyawan_dan_jabatan",
-   "fieldtype": "Data",
-   "label": "Nama Karyawan dan Jabatan"
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
   },
   {
    "fieldname": "jenis_pekerjaan_perbaikan",
@@ -95,24 +98,52 @@
   {
    "fieldname": "lokasi_kerja",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Lokasi Kerja / Stasiun",
    "options": "Station Master"
   },
   {
-   "fieldname": "jenis_bahan_material_yang_digunakan",
-   "fieldtype": "Data",
-   "label": "Jenis Bahan Material yang Digunakan"
+   "fieldname": "list_karyawan_tab",
+   "fieldtype": "Tab Break",
+   "label": "List Karyawan"
   },
   {
-   "fieldname": "jenis_alat_kerja_yang_digunakan",
-   "fieldtype": "Data",
-   "label": "Jenis Alat Kerja yang Digunakan"
+   "fieldname": "list_karyawan",
+   "fieldtype": "Table",
+   "label": "List Karyawan",
+   "options": "Employee Detail Mill"
+  },
+  {
+   "fieldname": "bahan_material_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bahan Material"
+  },
+  {
+   "fieldname": "list_bahan_material",
+   "fieldtype": "Table",
+   "label": "List Bahan Material",
+   "options": "list item detail"
+  },
+  {
+   "fieldname": "alat_kerja_tab",
+   "fieldtype": "Tab Break",
+   "label": "Alat Kerja"
+  },
+  {
+   "fieldname": "list_alat_kerja",
+   "fieldtype": "Table",
+   "label": "List alat Kerja",
+   "options": "list item detail"
+  },
+  {
+   "fieldname": "column_break_fmoz",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 14:00:28.877352",
+ "modified": "2026-03-09 11:00:31.591773",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Rencana Kerja Harian Pemeliharaan Mesin-Mesin",

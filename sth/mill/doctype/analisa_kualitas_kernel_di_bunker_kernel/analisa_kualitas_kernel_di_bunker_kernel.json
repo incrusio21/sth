@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_vutk",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_8ps2",
   "ffa_",
   "moisture_",
@@ -87,7 +87,8 @@
   },
   {
    "fieldname": "section_break_8ps2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "ffa_",
@@ -128,7 +129,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:13:41.903814",
+ "modified": "2026-03-09 11:30:14.674081",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas Kernel di Bunker Kernel",

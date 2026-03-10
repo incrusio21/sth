@@ -32,11 +32,13 @@
   "nik",
   "karyawan",
   "nama_karyawan",
-  "golongan_darah",
   "column_break_oeqg",
-  "data_tanggungan",
+  "ptkp_status",
+  "total_natura",
   "gaji_pokok",
+  "harga_per_jam_lembur",
   "jam_lembur",
+  "total_biaya_lembur",
   "premi_tetap"
  ],
  "fields": [
@@ -108,7 +110,8 @@
   },
   {
    "fieldname": "section_break_fzpj",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "department",
@@ -137,27 +140,19 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "karyawan.blood_group",
-   "fieldname": "golongan_darah",
-   "fieldtype": "Data",
-   "label": "Golongan Darah"
-  },
-  {
-   "fieldname": "data_tanggungan",
-   "fieldtype": "Data",
-   "label": "Data Tanggungan"
-  },
-  {
+   "description": "Dalam 1 Tahun",
    "fieldname": "gaji_pokok",
    "fieldtype": "Currency",
    "label": "Gaji Pokok"
   },
   {
+   "description": "Dalam 1 Tahun",
    "fieldname": "jam_lembur",
    "fieldtype": "Time",
    "label": "Jam Lembur"
   },
   {
+   "description": "Dalam 1 Tahun",
    "fieldname": "premi_tetap",
    "fieldtype": "Currency",
    "label": "Premi Tetap"
@@ -219,12 +214,34 @@
   {
    "fieldname": "section_break_ryxt",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "harga_per_jam_lembur",
+   "fieldtype": "Currency",
+   "label": "Harga Per Jam Lembur"
+  },
+  {
+   "description": "Dalam 1 Tahun",
+   "fieldname": "total_biaya_lembur",
+   "fieldtype": "Currency",
+   "label": "Total Biaya Lembur"
+  },
+  {
+   "fieldname": "ptkp_status",
+   "fieldtype": "Data",
+   "label": "PTKP Status"
+  },
+  {
+   "description": "Natura Dalam 1 Tahun",
+   "fieldname": "total_natura",
+   "fieldtype": "Currency",
+   "label": "Total Natura"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:13:51.551292",
+ "modified": "2026-03-09 14:19:06.211881",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Produksi dan Tenaga Kerja",

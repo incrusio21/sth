@@ -8,17 +8,22 @@
  "field_order": [
   "section_break_bapn",
   "naming_series",
-  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "catatan",
+  "column_break_nccm",
+  "company",
   "unit",
   "divisi",
+  "spb",
   "tanggal_panen",
   "no_polisi",
   "supplier",
+  "do_no",
+  "items_do",
+  "cust",
   "lokasi_pos",
-  "catatan",
   "column_break_mtrn",
   "transaction_type",
   "receive_type",
@@ -29,10 +34,7 @@
   "vehicle_exit_time",
   "no_pol_tidak_terdaftar",
   "qr_code_scan",
-  "spb",
   "purchase_order",
-  "do_no",
-  "items_do",
   "driver_data_tab",
   "driver_details_section",
   "driver_name",
@@ -230,6 +232,7 @@
    "depends_on": "eval:doc.transaction_type == 'Receive'",
    "fieldname": "receive_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Receive Type",
    "options": "\nTBS Internal\nTBS Eksternal\nLain - Lain"
   },
@@ -302,6 +305,7 @@
    "fetch_from": "qr_code_scan.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Unit",
    "options": "Unit",
    "reqd": 1
@@ -400,13 +404,25 @@
    "fieldname": "catatan",
    "fieldtype": "Small Text",
    "label": "Catatan"
+  },
+  {
+   "fieldname": "column_break_nccm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "do_no.customer_name",
+   "fieldname": "cust",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Customer/Buyer",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-04 14:22:35.851569",
+ "modified": "2026-03-09 15:04:41.652906",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
@@ -428,6 +444,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "driver_name,license_plate",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

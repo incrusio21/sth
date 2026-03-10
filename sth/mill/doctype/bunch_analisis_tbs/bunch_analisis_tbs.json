@@ -10,15 +10,17 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_aunm",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_ifmb",
-  "foto_sampel_tbs",
   "nama_sumber",
-  "potensi_oer_"
+  "column_break_xljp",
+  "potensi_oer_",
+  "potensi_ker_",
+  "foto_sampel_tbs"
  ],
  "fields": [
   {
@@ -28,12 +30,16 @@
   },
   {
    "fieldname": "nama_sumber",
-   "fieldtype": "Data",
-   "label": "Nama Sumber"
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Nama Supplier TBS",
+   "link_filters": "[[\"Supplier\",\"is_supplier_tbs\",\"=\",1]]",
+   "options": "Supplier"
   },
   {
    "fieldname": "potensi_oer_",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
+   "in_preview": 1,
    "label": "Potensi OER %"
   },
   {
@@ -98,16 +104,28 @@
   },
   {
    "fieldname": "section_break_ifmb",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "column_break_xljp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "potensi_ker_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Potensi KER %"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 16:38:48.840960",
+ "modified": "2026-03-09 13:42:09.226348",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Bunch Analisis TBS",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

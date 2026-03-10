@@ -166,7 +166,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Stasiun Threshing",
+   "options": "Monitoring TBS Olah",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -176,7 +176,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Stasiun Threshing",
+   "options": "Monitoring TBS Olah",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -191,25 +191,27 @@
    "label": "Foto Hasil Pemeriksaan"
   },
   {
+   "default": "0",
    "fieldname": "tbs_mentah",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Jumlah Restan TBS Mentah"
   },
   {
    "fieldname": "tbs_masak",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Jumlah Restan TBS Masak",
-   "read_only": 1
+   "label": "Jumlah Restan TBS Masak"
   },
   {
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
-   "label": "Jumlah Restan TBS yang Sudah di Olah"
+   "label": "Jumlah TBS yang Sudah di Olah"
   },
   {
    "fieldname": "section_break_ybji",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "mesin_1",
@@ -283,7 +285,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 14:48:33.122726",
+ "modified": "2026-03-09 13:20:31.730935",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring TBS Olah",

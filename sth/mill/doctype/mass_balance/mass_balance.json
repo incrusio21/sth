@@ -10,15 +10,11 @@
   "naming_series",
   "date",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_zxvd",
   "status",
-  "shift",
-  "section_break_rwcy",
-  "tanggal",
-  "column_break_qvri",
-  "unit_pabrik",
+  "company",
+  "unit",
   "section_break_qtus",
   "fibertbs",
   "nuttbs",
@@ -36,6 +32,10 @@
   "ltds_2nut",
   "wet_shellnut",
   "kerneltbs",
+  "dry_matter_fiberfiber_press_",
+  "kernelbrondolan_",
+  "fibernut_",
+  "final_effluenttbs_",
   "amended_from"
  ],
  "fields": [
@@ -101,26 +101,9 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_rwcy",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "tanggal",
-   "fieldtype": "Date",
-   "label": "Tanggal"
-  },
-  {
-   "fieldname": "column_break_qvri",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "unit_pabrik",
-   "fieldtype": "Data",
-   "label": "Unit Pabrik"
-  },
-  {
    "fieldname": "section_break_qtus",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "fibertbs",
@@ -210,16 +193,37 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "dry_matter_fiberfiber_press_",
+   "fieldtype": "Percent",
+   "label": "DRY MATTER FIBER/FIBER PRESS (%)"
+  },
+  {
+   "fieldname": "kernelbrondolan_",
+   "fieldtype": "Percent",
+   "label": "KERNEL/BRONDOLAN (%)"
+  },
+  {
+   "fieldname": "fibernut_",
+   "fieldtype": "Percent",
+   "label": "FIBER/NUT (%)"
+  },
+  {
+   "fieldname": "final_effluenttbs_",
+   "fieldtype": "Percent",
+   "label": "FINAL EFFLUENT/TBS (%)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:44:35.507909",
+ "modified": "2026-03-09 13:37:27.507849",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mass Balance",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

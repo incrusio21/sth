@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-09 13:55:31.863983",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "item",
+  "qty",
+  "uom",
+  "tipe_rutin",
+  "estimasi_kenaikan_harga",
+  "column_break_rnkj",
+  "rate",
+  "harga_estimasi_budget",
+  "amount",
+  "section_break_xwdy",
+  "used_total",
+  "column_break_enrh",
+  "realized_total"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "item.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Satuan",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Jumlah",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rnkj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_group.valuation_rate",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Harga Saat Ini"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_xwdy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "used_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Used Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_enrh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realized_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Realized Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "estimasi_kenaikan_harga",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Estimasi Kenaikan Harga"
+  },
+  {
+   "fetch_from": "item_group.valuation_rate",
+   "fieldname": "harga_estimasi_budget",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Harga Estimasi Budget"
+  },
+  {
+   "fieldname": "tipe_rutin",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tipe Rutin",
+   "options": "Rutin\nNon Rutin"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-09 14:00:11.658869",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Detail Item Budget Mill",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

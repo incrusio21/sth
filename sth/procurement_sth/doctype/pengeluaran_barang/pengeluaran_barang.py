@@ -20,11 +20,8 @@ class PengeluaranBarang(Document):
 	def validate_qty(self):
 		for row in self.items:
 			jumlah_permintaan,jumlah_keluar = frappe.db.get_value("Permintaan Pengeluaran Barang Item",row.reference,["jumlah","jumlah_keluar"])
-			qty = row.jumlah - (jumlah_permintaan - jumlah_keluar)
-			if qty < 0:
-				frappe.throw(f"Jumlah barang melebihi maksimal permintaan: {qty}")
-
-			if row.jumlah > jumlah_permintaan:
+			
+			if row.jumlah > jumlah_permintaan - jumlah_keluar:
 				frappe.throw((f"Jumlah barang melebihi permintaan: {row.jumlah}"))
 
 	def update_items_out(self):
@@ -153,4 +150,58 @@ def get_report_pemakaian_material(kode_barang):
 		JOIN `tabItem Group` ig on i.kelompok_barang = ig.name
 		where pb.docstatus = 1 and pbi.kode_barang = %s AND pb.tanggal BETWEEN %s AND %s
 		order by pb.tanggal,pb.name
-	""",(nama_barang,start_year,today),as_dict=True)
+	""",(kode_barang,start_year,today),as_dict=True)
+
+@frappe.whitelist()
+def history_pemakaian_barang(asset):
+	from erpnext.accounts.utils import get_fiscal_year
+	today = frappe.utils.today()
+	fiscal_year = get_fiscal_year(date=today,boolean=True)
+	start_year = fiscal_year[0][1]
+
+	details = frappe.db.sql("""
+		select e.first_name as operator ,k.no_pol, k.name as kode_kendaraan, k.tipe_master as jenis
+		from `tabAlat Berat Dan Kendaraan` k
+		join `tabEmployee` e on e.name = k.operator
+	    where k.no_pol = %s
+	""",(asset),as_dict=True)
+
+	details = details[0] if details else None
+
+	query = frappe.db.sql("""
+		SELECT pbi.`kode_barang`, i.`item_name` AS nama_barang, pb.`tanggal`,
+		SUM(pbi.`jumlah`) AS jumlah 
+		FROM `tabPengeluaran Barang Item` pbi
+		JOIN `tabPengeluaran Barang` pb ON pb.`name` = pbi.`parent`
+		LEFT JOIN `tabAlat Berat Dan Kendaraan` k ON pbi.`kendaraan` = k.`name`
+		JOIN `tabItem` i ON i.`name` = pbi.`kode_barang`
+		where pb.docstatus = 1 and k.no_pol = %s AND pb.tanggal BETWEEN %s AND %s
+		GROUP BY pbi.`kode_barang`, MONTH(pb.`tanggal`)
+		ORDER BY pb.`tanggal` ASC 
+	""",(asset,start_year,today),as_dict=True)
+
+	result = []
+	month = []
+
+	for data in query:
+		dict_data = frappe._dict({})
+		exists = next((r for r in result if r.kode_barang == data.kode_barang),None)
+		date = data.tanggal.strftime("%Y-%m")
+		month.append(date)
+
+		if exists:
+			exists[date] = data.jumlah
+			exists.jumlah += data.jumlah
+		else:
+			dict_data.kode_barang = data.kode_barang
+			dict_data.nama_barang = data.nama_barang
+			dict_data[date] = data.jumlah
+			dict_data.jumlah = data.jumlah
+			result.append(dict_data)
+
+
+	return {
+		"details": details,
+		"data" :result,
+		"month": set(month)
+	}

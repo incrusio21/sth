@@ -26,8 +26,8 @@
   "c_alkalinity",
   "m_alkalinity",
   "total_hardness",
-  "total_disolved_solid",
-  "fe"
+  "fe",
+  "total_disolved_solid"
  ],
  "fields": [
   {
@@ -152,16 +152,18 @@
   },
   {
    "fieldname": "section_break_sedr",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 16:48:32.987719",
+ "modified": "2026-03-09 11:33:01.873724",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kualitas Air Boiler",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

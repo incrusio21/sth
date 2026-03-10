@@ -10,19 +10,21 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_xffr",
   "status",
-  "shift",
+  "unit",
+  "company",
   "section_break_npbh",
   "operasi_pompa_injeksi_flowrate",
   "level_air_water_basin",
   "level_air_tower_tank",
   "kejernihan_air_di_clarifier",
+  "column_break_ijev",
   "back_wash_sand_filter",
   "upload_foto_pressure_gauge",
   "analisa_ph_air_ex_clarifier",
+  "column_break_cgdh",
   "analisa_conductivity_air_ex_clarifier"
  ],
  "fields": [
@@ -89,7 +91,8 @@
   },
   {
    "fieldname": "section_break_npbh",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "description": "(Dalam satuan Kg/Jam)",
@@ -145,12 +148,20 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Analisa Conductivity Air Ex. Clarifier "
+  },
+  {
+   "fieldname": "column_break_ijev",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cgdh",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-25 13:51:28.412719",
+ "modified": "2026-03-09 11:05:38.369422",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "External Treatment",

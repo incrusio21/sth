@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_gwbb",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_wtgt",
   "angka_ketebalan_padatan_kolam"
  ],
@@ -81,7 +81,8 @@
   },
   {
    "fieldname": "section_break_wtgt",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "description": "(satuan Cm)",
@@ -93,7 +94,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:45:38.853172",
+ "modified": "2026-03-09 11:07:37.167777",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ketebalan Padatan Kolam Anaerobik",

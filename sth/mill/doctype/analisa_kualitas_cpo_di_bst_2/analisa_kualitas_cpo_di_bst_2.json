@@ -10,14 +10,16 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_yiut",
   "status",
-  "shift",
+  "unit",
+  "company",
   "section_break_yngb",
   "ffa_",
+  "column_break_mbfz",
   "moisture_",
+  "column_break_cgyq",
   "dirt_",
   "amended_from"
  ],
@@ -84,7 +86,8 @@
   },
   {
    "fieldname": "section_break_yngb",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "ffa_",
@@ -110,13 +113,21 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_mbfz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cgyq",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:44:05.151443",
+ "modified": "2026-03-09 11:29:41.962403",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO di BST-2",

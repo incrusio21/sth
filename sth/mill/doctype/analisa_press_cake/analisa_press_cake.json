@@ -10,14 +10,16 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_vihj",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_3ibl",
   "nut_pecah_press_cake_",
+  "column_break_ifwk",
   "nut_to_press_cake_",
+  "column_break_zzya",
   "fiber_",
   "amended_from"
  ],
@@ -85,7 +87,8 @@
   },
   {
    "fieldname": "section_break_3ibl",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "nut_pecah_press_cake_",
@@ -111,13 +114,21 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_ifwk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zzya",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:44:17.021705",
+ "modified": "2026-03-09 11:24:10.563254",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Press Cake",

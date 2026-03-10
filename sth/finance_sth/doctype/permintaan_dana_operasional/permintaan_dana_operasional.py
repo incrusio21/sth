@@ -25,6 +25,8 @@ class PermintaanDanaOperasional(Document):
 	def validate(self):
 		self.update_pdo_default_account()
 		self.validate_child_tables()
+		if self.docstatus == 0:
+			self.hitung_total()
 
 	def update_pdo_default_account(self):
 		pass
@@ -32,8 +34,9 @@ class PermintaanDanaOperasional(Document):
 		# 	self.bahan_bakar_debit_to = frappe.get_doc("Company", self.company).default_pdo_bahan_bakar_account
 
 		
-	# def on_update(self):
-	# 	self.process_data_to_insert_vtwo()
+	def on_update(self):
+		if self.docstatus == 0:
+			self.outstanding_amount = self.grand_total_pdo
 
 	def before_submit(self):
 		self.submit_pdo_vtwo()
@@ -130,6 +133,54 @@ class PermintaanDanaOperasional(Document):
 							continue
 						msg = f"Pada Tabel {pdo} baris ke {row.idx} field currency atau angka harus lebih besar dari 0"
 						frappe.throw(msg)
+	
+	def hitung_total(self):
+		list_pdo = ["Bahan Bakar","Perjalanan Dinas", "Kas", "Dana Cadangan"]
+
+		tipe_mapping = {
+			'Bahan Bakar': {
+				'child_table': 'pdo_bahan_bakar',
+				'amount_field': 'revised_price_total',
+				'grand_total_field': 'grand_total_bahan_bakar',
+				'outstanding_field': 'outstanding_amount_bahan_bakar',
+				'before_amount_field' : 'price_total'
+			},
+			'Perjalanan Dinas': {
+				'child_table': 'pdo_perjalanan_dinas',
+				'amount_field': 'revised_total',
+				'grand_total_field': 'grand_total_perjalanan_dinas',
+				'outstanding_field': 'outstanding_amount_perjalanan_dinas',
+				'before_amount_field' : 'total'
+			},
+			'Kas': {
+				'child_table': 'pdo_kas',
+				'amount_field': 'revised_total',
+				'grand_total_field': 'grand_total_kas',
+				'outstanding_field': 'outstanding_amount_kas',
+				'before_amount_field' : 'total'
+			},
+			'Dana Cadangan': {
+				'child_table': 'pdo_dana_cadangan',
+				'amount_field': 'amount',
+				'grand_total_field': 'grand_total_dana_cadangan',
+				'outstanding_field': 'outstanding_amount_dana_cadangan',
+				'before_amount_field' : 'amount'
+			}
+		}
+
+		for satu_pdo in list_pdo:
+			grand_total = 0
+			mapping = tipe_mapping[satu_pdo]
+			for row in self.get(mapping['child_table']):
+				if row.get(mapping['amount_field']):
+					grand_total += row.get(mapping['amount_field'])
+				else:
+					grand_total += row.get(mapping['before_amount_field'])
+
+			self.set(mapping['grand_total_field'], grand_total)
+			self.set(mapping['outstanding_field'], grand_total)
+
+
 
 @frappe.whitelist()
 def filter_type(doctype, txt, searchfield, start, page_len, filters):
@@ -249,7 +300,6 @@ def create_payment_voucher(source_name, target_doc=None):
 		target.source_exchange_rate = 1
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
-		target.tipe_transfer = "PDO"
 		target.remarks = _("Payment for Permintaan Dana Operasional {0}").format(source.name)
 	
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)

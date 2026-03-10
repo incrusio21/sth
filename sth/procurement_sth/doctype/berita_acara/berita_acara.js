@@ -31,6 +31,12 @@ frappe.ui.form.on("Berita Acara", {
         })
 
         frm.refresh_field('table_klkc')
+    },
+
+    sub_purchase_type(frm) {
+        if (!frm.doc.sub_purchase_type || frm.doc.sub_purchase_type != "Purchase Request") {
+            frm.set_value("asset", 0)
+        }
     }
 });
 

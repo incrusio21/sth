@@ -209,195 +209,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Laboratorium",
-   "link_count": 18,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mass Balance",
-   "link_count": 0,
-   "link_to": "Mass Balance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Oil Losess On Sampel",
-   "link_count": 0,
-   "link_to": "Oil Losess On Sampel",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kernel Losess on Sampel",
-   "link_count": 0,
-   "link_to": "Kernel Losess on Sampel",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Oil Content",
-   "link_count": 0,
-   "link_to": "Analisa Oil Content",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Press Cake",
-   "link_count": 0,
-   "link_to": "Analisa Press Cake",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mass Passing Digester Analysis",
-   "link_count": 0,
-   "link_to": "Mass Passing Digester Analysis",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Size Faktor",
-   "link_count": 0,
-   "link_to": "Size Faktor",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas CPO Produksi Harian di POT",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas CPO Produksi Harian di POT",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas Kernel Produks",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas Kernel Produks",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas CPO di BST-1",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas CPO di BST-1",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas CPO di BST-2",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas CPO di BST-2",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas Kernel di Bunker Kernel",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas Kernel di Bunker Kernel",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas CPO  Pengiriman",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas CPO  Pengiriman",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas Palm Kernel  Pengiriman",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas Palm Kernel  Pengiriman",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bunch Analisis TBS",
-   "link_count": 0,
-   "link_to": "Bunch Analisis TBS",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kualitas Air Demint Plant",
-   "link_count": 0,
-   "link_to": "Kualitas Air Demint Plant",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kualitas Air Softener",
-   "link_count": 0,
-   "link_to": "Kualitas Air Softener",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Kualitas Air Boiler",
-   "link_count": 0,
-   "link_to": "Kualitas Air Boiler",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Temuan Lainnya",
    "link_count": 1,
    "link_type": "DocType",
@@ -429,85 +240,6 @@
    "label": "Sortasi",
    "link_count": 0,
    "link_to": "Sortasi",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Laporan Harian Produksi (LHP)",
-   "link_count": 7,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Data TBS",
-   "link_count": 0,
-   "link_to": "Data TBS",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sounding Stock CPO di BST",
-   "link_count": 0,
-   "link_to": "Sounding Stock CPO di BST",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
-   "link_count": 0,
-   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Penginputan Stock By Product",
-   "link_count": 0,
-   "link_to": "Penginputan Stock By Product",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jam Olah Pabrik",
-   "link_count": 0,
-   "link_to": "Jam Olah Pabrik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Curah Hujan",
-   "link_count": 0,
-   "link_to": "Curah Hujan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Penginputan Data Level Air Waduk",
-   "link_count": 0,
-   "link_to": "Penginputan Data Level Air Waduk",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -806,8 +538,126 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Traksi",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Alat Berat Dan Kendaraan",
+   "link_count": 0,
+   "link_to": "Alat Berat Dan Kendaraan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jenis Alat",
+   "link_count": 0,
+   "link_to": "Jenis Alat",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Buku Kerja Mandor Traksi",
+   "link_count": 0,
+   "link_to": "Buku Kerja Mandor Traksi",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Laporan Harian Produksi (LHP)",
+   "link_count": 7,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data TBS",
+   "link_count": 0,
+   "link_to": "Data TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock CPO di BST",
+   "link_count": 0,
+   "link_to": "Sounding Stock CPO di BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_count": 0,
+   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Penginputan Stock By Product",
+   "link_count": 0,
+   "link_to": "Penginputan Stock By Product",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Jam Olah Pabrik",
+   "link_count": 0,
+   "link_to": "Jam Olah Pabrik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Penginputan Data Level Air Waduk",
+   "link_count": 0,
+   "link_to": "Penginputan Data Level Air Waduk",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Curah Hujan",
+   "link_count": 0,
+   "link_to": "Curah Hujan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Bengkel",
-   "link_count": 8,
+   "link_count": 7,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -828,16 +678,6 @@
    "label": "Preventive Maintenance",
    "link_count": 0,
    "link_to": "Preventive Maintenance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jadwal dan realisasi service Rutin External",
-   "link_count": 0,
-   "link_to": "Jadwal dan realisasi service Rutin External",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -885,9 +725,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Buku Kerja Mandor Bengkel",
+   "label": "Jadwal dan Realisasi Service Rutin External",
    "link_count": 0,
-   "link_to": "Buku Kerja Mandor Bengkel",
+   "link_to": "Jadwal dan Realisasi Service Rutin External",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -895,8 +735,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Traksi",
-   "link_count": 3,
+   "label": "Laboratorium",
+   "link_count": 20,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -904,9 +744,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Alat Berat Dan Kendaraan",
+   "label": "Mass Balance",
    "link_count": 0,
-   "link_to": "Alat Berat Dan Kendaraan",
+   "link_to": "Mass Balance",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -914,9 +754,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Jenis Alat",
+   "label": "Oil Losess On Sampel",
    "link_count": 0,
-   "link_to": "Jenis Alat",
+   "link_to": "Oil Losess On Sampel",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -924,9 +764,179 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Buku Kerja Mandor Traksi",
+   "label": "Kernel Losess on Sampel",
    "link_count": 0,
-   "link_to": "Buku Kerja Mandor Traksi",
+   "link_to": "Kernel Losess on Sampel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Oil Content",
+   "link_count": 0,
+   "link_to": "Analisa Oil Content",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Press Cake",
+   "link_count": 0,
+   "link_to": "Analisa Press Cake",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mass Passing Digester Analysis",
+   "link_count": 0,
+   "link_to": "Mass Passing Digester Analysis",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Size Faktor",
+   "link_count": 0,
+   "link_to": "Size Faktor",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO Produksi Harian di POT",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO Produksi Harian di POT",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Kernel Produksi",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Kernel Produksi",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO di BST-1",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO di BST-1",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO di BST-2",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO di BST-2",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Kernel di Bunker Kernel",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Kernel di Bunker Kernel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas CPO  Pengiriman",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas CPO  Pengiriman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Palm Kernel  Pengiriman",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Palm Kernel  Pengiriman",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bunch Analisis TBS",
+   "link_count": 0,
+   "link_to": "Bunch Analisis TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Demint Plant",
+   "link_count": 0,
+   "link_to": "Kualitas Air Demint Plant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Softener",
+   "link_count": 0,
+   "link_to": "Kualitas Air Softener",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Boiler",
+   "link_count": 0,
+   "link_to": "Kualitas Air Boiler",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Waduk",
+   "link_count": 0,
+   "link_to": "Kualitas Air Waduk",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kualitas Air Sand Filter",
+   "link_count": 0,
+   "link_to": "Kualitas Air Sand Filter",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -943,6 +953,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Budget Produksi dan Tenaga Kerja",
+   "link_count": 0,
+   "link_to": "Budget Produksi dan Tenaga Kerja",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Budget Pemakaian Bahan Penolong",
    "link_count": 0,
    "link_to": "Budget Pemakaian Bahan Penolong",
@@ -953,9 +973,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+   "label": "Budget Pemakaian Sparepart ",
    "link_count": 0,
-   "link_to": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+   "link_to": "Budget Pemakaian Sparepart",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -973,9 +993,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Budget Produksi dan Tenaga Kerja",
+   "label": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
    "link_count": 0,
-   "link_to": "Budget Produksi dan Tenaga Kerja",
+   "link_to": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -986,16 +1006,6 @@
    "label": "Budget Kapital Tahunan",
    "link_count": 0,
    "link_to": "Budget Kapital Tahunan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Pemakaian Sparepart ",
-   "link_count": 0,
-   "link_to": "Budget Pemakaian Sparepart",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -1021,7 +1031,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-03-05 15:25:26.208838",
+ "modified": "2026-03-09 14:10:23.696068",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

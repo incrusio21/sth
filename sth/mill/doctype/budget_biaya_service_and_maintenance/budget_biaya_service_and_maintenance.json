@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "tipe_service_maintenance",
   "column_break_ydbf",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_zlnn",
   "nama_stasiun",
   "tahun_budget",
@@ -132,26 +132,24 @@
    "options": "Proses\nSelesai"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_zlnn",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tipe_service_maintenance",
+   "fieldtype": "Select",
+   "label": "Tipe Service Maintenance",
+   "options": "Internal\nEksternal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 10:59:43.072569",
+ "modified": "2026-03-09 14:26:34.880212",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Biaya Service and Maintenance",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

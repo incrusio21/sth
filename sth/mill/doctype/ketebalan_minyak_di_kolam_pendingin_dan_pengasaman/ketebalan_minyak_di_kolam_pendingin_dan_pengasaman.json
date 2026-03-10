@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_wceu",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_ljaf",
   "angka_ketebalan_minyak"
  ],
@@ -82,22 +82,25 @@
   },
   {
    "fieldname": "section_break_ljaf",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
-   "description": "(satuan Cm)",
+   "description": "(Satuan Cm)",
    "fieldname": "angka_ketebalan_minyak",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Angka Ketebalan Minyak"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:45:41.018298",
+ "modified": "2026-03-09 11:06:59.755353",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

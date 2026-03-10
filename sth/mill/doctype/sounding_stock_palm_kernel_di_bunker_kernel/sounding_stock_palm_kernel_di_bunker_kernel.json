@@ -10,20 +10,20 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_bbxq",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_obbx",
-  "foto",
-  "video",
-  "column_break_wnay",
   "no_bunker",
   "hasil_sounding",
-  "berat_jenis_kernel",
   "stock_pk",
-  "data_pengiriman_pk"
+  "data_pengiriman_pk",
+  "berat_jenis_kernel",
+  "column_break_wnay",
+  "foto",
+  "video"
  ],
  "fields": [
   {
@@ -126,16 +126,18 @@
   },
   {
    "fieldname": "section_break_obbx",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 10:57:36.658503",
+ "modified": "2026-03-09 11:42:02.796635",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

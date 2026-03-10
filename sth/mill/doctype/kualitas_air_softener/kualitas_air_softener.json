@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-01-17 11:18:51.840006",
+ "creation": "2026-03-09 13:50:08.533865",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -10,73 +10,22 @@
   "naming_series",
   "tanggal",
   "jam",
+  "shift",
+  "column_break_gnap",
+  "status",
   "company",
   "unit",
-  "column_break_filn",
-  "status",
-  "shift",
-  "section_break_tmcs",
+  "section_break_nxdd",
   "ph",
   "total_hardness",
   "methyl_alkalinity",
-  "p_alkanlinity",
-  "c_alkalinity",
-  "column_break_hjgw",
+  "chloride",
+  "column_break_aruf",
+  "fe",
   "silica",
-  "sulfit",
-  "phospate",
   "total_disolved_solid"
  ],
  "fields": [
-  {
-   "fieldname": "ph",
-   "fieldtype": "Int",
-   "label": "PH"
-  },
-  {
-   "fieldname": "total_hardness",
-   "fieldtype": "Data",
-   "label": "Total Hardness (TH)"
-  },
-  {
-   "fieldname": "methyl_alkalinity",
-   "fieldtype": "Data",
-   "label": "Methyl Alkalinity (M)"
-  },
-  {
-   "fieldname": "p_alkanlinity",
-   "fieldtype": "Data",
-   "label": "P Alkanlinity"
-  },
-  {
-   "fieldname": "c_alkalinity",
-   "fieldtype": "Data",
-   "label": "C Alkalinity"
-  },
-  {
-   "fieldname": "column_break_hjgw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "silica",
-   "fieldtype": "Data",
-   "label": "Silica (SiO2)"
-  },
-  {
-   "fieldname": "sulfit",
-   "fieldtype": "Data",
-   "label": "Sulfit"
-  },
-  {
-   "fieldname": "phospate",
-   "fieldtype": "Data",
-   "label": "Phospate"
-  },
-  {
-   "fieldname": "total_disolved_solid",
-   "fieldtype": "Data",
-   "label": "Total Disolved Solid (TDS)"
-  },
   {
    "fieldname": "header_section",
    "fieldtype": "Section Break",
@@ -105,6 +54,26 @@
    "read_only": 1
   },
   {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gnap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -119,37 +88,58 @@
    "options": "Unit"
   },
   {
-   "fieldname": "column_break_filn",
+   "fieldname": "section_break_nxdd",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "ph",
+   "fieldtype": "Int",
+   "label": "PH"
+  },
+  {
+   "fieldname": "total_hardness",
+   "fieldtype": "Data",
+   "label": "Total Hardness (TH)"
+  },
+  {
+   "fieldname": "methyl_alkalinity",
+   "fieldtype": "Data",
+   "label": "Methyl Alkalinity (M)"
+  },
+  {
+   "fieldname": "chloride",
+   "fieldtype": "Data",
+   "label": "Chloride"
+  },
+  {
+   "fieldname": "column_break_aruf",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
+   "fieldname": "fe",
+   "fieldtype": "Data",
+   "label": "FE"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
+   "fieldname": "silica",
+   "fieldtype": "Data",
+   "label": "Silica (SiO2)"
   },
   {
-   "fieldname": "section_break_tmcs",
-   "fieldtype": "Section Break"
+   "fieldname": "total_disolved_solid",
+   "fieldtype": "Data",
+   "label": "Total Disolved Solid (TDS)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 16:45:32.983839",
+ "modified": "2026-03-09 13:51:23.761558",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kualitas Air Softener",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

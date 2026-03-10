@@ -10,11 +10,35 @@
   "naming_series",
   "tanggal",
   "jam",
-  "companny",
-  "unit",
+  "shift",
   "column_break_juem",
   "status",
-  "shift"
+  "companny",
+  "unit",
+  "liquor_empty_bunch_press_section",
+  "oil_liquor",
+  "emulsi_liquor",
+  "column_break_wcez",
+  "kadar_air_liquor",
+  "nos_liquor",
+  "oil_cot_section",
+  "oil_cot",
+  "emulsi_cot",
+  "column_break_swyg",
+  "moist_cot",
+  "nos_cot",
+  "oil_underflow_section",
+  "oil_underflow",
+  "emulsi_underflow",
+  "column_break_zkgu",
+  "moist_underflow",
+  "nos_underflow",
+  "light_phase_section",
+  "oil_light_phase",
+  "emulsi_light_phase",
+  "column_break_wldw",
+  "moist_light_phase",
+  "nos_light_phase"
  ],
  "fields": [
   {
@@ -77,15 +101,148 @@
    "label": "Shift",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "liquor_empty_bunch_press_section",
+   "fieldtype": "Section Break",
+   "label": "Liquor Empty Bunch Press "
+  },
+  {
+   "fieldname": "oil_liquor",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Oil Liquor"
+  },
+  {
+   "fieldname": "emulsi_liquor",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Emulsi Liquor"
+  },
+  {
+   "fieldname": "kadar_air_liquor",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Kadar Air Liquor"
+  },
+  {
+   "fieldname": "nos_liquor",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "NOS Liquor"
+  },
+  {
+   "fieldname": "oil_cot_section",
+   "fieldtype": "Section Break",
+   "label": "Oil COT "
+  },
+  {
+   "fieldname": "oil_cot",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Oil COT"
+  },
+  {
+   "fieldname": "emulsi_cot",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Emulsi COT"
+  },
+  {
+   "fieldname": "moist_cot",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Moist COT"
+  },
+  {
+   "fieldname": "nos_cot",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "NOS COT"
+  },
+  {
+   "fieldname": "oil_underflow_section",
+   "fieldtype": "Section Break",
+   "label": "Oil Underflow "
+  },
+  {
+   "fieldname": "oil_underflow",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Oil Underflow"
+  },
+  {
+   "fieldname": "emulsi_underflow",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Emulsi Underflow"
+  },
+  {
+   "fieldname": "moist_underflow",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Moist Underflow"
+  },
+  {
+   "fieldname": "nos_underflow",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "NOS Underflow"
+  },
+  {
+   "fieldname": "light_phase_section",
+   "fieldtype": "Section Break",
+   "label": "Light Phase "
+  },
+  {
+   "fieldname": "oil_light_phase",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Oil Light Phase "
+  },
+  {
+   "fieldname": "emulsi_light_phase",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Emulsi Light Phase "
+  },
+  {
+   "fieldname": "moist_light_phase",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Moist Light Phase "
+  },
+  {
+   "fieldname": "nos_light_phase",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "NOS Light Phase "
+  },
+  {
+   "fieldname": "column_break_wcez",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_swyg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zkgu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wldw",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 15:36:14.735409",
+ "modified": "2026-03-09 11:46:01.608016",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Oil Content",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

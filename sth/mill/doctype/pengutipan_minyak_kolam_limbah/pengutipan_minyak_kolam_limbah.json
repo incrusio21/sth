@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_eejr",
   "select",
-  "shift",
+  "company",
+  "unit",
   "section_break_vwmu",
   "upload_foto"
  ],
@@ -82,7 +82,8 @@
   },
   {
    "fieldname": "section_break_vwmu",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "upload_foto",
@@ -93,7 +94,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:45:36.472310",
+ "modified": "2026-03-09 11:08:12.379626",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pengutipan Minyak Kolam Limbah",

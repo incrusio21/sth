@@ -255,8 +255,8 @@ class SupplierComparasion {
 				{ title: "Negara Buatan", field: "country", headerSort: false, width: 120, headerHozAlign: "center", },
 				{ title: "Spesifikasi <br> (Tipe/Model/ <br> Ukuran)", field: "description", headerSort: false, width: 120, headerHozAlign: "center", },
 				{ title: "Mata Uang", field: "currency", headerSort: false, width: 120, headerHozAlign: "center", },
-				{ title: "Harga Satuan", field: "rate", headerSort: false, width: 120, headerHozAlign: "center", },
-				{ title: "Total", field: "amount", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Harga Satuan", field: "rate", formatter: "money", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Total", field: "amount", formatter: "money", headerSort: false, width: 120, headerHozAlign: "center", },
 				{ title: "Nama Supplier", field: "supplier_name", headerSort: false, width: 120, headerHozAlign: "center", },
 				{ title: "No. PR/SR", field: "material_request", headerSort: false, width: 120, headerHozAlign: "center", },
 				{ title: "Keterangan", field: "keterangan", headerSort: false, width: 120, headerHozAlign: "center", },
@@ -272,6 +272,72 @@ class SupplierComparasion {
 		}
 
 		this.table_history = new Tabulator(el, options);
+	}
+
+	initTablePemakaianBarang(el, data = [], month = []) {
+		const month_column = month.map((row) => {
+			return { title: row, field: row, headerSort: false, width: 120, headerHozAlign: "center", }
+		})
+
+		let options = {
+			// layout: "fitDataStretch",
+			selectable: true,
+			data,
+			columnHeaderVertAlign: "middle",
+			maxHeight: "80vh",
+			renderHorizontal: "virtual",
+			columns: [
+				{ title: "No", formatter: "rownum", headerSort: false, hozAlign: "center", headerHozAlign: "center", resizable: false, },
+				{ title: "Kode Barang", field: "kode_barang", headerSort: false, width: 200, headerHozAlign: "center", },
+				{ title: "Nama Barang", field: "nama_barang", headerSort: false, width: 200, headerHozAlign: "center", },
+				{ title: "Bulan", headerSort: false, headerHozAlign: "center", columns: month_column },
+				{ title: "Jumlah", field: "jumlah", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Harga", field: "harga", formatter: "money", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Total", field: "total", formatter: "money", headerSort: false, width: 120, headerHozAlign: "center", },
+			]
+		}
+
+		if (!data.length) {
+			Object.assign(options, {
+				minHeight: "20vh",
+				placeholder: "No Data"
+			})
+		}
+
+		this.table_pemakaian_barang = new Tabulator(el, options);
+	}
+
+	initTablePurchaseRequest(el, data = []) {
+
+		let options = {
+			// layout: "fitDataStretch",
+			selectable: true,
+			data,
+			columnHeaderVertAlign: "middle",
+			maxHeight: "80vh",
+			renderHorizontal: "virtual",
+			columns: [
+				{ title: "No", formatter: "rownum", headerSort: false, hozAlign: "center", headerHozAlign: "center", resizable: false, },
+				{ title: "Tanggal", field: "tanggal", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "No. PO/SO", field: "no_po", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "No. PR/SR", field: "no_mr", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Kode Barang", field: "item_code", headerSort: false, width: 200, headerHozAlign: "center", },
+				{ title: "Nama Barang", field: "item_name", headerSort: false, width: 200, headerHozAlign: "center", },
+				{ title: "KM/HM", field: "km_hm", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Jumlah", field: "qty", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Harga", field: "rate", formatter: "money", headerSort: false, width: 120, headerHozAlign: "center", },
+				{ title: "Total", field: "amount", formatter: "money", headerSort: false, width: 120, headerHozAlign: "center", },
+			]
+		}
+
+		if (!data.length) {
+			Object.assign(options, {
+				minHeight: "20vh",
+				placeholder: "No Data"
+			})
+		}
+
+		this.table_pr_sr = new Tabulator(el, options);
 	}
 
 	getTableData() {
@@ -350,33 +416,54 @@ class SupplierComparasion {
 				title: "Kode Barang", field: "kode_barang", headerSort: false, frozen: true, width: 100, headerHozAlign: "center",
 				cellClick: function (e, cell) {
 					const row = cell.getRow().getData();
-					if (row.kode_barang) {
-						frappe.xcall("sth.procurement_sth.doctype.pengeluaran_barang.pengeluaran_barang.get_report_pemakaian_material",
-							{ kode_barang: row.kode_barang })
-							.then((res) => {
-								me.showHistory(res, "out")
-							})
-					}
+					if (!row.kode_barang) return
+
+					frappe.xcall("sth.procurement_sth.doctype.pengeluaran_barang.pengeluaran_barang.get_report_pemakaian_material",
+						{ kode_barang: row.kode_barang })
+						.then((res) => {
+							me.showHistory(res, "out")
+						})
 				}
 			},
 			{
 				title: "Nama Barang", field: "nama_barang", headerSort: false, frozen: true, width: 120, headerHozAlign: "center",
 				cellClick: function (e, cell) {
 					const row = cell.getRow().getData();
-					if (row.nama_barang) {
-						frappe.xcall("sth.buying_sth.custom.purchase_order.get_history_purchase_item",
-							{ nama_barang: row.nama_barang })
-							.then((res) => {
-								me.showHistory(res, "purchase")
-							})
-					}
+					if (!row.nama_barang) return
+
+					frappe.xcall("sth.buying_sth.custom.purchase_order.get_history_purchase_item",
+						{ nama_barang: row.nama_barang })
+						.then((res) => {
+							me.showHistory(res, "purchase")
+						})
 				}
 			},
 			{ title: "Satuan", field: "satuan", headerSort: false, frozen: true, headerHozAlign: "center", },
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
 			{ title: "Notes SQ", field: "notes_sq", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
 			{ title: "Notes PR/SR", field: "notes_pr_sr", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
-			{ title: "Asset", field: "asset", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
+			{
+				title: "Asset", field: "asset", headerSort: false, frozen: true, width: 100, headerHozAlign: "center",
+				cellClick: async function (e, cell) {
+					const row = cell.getRow().getData();
+					if (!row.asset) return
+
+					try {
+						const pemakaian_barang = await frappe.xcall("sth.procurement_sth.doctype.pengeluaran_barang.pengeluaran_barang.history_pemakaian_barang", { asset: row.asset })
+						const purchase_request = await frappe.xcall("sth.custom.material_request.get_history_purchase_request", { asset: row.asset })
+
+						const data = {
+							pemakaian_barang,
+							purchase_request
+						}
+
+						me.showHistoryAsset(data)
+					} catch (error) {
+						console.error(error);
+
+					}
+				}
+			},
 			...column_suppliers
 		]
 
@@ -568,10 +655,14 @@ class SupplierComparasion {
 			]
 		})
 
-		d.show()
+
 		const wrapper = d.get_field('data').$wrapper
 		if (!wrapper.find("#table-history").length) {
-			wrapper.append(`<div id="table-history" class='komparasion-style'></div>`)
+			wrapper.append(
+				`<div class='komparasion-style'>
+					<div id="table-history"></div>
+				</div>`
+			)
 		}
 
 		if (this.table_history) {
@@ -579,6 +670,40 @@ class SupplierComparasion {
 		}
 
 		func(wrapper.find('#table-history')[0], data)
+
+		d.show()
+	}
+
+	showHistoryAsset(data) {
+		let { details, data: res, month } = data.pemakaian_barang
+
+		month = month.sort()
+
+		const d = new frappe.ui.Dialog({
+			title: "History Asset",
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "data",
+					fieldtype: "HTML"
+				}
+			]
+		})
+		const wrapper = d.get_field('data').$wrapper
+		if (!wrapper.find("#history-asset").length) {
+			let grand_total = 0
+			data.purchase_request.forEach((r) => grand_total += r.amount)
+			grand_total = format_number(grand_total, null, 2)
+			wrapper.append(frappe.render_template("template_history_asset", { ...details, periode: `${month[0]} s/d ${month[month.length - 1]}`, grand_total }))
+		}
+
+		if (this.table_pemakaian_barang) {
+			this.table_pemakaian_barang.destroy()
+		}
+
+		this.initTablePemakaianBarang(wrapper.find('#table-pemakaian-barang')[0], res, month)
+		this.initTablePurchaseRequest(wrapper.find('#table-purchase-request')[0], data.purchase_request)
+		d.show()
 	}
 
 	initials(text) {

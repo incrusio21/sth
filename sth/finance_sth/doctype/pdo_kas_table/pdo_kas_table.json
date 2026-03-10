@@ -38,11 +38,11 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "type",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Jenis",
+   "label": "Nama Barang",
    "options": "Expense Claim Type",
    "reqd": 1
   },
@@ -50,13 +50,14 @@
    "columns": 1,
    "fieldname": "item_code",
    "fieldtype": "Data",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Item Barang"
   },
   {
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Item Name"
   },
   {
@@ -141,7 +142,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-24 22:48:44.175381",
+ "modified": "2026-03-06 15:20:17.521103",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Table",

@@ -48,11 +48,7 @@
   "tbs_process_tab",
   "unit_type",
   "quantity_to_process",
-  "total_weight_process",
-  "column_break_hdny",
-  "pending_quantity",
-  "total_weight_pending_process",
-  "capacity_per_lorry"
+  "column_break_hdny"
  ],
  "fields": [
   {
@@ -148,38 +144,8 @@
    "label": "Quantity To Process"
   },
   {
-   "fieldname": "total_weight_process",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Total Weight Process",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_hdny",
    "fieldtype": "Column Break"
-  },
-  {
-   "description": "Qty in Unit Type",
-   "fieldname": "pending_quantity",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Pending Quantity",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_weight_pending_process",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Total Weight Pending Process",
-   "read_only": 1
-  },
-  {
-   "description": "In Kilograms",
-   "fieldname": "capacity_per_lorry",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Capacity Per Lorry",
-   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -361,7 +327,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 12:11:21.763729",
+ "modified": "2026-03-09 13:17:29.743322",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sterilizer Transaction",

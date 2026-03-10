@@ -106,16 +106,22 @@ class PengakuanPembelianTBS(Document):
 		supplier_list = None
 
 		if parent:
-			if not is_all_supplier:
+
+			if is_all_supplier:
+				supplier_list = (self.nama_supplier,)
+
+			else:
 				suppliers = frappe.get_all(
 					"TBS Gabungan Supplier",
 					filters={"parent": parent},
 					pluck="supplier"
 				)
+
 				if suppliers:
 					supplier_list = tuple(suppliers)
 				else:
 					supplier_list = ("__no_supplier__",)
+
 		else:
 			supplier_list = (self.nama_supplier,)
 
@@ -183,6 +189,8 @@ class PengakuanPembelianTBS(Document):
 		"""
 
 		params_total = [self.tanggal_timbangan]
+
+		print("SUPPLIER LIST:", supplier_list)
 
 		if supplier_list:
 			conditions_total += " AND t.supplier IN %s"
@@ -366,3 +374,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	)
 	
 	return doclist
+
+
+def test():
+	doc = frappe.get_doc("Pengakuan Pembelian TBS", "20260310/ABAM/7222")
+	doc.get_timbangan()
+

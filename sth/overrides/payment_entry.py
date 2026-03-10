@@ -598,9 +598,74 @@ def on_submit_pdo(self,method):
 	if self.permintaan_dana_operasional:
 		update_permintaan_dana_operasional(self)
 
+	if self.payment_voucher_kas_pdo:
+		update_outstanding_pdo(self)
+
 def on_cancel_pdo(self,method):
 	if self.permintaan_dana_operasional:
 		clear_permintaan_dana_operasional(self)
+
+	if self.payment_voucher_kas_pdo:
+		update_outstanding_pdo(self)
+
+def update_outstanding_pdo(doc):
+	# Collect all unique PDO nos from the Payment Voucher Kas PDO table
+	pdo_list = set()
+	for row in doc.payment_voucher_kas_pdo:
+		if row.no_pdo:
+			pdo_list.add(row.no_pdo)
+	
+	for no_pdo in pdo_list:
+		recalculate_pdo_outstanding(no_pdo)
+
+def recalculate_pdo_outstanding(no_pdo):
+	# Get the approved amount from PDO
+	pdo_amount = frappe.db.get_value(
+		"Permintaan Dana Operasional", 
+		no_pdo, 
+		"grand_total_pdo"  # adjust field name as needed
+	)
+	
+	if not pdo_amount:
+		return
+
+	# Sum all submitted Payment Entry amounts linked to this PDO
+	# via the Payment Voucher Kas PDO child table
+	result = frappe.db.sql("""
+		SELECT SUM(pvk.total)
+		FROM `tabPayment Entry` pe
+		JOIN `tabPayment Voucher Kas PDO` pvk ON pvk.parent = pe.name
+		WHERE pvk.no_pdo = %s
+		AND pe.docstatus = 1
+	""", (no_pdo,), as_dict=False)
+
+	total_realisasi = result[0][0] or 0
+
+	outstanding = pdo_amount - total_realisasi
+
+	frappe.db.set_value(
+		"Permintaan Dana Operasional",
+		no_pdo,
+		"outstanding_amount",
+		outstanding
+	)
+
+	if outstanding == 0:
+		frappe.db.set_value(
+			"Permintaan Dana Operasional",
+			no_pdo,
+			"realisasi_status",
+			"Realized"
+		)
+	else:
+		frappe.db.set_value(
+			"Permintaan Dana Operasional",
+			no_pdo,
+			"realisasi_status",
+			"Not Realized"
+		)
+
+	frappe.db.commit()
 
 def update_permintaan_dana_operasional(self):
 	try:
@@ -623,6 +688,9 @@ def update_permintaan_dana_operasional(self):
 			title=f"Error updating PDO {self.permintaan_dana_operasional}"
 		)
 		frappe.throw(_("Failed to update Permintaan Dana Operasional: {0}").format(str(e)))
+
+	# update if realisasi
+
 
 def clear_permintaan_dana_operasional(self):
 	try:

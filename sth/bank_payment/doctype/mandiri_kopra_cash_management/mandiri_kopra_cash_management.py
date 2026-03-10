@@ -19,6 +19,9 @@ class MandiriKopraCashManagement(Document):
 		super().__init__(*args, **kwargs)
 		self._extension_name = ".txt"
 
+	def after_insert(self):
+		self.upload_mft_file()
+
 	def before_submit(self):
 		for d in self.items:
 			generate_duplicate_key(d, "duplicate_key", [self.voucher_type, self.voucher_no])

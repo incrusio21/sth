@@ -23,11 +23,11 @@ class PerhitunganKompensasiPHK(AccountsController):
 	def on_submit(self):
 		self.make_employee_payment_log()
 		self.update_exit_interview()
-		self.make_gl_entry()
+		# self.make_gl_entry()
 
 	def on_cancel(self):
 		super().on_cancel()
-		self.make_gl_entry()
+		# self.make_gl_entry()
 		self.delete_employee_payment()
 
 	@frappe.whitelist()
@@ -219,38 +219,39 @@ def filter_exit_interview(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def make_payment_entry(source_name, target_doc=None):
-	def post_process(source, target):
-		employee = frappe.db.get_value("Employee", source.employee, "*")
-		company = frappe.db.get_value("Company", source.company, "*")
+	pass
+	# def post_process(source, target):
+	# 	employee = frappe.db.get_value("Employee", source.employee, "*")
+	# 	company = frappe.db.get_value("Company", source.company, "*")
 
-		target.payment_type = "Pay"
-		target.party_type = "Employee"
-		target.party = employee.name
-		target.party_name = employee.employee_name
-		target.paid_amount = source.outstanding_amount
-		target.paid_to_account_currency = company.default_currency
-		target.append("references", {
-			"reference_doctype": "Perhitungan Kompensasi PHK",
-			"reference_name": source.name,
-			"total_amount": source.grand_total,
-			"outstanding_amount": source.outstanding_amount,
-			"allocated_amount": source.outstanding_amount
-		})
-	doclist = get_mapped_doc(
-		"Perhitungan Kompensasi PHK",
-		source_name,
-		{
-			"Perhitungan Kompensasi PHK": {
-				"doctype": "Payment Entry",
-				"field_map": {
-					"salary_account": "paid_from",
-					"credit_to": "paid_to"
-				}
-			}
-		},
-		target_doc,
-		post_process,
-	)
-	doclist.paid_from_account_currency="IDR"
-	doclist.paid_to_account_currency="IDR"
-	return doclist	
+	# 	target.payment_type = "Pay"
+	# 	target.party_type = "Employee"
+	# 	target.party = employee.name
+	# 	target.party_name = employee.employee_name
+	# 	target.paid_amount = source.outstanding_amount
+	# 	target.paid_to_account_currency = company.default_currency
+	# 	target.append("references", {
+	# 		"reference_doctype": "Perhitungan Kompensasi PHK",
+	# 		"reference_name": source.name,
+	# 		"total_amount": source.grand_total,
+	# 		"outstanding_amount": source.outstanding_amount,
+	# 		"allocated_amount": source.outstanding_amount
+	# 	})
+	# doclist = get_mapped_doc(
+	# 	"Perhitungan Kompensasi PHK",
+	# 	source_name,
+	# 	{
+	# 		"Perhitungan Kompensasi PHK": {
+	# 			"doctype": "Payment Entry",
+	# 			"field_map": {
+	# 				"salary_account": "paid_from",
+	# 				"credit_to": "paid_to"
+	# 			}
+	# 		}
+	# 	},
+	# 	target_doc,
+	# 	post_process,
+	# )
+	# doclist.paid_from_account_currency="IDR"
+	# doclist.paid_to_account_currency="IDR"
+	# return doclist	

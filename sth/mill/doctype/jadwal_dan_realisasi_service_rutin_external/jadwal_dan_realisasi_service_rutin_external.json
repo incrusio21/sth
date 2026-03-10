@@ -10,16 +10,18 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "tipe_service",
   "column_break_eubw",
   "status",
-  "tipe_service",
+  "company",
+  "unit",
   "section_break_gehm",
-  "nama_mesin",
   "nama_stasiun",
+  "nama_mesin",
+  "column_break_flny",
   "rencana_periode_service",
   "periode_realisasi_service",
+  "column_break_jtmu",
   "hasil_service_yang_telah_dilakukan",
   "amended_from"
  ],
@@ -78,7 +80,8 @@
   },
   {
    "fieldname": "section_break_gehm",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "nama_mesin",
@@ -123,16 +126,24 @@
    "in_preview": 1,
    "label": "Tipe Service",
    "options": "Internal\nEksternal"
+  },
+  {
+   "fieldname": "column_break_flny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jtmu",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 14:10:02.120794",
+ "modified": "2026-03-09 11:15:12.561166",
  "modified_by": "Administrator",
  "module": "Mill",
- "name": "Jadwal dan realisasi service Rutin External",
+ "name": "Jadwal dan Realisasi Service Rutin External",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

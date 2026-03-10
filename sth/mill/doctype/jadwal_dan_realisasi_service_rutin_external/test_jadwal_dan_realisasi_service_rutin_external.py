@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestJadwaldanrealisasiserviceRutinExternal(FrappeTestCase):
+class TestJadwaldanRealisasiServiceRutinExternal(FrappeTestCase):
 	pass

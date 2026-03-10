@@ -1,33 +1,30 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-01-16 22:52:13.110850",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "kebersihan_pabrik",
+  "header_section",
+  "naming_series",
   "tanggal",
-  "unit_pabrik_otomatis",
+  "jam",
+  "column_break_pduv",
+  "company",
+  "unit",
   "upload_foto",
-  "keterangan",
-  "perbaikan_upload_foto"
+  "perbaikan_upload_foto",
+  "keterangan"
  ],
  "fields": [
   {
-   "fieldname": "kebersihan_pabrik",
-   "fieldtype": "Data",
-   "label": "Kebersihan Pabrik"
-  },
-  {
+   "default": "Today",
    "fieldname": "tanggal",
    "fieldtype": "Date",
-   "label": "Tanggal"
-  },
-  {
-   "fieldname": "unit_pabrik_otomatis",
-   "fieldtype": "Link",
-   "label": "Unit Pabrik Otomatis",
-   "options": "Unit"
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
   },
   {
    "fieldname": "upload_foto",
@@ -43,15 +40,52 @@
    "fieldname": "perbaikan_upload_foto",
    "fieldtype": "Attach Image",
    "label": "Perbaikan Upload Foto"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "KP-MILL-"
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_pduv",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-16 22:53:04.898673",
+ "modified": "2026-03-09 11:19:32.885543",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kebersihan Pabrik",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

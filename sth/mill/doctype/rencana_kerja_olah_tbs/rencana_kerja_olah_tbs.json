@@ -8,16 +8,18 @@
  "field_order": [
   "header_section",
   "naming_series",
+  "tanggal",
   "jam",
-  "company",
-  "unit",
   "column_break_wdes",
   "status",
+  "company",
+  "unit",
   "section_break_oyhc",
   "jumlah_tbs_restan",
   "jumlah_taksasi_tbs_kebun",
   "jumlah_taksasi_tbs_luar",
   "total_volume_tbs",
+  "column_break_znog",
   "rencana_olah_tbs",
   "jam_shift"
  ],
@@ -68,7 +70,8 @@
   },
   {
    "fieldname": "section_break_oyhc",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "description": "(Satuan dalam Kg).",
@@ -89,10 +92,13 @@
    "label": "Jumlah Taksasi TBS Luar"
   },
   {
+   "default": "0",
    "description": " (Satuan dalam Kg)",
    "fieldname": "total_volume_tbs",
    "fieldtype": "Data",
-   "label": "Total Volume TBS"
+   "in_preview": 1,
+   "label": "Total Volume TBS",
+   "read_only": 1
   },
   {
    "description": "(Satuan dalam Kg)",
@@ -105,12 +111,24 @@
    "fieldname": "jam_shift",
    "fieldtype": "Data",
    "label": "Jam Shift"
+  },
+  {
+   "fieldname": "column_break_znog",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 13:53:58.939218",
+ "modified": "2026-03-09 10:43:24.846306",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Rencana Kerja Olah TBS",

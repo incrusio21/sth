@@ -44,15 +44,14 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
+   "label": "Tanggal"
   },
   {
    "default": "Now",
    "fieldname": "jam",
-   "fieldtype": "Date",
-   "label": "Jam",
-   "read_only": 1
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam"
   },
   {
    "fieldname": "company",
@@ -146,7 +145,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 14:27:16.176308",
+ "modified": "2026-03-09 13:28:47.021295",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Buku Kerja Mekanik",

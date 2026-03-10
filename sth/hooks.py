@@ -35,6 +35,7 @@ doctype_js = {
 	"Asset": "public/js/asset.js",
 	"Asset Capitalization": "public/js/asset_capitalization.js",
 	"Attendance": "public/js/attendance.js",
+	"Company": "public/js/company.js",
 	"Contract Template": "public/js/contract_template.js",
 	"Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
@@ -221,8 +222,12 @@ doc_events = {
 	},
 
 	"Asset": {
-		"validate": ["sth.accounting_sth.custom.asset.cek_prec_untuk_asset","sth.overrides.asset.validate_company","sth.utils.qr_generator.validate_create_qr","sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
-		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes"
+		"validate": ["sth.accounting_sth.custom.asset.cek_prec_untuk_asset",
+               "sth.overrides.asset.validate_company",
+               "sth.utils.qr_generator.validate_create_qr",
+               "sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes",
+		"on_submit": "sth.overrides.asset.validate_asset_for_vra_progress"
 	},
 	"Attendance": {
 		"validate": "sth.hr_customize.custom.attendance.Attendance",
@@ -288,9 +293,15 @@ doc_events = {
 			"sth.custom.payment_entry.update_status_dividen", 
 			"sth.overrides.payment_entry.on_submit_pdo",
 			"sth.custom.payment_entry.payment_entry_notification",
+            "sth.custom.payment_entry.update_pesangon_from_payment"
             # "sth.bank_payment.custom.payment_entry.make_entry"
         ],
-		"on_cancel": ["sth.custom.payment_entry.update_check_book", "sth.custom.payment_entry.update_status_deposito", "sth.custom.payment_entry.update_status_loan_bank", "sth.custom.payment_entry.update_status_dividen", "sth.overrides.payment_entry.on_cancel_pdo"],
+		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
+                "sth.custom.payment_entry.update_status_deposito", 
+                "sth.custom.payment_entry.update_status_loan_bank", 
+                "sth.custom.payment_entry.update_status_dividen", 
+                "sth.overrides.payment_entry.on_cancel_pdo",
+                "sth.custom.payment_entry.update_pesangon_from_payment"],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
 	# "Permintaan Pengeluaran Barang": {
@@ -322,7 +333,7 @@ doc_events = {
 		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
 	},
 	"Sales Invoice": {
-		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.sales_sth.custom.sales_invoice.validate_expense_account"],
 	},
 	"Supplier": {
 		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],
@@ -354,7 +365,10 @@ doc_events = {
 	},
     ("Delivery Note","Sales Invoice","Purchase Receipt","Purchase Invoice","Stock Entry"): {
         "validate": "sth.custom.stock_ledger.validate_posting_date"
-	}
+	},
+    "Delivery Order": {
+		"validate": "sth.sales_sth.custom.delivery_order.set_default_tax_fields",
+	},
 }
 
 

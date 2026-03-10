@@ -10,13 +10,14 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_zalz",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_mmtx",
   "angka_debit_air_limbah_masuk",
+  "column_break_lzhv",
   "angka_debit_air_limbah_keluar"
  ],
  "fields": [
@@ -83,7 +84,8 @@
   },
   {
    "fieldname": "section_break_mmtx",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "description": "(Satuan dalam m\u00b3)",
@@ -96,12 +98,16 @@
    "fieldname": "angka_debit_air_limbah_keluar",
    "fieldtype": "Data",
    "label": "Angka Debit Air Limbah Keluar"
+  },
+  {
+   "fieldname": "column_break_lzhv",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:24:30.652262",
+ "modified": "2026-03-09 11:06:14.966633",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Debit Air Limbah",

@@ -1,0 +1,162 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-03-09 13:49:01.646589",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "shift",
+  "column_break_gnap",
+  "status",
+  "company",
+  "unit",
+  "section_break_nxdd",
+  "ph",
+  "total_hardness",
+  "methyl_alkalinity",
+  "chloride",
+  "column_break_aruf",
+  "fe",
+  "silica",
+  "total_disolved_solid"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "KASF-.####"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gnap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_nxdd",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "ph",
+   "fieldtype": "Int",
+   "label": "PH"
+  },
+  {
+   "fieldname": "total_hardness",
+   "fieldtype": "Data",
+   "label": "Total Hardness (TH)"
+  },
+  {
+   "fieldname": "methyl_alkalinity",
+   "fieldtype": "Data",
+   "label": "Methyl Alkalinity (M)"
+  },
+  {
+   "fieldname": "chloride",
+   "fieldtype": "Data",
+   "label": "Chloride"
+  },
+  {
+   "fieldname": "column_break_aruf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fe",
+   "fieldtype": "Data",
+   "label": "FE"
+  },
+  {
+   "fieldname": "silica",
+   "fieldtype": "Data",
+   "label": "Silica (SiO2)"
+  },
+  {
+   "fieldname": "total_disolved_solid",
+   "fieldtype": "Data",
+   "label": "Total Disolved Solid (TDS)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-09 13:51:12.141004",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Kualitas Air Sand Filter",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

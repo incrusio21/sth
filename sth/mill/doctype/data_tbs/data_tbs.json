@@ -6,24 +6,26 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_pykt",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_xief",
   "jumlah_tbs_restan",
   "jumlah_tbs_diterima",
   "grand_total_tbs",
+  "column_break_rjip",
   "jumlah_lori",
   "jumlah_lori_restan",
   "column_break_rdlu",
-  "berat_rata_rata_tbs",
+  "tbs_restan",
   "tbs_olah",
-  "tbs_restan"
+  "berat_rata_rata_tbs"
  ],
  "fields": [
   {
@@ -34,7 +36,8 @@
   },
   {
    "fieldname": "section_break_xief",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "jumlah_tbs_restan",
@@ -127,12 +130,21 @@
    "label": "Shift",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rjip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 10:55:35.903542",
+ "modified": "2026-03-09 11:57:59.944335",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

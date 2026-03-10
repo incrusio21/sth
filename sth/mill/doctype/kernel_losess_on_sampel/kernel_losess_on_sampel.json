@@ -10,16 +10,18 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_cmmj",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_5la6",
   "usb_",
   "fibre_cyclone_",
+  "column_break_doth",
   "ltds_1_",
   "ltds_2_",
+  "column_break_rneu",
   "wet_shell_",
   "amended_from"
  ],
@@ -87,7 +89,8 @@
   },
   {
    "fieldname": "section_break_5la6",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "usb_",
@@ -123,13 +126,21 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_doth",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rneu",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:12:51.972941",
+ "modified": "2026-03-09 11:21:39.316906",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kernel Losess on Sampel",

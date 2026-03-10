@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_ebdh",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_xavt",
   "ffa_",
   "moisture_",
@@ -88,7 +88,8 @@
   },
   {
    "fieldname": "section_break_xavt",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "ffa_",
@@ -129,7 +130,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:44:10.233573",
+ "modified": "2026-03-09 11:26:41.758764",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO Produksi Harian di POT",

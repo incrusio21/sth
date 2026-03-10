@@ -81,10 +81,9 @@
   }
  ],
  "grid_page_length": 50,
- "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-06 16:10:24.058952",
+ "modified": "2026-03-06 16:30:42.425830",
  "modified_by": "Administrator",
  "module": "Bank Payment",
  "name": "Mandiri Kopra Cash Management",

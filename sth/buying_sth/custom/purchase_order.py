@@ -115,5 +115,21 @@ def get_history_purchase_item(nama_barang):
         JOIN `tabSupplier` s on s.name = po.supplier
         JOIN `tabPurchase Order Item` poi on poi.parent = po.name
         JOIN `tabMaterial Request` mr on mr.name = poi.material_request
-        WHERE po.docstatus = 1 AND poi.item_name = %s AND mr.transaction_date BETWEEN %s AND %s
+        WHERE po.docstatus = 1 AND poi.item_name = %s AND po.transaction_date BETWEEN %s AND %s
+        ORDER BY po.transaction_date, po.name
     """,(nama_barang,start_year,today),as_dict=True)
+
+@frappe.whitelist()
+def get_history_service_request(asset):
+    from erpnext.accounts.utils import get_fiscal_year
+    today = frappe.utils.today()
+    fiscal_year = get_fiscal_year(date=today,boolean=True)
+    start_year = fiscal_year[0][1]
+
+    return frappe.db.sql("""
+        SELECT poi.item_code, poi.item_name, po.name as no_po, po.transaction_date as tanggal, poi.qty, poi.rate, poi.amount, s.supplier_name, poi.material_request, mri.km_hm
+        FROM `tabPurchase Order` po 
+        JOIN `tabPurchase Order Item` poi on poi.parent = po.name
+        JOIN `tabMaterial Request Item` mri on mri.name = poi.material_request_item
+        WHERE po.docstatus = 1 AND mr.kendaraan = %s AND mr.transaction_date BETWEEN %s AND %s
+    """,(asset,start_year,today),as_dict=True)

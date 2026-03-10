@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_yfss",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_vffm",
   "warna_air_kolam_aerobik",
   "upload_foto"
@@ -83,7 +83,8 @@
   },
   {
    "fieldname": "section_break_vffm",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "default": "-",
@@ -101,7 +102,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:45:33.642321",
+ "modified": "2026-03-09 11:08:57.910780",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Warna Air Kolam Aerobik",

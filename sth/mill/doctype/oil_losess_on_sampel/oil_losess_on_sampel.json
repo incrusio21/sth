@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_tvvm",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_dh6y",
   "fiber_press_",
   "fiber_bunch_press_",
@@ -27,9 +27,6 @@
   "heavy_phase_separator_",
   "heavy_phase_sludge_centrifuge_",
   "final_effluent_oil_",
-  "final_effluent_moist_",
-  "final_effluent_nos_",
-  "final_effluent_oil_on_nos_",
   "amended_from"
  ],
  "fields": [
@@ -153,21 +150,6 @@
    "label": "Final Effluent Oil (%)"
   },
   {
-   "fieldname": "final_effluent_moist_",
-   "fieldtype": "Percent",
-   "label": "Final Effluent Moist (%)"
-  },
-  {
-   "fieldname": "final_effluent_nos_",
-   "fieldtype": "Percent",
-   "label": "Final Effluent NOS (%)"
-  },
-  {
-   "fieldname": "final_effluent_oil_on_nos_",
-   "fieldtype": "Percent",
-   "label": "Final Effluent Oil on NOS (%)"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -182,7 +164,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:44:19.099726",
+ "modified": "2026-03-09 13:40:15.662424",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Oil Losess On Sampel",

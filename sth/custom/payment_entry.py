@@ -413,3 +413,17 @@ def test_check_payment_notification():
 	# check_payment_notification(doc, "on_submit")
 
 	# print("TEST SELESAI")
+
+def update_pesangon_from_payment(doc, method):
+
+    if doc.tipe_transfer != "Salary Slip":
+        return
+
+    for row in doc.payment_voucher_salary_slip:
+        slip_name = row.salary_slip
+        slip = frappe.get_doc("Salary Slip", slip_name)
+
+        if slip.tipe_salary != "Pesangon" or not slip.pesangon_doc:
+            continue
+
+        slip.update_pesangon_payment_status()

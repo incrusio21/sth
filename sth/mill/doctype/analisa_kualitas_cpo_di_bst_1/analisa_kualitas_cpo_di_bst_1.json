@@ -10,13 +10,15 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
   "column_break_kfwz",
   "status",
+  "company",
+  "unit",
   "section_break_hckz",
   "ffa_",
+  "column_break_jvko",
   "moisture_",
+  "column_break_uisu",
   "dirt_",
   "amended_from"
  ],
@@ -75,7 +77,8 @@
   },
   {
    "fieldname": "section_break_hckz",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "ffa_",
@@ -101,16 +104,25 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_jvko",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_uisu",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 14:18:40.859743",
+ "modified": "2026-03-09 11:29:00.985652",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO di BST-1",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

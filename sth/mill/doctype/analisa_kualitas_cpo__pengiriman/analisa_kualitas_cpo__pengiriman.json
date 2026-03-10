@@ -10,67 +10,81 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
   "column_break_fmdz",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_irhy",
   "ticket_number",
+  "no_do",
+  "column_break_svsz",
+  "nama_customer",
   "no_polisi",
   "nama_supir",
-  "nama_customer",
-  "no_do",
-  "column_break_amxr",
+  "input_kualitas_cpo_section",
   "input_kualitas_ffa_",
+  "column_break_yseb",
   "input_kualitas_moisture_",
-  "input_kualitas_dirt_"
+  "column_break_juvd",
+  "input_kualitas_dirt_",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "ticket_number",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
    "label": "Ticket Number",
-   "options": "Security Check Point"
+   "options": "Security Check Point",
+   "reqd": 1
   },
   {
+   "fetch_from": "ticket_number.license_plate",
    "fieldname": "no_polisi",
    "fieldtype": "Data",
-   "label": "No. Polisi"
+   "in_preview": 1,
+   "label": "No. Polisi",
+   "read_only": 1
   },
   {
    "fetch_from": "ticket_number.driver_name",
    "fieldname": "nama_supir",
    "fieldtype": "Data",
-   "label": "Nama Supir"
+   "in_preview": 1,
+   "label": "Nama Supir",
+   "read_only": 1
   },
   {
+   "fetch_from": "ticket_number.cust",
    "fieldname": "nama_customer",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Nama Customer",
-   "options": "Customer"
+   "read_only": 1
   },
   {
+   "fetch_from": "ticket_number.do_no",
    "fieldname": "no_do",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
+   "in_preview": 1,
    "label": "No. DO",
-   "options": "Delivery Note"
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_amxr",
-   "fieldtype": "Column Break"
-  },
-  {
+   "default": "0",
    "fieldname": "input_kualitas_moisture_",
    "fieldtype": "Float",
    "label": "Input Kualitas Moisture %"
   },
   {
+   "default": "0",
    "fieldname": "input_kualitas_dirt_",
    "fieldtype": "Float",
    "label": "Input Kualitas Dirt %"
   },
   {
+   "default": "0",
    "fieldname": "input_kualitas_ffa_",
    "fieldtype": "Float",
    "label": "Input Kualitas FFA %"
@@ -110,6 +124,7 @@
    "options": "Company"
   },
   {
+   "fetch_from": "ticket_number.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -125,29 +140,51 @@
    "fieldtype": "Select",
    "in_preview": 1,
    "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
+   "options": "Proses QC\nPass QC",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_irhy",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail Data"
+  },
+  {
+   "fieldname": "input_kualitas_cpo_section",
+   "fieldtype": "Section Break",
+   "label": "Input Kualitas CPO"
+  },
+  {
+   "fieldname": "column_break_yseb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_juvd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_svsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Analisa Kualitas CPO  Pengiriman",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-02-21 16:32:55.189492",
+ "modified": "2026-03-09 13:07:29.510618",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO  Pengiriman",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -42,6 +42,23 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 				}
 			});
 		}
+	},
+	validate(frm) {
+		if (frm.doc.pdo_bahan_bakar) {
+			frm.doc.pdo_bahan_bakar.forEach(row => {
+				processBahanBakar(frm, row.doctype, row.name);
+			});
+		}
+		if (frm.doc.pdo_kas) {
+			frm.doc.pdo_kas.forEach(row => {
+				processKas(frm, row.doctype, row.name);
+			});
+		}
+		if (frm.doc.pdo_perjalanan_dinas) {
+			frm.doc.pdo_perjalanan_dinas.forEach(row => {
+				processPerjalananDinas(frm, row.doctype, row.name);
+			});
+		}
 	}
 });
 
@@ -61,7 +78,7 @@ frappe.ui.form.on("PDO Bahan Bakar Table", {
 	revised_unit_price(frm, cdt, cdn) {
 		processBahanBakar(frm, cdt, cdn);
 	},
-	designation(frm, cdt, cdn){
+	jabatan(frm, cdt, cdn){
 		get_plafon_pdo_bb(frm, cdt, cdn)
 	}
 });
@@ -252,8 +269,8 @@ function get_plafon_pdo(frm, cdt, cdn){
 
 function get_plafon_pdo_bb(frm, cdt, cdn){
 	let row = locals[cdt][cdn];
-	if (row.designation) {
-		fetch_plafon_value('BAHAN BAKAR', row.designation, 'jenis_plafon', cdt, cdn, frm, 'pdo_bahan_bakar'); 
+	if (row.jabatan) {
+		fetch_plafon_value('BAHAN BAKAR', row.jabatan, 'jenis_plafon', cdt, cdn, frm, 'pdo_bahan_bakar'); 
 	}       
 }
 
@@ -272,6 +289,7 @@ function fetch_plafon_value(plafon_name, filter_value, filter_field, cdt, cdn, f
 				let matching_row = plafon_pdo.plafon_pdo_table.find(
 					item => item[filter_field] === filter_value
 				);
+				console.log(matching_row)
 
 				
 				if (matching_row && matching_row.nilai) {
@@ -444,6 +462,7 @@ function calculateGrandTotal(frm) {
 		])
 
 		frm.set_value("grand_total_pdo", grandTotalPdo);
+		frm.set_value("outstanding_amount", grandTotalPdo);
 	}
 }
 
@@ -597,7 +616,7 @@ function make_payment_voucher(frm){
 }
 
 function make_realisasi_pdo(frm){
-	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher) {
+	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher && frm.doc.outstanding_amount > 0) {
 		frm.add_custom_button(__('Realisasi PDO'), function() {
 			show_realisasi_dialog(frm);
 		});    
@@ -804,11 +823,47 @@ function show_popup(frm, employee_atau_barang) {
 		
 		// Store dialog reference to use inside callback
 		let dialog = new frappe.ui.Dialog({
-			title: __('Tambah Item'),
+			title: __('Tambah Item PDO Kas'),
 			fields: fields,
-			primary_action_label: __('Add'),
+			size: 'small',
+			primary_action_label: __('Tambah'),
 			primary_action(values) {
-				// your existing add logic here
+				// Add row to pdo_kas child table
+				let child = frm.add_child('pdo_kas');
+				console.log(employee_atau_barang)
+				if (employee_atau_barang === 'Employee' && frm.doc.jenis_kas == "TUNJANGAN PEMBANTU") {
+					child.employee = values.employee;
+					child.routine_type = values.routine_type;
+					child.type = values.type;
+					child.price = values.price;
+					child.needs = values.needs;
+					child.designation = values.jabatan;
+				}
+				else if (employee_atau_barang === 'Employee') {
+					child.employee = values.employee;
+					child.routine_type = values.routine_type;
+					child.type = values.type;
+					child.qty = values.qty;
+					child.price = values.price;
+					child.needs = values.needs;
+				} else if (employee_atau_barang === 'Barang') {
+					child.routine_type = values.routine_type;
+					child.type = values.type;
+					child.item_code = values.type;
+					child.uom = values.uom;
+					child.qty = values.qty;
+					child.price = values.price;
+					child.needs = values.needs;
+				}
+				
+				// Clear jenis_kas and refresh
+				frm.refresh_field('pdo_kas');
+				
+				// Calculate grand total if function exists
+				if (typeof calculateGrandTotal === 'function') {
+					calculateGrandTotal(frm);
+				}
+				
 				dialog.hide();
 			}
 		});
@@ -904,13 +959,29 @@ function show_popup(frm, employee_atau_barang) {
 					fieldname: 'qty',
 					label: __('Qty'),
 					fieldtype: 'Float',
-					reqd: 1
+					reqd: 1,
+					onchange: function() {
+						let qty = d.get_value('qty') || 0;
+						let price = d.get_value('price') || 0;
+						d.set_value('total', qty * price);
+					}
 				},
 				{
 					fieldname: 'price',
 					label: __('Harga'),
 					fieldtype: 'Currency',
-					reqd: 1
+					reqd: 1,
+					onchange: function() {
+						let qty = d.get_value('qty') || 0;
+						let price = d.get_value('price') || 0;
+						d.set_value('total', qty * price);
+					}
+				},
+				{
+					fieldname: 'total',
+					label: __('Total'),
+					fieldtype: 'Currency',
+					read_only: 1
 				},
 				{
 					fieldname: 'needs',
@@ -922,7 +993,7 @@ function show_popup(frm, employee_atau_barang) {
 			fields = [
 				{
 					fieldname: 'type',
-					label: __('Subjenis'),
+					label: __('Item Barang'),
 					fieldtype: 'Link',
 					options: 'Expense Claim Type',
 					reqd: 1,
@@ -956,7 +1027,7 @@ function show_popup(frm, employee_atau_barang) {
 					fieldname: 'item_code',
 					label: __('Item Barang'),
 					fieldtype: 'Data',
-					reqd: 1
+					hidden: 1
 				},
 				{
 					fieldname: 'uom',
@@ -968,13 +1039,29 @@ function show_popup(frm, employee_atau_barang) {
 					fieldname: 'qty',
 					label: __('Qty'),
 					fieldtype: 'Float',
-					reqd: 1
+					reqd: 1,
+					onchange: function() {
+						let qty = d.get_value('qty') || 0;
+						let price = d.get_value('price') || 0;
+						d.set_value('total', qty * price);
+					}
 				},
 				{
 					fieldname: 'price',
 					label: __('Harga'),
 					fieldtype: 'Currency',
-					reqd: 1
+					reqd: 1,
+					onchange: function() {
+						let qty = d.get_value('qty') || 0;
+						let price = d.get_value('price') || 0;
+						d.set_value('total', qty * price);
+					}
+				},
+				{
+					fieldname: 'total',
+					label: __('Total'),
+					fieldtype: 'Currency',
+					read_only: 1
 				},
 				{
 					fieldname: 'needs',
@@ -993,7 +1080,7 @@ function show_popup(frm, employee_atau_barang) {
 			primary_action(values) {
 				// Add row to pdo_kas child table
 				let child = frm.add_child('pdo_kas');
-				
+				console.log(employee_atau_barang)
 				if (employee_atau_barang === 'Employee' && frm.doc.jenis_kas == "TUNJANGAN PEMBANTU") {
 					child.employee = values.employee;
 					child.routine_type = values.routine_type;
@@ -1012,7 +1099,7 @@ function show_popup(frm, employee_atau_barang) {
 				} else if (employee_atau_barang === 'Barang') {
 					child.routine_type = values.routine_type;
 					child.type = values.type;
-					child.item_code = values.item_code;
+					child.item_code = values.type;
 					child.uom = values.uom;
 					child.qty = values.qty;
 					child.price = values.price;

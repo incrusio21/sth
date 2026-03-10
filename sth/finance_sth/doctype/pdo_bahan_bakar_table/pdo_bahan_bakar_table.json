@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "designation",
+  "jabatan",
   "plafon",
   "unit_price",
   "price_total",
@@ -19,22 +19,13 @@
  ],
  "fields": [
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "employee",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Pengguna",
-   "reqd": 1
-  },
-  {
-   "columns": 1,
-   "fetch_from": "employee.designation",
-   "fieldname": "designation",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Jabatan",
-   "options": "Designation",
-   "read_only": 1
+   "label": "Pengguna",
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "columns": 1,
@@ -92,13 +83,23 @@
   {
    "fieldname": "column_break_xxgx",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "employee.designation",
+   "fieldname": "jabatan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jabatan",
+   "options": "Designation",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-24 22:55:48.490243",
+ "modified": "2026-03-06 15:31:55.078595",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Bahan Bakar Table",

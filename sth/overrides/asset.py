@@ -177,3 +177,75 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 @frappe.whitelist()
 def validate_company(self,method):
 	self.asset_owner_company = self.company
+
+def validate_asset_for_vra_progress(doc, method):
+
+	if not doc.asset_category:
+		return
+
+	create_vra_progress, tipe_master, jenis_alat = frappe.get_cached_value(
+		"Asset Category",
+		doc.asset_category,
+		["create_vra_progress", "tipe_master", "jenis_alat"]
+	)
+
+	if not create_vra_progress:
+		return
+
+	missing_fields = []
+
+	if not tipe_master:
+		missing_fields.append("Tipe Master")
+
+	if not jenis_alat:
+		missing_fields.append("Jenis Alat")
+
+	if missing_fields:
+		frappe.throw(
+			f"Asset Category <b>{doc.asset_category}</b> tidak bisa membuat VRA Progress "
+			f"karena field <b>{', '.join(missing_fields)}</b> kosong."
+		)
+
+	make_vra_progress_from_asset(doc)
+
+
+def make_vra_progress_from_asset(asset):
+
+	tipe_master, jenis_alat = frappe.get_cached_value(
+		"Asset Category",
+		asset.asset_category,
+		["tipe_master", "jenis_alat"]
+	)
+
+	divisi = None
+	if asset.operator:
+		divisi = frappe.get_cached_value(
+			"Employee",
+			asset.operator,
+			"department"
+		)
+
+	uom = None
+	if asset.item_code:
+		uom = frappe.get_cached_value(
+			"Item",
+			asset.item_code,
+			"stock_uom"
+		)
+
+	vra = frappe.get_doc({
+		"doctype": "Alat Berat Dan Kendaraan",
+		"tipe_master": tipe_master,
+		"jns_alt": jenis_alat,
+		"kode_item": asset.item_code,
+		"nama_item": asset.item_name,
+		"unit": asset.unit,
+		"uom": uom,
+		"asset": asset.name,
+		"divisi": divisi,
+		"operator": asset.operator,
+		"kmhm_akhir": 0,
+		"api_status": "Aktif"
+	})
+
+	vra.insert(ignore_permissions=True)

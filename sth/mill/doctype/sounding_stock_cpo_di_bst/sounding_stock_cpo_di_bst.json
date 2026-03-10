@@ -10,19 +10,19 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_eokt",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_oecm",
-  "foto",
-  "video",
-  "column_break_vbhx",
   "ukuran_hasil_sounding",
-  "hasil_suhu",
   "stock_bst",
-  "pengiriman_cpo"
+  "foto",
+  "column_break_vbhx",
+  "hasil_suhu",
+  "pengiriman_cpo",
+  "video"
  ],
  "fields": [
   {
@@ -121,16 +121,18 @@
   },
   {
    "fieldname": "section_break_oecm",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 10:57:02.709198",
+ "modified": "2026-03-09 11:41:13.613395",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

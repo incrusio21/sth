@@ -14,21 +14,32 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       fetchAccount(frm);
     }
 
-    console.log(frm.doc.workflow_state, frm.is_new());
-    if (frm.is_new()) {
+    frm.fields_dict["costings"].grid.update_docfield_property(
+      "jumlah_verifikasi_hrd",
+      "read_only",
+      0
+    );
+
+    if (frm.is_new() && frm.is_new() != undefined) {
+      console.log("render is_new");
       frm.fields_dict["costings"].grid.update_docfield_property(
         "jumlah_verifikasi_hrd",
         "read_only",
         1
       );
     }
-    if (frm.doc.workflow_state != "Butuh Persetujuan 1" && frm.doc.workflow_state != "Butuh Persetujuan 2") {
+
+    if (frm.doc.__islocal && !["Butuh Persetujuan 1", "Butuh Persetujuan 2"].includes(frm.doc.workflow_state)) {
+      console.log("render workflow_state");
       frm.fields_dict["costings"].grid.update_docfield_property(
         "jumlah_verifikasi_hrd",
         "read_only",
         1
       );
     }
+
+    console.log(frm.doc.__islocal, frm.doc.workflow_state);
+    frm.refresh_field("costings");
     createPayment(frm);
   },
   no_spd(frm) {
@@ -121,7 +132,7 @@ sth.plantation.PertanggungjawabanPerjalananDinas = class PertanggungjawabanPerja
 
 cur_frm.script_manager.make(sth.plantation.PertanggungjawabanPerjalananDinas);
 
-function filter_jenis_ex_type(frm){
+function filter_jenis_ex_type(frm) {
   frm.set_query('expense_type', 'costings', () => {
     return {
       filters: {

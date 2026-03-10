@@ -10,21 +10,19 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_gnap",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_nxdd",
   "ph",
   "total_hardness",
   "methyl_alkalinity",
-  "p_alkanlinity",
-  "c_alkalinity",
-  "column_break_hjgw",
+  "chloride",
+  "column_break_aruf",
+  "fe",
   "silica",
-  "sulfit",
-  "phospate",
   "total_disolved_solid"
  ],
  "fields": [
@@ -44,33 +42,9 @@
    "label": "Methyl Alkalinity (M)"
   },
   {
-   "fieldname": "p_alkanlinity",
-   "fieldtype": "Data",
-   "label": "P Alkanlinity"
-  },
-  {
-   "fieldname": "c_alkalinity",
-   "fieldtype": "Data",
-   "label": "C Alkalinity"
-  },
-  {
-   "fieldname": "column_break_hjgw",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "silica",
    "fieldtype": "Data",
    "label": "Silica (SiO2)"
-  },
-  {
-   "fieldname": "sulfit",
-   "fieldtype": "Data",
-   "label": "Sulfit"
-  },
-  {
-   "fieldname": "phospate",
-   "fieldtype": "Data",
-   "label": "Phospate"
   },
   {
    "fieldname": "total_disolved_solid",
@@ -140,16 +114,32 @@
   },
   {
    "fieldname": "section_break_nxdd",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "fe",
+   "fieldtype": "Data",
+   "label": "FE"
+  },
+  {
+   "fieldname": "chloride",
+   "fieldtype": "Data",
+   "label": "Chloride"
+  },
+  {
+   "fieldname": "column_break_aruf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-21 16:42:07.781534",
+ "modified": "2026-03-09 13:48:09.031077",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kualitas Air Demint Plant",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

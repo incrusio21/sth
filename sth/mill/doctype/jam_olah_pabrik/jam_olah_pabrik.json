@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
-  "unit",
+  "shift",
   "column_break_pmva",
   "status",
-  "shift",
+  "company",
+  "unit",
   "section_break_hwqb",
   "jam_cbc"
  ],
@@ -87,13 +87,14 @@
   },
   {
    "fieldname": "section_break_hwqb",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:43:56.046459",
+ "modified": "2026-03-09 11:43:32.640937",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Jam Olah Pabrik",

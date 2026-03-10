@@ -1,8 +1,16 @@
-// Copyright (c) 2026, DAS and contributors
-// For license information, please see license.txt
+frappe.ui.form.on("Pencatatan HM Mesin", {
 
-// frappe.ui.form.on("Pencatatan HM Mesin", {
-// 	refresh(frm) {
+    hm_mesin_awal: hitung_total_hm,
+    hm_mesin_akhir: hitung_total_hm
 
-// 	},
-// });
+});
+
+function hitung_total_hm(frm) {
+
+    let awal = flt(frm.doc.hm_mesin_awal);
+    let akhir = flt(frm.doc.hm_mesin_akhir);
+
+    let total = akhir - awal;
+
+    frm.set_value("total_hm_mesin", total);
+}

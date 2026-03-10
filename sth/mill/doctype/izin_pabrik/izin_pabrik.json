@@ -10,19 +10,18 @@
   "naming_series",
   "tanggal",
   "jam",
-  "company",
+  "periode",
   "column_break_szct",
   "status",
-  "shift",
-  "section_break_ufha",
+  "company",
   "unit",
-  "nama_unit",
-  "periode",
-  "nama_stasiun",
+  "section_break_ufha",
+  "nama_unitalat",
   "nama_izin_dan_alat",
   "column_break_lazg",
   "nomor_izin",
   "tanggal_dikeluarkan",
+  "column_break_vekm",
   "tanggal_pemeriksaan",
   "tanggal_jt_pemeriksaan_ulang",
   "tenggang_waktu_pemeriksaan_ulang",
@@ -36,20 +35,10 @@
    "options": "Unit"
   },
   {
-   "fetch_from": "unit.unit",
-   "fieldname": "nama_unit",
-   "fieldtype": "Data",
-   "label": "Nama Unit"
-  },
-  {
    "fieldname": "periode",
-   "fieldtype": "Data",
-   "label": "Periode"
-  },
-  {
-   "fieldname": "nama_stasiun",
-   "fieldtype": "Data",
-   "label": "Nama Stasiun"
+   "fieldtype": "Link",
+   "label": "Periode",
+   "options": "Fiscal Year"
   },
   {
    "fieldname": "nama_izin_dan_alat",
@@ -136,23 +125,24 @@
    "options": "Proses\nSelesai"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
+   "fieldname": "section_break_ufha",
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
-   "fieldname": "section_break_ufha",
-   "fieldtype": "Section Break"
+   "fieldname": "column_break_vekm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nama_unitalat",
+   "fieldtype": "Select",
+   "label": "Nama Unit/Alat"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-22 08:25:45.615794",
+ "modified": "2026-03-09 14:58:09.202422",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Izin Pabrik",
