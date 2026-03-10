@@ -299,7 +299,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		if not self.term_detail:
 			return
 			
-		frappe.db.set_value("Payment Schedule", self.term_detail, "term_used", not cancel)
+		frappe.db.set_value("Proposal Schedule", self.term_detail, "term_used", not cancel)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
