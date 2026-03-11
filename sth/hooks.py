@@ -111,7 +111,8 @@ doctype_list_js = {
 jinja = {
 	"methods": [
 		"sth.jinja.money_in_words_idr",
-		"sth.utils.encrypt"
+		"sth.jinja.format_tanggal_id",
+		"sth.utils.encrypt",
 	],
 	# "filters": "sth.utils.jinja_filters"
 }
@@ -178,6 +179,7 @@ standard_queries = {
 # DocType Class
 # ---------------
 # Override standard doctype classes
+
 
 override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
