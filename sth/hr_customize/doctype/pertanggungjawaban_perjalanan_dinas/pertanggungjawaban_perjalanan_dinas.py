@@ -28,9 +28,9 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 		tda = self.total_down_amount or 0
 		tsa = self.total_sanctioned_amount or 0
 
-		if tsa > tda:
+		if tsa < tda:
 			self.status_selisih = "Lebih Bayar"
-		elif tsa < tda:
+		elif tsa > tda:
 			self.status_selisih = "Kurang Bayar"
 		else:
 			self.status_selisih = "Tidak Ada Selisih"
