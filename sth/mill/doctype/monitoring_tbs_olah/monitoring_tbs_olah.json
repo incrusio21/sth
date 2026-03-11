@@ -34,9 +34,10 @@
   "foto_hasil_pemeriksaan",
   "tbs_process_tab",
   "unit_type",
-  "tbs_mentah",
-  "tbs_masak",
   "tbs_olah",
+  "tbs_mentah",
+  "jumlah_restan_tbs_masak",
+  "jumlah_loading_ramp",
   "total_jam",
   "column_break_hdny",
   "total_weight_process",
@@ -198,12 +199,6 @@
    "label": "Jumlah Restan TBS Mentah"
   },
   {
-   "fieldname": "tbs_masak",
-   "fieldtype": "Float",
-   "in_preview": 1,
-   "label": "Jumlah Restan TBS Masak"
-  },
-  {
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
    "label": "Jumlah TBS yang Sudah di Olah"
@@ -279,13 +274,27 @@
    "fieldtype": "Attach",
    "in_preview": 1,
    "label": "Foto hasil pemeriksaan"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_loading_ramp",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah Loading Ramp"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_restan_tbs_masak",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah Restan TBS Masak"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 13:20:31.730935",
+ "modified": "2026-03-11 08:36:40.751881",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring TBS Olah",

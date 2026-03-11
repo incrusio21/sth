@@ -22,9 +22,13 @@
   "column_break_rjip",
   "jumlah_lori",
   "jumlah_lori_restan",
+  "jumlah_lori_mentah",
+  "lori_estimasi_loading_ramp",
+  "grand_total_lori",
   "column_break_rdlu",
-  "tbs_restan",
   "tbs_olah",
+  "tbs_restan",
+  "tbs_loading_ramp",
   "berat_rata_rata_tbs"
  ],
  "fields": [
@@ -57,21 +61,22 @@
   {
    "fieldname": "jumlah_lori",
    "fieldtype": "Int",
-   "label": "Jumlah Lori"
+   "label": "Jumlah Lori Olah"
   },
   {
    "fieldname": "jumlah_lori_restan",
    "fieldtype": "Int",
-   "label": "Jumlah Lori Restan"
+   "label": "Jumlah Lori Masak"
   },
   {
    "fieldname": "column_break_rdlu",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Dalam Kg",
    "fieldname": "berat_rata_rata_tbs",
    "fieldtype": "Int",
-   "label": "Berat Rata-rata TBS"
+   "label": "Berat Rata-rata Lori"
   },
   {
    "fieldname": "tbs_olah",
@@ -139,12 +144,32 @@
    "fieldname": "header_section",
    "fieldtype": "Section Break",
    "label": "Header"
+  },
+  {
+   "fieldname": "jumlah_lori_mentah",
+   "fieldtype": "Int",
+   "label": "Jumlah Lori Mentah"
+  },
+  {
+   "fieldname": "lori_estimasi_loading_ramp",
+   "fieldtype": "Int",
+   "label": "Lori Estimasi Loading Ramp"
+  },
+  {
+   "fieldname": "tbs_loading_ramp",
+   "fieldtype": "Data",
+   "label": "TBS Loading Ramp"
+  },
+  {
+   "fieldname": "grand_total_lori",
+   "fieldtype": "Int",
+   "label": "Grand Total Lori"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:57:59.944335",
+ "modified": "2026-03-11 08:32:13.425664",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
