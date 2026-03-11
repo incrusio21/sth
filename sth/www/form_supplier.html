@@ -168,7 +168,7 @@
                             <button class="btn btn-sm btn-danger rounded-3">Delete</button>
                         </div>
                     </div>
-                    <div class="mb-3 row">
+                    <div class="mb-3 row align-items-start">
                         <div class="col-md-6">
                             <label class="form-label">Charges</label>
                             <div class="table-responsive">
@@ -230,16 +230,21 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="my-3">
                                 <label class="form-label">Sub Total</label>
                                 <input type="text" name="net_total" data-value="0" value="Rp.0"
-                                    class="form-control form-control-sm w-50" readonly disabled>
+                                    class="form-control form-control-sm" readonly disabled>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Grand Total</label>
-                                <input type="text" name="grand_total" value="Rp.0"
-                                    class="form-control form-control-sm w-50" readonly disabled>
+                                <input type="text" name="grand_total" value="Rp.0" class="form-control form-control-sm"
+                                    readonly disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mt-4">
+                            <div class="alert alert-warning" role="alert">
+                                Catatan: Harga yang dicantumkan di kolom harga adalah harga dasar/harga sebelum PPN
                             </div>
                         </div>
                     </div>
@@ -255,20 +260,14 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">Lokasi Pengiriman</label>
-                            <input type="text" name="lokasi_pengiriman" value="{{ lokasi_pengiriman }}"
-                                class="form-control form-control-sm" readonly>
-                            <!-- <select class="form-select" name="lokasi_pengiriman" required>
-                                <option value="" disabled selected>--Pilih--</option>
-                                {% for data in list_lokasi_pengiriman %}
-                                <option value="{{ data }}">{{ data }}</option>
-                                {% endfor %}
-                            </select> -->
+                            <textarea name="lokasi_pengiriman" class="form-control" rows="2"
+                                readonly>{{ lokasi_pengiriman }}</textarea>
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <div class="col-12">
                             <label class="form-label">Keterangan</label>
-                            <textarea name="keterangan" class="form-control form-control-sm" rows="3"></textarea>
+                            <textarea name="keterangan" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
                     <button class="btn btn-primary d-flex gap-2 ms-auto" id="btn-submit" type="submit">
