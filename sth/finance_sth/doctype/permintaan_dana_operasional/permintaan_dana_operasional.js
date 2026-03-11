@@ -15,6 +15,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		filterFundType(frm)
 		frm.fields_dict['pdo_dana_cadangan'].grid.refresh();
 		make_payment_voucher(frm)
+		make_payment_voucher_kebun(frm)
 		make_realisasi_pdo(frm)
 		hide_revisi_field(frm)
 		
@@ -615,8 +616,20 @@ function make_payment_voucher(frm){
 	}	
 }
 
+
+function make_payment_voucher_kebun(frm){
+	if (frm.doc.docstatus == 1 && !frm.doc.payment_voucher_kebun) {
+		frm.add_custom_button(__('Create PV Penerimaan Dana PDO Kebun'), function() {
+			frappe.model.open_mapped_doc({
+				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_kebun',
+				frm: frm
+			});
+		});
+	}	
+}
+
 function make_realisasi_pdo(frm){
-	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher && frm.doc.outstanding_amount > 0) {
+	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher  && frm.doc.payment_voucher_kebun && frm.doc.outstanding_amount > 0) {
 		frm.add_custom_button(__('Realisasi PDO'), function() {
 			show_realisasi_dialog(frm);
 		});    

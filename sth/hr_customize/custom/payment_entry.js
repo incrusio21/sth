@@ -9,7 +9,11 @@ frappe.ui.form.on("Payment Entry", {
 	tipe_transfer: function(frm) {
         if (frm.doc.tipe_transfer == 'PDO') {
             show_pdo_selector(frm);
-        } else {
+        } 
+        else if (frm.doc.tipe_transfer == 'Realisasi PDO') {
+            show_realisasi_pdo_selector(frm);
+        }
+        else {
             // Clear PDO field if another type is selected
             frm.set_value('permintaan_dana_operasional', '');
         }
@@ -586,6 +590,176 @@ function fetch_pdo_details(frm, pdo_name) {
                     indicator: 'green'
                 });
             }
+        }
+    });
+}
+
+function show_realisasi_pdo_selector(frm) {
+    frappe.call({
+        method: 'frappe.client.get_list',
+        args: {
+            doctype: 'Permintaan Dana Operasional',
+            filters: [
+                ['docstatus', '=', 1],
+                ['payment_voucher', '!=', '']
+            ],
+            fields: [
+                'name', 'posting_date', 'unit',
+                'grand_total_bahan_bakar',
+                'grand_total_perjalanan_dinas',
+                'grand_total_kas',
+                'grand_total_dana_cadangan',
+                'outstanding_amount_bahan_bakar',
+                'outstanding_amount_perjalanan_dinas',
+                'outstanding_amount_kas',
+                'outstanding_amount_dana_cadangan'
+            ],
+            limit: 50
+        },
+        callback: function(r) {
+            if (!r.message || r.message.length === 0) {
+                frappe.msgprint({
+                    title: __('No PDO Available'),
+                    message: __('There are no submitted PDO with payment voucher.'),
+                    indicator: 'orange'
+                });
+                frm.set_value('tipe_transfer', '');
+                return;
+            }
+
+            // Only show PDOs that have at least one outstanding tipe
+            let available_pdos = r.message.filter(d => {
+                return (d.outstanding_amount_bahan_bakar > 0) ||
+                       (d.outstanding_amount_perjalanan_dinas > 0) ||
+                       (d.outstanding_amount_kas > 0) ||
+                       (d.outstanding_amount_dana_cadangan > 0);
+            });
+
+            if (available_pdos.length === 0) {
+                frappe.msgprint({
+                    title: __('No PDO Available'),
+                    message: __('All PDOs have been fully realized.'),
+                    indicator: 'orange'
+                });
+                frm.set_value('tipe_transfer', '');
+                return;
+            }
+
+            let rows = available_pdos.map(d => {
+                let grand_total = (d.grand_total_bahan_bakar || 0) +
+                                  (d.grand_total_perjalanan_dinas || 0) +
+                                  (d.grand_total_kas || 0) +
+                                  (d.grand_total_dana_cadangan || 0);
+
+                let outstanding = (d.outstanding_amount_bahan_bakar || 0) +
+                                  (d.outstanding_amount_perjalanan_dinas || 0) +
+                                  (d.outstanding_amount_kas || 0) +
+                                  (d.outstanding_amount_dana_cadangan || 0);
+
+                return `
+                    <tr class="pdo-row"
+                        data-name="${d.name}"
+                        data-bb="${d.outstanding_amount_bahan_bakar || 0}"
+                        data-pd="${d.outstanding_amount_perjalanan_dinas || 0}"
+                        data-kas="${d.outstanding_amount_kas || 0}"
+                        data-dc="${d.outstanding_amount_dana_cadangan || 0}"
+                        style="cursor:pointer;">
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${d.name}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${d.unit || '-'}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${d.posting_date}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">
+                            ${frappe.format(grand_total, {fieldtype: 'Currency'})}
+                        </td>
+                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:right; color: #e74c3c;">
+                            ${frappe.format(outstanding, {fieldtype: 'Currency'})}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            let dialog = new frappe.ui.Dialog({
+                title: __('Select PDO for Realisasi'),
+                fields: [{
+                    fieldtype: 'HTML',
+                    fieldname: 'pdo_table',
+                    options: `
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f5f5f5; font-weight:bold;">
+                                    <th style="padding:8px; text-align:left;">PDO</th>
+                                    <th style="padding:8px; text-align:left;">Unit</th>
+                                    <th style="padding:8px; text-align:left;">Date</th>
+                                    <th style="padding:8px; text-align:right;">Grand Total</th>
+                                    <th style="padding:8px; text-align:right;">Outstanding</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    `
+                }]
+            });
+
+            dialog.show();
+
+            dialog.$wrapper.find('.pdo-row').on('click', function() {
+                let selected_name = $(this).data('name');
+                let outstanding_bb = $(this).data('bb');
+                let outstanding_pd = $(this).data('pd');
+                let outstanding_kas = $(this).data('kas');
+                let outstanding_dc = $(this).data('dc');
+
+                dialog.hide();
+
+                // Build tipe_pdo options based on which ones have outstanding amount
+                let tipe_options = [];
+                if (outstanding_bb > 0) tipe_options.push('Bahan Bakar');
+                if (outstanding_pd > 0) tipe_options.push('Perjalanan Dinas');
+                if (outstanding_kas > 0) tipe_options.push('Kas');
+                if (outstanding_dc > 0) tipe_options.push('Dana Cadangan');
+
+                let tipe_dialog = new frappe.ui.Dialog({
+                    title: __('Select Tipe PDO'),
+                    fields: [
+                        {
+                            fieldtype: 'HTML',
+                            fieldname: 'pdo_info',
+                            options: `<p style="margin-bottom:10px;">
+                                        PDO: <strong>${selected_name}</strong>
+                                      </p>`
+                        },
+                        {
+                            label: __('Tipe PDO'),
+                            fieldname: 'tipe_pdo',
+                            fieldtype: 'Select',
+                            options: tipe_options.join('\n'),
+                            reqd: 1
+                        }
+                    ],
+                    primary_action_label: __('Create Realisasi'),
+                    primary_action: function(values) {
+                        tipe_dialog.hide();
+
+                        frappe.call({
+                            method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
+                            args: {
+                                source_name: selected_name,
+                                tipe_pdo: values.tipe_pdo
+                            },
+                            freeze: true,
+                            freeze_message: __('Creating Realisasi PDO...'),
+                            callback: function(r) {
+                                if (r.message) {
+                                    var doc = r.message;
+                                    frappe.model.sync(doc);
+                                    frappe.set_route('Form', 'Payment Entry', doc.name);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                tipe_dialog.show();
+            });
         }
     });
 }

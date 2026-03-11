@@ -1,5 +1,7 @@
+import erpnext.controllers.taxes_and_totals as tat
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from frappe.utils import flt
+
 
 class CustomTaxesAndTotals(calculate_taxes_and_totals):
 
@@ -56,3 +58,6 @@ class CustomTaxesAndTotals(calculate_taxes_and_totals):
         self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
         self.set_rounded_total()
+
+
+tat.calculate_taxes_and_totals = CustomTaxesAndTotals

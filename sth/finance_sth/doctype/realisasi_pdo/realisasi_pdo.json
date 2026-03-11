@@ -14,14 +14,14 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Payment Voucher Kas",
-   "options": "Payment Voucher Kas"
+   "options": "Payment Entry"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-30 23:39:16.974881",
+ "modified": "2026-03-11 22:17:26.373488",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Realisasi PDO",

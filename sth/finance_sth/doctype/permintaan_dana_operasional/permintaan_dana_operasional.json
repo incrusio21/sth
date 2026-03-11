@@ -18,6 +18,7 @@
   "posting_date",
   "required_by",
   "payment_voucher",
+  "payment_voucher_kebun",
   "outstanding_amount",
   "realisasi_status",
   "section_break_evxe",
@@ -415,7 +416,7 @@
   {
    "fieldname": "payment_voucher",
    "fieldtype": "Link",
-   "label": "Payment Voucher",
+   "label": "Payment Voucher HO",
    "no_copy": 1,
    "options": "Payment Entry",
    "read_only": 1
@@ -425,9 +426,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "realisasi_pdo",
    "fieldtype": "Table",
    "label": "Realisasi PDO",
+   "no_copy": 1,
    "options": "Realisasi PDO",
    "read_only": 1
   },
@@ -474,13 +477,21 @@
    "no_copy": 1,
    "options": "Not Realized\nRealized",
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_voucher_kebun",
+   "fieldtype": "Link",
+   "label": "Payment Voucher Kebun",
+   "no_copy": 1,
+   "options": "Payment Entry",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-07 15:33:06.434633",
+ "modified": "2026-03-11 22:18:04.785705",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",
