@@ -46,7 +46,7 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
       doctype: doctype,
       name: this.frm.docname
     },
-    callback: (r) => {
+    callback: async (r) => {
       if (!r.message) return;
 
       const doc = r.message;
@@ -67,10 +67,13 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
           break;
 
         case "Delivery Order":
-          if (["FRANCO", "LOCCO"].includes(doc.tempat_penyerahan)) {
-            format = doc.tempat_penyerahan == "FRANCO"
-              ? "PF DO FRANCO"
-              : "PF DO LOCCO";
+          const loc = await frappe.xcall("sth.api.get_doc_ignore_perm", {
+            doctype: "Location",
+            name: doc.tempat_penyerahan
+          });
+
+          if (loc) {
+            format = loc.francoloco == "Franco" ? "PF DO FRANCO" : "PF DO LOCCO";
           }
           break;
 
@@ -110,6 +113,7 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
           break;
       }
 
+      console.log(format);
       setPrintFormat(format || this.frm.meta.default_print_format);
     }
   });

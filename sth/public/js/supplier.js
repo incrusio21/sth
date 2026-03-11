@@ -45,6 +45,9 @@ frappe.ui.form.on('Supplier', {
 	status_pkp: function (frm) {
 		check_status_pkp(frm)
 	},
+	badan_usaha: async function(frm) {
+		await update_kriteria_type(frm);
+	}
 });
 
 function generate_kode_supplier(frm) {
@@ -132,3 +135,44 @@ frappe.ui.form.on('Struktur Supplier', {
 		d.show();
 	}
 });
+
+frappe.ui.form.on("NPWP dan SPPKP Supplier", {
+	status_pkp: async function(frm, cdt, cdn) {
+		await update_kriteria_type(frm);
+	}
+});
+
+async function update_kriteria_type(frm) {
+	// Skip if new or unsaved
+	if (frm.is_new()) return;
+
+	let skip_sppkp = "Not SPPKP";
+	let badan_usaha = "Non Koperasi";
+
+	if ((frm.doc.npwp_dan_sppkp_supplier || []).some(row => row.status_pkp)) {
+		skip_sppkp = "SPPKP";
+	}
+	if (frm.doc.badan_usaha == "Koperasi") {
+		badan_usaha = "Koperasi";
+	}
+
+	const kriteria_type = badan_usaha + "-" + skip_sppkp;
+
+	await frappe.call({
+		method: "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.update_criteria_type",
+		freeze: true,
+		freeze_message: __("Updating criteria..."),
+		args: {
+			voucher_type: frm.doc.doctype,
+			voucher_no: frm.doc.name,
+			document_type: kriteria_type,
+		},
+	});
+
+	render_kriteria_upload(frm);
+
+	frappe.show_alert({
+		message: __(`Kriteria updated to: ${kriteria_type}`),
+		indicator: "blue"
+	});
+}

@@ -89,7 +89,7 @@
   {
    "fieldname": "deduction_phk_component",
    "fieldtype": "Link",
-   "label": "Deduction PHK Component",
+   "label": "PPh 21 Component",
    "options": "Salary Component"
   },
   {
@@ -136,7 +136,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-09 11:49:49.777633",
+ "modified": "2026-03-10 14:15:04.351718",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Bonus and Allowance Settings",

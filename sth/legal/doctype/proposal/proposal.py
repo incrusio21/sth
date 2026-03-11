@@ -90,11 +90,11 @@ class Proposal(BuyingController):
 		self.flags.allow_zero_qty = self.has_unit_price_items
 	
 	def validate(self):
-		self.validate_terms()
 
 		self.set_item_kegiatan_name()
 		
 		super().validate()
+		self.validate_terms()
 
 		self.set_status()
 
@@ -123,9 +123,19 @@ class Proposal(BuyingController):
 		self.set_retensi_or_term_value()
 	
 	def validate_terms(self):
-		for row in self.payment_schedule:
-			if row.invoice_portion:
-				row.payment_amount = row.invoice_portion * self.grand_total / 100
+		base_grand_total = self.base_net_total
+		grand_total = self.net_total
+		
+		for d in self.payment_schedule:
+			if d.invoice_portion:
+				d.payment_amount = flt(
+					grand_total * flt(d.invoice_portion) / 100, d.precision("payment_amount")
+				)
+				d.base_payment_amount = flt(
+					base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
+				)
+				d.outstanding = d.payment_amount
+				d.base_outstanding = d.base_payment_amount
 				
 	def set_item_kegiatan_name(self):
 		legal_item = get_legal_settings("default_item_code")

@@ -3,6 +3,7 @@
 
 import json
 from collections import Counter
+import pprint
 
 import frappe
 from frappe import _, scrub
@@ -58,6 +59,9 @@ class SalarySlip(SalarySlip):
 
 		self.set_pesangon_amount_from_periode()
 
+		# pprint.pprint([row.salary_component for row in self.earnings])
+		# pprint.pprint([row.salary_component for row in self.deductions])
+
 		self.compute_year_to_date()
 		self.compute_month_to_date()
 		self.compute_component_wise_year_to_date()
@@ -101,32 +105,26 @@ class SalarySlip(SalarySlip):
 			frappe.throw("Pesangon Document tidak ada")
 
 		pesangon = frappe.get_doc("Pesangon", self.pesangon_doc)
-
 		settings = frappe.get_single("Bonus and Allowance Settings")
 
 		if not settings.earning_phk_component:
-			frappe.throw("Earning PHK Component belum diset di Bonus and Allowance Settings")
-
+			frappe.throw("Earning PHK Component belum diset")
 		if not settings.deduction_phk_component:
-			frappe.throw("Deduction PHK Component belum diset di Bonus and Allowance Settings")
+			frappe.throw("Deduction PHK Component belum diset")
 
 		periode_slip = getdate(self.start_date).replace(day=1)
-
 		last_day = monthrange(periode_slip.year, periode_slip.month)[1]
 		self.start_date = periode_slip
 		self.end_date = periode_slip.replace(day=last_day)
 
 		row_match = None
-
 		for row in pesangon.pesangon_periode:
-			if getdate(row.periode) == periode_slip and not row.is_paid:
+			row_date = getdate(row.periode)
+			if row_date.year == periode_slip.year and row_date.month == periode_slip.month and not row.is_paid:
 				row_match = row
 				break
-
 		if not row_match:
-			frappe.throw(
-				f"Tidak ada periode Pesangon yang belum dibayar untuk {periode_slip}"
-			)
+			frappe.throw(f"Tidak ada periode Pesangon yang belum dibayar untuk {periode_slip.strftime('%B %Y')}")
 
 		self.earnings = []
 		self.deductions = []
@@ -135,22 +133,43 @@ class SalarySlip(SalarySlip):
 			"salary_component": settings.earning_phk_component,
 			"amount": flt(row_match.amount)
 		})
-
 		self.pesangon_amount = flt(row_match.amount)
 
 		total_pph = 0
-
 		for row in pesangon.pph_21_detail:
-			if getdate(row.periode) == periode_slip:
+			row_date = getdate(row.periode)
+			if row_date.year == periode_slip.year and row_date.month == periode_slip.month:
 				total_pph += flt(row.pph)
 
-		if total_pph > 0:
-			self.append("deductions", {
+		assignment = frappe.get_all(
+			"Salary Structure Assignment",
+			filters={
+				"employee": self.employee,
+				"salary_structure": self.salary_structure,
+				"docstatus": 1
+			},
+			fields=["pph_21_gross_up"],
+			order_by="from_date desc",
+			limit_page_length=1
+		)
+		# print(assignment)
+		gross_up = assignment[0].pph_21_gross_up if assignment else 0
+
+		if gross_up:
+			self.append("earnings", {
 				"salary_component": settings.deduction_phk_component,
 				"amount": flt(total_pph)
 			})
+		
+		self.append("deductions", {
+			"salary_component": settings.deduction_phk_component,
+			"amount": flt(total_pph)
+		})
 
-		self.calculate_net_pay()
+		self.gross_pay = self.get_component_totals("earnings", depends_on_payment_days=1)
+		self.base_gross_pay = flt(flt(self.gross_pay) * flt(self.exchange_rate), self.precision("base_gross_pay"))
+		self.set_net_pay()
+
 
 	def update_pesangon_payment_status(self):
 
@@ -944,6 +963,7 @@ class SalarySlip(SalarySlip):
 		return frappe.cache().get_value(LEAVE_CODE_MAP, _get_leave_code_map)
 	
 	def calculate_net_pay(self, skip_tax_breakup_computation: bool = False):
+		
 		# agar payment log selalu generate ulang
 		self.payment_log_list = []
 		self.loan_repayment_list = []
@@ -997,6 +1017,10 @@ class SalarySlip(SalarySlip):
 		self.set_net_pay()
 		if not skip_tax_breakup_computation:
 			self.compute_income_tax_breakup()
+
+		
+		pprint.pprint([row.amount for row in self.earnings])
+		pprint.pprint([row.amount for row in self.deductions])
 	
 		print("ini net {}".format(self.net_pay))
 
@@ -1755,3 +1779,7 @@ def make_payment_entry(source_name, target_doc=None):
     doclist.tipe_transfer = "Salary Slip"
     
     return doclist
+
+def test():
+	doc = frappe.get_doc("Salary Slip", "Sal Slip/HR-EMP-00061/00004")
+	doc.validate()

@@ -176,3 +176,61 @@ def get_criteria(voucher_type, voucher_no, doucment_type=None, only_kriteria=Fal
 		return kriteria
 
 	return {"document_no": kriteria_doc, "kriteria": kriteria}
+
+@frappe.whitelist()
+def update_criteria_type(voucher_type, voucher_no, document_type):
+	# Find existing Kriteria Upload Document
+	existing = frappe.db.get_value(
+		"Kriteria Upload Document",
+		{"voucher_type": voucher_type, "voucher_no": voucher_no},
+		"name"
+	)
+
+	if not existing:
+		return {"status": "no_document"}
+
+	parent_name = frappe.db.get_value(
+		"Kriteria Dokumen Finance",
+		{"criteria_type": document_type},
+		"name"
+	)
+
+	if not parent_name:
+		frappe.throw(f"No Kriteria Dokumen Finance found for criteria_type: {document_type}")
+
+	# Then fetch child rows from that parent
+	new_criteria = frappe.db.get_all(
+		"Kriteria Satuan Dokumen Finance",
+		filters={"parent": parent_name},
+		fields=["rincian_dokumen_finance", "mandatory"],
+		order_by="idx"
+	)
+	
+	if not new_criteria:
+		frappe.throw(f"No criteria template found for type: {document_type}")
+
+	doc = frappe.get_doc("Kriteria Upload Document", existing)
+
+	# Preserve existing uploaded files by matching rincian_dokumen_finance
+	existing_files = {
+		row.rincian_dokumen_finance: row.upload_file
+		for row in doc.file_upload
+		if row.upload_file
+	}
+
+	# Rebuild file_upload child table with new criteria
+	doc.file_upload = []
+	doc.document_type = document_type
+
+	for criteria_row in new_criteria:
+		doc.append("file_upload", {
+			"rincian_dokumen_finance": criteria_row.rincian_dokumen_finance,
+			"mandatory": criteria_row.mandatory,
+			# Re-attach file if same criteria name existed before
+			"upload_file": existing_files.get(criteria_row.rincian_dokumen_finance, None)
+		})
+
+	doc.save(ignore_permissions=True)
+	frappe.db.commit()
+
+	return {"status": "updated", "document_type": document_type}

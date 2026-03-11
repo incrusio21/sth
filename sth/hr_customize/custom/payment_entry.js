@@ -6,6 +6,14 @@ frappe.ui.form.off("Payment Entry", "get_outstanding_documents");
 frappe.ui.form.off("Payment Entry", "party");
 
 frappe.ui.form.on("Payment Entry", {
+	tipe_transfer: function(frm) {
+        if (frm.doc.tipe_transfer == 'PDO') {
+            show_pdo_selector(frm);
+        } else {
+            // Clear PDO field if another type is selected
+            frm.set_value('permintaan_dana_operasional', '');
+        }
+    },
 	party: function (frm) {
 		if (frm.doc.contact_email || frm.doc.contact_person) {
 			frm.set_value("contact_email", "");
@@ -452,6 +460,132 @@ function filter_bank_accounts(frm) {
                     }
                 }
             });
+        }
+    });
+}
+
+function show_pdo_selector(frm) {
+    frappe.call({
+        method: 'frappe.client.get_list',
+        args: {
+            doctype: 'Permintaan Dana Operasional',
+            filters: [
+                ['docstatus', '=', 1],
+                ['payment_voucher', '=', '']
+            ],
+            fields: ['name', 'posting_date', 'unit', 
+                     'grand_total_bahan_bakar', 
+                     'grand_total_perjalanan_dinas', 
+                     'grand_total_kas', 
+                     'grand_total_dana_cadangan', 
+                     'grand_total_non_pdo'],
+            limit: 50
+        },
+        callback: function(r) {
+            if (!r.message || r.message.length === 0) {
+                frappe.msgprint({
+                    title: __('No PDO Available'),
+                    message: __('There are no submitted PDO without payment voucher.'),
+                    indicator: 'orange'
+                });
+                frm.set_value('tipe_transfer', '');
+                return;
+            }
+
+            let rows = r.message.map(d => {
+                let total = (d.grand_total_bahan_bakar || 0) +
+                            (d.grand_total_perjalanan_dinas || 0) +
+                            (d.grand_total_kas || 0) +
+                            (d.grand_total_dana_cadangan || 0) +
+                            (d.grand_total_non_pdo || 0);
+                return `
+                    <tr class="pdo-row" 
+                        data-name="${d.name}"
+                        style="cursor:pointer;">
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${d.name}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${d.unit || '-'}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${d.posting_date}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">
+                            ${frappe.format(total, {fieldtype: 'Currency'})}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            let dialog = new frappe.ui.Dialog({
+                title: __('Select PDO'),
+                fields: [{
+                    fieldtype: 'HTML',
+                    fieldname: 'pdo_table',
+                    options: `
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f5f5f5; font-weight:bold;">
+                                    <th style="padding:8px; text-align:left;">PDO</th>
+                                    <th style="padding:8px; text-align:left;">Unit</th>
+                                    <th style="padding:8px; text-align:left;">Date</th>
+                                    <th style="padding:8px; text-align:right;">Grand Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    `
+                }]
+            });
+
+            dialog.show();
+
+            // ↓ THIS IS WHERE THE CLICK HANDLER GOES
+            dialog.$wrapper.find('.pdo-row').on('click', function() {
+                let selected_name = $(this).data('name');
+                dialog.hide();
+
+                frappe.call({
+                    method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher',
+                    args: {
+                        source_name: selected_name
+                    },
+                    freeze: true,
+                    freeze_message: __('Creating Payment Voucher...'),
+                    callback: function(r) {
+                        if (r.message) {
+                            var doc = r.message;
+                            frappe.model.sync(doc);
+                            frappe.set_route('Form', 'Payment Entry', doc.name);
+                        }
+                    }
+                });
+            });
+        }
+    });
+}
+
+function fetch_pdo_details(frm, pdo_name) {
+    let name = pdo_name || frm.doc.pdo_reference;
+    if (!name) return;
+
+    frappe.call({
+        method: 'frappe.client.get',
+        args: {
+            doctype: 'Permintaan Dana Operasional',
+            name: name
+        },
+        callback: function(r) {
+            if (r.message) {
+                let pdo = r.message;
+                // Map PDO fields to Payment Entry fields
+                frm.set_value('paid_amount', pdo.grand_total_pdo);
+                frm.set_value('received_amount', pdo.grand_total_pdo);
+                // Add other field mappings as needed
+                // frm.set_value('party', pdo.party);
+                // frm.set_value('cost_center', pdo.cost_center);
+
+                frm.refresh_fields();
+                frappe.show_alert({
+                    message: __('PDO {0} linked successfully', [name]),
+                    indicator: 'green'
+                });
+            }
         }
     });
 }

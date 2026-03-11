@@ -28,9 +28,9 @@ frappe.ui.form.on('Delivery Order', {
 					show_transporter_dialog(frm);
 				}, __('Create'));
 			} else {
-				frm.add_custom_button(__('Delivery Note'), function() {
-					create_delivery_note(frm, null);
-				}, __('Create'));
+				// frm.add_custom_button(__('Delivery Note'), function() {
+				// 	create_delivery_note(frm, null);
+				// }, __('Create'));
 			}
 		}
         

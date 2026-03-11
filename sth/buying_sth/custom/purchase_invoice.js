@@ -20,11 +20,13 @@ frappe.ui.form.on("Purchase Invoice", {
         sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
         frm.trigger("setup_queries")
 
-        frm.add_custom_button(
-            __("Training Event"),
-            function () {
-                showTrainingEventSelector(frm);
-            }, __("Get Items From"));
+        if (frm.doc.docstatus === 0 || frm.is_new()) {
+            frm.add_custom_button(
+                __("Training Event"),
+                function () {
+                    showTrainingEventSelector(frm);
+                }, __("Get Items From"));
+        }
     },
 
     setup_queries(frm) {
