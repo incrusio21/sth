@@ -74,7 +74,8 @@ def execute(filters=None):
 		'' as nomor_bukti_potong_sebelumnya,
 		'N/A' as fasilitas_pajak,
 		0 as pph_pasal_21,
-		DATE_FORMAT(LAST_DAY(MAX(ss.posting_date)), '%%m/%%d/%%Y') as tanggal_pemotong
+		cnd.nitku as id_tku_pemotong,
+		DATE_FORMAT(LAST_DAY(MAX(ss.posting_date)), '%%d/%%m/%%Y') as tanggal_pemotong
 
 		FROM `tabSalary Slip` as ss
 		JOIN `tabEmployee` as e ON e.name = ss.employee 
@@ -88,6 +89,9 @@ def execute(filters=None):
 		)
 		LEFT JOIN `tabSalary Detail` as sd ON sd.parent = ss.name
 		LEFT JOIN `tabSalary Component` sc ON sc.name = sd.salary_component
+		LEFT JOIN `tabCompany NITKU Detail` as cnd
+			ON cnd.parent = ss.company
+			AND cnd.golongan = e.grade
 		WHERE ss.docstatus = 1 {}
 		GROUP BY ss.employee, ss.employee_name, YEAR(ss.posting_date)
 		ORDER BY ss.employee_name;
@@ -186,42 +190,42 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Tunjangan PPh"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "tunjangan_pph",
 		},
 		{
 			"label": _("Tunjangan Lainnya / Lembur"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "tunjangan_lainnya_lembur",
 		},
 		{
 			"label": _("Honorarium"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "honarorium",
 		},
 		{
 			"label": _("Asuransi"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "asuransi",
 		},
 		{
 			"label": _("Natura"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "natura",
 		},
 		{
 			"label": _("Tantiem, Bonus, Gratifikasi, THR"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "tantiem_bonus_gratifikasi_thr",
 		},
 		{
 			"label": _("Iuran Pensiun atau Biaya THT/JHT"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "iuran_pensiun_atau_biaya_tht_jht",
 		},
 		{
 			"label": _("Zakat"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"fieldname": "zakat",
 		},
 		{

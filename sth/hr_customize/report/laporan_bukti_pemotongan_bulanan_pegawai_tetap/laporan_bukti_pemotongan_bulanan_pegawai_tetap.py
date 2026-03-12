@@ -47,7 +47,8 @@ def execute(filters=None):
 		)
 		) as penghasilan_kotor,
 		dt.tarif_pajak as tarif,
-		DATE_FORMAT(LAST_DAY(ss.posting_date), '%%m/%%d/%%Y') as tanggal_pemotong
+		cnd.nitku as id_tku,
+		DATE_FORMAT(LAST_DAY(ss.posting_date), '%%d/%%m/%%Y') as tanggal_pemotong
 		FROM `tabSalary Slip` as ss
 		JOIN `tabEmployee` as e ON e.name = ss.employee
 		JOIN `tabDesignation` as d ON d.name = e.designation
@@ -56,6 +57,9 @@ def execute(filters=None):
 			ON dt.parent = dgt.parent
 			AND ss.rounded_total >= dt.batas_bawah
 			AND ss.rounded_total <= dt.batas_atas
+		LEFT JOIN `tabCompany NITKU Detail` as cnd
+			ON cnd.parent = ss.company
+			AND cnd.golongan = e.grade
 		WHERE e.employment_type = 'KARYAWAN TETAP' AND ss.docstatus = 1 {}
 		ORDER BY MONTH(ss.posting_date);
   """.format(conditions), filters, as_dict=True)
