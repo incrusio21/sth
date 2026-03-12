@@ -295,7 +295,7 @@ class FormSupplier {
                 $(".loader").hide()
             });
 
-            //console.log(Object.fromEntries(formData));
+            console.log(Object.fromEntries(formData));
         })
     }
 
