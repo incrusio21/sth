@@ -37,6 +37,15 @@ frappe.ui.form.on("Security Check Point", {
 				}
 			}
 		})
+
+		frm.set_query("do_no", (doc) => {
+			return {
+				query: frappe.model.get_server_module_name(doc.doctype) + ".delivery_order_query",
+				filters: {
+					driver: doc.qr_code_scan
+				}
+			}
+		})
 	},
 
 	onload(frm) {
