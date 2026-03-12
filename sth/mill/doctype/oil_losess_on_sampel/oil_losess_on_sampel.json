@@ -27,7 +27,6 @@
   "heavy_phase_decanter_",
   "heavy_phase_separator_",
   "heavy_phase_sludge_centrifuge_",
-  "final_effluent_oil_",
   "amended_from"
  ],
  "fields": [
@@ -147,11 +146,6 @@
    "label": "Heavy Phase Sludge Centrifuge (%)"
   },
   {
-   "fieldname": "final_effluent_oil_",
-   "fieldtype": "Percent",
-   "label": "Final Effluent Oil (%)"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -172,7 +166,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-10 14:04:25.912874",
+ "modified": "2026-03-11 22:31:22.969856",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Oil Losess On Sampel",

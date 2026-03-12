@@ -127,7 +127,7 @@
   },
   {
    "fieldname": "total_jam",
-   "fieldtype": "Time",
+   "fieldtype": "Data",
    "label": "Total Jam"
   },
   {
@@ -145,7 +145,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 13:28:47.021295",
+ "modified": "2026-03-11 22:29:49.408066",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Buku Kerja Mekanik",

@@ -1,102 +1,62 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2026-01-17 10:45:19.230645",
+ "creation": "2026-03-12 10:23:11.412020",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "biaya_tenaga_kerja_tab",
   "header_section",
-  "naming_series",
+  "series",
   "tanggal",
   "jam",
-  "tipe_service_maintenance",
-  "column_break_ydbf",
-  "status",
-  "company",
   "unit",
-  "section_break_zlnn",
-  "nama_stasiun",
+  "column_break_fwob",
+  "status",
+  "shift",
+  "section_break_ryxt",
+  "company",
+  "unit_pabrik",
+  "column_break_vtxm",
   "tahun_budget",
-  "estimasi_kenaikan_harga_barang_",
-  "column_break_made",
-  "kode_barang",
-  "nama_barang",
-  "satuan_barang",
-  "qty_barang",
-  "harga_satuan",
-  "total_harga_barang"
+  "estimasi_kenaikan_upah_",
+  "dalam_setahun_section",
+  "jumlah_hari_kerja_efektif",
+  "jumlah_hari_kerja_biasa",
+  "jumlah_hari_kerja_biasa_sabtu",
+  "column_break_xyeu",
+  "jumlah_hari_libur_nasional",
+  "jumlah_hari_libur_minggu",
+  "harga_natura",
+  "section_break_fzpj",
+  "department",
+  "nik",
+  "karyawan",
+  "nama_karyawan",
+  "column_break_oeqg",
+  "ptkp_status",
+  "total_natura",
+  "gaji_pokok",
+  "harga_per_jam_lembur",
+  "jam_lembur",
+  "total_biaya_lembur",
+  "premi_tetap",
+  "tab_2_tab",
+  "detail_section",
+  "material"
  ],
  "fields": [
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company"
-  },
-  {
-   "fieldname": "tahun_budget",
-   "fieldtype": "Link",
-   "label": "Tahun Budget",
-   "options": "Fiscal Year"
-  },
-  {
-   "fieldname": "estimasi_kenaikan_harga_barang_",
-   "fieldtype": "Float",
-   "label": "Estimasi Kenaikan Harga Barang %"
-  },
-  {
-   "fieldname": "kode_barang",
-   "fieldtype": "Link",
-   "label": "Kode Barang",
-   "options": "Item"
-  },
-  {
-   "fetch_from": "kode_barang.item_name",
-   "fieldname": "nama_barang",
-   "fieldtype": "Data",
-   "label": "Nama Barang"
-  },
-  {
-   "fieldname": "column_break_made",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "satuan_barang",
-   "fieldtype": "Link",
-   "label": "Satuan Barang",
-   "options": "UOM"
-  },
-  {
-   "fieldname": "qty_barang",
-   "fieldtype": "Float",
-   "label": "Qty Barang"
-  },
-  {
-   "fieldname": "harga_satuan",
-   "fieldtype": "Currency",
-   "label": "Harga Satuan"
-  },
-  {
-   "fieldname": "total_harga_barang",
-   "fieldtype": "Currency",
-   "label": "Total Harga Barang"
-  },
-  {
-   "fieldname": "nama_stasiun",
-   "fieldtype": "Data",
-   "label": "Nama Stasiun"
-  },
   {
    "fieldname": "header_section",
    "fieldtype": "Section Break",
    "label": "Header"
   },
   {
-   "fieldname": "naming_series",
+   "fieldname": "series",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Series",
-   "options": "BBSA-.####"
+   "options": "BPDTK-.####"
   },
   {
    "default": "Today",
@@ -121,7 +81,7 @@
    "options": "Unit"
   },
   {
-   "fieldname": "column_break_ydbf",
+   "fieldname": "column_break_fwob",
    "fieldtype": "Column Break"
   },
   {
@@ -132,24 +92,184 @@
    "options": "Proses\nSelesai"
   },
   {
-   "fieldname": "section_break_zlnn",
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_ryxt",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "tipe_service_maintenance",
-   "fieldtype": "Select",
-   "label": "Tipe Service Maintenance",
-   "options": "Internal\nEksternal"
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Link",
+   "label": "Unit Pabrik",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_vtxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tahun_budget",
+   "fieldtype": "Link",
+   "label": "Tahun Budget",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "estimasi_kenaikan_upah_",
+   "fieldtype": "Float",
+   "label": "Estimasi Kenaikan Upah %"
+  },
+  {
+   "fieldname": "dalam_setahun_section",
+   "fieldtype": "Section Break",
+   "label": "Dalam Setahun"
+  },
+  {
+   "fieldname": "jumlah_hari_kerja_efektif",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Kerja Efektif"
+  },
+  {
+   "fieldname": "jumlah_hari_kerja_biasa",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Kerja Biasa"
+  },
+  {
+   "fieldname": "jumlah_hari_kerja_biasa_sabtu",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Kerja Biasa Sabtu"
+  },
+  {
+   "fieldname": "column_break_xyeu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jumlah_hari_libur_nasional",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Libur Nasional"
+  },
+  {
+   "fieldname": "jumlah_hari_libur_minggu",
+   "fieldtype": "Float",
+   "label": "Jumlah Hari Libur Minggu"
+  },
+  {
+   "fieldname": "harga_natura",
+   "fieldtype": "Currency",
+   "label": "Harga Natura"
+  },
+  {
+   "fieldname": "section_break_fzpj",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "nik",
+   "fieldtype": "Data",
+   "label": "NIK"
+  },
+  {
+   "fieldname": "karyawan",
+   "fieldtype": "Link",
+   "label": "Karyawan",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "nama_karyawan",
+   "fieldtype": "Data",
+   "label": "Nama Karyawan"
+  },
+  {
+   "fieldname": "column_break_oeqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ptkp_status",
+   "fieldtype": "Data",
+   "label": "PTKP Status"
+  },
+  {
+   "description": "Natura Dalam 1 Tahun",
+   "fieldname": "total_natura",
+   "fieldtype": "Currency",
+   "label": "Total Natura"
+  },
+  {
+   "description": "Dalam 1 Tahun",
+   "fieldname": "gaji_pokok",
+   "fieldtype": "Currency",
+   "label": "Gaji Pokok"
+  },
+  {
+   "fieldname": "harga_per_jam_lembur",
+   "fieldtype": "Currency",
+   "label": "Harga Per Jam Lembur"
+  },
+  {
+   "description": "Dalam 1 Tahun",
+   "fieldname": "jam_lembur",
+   "fieldtype": "Time",
+   "label": "Jam Lembur"
+  },
+  {
+   "description": "Dalam 1 Tahun",
+   "fieldname": "total_biaya_lembur",
+   "fieldtype": "Currency",
+   "label": "Total Biaya Lembur"
+  },
+  {
+   "description": "Dalam 1 Tahun",
+   "fieldname": "premi_tetap",
+   "fieldtype": "Currency",
+   "label": "Premi Tetap"
+  },
+  {
+   "fieldname": "biaya_tenaga_kerja_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tenaga Kerja Bengkel"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pemakaian Bahan Bengkel"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Material",
+   "options": "Detail Item Budget Mill"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 14:26:34.880212",
+ "modified": "2026-03-12 10:38:28.696171",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Biaya Service and Maintenance",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

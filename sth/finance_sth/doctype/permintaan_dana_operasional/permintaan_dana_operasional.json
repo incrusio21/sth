@@ -25,6 +25,11 @@
   "realisasi_pdo",
   "bahan_bakar_tab",
   "bahan_bakar_details_section",
+  "jenis_bahan_bakar",
+  "tambah_item_bahan_bakar",
+  "column_break_oaoq",
+  "column_break_xwrw",
+  "section_break_cbwc",
   "bahan_bakar_transaction_number",
   "pdo_bahan_bakar",
   "grand_total_bahan_bakar",
@@ -485,13 +490,36 @@
    "no_copy": 1,
    "options": "Payment Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "jenis_bahan_bakar",
+   "fieldtype": "Link",
+   "label": "Jenis Bahan Bakar",
+   "options": "PDO Type"
+  },
+  {
+   "fieldname": "tambah_item_bahan_bakar",
+   "fieldtype": "Button",
+   "label": "Tambah Item"
+  },
+  {
+   "fieldname": "section_break_cbwc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_oaoq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xwrw",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-11 22:18:04.785705",
+ "modified": "2026-03-12 10:24:24.838707",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

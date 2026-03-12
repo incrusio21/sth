@@ -18,6 +18,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		make_payment_voucher_kebun(frm)
 		make_realisasi_pdo(frm)
 		hide_revisi_field(frm)
+		make_jenis_filter(frm)
 		
 	},
 	jenis_kas(frm){
@@ -30,6 +31,18 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 			});
 		}
 	},
+
+	jenis_bahan_bakar(frm) {
+		if (frm.doc.jenis_bahan_bakar) {
+			show_bahan_bakar_category_dialog(frm);
+		}
+	},
+	tambah_item_bahan_bakar(frm) {
+		if (frm.doc.jenis_bahan_bakar) {
+			show_bahan_bakar_category_dialog(frm);
+		}
+	},
+
 	tambah_item(frm){
 		if (!frm.doc.jenis_kas) {
 			frappe.msgprint(__('Silakan pilih Jenis Kas terlebih dahulu'));
@@ -1149,4 +1162,189 @@ function make_pdo_kas_readonly(frm) {
 	frm.fields_dict['pdo_kas'].grid.cannot_add_rows = true;
 	
 	frm.refresh_field('pdo_kas');
+}
+
+function make_jenis_filter(frm){
+	frm.set_query('jenis_bahan_bakar', function() {
+		return {
+			query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_pdo_type_by_category',
+			filters: {
+				category: 'Bahan Bakar'
+			}
+		};
+	});
+	 frm.set_query('jenis_kas', function() {
+		return {
+			query: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_pdo_type_by_category',
+			filters: {
+				category: 'Kas'
+			}
+		};
+	});
+}
+
+function show_bahan_bakar_category_dialog(frm) {
+	let category_dialog = new frappe.ui.Dialog({
+		title: __('Pilih Kategori Bahan Bakar'),
+		fields: [
+			{
+				fieldname: 'kategori',
+				label: __('Kategori'),
+				fieldtype: 'Select',
+				options: '\nTunjangan Staff/Non Staff\nBiaya Umum\nOperasional',
+				reqd: 1
+			}
+		],
+		primary_action_label: __('Pilih'),
+		primary_action(values) {
+			category_dialog.hide();
+			show_bahan_bakar_detail_dialog(frm, values.kategori);
+		},
+		secondary_action_label: __('Batal'),
+		secondary_action() {
+			category_dialog.hide();
+		}
+	});
+
+	category_dialog.show();
+}
+
+function show_bahan_bakar_detail_dialog(frm, kategori) {
+	let is_tunjangan = kategori === 'Tunjangan Staff/Non Staff';
+	
+	let fields = [
+		{
+			fieldname: 'kategori',
+			label: __('Kategori'),
+			fieldtype: 'Data',
+			read_only: 1,
+			default: kategori
+		},
+		{
+			fieldname: 'employee',
+			label: __('Pengguna'),
+			fieldtype: is_tunjangan ? 'Link' : 'Data',
+			options: is_tunjangan ? 'Employee' : undefined,
+			reqd: 1,
+			onchange: is_tunjangan ? function() {
+				let employee = detail_dialog.get_value('employee');
+				if (employee) {
+					frappe.db.get_value('Employee', employee, 'designation', (r) => {
+						if (r && r.designation) {
+							detail_dialog.set_value('jabatan', r.designation);
+						}
+					});
+				} else {
+					detail_dialog.set_value('jabatan', '');
+				}
+			} : undefined
+		},
+		{
+			fieldname: 'jabatan',
+			label: __('Jabatan'),
+			fieldtype: 'Link',
+			options: 'Designation',
+			reqd: 1,
+			onchange: function() {
+				let jabatan = detail_dialog.get_value('jabatan');
+				if (jabatan) {
+					fetch_plafon_for_dialog(jabatan, detail_dialog);
+				} else {
+					detail_dialog.set_value('plafon', 0);
+					detail_dialog.set_value('unit_price', 0);
+					detail_dialog.set_value('price_total', 0);
+				}
+			}
+		},
+		{
+			fieldname: 'plafon',
+			label: __('Plafon'),
+			fieldtype: 'Currency',
+			read_only: 1
+		},
+		{
+			fieldname: 'unit_price',
+			label: __('Harga Unit'),
+			fieldtype: 'Currency',
+			reqd: 1,
+			onchange: function() {
+				let plafon = detail_dialog.get_value('plafon') || 0;
+				let unit_price = detail_dialog.get_value('unit_price') || 0;
+				detail_dialog.set_value('price_total', plafon * unit_price);
+			}
+		},
+		{
+			fieldname: 'price_total',
+			label: __('Total Harga'),
+			fieldtype: 'Currency',
+			read_only: 1
+		},
+		{
+			fieldname: 'needs',
+			label: __('Kebutuhan'),
+			fieldtype: 'Data'
+		}
+	];
+
+	let detail_dialog = new frappe.ui.Dialog({
+		title: __('Tambah Item PDO Bahan Bakar - ') + kategori,
+		fields: fields,
+		size: 'small',
+		primary_action_label: __('Tambah'),
+		primary_action(values) {
+			let child = frm.add_child('pdo_bahan_bakar');
+			child.jenis_bahan_bakar = frm.doc.jenis_bahan_bakar;
+			child.kategori = values.kategori;
+			child.employee = values.employee;
+			child.jabatan = values.jabatan;
+			child.plafon = values.plafon;
+			child.revised_plafon = values.plafon;
+			child.unit_price = values.unit_price;
+			child.revised_unit_price = values.unit_price;
+			child.price_total = values.price_total;
+			child.revised_price_total = values.price_total;
+			child.needs = values.needs;
+
+			frm.refresh_field('pdo_bahan_bakar');
+
+			if (typeof calculateGrandTotal === 'function') {
+				calculateGrandTotal(frm);
+			}
+
+			detail_dialog.hide();
+		},
+		secondary_action_label: __('Batal'),
+		secondary_action() {
+			detail_dialog.hide();
+		}
+	});
+
+	detail_dialog.set_value('kategori', kategori);
+	detail_dialog.show();
+}
+
+function fetch_plafon_for_dialog(jabatan, dialog) {
+	frappe.call({
+		method: 'frappe.client.get',
+		args: {
+			doctype: 'Plafon PDO',
+			name: 'BAHAN BAKAR'
+		},
+		callback: function(r) {
+			if (r.message) {
+				let table = r.message.plafon_pdo_table || [];
+				let matched = table.find(row => row.jenis_plafon === jabatan);
+
+				if (matched && matched.nilai) {
+					dialog.set_value('plafon', matched.nilai);
+					// Recalculate total if unit_price already filled
+					let unit_price = dialog.get_value('unit_price') || 0;
+					dialog.set_value('price_total', matched.nilai * unit_price);
+				} else {
+					dialog.set_value('plafon', 0);
+					frappe.msgprint(__('Tidak ada plafon untuk jabatan: ') + jabatan);
+				}
+			}
+		}
+	});
 }

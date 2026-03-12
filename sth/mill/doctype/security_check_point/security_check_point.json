@@ -345,8 +345,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Vehicle Queue Number",
-   "options": "REC-.DD.MM.YY.-.###\nDIS-.DD.MM.YY.-.###"
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
@@ -422,7 +423,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 15:04:41.652906",
+ "modified": "2026-03-12 10:19:37.886171",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

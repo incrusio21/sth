@@ -1,7 +1,25 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
+
+function set_series(frm) {
+    if (frm.doc.transaction_type == "Receive") {
+        frm.set_value("naming_series", "REC-.DD.MM.YY.-.###");
+    }
+
+    if (frm.doc.transaction_type == "Dispatch") {
+        frm.set_value("naming_series", "DIS-.DD.MM.YY.-.###");
+    }
+
+    if (frm.doc.transaction_type == "Return") {
+        frm.set_value("naming_series", "RET-.DD.MM.YY.-.###");
+    }
+}
+
 frappe.ui.form.on("Security Check Point", {
+	refresh(frm) {
+        set_series(frm);
+    },
 	setup(frm) {
 		frm.set_query("divisi", sth.queries.divisi)
 		frm.set_query("unit", (doc) => {
@@ -28,6 +46,8 @@ frappe.ui.form.on("Security Check Point", {
 
 	transaction_type(frm) {
 		frm.events.clear_fields(frm, "transaction")
+        set_series(frm);
+    
 	},
 
 	receive_type(frm) {

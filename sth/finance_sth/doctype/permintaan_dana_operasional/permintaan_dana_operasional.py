@@ -595,3 +595,25 @@ def get_available_tipe_pdo(source_name):
 			})
 	
 	return available_types
+
+@frappe.whitelist()
+def get_pdo_type_by_category(doctype, txt, searchfield, start, page_len, filters):
+	category = filters.get('category') if isinstance(filters, dict) else frappe.parse_json(filters).get('category')
+	
+	return frappe.db.sql("""
+		SELECT DISTINCT
+			pt.name, pt.name
+		FROM
+			`tabPDO Type` pt
+		INNER JOIN
+			`tabPDO Category Type Table` pct ON pct.parent = pt.name
+		WHERE
+			pct.category = %(category)s
+			AND pt.{searchfield} LIKE %(txt)s
+		LIMIT %(start)s, %(page_len)s
+	""".format(searchfield=searchfield), {
+		'category': category,
+		'txt': '%{}%'.format(txt),
+		'start': start,
+		'page_len': page_len
+	})
