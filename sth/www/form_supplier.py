@@ -20,6 +20,7 @@ def get_context(context):
         "90 hari setelah barang dan invoice diterima (Credit)",
         "120 hari setelah barang dan invoice diterima (Credit)",
         "CASH (CASH)",
+        "CASH BEFORE DELIVERY (CASH)"
         "Panjar / Down Payment (CASH)"
     ]
 
