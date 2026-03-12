@@ -16,7 +16,8 @@ def create_sq():
 	map_tax = {
 		"Ongkos Angkut":"ongkos_angkut",
 		"PPH 22":"pph_22",
-		"PBBKB":"pbbkb"
+		"PBBKB":"pbbkb",
+		"Cost": "cost"
 	}
 
 	charges_and_discount = json.loads(data.get("charges_and_discount"))
@@ -50,13 +51,14 @@ def create_sq():
 		child.qty = items_data["qty"][idx]
 		child.request_for_quotation = rfq_name
 
-	doc_sq.biaya_ongkos = charges_and_discount.get('ongkos_angkut')
-	doc_sq.ppn_biaya_ongkos = charges_and_discount.get('ppn_ongkos_angkut')
-	doc_sq.is_ppn_ongkos = True if doc_sq.ppn_biaya_ongkos > 0 else False
-	doc_sq.total_biaya_ongkos_angkut = doc_sq.biaya_ongkos + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
+
+	doc_sq.biaya_ongkos = flt(charges_and_discount.get('ongkos_angkut'))
+	doc_sq.ppn_biaya_ongkos = flt(charges_and_discount.get('ppn_ongkos_angkut'))
+	doc_sq.is_ppn_ongkos = True if doc_sq.ppn_biaya_ongkos > 0.0 else False
+	doc_sq.total_biaya_ongkos_angkut = flt(doc_sq.biaya_ongkos) + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
 	doc_sq.is_pph_22 = True
-	doc_sq.pph_22 = charges_and_discount.get('pph_22')
-	doc_sq.pbbkb = charges_and_discount.get('pbbkb')
+	doc_sq.pph_22 = flt(charges_and_discount.get('pph_22'))
+	doc_sq.pbbkb = flt(charges_and_discount.get('pbbkb'))
 
 	doc_sq.taxes = []
 	tax_template = get_taxes_template(doc_sq.company)
@@ -72,14 +74,6 @@ def create_sq():
 			taxes.tax_amount = charges_and_discount.get(field_name)
 		else:
 			taxes.tax_amount = doc_sq.biaya_ongkos + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
-
-	doc_sq.biaya_ongkos = charges_and_discount.get('ongkos_angkut')
-	doc_sq.ppn_biaya_ongkos = charges_and_discount.get('ppn_ongkos_angkut')
-	doc_sq.is_ppn_ongkos = True if doc_sq.ppn_biaya_ongkos > 0 else False
-	doc_sq.total_biaya_ongkos_angkut = doc_sq.biaya_ongkos + (doc_sq.biaya_ongkos * doc_sq.ppn_biaya_ongkos/100 )
-	doc_sq.is_pph_22 = True
-	doc_sq.pph_22 = charges_and_discount.get('pph_22')
-	doc_sq.pbbkb = charges_and_discount.get('pbbkb')
 
 	doc_sq.apply_discount_on = "Net Total"
 	doc_sq.additional_discount_percentage = flt(charges_and_discount.get('discount'))
@@ -105,6 +99,15 @@ def validate_request(data):
 	if not json.loads(data.get("items")):
 		message.append("Items is required")
 
+	if flt(data.get("gt_value")) == 0:
+		message.append("Grand total harus lebih besar dari 0")
+
+	items_data = json.loads(data.get("items"))
+
+	for idx,item in enumerate(items_data.get("item_code")):
+		if flt(items_data["rate"][idx]) == 0.0:
+			message.append("Harga {} harus lebih besar dari 0".format(items_data["item_name"][idx]))
+			break
 	
 	return message
 

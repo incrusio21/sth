@@ -29,7 +29,8 @@ def get_context(context):
         rfq_name = decrypt(rfqEn)
         context.rfq = rfqEn
         context.supplier = decrypt(supplier)
-        
+        context.supplier_name = frappe.get_cached_value("Supplier",context.supplier,"supplier_name")
+
         doc = frappe.get_doc("Request for Quotation",rfq_name)
         context.items = doc.get("items")
         context.status = doc.get("custom_offering_status")

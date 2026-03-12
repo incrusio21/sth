@@ -15,7 +15,7 @@ class FormSupplier {
             digitGroupSeparator: ',',
             decimalCharacter: '.',
             decimalPlaces: 2,
-            emptyInputBehavior: 'zero'
+            emptyInputBehavior: 'zero',
         }
         this.charges = {
             discount: 0,
@@ -39,7 +39,7 @@ class FormSupplier {
                 selectedDates: [''],
                 autoClose: true,
                 dateFormat: 'yyyy-MM-dd',
-                locale: this.getLocale()
+                locale: this.getLocale(),
             })
         })
 
@@ -114,6 +114,7 @@ class FormSupplier {
 
         const grand_total = this.net_total - discount_amount + this.charges.ongkos_angkut + ppn_ongkos_amount + this.charges.pbbkb + this.charges.pph_22
         $('input[name="grand_total"]').val(`Rp.${this.numberFormat(grand_total)}`)
+        $('input[name="gt_value"]').val(grand_total)
     }
 
     numberFormat(el) {
@@ -254,6 +255,7 @@ class FormSupplier {
             formData.append("file_url", file_upload ? file_upload?.name : "")
 
             let serialize = $(this).serializeArray()
+
             for (let field of serialize) {
                 if (field.name.includes("[]")) {
                     let title = field.name.replaceAll("[]", "")
@@ -264,6 +266,7 @@ class FormSupplier {
             }
 
             formData.append("items", JSON.stringify(items))
+
             formData.append("charges_and_discount", JSON.stringify(self.charges))
             $("#btn-submit").prop("disabled", true)
             $(".loader").show()
@@ -294,8 +297,6 @@ class FormSupplier {
                 $("#btn-submit").prop("disabled", false)
                 $(".loader").hide()
             });
-
-            console.log(Object.fromEntries(formData));
         })
     }
 

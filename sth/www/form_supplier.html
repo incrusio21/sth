@@ -58,12 +58,13 @@
                 <div>
                     <div class="mb-3 row">
                         <div class="col-xl-3 col-md-6 mb-2">
-                            <label class="form-label">Supplier</label>
-                            <input type="text" class="form-control form-control-sm" value="{{ supplier or '' }}"
-                                name="supplier" readonly required>
+                            <label class="form-label">Supplier*</label>
+                            <input type="text" class="form-control form-control-sm" value="{{ supplier_name or '' }}"
+                                name="supplier_name" readonly required>
+                            <input type="hidden" name="supplier" value="{{ supplier or '' }}">
                         </div>
                         <div class="col-xl-3 col-md-6 mb-2">
-                            <label class="form-label">Valid Till</label>
+                            <label class="form-label">Valid Till*</label>
                             <input type="text" class="form-control form-control-sm datepicker" name="valid_date"
                                 required>
                         </div>
@@ -73,7 +74,7 @@
                                 required>
                         </div> -->
                         <div class="col-xl-3 col-md-6 mb-2">
-                            <label for="file-upload" class="form-label">Upload Penawaran Harga</label>
+                            <label for="file-upload" class="form-label">Upload Penawaran Harga*</label>
                             <input class="form-control form-control-sm" type="file" id="file-upload" accept=".pdf"
                                 required>
                         </div>
@@ -143,8 +144,8 @@
                                             </select>
                                         </td>
                                         <td data-field="desc">
-                                            <textarea class="form-control form-control-sm" name="desc[]"
-                                                rows="1"></textarea>
+                                            <textarea class="form-control form-control-sm" name="desc[]" rows="1"
+                                                required></textarea>
                                         </td>
                                         <td data-field="qty">
                                             <input type="number" min="1" name="qty[]"
@@ -240,6 +241,7 @@
                                 <label class="form-label">Grand Total</label>
                                 <input type="text" name="grand_total" value="Rp.0" class="form-control form-control-sm"
                                     readonly disabled>
+                                <input type="hidden" name="gt_value" value="0">
                             </div>
                         </div>
                         <div class="col-md-3 mt-4">
@@ -250,7 +252,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-12 col-md-6">
-                            <label class="form-label">Syarat Pembayaran</label>
+                            <label class="form-label">Syarat Pembayaran*</label>
                             <select class="form-select form-select-sm" name="syarat_pembayaran" required>
                                 <option value="" disabled selected>--Pilih--</option>
                                 {% for data in payment_terms %}
