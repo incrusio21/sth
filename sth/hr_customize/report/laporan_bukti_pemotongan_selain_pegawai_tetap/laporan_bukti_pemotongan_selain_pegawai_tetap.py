@@ -60,6 +60,12 @@ def get_condition(filters):
 	if filters.get("unit"):
 		conditions += " AND ss.unit = %(unit)s"
 
+	if filters.get("grade"):
+		conditions += " AND e.grade = %(grade)s"
+
+	if filters.get("employment_type"):
+		conditions += " AND e.employment_type = %(employment_type)s"
+
 	if filters.get("bulan"):
 		filters["month_num"] = bulan_map.get(filters.get("bulan"), 1)
 		conditions += " AND MONTH(ss.posting_date) = %(month_num)s"

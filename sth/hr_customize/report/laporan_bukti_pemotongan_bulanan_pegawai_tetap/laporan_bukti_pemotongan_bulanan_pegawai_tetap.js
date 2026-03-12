@@ -16,6 +16,18 @@ frappe.query_reports["Laporan Bukti Pemotongan Bulanan Pegawai Tetap"] = {
 			"options": "Unit",
 		},
 		{
+			"fieldname": "grade",
+			"label": __("Golongan"),
+			"fieldtype": "Link",
+			"options": "Employee Grade",
+		},
+		{
+			"fieldname": "employment_type",
+			"label": __("Tipe Karyawan"),
+			"fieldtype": "Link",
+			"options": "Employment Type",
+		},
+		{
 			"fieldname": "designation",
 			"label": __("Jabatan"),
 			"fieldtype": "Link",

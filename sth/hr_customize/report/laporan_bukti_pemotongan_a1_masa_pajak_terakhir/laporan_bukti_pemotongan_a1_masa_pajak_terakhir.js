@@ -16,6 +16,18 @@ frappe.query_reports["Laporan Bukti Pemotongan A1 Masa Pajak Terakhir"] = {
 			"options": "Unit",
 		},
 		{
+			"fieldname": "grade",
+			"label": __("Golongan"),
+			"fieldtype": "Link",
+			"options": "Employee Grade",
+		},
+		{
+			"fieldname": "employment_type",
+			"label": __("Tipe Karyawan"),
+			"fieldtype": "Link",
+			"options": "Employment Type",
+		},
+		{
 			"fieldname": "tahun",
 			"label": __("Tahun"),
 			"fieldtype": "Link",

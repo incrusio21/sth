@@ -111,6 +111,12 @@ def get_condition(filters):
 	if filters.get("unit"):
 		conditions += " AND ss.unit = %(unit)s"
 
+	if filters.get("grade"):
+		conditions += " AND e.grade = %(grade)s"
+
+	if filters.get("employment_type"):
+		conditions += " AND e.employment_type = %(employment_type)s"
+
 	if filters.get("tahun"):
 		conditions += " AND YEAR(ss.posting_date) = %(tahun)s"
 
