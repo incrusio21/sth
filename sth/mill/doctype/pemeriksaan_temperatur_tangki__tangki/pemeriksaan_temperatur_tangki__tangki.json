@@ -18,20 +18,30 @@
   "crude_oil_tank__cot__section",
   "temperatur_cot",
   "foto_hasil_temperatur_cot",
+  "column_break_eiwl",
+  "temperatur_cot_info",
   "sand_trap_tank_section",
   "temperatur_stt",
   "foto_hasil_temperatur_stt",
+  "column_break_rngk",
+  "temperatur_stt_info",
   "pure_oil_tank__pot__section",
   "temperatur_pot",
   "foto_hasil_temperatur",
+  "column_break_eeen",
+  "temperatur_pot_info",
   "sludge_tank_section",
   "temperatur_st",
   "foto_hasil_temperatur_st",
+  "column_break_yywx",
+  "temperatur_st_info",
   "continuous_settling_tank__cst__section",
   "temperatur_cst",
   "ketebalan_minyak",
   "foto_hasil_temperatur_cst",
-  "amended_from"
+  "amended_from",
+  "column_break_swab",
+  "temperatur_cst_info"
  ],
  "fields": [
   {
@@ -191,16 +201,62 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_eiwl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperatur_cot_info",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rngk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperatur_stt_info",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eeen",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperatur_pot_info",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yywx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperatur_st_info",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_swab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperatur_cst_info",
+   "fieldtype": "Data",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 11:59:54.162491",
+ "modified": "2026-03-12 11:20:57.827904",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Temperatur Tangki- Tangki",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

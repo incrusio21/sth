@@ -3,23 +3,23 @@
 
 
 function set_series(frm) {
-    if (frm.doc.transaction_type == "Receive") {
-        frm.set_value("naming_series", "REC-.DD.MM.YY.-.###");
-    }
+	if (frm.doc.transaction_type == "Receive") {
+		frm.set_value("naming_series", "REC-.DD.MM.YY.-.###");
+	}
 
-    if (frm.doc.transaction_type == "Dispatch") {
-        frm.set_value("naming_series", "DIS-.DD.MM.YY.-.###");
-    }
+	if (frm.doc.transaction_type == "Dispatch") {
+		frm.set_value("naming_series", "DIS-.DD.MM.YY.-.###");
+	}
 
-    if (frm.doc.transaction_type == "Return") {
-        frm.set_value("naming_series", "RET-.DD.MM.YY.-.###");
-    }
+	if (frm.doc.transaction_type == "Return") {
+		frm.set_value("naming_series", "RET-.DD.MM.YY.-.###");
+	}
 }
 
 frappe.ui.form.on("Security Check Point", {
 	refresh(frm) {
-        set_series(frm);
-    },
+		set_series(frm);
+	},
 	setup(frm) {
 		frm.set_query("divisi", sth.queries.divisi)
 		frm.set_query("unit", (doc) => {
@@ -46,8 +46,8 @@ frappe.ui.form.on("Security Check Point", {
 
 	transaction_type(frm) {
 		frm.events.clear_fields(frm, "transaction")
-        set_series(frm);
-    
+		set_series(frm);
+
 	},
 
 	receive_type(frm) {
@@ -87,7 +87,7 @@ frappe.ui.form.on("Security Check Point", {
 					fields: ['name', 'weight_out_time']
 				},
 				async: false,
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message && r.message.length > 0) {
 						if (r.message[0].weight_out_time === '00:00:00') {
 
@@ -95,13 +95,13 @@ frappe.ui.form.on("Security Check Point", {
 							frappe.throw('Timbangan Belum Selesai');
 							return
 						}
-						else{
+						else {
 							const time = frm.doc.exit ? moment().format("HH:mm:ss") : "00:00:00"
 							frm.set_value("vehicle_exit_time", time)
 						}
 					} else {
 						// No Timbangan found
-						
+
 						frm.set_value("exit", 0)
 						frappe.throw('Timbangan Belum Dibuat');
 						return
@@ -109,10 +109,10 @@ frappe.ui.form.on("Security Check Point", {
 				}
 			});
 		}
-		
-		
+
+
 	},
-	do_no: function(frm) {
+	do_no: function (frm) {
 		if (frm.doc.do_no) {
 			frappe.call({
 				method: 'frappe.client.get',
@@ -120,10 +120,10 @@ frappe.ui.form.on("Security Check Point", {
 					doctype: 'Delivery Order',
 					name: frm.doc.do_no
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message && r.message.items) {
-						let item_codes = r.message.items.map(item => item.item_name);
-						frm.set_value('items_do', item_codes.join(', '));
+						let item_code = r.message.items[0].item_code;
+						frm.set_value('items_do', item_code);
 					}
 				}
 			});
