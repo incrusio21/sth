@@ -5,9 +5,11 @@ frappe.provide("sth.utils")
 frappe.ui.form.on("Timbangan", {
 	refresh(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["TBS Ledger Entry"]
-		// frm.add_custom_button(__("Connect"), function () {
-		// 	frm.trigger('readWeight')
-		// })
+
+		// buat tombol untuk create transaksi
+		make_transaction_button(frm)
+
+		if (frm.doc.docstatus == 1) return
 
 		navigator.serial.getPorts().then((port) => {
 			if (!port.length || !localStorage.getItem('location')) {
@@ -18,8 +20,6 @@ frappe.ui.form.on("Timbangan", {
 
 		});
 
-		// buat tombol untuk create transaksi
-		make_transaction_button(frm)
 		set_field_visibility(frm)
 	},
 

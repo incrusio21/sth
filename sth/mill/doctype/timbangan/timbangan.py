@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import add_days
 from frappe.model.document import Document
 from frappe.utils import get_datetime
-from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger
+from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
@@ -22,7 +23,7 @@ class Timbangan(Document):
 
 
 	def on_submit(self):
-		if self.type == "Receive":
+		if self.type == "Receive" and self.receive_type != "Lain - Lain":
 			create_tbs_ledger(frappe._dict({
 				"item_code": self.kode_barang,
 				"posting_date": self.posting_date,
@@ -68,6 +69,7 @@ class Timbangan(Document):
 		
 		if self.type == "Receive":
 			reverse_tbs_ledger(self.name)
+			repost_qty_tbs(self.kode_barang,add_days(self.posting_date,-7))
 
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):

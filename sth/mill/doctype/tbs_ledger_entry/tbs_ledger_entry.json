@@ -44,12 +44,6 @@
    "options": "\nTBS Internal\nTBS Eksternal"
   },
   {
-   "fieldname": "actual_qty",
-   "fieldtype": "Float",
-   "label": "Actual Qty",
-   "precision": "5"
-  },
-  {
    "fieldname": "balance_qty",
    "fieldtype": "Float",
    "label": "Balance Qty",
@@ -106,6 +100,12 @@
    "fieldtype": "Link",
    "label": "Item Code",
    "options": "Item"
+  },
+  {
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Actual Qty",
+   "precision": "5"
   }
  ],
  "grid_page_length": 50,
@@ -113,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-12 16:29:05.255210",
+ "modified": "2026-03-11 16:23:57.072917",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "TBS Ledger Entry",
