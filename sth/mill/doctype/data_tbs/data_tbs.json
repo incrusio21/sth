@@ -16,12 +16,14 @@
   "company",
   "unit",
   "section_break_xief",
+  "column_break_lfzm",
+  "get_data",
   "jumlah_tbs_restan",
   "jumlah_tbs_diterima",
   "grand_total_tbs",
   "column_break_rjip",
-  "jumlah_lori",
-  "jumlah_lori_restan",
+  "jumlah_lori_olah",
+  "jumlah_lori_masak",
   "jumlah_lori_mentah",
   "lori_estimasi_loading_ramp",
   "grand_total_lori",
@@ -35,6 +37,7 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Unit",
    "options": "Unit"
   },
@@ -44,49 +47,48 @@
    "label": "Detail"
   },
   {
+   "default": "0",
    "fieldname": "jumlah_tbs_restan",
    "fieldtype": "Int",
    "label": "Jumlah TBS Restan"
   },
   {
+   "default": "0",
    "fieldname": "jumlah_tbs_diterima",
    "fieldtype": "Int",
    "label": "Jumlah TBS Diterima"
   },
   {
+   "default": "0",
    "fieldname": "grand_total_tbs",
    "fieldtype": "Int",
    "label": "Grand Total TBS"
-  },
-  {
-   "fieldname": "jumlah_lori",
-   "fieldtype": "Int",
-   "label": "Jumlah Lori Olah"
-  },
-  {
-   "fieldname": "jumlah_lori_restan",
-   "fieldtype": "Int",
-   "label": "Jumlah Lori Masak"
   },
   {
    "fieldname": "column_break_rdlu",
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "description": "Dalam Kg",
    "fieldname": "berat_rata_rata_tbs",
-   "fieldtype": "Int",
-   "label": "Berat Rata-rata Lori"
+   "fieldtype": "Float",
+   "label": "Berat Rata-rata Lori",
+   "precision": "5"
   },
   {
+   "default": "0",
    "fieldname": "tbs_olah",
-   "fieldtype": "Data",
-   "label": "TBS Olah"
+   "fieldtype": "Float",
+   "label": "TBS Olah",
+   "precision": "2"
   },
   {
+   "default": "0",
    "fieldname": "tbs_restan",
-   "fieldtype": "Data",
-   "label": "TBS Restan"
+   "fieldtype": "Float",
+   "label": "TBS Restan",
+   "precision": "2"
   },
   {
    "fieldname": "naming_series",
@@ -146,30 +148,57 @@
    "label": "Header"
   },
   {
+   "default": "0",
    "fieldname": "jumlah_lori_mentah",
    "fieldtype": "Int",
    "label": "Jumlah Lori Mentah"
   },
   {
+   "default": "0",
    "fieldname": "lori_estimasi_loading_ramp",
    "fieldtype": "Int",
    "label": "Lori Estimasi Loading Ramp"
   },
   {
+   "default": "0",
    "fieldname": "tbs_loading_ramp",
-   "fieldtype": "Data",
-   "label": "TBS Loading Ramp"
+   "fieldtype": "Float",
+   "label": "TBS Loading Ramp",
+   "precision": "2"
   },
   {
+   "default": "0",
    "fieldname": "grand_total_lori",
    "fieldtype": "Int",
    "label": "Grand Total Lori"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_lori_olah",
+   "fieldtype": "Int",
+   "label": "Jumlah Lori Olah"
+  },
+  {
+   "default": "0",
+   "fieldname": "jumlah_lori_masak",
+   "fieldtype": "Int",
+   "label": "Jumlah Lori Masak"
+  },
+  {
+   "fieldname": "column_break_lfzm",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-11 08:32:13.425664",
+ "modified": "2026-03-13 13:52:19.617739",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

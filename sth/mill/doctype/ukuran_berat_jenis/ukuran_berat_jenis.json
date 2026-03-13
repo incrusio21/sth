@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-11 11:38:44.478587",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "suhu",
+  "column_break_pldy",
+  "berat_jenis"
+ ],
+ "fields": [
+  {
+   "fieldname": "suhu",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Suhu",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pldy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "berat_jenis",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Berat Jenis",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-11 11:41:28.608140",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Ukuran Berat Jenis",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

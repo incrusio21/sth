@@ -232,7 +232,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "EFB SUPER BUNCH PRESS NO.2",
    "fieldname": "mesin_2",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -256,7 +255,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "EFB SUPER BUNCH PRESS NO.3",
    "fieldname": "mesin_3",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -294,7 +292,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-11 08:36:40.751881",
+ "modified": "2026-03-13 10:49:29.365967",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring TBS Olah",
