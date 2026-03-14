@@ -10,11 +10,15 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_pykt",
   "status",
   "company",
   "unit",
+  "column_break_mhpi",
+  "pabrik",
+  "tanggal_produksi",
+  "total_jam_olah",
+  "kapasitas_pabrik",
   "section_break_xief",
   "column_break_lfzm",
   "get_data",
@@ -130,15 +134,6 @@
    "label": "Status"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_rjip",
    "fieldtype": "Column Break"
   },
@@ -193,12 +188,42 @@
    "fieldname": "get_data",
    "fieldtype": "Button",
    "label": "Get Data"
+  },
+  {
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Pabrik",
+   "options": "Mill Master"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_produksi",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Produksi"
+  },
+  {
+   "fieldname": "total_jam_olah",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Jam Olah"
+  },
+  {
+   "description": "Ton/Jam",
+   "fieldname": "kapasitas_pabrik",
+   "fieldtype": "Float",
+   "label": "Kapasitas Pabrik"
+  },
+  {
+   "fieldname": "column_break_mhpi",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-13 13:52:19.617739",
+ "modified": "2026-03-14 10:45:24.490309",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

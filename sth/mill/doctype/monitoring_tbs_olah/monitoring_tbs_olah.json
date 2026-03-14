@@ -10,6 +10,7 @@
   "naming_series",
   "tgl",
   "posting_time",
+  "pabrik",
   "company",
   "unit",
   "column_break_awov",
@@ -74,7 +75,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "shift_proses.company",
+   "fetch_from": "pabrik.company",
    "fieldname": "company",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -82,7 +83,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "shift_proses.unit",
+   "fetch_from": "pabrik.unit",
    "fieldname": "unit",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -133,11 +134,13 @@
    "label": "Transaksi Input LHP"
   },
   {
-   "fetch_from": "sterilizer_reference.unit_type",
+   "fetch_from": "pabrik.loricycle",
    "fieldname": "unit_type",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Unit Type",
-   "options": "Lorry\nCycle"
+   "options": "Lorry\nCycle",
+   "read_only": 1
   },
   {
    "fieldname": "total_jam",
@@ -286,13 +289,21 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah Restan TBS Masak"
+  },
+  {
+   "fetch_from": "shift_proses.company",
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Pabrik",
+   "options": "Mill Master"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-13 10:49:29.365967",
+ "modified": "2026-03-14 09:37:17.329988",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring TBS Olah",
