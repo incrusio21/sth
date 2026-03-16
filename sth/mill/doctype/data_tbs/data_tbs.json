@@ -11,7 +11,6 @@
   "tanggal",
   "jam",
   "column_break_pykt",
-  "status",
   "company",
   "unit",
   "column_break_mhpi",
@@ -128,10 +127,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
-   "label": "Status"
+   "label": "Shift",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_rjip",
@@ -223,7 +225,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-14 10:45:24.490309",
+ "modified": "2026-03-16 09:22:44.778815",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
