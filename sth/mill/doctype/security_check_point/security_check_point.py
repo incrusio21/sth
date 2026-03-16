@@ -1,7 +1,6 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
-from doctest import debug
 
 import frappe
 from frappe.model.document import Document

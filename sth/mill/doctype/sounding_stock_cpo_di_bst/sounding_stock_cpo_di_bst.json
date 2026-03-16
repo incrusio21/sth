@@ -9,9 +9,7 @@
   "header_section",
   "naming_series",
   "tanggal",
-  "tanggal_sounding",
   "jam",
-  "shift",
   "column_break_eokt",
   "status",
   "company",
@@ -102,14 +100,6 @@
    "options": "SSCPODB-.####"
   },
   {
-   "default": "Today",
-   "fieldname": "tanggal",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
-  },
-  {
    "default": "Now",
    "fieldname": "jam",
    "fieldtype": "Time",
@@ -133,15 +123,6 @@
    "in_preview": 1,
    "label": "Status",
    "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "depends_on": "eval:doc.gudang",
@@ -286,17 +267,18 @@
   },
   {
    "fieldname": "oer_netto_1",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "OER Netto 1"
   },
   {
    "fieldname": "oer_netto_2",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "OER Netto 2"
   },
   {
    "fieldname": "gudang",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Gudang",
    "options": "Warehouse",
    "reqd": 1
@@ -304,6 +286,7 @@
   {
    "fieldname": "gudang_2",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Gudang",
    "options": "Warehouse",
    "reqd": 1
@@ -317,12 +300,19 @@
    "fieldname": "get_stock",
    "fieldtype": "Button",
    "label": "Get Stock"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-14 10:13:23.395846",
+ "modified": "2026-03-16 10:26:46.571930",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

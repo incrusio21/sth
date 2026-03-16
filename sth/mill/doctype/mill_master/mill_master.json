@@ -9,6 +9,7 @@
  "field_order": [
   "type",
   "disabled",
+  "loricycle",
   "column_break_sdzx",
   "unit",
   "company"
@@ -49,12 +50,18 @@
    "in_preview": 1,
    "label": "Unit",
    "options": "Unit"
+  },
+  {
+   "fieldname": "loricycle",
+   "fieldtype": "Select",
+   "label": "Lori/Cycle",
+   "options": "Lori\nCycle"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-13 16:32:19.960274",
+ "modified": "2026-03-14 09:35:22.190624",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Master",

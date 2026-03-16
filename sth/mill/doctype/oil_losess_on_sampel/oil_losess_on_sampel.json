@@ -24,10 +24,13 @@
   "solid_decanter_",
   "column_break_eqhe",
   "air_rebusan_",
+  "finall_effluent_",
   "heavy_phase_decanter_",
   "heavy_phase_separator_",
   "heavy_phase_sludge_centrifuge_",
-  "amended_from"
+  "amended_from",
+  "oil_losess_tab",
+  "kernel_losess_tab"
  ],
  "fields": [
   {
@@ -160,13 +163,29 @@
    "fieldtype": "Percent",
    "in_preview": 1,
    "label": "Air Rebusan (%)"
+  },
+  {
+   "fieldname": "oil_losess_tab",
+   "fieldtype": "Tab Break",
+   "label": "Oil Losess"
+  },
+  {
+   "fieldname": "kernel_losess_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kernel Losess"
+  },
+  {
+   "fieldname": "finall_effluent_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Finall Effluent (%)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-11 22:31:22.969856",
+ "modified": "2026-03-16 11:37:31.165005",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Oil Losess On Sampel",

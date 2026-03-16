@@ -1,14 +1,25 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-03-11 22:33:13.890126",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "column_break_zryj",
+  "status",
+  "company",
+  "unit",
+  "detail_section",
   "final_effluent_moist_",
+  "column_break_pxhh",
   "final_effluent_nos_",
-  "final_effluent_oil_on_nos_",
-  "oil_losess_on_sampel"
+  "column_break_btrh",
+  "final_effluent_oil_on_nos_"
  ],
  "fields": [
   {
@@ -27,19 +38,81 @@
    "label": "Final Effluent Oil on NOS (%)"
   },
   {
-   "fieldname": "oil_losess_on_sampel",
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "AOL-"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "in_preview": 1,
+   "label": "Jam"
+  },
+  {
+   "fieldname": "column_break_zryj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses\nSelesai"
+  },
+  {
+   "fieldname": "company",
    "fieldtype": "Link",
-   "label": "Oil Losess On Sampel",
-   "options": "Oil Losess On Sampel"
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "column_break_pxhh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_btrh",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-11 22:33:13.890126",
+ "modified": "2026-03-13 09:01:04.360120",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Oil Losess",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

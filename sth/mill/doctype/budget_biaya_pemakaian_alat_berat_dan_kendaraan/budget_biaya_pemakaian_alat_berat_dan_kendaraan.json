@@ -1,22 +1,32 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-01-17 11:42:27.532183",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "pengisian_budget_biaya_bbm_dan_pelumas_section",
+  "detail_tab",
+  "header_section",
+  "naming_series",
+  "tahun_budget",
+  "column_break_avnc",
   "company",
   "unit",
-  "tahun_budget",
-  "estimasi_kenaikan_harga_barang_",
-  "column_break_adds",
-  "kode_barang",
-  "nama_barang",
-  "satuan_barang",
-  "qty_barang",
-  "harga_satuan",
-  "total_harga_barang"
+  "budget_operator_tab",
+  "operator",
+  "bahan_dan_suku_cadang_tab",
+  "bahan_dan_suku_cadang_section",
+  "material",
+  "budget_pemakaian_bbm_dan_pelumas_tab",
+  "pengisian_budget_biaya_bbm_dan_pelumas_section",
+  "table_qcaz",
+  "biaya_servis_tab",
+  "biaya_servis",
+  "vra",
+  "jumlah_km_hm",
+  "rp_per_km__hm",
+  "kegiatan"
  ],
  "fields": [
   {
@@ -43,56 +53,107 @@
    "options": "Fiscal Year"
   },
   {
-   "fieldname": "estimasi_kenaikan_harga_barang_",
-   "fieldtype": "Float",
-   "label": "Estimasi Kenaikan Harga Barang %"
+   "fieldname": "bahan_dan_suku_cadang_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bahan dan Suku Cadang"
   },
   {
-   "fieldname": "kode_barang",
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Bahan dan Suku Cadang",
+   "options": "Detail Item Budget Mill"
+  },
+  {
+   "fieldname": "budget_operator_tab",
+   "fieldtype": "Tab Break",
+   "label": "Budget Operator"
+  },
+  {
+   "fieldname": "operator",
    "fieldtype": "Link",
-   "label": "Kode Barang",
-   "options": "Item"
+   "label": "Operator",
+   "options": "Employee"
   },
   {
-   "fetch_from": "kode_barang.item_name",
-   "fieldname": "nama_barang",
-   "fieldtype": "Data",
-   "label": "Nama Barang"
+   "fieldname": "budget_pemakaian_bbm_dan_pelumas_tab",
+   "fieldtype": "Tab Break",
+   "label": "Budget Pemakaian BBM dan Pelumas"
   },
   {
-   "fieldname": "column_break_adds",
+   "fieldname": "biaya_servis_tab",
+   "fieldtype": "Tab Break",
+   "label": "Biaya Servis"
+  },
+  {
+   "default": "Internal",
+   "fieldname": "biaya_servis",
+   "fieldtype": "Select",
+   "label": "Biaya Servis",
+   "options": "Internal\nExternal"
+  },
+  {
+   "fieldname": "vra",
+   "fieldtype": "Link",
+   "label": "VRA",
+   "options": "Alat Berat Dan Kendaraan"
+  },
+  {
+   "fetch_from": "vra.kmhm_akhir",
+   "fieldname": "jumlah_km_hm",
+   "fieldtype": "Float",
+   "label": "Jumlah KM HM"
+  },
+  {
+   "fetch_from": "vra.basis_rpkg",
+   "fieldname": "rp_per_km__hm",
+   "fieldtype": "Float",
+   "label": "RP Per KM / HM"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan"
+  },
+  {
+   "fieldname": "detail_tab",
+   "fieldtype": "Tab Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BGT-PABK-"
+  },
+  {
+   "fieldname": "column_break_avnc",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "kode_barang.stock_uom",
-   "fieldname": "satuan_barang",
-   "fieldtype": "Link",
-   "label": "Satuan Barang",
-   "options": "UOM"
+   "fieldname": "bahan_dan_suku_cadang_section",
+   "fieldtype": "Section Break",
+   "label": "Bahan dan Suku Cadang"
   },
   {
-   "fieldname": "qty_barang",
-   "fieldtype": "Float",
-   "label": "Qty Barang"
-  },
-  {
-   "fieldname": "harga_satuan",
-   "fieldtype": "Currency",
-   "label": "Harga Satuan"
-  },
-  {
-   "fieldname": "total_harga_barang",
-   "fieldtype": "Currency",
-   "label": "Total Harga Barang"
+   "fieldname": "table_qcaz",
+   "fieldtype": "Table",
+   "options": "Detail Item Budget Mill"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-17 11:47:52.543993",
+ "modified": "2026-03-13 09:11:33.447696",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -9,6 +9,7 @@
   "header_section",
   "naming_series",
   "tanggal",
+  "tanggal_produksi",
   "jam",
   "shift",
   "column_break_flyo",
@@ -123,12 +124,19 @@
   {
    "fieldname": "column_break_jjbi",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_produksi",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Produksi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:42:58.277889",
+ "modified": "2026-03-14 10:39:05.205239",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Stock By Product",

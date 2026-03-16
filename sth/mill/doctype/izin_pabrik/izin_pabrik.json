@@ -21,6 +21,7 @@
   "column_break_lazg",
   "nomor_izin",
   "tanggal_dikeluarkan",
+  "yang_mengeluarkan",
   "column_break_vekm",
   "tanggal_pemeriksaan",
   "tanggal_jt_pemeriksaan_ulang",
@@ -43,7 +44,7 @@
   {
    "fieldname": "nama_izin_dan_alat",
    "fieldtype": "Data",
-   "label": "Nama Izin dan Alat"
+   "label": "Nama Perijinan"
   },
   {
    "fieldname": "column_break_lazg",
@@ -52,7 +53,7 @@
   {
    "fieldname": "nomor_izin",
    "fieldtype": "Data",
-   "label": "Nomor Izin"
+   "label": "Nomor Perijinan"
   },
   {
    "fieldname": "tanggal_dikeluarkan",
@@ -137,12 +138,17 @@
    "fieldname": "nama_unitalat",
    "fieldtype": "Select",
    "label": "Nama Unit/Alat"
+  },
+  {
+   "fieldname": "yang_mengeluarkan",
+   "fieldtype": "Data",
+   "label": "Yang Mengeluarkan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 14:58:09.202422",
+ "modified": "2026-03-14 09:15:41.901177",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Izin Pabrik",

@@ -15,28 +15,29 @@
   "status",
   "company",
   "unit",
-  "section_break_qtus",
-  "fibertbs",
+  "amended_from",
+  "data_input_oil_losess_section",
+  "fibernut_",
   "nuttbs",
   "fiber_bunch_presstbs",
   "lumpur_separatortbs",
-  "sludge_centrifugetbs",
   "sludge_decantertbs",
   "solid_decantertbs",
+  "column_break_wisz",
   "air_rebusantbs",
-  "column_break_tkcn",
-  "brondolanusb",
+  "final_effluenttbs_",
   "minyakbrondolan",
+  "brondolanusb",
   "empty_bunchtbs",
+  "sludge_centrifugetbs",
+  "column_break_gkwp",
+  "fibertbs",
   "ltds_1nut",
   "ltds_2nut",
   "wet_shellnut",
   "kerneltbs",
   "dry_matter_fiberfiber_press_",
-  "kernelbrondolan_",
-  "fibernut_",
-  "final_effluenttbs_",
-  "amended_from"
+  "kernelbrondolan_"
  ],
  "fields": [
   {
@@ -101,11 +102,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_qtus",
-   "fieldtype": "Section Break",
-   "label": "Detail"
-  },
-  {
    "fieldname": "fibertbs",
    "fieldtype": "Percent",
    "label": "Fiber/TBS (%)"
@@ -144,10 +140,6 @@
    "fieldname": "air_rebusantbs",
    "fieldtype": "Percent",
    "label": "Air Rebusan/TBS (%)"
-  },
-  {
-   "fieldname": "column_break_tkcn",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "brondolanusb",
@@ -197,29 +189,42 @@
   {
    "fieldname": "dry_matter_fiberfiber_press_",
    "fieldtype": "Percent",
-   "label": "DRY MATTER FIBER/FIBER PRESS (%)"
+   "label": "Dry Matter Fiber / Fiber Press (%)"
   },
   {
    "fieldname": "kernelbrondolan_",
    "fieldtype": "Percent",
-   "label": "KERNEL/BRONDOLAN (%)"
+   "label": "Kernel / Brondolan (%)"
   },
   {
    "fieldname": "fibernut_",
    "fieldtype": "Percent",
-   "label": "FIBER/NUT (%)"
+   "label": "Fiber/Nut (%)"
   },
   {
    "fieldname": "final_effluenttbs_",
    "fieldtype": "Percent",
-   "label": "FINAL EFFLUENT/TBS (%)"
+   "label": "Final Effluent/TBS (%)"
+  },
+  {
+   "fieldname": "column_break_wisz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "data_input_oil_losess_section",
+   "fieldtype": "Section Break",
+   "label": "Data Input"
+  },
+  {
+   "fieldname": "column_break_gkwp",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 13:37:27.507849",
+ "modified": "2026-03-13 13:19:26.195690",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mass Balance",

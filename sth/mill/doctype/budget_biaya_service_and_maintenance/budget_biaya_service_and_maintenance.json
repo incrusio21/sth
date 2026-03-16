@@ -10,15 +10,14 @@
   "series",
   "tanggal",
   "jam",
-  "unit",
+  "tahun_budget",
   "column_break_fwob",
   "status",
-  "shift",
-  "section_break_ryxt",
   "company",
-  "unit_pabrik",
+  "unit",
+  "section_break_ryxt",
+  "column_break_tkkh",
   "column_break_vtxm",
-  "tahun_budget",
   "estimasi_kenaikan_upah_",
   "dalam_setahun_section",
   "jumlah_hari_kerja_efektif",
@@ -92,15 +91,6 @@
    "options": "Proses\nSelesai"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_ryxt",
    "fieldtype": "Section Break"
   },
@@ -109,12 +99,6 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
-  },
-  {
-   "fieldname": "unit_pabrik",
-   "fieldtype": "Link",
-   "label": "Unit Pabrik",
-   "options": "Unit"
   },
   {
    "fieldname": "column_break_vtxm",
@@ -261,12 +245,16 @@
    "fieldtype": "Table",
    "label": "Material",
    "options": "Detail Item Budget Mill"
+  },
+  {
+   "fieldname": "column_break_tkkh",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-12 10:38:28.696171",
+ "modified": "2026-03-14 08:36:29.533140",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Biaya Service and Maintenance",

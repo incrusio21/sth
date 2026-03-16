@@ -128,6 +128,7 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Unit",
    "options": "Unit"
   },
@@ -180,7 +181,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 13:07:29.510618",
+ "modified": "2026-03-13 15:21:03.113157",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO  Pengiriman",

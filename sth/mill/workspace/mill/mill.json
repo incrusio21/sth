@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Pos Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"C7DZFVhHaD\",\"type\":\"card\",\"data\":{\"card_name\":\"Traksi\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}}]",
+ "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Pos Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"C7DZFVhHaD\",\"type\":\"card\",\"data\":{\"card_name\":\"Traksi\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}},{\"id\":\"-7jPYG1E_2\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2025-11-20 15:54:30.037918",
  "custom_blocks": [],
  "docstatus": 0,
@@ -577,85 +577,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Laporan Harian Produksi (LHP)",
-   "link_count": 7,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Data TBS",
-   "link_count": 0,
-   "link_to": "Data TBS",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sounding Stock CPO di BST",
-   "link_count": 0,
-   "link_to": "Sounding Stock CPO di BST",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
-   "link_count": 0,
-   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Penginputan Stock By Product",
-   "link_count": 0,
-   "link_to": "Penginputan Stock By Product",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jam Olah Pabrik",
-   "link_count": 0,
-   "link_to": "Jam Olah Pabrik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Penginputan Data Level Air Waduk",
-   "link_count": 0,
-   "link_to": "Penginputan Data Level Air Waduk",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Curah Hujan",
-   "link_count": 0,
-   "link_to": "Curah Hujan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Bengkel",
    "link_count": 7,
    "link_type": "DocType",
@@ -735,8 +656,175 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Budget",
+   "link_count": 8,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Produksi dan Tenaga Kerja",
+   "link_count": 0,
+   "link_to": "Budget Produksi dan Tenaga Kerja",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Pemakaian Bahan Penolong",
+   "link_count": 0,
+   "link_to": "Budget Pemakaian Bahan Penolong",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Pemakaian Sparepart ",
+   "link_count": 0,
+   "link_to": "Budget Pemakaian Sparepart",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Biaya Service and Maintenance",
+   "link_count": 0,
+   "link_to": "Budget Biaya Service and Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+   "link_count": 0,
+   "link_to": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Kapital Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Kapital Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mayor Maintenance ",
+   "link_count": 0,
+   "link_to": "Mayor Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Izin Pabrik",
+   "link_count": 0,
+   "link_to": "Izin Pabrik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Losess Kernel",
+   "link_count": 0,
+   "link_to": "Laporan Losess Kernel",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Oil Losess",
+   "link_count": 0,
+   "link_to": "Laporan Oil Losess",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Laporan Harian Produksi (LHP)",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data TBS",
+   "link_count": 0,
+   "link_to": "Data TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock CPO di BST",
+   "link_count": 0,
+   "link_to": "Sounding Stock CPO di BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_count": 0,
+   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Penginputan Stock By Product",
+   "link_count": 0,
+   "link_to": "Penginputan Stock By Product",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Laboratorium",
-   "link_count": 20,
+   "link_count": 23,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -884,6 +972,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Analisa Oil Losess",
+   "link_count": 0,
+   "link_to": "Analisa Oil Losess",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Bunch Analisis TBS",
    "link_count": 0,
    "link_to": "Bunch Analisis TBS",
@@ -944,18 +1042,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Budget",
-   "link_count": 8,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Produksi dan Tenaga Kerja",
+   "label": "Penginputan Data Level Air Waduk",
    "link_count": 0,
-   "link_to": "Budget Produksi dan Tenaga Kerja",
+   "link_to": "Penginputan Data Level Air Waduk",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -963,75 +1052,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Budget Pemakaian Bahan Penolong",
+   "label": "Curah Hujan",
    "link_count": 0,
-   "link_to": "Budget Pemakaian Bahan Penolong",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Pemakaian Sparepart ",
-   "link_count": 0,
-   "link_to": "Budget Pemakaian Sparepart",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Biaya Service and Maintenance",
-   "link_count": 0,
-   "link_to": "Budget Biaya Service and Maintenance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
-   "link_count": 0,
-   "link_to": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Kapital Tahunan",
-   "link_count": 0,
-   "link_to": "Budget Kapital Tahunan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mayor Maintenance ",
-   "link_count": 0,
-   "link_to": "Mayor Maintenance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Izin Pabrik",
-   "link_count": 0,
-   "link_to": "Izin Pabrik",
+   "link_to": "Curah Hujan",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-03-09 14:10:23.696068",
+ "modified": "2026-03-14 10:53:52.814770",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",
