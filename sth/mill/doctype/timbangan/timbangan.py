@@ -32,7 +32,7 @@ class Timbangan(Document):
 				"type": self.receive_type,
 				"voucher_type": self.doctype,
 				"voucher_no": self.name,
-				"balance_qty": self.netto - (self.potongan_sortasi/100),
+				"balance_qty": self.netto_2,
 			}))
 
 		elif self.type == "Dispatch":
@@ -151,7 +151,7 @@ def make_delivery_note(source_name, target_doc=None):
 	if source_doc.kode_barang and source_doc.netto:
 		doclist.append('items', {
 			'item_code': source_doc.kode_barang,
-			'qty': source_doc.netto - (source_doc.potongan_sortasi / 100),
+			'qty': source_doc.netto_2,
 			'timbangan': source_doc.name
 		})
 	
@@ -186,7 +186,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 	if source_doc.kode_barang and source_doc.netto:
 		doclist.append('items', {
 			'item_code': source_doc.kode_barang,
-			'qty': source_doc.netto - (source_doc.potongan_sortasi / 100),
+			'qty': source_doc.netto_2,
 			'timbangan': source_doc.name
 		})
 	
