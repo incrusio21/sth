@@ -28,7 +28,7 @@ def execute(filters=None):
 				'N/A' AS sertifikasi_fasilitas,
 				'21-100-01' AS kode_objek_pajak,
 
-				SUM(sd.amount) AS penghasilan_kotor,
+				sd_total.penghasilan_kotor AS penghasilan_kotor,
 
 				dt.tarif_pajak AS tarif,
 				cnd.nitku AS id_tku,
@@ -43,20 +43,12 @@ def execute(filters=None):
 		JOIN `tabDesignation` d 
 				ON d.name = e.designation
 
-		JOIN `tabDetail Golongan TER` dgt 
-				ON dgt.status_golongan = e.pkp_status
-
-		LEFT JOIN `tabDetail TER` dt
-				ON dt.parent = dgt.parent
-				AND ss.rounded_total BETWEEN dt.batas_bawah AND dt.batas_atas
-
-		LEFT JOIN `tabCompany NITKU Detail` cnd
-				ON cnd.parent = ss.company
-				AND cnd.golongan = e.grade
-
-		LEFT JOIN `tabSalary Detail` sd
-				ON sd.parent = ss.name
-				AND sd.salary_component IN (
+		LEFT JOIN (
+				SELECT 
+						parent,
+						SUM(amount) AS penghasilan_kotor
+				FROM `tabSalary Detail`
+				WHERE salary_component IN (
 						'Gaji Pokok',
 						'Upah Panen',
 						'Upah Perawatan',
@@ -84,6 +76,20 @@ def execute(filters=None):
 						'BPJS TK - JKK-RS',
 						'PPH21 TER Gross Up'
 				)
+				GROUP BY parent
+		) sd_total
+				ON sd_total.parent = ss.name
+
+		JOIN `tabDetail Golongan TER` dgt 
+				ON dgt.status_golongan = e.pkp_status
+
+		LEFT JOIN `tabDetail TER` dt
+				ON dt.parent = dgt.parent
+				AND sd_total.penghasilan_kotor BETWEEN dt.batas_bawah AND dt.batas_atas
+
+		LEFT JOIN `tabCompany NITKU Detail` cnd
+				ON cnd.parent = ss.company
+				AND cnd.golongan = e.grade
 
 		WHERE 
 				e.employment_type = 'KARYAWAN TETAP'

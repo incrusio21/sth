@@ -39,7 +39,7 @@ def execute(filters=None):
 
 				SUM(
 						CASE 
-								WHEN sd.salary_component = 'Gaji Pokok'
+								WHEN sd.salary_component IN ('Gaji Pokok','HKnE')
 								AND sc.type = 'Earning'
 								THEN sd.amount ELSE 0
 						END
@@ -80,8 +80,7 @@ def execute(filters=None):
 										'BPJS TK - JKK-RSR',
 										'BPJS TK - JKK-RT',
 										'BPJS TK - JKK-RSD',
-										'BPJS TK - JKK-RS',
-										'PPH21 TER Gross Up'
+										'BPJS TK - JKK-RS'
 								)
 								AND sc.type = 'Earning'
 								THEN sd.amount ELSE 0
