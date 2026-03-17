@@ -32,13 +32,20 @@ def execute(filters=None):
 
 	for leave in query_l_daftar_izin_cuti:
 
-		# leave_details = get_leave_details_unrestricted(employee=leave.employee,date=frappe.utils.today())
-		leave_details = get_leave_details_unrestricted(employee=leave.employee,date=leave.tgl_berakhir_cuti)
+		leave_details = get_leave_details_unrestricted(employee=leave.employee, date=leave.tgl_berakhir_cuti)
 
 		sisa = 0
 		if leave.jenis_izin_cuti in leave_details["leave_allocation"]:
 			sisa = leave_details["leave_allocation"][leave.jenis_izin_cuti]["remaining_leaves"]
 
+		# Subtract cuti bersama within the allocation period
+		if leave.jenis_izin_cuti == "Cuti":
+			cuti_bersama_used = get_cuti_bersama_in_period(
+				employee=leave.employee,
+				from_date=leave.tgl_awal,
+				to_date=leave.tgl_berakhir_cuti
+			)
+			sisa = sisa - cuti_bersama_used
 
 		data.append({
 			"pt": leave.pt,
@@ -195,19 +202,31 @@ def get_leave_details_unrestricted(employee, date, for_salary_slip=False):
 	}
 
 def get_effective_date(filters):
-    
-    today = getdate(nowdate())
-    
-    if filters.get("periode"):
-        fiscal_year = frappe.get_doc("Fiscal Year", filters.get("periode"))
-        fiscal_year_end = getdate(fiscal_year.year_end_date)
-        
-        # If today is greater than fiscal year end, use fiscal year end date
-        if today > fiscal_year_end:
-            return fiscal_year_end
-        else:
-            return today
+	
+	today = getdate(nowdate())
+	
+	if filters.get("periode"):
+		fiscal_year = frappe.get_doc("Fiscal Year", filters.get("periode"))
+		fiscal_year_end = getdate(fiscal_year.year_end_date)
+		
+		# If today is greater than fiscal year end, use fiscal year end date
+		if today > fiscal_year_end:
+			return fiscal_year_end
+		else:
+			return today
 
 @frappe.whitelist()
 def debug():
 	get_leave_details_unrestricted("HR-EMP-00701","2025-12-31")
+
+
+def get_cuti_bersama_in_period(employee, from_date, to_date):
+	holiday_list = frappe.db.get_value("Employee", employee, "holiday_list")
+	if not holiday_list:
+		return 0
+
+	return frappe.db.count("Holiday", filters={
+		"parent": holiday_list,
+		"cuti_bersama": 1,
+		"holiday_date": ["between", [from_date, to_date]]
+	})

@@ -11,57 +11,88 @@ def execute(filters=None):
  
 	query_data = frappe.db.sql("""
 		SELECT
-		ss.name,
-		MONTH(ss.posting_date) as masa_pajak,
-		YEAR(ss.posting_date) as tahun_pajak,
-		CASE 
-				WHEN e.custom_citizenship_status = "WNI" THEN "Resident"
-				ELSE "Foreign"
-		END as status_pegawai,
-		e.no_ktp as npwp_nik_tin,
-		e.passport_number as nomor_passport,
-		e.pkp_status as status,
-		d.designation_name as posisi,
-		'N/A' as sertifikasi_fasilitas,
-		'21-100-01' as kode_objek_pajak,
-		(
-		SELECT SUM(sd.amount) FROM `tabSalary Detail` as sd 
-		WHERE sd.parent = ss.name AND 
-		sd.salary_component IN (
-		'Gaji Pokok',
-		'Upah Panen',
-		'Upah Perawatan',
-		'Upah Traksi',
-		'HKnE',
-		'Lembur',
-		'Natura',
-		'Premi Brondolan',
-		'Premi Kehadiran',
-		'Premi Tutup Buku',
-		'Premi Angkut',
-		'Premi Supervisi',
-		'INCENTIF HKE PANEN',
-		'INCENTIF OUTPUT',
-		'Subsidi Tambahan',
-		'Rapel'
-		)
-		) as penghasilan_kotor,
-		dt.tarif_pajak as tarif,
-		cnd.nitku as id_tku,
-		DATE_FORMAT(LAST_DAY(ss.posting_date), '%%d/%%m/%%Y') as tanggal_pemotong
-		FROM `tabSalary Slip` as ss
-		JOIN `tabEmployee` as e ON e.name = ss.employee
-		JOIN `tabDesignation` as d ON d.name = e.designation
-		JOIN `tabDetail Golongan TER` as dgt ON dgt.status_golongan = e.pkp_status 
-		LEFT JOIN `tabDetail TER` as dt 
-			ON dt.parent = dgt.parent
-			AND ss.rounded_total >= dt.batas_bawah
-			AND ss.rounded_total <= dt.batas_atas
-		LEFT JOIN `tabCompany NITKU Detail` as cnd
-			ON cnd.parent = ss.company
-			AND cnd.golongan = e.grade
-		WHERE e.employment_type = 'KARYAWAN TETAP' AND ss.docstatus = 1 {}
-		ORDER BY MONTH(ss.posting_date);
+				ss.name,
+				MONTH(ss.posting_date) AS masa_pajak,
+				YEAR(ss.posting_date) AS tahun_pajak,
+
+				CASE 
+						WHEN e.custom_citizenship_status = 'WNI' THEN 'Resident'
+						ELSE 'Foreign'
+				END AS status_pegawai,
+
+				e.no_ktp AS npwp_nik_tin,
+				e.passport_number AS nomor_passport,
+				e.pkp_status AS status,
+				d.designation_name AS posisi,
+
+				'N/A' AS sertifikasi_fasilitas,
+				'21-100-01' AS kode_objek_pajak,
+
+				SUM(sd.amount) AS penghasilan_kotor,
+
+				dt.tarif_pajak AS tarif,
+				cnd.nitku AS id_tku,
+
+				DATE_FORMAT(LAST_DAY(ss.posting_date), '%%d/%%m/%%Y') AS tanggal_pemotong
+
+		FROM `tabSalary Slip` ss
+
+		JOIN `tabEmployee` e 
+				ON e.name = ss.employee
+
+		JOIN `tabDesignation` d 
+				ON d.name = e.designation
+
+		JOIN `tabDetail Golongan TER` dgt 
+				ON dgt.status_golongan = e.pkp_status
+
+		LEFT JOIN `tabDetail TER` dt
+				ON dt.parent = dgt.parent
+				AND ss.rounded_total BETWEEN dt.batas_bawah AND dt.batas_atas
+
+		LEFT JOIN `tabCompany NITKU Detail` cnd
+				ON cnd.parent = ss.company
+				AND cnd.golongan = e.grade
+
+		LEFT JOIN `tabSalary Detail` sd
+				ON sd.parent = ss.name
+				AND sd.salary_component IN (
+						'Gaji Pokok',
+						'Upah Panen',
+						'Upah Perawatan',
+						'Upah Traksi',
+						'HKnE',
+						'Lembur',
+						'Natura',
+						'Premi Brondolan',
+						'Premi Kehadiran',
+						'Premi Tutup Buku',
+						'Premi Angkut',
+						'Premi Supervisi',
+						'INCENTIF HKE PANEN',
+						'INCENTIF OUTPUT',
+						'Subsidi Tambahan',
+						'Rapel',
+						'THR Earning',
+						'Bonus Earning',
+						'BPJS Kesehatan (Perusahaan)',
+						'BPJS TK - JKM',
+						'BPJS TK - JKK-RST',
+						'BPJS TK - JKK-RSR',
+						'BPJS TK - JKK-RT',
+						'BPJS TK - JKK-RSD',
+						'BPJS TK - JKK-RS',
+						'PPH21 TER Gross Up'
+				)
+
+		WHERE 
+				e.employment_type = 'KARYAWAN TETAP'
+				AND ss.docstatus = 1
+				{}
+
+		GROUP BY ss.name
+
+		ORDER BY ss.posting_date;
   """.format(conditions), filters, as_dict=True)
 
 	for row in query_data:

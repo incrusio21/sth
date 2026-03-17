@@ -60,7 +60,8 @@ def get_columns(filters):
 	summary_cols = [
 		{"fieldname": "hke", "label": "HKE", "fieldtype": "Int", "width": 60, "align": "center"},
 		{"fieldname": "mg", "label": "MG", "fieldtype": "Int", "width": 60, "align": "center"},
-		{"fieldname": "ln", "label": "LN", "fieldtype": "Int", "width": 60, "align": "center"}
+		{"fieldname": "ln", "label": "LN", "fieldtype": "Int", "width": 60, "align": "center"},
+		{"fieldname": "cb", "label": "CB", "fieldtype": "Int", "width": 60, "align": "center"}
 	]
 	
 	for sc in status_codes:
@@ -93,17 +94,16 @@ def get_all_holidays(year, month_num, num_days):
 				f"{year}-{month_num:02d}-{num_days:02d}"
 			]]
 		},
-		fields=["parent", "holiday_date"]
+		fields=["parent", "holiday_date", "cuti_bersama"]  # ← added cuti_bersama
 	)
 	
 	# Group holidays by holiday_list (parent)
 	holiday_map = {}
 	for holiday in holidays:
-		# Exclude Sundays from national holidays
-		if holiday.holiday_date.weekday() != 6:
+		if holiday.holiday_date.weekday() != 6:  # Exclude Sundays
 			if holiday.parent not in holiday_map:
-				holiday_map[holiday.parent] = set()
-			holiday_map[holiday.parent].add(holiday.holiday_date.day)
+				holiday_map[holiday.parent] = {}
+			holiday_map[holiday.parent][holiday.holiday_date.day] = holiday.cuti_bersama  # ← dict instead of set
 	
 	return holiday_map
 
@@ -177,7 +177,8 @@ def get_data(filters):
 			"mg": 0,
 			"ln": 0,
 			"m": 0,
-			"l": 0
+			"l": 0,
+			"cb": 0
 		}
 		
 		for sc in status_codes:
@@ -185,8 +186,8 @@ def get_data(filters):
 				row[sc.status_code.lower()] = 0
 		
 		# Get holiday dates for this employee from pre-loaded map
-		holiday_dates = holiday_map.get(emp.holiday_list, set())
-		
+		holiday_dates = holiday_map.get(emp.holiday_list, {})
+				
 		attendances = frappe.get_all("Attendance",
 			filters={
 				"employee": emp.name,
@@ -214,8 +215,12 @@ def get_data(filters):
 			status = ""	
 			# Check if it's a national holiday (non-Sunday)
 			if day in holiday_dates and current_date <= today and (is_karyawan_tetap or (not is_karyawan_tetap and day not in attendance_dict)):
-				status = '<span style="color: red;">LN</span>'
-				row["ln"] += 1
+				if holiday_dates[day]:  # cuti_bersama == 1
+					status = '<span style="color: red;">CB</span>'
+					row["cb"] += 1
+				else:
+					status = '<span style="color: red;">LN</span>'
+					row["ln"] += 1
 			# Only show MG if the date has passed and it's not a national holiday
 			elif day_of_week == 6 and emp.designation != "NS30" :  # Sunday
 

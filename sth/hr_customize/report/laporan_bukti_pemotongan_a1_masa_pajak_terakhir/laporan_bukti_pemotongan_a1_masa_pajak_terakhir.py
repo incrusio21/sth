@@ -11,90 +11,152 @@ def execute(filters=None):
 
 	query_data = frappe.db.sql("""
 		SELECT
-		COUNT(DISTINCT MONTH(ss.posting_date)) as jumlah_slip,
-		ss.employee_name,
-		'No' as pemberi_kerja_selanjutnya,
-		MONTH(MIN(ss.posting_date)) as masa_pajak_awal,
-		MONTH(MAX(ss.posting_date)) as masa_pajak_akhir,
-		YEAR(MIN(ss.posting_date)) as tahun_pajak,
-		CASE 
-				WHEN e.custom_citizenship_status = "WNI" THEN "Resident"
-				ELSE "Foreign"
-		END as wni_wna,
-		e.passport_number as no_paspor,
-		e.no_ktp as npwp,
-		e.pkp_status as status_ptkp,
-		d.designation_name as posisi,
-		'21-100-01' as kode_objek_pajak,
-		CASE 
-				WHEN COUNT(DISTINCT MONTH(ss.posting_date)) = 12 THEN "FullYear"
-				ELSE "PartialYear"
-		END as status_bukti_potong,
-		CASE 
-				WHEN ssa.pph_21_gross_up = 1 THEN "Yes"
-				ELSE "No"
-		END as opsi_gross_up,
-		0 as tunjangan_pph,
-		SUM(
-				CASE 
-						WHEN sd.salary_component = 'Lembur' THEN sd.amount
-						ELSE 0
-				END
-		) as tunjangan_lainnya_lembur,
-		0 as honarorium,
-		SUM(
-				CASE 
-						WHEN sc.name LIKE '%%BPJS%%' AND sc.type = 'Earning'
-						THEN sd.amount
-						ELSE 0
-				END
-		) as asuransi,
-		SUM(
-				CASE 
-						WHEN sd.salary_component = 'Natura' AND sc.type = 'Earning'
-						THEN sd.amount
-						ELSE 0
-				END
-		) as natura,
-		SUM(
-				CASE 
-						WHEN sd.salary_component IN ('THR Earning', 'Bonus Earning')
-						THEN sd.amount
-						ELSE 0
-				END
-		) as tantiem_bonus_gratifikasi_thr,
-		SUM(
-				CASE 
-						WHEN sc.name LIKE '%%BPJS%%' AND sc.type = 'Deduction'
-						THEN sd.amount
-						ELSE 0
-				END
-		) as iuran_pensiun_atau_biaya_tht_jht,
-		0 as zakat,
-		'' as nomor_bukti_potong_sebelumnya,
-		'N/A' as fasilitas_pajak,
-		0 as pph_pasal_21,
-		cnd.nitku as id_tku_pemotong,
-		DATE_FORMAT(LAST_DAY(MAX(ss.posting_date)), '%%d/%%m/%%Y') as tanggal_pemotong
+				COUNT(DISTINCT MONTH(ss.posting_date)) AS jumlah_slip,
+				ss.employee_name,
 
-		FROM `tabSalary Slip` as ss
-		JOIN `tabEmployee` as e ON e.name = ss.employee 
-		JOIN `tabDesignation` as d ON d.name = e.designation
-		JOIN `tabSalary Structure Assignment` as ssa 
-			ON ssa.employee = ss.employee
-			AND ssa.from_date = (
-					SELECT MAX(ssa2.from_date)
-					FROM `tabSalary Structure Assignment` ssa2
-					WHERE ssa2.employee = ss.employee
-		)
-		LEFT JOIN `tabSalary Detail` as sd ON sd.parent = ss.name
-		LEFT JOIN `tabSalary Component` sc ON sc.name = sd.salary_component
-		LEFT JOIN `tabCompany NITKU Detail` as cnd
-			ON cnd.parent = ss.company
-			AND cnd.golongan = e.grade
-		WHERE ss.docstatus = 1 {}
-		GROUP BY ss.employee, ss.employee_name, YEAR(ss.posting_date)
-		ORDER BY ss.employee_name;
+				'No' AS pemberi_kerja_selanjutnya,
+
+				MONTH(MIN(ss.posting_date)) AS masa_pajak_awal,
+				MONTH(MAX(ss.posting_date)) AS masa_pajak_akhir,
+				YEAR(MIN(ss.posting_date)) AS tahun_pajak,
+
+				CASE 
+						WHEN e.custom_citizenship_status = 'WNI' THEN 'Resident'
+						ELSE 'Foreign'
+				END AS wni_wna,
+
+				e.passport_number AS no_paspor,
+				e.no_ktp AS npwp,
+				e.pkp_status AS status_ptkp,
+				d.designation_name AS posisi,
+
+				'21-100-01' AS kode_objek_pajak,
+
+				CASE 
+						WHEN COUNT(DISTINCT MONTH(ss.posting_date)) = 12 THEN 'FullYear'
+						ELSE 'PartialYear'
+				END AS status_bukti_potong,
+
+				SUM(
+						CASE 
+								WHEN sd.salary_component = 'Gaji Pokok'
+								AND sc.type = 'Earning'
+								THEN sd.amount ELSE 0
+						END
+				) AS gaji,
+
+				CASE 
+						WHEN ssa.pph_21_gross_up = 1 THEN 'Yes'
+						ELSE 'No'
+				END AS opsi_gross_up,
+
+				SUM(
+						CASE 
+								WHEN sd.salary_component = 'PPH21 TER Gross Up'
+								AND sc.type = 'Earning'
+								THEN sd.amount ELSE 0
+						END
+				) AS tunjangan_pph,
+
+				SUM(
+						CASE 
+								WHEN (
+										sd.salary_component IN ('Lembur','Natura')
+										OR sd.salary_component LIKE '%%Premi%%'
+								)
+								AND sc.type = 'Earning'
+								THEN sd.amount ELSE 0
+						END
+				) AS tunjangan_lainnya_lembur,
+
+				0 AS honarorium,
+
+				SUM(
+						CASE 
+								WHEN sc.name IN (
+										'BPJS Kesehatan (Perusahaan)',
+										'BPJS TK - JKM',
+										'BPJS TK - JKK-RST',
+										'BPJS TK - JKK-RSR',
+										'BPJS TK - JKK-RT',
+										'BPJS TK - JKK-RSD',
+										'BPJS TK - JKK-RS',
+										'PPH21 TER Gross Up'
+								)
+								AND sc.type = 'Earning'
+								THEN sd.amount ELSE 0
+						END
+				) AS asuransi,
+
+				0 AS natura,
+
+				SUM(
+						CASE 
+								WHEN sd.salary_component IN ('THR Earning','Bonus Earning')
+								THEN sd.amount ELSE 0
+						END
+				) AS tantiem_bonus_gratifikasi_thr,
+
+				SUM(
+						CASE 
+								WHEN sc.name IN (
+										'BPJS TK - JHT (Karyawan)',
+										'BPJS TK - JP (Karyawan)'
+								)
+								AND sc.type = 'Deduction'
+								THEN sd.amount ELSE 0
+						END
+				) AS iuran_pensiun_atau_biaya_tht_jht,
+
+				0 AS zakat,
+
+				'' AS nomor_bukti_potong_sebelumnya,
+				'N/A' AS fasilitas_pajak,
+				0 AS pph_pasal_21,
+
+				cnd.nitku AS id_tku_pemotong,
+
+				DATE_FORMAT(LAST_DAY(MAX(ss.posting_date)), '%%d/%%m/%%Y') AS tanggal_pemotong
+
+		FROM `tabSalary Slip` ss
+
+		JOIN `tabEmployee` e 
+				ON e.name = ss.employee
+
+		JOIN `tabDesignation` d 
+				ON d.name = e.designation
+
+		LEFT JOIN (
+				SELECT employee, MAX(from_date) AS from_date
+				FROM `tabSalary Structure Assignment`
+				GROUP BY employee
+		) latest_ssa
+				ON latest_ssa.employee = ss.employee
+
+		LEFT JOIN `tabSalary Structure Assignment` ssa
+				ON ssa.employee = latest_ssa.employee
+				AND ssa.from_date = latest_ssa.from_date
+
+		LEFT JOIN `tabSalary Detail` sd 
+				ON sd.parent = ss.name
+
+		LEFT JOIN `tabSalary Component` sc 
+				ON sc.name = sd.salary_component
+
+		LEFT JOIN `tabCompany NITKU Detail` cnd
+				ON cnd.parent = ss.company
+				AND cnd.golongan = e.grade
+
+		WHERE 
+				ss.docstatus = 1
+				{}
+
+		GROUP BY 
+				ss.employee,
+				YEAR(ss.posting_date)
+
+		ORDER BY 
+				ss.employee_name;
   """.format(conditions), filters, as_dict=True)
 
 	for row in query_data:
