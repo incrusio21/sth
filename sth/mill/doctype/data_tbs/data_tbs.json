@@ -34,7 +34,8 @@
   "tbs_olah",
   "tbs_restan",
   "tbs_loading_ramp",
-  "berat_rata_rata_tbs"
+  "berat_rata_rata_tbs",
+  "shift"
  ],
  "fields": [
   {
@@ -77,21 +78,21 @@
    "fieldname": "berat_rata_rata_tbs",
    "fieldtype": "Float",
    "label": "Berat Rata-rata Lori",
-   "precision": "5"
+   "precision": "0"
   },
   {
    "default": "0",
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
    "label": "TBS Olah",
-   "precision": "2"
+   "precision": "0"
   },
   {
    "default": "0",
    "fieldname": "tbs_restan",
    "fieldtype": "Float",
    "label": "TBS Restan",
-   "precision": "2"
+   "precision": "0"
   },
   {
    "fieldname": "naming_series",
@@ -161,7 +162,7 @@
    "fieldname": "tbs_loading_ramp",
    "fieldtype": "Float",
    "label": "TBS Loading Ramp",
-   "precision": "2"
+   "precision": "0"
   },
   {
    "default": "0",
@@ -225,7 +226,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-16 09:22:44.778815",
+ "modified": "2026-03-17 13:21:49.892204",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
