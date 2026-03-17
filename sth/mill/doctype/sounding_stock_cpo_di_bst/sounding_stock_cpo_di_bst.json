@@ -10,12 +10,12 @@
   "naming_series",
   "tanggal",
   "jam",
+  "get_data",
   "column_break_eokt",
   "status",
   "company",
   "unit",
   "section_break_nlsf",
-  "get_stock",
   "stock_awal",
   "stock_bst",
   "column_break_akrd",
@@ -64,28 +64,33 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "ukuran_hasil_sounding",
    "fieldtype": "Float",
    "label": "Ukuran Hasil Sounding (CM)",
    "precision": "2"
   },
   {
+   "default": "0",
    "fieldname": "hasil_suhu",
-   "fieldtype": "Float",
+   "fieldtype": "Link",
    "label": "Hasil Suhu (Derajat)",
+   "options": "Ukuran Berat Jenis",
    "precision": "2"
   },
   {
    "default": "0",
    "fieldname": "stock_bst",
-   "fieldtype": "Int",
-   "label": "Stock Awal BST"
+   "fieldtype": "Float",
+   "label": "Stock Awal BST",
+   "precision": "5"
   },
   {
    "default": "0",
    "fieldname": "pengiriman_cpo",
-   "fieldtype": "Data",
-   "label": "Pengiriman CPO"
+   "fieldtype": "Float",
+   "label": "Pengiriman CPO",
+   "precision": "5"
   },
   {
    "fieldname": "header_section",
@@ -152,16 +157,19 @@
   {
    "default": "0",
    "fieldname": "stock_awal",
-   "fieldtype": "Int",
-   "label": "Stock Awal"
+   "fieldtype": "Float",
+   "label": "Stock Awal",
+   "precision": "5"
   },
   {
+   "default": "0",
    "fieldname": "ukuran_hasil_sounding_kg",
    "fieldtype": "Float",
    "label": "Ukuran Hasil Sounding (KG)",
    "precision": "2"
   },
   {
+   "fetch_from": "hasil_suhu.berat_jenis",
    "fieldname": "berat_jenis_suhu",
    "fieldtype": "Float",
    "label": "Berat Jenis Suhu",
@@ -181,12 +189,14 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "ukuran_hasil_sounding_2",
    "fieldtype": "Float",
    "label": "Ukuran Hasil Sounding (CM)",
    "precision": "2"
   },
   {
+   "default": "0",
    "fieldname": "ukuran_hasil_sounding_kg_2",
    "fieldtype": "Float",
    "label": "Ukuran Hasil Sounding (KG)",
@@ -197,12 +207,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "hasil_suhu_2",
-   "fieldtype": "Float",
+   "fieldtype": "Link",
    "label": "Hasil Suhu (Derajat)",
+   "options": "Ukuran Berat Jenis",
    "precision": "2"
   },
   {
+   "default": "0",
+   "fetch_from": "hasil_suhu_2.berat_jenis",
    "fieldname": "berat_jenis_suhu_2",
    "fieldtype": "Float",
    "label": "Berat Jenis Suhu",
@@ -234,6 +248,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "tonase_sebenarnya_2",
    "fieldtype": "Float",
    "label": "Tonase Sebenarnya",
@@ -246,17 +261,19 @@
    "label": "OER Aktual BST"
   },
   {
+   "default": "0",
    "fieldname": "produksi_cpo",
    "fieldtype": "Float",
-   "label": "Produksi CPO",
-   "read_only": 1
+   "label": "Produksi CPO"
   },
   {
+   "default": "0",
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
    "label": "TBS Olah"
   },
   {
+   "default": "0",
    "fieldname": "potongan_sortasi",
    "fieldtype": "Float",
    "label": "Potongan Sortasi"
@@ -266,14 +283,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "oer_netto_1",
    "fieldtype": "Percent",
-   "label": "OER Netto 1"
+   "label": "OER Netto 1",
+   "precision": "3"
   },
   {
+   "default": "0",
    "fieldname": "oer_netto_2",
    "fieldtype": "Percent",
-   "label": "OER Netto 2"
+   "label": "OER Netto 2",
+   "precision": "3"
   },
   {
    "fieldname": "gudang",
@@ -297,22 +318,22 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "get_stock",
-   "fieldtype": "Button",
-   "label": "Get Stock"
-  },
-  {
    "default": "Today",
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal"
+  },
+  {
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-16 10:26:46.571930",
+ "modified": "2026-03-17 11:36:11.422430",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",
