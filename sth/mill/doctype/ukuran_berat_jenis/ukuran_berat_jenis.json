@@ -1,27 +1,25 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "field:suhu",
  "creation": "2026-03-11 11:38:44.478587",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "suhu",
-  "column_break_pldy",
   "berat_jenis"
  ],
  "fields": [
   {
    "fieldname": "suhu",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Suhu",
    "precision": "2",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_pldy",
-   "fieldtype": "Column Break"
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "berat_jenis",
@@ -29,16 +27,18 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Berat Jenis",
+   "precision": "4",
    "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-11 11:41:28.608140",
+ "modified": "2026-03-17 09:50:02.903878",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Berat Jenis",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

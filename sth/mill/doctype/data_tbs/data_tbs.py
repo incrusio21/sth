@@ -28,7 +28,7 @@ class DataTBS(Document):
 		self.jumlah_tbs_diterima = get_total_tbs()
 		self.grand_total_tbs = self.jumlah_tbs_restan + self.jumlah_tbs_diterima
 
-		self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori
+		self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori if self.grand_total_lori else 0
 		self.tbs_olah = self.berat_rata_rata_tbs * self.jumlah_lori_olah
 		self.tbs_restan = self.berat_rata_rata_tbs * (self.jumlah_lori_mentah + self.jumlah_lori_masak)
 		self.tbs_loading_ramp = self.berat_rata_rata_tbs * self.lori_estimasi_loading_ramp
@@ -47,7 +47,7 @@ def get_total_restan():
 
 	query = frappe.db.sql("""
 		select (tbs_restan + tbs_loading_ramp) as qty from `tabData TBS` dtb
-		where dtb.docstatus = 1 AND dtb.tanggal = %s
+		where dtb.tanggal = %s
 	""",(tanggal),as_dict=True)
 
 	return query[0].qty if query else 0
