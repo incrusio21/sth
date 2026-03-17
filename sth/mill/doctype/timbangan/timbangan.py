@@ -24,17 +24,7 @@ class Timbangan(Document):
 
 	def on_submit(self):
 		if self.type == "Receive" and self.receive_type != "Lain - Lain":
-			create_tbs_ledger(frappe._dict({
-				"item_code": self.kode_barang,
-				"posting_date": self.posting_date,
-				"posting_time" : self.posting_time,
-				"posting_datetime": get_datetime(f"{self.posting_date} {self.posting_time}"),
-				"type": self.receive_type,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"balance_qty": self.netto_2,
-			}))
-
+			self.make_tbs_ledger()
 		elif self.type == "Dispatch":
 			delivery_note = make_delivery_note(self.name)
 			delivery_note.insert()
@@ -64,16 +54,33 @@ class Timbangan(Document):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
-			"TBS Ledger Entry"
+			"TBS Ledger Entry",
+			"Sortasi"
 		)
 		
 		if self.type == "Receive":
 			reverse_tbs_ledger(self.name)
 			repost_qty_tbs(self.kode_barang,add_days(self.posting_date,-7))
+		
+		if sort_doc:=frappe.db.get_value("Sortasi",{"no_timbangan": self.name}):
+			frappe.get_doc("Sortasi",sort_doc).cancel()
 
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
 			frappe.throw("Ticket has been used before")
+	
+	def make_tbs_ledger(self):
+		create_tbs_ledger(frappe._dict({
+			"item_code": self.kode_barang,
+			"posting_date": self.posting_date,
+			"posting_time" : self.posting_time,
+			"posting_datetime": get_datetime(f"{self.posting_date} {self.posting_time}"),
+			"type": self.receive_type,
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"balance_qty": self.netto_2,
+		}))
+
 
 @frappe.whitelist()
 def get_spb_detail(spb):
