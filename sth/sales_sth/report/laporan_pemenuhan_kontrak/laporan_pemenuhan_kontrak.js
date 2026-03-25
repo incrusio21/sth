@@ -4,6 +4,24 @@
 frappe.query_reports["Laporan Pemenuhan Kontrak"] = {
     "filters": [
         {
+            "fieldname": "company",
+            "label": __("Company"),
+            "fieldtype": "Link",
+            "options": "Company",
+        },
+        {
+            "fieldname": "unit",
+            "label": __("Unit"),
+            "fieldtype": "Link",
+            "options": "Unit",
+        },
+        {
+            "fieldname": "komoditi",
+            "label": __("Komoditi"),
+            "fieldtype": "Link",
+            "options": "Komoditi",
+        },
+        {
             "fieldname": "from_date",
             "label": __("From Date"),
             "fieldtype": "Date",
@@ -17,37 +35,51 @@ frappe.query_reports["Laporan Pemenuhan Kontrak"] = {
             "default": frappe.datetime.get_today(),
             "reqd": 0
         },
-        {
-            "fieldname": "sales_order",
-            "label": __("Sales Order"),
-            "fieldtype": "Link",
-            "options": "Sales Order",
-            "get_query": function() {
-                return {
-                    "filters": {
-                        "docstatus": 1
-                    }
-                }
-            }
-        },
-        {
-            "fieldname": "customer",
-            "label": __("Customer"),
-            "fieldtype": "Link",
-            "options": "Customer"
-        },
-        {
-            "fieldname": "item_code",
-            "label": __("Item Code"),
-            "fieldtype": "Link",
-            "options": "Item"
-        },
-        {
-            "fieldname": "company",
-            "label": __("Company"),
-            "fieldtype": "Link",
-            "options": "Company",
-            "default": frappe.defaults.get_user_default("Company")
-        }
+        // {
+        //     "fieldname": "from_date",
+        //     "label": __("From Date"),
+        //     "fieldtype": "Date",
+        //     "default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+        //     "reqd": 0
+        // },
+        // {
+        //     "fieldname": "to_date",
+        //     "label": __("To Date"),
+        //     "fieldtype": "Date",
+        //     "default": frappe.datetime.get_today(),
+        //     "reqd": 0
+        // },
+        // {
+        //     "fieldname": "sales_order",
+        //     "label": __("Sales Order"),
+        //     "fieldtype": "Link",
+        //     "options": "Sales Order",
+        //     "get_query": function() {
+        //         return {
+        //             "filters": {
+        //                 "docstatus": 1
+        //             }
+        //         }
+        //     }
+        // },
+        // {
+        //     "fieldname": "customer",
+        //     "label": __("Customer"),
+        //     "fieldtype": "Link",
+        //     "options": "Customer"
+        // },
+        // {
+        //     "fieldname": "item_code",
+        //     "label": __("Item Code"),
+        //     "fieldtype": "Link",
+        //     "options": "Item"
+        // },
+        // {
+        //     "fieldname": "company",
+        //     "label": __("Company"),
+        //     "fieldtype": "Link",
+        //     "options": "Company",
+        //     "default": frappe.defaults.get_user_default("Company")
+        // }
     ],
 };

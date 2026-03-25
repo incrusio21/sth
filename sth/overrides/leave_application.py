@@ -1,6 +1,6 @@
 import frappe
 from hrms.hr.doctype.leave_application.leave_application import LeaveApplication, get_leave_allocation_records, get_allocation_expiry_for_cf_leaves, get_leaves_for_period, get_remaining_leaves, get_leave_allocation_records, get_leaves_pending_approval_for_period, get_leave_approver, get_leave_balance_on
-
+from datetime import date
 import datetime
 from frappe.utils import (
 	add_days,
@@ -60,10 +60,15 @@ def get_cuti_bersama_in_period(employee, from_date, to_date):
 	if not holiday_list:
 		return 0
 
+	if isinstance(from_date, str):
+		year_start = f"{from_date[:4]}-01-01"
+	else:
+		year_start = date(from_date.year, 1, 1)
+
 	return frappe.db.count("Holiday", filters={
 		"parent": holiday_list,
 		"cuti_bersama": 1,
-		"holiday_date": ["between", [from_date, to_date]]
+		"holiday_date": ["between", [year_start, to_date]]
 	})
 
 @frappe.whitelist()

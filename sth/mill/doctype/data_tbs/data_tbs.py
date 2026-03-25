@@ -32,8 +32,8 @@ class DataTBS(Document):
 		self.tbs_olah = self.berat_rata_rata_tbs * self.jumlah_lori_olah
 		self.tbs_restan = self.berat_rata_rata_tbs * (self.jumlah_lori_mentah + self.jumlah_lori_masak)
 		self.tbs_loading_ramp = self.berat_rata_rata_tbs * self.lori_estimasi_loading_ramp
-		self.total_jam_olah = frappe.db.get_value("CBC Monitoring",{"docstatus": 1, "posting_date": self.tanggal_produksi},"total_hour_meter")
-		self.kapasitas_pabrik = self.tbs_olah / self.total_jam_olah / 1000
+		self.total_jam_olah = frappe.db.get_value("CBC Monitoring",{"docstatus": 1, "posting_date": self.tanggal_produksi},"total_hour_meter") or 0
+		self.kapasitas_pabrik = self.tbs_olah / self.total_jam_olah / 1000 if self.total_jam_olah else 0
 
 def get_total_tbs(tanggal):
 	query = frappe.db.sql("""

@@ -79,7 +79,14 @@ class DataPenyemaianBibit(StatusUpdater):
 		doc.set_posting_time = 1
 		doc.posting_date = self.posting_date
 		doc.posting_time = self.posting_time
-  
+		
+		akun_expense = ""
+		plantation_settings = frappe.get_single("Plantation Settings")
+		
+		for row in plantation_settings.akun_penyemaian_table:
+			if row.company == self.company:
+				akun_expense = row.akun_penyemaian
+
 		warehouse = frappe.db.get_value(
 			"Purchase Receipt Item",
 			{
@@ -90,12 +97,13 @@ class DataPenyemaianBibit(StatusUpdater):
 			"warehouse"
 		)
 		doc.from_warehouse = warehouse
-  
+
 		doc.append("items", {			
 			"item_code": self.item_code,
 			"qty": self.qty,
 			"use_serial_batch_fields": 1,
-			"batch_no": self.batch
+			"batch_no": self.batch,
+			"expense_account": akun_expense
 		})
 		
 		doc.submit()

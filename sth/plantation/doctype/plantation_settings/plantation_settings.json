@@ -30,7 +30,9 @@
   "incentive_absent",
   "column_break_pbyq",
   "sc_incentive_output",
-  "incentive_output"
+  "incentive_output",
+  "penyemaian_tab",
+  "akun_penyemaian"
  ],
  "fields": [
   {
@@ -175,13 +177,24 @@
    "fieldtype": "Link",
    "label": "Salary Component Incentive Output",
    "options": "Salary Component"
+  },
+  {
+   "fieldname": "penyemaian_tab",
+   "fieldtype": "Tab Break",
+   "label": "Penyemaian"
+  },
+  {
+   "fieldname": "akun_penyemaian",
+   "fieldtype": "Table",
+   "label": "Akun Penyemaian",
+   "options": "Akun Penyemaian Table"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-26 13:08:13.020408",
+ "modified": "2026-03-25 15:48:01.888694",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

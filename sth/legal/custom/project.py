@@ -32,6 +32,13 @@ class Project:
                 self.move_task_to_new_project(delete=1)
     
     def set_capex_serial_no(self):
+
+        if not self.doc.proposal:
+            frappe.throw("Please create Proposal first.")
+
+        if not self.doc.proposal_type:
+            frappe.throw("Please setup Proposal Type.")
+
         if self.doc.proposal_type in ("Capex"):
             proposal_series = frappe.get_value("Proposal", self.doc.proposal, "project_name")
             series = NamingSeries(proposal_series + "_.#####")
