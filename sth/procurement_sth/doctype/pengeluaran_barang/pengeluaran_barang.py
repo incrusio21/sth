@@ -76,6 +76,13 @@ class PengeluaranBarang(Document):
 				"barcode",
 			)
 
+			akun_expense = ""
+			procurement_settings = frappe.get_single("Procurement Settings")
+			
+			for row in procurement_settings.akun_pengeluaran_table:
+				if row.company == self.company:
+					akun_expense = row.akun_pengeluaran
+
 			for item in target.items:
 				item_details = target.get_item_details(
 					frappe._dict(
@@ -85,6 +92,7 @@ class PengeluaranBarang(Document):
 							"project": target.project,
 							"uom": item.uom,
 							"s_warehouse": item.s_warehouse,
+							"expense_account": akun_expense
 						}
 					),
 					for_update=True,

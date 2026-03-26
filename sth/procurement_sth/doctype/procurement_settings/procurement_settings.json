@@ -5,7 +5,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "default_account"
+  "default_account",
+  "pengeluaran_barang_tab",
+  "akun_pengeluaran_table"
  ],
  "fields": [
   {
@@ -13,13 +15,24 @@
    "fieldtype": "Table",
    "label": "Default Account",
    "options": "Procurement Settings Account"
+  },
+  {
+   "fieldname": "pengeluaran_barang_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pengeluaran Barang"
+  },
+  {
+   "fieldname": "akun_pengeluaran_table",
+   "fieldtype": "Table",
+   "label": "Akun Pengeluaran Table",
+   "options": "Akun Pengeluaran Table"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-15 15:37:17.112557",
+ "modified": "2026-03-25 22:48:56.555381",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Procurement Settings",
