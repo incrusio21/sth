@@ -34,12 +34,12 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 
 	jenis_bahan_bakar(frm) {
 		if (frm.doc.jenis_bahan_bakar) {
-			show_bahan_bakar_category_dialog(frm);
+			show_bahan_bakar_detail_dialog(frm,frm.doc.jenis_bahan_bakar);
 		}
 	},
 	tambah_item_bahan_bakar(frm) {
 		if (frm.doc.jenis_bahan_bakar) {
-			show_bahan_bakar_category_dialog(frm);
+			show_bahan_bakar_detail_dialog(frm,frm.doc.jenis_bahan_bakar);
 		}
 	},
 

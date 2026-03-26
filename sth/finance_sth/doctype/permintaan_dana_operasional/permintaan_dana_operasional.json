@@ -493,9 +493,9 @@
   },
   {
    "fieldname": "jenis_bahan_bakar",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "label": "Jenis Bahan Bakar",
-   "options": "PDO Type"
+   "options": "Tunjangan Staff/Non Staff\nBiaya Umum\nOperasional"
   },
   {
    "fieldname": "tambah_item_bahan_bakar",
@@ -519,7 +519,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-12 10:24:24.838707",
+ "modified": "2026-03-26 11:09:52.734499",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",
