@@ -3,6 +3,12 @@
 
 frappe.query_reports["Laporan Histori Pemenuhan Kontrak"] = {
 	"filters": [
-
+		{
+			"fieldname": "no_kontrak",
+			"label": __("No Kontrak"),
+			"fieldtype": "Link",
+			"options": "Sales Order",
+			"reqd": 1
+		},
 	]
 };
