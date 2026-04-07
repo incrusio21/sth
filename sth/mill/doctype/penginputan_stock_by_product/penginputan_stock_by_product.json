@@ -11,11 +11,17 @@
   "tanggal",
   "tanggal_produksi",
   "jam",
-  "shift",
   "column_break_flyo",
-  "status",
   "company",
   "unit",
+  "column_break_qfco",
+  "tipe",
+  "tanggal_proses",
+  "get_data",
+  "section_break_jtjz",
+  "nama_barang",
+  "column_break_zzjs",
+  "data_olah_tbs",
   "section_break_nyty",
   "stock_awal",
   "produksi",
@@ -28,28 +34,33 @@
  "fields": [
   {
    "fieldname": "stock_awal",
-   "fieldtype": "Data",
-   "label": "Stock Awal"
+   "fieldtype": "Float",
+   "label": "Stock Awal",
+   "precision": "2"
   },
   {
    "fieldname": "produksi",
-   "fieldtype": "Data",
-   "label": "Produksi"
+   "fieldtype": "Float",
+   "label": "Produksi",
+   "precision": "2"
   },
   {
    "fieldname": "pengiriman",
-   "fieldtype": "Data",
-   "label": "Pengiriman"
+   "fieldtype": "Float",
+   "label": "Pengiriman",
+   "precision": "2"
   },
   {
    "fieldname": "input_dipakai_pabrik",
-   "fieldtype": "Data",
-   "label": "Input Dipakai Pabrik"
+   "fieldtype": "Float",
+   "label": "Input Dipakai Pabrik",
+   "precision": "2"
   },
   {
    "fieldname": "stock_akhir",
-   "fieldtype": "Data",
-   "label": "Stock Akhir"
+   "fieldtype": "Float",
+   "label": "Stock Akhir",
+   "precision": "2"
   },
   {
    "fieldname": "header_section",
@@ -97,22 +108,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
+   "depends_on": "eval:doc.nama_barang",
    "fieldname": "section_break_nyty",
    "fieldtype": "Section Break",
    "label": "Detail"
@@ -131,15 +127,63 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal Produksi"
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tipe",
+   "options": "\nCangkang\nFiber Bunch Press\nEmpty Bunch\nSolid",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_jtjz",
+   "fieldtype": "Section Break",
+   "label": "Informasi Data"
+  },
+  {
+   "fieldname": "nama_barang",
+   "fieldtype": "Link",
+   "label": "Nama Barang",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_qfco",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_proses",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Proses"
+  },
+  {
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
+  },
+  {
+   "fieldname": "column_break_zzjs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "data_olah_tbs",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Data Olah TBS",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-14 10:39:05.205239",
+ "modified": "2026-04-06 13:36:11.133409",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Stock By Product",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

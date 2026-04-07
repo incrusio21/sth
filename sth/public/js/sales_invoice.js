@@ -2,6 +2,10 @@ frappe.ui.form.on('Sales Invoice', {
 	refresh: function(frm) {
 		set_komoditi_filter(frm);
 		set_query_unit(frm)
+		toggle_qty_timbang_column(frm);
+	},
+	jenis_penagihan: function(frm) {
+		toggle_qty_timbang_column(frm);
 	},
 	komoditi: function(frm) {
 		if (frm.doc.komoditi && frm.doc.party_name && frm.doc.quotation_to == "Customer") {
@@ -46,6 +50,18 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
+})
+
+
+frappe.ui.form.on('Sales Invoice Item', {
+	qty_timbang_customer:function(frm,cdt,cdn){
+		let baris = locals[cdt][cdn]
+		if(baris.qty_timbang_customer){
+			if(baris.rate){
+				baris.sub_total_timbang = baris.rate * baris.qty_timbang_customer
+			}
+		}
+	}
 })
 
 function set_komoditi_filter(frm) {
@@ -696,5 +712,15 @@ erpnext.accounts.SalesInvoiceControllerCustom = class SalesInvoiceController ext
 	}
 };
 
+function toggle_qty_timbang_column(frm) {
+    const is_pengiriman = frm.doc.jenis_penagihan == "Pengiriman";
+
+    frm.fields_dict['items'].grid.toggle_display('qty_timbang_customer', is_pengiriman);
+    frm.fields_dict['items'].grid.refresh();
+    frm.fields_dict['items'].grid.toggle_display('sub_total_timbang', is_pengiriman);
+    frm.fields_dict['items'].grid.refresh();
+}
+
 // for backward compatibility: combine new and previous states
 extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceControllerCustom({ frm: cur_frm }));
+

@@ -25,7 +25,7 @@ class DataTBS(Document):
 		self.update(data_lori)
 
 		self.jumlah_tbs_restan = get_total_restan(self.tanggal_produksi)
-		self.jumlah_tbs_diterima = get_total_tbs(self.tanggal_produksi)
+		self.jumlah_tbs_diterima = get_total_tbs(self.tanggal_produksi,self.unit)
 		self.grand_total_tbs = self.jumlah_tbs_restan + self.jumlah_tbs_diterima
 
 		self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori if self.grand_total_lori else 0
@@ -35,12 +35,12 @@ class DataTBS(Document):
 		self.total_jam_olah = frappe.db.get_value("CBC Monitoring",{"docstatus": 1, "posting_date": self.tanggal_produksi},"total_hour_meter") or 0
 		self.kapasitas_pabrik = self.tbs_olah / self.total_jam_olah / 1000 if self.total_jam_olah else 0
 
-def get_total_tbs(tanggal):
+def get_total_tbs(tanggal,unit):
 	query = frappe.db.sql("""
-		select sum(balance_qty) as qty from `tabTBS Ledger Entry` tle
-		where tle.item_code = 'TBS' and tle.is_cancelled = 0 and tle.type LIKE 'TBS%%' and tle.posting_date = %s
-		group by tle.item_code
-	""",(tanggal),as_dict=True)
+		SELECT sum(netto_2) as qty
+		FROM `tabTimbangan` t
+		WHERE receive_type IN ('TBS Internal', 'TBS Eksternal') AND docstatus = 1 AND posting_date = %s AND unit = %s
+	""",(tanggal,unit),as_dict=True)
 
 	return query[0].qty if query else 0
 

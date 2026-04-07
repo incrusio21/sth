@@ -1,7 +1,7 @@
 // Copyright (c) 2026, DAS and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Analisa Kualitas Palm Kernel  Pengiriman", {
+// frappe.ui.form.on("Ukuran Bunker Kernel Silo", {
 // 	refresh(frm) {
 
 // 	},

@@ -1,0 +1,190 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:UMP-{#####}",
+ "creation": "2026-03-30 22:13:48.532186",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "date",
+  "tipe",
+  "no_kontrak",
+  "nilai_dp",
+  "payment_entry",
+  "dibuat_dari_payment_voucher",
+  "column_break_qntg",
+  "company",
+  "akun_uang_muka",
+  "akun_kas_bank",
+  "nota_hutang_pemenuhan_kontrak",
+  "amended_from",
+  "list_pemenuhan_kontrak_section",
+  "master_barang_placeholder_ppn",
+  "nota_hutang_pemenuhan_kontrak_table",
+  "section_break_vwzw",
+  "reclass_pengakuan_penjualan"
+ ],
+ "fields": [
+  {
+   "fieldname": "no_kontrak",
+   "fieldtype": "Link",
+   "label": "No Kontrak",
+   "options": "Sales Order"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Nota DP\"",
+   "fieldname": "nilai_dp",
+   "fieldtype": "Currency",
+   "label": "Nilai DP",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_qntg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Nota DP\"",
+   "fieldname": "akun_uang_muka",
+   "fieldtype": "Link",
+   "label": "Akun Uang Muka",
+   "options": "Account"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Nota Piutang",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Nota Piutang",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "label": "Tipe",
+   "options": "Nota DP\nPemenuhan Kontrak"
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Nota DP\"",
+   "fieldname": "akun_kas_bank",
+   "fieldtype": "Link",
+   "label": "Akun Kas Bank",
+   "options": "Account"
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Data",
+   "label": "Payment Voucher",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Pemenuhan Kontrak\"",
+   "fieldname": "list_pemenuhan_kontrak_section",
+   "fieldtype": "Section Break",
+   "label": "List Pemenuhan Kontrak"
+  },
+  {
+   "fieldname": "nota_hutang_pemenuhan_kontrak_table",
+   "fieldtype": "Table",
+   "label": "List Pengakuan Penjualan",
+   "options": "Nota Piutang Pemenuhan Kontrak Table",
+   "read_only": 1
+  },
+  {
+   "fieldname": "master_barang_placeholder_ppn",
+   "fieldtype": "Link",
+   "label": "Master Barang Placeholder PPN",
+   "link_filters": "[[\"Item\",\"custom_is_expense\",\"=\",1]]",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Pemenuhan Kontrak\"",
+   "fieldname": "nota_hutang_pemenuhan_kontrak",
+   "fieldtype": "Link",
+   "label": "Nota Piutang Pemenuhan Kontrak",
+   "no_copy": 1,
+   "options": "Nota Piutang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal"
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Pemenuhan Kontrak\"",
+   "fieldname": "section_break_vwzw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reclass_pengakuan_penjualan",
+   "fieldtype": "Table",
+   "label": "Reclass Pengakuan Penjualan",
+   "no_copy": 1,
+   "options": "Nota Piutang Reclass Table"
+  },
+  {
+   "default": "0",
+   "fieldname": "dibuat_dari_payment_voucher",
+   "fieldtype": "Check",
+   "label": "Dibuat Dari Payment Voucher",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-07 00:29:42.746588",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Nota Piutang",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

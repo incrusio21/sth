@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "creation": "2025-11-26 15:51:43.755855",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "employee",
@@ -142,7 +143,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-06 15:20:17.521103",
+ "modified": "2026-03-30 10:08:19.814903",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Table",

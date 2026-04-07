@@ -9,14 +9,13 @@
  "field_order": [
   "header_section",
   "company",
-  "vehicle",
   "status",
   "column_break_lmer",
   "segel_start_no",
   "segel_end_no",
-  "remaining_cheque_warning",
-  "segels_total",
-  "remaining_segels",
+  "remaining_number_warning",
+  "segel_total",
+  "remaining_segel",
   "segel_usage_history_tab",
   "table_ezdi",
   "amended_from"
@@ -38,16 +37,12 @@
    "width": "505"
   },
   {
-   "fieldname": "vehicle",
-   "fieldtype": "Link",
-   "label": "Vehicle",
-   "options": "Vehicle"
-  },
-  {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Status",
-   "options": "Available\nEmpty"
+   "options": "Available\nEmpty",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_lmer",
@@ -71,31 +66,6 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "remaining_cheque_warning",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Remaining Cheque Warning",
-   "reqd": 1
-  },
-  {
-   "fieldname": "segels_total",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Segels Total",
-   "read_only": 1
-  },
-  {
-   "fieldname": "remaining_segels",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Remaining Segels",
-   "read_only": 1
-  },
-  {
    "fieldname": "segel_usage_history_tab",
    "fieldtype": "Tab Break",
    "label": "Segel Usage History"
@@ -114,13 +84,38 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "remaining_number_warning",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Remaining Number Warning",
+   "reqd": 1
+  },
+  {
+   "fieldname": "segel_total",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Segel Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remaining_segel",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Remaining Segel",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-27 13:10:41.456652",
+ "modified": "2026-03-30 11:12:21.426275",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Segel",

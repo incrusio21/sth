@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-06 09:16:40.882110",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ukuran",
+  "tonase"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "ukuran",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Ukuran",
+   "precision": "5"
+  },
+  {
+   "default": "0",
+   "fieldname": "tonase",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tonase",
+   "precision": "3"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-06 09:18:09.084187",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Ukuran Bunker Kernel Silo Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

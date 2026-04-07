@@ -63,8 +63,7 @@
    "fieldname": "tgl",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
+   "label": "Tanggal"
   },
   {
    "default": "Now",
@@ -303,7 +302,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-14 09:37:17.329988",
+ "modified": "2026-04-06 12:08:27.799514",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring TBS Olah",

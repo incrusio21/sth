@@ -19,6 +19,12 @@
   "machine_station",
   "machine",
   "amended_from",
+  "time_stamp_section",
+  "tanggal_scan",
+  "column_break_bvma",
+  "jam_scan",
+  "column_break_jmqs",
+  "user_scan",
   "sterilizer_monitoring_tab",
   "sterilizer_transaction_monitoring",
   "detail_section",
@@ -67,11 +73,13 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.machine_station",
    "fieldname": "machine",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Mesin",
-   "options": "Mill Machine"
+   "options": "Mill Machine",
+   "reqd": 1
   },
   {
    "fetch_from": "shift_proses.unit",
@@ -106,13 +114,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "SM-00002",
    "fieldname": "machine_station",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Stasiun",
    "options": "Station Master",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "sterilizer_monitoring_tab",
@@ -321,13 +329,44 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal"
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "time_stamp_section",
+   "fieldtype": "Section Break",
+   "label": "Time Stamp"
+  },
+  {
+   "fieldname": "column_break_bvma",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jmqs",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 13:17:29.743322",
+ "modified": "2026-04-06 08:58:41.920392",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sterilizer Transaction",

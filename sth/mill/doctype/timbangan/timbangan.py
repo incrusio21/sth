@@ -1,12 +1,12 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
-import frappe
+import frappe,copy
 from frappe.utils import add_days
 from frappe.model.document import Document
-from frappe.utils import get_datetime
+from frappe.utils import get_datetime,flt
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
-from frappe import _
+from frappe import _, delete_doc
 from frappe.model.mapper import get_mapped_doc
 
 class Timbangan(Document):
@@ -94,6 +94,23 @@ def get_spb_detail(spb):
 	return spb_details
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_spb_available(doctype, txt, searchfield, start, page_len, filters):
+	params = {
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len
+	}
+	return frappe.db.sql("""
+		select spb.name,spb.pabrik,spb.no_polisi 
+		from `tabSurat Pengantar Buah` spb
+		join `tabSecurity Check Point` scp on scp.spb = spb.name
+		where spb.name LIKE %(txt)s AND scp.docstatus = 1 
+		group by spb.name
+		LIMIT %(start)s, %(page_len)s
+	""",params)
+	
+@frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	
 	def set_missing_values(source, target):
@@ -123,7 +140,6 @@ def make_delivery_note(source_name, target_doc=None):
 			target.komoditi = do_doc.komoditi
 			target.tempat_penyerahan = do_doc.tempat_penyerahan
 			target.jenis_berikat = do_doc.jenis_berikat
-			
 			# Copy child table keterangan_per_komoditi
 			if do_doc.keterangan_per_komoditi:
 				for row in do_doc.keterangan_per_komoditi:
@@ -131,9 +147,21 @@ def make_delivery_note(source_name, target_doc=None):
 						'parameter': row.parameter,
 						'keterangan': row.keterangan
 					})
+			
+			if source.kode_barang and source.netto:
+				fields_to_remove = ["doctype", "name", "owner","creation", "modified", "modified_by","idx"]
+				item = next((r for r in do_doc.items if r.item_code == source.kode_barang),[])
+				new_item = copy.deepcopy(item)
+				new_item = new_item.as_dict()
+				new_item.qty = source.netto_2
+				new_item.timbangan = source.name
+				new_item.delivery_order_item = item.name
+
+				for f in fields_to_remove:
+					new_item.pop(f, None)
 	
-	def update_item(source, target, source_parent):
-		target.timbangan = source_parent.name
+				target.append("items",new_item)
+
 	
 	doclist = get_mapped_doc(
 		"Timbangan",
@@ -147,20 +175,13 @@ def make_delivery_note(source_name, target_doc=None):
 					"driver_name": "driver_name",
 					"transportir": "transporter_name",
 					"license_number": "lr_no", 
+					"do_no": "delivery_order"
 				}
 			},
 		},
 		target_doc,
 		set_missing_values
 	)
-	source_doc = frappe.get_doc("Timbangan", source_name)
-	
-	if source_doc.kode_barang and source_doc.netto:
-		doclist.append('items', {
-			'item_code': source_doc.kode_barang,
-			'qty': source_doc.netto_2,
-			'timbangan': source_doc.name
-		})
 	
 	return doclist
 @frappe.whitelist()
@@ -202,3 +223,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 @frappe.whitelist()
 def get_timbangan_settings():
 	return frappe.db.get_all('Timbangan Setting Detail',['location','baudrate','baudrate','databits','parity','stopbits'])
+
+@frappe.whitelist()
+def get_sisa_do(reference):
+	delivered,qty = frappe.db.get_value("Delivery Order Item",reference,["delivered_qty","qty"])
+	return flt(qty) - flt(delivered)

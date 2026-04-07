@@ -3,6 +3,14 @@
 frappe.provide("sth.utils")
 
 frappe.ui.form.on("Timbangan", {
+	setup(frm) {
+		frm.set_query("spb", (doc) => {
+			return {
+				query: frappe.model.get_server_module_name(doc.doctype) + ".get_spb_available"
+			}
+		})
+	},
+
 	refresh(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["TBS Ledger Entry"]
 
@@ -89,6 +97,31 @@ frappe.ui.form.on("Timbangan", {
 				});
 				frm.refresh_field('spb_detail')
 			})
+
+		frappe
+			.xcall("frappe.client.get_value", {
+				doctype: "Security Check Point",
+				filters: {
+					spb: frm.doc.spb
+				},
+				fieldname: ["name"],
+			})
+			.then((res) => {
+				frm.set_value("ticket_number", res.name)
+			})
+	},
+
+	no_segel(frm) {
+		frm.set_value("jumlah_segel", frm.doc.no_segel.length)
+	},
+
+	reference_do_item(frm) {
+		if (!frm.doc.reference_do_item) return
+		const method = frappe.model.get_server_module_name(frm.doctype) + ".get_sisa_do"
+		frappe.xcall(method, { reference: frm.doc.reference_do_item })
+			.then((r) => {
+				frm.set_value("sisa_do", r)
+			})
 	},
 
 	gateweight(frm) {
@@ -151,21 +184,21 @@ function make_transaction_button(frm) {
 	// Tampilkan button hanya jika belum ada reference
 	if (!frm.doc.reference_name && !frm.is_new() && frm.doc.docstatus == 1) {
 		if (frm.doc.type == "Dispatch") {
-			frm.add_custom_button(__('Create Delivery Note'), function () {
-				frappe.call({
-					method: 'sth.mill.doctype.timbangan.timbangan.make_delivery_note',
-					args: {
-						source_name: frm.doc.name
-					},
-					callback: function (r) {
-						if (r.message) {
-							// Buka form DN baru tanpa save
-							frappe.model.sync(r.message);
-							frappe.set_route('Form', r.message.doctype, r.message.name);
-						}
-					}
-				});
-			}, __('Create'));
+			// frm.add_custom_button(__('Create Delivery Note'), function () {
+			// 	frappe.call({
+			// 		method: 'sth.mill.doctype.timbangan.timbangan.make_delivery_note',
+			// 		args: {
+			// 			source_name: frm.doc.name
+			// 		},
+			// 		callback: function (r) {
+			// 			if (r.message) {
+			// 				// Buka form DN baru tanpa save
+			// 				frappe.model.sync(r.message);
+			// 				frappe.set_route('Form', r.message.doctype, r.message.name);
+			// 			}
+			// 		}
+			// 	});
+			// }, __('Create'));
 		}
 
 		if (frm.doc.type == "Receive") {
@@ -246,3 +279,8 @@ function set_field_visibility(frm) {
 		}
 	}
 }
+
+// frappe.form.link_formatters['Item'] = function (value, doc) {
+// 	console.log(value);
+// 	return value
+// }

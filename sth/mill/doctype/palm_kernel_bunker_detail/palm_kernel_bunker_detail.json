@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-03 20:02:15.036128",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama_kompartemen",
+  "titik_bunker",
+  "hasil_titik_sounding"
+ ],
+ "fields": [
+  {
+   "fieldname": "nama_kompartemen",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Kompartemen",
+   "options": "Master Kompartemen"
+  },
+  {
+   "fieldname": "titik_bunker",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Titik Bunker ( CM )"
+  },
+  {
+   "default": "0",
+   "description": "satuan cm",
+   "fieldname": "hasil_titik_sounding",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hasil Titik Sounding",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-06 13:27:12.179773",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Palm Kernel Bunker Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

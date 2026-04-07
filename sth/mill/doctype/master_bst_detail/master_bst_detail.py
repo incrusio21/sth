@@ -5,6 +5,5 @@
 from frappe.model.document import Document
 
 
-class AnalisaKualitasPalmKernelPengiriman(Document):
-	def before_submit(self):
-		self.status = "Selesai"
+class MasterBSTDetail(Document):
+	pass

@@ -127,12 +127,14 @@ frappe.ui.form.on("Security Check Point", {
 				method: 'frappe.client.get',
 				args: {
 					doctype: 'Delivery Order',
-					name: frm.doc.do_no
+					name: frm.doc.do_no,
 				},
 				callback: function (r) {
 					if (r.message && r.message.items) {
 						let item_code = r.message.items[0].item_code;
+						let reference = r.message.items[0].name;
 						frm.set_value('items_do', item_code);
+						frm.set_value('items_do_reference', reference);
 					}
 				}
 			});

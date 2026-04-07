@@ -1,0 +1,207 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "PATL-.######",
+ "creation": "2026-03-31 11:04:23.938436",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "column_break_bqgi",
+  "unit",
+  "section_break_osgx",
+  "nama",
+  "column_break_rimx",
+  "no_kontrak_asuransi",
+  "section_break_dynq",
+  "tanggal_efektif",
+  "column_break_kokl",
+  "tanggal_pelunasan",
+  "section_break_teeg",
+  "harga",
+  "uang_muka",
+  "tingkat_suku_bunga",
+  "column_break_doaf",
+  "biaya_admin",
+  "survey",
+  "asuransi",
+  "column_break_jwpc",
+  "provisi",
+  "denda_keterlambatan",
+  "nomor_polis_kendaraan",
+  "section_break_miez",
+  "hitung",
+  "pencatatan_atas_transaksi_leasing_table",
+  "section_break_04qu",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_04qu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pencatatan Atas Transaksi Leasing",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_bqgi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_osgx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nama",
+   "fieldtype": "Data",
+   "label": "Nama"
+  },
+  {
+   "fieldname": "column_break_rimx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_kontrak_asuransi",
+   "fieldtype": "Data",
+   "label": "No Kontrak Asuransi"
+  },
+  {
+   "fieldname": "section_break_dynq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tanggal_efektif",
+   "fieldtype": "Date",
+   "label": "Tanggal Efektif"
+  },
+  {
+   "fieldname": "column_break_kokl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tanggal_pelunasan",
+   "fieldtype": "Date",
+   "label": "Tanggal Pelunasan"
+  },
+  {
+   "fieldname": "section_break_teeg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "harga",
+   "fieldtype": "Currency",
+   "label": "Harga"
+  },
+  {
+   "fieldname": "uang_muka",
+   "fieldtype": "Currency",
+   "label": "Uang Muka"
+  },
+  {
+   "fieldname": "tingkat_suku_bunga",
+   "fieldtype": "Data",
+   "label": "Tingkat Suku Bunga (%)"
+  },
+  {
+   "fieldname": "column_break_doaf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "biaya_admin",
+   "fieldtype": "Currency",
+   "label": "Biaya Admin"
+  },
+  {
+   "fieldname": "survey",
+   "fieldtype": "Currency",
+   "label": "Survey"
+  },
+  {
+   "fieldname": "asuransi",
+   "fieldtype": "Percent",
+   "label": "Asuransi (%)"
+  },
+  {
+   "fieldname": "column_break_jwpc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "provisi",
+   "fieldtype": "Percent",
+   "label": "Provisi (%)"
+  },
+  {
+   "fieldname": "denda_keterlambatan",
+   "fieldtype": "Percent",
+   "label": "Denda Keterlambatan (%)"
+  },
+  {
+   "fieldname": "nomor_polis_kendaraan",
+   "fieldtype": "Data",
+   "label": "Nomor Polis Kendaraan"
+  },
+  {
+   "fieldname": "section_break_miez",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "pencatatan_atas_transaksi_leasing_table",
+   "fieldtype": "Table",
+   "label": "Pencatatan Atas Transaksi Leasing Table",
+   "options": "Pencatatan Atas Transaksi Leasing Table"
+  },
+  {
+   "fieldname": "hitung",
+   "fieldtype": "Button",
+   "label": "Hitung"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-31 14:21:43.450150",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Pencatatan Atas Transaksi Leasing",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

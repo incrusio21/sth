@@ -12,16 +12,19 @@
   "jam",
   "get_data",
   "column_break_eokt",
-  "status",
+  "tanggal_proses",
+  "pabrik",
   "company",
   "unit",
   "section_break_nlsf",
   "stock_awal",
-  "stock_bst",
   "column_break_akrd",
   "pengiriman_cpo",
+  "column_break_ybip",
+  "stock_bst",
   "oer_aktual_bst_section",
   "produksi_cpo",
+  "column_break_dpqk",
   "tbs_olah",
   "potongan_sortasi",
   "column_break_mfaj",
@@ -54,10 +57,13 @@
  ],
  "fields": [
   {
+   "fetch_from": "pabrik.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_vbhx",
@@ -82,15 +88,19 @@
    "default": "0",
    "fieldname": "stock_bst",
    "fieldtype": "Float",
-   "label": "Stock Awal BST",
-   "precision": "5"
+   "in_preview": 1,
+   "label": "Stock Akhir",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "pengiriman_cpo",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Pengiriman CPO",
-   "precision": "5"
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "header_section",
@@ -123,13 +133,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
    "depends_on": "eval:doc.gudang",
    "fieldname": "section_break_oecm",
    "fieldtype": "Section Break"
@@ -158,22 +161,28 @@
    "default": "0",
    "fieldname": "stock_awal",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Stock Awal",
-   "precision": "5"
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "ukuran_hasil_sounding_kg",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Ukuran Hasil Sounding (KG)",
-   "precision": "2"
+   "precision": "0",
+   "read_only": 1
   },
   {
-   "fetch_from": "hasil_suhu.berat_jenis",
+   "default": "0",
    "fieldname": "berat_jenis_suhu",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Berat Jenis Suhu",
-   "precision": "5"
+   "precision": "5",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.gudang",
@@ -184,8 +193,8 @@
    "default": "0",
    "fieldname": "tonase_sebenarnya",
    "fieldtype": "Float",
-   "label": "Tonase Sebenarnya",
-   "precision": "5",
+   "label": "Tonase Sebenarnya ( KG )",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -199,8 +208,10 @@
    "default": "0",
    "fieldname": "ukuran_hasil_sounding_kg_2",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Ukuran Hasil Sounding (KG)",
-   "precision": "2"
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_ahfm",
@@ -216,11 +227,12 @@
   },
   {
    "default": "0",
-   "fetch_from": "hasil_suhu_2.berat_jenis",
    "fieldname": "berat_jenis_suhu_2",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Berat Jenis Suhu",
-   "precision": "5"
+   "precision": "5",
+   "read_only": 1
   },
   {
    "fieldname": "foto",
@@ -251,8 +263,8 @@
    "default": "0",
    "fieldname": "tonase_sebenarnya_2",
    "fieldtype": "Float",
-   "label": "Tonase Sebenarnya",
-   "precision": "5",
+   "label": "Tonase Sebenarnya ( KG )",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -264,19 +276,28 @@
    "default": "0",
    "fieldname": "produksi_cpo",
    "fieldtype": "Float",
-   "label": "Produksi CPO"
+   "in_preview": 1,
+   "label": "Produksi CPO",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
-   "label": "TBS Olah"
+   "in_preview": 1,
+   "label": "TBS Olah",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "potongan_sortasi",
    "fieldtype": "Float",
-   "label": "Potongan Sortasi"
+   "in_preview": 1,
+   "label": "Potongan Sortasi",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_mfaj",
@@ -286,30 +307,34 @@
    "default": "0",
    "fieldname": "oer_netto_1",
    "fieldtype": "Percent",
+   "in_preview": 1,
    "label": "OER Netto 1",
-   "precision": "3"
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "oer_netto_2",
    "fieldtype": "Percent",
+   "in_preview": 1,
    "label": "OER Netto 2",
-   "precision": "3"
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "gudang",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Gudang",
-   "options": "Warehouse",
+   "label": "BST 1",
+   "options": "Master BST",
    "reqd": 1
   },
   {
    "fieldname": "gudang_2",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Gudang",
-   "options": "Warehouse",
+   "label": "BST 2",
+   "options": "Master BST",
    "reqd": 1
   },
   {
@@ -322,18 +347,42 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal"
+   "label": "Tanggal",
+   "read_only": 1
   },
   {
    "fieldname": "get_data",
    "fieldtype": "Button",
    "label": "Get Data"
+  },
+  {
+   "fieldname": "column_break_ybip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dpqk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Pabrik",
+   "options": "Mill Master",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_proses",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Proses"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 11:36:11.422430",
+ "modified": "2026-04-06 13:40:27.859466",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

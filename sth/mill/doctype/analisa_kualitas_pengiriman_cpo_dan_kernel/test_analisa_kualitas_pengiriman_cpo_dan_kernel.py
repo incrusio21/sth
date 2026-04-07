@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestAnalisaKualitasCPOPengiriman(FrappeTestCase):
+class TestAnalisaKualitasPengirimanCPOdanKERNEL(FrappeTestCase):
 	pass

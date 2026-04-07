@@ -83,6 +83,23 @@ def make_delivery_order(source_name, target_doc=None):
 		target.run_method("set_missing_values")
 		# target.run_method("calculate_taxes_and_totals")
 
+	def get_do_qty_map(sales_order_name):
+		rows = frappe.db.sql("""
+			SELECT
+				doi.so_detail,
+				SUM(doi.qty) as total_do_qty
+			FROM
+				`tabDelivery Order Item` doi
+			INNER JOIN
+				`tabDelivery Order` do ON do.name = doi.parent
+			WHERE
+				doi.against_sales_order = %(sales_order)s
+				AND do.docstatus = 1
+			GROUP BY
+				doi.so_detail
+		""", {"sales_order": sales_order_name}, as_dict=True)
+
+		return {row.so_detail: row.total_do_qty for row in rows}
 	def update_item(source, target, source_parent):
 
 		target.sales_order = source_parent.name
@@ -91,6 +108,11 @@ def make_delivery_order(source_name, target_doc=None):
 		if source.warehouse:
 			target.warehouse = source.warehouse
 
+		# Set qty ke sisa yang belum di-DO
+		do_qty = do_qty_map.get(source.name, 0)
+		target.qty = source.qty - do_qty
+
+	do_qty_map = get_do_qty_map(source_name)
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Delivery Order",
@@ -109,13 +131,13 @@ def make_delivery_order(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Delivery Order Item",
 			"field_map": {
-				"name": "sales_order_item",
-				"parent": "sales_order",
+				"name": "so_detail",
+				"parent": "against_sales_order",
 				"rate": "rate",
 				"warehouse": "warehouse"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty
+			"condition": lambda doc: (doc.qty - do_qty_map.get(doc.name, 0)) > 0
 		}
 	}, target_doc, set_missing_values)
 

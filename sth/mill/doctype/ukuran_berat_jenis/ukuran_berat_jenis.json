@@ -8,7 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "suhu",
-  "berat_jenis"
+  "details"
  ],
  "fields": [
   {
@@ -22,19 +22,17 @@
    "unique": 1
   },
   {
-   "fieldname": "berat_jenis",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Berat Jenis",
-   "precision": "4",
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Ukuran Berat Jenis Detail",
    "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 09:50:02.903878",
+ "modified": "2026-04-02 17:02:50.095094",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Berat Jenis",

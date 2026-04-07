@@ -24,6 +24,7 @@
   "cust",
   "items_do",
   "items_do_name",
+  "items_do_reference",
   "tanggal_panen",
   "no_polisi",
   "supplier",
@@ -46,6 +47,7 @@
   "vehicle_details_section",
   "rear_view_photo_column",
   "transporter_name",
+  "nama_transporter",
   "license_plate",
   "vehicle_date",
   "front_image",
@@ -248,7 +250,7 @@
    "fetch_from": "qr_code_scan.transporter",
    "fieldname": "transporter_name",
    "fieldtype": "Data",
-   "label": "Transporter Name"
+   "label": "Transporter"
   },
   {
    "fieldname": "vehicle_date",
@@ -426,13 +428,28 @@
    "fieldtype": "Data",
    "label": "Items DO Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "qr_code_scan.transporter_name",
+   "fieldname": "nama_transporter",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Nama Transporter",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items_do_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Items DO Reference",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-14 10:24:38.184883",
+ "modified": "2026-03-30 15:25:41.678267",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

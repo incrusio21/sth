@@ -17,11 +17,15 @@ class KriteriaDokumenFinance(Document):
 def create_kriteria_upload_document(self, method):
 	if self.doctype == "DocType" or frappe.db.exists("Kriteria Upload Document", {"voucher_type": self.doctype, "voucher_no": self.name}):
 		return
-	
+
+	# skip kalau Delivery Note punya timbangan_ref
+	if self.doctype == "Delivery Note" and self.timbangan_ref:
+		return
+
 	kriteria_type = self.run_method("document_kriteria")
 	if not isinstance(kriteria_type, str):
 		kriteria_type = None
-	
+
 	entries = get_criteria(self.doctype, self.name, kriteria_type, True)
 	if entries:
 		create_kriteria_document(entries, self)

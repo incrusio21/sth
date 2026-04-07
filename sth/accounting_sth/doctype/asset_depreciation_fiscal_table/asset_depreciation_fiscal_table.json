@@ -7,11 +7,13 @@
  "engine": "InnoDB",
  "field_order": [
   "year",
+  "month",
   "depreciation_amount",
   "accumulated_depreciation_amount"
  ],
  "fields": [
   {
+   "columns": 1,
    "fieldname": "year",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -19,6 +21,7 @@
    "read_only": 1
   },
   {
+   "columns": 4,
    "fieldname": "depreciation_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -26,18 +29,26 @@
    "read_only": 1
   },
   {
+   "columns": 4,
    "fieldname": "accumulated_depreciation_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Accumulated Depreciation Amount",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "month",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Month"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-22 23:48:41.074960",
+ "modified": "2026-03-26 11:24:32.828046",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Asset Depreciation Fiscal Table",

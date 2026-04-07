@@ -11,7 +11,7 @@
   "unit",
   "nama",
   "deskripsi",
-  "npwp",
+  "default_bank_account",
   "bank_account",
   "api_status",
   "column_break_fyry",
@@ -66,13 +66,6 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "npwp",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "NPWP"
-  },
-  {
    "fieldname": "modul_list_section",
    "fieldtype": "Section Break",
    "label": "Modul List"
@@ -97,7 +90,7 @@
   {
    "fieldname": "bank_account",
    "fieldtype": "Link",
-   "label": "Bank Account",
+   "label": "Account",
    "options": "Account"
   },
   {
@@ -166,12 +159,18 @@
    "fieldtype": "Select",
    "label": "API Status",
    "options": "Aktif"
+  },
+  {
+   "fieldname": "default_bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-03 08:44:42.099773",
+ "modified": "2026-04-07 10:54:55.834790",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

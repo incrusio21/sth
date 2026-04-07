@@ -10,11 +10,30 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_bbxq",
-  "status",
+  "tanggal_proses",
+  "pabrik",
   "company",
   "unit",
+  "informasi_kompartemen_section",
+  "tinggi_normal_bunker",
+  "column_break_sfpp",
+  "tinggi_lubang_ukur",
+  "detal_section",
+  "ukuran_detail",
+  "detail_stock_section",
+  "stock_awal",
+  "pengiriman",
+  "stock_akhir",
+  "produksi",
+  "tbs_olah",
+  "ker_netto_1",
+  "ker_netto_2",
+  "column_break_wdwq",
+  "table_zfca",
+  "volume_sounding",
+  "section_break_jhlo",
+  "preview_data",
   "section_break_obbx",
   "no_bunker",
   "hasil_sounding",
@@ -37,10 +56,13 @@
    "label": "Video"
   },
   {
+   "fetch_from": "pabrik.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_wnay",
@@ -109,31 +131,133 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
+   "fieldname": "section_break_obbx",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Detail"
   },
   {
-   "fieldname": "shift",
+   "fieldname": "pabrik",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
+   "label": "Pabrik",
+   "options": "Mill Master",
    "reqd": 1
   },
   {
-   "fieldname": "section_break_obbx",
+   "default": "Today",
+   "fieldname": "tanggal_proses",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Proses"
+  },
+  {
+   "fieldname": "detal_section",
    "fieldtype": "Section Break",
-   "label": "Detail"
+   "label": "Detail Bunker"
+  },
+  {
+   "default": "0",
+   "fetch_from": "pabrik.tinggi_lubang_ukur",
+   "fieldname": "tinggi_lubang_ukur",
+   "fieldtype": "Float",
+   "label": "Tinggi Lubang Ukur ( CM )",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "pabrik.tinggi_normal_bunker",
+   "fieldname": "tinggi_normal_bunker",
+   "fieldtype": "Float",
+   "label": "Tinggi Normal Bunker ( CM )",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ukuran_detail",
+   "fieldtype": "Table",
+   "label": "Ukuran Detail",
+   "options": "Palm Kernel Bunker Detail"
+  },
+  {
+   "fieldname": "section_break_jhlo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "preview_data",
+   "fieldtype": "HTML",
+   "label": "Preview Data"
+  },
+  {
+   "fieldname": "detail_stock_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Stock"
+  },
+  {
+   "fieldname": "stock_awal",
+   "fieldtype": "Float",
+   "label": "Stock Awal "
+  },
+  {
+   "fieldname": "pengiriman",
+   "fieldtype": "Float",
+   "label": "Pengiriman"
+  },
+  {
+   "fieldname": "stock_akhir",
+   "fieldtype": "Float",
+   "label": "Stock Akhir"
+  },
+  {
+   "fieldname": "produksi",
+   "fieldtype": "Float",
+   "label": "Produksi"
+  },
+  {
+   "fieldname": "tbs_olah",
+   "fieldtype": "Float",
+   "label": "TBS Olah"
+  },
+  {
+   "fieldname": "ker_netto_1",
+   "fieldtype": "Float",
+   "label": "KER Netto 1 (%)"
+  },
+  {
+   "fieldname": "ker_netto_2",
+   "fieldtype": "Float",
+   "label": "KER Netto 2 (%)"
+  },
+  {
+   "fieldname": "column_break_wdwq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "table_zfca",
+   "fieldtype": "Table",
+   "options": "Ukuran Volume Sounding Bunker",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "volume_sounding",
+   "fieldtype": "Float",
+   "label": "Volume Sounding",
+   "read_only": 1
+  },
+  {
+   "fieldname": "informasi_kompartemen_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Kompartemen"
+  },
+  {
+   "fieldname": "column_break_sfpp",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:42:02.796635",
+ "modified": "2026-04-06 13:30:19.672070",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",

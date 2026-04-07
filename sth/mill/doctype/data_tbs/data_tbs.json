@@ -10,14 +10,14 @@
   "naming_series",
   "tanggal",
   "jam",
-  "column_break_pykt",
-  "company",
-  "unit",
   "column_break_mhpi",
-  "pabrik",
   "tanggal_produksi",
   "total_jam_olah",
   "kapasitas_pabrik",
+  "column_break_pykt",
+  "company",
+  "pabrik",
+  "unit",
   "section_break_xief",
   "column_break_lfzm",
   "get_data",
@@ -34,16 +34,18 @@
   "tbs_olah",
   "tbs_restan",
   "tbs_loading_ramp",
-  "berat_rata_rata_tbs",
-  "shift"
+  "berat_rata_rata_tbs"
  ],
  "fields": [
   {
+   "fetch_from": "pabrik.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_xief",
@@ -53,20 +55,29 @@
   {
    "default": "0",
    "fieldname": "jumlah_tbs_restan",
-   "fieldtype": "Int",
-   "label": "Jumlah TBS Restan"
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah TBS Restan",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "jumlah_tbs_diterima",
-   "fieldtype": "Int",
-   "label": "Jumlah TBS Diterima"
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah TBS Diterima",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "grand_total_tbs",
-   "fieldtype": "Int",
-   "label": "Grand Total TBS"
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Grand Total TBS",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_rdlu",
@@ -74,25 +85,30 @@
   },
   {
    "default": "0",
-   "description": "Dalam Kg",
    "fieldname": "berat_rata_rata_tbs",
    "fieldtype": "Float",
-   "label": "Berat Rata-rata Lori",
-   "precision": "0"
+   "in_preview": 1,
+   "label": "Berat Rata-rata Lori ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
-   "label": "TBS Olah",
-   "precision": "0"
+   "in_preview": 1,
+   "label": "TBS Olah ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "tbs_restan",
    "fieldtype": "Float",
-   "label": "TBS Restan",
-   "precision": "0"
+   "in_preview": 1,
+   "label": "TBS Restan ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "naming_series",
@@ -128,15 +144,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_rjip",
    "fieldtype": "Column Break"
   },
@@ -149,38 +156,50 @@
    "default": "0",
    "fieldname": "jumlah_lori_mentah",
    "fieldtype": "Int",
-   "label": "Jumlah Lori Mentah"
+   "in_preview": 1,
+   "label": "Jumlah Lori Mentah",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "lori_estimasi_loading_ramp",
    "fieldtype": "Int",
-   "label": "Lori Estimasi Loading Ramp"
+   "in_preview": 1,
+   "label": "Lori Estimasi Loading Ramp",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "tbs_loading_ramp",
    "fieldtype": "Float",
-   "label": "TBS Loading Ramp",
-   "precision": "0"
+   "in_preview": 1,
+   "label": "TBS Loading Ramp ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "grand_total_lori",
    "fieldtype": "Int",
-   "label": "Grand Total Lori"
+   "in_preview": 1,
+   "label": "Grand Total Lori",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "jumlah_lori_olah",
    "fieldtype": "Int",
-   "label": "Jumlah Lori Olah"
+   "in_preview": 1,
+   "label": "Jumlah Lori Olah",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "jumlah_lori_masak",
    "fieldtype": "Int",
-   "label": "Jumlah Lori Masak"
+   "in_preview": 1,
+   "label": "Jumlah Lori Masak",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_lfzm",
@@ -195,28 +214,36 @@
   {
    "fieldname": "pabrik",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Pabrik",
-   "options": "Mill Master"
+   "options": "Mill Master",
+   "reqd": 1
   },
   {
    "default": "Today",
    "fieldname": "tanggal_produksi",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal Produksi"
+   "label": "Tanggal Proses"
   },
   {
+   "default": "0",
    "fieldname": "total_jam_olah",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Total Jam Olah"
+   "label": "Total Jam Olah",
+   "read_only": 1
   },
   {
+   "default": "0",
    "description": "Ton/Jam",
    "fieldname": "kapasitas_pabrik",
    "fieldtype": "Float",
-   "label": "Kapasitas Pabrik"
+   "in_preview": 1,
+   "label": "Kapasitas Pabrik",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_mhpi",
@@ -226,7 +253,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 13:21:49.892204",
+ "modified": "2026-03-31 14:08:33.631645",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

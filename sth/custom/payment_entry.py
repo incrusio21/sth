@@ -85,11 +85,11 @@ def update_status_deposito(self, method):
 	update_deposito_payment_entry(self, method)
 
 def update_status_loan_bank(self, method):
-    update_loan_bank_payment_entry(self, method)
+	update_loan_bank_payment_entry(self, method)
 
 def update_status_dividen(self, method):
-    update_dividen_payment_entry(self, method)
-    
+	update_dividen_payment_entry(self, method)
+	
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args, validate=False):
@@ -264,36 +264,36 @@ def get_outstanding_reference_documents(args, validate=False):
 
 def payment_entry_notification(doc, method):
 
-    for ref in doc.references:
+	for ref in doc.references:
 
-        if not ref.reference_doctype or not ref.reference_name:
-            continue
+		if not ref.reference_doctype or not ref.reference_name:
+			continue
 
-        owner = frappe.db.get_value(
-            ref.reference_doctype,
-            ref.reference_name,
-            "owner"
-        )
+		owner = frappe.db.get_value(
+			ref.reference_doctype,
+			ref.reference_name,
+			"owner"
+		)
 
-        if not owner:
-            continue
+		if not owner:
+			continue
 
-        notification = frappe.get_doc({
-            "doctype": "Notification Log",
-            "subject": f"{ref.reference_doctype} {ref.reference_name} telah dibayarkan melalui {doc.name}",
-            "for_user": owner,
-            "type": "Alert",
-            "document_type": ref.reference_doctype,
-            "document_name": ref.reference_name
-        }).insert(ignore_permissions=True)
+		notification = frappe.get_doc({
+			"doctype": "Notification Log",
+			"subject": f"{ref.reference_doctype} {ref.reference_name} telah dibayarkan melalui {doc.name}",
+			"for_user": owner,
+			"type": "Alert",
+			"document_type": ref.reference_doctype,
+			"document_name": ref.reference_name
+		}).insert(ignore_permissions=True)
 
-        notification.notify_update()
+		notification.notify_update()
 
-        frappe.publish_realtime(
-            event="notification",
-            message={"type": "Alert"},
-            user=owner
-        )
+		frappe.publish_realtime(
+			event="notification",
+			message={"type": "Alert"},
+			user=owner
+		)
 
 
 def check_payment_notification(doc, method):
@@ -416,14 +416,51 @@ def test_check_payment_notification():
 
 def update_pesangon_from_payment(doc, method):
 
-    if doc.tipe_transfer != "Salary Slip":
-        return
+	if doc.tipe_transfer != "Salary Slip":
+		return
 
-    for row in doc.payment_voucher_salary_slip:
-        slip_name = row.salary_slip
-        slip = frappe.get_doc("Salary Slip", slip_name)
+	for row in doc.payment_voucher_salary_slip:
+		slip_name = row.salary_slip
+		slip = frappe.get_doc("Salary Slip", slip_name)
 
-        if slip.tipe_salary != "Pesangon" or not slip.pesangon_doc:
-            continue
+		if slip.tipe_salary != "Pesangon" or not slip.pesangon_doc:
+			continue
 
-        slip.update_pesangon_payment_status()
+		slip.update_pesangon_payment_status()
+
+def buat_nota_piutang(doc, method):
+	if doc.get("apakah_dp_kontrak") == 1 and doc.get("no_kontrak_penjualan"):
+		if doc.payment_type != "Receive":
+			return
+
+		if not doc.no_kontrak_penjualan:
+			return
+
+		if doc.reference_no and frappe.db.exists("Nota Piutang", doc.reference_no):
+			return
+
+		# Cegah duplikat
+		existing = frappe.db.exists("Nota Piutang", {"payment_entry": doc.name})
+		if existing:
+			frappe.msgprint(
+				f"Nota Piutang sudah ada: <b>{existing}</b>",
+				alert=True
+			)
+			return
+
+		ppn_total = sum(abs(d.amount) for d in doc.get("deductions") or [])
+		nilai_dp  = doc.paid_amount - ppn_total
+
+		np = frappe.new_doc("Nota Piutang")
+		np.tipe           = "Nota DP"
+		np.date           = doc.posting_date
+		np.no_kontrak     = doc.no_kontrak_penjualan
+		np.company        = doc.company
+		np.akun_uang_muka = doc.paid_from
+		np.akun_kas_bank  = doc.paid_to
+		np.nilai_dp       = nilai_dp
+		np.payment_entry  = doc.name
+		np.dibuat_dari_payment_voucher = 1
+
+		np.insert(ignore_permissions=True)
+		np.submit()

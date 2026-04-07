@@ -8,8 +8,82 @@ $(document).on('form-refresh', function (e, frm) {
 
 	bikin_tombol_upload(frm);
 	render_kriteria_upload(frm);
+	
+	if (frm.fields_dict['kriteria_upload_sebelumnya']) {
+		render_kriteria_previous(frm);
+	}
 });
 
+async function render_kriteria_previous(frm) {
+
+	const $wrapper = $(frm.fields_dict['kriteria_upload_sebelumnya'].wrapper);
+
+	$wrapper.html(`
+		<div style="padding:10px;color:#8D99AE;font-size:12px;">
+			⏳ Loading previous documents...
+		</div>
+	`);
+
+	try {
+
+		const r = await frappe.call({
+			method: "sth.api.get_previous_kriteria_documents",
+			args: {
+				doctype: frm.doc.doctype,
+				docname: frm.doc.name
+			}
+		});
+
+		const rows = r.message || [];
+
+		if (!rows.length) {
+			$wrapper.html(`
+				<div style="color:#aaa;font-size:12px;">
+					No previous documents found.
+				</div>
+			`);
+			return;
+		}
+
+		$wrapper.html(build_table_sebelumnya_html(rows));
+
+	} catch (err) {
+
+		console.error(err);
+
+		$wrapper.html(`
+			<div style="color:red;font-size:12px;">
+				Error loading previous documents
+			</div>
+		`);
+	}
+}
+
+function get_previous_document(frm) {
+
+	if (frm.doc.doctype === "Delivery Order") {
+		return {
+			voucher_type: "Sales Order",
+			voucher_no: frm.doc.sales_order
+		};
+	}
+
+	if (frm.doc.doctype === "Delivery Note") {
+		return {
+			voucher_type: "Delivery Order",
+			voucher_no: frm.doc.delivery_order
+		};
+	}
+
+	if (frm.doc.doctype === "Sales Invoice") {
+		return {
+			voucher_type: "Delivery Note",
+			voucher_no: frm.doc.delivery_note
+		};
+	}
+
+	return null;
+}
 
 async function render_kriteria_upload(frm) {
 	const $wrapper = $(frm.fields_dict['kriteria_upload_html'].wrapper);
@@ -135,6 +209,105 @@ function build_table_html(doc_name, rows) {
 	`;
 }
 
+function build_table_sebelumnya_html(rows) {
+
+	const rows_html = rows.map((row, idx) => {
+
+		const file_url = resolve_file_url(row.file);
+
+		const file_cell = file_url
+			? `<a href="${file_url}" target="_blank" rel="noopener noreferrer" style="
+					display:inline-flex; align-items:center; gap:5px;
+					background:#EBF3FF; border:1px solid #B8D4FF; border-radius:4px;
+					color:#1a73e8; font-size:12px; padding:4px 10px;
+					text-decoration:none; font-weight:500;
+			">${file_icon()} View File</a>`
+			: `<span style="color:#aaa; font-style:italic; font-size:12px;">No file</span>`;
+
+		return `
+			<tr style="border-bottom:1px solid #f0f0f0;">
+
+				<td style="padding:10px 12px;color:#aaa;font-size:12px;width:40px;">
+					${idx + 1}
+				</td>
+
+				<td style="padding:10px 12px;font-size:12px;color:#666;">
+					${frappe.utils.escape_html(row.voucher_type || '—')}
+				</td>
+
+				<td style="padding:10px 12px;font-size:13px;color:#333;">
+					${frappe.utils.escape_html(row.rincian || '—')}
+				</td>
+
+				<td style="padding:10px 12px;">
+					${file_cell}
+				</td>
+
+			</tr>
+		`;
+
+	}).join('');
+
+	return `
+		<div style="margin:4px 0 12px;">
+
+			<div style="
+				display:flex;
+				align-items:center;
+				justify-content:space-between;
+				margin-bottom:8px;
+			">
+				<span style="
+					font-size:12px;
+					font-weight:600;
+					color:#555;
+					text-transform:uppercase;
+					letter-spacing:0.05em;
+				">
+					Dokumen Sebelumnya
+				</span>
+			</div>
+
+			<div style="
+				border:1px solid #e4e4e4;
+				border-radius:6px;
+				overflow:hidden;
+				background:#fff;
+			">
+
+				<table style="width:100%; border-collapse:collapse;">
+
+					<thead>
+						<tr style="background:#f8f9fa;border-bottom:1px solid #e4e4e4;">
+
+							<th style="padding:9px 12px;font-size:11px;color:#888;width:40px;">#</th>
+
+							<th style="padding:9px 12px;font-size:11px;color:#888;width:160px;">
+								DocType
+							</th>
+
+							<th style="padding:9px 12px;font-size:11px;color:#888;">
+								Rincian Dokumen Finance
+							</th>
+
+							<th style="padding:9px 12px;font-size:11px;color:#888;width:120px;">
+								File
+							</th>
+
+						</tr>
+					</thead>
+
+					<tbody>
+						${rows_html}
+					</tbody>
+
+				</table>
+
+			</div>
+
+		</div>
+	`;
+}
 
 function resolve_file_url(file_path) {
 	if (!file_path) return null;
@@ -151,6 +324,17 @@ function file_icon() {
 }
 
 function bikin_tombol_upload(frm) {
+
+	if (
+		(frm.doc.doctype === "Timbangan" &&
+			!(frm.doc.type === "Dispatch" && frm.doc.docstatus === 0))
+		||
+		(frm.doc.doctype === "Delivery Note" &&
+			frm.doc.docstatus === 1)
+	) {
+		return;
+	}
+
 	if (!frm.is_new()) {
 		frm.add_custom_button(__('Upload File'), function () {
 			let submited_condition = false

@@ -417,6 +417,7 @@ class PaymentEntry(EmployeePaymentEntry):
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
 
+		print(gl_entries)
 		self.add_bank_gl_entries(gl_entries)
 		print(gl_entries)
 
@@ -455,7 +456,26 @@ class PaymentEntry(EmployeePaymentEntry):
 					item=self,
 				)
 			)
-		if self.payment_type in ("Receive", "Internal Transfer"):
+
+		if self.payment_type in ("Receive"):
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.paid_to,
+						"account_currency": self.paid_to_account_currency,
+						"against": self.party if self.payment_type == "Receive" else self.paid_from,
+						"debit_in_account_currency": self.received_amount,
+						"debit_in_transaction_currency": self.received_amount
+						if self.paid_to_account_currency == self.transaction_currency
+						else self.base_received_amount / self.transaction_exchange_rate,
+						"debit": self.base_received_amount,
+						"cost_center": self.cost_center,
+					},
+					item=self,
+				)
+			)
+
+		if self.payment_type in ("Internal Transfer"):
 
 			if self.payment_type == "Internal Transfer" and not self.tipe_transfer:
 				gl_entries.append(
@@ -778,11 +798,11 @@ def clear_permintaan_dana_operasional(self):
 			title=f"Error clearing PDO {self.permintaan_dana_operasional}"
 			)
 def debug():
-	t = frappe.get_doc("Payment Entry","PDO-00050")
+	t = frappe.get_doc("Nota Piutang","NDP-032026-00001")
 	# t.permintaan_dana_operasional = "PDO-00042"
 	# t.db_update()
 	# frappe.db.commit()
-	on_submit_pdo(t,"on_submit")
+	t.on_submit()
 
 
 def update_tipe_pdo_outstanding(self):

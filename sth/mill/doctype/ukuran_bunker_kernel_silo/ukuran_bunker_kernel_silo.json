@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:UBKS-{abbr}-{pabrik}",
+ "creation": "2026-04-06 09:16:26.091814",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "abbr",
+  "column_break_nxys",
+  "pabrik",
+  "section_break_wqrx",
+  "ukuran_silo"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_nxys",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Pabrik",
+   "options": "Mill Master",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_wqrx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ukuran_silo",
+   "fieldtype": "Table",
+   "label": "Ukuran Silo",
+   "options": "Ukuran Bunker Kernel Silo Detail"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-06 09:27:54.788546",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Ukuran Bunker Kernel Silo",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

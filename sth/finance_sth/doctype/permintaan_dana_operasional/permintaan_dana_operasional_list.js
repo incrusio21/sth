@@ -1,9 +1,9 @@
 frappe.listview_settings["Permintaan Dana Operasional"] = {
-	onload: function(listview) {
-        listview.page.add_inner_button("Preview", function() {
-            preview_dialog();
-        });
-    },
+	onload: function (listview) {
+		listview.page.add_inner_button("Preview", function () {
+			preview_dialog();
+		});
+	},
 
 	primary_action: function () {
 		this.new_doctype_dialog();
@@ -11,33 +11,33 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 
 	new_doctype_dialog() {
 		let fields = [
-            {
-                label: __("Company"),
-                fieldname: "company",
-                fieldtype: "Link",
-                options: "Company",
-                reqd: 1,
+			{
+				label: __("Company"),
+				fieldname: "company",
+				fieldtype: "Link",
+				options: "Company",
+				reqd: 1,
 				default: frappe.user_defaults.company
-            },
+			},
 			{
 				label: __("Unit"),
 				fieldname: "unit",
 				fieldtype: "Link",
-                options: "Unit",
+				options: "Unit",
 				reqd: 1,
 			},
-            {
+			{
 				label: __("Months"),
 				fieldname: "months",
 				fieldtype: "Link",
-                options: "Months",
+				options: "Months",
 				reqd: 1,
 			},
-            {
+			{
 				label: __("Fiscal Year"),
 				fieldname: "fiscal_year",
 				fieldtype: "Link",
-                options: "Fiscal Year",
+				options: "Fiscal Year",
 				reqd: 1,
 			},
 		];
@@ -84,30 +84,32 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 
 function preview_dialog() {
 
-    const PDO_PRINT_FORMAT = "PF Preview PDO";   
+	const PDO_PRINT_FORMAT = "PF Preview PDO";
 
-    let d = new frappe.ui.Dialog({
-        title: __("Preview Permintaan Dana Operasional"),
-        fields: [
-            {
-                label: __("PDO ID"),
-                fieldname: "pdo_id",
-                fieldtype: "Link",
-                options: "Permintaan Dana Operasional",
-                reqd: 1
-            }
-        ],
+	let d = new frappe.ui.Dialog({
+		title: __("Preview Permintaan Dana Operasional"),
+		fields: [
+			{
+				label: __("PDO ID"),
+				fieldname: "pdo_id",
+				fieldtype: "Link",
+				options: "Permintaan Dana Operasional",
+				reqd: 1
+			}
+		],
 
-        primary_action_label: __("Preview Print"),
-        primary_action(values) {
+		// primary_action_label: __("Preview Print"),
+		primary_action_label: __("Preview PDO"),
+		primary_action(values) {
 
-            let print_url = `${window.location.origin}/printview?doctype=Permintaan Dana Operasional&name=${values.pdo_id}&format=${encodeURIComponent(PDO_PRINT_FORMAT)}&no_letterhead=0&trigger_print=0`;
+			// let print_url = `${window.location.origin}/printview?doctype=Permintaan Dana Operasional&name=${values.pdo_id}&format=${encodeURIComponent(PDO_PRINT_FORMAT)}&no_letterhead=0&trigger_print=0`;
+			const print_url = `/app/preview-pdo?pdo_name=${values.pdo_id}`
 
-            window.open(print_url, "_blank");
+			window.open(print_url, "_blank");
 
-            d.hide();
-        }
-    });
+			d.hide();
+		}
+	});
 
-    d.show();
+	d.show();
 }

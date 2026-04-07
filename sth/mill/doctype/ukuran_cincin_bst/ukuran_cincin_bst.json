@@ -7,11 +7,13 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "nomor_cincin",
+  "header_section",
   "nama_bst",
+  "pabrik",
   "column_break_gwxs",
-  "dari_ukuran",
+  "nomor_cincin",
   "column_break_sade",
+  "dari_ukuran",
   "sampai_ukuran",
   "section_break_dyvs",
   "details"
@@ -42,7 +44,8 @@
   },
   {
    "fieldname": "section_break_dyvs",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
    "fieldname": "details",
@@ -59,12 +62,25 @@
    "label": "Nama BST",
    "options": "Master BST",
    "reqd": 1
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Pabrik",
+   "options": "Mill Master",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-13 15:02:47.528493",
+ "modified": "2026-03-31 13:49:54.512018",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Cincin BST",

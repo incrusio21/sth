@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-30 11:14:39.085957",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "segel_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "segel_number",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Segel Number",
+   "options": "Segel Number",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-30 11:16:00.173590",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Segel Timbangan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

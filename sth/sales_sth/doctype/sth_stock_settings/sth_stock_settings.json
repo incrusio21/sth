@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-01 01:12:42.898182",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "transit_settings_section",
+  "sth_stock_settings_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "transit_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transit Settings"
+  },
+  {
+   "fieldname": "sth_stock_settings_table",
+   "fieldtype": "Table",
+   "label": "STH Stock Settings Table",
+   "options": "STH Stock Settings Table"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-04-01 01:14:20.616134",
+ "modified_by": "Administrator",
+ "module": "Sales STH",
+ "name": "STH Stock Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

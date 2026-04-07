@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "nama_bst"
+  "nama_bst",
+  "details"
  ],
  "fields": [
   {
@@ -16,12 +17,18 @@
    "label": "Nama BST",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Master BST Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-11 11:35:58.005519",
+ "modified": "2026-04-02 13:10:45.594209",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Master BST",

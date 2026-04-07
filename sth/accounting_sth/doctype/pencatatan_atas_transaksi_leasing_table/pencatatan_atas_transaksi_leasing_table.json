@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-31 11:08:29.107907",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kontrak",
+  "saldo_awal",
+  "cicilan_pokok",
+  "bunga_cicilan",
+  "column_break_zipi",
+  "premi_asuransi",
+  "total_cicilan",
+  "denda_telat",
+  "saldo_akhir"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "kontrak",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kontrak"
+  },
+  {
+   "columns": 2,
+   "fieldname": "saldo_awal",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Saldo Awal"
+  },
+  {
+   "columns": 1,
+   "fieldname": "cicilan_pokok",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Cicilan Pokok"
+  },
+  {
+   "columns": 2,
+   "fieldname": "column_break_zipi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_cicilan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Cicilan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "premi_asuransi",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Premi Asuransi"
+  },
+  {
+   "columns": 1,
+   "fieldname": "denda_telat",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Denda Telat"
+  },
+  {
+   "columns": 2,
+   "fieldname": "saldo_akhir",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Saldo Akhir"
+  },
+  {
+   "columns": 1,
+   "fieldname": "bunga_cicilan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Bunga Cicilan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-31 14:54:49.846458",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Pencatatan Atas Transaksi Leasing Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

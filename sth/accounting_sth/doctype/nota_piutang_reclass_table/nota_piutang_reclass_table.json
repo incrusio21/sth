@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-02 13:30:46.432646",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "periode",
+  "qty",
+  "rate",
+  "subtotal",
+  "ppn",
+  "grand_total",
+  "reclass",
+  "akun_reclass"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "periode",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Periode"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate"
+  },
+  {
+   "columns": 1,
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Subtotal"
+  },
+  {
+   "columns": 1,
+   "fieldname": "ppn",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "PPN"
+  },
+  {
+   "columns": 1,
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total"
+  },
+  {
+   "columns": 1,
+   "fieldname": "reclass",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Reclass"
+  },
+  {
+   "columns": 2,
+   "fieldname": "akun_reclass",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Akun Reclass",
+   "options": "Account"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-02 13:37:41.112248",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Nota Piutang Reclass Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

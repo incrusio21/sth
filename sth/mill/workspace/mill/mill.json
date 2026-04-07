@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Pos Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"C7DZFVhHaD\",\"type\":\"card\",\"data\":{\"card_name\":\"Traksi\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}},{\"id\":\"-7jPYG1E_2\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"KgabNUUZ4g\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mill</span>\",\"col\":12}},{\"id\":\"fMAWfayWWm\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"1jicFVa4kx\",\"type\":\"card\",\"data\":{\"card_name\":\"Report Timbangan\",\"col\":4}},{\"id\":\"5rWZ8pDeKF\",\"type\":\"card\",\"data\":{\"card_name\":\"Kalibrasi Timbangan\",\"col\":4}},{\"id\":\"daAJaCTyfG\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring Proses Control\",\"col\":4}},{\"id\":\"V-XHOaLb9s\",\"type\":\"card\",\"data\":{\"card_name\":\"Pos Security\",\"col\":4}},{\"id\":\"QoS4QgU9kL\",\"type\":\"card\",\"data\":{\"card_name\":\"Timbangan\",\"col\":4}},{\"id\":\"MsUcHVxKT8\",\"type\":\"card\",\"data\":{\"card_name\":\"Sortasi\",\"col\":4}},{\"id\":\"pE1S15amwJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Sterilizer\",\"col\":4}},{\"id\":\"fGxDUdYwjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Thressing\",\"col\":4}},{\"id\":\"zD80RvDl70\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Press\",\"col\":4}},{\"id\":\"U1AIbuXV7g\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Klarifikasi\",\"col\":4}},{\"id\":\"OvlA5jMUaP\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Kernel\",\"col\":4}},{\"id\":\"dvQ2yYU2MN\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Power House\",\"col\":4}},{\"id\":\"z5qIu86a_3\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Water Treatment\",\"col\":4}},{\"id\":\"h64erVTc-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stasiun Effluent Treatment (Limbah)\",\"col\":4}},{\"id\":\"NNwHmowq3q\",\"type\":\"card\",\"data\":{\"card_name\":\"Laboratorium\",\"col\":4}},{\"id\":\"hjb_Znb5qO\",\"type\":\"card\",\"data\":{\"card_name\":\"Laporan Harian Produksi (LHP)\",\"col\":4}},{\"id\":\"QemMpSmEPB\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup Ukuran Sounding\",\"col\":4}},{\"id\":\"bZuGEwP4l3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rencana Kerja Harian (RKH)\",\"col\":4}},{\"id\":\"us_DXDeUGg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bengkel\",\"col\":4}},{\"id\":\"h6FUHIdxBa\",\"type\":\"card\",\"data\":{\"card_name\":\"Budget\",\"col\":4}},{\"id\":\"C7DZFVhHaD\",\"type\":\"card\",\"data\":{\"card_name\":\"Traksi\",\"col\":4}},{\"id\":\"Gdb2W__AUe\",\"type\":\"card\",\"data\":{\"card_name\":\"Gudang Mill\",\"col\":4}},{\"id\":\"E5v7oqBdBf\",\"type\":\"card\",\"data\":{\"card_name\":\"Temuan Lainnya\",\"col\":4}},{\"id\":\"-7jPYG1E_2\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2025-11-20 15:54:30.037918",
  "custom_blocks": [],
  "docstatus": 0,
@@ -489,55 +489,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Master",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pabrik",
-   "link_count": 0,
-   "link_to": "Mill Master",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Master Stasiun",
-   "link_count": 0,
-   "link_to": "Station Master",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Master Mesin",
-   "link_count": 0,
-   "link_to": "Mill Machine",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Driver",
-   "link_count": 0,
-   "link_to": "Driver",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Traksi",
    "link_count": 3,
    "link_type": "DocType",
@@ -774,57 +725,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Laporan Harian Produksi (LHP)",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Data TBS",
-   "link_count": 0,
-   "link_to": "Data TBS",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sounding Stock CPO di BST",
-   "link_count": 0,
-   "link_to": "Sounding Stock CPO di BST",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
-   "link_count": 0,
-   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Penginputan Stock By Product",
-   "link_count": 0,
-   "link_to": "Penginputan Stock By Product",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Laboratorium",
-   "link_count": 23,
+   "link_count": 22,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -855,6 +757,16 @@
    "label": "Kernel Losess on Sampel",
    "link_count": 0,
    "link_to": "Kernel Losess on Sampel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analisa Kualitas Pengiriman CPO dan KERNEL",
+   "link_count": 0,
+   "link_to": "Analisa Kualitas Pengiriman CPO dan KERNEL",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -952,26 +864,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Analisa Kualitas CPO  Pengiriman",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas CPO  Pengiriman",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Analisa Kualitas Palm Kernel  Pengiriman",
-   "link_count": 0,
-   "link_to": "Analisa Kualitas Palm Kernel  Pengiriman",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Analisa Oil Losess",
    "link_count": 0,
    "link_to": "Analisa Oil Losess",
@@ -1058,9 +950,166 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pabrik",
+   "link_count": 0,
+   "link_to": "Mill Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Stasiun",
+   "link_count": 0,
+   "link_to": "Station Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Mesin",
+   "link_count": 0,
+   "link_to": "Mill Machine",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Driver",
+   "link_count": 0,
+   "link_to": "Driver",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master BST",
+   "link_count": 0,
+   "link_to": "Master BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Laporan Harian Produksi (LHP)",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data TBS",
+   "link_count": 0,
+   "link_to": "Data TBS",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock CPO di BST",
+   "link_count": 0,
+   "link_to": "Sounding Stock CPO di BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_count": 0,
+   "link_to": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Penginputan Stock By Product",
+   "link_count": 0,
+   "link_to": "Penginputan Stock By Product",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setup Ukuran Sounding",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ukuran Sounding BST",
+   "link_count": 0,
+   "link_to": "Ukuran Sounding BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ukuran Cincin BST",
+   "link_count": 0,
+   "link_to": "Ukuran Cincin BST",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ukuran Berat Jenis",
+   "link_count": 0,
+   "link_to": "Ukuran Berat Jenis",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ukuran Bunker Kernel Silo",
+   "link_count": 0,
+   "link_to": "Ukuran Bunker Kernel Silo",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-03-14 10:53:52.814770",
+ "modified": "2026-04-06 10:43:45.636394",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",

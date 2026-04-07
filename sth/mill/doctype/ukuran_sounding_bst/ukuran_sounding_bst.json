@@ -2,18 +2,23 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:nama_bst",
+ "autoname": "format:{nama_bst}/{pabrik}",
  "creation": "2026-03-11 10:05:09.584302",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
   "nama_bst",
+  "column_break_johq",
+  "pabrik",
+  "detail_section",
   "details"
  ],
  "fields": [
   {
    "fieldname": "nama_bst",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Nama BST",
    "options": "Master BST",
    "unique": 1
@@ -23,16 +28,39 @@
    "fieldtype": "Table",
    "label": "Details",
    "options": "Ukuran Sounding BST Detail"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "column_break_johq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Pabrik",
+   "options": "Mill Master",
+   "reqd": 1
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-13 15:15:00.900168",
+ "modified": "2026-04-02 16:48:09.982810",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Sounding BST",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -422,50 +422,15 @@ function filter_bank_accounts(frm) {
             }
         }
     });
-    frappe.db.get_list('Bank Account', {
-        filters: {
-            'unit': frm.doc.unit
-        },
-        fields: ['name'],
-        limit: 1
-    }).then(records => {
-        if (records && records.length > 0) {
-            let bank_account_name = records[0].name;
-            
-            // Set the bank_account field
-            frm.set_value('bank_account', bank_account_name);
-            
-            // Now get the account from Unit doctype for paid_to/paid_from
-            frappe.db.get_value('Unit', frm.doc.unit, 'bank_account', (r) => {
-                if (r && r.bank_account) {
-                    let account = r.bank_account;
-                    
-                    if (frm.doc.payment_type === 'Receive') {
-                        // Filter and set paid_to field
-                        frm.set_query('paid_to', function() {
-                            return {
-                                filters: {
-                                    'name': account
-                                }
-                            };
-                        });
-                        frm.set_value('paid_to', account);
-                        
-                    } else if (frm.doc.payment_type === 'Pay') {
-                        // Filter and set paid_from field
-                        frm.set_query('paid_from', function() {
-                            return {
-                                filters: {
-                                    'name': account
-                                }
-                            };
-                        });
-                        frm.set_value('paid_from', account);
-                    }
-                }
-            });
+
+    frappe.db.get_value('Unit', frm.doc.unit, 'default_bank_account', (r) => {
+        if (r && r.default_bank_account) {
+            let default_bank_account = r.default_bank_account;
+            frm.set_value('bank_account', default_bank_account);            
         }
     });
+    
+    
 }
 
 function show_pdo_selector(frm) {

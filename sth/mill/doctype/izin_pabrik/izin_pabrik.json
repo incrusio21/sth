@@ -12,15 +12,16 @@
   "jam",
   "periode",
   "column_break_szct",
-  "status",
   "company",
   "unit",
+  "jenis_izin",
   "section_break_ufha",
   "nama_unitalat",
   "nama_izin_dan_alat",
-  "column_break_lazg",
   "nomor_izin",
+  "column_break_lazg",
   "tanggal_dikeluarkan",
+  "tanggal_habis_masa_berlaku",
   "yang_mengeluarkan",
   "column_break_vekm",
   "tanggal_pemeriksaan",
@@ -44,7 +45,8 @@
   {
    "fieldname": "nama_izin_dan_alat",
    "fieldtype": "Data",
-   "label": "Nama Perijinan"
+   "label": "Nama Perijinan",
+   "unique": 1
   },
   {
    "fieldname": "column_break_lazg",
@@ -119,13 +121,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
    "fieldname": "section_break_ufha",
    "fieldtype": "Section Break",
    "label": "Detail"
@@ -136,19 +131,32 @@
   },
   {
    "fieldname": "nama_unitalat",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "label": "Nama Unit/Alat"
   },
   {
    "fieldname": "yang_mengeluarkan",
    "fieldtype": "Data",
    "label": "Yang Mengeluarkan"
+  },
+  {
+   "fieldname": "jenis_izin",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Jenis Izin",
+   "options": "\nIZIN CORPORATE\nIZIN KEBUN\nIZIN PABRIK\nIZIN LINGKUNGAN"
+  },
+  {
+   "fieldname": "tanggal_habis_masa_berlaku",
+   "fieldtype": "Date",
+   "label": "Tanggal Habis Masa Berlaku"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-14 09:15:41.901177",
+ "modified": "2026-03-31 10:26:34.247422",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Izin Pabrik",

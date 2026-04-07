@@ -30,6 +30,7 @@
   "supplier",
   "spb",
   "do_no",
+  "delivery_note",
   "purchase_order",
   "section_break_mnhe",
   "isi_komidel",
@@ -40,6 +41,7 @@
   "delivery_order",
   "tujuan",
   "sisa_do",
+  "reference_do_item",
   "column_break_gypo",
   "no_segel",
   "jumlah_segel",
@@ -48,6 +50,7 @@
   "storage",
   "analisa_kualitas_produk_section",
   "kualitas_ffa_",
+  "kualitas_broken_",
   "column_break_etfh",
   "kualitas_moisture_",
   "column_break_pnhx",
@@ -140,7 +143,7 @@
    "fetch_from": "ticket_number.transporter_name",
    "fieldname": "transportir",
    "fieldtype": "Data",
-   "label": "Transportir"
+   "label": "Nama Transportir"
   },
   {
    "depends_on": "eval:doc.type == 'Receive'",
@@ -192,8 +195,9 @@
   },
   {
    "fieldname": "no_segel",
-   "fieldtype": "Data",
-   "label": "No Segel"
+   "fieldtype": "Table MultiSelect",
+   "label": "No Segel",
+   "options": "Segel Timbangan"
   },
   {
    "fieldname": "jumlah_segel",
@@ -267,14 +271,11 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "fetch_from": "ticket_number.spb",
    "fieldname": "spb",
    "fieldtype": "Link",
    "label": "SPB",
    "mandatory_depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "options": "Surat Pengantar Buah",
-   "read_only": 1
+   "options": "Surat Pengantar Buah"
   },
   {
    "depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
@@ -391,6 +392,7 @@
    "fetch_from": "kode_barang.item_name",
    "fieldname": "nama_barang",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Nama Barang",
    "read_only": 1
   },
@@ -418,6 +420,7 @@
   {
    "fieldname": "reference_doctype",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Reference Doctype",
    "options": "Delivery Note\nPurchase Receipt",
    "read_only": 1
@@ -425,6 +428,7 @@
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
+   "hidden": 1,
    "label": "Reference Name",
    "options": "reference_doctype",
    "read_only": 1
@@ -521,13 +525,35 @@
    "in_preview": 1,
    "label": "Kualitas Dirt %",
    "read_only": 1
+  },
+  {
+   "fieldname": "kualitas_broken_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Kualitas Broken %",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ticket_number.items_do_reference",
+   "fieldname": "reference_do_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference DO Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_note",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Delivery Note",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 10:23:41.644915",
+ "modified": "2026-04-02 11:50:14.867242",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

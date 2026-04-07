@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-03-27 14:07:23.216182",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "naming_series",
+  "tanggal",
+  "jam",
+  "tipe",
+  "column_break_fmdz",
+  "status",
+  "company",
+  "unit",
+  "section_break_irhy",
+  "ticket_number",
+  "no_do",
+  "column_break_svsz",
+  "nama_customer",
+  "no_polisi",
+  "nama_supir",
+  "input_kualitas_cpo_section",
+  "input_kualitas_ffa",
+  "input_kualitas_broken",
+  "column_break_yseb",
+  "input_kualitas_moisture",
+  "column_break_juvd",
+  "input_kualitas_dirt",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Series",
+   "options": "AKCP-.####"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fmdz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Proses QC\nPass QC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "ticket_number.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_irhy",
+   "fieldtype": "Section Break",
+   "label": "Detail Data"
+  },
+  {
+   "fieldname": "ticket_number",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Ticket Number",
+   "options": "Security Check Point",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "ticket_number.do_no",
+   "fieldname": "no_do",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "No. DO",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_svsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "ticket_number.cust",
+   "fieldname": "nama_customer",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Customer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ticket_number.license_plate",
+   "fieldname": "no_polisi",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "No. Polisi",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ticket_number.driver_name",
+   "fieldname": "nama_supir",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Supir",
+   "read_only": 1
+  },
+  {
+   "fieldname": "input_kualitas_cpo_section",
+   "fieldtype": "Section Break",
+   "label": "Input Kualitas"
+  },
+  {
+   "fieldname": "column_break_yseb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_juvd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Analisa Kualitas Pengiriman CPO dan KERNEL",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Analisa Kualitas Pengiriman CPO dan KERNEL",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "label": "Tipe",
+   "options": "\nCPO\nKERNEL",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe == \"KERNEL\"",
+   "fieldname": "input_kualitas_broken",
+   "fieldtype": "Percent",
+   "label": "Input Kualitas Broken % "
+  },
+  {
+   "default": "0",
+   "fieldname": "input_kualitas_ffa",
+   "fieldtype": "Percent",
+   "label": "Input Kualitas FFA %"
+  },
+  {
+   "default": "0",
+   "fieldname": "input_kualitas_moisture",
+   "fieldtype": "Percent",
+   "label": "Input Kualitas Moisture %"
+  },
+  {
+   "default": "0",
+   "fieldname": "input_kualitas_dirt",
+   "fieldtype": "Percent",
+   "label": "Input Kualitas Dirt %"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-27 14:18:28.927740",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Analisa Kualitas Pengiriman CPO dan KERNEL",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

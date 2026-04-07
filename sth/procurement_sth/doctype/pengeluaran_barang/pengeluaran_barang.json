@@ -25,7 +25,8 @@
   "items",
   "amended_from",
   "status",
-  "return_percentage"
+  "return_percentage",
+  "ste_reference"
  ],
  "fields": [
   {
@@ -154,13 +155,19 @@
    "in_preview": 1,
    "label": "Unit",
    "options": "Unit"
+  },
+  {
+   "fieldname": "ste_reference",
+   "fieldtype": "Data",
+   "label": "STE Reference",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 08:37:50.957622",
+ "modified": "2026-03-26 14:02:53.322189",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

@@ -14,8 +14,9 @@ class PengeluaranBarang(Document):
 		self.update_items_out()
 	
 	def on_cancel(self):
-		ste = frappe.get_doc("Stock Entry",{"references": self.no_permintaan_pengeluaran})
-		ste.cancel()
+		if frappe.db.exists("Stock Entry",{"references": self.name}):
+			ste = frappe.get_doc("Stock Entry",{"references": self.name})
+			ste.cancel()
 
 	def validate_qty(self):
 		for row in self.items:
@@ -113,18 +114,17 @@ class PengeluaranBarang(Document):
 			
 
 		mapper = {
-			"Permintaan Pengeluaran Barang": {
+			"Pengeluaran Barang": {
 				"doctype": "Stock Entry",
 				"field_map": {
 					"name":"references",
 					"doctype": "reference_doctype",
-					"sub_unit":"unit",
 					"pt_pemilik_barang":"company",
 					"tanggal":"posting_date"
 				}
 			},
 
-			"Permintaan Pengeluaran Barang Item": {
+			"Pengeluaran Barang Item": {
 				"doctype": "Stock Entry Detail",
 				"field_map": {
 					"kode_barang":"item_code",
@@ -136,10 +136,11 @@ class PengeluaranBarang(Document):
 			}
 		}
 
-		doc = get_mapped_doc("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran,mapper,None,postprocess,True)
+		doc = get_mapped_doc("Pengeluaran Barang",self.no_permintaan_pengeluaran,mapper,None,postprocess,True)
 		doc.insert()
 		doc.submit()
 		
+		self.ste_reference = doc.name
 
 @frappe.whitelist()
 def get_report_pemakaian_material(kode_barang):

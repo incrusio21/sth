@@ -51,7 +51,8 @@ doctype_js = {
 	"Leave Application": "public/js/leave_application.js",
 	"Material Request": "public/js/material_request.js",
 	"Payroll Entry": "hr_customize/custom/payroll_entry.js",
-	"Payment Entry": "hr_customize/custom/payment_entry.js",
+	"Payment Entry": ["hr_customize/custom/payment_entry.js",
+					  "public/js/payment_entry.js",],
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": [
         "buying_sth/custom/purchase_invoice.js", 
@@ -205,6 +206,7 @@ override_doctype_class = {
 	"Payroll Entry": "sth.overrides.payroll_entry.PayrollEntry",
 	"Purchase Invoice": "sth.overrides.purchase_invoice.SthPurchaseInvoice",
 	"Purchase Receipt": "sth.overrides.purchase_receipt.SthPurchaseReceipt",
+	"Sales Invoice": "sth.overrides.sales_invoice.SalesInvoice",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Supplier": "sth.overrides.supplier.Supplier",
@@ -240,7 +242,15 @@ doc_events = {
 		"repair_employee_payment_log": "sth.hr_customize.custom.attendance.Attendance"
 	},
 	"Delivery Note": {
-		"validate": ["sth.sales_sth.custom.quotation.calculate_ongkos_angkut","sth.sales_sth.custom.sales_order.validate_price_list"],
+		"validate": [
+			"sth.sales_sth.custom.quotation.calculate_ongkos_angkut",
+			"sth.sales_sth.custom.sales_order.validate_price_list",
+			"sth.custom.delivery_note.update_ke_stock_in_transit_account",
+			"sth.custom.delivery_note.update_kontrak_penjualan"
+		],
+        "before_submit": "sth.custom.delivery_note.update_delivered_do",
+        "before_cancel": "sth.custom.delivery_note.update_delivered_do",
+        "after_insert": "sth.custom.delivery_note.create_kriteria_upload_document"
 	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
@@ -297,7 +307,8 @@ doc_events = {
 			"sth.custom.payment_entry.update_status_dividen", 
 			"sth.overrides.payment_entry.on_submit_pdo",
 			"sth.custom.payment_entry.payment_entry_notification",
-            "sth.custom.payment_entry.update_pesangon_from_payment"
+            "sth.custom.payment_entry.update_pesangon_from_payment",
+            "sth.custom.payment_entry.buat_nota_piutang"
             # "sth.bank_payment.custom.payment_entry.make_entry"
         ],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
@@ -432,7 +443,8 @@ override_whitelisted_methods = {
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
-	"Project": "sth.legal.custom.project_dashboard.get_dashboard_data"
+	"Project": "sth.legal.custom.project_dashboard.get_dashboard_data",
+	"Sales Invoice": "sth.sales_sth.custom.sales_invoice_dashboard.get_data"
 }
 
 # exempt linked doctypes from being automatically cancelled
