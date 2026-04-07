@@ -160,7 +160,7 @@ def get_columns():
 		},
 		{
 			"fieldname": "bpjs_kesehatan_perusahaan",
-			"label": _("BPJS Kesehatan"),
+			"label": _("BPJS Kesehatan Perusahaan"),
 			"fieldtype": "Currency",
 			"width": 200
 		},
@@ -172,13 +172,13 @@ def get_columns():
 		},
 		{
 			"fieldname": "jht_perusahaan",
-			"label": _("JHT"),
+			"label": _("JHT Perusahaan"),
 			"fieldtype": "Currency",
 			"width": 200
 		},
 		{
 			"fieldname": "jp_perusahaan",
-			"label": _("JP"),
+			"label": _("JP Perusahaan"),
 			"fieldtype": "Currency",
 			"width": 200
 		},
@@ -223,7 +223,7 @@ def get_data(filters):
 				ss.name as slip_name,
 				e.name as id_karyawan,
 				e.employee_name as nama_karyawan,
-				e.religion as agama,
+				e.custom_religion as agama,
 				e.date_of_joining as tanggal_masuk_kerja,
 				e.pkp_status as status_pajak,
 				c.abbr as area,
@@ -296,26 +296,43 @@ def get_data(filters):
 
 		LEFT JOIN (
 				SELECT 
-						parent,
-						SUM(CASE WHEN salary_component IN ('Gaji Pokok', 'HKnE') THEN amount ELSE 0 END) as gaji_pokok,
-						SUM(CASE WHEN salary_component = 'Tunjangan Daerah' THEN amount ELSE 0 END) as uang_daerah,
-						SUM(CASE WHEN salary_component = 'Tunjangan Perumahan' THEN amount ELSE 0 END) as uang_perumahan,
-						SUM(CASE WHEN salary_component = 'Tunjangan Transportasi' THEN amount ELSE 0 END) as uang_transport,
-						SUM(CASE WHEN salary_component = 'Tunjangan Makan' THEN amount ELSE 0 END) as uang_makan,
-						SUM(CASE WHEN salary_component = 'Subsidi Perawatan Kendaraan' THEN amount ELSE 0 END) as premi_perawatan_kendaraan,
-						SUM(CASE WHEN salary_component = 'Tunjangan Komunikasi' THEN amount ELSE 0 END) as uang_telekomunikasi,
-						SUM(CASE WHEN salary_component = 'Premi Kehadiran'  THEN amount ELSE 0 END) as uang_kehadiran,
-						SUM(CASE WHEN salary_component = 'BPJS Kesehatan (Karyawan)' THEN amount ELSE 0 END) as bpjs_kesehatan,
-						SUM(CASE WHEN salary_component LIKE '%%BPJS TK - JKK%%' THEN amount ELSE 0 END) as jkk,
-						SUM(CASE WHEN salary_component = 'BPJS TK - JHT (Karyawan)' THEN amount ELSE 0 END) as jht,
-						SUM(CASE WHEN salary_component = 'BPJS TK - JP (Karyawan)' THEN amount ELSE 0 END) as jp,
-						SUM(CASE WHEN salary_component = 'BPJS Kesehatan (Perusahaan)' THEN amount ELSE 0 END) as bpjs_kesehatan_perusahaan,
-						SUM(CASE WHEN salary_component = 'BPJS TK - JKM' THEN amount ELSE 0 END) as jkm,
-						SUM(CASE WHEN salary_component = 'BPJS TK - JHT (Perusahaan)' THEN amount ELSE 0 END) as jht_perusahaan,
-						SUM(CASE WHEN salary_component = 'BPJS TK - JP (Perusahaan)' THEN amount ELSE 0 END) as jp_perusahaan,
-						SUM(CASE WHEN salary_component = 'PPH21 TER Gross Up' THEN amount ELSE 0 END) as pph21
-				FROM `tabSalary Detail`
-				GROUP BY parent
+						sd.parent,
+
+						SUM(
+								CASE
+										WHEN ss.salary_structure = 'NON STAFF SALARY STRUCTURE'
+												AND sd.salary_component IN ('Gaji Pokok', 'HKnE')
+										THEN sd.amount
+
+										WHEN ss.salary_structure != 'NON STAFF SALARY STRUCTURE'
+												AND sd.salary_component = 'Base Salary'
+										THEN sd.amount
+
+										ELSE 0
+								END
+						) as gaji_pokok,
+
+						SUM(CASE WHEN sd.salary_component = 'Tunjangan Daerah' THEN sd.amount ELSE 0 END) as uang_daerah,
+						SUM(CASE WHEN sd.salary_component = 'Tunjangan Perumahan' THEN sd.amount ELSE 0 END) as uang_perumahan,
+						SUM(CASE WHEN sd.salary_component = 'Tunjangan Transportasi' THEN sd.amount ELSE 0 END) as uang_transport,
+						SUM(CASE WHEN sd.salary_component = 'Tunjangan Makan' THEN sd.amount ELSE 0 END) as uang_makan,
+						SUM(CASE WHEN sd.salary_component = 'Subsidi Perawatan Kendaraan' THEN sd.amount ELSE 0 END) as premi_perawatan_kendaraan,
+						SUM(CASE WHEN sd.salary_component = 'Tunjangan Komunikasi' THEN sd.amount ELSE 0 END) as uang_telekomunikasi,
+						SUM(CASE WHEN sd.salary_component = 'Premi Kehadiran' THEN sd.amount ELSE 0 END) as uang_kehadiran,
+						SUM(CASE WHEN sd.salary_component = 'BPJS Kesehatan (Karyawan)' THEN sd.amount ELSE 0 END) as bpjs_kesehatan,
+						SUM(CASE WHEN sd.salary_component LIKE '%%BPJS TK - JKK%%' THEN sd.amount ELSE 0 END) as jkk,
+						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JHT (Karyawan)' THEN sd.amount ELSE 0 END) as jht,
+						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JP (Karyawan)' THEN sd.amount ELSE 0 END) as jp,
+						SUM(CASE WHEN sd.salary_component = 'BPJS Kesehatan (Perusahaan)' THEN sd.amount ELSE 0 END) as bpjs_kesehatan_perusahaan,
+						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JKM' THEN sd.amount ELSE 0 END) as jkm,
+						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JHT (Perusahaan)' THEN sd.amount ELSE 0 END) as jht_perusahaan,
+						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JP (Perusahaan)' THEN sd.amount ELSE 0 END) as jp_perusahaan,
+						SUM(CASE WHEN sd.salary_component = 'PPH21 TER Gross Up' THEN sd.amount ELSE 0 END) as pph21
+
+				FROM `tabSalary Detail` sd
+				JOIN `tabSalary Slip` ss ON ss.name = sd.parent 
+
+				GROUP BY sd.parent
 		) sd ON sd.parent = ss.name
 
 		LEFT JOIN (
@@ -330,7 +347,8 @@ def get_data(filters):
 		) ssll ON ssll.parent = ss.name
 
 		JOIN `tabEmployee` e ON e.name = ss.employee
-		JOIN `tabCompany` c ON c.name = e.company;
+		JOIN `tabCompany` c ON c.name = e.company
+		WHERE e.grade != 'NON STAF' {};
   """.format(conditions), filters, as_dict=True)
   
   for row in query:
@@ -340,8 +358,26 @@ def get_data(filters):
 
 def get_condition(filters):
 	conditions = ""
+	bulan_map = {
+		"Januari": 1, "Februari": 2, "Maret": 3, "April": 4,
+		"Mei": 5, "Juni": 6, "Juli": 7, "Agustus": 8,
+		"September": 9, "Oktober": 10, "November": 11, "Desember": 12
+	}
 
-	# if filters.get("no_kontrak"):
-	# 	conditions += " AND so.name = %(no_kontrak)s"
+	if filters.get("company"):
+		conditions += " AND ss.company = %(company)s"
+
+	if filters.get("unit"):
+		conditions += " AND ss.unit = %(unit)s"
+
+	if filters.get("bulan"):
+		filters["month_num"] = bulan_map.get(filters.get("bulan"), 1)
+		conditions += " AND MONTH(ss.posting_date) = %(month_num)s"
+
+	if filters.get("tahun"):
+		conditions += " AND YEAR(ss.posting_date) = %(tahun)s"
+
+	if filters.get("employee"):
+		conditions += " AND ss.employee = %(employee)s"
 
 	return conditions

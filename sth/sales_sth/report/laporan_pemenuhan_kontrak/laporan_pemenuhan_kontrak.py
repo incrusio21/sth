@@ -18,54 +18,54 @@ def get_columns():
 			"fieldname": "no_kontrak",
 			"label": _("No Kontrak"),
 			"fieldtype": "Data",
-			"width": 120
+			"width": 250
 		},
 		{
 			"fieldname": "komoditi",
 			"label": _("Komoditi"),
 			"fieldtype": "Data",
-			"width": 120
+			"width": 250
 		},
 		{
 			"fieldname": "tanggal_kontrak",
 			"label": _("Tanggal Kontrak"),
 			"fieldtype": "Date",
-			"width": 120
+			"width": 250
 		},
 		{
 			"fieldname": "pembeli",
 			"label": _("Pembeli"),
 			"fieldtype": "Data",
-			"width": 120
+			"width": 300
 		},
 		{
 			"fieldname": "estimasi_pengiriman",
 			"label": _("Estimasi Pengiriman"),
 			"fieldtype": "Data",
-			"width": 120
+			"width": 250
 		},
 		{
 			"fieldname": "banyaknya",
 			"label": _("Banyaknya"),
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "pemenuhan",
 			"label": _("Pemenuhan"),
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "berat_bersih_pembeli",
 			"label": _("Berat Bersih Pembeli"),
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "sisa",
 			"label": _("Sisa"),
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
@@ -93,11 +93,18 @@ def get_data(filters):
 		so.company as pembeli,
 		CONCAT(so.delivery_date, ' s.d ', so.end_delivery_date) as estimasi_pengiriman,
 		soi.qty as banyaknya,
+		SUM(t.netto_2) as pemenuhan,
+		SUM(sii.qty_timbang_customer) as berat_bersih_pembeli,
+		(soi.qty - SUM(t.netto_2)) as sisa,
 		'IDR' as mata_uang
 		FROM `tabSales Order` as so
 		JOIN `tabCompany` as c ON c.name = so.company
 		LEFT JOIN `tabSales Order Item` as soi ON soi.parent = so.name
-		WHERE so.docstatus = 1 {};
+		LEFT JOIN `tabDelivery Order` as do ON do.sales_order = so.name
+		LEFT JOIN `tabTimbangan` as t ON t.do_no = do.name
+		LEFT JOIN `tabSales Invoice Item` as sii ON sii.delivery_note = t.delivery_note
+		WHERE so.docstatus = 1 {}
+  	GROUP BY so.name;
 	""".format(conditions), filters, as_dict=True)
 
   for row in query:

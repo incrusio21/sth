@@ -1,0 +1,40 @@
+/* .table_main_content {
+	display: block;
+	overflow-x: auto;
+} */
+
+.layout-main-section {
+  overflow-x: scroll;
+}
+
+.table_main_content {
+  table-layout: fixed;
+  width: 150%;
+}
+
+.table_main_content td {
+  white-space: normal;     
+  word-break: break-word; 
+  overflow-wrap: break-word;
+}
+
+.table_main_content td:nth-child(1),
+.table_main_content td[colspan="8"] {
+  width: 50vw;
+  z-index: 1;
+  position: sticky;
+  left: 0;
+  background: #ffffff;
+  border-right: 1px solid #000;
+}
+
+.table_main_content tbody tr td {
+  padding-left: 0!important;
+  padding-bottom: 0!important;
+  padding-top: 0!important;
+  /* white-space: nowrap!important; */
+}
+
+.table_main_content tbody tr td {
+  border: 1px solid #000;
+}

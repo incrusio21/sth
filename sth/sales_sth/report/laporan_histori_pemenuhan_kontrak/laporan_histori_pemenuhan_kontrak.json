@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "add_translate_data": 0,
  "columns": [],
  "creation": "2026-03-18 11:06:13.282474",
@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-03-18 11:06:13.282474",
+ "modified": "2026-04-01 16:21:27.247330",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Laporan Histori Pemenuhan Kontrak",

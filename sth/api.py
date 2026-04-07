@@ -348,3 +348,255 @@ def return_status_absensi():
 @frappe.whitelist()
 def get_stock_item(item_code,warehouse):
 	return frappe.db.get_value("Bin",{"warehouse":warehouse,"item_code":item_code},"actual_qty")
+
+@frappe.whitelist()
+def get_pdo_detail_dana_cadangan(pdo_name):
+	return frappe.db.sql("""
+		SELECT
+			pdo.name,
+			pdo.posting_date,
+			pdct.jenis,
+			pdct.amount as estimate_unit,
+			pdct.revised_amount as estimate_revise
+		FROM `tabPermintaan Dana Operasional` pdo
+		JOIN `tabPDO Dana Cadangan Table` pdct ON pdct.parent = pdo.name
+		JOIN `tabPermintaan Dana Operasional` ref 
+			ON ref.name = %s
+
+		WHERE pdo.posting_date BETWEEN 
+				DATE_SUB(ref.posting_date, INTERVAL 5 MONTH)
+				AND ref.posting_date
+				AND pdo.unit = ref.unit
+		ORDER BY pdo.name, pdo.posting_date;
+	""", (pdo_name,), as_dict=1)
+
+@frappe.whitelist()
+def get_pdo_detail_kas(pdo_name):
+	return frappe.db.sql("""
+		SELECT
+				pdo.name,
+				pdo.posting_date,
+				ect.custom_pdo_type as jenis_kas,
+				e.employee_name as pengguna,
+				d.designation_name as jabatan,
+				pkt.type as item_barang,
+				pkt.uom as satuan,
+				pkt.qty as qty,
+				pkt.price as harga,
+				pkt.revised_qty as qty_revisi,
+				pkt.revised_price as harga_revisi,
+				pkt.needs as kebutuhan,
+				pkt.total as estimate_unit,
+				pkt.revised_total as estimate_revise
+		FROM `tabPermintaan Dana Operasional` pdo
+		JOIN `tabPDO Kas Table` pkt ON pkt.parent = pdo.name
+		JOIN `tabExpense Claim Type` ect ON ect.name = pkt.`type`
+		LEFT JOIN `tabEmployee` e ON e.name = pkt.employee 
+		LEFT JOIN `tabDesignation` d ON d.name = e.designation 
+		JOIN `tabPermintaan Dana Operasional` ref 
+			ON ref.name = %s
+
+		WHERE pdo.posting_date BETWEEN 
+				DATE_SUB(ref.posting_date, INTERVAL 5 MONTH)
+				AND ref.posting_date
+				AND pdo.unit = ref.unit
+		ORDER BY pdo.name, pdo.posting_date;
+	""", (pdo_name,), as_dict=1)
+
+@frappe.whitelist()
+def get_pdo_detail_perjalanan_dinas(pdo_name):
+	return frappe.db.sql("""
+		SELECT
+			pdo.name,
+			pdo.posting_date,
+			ppdt.employee as pengguna,
+			ppdt.license_plate_number as no_polisi,
+			ppdt.`type` as jenis,
+			ppdt.hari_dinas as hari_dinas,
+			ppdt.plafon as plafon,
+			ppdt.revised_duty_day as hari_dinas_revisi,
+			ppdt.revised_plafon as plafon_revisi,
+			ppdt.needs as keperluan,
+			ppdt.total as estimate_unit,
+			ppdt.revised_total as estimate_revise
+		FROM `tabPermintaan Dana Operasional` pdo
+		JOIN `tabPDO Perjalanan Dinas Table` ppdt ON ppdt.parent = pdo.name
+		JOIN `tabPermintaan Dana Operasional` ref 
+			ON ref.name = %s
+
+		WHERE pdo.posting_date BETWEEN 
+				DATE_SUB(ref.posting_date, INTERVAL 5 MONTH)
+				AND ref.posting_date
+				AND pdo.unit = ref.unit
+		ORDER BY pdo.name, pdo.posting_date;
+	""", (pdo_name,), as_dict=1)
+
+@frappe.whitelist()
+def get_pdo_detail_bahan_bakar(pdo_name):
+	return frappe.db.sql("""
+		SELECT
+			pdo.name,
+			pdo.posting_date,
+			pbbt.employee as pengguna,
+			d.designation_name as jabatan,
+			pbbt.plafon as plafon,
+			pbbt.unit_price as harga,
+			pbbt.revised_plafon as plafon_revisi,
+			pbbt.revised_unit_price as harga_revisi,
+			pbbt.needs as keperluan,
+			pbbt.price_total as estimate_unit,
+			pbbt.revised_price_total as estimate_revise
+		FROM `tabPermintaan Dana Operasional` pdo
+		JOIN `tabPDO Bahan Bakar Table` pbbt ON pbbt.parent = pdo.name
+		LEFT JOIN `tabEmployee` e ON e.employee_name = pbbt.employee
+		LEFT JOIN `tabDesignation` d ON d.name = e.designation
+		JOIN `tabPermintaan Dana Operasional` ref 
+			ON ref.name = %s
+
+		WHERE pdo.posting_date BETWEEN 
+				DATE_SUB(ref.posting_date, INTERVAL 5 MONTH)
+				AND ref.posting_date
+				AND pdo.unit = ref.unit
+		ORDER BY pdo.name, pdo.posting_date;
+	""", (pdo_name,), as_dict=1)
+
+@frappe.whitelist()
+def get_previous_kriteria_documents(doctype, docname):
+
+	DOC_LABEL = {
+		"Sales Order": "Kontrak Penjualan",
+		"Delivery Order": "Delivery Order",
+		"Delivery Note": "Delivery Note",
+		"Sales Invoice": "Pengakuan Penjualan",
+		"Purchase Order": "Purchase Order",
+		"Purchase Receipt": "Purchase Receipt",
+		"Purchase Invoice": "Purchase Invoice"
+	}
+
+	chain = []
+
+	if doctype == "Sales Invoice":
+
+		doc = frappe.get_doc("Sales Invoice", docname)
+
+		delivery_notes = list({row.delivery_note for row in doc.items if row.delivery_note})
+
+		for dn_name in delivery_notes:
+
+			chain.append({
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn_name
+			})
+
+			dn = frappe.get_doc("Delivery Note", dn_name)
+
+			if dn.delivery_order:
+
+				chain.append({
+					"voucher_type": "Delivery Order",
+					"voucher_no": dn.delivery_order
+				})
+
+				do = frappe.get_doc("Delivery Order", dn.delivery_order)
+
+				if do.sales_order:
+
+					chain.append({
+						"voucher_type": "Sales Order",
+						"voucher_no": do.sales_order
+					})
+
+	elif doctype == "Delivery Note":
+
+		doc = frappe.get_doc("Delivery Note", docname)
+
+		if doc.delivery_order:
+
+			chain.append({
+				"voucher_type": "Delivery Order",
+				"voucher_no": doc.delivery_order
+			})
+
+			do = frappe.get_doc("Delivery Order", doc.delivery_order)
+
+			if do.sales_order:
+
+				chain.append({
+					"voucher_type": "Sales Order",
+					"voucher_no": do.sales_order
+				})
+
+	elif doctype == "Delivery Order":
+
+		doc = frappe.get_doc("Delivery Order", docname)
+
+		if doc.sales_order:
+
+			chain.append({
+				"voucher_type": "Sales Order",
+				"voucher_no": doc.sales_order
+			})
+
+	elif doctype == "Purchase Invoice":
+
+		doc = frappe.get_doc("Purchase Invoice", docname)
+
+		purchase_receipts = list({row.purchase_receipt for row in doc.items if row.purchase_receipt})
+
+		for pr_name in purchase_receipts:
+
+			chain.append({
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr_name
+			})
+
+			pr = frappe.get_doc("Purchase Receipt", pr_name)
+
+			for item in pr.items:
+				if item.purchase_order:
+
+					chain.append({
+						"voucher_type": "Purchase Order",
+						"voucher_no": item.purchase_order
+					})
+
+	elif doctype == "Purchase Receipt":
+
+		doc = frappe.get_doc("Purchase Receipt", docname)
+
+		for item in doc.items:
+
+			if item.purchase_order:
+
+				chain.append({
+					"voucher_type": "Purchase Order",
+					"voucher_no": item.purchase_order
+				})
+
+	results = []
+
+	for row in chain:
+
+		docs = frappe.get_all(
+			"Kriteria Upload Document",
+			filters={
+				"voucher_type": row["voucher_type"],
+				"voucher_no": row["voucher_no"]
+			},
+			fields=["name"]
+		)
+
+		for d in docs:
+
+			doc = frappe.get_doc("Kriteria Upload Document", d.name)
+
+			for f in doc.file_upload:
+
+				results.append({
+					"voucher_type": DOC_LABEL.get(row["voucher_type"], row["voucher_type"]),
+					"voucher_no": row["voucher_no"],
+					"rincian": f.rincian_dokumen_finance,
+					"file": f.upload_file
+				})
+
+	return results

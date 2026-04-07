@@ -65,13 +65,13 @@ def get_columns():
 		{
 			"fieldname": "berat_bersih_pabrik",
 			"label": _("Berat Bersih Pabrik"),
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 150
 		},
 		{
 			"fieldname": "berat_bersih_pembeli",
 			"label": _("Berat Bersih Pembeli"),
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 150
 		},
 		{
@@ -83,13 +83,13 @@ def get_columns():
 		{
 			"fieldname": "kontrak_harga_satuan",
 			"label": _("Kontrak Harga Satuan"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"width": 150
 		},
 		{
 			"fieldname": "kontrak_nilai_per_truck",
 			"label": _("Kontrak Nilai Per Truk"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"width": 150
 		},
 		{
@@ -101,13 +101,13 @@ def get_columns():
 		{
 			"fieldname": "transportir_harga_satuan",
 			"label": _("Transportir Harga Satuan"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"width": 150
 		},
 		{
 			"fieldname": "transportir_nilai_per_truck",
 			"label": _("Transportir Nilai Per Truk"),
-			"fieldtype": "Data",
+			"fieldtype": "Currency",
 			"width": 150
 		},
 		{
@@ -136,7 +136,7 @@ def get_data(filters):
 	t.no_polisi as kendaraan,
 	t.driver_name as nama_supir,
 	t.netto_2 as berat_bersih_pabrik,
-	0 as berat_bersih_pembeli,
+	sii.qty_timbang_customer as berat_bersih_pembeli,
 	do.customer_name as kontrak_nama_customer,
 	soi.rate as kontrak_harga_satuan,
 	(t.netto_2 * soi.rate) as kontrak_nilai_per_truck,
@@ -148,6 +148,7 @@ def get_data(filters):
 	JOIN `tabSales Order Item` as soi ON soi.parent = so.name
 	JOIN `tabDelivery Order` as do ON do.sales_order = so.name
 	JOIN `tabTimbangan` as t ON t.do_no = do.name
+	LEFT JOIN `tabSales Invoice Item` as sii ON sii.delivery_note = t.delivery_note
 	WHERE so.docstatus = 1 {};
   """.format(conditions), filters, as_dict=True)
   
