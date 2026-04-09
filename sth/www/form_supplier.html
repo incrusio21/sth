@@ -145,7 +145,7 @@
                                         </td>
                                         <td data-field="desc">
                                             <textarea class="form-control form-control-sm" name="desc[]" rows="1"
-                                                required></textarea>
+                                                required>{{ item.description }}</textarea>
                                         </td>
                                         <td data-field="qty">
                                             <input type="number" min="1" name="qty[]"
@@ -219,7 +219,7 @@
                                             </td>
                                             <td class="amount">Rp. 0</td>
                                         </tr>
-                                        <tr data-type="pph_22">
+                                        <tr data-type="pph_22" style="display: none;">
                                             <td>PPH 22</td>
                                             <td>
                                                 <input type="text" name="pph_22"

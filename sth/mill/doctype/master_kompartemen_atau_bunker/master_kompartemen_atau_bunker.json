@@ -6,7 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "nama_kompartemen"
+  "nama_kompartemen",
+  "pabrik",
+  "company"
  ],
  "fields": [
   {
@@ -16,15 +18,27 @@
    "label": "Nama Kompartemen",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "label": "Pabrik",
+   "options": "Mill Master"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-03 20:03:56.843459",
+ "modified": "2026-04-07 13:37:57.874456",
  "modified_by": "Administrator",
  "module": "Mill",
- "name": "Master Kompartemen",
+ "name": "Master Kompartemen atau Bunker",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

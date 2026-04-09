@@ -298,7 +298,9 @@ doc_events = {
 	},
 	"Payment Entry":{
 		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", "sth.custom.payment_entry.update_check_book"
+			"sth.custom.payment_entry.cek_kriteria", 
+            "sth.custom.payment_entry.update_check_book",
+            "sth.custom.payment_entry.set_no_rekening"
 		],
 		"on_submit": [
             "sth.custom.payment_entry.update_check_book", 
@@ -384,6 +386,9 @@ doc_events = {
     "Delivery Order": {
 		"validate": "sth.sales_sth.custom.delivery_order.set_default_tax_fields",
 	},
+    "GL Entry": {
+        "validate": "sth.custom.gl_entry.set_unit_from_parent"
+    }
 }
 
 
@@ -429,11 +434,13 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
     "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry": "sth.legal.custom.payment_entry.get_payment_entry",
+    "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account": "sth.overrides.sales_invoice.get_bank_cash_account",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
 	"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
 	"erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
 	"erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
+    "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation": "sth.overrides.material_request.make_request_for_quotation",
 	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
 	"frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
 	"hrms.overrides.employee_payment_entry.get_payment_entry_for_employee": "sth.overrides.employee_advance.get_payment_entry_for_employee",
@@ -444,6 +451,7 @@ override_whitelisted_methods = {
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
 	"Project": "sth.legal.custom.project_dashboard.get_dashboard_data",
+	"Sales Order": "sth.sales_sth.custom.sales_order_dashboard.get_data",
 	"Sales Invoice": "sth.sales_sth.custom.sales_invoice_dashboard.get_data"
 }
 

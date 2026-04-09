@@ -505,22 +505,23 @@ class NotaPiutang(Document):
 @frappe.whitelist()
 def get_si_pengiriman(no_kontrak):
 	si_names = frappe.db.sql("""
-		SELECT DISTINCT si.name
+		SELECT 
+			si.name, 
+			SUM(sii.qty_timbang_customer) OR SUM(sii.qty) as qty, 
+			sii.rate, 
+			SUM(sii.rate*sii.qty_timbang_customer) OR SUM(sii.rate*sii.qty) as subtotal
 		FROM `tabSales Invoice` si
-		INNER JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
-		INNER JOIN `tabDelivery Note Item` dni ON dni.parent = sii.delivery_note
-		INNER JOIN `tabDelivery Order Item` doi ON doi.name = dni.delivery_order_item
-		INNER JOIN `tabDelivery Order` tdo on tdo.name = doi.parent
+		JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+		JOIN `tabDelivery Note Item` dni ON dni.parent = sii.delivery_note
+		JOIN `tabDelivery Order Item` doi ON doi.name = dni.delivery_order_item
+		JOIN `tabDelivery Order` tdo on tdo.name = doi.parent
 		WHERE tdo.sales_order = %(no_kontrak)s
 		AND si.docstatus = 1
 		AND si.jenis_penagihan = 'Pengiriman'
-	""", {"no_kontrak": no_kontrak}, pluck=True)
+		GROUP BY si.name
+	""", {"no_kontrak": no_kontrak}, as_dict=1)
 
 	if not si_names:
 		return []
 
-	return frappe.get_all(
-		"Sales Invoice",
-		filters={"name": ["in", si_names]},
-		fields=["name", "posting_date", "customer", "net_total", "grand_total"]
-	)
+	return si_names

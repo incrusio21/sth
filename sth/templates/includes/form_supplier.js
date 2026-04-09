@@ -46,8 +46,9 @@ class FormSupplier {
         this.dt.estimated_date?.selectDate(new Date('{{ required_date }}'))
 
         this.initSelect2("select[name='country[]']");
+        $("select[name='country[]']").val("").trigger("change")
         AutoNumeric.multiple('.number-format', this.opt);
-        AutoNumeric.getAutoNumericElement('input[name="ppn_ongkos_angkut"]').set(11);
+        // AutoNumeric.getAutoNumericElement('input[name="ppn_ongkos_angkut"]').set(11);
     }
 
     initSelect2(el) {
@@ -55,7 +56,7 @@ class FormSupplier {
             dropdownParent: $('body'),
             width: '100%'
         })
-        $("select[name='country[]']").val("").trigger("change")
+        // 
     }
 
     initMoney(el) {
@@ -231,16 +232,24 @@ class FormSupplier {
 
         $(".btn-duplicate").on("click", function (e) {
             e.preventDefault()
-            // wajib destroy dulu baru duplicate
             let row = $(this).closest("tr");
+
+            // wajib destroy dulu baru duplicate
             row.find("select").select2('destroy');
+            const country = row.find("select").val()
+
 
             let duplicateRow = row.clone(true)
             self.initMoney(duplicateRow.find(".number-format")[0])
             duplicateRow.insertAfter($(this).closest("tr"))
 
+            // init select2 untuk country
             self.initSelect2(duplicateRow.find("select"))
             self.initSelect2(row.find("select"))
+
+            // isi kembali default valuenya
+            duplicateRow.find("select").val(country).trigger('change')
+            row.find("select").val(country).trigger('change')
 
             self.refreshIdx()
         })

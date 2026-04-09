@@ -441,12 +441,6 @@ def buat_nota_piutang(doc, method):
 
 		# Cegah duplikat
 		existing = frappe.db.exists("Nota Piutang", {"payment_entry": doc.name})
-		if existing:
-			frappe.msgprint(
-				f"Nota Piutang sudah ada: <b>{existing}</b>",
-				alert=True
-			)
-			return
 
 		ppn_total = sum(abs(d.amount) for d in doc.get("deductions") or [])
 		nilai_dp  = doc.paid_amount - ppn_total
@@ -464,3 +458,36 @@ def buat_nota_piutang(doc, method):
 
 		np.insert(ignore_permissions=True)
 		np.submit()
+
+def set_no_rekening(doc, method):
+
+    if doc.no_rekening:
+        return
+
+    if not doc.party or not doc.party_type:
+        return
+
+    if doc.party_type == "Employee":
+
+        norek = frappe.db.get_value(
+            "Employee",
+            doc.party,
+            "bank_ac_no"
+        )
+
+        if norek:
+            doc.no_rekening = norek
+
+    elif doc.party_type == "Supplier":
+
+        norek = frappe.db.get_value(
+            "Data Bank Supplier",
+            {
+                "parent": doc.party,
+                "status_bank": "Aktif"
+            },
+            "no_rekening"
+        )
+
+        if norek:
+            doc.no_rekening = norek

@@ -1,0 +1,155 @@
+{% set website_settings = frappe.get_doc("Website Settings") %}
+{% set company = frappe.get_doc("Company", doc.company) %}
+{% set customer = frappe.get_doc("Customer", doc.customer) %}
+
+{%- if doc.items -%}
+{%- set so = frappe.get_doc("Sales Order", doc.items[0].sales_order) -%}
+{%- else -%}
+{%- set so = None -%}
+{%- endif -%}
+
+{%- if so.no_rekening_tujuan -%}
+{%- set rekening_tujuan = frappe.get_doc("Bank Account", so.no_rekening_tujuan) -%}
+{%- else -%}
+{%- set rekening_tujuan = None -%}
+{%- endif -%}
+
+<div>
+  <table>
+    <tr>
+      <td>
+        <img src="{{ website_settings.app_logo }}" style="height: 5rem; object-fit: contain;" />
+      </td>
+      <td>
+        <div style="width: 100%; height: 1rem; background: #449a49; border: 1px solid #000; margin-bottom: 0.5rem;">
+        </div>
+        {{doc.company or '-'}} <br />
+        (Oil Palm Plantation & Mill)
+      </td>
+    </tr>
+  </table>
+
+  <div
+    style="width: 100%; padding: 0.5rem 0; background: #449a49; border: 1px solid #000; text-align: center; color: #fff;">
+    <h1 style="margin: 0;">INVOICE</h1>
+  </div>
+
+  <table class="table_info mt-2">
+    <tr>
+      <td style="width: 16%!important;">ADDRESS</td>
+      <td style="width: 2%!important;">:</td>
+      <td>{{ company.company_description or '' }}</td>
+    </tr>
+    <tr>
+      <td>CITY, STATE, ZIP</td>
+      <td>:</td>
+      <td>{{ company.city_state_zip or '' }}</td>
+    </tr>
+    <tr>
+      <td>TELP & FAX</td>
+      <td>:</td>
+      <td>{{ company.phone_no or '' }} / {{ company.fax or '' }}</td>
+    </tr>
+  </table>
+
+  <table class="table_info mt-3">
+    <tr>
+      <td colspan="6">SOLD TO</td>
+    </tr>
+    <tr>
+      <td style="width: 16%!important;">NAME</td>
+      <td style="width: 2%!important;">:</td>
+      <td>{{ doc.customer or '' }}</td>
+      <td style="width: 20%!important;">INVOICE NUMBER</td>
+      <td style="width: 2%!important;">:</td>
+      <td>{{ doc.name or '' }}</td>
+    </tr>
+    <tr>
+      <td>ADDRESS</td>
+      <td>:</td>
+      <td>{{ customer.alamat or '' }}</td>
+      <td>INVOICE DATE</td>
+      <td>:</td>
+      <td>{{ format_tanggal_id(doc.posting_date) }}</td>
+    </tr>
+    <tr>
+      <td>CONTRACT</td>
+      <td>:</td>
+      <td colspan="4">
+        {%- if so -%}
+        {{ so.no_kontrak_external or so.name }}
+        {%- else -%}
+        -
+        {%- endif -%}
+      </td>
+    </tr>
+  </table>
+
+  <table class="table_content mt-3">
+    <tr>
+      <td>DATE</td>
+      <td>QUANTITY</td>
+      <td>DESCRIPTIONS</td>
+      <td>UNIT PRICE</td>
+      <td colspan="2">AMOUNT</td>
+    </tr>
+    <tr style="height: 3rem!important;">
+      <td>{{ format_tanggal_id(doc.posting_date) }}</td>
+      <td>
+        {{ frappe.format_value(doc.items[0].qty or 0, {"fieldtype": "Float"}) }} {{ doc.items[0].uom or '' }}
+      </td>
+      <td>{{ doc.items[0].description or '' }}</td>
+      <td>{{ frappe.format_value(doc.items[0].rate or 0, {"fieldtype": "Float"}) }}</td>
+      <td style="border: none!important">IDR</td>
+      <td style="border-left: none!important">
+        {{ frappe.format_value(doc.items[0].amount or 0, {"fieldtype": "Float"}) }}
+      </td>
+    </tr>
+    <tr>
+      <td>TOTAL</td>
+      <td>
+        {{ frappe.format_value(doc.items[0].qty or 0, {"fieldtype": "Float"}) }} {{ doc.items[0].uom or '' }}
+      </td>
+      <td></td>
+      <td>SUB TOTAL</td>
+      <td>IDR</td>
+      <td>{{ frappe.format_value(doc.total or 0, {"fieldtype": "Float"}) }}</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border: none!important"></td>
+      <td>TAX</td>
+      <td>IDR</td>
+      <td>{{ frappe.format_value(doc.total_taxes_and_charges or 0, {"fieldtype": "Float"}) }}</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border: none!important"></td>
+      <td>FREIGHT</td>
+      <td>IDR</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border: none!important"></td>
+      <td>TOTAL</td>
+      <td>IDR</td>
+      <td>{{ frappe.format_value(doc.grand_total or 0, {"fieldtype": "Float"}) }}</td>
+    </tr>
+  </table>
+
+  <p style="text-transform: capitalize;">Say: {{ money_in_words_idr(doc.grand_total) }}</p>
+
+  <div>
+    <p style="color: #f28c8c!important; text-decoration: underline;">Please send your payment to:</p>
+    <p style="color: #f28c8c!important; text-decoration: underline;">
+      {{ doc.company or '' }} </br>
+      {{ rekening_tujuan.bank or '' }} - {{ rekening_tujuan.branch_code or '' }} </br>
+      A/C No {{ rekening_tujuan.bank_account_no or '' }}
+    </p>
+  </div>
+
+  <div style="width: 10rem; text-align: center; float: right!important;">
+    <p>YOURS FAITHFULLY,</p>
+    <p style="margin: 0!important; margin-top: 5rem!important;">{{ so.penandatangan or '' }}</p>
+    <div style="width: 50%; height: 1px; background: #000; margin: 0 auto!important;"></div>
+    <p style="margin: 0!important;">{{ so.jabatan_penandatangan or '' }}</p>
+  </div>
+</div>

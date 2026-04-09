@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"NX_aDgfi_Q\",\"type\":\"card\",\"data\":{\"card_name\":\"Import Data\",\"col\":4}},{\"id\":\"7OYR7t1yeL\",\"type\":\"card\",\"data\":{\"card_name\":\"Event Calendar Setting\",\"col\":4}},{\"id\":\"V89B-N5Ttm\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"21jqLt3KFf\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Laporan Dashboard</b></span>\",\"col\":12}}]",
+ "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}},{\"id\":\"klUwHWFgcL\",\"type\":\"card\",\"data\":{\"card_name\":\"PDO\",\"col\":4}},{\"id\":\"NX_aDgfi_Q\",\"type\":\"card\",\"data\":{\"card_name\":\"Setting\",\"col\":4}},{\"id\":\"7OYR7t1yeL\",\"type\":\"card\",\"data\":{\"card_name\":\"Event Calendar Setting\",\"col\":4}},{\"id\":\"V89B-N5Ttm\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"21jqLt3KFf\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Laporan Dashboard</b></span>\",\"col\":12}}]",
  "creation": "2025-10-29 13:20:04.900745",
  "custom_blocks": [],
  "docstatus": 0,
@@ -274,25 +274,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Import Data",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Data Import",
-   "link_count": 0,
-   "link_to": "Data Import",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Event Calendar Setting",
    "link_count": 1,
    "link_type": "DocType",
@@ -377,9 +358,48 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setting",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Import",
+   "link_count": 0,
+   "link_to": "Data Import",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Kriteria Dokumen Finance",
+   "link_count": 0,
+   "link_to": "Kriteria Dokumen Finance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rincian Dokumen Finance",
+   "link_count": 0,
+   "link_to": "Rincian Dokumen Finance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-02-19 10:06:14.946135",
+ "modified": "2026-04-07 13:21:56.562659",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",

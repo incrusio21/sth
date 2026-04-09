@@ -31,6 +31,7 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
         //         });
         //     });
         // }
+        frm.events.set_no_rekening(frm);
 	},
     company(frm) {
         frm.cscript.get_details_account({
@@ -50,6 +51,38 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
                 childrens: frm.doc.items.length > 0 ? frm.doc.items : null,
             }
         })
+    },
+
+    set_no_rekening(frm) {
+
+        if (!frm.doc.items || frm.doc.items.length === 0) {
+            frm.set_value("no_rekening", "")
+            return
+        }
+
+        let row = frm.doc.items[0]
+
+        if (!row.sppt) {
+            frm.set_value("no_rekening", "")
+            return
+        }
+
+        frappe.db.get_value("GIS", row.sppt, "pemilik_lahan")
+            .then(r => {
+
+                if (!r.message || !r.message.pemilik_lahan) return
+
+                return frappe.db.get_value(
+                    "Daftar Masyarakat",
+                    r.message.pemilik_lahan,
+                    "norek"
+                )
+            })
+            .then(r => {
+                if (r && r.message && r.message.norek) {
+                    frm.set_value("no_rekening", r.message.norek)
+                }
+            })
     },
 });
 
@@ -78,6 +111,8 @@ frappe.ui.form.on("Ganti Rugi Lahan Item", {
                 childrens: [data],
             }
         })
+
+        frm.events.set_no_rekening(frm)
     }
 });
 
@@ -95,7 +130,7 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
     refresh() {
         this.show_general_ledger()
         this.set_query_field()
-        this.set_dynamic_labels();
+        this.set_dynamic_labels()
     }
 
     set_query_field() {
@@ -216,6 +251,7 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
 			});
 		}
 	}
+
 }
 
 cur_frm.script_manager.make(sth.legal.GantiRugiLahan);

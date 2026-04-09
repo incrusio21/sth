@@ -9,8 +9,10 @@
  "field_order": [
   "company",
   "abbr",
+  "default",
   "column_break_nxys",
   "pabrik",
+  "kompartemen_bunker",
   "section_break_wqrx",
   "ukuran_silo"
  ],
@@ -49,12 +51,24 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Abbr"
+  },
+  {
+   "fieldname": "kompartemen_bunker",
+   "fieldtype": "Link",
+   "label": "Nama Kompartemen / Bunker",
+   "options": "Master Kompartemen atau Bunker"
+  },
+  {
+   "default": "0",
+   "fieldname": "default",
+   "fieldtype": "Check",
+   "label": "default "
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-06 09:27:54.788546",
+ "modified": "2026-04-07 13:42:41.373406",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Bunker Kernel Silo",

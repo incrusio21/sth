@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class MasterKompartemen(Document):
+class SoundingAverageDetail(Document):
 	pass

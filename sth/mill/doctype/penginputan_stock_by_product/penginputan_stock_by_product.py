@@ -25,21 +25,22 @@ class PenginputanStockByProduct(Document):
 		stock_saat_ini = get_total_stock[0].qty if get_total_stock else 0
 		self.stock_awal = flt(stock_saat_ini) + flt(self.pengiriman)
 
-		tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi": self.tanggal_produksi},["tbs_olah"])
+		self.data_olah_tbs = frappe.db.get_value("Data TBS",{"tanggal_produksi": self.tanggal_produksi},["tbs_olah"])
+		
 		fields = []
 		if self.tipe == "Cangkang":
-			pass
+			fields = ["ltds_1nut","ltds_2nut","wet_shellnut"]
 		elif self.tipe == "Fiber Bunch Press":
-			pass
+			fields = ["fiber_bunch_presstbs"]
 		elif self.tipe == "Empty Bunch":
-			pass
+			fields = ["empty_bunchtbs"]
 		elif self.tipe == "Solid":
-			pass
+			fields = ["solid_decantertbs"]
 
 		if not fields: return
 		data_mass_balance = frappe.get_all("Mass Balance",fields=fields,order_by="date desc, jam desc",limit=1)
-		result = 1
+		result = 0
 		for index,field in enumerate(fields):
-			result *= flt(data_mass_balance[index][field])
+			result += flt(data_mass_balance[index][field])
 		
-		self.produksi = result * flt(tbs_olah)
+		self.produksi = result * flt(self.data_olah_tbs)

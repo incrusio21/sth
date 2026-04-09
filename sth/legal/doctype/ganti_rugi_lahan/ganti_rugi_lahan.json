@@ -18,6 +18,7 @@
   "company",
   "abbr",
   "posting_date",
+  "no_rekening",
   "keterangan",
   "amended_from",
   "accounting_dimension_section",
@@ -245,13 +246,19 @@
    "fieldtype": "Float",
    "label": "Exchange Rate",
    "precision": "9"
+  },
+  {
+   "fieldname": "no_rekening",
+   "fieldtype": "Data",
+   "label": "No Rekening",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 14:57:40.915699",
+ "modified": "2026-04-08 15:52:58.049311",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

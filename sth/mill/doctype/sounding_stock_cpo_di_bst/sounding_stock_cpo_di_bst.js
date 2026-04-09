@@ -78,7 +78,7 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     hasil_suhu_2(frm) {
-        frm.events.get_berat_jenis_suhu(frm.doc.pabrik, frm.doc.hasil_suhu).then((res) => {
+        frm.events.get_berat_jenis_suhu(frm.doc.pabrik, frm.doc.hasil_suhu_2).then((res) => {
             frm.set_value("berat_jenis_suhu_2", res)
         })
     },

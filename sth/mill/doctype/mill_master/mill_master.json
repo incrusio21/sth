@@ -15,7 +15,8 @@
   "tinggi_normal_bunker",
   "column_break_sdzx",
   "unit",
-  "company"
+  "company",
+  "jumlah_hasil_sounding"
  ],
  "fields": [
   {
@@ -76,12 +77,19 @@
    "fieldname": "header_section",
    "fieldtype": "Section Break",
    "label": "Header"
+  },
+  {
+   "default": "1 rata - rata",
+   "fieldname": "jumlah_hasil_sounding",
+   "fieldtype": "Select",
+   "label": "Jumlah Hasil Sounding",
+   "options": "\n1 rata - rata\n2 rata - rata"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-06 13:22:56.678026",
+ "modified": "2026-04-08 11:43:44.987197",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Master",

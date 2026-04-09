@@ -3,35 +3,31 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import today,flt
+from frappe.utils import today,flt,getdate
 
 class SoundingStockCPOdiBST(Document):
 	@frappe.whitelist()
 	def get_data(self):
-		get_delivery = frappe.db.sql("""
-			select coalesce(sum(dni.stock_qty),0) as qty from `tabDelivery Note` dn
-			join `tabDelivery Note Item` dni on dni.parent = dn.name
-			join `tabItem` i on dni.item_code = i.name
-			where dn.posting_date = %s and i.item_cpo = 1
-		""",(self.tanggal_proses),as_dict=True)
-
-		get_total_stock = frappe.db.sql("""
-			select coalesce(sum(netto_2),0) as qty from `tabTimbangan` b
-			join `tabItem` i on b.kode_barang = i.name
-			where i.item_cpo = 1 and b.docstatus = 1 and unit  = %s
+		get_stock_data = frappe.db.sql("""
+			select coalesce(netto_2,0) as qty, coalesce(netto - netto_2,0) as sortasi ,posting_date
+			from `tabTimbangan` t
+			join `tabItem` i on t.kode_barang = i.name
+			where i.item_cpo = 1 and t.docstatus = 1 and unit  = %s
 		""",(self.unit),as_dict=True)
 
-		get_sortasi = frappe.db.sql("""
-			select coalesce(sum(t.netto - t.netto_2),0) as sortasi
-			from `tabTimbangan` t
-			where t.posting_date = %s and t.docstatus = 1
-		""",(self.tanggal_proses),as_dict=True)
+		pengiriman_cpo = stock_bst = sortasi = 0
+		for data in get_stock_data:
+			if getdate(data.posting_date) == getdate(self.tanggal_proses):
+				pengiriman_cpo += data.qty
+				sortasi += data.sortasi
+			
+			stock_bst += data.qty
 
-		self.pengiriman_cpo = get_delivery[0].qty if get_delivery else 0
-		self.stock_bst = get_total_stock[0].qty if get_total_stock else 0
+		self.pengiriman_cpo = pengiriman_cpo
+		self.stock_bst = stock_bst
 		self.stock_awal = flt(self.stock_bst) + flt(self.pengiriman_cpo)
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
-		self.potongan_sortasi = get_sortasi[0].sortasi if get_sortasi else 0
+		self.potongan_sortasi = sortasi
 
 @frappe.whitelist()
 def get_ukuran_sounding(tinggi,bst,pabrik):

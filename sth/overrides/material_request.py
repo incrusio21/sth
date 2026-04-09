@@ -96,3 +96,33 @@ def make_request_for_quotation(source_name, target_doc=None, args=None):
 	)
 
 	return doclist
+
+
+@frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None):
+	def update_item(source,target,source_parent):
+		target.description = ""
+		target.country = ""
+
+	doclist = get_mapped_doc(
+		"Material Request",
+		source_name,
+		{
+			"Material Request": {
+				"doctype": "Request for Quotation",
+				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Purchase"]},
+			},
+			"Material Request Item": {
+				"doctype": "Request for Quotation Item",
+				"field_map": [
+					["name", "material_request_item"],
+					["parent", "material_request"],
+					["project", "project_name"],
+				],
+				"postprocess": update_item
+			},
+		},
+		target_doc,
+	)
+
+	return doclist

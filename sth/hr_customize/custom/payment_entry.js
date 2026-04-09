@@ -4,6 +4,7 @@
 frappe.ui.form.off("Payment Entry", "validate_reference_document");
 frappe.ui.form.off("Payment Entry", "get_outstanding_documents");
 frappe.ui.form.off("Payment Entry", "party");
+frappe.ui.form.off("Payment Entry", "mode_of_payment");
 
 frappe.ui.form.on("Payment Entry", {
 	tipe_transfer: function(frm) {

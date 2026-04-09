@@ -45,7 +45,7 @@ frappe.ui.form.on("Payment Entry", {
 	},
 	no_kontrak_penjualan: function(frm) {
 		if (!frm.doc.no_kontrak_penjualan) return;
-
+		frm.set_value("paid_from", "");
 		frappe.db.get_doc("Sales Order", frm.doc.no_kontrak_penjualan).then(so => {
 			// 1. Set customer sebagai party
 			frm.set_value("party_type", "Customer");
@@ -60,19 +60,8 @@ frappe.ui.form.on("Payment Entry", {
 				fields: ["name"],
 				limit: 1,
 			}).then(accounts => {
-				if (accounts && accounts.length) {
-					frm.set_value("paid_from", accounts[0].name);
-				} else {
-					frappe.msgprint("Akun 'Uang Muka Penjualan' tidak ditemukan.");
-				}
-			});
-
-			frappe.db.get_doc("Company", frm.doc.company).then(company => {
-				if (company.default_cash_account) {
-					frm.set_value("paid_to", company.default_cash_account);
-				} else {
-					frappe.msgprint("Default Cash Account tidak ditemukan di Company.");
-				}
+				frm.set_value("paid_from", accounts[0].name);
+				
 			});
 
 			const first_term = so.payment_schedule && so.payment_schedule[0];
@@ -81,44 +70,52 @@ frappe.ui.form.on("Payment Entry", {
 				return;
 			}
 
-			const nilai_dp = first_term.payment_amount;
+			let nilai_dp = first_term.payment_amount;
 
 			frm.set_value("paid_amount", nilai_dp);
 			frm.set_value("received_amount", nilai_dp);
 
+			category_tax = "%Excluding PPN%"
+			if(so.taxes){
+				if(so.taxes[0].included_in_print_rate == 1){
+					category_tax = "%Including PPN%"
+				}
+			}
+
 			frappe.db.get_list("Sales Taxes and Charges Template", {
 				filters: {
 					company: frm.doc.company,
-					title: ["like", "%Excluding PPN%"],
+					title: ["like", category_tax],
 					disabled: 0,
 				},
 				limit: 1,
 			}).then(templates => {
 				if (!templates || !templates.length) {
-					frappe.msgprint("Template 'Excluding PPN' tidak ditemukan.");
+					frappe.msgprint("Template PPN tidak ditemukan.");
 					return;
 				}
 
 				frappe.db.get_doc("Sales Taxes and Charges Template", templates[0].name).then(template_doc => {
-				    console.log("full template doc:", template_doc);
-				    console.log("taxes rows:", template_doc.taxes);
-				    if (template_doc.taxes && template_doc.taxes[0]) {
-				        console.log("first tax row keys:", Object.keys(template_doc.taxes[0]));
-				    }
-				});
-
-				frappe.db.get_doc("Sales Taxes and Charges Template", templates[0].name).then(template_doc => {
-					let taxes = template_doc.taxes
+					let taxes = template_doc.taxes;
 					if (!taxes || !taxes.length) {
 						frappe.msgprint("Tidak ada baris pajak di template PPN.");
 						return;
 					}
-					frm.clear_table("deductions");
 
+					frm.clear_table("deductions");
 					let ppn_total = 0;
+					const is_inclusive = so.taxes && so.taxes[0] && so.taxes[0].included_in_print_rate == 1;
 
 					taxes.forEach(tax => {
-						const amount = tax.tax_amount || (nilai_dp * tax.rate / 100);
+						let amount;
+						if (is_inclusive) {
+							// Kalau inclusive: ekstrak PPN dari nilai_dp
+							const dpp = nilai_dp / (1 + tax.rate / 100);
+							amount = nilai_dp - dpp;
+						} else {
+							// Kalau exclusive: PPN ditambahkan di atas nilai_dp
+							amount = nilai_dp * tax.rate / 100;
+						}
 						ppn_total += amount;
 
 						frappe.db.get_value("Company", frm.doc.company, "cost_center").then(r => {
@@ -130,10 +127,16 @@ frappe.ui.form.on("Payment Entry", {
 							});
 							frm.refresh_field("deductions");
 
-							// Update paid_amount & received_amount = nilai_dp + ppn
-							const total = nilai_dp + ppn_total;
-							frm.set_value("paid_amount", total);
-							frm.set_value("received_amount", total);
+							if (is_inclusive) {
+								// Paid amount tetap nilai_dp (sudah include PPN)
+								frm.set_value("paid_amount", nilai_dp);
+								frm.set_value("received_amount", nilai_dp);
+							} else {
+								// Paid amount = nilai_dp + PPN
+								const total = nilai_dp + ppn_total;
+								frm.set_value("paid_amount", total);
+								frm.set_value("received_amount", total);
+							}
 						});
 					});
 				});

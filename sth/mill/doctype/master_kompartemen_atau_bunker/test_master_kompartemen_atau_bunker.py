@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestMasterKompartemen(FrappeTestCase):
+class TestMasterKompartemenatauBunker(FrappeTestCase):
 	pass

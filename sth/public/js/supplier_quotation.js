@@ -241,7 +241,7 @@ function btn_get_material_request(frm) {
                 frm.trigger('calculate_totals')
                 frm.doc.__after_get_data = 1
                 doc.items.forEach(row => {
-                    row.description = row.item_name
+                    row.description = ""
                 });
             });
 

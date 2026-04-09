@@ -143,7 +143,7 @@ def get_data(filters):
 	t.transportir as transportir_nama_customer,
 	do.ongkos_angkut as transportir_harga_satuan,
 	(t.netto_2 * do.ongkos_angkut) as transportir_nilai_per_truck,
-	'' as no_invoice
+	sii.parent as no_invoice
 	FROM `tabSales Order` as so
 	JOIN `tabSales Order Item` as soi ON soi.parent = so.name
 	JOIN `tabDelivery Order` as do ON do.sales_order = so.name

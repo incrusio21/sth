@@ -19,7 +19,35 @@ class GantiRugiLahan(AccountsController):
 		self.set_missing_value()
 		self.validate_duplicate_sppt()
 		self.calculate_total()
+		self.set_no_rekening()
 		super().validate()
+
+	def set_no_rekening(self):
+		if not self.items:
+			return
+
+		row = self.items[0]
+
+		if not row.sppt:
+			return
+
+		pemilik = frappe.db.get_value(
+			"GIS",
+			row.sppt,
+			"pemilik_lahan"
+		)
+
+		if not pemilik:
+			return
+
+		norek = frappe.db.get_value(
+			"Daftar Masyarakat",
+			pemilik,
+			"norek"
+		)
+
+		if norek:
+			self.no_rekening = norek
 	
 	def validate_duplicate_sppt(self):
 		sppt = []

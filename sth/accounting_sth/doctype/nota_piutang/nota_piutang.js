@@ -80,11 +80,13 @@ function fetch_si_pengiriman(frm) {
 			}
 
 			frm.clear_table('nota_hutang_pemenuhan_kontrak_table');  
-
+			console.log(r.message)
 			r.message.forEach(si => {
 				let row = frm.add_child('nota_hutang_pemenuhan_kontrak_table');  
 				row.pengakuan_penjualan = si.name;
-				row.nominal = si.grand_total;
+				row.qty = si.qty;
+				row.rate = si.rate;
+				row.subtotal = si.subtotal;
 			});
 
 			frm.refresh_field('nota_hutang_pemenuhan_kontrak_table');  

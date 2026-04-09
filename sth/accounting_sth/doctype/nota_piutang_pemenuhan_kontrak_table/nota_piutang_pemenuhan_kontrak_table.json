@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "pengakuan_penjualan",
+  "qty",
   "rate",
   "subtotal"
  ],
@@ -20,21 +21,32 @@
    "options": "Sales Invoice"
   },
   {
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Rate"
   },
   {
+   "columns": 2,
    "fieldname": "subtotal",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Subtotal"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-02 13:38:46.832500",
+ "modified": "2026-04-07 11:18:16.629827",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang Pemenuhan Kontrak Table",

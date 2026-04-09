@@ -52,6 +52,14 @@ frappe.ui.form.on("Material Request", {
         frm.trigger('set_unit_to_child')
     },
 
+    purchase_type(frm) {
+        if (!frm.doc.purchase_type) {
+            frm.page.inner_toolbar.hide()
+        } else {
+            frm.page.inner_toolbar.show()
+        }
+    },
+
     set_default_reqdate(frm) {
         const required_date = frappe.datetime.add_days(frm.doc.date, 7)
         frm.set_value("schedule_date", required_date)
@@ -89,7 +97,10 @@ frappe.ui.form.on("Material Request", {
                     options: "Berita Acara",
                     get_query: function () {
                         return {
-                            query: "sth.controllers.queries.get_berita_acara"
+                            query: "sth.controllers.queries.get_berita_acara",
+                            filters: {
+                                unit: frm.doc.unit
+                            }
                         }
                     },
                     reqd: 1

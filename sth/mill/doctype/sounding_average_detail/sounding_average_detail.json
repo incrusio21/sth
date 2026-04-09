@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-08 13:29:09.795143",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nama_kompartemen_bunker",
+  "rata_rata_hasil",
+  "column_break_sovx",
+  "hasil_pembulatan",
+  "total_hitungan"
+ ],
+ "fields": [
+  {
+   "fieldname": "nama_kompartemen_bunker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nama Kompartemen / Bunker",
+   "options": "Master Kompartemen atau Bunker"
+  },
+  {
+   "fieldname": "rata_rata_hasil",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rata Rata Hasil",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_sovx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hasil_pembulatan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hasil Pembulatan",
+   "precision": "0"
+  },
+  {
+   "fieldname": "total_hitungan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Hitungan",
+   "precision": "0"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-08 15:52:02.186430",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Sounding Average Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
