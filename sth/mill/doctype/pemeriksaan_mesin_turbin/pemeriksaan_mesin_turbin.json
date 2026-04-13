@@ -28,6 +28,8 @@
   "foto_temperatur_cooler_turbin",
   "tegangan_r_s_t_turbin",
   "foto_tegangan_r_s_t_turbin",
+  "capasitor_bank",
+  "foto_capasitor_bank",
   "column_break_whjn",
   "frekwensi_turbin",
   "foto_frekwensi_turbin",
@@ -256,12 +258,25 @@
    "in_preview": 1,
    "label": "Total HM Turbin",
    "read_only": 1
+  },
+  {
+   "fieldname": "capasitor_bank",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Capasitor Bank ( Unit )",
+   "precision": "0"
+  },
+  {
+   "fieldname": "foto_capasitor_bank",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Capasitor Bank"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:49:08.713223",
+ "modified": "2026-04-13 09:34:49.659453",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Turbin",

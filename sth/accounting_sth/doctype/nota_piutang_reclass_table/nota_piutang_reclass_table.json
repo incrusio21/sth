@@ -13,7 +13,8 @@
   "ppn",
   "grand_total",
   "reclass",
-  "akun_reclass"
+  "akun_reclass",
+  "pengakuan_penjualan_ppn"
  ],
  "fields": [
   {
@@ -21,42 +22,48 @@
    "fieldname": "periode",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Periode"
+   "label": "Periode",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Qty",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate"
+   "label": "Rate",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "subtotal",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Subtotal"
+   "label": "Subtotal",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "ppn",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "PPN"
+   "label": "PPN",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Grand Total"
+   "label": "Grand Total",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -72,13 +79,20 @@
    "in_list_view": 1,
    "label": "Akun Reclass",
    "options": "Account"
+  },
+  {
+   "fieldname": "pengakuan_penjualan_ppn",
+   "fieldtype": "Data",
+   "label": "Pengakuan Penjualan PPN",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-02 13:37:41.112248",
+ "modified": "2026-04-09 22:36:55.180534",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang Reclass Table",

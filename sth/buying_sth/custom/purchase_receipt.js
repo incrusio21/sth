@@ -82,7 +82,7 @@ frappe.ui.form.on("Purchase Receipt", {
         }
 
         frappe.call({
-            method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+            method: "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
             args: {
                 source_name: frm.doc.purchase_order,
             },

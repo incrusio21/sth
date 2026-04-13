@@ -16,12 +16,24 @@
   "column_break_qntg",
   "company",
   "akun_uang_muka",
+  "unit",
   "akun_kas_bank",
   "nota_hutang_pemenuhan_kontrak",
   "amended_from",
   "list_pemenuhan_kontrak_section",
   "master_barang_placeholder_ppn",
   "nota_hutang_pemenuhan_kontrak_table",
+  "list_payment_voucher",
+  "section_break_ffbg",
+  "nilai_kontrak",
+  "column_break_hvvv",
+  "dpp",
+  "dp_dpp",
+  "sisa_dpp",
+  "column_break_uyce",
+  "ppn",
+  "dp_ppn",
+  "sisa_ppn",
   "section_break_vwzw",
   "reclass_pengakuan_penjualan"
  ],
@@ -157,13 +169,90 @@
    "label": "Dibuat Dari Payment Voucher",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "no_copy": 1,
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ffbg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nilai_kontrak",
+   "fieldtype": "Currency",
+   "label": "Nilai Kontrak",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "dpp",
+   "fieldtype": "Currency",
+   "label": "DPP",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "dp_dpp",
+   "fieldtype": "Currency",
+   "label": "DP DPP",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "sisa_dpp",
+   "fieldtype": "Currency",
+   "label": "Sisa DPP",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hvvv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ppn",
+   "fieldtype": "Currency",
+   "label": "PPN",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "dp_ppn",
+   "fieldtype": "Currency",
+   "label": "DP PPN",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "sisa_ppn",
+   "fieldtype": "Currency",
+   "label": "Sisa PPN",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_uyce",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "list_payment_voucher",
+   "fieldtype": "Table",
+   "label": "PV Pembayaran Pengakuan Penjualan",
+   "options": "Nota Piutang PV Table",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-07 00:29:42.746588",
+ "modified": "2026-04-10 11:28:30.037633",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

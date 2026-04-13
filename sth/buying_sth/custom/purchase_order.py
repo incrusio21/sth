@@ -29,6 +29,9 @@ def make_purchase_receipt(source_name, target_doc=None):
             (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
         )
 
+        # add mapping
+        target.po_qty = obj.qty
+
     doc = get_mapped_doc(
         "Purchase Order",
         source_name,

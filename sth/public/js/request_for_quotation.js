@@ -85,6 +85,14 @@ frappe.ui.form.on('Request for Quotation', {
                 frm.clear_table('items')
             }
         }
+
+        if (frm.doc.docstatus != 1) {
+            const message = `
+                <div class="form-message blue">
+                    <div>Submit this document to confirm</div>
+                </div>
+            `
+        }
     },
 
     onload_post_render(frm) {

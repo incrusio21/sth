@@ -53,7 +53,8 @@
   "berat_jenis_suhu_2",
   "video_2",
   "section_break_uilc",
-  "tonase_sebenarnya_2"
+  "tonase_sebenarnya_2",
+  "amended_from"
  ],
  "fields": [
   {
@@ -326,7 +327,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "BST 1",
-   "options": "Master BST",
+   "options": "Warehouse",
    "reqd": 1
   },
   {
@@ -334,7 +335,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "BST 2",
-   "options": "Master BST",
+   "options": "Warehouse",
    "reqd": 1
   },
   {
@@ -377,12 +378,23 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal Proses"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sounding Stock CPO di BST",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-04-06 13:40:27.859466",
+ "modified": "2026-04-09 16:23:27.709869",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

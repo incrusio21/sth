@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from sth.controllers.queries import get_fields
 from frappe.desk.reportview import get_filters_cond
+from frappe.utils import flt
 
 class PermintaanPengeluaranBarang(Document):
 	def validate(self):
@@ -17,8 +18,13 @@ class PermintaanPengeluaranBarang(Document):
 	
 	def validate_stock(self):
 		for row in self.items:
-			if row.jumlah > row.jumlah_saat_ini:
+			if flt(row.jumlah) == 0:
+				frappe.throw(f'Qty Barang {row.kode_barang} tidak boleh kosong')
+
+			if flt(row.jumlah) > flt(row.jumlah_saat_ini):
 				frappe.throw(f'Barang {row.kode_barang} tidak cukup stock untuk dikeluarkan')
+			
+			
 
 	def update_outgoing_percentage(self):
 		qty = 0

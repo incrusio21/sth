@@ -173,9 +173,11 @@ class PermintaanDanaOperasional(Document):
 			mapping = tipe_mapping[satu_pdo]
 			for row in self.get(mapping['child_table']):
 				if row.get(mapping['amount_field']):
-					grand_total += row.get(mapping['amount_field'])
+					if row.get(mapping['amount_field']):
+						grand_total += row.get(mapping['amount_field'])
 				else:
-					grand_total += row.get(mapping['before_amount_field'])
+					if row.get(mapping['before_amount_field']):
+						grand_total += row.get(mapping['before_amount_field'])
 
 			self.set(mapping['grand_total_field'], grand_total)
 			self.set(mapping['outstanding_field'], grand_total)

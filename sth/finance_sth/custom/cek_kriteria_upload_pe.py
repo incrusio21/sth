@@ -8,10 +8,21 @@ def generate_kriteria_upload_payment(doc, method=None):
 		return
 
 	all_rows = []
+	seen = set()
 
 	for ref in doc.references:
 		rows = get_kriteria_rows_for_reference(ref.reference_doctype, ref.reference_name)
-		all_rows.extend(rows)
+		for row in rows:
+			# Unique key: kombinasi document_type + document_no + rincian_dokumen_finance + file
+			key = (
+				row["document_type"],
+				row["document_no"],
+				row["rincian_dokumen_finance"],
+				row["uploaded_file"],
+			)
+			if key not in seen:
+				seen.add(key)
+				all_rows.append(row)
 
 	if not all_rows:
 		return  

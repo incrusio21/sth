@@ -29,3 +29,18 @@ def format_tanggal_id(tanggal):
         tanggal = frappe.utils.getdate(tanggal)
 
     return f"{tanggal.day} {bulan[tanggal.month]} {tanggal.year}"
+
+def sum_pengakuan_penjualan_by_nota_piutang(nota_piutang=None):
+    return frappe.db.sql("""
+    SELECT
+    nppkt.pengakuan_penjualan,
+    nppkt.posting_date as date,
+    SUM(nppkt.qty) as qty,
+    si.komoditi as descriptions,
+    SUM(nppkt.rate) as price,
+    SUM(nppkt.subtotal) as amount
+    FROM `tabNota Piutang` as np
+    JOIN `tabNota Piutang Pemenuhan Kontrak Table` as nppkt ON nppkt.parent = np.name
+    LEFT JOIN `tabSales Invoice` as si ON si.name = nppkt.pengakuan_penjualan
+    WHERE np.name = %s;
+    """, (nota_piutang), as_dict=1)[0]

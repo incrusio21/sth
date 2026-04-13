@@ -102,8 +102,8 @@ function preview_dialog() {
 		primary_action_label: __("Preview PDO"),
 		primary_action(values) {
 
-			// let print_url = `${window.location.origin}/printview?doctype=Permintaan Dana Operasional&name=${values.pdo_id}&format=${encodeURIComponent(PDO_PRINT_FORMAT)}&no_letterhead=0&trigger_print=0`;
-			const print_url = `/app/preview-pdo?pdo_name=${values.pdo_id}`
+			let print_url = `${window.location.origin}/printview?doctype=Permintaan Dana Operasional&name=${values.pdo_id}&format=${encodeURIComponent(PDO_PRINT_FORMAT)}&no_letterhead=0&trigger_print=0`;
+			// const print_url = `/app/preview-pdo?pdo_name=${values.pdo_id}`;
 
 			window.open(print_url, "_blank");
 

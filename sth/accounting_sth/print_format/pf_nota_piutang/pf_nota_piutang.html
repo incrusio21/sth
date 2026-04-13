@@ -2,10 +2,16 @@
 {% set company = frappe.get_doc("Company", doc.company) %}
 {% set customer = frappe.get_doc("Customer", doc.customer) %}
 
-{%- if doc.items -%}
-{%- set so = frappe.get_doc("Sales Order", doc.items[0].sales_order) -%}
+{%- if doc.no_kontrak -%}
+{%- set so = frappe.get_doc("Sales Order", doc.no_kontrak) -%}
 {%- else -%}
 {%- set so = None -%}
+{%- endif -%}
+
+{%- if so.customer -%}
+{%- set customer = frappe.get_doc("Customer", so.customer) -%}
+{%- else -%}
+{%- set customer = None -%}
 {%- endif -%}
 
 {%- if so.no_rekening_tujuan -%}
@@ -13,6 +19,8 @@
 {%- else -%}
 {%- set rekening_tujuan = None -%}
 {%- endif -%}
+
+{%- set pengakuan_penjualan = sum_pengakuan_penjualan_by_nota_piutang(doc.name) -%}
 
 <div>
   <table>
@@ -59,7 +67,7 @@
     <tr>
       <td style="width: 16%!important;">NAME</td>
       <td style="width: 2%!important;">:</td>
-      <td>{{ doc.customer or '' }}</td>
+      <td>{{ customer.customer_name or '' }}</td>
       <td style="width: 20%!important;">INVOICE NUMBER</td>
       <td style="width: 2%!important;">:</td>
       <td>{{ doc.name or '' }}</td>
@@ -70,7 +78,7 @@
       <td>{{ customer.alamat or '' }}</td>
       <td>INVOICE DATE</td>
       <td>:</td>
-      <td>{{ format_tanggal_id(doc.posting_date) }}</td>
+      <td>{{ format_tanggal_id(doc.date) }}</td>
     </tr>
     <tr>
       <td>CONTRACT</td>
@@ -94,26 +102,26 @@
       <td colspan="2">AMOUNT</td>
     </tr>
     <tr style="height: 3rem!important;">
-      <td>{{ format_tanggal_id(doc.posting_date) }}</td>
+      <td>{{ format_tanggal_id(doc.date) }}</td>
       <td>
-        {{ frappe.format_value(doc.items[0].qty or 0, {"fieldtype": "Float"}) }} {{ doc.items[0].uom or '' }}
+        {{ frappe.format_value(pengakuan_penjualan.qty or 0, {"fieldtype": "Float"}) }} KG
       </td>
-      <td>{{ doc.items[0].description or '' }}</td>
-      <td>{{ frappe.format_value(doc.items[0].rate or 0, {"fieldtype": "Float"}) }}</td>
+      <td>{{ pengakuan_penjualan.descriptions or '' }}</td>
+      <td>{{ frappe.format_value(pengakuan_penjualan.price or 0, {"fieldtype": "Float"}) }}</td>
       <td style="border: none!important">IDR</td>
       <td style="border-left: none!important">
-        {{ frappe.format_value(doc.items[0].amount or 0, {"fieldtype": "Float"}) }}
+        {{ frappe.format_value(pengakuan_penjualan.amount or 0, {"fieldtype": "Float"}) }}
       </td>
     </tr>
     <tr>
       <td>TOTAL</td>
       <td>
-        {{ frappe.format_value(doc.items[0].qty or 0, {"fieldtype": "Float"}) }} {{ doc.items[0].uom or '' }}
+        {{ frappe.format_value(pengakuan_penjualan.qty or 0, {"fieldtype": "Float"}) }} KG
       </td>
       <td></td>
       <td>SUB TOTAL</td>
       <td>IDR</td>
-      <td>{{ frappe.format_value(doc.total or 0, {"fieldtype": "Float"}) }}</td>
+      <td>{{ frappe.format_value(pengakuan_penjualan.amount or 0, {"fieldtype": "Float"}) }}</td>
     </tr>
     <tr>
       <td colspan="3" style="border: none!important"></td>
@@ -131,11 +139,11 @@
       <td colspan="3" style="border: none!important"></td>
       <td>TOTAL</td>
       <td>IDR</td>
-      <td>{{ frappe.format_value(doc.grand_total or 0, {"fieldtype": "Float"}) }}</td>
+      <td>{{ frappe.format_value(doc.nilai_kontrak or 0, {"fieldtype": "Float"}) }}</td>
     </tr>
   </table>
 
-  <p style="text-transform: capitalize;">Say: {{ money_in_words_idr(doc.grand_total) }}</p>
+  <p style="text-transform: capitalize;">Say: </p>
 
   <div>
     <p style="color: #f28c8c!important; text-decoration: underline;">Please send your payment to:</p>

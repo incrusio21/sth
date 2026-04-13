@@ -9,11 +9,11 @@
   "header_section",
   "naming_series",
   "tanggal",
-  "tanggal_produksi",
   "jam",
   "column_break_flyo",
   "company",
   "unit",
+  "gudang",
   "column_break_qfco",
   "tipe",
   "tanggal_proses",
@@ -29,7 +29,8 @@
   "pengiriman",
   "input_dipakai_pabrik",
   "column_break_jjbi",
-  "stock_akhir"
+  "stock_akhir",
+  "amended_from"
  ],
  "fields": [
   {
@@ -100,6 +101,7 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Unit",
    "options": "Unit"
   },
@@ -122,13 +124,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
-   "fieldname": "tanggal_produksi",
-   "fieldtype": "Date",
-   "in_preview": 1,
-   "label": "Tanggal Produksi"
-  },
-  {
    "fieldname": "tipe",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -142,8 +137,10 @@
    "label": "Informasi Data"
   },
   {
+   "depends_on": "eval:doc.tipe",
    "fieldname": "nama_barang",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Nama Barang",
    "options": "Item"
   },
@@ -156,6 +153,7 @@
    "fieldname": "tanggal_proses",
    "fieldtype": "Date",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Tanggal Proses"
   },
   {
@@ -174,12 +172,34 @@
    "in_preview": 1,
    "label": "Data Olah TBS",
    "read_only": 1
+  },
+  {
+   "fieldname": "gudang",
+   "fieldtype": "Link",
+   "label": "Gudang",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Penginputan Stock By Product",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-04-06 13:36:11.133409",
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "references"
+  }
+ ],
+ "modified": "2026-04-13 10:21:56.958280",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Stock By Product",
@@ -202,5 +222,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

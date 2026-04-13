@@ -7,6 +7,9 @@ def set_purchase_order_if_exist(doc,method):
 		if doc.items[0].purchase_order:
 			doc.purchase_order = doc.items[0].purchase_order
 
+	# for row in doc.items:
+	# 	if row.purchase_order_item:
+	# 		row.po_qty = frappe.get_doc("Purchase Order Item",purchase_order_item).qty
 
 def get_enabled_companies():
 	try:

@@ -27,7 +27,7 @@ def cek_kriteria(self,method):
 				if row.type == doctype and row.name1 == docname:
 					check = 1
 			
-			if check == 0:
+			if check == 1:
 				fill_kriteria(self, doctype, docname)
 
 		# bersih-bersih kalau ada yang tidak di reference
@@ -42,6 +42,7 @@ def cek_kriteria(self,method):
 
 def fill_kriteria(self,doctype, docname):
 	# ambil dulu dari kriteria
+	self.detail_dokumen_finance = []
 	kriteria = frappe.db.sql(""" SELECT name FROM `tabKriteria Dokumen Finance` WHERE name = "{}" """.format(doctype))
 	if len(kriteria) > 0:
 		kriteria_doc = frappe.get_doc("Kriteria Dokumen Finance",kriteria[0][0])
@@ -52,9 +53,8 @@ def fill_kriteria(self,doctype, docname):
 					"type": doctype,
 					"name1": docname
 				})
-			self.append("detail_dokumen_finance",{
-				"rincian_dokumen_finance": row.rincian_dokumen_finance
-			})
+
+		
 
 def update_check_book(self, method):
 	if self.mode_of_payment != "Cheque" and not self.custom_cheque_number:
@@ -428,6 +428,34 @@ def update_pesangon_from_payment(doc, method):
 
 		slip.update_pesangon_payment_status()
 
+def pasang_nota_piutang(doc, method):
+	if doc.get("nota_piutang_pemenuhan_kontrak"):
+		nota_piutang = doc.nota_piutang_pemenuhan_kontrak
+
+		# Ambil semua Payment Entry yang sudah submit dan terhubung ke nota yang sama
+		payment_entries = frappe.get_all(
+			"Payment Entry",
+			filters={
+				"nota_piutang_pemenuhan_kontrak": nota_piutang,
+				"docstatus": 1  # submitted
+			},
+			fields=["name"]
+		)
+
+		# Ambil dokumen Nota Piutang
+		nota_doc = frappe.get_doc("Nota Piutang", nota_piutang)
+
+		# Kosongkan dulu list_payment_voucher sebelum diisi ulang
+		nota_doc.set("list_payment_voucher", [])
+
+		# Tambahkan setiap Payment Entry ke child table
+		for pe in payment_entries:
+			nota_doc.append("list_payment_voucher", {
+				"payment_voucher": pe["name"]
+			})
+
+		nota_doc.save(ignore_permissions=True)
+	
 def buat_nota_piutang(doc, method):
 	if doc.get("apakah_dp_kontrak") == 1 and doc.get("no_kontrak_penjualan"):
 		if doc.payment_type != "Receive":
@@ -459,35 +487,77 @@ def buat_nota_piutang(doc, method):
 		np.insert(ignore_permissions=True)
 		np.submit()
 
+	
+		
 def set_no_rekening(doc, method):
 
-    if doc.no_rekening:
-        return
+	if not doc.party or not doc.party_type:
+		return
 
-    if not doc.party or not doc.party_type:
-        return
+	if doc.party_type == "Employee":
 
-    if doc.party_type == "Employee":
+		norek = frappe.db.get_value(
+			"Employee",
+			doc.party,
+			"bank_ac_no"
+		)
 
-        norek = frappe.db.get_value(
-            "Employee",
-            doc.party,
-            "bank_ac_no"
-        )
+		if norek:
+			doc.no_rekening = norek
 
-        if norek:
-            doc.no_rekening = norek
+	elif doc.party_type == "Supplier":
 
-    elif doc.party_type == "Supplier":
+		norek = frappe.db.get_value(
+			"Data Bank Supplier",
+			{
+				"parent": doc.party,
+				"status_bank": "Aktif"
+			},
+			"no_rekening"
+		)
 
-        norek = frappe.db.get_value(
-            "Data Bank Supplier",
-            {
-                "parent": doc.party,
-                "status_bank": "Aktif"
-            },
-            "no_rekening"
-        )
+		if norek:
+			doc.no_rekening = norek
 
-        if norek:
-            doc.no_rekening = norek
+@frappe.whitelist()
+def get_no_rekening(party_type, party):
+
+	if not party_type or not party:
+		return None
+
+	if party_type == "Employee":
+
+		return [
+			frappe.db.get_value(
+			"Employee",
+			party,
+			"bank_ac_no"),
+
+			frappe.db.get_value(
+			"Employee",
+			party,
+			"nama_bank")
+		]
+
+	elif party_type == "Supplier":
+
+		return [
+
+			frappe.db.get_value(
+			"Data Bank Supplier",
+			{
+				"parent": party,
+				"status_bank": "Aktif"
+			},
+			"no_rekening"
+			),
+
+			frappe.db.get_value(
+			"Data Bank Supplier",
+			{
+				"parent": party,
+				"status_bank": "Aktif"
+			},
+			"nama_bank"
+			)
+		]

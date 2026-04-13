@@ -115,6 +115,7 @@ jinja = {
 		"sth.jinja.money_in_words_idr",
 		"sth.jinja.format_tanggal_id",
 		"sth.utils.encrypt",
+		"sth.jinja.sum_pengakuan_penjualan_by_nota_piutang",
 	],
 	# "filters": "sth.utils.jinja_filters"
 }
@@ -298,7 +299,7 @@ doc_events = {
 	},
 	"Payment Entry":{
 		"validate": [
-			"sth.custom.payment_entry.cek_kriteria", 
+			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
             "sth.custom.payment_entry.update_check_book",
             "sth.custom.payment_entry.set_no_rekening"
 		],
@@ -310,7 +311,7 @@ doc_events = {
 			"sth.overrides.payment_entry.on_submit_pdo",
 			"sth.custom.payment_entry.payment_entry_notification",
             "sth.custom.payment_entry.update_pesangon_from_payment",
-            "sth.custom.payment_entry.buat_nota_piutang"
+            "sth.custom.payment_entry.pasang_nota_piutang"
             # "sth.bank_payment.custom.payment_entry.make_entry"
         ],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
@@ -318,7 +319,9 @@ doc_events = {
                 "sth.custom.payment_entry.update_status_loan_bank", 
                 "sth.custom.payment_entry.update_status_dividen", 
                 "sth.overrides.payment_entry.on_cancel_pdo",
-                "sth.custom.payment_entry.update_pesangon_from_payment"],
+                "sth.custom.payment_entry.update_pesangon_from_payment",
+                "sth.custom.payment_entry.pasang_nota_piutang"
+                ],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
 	# "Permintaan Pengeluaran Barang": {

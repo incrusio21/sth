@@ -8,6 +8,12 @@
 {%- set so = None -%}
 {%- endif -%}
 
+{%- if doc.customer -%}
+{%- set customer = frappe.get_doc("Customer", doc.customer) -%}
+{%- else -%}
+{%- set customer = None -%}
+{%- endif -%}
+
 {%- if so.no_rekening_tujuan -%}
 {%- set rekening_tujuan = frappe.get_doc("Bank Account", so.no_rekening_tujuan) -%}
 {%- else -%}
@@ -59,7 +65,7 @@
     <tr>
       <td style="width: 16%!important;">NAME</td>
       <td style="width: 2%!important;">:</td>
-      <td>{{ doc.customer or '' }}</td>
+      <td>{{ customer.customer_name or '' }}</td>
       <td style="width: 20%!important;">INVOICE NUMBER</td>
       <td style="width: 2%!important;">:</td>
       <td>{{ doc.name or '' }}</td>

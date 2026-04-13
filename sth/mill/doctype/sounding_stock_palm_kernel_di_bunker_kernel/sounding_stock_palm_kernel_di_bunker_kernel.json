@@ -17,21 +17,25 @@
   "unit",
   "informasi_kompartemen_section",
   "tinggi_normal_bunker",
+  "jumlah_hasil_sounding",
   "column_break_sfpp",
   "tinggi_lubang_ukur",
   "detal_section",
   "ukuran_detail",
   "hasil_titik_sounding",
   "detail_stock_section",
+  "get_stock",
   "stock_awal",
   "pengiriman",
   "stock_akhir",
+  "sortasi",
   "produksi",
   "tbs_olah",
   "ker_netto_1",
   "ker_netto_2",
   "column_break_wdwq",
-  "table_zfca",
+  "berat_jenis",
+  "rekap_hasil",
   "volume_sounding",
   "section_break_jhlo",
   "preview_data",
@@ -198,55 +202,79 @@
    "label": "Detail Stock"
   },
   {
+   "default": "0",
    "fieldname": "stock_awal",
    "fieldtype": "Float",
-   "label": "Stock Awal "
+   "in_preview": 1,
+   "label": "Stock Awal ",
+   "precision": "0",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "pengiriman",
    "fieldtype": "Float",
-   "label": "Pengiriman"
+   "in_preview": 1,
+   "label": "Pengiriman",
+   "precision": "0",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "stock_akhir",
    "fieldtype": "Float",
-   "label": "Stock Akhir"
+   "in_preview": 1,
+   "label": "Stock Akhir",
+   "precision": "0",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "produksi",
    "fieldtype": "Float",
-   "label": "Produksi"
+   "in_preview": 1,
+   "label": "Produksi",
+   "precision": "0",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "tbs_olah",
    "fieldtype": "Float",
-   "label": "TBS Olah"
+   "in_preview": 1,
+   "label": "TBS Olah",
+   "precision": "0",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "ker_netto_1",
-   "fieldtype": "Float",
-   "label": "KER Netto 1 (%)"
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "KER Netto 1 (%)",
+   "precision": "2",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "ker_netto_2",
-   "fieldtype": "Float",
-   "label": "KER Netto 2 (%)"
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "KER Netto 2 (%)",
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_wdwq",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "table_zfca",
-   "fieldtype": "Table",
-   "options": "Ukuran Volume Sounding Bunker",
-   "read_only": 1
-  },
-  {
    "default": "0",
    "fieldname": "volume_sounding",
    "fieldtype": "Float",
-   "label": "Volume Sounding",
+   "in_preview": 1,
+   "label": "Total Volume Sounding",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -262,13 +290,47 @@
    "fieldname": "hasil_titik_sounding",
    "fieldtype": "Table",
    "label": "Hasil Titik Sounding",
-   "options": "Sounding Average Detail"
+   "options": "Sounding Average Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "get_stock",
+   "fieldtype": "Button",
+   "label": "Get Stock"
+  },
+  {
+   "fetch_from": "pabrik.jumlah_hasil_sounding",
+   "fieldname": "jumlah_hasil_sounding",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Jumlah Hasil Sounding",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rekap_hasil",
+   "fieldtype": "Table",
+   "label": "Rekap Hasil Sounding",
+   "options": "Ukuran Volume Sounding Bunker"
+  },
+  {
+   "default": "0",
+   "description": "diisi ketika ukuran volume dalam satuan liter",
+   "fieldname": "berat_jenis",
+   "fieldtype": "Float",
+   "label": "Dencity / Berat Jenis"
+  },
+  {
+   "default": "0",
+   "fieldname": "sortasi",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Sortasi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-09 09:16:59.691153",
+ "modified": "2026-04-13 10:16:10.837360",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",

@@ -5,6 +5,12 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
     refresh(frm) {
 
     },
+
+    get_stock(frm) {
+        frm.call('get_stock').then(() => {
+            frm.refresh()
+        })
+    }
 });
 
 frappe.ui.form.on("Palm Kernel Bunker Detail", {

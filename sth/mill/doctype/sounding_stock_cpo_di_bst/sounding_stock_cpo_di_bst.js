@@ -24,9 +24,10 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     get_data(frm) {
-        frm.call("get_data").then(() => {
-            frm.refresh()
-        })
+        frm.call("get_data", { freeze: true, freeze_message: "Getting Data..." })
+            .then(() => {
+                frm.refresh()
+            })
     },
 
     get_warehouse_bst(frm) {
@@ -92,11 +93,11 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     tonase_sebenarnya(frm) {
-        frm.trigger('calculate_produksi_cpo')
+        frm.trigger('calculate_totals')
     },
 
     tonase_sebenarnya_2(frm) {
-        frm.trigger('calculate_produksi_cpo')
+        frm.trigger('calculate_totals')
     },
 
     produksi_cpo(frm) {
@@ -110,9 +111,11 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
         frm.set_value("oer_netto_2", oer_netto_2)
     },
 
-    calculate_produksi_cpo(frm) {
-        const total = (frm.doc.tonase_sebenarnya + frm.doc.tonase_sebenarnya_2) - frm.doc.stock_bst
-        frm.set_value("produksi_cpo", total)
+    calculate_totals(frm) {
+        const total_stock = frm.doc.tonase_sebenarnya + frm.doc.tonase_sebenarnya_2
+        const total_produksi = (total_stock + frm.doc.pengiriman_cpo) - frm.doc.stock_awal
+        frm.set_value("stock_bst", total_stock)
+        frm.set_value("produksi_cpo", total_produksi)
     },
 
 });

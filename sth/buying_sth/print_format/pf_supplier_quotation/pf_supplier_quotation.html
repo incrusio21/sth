@@ -1,0 +1,142 @@
+<div>
+  <table>
+    <tr>
+      <td>
+        <div class="form-group">
+          <label class="required">Supplier</label>
+          <input type="text" value="{{ doc.get_formatted('supplier') }}">
+        </div>
+        <div class="form-group">
+          <label>Supplier Name</label>
+          <input type="text" value="{{ doc.get_formatted('supplier_name') }}">
+        </div>
+        <div class="form-group">
+          <label class="required">Company</label>
+          <input type="text" value="{{ doc.get_formatted('company') }}">
+        </div>
+      </td>
+      <td>
+        <div class="form-group">
+          <label class="required">Status</label>
+          <input type="text" value="{{ doc.get_formatted('status') }}">
+        </div>
+        <div class="form-group">
+          <label class="required">Date</label>
+          <input type="text" value="{{ doc.get_formatted('transaction_date') }}">
+        </div>
+        <div class="form-group">
+          <label>Valid Till</label>
+          <input type="text" value="{{ doc.get_formatted('valid_till') }}">
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div>
+    <h4 class="mb-0">Pengiriman</h4>
+    <table>
+      <tr>
+        <td>
+          <div class="form-group">
+            <label class="required">Lokasi Pengiriman</label>
+            <input type="text" value="{{ doc.get_formatted('lokasi_pengiriman') }}">
+          </div>
+        </td>
+        <td>
+          <div class="form-group">
+            <label class="required">Syarat Pembayaran</label>
+            <input type="text" value="{{ doc.get_formatted('syarat_pembayaran') }}">
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div>
+    <p>Items</p>
+    <table class="table_items">
+      <tr>
+        <td>No.</td>
+        <td>Nama Barang</td>
+        <td>Merk</td>
+        <td>Negara Buatan</td>
+        <td>Spesifikasi</td>
+        <td>Jumlah</td>
+        <td>Satuan</td>
+        <td>Harga (IDR)</td>
+        <td>Total (IDR)</td>
+      </tr>
+
+      {%- for row in doc.items -%}
+      <tr>
+        <td>{{ row.idx }}</td>
+        <td>{{ row.get_formatted("item_code", doc) }}</td>
+        <td>{{ row.custom_merk }}</td>
+        <td>{{ row.custom_country }}</td>
+        <td>{{ row.description }}</td>
+        <td>{{ row.get_formatted("qty", doc) }}</td>
+        <td>{{ row.uom }}</td>
+        <td>{{ row.get_formatted("rate", doc) }}</td>
+        <td>{{ row.get_formatted("amount", doc) }}</td>
+      </tr>
+      {%- endfor -%}
+    </table>
+  </div>
+
+  <table>
+    <tr>
+      <td>
+        <div class="form-group">
+          <label>Keterangan</label>
+          <textarea style="height: 150px;"></textarea>
+        </div>
+      </td>
+      <td>
+        <div class="form-group">
+          <label>Sub Total (IDR)</label>
+          <input type="text" value="{{ doc.get_formatted('total') }}">
+        </div>
+        <div class="form-group">
+          <label>Discount Percentage</label>
+          <input type="text" value="{{ doc.get_formatted('additional_discount_percentage') }}">
+        </div>
+        <div class="form-group">
+          <label>Discount Amount (IDR)</label>
+          <input type="text" value="{{ doc.get_formatted('discount_amount') }}">
+        </div>
+        <div class="form-group">
+          <label>Biaya Ongkos Angkut</label>
+          <input type="text" value="{{ doc.get_formatted('biaya_ongkos') }}">
+        </div>
+        <div class="form-group">
+          <input type="checkbox">
+          <label style="display: inline-block;">Is PPN Biaya Angkut</label>
+        </div>
+        <div class="form-group">
+          <label class="required">PPN Biaya Ongkos Angkut</label>
+          <input type="text">
+        </div>
+        <div class="form-group">
+          <label>Total Biaya Ongkos Angkut</label>
+          <input type="text">
+        </div>
+        <div class="form-group">
+          <label>PBBKB</label>
+          <input type="text">
+        </div>
+        <div class="form-group">
+          <input type="checkbox">
+          <label style="display: inline-block;">Is PPh 22</label>
+        </div>
+        <div class="form-group">
+          <label>PPh 22</label>
+          <input type="text">
+        </div>
+        <div class="form-group">
+          <label class="required">Grand Total (IDR)</label>
+          <input type="text">
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>

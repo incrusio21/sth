@@ -2,7 +2,34 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Penginputan Stock By Product", {
-    nama_barang(frm) {
+    setup(frm) {
+        frm.set_query("unit", (doc) => {
+            return {
+                filters: {
+                    company: doc.company,
+                }
+            }
+        })
+
+        frm.set_query("gudang", (doc) => {
+            return {
+                filters: {
+                    unit: doc.unit,
+                    is_group: 0,
+
+                }
+            }
+        })
+    },
+
+    unit(frm) {
+        if (!frm.doc.unit) return
+        frappe.db.get_value("Warehouse", { "unit": frm.doc.unit, "central": 1 }, "name", (res) => {
+            frm.set_value("gudang", res.name)
+        })
+    },
+
+    get_data(frm) {
         if (!frm.doc.nama_barang) return
         frm.call("get_stock").then(() => {
             frm.refresh()

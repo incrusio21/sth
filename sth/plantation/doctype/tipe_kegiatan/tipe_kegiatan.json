@@ -10,6 +10,7 @@
   "section_break_coqy",
   "n_tipe",
   "column_break_zigr",
+  "daftar_divisi",
   "section_break_gfvn",
   "rkb_voucher_type",
   "column_break_rigb",
@@ -58,12 +59,18 @@
    "fieldname": "is_traksi",
    "fieldtype": "Check",
    "label": "Is Traksi"
+  },
+  {
+   "fieldname": "daftar_divisi",
+   "fieldtype": "Table",
+   "label": "Daftar Divisi",
+   "options": "Tipe Kegiatan Divisi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:30:11.855941",
+ "modified": "2026-04-10 11:36:34.156789",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Tipe Kegiatan",

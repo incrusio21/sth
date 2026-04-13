@@ -12,6 +12,7 @@ def get_data(data):
 			"Sales Invoice": "return_against",
 			"Auto Repeat": "reference_document",
 			"Purchase Invoice": "inter_company_invoice_reference",
+			"Nota Piutang": "pengakuan_penjualan_ppn",
 		},
 		"internal_links": {
 			"Sales Order": ["items", "sales_order"],
@@ -31,7 +32,7 @@ def get_data(data):
 					"Dunning",
 				],
 			},
-			{"label": _("Reference"), "items": ["Timesheet", "Delivery Note", "Sales Order"]},
+			{"label": _("Reference"), "items": ["Timesheet", "Delivery Note", "Sales Order", "Nota Piutang"]},
 			{"label": _("Returns"), "items": ["Sales Invoice"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
 			{"label": _("Internal Transfers"), "items": ["Purchase Invoice"]},

@@ -934,7 +934,7 @@ function show_popup(frm, employee_atau_barang) {
 					} else {
 						dialog.set_value('price', 0);
 						frappe.msgprint(
-							__('Tidak ada plafon untuk jabatan: ') + jabatan_value
+							__('Tidak ada plafon untuk jabatan: ') + jabatan_value + (', tambahkan di plafon PDO jika belum ada.')
 						);
 					}
 				}
@@ -1278,25 +1278,29 @@ function show_bahan_bakar_detail_dialog(frm, kategori) {
 		{
 			fieldname: 'jabatan',
 			label: __('Jabatan'),
-			fieldtype: 'Link',
-			options: 'Designation',
-			reqd: 1,
-			onchange: function () {
-				let jabatan = detail_dialog.get_value('jabatan');
-				if (jabatan) {
-					fetch_plafon_for_dialog(jabatan, detail_dialog);
-				} else {
-					detail_dialog.set_value('plafon', 0);
-					detail_dialog.set_value('unit_price', 0);
-					detail_dialog.set_value('price_total', 0);
+			fieldtype: is_tunjangan ? 'Link' : 'Data',
+			options: is_tunjangan ? 'Designation' : undefined,
+			reqd: is_tunjangan ? 1 : 0,
+			hidden: is_tunjangan ? 0 : 1,
+			onchange:  function () {
+				if(is_tunjangan){
+					let jabatan = detail_dialog.get_value('jabatan');
+					if (jabatan) {
+						fetch_plafon_for_dialog(jabatan, detail_dialog);
+					} else {
+						detail_dialog.set_value('plafon', 0);
+						detail_dialog.set_value('unit_price', 0);
+						detail_dialog.set_value('price_total', 0);
+					}
 				}
+				
 			}
 		},
 		{
 			fieldname: 'plafon',
 			label: __('Plafon'),
 			fieldtype: 'Currency',
-			read_only: 1
+			read_only:  is_tunjangan ? 1 : 0
 		},
 		{
 			fieldname: 'unit_price',

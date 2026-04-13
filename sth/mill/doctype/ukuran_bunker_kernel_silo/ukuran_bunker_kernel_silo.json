@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:UBKS-{abbr}-{pabrik}",
+ "autoname": "format:UBKS-{abbr}-{pabrik}-{###}",
  "creation": "2026-04-06 09:16:26.091814",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -31,6 +31,7 @@
    "fieldname": "pabrik",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Pabrik",
    "options": "Mill Master",
    "reqd": 1
@@ -55,6 +56,8 @@
   {
    "fieldname": "kompartemen_bunker",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Nama Kompartemen / Bunker",
    "options": "Master Kompartemen atau Bunker"
   },
@@ -68,7 +71,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 13:42:41.373406",
+ "modified": "2026-04-10 16:24:44.552930",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Bunker Kernel Silo",
@@ -91,5 +94,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
