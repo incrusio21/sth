@@ -990,6 +990,7 @@ function show_popup(frm, employee_atau_barang) {
 					label: __('Qty'),
 					fieldtype: 'Float',
 					reqd: 1,
+					default: 1,
 					onchange: function () {
 						let qty = d.get_value('qty') || 0;
 						let price = d.get_value('price') || 0;
@@ -1070,6 +1071,7 @@ function show_popup(frm, employee_atau_barang) {
 					label: __('Qty'),
 					fieldtype: 'Float',
 					reqd: 1,
+					default:1,
 					onchange: function () {
 						let qty = d.get_value('qty') || 0;
 						let price = d.get_value('price') || 0;

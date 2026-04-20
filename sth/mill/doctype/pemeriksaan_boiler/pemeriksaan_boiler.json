@@ -35,7 +35,9 @@
   "upload_foto",
   "drain_air_boiler_manual__blowdown_section",
   "hasil_analisa_laboratorium",
-  "upload_video_manual_blowdown"
+  "upload_video_manual_blowdown",
+  "double_dumper_section",
+  "upload_foto_double_dumper"
  ],
  "fields": [
   {
@@ -206,12 +208,22 @@
    "fieldname": "upload_video_manual_blowdown",
    "fieldtype": "Attach",
    "label": "Upload Video Manual Blowdown"
+  },
+  {
+   "fieldname": "upload_foto_double_dumper",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Double Dumper"
+  },
+  {
+   "fieldname": "double_dumper_section",
+   "fieldtype": "Section Break",
+   "label": "Double Dumper"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:24:32.798889",
+ "modified": "2026-04-14 15:35:19.964310",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Boiler",

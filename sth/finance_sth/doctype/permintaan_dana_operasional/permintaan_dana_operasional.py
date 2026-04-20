@@ -28,11 +28,46 @@ class PermintaanDanaOperasional(Document):
 		if self.docstatus == 0:
 			self.hitung_total()
 
+		self.check_duplicate()
+
 	def update_pdo_default_account(self):
 		pass
 		# if not self.bahan_bakar_debit_to:
 		# 	self.bahan_bakar_debit_to = frappe.get_doc("Company", self.company).default_pdo_bahan_bakar_account
 
+	def check_duplicate(self):
+		filters = {
+			"months": self.months,
+			"fiscal_year": self.fiscal_year,
+			"unit": self.unit,
+			"docstatus": ["!=", 2],  # exclude Cancelled
+		}
+
+		# Exclude dokumen saat ini jika sudah tersimpan (edit mode)
+		if self.name:
+			filters["name"] = ["!=", self.name]
+
+		existing = frappe.db.get_value(
+			"Permintaan Dana Operasional",
+			filters,
+			["name", "months", "fiscal_year", "unit"],
+			as_dict=True,
+		)
+
+		if existing:
+			frappe.throw(
+				_(
+					"Permintaan Dana Operasional sudah ada untuk "
+					"<b>Bulan: {0}</b>, <b>Tahun Fiskal: {1}</b>, <b>Unit: {2}</b>.<br><br>"
+					"Dokumen yang sudah ada: <a href='/app/permintaan-dana-operasional/{3}'>{3}</a>"
+				).format(
+					self.months,
+					self.fiscal_year,
+					self.unit,
+					existing.name,
+				),
+				title=_("Duplikasi Permintaan Dana Operasional"),
+			)
 		
 	def on_update(self):
 		if self.docstatus == 0:
@@ -168,6 +203,12 @@ class PermintaanDanaOperasional(Document):
 			}
 		}
 
+		for row in self.get("pdo_kas"):
+			if row.qty == 0 and row.revised_qty == 0:
+				row.qty = 1
+				row.total = row.qty * row.price
+
+		total = 0
 		for satu_pdo in list_pdo:
 			grand_total = 0
 			mapping = tipe_mapping[satu_pdo]
@@ -181,6 +222,13 @@ class PermintaanDanaOperasional(Document):
 
 			self.set(mapping['grand_total_field'], grand_total)
 			self.set(mapping['outstanding_field'], grand_total)
+
+			total += grand_total
+
+		self.grand_total_pdo = total
+		if self.docstatus == 0:
+			self.outstanding_amount	= total
+
 
 
 

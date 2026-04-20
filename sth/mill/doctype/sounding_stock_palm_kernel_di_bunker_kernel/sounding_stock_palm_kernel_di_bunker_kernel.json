@@ -47,7 +47,8 @@
   "berat_jenis_kernel",
   "column_break_wnay",
   "foto",
-  "video"
+  "video",
+  "amended_from"
  ],
  "fields": [
   {
@@ -126,6 +127,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "pabrik.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -290,8 +292,7 @@
    "fieldname": "hasil_titik_sounding",
    "fieldtype": "Table",
    "label": "Hasil Titik Sounding",
-   "options": "Sounding Average Detail",
-   "read_only": 1
+   "options": "Sounding Average Detail"
   },
   {
    "fieldname": "get_stock",
@@ -325,12 +326,23 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Sortasi"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sounding Stock Palm Kernel di Bunker Kernel",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-04-13 10:16:10.837360",
+ "modified": "2026-04-18 10:51:20.869651",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
@@ -353,5 +365,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

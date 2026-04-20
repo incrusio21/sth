@@ -1,15 +1,7 @@
-{% set gl_entries = frappe.db.sql("""
-SELECT
-a.account_number,
-gle.account,
-gle.debit,
-gle.credit
-FROM `tabGL Entry` as gle
-JOIN `tabAccount` as a ON a.name = gle.account
-WHERE gle.voucher_type = 'Payment Entry'
-AND gle.voucher_no = %s
-""", (doc.name,), as_dict=1) %}
-{% set bank_account = frappe.get_doc("Bank Account", doc.bank_account) %}
+{% set gl_entries = get_payment_entry_ledger_preview(doc.name) %}
+
+{% set bank_account = frappe.get_doc("Bank Account", doc.bank_account) if doc.bank_account else None %}
+
 {% set submit_time = frappe.db.sql("""
 SELECT creation
 FROM `tabVersion`
@@ -25,7 +17,14 @@ LIMIT 1
   <p>JAKARTA UTARA</p>
 
   <div style="background-color: #dcdcdc; border: 1px solid #000; text-align: center;">
-    <p>VOUCHER PENGELUARAN BANK</p>
+    <p>
+      VOUCHER PENGELUARAN
+      {% if doc.mode_of_payment == "Cash" %}
+      KAS
+      {% else %}
+      BANK
+      {% endif %}
+    </p>
   </div>
 
   <table style="border: 1px solid #000; margin-top: 0.5rem;">
@@ -48,7 +47,11 @@ LIMIT 1
     <tr>
       <td style="padding-bottom: 0!important;">NAMA BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">{{ bank_account.bank or '' }}</td>
+      <td style="padding-bottom: 0!important;">
+        {% if bank_account %}
+        {{ bank_account.bank or '' }}
+        {% endif %}
+      </td>
       <td style="padding-bottom: 0!important;">BANK PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">BANK MANDIRI</td>
@@ -56,7 +59,11 @@ LIMIT 1
     <tr>
       <td style="padding-bottom: 0!important;">NO REK</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">{{ bank_account.bank_account_no or '' }}</td>
+      <td style="padding-bottom: 0!important;">
+        {% if bank_account %}
+        {{ bank_account.bank_account_no or '' }}
+        {% endif %}
+      </td>
       <td style="padding-bottom: 0!important;">NAMA PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">PT. WIRA USAHATAMA LESTARI</td>
@@ -64,7 +71,11 @@ LIMIT 1
     <tr>
       <td style="padding-bottom: 0!important;">ATAS NAMA</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">{{ bank_account.account_name or '' }}</td>
+      <td style="padding-bottom: 0!important;">
+        {% if bank_account %}
+        {{ bank_account.account_name or '' }}
+        {% endif %}
+      </td>
       <td style="padding-bottom: 0!important;">NO REF BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">{{ doc.reference_no or '' }}</td>
@@ -76,7 +87,6 @@ LIMIT 1
       <th>No.</th>
       <th>No. Akun</th>
       <th>Nama Akun</th>
-      <th>Kode Kas</th>
       <th>Debet</th>
       <th>Kredit</th>
     </tr>
@@ -85,20 +95,19 @@ LIMIT 1
       <td>{{ loop.index }}</td>
       <td>{{ row.account_number }}</td>
       <td>
-        {{ row.account }} <br>
-        {% if row.debit > 0 and doc.references[0] %}
-        No. Invoice : {{ doc.references[0].reference_name or '' }}
+        {{ row.account }}
+        {% if row.debit > 0 and doc.references and doc.references[0] %}
+        <br>No. Invoice: {{ doc.references[0].reference_name or '' }}
         {% endif %}
       </td>
-      <td>10910</td>
-      <td>{{ frappe.format_value(row.debit, {"fieldtype": "Float"}) }}</td>
-      <td>{{ frappe.format_value(row.credit, {"fieldtype": "Float"}) }}</td>
+      <td class="text-right">{{ frappe.format_value(row.debit, {"fieldtype": "Currency"}) }}</td>
+      <td class="text-right">{{ frappe.format_value(row.credit, {"fieldtype": "Currency"}) }}</td>
     </tr>
     {% endfor %}
     <tr>
-      <td colspan="4" style="font-weight: bold; text-align: center;">Total</td>
-      <td>{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Float"}) }}</td>
-      <td>{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Float"}) }}</td>
+      <td colspan="3" style="font-weight: bold; text-align: center;">Total</td>
+      <td class="text-right">{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Currency"}) }}</td>
+      <td class="text-right">{{ frappe.format_value(doc.paid_amount, {"fieldtype": "Currency"}) }}</td>
     </tr>
   </table>
 

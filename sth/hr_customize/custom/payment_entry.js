@@ -209,6 +209,8 @@ frappe.ui.form.on("Payment Entry", {
 				frm.set_value("party", data.message)
 			}
 		})
+
+		frm.set_df_property('paid_from', 'read_only', 0);
 	},
 
 	validate_reference_document: function (frm, row) {

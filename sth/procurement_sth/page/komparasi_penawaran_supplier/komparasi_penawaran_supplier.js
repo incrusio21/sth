@@ -276,7 +276,11 @@ class SupplierComparasion {
 
 	initTablePemakaianBarang(el, data = [], month = []) {
 		const month_column = month.map((row) => {
-			return { title: row, field: row, headerSort: false, width: 120, headerHozAlign: "center", }
+			return {
+				title: row, field: row, headerSort: false, width: 120, headerHozAlign: "center", mutator: function (value) {
+					return value || 0;
+				}
+			}
 		})
 
 		let options = {

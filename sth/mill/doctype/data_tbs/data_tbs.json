@@ -34,7 +34,9 @@
   "tbs_olah",
   "tbs_restan",
   "tbs_loading_ramp",
-  "berat_rata_rata_tbs"
+  "total_tbs_restan",
+  "berat_rata_rata_tbs",
+  "amended_from"
  ],
  "fields": [
   {
@@ -248,12 +250,37 @@
   {
    "fieldname": "column_break_mhpi",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Data TBS",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_tbs_restan",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total TBS Restan ( Kg )",
+   "precision": "0",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-03-31 14:08:33.631645",
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "references"
+  }
+ ],
+ "modified": "2026-04-20 13:16:18.038116",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
@@ -276,5 +303,6 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

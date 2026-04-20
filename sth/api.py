@@ -468,6 +468,9 @@ def get_previous_kriteria_documents(doctype, docname):
 		"Delivery Order": "Delivery Order",
 		"Delivery Note": "Delivery Note",
 		"Sales Invoice": "Pengakuan Penjualan",
+		
+		"Material Request": "PR/SR",
+		"Supplier Quotation": "Supplier Quotation",
 		"Purchase Order": "Purchase Order",
 		"Purchase Receipt": "Purchase Receipt",
 		"Purchase Invoice": "Purchase Invoice"
@@ -475,12 +478,143 @@ def get_previous_kriteria_documents(doctype, docname):
 
 	chain = []
 
-	if doctype == "Sales Invoice":
+	if doctype == "Material Request":
+		doc = frappe.get_doc(doctype, docname)
+		chain.append({
+			"voucher_type": "Berita Acara",
+			"voucher_no": doc.berita_acara
+		})
+
+	elif doctype == "Supplier Quotation":
+		doc = frappe.get_doc(doctype, docname)
+		
+		berita_acaras = list({row.material_request for row in doc.items if row.material_request})
+		for prev_1_name in berita_acaras:
+
+			chain.append({
+				"voucher_type": "Material Request",
+				"voucher_no": prev_1_name
+			})
+
+			prev_1_doc = frappe.get_doc("Material Request", prev_1_name)
+
+			chain.append({
+				"voucher_type": "Berita Acara",
+				"voucher_no": prev_1_doc.berita_acara
+			})
+
+	elif doctype == "Purchase Order":
+		doc = frappe.get_doc(doctype, docname)
+		
+		supplier_quotations = list({row.supplier_quotation for row in doc.items if row.supplier_quotation})
+		for prev_2_name in supplier_quotations:
+			chain.append({
+				"voucher_type": "Supplier Quotation",
+				"voucher_no": prev_2_name
+			})
+
+			prev_2_doc = frappe.get_doc("Supplier Quotation", prev_2_name)
+
+			berita_acaras = list({row.material_request for row in prev_2_doc.items if row.material_request})
+			for prev_1_name in berita_acaras:
+
+				chain.append({
+					"voucher_type": "Material Request",
+					"voucher_no": prev_1_name
+				})
+
+				prev_1_doc = frappe.get_doc("Material Request", prev_1_name)
+
+				chain.append({
+					"voucher_type": "Berita Acara",
+					"voucher_no": prev_1_doc.berita_acara
+				})
+
+	elif doctype == "Purchase Receipt":
+
+		doc = frappe.get_doc(doctype, docname)
+		purchase_orders = list({row.purchase_order for row in doc.items if row.purchase_order})
+
+		for prev_3_name in purchase_orders:
+			chain.append({
+				"voucher_type": "Purchase Order",
+				"voucher_no": prev_3_name
+			})
+			prev_3_doc = frappe.get_doc("Purchase Order", prev_3_name)
+
+			supplier_quotations = list({row.supplier_quotation for row in prev_3_doc.items if row.supplier_quotation})
+			for prev_2_name in supplier_quotations:
+				chain.append({
+					"voucher_type": "Supplier Quotation",
+					"voucher_no": prev_2_name
+				})
+
+				prev_2_doc = frappe.get_doc("Supplier Quotation", prev_2_name)
+
+				berita_acaras = list({row.material_request for row in prev_2_doc.items if row.material_request})
+				for prev_1_name in berita_acaras:
+
+					chain.append({
+						"voucher_type": "Material Request",
+						"voucher_no": prev_1_name
+					})
+
+					prev_1_doc = frappe.get_doc("Material Request", prev_1_name)
+
+					chain.append({
+						"voucher_type": "Berita Acara",
+						"voucher_no": prev_1_doc.berita_acara
+					})
+
+	elif doctype == "Purchase Invoice":
+
+		doc = frappe.get_doc(doctype, docname)
+		purchase_receipts = list({row.purchase_receipt for row in doc.items if row.purchase_receipt})
+		for prev_4_name in purchase_receipts:
+			chain.append({
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": prev_4_name
+			})
+			prev_4_doc = frappe.get_doc("Purchase Receipt", prev_4_name)
+
+			purchase_orders = list({row.purchase_order for row in prev_4_doc.items if row.purchase_order})
+
+			for prev_3_name in purchase_orders:
+				chain.append({
+					"voucher_type": "Purchase Order",
+					"voucher_no": prev_3_name
+				})
+				prev_3_doc = frappe.get_doc("Purchase Order", prev_3_name)
+
+				supplier_quotations = list({row.supplier_quotation for row in prev_3_doc.items if row.supplier_quotation})
+				for prev_2_name in supplier_quotations:
+					chain.append({
+						"voucher_type": "Supplier Quotation",
+						"voucher_no": prev_2_name
+					})
+
+					prev_2_doc = frappe.get_doc("Supplier Quotation", prev_2_name)
+
+					berita_acaras = list({row.material_request for row in prev_2_doc.items if row.material_request})
+					for prev_1_name in berita_acaras:
+
+						chain.append({
+							"voucher_type": "Material Request",
+							"voucher_no": prev_1_name
+						})
+
+						prev_1_doc = frappe.get_doc("Material Request", prev_1_name)
+
+						chain.append({
+							"voucher_type": "Berita Acara",
+							"voucher_no": prev_1_doc.berita_acara
+						})
+
+
+	elif doctype == "Sales Invoice":
 
 		doc = frappe.get_doc("Sales Invoice", docname)
-
 		delivery_notes = list({row.delivery_note for row in doc.items if row.delivery_note})
-
 		for dn_name in delivery_notes:
 
 			chain.append({
@@ -537,41 +671,6 @@ def get_previous_kriteria_documents(doctype, docname):
 				"voucher_no": doc.sales_order
 			})
 
-	elif doctype == "Purchase Invoice":
-
-		doc = frappe.get_doc("Purchase Invoice", docname)
-
-		purchase_receipts = list({row.purchase_receipt for row in doc.items if row.purchase_receipt})
-
-		for pr_name in purchase_receipts:
-
-			chain.append({
-				"voucher_type": "Purchase Receipt",
-				"voucher_no": pr_name
-			})
-
-			pr = frappe.get_doc("Purchase Receipt", pr_name)
-
-			for item in pr.items:
-				if item.purchase_order:
-
-					chain.append({
-						"voucher_type": "Purchase Order",
-						"voucher_no": item.purchase_order
-					})
-
-	elif doctype == "Purchase Receipt":
-
-		doc = frappe.get_doc("Purchase Receipt", docname)
-
-		for item in doc.items:
-
-			if item.purchase_order:
-
-				chain.append({
-					"voucher_type": "Purchase Order",
-					"voucher_no": item.purchase_order
-				})
 
 	results = []
 

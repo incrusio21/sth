@@ -18,33 +18,11 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
 
     },
 
-    pabrik(frm) {
-        if (!frm.doc.pabrik) return
-        frm.trigger('get_warehouse_bst')
-    },
-
     get_data(frm) {
         frm.call("get_data", { freeze: true, freeze_message: "Getting Data..." })
             .then(() => {
                 frm.refresh()
             })
-    },
-
-    get_warehouse_bst(frm) {
-        const method = frappe.model.get_server_module_name(cur_frm.doctype) + ".get_warehouse_bst"
-        return frappe.xcall(method, { pabrik: frm.doc.pabrik }).then((res) => {
-            if (!res.length) {
-                frappe.throw(`Silahkan set default warehouse di pabrik ${frm.doc.pabrik}`)
-            }
-
-            res.forEach(row => {
-                if (row.name == "BST 01") {
-                    frm.set_value("gudang", row.gudang)
-                } else {
-                    frm.set_value("gudang_2", row.gudang)
-                }
-            });
-        })
     },
 
     get_ukuran_sounding(tinggi, bst, pabrik) {

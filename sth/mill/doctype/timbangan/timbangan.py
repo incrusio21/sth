@@ -114,8 +114,11 @@ def get_spb_available(doctype, txt, searchfield, start, page_len, filters):
 def make_delivery_note(source_name, target_doc=None):
 	
 	def set_missing_values(source, target):
+		target.set_posting_time = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
+
+
 		if source.driver_name:
 			# Cari driver berdasarkan driver_name
 			driver = frappe.db.get_value('Driver', {'full_name': source.driver_name}, 'name')

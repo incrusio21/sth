@@ -14,20 +14,30 @@ class PenginputanStockByProduct(Document):
 		if flt(self.produksi) > 0:
 			self.create_ste("In")
 
+	def on_cancel(self):
+		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
+		for row in ste:
+			doc = frappe.get_doc("Stock Entry",row)
+			doc.cancel()
+	
+	def on_trash(self):
+		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
+		for row in ste:
+			doc = frappe.get_doc("Stock Entry",row)
+			doc.delete()
+
 	@frappe.whitelist()
 	def get_stock(self):
 		get_delivery = frappe.db.sql("""
-			select coalesce(sum(dni.stock_qty),0) as qty from `tabDelivery Note` dn
-			join `tabDelivery Note Item` dni on dni.parent = dn.name
-			join `tabItem` i on dni.item_code = i.name
-			where dn.posting_date = %s and dni.item_code = %s and dn.unit = %s
-		""",(self.tanggal_proses,self.nama_barang,self.unit),as_dict=True)
+			select sum(coalesce(netto_2,0)) as qty
+			from `tabTimbangan` t
+			where t.docstatus = 1 and unit  = %s and t.posting_date = %s and t.kode_barang = %s
+		""",(self.unit,self.tanggal_proses,self.nama_barang),as_dict=True)
 
 		get_total_stock = frappe.db.sql("""
-			select coalesce(sum(netto_2),0) as qty from `tabTimbangan` b
-			join `tabItem` i on b.kode_barang = i.name
-			where i.name = %s and b.unit = %s
-		""",(self.nama_barang,self.unit),as_dict=True)
+			select b.actual_qty as qty from `tabBin` b
+			where b.item_code = %s and b.warehouse = %s
+		""",(self.nama_barang,self.gudang),as_dict=True)
 
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
 		stock_saat_ini = get_total_stock[0].qty if get_total_stock else 0
@@ -46,12 +56,13 @@ class PenginputanStockByProduct(Document):
 			fields = ["solid_decantertbs"]
 
 		if not fields: return
-		data_mass_balance = frappe.get_all("Mass Balance",fields=fields,order_by="date desc, jam desc",limit=1)
+		data_mass_balance = frappe.get_all("Mass Balance",filters={"docstatus": 1},fields=fields,order_by="date desc, jam desc",limit=1)
+
 		result = 0
 		for field in fields:
 			result += flt(data_mass_balance[0][field])
 		
-		self.produksi = result * flt(self.data_olah_tbs)
+		self.produksi = result * flt(self.data_olah_tbs) / 100
 	
 	def create_ste(self,type):
 		def postprocess(source,target):
@@ -68,12 +79,12 @@ class PenginputanStockByProduct(Document):
 				"uom"
 			)
 
-			akun_expense = ""
-			procurement_settings = frappe.get_single("Procurement Settings")
+			# akun_expense = ""
+			# procurement_settings = frappe.get_single("Procurement Settings")
 			
-			for row in procurement_settings.akun_pengeluaran_table:
-				if row.company == self.company:
-					akun_expense = row.akun_pengeluaran
+			# for row in procurement_settings.akun_pengeluaran_table:
+			# 	if row.company == self.company:
+			# 		akun_expense = row.akun_pengeluaran
 
 			item = target.append("items")
 			item.item_code = source.nama_barang
@@ -90,7 +101,6 @@ class PenginputanStockByProduct(Document):
 						"item_code": item.item_code,
 						"company": target.company,
 						"project": target.project,
-						"expense_account": akun_expense,
 					}
 				),
 				for_update=True,

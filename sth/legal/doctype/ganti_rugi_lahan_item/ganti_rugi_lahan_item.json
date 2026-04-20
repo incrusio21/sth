@@ -6,16 +6,16 @@
  "engine": "InnoDB",
  "field_order": [
   "jenis_biaya",
-  "perangkat_desa",
   "sppt",
-  "no_rekening",
   "no_pbb",
   "pemilik_lahan",
-  "column_break_ppdh",
+  "no_rekening",
   "qty",
   "rate",
-  "biaya_surat",
   "amount",
+  "biaya_surat",
+  "column_break_ppdh",
+  "perangkat_desa",
   "accounting_dimension_section",
   "cost_center",
   "section_break_pcox",
@@ -23,6 +23,7 @@
  ],
  "fields": [
   {
+   "columns": 1,
    "depends_on": "eval:doc.perangkat_desa != \"Ya\"",
    "fieldname": "sppt",
    "fieldtype": "Link",
@@ -53,11 +54,13 @@
    "mandatory_depends_on": "eval:doc.perangkat_desa != \"Ya\""
   },
   {
+   "columns": 1,
    "fieldname": "biaya_surat",
    "fieldtype": "Currency",
    "label": "Biaya Pembuatan Surat"
   },
   {
+   "columns": 1,
    "depends_on": "eval:doc.perangkat_desa == \"Ya\"",
    "fieldname": "pemilik_lahan",
    "fieldtype": "Link",
@@ -66,6 +69,7 @@
    "options": "Daftar Masyarakat"
   },
   {
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -73,6 +77,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "jenis_biaya",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -113,6 +118,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "depends_on": "eval:doc.perangkat_desa != \"Ya\"",
    "fetch_from": "sppt.no_pbb",
    "fieldname": "no_pbb",
@@ -122,6 +128,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "no_rekening",
    "fieldtype": "Data",
    "hidden": 1,
@@ -133,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-08 15:52:19.771091",
+ "modified": "2026-04-13 16:36:42.488629",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan Item",

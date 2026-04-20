@@ -194,7 +194,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-10 12:32:47.516404",
+ "modified": "2026-04-14 14:58:45.193585",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
@@ -217,7 +217,7 @@
  ],
  "row_format": "Dynamic",
  "search_fields": "nama_karyawan",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

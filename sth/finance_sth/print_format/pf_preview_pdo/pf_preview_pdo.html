@@ -24,7 +24,11 @@ JOIN `tabExpense Claim Type` ect ON ect.name = pkt.`type`
 LEFT JOIN `tabEmployee` e ON e.name = pkt.employee
 LEFT JOIN `tabDesignation` d ON d.name = e.designation
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
-WHERE pdo.posting_date BETWEEN DATE_SUB(ref.posting_date, INTERVAL 5 MONTH) AND ref.posting_date
+WHERE
+DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
+DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
+DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
+)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -39,7 +43,11 @@ pdct.revised_amount as estimate_revise
 FROM `tabPermintaan Dana Operasional` pdo
 JOIN `tabPDO Dana Cadangan Table` pdct ON pdct.parent = pdo.name
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
-WHERE pdo.posting_date BETWEEN DATE_SUB(ref.posting_date, INTERVAL 5 MONTH) AND ref.posting_date
+WHERE
+DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
+DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
+DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
+)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -62,7 +70,11 @@ JOIN `tabPDO Bahan Bakar Table` pbbt ON pbbt.parent = pdo.name
 LEFT JOIN `tabEmployee` e ON e.employee_name = pbbt.employee
 LEFT JOIN `tabDesignation` d ON d.name = e.designation
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
-WHERE pdo.posting_date BETWEEN DATE_SUB(ref.posting_date, INTERVAL 5 MONTH) AND ref.posting_date
+WHERE
+DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
+DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
+DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
+)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -84,7 +96,11 @@ ppdt.revised_total as estimate_revise
 FROM `tabPermintaan Dana Operasional` pdo
 JOIN `tabPDO Perjalanan Dinas Table` ppdt ON ppdt.parent = pdo.name
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
-WHERE pdo.posting_date BETWEEN DATE_SUB(ref.posting_date, INTERVAL 5 MONTH) AND ref.posting_date
+WHERE
+DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
+DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
+DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
+)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -103,7 +119,7 @@ ORDER BY pdo.posting_date, pdo.name
 
 {# ========================= MACRO HELPERS ========================= #}
 
-{% macro fmt(val) %}{{ frappe.utils.fmt_money(val or 0, currency=doc.currency or 'IDR') }}{% endmacro %}
+{% macro fmt(val) %}{{ frappe.utils.fmt_money(val or 0, currency=doc.currency or 'IDR', precision=0) }}{% endmacro %}
 
 {% macro empty_cols() %}
 {% for m in months %}
@@ -147,6 +163,297 @@ ORDER BY pdo.posting_date, pdo.name
 {% endfor %}
 {% endmacro %}
 
+{% macro total_cols_for_type(rows, jenis_value, estimate_field, revise_field) %}
+{% for m in months %}
+{% set ns = namespace(est=0, rev=0) %}
+{% for row in rows %}
+{% if row.jenis == jenis_value and row.posting_date.strftime('%Y-%m') == m %}
+{% set ns.est = ns.est + (row[estimate_field] or 0) %}
+{% set ns.rev = ns.rev + (row[revise_field] or 0) %}
+{% endif %}
+{% endfor %}
+<td class="text-right">{{ fmt(ns.est) }}</td>
+<td class="text-right">{{ fmt(ns.rev) }}</td>
+<td class="text-right">
+  <a href="/app/query-report/Laporan%20Histori%20Aktual%20PDO" style="color: red;" target="_blank">0</a>
+</td>
+<td class="text-right">0</td>
+{% endfor %}
+{% endmacro %}
+
+{# =================== MACRO GROUPING KAS DETAIL =================== #}
+
+{% macro grouped_kas_rows(group, group_rows) %}
+{% if group == "TUNJANGAN PEMBANTU" %}
+
+{# Unique key: pengguna + jabatan #}
+{% set ukeys = namespace(list=[]) %}
+{% for row in group_rows %}
+{% set key = (row.pengguna or '') ~ '|' ~ (row.jabatan or '') %}
+{% if key not in ukeys.list %}
+{% set ukeys.list = ukeys.list + [key] %}
+{% endif %}
+{% endfor %}
+
+{% for key in ukeys.list %}
+{% set parts = key.split('|') %}
+{% set pengguna = parts[0] %}
+{% set jabatan = parts[1] if parts|length > 1 else '' %}
+
+{% set grouped = {} %}
+{% for row in group_rows %}
+{% if (row.pengguna or '') == pengguna and (row.jabatan or '') == jabatan %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
+{% set cur_est = grouped.get(mk, {}).get('est', 0) %}
+{% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
+{% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
+0)}}) %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+<tr>
+  <td colspan="4">{{ pengguna }}</td>
+  <td colspan="4">{{ jabatan }}</td>
+  {% for m in months %}
+  {% if m in grouped %}
+  <td class="text-right">{{ fmt(grouped[m].est) }}</td>
+  <td class="text-right">{{ fmt(grouped[m].rev) }}</td>
+  <td class="text-right">0</td>
+  <td class="text-right">0</td>
+  {% else %}
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  {% endif %}
+  {% endfor %}
+</tr>
+{% endfor %}
+
+{% else %}
+
+{# Unique key: item_barang + satuan + kebutuhan #}
+{% set ukeys = namespace(list=[]) %}
+{% for row in group_rows %}
+{% set key = (row.item_barang or '') ~ '|' ~ (row.satuan or '') ~ '|' ~ (row.kebutuhan or '') %}
+{% if key not in ukeys.list %}
+{% set ukeys.list = ukeys.list + [key] %}
+{% endif %}
+{% endfor %}
+
+{% for key in ukeys.list %}
+{% set parts = key.split('|') %}
+{% set item_barang = parts[0] %}
+{% set satuan = parts[1] if parts|length > 1 else '' %}
+{% set kebutuhan = parts[2] if parts|length > 2 else '' %}
+
+{% set ref_row = namespace(row=None) %}
+{% for row in group_rows %}
+{% if ref_row.row is none
+and (row.item_barang or '') == item_barang
+and (row.satuan or '') == satuan
+and (row.kebutuhan or '') == kebutuhan %}
+{% set ref_row.row = row %}
+{% endif %}
+{% endfor %}
+
+{% set grouped = {} %}
+{% for row in group_rows %}
+{% if (row.item_barang or '') == item_barang
+and (row.satuan or '') == satuan
+and (row.kebutuhan or '') == kebutuhan %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
+{% set cur_est = grouped.get(mk, {}).get('est', 0) %}
+{% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
+{% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
+0)}}) %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+<tr>
+  <td>{{ item_barang }}</td>
+  <td>{{ satuan }}</td>
+  <td>{{ ref_row.row.qty if ref_row.row else '' }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.harga) if ref_row.row else '' }}</td>
+  <td>{{ ref_row.row.qty_revisi if ref_row.row else 0 }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.harga_revisi) if ref_row.row else '' }}</td>
+  <td colspan="2">{{ kebutuhan }}</td>
+  {% for m in months %}
+  {% if m in grouped %}
+  <td class="text-right">{{ fmt(grouped[m].est) }}</td>
+  <td class="text-right">{{ fmt(grouped[m].rev) }}</td>
+  <td class="text-right">0</td>
+  <td class="text-right">0</td>
+  {% else %}
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  {% endif %}
+  {% endfor %}
+</tr>
+{% endfor %}
+
+{% endif %}
+{% endmacro %}
+
+{# =================== MACRO GROUPING BBM =================== #}
+
+{% macro grouped_bbm_rows(bbm_data) %}
+{% set ukeys = namespace(list=[]) %}
+{% for row in bbm_data %}
+{% set key = (row.pengguna or '') ~ '|' ~ (row.jabatan or '') ~ '|' ~ (row.keperluan or '') %}
+{% if key not in ukeys.list %}
+{% set ukeys.list = ukeys.list + [key] %}
+{% endif %}
+{% endfor %}
+
+{% for key in ukeys.list %}
+{% set parts = key.split('|') %}
+{% set pengguna = parts[0] %}
+{% set jabatan = parts[1] if parts|length > 1 else '' %}
+{% set keperluan = parts[2] if parts|length > 2 else '' %}
+
+{% set ref_row = namespace(row=None) %}
+{% for row in bbm_data %}
+{% if ref_row.row is none
+and (row.pengguna or '') == pengguna
+and (row.jabatan or '') == jabatan
+and (row.keperluan or '') == keperluan %}
+{% set ref_row.row = row %}
+{% endif %}
+{% endfor %}
+
+{% set grouped = {} %}
+{% for row in bbm_data %}
+{% if (row.pengguna or '') == pengguna
+and (row.jabatan or '') == jabatan
+and (row.keperluan or '') == keperluan %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
+{% set cur_est = grouped.get(mk, {}).get('est', 0) %}
+{% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
+{% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
+0)}}) %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+<tr>
+  <td>{{ pengguna }}</td>
+  <td>{{ jabatan }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.plafon) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.harga) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.plafon_revisi) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.harga_revisi) if ref_row.row else '' }}</td>
+  <td colspan="2">{{ keperluan }}</td>
+  {% for m in months %}
+  {% if m in grouped %}
+  <td class="text-right">{{ fmt(grouped[m].est) }}</td>
+  <td class="text-right">{{ fmt(grouped[m].rev) }}</td>
+  <td class="text-right">0</td>
+  <td class="text-right">0</td>
+  {% else %}
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  {% endif %}
+  {% endfor %}
+</tr>
+{% endfor %}
+{% endmacro %}
+
+{# =================== MACRO GROUPING PERJALANAN DINAS =================== #}
+
+{% macro grouped_pd_rows(pd_data) %}
+{% set ukeys = namespace(list=[]) %}
+{% for row in pd_data %}
+{% set key = (row.pengguna or '') ~ '|' ~ (row.jenis or '') ~ '|' ~ (row.keperluan or '') %}
+{% if key not in ukeys.list %}
+{% set ukeys.list = ukeys.list + [key] %}
+{% endif %}
+{% endfor %}
+
+{% for key in ukeys.list %}
+{% set parts = key.split('|') %}
+{% set pengguna = parts[0] %}
+{% set jenis = parts[1] if parts|length > 1 else '' %}
+{% set keperluan = parts[2] if parts|length > 2 else '' %}
+
+{% set ref_row = namespace(row=None) %}
+{% for row in pd_data %}
+{% if ref_row.row is none
+and (row.pengguna or '') == pengguna
+and (row.jenis or '') == jenis
+and (row.keperluan or '') == keperluan %}
+{% set ref_row.row = row %}
+{% endif %}
+{% endfor %}
+
+{% set grouped = {} %}
+{% for row in pd_data %}
+{% if (row.pengguna or '') == pengguna
+and (row.jenis or '') == jenis
+and (row.keperluan or '') == keperluan %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
+{% set cur_est = grouped.get(mk, {}).get('est', 0) %}
+{% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
+{% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
+0)}}) %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+<tr>
+  <td>{{ pengguna }}</td>
+  <td>{{ ref_row.row.no_polisi if ref_row.row else '' }}</td>
+  <td>{{ jenis }}</td>
+  <td class="text-right">{{ ref_row.row.hari_dinas if ref_row.row else '' }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.plafon) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ ref_row.row.hari_dinas_revisi if ref_row.row else '' }}</td>
+  <td class="text-right">{{ fmt(ref_row.row.plafon_revisi) if ref_row.row else '' }}</td>
+  <td>{{ keperluan }}</td>
+  {% for m in months %}
+  {% if m in grouped %}
+  <td class="text-right">{{ fmt(grouped[m].est) }}</td>
+  <td class="text-right">{{ fmt(grouped[m].rev) }}</td>
+  <td class="text-right">0</td>
+  <td class="text-right">0</td>
+  {% else %}
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  {% endif %}
+  {% endfor %}
+</tr>
+{% endfor %}
+{% endmacro %}
+
+{# =================== MACRO TOTAL PER DATASET =================== #}
+
+{% macro total_cols_dataset(dataset) %}
+{% for m in months %}
+{% set ns = namespace(est=0, rev=0) %}
+{% for row in dataset %}
+{% if row.posting_date and row.posting_date.strftime('%Y-%m') == m %}
+{% set ns.est = ns.est + (row.estimate_unit or 0) %}
+{% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
+{% endif %}
+{% endfor %}
+<td class="text-right">{{ fmt(ns.est) }}</td>
+<td class="text-right">{{ fmt(ns.rev) }}</td>
+<td class="text-right">0</td>
+<td class="text-right">0</td>
+{% endfor %}
+{% endmacro %}
+
 {# ========================= STYLES ========================= #}
 
 <style>
@@ -166,12 +473,14 @@ ORDER BY pdo.posting_date, pdo.name
     border: 1px solid #999;
     padding: 2px 4px;
     vertical-align: middle;
-    /* word-wrap: break-word; */
+    word-wrap: break-word;
   }
 
   .table_main_content .text-right {
     text-align: right;
     white-space: nowrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .table_main_content .header-month {
@@ -231,6 +540,7 @@ ORDER BY pdo.posting_date, pdo.name
       </tr>
     </table>
   </div>
+
   <table class="table_main_content">
 
     {# HEADER ROW 1 - LABEL BULAN #}
@@ -284,22 +594,16 @@ ORDER BY pdo.posting_date, pdo.name
     </tr>
 
     {# KAS #}
-    {% set kas_dc = dc_data | selectattr('jenis', 'equalto', 'Kas') | list %}
-    {% for row in kas_dc %}
     <tr>
       <td colspan="8">Kas</td>
-      {{ month_cols(row, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_for_type(dc_data, 'Kas', 'estimate_unit', 'estimate_revise') }}
     </tr>
-    {% endfor %}
 
     {# BANK #}
-    {% set bank_dc = dc_data | selectattr('jenis', 'equalto', 'Bank') | list %}
-    {% for row in bank_dc %}
     <tr>
       <td colspan="8">Bank</td>
-      {{ month_cols(row, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_for_type(dc_data, 'Bank', 'estimate_unit', 'estimate_revise') }}
     </tr>
-    {% endfor %}
 
     {# TOTAL PLAFON #}
     <tr class="row-total">
@@ -367,24 +671,8 @@ ORDER BY pdo.posting_date, pdo.name
     </tr>
     {% endif %}
 
-    {# DETAIL ROWS #}
-    {% for row in group_rows %}
-    <tr>
-      {% if group == "TUNJANGAN PEMBANTU" %}
-      <td colspan="4">{{ row.pengguna or '' }}</td>
-      <td colspan="4">{{ row.jabatan or '' }}</td>
-      {% else %}
-      <td>{{ row.item_barang or '' }}</td>
-      <td>{{ row.satuan or '' }}</td>
-      <td>{{ row.qty or '' }}</td>
-      <td class="text-right">{{ fmt(row.harga) }}</td>
-      <td>{{ row.qty_revisi or 0 }}</td>
-      <td class="text-right">{{ fmt(row.harga_revisi) }}</td>
-      <td colspan="2">{{ row.kebutuhan or '' }}</td>
-      {% endif %}
-      {{ month_cols(row, 'estimate_unit', 'estimate_revise') }}
-    </tr>
-    {% endfor %}
+    {# DETAIL ROWS - grouped, no duplicates #}
+    {{ grouped_kas_rows(group, group_rows) }}
 
     {# TOTAL GROUP #}
     <tr class="row-total">
@@ -397,7 +685,7 @@ ORDER BY pdo.posting_date, pdo.name
     {# =================== BBM - PERTALITE/SOLAR =================== #}
     <tr class="row-group">
       <td colspan="8"><b>BBM - PERTALITE/SOLAR</b></td>
-      {{ total_cols(bbm_data, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_dataset(bbm_data) }}
     </tr>
     <tr class="header-col">
       <td>Pengguna</td>
@@ -412,27 +700,19 @@ ORDER BY pdo.posting_date, pdo.name
       <td></td>
       <td></td>{% endfor %}
     </tr>
-    {% for row in bbm_data %}
-    <tr>
-      <td>{{ row.pengguna or '' }}</td>
-      <td>{{ row.jabatan or '' }}</td>
-      <td class="text-right">{{ fmt(row.plafon) }}</td>
-      <td class="text-right">{{ fmt(row.harga) }}</td>
-      <td class="text-right">{{ fmt(row.plafon_revisi) }}</td>
-      <td class="text-right">{{ fmt(row.harga_revisi) }}</td>
-      <td colspan="2">{{ row.keperluan or '' }}</td>
-      {{ month_cols(row, 'estimate_unit', 'estimate_revise') }}
-    </tr>
-    {% endfor %}
+
+    {# DETAIL ROWS BBM - grouped, no duplicates #}
+    {{ grouped_bbm_rows(bbm_data) }}
+
     <tr class="row-total">
       <td colspan="8">TOTAL</td>
-      {{ total_cols(bbm_data, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_dataset(bbm_data) }}
     </tr>
 
     {# =================== PERJALANAN DINAS =================== #}
     <tr class="row-group">
       <td colspan="8"><b>PERJALANAN DINAS</b></td>
-      {{ total_cols(pd_data, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_dataset(pd_data) }}
     </tr>
     <tr class="header-col">
       <td>Pengguna</td>
@@ -448,22 +728,66 @@ ORDER BY pdo.posting_date, pdo.name
       <td></td>
       <td></td>{% endfor %}
     </tr>
-    {% for row in pd_data %}
-    <tr>
-      <td>{{ row.pengguna or '' }}</td>
-      <td>{{ row.no_polisi or '' }}</td>
-      <td>{{ row.jenis or '' }}</td>
-      <td>{{ row.hari_dinas or '' }}</td>
-      <td class="text-right">{{ fmt(row.plafon) }}</td>
-      <td>{{ row.hari_dinas_revisi or '' }}</td>
-      <td class="text-right">{{ fmt(row.plafon_revisi) }}</td>
-      <td>{{ row.keperluan or '' }}</td>
-      {{ month_cols(row, 'estimate_unit', 'estimate_revise') }}
-    </tr>
-    {% endfor %}
+
+    {# DETAIL ROWS PD - grouped, no duplicates #}
+    {{ grouped_pd_rows(pd_data) }}
+
     <tr class="row-total">
-      <td colspan="8">TOTAL</td>
-      {{ total_cols(pd_data, 'estimate_unit', 'estimate_revise') }}
+      <td colspan="8"><b>TOTAL</b></td>
+      {{ total_cols_dataset(pd_data) }}
+    </tr>
+
+    {# =================== GRAND TOTAL =================== #}
+    {% set grand_totals = namespace(data={}) %}
+    {% set plafon_totals = namespace(data={}) %}
+
+    {% for m in months %}
+    {% set ns = namespace(est=0, rev=0) %}
+    {% for dataset in [kas_data, dc_data, bbm_data, pd_data] %}
+    {% for row in dataset %}
+    {% if row.posting_date.strftime('%Y-%m') == m %}
+    {% set ns.est = ns.est + (row.estimate_unit or 0) %}
+    {% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+    {% set _ = grand_totals.data.update({m: {'est': ns.est, 'rev': ns.rev}}) %}
+    {% endfor %}
+
+    {% for m in months %}
+    {% set ns = namespace(est=0, rev=0) %}
+    {% for row in dc_data %}
+    {% if row.posting_date.strftime('%Y-%m') == m %}
+    {% set ns.est = ns.est + (row.estimate_unit or 0) %}
+    {% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
+    {% endif %}
+    {% endfor %}
+    {% set _ = plafon_totals.data.update({m: {'est': ns.est, 'rev': ns.rev}}) %}
+    {% endfor %}
+
+    <tr class="row-total" style="background-color:#d9edf7; font-weight:bold;">
+      <td colspan="8" style="text-align:left;">Grand Total Biaya</td>
+      {% for m in months %}
+      {% set gt = grand_totals.data[m] %}
+      <td class="text-right">{{ fmt(gt.est) }}</td>
+      <td class="text-right">{{ fmt(gt.rev) }}</td>
+      <td class="text-right">0</td>
+      <td class="text-right">{{ fmt(gt.est - gt.rev) }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr class="row-total" style="background-color:#d9edf7; font-weight:bold;">
+      <td colspan="8" style="text-align:left;">PDO Di Setujui - {{ doc.unit }}</td>
+      {% for m in months %}
+      {% set gt = grand_totals.data[m] %}
+      {% set pt = plafon_totals.data[m] %}
+      {% set total_est = (gt.est or 0) + (pt.est or 0) %}
+      {% set total_rev = (gt.rev or 0) + (pt.rev or 0) %}
+      <td class="text-right">{{ fmt(total_est) }}</td>
+      <td class="text-right">{{ fmt(total_rev) }}</td>
+      <td class="text-right">0</td>
+      <td class="text-right">{{ fmt(total_est - total_rev) }}</td>
+      {% endfor %}
     </tr>
 
   </table>

@@ -16,6 +16,7 @@
   "pabrik",
   "company",
   "unit",
+  "gudang",
   "section_break_nlsf",
   "stock_awal",
   "column_break_akrd",
@@ -31,7 +32,6 @@
   "oer_netto_1",
   "oer_netto_2",
   "perhitungan_stock_bst_1_tab",
-  "gudang",
   "section_break_oecm",
   "ukuran_hasil_sounding",
   "ukuran_hasil_sounding_kg",
@@ -43,7 +43,6 @@
   "section_break_hlrz",
   "tonase_sebenarnya",
   "perhitungan_stock_bst_2_tab",
-  "gudang_2",
   "section_break_wnxp",
   "ukuran_hasil_sounding_2",
   "ukuran_hasil_sounding_kg_2",
@@ -123,6 +122,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "pabrik.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -134,7 +134,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.gudang",
    "fieldname": "section_break_oecm",
    "fieldtype": "Section Break"
   },
@@ -186,7 +185,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.gudang",
    "fieldname": "section_break_hlrz",
    "fieldtype": "Section Break"
   },
@@ -256,7 +254,6 @@
    "label": "Video"
   },
   {
-   "depends_on": "eval:doc.gudang_2",
    "fieldname": "section_break_uilc",
    "fieldtype": "Section Break"
   },
@@ -325,21 +322,11 @@
   {
    "fieldname": "gudang",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "BST 1",
-   "options": "Warehouse",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Gudang",
+   "options": "Warehouse"
   },
   {
-   "fieldname": "gudang_2",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "BST 2",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.gudang_2",
    "fieldname": "section_break_wnxp",
    "fieldtype": "Section Break"
   },
@@ -367,6 +354,7 @@
   {
    "fieldname": "pabrik",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Pabrik",
    "options": "Mill Master",
@@ -393,8 +381,13 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-04-09 16:23:27.709869",
+ "links": [
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "references"
+  }
+ ],
+ "modified": "2026-04-17 08:39:24.738470",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

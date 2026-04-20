@@ -91,8 +91,30 @@ def add_criteria(entries, document_no, doc, do_not_save=False):
 
 def update_kriteria_document(document_no, entries, doc):
 	doc = frappe.get_doc("Kriteria Upload Document", document_no)
+	
+	# Ambil mapping file lama: rincian_dokumen_finance -> upload_file
+	old_files = {
+		row.rincian_dokumen_finance: row.upload_file
+		for row in doc.get("file_upload")
+		if row.upload_file
+	}
+	
+	# Bandingkan dengan entries baru, hapus file yang diganti
+	for row in entries:
+		row = frappe._dict(row)
+		old_file = old_files.get(row.rincian_dokumen_finance)
+		new_file = row.upload_file
+		
+		if old_file and new_file and old_file != new_file:
+			# File diganti, hapus yang lama
+			try:
+				file_doc = frappe.get_doc("File", {"file_url": old_file})
+				file_doc.delete(ignore_permissions=True)
+			except frappe.DoesNotExistError:
+				pass  # File sudah tidak ada, skip
+	
+	# Lanjut proses seperti biasa
 	doc.set("file_upload", [])
-
 	for row in entries:
 		row = frappe._dict(row)
 		doc.append(
@@ -100,16 +122,12 @@ def update_kriteria_document(document_no, entries, doc):
 			{
 				"rincian_dokumen_finance": row.rincian_dokumen_finance,
 				"upload_file": row.upload_file,
-				"mandatory": row.mandatory
+				"mandatory": row.mandatory,
 			},
 		)
-
 	doc.save(ignore_permissions=True)
-
 	frappe.msgprint(_("Kriteria Document updated"), alert=True)
-
 	return doc
-
 def create_kriteria_document(entries, doc, do_not_save=False):
 
 	if not doc.doctype:

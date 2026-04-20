@@ -4,8 +4,14 @@
 
 {%- if doc.no_kontrak -%}
 {%- set so = frappe.get_doc("Sales Order", doc.no_kontrak) -%}
+{%- set do = frappe.db.get_value(
+"Delivery Order",
+{"sales_order": doc.name},
+"*"
+) -%}
 {%- else -%}
 {%- set so = None -%}
+{%- set do = None -%}
 {%- endif -%}
 
 {%- if so.customer -%}
@@ -127,13 +133,15 @@
       <td colspan="3" style="border: none!important"></td>
       <td>TAX</td>
       <td>IDR</td>
-      <td>{{ frappe.format_value(doc.total_taxes_and_charges or 0, {"fieldtype": "Float"}) }}</td>
+      <td></td>
     </tr>
     <tr>
       <td colspan="3" style="border: none!important"></td>
       <td>FREIGHT</td>
       <td>IDR</td>
-      <td>0.00</td>
+      <td>
+        {{ frappe.format_value((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0), {"fieldtype": "Currency"}) }}
+      </td>
     </tr>
     <tr>
       <td colspan="3" style="border: none!important"></td>

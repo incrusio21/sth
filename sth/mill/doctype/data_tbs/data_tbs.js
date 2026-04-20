@@ -8,6 +8,7 @@ frappe.ui.form.on("Data TBS", {
 
     get_data(frm) {
         frm.call("get_data").then(() => {
+            frm.dirty()
             frm.refresh()
         })
     }

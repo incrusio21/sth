@@ -167,7 +167,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-26 14:02:53.322189",
+ "modified": "2026-04-14 15:00:10.123847",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",
@@ -189,7 +189,7 @@
   }
  ],
  "row_format": "Dynamic",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

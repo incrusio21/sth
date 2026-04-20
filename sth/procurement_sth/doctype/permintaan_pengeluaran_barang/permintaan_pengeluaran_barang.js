@@ -116,5 +116,11 @@ frappe.ui.form.on('Permintaan Pengeluaran Barang Item', {
             frappe.msgprint(__('Please select Gudang first'));
             frappe.model.set_value(cdt, cdn, 'kode_gudang', '');
         }
+    },
+
+    sub_unit(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        frappe.model.set_value(cdt, cdn, 'kendaraan', '');
     }
+
 });

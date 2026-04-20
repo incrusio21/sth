@@ -10,6 +10,7 @@
   "date",
   "tipe",
   "no_kontrak",
+  "bulan",
   "nilai_dp",
   "payment_entry",
   "dibuat_dari_payment_voucher",
@@ -25,7 +26,6 @@
   "nota_hutang_pemenuhan_kontrak_table",
   "list_payment_voucher",
   "section_break_ffbg",
-  "nilai_kontrak",
   "column_break_hvvv",
   "dpp",
   "dp_dpp",
@@ -34,6 +34,9 @@
   "ppn",
   "dp_ppn",
   "sisa_ppn",
+  "column_break_hkyb",
+  "nilai_kontrak",
+  "total_dp",
   "section_break_vwzw",
   "reclass_pengakuan_penjualan"
  ],
@@ -125,6 +128,7 @@
   {
    "fieldname": "master_barang_placeholder_ppn",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Master Barang Placeholder PPN",
    "link_filters": "[[\"Item\",\"custom_is_expense\",\"=\",1]]",
    "options": "Item"
@@ -246,13 +250,32 @@
    "label": "PV Pembayaran Pengakuan Penjualan",
    "options": "Nota Piutang PV Table",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Pemenuhan Kontrak\"",
+   "fieldname": "bulan",
+   "fieldtype": "Data",
+   "label": "Bulan",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hkyb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_dp",
+   "fieldtype": "Currency",
+   "label": "Total DP",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-10 11:28:30.037633",
+ "modified": "2026-04-20 13:26:46.823170",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

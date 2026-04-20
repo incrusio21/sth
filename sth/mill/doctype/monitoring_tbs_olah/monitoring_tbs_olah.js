@@ -20,22 +20,32 @@ frappe.ui.form.on("Monitoring TBS Olah", {
 			}
 		})
 	},
-	refresh: function(frm) {
-        frm.get_field('table_vjjc').grid.cannot_delete_rows = true;
-        frm.get_field('table_vjjc').grid.refresh();
-    },
-    validate: function(frm){
-    	update_all(frm)
-    }
+	refresh: function (frm) {
+		frm.get_field('table_vjjc').grid.cannot_delete_rows = true;
+		frm.get_field('table_vjjc').grid.refresh();
+	},
+	validate: function (frm) {
+		update_all(frm)
+	}
 });
 
-frappe.ui.form.on('Thresing Detail', {  
-	table_vjjc_add: function(frm, cdt, cdn) {
+frappe.ui.form.on('Thresing Detail', {
+	table_vjjc_add: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
+		const today = moment()
+		const next_posting_date = frappe.datetime.add_days(cur_frm.doc.tgl, 1)
+		const limit = moment(`${next_posting_date} 07:00:00`)
+
+		if (today.isAfter(limit) && !frm.doc.skip_validation_tbs_olah) {
+			frappe.model.clear_doc(row.doctype, row.name)
+			refresh_field("table_vjjc")
+			frappe.throw("Tidak bisa input tbs olah melebihi jam 7.")
+		}
+
 		frappe.model.set_value(cdt, cdn, 'jam', frappe.datetime.now_time());
 		update_all(frm);
 	},
-	table_vjjc_remove: function(frm) {
+	table_vjjc_remove: function (frm) {
 		update_all(frm);
 	}
 });

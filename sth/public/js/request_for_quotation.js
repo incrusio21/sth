@@ -87,11 +87,7 @@ frappe.ui.form.on('Request for Quotation', {
         }
 
         if (frm.doc.docstatus != 1) {
-            const message = `
-                <div class="form-message blue">
-                    <div>Submit this document to confirm</div>
-                </div>
-            `
+            frm.trigger('set_reminder')
         }
     },
 
@@ -99,6 +95,31 @@ frappe.ui.form.on('Request for Quotation', {
         // frm.trigger('remove_listener_edit_item')
         // frm.set_df_property("items", "cannot_add_rows", true)
         // frm.trigger('add_duplicate_button_items')
+    },
+
+    set_reminder(frm) {
+        frappe
+            .xcall("sth.custom.request_for_quotation.check_created_rfq", { pr_sr: frm.doc.items[0].material_request || "" })
+            .then((res) => {
+                console.log(res);
+                const others = res.map((row) => frappe.utils.get_form_link("Request for Quotation", row, true))
+                if (!res) return
+                const message = `
+                    <div class="reminder-message form-message yellow">
+                        <div> Terdapat RFQ dengan PR/SR yang sama</div>
+                        <div> ${others.join(', ')} </div>
+                    </div>
+                `
+
+                const message_wrapper = frm.get_field("message_reminder").$wrapper.find('.reminder-message')
+
+                if (message_wrapper.length) {
+                    message_wrapper.html(message)
+                } else {
+                    frm.get_field("message_reminder").$wrapper.append(message)
+                }
+            })
+
     },
 
     add_duplicate_button_items(frm) {

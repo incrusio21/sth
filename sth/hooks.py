@@ -116,6 +116,7 @@ jinja = {
 		"sth.jinja.format_tanggal_id",
 		"sth.utils.encrypt",
 		"sth.jinja.sum_pengakuan_penjualan_by_nota_piutang",
+		"sth.jinja.get_payment_entry_ledger_preview",
 	],
 	# "filters": "sth.utils.jinja_filters"
 }
@@ -298,10 +299,14 @@ doc_events = {
 		"on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	"Payment Entry":{
+		"after_insert": [
+			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
+		],
 		"validate": [
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
             "sth.custom.payment_entry.update_check_book",
-            "sth.custom.payment_entry.set_no_rekening"
+            "sth.custom.payment_entry.set_no_rekening",
+            "sth.custom.payment_entry.validate_payment_voucher_kas_pdo"
 		],
 		"on_submit": [
             "sth.custom.payment_entry.update_check_book", 

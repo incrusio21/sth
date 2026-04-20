@@ -44,3 +44,32 @@ def sum_pengakuan_penjualan_by_nota_piutang(nota_piutang=None):
     LEFT JOIN `tabSales Invoice` as si ON si.name = nppkt.pengakuan_penjualan
     WHERE np.name = %s;
     """, (nota_piutang), as_dict=1)[0]
+
+def get_payment_entry_ledger_preview(docname):
+    import frappe
+    
+    docstatus = frappe.db.get_value("Payment Entry", docname, "docstatus")
+    
+    if docstatus == 1:
+        return frappe.db.sql("""
+            SELECT
+                a.account_number,
+                gle.account,
+                gle.debit,
+                gle.credit
+            FROM `tabGL Entry` gle
+            JOIN `tabAccount` a ON a.name = gle.account
+            WHERE gle.voucher_no = %s
+            AND gle.is_cancelled = 0
+        """, (docname,), as_dict=1)
+    else:
+        pe = frappe.get_doc("Payment Entry", docname)
+        pe.docstatus = 1  # set di memory saja
+        gl_map = pe.build_gl_map()
+        
+        return [{
+            "account_number": frappe.db.get_value("Account", e.get("account"), "account_number") or "",
+            "account": e.get("account", ""),
+            "debit": e.get("debit", 0),
+            "credit": e.get("credit", 0),
+        } for e in gl_map]

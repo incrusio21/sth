@@ -52,8 +52,9 @@ def get_history_purchase_request(asset):
         SELECT poi.item_code, poi.item_name, po.name as no_po, po.transaction_date as tanggal, poi.qty, poi.rate, poi.amount, poi.material_request as no_mr, mri.km_hm
         FROM `tabPurchase Order` po
         JOIN `tabPurchase Order Item` poi on poi.parent = po.name
+		JOIN `tabMaterial Request` mr on mr.name = po.material_request
         JOIN `tabMaterial Request Item` mri on mri.name = poi.material_request_item
 		JOIN `tabAlat Berat Dan Kendaraan` k on k.name = mri.kendaraan
-        WHERE po.docstatus = 1 AND k.no_pol = %s AND po.transaction_date BETWEEN %s AND %s
+        WHERE po.docstatus = 1 AND mr.sub_purchase_type = "Service Request" AND k.no_pol = %s AND po.transaction_date BETWEEN %s AND %s
 		ORDER BY po.transaction_date,po.name
     """,(asset,start_year,today),as_dict=True)

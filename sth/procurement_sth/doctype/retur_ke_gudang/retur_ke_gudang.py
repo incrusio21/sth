@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt
 
 class ReturKeGudang(Document):
 	def validate(self):
@@ -21,8 +22,13 @@ class ReturKeGudang(Document):
 
 	def validate_qty(self):
 		for row in self.items:
+			if flt(row.jumlah) == 0:
+				frappe.throw(f"Jumlah barang {row.nama_barang} tidak boleh 0")
+			
 			if row.jumlah > row.jumlah_maksimal:
 				frappe.throw(f"Jumlah barang melebihi maksimal yang dikembalikan")
+			
+
 
 	def update_items_return(self,method):
 		for row in self.items:

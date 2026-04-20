@@ -10,6 +10,7 @@ $(document).on('form-refresh', function (e, frm) {
 	render_kriteria_upload(frm);
 	
 	if (frm.fields_dict['kriteria_upload_sebelumnya']) {
+		
 		render_kriteria_previous(frm);
 	}
 });
@@ -149,9 +150,17 @@ async function render_kriteria_upload(frm) {
 	}
 }
 
-
 function build_table_html(doc_name, rows) {
-	const rows_html = rows.map((row, idx) => {
+    // Filter hanya rows yang punya file
+    const filtered = rows.filter(row => resolve_file_url(row.upload_file));
+
+    if (!filtered.length) {
+        return `<div style="color:#aaa; font-size:12px; padding:8px 0;">
+            No files uploaded yet.
+        </div>`;
+    }
+
+    const rows_html = filtered.map((row, idx) => {
 		const file_url = resolve_file_url(row.upload_file);
 		const file_cell = file_url
 			? `<a href="${file_url}" target="_blank" rel="noopener noreferrer" style="

@@ -32,7 +32,10 @@ class Project:
                 self.move_task_to_new_project(delete=1)
     
     def set_capex_serial_no(self):
-
+        
+        if not self.doc.for_proposal:
+            return
+        
         if not self.doc.proposal:
             frappe.throw("Please create Proposal first.")
 

@@ -11,13 +11,13 @@
   "tanggal",
   "jam",
   "column_break_flyo",
-  "company",
   "unit",
-  "gudang",
-  "column_break_qfco",
   "tipe",
   "tanggal_proses",
   "get_data",
+  "column_break_qfco",
+  "company",
+  "gudang",
   "section_break_jtjz",
   "nama_barang",
   "column_break_zzjs",
@@ -36,32 +36,41 @@
   {
    "fieldname": "stock_awal",
    "fieldtype": "Float",
-   "label": "Stock Awal",
-   "precision": "2"
+   "in_preview": 1,
+   "label": "Stock Awal ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "produksi",
    "fieldtype": "Float",
-   "label": "Produksi",
-   "precision": "2"
+   "in_preview": 1,
+   "label": "Produksi ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "pengiriman",
    "fieldtype": "Float",
-   "label": "Pengiriman",
-   "precision": "2"
+   "in_preview": 1,
+   "label": "Pengiriman ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "input_dipakai_pabrik",
    "fieldtype": "Float",
-   "label": "Input Dipakai Pabrik",
+   "in_preview": 1,
+   "label": "Input Dipakai Pabrik ( Kg )",
    "precision": "2"
   },
   {
    "fieldname": "stock_akhir",
    "fieldtype": "Float",
-   "label": "Stock Akhir",
-   "precision": "2"
+   "in_preview": 1,
+   "label": "Stock Akhir ( Kg )",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "header_section",
@@ -91,6 +100,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "unit.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -170,12 +180,13 @@
    "fieldname": "data_olah_tbs",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Data Olah TBS",
+   "label": "Data Olah TBS ( Kg )",
    "read_only": 1
   },
   {
    "fieldname": "gudang",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Gudang",
    "options": "Warehouse"
   },
@@ -199,7 +210,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-04-13 10:21:56.958280",
+ "modified": "2026-04-14 13:25:22.629194",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Stock By Product",

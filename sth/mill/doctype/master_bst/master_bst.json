@@ -21,6 +21,7 @@
   {
    "fieldname": "details",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Details",
    "options": "Master BST Detail"
   }
@@ -28,7 +29,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-02 13:10:45.594209",
+ "modified": "2026-04-15 13:17:42.638446",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Master BST",

@@ -10,11 +10,12 @@
   "posting_date",
   "qty",
   "rate",
-  "subtotal"
+  "subtotal",
+  "outstanding_amount"
  ],
  "fields": [
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "pengakuan_penjualan",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -48,13 +49,20 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date"
+  },
+  {
+   "columns": 1,
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding Amount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-09 20:15:19.154021",
+ "modified": "2026-04-15 00:11:02.292917",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang Pemenuhan Kontrak Table",

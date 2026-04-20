@@ -30,9 +30,9 @@ def get_filter_ticket(doctype, txt, searchfield, start, page_len, filters):
 	if filters:
 		if type:=filters.get("tipe"):
 			if type == "KERNEL":
-				fcond += " AND i.item_palm_kernel = 1"
+				fcond += " AND i.tipe_barang = 'Palm Kernel'"
 			elif type == "CPO":
-				fcond += " AND i.item_cpo = 1"
+				fcond += " AND i.tipe_barang = 'CPO'"
 
 	return frappe.db.sql(f"""
 		SELECT scp.name

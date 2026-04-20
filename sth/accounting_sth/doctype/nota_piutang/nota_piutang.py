@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import nowdate, flt
 from frappe.model.document import Document
 
 
@@ -29,23 +29,24 @@ class NotaPiutang(Document):
 		if not self.tipe or not self.no_kontrak:
 			return
 
-		duplikat = frappe.db.exists(
-			"Nota Piutang",
-			{
-				"tipe": self.tipe,
-				"no_kontrak": self.no_kontrak,
-				"name": ("!=", self.name),  # exclude dokumen ini sendiri
-				"docstatus": ("!=", 2),     # exclude yang sudah cancelled
-			}
-		)
-
-		if duplikat:
-			frappe.throw(
-				f"Nota Piutang dengan Tipe <b>{self.tipe}</b> "
-				f"dan No. Kontrak <b>{self.no_kontrak}</b> "
-				f"sudah ada: <b>{duplikat}</b>",
-				title="Duplikat Tidak Diizinkan"
+		if self.tipe == "Nota DP":
+			duplikat = frappe.db.exists(
+				"Nota Piutang",
+				{
+					"tipe": self.tipe,
+					"no_kontrak": self.no_kontrak,
+					"name": ("!=", self.name),  # exclude dokumen ini sendiri
+					"docstatus": ("!=", 2),     # exclude yang sudah cancelled
+				}
 			)
+
+			if duplikat:
+				frappe.throw(
+					f"Nota Piutang dengan Tipe <b>{self.tipe}</b> "
+					f"dan No. Kontrak <b>{self.no_kontrak}</b> "
+					f"sudah ada: <b>{duplikat}</b>",
+					title="Duplikat Tidak Diizinkan"
+				)
 
 	def on_submit(self):
 		if self.tipe == "Nota DP":
@@ -126,6 +127,7 @@ class NotaPiutang(Document):
 		pe.paid_to          = self.akun_kas_bank
 		pe.paid_amount      = total_amount
 		pe.received_amount  = total_amount
+		pe.nota_piutang_pemenuhan_kontrak = self.name
 		pe.reference_no     = self.name
 		pe.reference_date   = nowdate()
 		pe.apakah_dp_kontrak = 1
@@ -188,52 +190,31 @@ class NotaPiutang(Document):
 
 	def create_ppn_invoices(self):
 		# ── 1. Cari linked SI names ────────────────────────────────────────
-		linked_si_names = frappe.db.sql("""
-			SELECT DISTINCT si.name
-			FROM `tabSales Invoice` si
-			INNER JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
-			INNER JOIN `tabDelivery Note Item` dni ON dni.parent = sii.delivery_note
-			INNER JOIN `tabDelivery Order Item` doi ON doi.name = dni.delivery_order_item
-			INNER JOIN `tabDelivery Order` tdo ON tdo.name = doi.parent
-			WHERE tdo.sales_order = %(no_kontrak)s
-			  AND si.docstatus = 1
-			  AND si.jenis_penagihan = 'Pengiriman'
-		""", {"no_kontrak": self.no_kontrak}, pluck=True)
-
-		if not linked_si_names:
-			linked_si_names = frappe.db.sql("""
-				SELECT DISTINCT si.name
-				FROM `tabSales Invoice` si
-				INNER JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
-				WHERE sii.sales_order = %(no_kontrak)s
-				  AND si.docstatus = 1
-				  AND si.jenis_penagihan = 'Pengiriman'
-			""", {"no_kontrak": self.no_kontrak}, pluck=True)
+		linked_si_names = [
+			row.pengakuan_penjualan
+			for row in self.get("nota_hutang_pemenuhan_kontrak_table", [])
+			if row.pengakuan_penjualan
+		]
 
 		if not linked_si_names:
 			frappe.throw(
-				f"Tidak ada Sales Invoice Pengiriman yang linked ke kontrak <b>{self.no_kontrak}</b>"
+				f"Tidak ada Sales Invoice di tabel Pemenuhan Kontrak pada dokumen ini."
 			)
 
 		# ── 2. Cek tax SO: including atau excluding ────────────────────────
 		so = frappe.get_doc("Sales Order", self.no_kontrak)
-
 		tax_included = any(t.included_in_print_rate for t in so.get("taxes", []))
 
-		# Hitung divisor dan ppn_rate dari SO
-		divisor   = 1.0
-		ppn_rate  = 0.0
+		ppn_rate    = 0.0
 		ppn_account = None
 
-		for t in so.get("taxes", []):
-			if t.included_in_print_rate:
-				divisor  *= (1 + t.rate / 100)
-				ppn_rate += t.rate
-				if not ppn_account:
-					ppn_account = t.account_head
-
-		if not tax_included:
-			# Excluding: ambil dari template Excluding PPN
+		if tax_included:
+			for t in so.get("taxes", []):
+				if t.included_in_print_rate:
+					ppn_rate += t.rate
+					if not ppn_account:
+						ppn_account = t.account_head
+		else:
 			template_name = frappe.db.get_value(
 				"Sales Taxes and Charges Template",
 				{
@@ -273,23 +254,18 @@ class NotaPiutang(Document):
 		)
 
 		# ── 4. Build map periode → reclass rows dari child table ──────────
-		# Periode di child table format "Januari 2024", cocokkan ke bulan_key "2024-01"
 		from frappe.utils import getdate, get_last_day
-		import locale
 
 		def periode_to_key(periode_str):
-			"""Konversi 'Januari 2024' → '2024-01'"""
 			try:
-				import datetime
-				# Coba parse pakai locale Indonesia
 				bulan_map = {
 					"januari": 1, "februari": 2, "maret": 3, "april": 4,
 					"mei": 5, "juni": 6, "juli": 7, "agustus": 8,
 					"september": 9, "oktober": 10, "november": 11, "desember": 12
 				}
-				parts      = periode_str.lower().split()
-				month_num  = bulan_map.get(parts[0], 0)
-				year       = int(parts[1])
+				parts     = periode_str.lower().split()
+				month_num = bulan_map.get(parts[0], 0)
+				year      = int(parts[1])
 				return f"{year}-{str(month_num).zfill(2)}"
 			except Exception:
 				return None
@@ -308,79 +284,84 @@ class NotaPiutang(Document):
 			bulan_key = getdate(si.posting_date).strftime("%Y-%m")
 			si_per_bulan[bulan_key].append(si)
 
-		created_si_list = []
+		created_je_list = []
 
 		for bulan_key, si_group in sorted(si_per_bulan.items()):
-
 			reclass_row = reclass_by_periode.get(bulan_key)
-			if reclass_row:
-				total_dpp   = sum(si.net_total for si in si_group)
-				total_ppn   = reclass_row.ppn
+			if not reclass_row:
+				continue
 
-				if total_ppn <= 0:
-					continue
+			total_ppn = reclass_row.ppn
+			if total_ppn <= 0:
+				continue
 
-				sample_date  = getdate(si_group[0].posting_date)
-				posting_date = get_last_day(sample_date)
-				customer     = si_group[0].customer
-				debit_to     = si_group[0].debit_to
+			sample_date  = getdate(si_group[0].posting_date)
+			posting_date = get_last_day(sample_date)
+			customer     = si_group[0].customer
+			debit_to     = si_group[0].debit_to  # akun piutang
 
-				# ── Buat Sales Invoice PPN ─────────────────────────────────────
-				si_ppn = frappe.new_doc("Sales Invoice")
-				si_ppn.customer        = customer
-				si_ppn.company         = self.company
-				si_ppn.posting_date    = posting_date
-				si_ppn.due_date        = posting_date
-				si_ppn.no_kontrak_eksternal = frappe.get_doc("Sales Order", self.no_kontrak).no_kontrak_external
-				si_ppn.unit		       = self.unit
-				si_ppn.set_posting_time = 1
-				si_ppn.debit_to        = debit_to
-				si_ppn.jenis_penagihan = "Pemenuhan Kontrak"
-				si_ppn.keterangan 	   = "PPN + Reclass Nota Piutang {}".format(self.name)
-				si_ppn.nota_hutang_pk  = self.name
+			# ── Buat Journal Entry ─────────────────────────────────────────
+			je = frappe.new_doc("Journal Entry")
+			je.voucher_type    = "Journal Entry"
+			je.company         = self.company
+			je.posting_date    = posting_date
+			je.user_remark     = f"PPN + Reclass Nota Piutang {self.name} - {bulan_key}"
+			je.sales_order     = self.no_kontrak
+			je.nota_hutang_pk  = self.name  # custom field, sesuaikan jika nama berbeda
 
-				# Item placeholder (rate 0, PPN di-handle lewat tax actual)
-				si_ppn.append("items", {
-					"item_code"   : self.master_barang_placeholder_ppn,
-					"qty"         : 1,
-					"rate"        : 0,
-					"sales_order" : self.no_kontrak,
+			# Baris 1: Debit piutang (akun AR customer) sebesar PPN
+			je.append("accounts", {
+				"account"       : debit_to,
+				"party_type"    : "Customer",
+				"party"         : customer,
+				"debit_in_account_currency" : total_ppn,
+				"credit_in_account_currency": 0,
+				"user_remark"   : f"PPN {bulan_key}",
+			})
+
+			# Baris 2: Credit akun PPN keluaran
+			je.append("accounts", {
+				"account"       : ppn_account,
+				"debit_in_account_currency" : 0,
+				"credit_in_account_currency": total_ppn,
+				"user_remark"   : f"PPN {bulan_key}",
+			})
+
+			# Baris 3 & 4: Reclass (jika akun reclass tersedia)
+			if reclass_row.akun_reclass and reclass_row.reclass:
+				total_reclass = reclass_row.reclass
+
+				# Tentukan arah debit/credit reclass sesuai kebutuhan bisnis.
+				# Contoh: debit akun reclass, credit kembali ke akun piutang.
+				# Sesuaikan pasangan akun ini dengan perlakuan akuntansi yang berlaku.
+				je.append("accounts", {
+					"account"       : reclass_row.akun_reclass,
+					"user_remark"   : f"Reclass {reclass_row.periode}",
+					"debit_in_account_currency" : 0,
+					"credit_in_account_currency": total_reclass,
+				})
+				je.append("accounts", {
+					"account"       : debit_to,
+					"party_type"    : "Customer",
+					"party"         : customer,
+					"debit_in_account_currency" : total_reclass,
+					"credit_in_account_currency": 0,
+					"user_remark"   : f"Reclass {reclass_row.periode}",
 				})
 
-				# Tax PPN actual
-				si_ppn.append("taxes", {
-					"charge_type" : "Actual",
-					"account_head": ppn_account,
-					"description" : f"PPN - {bulan_key}",
-					"tax_amount"  : total_ppn,
-					"total"       : total_ppn,
-				})
+			je.insert(ignore_permissions=True)
+			je.submit()
+			created_je_list.append(je.name)
 
-				# ── Tambah baris reclass kalau ada ────────────────────────────
-				if reclass_row and reclass_row.akun_reclass:
-					si_ppn.append("taxes", {
-						"charge_type" : "Actual",
-						"account_head": reclass_row.akun_reclass,
-						"description" : f"Reclass - {reclass_row.periode}",
-						"tax_amount"  : reclass_row.reclass,
-						"total"       : reclass_row.reclass,
-					})
+			# Update child table dengan referensi JE
+			for baris_reclass in self.reclass_pengakuan_penjualan:
+				if baris_reclass.name == reclass_row.name:
+					baris_reclass.pengakuan_penjualan_ppn = je.name
+					baris_reclass.db_update()
 
-				
-
-				si_ppn.insert(ignore_permissions=True)
-				frappe.flags.skip_validate_file = True
-				si_ppn.submit()
-				created_si_list.append(si_ppn.name)
-
-				for baris_reclass in self.reclass_pengakuan_penjualan:
-					if baris_reclass.name == reclass_row.name:
-						baris_reclass.pengakuan_penjualan_ppn = si_ppn.name
-						baris_reclass.db_update()
-
-		if created_si_list:
+		if created_je_list:
 			frappe.msgprint(
-				f"Sales Invoice PPN berhasil dibuat: <b>{', '.join(created_si_list)}</b>",
+				f"Journal Entry PPN berhasil dibuat: <b>{', '.join(created_je_list)}</b>",
 				alert=True
 			)
 		else:
@@ -417,56 +398,87 @@ class NotaPiutang(Document):
 			)
 
 
-
 @frappe.whitelist()
-def get_si_pengiriman(no_kontrak):
-	def run_query(where_clause, join_clause=""):
-		return frappe.db.sql(f"""
-			SELECT 
-				si.name,
-				si.posting_date,
-				SUM(COALESCE(NULLIF(sii.qty_timbang_customer, 0), sii.qty)) AS qty,
-				sii.rate / COALESCE(
-					NULLIF((
-						SELECT EXP(SUM(LOG(1 + stc.rate / 100)))
-						FROM `tabSales Taxes and Charges` stc
-						WHERE stc.parent = si.name
-						  AND stc.included_in_print_rate = 1
-					), 0),
-				1) AS rate,
-				SUM(
-					COALESCE(NULLIF(sii.qty_timbang_customer, 0), sii.qty) *
-					sii.rate / COALESCE(
-						NULLIF((
-							SELECT EXP(SUM(LOG(1 + stc.rate / 100)))
-							FROM `tabSales Taxes and Charges` stc
-							WHERE stc.parent = si.name
-							  AND stc.included_in_print_rate = 1
-						), 0),
-					1)
-				) AS subtotal
-			FROM `tabSales Invoice` si
-			JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
-			{join_clause}
-			WHERE {where_clause}
-			  AND si.docstatus = 1
-			  AND si.jenis_penagihan = 'Pengiriman'
-			GROUP BY si.name, si.posting_date, sii.rate
-		""", {"no_kontrak": no_kontrak}, as_dict=1)
+def get_si_pengiriman(no_kontrak, bulan=None):
+	"""
+	Ambil SI Pengiriman untuk kontrak, exclude:
+	1. SI yang sudah ada di Nota Piutang lain (docstatus != 2)
+	2. SI yang sudah di-offset DP lewat Journal Entry (je.sales_invoice = si.name)
+	   → tapi hanya exclude kalau outstanding_amount - total_offset <= 0
+	3. Filter per bulan posting_date kalau bulan diisi (format: YYYY-MM)
+	"""
+	# SI yang sudah terpakai di Nota Piutang manapun yang tidak di-cancel
+	si_terpakai = frappe.db.sql_list("""
+		SELECT DISTINCT child.pengakuan_penjualan
+		FROM `tabNota Piutang Pemenuhan Kontrak Table` child
+		JOIN `tabNota Piutang` np ON np.name = child.parent
+		WHERE np.docstatus != 2
+		  AND child.pengakuan_penjualan IS NOT NULL
+		  AND child.pengakuan_penjualan != ''
+	""")
 
-	result = run_query(
-		where_clause="tdo.sales_order = %(no_kontrak)s",
-		join_clause="""
-			JOIN `tabDelivery Note Item` dni ON dni.parent = sii.delivery_note
-			JOIN `tabDelivery Order Item` doi ON doi.name = dni.delivery_order_item
-			JOIN `tabDelivery Order` tdo ON tdo.name = doi.parent
-		"""
-	)
-	if not result:
-		result = run_query(where_clause="sii.sales_order = %(no_kontrak)s")
+	# SI yang sudah di-offset DP lewat JE: ambil nama + total amount offset-nya
+	si_je_dp_amounts = frappe.db.sql("""
+		SELECT je.sales_invoice, SUM(jea.credit) AS total_offset
+		FROM `tabJournal Entry` je
+		JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
+		WHERE je.docstatus = 1
+		  AND je.sales_order = %s
+		  AND je.sales_invoice IS NOT NULL
+		  AND je.sales_invoice != ''
+		  AND jea.reference_name = je.sales_invoice
+		GROUP BY je.sales_invoice
+	""", [no_kontrak], as_dict=True)
 
-	return result or []
+	# Map: {si_name: total_offset}
+	offset_map = {row.sales_invoice: row.total_offset for row in si_je_dp_amounts}
 
+	conditions   = ["si.docstatus = 1", "sii.sales_order = %s"]
+	ordered_vals = [no_kontrak]
+
+	if bulan:
+		tahun, bln = bulan.split('-')
+		conditions.append("YEAR(si.posting_date) = %s")
+		conditions.append("MONTH(si.posting_date) = %s")
+		ordered_vals += [int(tahun), int(bln)]
+
+	if si_terpakai:
+		placeholders = ', '.join(['%s'] * len(si_terpakai))
+		conditions.append(f"si.name NOT IN ({placeholders})")
+		ordered_vals += si_terpakai
+
+	where_clause = " AND ".join(conditions)
+
+	query = f"""
+		SELECT
+			si.name,
+			si.posting_date,
+			si.grand_total as outstanding_amount,
+			sii.qty,
+			sii.rate,
+			sii.amount AS subtotal
+		FROM `tabSales Invoice` si
+		JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+		WHERE {where_clause}
+		ORDER BY si.posting_date
+	"""
+
+	rows = frappe.db.sql(query, ordered_vals, as_dict=True)
+
+	# Post-filter: kalau SI ada di offset_map,
+	# kurangi outstanding_amount dengan total_offset
+	# → exclude kalau sisa <= 0, update field kalau masih ada sisa
+	result = []
+	for row in rows:
+		if row.name in offset_map:
+			sisa = row.outstanding_amount - offset_map[row.name]
+			if sisa <= 0:
+				continue  # sudah lunas dari offset DP, skip
+			row.outstanding_amount = sisa  # tampilkan sisa yang belum terbayar
+		result.append(row)
+
+	return result
+	
 @frappe.whitelist()
 def get_nilai_kontrak(no_kontrak):
 	# Ambil Sales Order
@@ -545,3 +557,109 @@ def get_akun_reclass(doctype, txt, searchfield, start, page_len, filters):
 		"start":    start,
 		"page_len": page_len,
 	})
+
+
+@frappe.whitelist()
+def get_sisa_dp(no_kontrak):
+	"""
+	Sisa DP = Total DP diterima (Payment Entry) - Total DP terpakai (JE offset di SI Pengiriman)
+
+	DP diterima  : Payment Entry dimana apakah_dp_kontrak=1 dan no_kontrak_penjualan=no_kontrak
+	DP terpakai  : Journal Entry dimana sales_order=no_kontrak, 
+				   child debit di akun uang muka (akun yang sama dengan field akun_uang_muka 
+				   di Nota Piutang tipe Nota DP untuk kontrak ini)
+	"""
+
+	# 1. Ambil akun_uang_muka dari Nota Piutang tipe "Nota DP" untuk kontrak ini
+	akun_uang_muka = frappe.db.get_value(
+		'Nota Piutang',
+		{
+			'no_kontrak': no_kontrak,
+			'tipe': 'Nota DP',
+			'docstatus': 1
+		},
+		'akun_uang_muka'
+	)
+
+	if not akun_uang_muka:
+		# Belum ada Nota DP submitted untuk kontrak ini, DP = 0
+		return 0
+
+	# 2. Total DP yang diterima dari Payment Entry
+	dp_diterima = frappe.db.sql("""
+		SELECT COALESCE(SUM(pe.paid_amount), 0)
+		FROM `tabPayment Entry` pe
+		WHERE pe.docstatus = 1
+		  AND pe.apakah_dp_kontrak = 1
+		  AND pe.no_kontrak_penjualan = %(no_kontrak)s
+	""", {'no_kontrak': no_kontrak})[0][0]
+
+	# 3. Total DP yang sudah terpakai (debit akun uang muka di JE yang sales_order = kontrak)
+	dp_terpakai = frappe.db.sql("""
+		SELECT COALESCE(SUM(jed.debit), 0)
+		FROM `tabJournal Entry Account` jed
+		JOIN `tabJournal Entry` je ON je.name = jed.parent
+		WHERE je.docstatus = 1
+		  AND je.sales_order = %(no_kontrak)s
+		  AND jed.account = %(akun_uang_muka)s
+	""", {
+		'no_kontrak': no_kontrak,
+		'akun_uang_muka': akun_uang_muka
+	})[0][0]
+
+	sisa = flt(dp_diterima) - flt(dp_terpakai)
+	return sisa if sisa > 0 else 0
+
+@frappe.whitelist()
+def get_dp_from_je(no_kontrak, pengakuan_list):
+    import json
+
+    if isinstance(pengakuan_list, str):
+        pengakuan_list = json.loads(pengakuan_list)
+
+    if not pengakuan_list:
+        return {"dp_dpp": 0, "dp_ppn": 0}
+
+    # ── 1. Ambil tax rate dari Sales Order ──────────────────────────────
+    so = frappe.get_doc("Sales Order", no_kontrak)
+
+    tax_rate = 0.0
+    for t in so.get("taxes", []):
+        tax_rate += t.rate / 100  # e.g. 11% → 0.11
+
+    # ── 2. Cari JE DP yang terkait pengakuan_penjualan ──────────────────
+    je_rows = frappe.db.sql("""
+        SELECT je.name, je.sales_invoice
+        FROM `tabJournal Entry` je
+        WHERE je.sales_order   = %(no_kontrak)s
+          AND je.user_remark   LIKE %(user_remark)s
+          AND je.docstatus     = 1
+          AND je.sales_invoice IN %(pengakuan_list)s
+    """, {
+        "no_kontrak":     no_kontrak,
+        "user_remark":    "Pembayaran DP Sales Invoice%",
+        "pengakuan_list": tuple(pengakuan_list),
+    }, as_dict=1)
+
+    if not je_rows:
+        return {"dp_dpp": 0, "dp_ppn": 0}
+
+    # ── 3. Total debit dari JE Account ──────────────────────────────────
+    je_names = tuple(j.name for j in je_rows)
+
+    debit_row = frappe.db.sql("""
+        SELECT COALESCE(SUM(jea.debit_in_account_currency), 0) AS total_debit
+        FROM `tabJournal Entry Account` jea
+        WHERE jea.parent IN %(je_names)s
+    """, {"je_names": je_names}, as_dict=1)
+
+    total_debit = debit_row[0].total_debit if debit_row else 0
+
+    # ── 4. dp_dpp = total_debit, dp_ppn = dp_dpp * rate ─────────────────
+    dp_dpp = total_debit
+    dp_ppn = dp_dpp * tax_rate
+
+    return {
+        "dp_dpp": dp_dpp,
+        "dp_ppn": dp_ppn,
+    }

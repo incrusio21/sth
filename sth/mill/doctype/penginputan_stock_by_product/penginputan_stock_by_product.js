@@ -20,11 +20,19 @@ frappe.ui.form.on("Penginputan Stock By Product", {
                 }
             }
         })
+
+        frm.set_query("nama_barang", (doc) => {
+            return {
+                filters: {
+                    tipe_barang: doc.tipe,
+                }
+            }
+        })
     },
 
     unit(frm) {
         if (!frm.doc.unit) return
-        frappe.db.get_value("Warehouse", { "unit": frm.doc.unit, "central": 1 }, "name", (res) => {
+        frappe.db.get_value("Warehouse", { "unit": frm.doc.unit, "warehouse_category": "By Product" }, "name", (res) => {
             frm.set_value("gudang", res.name)
         })
     },
@@ -33,6 +41,7 @@ frappe.ui.form.on("Penginputan Stock By Product", {
         if (!frm.doc.nama_barang) return
         frm.call("get_stock").then(() => {
             frm.refresh()
+            frm.trigger('calculate_stock_akhir')
         })
     },
 

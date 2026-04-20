@@ -20,7 +20,9 @@
   "signature_section",
   "make",
   "material_request",
-  "column_break_vukp"
+  "column_break_vukp",
+  "kriteria_tab",
+  "kriteria_upload_html"
  ],
  "fields": [
   {
@@ -113,13 +115,23 @@
    "fieldname": "asset",
    "fieldtype": "Check",
    "label": "Asset ?"
+  },
+  {
+   "fieldname": "kriteria_tab",
+   "fieldtype": "Tab Break",
+   "label": "Kriteria"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 16:00:01.065009",
+ "modified": "2026-04-13 11:49:48.829630",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara",

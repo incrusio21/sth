@@ -10,7 +10,8 @@
   "rata_rata_hasil",
   "column_break_sovx",
   "hasil_pembulatan",
-  "total_hitungan"
+  "total_hitungan",
+  "hitung_limas"
  ],
  "fields": [
   {
@@ -18,14 +19,16 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Nama Kompartemen / Bunker",
-   "options": "Master Kompartemen atau Bunker"
+   "options": "Master Kompartemen atau Bunker",
+   "read_only": 1
   },
   {
    "fieldname": "rata_rata_hasil",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Rata Rata Hasil",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_sovx",
@@ -36,21 +39,29 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Hasil Pembulatan",
-   "precision": "0"
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "total_hitungan",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Hitungan",
-   "precision": "0"
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.unit == \"TPRM\"",
+   "fieldname": "hitung_limas",
+   "fieldtype": "Button",
+   "label": "Hitung Limas"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-09 13:59:28.972140",
+ "modified": "2026-04-18 10:53:07.583895",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Average Detail",

@@ -24,6 +24,9 @@ class PengeluaranBarang(Document):
 			
 			if row.jumlah > jumlah_permintaan - jumlah_keluar:
 				frappe.throw((f"Jumlah barang melebihi permintaan: {row.jumlah}"))
+			
+			if row.jumlah > row.jumlah_saat_ini:
+				frappe.throw((f"Jumlah barang {row.item_name} melebihi stock saat ini: {row.jumlah_saat_ini - row.jumlah}"))
 
 	def update_items_out(self):
 		for row in self.items:
@@ -51,7 +54,7 @@ class PengeluaranBarang(Document):
 		if not self.validate_document_permintaan():
 			return
 
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","blok","name as reference"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","jumlah_saat_ini","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","blok","name as reference"])
 
 		for row in items:
 			child = self.append("items",row)
@@ -136,7 +139,7 @@ class PengeluaranBarang(Document):
 			}
 		}
 
-		doc = get_mapped_doc("Pengeluaran Barang",self.no_permintaan_pengeluaran,mapper,None,postprocess,True)
+		doc = get_mapped_doc("Pengeluaran Barang",self.name,mapper,None,postprocess,True)
 		doc.insert()
 		doc.submit()
 		

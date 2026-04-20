@@ -90,6 +90,8 @@ def make_payment_entry(source_name, target_doc=None):
 		target.party_type = "Employee"
 		target.party = employee.name
 		target.party_name = employee.employee_name
+		target.no_rekening = employee.bank_ac_no
+		target.nama_bank = employee.nama_bank
 		target.unit = employee.unit
 		target.no_rekening_tujuan = employee.bank_ac_no
 		target.bank_tujuan = employee.bank_name
@@ -103,6 +105,7 @@ def make_payment_entry(source_name, target_doc=None):
 			"outstanding_amount": source.outstanding_amount,
 			"allocated_amount": source.outstanding_amount
 		})
+
 	doclist = get_mapped_doc(
 		"Pertanggungjawaban Perjalanan Dinas",
 		source_name,
@@ -111,7 +114,7 @@ def make_payment_entry(source_name, target_doc=None):
 				"doctype": "Payment Entry",
 				"field_map": {
 					"salary_account": "paid_from",
-					"credit_to": "paid_to"
+					"credit_to": "paid_to",
 				}
 			}
 		},
