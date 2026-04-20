@@ -72,15 +72,13 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def add_rekap_hasil(self):
 		for row in self.hasil_titik_sounding:
 			parent_doc = frappe.db.get_value("Ukuran Bunker Kernel Silo",{"pabrik":self.pabrik,"kompartemen_bunker":row.nama_kompartemen_bunker}) or frappe.db.get_value("Ukuran Bunker Kernel Silo",{"pabrik":self.pabrik,"default":1})
-			volume = 0
+
 			tonase,liter = frappe.get_value("Ukuran Bunker Kernel Silo Detail",{"parent": parent_doc,"ukuran":row.total_hitungan, },["tonase","liter"]) or (0,0)
 
-			if flt(tonase) > 0:
-				volume = (volume + tonase) * 1000
-			else:
-				volume += liter
+			volume = tonase * 1000 if flt(tonase) > 0 else liter
 
 			self.append("rekap_hasil",{
+				"kompartemen": row.nama_kompartemen_bunker,
 				"ukuran": row.total_hitungan,
 				"volume": volume,
 				"netto" : volume * self.berat_jenis if self.berat_jenis > 0 else volume
@@ -196,6 +194,16 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		doc.insert()
 		doc.submit()
 
-@frappe.whitelist()
+
 def get_warehouse_palm(unit):
 	return frappe.db.get_value("Warehouse",{"unit":unit,"warehouse_category": "Product Palm Kernel"})
+
+@frappe.whitelist()
+def get_berat_limas(density,kompartemen,pabrik):
+	query = frappe.db.sql("""
+		select bjld.berat from `tabUkuran Berat Jenis Limas` bjl
+		join `tabUkuran Berat Jenis Limas Detail` bjld on bjl.name = bjld.parent
+		where bjl.pabrik = %s and bjl.kompartemen = %s and bjld.density = %s 
+	""",(pabrik,kompartemen,density),as_dict=True)
+
+	return query[0].berat if query else 0 

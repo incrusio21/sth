@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{pabrik}-{bst}",
+ "creation": "2026-04-18 11:03:48.122002",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kompartemen",
+  "column_break_lnll",
+  "pabrik",
+  "section_break_jlfu",
+  "detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_lnll",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "PKS TPRM",
+   "fieldname": "pabrik",
+   "fieldtype": "Link",
+   "label": "Pabrik",
+   "options": "Mill Master",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_jlfu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Table",
+   "label": "Detail",
+   "options": "Ukuran Berat Jenis Limas Detail"
+  },
+  {
+   "fieldname": "kompartemen",
+   "fieldtype": "Link",
+   "label": "Kompartemen / Bunker",
+   "options": "Master Kompartemen atau Bunker"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-20 15:23:07.529232",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Ukuran Berat Jenis Limas",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -22,41 +22,50 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
         })
     },
 
-    show_calculate_pyramid_dialog(frm) {
-        const d = frappe.ui.Dialog({
+    show_calculate_pyramid_dialog(doc, row) {
+        const dialog = new frappe.ui.Dialog({
             title: __('Hitung Volume Limas'),
             fields: [
                 {
-                    label: __('Luas Alas (La)'),
-                    fieldname: 'base_area',
+                    label: __('Perkiraan'),
+                    fieldname: 'perkiraan',
                     fieldtype: 'Float',
                     reqd: 1,
-                    description: __('Masukkan luas alas limas')
+                    default: 0
                 },
                 {
-                    label: __('Tinggi (t)'),
-                    fieldname: 'height',
+                    label: __('Berat Jenis/Density'),
+                    fieldname: 'density',
                     fieldtype: 'Float',
                     reqd: 1,
-                    description: __('Masukkan tinggi tegak limas')
+                    default: 0,
+                    change: (el) => {
+                        const val = flt(el.target.value)
+                        const method = frappe.model.get_server_module_name(doc.doctype) + ".get_berat_limas"
+                        frappe.xcall(method, {
+                            density: val, kompartemen: row.kompartemen, pabrik: doc.pabrik
+                        }).then((res) => {
+                            dialog.set_value('berat_kg', res)
+                        })
+                    }
                 },
                 {
-                    fieldtype: 'Section Break'
-                },
-                {
-                    label: __('Hasil Volume'),
-                    fieldname: 'volume_result',
+                    label: __('Berat (Kg/M3)'),
+                    fieldname: 'berat_kg',
                     fieldtype: 'Float',
-                    read_only: 1
+                    read_only: 1,
+                    default: 0
                 }
             ],
-            primary_action_label: __('Hitung'),
+            primary_action_label: __('Hitung Limas'),
             primary_action(values) {
-
+                const result = values.perkiraan * values.berat_kg
+                frappe.model.set_value(row.doctype, row.name, 'netto', result)
+                dialog.hide()
             }
         });
 
-        d.show();
+        dialog.show();
     }
 
 });
@@ -68,11 +77,11 @@ frappe.ui.form.on("Palm Kernel Bunker Detail", {
     },
 });
 
-frappe.ui.form.on("Sounding Average Detail", {
+frappe.ui.form.on("Ukuran Volume Sounding Bunker", {
     hitung_limas(frm, dt, dn) {
         const row = locals[dt][dn]
-        if (row.total_hitungan <= 0) {
-
+        if (row.ukuran <= 0) {
+            frm.events.show_calculate_pyramid_dialog(frm.doc, row)
         }
     }
 });

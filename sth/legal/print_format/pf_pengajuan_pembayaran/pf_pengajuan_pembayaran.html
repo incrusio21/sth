@@ -1,0 +1,106 @@
+{%- set kategori = frappe.get_doc("Account", doc.expense_account) -%}
+{% set current_user = frappe.db.get_value(
+"Employee",
+{"user_id": frappe.session.user},
+["name", "employee_name", "designation"],
+as_dict=True
+) %}
+
+<div>
+  <h1>form pengajuan pembayaran</h1>
+
+  <div class="mt-3">
+    <table class="table_info">
+      <tr>
+        <td>
+          Nama Pemesan : <b>{{ doc.pemesan or '' }}</b>
+        </td>
+        <td style="text-align: right;">
+          Nomor : <b style="text-decoration: underline;">{{ doc.name or '' }}</b>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          Lokasi Pemesan : <b>{{ doc.unit or '' }}</b>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          Kategori Pengajuan Pembayaran : <b>{{ kategori.account_number or '' }}</b>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="mt-3">
+    <table class="table_items">
+      <thead>
+        <tr>
+          <td>No</td>
+          <td>Deskripsi</td>
+          <td>Total</td>
+        </tr>
+      </thead>
+      {%- for row in doc.details -%}
+      <tr>
+        <td class="text-center">{{ row.idx }}</td>
+        <td>{{ row.deskripsi }}</td>
+        <td class="text-right">{{ row.get_formatted("amount", doc) }}</td>
+      </tr>
+      {%- endfor -%}
+      <tfoot>
+        <tr>
+          <td colspan="2" style="text-align: right!important;">Total</td>
+          <td style="text-align: right!important;">{{ doc.get_formatted("grand_total") }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="mt-3">
+    <h4 class="mb-0">Tujuan:</h4>
+    <table class="table_items">
+      <tr>
+        <td>{{ doc.tujuan or '' }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="mt-3">
+    <h4 style="float: right;">Tanggal: {{ doc.get_formatted("posting_date") }}</h4>
+    <table>
+      <tr>
+        <td class="text-center" style="font-size: 1rem !important; padding-bottom: 5rem !important;">
+          Disetujui Oleh,
+        </td>
+        <td class="text-center" style="font-size: 1rem !important; padding-bottom: 5rem !important;">
+          Diminta Oleh,
+        </td>
+      <tr>
+        <td>
+          <table>
+            <tr>
+              <td class="text-center">
+                <h4 class="mb-0" style="text-decoration: underline;">WIRYADINATA</h4>
+                <h4 class="mb-0">{{ doc.get_formatted("posting_date") }}</h4>
+              </td>
+              <td class="text-center">
+                <h4 class="mb-0" style="text-decoration: underline;">ADI WIRIANTO</h4>
+                <h4 class="mb-0">{{ doc.get_formatted("posting_date") }}</h4>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td class="text-center">
+          <h4 class="mb-0" style="text-decoration: underline;">
+            {{ current_user.employee_name or frappe.session.user }}
+          </h4>
+          <h4 class="mb-0">
+            {{ current_user.designation or '-' }}
+          </h4>
+        </td>
+      </tr>
+      </tr>
+    </table>
+  </div>
+</div>

@@ -10,8 +10,7 @@
   "rata_rata_hasil",
   "column_break_sovx",
   "hasil_pembulatan",
-  "total_hitungan",
-  "hitung_limas"
+  "total_hitungan"
  ],
  "fields": [
   {
@@ -49,19 +48,13 @@
    "label": "Total Hitungan",
    "precision": "0",
    "read_only": 1
-  },
-  {
-   "depends_on": "eval:parent.unit == \"TPRM\"",
-   "fieldname": "hitung_limas",
-   "fieldtype": "Button",
-   "label": "Hitung Limas"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-18 10:53:07.583895",
+ "modified": "2026-04-20 15:40:05.880529",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Average Detail",
