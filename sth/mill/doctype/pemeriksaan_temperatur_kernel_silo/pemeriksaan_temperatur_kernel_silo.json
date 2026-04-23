@@ -15,11 +15,17 @@
   "status",
   "company",
   "unit",
-  "machine",
+  "stasiun",
+  "mesin",
+  "section_break_fnwx",
+  "tanggal_scan",
+  "column_break_winw",
+  "jam_scan",
+  "column_break_ktlg",
+  "user_scan",
   "kernel_silo_no1_section",
   "temperatur_ks_1",
   "foto_hasil_temperatur_ks_1",
-  "column_break_tmye",
   "kernel_silo_no2_section",
   "temperatur_ks_2",
   "foto_hasil_temperatur_ks_2",
@@ -91,13 +97,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "machine",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Mesin",
-   "options": "Mill Machine"
-  },
-  {
    "fieldname": "kernel_silo_no1_section",
    "fieldtype": "Section Break",
    "label": "Kernel Silo No.1"
@@ -146,14 +145,56 @@
    "label": "Foto Hasil Temperatur (KS 3)"
   },
   {
-   "fieldname": "column_break_tmye",
+   "fieldname": "section_break_fnwx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.stasiun",
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_winw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ktlg",
    "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:03:09.794980",
+ "modified": "2026-04-23 13:53:10.281703",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Temperatur Kernel Silo",

@@ -14,7 +14,14 @@
   "column_break_gwxx",
   "status",
   "shift",
+  "stasiun",
   "mesin",
+  "section_break_fnwx",
+  "tanggal_scan",
+  "column_break_hfiv",
+  "jam_scan",
+  "column_break_lbva",
+  "user_scan",
   "section_break_druq",
   "tekanan_inlet",
   "foto_tekanan_inlet",
@@ -107,7 +114,8 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Mesin",
-   "options": "Mill Machine"
+   "options": "Mill Machine",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_druq",
@@ -271,12 +279,50 @@
    "fieldtype": "Attach Image",
    "in_preview": 1,
    "label": "Foto Capasitor Bank"
+  },
+  {
+   "fieldname": "section_break_fnwx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hfiv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lbva",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-13 09:34:49.659453",
+ "modified": "2026-04-23 13:54:34.672060",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Turbin",

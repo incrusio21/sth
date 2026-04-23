@@ -14,6 +14,9 @@
   "unit",
   "column_break_tdai",
   "status",
+  "tanggal_scan",
+  "jam_scan",
+  "user_scan",
   "section_break_ptwp",
   "nama_stasiun",
   "nama_mesin",
@@ -139,13 +142,31 @@
    "fieldname": "uf_axial",
    "fieldtype": "Attach Image",
    "label": "Upload Foto"
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 14:12:42.985304",
+ "modified": "2026-04-23 11:31:00.748803",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pencatatan Vibrasi Mesin",

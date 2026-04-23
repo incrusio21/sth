@@ -17,6 +17,12 @@
   "shift",
   "mesin",
   "stasiun",
+  "section_break_fcqk",
+  "tanggal_scan",
+  "column_break_aadm",
+  "jam_scan",
+  "column_break_geak",
+  "user_scan",
   "pemeriksaan_temperature_press_cake_tab",
   "mesin_press",
   "pemeriksaan_temperatur_dan_level_digester_tab",
@@ -148,13 +154,43 @@
    "in_preview": 1,
    "label": "Stasiun",
    "read_only": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fcqk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_aadm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_geak",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-24 14:04:31.207858",
+ "modified": "2026-04-23 13:20:36.616780",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Stasiun Press",

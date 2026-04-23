@@ -15,7 +15,14 @@
   "column_break_qemh",
   "status",
   "shift",
-  "machine",
+  "stasiun",
+  "mesin",
+  "section_break_fnwx",
+  "tanggal_scan",
+  "column_break_lhgv",
+  "jam_scan",
+  "column_break_xmvf",
+  "user_scan",
   "tekanan_boiler_section",
   "tekanan_boiler",
   "foto_hasil_tekanan_boiler",
@@ -100,13 +107,6 @@
    "label": "Shift",
    "options": "Monitoring Proses Control",
    "reqd": 1
-  },
-  {
-   "fieldname": "machine",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Mesin",
-   "options": "Mill Machine"
   },
   {
    "fieldname": "tekanan_boiler_section",
@@ -218,12 +218,58 @@
    "fieldname": "double_dumper_section",
    "fieldtype": "Section Break",
    "label": "Double Dumper"
+  },
+  {
+   "fieldname": "section_break_fnwx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.stasiun",
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lhgv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xmvf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-14 15:35:19.964310",
+ "modified": "2026-04-23 13:57:38.558284",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Boiler",

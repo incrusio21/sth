@@ -15,6 +15,12 @@
   "column_break_arad",
   "status",
   "shift",
+  "column_break_kgot",
+  "stasiun",
+  "mesin",
+  "tanggal_scan",
+  "jam_scan",
+  "user_scan",
   "crude_oil_tank__cot__section",
   "temperatur_cot",
   "foto_hasil_temperatur_cot",
@@ -246,13 +252,51 @@
    "fieldname": "temperatur_cst_info",
    "fieldtype": "Data",
    "read_only": 1
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.stasiun",
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kgot",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-12 11:20:57.827904",
+ "modified": "2026-04-23 11:28:55.730684",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Temperatur Tangki- Tangki",

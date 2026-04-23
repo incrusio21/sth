@@ -15,9 +15,15 @@
   "company",
   "unit",
   "shift",
-  "amended_from",
+  "column_break_fnwx",
+  "stasiun",
+  "mesin",
+  "tanggal_scan",
+  "jam_scan",
+  "user_scan",
   "hasil_pemeriksaan_section",
-  "table_ctln"
+  "table_ctln",
+  "amended_from"
  ],
  "fields": [
   {
@@ -110,13 +116,51 @@
    "fieldname": "table_ctln",
    "fieldtype": "Table",
    "options": "Pemeriksaan Ampere Motor Detail"
+  },
+  {
+   "fieldname": "column_break_fnwx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.stasiun",
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-03 15:31:15.010516",
+ "modified": "2026-04-23 11:01:47.699808",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Ampere Motor",

@@ -14,7 +14,14 @@
   "column_break_dgsu",
   "status",
   "shift",
-  "machine",
+  "stasiun",
+  "mesin",
+  "section_break_fnwx",
+  "tanggal_scan",
+  "column_break_wxbv",
+  "jam_scan",
+  "column_break_wmnj",
+  "user_scan",
   "section_break_igtk",
   "genset_no_1_column",
   "daya_genset_1",
@@ -124,13 +131,6 @@
    "label": "Shift",
    "options": "Monitoring Proses Control",
    "reqd": 1
-  },
-  {
-   "fieldname": "machine",
-   "fieldtype": "Link",
-   "in_preview": 1,
-   "label": "Mesin",
-   "options": "Mill Machine"
   },
   {
    "fieldname": "section_break_igtk",
@@ -414,12 +414,58 @@
    "fieldname": "upload_foto_pressure_oil_genset_3",
    "fieldtype": "Attach Image",
    "label": "Upload Foto Pressure Oil Genset 3"
+  },
+  {
+   "fieldname": "section_break_fnwx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.stasiun",
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wxbv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wmnj",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:24:26.342567",
+ "modified": "2026-04-23 13:56:04.065182",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Genset",
