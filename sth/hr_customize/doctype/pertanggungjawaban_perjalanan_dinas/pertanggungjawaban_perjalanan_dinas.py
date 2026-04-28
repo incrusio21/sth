@@ -98,6 +98,7 @@ def make_payment_entry(source_name, target_doc=None):
 		target.paid_amount = source.outstanding_amount
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
+		target.received_amount = source.outstanding_amount
 		target.append("references", {
 			"reference_doctype": "Pertanggungjawaban Perjalanan Dinas",
 			"reference_name": source.name,

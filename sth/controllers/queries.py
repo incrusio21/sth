@@ -463,7 +463,6 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_group_query(doctype, txt, searchfield, start, page_len, filters):
-
 	conditions = []
 	fields = ", ".join(get_fields(doctype, ["name", "item_group_name", "parent_item_group"]))
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""

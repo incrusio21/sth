@@ -307,7 +307,7 @@ class NotaPiutang(Document):
 			je.posting_date    = posting_date
 			je.user_remark     = f"PPN + Reclass Nota Piutang {self.name} - {bulan_key}"
 			je.sales_order     = self.no_kontrak
-			je.nota_hutang_pk  = self.name  # custom field, sesuaikan jika nama berbeda
+			je.nota_piutang    = self.name  # custom field, sesuaikan jika nama berbeda
 
 			# Baris 1: Debit piutang (akun AR customer) sebesar PPN
 			je.append("accounts", {
@@ -472,13 +472,35 @@ def get_si_pengiriman(no_kontrak, bulan=None):
 	for row in rows:
 		if row.name in offset_map:
 			sisa = row.outstanding_amount - offset_map[row.name]
-			if sisa <= 0:
-				continue  # sudah lunas dari offset DP, skip
 			row.outstanding_amount = sisa  # tampilkan sisa yang belum terbayar
 		result.append(row)
 
-	return result
+	if not any(row.outstanding_amount > 0 for row in result):
+		result = []
+
+	# Hitung qty DO submitted untuk Sales Order ini
+	do_qty = frappe.db.sql("""
+		SELECT COALESCE(SUM(doi.qty), 0)
+		FROM `tabDelivery Order Item` doi
+		JOIN `tabDelivery Order` do_doc ON do_doc.name = doi.parent
+		WHERE doi.against_sales_order = %s
+		  AND do_doc.docstatus = 1
+	""", [no_kontrak])[0][0] or 0
+
+	# Hitung qty DN submitted yang linked ke Delivery Order Item
+	dn_qty = frappe.db.sql("""
+		SELECT COALESCE(SUM(dni.qty), 0)
+		FROM `tabDelivery Note Item` dni
+		JOIN `tabDelivery Note` dn ON dn.name = dni.parent
+		WHERE dni.against_sales_order = %s
+		  AND dn.docstatus = 1
+	""", [no_kontrak])[0][0] or 0
 	
+	return {
+		"si_list": result,
+		"qty_do_belum_terkirim": flt(do_qty) - flt(dn_qty)
+	}
+
 @frappe.whitelist()
 def get_nilai_kontrak(no_kontrak):
 	# Ambil Sales Order
@@ -585,6 +607,12 @@ def get_sisa_dp(no_kontrak):
 		# Belum ada Nota DP submitted untuk kontrak ini, DP = 0
 		return 0
 
+	so = frappe.get_doc("Sales Order", no_kontrak)
+	divisor = 1.0
+	for t in so.get("taxes", []):
+		if t.included_in_print_rate:
+			divisor *= (1 + t.rate / 100)
+			
 	# 2. Total DP yang diterima dari Payment Entry
 	dp_diterima = frappe.db.sql("""
 		SELECT COALESCE(SUM(pe.paid_amount), 0)
@@ -607,59 +635,59 @@ def get_sisa_dp(no_kontrak):
 		'akun_uang_muka': akun_uang_muka
 	})[0][0]
 
-	sisa = flt(dp_diterima) - flt(dp_terpakai)
-	return sisa if sisa > 0 else 0
+	sisa = (flt(dp_diterima) / divisor) - flt(dp_terpakai)
+	return flt(sisa, 2) if sisa > 0.001 else 0
 
 @frappe.whitelist()
 def get_dp_from_je(no_kontrak, pengakuan_list):
-    import json
+	import json
 
-    if isinstance(pengakuan_list, str):
-        pengakuan_list = json.loads(pengakuan_list)
+	if isinstance(pengakuan_list, str):
+		pengakuan_list = json.loads(pengakuan_list)
 
-    if not pengakuan_list:
-        return {"dp_dpp": 0, "dp_ppn": 0}
+	if not pengakuan_list:
+		return {"dp_dpp": 0, "dp_ppn": 0}
 
-    # ── 1. Ambil tax rate dari Sales Order ──────────────────────────────
-    so = frappe.get_doc("Sales Order", no_kontrak)
+	# ── 1. Ambil tax rate dari Sales Order ──────────────────────────────
+	so = frappe.get_doc("Sales Order", no_kontrak)
 
-    tax_rate = 0.0
-    for t in so.get("taxes", []):
-        tax_rate += t.rate / 100  # e.g. 11% → 0.11
+	tax_rate = 0.0
+	for t in so.get("taxes", []):
+		tax_rate += t.rate / 100  # e.g. 11% → 0.11
 
-    # ── 2. Cari JE DP yang terkait pengakuan_penjualan ──────────────────
-    je_rows = frappe.db.sql("""
-        SELECT je.name, je.sales_invoice
-        FROM `tabJournal Entry` je
-        WHERE je.sales_order   = %(no_kontrak)s
-          AND je.user_remark   LIKE %(user_remark)s
-          AND je.docstatus     = 1
-          AND je.sales_invoice IN %(pengakuan_list)s
-    """, {
-        "no_kontrak":     no_kontrak,
-        "user_remark":    "Pembayaran DP Sales Invoice%",
-        "pengakuan_list": tuple(pengakuan_list),
-    }, as_dict=1)
+	# ── 2. Cari JE DP yang terkait pengakuan_penjualan ──────────────────
+	je_rows = frappe.db.sql("""
+		SELECT je.name, je.sales_invoice
+		FROM `tabJournal Entry` je
+		WHERE je.sales_order   = %(no_kontrak)s
+		  AND je.user_remark   LIKE %(user_remark)s
+		  AND je.docstatus     = 1
+		  AND je.sales_invoice IN %(pengakuan_list)s
+	""", {
+		"no_kontrak":     no_kontrak,
+		"user_remark":    "Pembayaran DP Sales Invoice%",
+		"pengakuan_list": tuple(pengakuan_list),
+	}, as_dict=1)
 
-    if not je_rows:
-        return {"dp_dpp": 0, "dp_ppn": 0}
+	if not je_rows:
+		return {"dp_dpp": 0, "dp_ppn": 0}
 
-    # ── 3. Total debit dari JE Account ──────────────────────────────────
-    je_names = tuple(j.name for j in je_rows)
+	# ── 3. Total debit dari JE Account ──────────────────────────────────
+	je_names = tuple(j.name for j in je_rows)
 
-    debit_row = frappe.db.sql("""
-        SELECT COALESCE(SUM(jea.debit_in_account_currency), 0) AS total_debit
-        FROM `tabJournal Entry Account` jea
-        WHERE jea.parent IN %(je_names)s
-    """, {"je_names": je_names}, as_dict=1)
+	debit_row = frappe.db.sql("""
+		SELECT COALESCE(SUM(jea.debit_in_account_currency), 0) AS total_debit
+		FROM `tabJournal Entry Account` jea
+		WHERE jea.parent IN %(je_names)s
+	""", {"je_names": je_names}, as_dict=1)
 
-    total_debit = debit_row[0].total_debit if debit_row else 0
+	total_debit = debit_row[0].total_debit if debit_row else 0
 
-    # ── 4. dp_dpp = total_debit, dp_ppn = dp_dpp * rate ─────────────────
-    dp_dpp = total_debit
-    dp_ppn = dp_dpp * tax_rate
+	# ── 4. dp_dpp = total_debit, dp_ppn = dp_dpp * rate ─────────────────
+	dp_dpp = total_debit
+	dp_ppn = dp_dpp * tax_rate
 
-    return {
-        "dp_dpp": dp_dpp,
-        "dp_ppn": dp_ppn,
-    }
+	return {
+		"dp_dpp": dp_dpp,
+		"dp_ppn": dp_ppn,
+	}

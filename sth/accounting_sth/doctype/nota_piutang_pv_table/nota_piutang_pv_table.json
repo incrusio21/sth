@@ -11,17 +11,16 @@
  "fields": [
   {
    "fieldname": "payment_voucher",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Payment Voucher",
-   "options": "Payment Entry"
+   "label": "Payment Voucher"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-10 11:14:09.034838",
+ "modified": "2026-04-21 13:26:46.138403",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang PV Table",

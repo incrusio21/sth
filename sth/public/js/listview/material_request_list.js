@@ -1,5 +1,5 @@
 frappe.listview_settings["Material Request"] = {
-    add_fields: ["material_request_type", "status", "per_ordered", "per_received", "transfer_status"],
+    add_fields: ["material_request_type", "status", "per_ordered", "per_received", "per_quotation", "transfer_status"],
     get_indicator: function (doc) {
         var precision = frappe.defaults.get_default("float_precision");
         if (doc.status == "Stopped") {
@@ -12,9 +12,16 @@ frappe.listview_settings["Material Request"] = {
             } else if (doc.transfer_status == "Completed") {
                 return [__("Completed"), "green"];
             }
-        } else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0) {
-            return [__("Submitted"), "blue", "per_ordered,=,0|docstatus,=,1"];
-        } else if (
+        }
+        else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0 && flt(doc.per_quotation, precision) == 0) {
+            return [__("Not Quoted"), "gray", "per_quotation,=,0|docstatus,=,1"];
+        } else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0 && flt(doc.per_quotation, precision) < 100) {
+            return [__("Partially Quoted"), "yellow", "per_quotation,<,100|docstatus,=,1"];
+        } else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0 && flt(doc.per_quotation, precision) == 100) {
+            return [__("Fully Quoted"), "green", "per_quotation,=,100|docstatus,=,1"];
+        }
+
+        else if (
             doc.docstatus == 1 &&
             flt(doc.per_ordered, precision) < 100 &&
             doc.material_request_type == "Material Transfer"

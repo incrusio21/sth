@@ -73,7 +73,7 @@ doctype_js = {
 	"Supplier Quotation": "public/js/supplier_quotation.js",
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
-	
+	"Task": "public/js/task.js",
 }
 
 doctype_list_js = {
@@ -117,6 +117,7 @@ jinja = {
 		"sth.utils.encrypt",
 		"sth.jinja.sum_pengakuan_penjualan_by_nota_piutang",
 		"sth.jinja.get_payment_entry_ledger_preview",
+		"sth.jinja.get_account_balance",
 	],
 	# "filters": "sth.utils.jinja_filters"
 }
@@ -258,6 +259,7 @@ doc_events = {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
 	},
 	"Employee": {
+		"autoname": "sth.custom.employee.autoname_employee",
 		"after_insert": "sth.hr_customize.custom.leave_policy.create_allocations_for_new_employee"
 	},
 	# "Employee Potongan": {
@@ -295,7 +297,7 @@ doc_events = {
 		"on_cancel": "sth.hr_customize.custom.loan_disbursement.LoanDisbursement",
 	},
 	"Material Request": {
-		"on_submit": "sth.custom.material_request.update_ba_reference",
+		"on_submit": ["sth.custom.material_request.update_ba_reference","sth.custom.material_request.set_pr_sr_status"],
 		"on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	"Payment Entry":{
@@ -313,6 +315,7 @@ doc_events = {
 			"sth.custom.payment_entry.update_status_deposito", 
 			"sth.custom.payment_entry.update_status_loan_bank", 
 			"sth.custom.payment_entry.update_status_dividen", 
+			"sth.custom.payment_entry.update_payment_voucher_ppd", 
 			"sth.overrides.payment_entry.on_submit_pdo",
 			"sth.custom.payment_entry.payment_entry_notification",
             "sth.custom.payment_entry.update_pesangon_from_payment",
@@ -344,6 +347,7 @@ doc_events = {
 	"Purchase Receipt": {
 		"validate": ["sth.custom.purchase_receipt.set_purchase_order_if_exist","sth.custom.purchase_receipt.validate_val_proc"],
 		"before_submit": ["sth.custom.purchase_receipt.validate_val_proc"],
+		"on_submit": "sth.custom.purchase_receipt.auto_create_assets_from_pr"
 	},
 	"Purchase Invoice": {
 		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim"],
@@ -369,7 +373,7 @@ doc_events = {
 	},
 	"Supplier Quotation": {
 		# "before_submit": "sth.custom.supplier_quotation.update_status_rfq",
-		"on_submit": "sth.custom.supplier_quotation.create_po_draft"
+		"on_submit": ["sth.custom.supplier_quotation.create_po_draft","sth.custom.material_request.calculate_percent_quoted"]
 	},
 	
 	# "Training Event": {
@@ -382,7 +386,8 @@ doc_events = {
 	},
 	
 	"Request for Quotation": {
-		"before_save": "sth.custom.request_for_quotation.update_unit_in_table"
+		"before_save": "sth.custom.request_for_quotation.update_unit_in_table",
+        "on_submit": "sth.custom.material_request.calculate_percent_quoted"
 	},
     ("Proposal", "BAPP"): {
         "before_validate": "sth.legal.custom.tax_validation.validate_custom_tax",
@@ -396,6 +401,9 @@ doc_events = {
 	},
     "GL Entry": {
         "validate": "sth.custom.gl_entry.set_unit_from_parent"
+    },
+    "Warehouse": {
+    	"autoname": "sth.custom.warehouse.autoname_warehouse"
     }
 }
 
@@ -414,9 +422,9 @@ scheduler_events = {
     "daily_long": [
 		"sth.hr_customize.doctype.employee_update_log.employee_update_log.repost_entries",
 	],
-# 	"hourly": [
-# 		"sth.tasks.hourly"
-# 	],
+	"hourly": [
+		"sth.bank_payment.doctype.mandiri_kopra_cash_management.mandiri_kopra_cash_management.get_payment_status"
+	],
 # 	"weekly": [
 # 		"sth.tasks.weekly"
 # 	],

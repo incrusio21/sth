@@ -13,12 +13,16 @@
   "nama_item",
   "uom",
   "kmhm_akhir",
+  "jenis_alat",
   "kategori_alat",
   "tipe_alat",
-  "jns_alt",
+  "jenis",
   "kap_kg",
+  "pemilik",
   "column_break_vypn",
+  "kode_unit",
   "unit",
+  "kode_divisi",
   "divisi",
   "no_pol",
   "operator",
@@ -52,11 +56,10 @@
    "search_index": 1
   },
   {
-   "description": "Ex : Angkutan Sendiri,Angkutan Kontrak,Langsir Traktor,Langsir Pickup etc",
+   "fetch_from": "kode_kategori_alat.nama",
    "fieldname": "kategori_alat",
-   "fieldtype": "Link",
-   "label": "Kategori Alat",
-   "options": "Kategori Alat"
+   "fieldtype": "Data",
+   "label": "Kategori Alat"
   },
   {
    "description": "Ex : Pengangkutan Langsung , Pengangkutan tidak langsung etc ",
@@ -70,11 +73,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "kode_divisi.nama",
    "fieldname": "divisi",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Divisi",
-   "options": "Divisi"
+   "fieldtype": "Data",
+   "label": "Divisi"
   },
   {
    "fieldname": "basis_rpkg",
@@ -86,8 +88,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Operator/Supir",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "fieldname": "kap_kg",
@@ -128,15 +129,6 @@
    "options": "Asset"
   },
   {
-   "depends_on": "eval:doc.tipe_master == \"Alat Berat\"",
-   "description": "Ex : Dump Truk , Mobil Kecil , Alat Berat etc",
-   "fieldname": "jns_alt",
-   "fieldtype": "Link",
-   "label": "Jenis Alat",
-   "mandatory_depends_on": "eval:doc.tipe_master == \"Alat Berat\"",
-   "options": "Jenis Alat"
-  },
-  {
    "fieldname": "tipe_master",
    "fieldtype": "Select",
    "label": "Tipe Master",
@@ -172,14 +164,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "divisi.unit",
+   "fetch_from": "kode_unit.nama",
    "fieldname": "unit",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Unit",
-   "options": "Unit",
-   "read_only": 1,
-   "reqd": 1
+   "fieldtype": "Data",
+   "label": "Unit"
   },
   {
    "fieldname": "helper",
@@ -204,12 +192,46 @@
    "fieldname": "qr_code",
    "fieldtype": "Data",
    "label": "QR Code"
+  },
+  {
+   "fetch_from": "divisi.unit",
+   "fieldname": "kode_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Unit",
+   "options": "Unit",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "kode_divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kode Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "jenis",
+   "fieldtype": "Data",
+   "label": "Jenis"
+  },
+  {
+   "description": "Ex : Angkutan Sendiri,Angkutan Kontrak,Langsir Traktor,Langsir Pickup etc",
+   "fieldname": "jenis_alat",
+   "fieldtype": "Link",
+   "label": "Kode Kategori Alat",
+   "options": "Kategori Alat"
+  },
+  {
+   "fieldname": "pemilik",
+   "fieldtype": "Data",
+   "label": "Pemilik"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-05 15:06:59.017852",
+ "modified": "2026-04-23 00:54:29.247870",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

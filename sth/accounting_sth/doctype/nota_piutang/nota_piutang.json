@@ -24,6 +24,8 @@
   "list_pemenuhan_kontrak_section",
   "master_barang_placeholder_ppn",
   "nota_hutang_pemenuhan_kontrak_table",
+  "net_total_pengakuan_penjualan",
+  "qty_do_belum_terkirim",
   "list_payment_voucher",
   "section_break_ffbg",
   "column_break_hvvv",
@@ -269,13 +271,30 @@
    "label": "Total DP",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "net_total_pengakuan_penjualan",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Net Total Pengakuan Penjualan",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "qty_do_belum_terkirim",
+   "fieldtype": "Float",
+   "label": "Qty DO Belum Terkirim",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-20 13:26:46.823170",
+ "modified": "2026-04-21 11:18:02.739733",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

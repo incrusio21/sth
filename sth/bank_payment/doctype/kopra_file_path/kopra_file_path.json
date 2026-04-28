@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "disabled"
+  "disabled",
+  "naming_path"
  ],
  "fields": [
   {
@@ -14,12 +15,17 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "naming_path",
+   "fieldtype": "Data",
+   "label": "Naming Path"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-05 11:15:20.799658",
+ "modified": "2026-04-22 16:28:17.963895",
  "modified_by": "Administrator",
  "module": "Bank Payment",
  "name": "Kopra File Path",

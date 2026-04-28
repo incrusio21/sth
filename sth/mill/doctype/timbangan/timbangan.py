@@ -12,6 +12,8 @@ from frappe.model.mapper import get_mapped_doc
 class Timbangan(Document):
 	def validate(self):
 		self.validate_ticket()
+		self.validate_qty_do()
+
 		if self.do_no and not self.storage:
 			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
 
@@ -69,6 +71,16 @@ class Timbangan(Document):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
 			frappe.throw("Ticket has been used before")
 	
+	def validate_qty_do(self):
+		if self.do_no:
+			qty_do = frappe.db.get_value("Delivery Order Item",{"item_code":self.kode_barang,"parent": self.do_no},["qty"])
+			qty_timbangan = frappe.db.get_value("Timbangan",filters={"do_no":self.do_no,"name":["!=",self.name],"kode_barang": self.kode_barang},fieldname=["sum(netto) as qty"])
+
+			diff_qty = flt(qty_do) - (flt(qty_timbangan) + flt(self.netto)) 
+			print(diff_qty)
+			if diff_qty < 0:
+				frappe.throw(f"Jumlah Netto melebihi qty DO: {diff_qty}")
+
 	def make_tbs_ledger(self):
 		create_tbs_ledger(frappe._dict({
 			"item_code": self.kode_barang,

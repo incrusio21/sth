@@ -58,3 +58,40 @@ def get_history_purchase_request(asset):
         WHERE po.docstatus = 1 AND mr.sub_purchase_type = "Service Request" AND k.no_pol = %s AND po.transaction_date BETWEEN %s AND %s
 		ORDER BY po.transaction_date,po.name
     """,(asset,start_year,today),as_dict=True)
+
+
+def calculate_percent_quoted(self,method):
+	pr_sr = set([ r.material_request for r in self.items ])
+	for name in pr_sr:
+		percent_quotation = get_percent_quotation_created(name)
+		doc = frappe.get_doc("Material Request",name)
+		doc.db_set("per_quotation",percent_quotation)
+		set_pr_sr_status(doc)
+
+def get_percent_quotation_created(name):
+	quotation_created = frappe.db.sql("""
+		select count(*) as total_created
+		from `tabMaterial Request Item` mri
+		left join `tabRequest for Quotation Item` rfqi on rfqi.material_request_item = mri.name
+		left join `tabSupplier Quotation Item` sqi on sqi.material_request_item = mri.name
+		where mri.parent = %s and (rfqi.name is not null or sqi.name is not null)
+	""",(name),as_dict=True)
+
+	created = quotation_created[0].total_created
+	total_item = frappe.db.get_value("Material Request Item",fieldname=["count(*) as total_item"],filters={"parent": name})
+
+	return created / total_item * 100
+
+# set custom status untuk
+def set_pr_sr_status(doc,method=None):
+	status = None
+	if doc.per_ordered == 0 and doc.per_received == 0:
+		if doc.per_quotation == 0:
+			status = "Not Quoted"
+		elif doc.per_quotation < 100:
+			status = "Partially Quoted"
+		elif doc.per_quotation == 100 and doc.per_ordered == 0:
+			status = "Fully Quoted"
+	
+	if status:
+		doc.db_set("status",status)

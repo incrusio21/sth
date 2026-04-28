@@ -1,5 +1,6 @@
 frappe.ui.form.on('Sales Invoice', {
 	refresh: function(frm) {
+		set_rate_precision(frm)
 		set_komoditi_filter(frm);
 		set_query_unit(frm)
 		toggle_qty_timbang_column(frm);
@@ -713,12 +714,18 @@ erpnext.accounts.SalesInvoiceControllerCustom = class SalesInvoiceController ext
 };
 
 function toggle_qty_timbang_column(frm) {
-    const is_pengiriman = frm.doc.jenis_penagihan == "Pengiriman";
+	const is_pengiriman = frm.doc.jenis_penagihan == "Pengiriman";
 
-    frm.fields_dict['items'].grid.toggle_display('qty_timbang_customer', is_pengiriman);
-    frm.fields_dict['items'].grid.refresh();
-    frm.fields_dict['items'].grid.toggle_display('sub_total_timbang', is_pengiriman);
-    frm.fields_dict['items'].grid.refresh();
+	frm.fields_dict['items'].grid.toggle_display('qty_timbang_customer', is_pengiriman);
+	frm.fields_dict['items'].grid.refresh();
+	frm.fields_dict['items'].grid.toggle_display('sub_total_timbang', is_pengiriman);
+	frm.fields_dict['items'].grid.refresh();
+}
+
+function set_rate_precision(frm){
+	frm.fields_dict['items'].grid.update_docfield_property(
+		'rate', 'precision', 2
+	);
 }
 
 // for backward compatibility: combine new and previous states

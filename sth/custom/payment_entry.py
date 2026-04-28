@@ -646,3 +646,25 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 				f"Akan dibayar sekarang: <b>Rp {frappe.format(total_doc_ini, 'Currency')}</b><br>"
 				f"Total: <b>Rp {frappe.format(total_keseluruhan, 'Currency')}</b>"
 			)
+
+def update_payment_voucher_ppd(doc, method=None):
+	if not doc.references:
+		return
+
+	for ref in doc.references:
+		if ref.reference_doctype == "Pertanggungjawaban Perjalanan Dinas":
+			try:
+				frappe.db.set_value(
+						"Pertanggungjawaban Perjalanan Dinas",
+						ref.reference_name,
+						"payment_voucher",
+						doc.name
+				)
+
+				frappe.msgprint(f"Updated PPD: {ref.reference_name}")
+
+			except Exception as e:
+				frappe.log_error(
+					f"Gagal update PPD {ref.reference_name}: {str(e)}",
+					"Update Payment Voucher PPD"
+				)

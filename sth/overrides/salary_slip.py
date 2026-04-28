@@ -750,7 +750,7 @@ class SalarySlip(SalarySlip):
 
 		apakah_karyawan_tetap = 0 
 		emp_doc = frappe.get_cached_doc("Employee", self.employee)
-		
+		self.employment_type = frappe.get_cached_doc("Employee", self.employee).employment_type
 		if frappe.get_cached_doc("Employee", self.employee).employment_type == 'KARYAWAN TETAP':
 			apakah_karyawan_tetap = 1
 

@@ -5,6 +5,7 @@ frappe.ui.form.on("Retur Ke Supplier", {
     setup(frm) {
         frm.set_query("no_dokumen_penerimaan", (doc) => {
             return {
+                query: frappe.model.get_server_module_name(doc.doctype) + ".purchase_receipt_query",
                 filters: {
                     set_warehouse: doc.gudang,
                     docstatus: 1,

@@ -20,6 +20,7 @@ frappe.query_reports["Laporan Permintaan Dana Operasional"] = {
 			"label": __("Tahun"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
+			"reqd": 1
 		},
 		{
 			"fieldname": "from_month",

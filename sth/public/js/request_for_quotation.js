@@ -11,7 +11,7 @@ frappe.ui.form.on('Request for Quotation', {
             this.frm.add_custom_button(
                 __("Material Request"), function () {
                     const d = erpnext.utils.map_current_doc({
-                        method: "sth.overrides.material_request.make_request_for_quotation",
+                        method: "sth.overrides.material_request.make_multiple_request_for_quotation",
                         source_doctype: "Material Request",
                         target: frm,
                         allow_child_item_selection: 1,
@@ -103,7 +103,7 @@ frappe.ui.form.on('Request for Quotation', {
             .then((res) => {
                 console.log(res);
                 const others = res.map((row) => frappe.utils.get_form_link("Request for Quotation", row, true))
-                if (!res) return
+                if (!res || !others.length) return
                 const message = `
                     <div class="reminder-message form-message yellow">
                         <div> Terdapat RFQ dengan PR/SR yang sama</div>

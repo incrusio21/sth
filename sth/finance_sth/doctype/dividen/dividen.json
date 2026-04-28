@@ -160,7 +160,7 @@
    "fieldname": "bank_account_one",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Nama Bank 1",
+   "label": "No Rek Bank 1",
    "options": "Bank Account",
    "reqd": 1
   },
@@ -174,7 +174,7 @@
   {
    "fieldname": "bank_account_two",
    "fieldtype": "Link",
-   "label": "Nama Bank 2",
+   "label": "No Rek Bank 2",
    "options": "Bank Account",
    "reqd": 1
   },
@@ -254,7 +254,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-27 10:26:07.120896",
+ "modified": "2026-04-21 09:20:39.630499",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Dividen",

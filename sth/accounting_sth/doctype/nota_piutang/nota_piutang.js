@@ -16,11 +16,16 @@ frappe.ui.form.on('Nota Piutang', {
 			}, __("Buat"));
 		}
 		setup_filter(frm);
+		calculate_net_total(frm);
 	},
 
 	company: function(frm) {
 		setup_filter(frm);
 	},
+
+	nota_hutang_pemenuhan_kontrak_table_remove(frm) {
+        calculate_net_total(frm);
+    },
 
 	no_kontrak: function(frm) {
 		if (!frm.doc.no_kontrak) return;
@@ -104,10 +109,12 @@ function tampilkan_dialog_bulan(frm) {
 			bulan: null  // tanpa filter bulan, untuk dapat semua pilihan
 		},
 		callback: function(r) {
-			if (!r.message || r.message.length === 0) {
+			frm.set_value("qty_do_belum_terkirim", r.message.qty_do_belum_terkirim);
+
+			if (!r.message || r.message.si_list.length === 0) {
 				frappe.msgprint({
-					title: __('Tidak Ada SI'),
-					message: __('Tidak ada Sales Invoice Pengiriman yang tersedia untuk kontrak ini.'),
+					title: __('Tidak Ada Pengakuan Penjualan'),
+					message: __('Tidak ada Pengakuan Penjualan Pengiriman yang tersedia untuk kontrak ini.'),
 					indicator: 'red'
 				});
 				return;
@@ -120,7 +127,7 @@ function tampilkan_dialog_bulan(frm) {
 				'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 			];
 
-			r.message.forEach(si => {
+			r.message.si_list.forEach(si => {
 				const d = new Date(si.posting_date);
 				const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 				bulan_map[key] = `${month_names[d.getMonth()]} ${d.getFullYear()}`;
@@ -157,6 +164,12 @@ function tampilkan_dialog_bulan(frm) {
 	});
 }
 
+frappe.ui.form.on('Nota Piutang Pemenuhan Kontrak Table', {
+    subtotal(frm) {
+        calculate_net_total(frm);
+    },
+});
+
 // ── Fetch SI per bulan dan isi tabel ──────────────────────────────────
 function fetch_si_pengiriman(frm, bulan) {
 	if (!frm.doc.no_kontrak) {
@@ -173,10 +186,12 @@ function fetch_si_pengiriman(frm, bulan) {
 			bulan: bulan || null
 		},
 		callback: function(r) {
-			if (!r.message || r.message.length === 0) {
+
+			frm.set_value("qty_do_belum_terkirim", r.message.qty_do_belum_terkirim);
+			if (!r.message || r.message.si_list.length === 0) {
 				frappe.msgprint({
 					title: __('Tidak Ada SI'),
-					message: __('Tidak ada Sales Invoice Pengiriman untuk bulan ini, ' +
+					message: __('Tidak ada Pengakuan Penjualan Pengiriman untuk bulan ini, ' +
 								'atau semua SI sudah dipakai di Nota Piutang lain.'),
 					indicator: 'red'
 				});
@@ -184,8 +199,9 @@ function fetch_si_pengiriman(frm, bulan) {
 			}
 
 			frm.clear_table('nota_hutang_pemenuhan_kontrak_table');
+			let net_total = 0;
 
-			r.message.forEach(si => {
+			r.message.si_list.forEach(si => {   // ← sebelumnya r.message
 				let row = frm.add_child('nota_hutang_pemenuhan_kontrak_table');
 				row.pengakuan_penjualan = si.name;
 				row.qty                 = si.qty;
@@ -193,13 +209,25 @@ function fetch_si_pengiriman(frm, bulan) {
 				row.subtotal            = si.subtotal;
 				row.posting_date        = si.posting_date;
 				row.outstanding_amount  = si.outstanding_amount;
+				net_total               += si.subtotal;
 			});
+
+			frm.set_value("net_total_pengakuan_penjualan", net_total);
 
 			frm.refresh_field('nota_hutang_pemenuhan_kontrak_table');
 			fetch_nilai_kontrak(frm);
 		}
 	});
 }
+
+function calculate_net_total(frm) {
+    let net_total = 0;
+    (frm.doc.nota_hutang_pemenuhan_kontrak_table || []).forEach(row => {
+        net_total += flt(row.subtotal);
+    });
+    frm.set_value("net_total_pengakuan_penjualan", net_total);
+}
+
 
 // ── (tidak berubah) ────────────────────────────────────────────────────
 function setup_filter(frm) {
@@ -370,14 +398,29 @@ async function make_payment_entry(frm) {
 			.map(row => row.pengakuan_penjualan_ppn);
 
 		if (si_names.length === 0 && je_names.length === 0) {
-			frappe.throw(__("Tidak ada Sales Invoice maupun Journal Entry di tabel."));
+			frappe.throw(__("Tidak ada Pengakuan Penjualan maupun Journal Entry di tabel."));
 		}
 
 		// ── Fetch docs paralel ─────────────────────────────────────────
-		const [si_docs, je_docs] = await Promise.all([
-			si_names.length ? Promise.all(si_names.map(n => frappe.db.get_doc("Sales Invoice", n))) : [],
-			je_names.length ? Promise.all(je_names.map(n => frappe.db.get_doc("Journal Entry", n)))  : [],
+		const [si_docs, je_docs_raw] = await Promise.all([
+			si_names.length
+				? Promise.all(si_names.map(n => frappe.db.get_doc("Sales Invoice", n)))
+				: [],
+			je_names.length
+				? Promise.all(je_names.map(n => frappe.db.get_doc("Journal Entry", n).catch(() => null)))
+				: [],
 		]);
+
+		// Cek JE yang tercancel atau sudah didelete
+		const je_bermasalah = je_names.filter((n, i) => !je_docs_raw[i] || je_docs_raw[i].docstatus == 2);
+		if (je_bermasalah.length) {
+			frappe.throw(__(
+				`Journal Entry berikut sudah dicancel atau tidak ditemukan, tidak bisa membuat pembayaran:<br>` +
+				`<b>${je_bermasalah.join(", ")}</b>`
+			));
+		}
+
+		const je_docs = je_docs_raw;
 
 		const payable_si = si_docs.filter(si => flt(si.outstanding_amount) > 0);
 		const payable_je = je_docs.filter(je => flt(je.total_debit) > 0);
@@ -397,7 +440,7 @@ async function make_payment_entry(frm) {
 
 		// ── Ambil akun AR dan customer dari SI (source of truth) ───────
 		if (payable_si.length === 0) {
-			frappe.throw(__("Tidak ada Sales Invoice dengan outstanding > 0, tidak bisa menentukan akun AR dan customer."));
+			frappe.throw(__("Tidak ada Pengakuan Penjualan dengan outstanding > 0, tidak bisa menentukan akun AR dan customer."));
 		}
 		const receivable_account = payable_si[0].debit_to;
 		const customer           = payable_si[0].customer;

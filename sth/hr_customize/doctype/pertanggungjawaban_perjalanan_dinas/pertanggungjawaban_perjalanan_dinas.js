@@ -86,7 +86,11 @@ frappe.ui.form.on("PPD Costing Detail", {
 });
 
 function createPayment(frm) {
-  if (frm.doc.docstatus == 1 && frm.doc.outstanding_amount > 0) {
+  if (
+    frm.doc.docstatus == 1 &&
+    frm.doc.outstanding_amount > 0 &&
+    !frm.doc.payment_voucher
+  ) {
     if (frm.doc.status_selisih == "Tidak Ada Selisih") {
       frappe.show_alert({
         message: __('Tidak Ada Selisih'),
@@ -99,7 +103,7 @@ function createPayment(frm) {
       frappe.model.open_mapped_doc({
         method: "sth.hr_customize.doctype.pertanggungjawaban_perjalanan_dinas.pertanggungjawaban_perjalanan_dinas.make_payment_entry",
         frm: frm,
-      })
+      });
     }, 'Create');
   }
 }

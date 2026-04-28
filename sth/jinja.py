@@ -73,3 +73,35 @@ def get_payment_entry_ledger_preview(docname):
             "debit": e.get("debit", 0),
             "credit": e.get("credit", 0),
         } for e in gl_map]
+
+def get_account_balance(account, posting_date):
+    from frappe.utils import get_last_day, getdate
+    """
+    Mengembalikan balance account pada akhir bulan dari posting_date.
+    
+    Args:
+        account (str): Nama account di Chart of Accounts
+        posting_date (str|date): Tanggal posting PDO (misal '2026-04-13')
+    
+    Returns:
+        float: Balance account pada akhir bulan posting_date
+    
+    Contoh pemanggilan di Jinja print format:
+        {{ get_account_balance(row.account_for_cash, row.posting_date) }}
+    """
+    if not account or not posting_date:
+        return 0
+ 
+    # Ambil akhir bulan dari posting_date
+    end_of_month = get_last_day(getdate(posting_date))
+ 
+    result = frappe.db.sql("""
+        SELECT COALESCE(SUM(debit - credit), 0) as balance
+        FROM `tabGL Entry`
+        WHERE
+            account = %s
+            AND posting_date <= %s
+            AND is_cancelled = 0
+    """, (account, end_of_month), as_dict=1)
+ 
+    return result[0].balance if result else 0

@@ -4,10 +4,11 @@
 import frappe
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 from frappe.model.document import Document
-
+from sth.controllers.queries import get_fields,get_filters_cond
 
 class ReturKeSupplier(Document):
 	def validate(self):
+		self.validate_qty()
 		self.validate_status_prec()
 
 	def before_submit(self):
@@ -34,6 +35,14 @@ class ReturKeSupplier(Document):
 	def validate_status_prec(self):
 		if frappe.db.get_value("Purchase Receipt",{"name": self.no_dokumen_penerimaan},"status") in ["Return","Return Issued"]:
 			frappe.throw(f"Document {self.no_dokumen_penerimaan} cannot be return")
+
+	def validate_qty(self):
+		for row in self.items:
+			if row.jumlah == 0:
+				frappe.throw(f"Jumlah return barang {row.kode_barang} tidak boleh 0")
+
+			if row.jumlah_penerimaan < row.jumlah:
+				frappe.throw(f"Jumlah return barang {row.kode_barang} melebihi penerimaan")
 
 	def create_purchase_return(self):
 		mapping_qty_items = { r.kode_barang: r.jumlah for r in self.items }
@@ -66,3 +75,22 @@ class ReturKeSupplier(Document):
 		for prec_name in self.prec_reference.split(","):
 			doc = frappe.get_doc("Purchase Receipt",prec_name)
 			doc.cancel()
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def purchase_receipt_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+	fields = ", ".join(get_fields(doctype, ["name"]))
+	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
+	return frappe.db.sql(
+		f"""
+			select {fields} from `tabPurchase Receipt`
+			where `tabPurchase Receipt`.{searchfield} like %(txt)s {fcond}
+			order by
+				(case when locate(%(_txt)s, `tabPurchase Receipt`.name) > 0 then locate(%(_txt)s, `tabPurchase Receipt`.name) else 99999 end),
+				`tabPurchase Receipt`.posting_date desc,`tabPurchase Receipt`.posting_time desc,`tabPurchase Receipt`.name desc
+			limit %(page_len)s offset %(start)s
+		""",
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)

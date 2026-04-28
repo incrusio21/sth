@@ -87,8 +87,8 @@ class Asset(Asset):
 				"create_vra_progress"
 			)
 
-			if create_vra_progress and not self.operator:
-				frappe.throw("Asset Category membuat VRA Progress. Operator wajib diisi")
+			# if create_vra_progress and not self.operator:
+			# 	frappe.throw("Asset Category membuat VRA Progress. Operator wajib diisi")
 				
 	def make_asset_movement(self):
 		reference_doctype = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"

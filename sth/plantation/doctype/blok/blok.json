@@ -10,8 +10,10 @@
   "section_break_zd5t",
   "disabled",
   "blok",
+  "kode_divisi",
   "divisi",
   "unit",
+  "estate",
   "cost_center",
   "nama",
   "deskripsi",
@@ -64,15 +66,13 @@
   {
    "fieldname": "jumlah_pokok",
    "fieldtype": "Float",
-   "label": "Jumlah Pokok",
-   "reqd": 1
+   "label": "Jumlah Pokok"
   },
   {
+   "fetch_from": "kode_divisi.nama",
    "fieldname": "divisi",
-   "fieldtype": "Link",
-   "label": "Divisi",
-   "options": "Divisi",
-   "reqd": 1
+   "fieldtype": "Data",
+   "label": "Divisi"
   },
   {
    "fieldname": "cost_center",
@@ -89,19 +89,10 @@
    "unique": 1
   },
   {
-   "fetch_from": "divisi.unit",
-   "fieldname": "unit",
-   "fieldtype": "Link",
-   "label": "Unit/Kebun",
-   "options": "Unit",
-   "read_only": 1
-  },
-  {
    "fieldname": "sph",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "SPH ( Stand Per Hectare )",
-   "reqd": 1
+   "label": "SPH ( Stand Per Hectare )"
   },
   {
    "default": "0",
@@ -195,12 +186,31 @@
    "fieldtype": "Select",
    "label": "API Status",
    "options": "Aktif\nNon Aktif"
+  },
+  {
+   "fetch_from": "unit.nama",
+   "fieldname": "estate",
+   "fieldtype": "Data",
+   "label": "Estate"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Kode Unit/Kebun/Estate",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "kode_divisi",
+   "fieldtype": "Link",
+   "label": "Kode Divisi",
+   "options": "Divisi",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-26 11:54:29.782425",
+ "modified": "2026-04-23 00:19:19.080426",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

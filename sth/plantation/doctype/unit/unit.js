@@ -3,10 +3,28 @@
 
 frappe.ui.form.on("Unit", {
     refresh(frm) {
+        frm.set_query("default_bank_account", () => {
+            return {
+                filters: {
+                    "unit": frm.doc.name,
+                    "company": frm.doc.company
+                }
+            }
+        });
+
         frm.set_query("bank_account", () => {
             return {
                 filters: {
                     "account_type": "Bank",
+                    "company": frm.doc.company
+                }
+            }
+        });
+
+        frm.set_query("account_for_cash", () => {
+            return {
+                filters: {
+                    "account_type": "Cash",
                     "company": frm.doc.company
                 }
             }

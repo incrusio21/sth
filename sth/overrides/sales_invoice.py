@@ -4,19 +4,27 @@ from frappe.utils import get_last_day,flt
 
 class SalesInvoice(SalesInvoice):
 	def validate(self):
+		self.hitung_do_tidak_terkirim()
 		if self.jenis_penagihan == "Pengiriman":
 			self._apply_timbang_qty_tanpa_ganti()
 
 	def on_submit(self):
+		
 		super().on_submit()
+		
 		if self.jenis_penagihan == "Pengiriman":
+			
 			self.create_timbang_journal_entry()
+			
 			self.create_dp_payment_journal_entry()
 
 	def on_cancel(self):
 		if self.jenis_penagihan == "Pengiriman":
-			self.cancel_timbang_journal_entry()
-			self.cancel_dp_payment_journal_entry()		
+			try:
+				self.cancel_timbang_journal_entry()
+				self.cancel_dp_payment_journal_entry()		
+			except:
+				pass
 		super().on_cancel()
 
 	def get_gl_entries(self, warehouse_account=None):
@@ -30,101 +38,38 @@ class SalesInvoice(SalesInvoice):
 
 		return gl_entries
 
-	# def _apply_timbang_qty(self):
-	# 	self._original_values = {}
-	# 	self._original_totals = {
-	# 		"grand_total"       : self.grand_total,
-	# 		"base_grand_total"  : self.base_grand_total,
-	# 		"net_total"         : self.net_total,
-	# 		"base_net_total"    : self.base_net_total,
-	# 		"total"             : self.total,
-	# 		"base_total"        : self.base_total,
-	# 		"outstanding_amount": self.outstanding_amount,
-	# 		"taxes"             : [
-	# 			{
-	# 				"name"         : t.name,
-	# 				"tax_amount"   : t.tax_amount,
-	# 				"total"        : t.total,
-	# 				"base_total"   : t.base_total,
-	# 				"tax_amount_after_discount_amount": t.tax_amount_after_discount_amount,
-	# 			}
-	# 			for t in self.taxes
-	# 		],
-	# 	}
+	def hitung_do_tidak_terkirim(self):
+		# Ambil semua Sales Order dari item invoice
+		sales_orders = list(set([
+			item.sales_order for item in self.items 
+			if item.get("sales_order")
+		]))
 
-	# 	has_included_tax = any(t.included_in_print_rate for t in self.taxes)
-		
-	# 	included_tax_rate = 0
-	# 	if has_included_tax:
-	# 		for t in self.taxes:
-	# 			if t.included_in_print_rate:
-	# 				included_tax_rate += t.rate
+		if not sales_orders:
+			self.qty_do_belum_terkirim = 0
+		else:
+			# Total qty dari Delivery Order (submitted) berdasarkan sales order
+			do_qty = frappe.db.sql("""
+				SELECT COALESCE(SUM(doi.qty), 0)
+				FROM `tabDelivery Order Item` doi
+				INNER JOIN `tabDelivery Order` do_doc 
+					ON do_doc.name = doi.parent
+				WHERE doi.against_sales_order IN %(sales_orders)s
+				  AND do_doc.docstatus = 1
+			""", {"sales_orders": sales_orders})[0][0] or 0
 
-	# 	total_diff = 0
-	# 	for item in self.items:
-	# 		timbang = item.qty_timbang_customer
-	# 		if not timbang:
-	# 			timbang = item.qty
+			# Total qty dari Delivery Note (submitted) yang punya delivery_order_item
+			dn_qty = frappe.db.sql("""
+				SELECT COALESCE(SUM(dni.qty), 0)
+				FROM `tabDelivery Note Item` dni
+				INNER JOIN `tabDelivery Note` dn 
+					ON dn.name = dni.parent
+				WHERE dni.against_sales_order IN %(sales_orders)s
+				  AND dn.docstatus = 1
+			""", {"sales_orders": sales_orders})[0][0] or 0
 
-	# 		if timbang and timbang != 0:
-	# 			self._original_values[item.name] = {
-	# 				"qty"            : item.qty,
-	# 				"rate"           : item.rate,
-	# 				"base_rate"      : item.base_rate,
-	# 				"net_rate"       : item.net_rate,
-	# 				"base_net_rate"  : item.base_net_rate,
-	# 				"amount"         : item.amount,
-	# 				"base_amount"    : item.base_amount,
-	# 				"net_amount"     : item.net_amount,
-	# 				"base_net_amount": item.base_net_amount,
-	# 			}
-	# 			original_amount = item.amount
-
-	# 			if has_included_tax:
-	# 				# Ekstrak rate tanpa pajak
-	# 				divisor         = 1 + (included_tax_rate / 100)
-	# 				clean_rate      = flt(item.rate / divisor, 9)
-	# 				clean_base_rate = flt(item.base_rate / divisor, 9)
-
-	# 				item.rate           = clean_rate
-	# 				item.base_rate      = clean_base_rate
-	# 				item.net_rate       = clean_rate
-	# 				item.base_net_rate  = clean_base_rate
-
-	# 				new_amount = timbang * clean_rate
-	# 			else:
-	# 				new_amount = timbang * item.rate
-
-	# 			item.qty             = timbang
-	# 			item.amount          = new_amount
-	# 			item.base_amount     = timbang * item.base_rate
-	# 			item.net_amount      = timbang * item.net_rate
-	# 			item.base_net_amount = timbang * item.base_net_rate
-	# 			item.sub_total_timbang = new_amount
-	# 			item.db_update()
-	# 			total_diff += (new_amount - original_amount)
-
-	# 	if has_included_tax:
-	# 		for t in self.taxes:
-	# 			t.tax_amount                          = 0
-	# 			t.total                               = 0
-	# 			t.base_total                          = 0
-	# 			t.tax_amount_after_discount_amount    = 0
-
-	# 	# Adjust header totals
-
-	# 	self.taxes_and_charges  = ""
-	# 	self.taxes 				= []
-	# 	self.total_taxes_and_charges = 0
-	# 	self.total              = (self.total or 0) + total_diff
-	# 	self.base_total         = (self.base_total or 0) + total_diff
-	# 	self.net_total          = (self.net_total or 0) + total_diff
-	# 	self.base_net_total     = (self.base_net_total or 0) + total_diff
-	# 	self.grand_total        = (self.grand_total or 0) + total_diff
-	# 	self.rounded_total      = (self.rounded_total or 0) + total_diff
-	# 	self.base_grand_total   = (self.base_grand_total or 0) + total_diff
-	# 	self.outstanding_amount = (self.outstanding_amount or 0) + total_diff
-	# 	self.set_total_in_words()
+			self.qty_do_belum_terkirim = flt(do_qty) - flt(dn_qty)
+	
 	def _apply_timbang_qty_tanpa_ganti(self):
 		self._original_values = {}
 		self._original_totals = {
@@ -168,6 +113,7 @@ class SalesInvoice(SalesInvoice):
 						included_tax_rate += t.rate
 		else:
 			# fallback ke self.taxes jika tidak ada dn_detail sama sekali
+			frappe.throw("Sales Order wajib dipasang di Sales Invoice Pengiriman.")
 			has_included_tax = any(t.included_in_print_rate for t in self.taxes)
 			if has_included_tax:
 				for t in self.taxes:
@@ -181,7 +127,7 @@ class SalesInvoice(SalesInvoice):
 				timbang = item.qty
 			
 			if timbang and timbang != 0:
-				print(item.rate)
+				# print(item.rate)
 				self._original_values[item.name] = {
 					"qty"            : item.qty,
 					"rate"           : item.rate,
@@ -208,25 +154,27 @@ class SalesInvoice(SalesInvoice):
 				original_amount = item.amount
 				if has_included_tax:
 					divisor         = 1 + (included_tax_rate / 100)
-					clean_rate      = flt(item.rate / divisor, 9)
-					clean_base_rate = flt(item.base_rate / divisor, 9)
-					print(clean_rate)
+					clean_rate      = flt(so_item_rate / divisor, 9)
+					clean_base_rate = flt(so_item_base_rate / divisor, 9)
+					# print(clean_rate)
 					item.rate           = clean_rate
 					item.base_rate      = clean_base_rate
 					item.net_rate       = clean_rate
 					item.base_net_rate  = clean_base_rate
 					new_amount = timbang * clean_rate
-					print(new_amount)
+					# print(new_amount)
 
 				else:
 					new_amount = timbang * item.rate
 
 				# item.qty             = timbang
-				# item.amount          = new_amount
-				# item.base_amount     = timbang * item.base_rate
-				# item.net_amount      = timbang * item.net_rate
-				# item.base_net_amount = timbang * item.base_net_rate
-				# item.sub_total_timbang = new_amount
+				item.amount          = item.qty * item.rate
+				item.base_amount     = item.qty * item.base_rate
+				item.net_amount      = item.qty * item.net_rate
+				item.base_net_amount = item.qty * item.base_net_rate
+				item.sub_total_timbang = new_amount
+
+				self.calculate_taxes_and_totals()
 				# total_diff += (new_amount - original_amount)
 
 		if has_included_tax:
@@ -294,6 +242,7 @@ class SalesInvoice(SalesInvoice):
 						included_tax_rate += t.rate
 		else:
 			# fallback ke self.taxes jika tidak ada dn_detail sama sekali
+			frappe.throw("Sales Order wajib dipasang di Sales Invoice Pengiriman.")
 			has_included_tax = any(t.included_in_print_rate for t in self.taxes)
 			if has_included_tax:
 				for t in self.taxes:
@@ -332,8 +281,8 @@ class SalesInvoice(SalesInvoice):
 				original_amount = item.amount
 				if has_included_tax:
 					divisor         = 1 + (included_tax_rate / 100)
-					clean_rate      = flt(item.rate / divisor, 9)
-					clean_base_rate = flt(item.base_rate / divisor, 9)
+					clean_rate      = flt(so_item_rate / divisor, 9)
+					clean_base_rate = flt(so_item_base_rate / divisor, 9)
 					item.rate           = clean_rate
 					item.base_rate      = clean_base_rate
 					item.net_rate       = clean_rate
@@ -594,10 +543,12 @@ class SalesInvoice(SalesInvoice):
 		if not total_dp_masuk or total_dp_masuk <= 0:
 			return
 
-		has_included_tax = any(t.included_in_print_rate for t in self.taxes)
+		so_doc = frappe.get_doc("Sales Order", self.items[0].sales_order)
+
+		has_included_tax = any(t.included_in_print_rate for t in so_doc.taxes)
 		included_tax_rate = 0
 		if has_included_tax:
-			for t in self.taxes:
+			for t in so_doc.taxes:
 				if t.included_in_print_rate:
 					included_tax_rate += t.rate
 		divisor = 1 + (included_tax_rate / 100)
@@ -618,9 +569,12 @@ class SalesInvoice(SalesInvoice):
 		})[0][0]
 
 		if has_included_tax:
+			# frappe.throw("{}-{}-{}-{}".format(total_dp_masuk, divisor, flt(total_dp_masuk / divisor,9), total_dp_terpakai))
 			total_dp_masuk = flt(total_dp_masuk / divisor,9)
 
 		sisa_dp = total_dp_masuk - total_dp_terpakai
+
+		# frappe.throw(str(total_dp_masuk))
 
 		if sisa_dp <= 0:
 			# frappe.msgprint(
@@ -630,22 +584,20 @@ class SalesInvoice(SalesInvoice):
 			return
 		outstanding_amount = 0
 
-		
-		
 		for row in self.items:
 
-			if has_included_tax:
-				clean_rate      = flt(row.rate / divisor, 9)
-			else:
-				clean_rate 		= flt(row.rate, 9)
+			# if has_included_tax:
+			# 	clean_rate      = flt(row.rate / divisor, 9)
+			# else:
+			# 	clean_rate 		= flt(row.rate, 9)
 
 			qty_check = row.qty
 			if row.qty_timbang_customer:
 				qty_check = row.qty_timbang_customer
 
-			outstanding_amount += qty_check * clean_rate
+			outstanding_amount += qty_check * row.rate
 
-		amount = min(sisa_dp, outstanding_amount)
+		amount = min(sisa_dp, flt(outstanding_amount,2))
 
 		if sisa_dp < outstanding_amount:
 			frappe.msgprint( "Qty melebihi dp, harap dibuatkan invoice penjualan." )
@@ -689,15 +641,16 @@ class SalesInvoice(SalesInvoice):
 			"reference_name"            : self.name,
 		})
 		je.total_amount = amount
-		je.insert(ignore_permissions=True)
-		je.submit()
+		if je.total_amount > 1:
+			je.insert(ignore_permissions=True)
+			je.submit()
 
-		frappe.db.set_value("Sales Invoice", self.name, "dp_journal_entry", je.name)
-		frappe.msgprint(
-			f"Journal Entry pembayaran DP <b>{je.name}</b> sebesar "
-			f"<b>{frappe.format(amount, 'Currency')}</b> berhasil dibuat.",
-			alert=True
-		)
+			frappe.db.set_value("Sales Invoice", self.name, "dp_journal_entry", je.name)
+			frappe.msgprint(
+				f"Journal Entry pembayaran DP <b>{je.name}</b> sebesar "
+				f"<b>{frappe.format(amount, 'Currency')}</b> berhasil dibuat.",
+				alert=True
+			)
 
 
 	def cancel_dp_payment_journal_entry(self):

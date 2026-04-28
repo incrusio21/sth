@@ -16,7 +16,7 @@ frappe.query_reports["Laporan Harian Kas dan Bank"] = {
 			"label": __("Unit"),
 			"fieldtype": "Link",
 			"options": "Unit",
-			"get_query": function() {
+			"get_query": function () {
 				let company = frappe.query_report.get_filter_value("company");
 				return {
 					filters: {
@@ -30,6 +30,7 @@ frappe.query_reports["Laporan Harian Kas dan Bank"] = {
 			"label": __("Kas/Bank"),
 			"fieldtype": "Select",
 			"options": ["Kas", "Bank"],
+			"default": "Kas"
 		},
 		{
 			"fieldname": "from_date",

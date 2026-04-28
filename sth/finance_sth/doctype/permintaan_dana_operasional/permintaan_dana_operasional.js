@@ -146,11 +146,30 @@ frappe.ui.form.on("PDO Perjalanan Dinas Table", {
 						label: __("Pengguna"),
 						options: "Employee",
 						reqd: 1,
+						onchange() {
+							const employee = dialog.get_value("pengguna");
+							if (employee) {
+								frappe.db.get_value("Employee", employee, "employee_name", (r) => {
+									if (r && r.employee_name) {
+										dialog.set_value("nama_pengguna", r.employee_name);
+									}
+								});
+							} else {
+								dialog.set_value("nama_pengguna", "");
+							}
+						},
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "nama_pengguna",
+						label: __("Nama Pengguna"),
+						read_only: 1,
+						hidden: 1
 					},
 				],
 				primary_action_label: __("Pilih"),
 				primary_action(values) {
-					frappe.model.set_value(cdt, cdn, "employee", values.pengguna);
+					frappe.model.set_value(cdt, cdn, "employee", values.nama_pengguna);
 					dialog.hide();
 				},
 				secondary_action_label: __("Batal"),
@@ -621,7 +640,7 @@ function set_field_properties_kas(frm, cdt, cdn, jenis) {
 
 function make_payment_voucher(frm) {
 	if (frm.doc.docstatus == 1 && !frm.doc.payment_voucher) {
-		frm.add_custom_button(__('Create Payment Voucher'), function () {
+		frm.add_custom_button(__('Create PV Pengiriman Dana Kebun'), function () {
 			frappe.model.open_mapped_doc({
 				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher',
 				frm: frm
@@ -633,7 +652,7 @@ function make_payment_voucher(frm) {
 
 function make_payment_voucher_kebun(frm) {
 	if (frm.doc.docstatus == 1 && !frm.doc.payment_voucher_kebun) {
-		frm.add_custom_button(__('Create PV Penerimaan Dana PDO Kebun'), function () {
+		frm.add_custom_button(__('Create RV Penerimaan Dana PDO Kebun'), function () {
 			frappe.model.open_mapped_doc({
 				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_kebun',
 				frm: frm

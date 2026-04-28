@@ -22,7 +22,7 @@ function calculate_total_costing(frm) {
   frm.refresh_field("custom_grand_total_costing");
 }
 
-function filter_jenis_ex_type(frm){
+function filter_jenis_ex_type(frm) {
   frm.set_query('expense_type', 'costings', () => {
     return {
       filters: {

@@ -20,6 +20,7 @@
   "address",
   "modul_list_section",
   "plantation",
+  "plasma",
   "mill",
   "ho",
   "accounts_section",
@@ -165,12 +166,18 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "plasma",
+   "fieldtype": "Check",
+   "label": "Plasma"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 10:54:55.834790",
+ "modified": "2026-04-22 14:53:33.874639",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

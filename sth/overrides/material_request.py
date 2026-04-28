@@ -64,13 +64,14 @@ def set_missing_values(source, target_doc):
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name, target_doc=None, args=None):
+def make_multiple_request_for_quotation(source_name, target_doc=None, args=None):
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children",[]) if args else None
 		return d.name in filtered_items if filtered_items else True
 
 	def update_item(source,target,source_parent):
+		target.description = ""
 		target.country = ""
 	
 	doclist = get_mapped_doc(

@@ -199,6 +199,9 @@ frappe.ui.form.on("Payment Entry", {
 		filter_bank_accounts(frm);
 
 	},
+    mode_of_payment(frm) {
+		filter_bank_accounts(frm);
+	},
 
 	internal_employee(frm) {
 		if (!frm.doc.internal_employee) return
@@ -390,50 +393,93 @@ frappe.ui.form.on("Payment Entry Reference", {
 
 
 function filter_bank_accounts(frm) {
-    if (!frm.doc.unit) {
+    // frm.set_value('paid_to', '');
+    // frm.set_value('paid_from', '');
+
+    if (!frm.doc.unit || !frm.doc.mode_of_payment || !frm.doc.company) {
         return;
     }
-    
-    frappe.db.get_value('Unit', frm.doc.unit, 'bank_account', (r) => {
-        if (r && r.bank_account) {
-            let bank_account = r.bank_account;
-            
-            if (frm.doc.payment_type === 'Receive') {
-                frm.set_query('paid_to', function() {
-                    return {
-                        filters: {
-                            'name': bank_account
+
+    frappe.db.get_value(
+        'Unit',
+        frm.doc.unit,
+        ['bank_account', 'account_for_cash'],
+        (unit_res) => {
+
+            let mop = frm.doc.mode_of_payment.toLowerCase();
+            let is_cash = mop.includes("cash");
+
+            let selected_account = null;
+
+            if (is_cash) {
+                selected_account = unit_res.account_for_cash;
+            } else {
+                selected_account = unit_res.bank_account;
+            }
+
+            if (!selected_account) {
+
+                let msg = is_cash
+                    ? `Account Cash di Unit <b>${frm.doc.unit}</b> belum diisi.<br>Mencoba menggunakan default cash account dari Company.`
+                    : `Account Bank di Unit <b>${frm.doc.unit}</b> belum diisi.<br>Mencoba menggunakan default bank account dari Company.`;
+
+                frappe.db.get_value(
+                    'Company',
+                    frm.doc.company,
+                    ['default_bank_account', 'default_cash_account'],
+                    (comp_res) => {
+
+                        if (is_cash) {
+                            selected_account = comp_res.default_cash_account;
+                        } else {
+                            selected_account = comp_res.default_bank_account;
                         }
-                    };
-                });
-                
-                // Optionally set the value automatically
-                frm.set_value('paid_to', bank_account);
-                
-            } else if (frm.doc.payment_type === 'Pay') {
-                // Filter paid_from field
-                frm.set_query('paid_from', function() {
-                    return {
-                        filters: {
-                            'name': bank_account
+
+                        if (!selected_account) {
+
+                            let err_msg = is_cash
+                                ? `Default Cash Account di Company <b>${frm.doc.company}</b> juga belum diisi.<br>Silakan lengkapi pengaturan Account terlebih dahulu.`
+                                : `Default Bank Account di Company <b>${frm.doc.company}</b> juga belum diisi.<br>Silakan lengkapi pengaturan Account terlebih dahulu.`;
+
+                            frappe.msgprint({
+                                title: "Account Tidak Ditemukan",
+                                message: err_msg,
+                                indicator: "red"
+                            });
+
+                            apply_account(frm, null);
+                            return;
                         }
-                    };
-                });
-                
-                // Optionally set the value automatically
-                frm.set_value('paid_from', bank_account);
+
+                        apply_account(frm, selected_account);
+                    }
+                );
+            } else {
+                apply_account(frm, selected_account);
             }
         }
-    });
+    );
+}
 
-    frappe.db.get_value('Unit', frm.doc.unit, 'default_bank_account', (r) => {
-        if (r && r.default_bank_account) {
-            let default_bank_account = r.default_bank_account;
-            frm.set_value('bank_account', default_bank_account);            
-        }
-    });
-    
-    
+
+function apply_account(frm, account) {
+
+    if (frm.doc.payment_type == 'Receive'  || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Penerimaan Dana PDO" || frm.doc.tipe_transfer == "Dividen Receive") )) {
+
+        frm.set_query('paid_to', function () {
+            return account ? { filters: { name: account } } : {};
+        });
+
+        frm.set_value('paid_to', account || "");
+
+    } else if (frm.doc.payment_type == 'Pay' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Realisasi PDO" || frm.doc.tipe_transfer == "PDO" || frm.doc.tipe_transfer == "Dividen Sent" ))) {
+
+        frm.set_query('paid_from', function () {
+            return account ? { filters: { name: account } } : {};
+        });
+
+        frm.set_value('paid_from', account || "");
+    }
 }
 
 function show_pdo_selector(frm) {

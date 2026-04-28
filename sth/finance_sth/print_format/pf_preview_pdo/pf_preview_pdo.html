@@ -2,6 +2,42 @@
 
 {# ========================= FETCH ALL DATA ========================= #}
 
+{% set balance_data = frappe.db.sql("""
+SELECT
+pdo.name,
+pdo.posting_date,
+u.bank_account,
+u.account_for_cash
+FROM `tabPermintaan Dana Operasional` pdo
+JOIN `tabUnit` u ON u.name = pdo.unit
+JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
+WHERE
+pdo.posting_date BETWEEN
+DATE_SUB(DATE_FORMAT(ref.posting_date, '%%Y-%%m-01'), INTERVAL 1 MONTH)
+AND LAST_DAY(ref.posting_date)
+AND pdo.unit = ref.unit
+ORDER BY pdo.posting_date, pdo.name
+""", (pdo_name,), as_dict=1) %}
+
+{% set dc_saldo_data = frappe.db.sql("""
+SELECT
+pdo.name,
+pdo.posting_date,
+pdct.jenis,
+pdct.cash_bank_balance_adjustment as estimate_unit,
+pdct.revised_amount as estimate_revise
+FROM `tabPermintaan Dana Operasional` pdo
+JOIN `tabPDO Dana Cadangan Table` pdct ON pdct.parent = pdo.name
+JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
+WHERE
+pdo.posting_date BETWEEN
+DATE_SUB(DATE_FORMAT(ref.posting_date, '%%Y-%%m-01'), INTERVAL 1 MONTH)
+AND LAST_DAY(ref.posting_date)
+AND pdo.unit = ref.unit
+AND pdct.jenis = 'Saldo'
+ORDER BY pdo.posting_date, pdo.name
+""", (pdo_name,), as_dict=1) %}
+
 {% set kas_data = frappe.db.sql("""
 SELECT
 pdo.name,
@@ -25,10 +61,9 @@ LEFT JOIN `tabEmployee` e ON e.name = pkt.employee
 LEFT JOIN `tabDesignation` d ON d.name = e.designation
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
 WHERE
-DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
-DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
-DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
-)
+pdo.posting_date BETWEEN
+DATE_SUB(DATE_FORMAT(ref.posting_date, '%%Y-%%m-01'), INTERVAL 1 MONTH)
+AND LAST_DAY(ref.posting_date)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -44,11 +79,11 @@ FROM `tabPermintaan Dana Operasional` pdo
 JOIN `tabPDO Dana Cadangan Table` pdct ON pdct.parent = pdo.name
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
 WHERE
-DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
-DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
-DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
-)
+pdo.posting_date BETWEEN
+DATE_SUB(DATE_FORMAT(ref.posting_date, '%%Y-%%m-01'), INTERVAL 1 MONTH)
+AND LAST_DAY(ref.posting_date)
 AND pdo.unit = ref.unit
+AND pdct.jenis IN ('Kas', 'Bank')
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
 
@@ -71,10 +106,9 @@ LEFT JOIN `tabEmployee` e ON e.employee_name = pbbt.employee
 LEFT JOIN `tabDesignation` d ON d.name = e.designation
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
 WHERE
-DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
-DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
-DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
-)
+pdo.posting_date BETWEEN
+DATE_SUB(DATE_FORMAT(ref.posting_date, '%%Y-%%m-01'), INTERVAL 1 MONTH)
+AND LAST_DAY(ref.posting_date)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -83,7 +117,10 @@ ORDER BY pdo.posting_date, pdo.name
 SELECT
 pdo.name,
 pdo.posting_date,
-ppdt.employee as pengguna,
+CASE
+WHEN ect.pengguna = 'Link' THEN e.first_name
+ELSE ppdt.employee
+END as pengguna,
 ppdt.license_plate_number as no_polisi,
 ppdt.`type` as jenis,
 ppdt.hari_dinas as hari_dinas,
@@ -95,12 +132,13 @@ ppdt.total as estimate_unit,
 ppdt.revised_total as estimate_revise
 FROM `tabPermintaan Dana Operasional` pdo
 JOIN `tabPDO Perjalanan Dinas Table` ppdt ON ppdt.parent = pdo.name
+JOIN `tabExpense Claim Type` ect ON ect.name = ppdt.`type`
+LEFT JOIN `tabEmployee` e ON e.name = ppdt.employee
 JOIN `tabPermintaan Dana Operasional` ref ON ref.name = %s
 WHERE
-DATE_FORMAT(pdo.posting_date, '%%Y-%%m') IN (
-DATE_FORMAT(ref.posting_date, '%%Y-%%m'),
-DATE_FORMAT(DATE_SUB(ref.posting_date, INTERVAL 1 MONTH), '%%Y-%%m')
-)
+pdo.posting_date BETWEEN
+DATE_SUB(DATE_FORMAT(ref.posting_date, '%%Y-%%m-01'), INTERVAL 1 MONTH)
+AND LAST_DAY(ref.posting_date)
 AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
@@ -130,23 +168,10 @@ ORDER BY pdo.posting_date, pdo.name
 {% endfor %}
 {% endmacro %}
 
-{% macro month_cols(row, estimate_field, revise_field) %}
-{% for m in months %}
-{% set row_month = row.posting_date.strftime('%Y-%m') %}
-{% if row_month == m %}
-<td class="text-right">{{ fmt(row[estimate_field]) }}</td>
-<td class="text-right">{{ fmt(row[revise_field]) }}</td>
-<td class="text-right">0</td>
-<td class="text-right">0</td>
-{% else %}
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-{% endif %}
-{% endfor %}
-{% endmacro %}
-
+{#
+total_cols: sum semua rows per bulan, tanpa filter jenis
+Dipakai untuk: dc_saldo_data, group_rows, bbm, pd
+#}
 {% macro total_cols(rows, estimate_field, revise_field) %}
 {% for m in months %}
 {% set ns = namespace(est=0, rev=0) %}
@@ -163,6 +188,10 @@ ORDER BY pdo.posting_date, pdo.name
 {% endfor %}
 {% endmacro %}
 
+{#
+total_cols_for_type: sum rows yang jenis == jenis_value per bulan
+Dipakai untuk: Kas, Bank (dc_data)
+#}
 {% macro total_cols_for_type(rows, jenis_value, estimate_field, revise_field) %}
 {% for m in months %}
 {% set ns = namespace(est=0, rev=0) %}
@@ -186,7 +215,6 @@ ORDER BY pdo.posting_date, pdo.name
 {% macro grouped_kas_rows(group, group_rows) %}
 {% if group == "TUNJANGAN PEMBANTU" %}
 
-{# Unique key: pengguna + jabatan #}
 {% set ukeys = namespace(list=[]) %}
 {% for row in group_rows %}
 {% set key = (row.pengguna or '') ~ '|' ~ (row.jabatan or '') %}
@@ -234,7 +262,6 @@ ORDER BY pdo.posting_date, pdo.name
 
 {% else %}
 
-{# Unique key: item_barang + satuan + kebutuhan #}
 {% set ukeys = namespace(list=[]) %}
 {% for row in group_rows %}
 {% set key = (row.item_barang or '') ~ '|' ~ (row.satuan or '') ~ '|' ~ (row.kebutuhan or '') %}
@@ -346,9 +373,9 @@ and (row.keperluan or '') == keperluan %}
 <tr>
   <td>{{ pengguna }}</td>
   <td>{{ jabatan }}</td>
-  <td class="text-right">{{ fmt(ref_row.row.plafon) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ ref_row.row.plafon if ref_row.row else '' }}</td>
   <td class="text-right">{{ fmt(ref_row.row.harga) if ref_row.row else '' }}</td>
-  <td class="text-right">{{ fmt(ref_row.row.plafon_revisi) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ ref_row.row.plafon_revisi if ref_row.row else '' }}</td>
   <td class="text-right">{{ fmt(ref_row.row.harga_revisi) if ref_row.row else '' }}</td>
   <td colspan="2">{{ keperluan }}</td>
   {% for m in months %}
@@ -415,9 +442,9 @@ and (row.keperluan or '') == keperluan %}
   <td>{{ ref_row.row.no_polisi if ref_row.row else '' }}</td>
   <td>{{ jenis }}</td>
   <td class="text-right">{{ ref_row.row.hari_dinas if ref_row.row else '' }}</td>
-  <td class="text-right">{{ fmt(ref_row.row.plafon) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ ref_row.row.plafon if ref_row.row else '' }}</td>
   <td class="text-right">{{ ref_row.row.hari_dinas_revisi if ref_row.row else '' }}</td>
-  <td class="text-right">{{ fmt(ref_row.row.plafon_revisi) if ref_row.row else '' }}</td>
+  <td class="text-right">{{ ref_row.row.plafon_revisi if ref_row.row else '' }}</td>
   <td>{{ keperluan }}</td>
   {% for m in months %}
   {% if m in grouped %}
@@ -565,22 +592,74 @@ and (row.keperluan or '') == keperluan %}
       {% endfor %}
     </tr>
 
+    {% set balance_map = {} %}
+    {% for row in balance_data %}
+    {% set m = row.posting_date.strftime('%Y-%m') %}
+    {% if m not in balance_map %}
+    {% set coh = get_account_balance(row.account_for_cash, row.posting_date) %}
+    {% set cib = get_account_balance(row.bank_account, row.posting_date) %}
+    {% set _ = balance_map.update({m: {'cash_on_hand': coh, 'cash_in_bank': cib}}) %}
+    {% endif %}
+    {% endfor %}
+
     {# BEGINNING BALANCE - CASH ON HAND #}
     <tr>
       <td colspan="8">BEGINNING BALANCE | CASH ON HAND</td>
-      {{ empty_cols() }}
+      {% for m in months %}
+      {% set bal = balance_map.get(m, {}) %}
+      <td class="text-right">{{ fmt(bal.get('cash_on_hand', 0)) }}</td>
+      <td class="text-right">{{ fmt(bal.get('cash_on_hand', 0)) }}</td>
+      <td class="text-right">0</td>
+      <td class="text-right">0</td>
+      {% endfor %}
     </tr>
 
     {# BEGINNING BALANCE - CASH IN BANK #}
     <tr>
       <td colspan="8">BEGINNING BALANCE | CASH IN BANK</td>
-      {{ empty_cols() }}
+      {% for m in months %}
+      {% set bal = balance_map.get(m, {}) %}
+      <td class="text-right">{{ fmt(bal.get('cash_in_bank', 0)) }}</td>
+      <td class="text-right">{{ fmt(bal.get('cash_in_bank', 0)) }}</td>
+      <td class="text-right">0</td>
+      <td class="text-right">0</td>
+      {% endfor %}
     </tr>
 
-    {# PENYESUAIAN SALDO KAS DAN BANK #}
+    {#
+    PENYESUAIAN SALDO KAS DAN BANK
+    Pakai total_cols (bukan total_cols_for_type) karena dc_saldo_data
+    sudah difilter jenis = 'Saldo' langsung di query SQL.
+    total_cols_for_type akan gagal karena string 'Saldo' di Jinja expression
+    menyebabkan TemplateSyntaxError.
+    #}
     <tr>
       <td colspan="8">PENYESUAIAN SALDO KAS DAN BANK</td>
-      {{ empty_cols() }}
+      {{ total_cols(dc_saldo_data, "estimate_unit", "estimate_revise") }}
+    </tr>
+
+    {# TOTAL #}
+    <tr class="row-total">
+      <td colspan="8">TOTAL</td>
+      {% for m in months %}
+      {% set bal = balance_map.get(m, {}) %}
+      {% set coh = bal.get('cash_on_hand', 0) %}
+      {% set cib = bal.get('cash_in_bank', 0) %}
+
+      {# Ambil nilai penyesuaian saldo untuk bulan ini #}
+      {% set ns_saldo = namespace(est=0, rev=0) %}
+      {% for row in dc_saldo_data %}
+      {% if row.posting_date.strftime('%Y-%m') == m %}
+      {% set ns_saldo.est = ns_saldo.est + (row.estimate_unit or 0) %}
+      {% set ns_saldo.rev = ns_saldo.rev + (row.estimate_revise or 0) %}
+      {% endif %}
+      {% endfor %}
+
+      <td class="text-right">{{ fmt(coh + cib + ns_saldo.est) }}</td>
+      <td class="text-right">{{ fmt(coh + cib + ns_saldo.rev) }}</td>
+      <td class="text-right">0</td>
+      <td class="text-right">0</td>
+      {% endfor %}
     </tr>
 
     {# DANA CADANGAN #}
@@ -596,13 +675,13 @@ and (row.keperluan or '') == keperluan %}
     {# KAS #}
     <tr>
       <td colspan="8">Kas</td>
-      {{ total_cols_for_type(dc_data, 'Kas', 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_for_type(dc_data, "Kas", "estimate_unit", "estimate_revise") }}
     </tr>
 
     {# BANK #}
     <tr>
       <td colspan="8">Bank</td>
-      {{ total_cols_for_type(dc_data, 'Bank', 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols_for_type(dc_data, "Bank", "estimate_unit", "estimate_revise") }}
     </tr>
 
     {# TOTAL PLAFON #}
@@ -642,7 +721,7 @@ and (row.keperluan or '') == keperluan %}
     {# GROUP HEADER #}
     <tr class="row-group">
       <td colspan="8"><b>{{ group }}</b></td>
-      {{ total_cols(group_rows, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols(group_rows, "estimate_unit", "estimate_revise") }}
     </tr>
 
     {# COLUMN HEADER #}
@@ -677,7 +756,7 @@ and (row.keperluan or '') == keperluan %}
     {# TOTAL GROUP #}
     <tr class="row-total">
       <td colspan="8">TOTAL</td>
-      {{ total_cols(group_rows, 'estimate_unit', 'estimate_revise') }}
+      {{ total_cols(group_rows, "estimate_unit", "estimate_revise") }}
     </tr>
 
     {% endfor %}
@@ -701,7 +780,6 @@ and (row.keperluan or '') == keperluan %}
       <td></td>{% endfor %}
     </tr>
 
-    {# DETAIL ROWS BBM - grouped, no duplicates #}
     {{ grouped_bbm_rows(bbm_data) }}
 
     <tr class="row-total">
@@ -729,7 +807,6 @@ and (row.keperluan or '') == keperluan %}
       <td></td>{% endfor %}
     </tr>
 
-    {# DETAIL ROWS PD - grouped, no duplicates #}
     {{ grouped_pd_rows(pd_data) }}
 
     <tr class="row-total">
@@ -781,8 +858,26 @@ and (row.keperluan or '') == keperluan %}
       {% for m in months %}
       {% set gt = grand_totals.data[m] %}
       {% set pt = plafon_totals.data[m] %}
-      {% set total_est = (gt.est or 0) + (pt.est or 0) %}
-      {% set total_rev = (gt.rev or 0) + (pt.rev or 0) %}
+
+      {# Hitung total beginning balance + penyesuaian untuk bulan ini #}
+      {% set bal = balance_map.get(m, {}) %}
+      {% set coh = bal.get('cash_on_hand', 0) %}
+      {% set cib = bal.get('cash_in_bank', 0) %}
+
+      {% set ns_saldo = namespace(est=0, rev=0) %}
+      {% for row in dc_saldo_data %}
+      {% if row.posting_date.strftime('%Y-%m') == m %}
+      {% set ns_saldo.est = ns_saldo.est + (row.estimate_unit or 0) %}
+      {% set ns_saldo.rev = ns_saldo.rev + (row.estimate_revise or 0) %}
+      {% endif %}
+      {% endfor %}
+
+      {% set beginning_total_est = coh + cib + ns_saldo.est %}
+      {% set beginning_total_rev = coh + cib + ns_saldo.rev %}
+
+      {% set total_est = (gt.est or 0) + (pt.est or 0) - beginning_total_est %}
+      {% set total_rev = (gt.rev or 0) + (pt.rev or 0) - beginning_total_rev %}
+
       <td class="text-right">{{ fmt(total_est) }}</td>
       <td class="text-right">{{ fmt(total_rev) }}</td>
       <td class="text-right">0</td>

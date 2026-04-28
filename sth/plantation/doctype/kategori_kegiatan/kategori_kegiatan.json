@@ -10,11 +10,13 @@
   "section_break_f7lg",
   "kd_kgt",
   "n_kategori",
-  "kelompok_kemandoran",
+  "deskripsi",
   "api_status",
   "column_break_smxm",
   "has_basis",
   "is_perawatan",
+  "kode_kelompok_kemandoran",
+  "kelompok_kemandoran",
   "budget_section",
   "is_bibitan",
   "column_break_rkbk"
@@ -76,23 +78,34 @@
    "label": "Perawatan ?"
   },
   {
-   "fieldname": "kelompok_kemandoran",
-   "fieldtype": "Link",
-   "label": "Kelompok Kemandoran",
-   "options": "Kelompok Kemandoran"
-  },
-  {
    "default": "Aktif",
    "fieldname": "api_status",
    "fieldtype": "Select",
    "label": "API Status",
    "options": "Aktif\nNon Aktif"
+  },
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Small Text",
+   "label": "Deskripsi"
+  },
+  {
+   "fieldname": "kode_kelompok_kemandoran",
+   "fieldtype": "Link",
+   "label": "Kode Kelompok Kemandoran",
+   "options": "Kelompok Kemandoran"
+  },
+  {
+   "fetch_from": "kode_kelompok_kemandoran.nama",
+   "fieldname": "kelompok_kemandoran",
+   "fieldtype": "Data",
+   "label": "Kelompok Kemandoran"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 18:54:47.833457",
+ "modified": "2026-04-22 16:26:23.898465",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kategori Kegiatan",

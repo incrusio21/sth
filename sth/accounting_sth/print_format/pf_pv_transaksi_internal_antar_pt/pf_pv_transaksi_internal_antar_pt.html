@@ -100,8 +100,10 @@ LIMIT 1
         <br>No. Invoice: {{ doc.references[0].reference_name or '' }}
         {% endif %}
       </td>
-      <td class="text-right">{{ frappe.format_value(row.debit, {"fieldtype": "Currency"}) }}</td>
-      <td class="text-right">{{ frappe.format_value(row.credit, {"fieldtype": "Currency"}) }}</td>
+      <td class="text-right" style="white-space: nowrap;">{{ frappe.format_value(row.debit, {"fieldtype": "Currency"})
+        }}</td>
+      <td class="text-right" style="white-space: nowrap;">{{ frappe.format_value(row.credit, {"fieldtype": "Currency"})
+        }}</td>
     </tr>
     {% endfor %}
     <tr>

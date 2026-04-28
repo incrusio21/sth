@@ -1,15 +1,19 @@
 {
  "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-01-09 09:31:06.434635",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_tmnb",
+  "naming_series",
   "posting_date",
   "path",
   "public_key",
   "column_break_htwj",
   "company",
+  "mft_server",
   "status",
   "section_break_qnes",
   "payment_entry",
@@ -27,7 +31,8 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Date",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_htwj",
@@ -55,7 +60,8 @@
    "fieldname": "path",
    "fieldtype": "Link",
    "label": "Path",
-   "options": "Kopra File Path"
+   "options": "Kopra File Path",
+   "set_only_once": 1
   },
   {
    "fieldname": "status",
@@ -78,15 +84,34 @@
    "fieldtype": "Link",
    "label": "Payment Entry",
    "options": "Payment Entry"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fetch_from": "public_key.mft_server",
+   "fieldname": "mft_server",
+   "fieldtype": "Link",
+   "label": "MFT Server",
+   "options": "Mandiri MFT",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-06 16:30:42.425830",
+ "modified": "2026-04-22 16:43:15.354093",
  "modified_by": "Administrator",
  "module": "Bank Payment",
  "name": "Mandiri Kopra Cash Management",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

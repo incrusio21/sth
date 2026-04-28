@@ -7,8 +7,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "unit",
   "estate",
+  "kode_divisi",
   "divisi",
+  "kode_kelompok",
   "kelompok",
   "kode",
   "nama",
@@ -17,22 +20,22 @@
  ],
  "fields": [
   {
+   "fetch_from": "unit.nama",
    "fieldname": "estate",
-   "fieldtype": "Link",
-   "label": "Estate",
-   "options": "Unit"
+   "fieldtype": "Data",
+   "label": "Estate"
   },
   {
+   "fetch_from": "kode_divisi.nama",
    "fieldname": "divisi",
-   "fieldtype": "Link",
-   "label": "Divisi",
-   "options": "Divisi"
+   "fieldtype": "Data",
+   "label": "Divisi"
   },
   {
+   "fetch_from": "kode_kelompok.nama",
    "fieldname": "kelompok",
-   "fieldtype": "Link",
-   "label": "Kelompok",
-   "options": "Kelompok Kemandoran"
+   "fieldtype": "Data",
+   "label": "Kelompok"
   },
   {
    "fieldname": "kode",
@@ -54,13 +57,31 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Aktif\nNon Aktif"
+   "options": "Aktif\nTidak Aktif"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Kode Estate",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "kode_divisi",
+   "fieldtype": "Link",
+   "label": "Kode Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "kode_kelompok",
+   "fieldtype": "Link",
+   "label": "Kode Kelompok",
+   "options": "Kelompok Kemandoran"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 10:45:53.928288",
+ "modified": "2026-04-23 01:17:59.739428",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kemandoran",

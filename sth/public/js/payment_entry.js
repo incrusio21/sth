@@ -11,11 +11,12 @@ frappe.ui.form.on("Payment Entry", {
 			};
 		});
 
-        if (frm.doc.docstatus == 0) {
-            frm.add_custom_button(__("Pilih Nota Piutang"), function () {
-                pick_nota_piutang(frm);
-            }, __("Buat"));
-        }
+		if (frm.doc.docstatus == 0) {
+			frm.add_custom_button(__("Pilih Nota Piutang"), function () {
+				pick_nota_piutang(frm);
+			}, __("Buat"));
+		}
+		make_pdo_preview(frm)
 	},
 
 	company: function(frm) {
@@ -32,6 +33,10 @@ frappe.ui.form.on("Payment Entry", {
 	},
 	party_type: function(frm){
 		set_no_rekening(frm);
+	},
+
+	unit: function(frm){
+		pasang_company_account(frm);
 	},
 	party: function(frm) {
 		// Reset no_kontrak_penjualan jika party berubah
@@ -184,119 +189,183 @@ function set_no_rekening(frm) {
 
 
 function pick_nota_piutang(frm) {
-    const dialog = new frappe.ui.Dialog({
-        title: __("Pilih Nota Piutang"),
-        fields: [
-            {
-                fieldtype: "Link",
-                fieldname: "nota_piutang",
-                label: "Nota Piutang",
-                options: "Nota Piutang",
-                reqd: 1,
-                get_query() {
-                    return {
-                        filters: {
-                            tipe: "Pemenuhan Kontrak",
-                            docstatus: 1,
-                        }
-                    };
-                }
-            }
-        ],
-        primary_action_label: __("Terapkan"),
-        primary_action(values) {
-            dialog.hide();
-            apply_nota_piutang(frm, values.nota_piutang);
-        }
-    });
+	const dialog = new frappe.ui.Dialog({
+		title: __("Pilih Nota Piutang"),
+		fields: [
+			{
+				fieldtype: "Link",
+				fieldname: "nota_piutang",
+				label: "Nota Piutang",
+				options: "Nota Piutang",
+				reqd: 1,
+				get_query() {
+					return {
+						filters: {
+							tipe: "Pemenuhan Kontrak",
+							docstatus: 1,
+						}
+					};
+				}
+			}
+		],
+		primary_action_label: __("Terapkan"),
+		primary_action(values) {
+			dialog.hide();
+			apply_nota_piutang(frm, values.nota_piutang);
+		}
+	});
  
-    dialog.show();
+	dialog.show();
 }
  
 async function apply_nota_piutang(frm, nota_piutang_name) {
-    try {
-        // 1. Fetch Nota Piutang
-        const np = await frappe.db.get_doc("Nota Piutang", nota_piutang_name);
- 		frm.set_value("unit", np.unit)
-        // 2. Kumpulkan semua SI dari kedua table
-        const si_from_main = (np.nota_hutang_pemenuhan_kontrak_table || [])
-            .filter(row => row.pengakuan_penjualan)
-            .map(row => row.pengakuan_penjualan);
+	try {
+		// 1. Fetch Nota Piutang
+		const np = await frappe.db.get_doc("Nota Piutang", nota_piutang_name);
+		frm.set_value("unit", np.unit)
+		// 2. Kumpulkan semua SI dari kedua table
+		const si_from_main = (np.nota_hutang_pemenuhan_kontrak_table || [])
+			.filter(row => row.pengakuan_penjualan)
+			.map(row => row.pengakuan_penjualan);
  
-        const si_from_reclass = (np.reclass_pengakuan_penjualan || [])
-            .filter(row => row.pengakuan_penjualan_ppn)
-            .map(row => row.pengakuan_penjualan_ppn);
+		const si_from_reclass = (np.reclass_pengakuan_penjualan || [])
+			.filter(row => row.pengakuan_penjualan_ppn)
+			.map(row => row.pengakuan_penjualan_ppn);
  
-        const all_si_names = [...new Set([...si_from_main, ...si_from_reclass])];
+		const all_si_names = [...new Set([...si_from_main, ...si_from_reclass])];
  
-        if (all_si_names.length === 0) {
-            frappe.throw(__("Nota Piutang ini tidak memiliki Sales Invoice."));
-        }
+		if (all_si_names.length === 0) {
+			frappe.throw(__("Nota Piutang ini tidak memiliki Sales Invoice."));
+		}
  
-        // 3. Fetch tiap SI untuk outstanding_amount terkini
-        const si_docs = await Promise.all(
-            all_si_names.map(name => frappe.db.get_doc("Sales Invoice", name))
-        );
+		// 3. Fetch tiap SI untuk outstanding_amount terkini
+		const si_docs = await Promise.all(
+			all_si_names.map(name => frappe.db.get_doc("Sales Invoice", name))
+		);
  
-        // 4. Filter outstanding > 0
-        const payable_si = si_docs.filter(si => flt(si.outstanding_amount) > 0);
+		// 4. Filter outstanding > 0
+		const payable_si = si_docs.filter(si => flt(si.outstanding_amount) > 0);
  
-        if (payable_si.length === 0) {
-            frappe.throw(__("Semua Sales Invoice pada Nota Piutang ini sudah lunas."));
-        }
+		if (payable_si.length === 0) {
+			frappe.throw(__("Semua Sales Invoice pada Nota Piutang ini sudah lunas."));
+		}
  
-        // 5. Hitung total outstanding
-        const total_outstanding = payable_si.reduce(
-            (sum, si) => sum + flt(si.outstanding_amount), 0
-        );
+		// 5. Hitung total outstanding
+		const total_outstanding = payable_si.reduce(
+			(sum, si) => sum + flt(si.outstanding_amount), 0
+		);
  
-        // 6. Set field nota_piutang_pemenuhan_kontrak
-        frm.set_value("nota_piutang_pemenuhan_kontrak", np.name);
+		// 6. Set field nota_piutang_pemenuhan_kontrak
+		frm.set_value("nota_piutang_pemenuhan_kontrak", np.name);
  
-        // 7. Set party dari SI pertama jika belum diisi
-        if (!frm.doc.party) {
-            await frm.set_value("party_type", "Customer");
-            await frm.set_value("party", payable_si[0].customer);
-        }
+		// 7. Set party dari SI pertama jika belum diisi
+		if (!frm.doc.party) {
+			await frm.set_value("party_type", "Customer");
+			await frm.set_value("party", payable_si[0].customer);
+		}
  
-        // 8. Set bank account dari Unit
-        if (np.unit) {
-            const unit_doc = await frappe.db.get_doc("Unit", np.unit);
-            if (unit_doc.bank_account) {
-                await frm.set_value("paid_to", unit_doc.bank_account);
-            }
-        }
+		// 8. Set bank account dari Unit
+		if (np.unit) {
+			const unit_doc = await frappe.db.get_doc("Unit", np.unit);
+			if (unit_doc.bank_account) {
+				await frm.set_value("paid_to", unit_doc.bank_account);
+			}
+		}
  
-        // 9. Kosongkan references lama lalu isi yang baru
-        frm.clear_table("references");
+		// 9. Kosongkan references lama lalu isi yang baru
+		frm.clear_table("references");
  
-        for (const si of payable_si) {
-            const row = frm.add_child("references");
-            row.reference_doctype = "Sales Invoice";
-            row.reference_name = si.name;
-            row.bill_no = si.bill_no || "";
-            row.due_date = si.due_date;
-            row.total_amount = flt(si.grand_total);
-            row.outstanding_amount = flt(si.outstanding_amount);
-            row.allocated_amount = flt(si.outstanding_amount);
-        }
+		for (const si of payable_si) {
+			const row = frm.add_child("references");
+			row.reference_doctype = "Sales Invoice";
+			row.reference_name = si.name;
+			row.bill_no = si.bill_no || "";
+			row.due_date = si.due_date;
+			row.total_amount = flt(si.grand_total);
+			row.outstanding_amount = flt(si.outstanding_amount);
+			row.allocated_amount = flt(si.outstanding_amount);
+		}
  
-        frm.refresh_field("references");
+		frm.refresh_field("references");
  
-        // 10. Recalculate paid_amount & received_amount
-        frm.set_value("paid_amount", total_outstanding);
-        frm.set_value("received_amount", total_outstanding);
+		// 10. Recalculate paid_amount & received_amount
+		frm.set_value("paid_amount", total_outstanding);
+		frm.set_value("received_amount", total_outstanding);
  
-        frappe.show_alert({
-            message: __(`Nota Piutang <b>${np.name}</b> berhasil diterapkan.`),
-            indicator: "green"
-        }, 4);
+		frappe.show_alert({
+			message: __(`Nota Piutang <b>${np.name}</b> berhasil diterapkan.`),
+			indicator: "green"
+		}, 4);
  
-    } catch (err) {
-        frappe.msgprint({
-            title: __("Error"),
-            message: err.message || JSON.stringify(err),
-            indicator: "red"
-        });
-    }
+	} catch (err) {
+		frappe.msgprint({
+			title: __("Error"),
+			message: err.message || JSON.stringify(err),
+			indicator: "red"
+		});
+	}
+}
+
+function pasang_company_account(frm){
+	if (frm.doc.unit) {
+		frappe.db.get_value('Unit', frm.doc.unit, 'default_bank_account', function(r) {
+			if (r && r.default_bank_account) {
+				frm.set_value('bank_account', r.default_bank_account);
+			} else {
+				frm.set_value('bank_account', '');
+			}
+		});
+	} else {
+		frm.set_value('bank_account', '');
+	}
+}
+
+function make_pdo_preview(frm){
+	const rows = frm.doc.payment_voucher_kas_pdo || [];
+	if (rows.length === 0) return;
+
+	const uniquePDO = [...new Set(
+		rows
+			.map(r => r.no_pdo)
+			.filter(v => v && v.trim() !== '')
+	)];
+
+	if (uniquePDO.length === 0) return;
+
+	frm.add_custom_button(__('Check Preview'), function() {
+		show_pdo_preview(uniquePDO);
+	}, __('PDO'));
+}
+
+function show_pdo_preview(pdoList) {
+	const baseUrl = 'https://sth.digitalasiasolusindo.com/printview'
+		+ '?doctype=Permintaan%20Dana%20Operasional'
+		+ '&format=PF%20Preview%20PDO'
+		+ '&no_letterhead=0'
+		+ '&trigger_print=0';
+
+	let html = '<div style="display:flex; flex-direction:column; gap:10px; padding: 10px 0;">';
+
+	pdoList.forEach(pdo => {
+		const url = `${baseUrl}&name=${encodeURIComponent(pdo)}`;
+		html += `
+			<div style="display:flex; justify-content:space-between; align-items:center; 
+						padding: 10px 14px; border: 1px solid #d1d8dd; border-radius: 6px;">
+				<span style="font-weight:500;">${frappe.utils.escape_html(pdo)}</span>
+				<a href="${url}" target="_blank" class="btn btn-sm btn-primary">
+					<i class="fa fa-external-link"></i>&nbsp; Open Preview
+				</a>
+			</div>`;
+	});
+
+	html += '</div>';
+
+	new frappe.ui.Dialog({
+		title: __('PDO Preview'),
+		fields: [{
+			fieldtype: 'HTML',
+			fieldname: 'preview_html',
+			options: html
+		}]
+	}).show();
 }

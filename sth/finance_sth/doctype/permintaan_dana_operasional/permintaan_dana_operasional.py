@@ -331,7 +331,8 @@ def create_payment_voucher(source_name, target_doc=None):
 			None
 		)	
 
-		target.paid_from = account_row.kas_ho_account
+		target.mode_of_payment = "Cash"
+		# target.paid_from = account_row.kas_ho_account
 		target.paid_to = account_row.kas_dan_bank_dalam_perjalanan
 		
 		
@@ -353,7 +354,8 @@ def create_payment_voucher(source_name, target_doc=None):
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
 		target.remarks = _("Payment HO for Permintaan Dana Operasional {0}").format(source.name)
-		target.naming_series = "PVPDO.-"
+		target.unit = ""
+		target.naming_series = "ACC-PAY-.YYYY.-"
 	
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	validate_source(source_doc)
@@ -423,12 +425,13 @@ def create_payment_voucher_kebun(source_name, target_doc=None):
 		target.remarks = _("Penerimaan Kebun for Permintaan Dana Operasional {0}").format(source.name)
 		payment_voucher = frappe.get_doc("Payment Entry", source.payment_voucher)
 		target.paid_from = payment_voucher.paid_to
-		target.naming_series = "PVPDO.-"
+		target.naming_series = "ACC-PAY-.YYYY.-"
 		
 		unit_doc = frappe.get_doc("Unit", source.unit)
 		if not unit_doc.bank_account:
 			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
 		target.paid_to = unit_doc.bank_account
+		target.mode_of_payment = "Bank Draft"
 	
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	validate_source(source_doc)
@@ -540,7 +543,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		target.paid_to_account_currency = "IDR"
 		target.tipe_transfer = "Realisasi PDO"
 		target.payment_voucher_kas_pdo = []
-		target.naming_series = "PVPDO.-"
+
 		target.remarks = _("Realisasi PDO tipe {1} for Permintaan Dana Operasional {0}").format(source.name, tipe_pdo)
 
 		# target.paid_to = payment_voucher.paid_to
@@ -549,6 +552,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		if not unit_doc.bank_account:
 			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
 		target.paid_from = unit_doc.bank_account
+		target.mode_of_payment = "Bank Draft"
 		
 		# Get child table data
 		child_data = getattr(source, child_table_name, [])
@@ -556,9 +560,10 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		if not child_data:
 			frappe.throw(_("No data found in {0} table").format(tipe_pdo))
 		
+		header_debit_account = getattr(source, header_debit_field, None) if header_debit_field else None
+			
 		# For Bahan Bakar, get debit account from header
 		if header_debit_field:
-			header_debit_account = getattr(source, header_debit_field, None)
 			if not header_debit_account:
 				frappe.throw(_("Debit account field {0} not found in source document").format(header_debit_field))
 			target.paid_to = header_debit_account
@@ -574,11 +579,24 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
 			amount = getattr(row, amount_field, 0) or getattr(row, before_amount_field, 0)
 			
-			if row.get(debit_account_field):
-				# debit_account = source.kas_dan_bank_dalam_perjalanan
+			if debit_account_field and row.get(debit_account_field):
 				debit_account = row.get(debit_account_field)
 			elif header_debit_account:
 				debit_account = header_debit_account
+			else:
+				debit_account = None
+
+			if tipe_pdo == "Perjalanan Dinas" or tipe_pdo == "Kas":
+				ex_claim_type = row.type
+				ex_claim_doc = frappe.get_doc("Expense Claim Type", ex_claim_type)
+
+				for ex_claim_row in ex_claim_doc.accounts:
+					if ex_claim_row.company == source_doc.company:
+						debit_account = ex_claim_row.default_account
+						if not header_debit_account:
+							header_debit_account = ex_claim_row.default_account
+							target.paid_to = header_debit_account
+
 
 			target.append('payment_voucher_kas_pdo', {
 				'no_pdo': source.name,
@@ -588,8 +606,8 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 				'debit_to': debit_account,  # Add debit account
 				'pdo_child_name': row.name
 			})
-			if not header_debit_field:
-				target.paid_to = debit_account
+			# if not header_debit_field:
+			# 	target.paid_to = debit_account
 	
 	# Map document
 	doclist = get_mapped_doc(

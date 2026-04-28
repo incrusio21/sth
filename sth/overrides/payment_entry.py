@@ -108,6 +108,12 @@ class PaymentEntry(EmployeePaymentEntry):
 		unallocated_amount: DF.Currency
 	# end: auto-generated types
 
+	def onload(self):
+		for d in self.get("references"):
+
+			if d.reference_doctype == "Sales Invoice":
+				d.total_amount = frappe.get_doc(d.reference_doctype, d.reference_name).grand_total
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._payment_settings = get_payment_settings()
@@ -130,6 +136,10 @@ class PaymentEntry(EmployeePaymentEntry):
 			return
 
 		for d in self.get("references"):
+
+			if d.reference_doctype == "Sales Invoice":
+				d.total_amount = frappe.get_doc(d.reference_doctype, d.reference_name).grand_total
+
 			if not d.allocated_amount:
 				continue
 
@@ -495,7 +505,7 @@ class PaymentEntry(EmployeePaymentEntry):
 					)
 				)
 
-			if self.payment_type == "Internal Transfer" and (self.tipe_transfer == "PDO" or self.tipe_transfer == "Penerimaan Dana PDO"):
+			if self.payment_type == "Internal Transfer" and (self.tipe_transfer == "PDO" or self.tipe_transfer == "Penerimaan Dana PDO" or self.tipe_transfer == "Dividen Sent" or self.tipe_transfer == "Dividen Receive"):
 				gl_entries.append(
 					self.get_gl_dict(
 						{
@@ -639,8 +649,8 @@ def on_submit_pdo(self,method):
 	if self.payment_voucher_kas_pdo:
 		update_outstanding_pdo(self)
 		update_tipe_pdo_outstanding(self)
-		update_pdo_non_pdo_table(self)
-		check_plafon_and_split_excess(self)
+		# update_pdo_non_pdo_table(self)
+		# check_plafon_and_split_excess(self)
 
 def on_cancel_pdo(self,method):
 	if self.permintaan_dana_operasional:
@@ -981,7 +991,7 @@ def check_plafon_and_split_excess(self):
 		if not designation:
 			continue
 		
-		plafon_info = self.get_plafon_for_designation(designation)
+		plafon_info = get_plafon_for_designation(self, designation)
 		
 		print(plafon_info)
 		if not plafon_info:

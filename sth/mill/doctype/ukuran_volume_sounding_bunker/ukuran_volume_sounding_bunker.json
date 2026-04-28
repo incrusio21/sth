@@ -11,7 +11,8 @@
   "netto",
   "column_break_uqra",
   "kompartemen",
-  "hitung_limas"
+  "hitung_limas",
+  "upload_foto_limas"
  ],
  "fields": [
   {
@@ -53,13 +54,18 @@
    "fieldname": "hitung_limas",
    "fieldtype": "Button",
    "label": "Hitung Limas"
+  },
+  {
+   "fieldname": "upload_foto_limas",
+   "fieldtype": "Attach Image",
+   "label": "Upload Foto Limas"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-20 15:39:19.835186",
+ "modified": "2026-04-23 10:20:46.709406",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Volume Sounding Bunker",

@@ -29,8 +29,6 @@
   "itinerary",
   "costing_details_section",
   "costings",
-  "upload_file_section",
-  "kriteria_upload_html",
   "section_break_pqjx",
   "total_claimed_amount",
   "total_sanctioned_amount",
@@ -48,10 +46,15 @@
   "cost_center",
   "section_break_63wn",
   "amended_from",
+  "upload_file_tab",
+  "upload_file_section",
+  "kriteria_upload_html",
   "more_information_tab",
   "accounts_details_section",
   "salary_account",
-  "credit_to"
+  "credit_to",
+  "section_break_jzah",
+  "payment_voucher"
  ],
  "fields": [
   {
@@ -314,13 +317,29 @@
    "fieldname": "kriteria_upload_html",
    "fieldtype": "HTML",
    "label": "Kriteria Upload HTML"
+  },
+  {
+   "fieldname": "section_break_jzah",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payment_voucher",
+   "fieldtype": "Link",
+   "label": "Payment Voucher",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "label": "Upload File"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-18 22:58:54.960880",
+ "modified": "2026-04-23 09:40:28.506154",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",
