@@ -135,7 +135,7 @@ frappe.ui.form.on('Transaksi Berulang', {
     // tanggal_mulai mengambil hari dari tanggal_mulai yang sudah ada,
     // lalu update bulan/tahunnya ke periode_from
     periode_from: function (frm) {
-        _update_tanggal_mulai(frm);
+        // _update_tanggal_mulai(frm);
         hitung_bulan(frm);
     },
 
