@@ -1,0 +1,260 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:TB-{#####}",
+ "creation": "2026-05-01 13:56:06.709246",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "jenis_transaksi",
+  "jenis_pertanggungan",
+  "tarik_purchase_invoice",
+  "tanggal_invoice",
+  "column_break_zrru",
+  "periode_from",
+  "periode_to",
+  "masa_periode",
+  "company",
+  "section_break_kfuj",
+  "nama_vendor",
+  "column_break_jkym",
+  "premi",
+  "deposit",
+  "section_break_hteh",
+  "nama_pemilik",
+  "nomor_polis",
+  "biaya_pertanggungan",
+  "tanggal_mulai",
+  "keterangan",
+  "column_break_ymsb",
+  "no_rangka",
+  "nomor_polisi",
+  "no_mesin",
+  "section_break_vcpp",
+  "jurnal_debit",
+  "column_break_vddw",
+  "jurnal_kredit",
+  "section_break_okiw",
+  "transaksi_berulang_je_log",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:doc.jenis_transaksi",
+   "fieldname": "tarik_purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Tarik Purchase Invoice",
+   "options": "Purchase Invoice"
+  },
+  {
+   "fieldname": "jenis_transaksi",
+   "fieldtype": "Select",
+   "label": "Jenis Transaksi",
+   "options": "\nASURANSI\nSEWA"
+  },
+  {
+   "fieldname": "nama_vendor",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Nama Vendor",
+   "options": "Supplier"
+  },
+  {
+   "default": "Today",
+   "fieldname": "periode_from",
+   "fieldtype": "Date",
+   "label": "Periode From"
+  },
+  {
+   "fieldname": "column_break_zrru",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periode_to",
+   "fieldtype": "Date",
+   "label": "Periode To"
+  },
+  {
+   "fieldname": "section_break_hteh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Premi",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "fieldname": "nomor_polis",
+   "fieldtype": "Data",
+   "label": "Nomor Polis"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "fieldname": "biaya_pertanggungan",
+   "fieldtype": "Currency",
+   "label": "Biaya Pertanggungan"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_mulai",
+   "fieldtype": "Date",
+   "label": "Tanggal Mulai"
+  },
+  {
+   "fieldname": "column_break_ymsb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "fieldname": "no_rangka",
+   "fieldtype": "Data",
+   "label": "No Rangka"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "fieldname": "nomor_polisi",
+   "fieldtype": "Data",
+   "label": "Nomor Polisi"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "fieldname": "no_mesin",
+   "fieldtype": "Data",
+   "label": "No Mesin"
+  },
+  {
+   "default": "0",
+   "fieldname": "masa_periode",
+   "fieldtype": "Int",
+   "in_preview": 1,
+   "label": "Masa Asuransi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_vcpp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "jurnal_debit",
+   "fieldtype": "Link",
+   "label": "Jurnal Debit",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_vddw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jurnal_kredit",
+   "fieldtype": "Link",
+   "label": "Jurnal Kredit",
+   "options": "Account"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "fieldname": "jenis_pertanggungan",
+   "fieldtype": "Select",
+   "label": "Jenis Pertanggungan",
+   "options": "JASA ASURANSI ALAT BERAT\nJASA ASURANSI GEDUNG/PROPERTI\nJASA ASURANSI KENDARAAN\nJASA ASURANSI KESEHATAN\nJASA ASURANSI MESIN PABRIK\nJASA ASURANSI UMUM"
+  },
+  {
+   "fieldname": "section_break_kfuj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_jkym",
+   "fieldtype": "Column Break",
+   "in_preview": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_okiw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "transaksi_berulang_je_log",
+   "fieldtype": "Table",
+   "label": "Transaksi Berulang JE Log",
+   "no_copy": 1,
+   "options": "Transaksi Berulang JE Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transaksi Berulang",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"SEWA\"",
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Keterangan"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"SEWA\"",
+   "fieldname": "nama_pemilik",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Pemilik"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"SEWA\"",
+   "fieldname": "deposit",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Deposit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "tarik_purchase_invoice.posting_date",
+   "fieldname": "tanggal_invoice",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Invoice",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-07 09:08:11.216435",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Transaksi Berulang",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
