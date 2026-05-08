@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 2,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-10-20 09:55:16.054625",
+ "modified": "2026-05-07 17:20:42.842171",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Budget Panen",
@@ -24,10 +24,16 @@
    "role": "System Manager"
   },
   {
-   "role": "Plantation Supervisor"
+   "role": "Plantation Staff"
   },
   {
    "role": "Admin Plantation"
+  },
+  {
+   "role": "ADMIN KEBUN"
+  },
+  {
+   "role": "ASISTEN KUALITAS KONTROL (QM)"
   }
  ],
  "timeout": 0

@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-12-18 15:44:35.419582",
+ "modified": "2026-05-05 13:49:20.231063",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Rekap izin Cuti",
@@ -28,6 +28,18 @@
   },
   {
    "role": "Employee Self Service"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
   }
  ],
  "timeout": 0

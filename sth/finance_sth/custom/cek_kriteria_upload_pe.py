@@ -1,4 +1,74 @@
 import frappe
+from frappe.utils.pdf import get_pdf
+from frappe.utils.file_manager import save_file
+from frappe.www.printview import get_html_and_style
+import requests as req_lib
+from urllib.parse import quote
+
+
+def debug():
+	l = frappe.db.sql(""" SELECT name FROM `tabPayment Entry` WHERE tipe_transfer = "Realisasi PDO" """)
+	for row in l:
+		generate_kriteria_upload_payment_pdo(frappe.get_doc("Payment Entry",row[0]))
+		print(row[0])
+
+def generate_kriteria_upload_payment_pdo(doc, method=None):
+	if doc.is_new():
+		return
+
+	# Ambil unique PDO dari child table payment_voucher_kas_pdo
+	pdo_rows = doc.payment_voucher_kas_pdo or []
+	unique_pdos = list(dict.fromkeys(
+		r.no_pdo for r in pdo_rows if r.no_pdo and r.no_pdo.strip()
+	))
+
+	if not unique_pdos:
+		return
+
+	for no_pdo in unique_pdos:
+		all_rows = []
+		seen = set()
+
+		# Ambil kriteria rows khusus untuk PDO ini
+		rows = get_kriteria_rows_for_reference_pdo("Permintaan Dana Operasional", no_pdo)
+		for row in rows:
+			key = (
+				row["document_type"],
+				row["document_no"],
+				row["rincian_dokumen_finance"],
+				row["uploaded_file"],
+			)
+			if key not in seen:
+				seen.add(key)
+				all_rows.append(row)
+
+		if not all_rows:
+			continue
+
+		existing = frappe.db.get_value(
+			"Kriteria Upload Payment",
+			{
+				"voucher_type": "Payment Entry",
+				"voucher_no": doc.name
+			},
+			"name"
+		)
+
+		if existing:
+			kup = frappe.get_doc("Kriteria Upload Payment", existing)
+			kup.file_upload = []
+			for row in all_rows:
+				kup.append("file_upload", row)
+			kup.save(ignore_permissions=True)
+		else:
+			kup = frappe.new_doc("Kriteria Upload Payment")
+			kup.voucher_type = "Payment Entry"
+			kup.voucher_no = doc.name
+			for row in all_rows:
+				kup.append("file_upload", row)
+			kup.insert(ignore_permissions=True)
+
+	frappe.db.commit()
 
 def generate_kriteria_upload_payment(doc, method=None):
 	if doc.is_new():
@@ -51,6 +121,27 @@ def generate_kriteria_upload_payment(doc, method=None):
 	frappe.db.commit()
 
 
+def get_kriteria_rows_for_reference_pdo(doctype, docname):
+
+	BASE_URL = frappe.utils.get_url()
+
+	# Fetch HTML dari printview URL
+	print_url = (
+		f"{BASE_URL}/printview"
+		f"?doctype={quote('Permintaan Dana Operasional')}"
+		f"&name={quote(docname)}"
+		f"&format={quote('PF Preview PDO')}"
+		f"&no_letterhead=0"
+		f"&trigger_print=0"
+	)
+
+	return [{
+		"document_type": doctype,
+		"document_no": docname,
+		"rincian_dokumen_finance": "PF Preview PDO",
+		"uploaded_file": print_url,
+	}]
+	
 def get_kriteria_rows_for_reference(reference_doctype, reference_name):
 	rows = []
 

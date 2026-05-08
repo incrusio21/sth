@@ -1,8 +1,7 @@
 # Copyright (c) 2026, DAS and contributors
 # For license information, please see license.txt
 import os
-import io
-import time
+import io,time
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -13,13 +12,18 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.naming import parse_naming_series
 from frappe.utils import format_date
+from frappe.utils import now_datetime
+from datetime import timedelta
 
 from sth.utils import generate_duplicate_key
 
 from sth.bank_payment.doctype.mandiri_kopra_cash_management import kcm_template
 
 template_function = {
-	"MCM_SingleMix": kcm_template.mtfu_separated
+	"MCM_SingleMix": kcm_template.mtfu_separated,
+	"MCM_BatchUpload": kcm_template.mtfu_consolidated,
+	"MCM_BillPaymentSingle": kcm_template.mtfu_bill_separated,
+	"MCM_PayrollMix": kcm_template.mtfu_payroll
 }
 
 class MandiriKopraCashManagement(Document):
@@ -35,16 +39,33 @@ class MandiriKopraCashManagement(Document):
 
 		self.naming_series = f"{company_alias}{path_alias}{date_naming}.######"
 		
-		parts = self.series.split(".")
+		parts = self.naming_series.split(".")
 		self.name = parse_naming_series(parts)
 
-	def before_submit(self):
-		for d in self.items:
-			generate_duplicate_key(d, "duplicate_key", [self.voucher_type, self.voucher_no])
+	# def before_submit(self):
+	# 	for d in self.items:
+	# 		generate_duplicate_key(d, "duplicate_key", [self.voucher_type, self.voucher_no])
 
 	def on_submit(self):
 		self.update_payment_entry_status()
 		self.upload_mft_file()
+
+	def validate(self):
+		if self.is_new():
+			self.raw_response = None
+			self.payment_status = "In Progress"
+
+		if self.path not in template_function:
+			frappe.throw(f"Path {self.path} belum ada templatenya")
+
+		if self.path == "MCM_BatchUpload":
+			debit_accounts = {d.debit_account for d in self.detail if d.debit_account}
+
+			if len(debit_accounts) > 1:
+				frappe.throw("Batch Upload (Consolidated) hanya boleh 1 debit account")
+
+		content = self.create_content()
+		self.raw_content = content
 
 	def before_cancel(self):
 		for d in self.items:
@@ -59,14 +80,17 @@ class MandiriKopraCashManagement(Document):
 	def upload_mft_file(self):
 		# 1. Buat konten TXT di memori
 		content = self.create_content()
-		# print("CONTENT RAW:", content)
+		print("CONTENT RAW:", content[:100])
+		self.raw_content = content
 
 		mpk = frappe.get_value("Mandiri Public Key", self.public_key, ["recipient_email", "public_key"], as_dict=1)
 
 		if mpk.public_key:
 			# 2. Enkripsi ke PGP di memori
 			content = self.encrypt_in_memory(content, mpk.public_key, mpk.recipient_email)
-			# print("TYPE:", type(content))
+			print("TYPE:", type(content))
+			print("AFTER ENCRYPT SAMPLE:", content[:100]) 
+
 			self._extension_name = ".pgp"
 		
 		self.upload_to_sftp(content)
@@ -97,51 +121,56 @@ class MandiriKopraCashManagement(Document):
 
 		return encrypted.data  # bytes hasil enkripsi
 	
+	# def upload_to_sftp(self, data) -> None:
+	# 	ssh = ssh_connect(self.mft_server)
+		
+	# 	if not ssh:
+	# 		frappe.throw(f"Gagal konek ke MFT server: {self.mft_server}")
+		
+	# 	path = f"Upload/Users/{self.path}"
+	# 	try:
+	# 		with ssh.open_sftp() as sftp:
+	# 			try:
+	# 				sftp.stat(path)
+	# 			except FileNotFoundError:
+	# 				frappe.throw(f"Folder {path} Not Found")
+
+	# 			remote_path = f"{path}/{self.name}{self._extension_name}"
+	# 			with sftp.open(remote_path, 'wb') as remote_file:
+	# 				remote_file.set_pipelined(True)
+	# 				remote_file.write(data)
+	# 	finally:
+	# 		ssh.close()  # ✅ selalu dieksekusi meski frappe.throw() dipanggil
+
 	def upload_to_sftp(self, data) -> None:
 		ssh = ssh_connect(self.mft_server)
-		
+
 		if not ssh:
 			frappe.throw(f"Gagal konek ke MFT server: {self.mft_server}")
-		
-		path = f"/Upload/Users/{self.path}"
+
+		path = f"Upload/Users/{self.path}"
+		remote_path = f"{path}/{self.name}{self._extension_name}"
+
 		try:
 			with ssh.open_sftp() as sftp:
-				try:
-					sftp.stat(path)
-				except FileNotFoundError:
-					frappe.throw(f"Folder {path} Not Found")
 
-				print("BEFORE UPLOAD:", sftp.listdir(path))
-				remote_path = f"{path}/{self.name}{self._extension_name}"
-				
-				# with sftp.open(remote_path, 'wb') as remote_file:
-				# 	remote_file.set_pipelined(True)
-				# 	remote_file.write(data)
+				# print("CHECK /Upload:", sftp.listdir("/Upload"))
+				# print("CHECK /Upload/Users:", sftp.listdir("/Upload/Users"))
+				# print("CHECK TARGET:", sftp.listdir(path))
 
-				with ssh.open_sftp() as sftp:
+				# print("UPLOAD TO:", remote_path)
+				# print("DATA SIZE:", len(data))
 
-					print("CHECK /Upload:", sftp.listdir("/Upload"))
-					print("CHECK /Upload/Users:", sftp.listdir("/Upload/Users"))
-					print("CHECK TARGET:", sftp.listdir(path))
+				f = sftp.open(remote_path, 'wb')
+				f.write(data)
+				f.flush()
+				f.close()
 
-					remote_path = f"{path}/{self.name}{self._extension_name}"
-					print("UPLOAD TO:", remote_path)
+				# print("UNREAD:", sftp.listdir("/Downloads/Unread Files"))
+				# print("UPLOAD DONE (FILE CLOSED)")
 
-					with sftp.open(remote_path, 'wb') as f:
-						f.write(data)
-						f.flush()
-
-					time.sleep(2)
-
-					try:
-						print("AFTER:", sftp.listdir(path))
-						print("SIZE:", sftp.stat(remote_path).st_size)
-					except Exception as e:
-						print("ERROR:", str(e))
-				
-				print("AFTER UPLOAD:", sftp.listdir(path))
 		finally:
-			ssh.close()  # ✅ selalu dieksekusi meski frappe.throw() dipanggil
+			ssh.close()
 
 def ssh_connect(sftp_server):
 	ssh = paramiko.SSHClient()
@@ -157,159 +186,125 @@ def ssh_connect(sftp_server):
 
 	return ssh
 
-
+@frappe.whitelist()
 def get_payment_status():
-	import io
-
-	print("=== MASUK FUNCTION get_payment_status ===")
-
+	
 	progress_payment = frappe.get_all(
 		"Mandiri Kopra Cash Management",
-		filters={"status": "In Progress"},
-		fields=["name", "mft_server"]
+		filters={
+			"payment_status": "In Progress",
+			"docstatus": 1,
+		},
+		fields=["name", "mft_server", "creation"]
 	)
 
-	print("DATA progress_payment:", progress_payment)
-
 	if not progress_payment:
-		print("TIDAK ADA DATA")
 		return
 
 	mft_server = {}
-	for kcm in progress_payment:
-		print(f"Mapping KCM: {kcm.name} -> {kcm.mft_server}")
-		mft_server.setdefault(kcm.mft_server, []).append(kcm.name)
-
-	print("MFT SERVER RESULT:", mft_server)
-
-	if not mft_server:
-		print("mft_server kosong")
-		return
+	for row in progress_payment:
+		mft_server.setdefault(row.mft_server, []).append(row)
 
 	kcm_to_update = {}
-	remote_dir = '/Downloads/Unread Files'
 
-	for server, kcm_names in mft_server.items():
-		print(f"\n=== CONNECT KE SERVER: {server} ===")
+	dirs = [
+		"/Downloads/Unread Files",
+		"/Downloads/Read Files",
+		"/Downloads"
+	]
 
+	for server, rows in mft_server.items():
 		ssh = None
 
 		try:
 			ssh = ssh_connect(server)
-
 			if not ssh:
-				print(f"SSH RETURN NONE: {server}")
 				continue
 
-			print("SSH CONNECTED:", server)
-
-		except Exception as e:
-			print("SSH ERROR:", e)
-			continue
-
-		try:
 			with ssh.open_sftp() as sftp:
-				print("OPEN SFTP SUCCESS")
 
-				try:
-					files = sftp.listdir(remote_dir)
-					print(f"FILES di {remote_dir}: {files}")
-				except Exception as e:
-					print("ERROR LISTDIR:", e)
-					continue
-
-				for kcm_name in kcm_names:
-					print(f"\nCEK FILE UNTUK: {kcm_name}")
-
-					matched_file = None
+				for remote_dir in dirs:
+					try:
+						files = sftp.listdir(remote_dir)
+					except:
+						continue
 
 					for file in files:
-						print(f"   - compare: {file}")
-						if file.startswith(kcm_name) and file.endswith(('.ack', '.nack')):
-							matched_file = file
-							break
 
-					if not matched_file:
-						print(f"TIDAK KETEMU FILE untuk {kcm_name}")
-						continue
+						if not (file.endswith(".ack") or file.endswith(".nack")):
+							continue
 
-					print(f"KETEMU FILE: {matched_file}")
+						for row in rows:
+							kcm_name = row.name
 
-					remote_path = f"{remote_dir}/{matched_file}"
-					print(f"DOWNLOAD: {remote_path}")
+							if kcm_name in kcm_to_update:
+								continue
 
-					try:
-						buffer = io.BytesIO()
-						sftp.getfo(remote_path, buffer)
-						buffer.seek(0)
-						data = buffer.read()
-					except Exception as e:
-						print("ERROR DOWNLOAD FILE:", e)
-						continue
+							if not file.startswith(kcm_name):
+								continue
 
-					try:
-						decoded = data.decode("utf-8", errors="ignore")
-					except Exception as e:
-						print("ERROR DECODE:", e)
-						decoded = str(data)
+							remote_path = f"{remote_dir}/{file}"
 
-					print(f"\n===== BANK RESPONSE =====")
-					print(f"{kcm_name}")
-					print(decoded)
-					print(f"========================\n")
+							try:
+								buffer = io.BytesIO()
+								sftp.getfo(remote_path, buffer)
+								buffer.seek(0)
+								data = buffer.read()
+							except:
+								continue
 
-					kcm_to_update[kcm_name] = {
-						"status": "Completed" if matched_file.endswith(".ack") else "Error",
-						"callback": decoded
-					}
+							try:
+								decoded = data.decode("utf-8", errors="ignore")
+							except:
+								decoded = str(data)
+
+							status = "Success" if file.endswith(".ack") else "Failed"
+
+							kcm_to_update[kcm_name] = {
+								"payment_status": status,
+								"raw_response": decoded
+							}
 
 		finally:
 			if ssh:
-				print("🔌 CLOSE SSH:", server)
 				ssh.close()
 
-	# DEBUG sementara
-	print("HASIL AKHIR:", kcm_to_update)
+	# TAMBAHAN: HANDLE TIMEOUT 30 MENIT
+	now = now_datetime()
 
-	# if not kcm_to_update:
-	if True:
-		print("TIDAK ADA DATA YANG DIUPDATE")
+	for rows in mft_server.values():
+		for row in rows:
+			if row.name in kcm_to_update:
+				continue
+
+			created_time = row.creation
+			if created_time and (now - created_time) > timedelta(minutes=30):
+				kcm_to_update[row.name] = {
+					"payment_status": "Failed",
+					"raw_response": "Timeout: No response from bank after 30 minutes"
+				}
+
+	# ==============================
+
+	if not kcm_to_update:
 		return
 
-	print("DATA YANG AKAN DIUPDATE:", kcm_to_update)
-
-	status_update = ""
-	callback_update = ""
+	status_case = ""
+	response_case = ""
 	kcm_list = []
 
-	for kcm_name, value in kcm_to_update.items():
-		status_update += """ WHEN name = {} THEN {} """.format(
-			frappe.db.escape(kcm_name),
-			frappe.db.escape(value["status"]),
-		)
+	for name, val in kcm_to_update.items():
+		status_case += f" WHEN name = {frappe.db.escape(name)} THEN {frappe.db.escape(val['payment_status'])} "
+		response_case += f" WHEN name = {frappe.db.escape(name)} THEN {frappe.db.escape(val['raw_response'])} "
+		kcm_list.append(name)
 
-		callback_update += """ WHEN name = {} THEN {} """.format(
-			frappe.db.escape(kcm_name),
-			frappe.db.escape(value["callback"]),
-		)
-
-		kcm_list.append(kcm_name)
-
-	print("KCM LIST:", kcm_list)
-
-	frappe.db.sql(
-		f"""
+	frappe.db.sql(f"""
 		UPDATE `tabMandiri Kopra Cash Management`
 		SET
-			status = CASE {status_update} END,
-			callback = CASE {callback_update} END
-		WHERE
-			name in %(kcm)s
-		""",
-		{"kcm": kcm_list}
-	)
-
-	print("UPDATE DATABASE SELESAI")
+			payment_status = CASE {status_case} END,
+			raw_response = CASE {response_case} END
+		WHERE name in %(kcm)s
+	""", {"kcm": kcm_list})
 
 # def get_payment_status():
 # 	progress_payment = frappe.get_all("Mandiri Kopra Cash Management", filters={"docstatus": 1, "status": "In Progress"}, fields=["name", "mft_server"])
@@ -385,11 +380,49 @@ def get_payment_status():
 # 		{"kcm": kcm_list}
 # 	)
 
+@frappe.whitelist()
+def get_payment_entry_details(payment_entry):
+    if not payment_entry:
+        return {}
+
+    pe = frappe.get_doc("Payment Entry", payment_entry)
+
+    debit_account_number = frappe.db.get_value(
+        "Bank Account",
+        {"account": pe.paid_from},
+        "bank_account_no"
+    )
+
+    beneficiary_data = frappe.db.get_value(
+        "Bank Account",
+        {"account": pe.paid_to},
+        ["bank_account_no", "account_name"],
+        as_dict=1
+    )
+
+    beneficiary_account_number = (
+        pe.no_rekening_tujuan
+        or (beneficiary_data.get("bank_account_no") if beneficiary_data else None)
+    )
+
+    beneficiary_name = (
+        beneficiary_data.get("account_name")
+        if beneficiary_data else None
+    )
+
+    return {
+        "paid_from": pe.paid_from,
+        "paid_to": pe.paid_to,
+        "debit_account": pe.no_rekening or debit_account_number,
+        "beneficiary_account": beneficiary_account_number,
+        "beneficiary_name": beneficiary_name,
+        "currency": pe.paid_from_account_currency,
+        "amount": pe.paid_amount,
+        "customer_reference": pe.reference_no,
+        "remarks": pe.remarks
+    }
+
 def test():
-    print("STEP 1")
-
-    doc = frappe.get_doc("Mandiri Kopra Cash Management", "TMTL0011522042026000006")
-    print("STEP 2")
-
-    doc.upload_mft_file()
-    print("STEP 3 DONE")
+	doc = frappe.get_doc("Mandiri Kopra Cash Management", "TMTL0011404052026000006")
+	content = doc.create_content()
+	print(content)

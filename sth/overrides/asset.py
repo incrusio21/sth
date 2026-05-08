@@ -239,10 +239,10 @@ def make_vra_progress_from_asset(asset):
 		"jns_alt": jenis_alat,
 		"kode_item": asset.item_code,
 		"nama_item": asset.item_name,
-		"unit": asset.unit,
+		"kode_unit": asset.unit,
 		"uom": uom,
 		"asset": asset.name,
-		"divisi": divisi,
+		"kode_divisi": divisi,
 		"operator": asset.operator,
 		"kmhm_akhir": 0,
 		"api_status": "Aktif"

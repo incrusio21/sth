@@ -1,0 +1,252 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:CIT-{akhir_tahun_berapa}-{abbr}",
+ "creation": "2026-05-03 23:59:48.374487",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "abbr",
+  "akhir_tahun_berapa",
+  "penghasilan_neto_komersial",
+  "section_break_owmm",
+  "penyesuaian_fiskal_positif",
+  "selisih_penyusutan_komersial_vs_fiskal_positif",
+  "jumlah_koreksi_positif",
+  "section_break_vroi",
+  "penyesuaian_fiskal_negatif",
+  "selisih_penyusutan_komersial_vs_fiskal_negatif",
+  "jumlah_koreksi_negatif",
+  "section_break_dviw",
+  "jumlah_koreksi_fiskal",
+  "penghasilan_neto_fiskal",
+  "kompensasi_kerugian_fiskal",
+  "column_break_ryfr",
+  "penghasilan_kena_pajak",
+  "pembulatan_penghasilan_kena_pajak",
+  "section_break_rxyc",
+  "persentase_pph_terutang",
+  "column_break_wwmg",
+  "pph_terutang",
+  "section_break_pwqk",
+  "pajak_penghasilan_pph_22",
+  "pajak_penghasilan_pph_23",
+  "column_break_jjxy",
+  "jumlah_kredit_pajak",
+  "section_break_wcnk",
+  "status_pph_pasal_29_terhutang",
+  "column_break_pwrr",
+  "pph_pasal_29_terhutang",
+  "section_break_omxu",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_omxu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "CIT",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "akhir_tahun_berapa",
+   "fieldtype": "Link",
+   "label": "Tahun",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "section_break_owmm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "penghasilan_neto_komersial",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Penghasilan Neto Komersial"
+  },
+  {
+   "fieldname": "penyesuaian_fiskal_positif",
+   "fieldtype": "Table",
+   "label": "Penyesuaian Fiskal Positif",
+   "options": "Penyesuaian Fiskal Positif"
+  },
+  {
+   "fieldname": "jumlah_koreksi_positif",
+   "fieldtype": "Currency",
+   "label": "Jumlah Koreksi Positif"
+  },
+  {
+   "fieldname": "section_break_vroi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "penyesuaian_fiskal_negatif",
+   "fieldtype": "Table",
+   "label": "Penyesuaian Fiskal Negatif",
+   "options": "Penyesuaian Fiskal Negatif"
+  },
+  {
+   "fieldname": "selisih_penyusutan_komersial_vs_fiskal_positif",
+   "fieldtype": "Currency",
+   "label": "Selisih Penyusutan Komersial vs Fiskal Positif"
+  },
+  {
+   "fieldname": "selisih_penyusutan_komersial_vs_fiskal_negatif",
+   "fieldtype": "Currency",
+   "label": "Selisih Penyusutan Komersial vs Fiskal Negatif"
+  },
+  {
+   "fieldname": "jumlah_koreksi_negatif",
+   "fieldtype": "Currency",
+   "label": "Jumlah Koreksi Negatif"
+  },
+  {
+   "fieldname": "section_break_dviw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "jumlah_koreksi_fiskal",
+   "fieldtype": "Currency",
+   "label": "Jumlah Koreksi Fiskal"
+  },
+  {
+   "fieldname": "penghasilan_neto_fiskal",
+   "fieldtype": "Currency",
+   "label": "Penghasilan Neto Fiskal"
+  },
+  {
+   "fieldname": "kompensasi_kerugian_fiskal",
+   "fieldtype": "Currency",
+   "label": "Kompensasi Kerugian Fiskal"
+  },
+  {
+   "fieldname": "penghasilan_kena_pajak",
+   "fieldtype": "Currency",
+   "label": "Penghasilan Kena Pajak"
+  },
+  {
+   "bold": 1,
+   "fieldname": "pembulatan_penghasilan_kena_pajak",
+   "fieldtype": "Currency",
+   "label": "Pembulatan Penghasilan Kena Pajak"
+  },
+  {
+   "fieldname": "section_break_pwqk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "pph_terutang",
+   "fieldtype": "Currency",
+   "label": "PPh Terutang"
+  },
+  {
+   "fieldname": "pajak_penghasilan_pph_22",
+   "fieldtype": "Currency",
+   "label": "Pajak Penghasilan PPh 22"
+  },
+  {
+   "fieldname": "pajak_penghasilan_pph_23",
+   "fieldtype": "Currency",
+   "label": "Pajak Penghasilan PPH 23"
+  },
+  {
+   "bold": 1,
+   "fieldname": "jumlah_kredit_pajak",
+   "fieldtype": "Currency",
+   "label": "Jumlah Kredit Pajak"
+  },
+  {
+   "fieldname": "section_break_wcnk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status_pph_pasal_29_terhutang",
+   "fieldtype": "Data",
+   "label": "Status PPh pasal 29 terhutang"
+  },
+  {
+   "fieldname": "column_break_pwrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "pph_pasal_29_terhutang",
+   "fieldtype": "Currency",
+   "label": "PPh pasal 29 terhutang"
+  },
+  {
+   "fieldname": "section_break_rxyc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wwmg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "22",
+   "fieldname": "persentase_pph_terutang",
+   "fieldtype": "Percent",
+   "label": "Persentase PPh Terutang"
+  },
+  {
+   "fieldname": "column_break_ryfr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jjxy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Abbr"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-06 13:51:25.243291",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "CIT",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

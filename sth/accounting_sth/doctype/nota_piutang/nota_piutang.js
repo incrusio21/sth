@@ -68,6 +68,30 @@ frappe.ui.form.on('Nota Piutang', {
 	}
 });
 
+frappe.ui.form.on('Nota Piutang Reclass Table', {
+	reclass: function(frm, cdt, cdn){
+		calculate_sisa(frm);
+	}
+});
+
+function calculate_sisa(frm) {
+    // Base sisa_dpp = sum outstanding_amount dari tabel pemenuhan kontrak
+    let table_total = (frm.doc.nota_hutang_pemenuhan_kontrak_table || []).reduce((sum, row) => {
+        return sum + (row.outstanding_amount || 0);
+    }, 0);
+
+    // Kurangi total reclass yang sudah diisi
+    let total_reclass = (frm.doc.reclass_pengakuan_penjualan || []).reduce((sum, row) => {
+        return sum + (row.reclass || 0);
+    }, 0);
+
+    let sisa_dpp = table_total + total_reclass;
+    let sisa_ppn = sisa_dpp * 11 / 100;
+
+    frm.set_value('sisa_dpp', sisa_dpp < 0 ? 0 : sisa_dpp);
+    frm.set_value('sisa_ppn', sisa_ppn < 0 ? 0 : sisa_ppn);
+}
+
 // ── Cek sisa DP, kalau sudah habis tampilkan dialog bulan ──────────────
 function cek_dp_lalu_dialog(frm) {
 	if (!frm.doc.no_kontrak) return;

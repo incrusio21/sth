@@ -9,8 +9,8 @@
  "field_order": [
   "kode_unit",
   "unit",
-  "kode_divisi",
   "divisi",
+  "nama_divisi",
   "divisi_lama",
   "blok",
   "kode",
@@ -19,12 +19,6 @@
   "status"
  ],
  "fields": [
-  {
-   "fetch_from": "kode_divisi.nama",
-   "fieldname": "divisi",
-   "fieldtype": "Data",
-   "label": "Divisi"
-  },
   {
    "fetch_from": "kode_blok.nama",
    "fieldname": "blok",
@@ -61,12 +55,6 @@
    "options": "Divisi"
   },
   {
-   "fieldname": "kode_divisi",
-   "fieldtype": "Link",
-   "label": "Kode Divisi",
-   "options": "Divisi"
-  },
-  {
    "fieldname": "kode_unit",
    "fieldtype": "Link",
    "label": "Kode Estate",
@@ -77,12 +65,24 @@
    "fieldname": "unit",
    "fieldtype": "Data",
    "label": "Estate"
+  },
+  {
+   "fetch_from": "divisi.nama",
+   "fieldname": "nama_divisi",
+   "fieldtype": "Data",
+   "label": "Nama Divisi"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-23 01:02:56.303157",
+ "modified": "2026-05-04 18:18:16.826116",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "TPH",

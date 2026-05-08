@@ -699,3 +699,11 @@ def get_previous_kriteria_documents(doctype, docname):
 				})
 
 	return results
+
+@frappe.whitelist()
+def submit_payment_entry(docname, reference_no, reference_date):
+	doc = frappe.get_doc("Payment Entry", docname)
+	doc.reference_no = reference_no
+	doc.reference_date = reference_date
+	doc.save()
+	doc.submit()

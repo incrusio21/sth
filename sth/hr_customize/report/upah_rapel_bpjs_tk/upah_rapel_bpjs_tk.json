@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 14,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-09-17 13:31:32.797857",
+ "modified": "2026-04-30 14:59:53.023526",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Upah Rapel BPJS TK",
@@ -33,7 +33,22 @@
    "role": "Employee Self Service"
   },
   {
-   "role": "Plantation Supervisor"
+   "role": "Plantation Staff"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
+  },
+  {
+   "role": "KRANI PERSONALIA"
   }
  ],
  "timeout": 0

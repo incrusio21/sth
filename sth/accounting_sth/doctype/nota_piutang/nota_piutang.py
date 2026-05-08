@@ -334,20 +334,38 @@ class NotaPiutang(Document):
 				# Tentukan arah debit/credit reclass sesuai kebutuhan bisnis.
 				# Contoh: debit akun reclass, credit kembali ke akun piutang.
 				# Sesuaikan pasangan akun ini dengan perlakuan akuntansi yang berlaku.
-				je.append("accounts", {
-					"account"       : reclass_row.akun_reclass,
-					"user_remark"   : f"Reclass {reclass_row.periode}",
-					"debit_in_account_currency" : 0,
-					"credit_in_account_currency": total_reclass,
-				})
-				je.append("accounts", {
-					"account"       : debit_to,
-					"party_type"    : "Customer",
-					"party"         : customer,
-					"debit_in_account_currency" : total_reclass,
-					"credit_in_account_currency": 0,
-					"user_remark"   : f"Reclass {reclass_row.periode}",
-				})
+
+				if total_reclass > 0:
+					je.append("accounts", {
+						"account"       : reclass_row.akun_reclass,
+						"user_remark"   : f"Reclass {reclass_row.periode}",
+						"debit_in_account_currency" : 0,
+						"credit_in_account_currency": total_reclass,
+					})
+					je.append("accounts", {
+						"account"       : debit_to,
+						"party_type"    : "Customer",
+						"party"         : customer,
+						"debit_in_account_currency" : total_reclass,
+						"credit_in_account_currency": 0,
+						"user_remark"   : f"Reclass {reclass_row.periode}",
+					})
+				else:
+					je.append("accounts", {
+						"account"       : reclass_row.akun_reclass,
+						"user_remark"   : f"Reclass {reclass_row.periode}",
+						"credit_in_account_currency" : 0,
+						"debit_in_account_currency": total_reclass * -1,
+					})
+					je.append("accounts", {
+						"account"       : debit_to,
+						"party_type"    : "Customer",
+						"party"         : customer,
+						"credit_in_account_currency" : total_reclass * -1,
+						"debit_in_account_currency": 0,
+						"user_remark"   : f"Reclass {reclass_row.periode}",
+					})
+
 
 			je.insert(ignore_permissions=True)
 			je.submit()

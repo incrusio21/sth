@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 3,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-12-22 13:47:00.138069",
+ "modified": "2026-04-30 14:49:28.406870",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Mutasi Karyawan",
@@ -28,6 +28,21 @@
   },
   {
    "role": "HR Manager"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
+  },
+  {
+   "role": "KRANI PERSONALIA"
   }
  ],
  "timeout": 0

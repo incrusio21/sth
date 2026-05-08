@@ -4,7 +4,6 @@
 frappe.ui.form.on("Purchase Receipt", {
     setup(frm) {
         sth.form.setup_fieldname_select(frm, "items")
-
         frm.set_query("purchase_order", (doc) => {
             return {
                 filters: {
@@ -16,7 +15,6 @@ frappe.ui.form.on("Purchase Receipt", {
                 }
             }
         })
-
         frm.set_query("unit", function (doc) {
             return {
                 filters: {
@@ -24,7 +22,6 @@ frappe.ui.form.on("Purchase Receipt", {
                 },
             };
         });
-
         frm.set_query("bank_account", function (doc) {
             return {
                 filters: {
@@ -44,6 +41,52 @@ frappe.ui.form.on("Purchase Receipt", {
                 })
             })
         }
+        frm.set_df_property("net_total", "hidden", 1)
+    },
+
+    validate(frm) {
+        if (frm.doc.docstatus != 0) return
+
+        // Kumpulkan unique purchase_order dari items
+        const po_names = [...new Set(
+            (frm.doc.items || [])
+                .map((d) => d.purchase_order)
+                .filter(Boolean)
+        )]
+
+        if (!po_names.length) return
+
+        frm.clear_table('taxes')
+
+        // Fetch taxes dari setiap PO lalu copy ke PR
+        const promises = po_names.map((po_name) =>
+            frappe.xcall('frappe.client.get', {
+                doctype: 'Purchase Order',
+                name: po_name,
+                filters: { name: po_name }
+            }).then((po) => {
+                for (const tax of (po.taxes || [])) {
+                    // Cek apakah account_head sudah ada (hindari duplikat jika multi-PO)
+                    const exists = (frm.doc.taxes || []).find(
+                        (t) => t.account_head === tax.account_head
+                    )
+                    if (exists) continue
+
+                    const row = frm.add_child('taxes')
+                    row.account_head    = tax.account_head
+                    row.charge_type     = tax.charge_type
+                    row.add_deduct_tax  = tax.add_deduct_tax
+                    row.tax_amount      = tax.tax_amount
+                    row.description     = tax.description
+                    row.tipe_pajak      = tax.tipe_pajak
+                    row.category        = tax.category
+                }
+            })
+        )
+
+        return Promise.all(promises).then(() => {
+            frm.refresh_field('taxes')
+        })
     },
 
     refresh(frm) {
@@ -60,8 +103,7 @@ frappe.ui.form.on("Purchase Receipt", {
             frm.remove_custom_button("Purchase Order", "Get Items From")
         })
         frm.remove_custom_button("Purchase Order", "Get Items From")
-        console.log("Masuk");
-
+        frm.set_df_property("net_total", "hidden", 1)
         frm.set_query("set_warehouse", function (doc) {
             return {
                 query: "sth.controllers.queries.get_wh_prec",
@@ -72,6 +114,7 @@ frappe.ui.form.on("Purchase Receipt", {
             };
         });
     },
+
     purchase_type(frm) {
         sth.form.setup_column_table_items(frm, frm.doc.purchase_type, null, "Purchase Type")
     },
@@ -80,7 +123,6 @@ frappe.ui.form.on("Purchase Receipt", {
         if (!frm.doc.purchase_order) {
             return
         }
-
         frappe.call({
             method: "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
             args: {
@@ -90,8 +132,6 @@ frappe.ui.form.on("Purchase Receipt", {
             freeze_message: "Mapping Data...",
             debounce: 1000,
             callback: function (r) {
-                console.log(frm.docname);
-
                 r.message.name = frm.docname
                 r.message.items = r.message.items.map((r) => { return { ...r, parent: frm.docname } })
                 frappe.model.sync(r.message);
@@ -100,7 +140,6 @@ frappe.ui.form.on("Purchase Receipt", {
         });
     },
 });
-
 
 frappe.form.link_formatters['Item'] = function (value, doc) {
     return value

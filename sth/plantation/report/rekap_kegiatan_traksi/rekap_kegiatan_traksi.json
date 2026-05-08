@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 5,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-09-10 10:18:28.631696",
+ "modified": "2026-05-07 17:19:58.761725",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Kegiatan Traksi",
@@ -24,10 +24,16 @@
    "role": "System Manager"
   },
   {
-   "role": "Plantation Supervisor"
+   "role": "Plantation Staff"
   },
   {
    "role": "Admin Plantation"
+  },
+  {
+   "role": "ADMIN KEBUN"
+  },
+  {
+   "role": "ASISTEN KUALITAS KONTROL (QM)"
   }
  ],
  "timeout": 0

@@ -9,13 +9,9 @@ class SalesInvoice(SalesInvoice):
 			self._apply_timbang_qty_tanpa_ganti()
 
 	def on_submit(self):
-		
 		super().on_submit()
-		
 		if self.jenis_penagihan == "Pengiriman":
-			
 			self.create_timbang_journal_entry()
-			
 			self.create_dp_payment_journal_entry()
 
 	def on_cancel(self):
@@ -32,7 +28,7 @@ class SalesInvoice(SalesInvoice):
 			self._apply_timbang_qty()
 
 		gl_entries = super().get_gl_entries(warehouse_account)
-		# frappe.throw(str(gl_entries))
+		# frappe.throw("{}-{}-{}".format(self.grand_total, self.base_grand_total, self,total_akhir_timbang))
 		if self.jenis_penagihan == "Pengiriman":
 			self._restore_original_qty()
 
@@ -121,6 +117,7 @@ class SalesInvoice(SalesInvoice):
 						included_tax_rate += t.rate
 
 		total_diff = 0
+		total_timbang = 0
 		for item in self.items:
 			timbang = item.qty_timbang_customer
 			if not timbang:
@@ -173,6 +170,7 @@ class SalesInvoice(SalesInvoice):
 				item.net_amount      = item.qty * item.net_rate
 				item.base_net_amount = item.qty * item.base_net_rate
 				item.sub_total_timbang = new_amount
+				total_timbang += new_amount
 
 				self.calculate_taxes_and_totals()
 				# total_diff += (new_amount - original_amount)
@@ -188,16 +186,7 @@ class SalesInvoice(SalesInvoice):
 		self.taxes                   = []
 		self.total_taxes_and_charges = 0
 		self.disable_rounded_total = 1
-		# self.total              = (self.total or 0) + total_diff
-		# self.base_total         = (self.base_total or 0) + total_diff
-		# self.net_total          = (self.net_total or 0) + total_diff
-		# self.base_net_total     = (self.base_net_total or 0) + total_diff
-		# self.grand_total        = (self.grand_total or 0) + total_diff
-		# self.rounded_total      = (self.rounded_total or 0) + total_diff
-		# self.base_grand_total   = (self.base_grand_total or 0) + total_diff
-		# self.outstanding_amount = (self.outstanding_amount or 0) + total_diff
-		# self.set_total_in_words()
-
+		self.total_akhir_timbang = total_timbang
 
 	def _apply_timbang_qty(self):
 		self._original_values = {}
@@ -314,7 +303,8 @@ class SalesInvoice(SalesInvoice):
 		self.base_total         = (self.base_total or 0) + total_diff
 		self.net_total          = (self.net_total or 0) + total_diff
 		self.base_net_total     = (self.base_net_total or 0) + total_diff
-		self.grand_total        = (self.grand_total or 0) + total_diff
+		# self.grand_total        = (self.grand_total or 0) + total_diff
+		self.total_akhir_timbang = (self.grand_total or 0) + total_diff
 		self.rounded_total      = (self.rounded_total or 0) + total_diff
 		self.base_grand_total   = (self.base_grand_total or 0) + total_diff
 		self.outstanding_amount = (self.outstanding_amount or 0) + total_diff
@@ -326,17 +316,17 @@ class SalesInvoice(SalesInvoice):
 			if item.name in self._original_values:
 				orig = self._original_values[item.name]
 				item.qty             = orig["qty"]
-				# item.rate            = orig["rate"]
-				# item.base_rate       = orig["base_rate"]
-				# item.net_rate        = orig["net_rate"]
-				# item.base_net_rate   = orig["base_net_rate"]
-				# item.amount          = orig["amount"]
-				# item.base_amount     = orig["base_amount"]
-				# item.net_amount      = orig["net_amount"]
-				# item.base_net_amount = orig["base_net_amount"]
+				item.rate            = orig["rate"]
+				item.base_rate       = orig["base_rate"]
+				item.net_rate        = orig["net_rate"]
+				item.base_net_rate   = orig["base_net_rate"]
+				item.amount          = orig["amount"]
+				item.base_amount     = orig["base_amount"]
+				item.net_amount      = orig["net_amount"]
+				item.base_net_amount = orig["base_net_amount"]
 
-		# for key in ["total", "base_total", "net_total", "base_net_total"]:
-		# 	setattr(self, key, self._original_totals[key])
+		for key in ["total", "base_total", "net_total", "base_net_total"]:
+			setattr(self, key, self._original_totals[key])
 
 	def create_timbang_journal_entry(self):
 		timbang_items = [
@@ -346,13 +336,15 @@ class SalesInvoice(SalesInvoice):
 		if not timbang_items:
 			return
 
-		expense_account = frappe.db.get_value(
-			"Company", self.company, "default_expense_account"
-		)
-		if not expense_account:
-			frappe.throw(
-				f"Default Expense Account belum diset di Company <b>{self.company}</b>"
-			)
+		# expense_account = frappe.db.get_value(
+		# 	"Company", self.company, "default_expense_account"
+		# )
+		# if not expense_account:
+		# 	frappe.throw(
+		# 		f"Default Expense Account belum diset di Company <b>{self.company}</b>"
+		# 	)
+
+		expense_account = self.items[0].income_account
 
 		dn_names = list(set([
 			item.delivery_note

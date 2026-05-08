@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-03 23:01:57.872310",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asset",
+  "tanggal_perolehan",
+  "nilai_perolehan",
+  "penyusutan_komersial",
+  "penyusutan_fiskal",
+  "penyusutan_per_bulan_komersial",
+  "penyusutan_per_bulan_fiskal"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Asset"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tanggal_perolehan",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Perolehan"
+  },
+  {
+   "columns": 2,
+   "fieldname": "nilai_perolehan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Nilai Perolehan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "penyusutan_komersial",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Penyusutan Komersial"
+  },
+  {
+   "columns": 1,
+   "fieldname": "penyusutan_fiskal",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Penyusutan Fiskal"
+  },
+  {
+   "columns": 2,
+   "fieldname": "penyusutan_per_bulan_komersial",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Penyusutan Per Bulan Komersial"
+  },
+  {
+   "columns": 2,
+   "fieldname": "penyusutan_per_bulan_fiskal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Penyusutan Per Bulan Fiskal"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-03 23:43:18.238329",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Report Komersial dan Fiskal Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

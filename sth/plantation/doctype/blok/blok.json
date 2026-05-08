@@ -10,8 +10,8 @@
   "section_break_zd5t",
   "disabled",
   "blok",
-  "kode_divisi",
   "divisi",
+  "nama_divisi",
   "unit",
   "estate",
   "cost_center",
@@ -69,12 +69,6 @@
    "label": "Jumlah Pokok"
   },
   {
-   "fetch_from": "kode_divisi.nama",
-   "fieldname": "divisi",
-   "fieldtype": "Data",
-   "label": "Divisi"
-  },
-  {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -126,8 +120,9 @@
   },
   {
    "fieldname": "varietas",
-   "fieldtype": "Data",
-   "label": "Varietas"
+   "fieldtype": "Link",
+   "label": "Varietas",
+   "options": "Bibit"
   },
   {
    "fieldname": "type",
@@ -200,9 +195,15 @@
    "options": "Unit"
   },
   {
-   "fieldname": "kode_divisi",
+   "fetch_from": "divisi.nama",
+   "fieldname": "nama_divisi",
+   "fieldtype": "Data",
+   "label": "Nama Divisi"
+  },
+  {
+   "fieldname": "divisi",
    "fieldtype": "Link",
-   "label": "Kode Divisi",
+   "label": "Divisi",
    "options": "Divisi",
    "reqd": 1
   }
@@ -210,7 +211,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-23 00:19:19.080426",
+ "modified": "2026-05-05 16:43:49.173870",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

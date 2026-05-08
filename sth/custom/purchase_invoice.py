@@ -7,6 +7,13 @@ def set_training_event_purchase_invoice(self, method):
 		training_event = frappe.get_doc("Training Event", self.custom_reference_name)
 		training_event.db_set("custom_purchase_invoice", self.name)
 
+def check_expense(self,method):
+	for item in self.items:
+		item_doc = frappe.get_doc("Item", item.item_code)
+		for row in item_doc.item_defaults:
+			if row.company == self.company:
+				item.expense_account = row.expense_account
+
 @frappe.whitelist()
 def get_default_coa(type,company):
 	return frappe.get_value("Procurement Settings Account",{"company":company,"type":type},["account"])

@@ -14,7 +14,16 @@ frappe.ui.form.on('Transaksi Berulang', {
         isi_jurnal_sewa(frm);
     },
 
+    jenis_pertanggungan: function(frm){
+        isi_jurnal_sewa(frm)
+    },
+
+    before_save: function(frm) {
+        return validate_duplicate_purchase_invoice(frm);
+    },
+    
     tarik_purchase_invoice: function (frm) {
+        validate_duplicate_purchase_invoice(frm);
         if (!frm.doc.tarik_purchase_invoice) {
             frm.set_value('nama_vendor', '');
             frm.set_value('premi', 0);
@@ -192,16 +201,28 @@ function hitung_bulan(frm) {
     }
 }
 
-function set_pi_filter(frm) {
+async function set_pi_filter(frm) {
     const map = {
         'ASURANSI': 'Asuransi',
         'SEWA': 'Sewa'
     };
 
+    // Ambil semua PI yang sudah dipakai di Transaksi Berulang lain
+    const results = await frappe.db.get_list('Transaksi Berulang', {
+        filters: [['name', '!=', frm.doc.name || '']],
+        fields: ['tarik_purchase_invoice'],
+        limit: 0
+    });
+
+    const used_pi = results
+        .map(r => r.tarik_purchase_invoice)
+        .filter(Boolean); // buang yang null/undefined/kosong
+
     frm.set_query('tarik_purchase_invoice', function () {
         return {
             filters: {
-                invoice_type: map[frm.doc.jenis_transaksi] || ''
+                invoice_type: map[frm.doc.jenis_transaksi] || '',
+                ...(used_pi.length && { name: ['not in', used_pi] })
             }
         };
     });
@@ -229,5 +250,97 @@ function isi_jurnal_sewa(frm) {
                 }
             }
         );
+
+    } else if (frm.doc.jenis_transaksi === 'ASURANSI') {
+        const mapping_pertanggungan = {
+            'JASA ASURANSI ALAT BERAT':      '8212601',
+            'JASA ASURANSI GEDUNG/PROPERTI': '8212601',
+            'JASA ASURANSI KENDARAAN':       '8212601',
+            'JASA ASURANSI KESEHATAN':       '8212603',
+            'JASA ASURANSI MESIN PABRIK':    '8212603',
+            'JASA ASURANSI UMUM':            '8212603',
+        };
+
+        const pertanggungan = frm.doc.jenis_pertanggungan;
+        const account_number = mapping_pertanggungan[pertanggungan];
+
+        if (!pertanggungan) {
+            frappe.msgprint({
+                title: __('Jenis Pertanggungan Kosong'),
+                message: __('Harap isi Jenis Pertanggungan terlebih dahulu.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        if (!account_number) {
+            frappe.msgprint({
+                title: __('Mapping Tidak Ditemukan'),
+                message: __('Jenis Pertanggungan "{0}" tidak dikenali. Periksa konfigurasi mapping akun.', [pertanggungan]),
+                indicator: 'red'
+            });
+            return;
+        }
+
+        frappe.db.get_value(
+            'Account',
+            { account_number: account_number, company: frm.doc.company },
+            'name',
+            function (r) {
+                if (r && r.name) {
+                    frm.set_value('jurnal_debit', r.name);
+                    frappe.show_alert({
+                        message: __('Akun kredit otomatis diisi: {0}', [r.name]),
+                        indicator: 'green'
+                    }, 4);
+                } else {
+                    frappe.msgprint({
+                        title: __('Akun Tidak Ditemukan'),
+                        message: __('Tidak ada akun dengan nomor {0} untuk perusahaan ini. Periksa master Chart of Accounts.', [account_number]),
+                        indicator: 'red'
+                    });
+                }
+            }
+        );
     }
+}
+
+
+function validate_duplicate_purchase_invoice(frm) {
+    const invoice = frm.doc.tarik_purchase_invoice;
+
+    if (!invoice) return;
+
+    return frappe.db.get_list('Transaksi Berulang', {
+        filters: [
+            ['tarik_purchase_invoice', '=', invoice],
+            ['name', '!=', frm.doc.name],          // abaikan dokumen saat ini
+            ['docstatus', '!=', 2]                  // abaikan yang sudah cancelled
+        ],
+        fields: ['name', 'docstatus'],
+        limit: 1
+    }).then(results => {
+        if (results && results.length > 0) {
+            // Reset field ke nilai sebelumnya
+            frappe.model.set_value(
+                frm.doc.doctype,
+                frm.doc.name,
+                'tarik_purchase_invoice',
+                ''
+            );
+
+            frappe.msgprint({
+                title: __('Duplikat Purchase Invoice'),
+                indicator: 'red',
+                message: __(
+                    'Purchase Invoice <strong>{0}</strong> sudah digunakan di dokumen <strong>{1}</strong>. ' +
+                    'Tidak boleh dipakai di lebih dari satu Transaksi Berulang.',
+                    [invoice, results[0].name]
+                )
+            });
+
+            // Hentikan proses simpan jika dipanggil dari before_save
+            frappe.validated = false;
+        }
+    });
 }

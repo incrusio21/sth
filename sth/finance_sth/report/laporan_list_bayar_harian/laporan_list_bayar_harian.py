@@ -15,7 +15,7 @@ def get_columns():
 			"fieldname": "jenis_transaksi",
 			"label": _("JENIS TRANSAKSI"),
 			"fieldtype": "Data",
-			"width": 180,
+			"width": 250,
 		},
 		{
 			"fieldname": "pt",
@@ -75,17 +75,40 @@ def get_data(filters=None):
 		"""
 		SELECT
 			pe.name,
+			pe.payment_type,
+			pe.tipe_transfer,
+			uf.name as unit_from,
+			ut.name as unit_to,
+			cf.abbr as company_from,
+			ct.abbr as company_to,
 			pe.company,
 			pe.party,
 			pe.reference_no,
+			pi.invoice_type,
 			per.reference_doctype,
-			per.outstanding_amount
+			per.outstanding_amount,
+			pe.paid_amount,
+			pe.request_release_date
 		FROM
 			`tabPayment Entry` pe
-		INNER JOIN
+		LEFT JOIN
 			`tabPayment Entry Reference` per ON per.parent = pe.name
+		LEFT JOIN
+			`tabPurchase Invoice` pi ON pi.name = per.reference_name
+		LEFT JOIN
+			`tabUnit` uf ON uf.bank_account = pe.paid_from
+		LEFT JOIN
+			`tabUnit` ut ON ut.bank_account = pe.paid_to
+		LEFT JOIN
+			`tabAccount` af ON af.name = pe.paid_from
+		LEFT JOIN
+			`tabAccount` at ON at.name = pe.paid_to
+		LEFT JOIN
+			`tabCompany` cf ON cf.name = af.company
+		LEFT JOIN
+			`tabCompany` ct ON ct.name = at.company
 		WHERE
-			pe.docstatus = 0
+			pe.docstatus = 0 AND pe.tipe_transfer = '' AND pe.permintaan_dana_operasional IS NULL
 		ORDER BY
 			FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
 			pe.company,
@@ -95,7 +118,10 @@ def get_data(filters=None):
 	)
 
 	# Group rows by section
+	pindah_dana_rows = []
+	tbs_luar_rows = []
 	bpjs_rows = []
+	bpjs_tk_rows = []
 	hrd_rows = []
 	supplier_rows = []
 
@@ -108,25 +134,88 @@ def get_data(filters=None):
 			"no_payment_voucher": pe.name,
 			"no_reff_mcm": pe.reference_no,
 			"nilai_tagihan": flt(pe.outstanding_amount),
-			"payment_schedule": "",
+			"payment_schedule": pe.request_release_date,
 			"submit_button": pe.name,  # JS will render a button using this
 		}
 
-		if ref_type == "BPJS KES":
+		if pe.get("payment_type") == "Internal Transfer":
+			row["jenis_transaksi"] = "PINDAH DANA"
+			row["payment_status"] = ""
+			row["pt"] = f"{pe.get('company_from')} -> {pe.get('company_to')}"
+			row["uraian"] = f"{pe.get('unit_from')} -> {pe.get('unit_to')}"
+			row["nilai_tagihan"] = pe.get("paid_amount")
+			pindah_dana_rows.append(row)	
+		elif ref_type == "Purchase Invoice" and pe.get("invoice_type") == "Pengakuan Pembelian TBS":
+			row["jenis_transaksi"] = "PEMBELIAN TBS LUAR"
+			row["payment_status"] = "TOP PRIORITY"
+			tbs_luar_rows.append(row)	
+		elif ref_type == "BPJS KES":
 			row["jenis_transaksi"] = "BPJS KESEHATAN"
 			row["payment_status"] = "PRIORITY"
 			bpjs_rows.append(row)
+		elif ref_type == "BPJS TK":
+			row["jenis_transaksi"] = "BPJS TK"
+			row["payment_status"] = "PRIORITY"
+			bpjs_tk_rows.append(row)
 		elif ref_type == "Employee Advance":
+			row["jenis_transaksi"] = "PENGAJUAN PERJALANAN DINAS"
+			row["payment_status"] = ""
+			hrd_rows.append(row)
+		elif ref_type in ["Pertanggungjawaban Perjalanan Dinas", "Employee Potongan"]:
 			row["jenis_transaksi"] = "TAGIHAN HRD"
 			row["payment_status"] = ""
 			hrd_rows.append(row)
-		elif ref_type == "Purchase Invoice":
+		elif pe.get("invoice_type") == "Jasa Pelatihan":
+			row["jenis_transaksi"] = "TAGIHAN HRD"
+			row["payment_status"] = ""
+			hrd_rows.append(row)
+		elif ref_type == "Purchase Invoice" and pe.get("invoice_type") not in ["Jasa Pelatihan", "Pengakuan Pembelian TBS"]:
 			row["jenis_transaksi"] = "TAGIHAN SUPPLIER"
 			row["payment_status"] = ""
 			supplier_rows.append(row)
 
 	data = []
 	grand_total = 0
+
+	# --- PINDAH DANA ---
+	if pindah_dana_rows:
+		pindah_dana_total = sum(r["nilai_tagihan"] for r in pindah_dana_rows)
+		grand_total += pindah_dana_total
+		data.extend(pindah_dana_rows)
+		data.append(
+			{
+				"jenis_transaksi": "",
+				"pt": "",
+				"uraian": "TOTAL PINDAH DANA",
+				"no_payment_voucher": "",
+				"no_reff_mcm": "",
+				"nilai_tagihan": pindah_dana_total,
+				"payment_schedule": "",
+				"payment_status": "",
+				"submit_button": "",
+				"is_total": 1,
+			}
+		)
+
+	# --- PEMBELIAN TBS LUAR ---
+	if tbs_luar_rows:
+		tbs_luar_total = sum(r["nilai_tagihan"] for r in tbs_luar_rows)
+		grand_total += tbs_luar_total
+		data.extend(tbs_luar_rows)
+		data.append(
+			{
+				"jenis_transaksi": "",
+				"pt": "",
+				"uraian": "TOTAL PEMBELIAN TBS LUAR",
+				"no_payment_voucher": "",
+				"no_reff_mcm": "",
+				"nilai_tagihan": tbs_luar_total,
+				"payment_schedule": "",
+				"payment_status": "",
+				"submit_button": "",
+				"is_total": 1,
+			}
+		)
 
 	# --- BPJS KESEHATAN ---
 	if bpjs_rows:
@@ -141,6 +230,26 @@ def get_data(filters=None):
 				"no_payment_voucher": "",
 				"no_reff_mcm": "",
 				"nilai_tagihan": bpjs_total,
+				"payment_schedule": "",
+				"payment_status": "",
+				"submit_button": "",
+				"is_total": 1,
+			}
+		)
+
+	# --- BPJS TK ---
+	if bpjs_tk_rows:
+		bpjs_tk_total = sum(r["nilai_tagihan"] for r in bpjs_tk_rows)
+		grand_total += bpjs_tk_total
+		data.extend(bpjs_tk_rows)
+		data.append(
+			{
+				"jenis_transaksi": "",
+				"pt": "",
+				"uraian": "TOTAL BPJS TK",
+				"no_payment_voucher": "",
+				"no_reff_mcm": "",
+				"nilai_tagihan": bpjs_tk_total,
 				"payment_schedule": "",
 				"payment_status": "",
 				"submit_button": "",

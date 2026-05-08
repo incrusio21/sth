@@ -153,7 +153,7 @@ ORDER BY pdo.posting_date, pdo.name
 {% endif %}
 {% endfor %}
 {% set months = month_set.months | sort %}
-{% set current_month = doc.posting_date.strftime('%Y-%m') %}
+{% set current_month = frappe.utils.getdate(doc.posting_date).strftime('%Y-%m') %}
 
 {# ========================= MACRO HELPERS ========================= #}
 

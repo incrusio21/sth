@@ -16,7 +16,7 @@ frappe.ui.form.on("Payment Entry", {
 				pick_nota_piutang(frm);
 			}, __("Buat"));
 		}
-		make_pdo_preview(frm)
+		// make_pdo_preview(frm)
 	},
 
 	company: function(frm) {

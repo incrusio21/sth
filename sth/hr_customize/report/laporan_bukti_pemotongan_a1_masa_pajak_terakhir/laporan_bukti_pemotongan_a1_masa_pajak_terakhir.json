@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-03-04 11:44:30.559467",
+ "modified": "2026-05-05 13:49:47.739345",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Bukti Pemotongan A1 Masa Pajak Terakhir",
@@ -25,6 +25,18 @@
   },
   {
    "role": "HR Manager"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
   }
  ],
  "timeout": 0

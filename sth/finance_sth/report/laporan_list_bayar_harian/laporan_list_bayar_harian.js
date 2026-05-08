@@ -9,46 +9,95 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 		value = default_formatter(value, row, column, data);
 
 		if (column.fieldname === "submit_button") {
-
-			// hanya tampilkan button jika payment_status ada value
-			if (data.payment_status) {
-				return `
+			return `
 					<button 
-						class="btn btn-primary btn-sm submit-btn"
+						class="btn btn-primary btn-xs submit-btn"
 						data-docname="${data.submit_button}">
 						Submit
 					</button>
 				`;
-			} else {
-				return ""; // kosongkan jika tidak ada payment_status
-			}
 		}
 
 		return value;
 	},
 	onload: function (report) {
+		if (!document.getElementById("custom-report-style")) {
+			const style = document.createElement("style");
+			style.id = "custom-report-style";
+			style.innerHTML = `
+				.dt-row:has(.dt-cell__content[title="PINDAH DANA"]) .dt-cell {
+					background-color: #0070c0!important;
+					color: #fff!important;
+				}
+				.dt-row:has(.dt-cell__content[title="PINDAH DANA"]) .dt-cell a {
+					color: #fff!important;
+				}
+
+				.dt-row:has(.dt-cell__content[title="BPJS KESEHATAN"]) .dt-cell {
+					background-color: #fbe4d5!important;
+					color: red!important;
+				}
+				.dt-row:has(.dt-cell__content[title="BPJS KESEHATAN"]) .dt-cell a {
+					color: red!important;
+				}
+				.dt-row:has(.dt-cell__content[title="TOTAL BPJS KESEHATAN"]) .dt-cell {
+					background-color: #c55a11!important;
+					color: #fff !important;
+				}
+
+				.dt-row:has(.dt-cell__content[title="TOTAL TAGIHAN HRD"]) .dt-cell,
+				.dt-row:has(.dt-cell__content[title="TOTAL TAGIHAN SUPPLIER"]) .dt-cell {
+					background-color: #2e75b5!important;
+					color: #fff !important;
+				}
+
+				.dt-row:has(.dt-cell__content[title="PINDAH DANA"]) .dt-cell:nth-child(1),
+				.dt-row:has(.dt-cell__content[title="BPJS KESEHATAN"]) .dt-cell:nth-child(1),
+				.dt-row:has(.dt-cell__content[title="TOTAL BPJS KESEHATAN"]) .dt-cell:nth-child(1),
+				.dt-row:has(.dt-cell__content[title="TOTAL TAGIHAN HRD"]) .dt-cell:nth-child(1),
+				.dt-row:has(.dt-cell__content[title="TOTAL TAGIHAN SUPPLIER"]) .dt-cell:nth-child(1) {
+					background-color: unset!important;
+					color: unset!important;
+				}
+			`;
+			document.head.appendChild(style);
+		}
+
 		$(document).on("click", ".submit-btn", function (e) {
 			let docname = $(this).data("docname");
 
-			alert(docname);
-			// frappe.confirm(
-			// 	`Yakin ingin submit ${docname}?`,
-			// 	function () {
-
-			// 		frappe.call({
-			// 			method: "frappe.client.submit",
-			// 			args: {
-			// 				doctype: "Sales Order", // ganti sesuai doctype
-			// 				name: docname
-			// 			},
-			// 			callback: function (r) {
-			// 				frappe.msgprint("Berhasil di-submit");
-			// 				report.refresh();
-			// 			}
-			// 		});
-
-			// 	}
-			// );
+			frappe.prompt(
+				[
+					{
+						fieldname: "reference_no",
+						label: "No Referensi",
+						fieldtype: "Data",
+						reqd: 1
+					},
+					{
+						fieldname: "reference_date",
+						label: "Tanggal Bayar",
+						fieldtype: "Date",
+						reqd: 1,
+						default: frappe.datetime.get_today()
+					}
+				],
+				function (values) {
+					frappe.call({
+						method: "sth.api.submit_payment_entry",
+						args: {
+							docname: docname,
+							reference_no: values.reference_no,
+							reference_date: values.reference_date
+						},
+						callback: function () {
+							frappe.query_report.refresh();
+						}
+					});
+				},
+				"Input Pembayaran",
+				"Submit"
+			);
 		});
 	}
 };

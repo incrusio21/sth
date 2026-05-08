@@ -489,6 +489,7 @@
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Sisa DO",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -556,7 +557,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-24 15:56:45.314776",
+ "modified": "2026-04-30 09:59:41.099995",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

@@ -198,6 +198,15 @@ frappe.ui.form.on("Purchase Order", {
 		}
 	},
 
+	validate(frm) {
+		if (frm.doc.docstatus == 0) {
+			frm.clear_table('taxes')
+			frappe.refererence.__ref_tax = {}
+			frm._force_regenerate_taxes = true
+			frm.trigger('get_tax_template')
+		}
+	},
+
 	company(frm) {
 		frm.trigger('get_tax_template')
 	},
@@ -275,6 +284,7 @@ frappe.ui.form.on("Purchase Order", {
 				taxes.account_head = coa
 				taxes.add_deduct_tax = "Add"
 				taxes.charge_type = "Actual"
+				taxes.category = "Valuation and Total"
 				taxes.tax_amount = frm.doc.cost
 				frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
 				frm.trigger('calculate_taxes_and_totals')
@@ -291,15 +301,21 @@ frappe.ui.form.on("Purchase Order", {
 
 			frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
 				for (const row of res) {
-					if (frm.is_new()) {
+					if (frm.is_new() || frm._force_regenerate_taxes) {
 						let taxes = frm.add_child('taxes')
 						taxes.account_head = row.account
 						taxes.add_deduct_tax = "Add"
 						taxes.charge_type = "Actual"
+						taxes.category = "Valuation and Total"
 						frm.script_manager.trigger(taxes.doctype, taxes.name, "account_head")
 					}
 					frappe.refererence.__ref_tax[row.type] = row
 				}
+				frm._force_regenerate_taxes = false
+				frm.trigger('total_biaya_ongkos_angkut')
+				frm.trigger('pbbkb')
+				frm.trigger('pph_22')
+				frm.trigger('cost')
 			})
 		}
 	},

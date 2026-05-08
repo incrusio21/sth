@@ -351,6 +351,7 @@ def make_pinalti_deposito_ledger(parent):
 
 
 def deposito_roll_over():
+	# GANTI KE JURNAL
 	query = """
 		SELECT * FROM `tabDeposito`
 		WHERE 

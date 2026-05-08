@@ -10,7 +10,7 @@
  "idx": 6,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-04-23 13:47:05.217360",
+ "modified": "2026-05-07 14:05:42.278391",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Harian Kas dan Bank",
@@ -28,6 +28,9 @@
   },
   {
    "role": "Finance UAT"
+  },
+  {
+   "role": "KASIR"
   }
  ],
  "timeout": 0

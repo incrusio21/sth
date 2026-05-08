@@ -10,7 +10,7 @@
  "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-03-17 01:11:34.027953",
+ "modified": "2026-05-05 13:49:11.502550",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Daftar Izin Cuti",
@@ -28,6 +28,18 @@
   },
   {
    "role": "Employee Self Service"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
   }
  ],
  "timeout": 0

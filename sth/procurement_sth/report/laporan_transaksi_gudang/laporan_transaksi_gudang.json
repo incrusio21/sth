@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 3,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-12-21 20:39:41.872353",
+ "modified": "2026-05-07 13:31:33.157942",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Transaksi Gudang",
@@ -48,7 +48,7 @@
    "role": "Item Manager"
   },
   {
-   "role": "Plantation Supervisor"
+   "role": "Plantation Staff"
   },
   {
    "role": "Admin Plantation"
@@ -61,6 +61,9 @@
   },
   {
    "role": "Mill UAT"
+  },
+  {
+   "role": "KERANI GUDANG"
   }
  ],
  "timeout": 0

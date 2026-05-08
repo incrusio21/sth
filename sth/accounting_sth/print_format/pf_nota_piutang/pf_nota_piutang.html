@@ -112,28 +112,52 @@
       <td>
         {{ frappe.format_value(pengakuan_penjualan.qty or 0, {"fieldtype": "Float"}) }} KG
       </td>
-      <td>{{ pengakuan_penjualan.descriptions or '' }}</td>
+      <td>
+        {{ pengakuan_penjualan.descriptions or '' }} <br>
+      </td>
       <td>{{ frappe.format_value(pengakuan_penjualan.price or 0, {"fieldtype": "Float"}) }}</td>
       <td style="border: none!important">IDR</td>
       <td style="border-left: none!important">
         {{ frappe.format_value(pengakuan_penjualan.amount or 0, {"fieldtype": "Float"}) }}
       </td>
     </tr>
+    {% set ns = namespace(grand_total_reclass=0) %}
+    {%- for row in doc.reclass_pengakuan_penjualan -%}
+    {% set ns.grand_total_reclass = ns.grand_total_reclass + (row.reclass or 0) %}
+    <tr style="height: 3rem!important;">
+      <td></td>
+      <td></td>
+      <td>
+        RECLASS
+      </td>
+      <td></td>
+      <td style="border-right: 0!important;">IDR</td>
+      <td style="border-left: none!important">
+        {{ frappe.format_value(row.reclass or 0, {"fieldtype": "Float"}) }}
+      </td>
+    </tr>
+    {%- endfor -%}
     <tr>
       <td>TOTAL</td>
       <td>
         {{ frappe.format_value(pengakuan_penjualan.qty or 0, {"fieldtype": "Float"}) }} KG
       </td>
       <td></td>
+      <td colspan="3"></td>
+    </tr>
+
+    {% set subtotal = (pengakuan_penjualan.amount or 0) %}
+    <tr>
+      <td colspan="3" style="border: none!important"></td>
       <td>SUB TOTAL</td>
       <td>IDR</td>
-      <td>{{ frappe.format_value(pengakuan_penjualan.amount or 0, {"fieldtype": "Float"}) }}</td>
+      <td>{{ frappe.format_value(subtotal, {"fieldtype": "Currency"}) }}</td>
     </tr>
     <tr>
       <td colspan="3" style="border: none!important"></td>
       <td>TAX</td>
       <td>IDR</td>
-      <td></td>
+      <td>{{ frappe.format_value(doc.sisa_ppn or 0, {"fieldtype": "Currency"}) }}</td>
     </tr>
     <tr>
       <td colspan="3" style="border: none!important"></td>
@@ -147,7 +171,18 @@
       <td colspan="3" style="border: none!important"></td>
       <td>TOTAL</td>
       <td>IDR</td>
-      <td>{{ frappe.format_value(doc.nilai_kontrak or 0, {"fieldtype": "Float"}) }}</td>
+      <td>{{ frappe.format_value((subtotal + ((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0))) or 0,
+        {"fieldtype": "Currency"}) }}</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border: none!important"></td>
+      <td>GRAND TOTAL</td>
+      <td>IDR</td>
+      <td>
+        {{ frappe.format_value(((subtotal + ((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0))) or 0) +
+        ns.grand_total_reclass,
+        {"fieldtype": "Currency"}) }}
+      </td>
     </tr>
   </table>
 

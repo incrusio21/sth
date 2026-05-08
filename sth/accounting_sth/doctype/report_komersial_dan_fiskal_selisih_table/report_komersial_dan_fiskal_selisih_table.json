@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-03 23:24:48.601799",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asset",
+  "masa_penyusutan",
+  "penyusutan_per_bulan_komersial",
+  "penyusutan_per_bulan_fiskal",
+  "selisih_penyusutan"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Asset"
+  },
+  {
+   "fieldname": "penyusutan_per_bulan_komersial",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Penyusutan Per Bulan Komersial"
+  },
+  {
+   "fieldname": "penyusutan_per_bulan_fiskal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Penyusutan Per Bulan Fiskal"
+  },
+  {
+   "fieldname": "masa_penyusutan",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Masa Penyusutan"
+  },
+  {
+   "fieldname": "selisih_penyusutan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Selisih Penyusutan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-03 23:25:42.610225",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Report Komersial dan Fiskal Selisih Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

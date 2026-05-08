@@ -11,7 +11,7 @@
  "is_standard": "Yes",
  "json": "{}",
  "letterhead": null,
- "modified": "2026-02-23 13:07:55.901624",
+ "modified": "2026-05-05 13:48:33.985955",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Laporan Gaji Kebun",
@@ -31,13 +31,25 @@
    "role": "Employee Self Service"
   },
   {
-   "role": "Plantation Supervisor"
+   "role": "Plantation Staff"
   },
   {
    "role": "Admin Plantation"
   },
   {
    "role": "HR Manager"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
   }
  ],
  "timeout": 0

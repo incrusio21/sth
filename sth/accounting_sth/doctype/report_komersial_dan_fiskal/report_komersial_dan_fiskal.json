@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:RKF-{#####}",
+ "creation": "2026-05-03 23:22:44.551507",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_lksq",
+  "company",
+  "report_komersial_dan_fiskal_table",
+  "nilai_section",
+  "tahun_cek_nilai",
+  "report_komersial_dan_fiskal_nilai_table",
+  "selisih_section",
+  "tahun_cek_selisih",
+  "report_komersial_dan_fiskal_selisih_table",
+  "section_break_ggca",
+  "amended_from",
+  "column_break_bqec",
+  "total_penyusutan"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_lksq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Report Komersial dan Fiskal",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "selisih_section",
+   "fieldtype": "Section Break",
+   "label": "Selisih"
+  },
+  {
+   "fieldname": "nilai_section",
+   "fieldtype": "Section Break",
+   "label": "Nilai"
+  },
+  {
+   "fieldname": "tahun_cek_nilai",
+   "fieldtype": "Int",
+   "label": "Tahun Cek Nilai"
+  },
+  {
+   "fieldname": "tahun_cek_selisih",
+   "fieldtype": "Int",
+   "label": "Tahun Cek Selisih"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "report_komersial_dan_fiskal_table",
+   "fieldtype": "Table",
+   "label": "Report Komersial dan Fiskal Table",
+   "options": "Report Komersial dan Fiskal Table"
+  },
+  {
+   "fieldname": "report_komersial_dan_fiskal_nilai_table",
+   "fieldtype": "Table",
+   "label": "Report Komersial dan Fiskal Nilai Table",
+   "options": "Report Komersial dan Fiskal Nilai Table"
+  },
+  {
+   "fieldname": "report_komersial_dan_fiskal_selisih_table",
+   "fieldtype": "Table",
+   "label": "Report Komersial dan Fiskal Selisih Table",
+   "options": "Report Komersial dan Fiskal Selisih Table"
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_penyusutan",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Total Selisih Penyusutan",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ggca",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_bqec",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-07 14:30:46.965010",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Report Komersial dan Fiskal",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

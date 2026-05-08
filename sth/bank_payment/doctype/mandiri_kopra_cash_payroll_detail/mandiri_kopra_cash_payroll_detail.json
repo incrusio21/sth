@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-06 11:29:27.799989",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_entry",
+  "paid_from",
+  "debit_account",
+  "currency",
+  "amount",
+  "column_break_dxlh",
+  "beneficiary_account",
+  "beneficiary_name",
+  "ft_service",
+  "bank_code",
+  "email_flag",
+  "email",
+  "column_break_lede",
+  "charge",
+  "customer_reference",
+  "beneficiary_type",
+  "remark"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payment Entry",
+   "options": "Payment Entry"
+  },
+  {
+   "fieldname": "paid_from",
+   "fieldtype": "Link",
+   "label": "Paid From",
+   "options": "Account"
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Debit Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "column_break_dxlh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lede",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "beneficiary_account",
+   "fieldtype": "Data",
+   "label": "Beneficiary Account"
+  },
+  {
+   "fieldname": "beneficiary_name",
+   "fieldtype": "Data",
+   "label": "Beneficiary Name"
+  },
+  {
+   "default": "IBU",
+   "fieldname": "ft_service",
+   "fieldtype": "Select",
+   "label": "FT Service",
+   "options": "IBU\nLBU\nRBU\nINU\nOBU\nVIA\nBPU\nBAU"
+  },
+  {
+   "fieldname": "bank_code",
+   "fieldtype": "Data",
+   "label": "Bank Code"
+  },
+  {
+   "fieldname": "customer_reference",
+   "fieldtype": "Data",
+   "label": "Customer Reference"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Long Text",
+   "label": "Remark"
+  },
+  {
+   "default": "N",
+   "fieldname": "email_flag",
+   "fieldtype": "Select",
+   "label": "Email Flag",
+   "options": "Y\nN"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "charge",
+   "fieldtype": "Data",
+   "label": "Charge"
+  },
+  {
+   "default": "2",
+   "fieldname": "beneficiary_type",
+   "fieldtype": "Data",
+   "label": "Beneficiary Type"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-06 11:43:20.818544",
+ "modified_by": "Administrator",
+ "module": "Bank Payment",
+ "name": "Mandiri Kopra Cash Payroll Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

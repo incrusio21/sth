@@ -25,8 +25,8 @@ def get_data(conditions, filters):
 			ss.total_deduction + COALESCE(SUM(ssll.principal_amount), 0) AS pemotong,
 			ss.net_pay AS gaji_bersih
 		FROM `tabSalary Slip` ss
-		INNER JOIN `tabEmployee` e ON e.name = ss.employee
-		JOIN `tabDesignation` d ON d.name = e.designation
+		LEFT JOIN `tabEmployee` e ON e.name = ss.employee
+		LEFT JOIN `tabDesignation` d ON d.name = e.designation
   	LEFT JOIN `tabSalary Slip Loan` ssll ON ssll.parent = ss.name
 		WHERE ss.company IS NOT NULL {}
 		GROUP BY

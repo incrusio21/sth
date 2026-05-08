@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-10-20 09:58:08.161280",
+ "modified": "2026-05-07 17:21:35.251718",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Kebutuhan Material",
@@ -24,10 +24,16 @@
    "role": "System Manager"
   },
   {
-   "role": "Plantation Supervisor"
+   "role": "Plantation Staff"
   },
   {
    "role": "Admin Plantation"
+  },
+  {
+   "role": "ADMIN KEBUN"
+  },
+  {
+   "role": "ASISTEN KUALITAS KONTROL (QM)"
   }
  ],
  "timeout": 0

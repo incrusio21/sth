@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 2,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-12-08 18:06:43.477030",
+ "modified": "2026-05-05 13:48:53.858266",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Gaji Kantor",
@@ -22,6 +22,18 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "HRD MANAGER"
+  },
+  {
+   "role": "HRD SPV"
+  },
+  {
+   "role": "HRD STAFF"
+  },
+  {
+   "role": "ASISTEN PERSONALIA"
   }
  ],
  "timeout": 0

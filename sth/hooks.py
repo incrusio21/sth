@@ -197,6 +197,7 @@ override_doctype_class = {
 	"Contract Template": "sth.overrides.contract_template.ContractTemplate",
 	"Currency Exchange": "sth.overrides.currency_exchange.CurrencyExchange",
 	"Customer": "sth.overrides.customer.Customer",
+	"Delivery Note": "sth.overrides.delivery_note.DeliveryNote",
 	"Employee Promotion": "sth.overrides.employee_promotion.STHEmployeePromotion",
 	"Employee Transfer": "sth.overrides.employee_transfer.STHEmployeeTransfer",
 	"Event": "sth.overrides.event.Event",
@@ -230,6 +231,10 @@ doc_events = {
         "on_submit":"sth.custom.payment_entry.check_payment_notification"
 	},
 
+	"Accounting Period":{
+		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period"
+	},
+
 	"Asset": {
 		"validate": ["sth.accounting_sth.custom.asset.cek_prec_untuk_asset",
                "sth.overrides.asset.validate_company",
@@ -261,6 +266,9 @@ doc_events = {
 	"Employee": {
 		"autoname": "sth.custom.employee.autoname_employee",
 		"after_insert": "sth.hr_customize.custom.leave_policy.create_allocations_for_new_employee"
+	},
+	"Employee Grievance": {
+		"validate": "sth.custom.cek_golongan.isi_golongan",
 	},
 	# "Employee Potongan": {
 	# 	"validate": "sth.procurement_sth.custom.item.check_persetujuan",
@@ -303,9 +311,11 @@ doc_events = {
 	"Payment Entry":{
 		"after_insert": [
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
+			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
 		],
 		"validate": [
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
+			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
             "sth.custom.payment_entry.update_check_book",
             "sth.custom.payment_entry.set_no_rekening",
             "sth.custom.payment_entry.validate_payment_voucher_kas_pdo"
@@ -332,6 +342,10 @@ doc_events = {
                 ],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
+	"Period Closing Voucher": {
+		"validate": ["sth.custom.period_closing_voucher.check_invoice_asuransi_sewa"],
+	},
+
 	# "Permintaan Pengeluaran Barang": {
 	# 	"validate": ["sth.procurement_sth.custom.item.check_persetujuan"],
 	# },
@@ -350,7 +364,7 @@ doc_events = {
 		"on_submit": "sth.custom.purchase_receipt.auto_create_assets_from_pr"
 	},
 	"Purchase Invoice": {
-		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim"],
+		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim","sth.custom.purchase_invoice.check_expense"],
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
 	},
 	"Quotation": {
@@ -417,7 +431,8 @@ scheduler_events = {
 # 	],
 	"daily": [
 		"sth.finance_sth.doctype.deposito.deposito.deposito_roll_over",
-		"sth.overrides.event.custom_send_email_digest"
+		"sth.overrides.event.custom_send_email_digest",
+		"sth.accounting_sth.doctype.transaksi_berulang.transaksi_berulang.process_scheduled_je",
 	],
     "daily_long": [
 		"sth.hr_customize.doctype.employee_update_log.employee_update_log.repost_entries",
@@ -431,7 +446,10 @@ scheduler_events = {
 	"monthly": [
 		"sth.tasks.employee.update_employee_employment_tenure"
 	],
-	"cron": {
+    "cron": {
+		# "*/2 * * * *": [
+		# 	"sth.bank_payment.doctype.mandiri_kopra_cash_management.mandiri_kopra_cash_management.get_payment_status"
+		# ],
 		"0 0 * * *": [
 			"sth.hr_customize.custom.leave_policy.create_daily_leave_allocations"
 		]
@@ -466,6 +484,7 @@ override_whitelisted_methods = {
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
+	"Asset": "sth.accounting_sth.custom.asset_dashboard.get_data",
 	"Project": "sth.legal.custom.project_dashboard.get_dashboard_data",
 	"Sales Order": "sth.sales_sth.custom.sales_order_dashboard.get_data",
 	"Sales Invoice": "sth.sales_sth.custom.sales_invoice_dashboard.get_data"

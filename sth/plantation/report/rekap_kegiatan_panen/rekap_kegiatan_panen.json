@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-09-09 09:35:10.303267",
+ "modified": "2026-05-07 17:19:16.340413",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Kegiatan Panen",
@@ -19,6 +19,16 @@
  "ref_doctype": "Budget Kebun Tahunan",
  "report_name": "Rekap Kegiatan Panen",
  "report_type": "Script Report",
- "roles": [],
+ "roles": [
+  {
+   "role": "Admin Plantation"
+  },
+  {
+   "role": "ADMIN KEBUN"
+  },
+  {
+   "role": "ASISTEN KUALITAS KONTROL (QM)"
+  }
+ ],
  "timeout": 0
 }

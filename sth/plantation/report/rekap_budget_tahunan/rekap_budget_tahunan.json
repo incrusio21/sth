@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 5,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-08-22 14:20:58.150335",
+ "modified": "2026-05-07 17:17:16.045716",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Budget Tahunan",
@@ -19,6 +19,16 @@
  "ref_doctype": "Budget Kebun Tahunan",
  "report_name": "Rekap Budget Tahunan",
  "report_type": "Script Report",
- "roles": [],
+ "roles": [
+  {
+   "role": "Admin Plantation"
+  },
+  {
+   "role": "ADMIN KEBUN"
+  },
+  {
+   "role": "ASISTEN KUALITAS KONTROL (QM)"
+  }
+ ],
  "timeout": 0
 }
