@@ -264,6 +264,7 @@ class BukuKerjaMandorController(PlantationController):
         super().on_cancel()
         # self.remove_journal()
         self.delete_payment_log()
+        # if not frappe.flags.mass_delete_bkm:
         self.create_or_update_mandor_premi()
         # self.update_rkb_realization()
                 

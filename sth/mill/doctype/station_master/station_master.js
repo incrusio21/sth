@@ -6,6 +6,17 @@ frappe.ui.form.on('Station Master', {
 		if (frm.doc.qr) {
 			render_qr(frm);
 		}
+		frm.set_query("account", "station_procurement_settings", function (doc, cdt, cdn) {
+			let row = locals[cdt][cdn];
+
+			return {
+				filters: {
+					company: row.company,
+					is_group: 1,
+					name: ["like", "630%"]
+				}
+			};
+		});
 	},
 });
 

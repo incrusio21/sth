@@ -23,30 +23,110 @@ from datetime import datetime, timedelta
 #     )
 
 def mtfu_separated(self):
+
     lines = []
 
     def safe(v, default=""):
         return default if v is None else v
 
     for row in self.detail:
-        lines.append(build_mtfu_separated({
+
+        payload = {
+
             "instruction_mode": "1",
-            "session": safe(row.session, "1"),
-            "debit_account": safe(row.debit_account),
-            "beneficiary_account": safe(row.beneficiary_account),
-            "beneficiary_name": safe(row.beneficiary_name),
-            "currency": safe(row.currency),
-            "amount": safe(row.amount),
-            "ft_service": safe(row.ft_service),
-            "bank_code": safe(row.bank_code),
-            "bank_name": safe(row.beneficiary_bank_name),
-            "remark": safe(row.remark),
-            "customer_ref": safe(row.customer_reference),
-            "email_flag": "Y" if row.email_flag else "",
-            "email": safe(row.email),
-            "charge": safe(row.charge, "OUR"),
-            "beneficiary_type": safe(row.beneficiary_type, "1")
-        }))
+
+            "instruction_date": safe(
+                row.instruction_date
+            ),
+
+            "session": safe(
+                row.session,
+                "1"
+            ),
+
+            "debit_account": safe(
+                row.debit_account
+            ),
+
+            "beneficiary_account": safe(
+                row.beneficiary_account
+            ),
+
+            # BPU
+            "proxy_value": safe(
+                row.beneficiary_account
+            ),
+
+            "beneficiary_name": safe(
+                row.beneficiary_name
+            ),
+
+            "currency": safe(
+                row.currency
+            ),
+
+            "amount": safe(
+                row.amount
+            ),
+
+            "ft_service": safe(
+                row.ft_service
+            ),
+
+            "bank_code": safe(
+                row.bank_code
+            ),
+
+            "bank_name": safe(
+                row.beneficiary_bank_name
+            ),
+
+            "remark": safe(
+                row.remark
+            ),
+
+            "customer_ref": safe(
+                row.customer_reference
+            ),
+
+            "email_flag": (
+                "Y" if row.email_flag else ""
+            ),
+
+            "email": safe(
+                row.email
+            ),
+
+            "charge": safe(
+                row.charge,
+                "OUR"
+            ),
+
+            "beneficiary_type": safe(
+                row.beneficiary_type,
+                "1"
+            ),
+
+            "country_code": safe(
+                row.country_code
+            ),
+
+            "purpose_code": safe(
+                row.purpose_code
+            ),
+
+            "transaction_description": safe(
+                row.transaction_description
+            ),
+
+            "proxy_type": safe(
+                row.proxy_type
+            )
+        }
+
+        lines.append(
+            build_mtfu_separated(payload)
+        )
 
     return "\r\n".join(lines)
 
@@ -128,8 +208,9 @@ def mtfu_consolidated(self):
 #     return "\r\n".join(lines)
 
 def mtfu_bill_separated(self):
-    return(
-        "M;1;;;;;;1680001067568;88042;;880421234151093;180000;;IDR;2;UBP;Amount IDR 180000 tr;;;;;E\r\n"
+    return (
+        "M;2;20260515;2;1;;20260515;1680001067568;88042;;880421234151093;180000;;IDR;Payment;UBP;Payment;osokida@gmail.com;;;EPD1;E\r\n"
+        "M;1;;;;;;1680001067568;88047;;880471234151093;;;IDR;Payment;UBP;Payment;osokida@gmail.com;;;EPD2;E\r\n"
     )
     # return (
     #     "M;2;20260507;2;1;;20260507;1150015101993;88042;Bank Mandiri;880421234151093;;50000;IDR;Payment;UBP;Payment;riskyaghata@gmail.com;;;EPD1;E\r\n"
@@ -266,36 +347,218 @@ def validate_ft_service(v):
 def get_next_day():
     return (datetime.now() + timedelta(days=1)).strftime("%Y%m%d")
 
+# def build_mtfu_separated(data: dict):
+#     fields = [""] * 72
+
+#     fields[0] = "M"
+#     fields[1] = val(data, "instruction_mode", 1, default="1")
+#     fields[2] = get_next_day()  
+#     fields[3] = val(data, "session", 6, default="1")
+
+#     fields[7] = val(data, "debit_account", 40, numeric=True)
+#     fields[8] = val(data, "beneficiary_account", 35)
+#     fields[9] = val(data, "beneficiary_name", 35)
+
+#     fields[13] = val(data, "currency", 4, upper=True)
+#     fields[14] = format_amount(data.get("amount"))
+
+#     fields[18] = val(data, "remark", 19)   
+#     fields[19] = val(data, "customer_ref", 19)
+
+#     ft = val(data, "ft_service", 3, upper=True)
+#     fields[20] = validate_ft_service(ft)
+
+#     fields[21] = val(data, "bank_code", 12)
+#     fields[22] = val(data, "bank_name", 35)
+
+#     fields[27] = val(data, "email_flag", 1, upper=True)
+#     fields[28] = val(data, "email", 100)
+
+#     fields[49] = val(data, "charge", 3, default="OUR", upper=True)
+
+#     fields[50] = val(data, "beneficiary_type", 3, default="1")
+
+#     fields[71] = "E"
+
+#     return ";".join(fields)
+
 def build_mtfu_separated(data: dict):
+
     fields = [""] * 72
 
+    ft = validate_ft_service(
+        val(data, "ft_service", 3, upper=True)
+    )
+
+    instruction_mode = val(
+        data,
+        "instruction_mode",
+        1,
+        default="1"
+    )
+
     fields[0] = "M"
-    fields[1] = val(data, "instruction_mode", 1, default="1")
-    fields[2] = get_next_day()  
-    fields[3] = val(data, "session", 6, default="1")
 
-    fields[7] = val(data, "debit_account", 40, numeric=True)
-    fields[8] = val(data, "beneficiary_account", 35)
-    fields[9] = val(data, "beneficiary_name", 35)
+    fields[1] = instruction_mode
 
-    fields[13] = val(data, "currency", 4, upper=True)
-    fields[14] = format_amount(data.get("amount"))
+    if instruction_mode in ["1","2","3"]:
 
-    fields[18] = val(data, "remark", 19)   
-    fields[19] = val(data, "customer_ref", 19)
+        instruction_date = val(
+            data,
+            "instruction_date",
+            10
+        )
 
-    ft = val(data, "ft_service", 3, upper=True)
-    fields[20] = validate_ft_service(ft)
+        fields[2] = (
+            instruction_date.replace("-", "")
+            if instruction_date
+            else ""
+        )
 
-    fields[21] = val(data, "bank_code", 12)
-    fields[22] = val(data, "bank_name", 35)
+    else:
 
-    fields[27] = val(data, "email_flag", 1, upper=True)
-    fields[28] = val(data, "email", 100)
+        fields[2] = ""
 
-    fields[49] = val(data, "charge", 3, default="OUR", upper=True)
+    fields[3] = val(
+        data,
+        "session",
+        6,
+        default="1"
+    )
 
-    fields[50] = val(data, "beneficiary_type", 3, default="1")
+    fields[7] = val(
+        data,
+        "debit_account",
+        40,
+        numeric=True
+    )
+
+    # BPU menggunakan proxy value
+    if ft == "BPU":
+
+        fields[8] = val(
+            data,
+            "proxy_value",
+            35
+        )
+
+    else:
+
+        fields[8] = val(
+            data,
+            "beneficiary_account",
+            35
+        )
+
+    fields[9] = val(
+        data,
+        "beneficiary_name",
+        35
+    )
+
+    fields[13] = val(
+        data,
+        "currency",
+        4,
+        upper=True
+    )
+
+    fields[14] = format_amount(
+        data.get("amount")
+    )
+
+    fields[18] = val(
+        data,
+        "remark",
+        19
+    )
+
+    fields[19] = val(
+        data,
+        "customer_ref",
+        19
+    )
+
+    fields[20] = ft
+
+    if ft in [
+        "OBU",
+        "LBU",
+        "RBU",
+        "BAU",
+        "BPU"
+    ]:
+
+        fields[21] = val(
+            data,
+            "bank_code",
+            12
+        )
+
+        fields[22] = val(
+            data,
+            "bank_name",
+            35
+        )
+
+    fields[27] = val(
+        data,
+        "email_flag",
+        1,
+        upper=True
+    )
+
+    fields[28] = val(
+        data,
+        "email",
+        100
+    )
+
+    if ft == "INU":
+
+        fields[35] = val(
+            data,
+            "country_code",
+            2,
+            upper=True
+        )
+
+        fields[36] = val(
+            data,
+            "purpose_code",
+            10,
+            upper=True
+        )
+
+        fields[37] = val(
+            data,
+            "transaction_description",
+            140
+        )
+
+    fields[49] = val(
+        data,
+        "charge",
+        3,
+        default="OUR",
+        upper=True
+    )
+
+    fields[50] = val(
+        data,
+        "beneficiary_type",
+        3,
+        default="1"
+    )
+
+    if ft == "BPU":
+
+        fields[51] = val(
+            data,
+            "proxy_type",
+            10,
+            upper=True
+        )
 
     fields[71] = "E"
 

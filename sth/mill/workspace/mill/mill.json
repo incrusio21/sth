@@ -607,95 +607,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Budget",
-   "link_count": 8,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Produksi dan Tenaga Kerja",
-   "link_count": 0,
-   "link_to": "Budget Produksi dan Tenaga Kerja",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Pemakaian Bahan Penolong",
-   "link_count": 0,
-   "link_to": "Budget Pemakaian Bahan Penolong",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Pemakaian Sparepart ",
-   "link_count": 0,
-   "link_to": "Budget Pemakaian Sparepart",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Biaya Service and Maintenance",
-   "link_count": 0,
-   "link_to": "Budget Biaya Service and Maintenance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
-   "link_count": 0,
-   "link_to": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Budget Kapital Tahunan",
-   "link_count": 0,
-   "link_to": "Budget Kapital Tahunan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mayor Maintenance ",
-   "link_count": 0,
-   "link_to": "Mayor Maintenance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Izin Pabrik",
-   "link_count": 0,
-   "link_to": "Izin Pabrik",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Reports",
    "link_count": 2,
    "link_type": "DocType",
@@ -1117,9 +1028,108 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget",
+   "link_count": 9,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Mill Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Kebun Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Produksi dan Tenaga Kerja",
+   "link_count": 0,
+   "link_to": "Budget Produksi dan Tenaga Kerja",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Pemakaian Bahan Penolong",
+   "link_count": 0,
+   "link_to": "Budget Pemakaian Bahan Penolong",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Pemakaian Sparepart ",
+   "link_count": 0,
+   "link_to": "Budget Pemakaian Sparepart",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Biaya Service and Maintenance",
+   "link_count": 0,
+   "link_to": "Budget Biaya Service and Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+   "link_count": 0,
+   "link_to": "Budget Biaya Pemakaian Alat Berat dan Kendaraan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Budget Kapital Tahunan",
+   "link_count": 0,
+   "link_to": "Budget Kapital Tahunan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mayor Maintenance ",
+   "link_count": 0,
+   "link_to": "Mayor Maintenance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Izin Pabrik",
+   "link_count": 0,
+   "link_to": "Izin Pabrik",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-04-09 13:33:06.433849",
+ "modified": "2026-06-03 11:55:26.497772",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill",
@@ -1129,7 +1139,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 9.0,
+ "sequence_id": 11.0,
  "shortcuts": [],
  "title": "Mill"
 }

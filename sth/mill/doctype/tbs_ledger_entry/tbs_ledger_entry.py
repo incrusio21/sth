@@ -37,7 +37,7 @@ def calculate_actual_qty(data):
 	if last_ledger:
 		last_qty = last_ledger[0].actual_qty
 
-	return last_qty + data.balance_qty
+	return last_qty + (data.balance_qty or 0)
 
 
 def repost_qty_tbs(from_date,item_code):

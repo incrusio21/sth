@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_riku",
   "status",
   "company",
   "unit",
+  "shift_proses",
   "stasiun",
   "mesin",
   "section_break_fnwx",
@@ -86,15 +86,6 @@
    "label": "Status",
    "options": "Proses\nSelesai",
    "read_only": 1
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "fieldname": "kernel_silo_no1_section",
@@ -189,12 +180,22 @@
   {
    "fieldname": "column_break_ktlg",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-23 13:53:10.281703",
+ "modified": "2026-06-03 11:39:59.684306",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Temperatur Kernel Silo",

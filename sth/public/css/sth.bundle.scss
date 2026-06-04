@@ -17,3 +17,7 @@
 .form-attachments{
     display: none!important;
 }
+
+.ce-block:has([card_name="Custom Reports"]) {
+  display: none;
+}

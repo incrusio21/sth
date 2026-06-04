@@ -8,5 +8,11 @@ frappe.ui.form.on('Salary Slip', {
                 });
             }, __('Create'));
         }
+        if (frm.doc.docstatus == 0) {
+            frm.page.set_primary_action(__('Save'), () => frm.save());
+        }
+    },
+    before_submit(frm) {
+        frappe.throw(__('Submission has been disabled for Salary Slip.'));
     }
 });

@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 6,
+ "idx": 10,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-07 14:05:42.278391",
+ "modified": "2026-05-11 11:24:56.444419",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Harian Kas dan Bank",
@@ -31,6 +31,9 @@
   },
   {
    "role": "KASIR"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
   }
  ],
  "timeout": 0

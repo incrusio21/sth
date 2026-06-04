@@ -99,11 +99,11 @@ class NotaPiutang(Document):
 
 		for tax in taxes:
 			# Hitung tax_amount dari rate jika tax_amount = 0
-			if tax.included_in_print_rate:
-				base_amount = self.nilai_dp / (1 + tax.rate / 100)
-				amount = self.nilai_dp - base_amount
-			else:
-				amount = tax.tax_amount or (self.nilai_dp * tax.rate / 100)
+			# if tax.included_in_print_rate:
+			# 	base_amount = self.nilai_dp / (1 + tax.rate / 100)
+			# 	amount = self.nilai_dp - base_amount
+			# else:
+			amount = tax.tax_amount or (self.nilai_dp * tax.rate / 100)
 
 			ppn_amount  += amount
 			ppn_account  = tax.account_head
@@ -127,7 +127,7 @@ class NotaPiutang(Document):
 		pe.paid_to          = self.akun_kas_bank
 		pe.paid_amount      = total_amount
 		pe.received_amount  = total_amount
-		pe.nota_piutang_pemenuhan_kontrak = self.name
+		pe.nota_piutang_pemenuhan_kontrak  = self.name
 		pe.reference_no     = self.name
 		pe.reference_date   = nowdate()
 		pe.apakah_dp_kontrak = 1
@@ -144,8 +144,8 @@ class NotaPiutang(Document):
 				"cost_center" : frappe.db.get_value("Company", self.company, "cost_center"),
 				"amount"      : ppn_amount * -1,
 			})
-
-		pe.insert(ignore_permissions=True)
+		print(pe.paid_from)
+		# pe.insert(ignore_permissions=True)
 		pe.submit()
 
 		frappe.db.set_value("Nota Piutang", self.name, "payment_entry", pe.name)
@@ -415,6 +415,8 @@ class NotaPiutang(Document):
 				alert=True
 			)
 
+def debug():
+	get_sisa_dp("SAL-ORD-2026-00026")
 
 @frappe.whitelist()
 def get_si_pengiriman(no_kontrak, bulan=None):
@@ -448,6 +450,7 @@ def get_si_pengiriman(no_kontrak, bulan=None):
 		GROUP BY je.sales_invoice
 	""", [no_kontrak], as_dict=True)
 
+	print(si_je_dp_amounts)
 	# Map: {si_name: total_offset}
 	offset_map = {row.sales_invoice: row.total_offset for row in si_je_dp_amounts}
 
@@ -487,6 +490,7 @@ def get_si_pengiriman(no_kontrak, bulan=None):
 	# kurangi outstanding_amount dengan total_offset
 	# → exclude kalau sisa <= 0, update field kalau masih ada sisa
 	result = []
+	print(offset_map)
 	for row in rows:
 		if row.name in offset_map:
 			sisa = row.outstanding_amount - offset_map[row.name]
@@ -514,6 +518,8 @@ def get_si_pengiriman(no_kontrak, bulan=None):
 		  AND dn.docstatus = 1
 	""", [no_kontrak])[0][0] or 0
 	
+	print(result)
+
 	return {
 		"si_list": result,
 		"qty_do_belum_terkirim": flt(do_qty) - flt(dn_qty)
@@ -633,7 +639,7 @@ def get_sisa_dp(no_kontrak):
 			
 	# 2. Total DP yang diterima dari Payment Entry
 	dp_diterima = frappe.db.sql("""
-		SELECT COALESCE(SUM(pe.paid_amount), 0)
+		SELECT COALESCE(SUM(pe.unallocated_amount), 0)
 		FROM `tabPayment Entry` pe
 		WHERE pe.docstatus = 1
 		  AND pe.apakah_dp_kontrak = 1
@@ -654,6 +660,8 @@ def get_sisa_dp(no_kontrak):
 	})[0][0]
 
 	sisa = (flt(dp_diterima) / divisor) - flt(dp_terpakai)
+	print(dp_terpakai)
+
 	return flt(sisa, 2) if sisa > 0.001 else 0
 
 @frappe.whitelist()

@@ -1,6 +1,7 @@
 # Copyright (c) 2026, DAS and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from sth.custom import method_ambil_account
 
 import frappe
 from frappe import _, throw
@@ -9,7 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 from pypika import functions as fn
-
+import json
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
@@ -17,6 +18,8 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
+
+from erpnext.accounts.general_ledger import make_gl_entries as gle_post
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -160,6 +163,8 @@ class BAPP(BuyingController):
 			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
 	def validate(self):
+		self.title = self.supplier
+		self.update_expense_account()
 		self.validate_posting_time()
 		super().validate()
 
@@ -179,6 +184,30 @@ class BAPP(BuyingController):
 			throw(_("Posting Date cannot be future date"))
 		
 		self.validate_terms()
+
+	def update_expense_account(self):
+		if not self.company:
+			frappe.throw(_("Company harus diisi terlebih dahulu."))
+
+		akun_expense = ""
+		# akun_expense = method_ambil_account.ambil_ap_in_transit_procurement("proposal", self.company)
+		# diganti ambil dari proposal type
+
+		proposal_doc = frappe.get_doc("Proposal", self.proposal)
+		proposal_type_doc = frappe.get_doc("Proposal Type", proposal_doc.proposal_type)
+
+		for row in proposal_type_doc.hutang_usaha_proposal_type:
+			if row.company == self.company:
+				akun_expense = row.account
+
+		if not akun_expense:
+			frappe.throw(
+				_("Account untuk proposal type {1} company <b>{0}</b> tidak ditemukan. "
+				  "Pastikan akun tersebut sudah dipasang di Proposal Type. ").format(self.company, proposal_doc.proposal_type)
+			)
+
+		for item in self.get("items"):
+			item.expense_account = akun_expense
 
 	def validate_uom_is_integer(self):
 		super().validate_uom_is_integer("uom", ["qty", "received_qty"], "BAPP Item")
@@ -363,6 +392,135 @@ class BAPP(BuyingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+		)
+	def make_gl_entries(self, cancel=False):
+		"""
+		Buat GL Entries untuk setiap baris di items:
+
+		  DEBIT  → account dari DocType Kegiatan
+				   (ambil child table Kegiatan.items, cocokan company == self.company,
+					lalu ambil field 'account')
+
+		  CREDIT → expense_account di baris item BAPP
+
+		  AMOUNT → amount per baris (total seluruh baris = grand_total)
+		"""
+		gl_entries = []
+
+		for item in self.get("items"):
+			amount = flt(item.amount)
+			if not amount:
+				continue
+
+			proposal_doc = frappe.get_doc("Proposal", self.proposal)
+			if "Jasa" in proposal_doc.proposal_type:
+				# ── Ambil debit account dari Kegiatan ───────────────────────
+				if not item.item_code:
+					frappe.throw(
+						_("Baris {0}: Field <b>Item Code</b> belum diisi.").format(item.idx)
+					)
+
+				debit_account = self._get_item_code_account(item.item_code, item.idx)
+			else:
+				# ── Ambil debit account dari Kegiatan ───────────────────────
+				if not item.kegiatan:
+					frappe.throw(
+						_("Baris {0}: Field <b>Kegiatan</b> belum diisi.").format(item.idx)
+					)
+
+				debit_account = self._get_kegiatan_account(item.kegiatan, item.idx)
+
+			# ── Validasi credit account ──────────────────────────────────
+			if not item.expense_account:
+				frappe.throw(
+					_("Baris {0}: <b>Expense Account</b> belum diisi. "
+					  "Simpan ulang dokumen agar ter-fill otomatis.").format(item.idx)
+				)
+
+			remarks = self.get("remarks") or _("Accounting Entry untuk BAPP {0}").format(self.name)
+
+			# ── DEBIT : account kegiatan ─────────────────────────────────
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": debit_account,
+						"debit": amount,
+						"debit_in_account_currency": amount,
+						"against": item.expense_account,
+						"cost_center": item.get("cost_center") or self.get("cost_center"),
+						"remarks": remarks,
+						"voucher_detail_no": item.name,
+					},
+					item.get("account_currency"),
+				)
+			)
+
+			# ── CREDIT : expense_account item ────────────────────────────
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": item.expense_account,
+						"credit": amount,
+						"credit_in_account_currency": amount,
+						"against": debit_account,
+						"cost_center": item.get("cost_center") or self.get("cost_center"),
+						"remarks": remarks,
+						"voucher_detail_no": item.name,
+					},
+					item.get("account_currency"),
+				)
+			)
+
+		if gl_entries:
+			gle_post(gl_entries, cancel=cancel, adv_adj=False)
+
+	# ------------------------------------------------------------------ #
+	#  HELPER                                                              #
+	# ------------------------------------------------------------------ #
+	def _get_item_code_account(self,item_code, item_idx):
+		item_doc = frappe.get_doc("Item", item_code)
+		for row in item_doc.get("item_defaults"):
+			if row.company == self.company:
+				if not row.expense_account:
+					frappe.throw(
+						_("Baris {0}: Barang <b>{1}</b> — field <b>Expense Account</b> kosong "
+						  "untuk Company <b>{2}</b>.").format(item_idx, item_code, self.company)
+					)
+				return row.expense_account
+
+
+		frappe.throw(
+			_("Baris {0}: Barang <b>{1}</b> tidak memiliki Expense Account "
+			  "untuk Company <b>{2}</b>. "
+			  "Tambahkan entri company tersebut di master Barang.").format(
+				item_idx, item_code, self.company
+			)
+		)
+
+
+	def _get_kegiatan_account(self, kegiatan_name, item_idx):
+		"""
+		Buka DocType Kegiatan, iterasi child table items-nya,
+		kembalikan field 'account' di baris yang company-nya cocok
+		dengan self.company.
+		"""
+		kegiatan_doc = frappe.get_doc("Kegiatan", kegiatan_name)
+
+		for row in kegiatan_doc.get("items"):
+			if row.company == self.company:
+				if not row.account:
+					frappe.throw(
+						_("Baris {0}: Kegiatan <b>{1}</b> — field <b>Account</b> kosong "
+						  "untuk Company <b>{2}</b>.").format(item_idx, kegiatan_name, self.company)
+					)
+				return row.account
+
+		frappe.throw(
+			_("Baris {0}: Kegiatan <b>{1}</b> tidak memiliki Account "
+			  "untuk Company <b>{2}</b>. "
+			  "Tambahkan entri company tersebut di master Kegiatan.").format(
+				item_idx, kegiatan_name, self.company
+			)
 		)
 
 	def before_cancel(self):
@@ -903,10 +1061,13 @@ def update_billing_percentage(pr_doc, update_modified=True):
 		pr_doc.notify_update()
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None, args=None):
+def make_purchase_invoice(source_name, target_doc=None, args=None, selected_items=None):
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("BAPP", source_name)
+	if isinstance(selected_items, str):
+		selected_items = json.loads(selected_items)
+	
 	
 	if doc.items:
 		portion = frappe.db.get_value("Proposal Schedule", doc.term_detail, "invoice_portion") if doc.term_detail else 0
@@ -1002,6 +1163,42 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			set_missing_values,
 		)
 
+		if selected_items:
+			for item_name in selected_items:
+				item = frappe.db.get_value(
+					"Pengeluaran Barang Item",
+					item_name,
+					["kode_barang", "item_name", "jumlah", "account", "parent"],
+					as_dict=True,
+				)
+				if not item:
+					continue
+
+				rate = frappe.db.get_value(
+					"Stock Entry Detail",
+					filters={
+						"item_code": item.kode_barang,
+						"parent": ["in",
+							frappe.get_all(
+								"Stock Entry",
+								filters={"pengeluaran_barang": item.parent},
+								pluck="name",
+							)
+						],
+					},
+					fieldname="valuation_rate",
+				) or 0
+
+				doclist.append("purchase_invoice_pengeluaran_barang", {
+					"kode_barang": item.kode_barang,
+					"nama_barang": item.item_name,
+					"qty": item.jumlah,
+					"rate": rate,
+					"amount": item.jumlah * rate,
+					"account": item.account,
+					"pengeluaran_barang_item": item_name,
+				})
+
 		return doclist
 	else:
 		from sth.legal.doctype.proposal.proposal import make_purchase_invoice
@@ -1034,3 +1231,49 @@ def update_bapp_status(docname, status):
 @erpnext.allow_regional
 def update_regional_gl_entries(gl_list, doc):
 	return
+
+@frappe.whitelist()
+def get_unclaimed_pengeluaran_barang_items(bapp):
+	project = frappe.db.get_value("BAPP", bapp, "project")
+	if not project:
+		return []
+
+	claimed = frappe.get_all(
+		"Purchase Invoice Pengeluaran Barang",
+		filters=[["pengeluaran_barang_item", "!=", ""],["docstatus","!=","2"]],
+		pluck="pengeluaran_barang_item",
+	)
+
+	filters = {"project": project,"docstatus": 1}
+	if claimed:
+		filters["name"] = ["not in", claimed]
+
+	items = frappe.get_all(
+		"Pengeluaran Barang Item",
+		filters=filters,
+		fields=["name", "kode_barang", "item_name", "jumlah", "satuan", "account", "parent"],
+	)
+
+	for item in items:
+		# item_name dari Item master
+		item["item_name"] = frappe.db.get_value("Item", item["kode_barang"], "item_name") or item.get("item_name") or ""
+
+		# valuation_rate dari Stock Entry Detail yang Stock Entry-nya punya pengeluaran_barang = parent item ini
+		rate = frappe.db.get_value(
+			"Stock Entry Detail",
+			filters={
+				"item_code": item["kode_barang"],
+				"parent": ["in",
+					frappe.get_all(
+						"Stock Entry",
+						filters={"pengeluaran_barang": item["parent"]},
+						pluck="name",
+					)
+				],
+			},
+			fieldname="valuation_rate",
+		)
+		item["rate"] = rate or 0
+		item["amount"] = item["jumlah"] * item["rate"]
+
+	return items

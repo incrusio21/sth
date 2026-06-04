@@ -95,6 +95,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.pabrik",
    "fieldname": "shift_proses",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -294,9 +295,11 @@
    "fetch_from": "shift_proses.company",
    "fieldname": "pabrik",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Pabrik",
-   "options": "Mill Master"
+   "options": "Mill Master",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -309,7 +312,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-18 09:57:46.789318",
+ "modified": "2026-06-03 09:10:40.851129",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring TBS Olah",

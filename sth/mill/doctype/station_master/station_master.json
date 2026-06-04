@@ -12,7 +12,9 @@
   "machine_name",
   "column_break_uknw",
   "qr",
-  "qr_preview"
+  "qr_preview",
+  "account_tab",
+  "station_procurement_settings"
  ],
  "fields": [
   {
@@ -52,12 +54,23 @@
    "fieldname": "qr_preview",
    "fieldtype": "HTML",
    "label": "QR Preview"
+  },
+  {
+   "fieldname": "account_tab",
+   "fieldtype": "Tab Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "station_procurement_settings",
+   "fieldtype": "Table",
+   "label": "Station Procurement Settings",
+   "options": "Station Procurement Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 12:12:05.525546",
+ "modified": "2026-06-02 12:27:55.753918",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Station Master",

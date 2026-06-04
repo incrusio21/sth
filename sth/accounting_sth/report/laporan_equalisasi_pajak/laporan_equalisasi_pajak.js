@@ -16,6 +16,19 @@ frappe.query_reports["Laporan Equalisasi Pajak"] = {
 			"options": "Unit",
 		},
 		{
+			"fieldname": "jenis_pajak",
+			"label": __("Jenis Pajak"),
+			"fieldtype": "Link",
+			"options": "Tax Rate",
+			get_query: () => {
+				return {
+					filters: {
+						is_group: 1
+					}
+				};
+			}
+		},
+		{
 			"fieldname": "from_date",
 			"label": __("Tanggal Dari"),
 			"fieldtype": "Date",

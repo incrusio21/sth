@@ -10,11 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_xffr",
   "status",
   "unit",
   "company",
+  "shift_proses",
   "section_break_npbh",
   "operasi_pompa_injeksi_flowrate",
   "level_air_water_basin",
@@ -79,15 +79,6 @@
    "in_preview": 1,
    "label": "Status",
    "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_npbh",
@@ -156,12 +147,22 @@
   {
    "fieldname": "column_break_cgdh",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:05:38.369422",
+ "modified": "2026-06-03 11:34:10.213455",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "External Treatment",

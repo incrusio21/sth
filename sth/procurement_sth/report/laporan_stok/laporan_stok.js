@@ -7,7 +7,9 @@ frappe.query_reports["Laporan Stok"] = {
 			fieldname: "company",
 			label: __("Perusahaan"),
 			fieldtype: "Link",
-			options: "Company"
+			options: "Company",
+			reqd: 1,
+			default: frappe.defaults.get_default("Company"),
 		},
 		{
 			fieldname: "unit",
@@ -27,11 +29,13 @@ frappe.query_reports["Laporan Stok"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
+			reqd: 1,
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
+			reqd: 1,
 		},
 		{
 			fieldname: "item_group",
@@ -60,5 +64,22 @@ frappe.query_reports["Laporan Stok"] = {
 				};
 			}
 		},
-	]
+	],
+	formatter: function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (column.fieldname == "nama_barang" && data) {
+			let filters = frappe.query_report.get_values();
+
+			value = `
+				<a 
+					href="/app/query-report/Laporan%20Histori%20Stok?company=${encodeURIComponent(filters.company)}&from_date=${filters.from_date}&to_date=${filters.to_date}&item_code=${encodeURIComponent(data.kode_barang)}"
+					target="_blank"
+				>
+					${data.nama_barang}
+				</a>
+			`;
+		}
+		return value;
+	},
 };

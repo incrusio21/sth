@@ -15,7 +15,9 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 )
+from frappe.query_builder.functions import Coalesce, Count
 
+from erpnext.accounts.general_ledger import make_gl_entries as post_gl_entries
 from frappe import _
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry, create_salary_slips_for_employees, get_salary_structure,set_fields_to_select,set_searchfield,set_filter_conditions,set_match_conditions,remove_payrolled_employees
 class PayrollEntry(PayrollEntry):
@@ -214,12 +216,160 @@ class PayrollEntry(PayrollEntry):
 			filters.update(dict(payroll_frequency=self.payroll_frequency))
 
 		return filters
+
 	
+	@frappe.whitelist()
+	def create_payment_entry(self):
+		if self.docstatus != 1:
+			frappe.throw(_("Payroll Entry harus sudah di-Submit"))
+
+		existing = frappe.db.get_value(
+			"Payment Entry",
+			{"no_payroll_entry": self.name, "docstatus": ["!=", 2]},
+			"name",
+		)
+		if existing:
+			frappe.throw(
+				_("Payment Entry sudah ada: {0}").format(frappe.bold(existing))
+			)
+
+		total_amount = frappe.db.sql(
+			"""
+			SELECT COALESCE(SUM(net_pay), 0)
+			FROM `tabSalary Slip`
+			WHERE payroll_entry = %s AND docstatus = 1
+			""",
+			self.name,
+		)[0][0]
+
+		if not total_amount:
+			frappe.throw(_("Tidak ada Salary Slip submitted pada Payroll Entry ini"))
+
+		if not self.payroll_payable_account:
+			frappe.throw(_("Payroll Payable Account belum diisi"))
+
+		account_currency = frappe.db.get_value(
+			"Account", self.payroll_payable_account, "account_currency"
+		) or frappe.get_cached_value("Company", self.company, "default_currency")
+
+		# ← Tidak insert, cukup return data
+		return {
+			"payment_type":              "Internal Transfer",
+			"company":                   self.company,
+			"posting_date":              frappe.utils.today(),
+			"paid_to":                   self.payroll_payable_account,
+			"paid_to_account_currency":  account_currency,
+			"paid_amount":               total_amount,
+			"received_amount":           total_amount,
+			"no_payroll_entry":          self.name,
+			"cost_center":               self.cost_center or None,
+			"tipe_transfer":		     "Payroll Entry",
+			"unit":						 self.unit,
+			"remarks":                   "Payment untuk Payroll Entry: {0}".format(self.name),
+		}
+	
+	def make_payroll_gl_entries(self):
+		"""
+		Membuat GL Entry untuk Payroll Entry:
+		  - Debit  : Akun 6211002 (Gaji, Tunjangan dan Manfaat) sesuai company
+		  - Credit : payroll_payable_account
+		Nilai diambil dari total net_pay seluruh Salary Slip yang terhubung.
+		Hanya menghasilkan 2 baris GL Entry.
+		"""
+
+		# ── 1. Hitung total dari semua Salary Slip yang terhubung ──────────────
+		total_amount = frappe.db.sql(
+			"""
+			SELECT COALESCE(SUM(net_pay), 0)
+			FROM `tabSalary Slip`
+			WHERE payroll_entry = %s
+			  AND docstatus = 1
+			""",
+			self.name,
+		)[0][0]
+
+		if not total_amount:
+			frappe.throw(
+				_("Tidak ada Salary Slip yang sudah di-submit pada Payroll Entry {0}").format(
+					self.name
+				)
+			)
+
+		# ── 2. Ambil akun debit 6211002 berdasarkan company ───────────────────
+		debit_account = frappe.db.get_value(
+			"Account",
+			{"account_number": "6211002", "company": self.company},
+			"name",
+		)
+
+		if not debit_account:
+			frappe.throw(
+				_("Akun dengan nomor 6211002 tidak ditemukan untuk perusahaan {0}").format(
+					self.company
+				)
+			)
+
+		# ── 3. Validasi akun kredit ────────────────────────────────────────────
+		if not self.payroll_payable_account:
+			frappe.throw(_("Field 'Payroll Payable Account' belum diisi pada Payroll Entry ini"))
+
+		# ── 4. Buat 2 baris GL Entry ───────────────────────────────────────────
+		remarks = "Payroll Entry: {0}".format(self.name)
+
+		gl_entries = [
+			# Baris 1 — DEBIT (Beban Gaji)
+			frappe._dict({
+				"doctype": "GL Entry",
+				"posting_date": self.posting_date,
+				"account": debit_account,
+				"against": self.payroll_payable_account,
+				"debit": total_amount,
+				"debit_in_account_currency": total_amount,
+				"credit": 0,
+				"credit_in_account_currency": 0,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company,
+				"cost_center": self.cost_center or None,
+				"remarks": remarks,
+				"is_opening": "No",
+			}),
+			# Baris 2 — CREDIT (Hutang Gaji)
+			frappe._dict({
+				"doctype": "GL Entry",
+				"posting_date": self.posting_date,
+				"account": self.payroll_payable_account,
+				"against": debit_account,
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": total_amount,
+				"credit_in_account_currency": total_amount,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company,
+				"cost_center": self.cost_center or None,
+				"remarks": remarks,
+				"is_opening": "No",
+			}),
+		]
+
+		post_gl_entries(gl_entries)
+
+		frappe.msgprint(
+			_("GL Entry berhasil dibuat: Debit {0} | Credit {1} | Total {2}").format(
+				debit_account,
+				self.payroll_payable_account,
+				frappe.format(total_amount, {"fieldtype": "Currency"}),
+			),
+			indicator="green",
+			alert=True,
+		)
+
 	@frappe.whitelist()
 	def submit_salary_slips(self):
 		self.check_permission("write")
 
-		salary_slips = self.get_sal_slip_list(ss_status=0)  
+		salary_slips = self.get_sal_slip_list_draft(ss_status=0)  
 
 		if not salary_slips:
 			frappe.msgprint(_("No draft Salary Slips found"))
@@ -243,6 +393,29 @@ class PayrollEntry(PayrollEntry):
 			)
 		else:
 			submit_salary_slips_no_jv(self.name, salary_slips, publish_progress=False)
+
+		self.make_payroll_gl_entries()
+
+	def get_sal_slip_list_draft(self, ss_status, as_dict=False):
+		"""
+		Returns list of salary slips based on selected criteria
+		"""
+
+		ss = frappe.qb.DocType("Salary Slip")
+		ss_list = (
+			frappe.qb.from_(ss)
+			.select(ss.name, ss.salary_structure)
+			.where(
+				(ss.docstatus == 0)
+				& (ss.start_date >= self.start_date)
+				& (ss.end_date <= self.end_date)
+				& (ss.payroll_entry == self.name)
+				& ((ss.journal_entry.isnull()) | (ss.journal_entry == ""))
+				& (Coalesce(ss.salary_slip_based_on_timesheet, 0) == self.salary_slip_based_on_timesheet)
+			)
+		).run(as_dict=as_dict)
+
+		return ss_list
 
 def submit_salary_slips_no_jv(payroll_entry, salary_slips, publish_progress=True):
 	payroll_entry = frappe.get_doc("Payroll Entry", payroll_entry)
@@ -546,3 +719,40 @@ def get_existing_salary_slips_custom(employees, args):
 		.distinct()
 		.where(conditions)
 	).run(pluck=True)
+
+
+@frappe.whitelist()
+def get_payroll_entry_for_payment(payroll_entry):
+	"""
+	Dipanggil dari Client Script Payment Entry.
+	Mengembalikan detail Payroll Entry untuk auto-fill form.
+	"""
+	doc = frappe.get_doc("Payroll Entry", payroll_entry)
+
+	if doc.docstatus != 1:
+		frappe.throw(_("Payroll Entry {0} belum di-Submit").format(payroll_entry))
+
+	total_amount = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(net_pay), 0)
+		FROM `tabSalary Slip`
+		WHERE payroll_entry = %s
+		  AND docstatus = 1
+		""",
+		payroll_entry,
+	)[0][0]
+
+	account_currency = frappe.db.get_value(
+		"Account", doc.payroll_payable_account, "account_currency"
+	) or frappe.get_cached_value("Company", doc.company, "default_currency")
+
+	return {
+		"company"                 : doc.company,
+		"paid_to"                 : doc.payroll_payable_account,
+		"paid_to_account_currency": account_currency,
+		"paid_amount"             : total_amount,
+		"received_amount"         : total_amount,
+		"cost_center"             : doc.cost_center or "",
+		"unit"					  : doc.unit,
+		"remarks"                 : "Payment untuk Payroll Entry: {0}".format(payroll_entry),
+	}

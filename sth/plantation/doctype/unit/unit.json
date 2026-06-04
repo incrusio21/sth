@@ -103,6 +103,7 @@
   {
    "fieldname": "accounts_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounts"
   },
   {
@@ -177,7 +178,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-04 18:15:21.473604",
+ "modified": "2026-06-02 09:58:24.967548",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",

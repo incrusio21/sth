@@ -189,7 +189,7 @@ class Project:
             task = frappe.new_doc("Task")
 
             task.update({
-                "subject": item.kegiatan_name,
+                "subject": item.kegiatan_name or item.item_name,
                 "project": self.doc.name,
                 "proposal": self.doc.proposal,
                 "proposal_item": item.name,

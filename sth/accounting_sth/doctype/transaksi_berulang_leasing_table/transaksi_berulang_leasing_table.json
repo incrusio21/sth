@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-18 13:36:27.888998",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tanggal_angsuran",
+  "no_transfer",
+  "tenor",
+  "angsuran",
+  "bunga",
+  "pembayaran_pokok",
+  "denda_keterlambatan",
+  "saldo",
+  "status_bayar",
+  "no_transaksi_kas_bank"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "tanggal_angsuran",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Angsuran"
+  },
+  {
+   "columns": 1,
+   "fieldname": "no_transfer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No. Transfer"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tenor",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Tenor"
+  },
+  {
+   "columns": 1,
+   "fieldname": "angsuran",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Angsuran"
+  },
+  {
+   "columns": 1,
+   "fieldname": "bunga",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Bunga"
+  },
+  {
+   "columns": 1,
+   "fieldname": "pembayaran_pokok",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Pembayaran Pokok"
+  },
+  {
+   "columns": 1,
+   "fieldname": "denda_keterlambatan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Denda Keterlambatan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "saldo",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Saldo"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "status_bayar",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status Bayar"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "no_transaksi_kas_bank",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No Transaksi Kas Bank"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-25 13:19:04.444945",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Transaksi Berulang Leasing Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

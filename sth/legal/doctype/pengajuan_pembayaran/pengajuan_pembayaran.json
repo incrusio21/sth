@@ -23,6 +23,7 @@
   "bank_account",
   "no_rek",
   "atas_nama_penerima",
+  "no_rekening_tujuan",
   "tujuan",
   "amended_from",
   "accounting_dimension_section",
@@ -242,13 +243,19 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Abbr"
+  },
+  {
+   "depends_on": "eval:doc.tipe_pembayaran == \"Transfer\"",
+   "fieldname": "no_rekening_tujuan",
+   "fieldtype": "Data",
+   "label": "No Rekening Tujuan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-19 13:31:18.556954",
+ "modified": "2026-05-20 09:36:59.728959",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

@@ -26,17 +26,15 @@
  "fields": [
   {
    "fieldname": "payment_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Payment Entry",
-   "options": "Payment Entry"
+   "label": "Payment Entry"
   },
   {
    "fieldname": "debit_account",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Debit Account",
-   "reqd": 1
+   "label": "Debit Account"
   },
   {
    "fieldname": "paid_from",
@@ -68,14 +66,12 @@
    "fieldname": "biller_code",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Biller Code",
-   "reqd": 1
+   "label": "Biller Code"
   },
   {
    "fieldname": "bill_key_1",
    "fieldtype": "Data",
-   "label": "Bill Key 1",
-   "reqd": 1
+   "label": "Bill Key 1"
   },
   {
    "fieldname": "bill_key_2",
@@ -116,7 +112,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-05 11:43:50.697791",
+ "modified": "2026-06-02 16:08:21.683972",
  "modified_by": "Administrator",
  "module": "Bank Payment",
  "name": "Mandiri Kopra Cash Bill Detail",

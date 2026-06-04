@@ -4,6 +4,7 @@
 frappe.ui.form.on("Proposal Type", {
     refresh(frm){
         frm.trigger("setup_column")
+        set_akun_query(frm)
     },
     document_type(frm){
         frm.clear_table("fields")
@@ -19,3 +20,18 @@ frappe.ui.form.on("Proposal Type", {
         });
     }
 });
+
+
+function set_akun_query(frm, cdt, cdn) {
+
+    frm.set_query("account", "hutang_usaha_proposal_type", function (doc, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        return {
+            filters: {
+                company: row.company,
+                is_group: 0 
+            }
+        };
+    });
+}

@@ -10,12 +10,11 @@
   "naming_series",
   "tanggal",
   "jam",
-  "nama_mesin",
+  "tahun_budget",
   "column_break_tyie",
-  "status",
   "company",
   "unit",
-  "tahun_budget",
+  "nama_mesin",
   "section_break_dppq",
   "table_mgxe"
  ],
@@ -80,12 +79,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
    "fieldname": "nama_mesin",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -98,7 +91,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 14:51:11.839574",
+ "modified": "2026-06-02 09:45:39.610746",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mayor Maintenance",

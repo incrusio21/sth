@@ -427,9 +427,7 @@ class PaymentEntry(EmployeePaymentEntry):
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
 
-		print(gl_entries)
 		self.add_bank_gl_entries(gl_entries)
-		print(gl_entries)
 
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
@@ -505,7 +503,7 @@ class PaymentEntry(EmployeePaymentEntry):
 					)
 				)
 
-			if self.payment_type == "Internal Transfer" and (self.tipe_transfer == "PDO" or self.tipe_transfer == "Penerimaan Dana PDO" or self.tipe_transfer == "Dividen Sent" or self.tipe_transfer == "Dividen Receive"):
+			if self.payment_type == "Internal Transfer" and (self.tipe_transfer == "PDO" or self.tipe_transfer == "Penerimaan Dana PDO" or self.tipe_transfer == "Dividen Sent" or self.tipe_transfer == "Dividen Receive" or self.tipe_transfer == "Payroll Entry" or self.tipe_transfer == "Leasing"):
 				gl_entries.append(
 					self.get_gl_dict(
 						{

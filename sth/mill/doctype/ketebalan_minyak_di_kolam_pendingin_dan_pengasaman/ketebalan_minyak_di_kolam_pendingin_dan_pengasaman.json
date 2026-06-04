@@ -10,11 +10,10 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_wceu",
-  "status",
   "company",
   "unit",
+  "shift_proses",
   "section_break_ljaf",
   "angka_ketebalan_minyak"
  ],
@@ -65,22 +64,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_ljaf",
    "fieldtype": "Section Break",
    "label": "Detail"
@@ -91,12 +74,22 @@
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Angka Ketebalan Minyak"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:06:59.755353",
+ "modified": "2026-06-03 11:48:48.209988",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ketebalan minyak di Kolam Pendingin dan Pengasaman",

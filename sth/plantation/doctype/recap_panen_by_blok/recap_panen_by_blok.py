@@ -15,6 +15,9 @@ class RecapPanenbyBlok(Document):
 		# skip jika berasal dari transaksi
 		if self.flags.transaction_panen:
 			return
+
+		# if frappe.flags.mass_delete_bkm:
+		# 	return
 		
 		msg = _("Individual Recap Panen by Blok cannot be deleted.")
 		msg += "<br>" + _("Please cancel related transaction.")

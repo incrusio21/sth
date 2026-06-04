@@ -9,6 +9,9 @@ frappe.ui.form.on('Nota Piutang', {
 		frm.fields_dict['reclass_pengakuan_penjualan'].grid.cannot_add_rows = true;
 	},
 
+	validate:function(frm){
+		calculate_sisa(frm)
+	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.tipe === "Pemenuhan Kontrak") {
 			frm.add_custom_button(__("Pembayaran ke PV"), function () {
@@ -24,8 +27,8 @@ frappe.ui.form.on('Nota Piutang', {
 	},
 
 	nota_hutang_pemenuhan_kontrak_table_remove(frm) {
-        calculate_net_total(frm);
-    },
+		calculate_net_total(frm);
+	},
 
 	no_kontrak: function(frm) {
 		if (!frm.doc.no_kontrak) return;
@@ -35,7 +38,13 @@ frappe.ui.form.on('Nota Piutang', {
 				frm.set_value('company', so.company);
 
 				if (so.payment_schedule && so.payment_schedule.length > 0) {
-					frm.set_value('nilai_dp', so.payment_schedule[0].payment_amount);
+					let payment_amount = so.payment_schedule[0].payment_amount;
+					tax_rate = 11
+					let nilai_dp = tax_rate > 0
+						? flt(payment_amount) / (1 + (tax_rate / 100))
+						: flt(payment_amount);
+
+					frm.set_value('nilai_dp', nilai_dp);
 				}
 
 				if (so.unit) {
@@ -75,21 +84,21 @@ frappe.ui.form.on('Nota Piutang Reclass Table', {
 });
 
 function calculate_sisa(frm) {
-    // Base sisa_dpp = sum outstanding_amount dari tabel pemenuhan kontrak
-    let table_total = (frm.doc.nota_hutang_pemenuhan_kontrak_table || []).reduce((sum, row) => {
-        return sum + (row.outstanding_amount || 0);
-    }, 0);
+	// Base sisa_dpp = sum outstanding_amount dari tabel pemenuhan kontrak
+	let table_total = (frm.doc.nota_hutang_pemenuhan_kontrak_table || []).reduce((sum, row) => {
+		return sum + (row.outstanding_amount || 0);
+	}, 0);
 
-    // Kurangi total reclass yang sudah diisi
-    let total_reclass = (frm.doc.reclass_pengakuan_penjualan || []).reduce((sum, row) => {
-        return sum + (row.reclass || 0);
-    }, 0);
+	// Kurangi total reclass yang sudah diisi
+	let total_reclass = (frm.doc.reclass_pengakuan_penjualan || []).reduce((sum, row) => {
+		return sum + (row.reclass || 0);
+	}, 0);
 
-    let sisa_dpp = table_total + total_reclass;
-    let sisa_ppn = sisa_dpp * 11 / 100;
+	let sisa_dpp = table_total + total_reclass;
+	let sisa_ppn = sisa_dpp * 11 / 100;
 
-    frm.set_value('sisa_dpp', sisa_dpp < 0 ? 0 : sisa_dpp);
-    frm.set_value('sisa_ppn', sisa_ppn < 0 ? 0 : sisa_ppn);
+	frm.set_value('sisa_dpp', sisa_dpp < 0 ? 0 : sisa_dpp);
+	frm.set_value('sisa_ppn', sisa_ppn < 0 ? 0 : sisa_ppn);
 }
 
 // ── Cek sisa DP, kalau sudah habis tampilkan dialog bulan ──────────────
@@ -189,9 +198,9 @@ function tampilkan_dialog_bulan(frm) {
 }
 
 frappe.ui.form.on('Nota Piutang Pemenuhan Kontrak Table', {
-    subtotal(frm) {
-        calculate_net_total(frm);
-    },
+	subtotal(frm) {
+		calculate_net_total(frm);
+	},
 });
 
 // ── Fetch SI per bulan dan isi tabel ──────────────────────────────────
@@ -245,11 +254,11 @@ function fetch_si_pengiriman(frm, bulan) {
 }
 
 function calculate_net_total(frm) {
-    let net_total = 0;
-    (frm.doc.nota_hutang_pemenuhan_kontrak_table || []).forEach(row => {
-        net_total += flt(row.subtotal);
-    });
-    frm.set_value("net_total_pengakuan_penjualan", net_total);
+	let net_total = 0;
+	(frm.doc.nota_hutang_pemenuhan_kontrak_table || []).forEach(row => {
+		net_total += flt(row.subtotal);
+	});
+	frm.set_value("net_total_pengakuan_penjualan", net_total);
 }
 
 
@@ -321,12 +330,7 @@ function fetch_nilai_kontrak(frm) {
 					frm.set_value('dp_dpp',   dp_dpp);
 					frm.set_value('dp_ppn',   dp_ppn);
 					frm.set_value('total_dp', dp_dpp + dp_ppn);
-
-					let sisa_dpp = table_total;
-					let sisa_ppn = sisa_dpp * d.tax_rate_total;
-
-					frm.set_value('sisa_dpp', sisa_dpp < 0 ? 0 : sisa_dpp);
-					frm.set_value('sisa_ppn', sisa_ppn < 0 ? 0 : sisa_ppn);
+					calculate_sisa(frm)
 
 					build_reclass_table(frm, d.tax_rate_total);
 				}

@@ -97,7 +97,7 @@ frappe.ui.form.on("BAPP", {
 
 frappe.ui.form.on("BAPP", {
 	refresh: function (frm) {
-        frm.set_query("ppn",(doc) => {
+		frm.set_query("ppn",(doc) => {
 			return {
 				filters: {
 					"type": "PPN"
@@ -300,9 +300,112 @@ erpnext.stock.BAPPController = class BAPPController extends (
 	}
 
 	make_purchase_invoice() {
-		frappe.model.open_mapped_doc({
-			method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
-			frm: cur_frm,
+		frappe.call({
+			method: "sth.legal.doctype.bapp.bapp.get_unclaimed_pengeluaran_barang_items",
+			args: { bapp: cur_frm.doc.name },
+			callback(r) {
+				const items = r.message || [];
+
+				if (!items.length) {
+					frappe.model.open_mapped_doc({
+						method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
+						frm: cur_frm,
+					});
+					return;
+				}
+
+				const fmt_currency = (val) =>
+					frappe.format(val, { fieldtype: "Currency" });
+
+				const rows = items
+					.map(
+						(item, idx) => `
+					<tr>
+						<td class="text-center">
+							<input type="checkbox" class="pb-item-check" data-idx="${idx}" checked />
+						</td>
+						<td>${item.kode_barang}</td>
+						<td>${item.item_name}</td>
+						<td class="text-right">${item.jumlah} ${item.satuan || ""}</td>
+						<td class="text-right">${fmt_currency(item.rate)}</td>
+						<td class="text-right">${fmt_currency(item.amount)}</td>
+					</tr>`
+					)
+					.join("");
+
+				const html = `
+					<div style="overflow-x:auto">
+						<table class="table table-bordered table-condensed" style="font-size:12px">
+							<thead class="grid-heading-row">
+								<tr>
+									<th style="width:40px">
+										<input type="checkbox" id="pb-check-all" checked title="Pilih Semua"/>
+									</th>
+									<th>Kode Barang</th>
+									<th>Nama Barang</th>
+									<th class="text-right">Qty</th>
+									<th class="text-right">Rate</th>
+									<th class="text-right">Amount</th>
+								</tr>
+							</thead>
+							<tbody>${rows}</tbody>
+						</table>
+					</div>`;
+
+				const d = new frappe.ui.Dialog({
+					title: "Pengeluaran Barang Belum Ditagihkan",
+					fields: [{ fieldtype: "HTML", fieldname: "items_html", options: html }],
+					primary_action_label: "Buat Purchase Invoice",
+					primary_action() {
+						const selected_items = [];
+						d.$wrapper.find(".pb-item-check:checked").each(function () {
+							const idx = parseInt($(this).data("idx"));
+							selected_items.push(items[idx].name);
+						});
+
+						if (!selected_items.length) {
+							frappe.msgprint(__("Pilih minimal satu item."));
+							return;
+						}
+
+						d.hide();
+						frappe.call({
+							method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
+							args: {
+								source_name: cur_frm.doc.name,
+								selected_items: selected_items,
+							},
+							callback(r) {
+								if (r.message) {
+									frappe.model.sync(r.message);
+									frappe.set_route("Form", r.message.doctype, r.message.name);
+								}
+							},
+						});
+					},
+					secondary_action_label: "Lewati",
+					secondary_action() {
+						d.hide();
+						frappe.call({
+							method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
+							args: { source_name: cur_frm.doc.name },
+							callback(r) {
+								if (r.message) {
+									frappe.model.sync(r.message);
+									frappe.set_route("Form", r.message.doctype, r.message.name);
+								}
+							},
+						});
+					},
+				});
+
+				d.show();
+
+				// Check all toggle
+				d.$wrapper.find("#pb-check-all").on("change", function () {
+					d.$wrapper.find(".pb-item-check").prop("checked", this.checked);
+				});
+			},
 		});
 	}
 

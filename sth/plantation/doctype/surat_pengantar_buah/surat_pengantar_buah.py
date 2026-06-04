@@ -94,7 +94,7 @@ class SuratPengantarBuah(Document):
 			if not d.blok_restan:
 				d.qty_restan = 0
 
-			d.total_janjang = d.qty + d.qty_restan
+			d.total_janjang = (d.qty or 0) + d.qty_restan
 
 			total_janjang += d.total_janjang
 
@@ -193,21 +193,24 @@ def get_recap_panen(blok, posting_date):
 	filters = {
 		"blok": blok, "posting_date": posting_date
 	}
+	ress = {}
+	try:
+		recap_panen = frappe.get_value("Recap Panen by Blok", filters, [
+			"name", "jumlah_janjang", "transfered_janjang"
+		], as_dict=1)
 
-	recap_panen = frappe.get_value("Recap Panen by Blok", filters, [
-		"name", "jumlah_janjang", "transfered_janjang"
-	], as_dict=1)
-
-	if not recap_panen:
-		message = "Recap Panen by Blok not Found for Filters"
-		for key, value in filters.items():
-			message += f"<br>{unscrub(key)}: {value}"
-			
-		frappe.throw(message)
-	
-	ress = { 
-		"recap_panen": recap_panen.name,
-		"qty": flt(recap_panen.jumlah_janjang - recap_panen.transfered_janjang)
-	}
+		if not recap_panen:
+			message = "Recap Panen by Blok not Found for Filters"
+			for key, value in filters.items():
+				message += f"<br>{unscrub(key)}: {value}"
+				
+			frappe.throw(message)
+		
+		ress = { 
+			"recap_panen": recap_panen.name,
+			"qty": flt(recap_panen.jumlah_janjang - recap_panen.transfered_janjang)
+		}
+	except:
+		ress = {}
 
 	return ress

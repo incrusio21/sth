@@ -6,14 +6,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_p0cs",
   "naming_series",
-  "posting_date",
-  "shift_proses",
   "column_break_awov",
-  "unit",
+  "posting_date",
   "company",
-  "amended_from",
+  "unit",
+  "shift_proses",
   "sterilizer_monitoring_tab",
   "cbc_operating_hours_start__till_stop_section",
   "machine_station",
@@ -23,14 +21,10 @@
   "start_upload",
   "ending_hour_meter",
   "end_upload",
-  "total_hour_meter"
+  "total_hour_meter",
+  "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "section_break_p0cs",
-   "fieldtype": "Section Break",
-   "label": "Header"
-  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -45,18 +39,18 @@
   {
    "fetch_from": "document_reference.unit",
    "fieldname": "unit",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Unit",
-   "read_only": 1
+   "options": "Unit"
   },
   {
    "fetch_from": "document_reference.company",
    "fieldname": "company",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_preview": 1,
    "label": "Company",
-   "read_only": 1
+   "options": "Company"
   },
   {
    "fieldname": "amended_from",
@@ -150,6 +144,7 @@
    "label": "End Upload"
   },
   {
+   "depends_on": "eval:doc.unit",
    "fieldname": "shift_proses",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -162,7 +157,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-24 14:14:32.083816",
+ "modified": "2026-06-03 17:52:39.896529",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "CBC Monitoring",

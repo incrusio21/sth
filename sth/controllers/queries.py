@@ -149,7 +149,7 @@ def material_kegiatan_query(
 	searchfields = meta.get_search_fields()
 
 	columns = ""
-	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
+	extra_searchfields = ["`tabItem`." + field for field in searchfields if field not in ["name", "description"]]
 
 	if extra_searchfields:
 		columns += ", " + ", ".join(extra_searchfields)
@@ -209,7 +209,7 @@ def material_kegiatan_query(
 			"start": start,
 			"page_len": page_len,
 		},
-		as_dict=as_dict,
+		as_dict=as_dict
 	)
 
 @frappe.whitelist()
@@ -566,3 +566,51 @@ def get_wh_prec(doctype, txt, searchfield, start, page_len, filters):
 		ORDER BY name
 		LIMIT %(start)s, %(page_len)s
 	""", params)
+ 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_non_stock_non_asset_items(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		SELECT i.name, i.item_name
+		FROM `tabItem` i
+		JOIN `tabItem Group` ig ON ig.name = i.item_group
+		WHERE i.is_stock_item = 0
+			AND ig.kelompok_asset = 0
+			AND (
+				i.name LIKE %(txt)s
+				OR i.item_name LIKE %(txt)s
+			)
+		LIMIT %(start)s, %(page_len)s
+	""", {
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len
+	})
+ 
+# @frappe.whitelist()
+# @frappe.validate_and_sanitize_search_inputs
+# def unit_query_by_company(doctype, txt, searchfield, start, page_len, filters):
+# 	company = filters.get("company") if filters else None
+
+# 	conditions = ""
+# 	values = {
+# 		"txt": f"%{txt}%",
+# 		"start": start,
+# 		"page_len": page_len
+# 	}
+
+# 	if company:
+# 		conditions += " AND company = %(company)s"
+# 		values["company"] = company
+
+# 	conditions += " AND mill = 1"
+
+# 	return frappe.db.sql(f"""
+# 		SELECT name
+# 		FROM `tabUnit`
+# 		WHERE
+# 			{searchfield} LIKE %(txt)s
+# 			{conditions}
+# 		ORDER BY name
+# 		LIMIT %(start)s, %(page_len)s
+# 	""", values)

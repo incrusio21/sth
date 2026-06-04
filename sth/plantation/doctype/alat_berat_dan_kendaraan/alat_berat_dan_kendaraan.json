@@ -14,16 +14,16 @@
   "uom",
   "kmhm_akhir",
   "jenis_alat",
-  "kategori_alat",
+  "nama_kategori_alat",
   "tipe_alat",
   "jenis",
   "kap_kg",
   "pemilik",
   "column_break_vypn",
-  "kode_unit",
   "unit",
-  "kode_divisi",
+  "nama_unit",
   "divisi",
+  "nama_divisi",
   "no_pol",
   "operator",
   "helper",
@@ -33,6 +33,7 @@
   "deskripsi",
   "api_status",
   "qr_code",
+  "company",
   "section_break_nzwb",
   "basis_rpkg",
   "column_break_lphp",
@@ -56,12 +57,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "kode_kategori_alat.nama",
-   "fieldname": "kategori_alat",
-   "fieldtype": "Data",
-   "label": "Kategori Alat"
-  },
-  {
    "description": "Ex : Pengangkutan Langsung , Pengangkutan tidak langsung etc ",
    "fieldname": "tipe_alat",
    "fieldtype": "Link",
@@ -71,12 +66,6 @@
   {
    "fieldname": "column_break_vypn",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "kode_divisi.nama",
-   "fieldname": "divisi",
-   "fieldtype": "Data",
-   "label": "Divisi"
   },
   {
    "fieldname": "basis_rpkg",
@@ -164,12 +153,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "kode_unit.nama",
-   "fieldname": "unit",
-   "fieldtype": "Data",
-   "label": "Unit"
-  },
-  {
    "fieldname": "helper",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -194,23 +177,6 @@
    "label": "QR Code"
   },
   {
-   "fetch_from": "divisi.unit",
-   "fieldname": "kode_unit",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kode Unit",
-   "options": "Unit",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "kode_divisi",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Kode Divisi",
-   "options": "Divisi"
-  },
-  {
    "fieldname": "jenis",
    "fieldtype": "Data",
    "label": "Jenis"
@@ -219,19 +185,58 @@
    "description": "Ex : Angkutan Sendiri,Angkutan Kontrak,Langsir Traktor,Langsir Pickup etc",
    "fieldname": "jenis_alat",
    "fieldtype": "Link",
-   "label": "Kode Kategori Alat",
+   "label": "Kategori Alat",
    "options": "Kategori Alat"
   },
   {
    "fieldname": "pemilik",
    "fieldtype": "Data",
    "label": "Pemilik"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "unit.nama",
+   "fieldname": "nama_unit",
+   "fieldtype": "Data",
+   "label": "Nama Unit"
+  },
+  {
+   "fetch_from": "divisi.nama",
+   "fieldname": "nama_divisi",
+   "fieldtype": "Data",
+   "label": "Nama Divisi"
+  },
+  {
+   "fetch_from": "jenis_alat.nama",
+   "fieldname": "nama_kategori_alat",
+   "fieldtype": "Data",
+   "label": "Nama Kategori Alat"
+  },
+  {
+   "fetch_from": "unit.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-23 00:54:29.247870",
+ "modified": "2026-06-01 19:27:09.126662",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

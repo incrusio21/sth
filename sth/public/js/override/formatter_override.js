@@ -170,6 +170,11 @@ frappe.form.formatters = {
 			class="disabled-${value ? "selected" : "deselected"}">`;
 	},
 	Link: function (value, docfield, options, doc) {
+		// if(doc.doctype == "Item Overreceipt Procurement Settings"){
+		// 	if("item" in doc){
+		// 		return value
+		// 	}
+		// }
 		var doctype = docfield._options || docfield.options;
 		var original_value = value;
 		let link_title = frappe.utils.get_link_title(doctype, value);

@@ -7,11 +7,11 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 1,
  "is_standard": "Yes",
  "json": "{}",
  "letterhead": null,
- "modified": "2026-05-05 13:48:33.985955",
+ "modified": "2026-05-20 14:13:57.932246",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Laporan Gaji Kebun",
@@ -50,6 +50,9 @@
   },
   {
    "role": "ASISTEN PERSONALIA"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
   }
  ],
  "timeout": 0

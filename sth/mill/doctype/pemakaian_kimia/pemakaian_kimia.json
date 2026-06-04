@@ -10,20 +10,21 @@
   "naming_series",
   "tanggal",
   "jam",
+  "column_break_zziw",
   "company",
   "unit",
-  "column_break_zziw",
-  "status",
-  "shift",
+  "shift_proses",
   "external_water_treatment_section",
   "alumunium_sulfate",
   "soda_ash",
+  "column_break_thse",
   "poly_alumunium_chloride",
   "flocculant",
   "internal_water_treatment_section",
   "ww_108",
   "ww_109",
   "ww_112",
+  "column_break_sjra",
   "garam_non_yodium",
   "hcl",
   "caustic_soda"
@@ -73,22 +74,6 @@
   {
    "fieldname": "column_break_zziw",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "fieldname": "external_water_treatment_section",
@@ -169,12 +154,30 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Caustic Soda"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_thse",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_sjra",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 11:24:23.872701",
+ "modified": "2026-06-03 11:35:08.371726",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemakaian Kimia",

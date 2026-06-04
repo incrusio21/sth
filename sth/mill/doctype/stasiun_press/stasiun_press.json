@@ -14,7 +14,7 @@
   "unit",
   "column_break_ivha",
   "status",
-  "shift",
+  "shift_proses",
   "mesin",
   "stasiun",
   "section_break_fcqk",
@@ -70,14 +70,6 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "fieldname": "pemeriksaan_temperature_press_cake_tab",
@@ -184,13 +176,22 @@
   {
    "fieldname": "column_break_geak",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-23 13:20:36.616780",
+ "modified": "2026-06-03 11:42:30.215511",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Stasiun Press",

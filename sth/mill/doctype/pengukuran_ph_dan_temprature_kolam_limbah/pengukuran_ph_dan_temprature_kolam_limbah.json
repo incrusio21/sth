@@ -11,11 +11,10 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_dvda",
-  "status",
   "company",
   "unit",
+  "shift_proses",
   "kolam_pendingin_tab",
   "hasil_pengukuran_ph_klm_pdgn",
   "hasil_pengukuran_suhu_kolam_pdgn",
@@ -87,21 +86,6 @@
   {
    "fieldname": "column_break_dvda",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control"
   },
   {
    "fieldname": "kolam_pendingin_tab",
@@ -217,12 +201,21 @@
    "fieldtype": "Attach Image",
    "in_preview": 1,
    "label": "Upload Foto"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:09:23.640592",
+ "modified": "2026-06-03 11:47:11.930149",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pengukuran PH dan Temprature kolam limbah",

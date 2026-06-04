@@ -54,7 +54,7 @@ class PengeluaranBarang(Document):
 		if not self.validate_document_permintaan():
 			return
 
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","jumlah_saat_ini","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","blok","name as reference"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","jumlah_saat_ini","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","blok","name as reference","project","account"])
 
 		for row in items:
 			child = self.append("items",row)
@@ -80,12 +80,12 @@ class PengeluaranBarang(Document):
 				"barcode",
 			)
 
-			akun_expense = ""
-			procurement_settings = frappe.get_single("Procurement Settings")
+			# akun_expense = ""
+			# procurement_settings = frappe.get_single("Procurement Settings")
 			
-			for row in procurement_settings.akun_pengeluaran_table:
-				if row.company == self.company:
-					akun_expense = row.akun_pengeluaran
+			# for row in procurement_settings.akun_pengeluaran_table:
+			# 	if row.company == self.company:
+			# 		akun_expense = row.akun_pengeluaran
 
 			for item in target.items:
 				item_details = target.get_item_details(
@@ -95,8 +95,7 @@ class PengeluaranBarang(Document):
 							"company": target.company,
 							"project": target.project,
 							"uom": item.uom,
-							"s_warehouse": item.s_warehouse,
-							"expense_account": akun_expense
+							"s_warehouse": item.s_warehouse
 						}
 					),
 					for_update=True,
@@ -120,8 +119,7 @@ class PengeluaranBarang(Document):
 			"Pengeluaran Barang": {
 				"doctype": "Stock Entry",
 				"field_map": {
-					"name":"references",
-					"doctype": "reference_doctype",
+					"name":"pengeluaran_barang",
 					"pt_pemilik_barang":"company",
 					"tanggal":"posting_date"
 				}
@@ -133,7 +131,8 @@ class PengeluaranBarang(Document):
 					"kode_barang":"item_code",
 					"jumlah": "qty",
 					"kendaraan":"custom_alat_berat_dan_kendaraan",
-					"satuan": "uom"
+					"satuan": "uom",
+					"account": "expense_account"
 				},
 				"postprocess": update_item
 			}

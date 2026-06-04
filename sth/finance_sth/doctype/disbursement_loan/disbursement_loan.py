@@ -38,6 +38,7 @@ class DisbursementLoan(AccountsController):
 			"reference_doctype": self.doctype,
 			"reference_docname": self.name,
 			"remarks": f"Pencairan Loan Bank - {self.name}",
+			"tipe_transfer": "Loan Bank"
 		})
 		pe.insert()
 		pe.submit()

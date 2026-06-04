@@ -76,12 +76,18 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		ste.stock_entry_type = "Material Used"
 		ste.posting_date = self.posting_date
 		ste.set_purpose_for_stock_entry()
+		account_kegiatan = ""
+		if self.kegiatan_account:
+			account_kegiatan = self.kegiatan_account
+		else:
+			frappe.throw("Account Kegiatan tidak boleh kosong.")
 
 		for d in self.material:
 			ste.append("items", {
 				"s_warehouse": d.warehouse,
 				"item_code": d.item,
 				"qty": d.qty,
+				"expense_account": account_kegiatan
 			})
 		
 		ste.submit()

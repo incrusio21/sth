@@ -75,7 +75,7 @@ class PlantationController(AccountsController):
 
             for f in self.fieldname_total:
                 if d.get(f):
-                    total[f] += d.get(f)
+                    total[f] += frappe.utils.flt(d.get(f))
 
         for total_field in self.fieldname_total:
             fieldname = f"{table_fieldname}_{total_field}"

@@ -472,7 +472,7 @@ function apply_account(frm, account) {
 
         frm.set_value('paid_to', account || "");
 
-    } else if (frm.doc.payment_type == 'Pay' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Realisasi PDO" || frm.doc.tipe_transfer == "PDO" || frm.doc.tipe_transfer == "Dividen Sent" ))) {
+    } else if (frm.doc.payment_type == 'Pay' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Payroll Entry" || frm.doc.tipe_transfer == "Realisasi PDO" || frm.doc.tipe_transfer == "PDO" || frm.doc.tipe_transfer == "Dividen Sent" || frm.doc.tipe_transfer == "Leasing" ))) {
 
         frm.set_query('paid_from', function () {
             return account ? { filters: { name: account } } : {};

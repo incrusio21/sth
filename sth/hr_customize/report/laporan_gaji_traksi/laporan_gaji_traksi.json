@@ -10,7 +10,7 @@
  "idx": 4,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-05 13:48:19.278640",
+ "modified": "2026-05-20 14:14:11.907090",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Gaji Traksi",
@@ -34,6 +34,9 @@
   },
   {
    "role": "ASISTEN PERSONALIA"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
   }
  ],
  "timeout": 0

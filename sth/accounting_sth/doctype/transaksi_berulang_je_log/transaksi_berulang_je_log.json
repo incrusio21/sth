@@ -12,18 +12,21 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "scheduled_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Scheduled Date"
   },
   {
+   "columns": 3,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount"
   },
   {
+   "columns": 5,
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "in_list_view": 1,
@@ -39,7 +42,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-04 13:38:11.574687",
+ "modified": "2026-05-11 11:13:03.970403",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Transaksi Berulang JE Log",

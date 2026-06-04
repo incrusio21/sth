@@ -201,7 +201,7 @@ frappe.ui.form.on("Proposal", {
 		sth.form.setup_fieldname_select(frm, "items")
 
 		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
-		
+
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
@@ -230,7 +230,7 @@ frappe.ui.form.on("Proposal", {
 				},
 			};
 		});
-		
+
 		frm.set_query("unit", function (doc) {
 			return {
 				filters: {
@@ -290,6 +290,14 @@ frappe.ui.form.on("Proposal", {
 		if (frm.doc.docstatus == 0) {
 			erpnext.set_unit_price_items_note(frm);
 		}
+
+		setTimeout(() => {
+			frm.set_query("item_code", "items", function () {
+				return {
+					query: "sth.controllers.queries.get_non_stock_non_asset_items"
+				};
+			});
+		}, 500);
 	},
 
 	proposal_type(frm) {
@@ -358,9 +366,19 @@ frappe.ui.form.on("Proposal", {
 		if (frm.is_new()) {
 			frm.set_value("advance_paid", 0);
 		}
+
+		frm.fields_dict['items'].grid.update_docfield_property(
+			'kegiatan_name', 'get_query', function () {
+				return {
+					filters: {
+						is_stock_item: 0
+					}
+				};
+			}
+		);
 	},
 
-	default_identification: function(frm){
+	default_identification: function (frm) {
 		frm.clear_table("identifications")
 		let default_identification = [
 			"Akta Perusahaan",
@@ -372,7 +390,7 @@ frappe.ui.form.on("Proposal", {
 			"Bukti Kepemilikan alat/pajak",
 			"Proposal dari Pemilik Alat"
 		]
-		
+
 		for (const val of default_identification) {
 			let item = frm.add_child("identifications")
 			item.identification = val
@@ -391,7 +409,7 @@ frappe.ui.form.on("Proposal", {
 
 frappe.ui.form.on("Proposal", {
 	refresh: function (frm) {
-		frm.set_query("ppn",(doc) => {
+		frm.set_query("ppn", (doc) => {
 			return {
 				filters: {
 					"type": "PPN"
@@ -399,7 +417,7 @@ frappe.ui.form.on("Proposal", {
 			}
 		})
 
-		frm.set_query("type", "pph_details",(doc) => {
+		frm.set_query("type", "pph_details", (doc) => {
 			return {
 				filters: {
 					"type": "PPh"
@@ -415,8 +433,8 @@ frappe.ui.form.on("Proposal", {
 				company: frm.doc.company,
 				type: "Masukan",
 			},
-			callback: function(r){
-				if(r.message){
+			callback: function (r) {
+				if (r.message) {
 					frm.doc.ppn_rate = r.message.rate
 					frm.doc.ppn_account = r.message.account
 					frm.doc.ppn_amount = flt(frm.doc.net_total * (frm.doc.ppn_rate / 100));
@@ -439,7 +457,7 @@ frappe.ui.form.on("Proposal Item", {
 		}
 	},
 
-	kegiatan(frm, cdt, cdn){
+	kegiatan(frm, cdt, cdn) {
 		let item = locals[cdt][cdn]
 
 		frappe.call({
@@ -570,7 +588,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 							__("Create")
 						);
 					}
-					
+
 					// Please do not add precision in the below flt function
 					if (!doc.is_bapp_retensi && flt(doc.per_billed) < 100)
 						this.frm.add_custom_button(
@@ -604,9 +622,9 @@ erpnext.buying.ProposalController = class ProposalController extends (
 			cur_frm.cscript.add_from_mappers();
 		}
 
-		if(this.frm.doc.per_billed == 100){
+		if (this.frm.doc.per_billed == 100) {
 			let label = "Approve"
-			if(this.frm.doc.retensi_paid){
+			if (this.frm.doc.retensi_paid) {
 				label = "Cancel"
 				this.frm.add_custom_button(__(`Payment Remaining Invoice`), () => {
 					frappe.call({
@@ -614,7 +632,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 						args: {
 							document_no: this.frm.doc.name
 						},
-						callback: function(r) {
+						callback: function (r) {
 							var doclist = frappe.model.sync(r.message);
 							frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 						}
@@ -662,11 +680,11 @@ erpnext.buying.ProposalController = class ProposalController extends (
 				"erpnext.stock.doctype.material_request.material_request.get_material_requests_based_on_supplier",
 		});
 	}
-	
+
 	validate() {
 		set_schedule_date(this.frm);
 	}
-	
+
 	has_unsupplied_items() {
 		return this.frm.doc["supplied_items"].some((item) => item.required_qty > item.supplied_qty);
 	}
@@ -686,13 +704,13 @@ erpnext.buying.ProposalController = class ProposalController extends (
 	}
 
 	make_bapp() {
-		if(cur_frm.doc.is_bapp_retensi){
+		if (cur_frm.doc.is_bapp_retensi) {
 			frappe.model.open_mapped_doc({
 				method: "sth.legal.doctype.proposal.proposal.make_bapp",
 				frm: cur_frm,
 				freeze_message: __("Creating BAPP ..."),
 			});
-		}else{
+		} else {
 			let term = cur_frm.doc.payment_schedule
 				.filter((d) => !d.term_used)
 				.map((d) => {
@@ -700,7 +718,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 						"value": d.name, "label": d.payment_term
 					}
 				})
-	
+
 			var d = new frappe.ui.Dialog({
 				title: __("Payment Term"),
 				fields: [
@@ -757,7 +775,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 			},
 		});
 		d.show();
-		
+
 	}
 
 	add_from_mappers() {
@@ -846,12 +864,12 @@ erpnext.buying.ProposalController = class ProposalController extends (
 
 									frappe.msgprint(
 										"Assigning " +
-											d.mr_name +
-											" to " +
-											d.item_code +
-											" (row " +
-											me.frm.doc.items[i].idx +
-											")"
+										d.mr_name +
+										" to " +
+										d.item_code +
+										" (row " +
+										me.frm.doc.items[i].idx +
+										")"
 									);
 									if (qty > 0) {
 										frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
@@ -887,7 +905,7 @@ erpnext.buying.ProposalController = class ProposalController extends (
 	tc_name() {
 		this.get_terms();
 	}
-	
+
 	items_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		if (doc.schedule_date) {
@@ -997,7 +1015,7 @@ frappe.provide("erpnext.buying");
 frappe.ui.form.on("Proposal Schedule", {
 	invoice_portion: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn]
-		if(row.invoice_portion){
+		if (row.invoice_portion) {
 			frappe.model.set_value(cdt, cdn, "payment_amount", row.invoice_portion * frm.doc.net_total / 100);
 			frm.refresh_field("payment_schedule");
 		}

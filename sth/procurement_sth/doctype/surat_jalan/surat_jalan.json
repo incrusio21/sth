@@ -12,6 +12,7 @@
   "gudang_asal",
   "tanggal_transaksi",
   "tanggal_kirim",
+  "tanggal_diterima",
   "expeditor",
   "kode_traksi",
   "no_polisi",
@@ -22,6 +23,7 @@
   "gudang_tujuan",
   "unit",
   "catatan",
+  "status",
   "section_break_omcd",
   "items",
   "amended_from"
@@ -148,13 +150,28 @@
   {
    "fieldname": "column_break_vsda",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nTerkirim\nDiterima",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tanggal_diterima",
+   "fieldtype": "Date",
+   "label": "Tanggal Diterima",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 11:13:52.036266",
+ "modified": "2026-05-13 13:23:39.378106",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan",

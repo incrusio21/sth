@@ -24,9 +24,12 @@
   "sph",
   "jumlah_pokok",
   "jenis",
+  "seed_code",
   "varietas",
   "type",
   "section_break_xxdp",
+  "bulan",
+  "tahun",
   "periode_bjr",
   "last_bjr",
   "section_break_ofgm",
@@ -119,12 +122,6 @@
    "label": "Jenis"
   },
   {
-   "fieldname": "varietas",
-   "fieldtype": "Link",
-   "label": "Varietas",
-   "options": "Bibit"
-  },
-  {
    "fieldname": "type",
    "fieldtype": "Data",
    "label": "Type"
@@ -206,12 +203,34 @@
    "label": "Divisi",
    "options": "Divisi",
    "reqd": 1
+  },
+  {
+   "fieldname": "seed_code",
+   "fieldtype": "Link",
+   "label": "Seed Code",
+   "options": "Bibit"
+  },
+  {
+   "fetch_from": "seed_code.nama",
+   "fieldname": "varietas",
+   "fieldtype": "Data",
+   "label": "Varietas"
+  },
+  {
+   "fieldname": "bulan",
+   "fieldtype": "Data",
+   "label": "Bulan"
+  },
+  {
+   "fieldname": "tahun",
+   "fieldtype": "Int",
+   "label": "Tahun"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-05 16:43:49.173870",
+ "modified": "2026-05-15 13:55:59.570221",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

@@ -124,6 +124,10 @@ class BukuKerjaMandorPremi(Document):
 		doc.save()
 		
 	def on_trash(self):
+
+		# if frappe.flags.mass_delete_bkm:
+		# 	return
+		
 		self.remove_document()
 
 		for epl in frappe.get_all(
@@ -134,6 +138,10 @@ class BukuKerjaMandorPremi(Document):
 			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
 	def remove_document(self):
+		# bypass saat mass delete
+		# if frappe.flags.mass_delete_bkm:
+		# 	return
+		
 		# skip jika berasal dari transaksi
 		if self.flags.transaction_employee:
 			return

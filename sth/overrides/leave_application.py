@@ -17,7 +17,9 @@ from frappe.utils import (
 
 
 class LeaveApplication(LeaveApplication):
-	pass
+	def onload(self):
+		# frappe.throw(str(frappe.session))
+		pass
 
 @frappe.whitelist()
 def get_leave_balance_on_custom(

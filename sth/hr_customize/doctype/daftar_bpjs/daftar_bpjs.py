@@ -135,7 +135,7 @@ class DaftarBPJS(Document):
 		pasang_bpjs(self)
 
 def debug_bpjs():
-	doc = frappe.get_doc("Daftar BPJS","BPJS KES-PT. TRIMITRA LESTARI-00468")
+	doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-02477")
 	pasang_bpjs(doc)
 
 def pasang_bpjs(doc):
@@ -162,14 +162,15 @@ def pasang_bpjs(doc):
 				SSAssignment.custom_tunjangan_komunikasi + SSAssignment.custom_tunjangan_daerah + SSAssignment.custom_tunjangan_perumahan,
 				Employee.grade,
 
-				Employee.custom_kriteria
+				Employee.custom_kriteria,
+				Employee.jabatan
 				
 				)
 			.where(
 				(Employee.unit == doc.unit)
 				& (Employee.company == doc.pt)
 				& (Employee.status == "Active")
-				& (Employee.grade == "NON STAF" if doc.golongan == "Non Staf" else Employee.grade != "NON STAF" )
+				& (Employee.grade == "NON STAFF" if doc.golongan == "Non Staf" else Employee.grade != "NON STAFF" )
 				& (SSAssignment.from_date <= doc.start_periode)
 			)
 		)
@@ -185,13 +186,13 @@ def pasang_bpjs(doc):
 			program_doc = frappe.get_doc("Program BPJS", row.nama_program)
 			batas = 0
 			for baris_program in program_doc.program_bpjs_staff:
-				if baris_program.golongan == "Non Staff" and satu_employee[10] == "NON STAF":
+				if baris_program.golongan == "Non Staff" and satu_employee[10] == "NON STAFF":
 					if baris_program.kriteria == "Satuan Hasil" and satu_employee[11] == "Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
 					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[11] == "Non Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
 
-				elif baris_program.golongan == "Staf Up" and satu_employee[10] == "STAF":
+				elif baris_program.golongan == "Staf Up" and satu_employee[10] == "STAFF":
 					if baris_program.kriteria == "Satuan Hasil" and satu_employee[11] == "Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
 					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[11] == "Non Satuan Hasil":
@@ -231,6 +232,7 @@ def pasang_bpjs(doc):
 		nama_ibu = row[6]
 		gol_darah = row[7]
 		kelas_bpjs_kesehatan = row[8]
+		nama_jabatan = row[12]
 		beban_karyawan = 0
 		beban_perusahaan = 0
 		# masukkan semua detil ke table detail
@@ -282,4 +284,6 @@ def pasang_bpjs(doc):
 		satu_row_employee.no_bpjs_tkkes = no_bpjs
 		satu_row_employee.nama_ibu_kandung = nama_ibu
 		satu_row_employee.gol_darah = gol_darah
+
+		satu_row_employee.nama_jabatan = nama_jabatan
 			

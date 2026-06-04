@@ -1,5 +1,28 @@
 frappe.ui.form.on("Payment Entry", {
+	setup(frm) {
+
+		frm.set_query('path', function() {
+			return {
+				filters: {
+					disabled: 0
+				}
+			};
+		});
+
+	},
+	// before_submit(frm) {
+	// 	return check_mandiri_kcm_warning(frm);
+	// },
+	before_workflow_action: async function(frm) {
+		if (
+			frm.doc.workflow_state === "Butuh Persetujuan 2" &&
+			frm.selected_workflow_action === "Approve"
+		) {
+			await check_mandiri_kcm_warning(frm);
+		}
+	},
 	refresh: function(frm) {
+		
 		frm.set_query("no_kontrak_penjualan", function() {
 			return {
 				filters: {
@@ -16,9 +39,24 @@ frappe.ui.form.on("Payment Entry", {
 				pick_nota_piutang(frm);
 			}, __("Buat"));
 		}
+
+		check_mandiri_kcm(frm);
 		// make_pdo_preview(frm)
 	},
-
+	paid_from: function(frm){
+		check_mandiri_kcm(frm);
+		set_ft_service(frm);
+	},
+	paid_to: function(frm){
+		set_ft_service(frm);
+	},
+	ft_service: function(frm) {
+		if (frm.doc.ft_service === "UBP") {
+			frm.set_value("path", "MCM_BillPaymentSingle");
+		} else {
+			frm.set_value("path", "MCM_SingleMix");
+		}
+	},
 	company: function(frm) {
 		frm.set_query("no_kontrak_penjualan", function() {
 			return {
@@ -58,6 +96,37 @@ frappe.ui.form.on("Payment Entry", {
 			};
 		});
 	},
+	no_payroll_entry(frm) {
+        if (!frm.doc.no_payroll_entry) return;
+
+        frappe.call({
+            // Sesuaikan path method dengan lokasi file kamu
+            method: "sth.overrides.payroll_entry.get_payroll_entry_for_payment",
+            args: { payroll_entry: frm.doc.no_payroll_entry },
+            freeze: true,
+            freeze_message: __("Mengambil data Payroll Entry..."),
+            callback(r) {
+                if (!r.message) return;
+
+                const d = r.message;
+
+                // Set payment type paksa Internal Transfer
+                frm.set_value("payment_type", "Internal Transfer");
+
+                // Auto-fill field dari Payroll Entry
+                frm.set_value("company",                  d.company);
+                frm.set_value("paid_to",                  d.paid_to);
+                frm.set_value("paid_to_account_currency", d.paid_to_account_currency);
+                frm.set_value("paid_amount",              d.paid_amount);
+                frm.set_value("received_amount",          d.received_amount);
+                frm.set_value("remarks",                  d.remarks);
+
+                if (d.cost_center) {
+                    frm.set_value("cost_center", d.cost_center);
+                }
+            }
+        });
+    },
 	no_kontrak_penjualan: function(frm) {
 		if (!frm.doc.no_kontrak_penjualan) return;
 		frm.set_value("paid_from", "");
@@ -162,31 +231,56 @@ frappe.ui.form.on("Payment Entry", {
 
 function set_no_rekening(frm) {
 
-	if (!frm.doc.party || !frm.doc.party_type) {
-		frm.set_value("no_rekening", "");
-		return;
+	let paid_to = null;
+
+	if (frm.doc.payment_type === "Internal Transfer") {
+		paid_to = frm.doc.paid_to;
 	}
 
 	frappe.call({
 		method: "sth.custom.payment_entry.get_no_rekening",
 		args: {
 			party_type: frm.doc.party_type,
-			party: frm.doc.party
+			party: frm.doc.party,
+			paid_to: paid_to,
+			tipe_transfer: frm.doc.tipe_transfer,
+			permintaan_dana_operasional: frm.doc.permintaan_dana_operasional,
+			payment_type: frm.doc.payment_type
 		},
 		callback: function(r) {
 
 			if (r.message) {
-				frm.set_value("no_rekening", r.message[0]);
-				frm.set_value("nama_bank", r.message[1]);
+
+				frm.set_value(
+					"no_rekening",
+					r.message.no_rekening || ""
+				);
+
+				frm.set_value(
+					"nama_bank",
+					r.message.nama_bank || ""
+				);
+
+				frm.set_value(
+					"no_rekening_tujuan",
+					r.message.no_rekening_tujuan || ""
+				);
+
+				frm.set_value(
+					"bank_tujuan",
+					r.message.bank_tujuan || ""
+				);
+
 			} else {
+
 				frm.set_value("no_rekening", "");
 				frm.set_value("nama_bank", "");
+				frm.set_value("no_rekening_tujuan", "");
+				frm.set_value("bank_tujuan", "");
 			}
 		}
 	});
-
 }
-
 
 function pick_nota_piutang(frm) {
 	const dialog = new frappe.ui.Dialog({
@@ -368,4 +462,166 @@ function show_pdo_preview(pdoList) {
 			options: html
 		}]
 	}).show();
+}
+
+function check_mandiri_kcm(frm) {
+
+	if (!frm.doc.paid_from) {
+
+		frm.set_df_property(
+			'mandiri_kcm',
+			'hidden',
+			1
+		);
+
+		return;
+	}
+
+	frappe.call({
+		method: 'sth.custom.payment_entry.is_mandiri_kcm',
+		args: {
+			account: frm.doc.paid_from
+		},
+		callback: function(r) {
+
+			let is_mandiri_kcm = r.message ? 0 : 1;
+
+			frm.set_df_property(
+				'mandiri_kcm',
+				'hidden',
+				is_mandiri_kcm
+			);
+		}
+	});
+}
+
+async function set_ft_service(frm) {
+
+	let paid_from = frm.doc.paid_from;
+
+	if (!paid_from) {
+		return;
+	}
+
+	try {
+
+		let from_bank_account = await frappe.db.get_value(
+			'Bank Account',
+			{ account: paid_from },
+			['bank']
+		);
+
+		let from_bank = from_bank_account.message?.bank;
+
+		if (!from_bank) {
+
+			frm.set_value(
+				'ft_service',
+				'InHouse Transfer'
+			);
+
+			return;
+		}
+
+		let rekening = await frappe.call({
+			method: "sth.custom.payment_entry.get_no_rekening",
+			args: {
+				party_type: frm.doc.party_type,
+				party: frm.doc.party,
+				paid_to: frm.doc.payment_type === "Internal Transfer"
+					? frm.doc.paid_to
+					: null
+			}
+		});
+
+		let to_bank =
+			rekening.message?.bank_tujuan ||
+			rekening.message?.nama_bank;
+
+		if (!to_bank) {
+
+			frm.set_value(
+				'ft_service',
+				'InHouse Transfer'
+			);
+
+			return;
+		}
+
+		frm.set_value(
+			'ft_service',
+			from_bank !== to_bank
+				? 'Online Domestic Transfer'
+				: 'InHouse Transfer'
+		);
+
+	}
+
+	catch (e) {
+
+		console.log(e);
+
+		frm.set_value(
+			'ft_service',
+			'InHouse Transfer'
+		);
+
+	}
+}
+
+async function check_mandiri_kcm_warning(frm) {
+
+    let r = await frappe.call({
+        method: "sth.bank_payment.custom.payment_entry.get_mandiri_kcm_warnings",
+        args: {
+            payment_entry: frm.doc.name
+        }
+    });
+
+    let data = r.message || {};
+
+    if (!data.has_warning) {
+        return;
+    }
+
+    const field_labels = {
+        beneficiary_account: "beneficiary_account / No Rekening Tujuan",
+        debit_account: "debit_account / No Rekening",
+        beneficiary_name: "beneficiary_name / Nama Penerima",
+        bank_code: "bank_code / Kode Bank",
+        amount: "amount / Nominal",
+        currency: "currency / Mata Uang"
+    };
+
+    let missing_fields = (data.missing_fields || []).map(
+        field => field_labels[field] || field
+    );
+
+    return new Promise((resolve, reject) => {
+
+		// console.log("freeze count", frappe.dom.freeze_count);
+
+		frappe.dom.unfreeze();
+
+		// console.log("after unfreeze", frappe.dom.freeze_count);
+
+		frappe.confirm(
+			`
+			Mandatory field Mandiri KCM belum lengkap:
+			<br><br>
+			<b>${missing_fields.join("<br>")}</b>
+			<br><br>
+			Proses Mandiri KCM kemungkinan gagal.
+			<br><br>
+			Apakah Anda ingin melanjutkan?
+			`,
+			() => resolve(),
+			async () => {
+				await frm.reload_doc();
+				reject();
+			}
+		);
+
+	});
+
 }

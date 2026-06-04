@@ -18,6 +18,10 @@
   "estate",
   "company",
   "cost_center",
+  "section_break_xjpd",
+  "plantation",
+  "mill",
+  "plasma",
   "setting_coa_default_section",
   "account_default_divisi",
   "column_break_mnfw"
@@ -102,12 +106,40 @@
    "fieldname": "estate",
    "fieldtype": "Data",
    "label": "Estate"
+  },
+  {
+   "fieldname": "section_break_xjpd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "unit.plantation",
+   "fetch_if_empty": 1,
+   "fieldname": "plantation",
+   "fieldtype": "Check",
+   "label": "Plantation"
+  },
+  {
+   "default": "0",
+   "fetch_from": "unit.mill",
+   "fetch_if_empty": 1,
+   "fieldname": "mill",
+   "fieldtype": "Check",
+   "label": "Mill"
+  },
+  {
+   "default": "0",
+   "fetch_from": "unit.plasma",
+   "fetch_if_empty": 1,
+   "fieldname": "plasma",
+   "fieldtype": "Check",
+   "label": "Plasma"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-22 16:38:04.068543",
+ "modified": "2026-05-18 10:03:12.149828",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Divisi",

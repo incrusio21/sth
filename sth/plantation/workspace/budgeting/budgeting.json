@@ -270,7 +270,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-04 13:06:48.103360",
+ "modified": "2026-05-22 10:16:54.108784",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budgeting",
@@ -280,7 +280,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 5.0,
+ "sequence_id": 6.0,
  "shortcuts": [],
  "title": "Budgeting"
 }

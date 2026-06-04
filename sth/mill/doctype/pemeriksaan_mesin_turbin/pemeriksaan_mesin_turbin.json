@@ -9,19 +9,18 @@
   "naming_series",
   "tanggal",
   "jam",
+  "column_break_gwxx",
   "company",
   "unit",
-  "column_break_gwxx",
-  "status",
-  "shift",
+  "shift_proses",
   "stasiun",
   "mesin",
   "section_break_fnwx",
-  "tanggal_scan",
-  "column_break_hfiv",
-  "jam_scan",
-  "column_break_lbva",
   "user_scan",
+  "column_break_hfiv",
+  "tanggal_scan",
+  "column_break_lbva",
+  "jam_scan",
   "section_break_druq",
   "tekanan_inlet",
   "foto_tekanan_inlet",
@@ -92,22 +91,6 @@
   {
    "fieldname": "column_break_gwxx",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "fieldname": "mesin",
@@ -282,7 +265,8 @@
   },
   {
    "fieldname": "section_break_fnwx",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Time Stamp"
   },
   {
    "fieldname": "stasiun",
@@ -317,12 +301,22 @@
   {
    "fieldname": "column_break_lbva",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-23 13:54:34.672060",
+ "modified": "2026-06-03 11:50:25.148909",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Turbin",

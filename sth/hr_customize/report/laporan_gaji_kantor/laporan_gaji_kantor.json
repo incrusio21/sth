@@ -10,7 +10,7 @@
  "idx": 2,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-05 13:48:53.858266",
+ "modified": "2026-05-20 14:13:21.320143",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Gaji Kantor",
@@ -34,6 +34,9 @@
   },
   {
    "role": "ASISTEN PERSONALIA"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
   }
  ],
  "timeout": 0

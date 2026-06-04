@@ -3,11 +3,26 @@
 
 frappe.provide("sth.legal");
 
-// frappe.ui.form.on("Pengajuan Pembayaran", {
-// 	refresh(frm) {
-
-// 	},
-// });
+frappe.ui.form.on("Pengajuan Pembayaran", {
+    onload(frm) {
+        frm.set_query("bank_account", function () {
+            return {
+                filters: {
+                    company: frm.doc.company
+                }
+            }
+        });
+    },
+    company(frm) {
+        frm.set_query("bank_account", function () {
+            return {
+                filters: {
+                    company: frm.doc.company
+                }
+            }
+        });
+    },
+});
 
 sth.legal.PengajuanPembayaran = class PengajuanPembayaran extends sth.plantation.AccountsController {
     setup() {
@@ -19,7 +34,7 @@ sth.legal.PengajuanPembayaran = class PengajuanPembayaran extends sth.plantation
             });
         }
     }
-    
+
     refresh() {
         this.show_general_ledger()
         this.set_query_field()
@@ -53,7 +68,7 @@ sth.legal.PengajuanPembayaran = class PengajuanPembayaran extends sth.plantation
         })
     }
 
-    get_accounts(){
+    get_accounts() {
         let me = this
 
         frappe.call({
@@ -61,15 +76,15 @@ sth.legal.PengajuanPembayaran = class PengajuanPembayaran extends sth.plantation
             args: {
                 company: me.frm.doc.company
             },
-            callback: function(r) {
-                if(!r.exc && r.message) {
+            callback: function (r) {
+                if (!r.exc && r.message) {
                     me.frm.set_value(r.message);
                 }
             }
         });
     }
 
-    calculate_total(){
+    calculate_total() {
         let totals = 0
         for (const item of this.frm.doc.details || []) {
             totals += flt(item.amount)

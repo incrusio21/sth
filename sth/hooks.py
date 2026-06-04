@@ -52,7 +52,7 @@ doctype_js = {
 	"Material Request": "public/js/material_request.js",
 	"Payroll Entry": "hr_customize/custom/payroll_entry.js",
 	"Payment Entry": ["hr_customize/custom/payment_entry.js",
-					  "public/js/payment_entry.js",],
+					  "public/js/payment_entry.js","public/js/payment_entry_leasing.js"],
 	"Project": "legal/custom/project.js",
 	"Purchase Invoice": [
         "buying_sth/custom/purchase_invoice.js", 
@@ -178,6 +178,7 @@ standard_queries = {
 	"Item Group": "sth.controllers.queries.item_group_query",
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
+	# "Unit": "sth.controllers.queries.unit_query_by_company",
 	# "Unit": "sth.controllers.queries.unit_query",
 }
 
@@ -329,8 +330,9 @@ doc_events = {
 			"sth.overrides.payment_entry.on_submit_pdo",
 			"sth.custom.payment_entry.payment_entry_notification",
             "sth.custom.payment_entry.update_pesangon_from_payment",
-            "sth.custom.payment_entry.pasang_nota_piutang"
-            # "sth.bank_payment.custom.payment_entry.make_entry"
+            "sth.custom.payment_entry.pasang_nota_piutang",
+            "sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
+            "sth.custom.payment_entry_leasing.on_payment_entry_submit"
         ],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
                 "sth.custom.payment_entry.update_status_deposito", 
@@ -338,7 +340,8 @@ doc_events = {
                 "sth.custom.payment_entry.update_status_dividen", 
                 "sth.overrides.payment_entry.on_cancel_pdo",
                 "sth.custom.payment_entry.update_pesangon_from_payment",
-                "sth.custom.payment_entry.pasang_nota_piutang"
+                "sth.custom.payment_entry.pasang_nota_piutang",
+                "sth.custom.payment_entry_leasing.on_payment_entry_cancel"
                 ],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
@@ -359,13 +362,14 @@ doc_events = {
 		"before_save": "sth.buying_sth.custom.purchase_order.set_accept_day"
 	},
 	"Purchase Receipt": {
-		"validate": ["sth.custom.purchase_receipt.set_purchase_order_if_exist","sth.custom.purchase_receipt.validate_val_proc"],
-		"before_submit": ["sth.custom.purchase_receipt.validate_val_proc"],
-		"on_submit": "sth.custom.purchase_receipt.auto_create_assets_from_pr"
+		"validate": ["sth.custom.purchase_receipt.set_purchase_order_if_exist", "sth.custom.purchase_receipt.validate_overreceipt"],
+		# "before_submit": ["sth.custom.purchase_receipt.validate_val_proc"],
+		"on_submit": ["sth.custom.purchase_receipt.auto_create_assets_from_pr", "sth.custom.purchase_receipt.check_receipt_notification"]
 	},
 	"Purchase Invoice": {
-		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim","sth.custom.purchase_invoice.check_expense"],
-		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice"
+		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim","sth.custom.purchase_invoice.validate_qty_against_purchase_receipt"],
+		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice",
+  		"before_save": "sth.custom.purchase_invoice.update_keterangan",
 	},
 	"Quotation": {
 		# "validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.procurement_sth.custom.item.check_persetujuan"],
@@ -433,6 +437,7 @@ scheduler_events = {
 		"sth.finance_sth.doctype.deposito.deposito.deposito_roll_over",
 		"sth.overrides.event.custom_send_email_digest",
 		"sth.accounting_sth.doctype.transaksi_berulang.transaksi_berulang.process_scheduled_je",
+		# "sth.accounting_sth.doctype.transaksi_berulang.transaksi_berulang.process_scheduled_pe_leasing"
 	],
     "daily_long": [
 		"sth.hr_customize.doctype.employee_update_log.employee_update_log.repost_entries",

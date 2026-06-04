@@ -491,76 +491,223 @@ def buat_nota_piutang(doc, method):
 		
 def set_no_rekening(doc, method):
 
-	if not doc.party or not doc.party_type:
-		return
+	bank_account = frappe.db.get_value(
+		"Bank Account",
+		{
+			"account": doc.paid_from
+		},
+		["bank_account_no", "bank"],
+		as_dict=True
+	)
 
-	if doc.party_type == "Employee":
-
-		norek = frappe.db.get_value(
-			"Employee",
-			doc.party,
-			"bank_ac_no"
+	if bank_account:
+		doc.no_rekening_asal = (
+			bank_account.bank_account_no
 		)
 
-		if norek:
-			doc.no_rekening = norek
+	result = get_no_rekening(
+		party_type=doc.party_type,
+		party=doc.party,
+		paid_to=doc.paid_to,
+		tipe_transfer=doc.tipe_transfer,
+		permintaan_dana_operasional=doc.permintaan_dana_operasional,
+		payment_type=doc.payment_type
+	)
 
-	elif doc.party_type == "Supplier":
+	doc.no_rekening = None
+	doc.nama_bank = None
 
-		norek = frappe.db.get_value(
-			"Data Bank Supplier",
-			{
-				"parent": doc.party,
-				"status_bank": "Aktif"
-			},
-			"no_rekening"
+	# special handling internal employee
+	if (
+		doc.party_type == "Employee"
+		and doc.internal_employee
+	):
+
+		reference = None
+
+		if doc.references:
+			reference = doc.references[0]
+
+		if (
+			reference
+			and reference.reference_doctype
+			and reference.reference_name
+		):
+
+			no_rekening_tujuan = frappe.db.get_value(
+				reference.reference_doctype,
+				reference.reference_name,
+				"no_rekening_tujuan"
+			)
+
+			if no_rekening_tujuan:
+
+				bank_account = frappe.db.get_value(
+					"Bank Account",
+					no_rekening_tujuan,
+					[
+						"bank_account_no",
+						"bank"
+					],
+					as_dict=True
+				)
+
+				if bank_account:
+
+					doc.no_rekening_tujuan = (
+						bank_account.bank_account_no
+					)
+
+					doc.bank_tujuan = (
+						bank_account.bank
+					)
+
+	else:
+
+		if result.get("no_rekening"):
+			doc.no_rekening = (
+				result["no_rekening"]
+			)
+
+		if result.get("nama_bank"):
+			doc.nama_bank = (
+				result["nama_bank"]
+			)
+
+	if result.get("no_rekening_tujuan"):
+		doc.no_rekening_tujuan = (
+			result["no_rekening_tujuan"]
 		)
 
-		if norek:
-			doc.no_rekening = norek
+	if result.get("bank_tujuan"):
+		doc.bank_tujuan = (
+			result["bank_tujuan"]
+		)
+
+	doc.beneficary_account = (
+		doc.no_rekening_tujuan
+	)
+
+	doc.beneficary_bank = (
+		doc.bank_tujuan
+	)
 
 @frappe.whitelist()
-def get_no_rekening(party_type, party):
+def get_no_rekening(party_type=None, party=None, 
+					paid_to=None, tipe_transfer=None, 
+					permintaan_dana_operasional=None, payment_type=None):
 
-	if not party_type or not party:
-		return None
+	result = {
+		"no_rekening": None,
+		"nama_bank": None,
+		"no_rekening_tujuan": None,
+		"bank_tujuan": None
+	}
 
-	if party_type == "Employee":
+	if (
+		payment_type == "Internal Transfer"
+		and tipe_transfer == "PDO"
+		and permintaan_dana_operasional
+	):
 
-		return [
-			frappe.db.get_value(
-			"Employee",
-			party,
-			"bank_ac_no"),
+		unit = frappe.db.get_value(
+			"Permintaan Dana Operasional",
+			permintaan_dana_operasional,
+			"unit"
+		)
 
-			frappe.db.get_value(
-			"Employee",
-			party,
-			"nama_bank")
-		]
+		if unit:
 
-	elif party_type == "Supplier":
-
-		return [
-
-			frappe.db.get_value(
-			"Data Bank Supplier",
-			{
-				"parent": party,
-				"status_bank": "Aktif"
-			},
-			"no_rekening"
-			),
-
-			frappe.db.get_value(
-			"Data Bank Supplier",
-			{
-				"parent": party,
-				"status_bank": "Aktif"
-			},
-			"nama_bank"
+			default_bank_account = frappe.db.get_value(
+				"Unit",
+				unit,
+				"default_bank_account"
 			)
-		]
+
+			if default_bank_account:
+
+				bank_account = frappe.db.get_value(
+					"Bank Account",
+					default_bank_account,
+					["bank_account_no", "bank"],
+					as_dict=True
+				)
+
+				if bank_account:
+
+					result["no_rekening_tujuan"] = (
+						bank_account.bank_account_no
+					)
+
+					result["bank_tujuan"] = (
+						bank_account.bank
+					)
+
+	elif paid_to:
+
+		bank_account = frappe.db.get_value(
+			"Bank Account",
+			{
+				"account": paid_to
+			},
+			["bank_account_no", "bank"],
+			as_dict=True
+		)
+
+		if bank_account:
+
+			result["no_rekening_tujuan"] = (
+				bank_account.bank_account_no
+			)
+
+			result["bank_tujuan"] = (
+				bank_account.bank
+			)
+
+	if party_type and party:
+
+		if party_type == "Employee":
+
+			employee = frappe.db.get_value(
+				"Employee",
+				party,
+				["bank_ac_no", "nama_bank"],
+				as_dict=True
+			)
+
+			if employee:
+
+				result["no_rekening"] = (
+					employee.bank_ac_no
+				)
+
+				result["nama_bank"] = (
+					employee.nama_bank
+				)
+
+		elif party_type == "Supplier":
+
+			supplier_bank = frappe.db.get_value(
+				"Data Bank Supplier",
+				{
+					"parent": party,
+					"status_bank": "Aktif"
+				},
+				["no_rekening", "nama_bank"],
+				as_dict=True
+			)
+
+			if supplier_bank:
+
+				result["no_rekening"] = (
+					supplier_bank.no_rekening
+				)
+
+				result["nama_bank"] = (
+					supplier_bank.nama_bank
+				)
+
+	return result
 
 def validate_payment_voucher_kas_pdo(doc, method=None):
 
@@ -668,3 +815,30 @@ def update_payment_voucher_ppd(doc, method=None):
 					f"Gagal update PPD {ref.reference_name}: {str(e)}",
 					"Update Payment Voucher PPD"
 				)
+
+
+@frappe.whitelist()
+def is_mandiri_kcm(account):
+
+	if not account:
+		return False
+
+	bank = frappe.db.get_value(
+		"Bank Account",
+		{
+			"account": account
+		},
+		"bank"
+	)
+
+	if not bank:
+		return False
+
+	return bool(
+		frappe.db.get_value(
+			"Bank",
+			bank,
+			"is_mandiri_kca"
+		)
+	)
+

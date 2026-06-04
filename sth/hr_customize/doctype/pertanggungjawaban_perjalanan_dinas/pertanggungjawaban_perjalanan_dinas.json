@@ -52,6 +52,7 @@
   "more_information_tab",
   "accounts_details_section",
   "salary_account",
+  "advance_account",
   "credit_to",
   "section_break_jzah",
   "payment_voucher"
@@ -260,9 +261,9 @@
   {
    "fieldname": "salary_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salary Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "credit_to",
@@ -333,13 +334,20 @@
    "fieldname": "upload_file_tab",
    "fieldtype": "Tab Break",
    "label": "Upload File"
+  },
+  {
+   "fieldname": "advance_account",
+   "fieldtype": "Link",
+   "label": "Advance Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-23 09:40:28.506154",
+ "modified": "2026-05-21 15:08:32.018190",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",

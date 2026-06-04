@@ -62,7 +62,11 @@ class Timbangan(Document):
 		
 		if self.type == "Receive":
 			reverse_tbs_ledger(self.name)
-			repost_qty_tbs(self.kode_barang,add_days(self.posting_date,-7))
+			# repost_qty_tbs(self.kode_barang,add_days(self.posting_date,-7))
+			repost_qty_tbs(
+				from_date=add_days(self.posting_date,-7),
+				item_code=self.kode_barang
+			)
 		
 		if sort_doc:=frappe.db.get_value("Sortasi",{"no_timbangan": self.name}):
 			frappe.get_doc("Sortasi",sort_doc).cancel()

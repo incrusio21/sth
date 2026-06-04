@@ -10,6 +10,7 @@
   "nama",
   "no_ktp",
   "jabatan",
+  "nama_jabatan",
   "gp",
   "beban_karyawan",
   "beban_perusahaan",
@@ -21,12 +22,14 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "nama",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Nama"
   },
   {
+   "columns": 1,
    "fieldname": "no_ktp",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -35,22 +38,24 @@
   {
    "fieldname": "jabatan",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Jabatan"
+   "label": "Kode Jabatan"
   },
   {
+   "columns": 2,
    "fieldname": "gp",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "GP"
   },
   {
+   "columns": 2,
    "fieldname": "beban_karyawan",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Beban Karyawan"
   },
   {
+   "columns": 2,
    "fieldname": "beban_perusahaan",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -91,13 +96,21 @@
    "fieldtype": "Link",
    "label": "Employee",
    "options": "Employee"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "employee.jabatan",
+   "fieldname": "nama_jabatan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Jabatan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-14 11:34:11.363611",
+ "modified": "2026-05-21 11:31:36.235025",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Daftar BPJS Employee",

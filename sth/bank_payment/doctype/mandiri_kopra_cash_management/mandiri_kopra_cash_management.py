@@ -56,20 +56,20 @@ class MandiriKopraCashManagement(Document):
 			self.payment_status = "In Progress"
 
 		if self.path not in template_function:
-			frappe.throw(f"Path {self.path} belum ada templatenya")
+			frappe.msgprint(f"Path {self.path} belum ada templatenya")
 
 		if self.path == "MCM_BatchUpload":
 			debit_accounts = {d.debit_account for d in self.detail if d.debit_account}
 
 			if len(debit_accounts) > 1:
-				frappe.throw("Batch Upload (Consolidated) hanya boleh 1 debit account")
+				frappe.msgprint("Batch Upload (Consolidated) hanya boleh 1 debit account")
 
-		content = self.create_content()
-		self.raw_content = content
+		# content = self.create_content()
+		# self.raw_content = content
 
-	def before_cancel(self):
-		for d in self.items:
-			generate_duplicate_key(d, "duplicate_key", cancel=1)
+	# def before_cancel(self):
+	# 	for d in self.items:
+	# 		generate_duplicate_key(d, "duplicate_key", cancel=1)
 
 	def on_cancel(self):
 		self.update_payment_entry_status()
@@ -81,7 +81,7 @@ class MandiriKopraCashManagement(Document):
 		# 1. Buat konten TXT di memori
 		content = self.create_content()
 		print("CONTENT RAW:", content[:100])
-		self.raw_content = content
+		# self.raw_content = content
 
 		mpk = frappe.get_value("Mandiri Public Key", self.public_key, ["recipient_email", "public_key"], as_dict=1)
 
@@ -90,14 +90,18 @@ class MandiriKopraCashManagement(Document):
 			content = self.encrypt_in_memory(content, mpk.public_key, mpk.recipient_email)
 			print("TYPE:", type(content))
 			print("AFTER ENCRYPT SAMPLE:", content[:100]) 
-
+			self.raw_content = content
 			self._extension_name = ".pgp"
 		
 		self.upload_to_sftp(content)
 
 	def create_content(self):
+
+		if self.test_request:
+			return self.test_request
+		
 		if not template_function.get(self.path):
-			frappe.throw(f"{self.path} doesn't have Template")
+			frappe.msgprint(f"{self.path} doesn't have Template")
 		
 		return template_function[self.path](self)
 
@@ -117,7 +121,7 @@ class MandiriKopraCashManagement(Document):
 		)
 
 		if not encrypted.ok:
-			frappe.throw(f"Status : {encrypted.status} Stderr : {encrypted.stderr}")
+			frappe.msgprint(f"Status : {encrypted.status} Stderr : {encrypted.stderr}")
 
 		return encrypted.data  # bytes hasil enkripsi
 	
@@ -146,29 +150,17 @@ class MandiriKopraCashManagement(Document):
 		ssh = ssh_connect(self.mft_server)
 
 		if not ssh:
-			frappe.throw(f"Gagal konek ke MFT server: {self.mft_server}")
+			frappe.msgprint(f"Gagal konek ke MFT server: {self.mft_server}")
 
 		path = f"Upload/Users/{self.path}"
 		remote_path = f"{path}/{self.name}{self._extension_name}"
 
 		try:
 			with ssh.open_sftp() as sftp:
-
-				# print("CHECK /Upload:", sftp.listdir("/Upload"))
-				# print("CHECK /Upload/Users:", sftp.listdir("/Upload/Users"))
-				# print("CHECK TARGET:", sftp.listdir(path))
-
-				# print("UPLOAD TO:", remote_path)
-				# print("DATA SIZE:", len(data))
-
 				f = sftp.open(remote_path, 'wb')
 				f.write(data)
 				f.flush()
 				f.close()
-
-				# print("UNREAD:", sftp.listdir("/Downloads/Unread Files"))
-				# print("UPLOAD DONE (FILE CLOSED)")
-
 		finally:
 			ssh.close()
 
@@ -269,7 +261,6 @@ def get_payment_status():
 			if ssh:
 				ssh.close()
 
-	# TAMBAHAN: HANDLE TIMEOUT 30 MENIT
 	now = now_datetime()
 
 	for rows in mft_server.values():
@@ -306,79 +297,27 @@ def get_payment_status():
 		WHERE name in %(kcm)s
 	""", {"kcm": kcm_list})
 
-# def get_payment_status():
-# 	progress_payment = frappe.get_all("Mandiri Kopra Cash Management", filters={"docstatus": 1, "status": "In Progress"}, fields=["name", "mft_server"])
+	# UPDATE PAYMENT ENTRY STATUS
+	for kcm_name, val in kcm_to_update.items():
 
-# 	mft_server = {}
-# 	for kcm in progress_payment:
-# 		mft = mft_server.setdefault(kcm.mft_server, [])
-# 		mft.append(kcm.name)
+		payment_entries = frappe.get_all(
+			"Mandiri Kopra Detail",
+			filters={
+				"parent": kcm_name
+			},
+			fields=["payment_entry"]
+		)
 
-# 	kcm_to_update = {}
-# 	remote_dir = '/Downloads/Unread Files'
-# 	for server, kcm in mft_server:
-# 		ssh = ssh_connect(server)
-		
-# 	for kcm in progress_payment:
-		
-# 		try:
-# 			with ssh.open_sftp() as sftp:
-# 				files = sftp.listdir(remote_dir)
+		for pe in payment_entries:
 
-# 				matched_file = None
-# 				for file in files:
-# 					if file.startswith(kcm.name) and file.endswith(('.ack', '.nack')):
-# 						matched_file = file
-# 						break
-				
-# 				if matched_file:
-# 					remote_path = f"{remote_dir}/{matched_file}"
+			if pe.payment_entry:
 
-# 					buffer = io.BytesIO()
-# 					sftp.getfo(remote_path, buffer)
-# 					buffer.seek(0)
-# 					data = buffer.read()
-
-# 					decoded = data.decode("utf-8", errors="ignore")
-
-# 					print(f"{kcm.name} => {decoded}")
-
-# 					kcm_to_update[kcm.name] = {
-# 						"status": "Completed" if matched_file.endswith(".ack") else "Error",
-# 						"callback": data
-# 					}
-# 		finally:
-# 			ssh.close()  # ✅ selalu dieksekusi meski frappe.throw() dipanggil
-
-# 	if not kcm_to_update:
-# 		return
-	
-# 	status_update = callback_update = ""
-# 	kcm_list = []
-# 	for kcm_name, value in kcm_to_update.items():
-# 		status_update += """ WHEN name = {} THEN {}
-# 			""".format(
-# 			frappe.db.escape(kcm_name),
-# 			value.status,
-# 		)
-		
-# 		callback_update += """ WHEN name = {} THEN {}
-# 			""".format(
-# 			frappe.db.escape(kcm_name),
-# 			value.status,
-# 		)
-
-# 		kcm_list.append(kcm_name)
-		
-# 	frappe.db.sql(
-# 		f""" UPDATE `tabMandiri Kopra Cash Management`
-# 		SET
-# 			status = CASE {status_update} END,
-# 			callback = CASE {callback_update} END
-# 		WHERE
-# 			name in %(kcm)s """,
-# 		{"kcm": kcm_list}
-# 	)
+				frappe.db.set_value(
+					"Payment Entry",
+					pe.payment_entry,
+					"payment_status",
+					val["payment_status"]
+				)
 
 @frappe.whitelist()
 def get_payment_entry_details(payment_entry):

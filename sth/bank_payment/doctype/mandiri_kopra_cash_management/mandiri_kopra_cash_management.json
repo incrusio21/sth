@@ -15,6 +15,7 @@
   "company",
   "mft_server",
   "payment_status",
+  "test_request",
   "section_break_ksio",
   "detail",
   "bill_detail",
@@ -34,7 +35,6 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Date",
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -45,8 +45,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company",
-   "reqd": 1
+   "options": "Company"
   },
   {
    "fieldname": "section_break_ksio",
@@ -63,8 +62,7 @@
    "fieldname": "public_key",
    "fieldtype": "Link",
    "label": "Public Key",
-   "options": "Mandiri Public Key",
-   "reqd": 1
+   "options": "Mandiri Public Key"
   },
   {
    "fieldname": "naming_series",
@@ -81,8 +79,7 @@
    "fieldtype": "Link",
    "label": "MFT Server",
    "options": "Mandiri MFT",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -141,13 +138,18 @@
    "fieldtype": "Table",
    "label": "Payroll Detail",
    "options": "Mandiri Kopra Cash Payroll Detail"
+  },
+  {
+   "fieldname": "test_request",
+   "fieldtype": "Text",
+   "label": "test request"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-06 11:54:27.044416",
+ "modified": "2026-05-29 12:24:08.101130",
  "modified_by": "Administrator",
  "module": "Bank Payment",
  "name": "Mandiri Kopra Cash Management",

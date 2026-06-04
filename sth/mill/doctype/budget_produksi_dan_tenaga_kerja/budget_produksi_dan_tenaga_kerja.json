@@ -9,14 +9,9 @@
   "series",
   "tanggal",
   "jam",
-  "unit",
   "column_break_fwob",
-  "status",
-  "shift",
-  "section_break_ryxt",
   "company",
-  "unit_pabrik",
-  "column_break_vtxm",
+  "unit",
   "tahun_budget",
   "estimasi_kenaikan_upah_",
   "dalam_setahun_section",
@@ -47,16 +42,6 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
-  },
-  {
-   "fieldname": "unit_pabrik",
-   "fieldtype": "Link",
-   "label": "Unit Pabrik",
-   "options": "Unit"
-  },
-  {
-   "fieldname": "column_break_vtxm",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "tahun_budget",
@@ -196,26 +181,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_break_ryxt",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "harga_per_jam_lembur",
    "fieldtype": "Currency",
    "label": "Harga Per Jam Lembur"
@@ -241,7 +206,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 14:19:06.211881",
+ "modified": "2026-06-02 09:41:06.733777",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Budget Produksi dan Tenaga Kerja",

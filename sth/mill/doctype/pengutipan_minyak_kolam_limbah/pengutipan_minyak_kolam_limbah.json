@@ -10,11 +10,10 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_eejr",
-  "select",
   "company",
   "unit",
+  "shift_proses",
   "section_break_vwmu",
   "upload_foto"
  ],
@@ -65,22 +64,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "select",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Select",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_vwmu",
    "fieldtype": "Section Break",
    "label": "Detail"
@@ -89,12 +72,22 @@
    "fieldname": "upload_foto",
    "fieldtype": "Attach Image",
    "label": "Upload Foto"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:08:12.379626",
+ "modified": "2026-06-03 11:49:19.748583",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pengutipan Minyak Kolam Limbah",

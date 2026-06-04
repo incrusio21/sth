@@ -176,3 +176,4 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			frappe.throw(f"Document already have Pengajuan Kontanan. please cancel it first")
 
 		self.create_or_update_payment_log(update_payment_log, "Upah")
+		self.create_or_update_mandor_premi()

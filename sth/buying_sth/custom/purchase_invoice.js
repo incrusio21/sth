@@ -196,7 +196,49 @@ frappe.ui.form.on("Purchase Invoice", {
         // frm.doc.biaya_lainnya = frm.doc.taxes_and_charges_added - frm.doc.ppn
         frm.doc.biaya_lainnya = total_lainnya
         frm.refresh_fields()
-    }
+    },
+    validate(frm) {
+        if (frm.doc.docstatus != 0) return
+
+        const po_names = [...new Set(
+            (frm.doc.items || [])
+                .map((d) => d.purchase_order)
+                .filter(Boolean)
+        )]
+
+        if (!po_names.length) return
+
+        // JANGAN clear_table di sini — cukup merge/skip duplikat
+
+        const promises = po_names.map((po_name) =>
+            frappe.xcall('frappe.client.get', {
+                doctype: 'Purchase Order',
+                name: po_name,
+                filters: { name: po_name }
+            }).then((po) => {
+                for (const tax of (po.taxes || [])) {
+                    const exists = (frm.doc.taxes || []).find(
+                        (t) => t.account_head === tax.account_head
+                    )
+                    if (exists) continue  // skip duplikat, termasuk dari get_tax_template
+
+                    const row = frm.add_child('taxes')
+                    row.account_head   = tax.account_head
+                    row.charge_type    = tax.charge_type
+                    row.add_deduct_tax = tax.add_deduct_tax
+                    row.tax_amount     = tax.tax_amount
+                    row.description    = tax.description
+                    row.tipe_pajak     = tax.tipe_pajak
+                    row.category       = tax.category
+                }
+            })
+        )
+
+        return Promise.all(promises).then(() => {
+            frm.refresh_field('taxes')
+        })
+    },
+
 });
 
 async function showTrainingEventSelector(frm) {
@@ -278,6 +320,7 @@ async function showTrainingEventSelector(frm) {
 
             frm.set_value("custom_reference_doctype", "Training Event");
             frm.set_value("custom_reference_name", selected_items[0].name);
+            frm.set_value("invoice_type", "Jasa Pelatihan");
             frm.refresh_field("items");
             frm.trigger("calculate_taxes_and_totals");
             d.hide();

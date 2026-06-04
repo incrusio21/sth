@@ -100,6 +100,139 @@ frappe.ui.form.on("Payroll Entry", {
 		// 		frm.scroll_to_field("error_message");
 		// 	});
 		// }
+        if (frm.doc.docstatus === 1) {
+            frm.add_custom_button(__("Buat Payment Voucher"), () => {
+                frappe.confirm(
+                    __("Buat Payment Voucher untuk Payroll Entry <b>{0}</b>?", [frm.doc.name]),
+                    () => {
+                        frappe.call({
+                            method: "create_payment_entry",   // jika pakai class method
+                            doc: frm.doc,
+                            freeze: true,
+                            freeze_message: __("Membuat Payment Voucher..."),
+                            callback(r) {
+							    if (r.message) {
+							        frappe.new_doc("Payment Entry", r.message);
+							    }
+							}
+                        });
+                    }
+                );
+            }, __("Keuangan"));
+        }
+
+        if (frm.doc.docstatus === 1) {
+            frm.add_custom_button(__("Lihat GL Entry"), () => {
+                frappe.call({
+                    method: "frappe.client.get_list",
+                    args: {
+                        doctype: "GL Entry",
+                        filters: {
+                            voucher_type: "Payroll Entry",
+                            voucher_no: frm.doc.name,
+                            is_cancelled: 0,
+                        },
+                        fields: [
+                            "name",
+                            "posting_date",
+                            "account",
+                            "debit",
+                            "credit",
+                            "against",
+                            "remarks",
+                            "cost_center",
+                        ],
+                        order_by: "creation asc",
+                        limit: 50,
+                    },
+                    callback(r) {
+                        const entries = r.message || [];
+
+                        if (!entries.length) {
+                            frappe.msgprint({
+                                title: __("GL Entry"),
+                                message: __("Belum ada GL Entry untuk Payroll Entry ini."),
+                                indicator: "orange",
+                            });
+                            return;
+                        }
+
+                        // Hitung total debit & kredit
+                        const totalDebit  = entries.reduce((s, e) => s + (e.debit  || 0), 0);
+                        const totalCredit = entries.reduce((s, e) => s + (e.credit || 0), 0);
+
+                        const fmt = (val) =>
+                            val
+                                ? frappe.format(val, { fieldtype: "Currency" })
+                                : "<span style='color:#aaa'>—</span>";
+
+                        // Bangun baris tabel
+                        const rows = entries.map(e => `
+                            <tr>
+                                <td>${e.posting_date}</td>
+                                <td>
+                                    <a href="/app/account/${encodeURIComponent(e.account)}" target="_blank">
+                                        ${e.account}
+                                    </a>
+                                </td>
+                                <td style="text-align:right; color:#2ecc71; font-weight:600">
+                                    ${fmt(e.debit)}
+                                </td>
+                                <td style="text-align:right; color:#e74c3c; font-weight:600">
+                                    ${fmt(e.credit)}
+                                </td>
+                                <td style="color:#888; font-size:0.85em">${e.remarks || "—"}</td>
+                            </tr>
+                        `).join("");
+
+                        const html = `
+                            <table class="table table-bordered table-condensed" style="margin-bottom:0">
+                                <thead style="background:#f5f5f5">
+                                    <tr>
+                                        <th>${__("Tanggal")}</th>
+                                        <th>${__("Akun")}</th>
+                                        <th style="text-align:right">${__("Debit")}</th>
+                                        <th style="text-align:right">${__("Kredit")}</th>
+                                        <th>${__("Keterangan")}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rows}</tbody>
+                                <tfoot style="background:#f9f9f9; font-weight:bold">
+                                    <tr>
+                                        <td colspan="2" style="text-align:right">${__("Total")}</td>
+                                        <td style="text-align:right; color:#2ecc71">
+                                            ${fmt(totalDebit)}
+                                        </td>
+                                        <td style="text-align:right; color:#e74c3c">
+                                            ${fmt(totalCredit)}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        `;
+
+                        const d = new frappe.ui.Dialog({
+                            title: __("GL Entry — {0}", [frm.doc.name]),
+                            size: "extra-large",
+                        });
+
+                        d.body.innerHTML = html;
+                        d.show();
+
+                        // Tombol shortcut ke list GL Entry
+                        d.$wrapper.find(".modal-footer").prepend(`
+                            <a href="/app/gl-entry?voucher_type=Payroll Entry&voucher_no=${frm.doc.name}"
+                               target="_blank"
+                               class="btn btn-sm btn-default">
+                                ${__("Buka di GL Entry List")}
+                            </a>
+                        `);
+                    },
+                });
+            }, __("Keuangan"));
+        }
+    
 	},
 
 	get_employee_details: function (frm) {
@@ -147,7 +280,7 @@ frappe.ui.form.on("Payroll Entry", {
 			
         
 		} else if (frm.doc.salary_slips_created && frm.doc.status !== "Queued") {
-			frm.add_custom_button(__("Submit Salary Slips"), function () {
+			frm.add_custom_button(__("Submit Salary Slip"), function () {
 				submit_salary_slips(frm);
 			}).addClass("btn-primary");
 		} else if (!frm.doc.salary_slips_created && frm.doc.status === "Failed") {
@@ -415,3 +548,4 @@ const submit_salary_slips = function (frm) {
 		},
 	);
 };
+

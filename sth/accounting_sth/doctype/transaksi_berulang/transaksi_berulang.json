@@ -30,10 +30,53 @@
   "no_rangka",
   "nomor_polisi",
   "no_mesin",
+  "section_break_lykn",
+  "lessor",
+  "vendor",
+  "po",
+  "section_break_rgvg",
+  "nomor_kontrak_vendor",
+  "nama_asuransi",
+  "nomor_kontrak_asuransi",
+  "tingkat_suku_bunga",
+  "column_break_ikza",
+  "denda_keterlambatan",
+  "jumlah_angsuran",
+  "tanggal_efektif",
+  "tanggal_berakhir",
+  "rincian_harga_kendaraan_section",
+  "dpp",
+  "column_break_fubh",
+  "ppn",
+  "column_break_rges",
+  "pbbkb",
+  "total",
+  "section_break_esit",
+  "pembayaran_uang_muka",
+  "pembayaran_angsuran_pertama",
+  "biaya_admin",
+  "admin_polis",
+  "total_pembayaran_pertama",
+  "column_break_fuko",
+  "nilai_pelunasan",
+  "asuransi_kredit",
+  "nilai_bunga",
+  "total_kredit",
+  "pembayaran_angsuran_perbulan",
+  "leasing_memorial_section",
+  "leasing_jurnal_debit",
+  "biaya_bunga_leasing_debit",
+  "ppn_masukan_account",
+  "column_break_xzjt",
+  "leasing_jurnal_kredit",
+  "biaya_admin_account",
+  "biaya_asuransi_account",
   "section_break_vcpp",
   "jurnal_debit",
   "column_break_vddw",
   "jurnal_kredit",
+  "section_break_mwhn",
+  "transaksi_berulang_leasing_table",
   "section_break_okiw",
   "transaksi_berulang_je_log",
   "amended_from"
@@ -50,7 +93,7 @@
    "fieldname": "jenis_transaksi",
    "fieldtype": "Select",
    "label": "Jenis Transaksi",
-   "options": "\nASURANSI\nSEWA"
+   "options": "\nASURANSI\nSEWA\nLEASING"
   },
   {
    "fieldname": "nama_vendor",
@@ -75,6 +118,7 @@
    "label": "Periode To"
   },
   {
+   "depends_on": "eval:doc.jenis_transaksi != \"LEASING\"",
    "fieldname": "section_break_hteh",
    "fieldtype": "Section Break"
   },
@@ -127,6 +171,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.jenis_transaksi == \"ASURANSI\"",
    "fieldname": "masa_periode",
    "fieldtype": "Int",
    "in_preview": 1,
@@ -134,6 +179,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.jenis_transaksi == \"LEASING\"",
    "fieldname": "section_break_vcpp",
    "fieldtype": "Section Break"
   },
@@ -160,13 +206,14 @@
    "options": "Company"
   },
   {
-   "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
+   "depends_on": "eval:doc.jenis_transaksi == \"ASURANSI\"",
    "fieldname": "jenis_pertanggungan",
    "fieldtype": "Select",
    "label": "Jenis Pertanggungan",
    "options": "JASA ASURANSI ALAT BERAT\nJASA ASURANSI GEDUNG/PROPERTI\nJASA ASURANSI KENDARAAN\nJASA ASURANSI KESEHATAN\nJASA ASURANSI MESIN PABRIK\nJASA ASURANSI UMUM"
   },
   {
+   "depends_on": "eval:doc.jenis_transaksi != \"LEASING\"",
    "fieldname": "section_break_kfuj",
    "fieldtype": "Section Break"
   },
@@ -177,6 +224,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.jenis_transaksi != \"LEASING\"",
    "fieldname": "section_break_okiw",
    "fieldtype": "Section Break"
   },
@@ -227,13 +275,248 @@
    "in_preview": 1,
    "label": "Tanggal Invoice",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"LEASING\"",
+   "fieldname": "section_break_rgvg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nomor_kontrak_vendor",
+   "fieldtype": "Data",
+   "label": "Nomor Kontrak Vendor"
+  },
+  {
+   "fieldname": "nama_asuransi",
+   "fieldtype": "Data",
+   "label": "Nama Asuransi"
+  },
+  {
+   "fieldname": "nomor_kontrak_asuransi",
+   "fieldtype": "Data",
+   "label": "Nomor Kontrak Asuransi"
+  },
+  {
+   "fieldname": "tingkat_suku_bunga",
+   "fieldtype": "Percent",
+   "label": "Tingkat Suku Bunga ( % )"
+  },
+  {
+   "fieldname": "denda_keterlambatan",
+   "fieldtype": "Percent",
+   "label": "Denda Keterlambatan ( % )"
+  },
+  {
+   "fieldname": "jumlah_angsuran",
+   "fieldtype": "Int",
+   "label": "Jumlah Angsuran"
+  },
+  {
+   "fieldname": "tanggal_efektif",
+   "fieldtype": "Date",
+   "label": "Tanggal Efektif"
+  },
+  {
+   "fieldname": "column_break_ikza",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tanggal_berakhir",
+   "fieldtype": "Date",
+   "label": "Tanggal Berakhir"
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"LEASING\"",
+   "fieldname": "rincian_harga_kendaraan_section",
+   "fieldtype": "Section Break",
+   "label": "Rincian Harga Kendaraan"
+  },
+  {
+   "default": "0",
+   "fieldname": "dpp",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "DPP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fubh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "ppn",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "PPN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rges",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pbbkb",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "PBBKB",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "TOTAL",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"LEASING\"",
+   "fieldname": "section_break_esit",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "pembayaran_uang_muka",
+   "fieldtype": "Currency",
+   "label": "Pembayaran Uang Muka"
+  },
+  {
+   "fieldname": "pembayaran_angsuran_pertama",
+   "fieldtype": "Currency",
+   "label": "Pembayaran Angsuran Pertama"
+  },
+  {
+   "fieldname": "biaya_admin",
+   "fieldtype": "Currency",
+   "label": "Biaya Admin"
+  },
+  {
+   "fieldname": "admin_polis",
+   "fieldtype": "Currency",
+   "label": "Admin Polis"
+  },
+  {
+   "fieldname": "total_pembayaran_pertama",
+   "fieldtype": "Currency",
+   "label": "Total Pembayaran Pertama",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fuko",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nilai_pelunasan",
+   "fieldtype": "Currency",
+   "label": "Nilai Pelunasan"
+  },
+  {
+   "fieldname": "asuransi_kredit",
+   "fieldtype": "Currency",
+   "label": "Asuransi Kredit"
+  },
+  {
+   "fieldname": "nilai_bunga",
+   "fieldtype": "Currency",
+   "label": "Nilai Bunga"
+  },
+  {
+   "fieldname": "total_kredit",
+   "fieldtype": "Currency",
+   "label": "Total Kredit"
+  },
+  {
+   "fieldname": "pembayaran_angsuran_perbulan",
+   "fieldtype": "Currency",
+   "label": "Pembayaran Angsuran Perbulan",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"LEASING\"",
+   "fieldname": "section_break_lykn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "lessor",
+   "fieldtype": "Data",
+   "label": "Lessor"
+  },
+  {
+   "fieldname": "vendor",
+   "fieldtype": "Data",
+   "label": "Vendor"
+  },
+  {
+   "fieldname": "po",
+   "fieldtype": "Data",
+   "label": "PO."
+  },
+  {
+   "depends_on": "eval:doc.jenis_transaksi == \"LEASING\"",
+   "fieldname": "section_break_mwhn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "transaksi_berulang_leasing_table",
+   "fieldtype": "Table",
+   "label": "Transaksi Berulang Leasing Table",
+   "options": "Transaksi Berulang Leasing Table"
+  },
+  {
+   "fieldname": "leasing_memorial_section",
+   "fieldtype": "Section Break",
+   "label": "Leasing Memorial"
+  },
+  {
+   "fieldname": "leasing_jurnal_debit",
+   "fieldtype": "Link",
+   "label": "Leasing Jurnal Debit",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_xzjt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leasing_jurnal_kredit",
+   "fieldtype": "Link",
+   "label": "Leasing Jurnal Kredit",
+   "options": "Account"
+  },
+  {
+   "fieldname": "biaya_bunga_leasing_debit",
+   "fieldtype": "Link",
+   "label": "Biaya Bunga Leasing Debit",
+   "options": "Account"
+  },
+  {
+   "fieldname": "ppn_masukan_account",
+   "fieldtype": "Link",
+   "label": "PPN Masukan Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "biaya_admin_account",
+   "fieldtype": "Link",
+   "label": "Biaya Admin Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "biaya_asuransi_account",
+   "fieldtype": "Link",
+   "label": "Biaya Asuransi Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-07 10:39:25.685292",
+ "modified": "2026-05-25 13:55:24.738825",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Transaksi Berulang",

@@ -21,7 +21,7 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
     );
 
     if (frm.is_new() && frm.is_new() != undefined) {
-      console.log("render is_new");
+      // console.log("render is_new");
       frm.fields_dict["costings"].grid.update_docfield_property(
         "jumlah_verifikasi_hrd",
         "read_only",
@@ -30,7 +30,7 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
     }
 
     if (frm.doc.__islocal && !["Butuh Persetujuan 1", "Butuh Persetujuan 2"].includes(frm.doc.workflow_state)) {
-      console.log("render workflow_state");
+      // console.log("render workflow_state");
       frm.fields_dict["costings"].grid.update_docfield_property(
         "jumlah_verifikasi_hrd",
         "read_only",
@@ -38,7 +38,7 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       );
     }
 
-    console.log(frm.doc.__islocal, frm.doc.workflow_state);
+    // console.log(frm.doc.__islocal, frm.doc.workflow_state);
     frm.refresh_field("costings");
     createPayment(frm);
   },

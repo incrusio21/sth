@@ -103,10 +103,11 @@ class ReturKeGudang(Document):
 			"Retur Ke Gudang": {
 				"doctype": "Stock Entry",
 				"field_map": {
-					"name":"references",
+					"name":"retur_ke_gudang",
 					"doctype": "reference_doctype",
 					"pemilik":"company",
 					"tanggal": "posting_date"
+
 				}
 			},
 
@@ -123,5 +124,13 @@ class ReturKeGudang(Document):
 		}
 
 		doc = get_mapped_doc("Retur Ke Gudang",self.name,mapper,None,postprocess,True)
+
+		source_doc = frappe.get_doc("Pengeluaran Barang",self.no_pengeluaran)
+
+		for row in doc.items:
+			for source_row in source_doc.items:
+				if row.item_code == source_row.kode_barang:
+					row.expense_account = source_row.account
+
 		doc.insert()
 		doc.submit()

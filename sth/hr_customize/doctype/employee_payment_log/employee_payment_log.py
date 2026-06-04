@@ -17,6 +17,9 @@ class EmployeePaymentLog(Document):
             self.status = "Approved"
 
     def on_trash(self):
+        # if frappe.flags.mass_delete_bkm:
+        #     return
+        
         self.remove_document()
         self.document_already_paid()
     
@@ -30,5 +33,8 @@ class EmployeePaymentLog(Document):
         frappe.throw(msg)
 
     def document_already_paid(self):
+        # if frappe.flags.mass_delete_bkm:
+        #     return
+        
         if self.is_paid:
             frappe.throw("Payment for Employee {} has been made.".format(self.employee))

@@ -1,33 +1,33 @@
 frappe.ui.form.on("Expense Claim", {
   refresh(frm) {
-    if (frm.doc.docstatus == 0 || frm.is_new()) {
-      frm.add_custom_button(
-        __("Get Travel Request Expense"),
-        function () {
-          if (!(frm.doc.employee)) {
-            frappe.msgprint(__("Lengkapi Employee terlebih dahulu."));
-            return;
-          }
-          if (!(frm.doc.custom_travel_request)) {
-            frappe.msgprint(__("Lengkapi Travel Request terlebih dahulu."));
-            return;
-          }
+    // if (frm.doc.docstatus == 0 || frm.is_new()) {
+    //   frm.add_custom_button(
+    //     __("Get Travel Request Expense"),
+    //     function () {
+    //       if (!(frm.doc.employee)) {
+    //         frappe.msgprint(__("Lengkapi Employee terlebih dahulu."));
+    //         return;
+    //       }
+    //       if (!(frm.doc.custom_travel_request)) {
+    //         frappe.msgprint(__("Lengkapi Travel Request terlebih dahulu."));
+    //         return;
+    //       }
 
-          frm.clear_table("expenses");
-          frm.clear_table("advances");
-          show_expense_selector(frm);
-        });
+    //       frm.clear_table("expenses");
+    //       frm.clear_table("advances");
+    //       show_expense_selector(frm);
+    //     });
 
-      // frm.set_query('expense_type', 'expenses', function (doc, cdt, cdn) {
-      //   let row = locals[cdt][cdn];
+    //   // frm.set_query('expense_type', 'expenses', function (doc, cdt, cdn) {
+    //   //   let row = locals[cdt][cdn];
 
-      //   return {
-      //     filters: {
-      //       is_hrd: ['is', 'set']
-      //     }
-      //   };
-      // });
-    }
+    //   //   return {
+    //   //     filters: {
+    //   //       is_hrd: ['is', 'set']
+    //   //     }
+    //   //   };
+    //   // });
+    // }
     filter_jenis_ex_type(frm)
   },
   async custom_get_travel_request_expense(frm) {
@@ -229,7 +229,7 @@ async function show_expense_selector(frm) {
   d.show();
 }
 
-function filter_jenis_ex_type(frm){
+function filter_jenis_ex_type(frm) {
   frm.set_query('expense_type', 'expenses', () => {
     return {
       filters: {

@@ -35,6 +35,9 @@ class RekapTimbanganPanen(Document):
 		generate_duplicate_key(self, "duplicate_key", cancel=1)
 
 	def on_cancel(self):
+		# if frappe.flags.mass_delete_bkm:
+		# 	return
+		
 		self.update_transfered_bkm_panen()
 		
 	def update_transfered_bkm_panen(self):

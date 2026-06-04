@@ -10,7 +10,7 @@
  "idx": 5,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-07 17:17:16.045716",
+ "modified": "2026-05-22 16:31:06.979020",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Budget Tahunan",
@@ -28,6 +28,39 @@
   },
   {
    "role": "ASISTEN KUALITAS KONTROL (QM)"
+  },
+  {
+   "role": "HEAD PLANTATION"
+  },
+  {
+   "role": "SENIOR ESTATE MANAGER"
+  },
+  {
+   "role": "ESTATE MANAGER"
+  },
+  {
+   "role": "ASISTEN KEPALA"
+  },
+  {
+   "role": "KOORD QM"
+  },
+  {
+   "role": "ASISTEN DIVISI"
+  },
+  {
+   "role": "ASISTEN BIBITAN"
+  },
+  {
+   "role": "ASISTEN REPLANTING"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "OPR PLANTATION SPV"
+  },
+  {
+   "role": "HEAD PLANTATION"
   }
  ],
  "timeout": 0

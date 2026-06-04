@@ -8,11 +8,18 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "is_default_pph_22",
   "type",
+  "is_default_pph_22",
   "rate",
+  "parent_tax_rate",
+  "column_break_yfrn",
+  "is_group",
   "keterangan",
-  "tax_rate_account"
+  "section_break_glol",
+  "tax_rate_account",
+  "lft",
+  "rgt",
+  "old_parent"
  ],
  "fields": [
   {
@@ -38,6 +45,7 @@
    "label": "Keterangan"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "tax_rate_account",
    "fieldtype": "Table",
    "label": "Tax Rate Account",
@@ -48,16 +56,62 @@
    "fieldname": "is_default_pph_22",
    "fieldtype": "Check",
    "label": "Is Default PPh 22"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Tax Rate"
+  },
+  {
+   "fieldname": "parent_tax_rate",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Tax Rate",
+   "link_filters": "[[\"Tax Rate\",\"is_group\",\"=\",1]]",
+   "options": "Tax Rate"
+  },
+  {
+   "fieldname": "column_break_yfrn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_glol",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2026-01-30 13:11:09.999252",
+ "modified": "2026-05-25 10:17:33.342590",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Tax Rate",
  "naming_rule": "By fieldname",
+ "nsm_parent_field": "parent_tax_rate",
  "owner": "Administrator",
  "permissions": [
   {

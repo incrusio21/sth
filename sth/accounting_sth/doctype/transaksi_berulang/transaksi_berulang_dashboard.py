@@ -8,7 +8,7 @@ def get_data():
 			{
 				"label": _("Journal"),
 				"items": [
-					"Journal Entry"
+					"Journal Entry", "Payment Entry"
 				],
 			}
 		],

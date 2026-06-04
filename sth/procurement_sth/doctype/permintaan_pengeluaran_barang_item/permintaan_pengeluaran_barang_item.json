@@ -11,6 +11,7 @@
   "jumlah",
   "jumlah_saat_ini",
   "sub_unit",
+  "stasiun",
   "column_break_lfrt",
   "blok",
   "kendaraan",
@@ -18,7 +19,8 @@
   "km",
   "kegiatan",
   "nama_kegiatan",
-  "jumlah_keluar"
+  "jumlah_keluar",
+  "account"
  ],
  "fields": [
   {
@@ -120,20 +122,33 @@
    "options": "Project"
   },
   {
-   "columns": 1,
    "fetch_from": "kegiatan.nm_kgt",
    "fieldname": "nama_kegiatan",
    "fieldtype": "Data",
    "hidden": 1,
    "in_list_view": 1,
    "label": "Nama Kegiatan"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master"
+  },
+  {
+   "columns": 1,
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-10 11:03:25.496972",
+ "modified": "2026-06-04 00:31:12.342674",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

@@ -10,11 +10,10 @@
   "naming_series",
   "tanggal",
   "jam",
-  "shift",
   "column_break_gwbb",
-  "status",
   "company",
   "unit",
+  "shift_proses",
   "section_break_wtgt",
   "angka_ketebalan_padatan_kolam"
  ],
@@ -64,22 +63,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_wtgt",
    "fieldtype": "Section Break",
    "label": "Detail"
@@ -89,12 +72,22 @@
    "fieldname": "angka_ketebalan_padatan_kolam",
    "fieldtype": "Data",
    "label": "Angka Ketebalan Padatan Kolam"
+  },
+  {
+   "depends_on": "eval:doc.unit",
+   "fieldname": "shift_proses",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Shift Proses",
+   "options": "Monitoring Proses Control",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:07:37.167777",
+ "modified": "2026-06-03 11:45:10.490102",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ketebalan Padatan Kolam Anaerobik",

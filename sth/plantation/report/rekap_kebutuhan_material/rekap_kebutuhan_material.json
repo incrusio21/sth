@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-07 17:21:35.251718",
+ "modified": "2026-05-22 16:45:26.755698",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Kebutuhan Material",
@@ -34,6 +34,39 @@
   },
   {
    "role": "ASISTEN KUALITAS KONTROL (QM)"
+  },
+  {
+   "role": "HEAD PLANTATION"
+  },
+  {
+   "role": "SENIOR ESTATE MANAGER"
+  },
+  {
+   "role": "ESTATE MANAGER"
+  },
+  {
+   "role": "ASISTEN KEPALA"
+  },
+  {
+   "role": "KOORD QM"
+  },
+  {
+   "role": "ASISTEN DIVISI"
+  },
+  {
+   "role": "ASISTEN BIBITAN"
+  },
+  {
+   "role": "ASISTEN REPLANTING"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "ASISTEN DIVISI"
+  },
+  {
+   "role": "OPR PLANTATION SPV"
   }
  ],
  "timeout": 0

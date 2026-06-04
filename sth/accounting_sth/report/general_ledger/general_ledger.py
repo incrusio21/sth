@@ -194,7 +194,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			voucher_type, voucher_subtype, voucher_no, unit, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
-			against, is_opening, creation {select_fields}
+			against, is_opening, creation {select_fields}, voucher_detail_no
 		from `tabGL Entry`
 		where company=%(company)s {get_conditions(filters)}
 		{order_by_statement}
@@ -522,6 +522,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, tot
 				gle_map[group_by_value].entries.append(gle)
 
 			elif group_by_voucher_consolidated:
+
 				keylist = [
 					gle.get("posting_date"),
 					gle.get("voucher_type"),
@@ -529,6 +530,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, tot
 					gle.get("account"),
 					gle.get("party_type"),
 					gle.get("party"),
+					gle.get("voucher_detail_no"),
 				]
 
 				if immutable_ledger:
@@ -570,7 +572,7 @@ def get_result_as_list(data, filters):
 			balance = 0
 
 		balance = get_balance(d, balance, "debit", "credit")
-
+		d["amount"] = (d.get("debit") or 0) - (d.get("credit") or 0)
 		d["balance"] = balance
 
 		d["account_currency"] = filters.account_currency
@@ -631,6 +633,13 @@ def get_columns(filters):
 		{
 			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
+			"fieldtype": "Currency",
+			"options": "presentation_currency",
+			"width": 130,
+		},
+		{
+			"label": _("Amount ({0})").format(currency),
+			"fieldname": "amount",
 			"fieldtype": "Currency",
 			"options": "presentation_currency",
 			"width": 130,

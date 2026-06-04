@@ -526,7 +526,7 @@ class SalesInvoice(SalesInvoice):
 		# Hitung total DP yang sudah masuk dari PE Nota Piutang DP
 		nota_dp_names = [n.name for n in nota_dp_list]
 		total_dp_masuk = frappe.db.sql("""
-			SELECT IFNULL(SUM(pe.paid_amount), 0)
+			SELECT IFNULL(SUM(pe.unallocated_amount), 0)
 			FROM `tabPayment Entry` pe
 			WHERE pe.reference_no IN %(nota_dp_names)s
 			AND pe.docstatus = 1

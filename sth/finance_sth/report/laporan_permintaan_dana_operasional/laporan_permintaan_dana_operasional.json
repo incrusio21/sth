@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 8,
+ "idx": 9,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-07 14:05:24.354385",
+ "modified": "2026-05-11 11:24:44.511135",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Permintaan Dana Operasional",
@@ -28,6 +28,9 @@
   },
   {
    "role": "KASIR"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
   }
  ],
  "timeout": 0

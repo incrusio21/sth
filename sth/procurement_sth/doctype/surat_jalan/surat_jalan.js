@@ -34,6 +34,51 @@ frappe.ui.form.on("Surat Jalan", {
                 frm.trigger('open_dialog_material')
             }, __("Get Items From"))
         }
+        if (frm.doc.docstatus === 1 && frm.doc.status === "Terkirim") {
+            frm.add_custom_button(__("Barang Diterima"), function () {
+                let dialog = new frappe.ui.Dialog({
+                    title: __("Konfirmasi Penerimaan Barang"),
+                    fields: [
+                        {
+                            label: __("Tanggal Diterima"),
+                            fieldname: "tanggal_terima",
+                            fieldtype: "Date",
+                            reqd: 1,
+                            default: frappe.datetime.get_today(),
+                        },
+                    ],
+                    primary_action_label: __("Konfirmasi"),
+                    primary_action(values) {
+                        dialog.hide();
+
+                        frappe.call({
+                            method: "create_ste_receipt",
+                            doc: frm.doc,
+                            args: {
+                                tanggal_terima: values.tanggal_terima,
+                            },
+                            freeze: true,
+                            freeze_message: __("Membuat Stock Entry Receipt…"),
+                            callback(r) {
+                                if (!r.exc) {
+                                    frappe.msgprint({
+                                        title: __("Berhasil"),
+                                        message: __(
+                                            "Stock Entry Receipt <b>{0}</b> berhasil dibuat.",
+                                            [r.message]
+                                        ),
+                                        indicator: "green",
+                                    });
+                                    frm.reload_doc();
+                                }
+                            },
+                        });
+                    },
+                });
+
+                dialog.show();
+            });
+        }
     },
 
     open_dialog_material(frm) {

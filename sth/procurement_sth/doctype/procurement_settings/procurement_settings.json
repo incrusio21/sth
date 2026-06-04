@@ -1,13 +1,32 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-15 15:32:28.765948",
+ "creation": "2026-05-19 14:03:08.401722",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "default_account",
+  "barang_terima_lebih_tab",
+  "item_overreceipt_procurement_settings",
+  "notifikasi_penerimaan_tab",
+  "receipt_notification_procurement_settings",
   "pengeluaran_barang_tab",
-  "akun_pengeluaran_table"
+  "akun_pengeluaran_table",
+  "account_transaksi_purchase_tab",
+  "purchase_order_barang_section",
+  "ap_in_transit_po_barang",
+  "hutang_invoice_po_barang",
+  "uang_muka_po_barang",
+  "purchase_order_jasa_section",
+  "ap_in_transit_po_jasa",
+  "hutang_invoice_po_jasa",
+  "uang_muka_po_jasa",
+  "proposal_borongan_section",
+  "ap_in_transit_proposal",
+  "hutang_invoice_proposal",
+  "uang_muka_proposal",
+  "persediaan_dalam_perjalanan_tab",
+  "persediaan_dalam_perjalanan_procurement_settings"
  ],
  "fields": [
   {
@@ -26,13 +45,120 @@
    "fieldtype": "Table",
    "label": "Akun Pengeluaran Table",
    "options": "Akun Pengeluaran Table"
+  },
+  {
+   "fieldname": "barang_terima_lebih_tab",
+   "fieldtype": "Tab Break",
+   "label": "Barang Terima Lebih"
+  },
+  {
+   "fieldname": "item_overreceipt_procurement_settings",
+   "fieldtype": "Table",
+   "label": "Item Overreceipt Procurement Settings",
+   "options": "Item Overreceipt Procurement Settings"
+  },
+  {
+   "fieldname": "notifikasi_penerimaan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Notifikasi Penerimaan"
+  },
+  {
+   "fieldname": "receipt_notification_procurement_settings",
+   "fieldtype": "Table",
+   "label": "Receipt Notification Procurement Settings",
+   "options": "Receipt Notification Procurement Settings"
+  },
+  {
+   "fieldname": "account_transaksi_purchase_tab",
+   "fieldtype": "Tab Break",
+   "label": "Account Transaksi Purchase"
+  },
+  {
+   "fieldname": "purchase_order_barang_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Order Barang"
+  },
+  {
+   "fieldname": "ap_in_transit_po_barang",
+   "fieldtype": "Table",
+   "label": "AP in Transit PO Barang",
+   "options": "AP In Transit Procurement Settings"
+  },
+  {
+   "fieldname": "hutang_invoice_po_barang",
+   "fieldtype": "Table",
+   "label": "Hutang Invoice PO Barang",
+   "options": "Hutang Leasing Procurement Settings"
+  },
+  {
+   "fieldname": "uang_muka_po_barang",
+   "fieldtype": "Table",
+   "label": "Uang Muka PO Barang",
+   "options": "Uang Muka Procurement Settings"
+  },
+  {
+   "fieldname": "purchase_order_jasa_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Order Jasa"
+  },
+  {
+   "fieldname": "ap_in_transit_po_jasa",
+   "fieldtype": "Table",
+   "label": "AP in Transit PO Jasa",
+   "options": "AP In Transit Procurement Settings"
+  },
+  {
+   "fieldname": "hutang_invoice_po_jasa",
+   "fieldtype": "Table",
+   "label": "Hutang Invoice PO Jasa",
+   "options": "Hutang Leasing Procurement Settings"
+  },
+  {
+   "fieldname": "proposal_borongan_section",
+   "fieldtype": "Section Break",
+   "label": "Proposal Borongan"
+  },
+  {
+   "fieldname": "ap_in_transit_proposal",
+   "fieldtype": "Table",
+   "label": "AP in Transit Proposal",
+   "options": "AP In Transit Procurement Settings"
+  },
+  {
+   "fieldname": "hutang_invoice_proposal",
+   "fieldtype": "Table",
+   "label": "Hutang Invoice Proposal",
+   "options": "Hutang Leasing Procurement Settings"
+  },
+  {
+   "fieldname": "uang_muka_po_jasa",
+   "fieldtype": "Table",
+   "label": "Uang Muka PO Jasa",
+   "options": "Uang Muka Procurement Settings"
+  },
+  {
+   "fieldname": "uang_muka_proposal",
+   "fieldtype": "Table",
+   "label": "Uang Muka Proposal",
+   "options": "Uang Muka Procurement Settings"
+  },
+  {
+   "fieldname": "persediaan_dalam_perjalanan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Persediaan Dalam Perjalanan"
+  },
+  {
+   "fieldname": "persediaan_dalam_perjalanan_procurement_settings",
+   "fieldtype": "Table",
+   "label": "Persediaan Dalam Perjalanan Procurement Settings",
+   "options": "Persediaan Dalam Perjalanan Procurement Settings"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-25 22:48:56.555381",
+ "modified": "2026-06-04 11:20:07.131378",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Procurement Settings",

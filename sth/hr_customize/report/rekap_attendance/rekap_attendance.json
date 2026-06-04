@@ -10,7 +10,7 @@
  "idx": 12,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-02-19 00:09:00.436780",
+ "modified": "2026-05-11 11:18:35.631372",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Rekap Attendance",
@@ -37,6 +37,9 @@
   },
   {
    "role": "Employee Self Service"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
   }
  ],
  "timeout": 0

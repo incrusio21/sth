@@ -10,7 +10,7 @@
  "idx": 5,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-07 17:19:58.761725",
+ "modified": "2026-05-22 16:40:09.895162",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rekap Kegiatan Traksi",
@@ -24,9 +24,6 @@
    "role": "System Manager"
   },
   {
-   "role": "Plantation Staff"
-  },
-  {
    "role": "Admin Plantation"
   },
   {
@@ -34,6 +31,30 @@
   },
   {
    "role": "ASISTEN KUALITAS KONTROL (QM)"
+  },
+  {
+   "role": "SENIOR ESTATE MANAGER"
+  },
+  {
+   "role": "ESTATE MANAGER"
+  },
+  {
+   "role": "ASISTEN KEPALA"
+  },
+  {
+   "role": "KOORD QM"
+  },
+  {
+   "role": "ASISTEN TRAKSI DAN BENGKEL"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "OPR PLANTATION SPV"
+  },
+  {
+   "role": "HEAD PLANTATION"
   }
  ],
  "timeout": 0

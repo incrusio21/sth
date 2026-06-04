@@ -21,6 +21,7 @@ frappe.ui.form.on('Supplier', {
 			generate_kode_supplier(frm);
 		}
 		hide_details(frm)
+		set_query_akun(frm)
 
 	},
 	refresh: function (frm) {
@@ -49,6 +50,41 @@ frappe.ui.form.on('Supplier', {
 		await update_kriteria_type(frm);
 	}
 });
+
+function set_query_akun(frm){
+	frm.set_query("account", "ap_in_transit_procurement_settings", function (doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		return {
+			filters: {
+				company: row.company,
+				is_group: 0 
+			}
+		};
+	});
+
+	frm.set_query("account", "hutang_leasing_procurement_settings", function (doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		return {
+			filters: {
+				company: row.company,
+				is_group: 0 
+			}
+		};
+	});
+
+	frm.set_query("account", "uang_muka_procurement_settings", function (doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		return {
+			filters: {
+				company: row.company,
+				is_group: 0 
+			}
+		};
+	});
+}
 
 function generate_kode_supplier(frm) {
 	frappe.call({

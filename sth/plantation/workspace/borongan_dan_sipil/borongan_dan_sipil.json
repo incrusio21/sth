@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Y33K0W2yTv\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Borongan Dan Sipil</span>\",\"col\":12}},{\"id\":\"RC1hFLH4V1\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Non Capex\",\"col\":4}},{\"id\":\"AB_eHPBwO9\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Capex Dan Pekerjaan Borongan\",\"col\":7}}]",
+ "content": "[{\"id\":\"Y33K0W2yTv\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Borongan Dan Sipil</span>\",\"col\":12}},{\"id\":\"RC1hFLH4V1\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaksi Non Capex\",\"col\":4}}]",
  "creation": "2025-09-29 11:42:19.585150",
  "custom_blocks": [],
  "docstatus": 0,
@@ -25,26 +25,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Berita Acara",
-   "link_count": 0,
-   "link_to": "Berita Acara",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Berita Acara",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Transaksi Capex Dan Pekerjaan Borongan",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Proposal & Progress Pekerjaan",
    "link_count": 0,
    "link_to": "Proposal",
@@ -53,7 +33,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-04 13:06:48.412262",
+ "modified": "2026-05-22 10:16:54.676067",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Borongan Dan Sipil",
@@ -62,8 +42,15 @@
  "parent_page": "Plantation",
  "public": 1,
  "quick_lists": [],
- "roles": [],
- "sequence_id": 7.0,
+ "roles": [
+  {
+   "role": "ASISTEN TRAKSI DAN BENGKEL"
+  },
+  {
+   "role": "KERANI TRAKSI"
+  }
+ ],
+ "sequence_id": 8.0,
  "shortcuts": [],
  "title": "Borongan Dan Sipil"
 }

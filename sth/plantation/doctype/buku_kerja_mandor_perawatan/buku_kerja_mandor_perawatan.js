@@ -4,12 +4,21 @@
 sth.plantation.setup_bkm_controller()
 
 frappe.ui.form.on("Buku Kerja Mandor Perawatan", {
-    refresh(frm) {
-
+    onload(frm) {
+        const original_link_formatter = frappe.form.formatters.Link;
+        frappe.form.formatters.Link = function(value, docfield, options, doc) {
+            // Hanya berlaku untuk child doctype "Detail BKM Material"
+            if (doc && doc.doctype === "Detail BKM Material") {
+                return value || "";
+            }
+            // Doctype lain tetap pakai formatter asli
+            return original_link_formatter(value, docfield, options, doc);
+        };
     },
     kategori_kegiatan(frm) {
         frm.set_value({"blok": "", "batch": ""})
     },
+
 });
 
 sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends sth.plantation.BKMController {
