@@ -1,0 +1,70 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2026-06-08 09:38:13.531217",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2026-06-08 09:38:13.531217",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Laporan Stock Gudang",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Stock Ledger Entry",
+ "report_name": "Laporan Stock Gudang",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Desk User"
+  },
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Maintenance User"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Item Manager"
+  },
+  {
+   "role": "Plantation Staff"
+  },
+  {
+   "role": "Admin Plantation"
+  },
+  {
+   "role": "Admin Plantation"
+  },
+  {
+   "role": "Finance UAT"
+  },
+  {
+   "role": "Mill UAT"
+  },
+  {
+   "role": "Admin Sales"
+  }
+ ],
+ "timeout": 0
+}
