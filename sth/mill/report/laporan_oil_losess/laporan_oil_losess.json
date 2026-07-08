@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 7,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-03-13 13:29:58.793915",
+ "modified": "2026-07-03 13:46:57.039012",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Oil Losess",
@@ -25,6 +25,27 @@
   },
   {
    "role": "Mill UAT"
+  },
+  {
+   "role": "Mill Manager"
+  },
+  {
+   "role": "TECHNICAL CONTROLLER"
+  },
+  {
+   "role": "MILL TECHNICAL ANALYS"
+  },
+  {
+   "role": "ASISTEN KEPALA MILL"
+  },
+  {
+   "role": "ASISTEN LAB"
+  },
+  {
+   "role": "ASISTEN PROSES"
+  },
+  {
+   "role": "ASISTEN MAINTENANCE"
   }
  ],
  "timeout": 0

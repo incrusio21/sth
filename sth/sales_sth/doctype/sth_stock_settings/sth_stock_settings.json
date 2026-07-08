@@ -5,8 +5,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "transit_tab",
   "transit_settings_section",
-  "sth_stock_settings_table"
+  "sth_stock_settings_table",
+  "persediaan_account_pengecualian_tab",
+  "sth_stock_settings_persediaan_account"
  ],
  "fields": [
   {
@@ -15,17 +18,35 @@
    "label": "Transit Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "sth_stock_settings_table",
    "fieldtype": "Table",
    "label": "STH Stock Settings Table",
    "options": "STH Stock Settings Table"
+  },
+  {
+   "fieldname": "transit_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transit"
+  },
+  {
+   "fieldname": "persediaan_account_pengecualian_tab",
+   "fieldtype": "Tab Break",
+   "label": "Persediaan Account Pengecualian"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "sth_stock_settings_persediaan_account",
+   "fieldtype": "Table",
+   "label": "STH Stock Settings Persediaan Account",
+   "options": "STH Stock Settings Persediaan Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-01 01:14:20.616134",
+ "modified": "2026-06-10 20:23:10.621552",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "STH Stock Settings",

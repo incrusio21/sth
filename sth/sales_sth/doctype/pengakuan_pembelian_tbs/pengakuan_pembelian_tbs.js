@@ -7,6 +7,31 @@ frappe.ui.form.on('Pengakuan Pembelian TBS', {
 				}
 			}
 		})
+
+		frm.set_query("item_code", function() {
+			return {
+				filters: {
+					tipe_barang: "TBS"
+				}
+			};
+		});
+
+		if (!frm.doc.item_code && frm.is_new()) {
+
+			frappe.db.get_list("Item", {
+				filters: {
+					tipe_barang: "TBS"
+				},
+				fields: ["name"],
+				limit: 1
+			}).then(r => {
+
+				if (r.length) {
+					frm.set_value("item_code", r[0].name);
+				}
+
+			});
+		}
 	},
 	refresh(frm) {
 
@@ -51,11 +76,13 @@ frappe.ui.form.on('Pengakuan Pembelian TBS', {
 	},
 
 	jarak(frm) {
-		const jarak = frm.doc.jarak
+		const jarak = frm.doc.jarak;
+		const item_code = frm.doc.item_code;
+		
 		if (jarak) {
 			const method = frappe.model.get_server_module_name(frm.doctype) + "." + "get_rate"
 			frappe
-				.xcall(method, { jarak })
+				.xcall(method, { jarak,item_code })
 				.then((res) => {
 					frm.set_value("harga", res + frm.doc.subsidi_angkut)
 				})
@@ -88,7 +115,7 @@ function update_subsidi_angkut_child(frm) {
 
             let total_seluruhnya = (rate + bonus + subsidi) * terima;
             frappe.model.set_value(row.doctype, row.name, "total_seluruhnya", total_seluruhnya);
-            frappe.model.set_value(row.doctype, row.name, "rupiah_pajak_pph_22", total_seluruhnya * percent_pph22 / 100);
+            frappe.model.set_value(row.doctype, row.name, "rupiah_pajak_pph_22", row.terima * row.rate * percent_pph22 / 100);
             frappe.model.set_value(row.doctype, row.name, "total", total_seluruhnya - (total_seluruhnya * percent_pph22 / 100));
         });
     }
@@ -163,7 +190,7 @@ function calculate_parent_totals(frm) {
     let total_pembayaran = 0;
     let total_bonus = 0;
     let total_seluruhnya = 0;
-	let total_pajak_pph_22 = 0;
+    let subtotal = 0;
 
     if (frm.doc.items && frm.doc.items.length > 0) {
 
@@ -173,10 +200,11 @@ function calculate_parent_totals(frm) {
             total_netto += flt(row.netto);
             total_potkg += flt(row.pot);
             total_terima += flt(row.terima);
-            total_bonus += flt(row.bonus)*flt(row.terima);
+            total_bonus += flt(row.bonus) * flt(row.terima);
             total_seluruhnya += flt(row.total_seluruhnya);
-            total_pembayaran += flt(row.total); 
-			total_pajak_pph_22 += flt(row.rupiah_pajak_pph_22); 
+            total_pembayaran += flt(row.total);
+            subtotal += flt(row.rate) * flt(row.terima);
+			console.log(subtotal);
         });
 
     }
@@ -189,5 +217,6 @@ function calculate_parent_totals(frm) {
     frm.set_value("total_bonus", total_bonus);
     frm.set_value("total_seluruhnya", total_seluruhnya);
     frm.set_value("total_pembayaran_ke_supplier", total_pembayaran);
-	frm.set_value("total_pajak_pph_22", total_pajak_pph_22);
+    frm.set_value("subtotal", subtotal);
+    frm.set_value("total_pajak_pph_22", flt(subtotal * 0.25 / 100));
 }

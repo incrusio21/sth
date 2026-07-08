@@ -283,7 +283,7 @@ erpnext.stock.BAPPController = class BAPPController extends (
 				if (flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(
 						__("Purchase Invoice"),
-						this.make_purchase_invoice,
+						() => this._make_pi_with_supplier_dialog(cur_frm),
 						__("Create")
 					);
 				}
@@ -299,50 +299,104 @@ erpnext.stock.BAPPController = class BAPPController extends (
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_old_subcontracting_flow);
 	}
 
-	make_purchase_invoice() {
-		frappe.call({
-			method: "sth.legal.doctype.bapp.bapp.get_unclaimed_pengeluaran_barang_items",
-			args: { bapp: cur_frm.doc.name },
-			callback(r) {
-				const items = r.message || [];
+	// Ganti kedua method lama dengan ini saja
+	_make_pi_with_supplier_dialog(frm) {
+		// Step 1: ambil kontraktor & pengeluaran barang secara paralel
+		Promise.all([
+			frm.doc.proposal
+				? frappe.db.get_doc("Proposal", frm.doc.proposal).then(doc => {
+					// Ganti "kontraktor_proposal" dengan fieldname sebenarnya dari console
+					return doc.kontraktor_proposal || [];
+				  })
+				: Promise.resolve([]),
+			frappe.xcall("sth.legal.doctype.bapp.bapp.get_unclaimed_pengeluaran_barang_items", {
+				bapp: frm.doc.name,
+			}),
+		]).then(([contractor_rows, pb_items]) => {
+			 console.log("contractor_rows:", contractor_rows);  // ← lihat di browser console
+		console.log("proposal:", frm.doc.proposal);
+			const contractors = contractor_rows.map(r => r.kontraktor);
 
-				if (!items.length) {
-					frappe.model.open_mapped_doc({
-						method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
-						frm: cur_frm,
-					});
-					return;
-				}
+			if (contractors.length <= 1) {
+				// Tidak perlu pilih supplier, langsung ke step pengeluaran barang
+				this._show_pb_and_create_pi(frm, null, pb_items);
+			} else {
+				// Step 2: pilih supplier dulu
+				const dialog = new frappe.ui.Dialog({
+					title: __("Pilih Supplier untuk Purchase Invoice"),
+					fields: [
+						{
+							label: __("Supplier"),
+							fieldname: "selected_supplier",
+							fieldtype: "Link",
+							options: "Supplier",
+							reqd: 1,
+							get_query: () => ({ filters: { name: ["in", contractors] } }),
+							description: `${contractors.length} kontraktor tersedia. Qty akan dibagi rata (1/${contractors.length} per PI).`,
+						},
+					],
+					primary_action_label: __("Lanjut"),
+					primary_action: (values) => {
+						dialog.hide();
+						this._show_pb_and_create_pi(frm, values.selected_supplier, pb_items);
+					},
+				});
+				dialog.show();
+			}
+		});
+	}
 
-				const fmt_currency = (val) =>
-					frappe.format(val, { fieldtype: "Currency" });
+	_show_pb_and_create_pi(frm, selected_supplier, pb_items) {
+		const _call_make_pi = (selected_items) => {
+			frappe.call({
+				method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
+				args: {
+					source_name: frm.doc.name,
+					selected_supplier: selected_supplier || null,
+					selected_items: selected_items || null,
+				},
+				callback(r) {
+					if (r.message) {
+						frappe.model.sync(r.message);
+						frappe.set_route("Form", r.message.doctype, r.message.name);
+					}
+				},
+			});
+		};
 
-				const rows = items
-					.map(
-						(item, idx) => `
-					<tr>
-						<td class="text-center">
-							<input type="checkbox" class="pb-item-check" data-idx="${idx}" checked />
-						</td>
-						<td>${item.kode_barang}</td>
-						<td>${item.item_name}</td>
-						<td class="text-right">${item.jumlah} ${item.satuan || ""}</td>
-						<td class="text-right">${fmt_currency(item.rate)}</td>
-						<td class="text-right">${fmt_currency(item.amount)}</td>
-					</tr>`
-					)
-					.join("");
+		if (!pb_items || !pb_items.length) {
+			// Tidak ada pengeluaran barang, langsung buat PI
+			_call_make_pi(null);
+			return;
+		}
 
-				const html = `
+		// Tampilkan dialog pengeluaran barang
+		const fmt = (val) => frappe.format(val, { fieldtype: "Currency" });
+		const rows = pb_items.map((item, idx) => `
+			<tr>
+				<td class="text-center">
+					<input type="checkbox" class="pb-item-check" data-idx="${idx}" checked />
+				</td>
+				<td>${item.kode_barang}</td>
+				<td>${item.item_name}</td>
+				<td class="text-right">${item.jumlah} ${item.satuan || ""}</td>
+				<td class="text-right">${fmt(item.rate)}</td>
+				<td class="text-right">${fmt(item.amount)}</td>
+			</tr>`).join("");
+
+		const d = new frappe.ui.Dialog({
+			title: __("Pengeluaran Barang Belum Ditagihkan"),
+			fields: [{
+				fieldtype: "HTML",
+				options: `
 					<div style="overflow-x:auto">
 						<table class="table table-bordered table-condensed" style="font-size:12px">
 							<thead class="grid-heading-row">
 								<tr>
 									<th style="width:40px">
-										<input type="checkbox" id="pb-check-all" checked title="Pilih Semua"/>
+										<input type="checkbox" id="pb-check-all" checked />
 									</th>
-									<th>Kode Barang</th>
-									<th>Nama Barang</th>
+									<th>Kode Barang</th><th>Nama Barang</th>
 									<th class="text-right">Qty</th>
 									<th class="text-right">Rate</th>
 									<th class="text-right">Amount</th>
@@ -350,63 +404,36 @@ erpnext.stock.BAPPController = class BAPPController extends (
 							</thead>
 							<tbody>${rows}</tbody>
 						</table>
-					</div>`;
-
-				const d = new frappe.ui.Dialog({
-					title: "Pengeluaran Barang Belum Ditagihkan",
-					fields: [{ fieldtype: "HTML", fieldname: "items_html", options: html }],
-					primary_action_label: "Buat Purchase Invoice",
-					primary_action() {
-						const selected_items = [];
-						d.$wrapper.find(".pb-item-check:checked").each(function () {
-							const idx = parseInt($(this).data("idx"));
-							selected_items.push(items[idx].name);
-						});
-
-						if (!selected_items.length) {
-							frappe.msgprint(__("Pilih minimal satu item."));
-							return;
-						}
-
-						d.hide();
-						frappe.call({
-							method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
-							args: {
-								source_name: cur_frm.doc.name,
-								selected_items: selected_items,
-							},
-							callback(r) {
-								if (r.message) {
-									frappe.model.sync(r.message);
-									frappe.set_route("Form", r.message.doctype, r.message.name);
-								}
-							},
-						});
-					},
-					secondary_action_label: "Lewati",
-					secondary_action() {
-						d.hide();
-						frappe.call({
-							method: "sth.legal.doctype.bapp.bapp.make_purchase_invoice",
-							args: { source_name: cur_frm.doc.name },
-							callback(r) {
-								if (r.message) {
-									frappe.model.sync(r.message);
-									frappe.set_route("Form", r.message.doctype, r.message.name);
-								}
-							},
-						});
-					},
+					</div>`,
+			}],
+			primary_action_label: __("Buat Purchase Invoice"),
+			primary_action() {
+				const selected_items = [];
+				d.$wrapper.find(".pb-item-check:checked").each(function () {
+					selected_items.push(pb_items[parseInt($(this).data("idx"))].name);
 				});
-
-				d.show();
-
-				// Check all toggle
-				d.$wrapper.find("#pb-check-all").on("change", function () {
-					d.$wrapper.find(".pb-item-check").prop("checked", this.checked);
-				});
+				if (!selected_items.length) {
+					frappe.msgprint(__("Pilih minimal satu item."));
+					return;
+				}
+				d.hide();
+				_call_make_pi(selected_items);
+			},
+			secondary_action_label: __("Lewati"),
+			secondary_action() {
+				d.hide();
+				_call_make_pi(null);
 			},
 		});
+
+		d.show();
+		d.$wrapper.find("#pb-check-all").on("change", function () {
+			d.$wrapper.find(".pb-item-check").prop("checked", this.checked);
+		});
+	}
+
+	make_purchase_invoice() {
+		this._make_pi_with_supplier_dialog(cur_frm);
 	}
 
 	close_bapp() {

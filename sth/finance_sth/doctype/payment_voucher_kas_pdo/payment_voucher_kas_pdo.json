@@ -28,9 +28,10 @@
   {
    "columns": 2,
    "fieldname": "penerima",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Penerima"
+   "label": "Penerima",
+   "options": "Employee"
   },
   {
    "columns": 2,
@@ -73,7 +74,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-11 12:17:11.455888",
+ "modified": "2026-07-08 12:09:33.763615",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Voucher Kas PDO",

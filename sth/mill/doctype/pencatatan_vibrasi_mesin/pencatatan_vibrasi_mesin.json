@@ -17,6 +17,12 @@
   "tanggal_scan",
   "jam_scan",
   "user_scan",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_qxik",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_ptwp",
   "nama_stasiun",
   "nama_mesin",
@@ -132,17 +138,20 @@
   {
    "fieldname": "uf_ver",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "uf_hori",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "uf_axial",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "tanggal_scan",
@@ -165,15 +174,50 @@
   {
    "fieldname": "upload_video",
    "fieldtype": "Attach",
+   "in_list_view": 1,
    "in_preview": 1,
-   "label": "Upload Video"
+   "label": "Upload Video",
+   "reqd": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qxik",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-23 16:18:25.588275",
+ "modified": "2026-06-08 11:49:28.527235",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pencatatan Vibrasi Mesin",

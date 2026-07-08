@@ -15,6 +15,12 @@
   "shift_proses",
   "stasiun",
   "mesin",
+  "section_break_rdxr",
+  "latitude",
+  "longitude",
+  "column_break_gjon",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_fnwx",
   "user_scan",
   "column_break_hfiv",
@@ -113,7 +119,8 @@
   {
    "fieldname": "foto_tekanan_inlet",
    "fieldtype": "Attach Image",
-   "label": "Foto Tekanan Inlet"
+   "label": "Foto Tekanan Inlet",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Kg/Cm\u00b2)",
@@ -124,7 +131,8 @@
   {
    "fieldname": "foto_tekanan_exhaust",
    "fieldtype": "Attach Image",
-   "label": "Foto Tekanan Exhaust"
+   "label": "Foto Tekanan Exhaust",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Kg/Cm\u00b2)",
@@ -135,7 +143,8 @@
   {
    "fieldname": "foto_tekanan_bpv",
    "fieldtype": "Attach Image",
-   "label": "Foto Tekanan BPV"
+   "label": "Foto Tekanan BPV",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Kg/Cm\u00b2)",
@@ -146,7 +155,8 @@
   {
    "fieldname": "foto_tekanan_oil_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Tekanan Oil Turbin"
+   "label": "Foto Tekanan Oil Turbin",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam \u00b0C)",
@@ -157,7 +167,8 @@
   {
    "fieldname": "foto_temperatur_cooler_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Temperatur Cooler Turbin"
+   "label": "Foto Temperatur Cooler Turbin",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Volt)",
@@ -168,7 +179,8 @@
   {
    "fieldname": "foto_tegangan_r_s_t_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Tegangan R S T Turbin"
+   "label": "Foto Tegangan R S T Turbin",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_whjn",
@@ -183,7 +195,8 @@
   {
    "fieldname": "foto_frekwensi_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Frekwensi Turbin"
+   "label": "Foto Frekwensi Turbin",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Ampere)",
@@ -194,7 +207,8 @@
   {
    "fieldname": "foto_ampere_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Ampere Turbin"
+   "label": "Foto Ampere Turbin",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Kw)",
@@ -205,7 +219,8 @@
   {
    "fieldname": "foto_kw_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Kw Turbin"
+   "label": "Foto Kw Turbin",
+   "reqd": 1
   },
   {
    "description": "(Satuan dalam Kwh)",
@@ -216,7 +231,8 @@
   {
    "fieldname": "foto_kwh_turbin",
    "fieldtype": "Attach Image",
-   "label": "Foto Kwh Turbin"
+   "label": "Foto Kwh Turbin",
+   "reqd": 1
   },
   {
    "description": "(Total HM otomatis dan dalam satuan HM)",
@@ -261,7 +277,8 @@
    "fieldname": "foto_capasitor_bank",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Capasitor Bank"
+   "label": "Foto Capasitor Bank",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_fnwx",
@@ -311,12 +328,44 @@
    "label": "Shift Proses",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_rdxr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_gjon",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:50:25.148909",
+ "modified": "2026-07-06 09:32:49.511971",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Turbin",

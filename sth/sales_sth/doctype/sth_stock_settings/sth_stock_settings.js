@@ -21,4 +21,22 @@ function set_akun_query(frm, cdt, cdn) {
 			}
 		};
 	};
+
+	frm.fields_dict['sth_stock_settings_persediaan_account'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		return {
+			filters: {
+				company: row.company,
+				is_group: 0
+			}
+		};
+	};
+	frm.fields_dict['sth_stock_settings_persediaan_account'].grid.get_field('master_barang').get_query = function(doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		return {
+			filters: {
+				is_stock_item: 1
+			}
+		};
+	};
 }

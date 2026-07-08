@@ -106,8 +106,11 @@ function process_non_voucher_entries(frm) {
                 // Clear existing items
                 frm.clear_table('items');
 
-                // Clear existing taxes
-                frm.clear_table('taxes');
+                // Clear taxes kecuali yang dari charges_purchase_invoice
+                const CHARGES_MARKER = "__from_charges__";
+                frm.doc.taxes = (frm.doc.taxes || []).filter(
+                    row => (row.description || "").startsWith(CHARGES_MARKER)
+                );
 
                 let total_dpp = 0;
                 let total_ppn = 0;

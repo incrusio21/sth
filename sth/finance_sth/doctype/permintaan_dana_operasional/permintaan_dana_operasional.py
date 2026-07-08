@@ -521,11 +521,11 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	outstanding_amount = getattr(source_doc, outstanding_field, 0)
 	
-	if outstanding_amount <= 0:
-		frappe.throw(_("{0} has been fully paid. Outstanding amount: {1}").format(
-			tipe_pdo, 
-			frappe.format_value(outstanding_amount, {'fieldtype': 'Currency'})
-		))
+	# if outstanding_amount <= 0:
+	# 	frappe.throw(_("{0} has been fully paid. Outstanding amount: {1}").format(
+	# 		tipe_pdo, 
+	# 		frappe.format_value(outstanding_amount, {'fieldtype': 'Currency'})
+	# 	))
 	
 	def set_missing_values(source, target):
 		# Get Payment Voucher to fetch paid_to account
@@ -542,6 +542,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
 		target.tipe_transfer = "Realisasi PDO"
+		target.naming_series = "ACC-PAY-.YYYY.-"
 		target.payment_voucher_kas_pdo = []
 
 		target.remarks = _("Realisasi PDO tipe {1} for Permintaan Dana Operasional {0}").format(source.name, tipe_pdo)
@@ -597,7 +598,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 							header_debit_account = ex_claim_row.default_account
 							target.paid_to = header_debit_account
 
-
+			# frappe.throw(str(debit_account))
 			target.append('payment_voucher_kas_pdo', {
 				'no_pdo': source.name,
 				'tipe_pdo': tipe_pdo,
@@ -628,7 +629,15 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 	
 	total = 0
 	for row in doclist.payment_voucher_kas_pdo:
-		total += row.total
+		pdo_doc = frappe.get_doc("Permintaan Dana Operasional", row.no_pdo)
+		if row.tipe_pdo == "Bahan Bakar":
+			total += pdo_doc.outstanding_amount_bahan_bakar
+		elif row.tipe_pdo == "Perjalanan Dinas":
+			total += pdo_doc.outstanding_amount_perjalanan_dinas
+		elif row.tipe_pdo == "Kas":
+			total += pdo_doc.outstanding_amount_kas
+		elif row.tipe_pdo == "Dana Cadangan":
+			total += pdo_doc.outstanding_amount_dana_cadangan
 
 	doclist.paid_amount = total
 	doclist.received_amount = total

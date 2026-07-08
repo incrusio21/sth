@@ -13,6 +13,8 @@
   "column_break_uknw",
   "qr",
   "qr_preview",
+  "section_break_wmlw",
+  "detail_station_settings",
   "account_tab",
   "station_procurement_settings"
  ],
@@ -65,12 +67,22 @@
    "fieldtype": "Table",
    "label": "Station Procurement Settings",
    "options": "Station Procurement Settings"
+  },
+  {
+   "fieldname": "section_break_wmlw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "detail_station_settings",
+   "fieldtype": "Table",
+   "label": "Detail Station Settings",
+   "options": "Detail Station Master"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-02 12:27:55.753918",
+ "modified": "2026-06-05 10:17:36.195326",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Station Master",

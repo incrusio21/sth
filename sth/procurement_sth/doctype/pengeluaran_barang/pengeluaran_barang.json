@@ -26,7 +26,9 @@
   "amended_from",
   "status",
   "return_percentage",
-  "ste_reference"
+  "ste_reference",
+  "per_penyemaian",
+  "qty_penyemaian"
  ],
  "fields": [
   {
@@ -161,13 +163,29 @@
    "fieldtype": "Data",
    "label": "STE Reference",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "per_penyemaian",
+   "fieldtype": "Percent",
+   "label": "Per Penyemaian",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "qty_penyemaian",
+   "fieldtype": "Float",
+   "label": "Qty Penyemaian",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-04 00:31:34.637088",
+ "modified": "2026-06-18 14:05:42.100428",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

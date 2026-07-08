@@ -86,7 +86,7 @@
    "label": "Detail"
   },
   {
-   "description": "(Dalam satuan Kg/Jam)",
+   "description": "(Dalam satuan Jam/Drum)",
    "fieldname": "operasi_pompa_injeksi_flowrate",
    "fieldtype": "Float",
    "in_preview": 1,
@@ -124,7 +124,8 @@
    "fieldname": "upload_foto_pressure_gauge",
    "fieldtype": "Attach",
    "in_preview": 1,
-   "label": "Upload Foto Pressure Gauge"
+   "label": "Upload Foto Pressure Gauge",
+   "reqd": 1
   },
   {
    "description": "(Dalam Satuan Ph)",
@@ -162,7 +163,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:34:10.213455",
+ "modified": "2026-06-08 15:34:27.216970",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "External Treatment",

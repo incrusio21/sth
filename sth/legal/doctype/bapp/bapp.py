@@ -193,12 +193,7 @@ class BAPP(BuyingController):
 		# akun_expense = method_ambil_account.ambil_ap_in_transit_procurement("proposal", self.company)
 		# diganti ambil dari proposal type
 
-		proposal_doc = frappe.get_doc("Proposal", self.proposal)
-		proposal_type_doc = frappe.get_doc("Proposal Type", proposal_doc.proposal_type)
-
-		for row in proposal_type_doc.hutang_usaha_proposal_type:
-			if row.company == self.company:
-				akun_expense = row.account
+		akun_expense = method_ambil_account.ambil_proposal_hutang_usaha(self.proposal, self.company)
 
 		if not akun_expense:
 			frappe.throw(
@@ -413,7 +408,7 @@ class BAPP(BuyingController):
 				continue
 
 			proposal_doc = frappe.get_doc("Proposal", self.proposal)
-			if "Jasa" in proposal_doc.proposal_type:
+			if "Jasa" in proposal_doc.proposal_type or "Capex" in proposal_doc.proposal_type:
 				# ── Ambil debit account dari Kegiatan ───────────────────────
 				if not item.item_code:
 					frappe.throw(
@@ -421,6 +416,7 @@ class BAPP(BuyingController):
 					)
 
 				debit_account = self._get_item_code_account(item.item_code, item.idx)
+
 			else:
 				# ── Ambil debit account dari Kegiatan ───────────────────────
 				if not item.kegiatan:
@@ -1061,14 +1057,32 @@ def update_billing_percentage(pr_doc, update_modified=True):
 		pr_doc.notify_update()
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None, args=None, selected_items=None):
+def make_purchase_invoice(source_name, target_doc=None, args=None, selected_items=None, selected_supplier=None):
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("BAPP", source_name)
-	if isinstance(selected_items, str):
+	if selected_items and isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
-	
-	
+
+	# Kalau selected_supplier datang dari map_docs (lewat args dict)
+	if not selected_supplier and args:
+		if isinstance(args, str):
+			args = json.loads(args)
+		if isinstance(args, dict):
+			selected_supplier = args.get("selected_supplier")
+
+
+	# Hitung jumlah kontraktor dari Proposal untuk pembagian qty rata
+	num_suppliers = 1
+	if selected_supplier and doc.proposal:
+		# Ganti "kontraktor_proposal" dengan fieldname child table Kontraktor Proposal di Proposal
+		kontraktor_list = frappe.get_all(
+			"Kontraktor Proposal",
+			filters={"parent": doc.proposal, "parentfield": "kontraktor_proposal"},
+			pluck="kontraktor",
+		)
+		num_suppliers = max(len(kontraktor_list), 1)
+
 	if doc.items:
 		portion = frappe.db.get_value("Proposal Schedule", doc.term_detail, "invoice_portion") if doc.term_detail else 0
 		invoiced_qty_map = get_invoiced_qty_map(source_name)
@@ -1076,13 +1090,20 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 		def set_missing_values(source, target):
 			if len(target.get("items")) == 0:
 				frappe.throw(_("All items have already been Invoiced/Returned"))
-			
+
 			doc = frappe.get_doc(target)
 			doc.invoice_type = "SPK"
 			doc.document_no = source_name
 			doc.term_detail = source.term_detail
 
-			doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
+			# Override supplier jika dipilih dari dialog
+			if selected_supplier:
+				doc.supplier = selected_supplier
+				doc.supplier_name = frappe.db.get_value("Supplier", selected_supplier, "supplier_name")
+
+			doc.payment_terms_template = get_payment_terms_template(
+				selected_supplier or source.supplier, "Supplier", source.company
+			)
 			doc.run_method("onload")
 			doc.run_method("set_missing_values")
 
@@ -1093,7 +1114,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 					"account": source.ppn_account,
 					"percentage": source.ppn_rate
 				})
-				
+
 			if args and args.get("merge_taxes"):
 				merge_taxes(source.get("taxes") or [], doc)
 
@@ -1101,22 +1122,26 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 			doc.set_payment_schedule()
 
 		def update_item(source_doc, target_doc, source_parent):
-			if portion:
-				qty = frappe.get_value("Proposal Item", source_doc.proposal_item, "qty")
-				target_doc.qty = flt(qty * portion / 100)
-				target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
-				target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+			# if portion:
+			# 	qty = frappe.get_value("Proposal Item", source_doc.proposal_item, "qty")
+			# 	base_qty = flt(qty * portion / 100)
+			# 	target_doc.qty = flt(base_qty / num_suppliers)
+			# 	target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
+			# 	target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+			# else:
+			pending = get_pending_qty(source_doc)
+			if selected_supplier and num_suppliers > 1:
+				# Qty per PI = qty BAPP dibagi jumlah supplier, tidak melebihi pending
+				split_qty = flt(source_doc.qty / num_suppliers)
+				target_doc.qty = min(split_qty, pending)
 			else:
-				target_doc.amount = flt(source_doc.amount) - flt(source_doc.billed_amt)
-				target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
-				target_doc.qty = (
-					target_doc.amount / flt(source_doc.rate) if (flt(source_doc.rate) and flt(source_doc.billed_amt)) else flt(source_doc.qty)
-				)
+				target_doc.qty = pending
 
-				target_doc.qty = get_pending_qty(source_doc)
-				target_doc.stock_qty = flt(target_doc.qty) * flt(
-					target_doc.conversion_factor, target_doc.precision("conversion_factor")
-				)
+			target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
+			target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
+			target_doc.stock_qty = flt(target_doc.qty) * flt(
+				target_doc.conversion_factor, target_doc.precision("conversion_factor")
+			)
 
 		def get_pending_qty(item_row):
 			return item_row.qty - invoiced_qty_map.get(item_row.name, 0)
@@ -1198,7 +1223,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 					"account": item.account,
 					"pengeluaran_barang_item": item_name,
 				})
-
+		doclist.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(doc.proposal, doc.company)				
 		return doclist
 	else:
 		from sth.legal.doctype.proposal.proposal import make_purchase_invoice
@@ -1206,6 +1231,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 		doclist = make_purchase_invoice(doc.proposal, target_doc, {"term": doc.term_detail})
 		doclist.document_no = source_name
 
+		doclist.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(doc.proposal, doc.company)							
 		return doclist
 
 def get_invoiced_qty_map(bapp):

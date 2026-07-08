@@ -45,7 +45,13 @@
 
   <div
     style="width: 100%; padding: 0.5rem 0; background: #449a49; border: 1px solid #000; text-align: center; color: #fff;">
-    <h1 style="margin: 0;">INVOICE</h1>
+    <h1 style="margin: 0;">
+      {% if doc.tipe == "Pemenuhan Kontrak" %}
+      INVOICE
+      {% else %}
+      INVOICE DP
+      {% endif %}
+    </h1>
   </div>
 
   <table class="table_info mt-2">
@@ -110,15 +116,29 @@
     <tr style="height: 3rem!important;">
       <td>{{ format_tanggal_id(doc.date) }}</td>
       <td>
+        {% if doc.tipe == "Pemenuhan Kontrak" %}
         {{ frappe.format_value(pengakuan_penjualan.qty or 0, {"fieldtype": "Float"}) }} KG
+        {% endif %}
       </td>
       <td>
+        {% if doc.tipe == "Pemenuhan Kontrak" %}
         {{ pengakuan_penjualan.descriptions or '' }} <br>
+        {% endif %}
       </td>
-      <td>{{ frappe.format_value(pengakuan_penjualan.price or 0, {"fieldtype": "Float"}) }}</td>
+      <td>
+        {% if doc.tipe == "Pemenuhan Kontrak" %}
+        {{ frappe.format_value(pengakuan_penjualan.price or 0, {"fieldtype": "Float"}) }}
+        {% else %}
+        {{ doc.get_formatted("nilai_dp") }}
+        {% endif %}
+      </td>
       <td style="border: none!important">IDR</td>
       <td style="border-left: none!important">
+        {% if doc.tipe == "Pemenuhan Kontrak" %}
         {{ frappe.format_value(pengakuan_penjualan.amount or 0, {"fieldtype": "Float"}) }}
+        {% else %}
+        {{ doc.get_formatted("nilai_dp") }}
+        {% endif %}
       </td>
     </tr>
     {% set ns = namespace(grand_total_reclass=0) %}
@@ -137,6 +157,7 @@
       </td>
     </tr>
     {%- endfor -%}
+    {% if doc.tipe == "Pemenuhan Kontrak" %}
     <tr>
       <td>TOTAL</td>
       <td>
@@ -145,14 +166,22 @@
       <td></td>
       <td colspan="3"></td>
     </tr>
+    {% endif %}
 
     {% set subtotal = (pengakuan_penjualan.amount or 0) %}
     <tr>
       <td colspan="3" style="border: none!important"></td>
       <td>SUB TOTAL</td>
       <td>IDR</td>
-      <td>{{ frappe.format_value(subtotal, {"fieldtype": "Currency"}) }}</td>
+      <td>
+        {% if doc.tipe == "Pemenuhan Kontrak" %}
+        {{ frappe.format_value(subtotal, {"fieldtype": "Currency"}) }}
+        {% else %}
+        {{ doc.get_formatted("nilai_dp") }}
+        {% endif %}
+      </td>
     </tr>
+    {% if doc.tipe == "Pemenuhan Kontrak" %}
     <tr>
       <td colspan="3" style="border: none!important"></td>
       <td>TAX</td>
@@ -167,21 +196,27 @@
         {{ frappe.format_value((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0), {"fieldtype": "Currency"}) }}
       </td>
     </tr>
-    <tr>
+    {% endif %}
+    <!-- <tr>
       <td colspan="3" style="border: none!important"></td>
       <td>TOTAL</td>
       <td>IDR</td>
       <td>{{ frappe.format_value((subtotal + ((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0))) or 0,
         {"fieldtype": "Currency"}) }}</td>
-    </tr>
+    </tr> -->
     <tr>
       <td colspan="3" style="border: none!important"></td>
       <td>GRAND TOTAL</td>
       <td>IDR</td>
       <td>
-        {{ frappe.format_value(((subtotal + ((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0))) or 0) +
+        <!-- {{ frappe.format_value(((subtotal + ((pengakuan_penjualan.qty or 0) * (do.ongkos_angkut or 0))) or 0) +
         ns.grand_total_reclass,
-        {"fieldtype": "Currency"}) }}
+        {"fieldtype": "Currency"}) }} -->
+        {% if doc.tipe == "Pemenuhan Kontrak" %}
+        {{ doc.get_formatted("grandtotal") }}
+        {% else %}
+        {{ doc.get_formatted("nilai_dp") }}
+        {% endif %}
       </td>
     </tr>
   </table>

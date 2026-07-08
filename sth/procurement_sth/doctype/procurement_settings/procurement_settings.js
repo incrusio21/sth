@@ -9,33 +9,34 @@ frappe.ui.form.on("Procurement Settings", {
 			return {
 				filters: {
 					company: row.company,
-					is_group: 0 
+					is_group: 0
 				}
 			};
 		});
 
 		const original_link_formatter = frappe.form.formatters.Link;
 
-        frappe.form.formatters.Link = function(value, docfield, options, doc) {
-            // Tampilkan plain text untuk Procurement Settings
-            if (doc) {
-                return value || "";
-            }
-            // Doctype lain tetap pakai formatter asli
-            return original_link_formatter(value, docfield, options, doc);
-        };
+		frappe.form.formatters.Link = function (value, docfield, options, doc) {
+			// Tampilkan plain text untuk Procurement Settings
+			if (doc) {
+				return value || "";
+			}
+			// Doctype lain tetap pakai formatter asli
+			return original_link_formatter(value, docfield, options, doc);
+		};
 
 		set_akun_query(frm);
 	},
-	refresh: function(frm){
+	refresh: function (frm) {
 		frm.fields_dict['item_overreceipt_procurement_settings'].grid.wrapper.on(
-            'change', 
-            function() {
-                fix_kode_barang(frm);
-            }
-        );
-        fix_kode_barang(frm);
-   	}
+			'change',
+			function () {
+				fix_kode_barang(frm);
+			}
+		);
+		fix_kode_barang(frm);
+		set_akun_query(frm);
+	}
 });
 
 frappe.ui.form.on('Akun Pengeluaran Table', {
@@ -46,15 +47,15 @@ frappe.ui.form.on('Akun Pengeluaran Table', {
 });
 
 function fix_kode_barang(frm) {
-    let grid = frm.fields_dict['item_overreceipt_procurement_settings'].grid;
-    grid.data.forEach((row, i) => {
-        let grid_row = grid.grid_rows[i];
-        if (!grid_row) return;
-        let field = grid_row.columns['item'];
-        if (field && field.$value) {
-            field.$value.text(row.item); // tampilkan kode asli
-        }
-    });
+	let grid = frm.fields_dict['item_overreceipt_procurement_settings'].grid;
+	grid.data.forEach((row, i) => {
+		let grid_row = grid.grid_rows[i];
+		if (!grid_row) return;
+		let field = grid_row.columns['item'];
+		if (field && field.$value) {
+			field.$value.text(row.item); // tampilkan kode asli
+		}
+	});
 }
 
 function set_akun_query(frm, cdt, cdn) {
@@ -75,7 +76,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -85,7 +86,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -95,7 +96,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -105,7 +106,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -115,7 +116,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -125,7 +126,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -135,7 +136,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -145,7 +146,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -155,7 +156,7 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
 	});
@@ -165,7 +166,28 @@ function set_akun_query(frm, cdt, cdn) {
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
+			}
+		};
+	});
+	// frm.set_query("account", "sub_unit_traksi_procurement_settings", function (doc, cdt, cdn) {
+	// 	let row = locals[cdt][cdn];
+
+	// 	return {
+	// 		filters: {
+	// 			company: row.company,
+	// 			is_group: 0,
+	// 			root_type: "Expense"
+	// 		}
+	// 	};
+	// });
+	frm.set_query("account", "procurement_settings_pengakuan_pembelian_tbs_account", function (doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		return {
+			filters: {
+				company: row.company,
+				is_group: 0
 			}
 		};
 	});

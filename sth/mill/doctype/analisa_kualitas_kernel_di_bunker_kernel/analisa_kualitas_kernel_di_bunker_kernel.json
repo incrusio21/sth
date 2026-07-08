@@ -9,10 +9,10 @@
   "header_section",
   "naming_series",
   "tanggal",
+  "tanggal_proses",
   "jam",
   "shift",
   "column_break_vutk",
-  "status",
   "company",
   "unit",
   "section_break_8ps2",
@@ -70,13 +70,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
    "fieldname": "shift",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -123,13 +116,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_proses",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Proses"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 11:30:14.674081",
+ "modified": "2026-07-03 13:17:06.627339",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas Kernel di Bunker Kernel",

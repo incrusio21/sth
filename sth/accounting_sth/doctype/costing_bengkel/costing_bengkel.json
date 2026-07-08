@@ -1,0 +1,313 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-07-02 02:02:55.758717",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "column_break_1",
+  "company",
+  "unit",
+  "section_break_jtsa",
+  "periode_dari",
+  "column_break_pkoq",
+  "periode_sampai",
+  "section_pengeluaran",
+  "costing_bengkel_pengeluaran_barang",
+  "total_pengeluaran_barang",
+  "section_pengeluaran_solar",
+  "costing_bengkel_pengeluaran_barang_solar",
+  "total_pengeluaran_barang_solar",
+  "section_payslip_karyawan",
+  "costing_bengkel_payslip_karyawan_bengkel",
+  "total_payslip_karyawan_bengkel",
+  "section_alokasi_gaji_karyawan",
+  "costing_bengkel_alokasi_gaji_karyawan_bengkel",
+  "total_alokasi_gaji_karyawan_bengkel",
+  "section_payslip_operator_vra",
+  "costing_bengkel_payslip_operator_vra",
+  "total_payslip_operator_vra",
+  "section_alokasi_gaji_operator_vra",
+  "costing_bengkel_alokasi_gaji_operator_vra",
+  "total_alokasi_gaji_operator_vra",
+  "closing_bengkel_section",
+  "costing_bengkel_closing_bengkel",
+  "section_gl_bkm_traksi",
+  "costing_bengkel_gl_bkm_traksi",
+  "total_gl_bkm_traksi",
+  "section_kegiatan_bkm_traksi",
+  "costing_bengkel_kegiatan_bkm_traksi",
+  "total_kegiatan_bkm_traksi",
+  "section_closing_vra",
+  "costing_bengkel_closing_vra",
+  "total_closing_vra",
+  "section_summary",
+  "grand_total",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokumen",
+   "options": "CB-.YYYY.-.####"
+  },
+  {
+   "fieldname": "section_break_jtsa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "periode_dari",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pkoq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periode_sampai",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_pengeluaran",
+   "fieldtype": "Section Break",
+   "label": "Pengeluaran Barang Suku Cadang"
+  },
+  {
+   "fieldname": "costing_bengkel_pengeluaran_barang",
+   "fieldtype": "Table",
+   "label": "Suku Cadang",
+   "options": "Costing Bengkel Pengeluaran Barang"
+  },
+  {
+   "fieldname": "total_pengeluaran_barang",
+   "fieldtype": "Currency",
+   "label": "Total Pengeluaran Barang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_payslip_karyawan",
+   "fieldtype": "Section Break",
+   "label": "Payslip Karyawan Bengkel"
+  },
+  {
+   "fieldname": "costing_bengkel_payslip_karyawan_bengkel",
+   "fieldtype": "Table",
+   "label": "Payslip Karyawan Bengkel",
+   "options": "Costing Bengkel Payslip Karyawan Bengkel"
+  },
+  {
+   "fieldname": "total_payslip_karyawan_bengkel",
+   "fieldtype": "Currency",
+   "label": "Total Payslip Karyawan Bengkel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_alokasi_gaji_karyawan",
+   "fieldtype": "Section Break",
+   "label": "Alokasi Gaji Karyawan Bengkel"
+  },
+  {
+   "fieldname": "costing_bengkel_alokasi_gaji_karyawan_bengkel",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel Alokasi Gaji Karyawan Bengkel",
+   "options": "Costing Bengkel Alokasi Gaji Karyawan Bengkel"
+  },
+  {
+   "fieldname": "total_alokasi_gaji_karyawan_bengkel",
+   "fieldtype": "Currency",
+   "label": "Total Alokasi Gaji Karyawan Bengkel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_pengeluaran_solar",
+   "fieldtype": "Section Break",
+   "label": "Pengeluaran Barang Solar"
+  },
+  {
+   "fieldname": "costing_bengkel_pengeluaran_barang_solar",
+   "fieldtype": "Table",
+   "label": "Solar",
+   "options": "Costing Bengkel Pengeluaran Barang Solar"
+  },
+  {
+   "fieldname": "total_pengeluaran_barang_solar",
+   "fieldtype": "Currency",
+   "label": "Total Pengeluaran Barang Solar",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_payslip_operator_vra",
+   "fieldtype": "Section Break",
+   "label": "Payslip Operator VRA"
+  },
+  {
+   "fieldname": "costing_bengkel_payslip_operator_vra",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel Payslip Operator VRA",
+   "options": "Costing Bengkel Payslip Operator VRA"
+  },
+  {
+   "fieldname": "total_payslip_operator_vra",
+   "fieldtype": "Currency",
+   "label": "Total Payslip Operator VRA",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_alokasi_gaji_operator_vra",
+   "fieldtype": "Section Break",
+   "label": "Alokasi Gaji Operator VRA"
+  },
+  {
+   "fieldname": "costing_bengkel_alokasi_gaji_operator_vra",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel Alokasi Gaji Operator VRA",
+   "options": "Costing Bengkel Alokasi Gaji Operator VRA"
+  },
+  {
+   "fieldname": "total_alokasi_gaji_operator_vra",
+   "fieldtype": "Currency",
+   "label": "Total Alokasi Gaji Operator VRA",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_gl_bkm_traksi",
+   "fieldtype": "Section Break",
+   "label": "GL BKM Traksi"
+  },
+  {
+   "fieldname": "costing_bengkel_gl_bkm_traksi",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel GL BKM Traksi",
+   "options": "Costing Bengkel GL BKM Traksi"
+  },
+  {
+   "fieldname": "total_gl_bkm_traksi",
+   "fieldtype": "Currency",
+   "label": "Total GL BKM Traksi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_kegiatan_bkm_traksi",
+   "fieldtype": "Section Break",
+   "label": "Kegiatan BKM Traksi"
+  },
+  {
+   "fieldname": "costing_bengkel_kegiatan_bkm_traksi",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel Kegiatan BKM Traksi",
+   "options": "Costing Bengkel Kegiatan BKM Traksi"
+  },
+  {
+   "fieldname": "total_kegiatan_bkm_traksi",
+   "fieldtype": "Currency",
+   "label": "Total Kegiatan BKM Traksi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_closing_vra",
+   "fieldtype": "Section Break",
+   "label": "Closing VRA"
+  },
+  {
+   "fieldname": "costing_bengkel_closing_vra",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel Closing VRA",
+   "options": "Costing Bengkel Closing VRA"
+  },
+  {
+   "fieldname": "total_closing_vra",
+   "fieldtype": "Currency",
+   "label": "Total Closing VRA",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_summary",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Costing Bengkel",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "closing_bengkel_section",
+   "fieldtype": "Section Break",
+   "label": "Closing Bengkel"
+  },
+  {
+   "fieldname": "costing_bengkel_closing_bengkel",
+   "fieldtype": "Table",
+   "label": "Costing Bengkel Closing Bengkel",
+   "options": "Costing Bengkel Closing Bengkel"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-07-02 02:26:48.112109",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Bengkel",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

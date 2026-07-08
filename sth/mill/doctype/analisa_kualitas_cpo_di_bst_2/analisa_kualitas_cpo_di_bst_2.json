@@ -9,10 +9,9 @@
   "header_section",
   "naming_series",
   "tanggal",
+  "tanggal_proses",
   "jam",
-  "shift",
   "column_break_yiut",
-  "status",
   "unit",
   "company",
   "section_break_yngb",
@@ -41,7 +40,8 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal"
+   "label": "Tanggal Transaksi",
+   "read_only": 1
   },
   {
    "default": "Now",
@@ -67,22 +67,6 @@
   {
    "fieldname": "column_break_yiut",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Shift",
-   "options": "Monitoring Proses Control",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_yngb",
@@ -121,16 +105,24 @@
   {
    "fieldname": "column_break_cgyq",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_proses",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Proses"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 11:29:41.962403",
+ "modified": "2026-07-03 13:19:16.408211",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO di BST-2",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

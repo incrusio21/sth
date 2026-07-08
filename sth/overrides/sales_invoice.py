@@ -4,18 +4,25 @@ from frappe.utils import get_last_day,flt
 
 class SalesInvoice(SalesInvoice):
 	def validate(self):
+		if self.is_return == 1:
+			for row in self.items:
+				if row.qty > 0:
+					row.qty = row.qty * -1
+				if row.qty_timbang_customer > 0:
+					row.qty_timbang_customer = row.qty_timbang_customer * -1
+
 		self.hitung_do_tidak_terkirim()
 		if self.jenis_penagihan == "Pengiriman":
 			self._apply_timbang_qty_tanpa_ganti()
 
 	def on_submit(self):
 		super().on_submit()
-		if self.jenis_penagihan == "Pengiriman":
+		if self.jenis_penagihan == "Pengiriman" and self.is_return == 0:
 			self.create_timbang_journal_entry()
 			self.create_dp_payment_journal_entry()
 
 	def on_cancel(self):
-		if self.jenis_penagihan == "Pengiriman":
+		if self.jenis_penagihan == "Pengiriman" and self.is_return == 0:
 			try:
 				self.cancel_timbang_journal_entry()
 				self.cancel_dp_payment_journal_entry()		
@@ -415,12 +422,20 @@ class SalesInvoice(SalesInvoice):
 			"credit_in_account_currency": 0,
 		})
 
+		# for dn_name, amount in dn_amount_map.items():
+		# 	je.append("accounts", {
+		# 		"account"                   : dn_account_map[dn_name],
+		# 		"debit_in_account_currency" : 0,
+		# 		"credit_in_account_currency": total_gl,
+		# 	})
+
 		for dn_name, amount in dn_amount_map.items():
 			je.append("accounts", {
 				"account"                   : dn_account_map[dn_name],
 				"debit_in_account_currency" : 0,
 				"credit_in_account_currency": total_gl,
 			})
+			break
 
 		je.insert(ignore_permissions=True)
 		je.submit()

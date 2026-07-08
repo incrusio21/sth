@@ -6,6 +6,7 @@ def get_data(data):
 		"fieldname": "sales_order",
 		"non_standard_fieldnames": {
 			"Delivery Note": "against_sales_order",
+			"Delivery Order": "sales_order",
 			"Journal Entry": "sales_order",
 			"Payment Entry": "no_kontrak_penjualan",
 			"Payment Request": "reference_name",
@@ -23,7 +24,7 @@ def get_data(data):
 		"transactions": [
 			{
 				"label": _("Fulfillment"),
-				"items": ["Sales Invoice", "Pick List", "Delivery Note", "Maintenance Visit", "Nota Piutang"],
+				"items": ["Sales Invoice", "Pick List", "Delivery Note", "Maintenance Visit", "Nota Piutang", "Delivery Order"],
 			},
 			{"label": _("Purchasing"), "items": ["Material Request", "Purchase Order"]},
 			{"label": _("Projects"), "items": ["Project"]},

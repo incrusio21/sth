@@ -297,27 +297,100 @@ def get_payment_status():
 		WHERE name in %(kcm)s
 	""", {"kcm": kcm_list})
 
+	# # UPDATE PAYMENT ENTRY STATUS
+	# for kcm_name, val in kcm_to_update.items():
+
+	# 	payment_entries = frappe.get_all(
+	# 		"Mandiri Kopra Detail",
+	# 		filters={
+	# 			"parent": kcm_name
+	# 		},
+	# 		fields=["payment_entry"]
+	# 	)
+
+	# 	for pe in payment_entries:
+
+	# 		if pe.payment_entry:
+
+	# 			frappe.db.set_value(
+	# 				"Payment Entry",
+	# 				pe.payment_entry,
+	# 				"payment_status",
+	# 				val["payment_status"]
+	# 			)
+
 	# UPDATE PAYMENT ENTRY STATUS
 	for kcm_name, val in kcm_to_update.items():
 
-		payment_entries = frappe.get_all(
-			"Mandiri Kopra Detail",
-			filters={
-				"parent": kcm_name
-			},
-			fields=["payment_entry"]
+		payment_entries = []
+
+		payment_entries.extend(
+			frappe.get_all(
+				"Mandiri Kopra Detail",
+				filters={
+					"parent": kcm_name
+				},
+				fields=["idx", "payment_entry"],
+				order_by="idx asc"
+			)
 		)
 
-		for pe in payment_entries:
+		payment_entries.extend(
+			frappe.get_all(
+				"Mandiri Kopra Cash Bill Detail",
+				filters={
+					"parent": kcm_name
+				},
+				fields=["idx", "payment_entry"],
+				order_by="idx asc"
+			)
+		)
 
-			if pe.payment_entry:
+		payment_entries = sorted(payment_entries, key=lambda x: x.idx)
 
-				frappe.db.set_value(
-					"Payment Entry",
-					pe.payment_entry,
-					"payment_status",
-					val["payment_status"]
-				)
+		responses = []
+
+		for line in val.get("raw_response", "").splitlines():
+			line = line.strip()
+
+			if not line:
+				continue
+
+			delimiter = ";" if ";" in line else ","
+
+			parts = [p.strip() for p in line.split(delimiter)]
+
+			if "SUCCESS" in parts:
+				responses.append("SUCCESS")
+
+			elif "ERROR" in parts:
+				error_idx = parts.index("ERROR")
+
+				if error_idx + 1 < len(parts) and parts[error_idx + 1]:
+					responses.append(
+						f"ERROR;{parts[error_idx + 1]}"
+					)
+				else:
+					responses.append("ERROR")
+
+		for idx, pe in enumerate(payment_entries):
+
+			if not pe.payment_entry:
+				continue
+
+			kcm_response = ""
+
+			if idx < len(responses):
+				kcm_response = responses[idx]
+
+			frappe.db.set_value(
+				"Payment Entry",
+				pe.payment_entry,
+				{
+					"payment_status": val["payment_status"],
+					"kcm_response": kcm_response
+				}
+			)
 
 @frappe.whitelist()
 def get_payment_entry_details(payment_entry):

@@ -7,14 +7,15 @@ from frappe.model.document import Document
 from erpnext.stock.doctype.delivery_note.delivery_note import DeliveryNote
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, nowdate, nowtime
+from sth.sales_sth.custom.sales_order import update_per_delivery_ordered_on_submit_cancel
 import json
 
 class DeliveryOrder(DeliveryNote):
 	def on_submit(self):
-		pass
+		update_per_delivery_ordered_on_submit_cancel(self, "on_submit")
 
 	def on_cancel(self):
-		pass
+		update_per_delivery_ordered_on_submit_cancel(self, "on_cancel")
 
 
 @frappe.whitelist()

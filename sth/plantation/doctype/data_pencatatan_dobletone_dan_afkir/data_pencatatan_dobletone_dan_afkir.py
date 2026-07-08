@@ -25,7 +25,21 @@ class DataPencatatanDobletoneDanAfkir(Document):
 				frappe.throw(f"Acumulate Available Qty - Jumlah Bibit cant be less than {self.available_qty}")
 
 	def validate(self):
+		self.set_available_qty()
 		self.limit_qty()
+
+	def set_available_qty(self):
+		if not self.data_penyemaian_bibit:
+			self.available_qty = 0
+			return
+
+		qty = frappe.db.get_value(
+			"Data Penyemaian Bibit",
+			self.data_penyemaian_bibit,
+			"qty"
+		)
+
+		self.available_qty = flt(qty)
 	
 	def recalculate_qty_data_penyemaian_bibit(self):
 		dpda = frappe.qb.DocType("Data Pencatatan Dobletone Dan Afkir")
@@ -59,3 +73,19 @@ class DataPencatatanDobletoneDanAfkir(Document):
 	
 	def on_cancel(self):
 		self.recalculate_qty_data_penyemaian_bibit()
+
+@frappe.whitelist()
+def get_available_qty(data_penyemaian_bibit):
+	# return frappe.db.get_value(
+	#     "Data Penyemaian Bibit",
+	#     data_penyemaian_bibit,
+	#     "qty"
+	# )
+	total_pemindahan = frappe.db.sql("""
+		SELECT qty
+		FROM `tabData Penyemaian Bibit`
+		WHERE name = %s
+		AND docstatus = 1
+	""", (data_penyemaian_bibit,), as_list=True, debug=1)[0][0]
+
+	return total_pemindahan

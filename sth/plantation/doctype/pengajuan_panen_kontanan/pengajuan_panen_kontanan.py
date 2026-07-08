@@ -43,7 +43,7 @@ class PengajuanPanenKontanan(PlantationController):
 	
 	def before_submit(self):
 		generate_duplicate_key(self, "duplicate_key", [self.bkm_panen])
-		self.validate_account_and_salary_component()
+		# self.validate_account_and_salary_component()
 
 	def validate_account_and_salary_component(self):
 		if not (self.salary_account and self.credit_to):
@@ -52,7 +52,7 @@ class PengajuanPanenKontanan(PlantationController):
 	def on_submit(self):
 		self.check_status_bkm_panen()
 		self.create_or_update_epl_supervisi()
-		self.make_gl_entry()
+		# self.make_gl_entry()
 
 	def create_or_update_epl_supervisi(self):
 		for emp in self.supervisi_list:
@@ -97,7 +97,7 @@ class PengajuanPanenKontanan(PlantationController):
 		super().on_cancel()
 		self.check_status_bkm_panen(cancel=1)
 		self.delete_employee_payment_log()
-		self.make_gl_entry()
+		# self.make_gl_entry()
 
 	def check_status_bkm_panen(self, cancel=0):
 		doc = frappe.get_doc("Buku Kerja Mandor Panen", self.bkm_panen)

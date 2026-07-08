@@ -2,6 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Data Penyemaian Bibit", {
+    setup(frm) {
+        frm.set_query("voucher_no", function(doc) {
+            return {
+                query: "sth.api.get_pengeluaran_barang_bibit",
+                filters: {
+                    company: doc.company
+                }
+            };
+        });
+    },
     onload: function(frm) {      
         if (frm.is_new() && !frm.doc.posting_time) {
             let now = frappe.datetime.now_time(); 
@@ -9,15 +19,14 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
         }
     },
 	refresh(frm) {
-        frm.set_query("voucher_no", function(doc) {
-            return {
-                "filters": [
-                    ["company",  "=", doc.company],
-                    ["docstatus",  "=", 1],
-                    ["per_penyemaian", "<", 100]                    
-                ]
-            };            
-        });
+        // frm.set_query("voucher_no", function(doc) {
+        //     return {
+        //         "filters": [
+        //             ["pt_pemilik_barang",  "=", doc.company],
+        //             ["docstatus",  "=", 1]                 
+        //         ]
+        //     };            
+        // });
         
         frm.set_query("item_code", function(doc) {
 			return {
@@ -37,9 +46,19 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
                 }
 			}            
 		});
+        if(frm.doc.docstatus == 1){
+            show_gl_button(frm)
+        }
+        if(frm.is_new()){
+            isi_account_company(frm)
+        }
+
 	},
+    company: function(frm) {
+        isi_account_company(frm)
+    },
     voucher_no(frm){
-        sth.form.reset_value(frm, ["purchase_receipt_item", "item_code", "batch"])
+        sth.form.reset_value(frm, ["pengeluaran_barang_item", "item_code", "batch"])
     },
     select_item(frm){
         const fields = [
@@ -51,26 +70,24 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
                 label: __("New Doc")
             },
             {
-                fieldtype: "Link",
-                fieldname: "item_code",
-                options: "Item",
+                fieldtype: "Data",
+                fieldname: "kode_barang",
                 in_list_view: 1,
                 read_only: 1,
                 disabled: 0,
                 label: __("Item")
             },
             {
-                fieldtype: "Link",
-                fieldname: "batch_no",
-                options: "Batch",
+                fieldtype: "Data",
+                fieldname: "item_name",
                 in_list_view: 1,
                 read_only: 1,
                 disabled: 0,
-                label: __("Batch")
+                label: __("Nama Item")
             },
             {
                 fieldtype: "Float",
-                fieldname: "remaining_qty",
+                fieldname: "jumlah",
                 in_list_view: 1,
                 read_only: 1,
                 disabled: 0,
@@ -79,7 +96,7 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
         ]
 
         frappe.call({
-            method: "sth.plantation.doctype.data_penyemaian_bibit.data_penyemaian_bibit.select_purchase_receipt_item",
+            method: "sth.plantation.doctype.data_penyemaian_bibit.data_penyemaian_bibit.select_pengeluaran_barang_item",
             args: {
                 voucher_no: frm.doc.voucher_no
             },
@@ -113,12 +130,12 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
                         if (selected_items.length != 1) {
                             frappe.throw("Please Select at One Item")
                         }
+
+                        console.log(selected_items[0])
                         
-                        frm.doc.purchase_receipt_item =  selected_items[0].detail_name
-                        frm.doc.item_code =  selected_items[0].item_code
-                        frm.doc.item_code =  selected_items[0].item_code
-                        frm.doc.batch =  selected_items[0].batch_no
-                        frm.doc.qty_planting =  selected_items[0].remaining_qty
+                        frm.doc.pengeluaran_barang_item =  selected_items[0].detail_name
+                        frm.doc.item_code = selected_items[0].kode_barang
+                        frm.doc.qty_planting =  selected_items[0].jumlah
 
                         frm.trigger("calculate_qty")
                         
@@ -142,3 +159,37 @@ frappe.ui.form.on("Data Penyemaian Bibit", {
         frm.refresh_fields()
     }
 });
+
+
+function show_gl_button(frm){
+    if(frm.doc.docstatus == 1){
+        frm.add_custom_button(__('GL Entry'), () => {
+            frappe.route_options = {
+                voucher_no: frm.doc.name,
+                voucher_type: frm.doc.doctype,
+                from_date: frm.doc.posting_date,
+                to_date: frm.doc.posting_date,
+                company: frm.doc.company
+            };
+            frappe.set_route('query-report', 'General Ledger');
+        }, __('View'));
+    }
+}
+
+function isi_account_company(frm){
+    if (!frm.doc.company) return;
+    frappe.call({
+        method: 'sth.plantation.doctype.data_penyemaian_bibit.data_penyemaian_bibit.get_akun_penyemaian',
+        args: { company: frm.doc.company },
+        callback: (r) => {
+            if (r.message) {
+                if(!frm.doc.debit_account){
+                    frm.set_value('debit_account', r.message.debit_account);
+                }
+                if(!frm.doc.credit_account){
+                    frm.set_value('credit_account', r.message.credit_account);
+                }
+            }
+        }
+    });
+}

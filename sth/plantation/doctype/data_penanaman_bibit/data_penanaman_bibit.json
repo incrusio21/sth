@@ -1,13 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "DPB-.MM.-.YYYY.-.#####",
  "creation": "2025-07-08 13:36:17.515805",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_zzrf",
-  "naming_series",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -16,22 +15,37 @@
   "amended_from",
   "section_break_toxq",
   "no_spb",
+  "kegiatan",
+  "intex",
   "divisi",
   "blok",
+  "address",
+  "nama_asisten_bibitan",
   "description",
   "column_break_pdlg",
+  "batch",
   "data_penyemaian_bibit",
   "item_code",
-  "batch",
   "available_qty",
   "qty",
+  "rupiah_basis",
+  "total_bibit",
+  "column_break_tusk",
+  "total_bkm",
+  "actual_amount_bkm",
+  "total_jurnal",
   "shipping_detail_section",
   "alat_berat_dan_kendaraan",
+  "column_break_auoy",
+  "nama_sopir",
+  "nama_assisten",
+  "column_break_rttq",
   "employee",
   "employee_assisten",
-  "intex",
-  "column_break_auoy",
-  "address"
+  "journal_settings_section",
+  "debit_account",
+  "column_break_nwsw",
+  "credit_account"
  ],
  "fields": [
   {
@@ -43,7 +57,7 @@
    "fieldname": "divisi",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Divisi",
+   "label": "Divisi Tujuan",
    "options": "Divisi",
    "reqd": 1
   },
@@ -51,7 +65,7 @@
    "fieldname": "blok",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Blok",
+   "label": "Blok Tujuan",
    "options": "Blok",
    "reqd": 1
   },
@@ -81,13 +95,11 @@
    "reqd": 1
   },
   {
-   "fetch_from": "data_penyemaian_bibit.batch",
    "fieldname": "batch",
    "fieldtype": "Link",
    "label": "Batch",
    "no_copy": 1,
-   "options": "Batch",
-   "read_only": 1,
+   "options": "Batch Bibit",
    "reqd": 1
   },
   {
@@ -102,7 +114,7 @@
   },
   {
    "fieldname": "no_spb",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "No SPB"
   },
@@ -113,11 +125,12 @@
    "options": "\nTanam Inti\nSisip Inti\nTanam Plasma\nTanam Inti\nJual\nAfiliasi"
   },
   {
+   "fetch_from": "divisi.estate",
    "fieldname": "address",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Address",
-   "options": "Address"
+   "label": "Alamat Tujuan",
+   "read_only": 1
   },
   {
    "default": "Today",
@@ -203,36 +216,126 @@
    "options": "Alat Berat Dan Kendaraan"
   },
   {
+   "fetch_from": "alat_berat_dan_kendaraan.operator",
    "fieldname": "employee",
    "fieldtype": "Link",
-   "label": "Nama Sopir",
+   "hidden": 1,
+   "label": "Kode Sopir",
    "options": "Employee",
-   "reqd": 1
+   "read_only": 1
   },
   {
+   "fetch_from": "alat_berat_dan_kendaraan.helper",
    "fieldname": "employee_assisten",
    "fieldtype": "Link",
-   "label": "Nama Assisten",
+   "hidden": 1,
+   "label": "Kode Assisten",
    "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rupiah_basis",
+   "fieldtype": "Currency",
+   "label": "HPP",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "naming_series",
+   "bold": 1,
+   "fieldname": "total_jurnal",
+   "fieldtype": "Currency",
+   "label": "Total Amount Jurnal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Journal Settings"
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_nwsw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "total_bkm",
+   "fieldtype": "Currency",
+   "label": "Total Amount BKM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_bibit",
+   "fieldtype": "Currency",
+   "label": "Amount Bibit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kegiatan",
    "fieldtype": "Select",
-   "label": "Series",
-   "options": "DPNMB-",
+   "label": "Kegiatan",
+   "options": "\nTanam Baru\nSisip"
+  },
+  {
+   "fieldname": "nama_asisten_bibitan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Nama Asisten Bibitan",
+   "link_filters": "[[\"Employee\",\"designation\",\"=\",\"ST05\"]]",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "column_break_tusk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "actual_amount_bkm",
+   "fieldtype": "Currency",
+   "label": "Actual Amount BKM",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.first_name",
+   "fieldname": "nama_sopir",
+   "fieldtype": "Data",
+   "label": "Nama Sopir",
+   "options": "Employee",
+   "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "employee_assisten.first_name",
+   "fieldname": "nama_assisten",
+   "fieldtype": "Data",
+   "label": "Nama Assisten",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rttq",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:02:00.446495",
+ "modified": "2026-06-22 15:10:57.783381",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penanaman Bibit",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

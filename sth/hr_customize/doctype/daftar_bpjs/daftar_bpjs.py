@@ -76,6 +76,7 @@ class DaftarBPJS(Document):
 		new_doc.grand_total = grand_total
 		new_doc.outstanding_amount = 0
 		new_doc.posting_date = self.end_periode
+		new_doc.no_rekening_tujuan = self.no_rekening_tujuan
 
 		new_doc.company = self.pt
 

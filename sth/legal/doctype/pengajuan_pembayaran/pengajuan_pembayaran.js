@@ -5,12 +5,16 @@ frappe.provide("sth.legal");
 
 frappe.ui.form.on("Pengajuan Pembayaran", {
     onload(frm) {
-        frm.set_query("bank_account", function () {
+        
+    },
+    refresh(frm){
+        frm.set_query("bank_account", function() {
             return {
                 filters: {
-                    company: frm.doc.company
+                    company: frm.doc.company,
+                    unit: frm.doc.unit
                 }
-            }
+            };
         });
     },
     company(frm) {
@@ -22,6 +26,16 @@ frappe.ui.form.on("Pengajuan Pembayaran", {
             }
         });
     },
+    unit(frm){
+        frm.set_query("bank_account", function() {
+            return {
+                filters: {
+                    company: frm.doc.company,
+                    unit: frm.doc.unit
+                }
+            };
+        });
+    }
 });
 
 sth.legal.PengajuanPembayaran = class PengajuanPembayaran extends sth.plantation.AccountsController {

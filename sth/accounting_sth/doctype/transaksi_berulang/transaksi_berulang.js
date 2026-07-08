@@ -347,7 +347,7 @@ async function set_pi_filter(frm) {
     frm.set_query('tarik_purchase_invoice', function () {
         return {
             filters: {
-                invoice_type: map[frm.doc.jenis_transaksi] || '',
+...(frm.doc.nama_vendor && { supplier: frm.doc.nama_vendor }),
                 ...(used_pi.length && { name: ['not in', used_pi] })
             }
         };

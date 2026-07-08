@@ -702,8 +702,89 @@ def get_previous_kriteria_documents(doctype, docname):
 
 @frappe.whitelist()
 def submit_payment_entry(docname, reference_no, reference_date):
-	doc = frappe.get_doc("Payment Entry", docname)
-	doc.reference_no = reference_no
-	doc.reference_date = reference_date
-	doc.save()
-	doc.submit()
+	if isinstance(docname, str):
+		try:
+			docnames = json.loads(docname)
+
+			if not isinstance(docnames, list):
+				docnames = [docname]
+
+		except Exception:
+			docnames = [docname]
+
+	elif isinstance(docname, list):
+		docnames = docname
+
+	else:
+		docnames = [docname]
+
+	for payment_entry_name in docnames:
+		doc = frappe.get_doc("Payment Entry", payment_entry_name)
+
+		doc.reference_no = reference_no
+		doc.reference_date = reference_date
+
+		doc.save()
+
+		if doc.docstatus == 0:
+			doc.submit()
+
+	frappe.db.commit()
+
+	return {
+		"success": True,
+		"count": len(docnames)
+	}
+
+
+
+@frappe.whitelist()
+def get_pengeluaran_barang_bibit(doctype, txt, searchfield, start, page_len, filters):
+
+    company = filters.get("company")
+
+    return frappe.db.sql("""
+        SELECT DISTINCT
+            pb.name
+        FROM
+            `tabPengeluaran Barang` pb
+        INNER JOIN
+            `tabPengeluaran Barang Item` pbi
+        ON
+            pbi.parent = pb.name
+        WHERE
+            pb.pt_pemilik_barang = %(company)s
+            AND pb.docstatus = 1
+            AND pbi.sub_unit LIKE %(sub_unit)s
+            AND (pbi.jumlah - pbi.penyemaian_qty) > 0
+            AND pb.name LIKE %(txt)s
+        ORDER BY
+            pb.name
+        LIMIT %(start)s, %(page_len)s
+    """, {
+        "company": company,
+        "sub_unit": "%bibit%",
+        "txt": "%" + txt + "%",
+        "start": start,
+        "page_len": page_len
+    })
+
+@frappe.whitelist()
+def get_batch_penyemaian(doctype, txt, searchfield, start, page_len, filters):
+
+    return frappe.db.sql("""
+        SELECT DISTINCT
+            batch
+        FROM
+            `tabData Penyemaian Bibit`
+        WHERE
+            docstatus = 1
+            AND batch LIKE %(txt)s
+        ORDER BY
+            batch
+        LIMIT %(start)s, %(page_len)s
+    """, {
+        "txt": "%" + txt + "%",
+        "start": start,
+        "page_len": page_len
+    })

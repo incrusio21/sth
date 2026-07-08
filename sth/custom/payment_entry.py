@@ -534,11 +534,14 @@ def set_no_rekening(doc, method):
 			and reference.reference_name
 		):
 
-			no_rekening_tujuan = frappe.db.get_value(
-				reference.reference_doctype,
-				reference.reference_name,
-				"no_rekening_tujuan"
-			)
+			no_rekening_tujuan = ""
+
+			if frappe.get_meta(reference.reference_doctype).has_field("no_rekening_tujuan"):
+				no_rekening_tujuan = frappe.db.get_value(
+					reference.reference_doctype,
+					reference.reference_name,
+					"no_rekening_tujuan"
+				) or ""
 
 			if no_rekening_tujuan:
 
@@ -562,6 +565,11 @@ def set_no_rekening(doc, method):
 						bank_account.bank
 					)
 
+				if not doc.bill_no: 
+					doc.bill_no = (
+						no_rekening_tujuan
+					)
+
 	else:
 
 		if result.get("no_rekening"):
@@ -579,18 +587,19 @@ def set_no_rekening(doc, method):
 			result["no_rekening_tujuan"]
 		)
 
+		if not doc.bill_no: 
+			doc.bill_no = (
+				result["no_rekening_tujuan"]
+			)
+
 	if result.get("bank_tujuan"):
 		doc.bank_tujuan = (
 			result["bank_tujuan"]
 		)
 
-	doc.beneficary_account = (
-		doc.no_rekening_tujuan
-	)
+	doc.beneficary_account = (doc.no_rekening) or (doc.no_rekening_tujuan)
 
-	doc.beneficary_bank = (
-		doc.bank_tujuan
-	)
+	doc.beneficary_bank = (doc.nama_bank) or (doc.bank_tujuan)
 
 @frappe.whitelist()
 def get_no_rekening(party_type=None, party=None, 
@@ -723,76 +732,75 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 		"pdo_kas": {
 			"revised": "revised_total",
 			"normal": "total"
-		},
+		}
 	}
 
 	for row in doc.payment_voucher_kas_pdo:
-		no_pdo = row.no_pdo
-		tipe_pdo = row.tipe_pdo
-		penerima = row.penerima
+		if row.tipe_pdo.lower() != "dana cadangan":
+			no_pdo = row.no_pdo
+			tipe_pdo = row.tipe_pdo
+			penerima = row.penerima
 
-		# Ambil nama table dari tipe_pdo
-		# Contoh: "Bahan Bakar" -> "pdo_bahan_bakar"
-		table_name = "pdo_" + tipe_pdo.lower().replace(" ", "_")
+			# Ambil nama table dari tipe_pdo
+			# Contoh: "Bahan Bakar" -> "pdo_bahan_bakar"
+			table_name = "pdo_" + tipe_pdo.lower().replace(" ", "_")
 
-		# Ambil total harga dari PDO untuk penerima ini
-		pdo_doc = frappe.get_doc("Permintaan Dana Operasional", no_pdo)
-		
-		table_name = "pdo_" + tipe_pdo.lower().replace(" ", "_")
+			# Ambil total harga dari PDO untuk penerima ini
+			pdo_doc = frappe.get_doc("Permintaan Dana Operasional", no_pdo)
+			
+			table_name = "pdo_" + tipe_pdo.lower().replace(" ", "_")
 
-		# Ambil field names untuk table ini
-		field_config = TABLE_TOTAL_FIELDS.get(table_name)
-		if not field_config:
-			frappe.throw(f"Tipe PDO <b>{tipe_pdo}</b> tidak dikenali.")
+			# Ambil field names untuk table ini
+			field_config = TABLE_TOTAL_FIELDS.get(table_name)
+			if not field_config:
+				frappe.throw(f"Tipe PDO <b>{tipe_pdo}</b> tidak dikenali.")
 
-		revised_field = field_config["revised"]
-		normal_field = field_config["normal"]
+			revised_field = field_config["revised"]
+			normal_field = field_config["normal"]
 
-		total_harga_pdo = 0
-		for pdo_row in pdo_doc.get(table_name):
-			if pdo_row.employee == penerima:
-				total_harga_pdo += (
-					getattr(pdo_row, revised_field) or getattr(pdo_row, normal_field) or 0
+			total_harga_pdo = 0
+			for pdo_row in pdo_doc.get(table_name):
+				if pdo_row.employee == penerima:
+					total_harga_pdo += (
+						getattr(pdo_row, revised_field) or getattr(pdo_row, normal_field) or 0
+					)
+
+			# if total_harga_pdo == 0:
+			# 	frappe.throw(
+			# 		f"Penerima <b>{penerima}</b> tidak ditemukan di tabel <b>{table_name}</b> "
+			# 		f"pada PDO <b>{no_pdo}</b>."
+			# 	)
+
+			# Hitung total Payment Entry yang sudah ada (diluar doc ini)
+			existing_entries = frappe.db.sql("""
+				SELECT SUM(pe.paid_amount) as total_dibayar
+				FROM `tabPayment Entry` pe
+				INNER JOIN `tabPayment Voucher Kas PDO` pvkp ON pvkp.parent = pe.name
+				WHERE pvkp.no_pdo = %s
+				  AND pvkp.tipe_pdo = %s
+				  AND pvkp.penerima = %s
+				  AND pe.docstatus = 1
+				  AND pe.name != %s
+			""", (no_pdo, tipe_pdo, penerima, doc.name), as_dict=True)
+
+			total_sudah_dibayar = existing_entries[0].total_dibayar or 0
+
+			# Tambah total dari doc saat ini (semua row yang cocok)
+			total_doc_ini = doc.paid_amount
+
+			total_keseluruhan = total_sudah_dibayar + total_doc_ini
+
+			if total_keseluruhan > total_harga_pdo:
+				frappe.msgprint(
+					f"Total pembayaran untuk penerima <b>{penerima}</b> "
+					f"pada PDO <b>{no_pdo}</b> ({tipe_pdo}) "
+					f"melebihi batas yang ditentukan.<br>"
+					f"Total PDO: <b>Rp {frappe.format(total_harga_pdo, 'Currency')}</b><br>"
+					f"Sudah dibayar: <b>Rp {frappe.format(total_sudah_dibayar, 'Currency')}</b><br>"
+					f"Akan dibayar sekarang: <b>Rp {frappe.format(total_doc_ini, 'Currency')}</b><br>"
+					f"Akan masuk ke non PDO sejumlah: <b>Rp {frappe.format(total_sudah_dibayar + total_doc_ini - total_harga_pdo, 'Currency')}</b><br>"
+
 				)
-
-		if total_harga_pdo == 0:
-			frappe.throw(
-				f"Penerima <b>{penerima}</b> tidak ditemukan di tabel <b>{table_name}</b> "
-				f"pada PDO <b>{no_pdo}</b>."
-			)
-
-		# Hitung total Payment Entry yang sudah ada (diluar doc ini)
-		existing_entries = frappe.db.sql("""
-			SELECT SUM(pvkp.total) as total_dibayar
-			FROM `tabPayment Entry` pe
-			INNER JOIN `tabPayment Voucher Kas PDO` pvkp ON pvkp.parent = pe.name
-			WHERE pvkp.no_pdo = %s
-			  AND pvkp.tipe_pdo = %s
-			  AND pvkp.penerima = %s
-			  AND pe.docstatus = 1
-			  AND pe.name != %s
-		""", (no_pdo, tipe_pdo, penerima, doc.name), as_dict=True)
-
-		total_sudah_dibayar = existing_entries[0].total_dibayar or 0
-
-		# Tambah total dari doc saat ini (semua row yang cocok)
-		total_doc_ini = sum(
-			r.total for r in doc.payment_voucher_kas_pdo
-			if r.no_pdo == no_pdo and r.tipe_pdo == tipe_pdo and r.penerima == penerima
-		)
-
-		total_keseluruhan = total_sudah_dibayar + total_doc_ini
-
-		if total_keseluruhan > total_harga_pdo:
-			frappe.msgprint(
-				f"Total pembayaran untuk penerima <b>{penerima}</b> "
-				f"pada PDO <b>{no_pdo}</b> ({tipe_pdo}) "
-				f"melebihi batas yang diizinkan.<br>"
-				f"Total PDO: <b>Rp {frappe.format(total_harga_pdo, 'Currency')}</b><br>"
-				f"Sudah dibayar: <b>Rp {frappe.format(total_sudah_dibayar, 'Currency')}</b><br>"
-				f"Akan dibayar sekarang: <b>Rp {frappe.format(total_doc_ini, 'Currency')}</b><br>"
-				f"Total: <b>Rp {frappe.format(total_keseluruhan, 'Currency')}</b>"
-			)
 
 def update_payment_voucher_ppd(doc, method=None):
 	if not doc.references:
@@ -842,3 +850,46 @@ def is_mandiri_kcm(account):
 		)
 	)
 
+
+@frappe.whitelist()
+def update_payment_reference(
+	payment_entry,
+	nomor_referensi_bayar,
+	tanggal_bayar,
+	bukti_pembayaran=None
+):
+
+	doc = frappe.get_doc(
+		"Payment Entry",
+		payment_entry
+	)
+
+
+	# allow update submitted document
+	if doc.docstatus == 1:
+		doc.flags.ignore_validate_update_after_submit = True
+
+
+	doc.nomor_referensi_bayar = nomor_referensi_bayar
+	doc.tanggal_bayar = tanggal_bayar
+
+
+	if bukti_pembayaran:
+		doc.bukti_pembayaran = bukti_pembayaran
+
+
+	doc.save()
+
+
+	return {
+		"name": doc.name,
+		"status": "updated"
+	}
+
+
+def set_reference_no(doc, method):
+
+	if doc.docstatus < 1:
+		if ((not doc.reference_no) or (doc.reference_no=="-")) :
+			doc.reference_no = doc.name
+			

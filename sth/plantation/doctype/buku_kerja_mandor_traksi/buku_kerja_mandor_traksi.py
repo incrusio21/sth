@@ -58,6 +58,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		self._clear_fields = ["blok", "divisi", "batch", "project"]
 		self._bkm_name = "Traksi"
+		self._used_task = set()
 		
 	def validate(self):
 		self.set_posting_datetime()
@@ -83,6 +84,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			# kalkulasi ulang
 			if len(self.hasil_kerja) == 1:
 				self.hasil_kerja[0].kegiatan_list += f"\n{d.name}"
+				if hasattr(self.hasil_kerja[0], "_kegiatan_list"):
+					del self.hasil_kerja[0]._kegiatan_list
 				re_calculate = True
 				continue
 
@@ -185,7 +188,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def on_submit(self):
 		super().on_submit()
 		self.make_gl_entry()
-		self.update_kendaraan_field()
+		# self.update_kendaraan_field()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -195,7 +198,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def update_kendaraan_field(self, cancel=0):
 		if not self.kendaraan:
 			return
-
+			
 		# cek apakah terdapat future pemakaian kendaraan
 		if future_bkm := frappe.get_value(
 			"Buku Kerja Mandor Traksi", 
@@ -230,14 +233,22 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			
 	def get_gl_entries(self):
 		gl_entries = []
-		
+
 		self._all_expense_account = set()
-		self.make_kegiatan_gl_entry(gl_entries)
+
+		self.make_upah_gl_entry(gl_entries)
+		self.make_premi_gl_entry(gl_entries)
+
+		# self.make_kegiatan_gl_entry(gl_entries)
+
+		# if self._all_expense_account:
+		# self.make_salary_gl_entry(gl_entries)
+
+		# self.make_transit_gl_entry(gl_entries)
+		# print(gl_entries)
+
 		gl_entries = merge_similar_entries(gl_entries)
 
-		if self._all_expense_account:
-			self.make_salary_gl_entry(gl_entries)
-		
 		return gl_entries
 
 	def make_kegiatan_gl_entry(self, gl_entries):
@@ -245,7 +256,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		for emp in self.hasil_kerja:
 			# daftar gl entry kegiatan yang memiliki upah
-			for t in self.get("task", {"name": ["in", emp.get_kegiatan_list()]}):
+			for t in self.get("task", {"name": ["in", emp.get_kegiatan_list() or []]}):
 				if not t.amount:
 					continue
 
@@ -254,8 +265,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 						{
 							"account": t.kegiatan_account,
 							"against": self.salary_account,
-							"credit": t.amount,
-							"credit_in_account_currency": t.amount,
+							"debit": t.amount,
+							"debit_in_account_currency": t.amount,
 							"cost_center": self.get("cost_center") or cost_center,
 						},
 						item=self,
@@ -264,16 +275,260 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 				self._all_expense_account.add(t.kegiatan_account)
 
-	def make_salary_gl_entry(self, gl_entries):
+	def make_upah_gl_entry(self, gl_entries):
+		total_upah = 0
+		total_upah = self.hasil_kerja_amount
+		default_cost_center = erpnext.get_default_cost_center(self.company)
+		from sth.accounting_sth.doctype.costing_bengkel.costing_bengkel import get_or_create_cost_center
+		cost_center = get_or_create_cost_center(self.kendaraan, self.company) if self.kendaraan else default_cost_center
+
+		if not total_upah:
+			return
+
+		single_doc = frappe.get_single("Plantation Settings")
+		debit_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_transit_upah_bkm_traksi
+			 if row.company == self.company),
+			None,
+		)
+
+		if not debit_account:
+			frappe.throw(
+				frappe._(
+					"Akun Transit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		kredit_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_upah_bkm_traksi
+			 if row.company == self.company),
+			None,
+		)
+
+		if not kredit_account:
+			frappe.throw(
+				frappe._(
+					"Akun Kredit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": debit_account,
+					"against": kredit_account,
+					"debit": total_upah,
+					"debit_in_account_currency": total_upah,
+					"cost_center": cost_center,
+					"remarks": f"BKM Traksi Transit - {self.name}",
+				},
+				item=self,
+			)
+		)
+
+		
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": kredit_account,
+					"against": debit_account,
+					"credit": total_upah,
+					"credit_in_account_currency": total_upah,
+					"cost_center": cost_center,
+					"remarks": f"BKM Traksi Transit - {self.name}",
+				},
+				item=self,
+			)
+		)
+
+	def make_premi_gl_entry(self, gl_entries):
+		total_premi = 0
+		total_premi = self.hasil_kerja_premi_tbs_amount + self.hasil_kerja_premi_angkut_amount + self.hasil_kerja_premi_trans_amount
+
+		default_cost_center = erpnext.get_default_cost_center(self.company)
+		from sth.accounting_sth.doctype.costing_bengkel.costing_bengkel import get_or_create_cost_center
+		cost_center = get_or_create_cost_center(self.kendaraan, self.company) if self.kendaraan else default_cost_center
+
+		if not total_premi:
+			return
+
+		single_doc = frappe.get_single("Plantation Settings")
+		debit_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_transit_premi_bkm_traksi
+			 if row.company == self.company),
+			None,
+		)
+
+		if not debit_account:
+			frappe.throw(
+				frappe._(
+					"Akun Transit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		kredit_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_kredit_bkm
+			 if row.company == self.company),
+			None,
+		)
+
+		if not kredit_account:
+			frappe.throw(
+				frappe._(
+					"Akun Kredit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": debit_account,
+					"against": kredit_account,
+					"debit": total_premi,
+					"debit_in_account_currency": total_premi,
+					"cost_center": cost_center,
+					"remarks": f"BKM Traksi Transit - {self.name}",
+				},
+				item=self,
+			)
+		)
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": kredit_account,
+					"against": debit_account,
+					"credit": total_premi,
+					"credit_in_account_currency": total_premi,
+					"cost_center": cost_center,
+					"remarks": f"BKM Traksi Transit - {self.name}",
+				},
+				item=self,
+			)
+		)
+
+	def make_transit_gl_entry(self, gl_entries):
+		if not self.grand_total:
+			return
+
+		single_doc = frappe.get_single("Plantation Settings")
+		transit_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_transit_upah_bkm_traksi
+			 if row.company == self.company),
+			None,
+		)
+
+		if not transit_account:
+			frappe.throw(
+				frappe._(
+					"Akun Transit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
 		cost_center = erpnext.get_default_cost_center(self.company)
 
 		gl_entries.append(
 			self.get_gl_dict(
 				{
-					"account": self.salary_account,
+					"account": transit_account,
+					"against": self.salary_account,
+					"debit": self.grand_total,
+					"debit_in_account_currency": self.grand_total,
+					"cost_center": cost_center,
+					"remarks": f"BKM Traksi Transit - {self.name}",
+				},
+				item=self,
+			)
+		)
+
+		kredit_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_kredit_bkm
+			 if row.company == self.company),
+			None,
+		)
+
+		if not kredit_account:
+			frappe.throw(
+				frappe._(
+					"Akun Kredit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": kredit_account,
+					"against": transit_account,
+					"credit": self.grand_total,
+					"credit_in_account_currency": self.grand_total,
+					"cost_center": cost_center,
+					"remarks": f"BKM Traksi Transit - {self.name}",
+				},
+				item=self,
+			)
+		)
+
+	def make_salary_gl_entry(self, gl_entries):
+		single_doc = frappe.get_single("Plantation Settings")
+		default_cost_center = erpnext.get_default_cost_center(self.company)
+		from sth.accounting_sth.doctype.costing_bengkel.costing_bengkel import get_or_create_cost_center
+		cost_center = get_or_create_cost_center(self.kendaraan, self.company) if self.kendaraan else default_cost_center
+
+		kendaraan_dialokasi_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_transit_upah_bkm_traksi
+			 if row.company == self.company),
+			None,
+		)
+
+		if not kendaraan_dialokasi_account:
+			frappe.throw(
+				frappe._(
+					"Akun Kredit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": kendaraan_dialokasi_account,
 					"against": ",".join(self._all_expense_account),
-					"debit": self.hasil_kerja_amount,
-					"debit_in_account_currency": self.hasil_kerja_amount,
+					"debit": self.grand_total,
+					"debit_in_account_currency": self.grand_total,
+					"cost_center": cost_center		
+				},
+				item=self,
+			)
+		)
+
+		kendaraan_dialokasi_account = next(
+			(row.account for row in single_doc.plantation_settings_akun_upah_bkm_traksi
+			 if row.company == self.company),
+			None,
+		)
+
+		if not kendaraan_dialokasi_account:
+			frappe.throw(
+				frappe._(
+					"Akun Kredit BKM Traksi untuk company <b>{0}</b> tidak ditemukan. "
+					"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+				).format(self.company)
+			)
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": kendaraan_dialokasi_account,
+					"against": ",".join(self._all_expense_account),
+					"credit": self.grand_total,
+					"credit_in_account_currency": self.grand_total,
 					"cost_center": cost_center		
 				},
 				item=self,
@@ -294,7 +549,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		
 		self._used_task = set()
 		# looping task sesuai list yang terdaftar pada pegawai
-		for t in self.get("task", {"name": ["in", item.get_kegiatan_list()]}):
+		for t in self.get("task", {"name": ["in", item.get_kegiatan_list() or []]}):
 			# ubah data string agar bsa di baca 
 			kegiatan = json.loads(t.company_details).get(item.position or "Operator") or {}
 			
@@ -346,7 +601,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			return
 		
 		detail_kendaraan = frappe.get_doc("Alat Berat Dan Kendaraan", self.kendaraan)
-		self.jenis_alat = detail_kendaraan.jns_alt
+		self.jenis_alat = detail_kendaraan.jenis_alat
 
 		get_details_employee(self.hasil_kerja, self.posting_date, detail_kendaraan.operator)
 		self.set_details_diffrence(detail_kendaraan.kmhm_akhir)

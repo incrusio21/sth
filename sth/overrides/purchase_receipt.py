@@ -49,7 +49,7 @@ class SthPurchaseReceipt(PurchaseReceipt):
 		total_valuation_amount = sum(
 			flt(d.base_tax_amount_after_discount_amount)
 			for d in self.get("taxes")
-			if d.category in ["Valuation", "Valuation and Total"]
+			if d.category in ["Valuation", "Valuation and Total", "Total"]
 		)
 
 		valuation_amount_adjustment = total_valuation_amount
@@ -92,7 +92,6 @@ class SthPurchaseReceipt(PurchaseReceipt):
 							+ item.item_tax_amount
 							+ item.rm_supp_cost
 							+ flt(item.landed_cost_voucher_amount)
-							- self.pph_22
 						) / qty_in_stock_uom
 					else:
 						item.valuation_rate = (
@@ -108,7 +107,6 @@ class SthPurchaseReceipt(PurchaseReceipt):
 							+ item.item_tax_amount
 							+ flt(item.landed_cost_voucher_amount)
 							+ flt(item.get("amount_difference_with_purchase_invoice"))
-							- self.pph_22
 						) / qty_in_stock_uom
 					else:
 						item.valuation_rate = (
@@ -309,10 +307,37 @@ class SthPurchaseReceipt(PurchaseReceipt):
 							else:
 								expense_account = method_ambil_account.ambil_ap_in_transit_procurement("barang", self.company)
 
+							wh_account = ""
+
+							if sle.get("item_code"):
+								check_sth_ss = 0
+								st_setting = frappe.get_single("STH Stock Settings")
+								for st_row in st_setting.sth_stock_settings_persediaan_account:
+									if st_row.master_barang == sle.item_code and st_row.company == self.company:
+										check_sth_ss = 1
+										wh_account = st_row.account
+
+								if check_sth_ss == 0:
+									item_doc = frappe.get_doc("Item",sle.get("item_code"))
+									kelompok_barang_doc = frappe.get_doc("Item Group",item_doc.kelompok_barang)
+									for row_kelompok in kelompok_barang_doc.account_persediaan_kelompok_barang:
+										if row_kelompok.company == self.company:
+											wh_account = row_kelompok.account
+
+									if wh_account == "" or not wh_account:
+										frappe.throw(
+											_(
+												"Account untuk Kelompok Barang <b>{0}</b> "
+												"dan Company <b>{1}</b> tidak ditemukan. "
+												"Harap periksa pengaturan Kelompok Barang Accounts."
+											).format(kelompok_barang_doc.name, self.company)
+										)
+
+
 							gl_list.append(
 								self.get_gl_dict(
 									{
-										"account": warehouse_account[sle.warehouse]["account"],
+										"account": wh_account,
 										"against": expense_account,
 										"cost_center": item_row.cost_center,
 										"project": sle.get("project") or item_row.project or self.get("project"),
@@ -372,31 +397,31 @@ class SthPurchaseReceipt(PurchaseReceipt):
 								)
 							)
 
-							for row in self.taxes:
-								if "PPH 22" in row.account_head:
-									expense_account_head = frappe.db.get_value(
-										"Account",
-										{"account_number": "1171001", "company": self.company},
-										"name"
-									)
+							# for row in self.taxes:
+							# 	if "PPH 22" in row.account_head:
+							# 		expense_account_head = frappe.db.get_value(
+							# 			"Account",
+							# 			{"account_number": "1171001", "company": self.company},
+							# 			"name"
+							# 		)
 
-							gl_list.append(
-								self.get_gl_dict(
-									{
-										"account": expense_account_head,
-										"against": expense_account,
-										"cost_center": item_row.cost_center,
-										"project": sle.get("project") or item_row.project or self.get("project"),
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"debit": flt(self.pph_22, precision),
-										"is_opening": item_row.get("is_opening")
-										or self.get("is_opening")
-										or "No",
-									},
-									warehouse_account[sle.warehouse]["account_currency"],
-									item=item_row,
-								)
-							)
+							# gl_list.append(
+							# 	self.get_gl_dict(
+							# 		{
+							# 			"account": expense_account_head,
+							# 			"against": expense_account,
+							# 			"cost_center": item_row.cost_center,
+							# 			"project": sle.get("project") or item_row.project or self.get("project"),
+							# 			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							# 			"debit": flt(self.pph_22, precision),
+							# 			"is_opening": item_row.get("is_opening")
+							# 			or self.get("is_opening")
+							# 			or "No",
+							# 		},
+							# 		warehouse_account[sle.warehouse]["account_currency"],
+							# 		item=item_row,
+							# 	)
+							# )
 
 							gl_list.append(
 								self.get_gl_dict(
@@ -419,24 +444,24 @@ class SthPurchaseReceipt(PurchaseReceipt):
 								)
 							)
 
-							gl_list.append(
-								self.get_gl_dict(
-									{
-										"account": expense_account,
-										"against": warehouse_account[sle.warehouse]["account"],
-										"cost_center": item_row.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"debit": -1 * flt(self.pph_22, precision),
-										"project": sle.get("project")
-										or item_row.get("project")
-										or self.get("project"),
-										"is_opening": item_row.get("is_opening")
-										or self.get("is_opening")
-										or "No",
-									},
-									item=item_row,
-								)
-							)
+							# gl_list.append(
+							# 	self.get_gl_dict(
+							# 		{
+							# 			"account": expense_account,
+							# 			"against": warehouse_account[sle.warehouse]["account"],
+							# 			"cost_center": item_row.cost_center,
+							# 			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							# 			"debit": -1 * flt(self.pph_22, precision),
+							# 			"project": sle.get("project")
+							# 			or item_row.get("project")
+							# 			or self.get("project"),
+							# 			"is_opening": item_row.get("is_opening")
+							# 			or self.get("is_opening")
+							# 			or "No",
+							# 		},
+							# 		item=item_row,
+							# 	)
+							# )
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
@@ -532,7 +557,11 @@ def make_gl_entries_for_non_stock_items(doc, cancel=False):
 	# ── Credit Account ────────────────────────────────────────────────────────
 	# Ambil dari doctype Procurement Settings → tabel ap_in_transit_po_
 	# cari baris yang company-nya sama dengan Purchase Receipt
-	credit_account = _get_ap_in_transit_account(1, doc.company)
+	service = 0
+	if doc.sub_purchase_type == "Service Request":
+		service = 1
+
+	credit_account = _get_ap_in_transit_account(service, doc.company)
 
 	# ── Buat GL Entry per item ────────────────────────────────────────────────
 	for item in non_stock_items:
@@ -650,7 +679,7 @@ def _get_fixed_asset_account(asset_category: str, company: str) -> str | None:
 
 	for row in asset_cat.get("accounts", []):
 		if row.company_name == company:
-			return row.fixed_asset_account
+			return row.capital_work_in_progress_account
 
 	return None
 
@@ -811,8 +840,26 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		po_doc = frappe.get_doc("Purchase Order", doc.purchase_order)
 		if po_doc.sub_purchase_type == "Purchase Request":
 			doclist.invoice_type = "Purchase Order"
+			doclist.document_no = doc.name
 		elif po_doc.sub_purchase_type == "Service Request":
 			doclist.invoice_type = "Service Order"
 
+		doclist.biaya_ongkos = po_doc.biaya_ongkos
+		doclist.is_ppn_ongkos = po_doc.is_ppn_ongkos
+		doclist.total_biaya_ongkos_angkut = po_doc.total_biaya_ongkos_angkut
+		doclist.pbbkb = po_doc.pbbkb
+		doclist.is_pph_22 = po_doc.is_pph_22
+		doclist.pph_22 = po_doc.pph_22
+		doclist.cost = po_doc.cost
+
+		doclist.set("ppn", [])
+		for row in po_doc.get("ppn", []):
+			doclist.append("ppn", row.as_dict())
+
+		doclist.set("pph_lainnya", [])
+		for row in po_doc.get("pph_lainnya", []):
+			doclist.append("pph_lainnya", row.as_dict())
+
+	doclist.sub_total = doclist.total
 
 	return doclist

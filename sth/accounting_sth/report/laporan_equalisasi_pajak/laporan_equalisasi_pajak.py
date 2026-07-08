@@ -106,6 +106,9 @@ def execute(filters=None):
 			row["jenis_pajak"] = jenis_pajak_str
 			row["tanggal_bayar"] = get_oldest_payment_date(row.get("pi_name"))
 
+			if row.get("tipe_voucher") == "Voucher Match":
+				row["dpp"] = get_dpp_voucher_match(row.get("pi_name"))
+
 			if row.get("tipe_voucher") == "Non Voucher Match":
 				row["summary_all_pph"] = get_nvm_summary_all_pph(row.get("pi_name"))
    
@@ -274,3 +277,19 @@ def get_oldest_payment_date(parent):
 	}, as_dict=True)
   
   return query[0].oldest_payment_date or 0
+
+def get_dpp_voucher_match(parent):
+    result = frappe.db.sql("""
+        SELECT
+            CASE
+                WHEN SUM(CASE WHEN pph = 1 THEN 1 ELSE 0 END) > 0
+                THEN SUM(CASE WHEN pph = 1 THEN amount ELSE 0 END)
+                ELSE SUM(amount)
+            END AS total_amount
+        FROM `tabPurchase Invoice Item`
+        WHERE parent = %(parent)s
+    """, {
+        "parent": parent
+    }, as_dict=True)
+
+    return result[0].total_amount or 0

@@ -33,10 +33,16 @@
   "oer_netto_2",
   "perhitungan_stock_bst_1_tab",
   "section_break_oecm",
+  "uhst1",
+  "uhst2",
+  "uhst3",
   "ukuran_hasil_sounding",
   "ukuran_hasil_sounding_kg",
   "foto",
   "column_break_vbhx",
+  "hst1",
+  "hst2",
+  "hst3",
   "hasil_suhu",
   "berat_jenis_suhu",
   "video",
@@ -44,10 +50,16 @@
   "tonase_sebenarnya",
   "perhitungan_stock_bst_2_tab",
   "section_break_wnxp",
+  "uhst1_2",
+  "uhst2_2",
+  "uhst3_2",
   "ukuran_hasil_sounding_2",
   "ukuran_hasil_sounding_kg_2",
   "foto_2",
   "column_break_ahfm",
+  "hst1_2",
+  "hst2_2",
+  "hst3_2",
   "hasil_suhu_2",
   "berat_jenis_suhu_2",
   "video_2",
@@ -70,19 +82,25 @@
    "fieldtype": "Column Break"
   },
   {
+   "bold": 1,
    "default": "0",
    "fieldname": "ukuran_hasil_sounding",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding (CM)",
-   "precision": "2"
+   "in_preview": 1,
+   "label": "Ukuran Hasil Sounding Rata-Rata (CM)",
+   "precision": "1",
+   "read_only": 1
   },
   {
+   "bold": 1,
    "default": "0",
    "fieldname": "hasil_suhu",
    "fieldtype": "Link",
-   "label": "Hasil Suhu (Derajat)",
+   "in_preview": 1,
+   "label": "Hasil Suhu Rata-Rata (Derajat)",
    "options": "Ukuran Berat Jenis",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -171,8 +189,8 @@
    "fieldname": "ukuran_hasil_sounding_kg",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Ukuran Hasil Sounding (KG)",
-   "precision": "0",
+   "label": "Ukuran Hasil Sounding (Liter)",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -197,19 +215,22 @@
    "read_only": 1
   },
   {
+   "bold": 1,
    "default": "0",
    "fieldname": "ukuran_hasil_sounding_2",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Ukuran Hasil Sounding (CM)",
-   "precision": "2"
+   "precision": "1",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "ukuran_hasil_sounding_kg_2",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Ukuran Hasil Sounding (KG)",
-   "precision": "0",
+   "label": "Ukuran Hasil Sounding (Liter)",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -217,12 +238,15 @@
    "fieldtype": "Column Break"
   },
   {
+   "bold": 1,
    "default": "0",
    "fieldname": "hasil_suhu_2",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Hasil Suhu (Derajat)",
    "options": "Ukuran Berat Jenis",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -236,22 +260,26 @@
   {
    "fieldname": "foto",
    "fieldtype": "Attach Image",
-   "label": "Foto"
+   "label": "Foto",
+   "mandatory_depends_on": "eval:doc.ukuran_hasil_sounding_kg && doc.berat_jenis_suhu"
   },
   {
    "fieldname": "video",
    "fieldtype": "Attach",
-   "label": "Video"
+   "label": "Video",
+   "mandatory_depends_on": "eval:doc.ukuran_hasil_sounding_kg && doc.berat_jenis_suhu"
   },
   {
    "fieldname": "foto_2",
    "fieldtype": "Attach Image",
-   "label": "Foto"
+   "label": "Foto",
+   "mandatory_depends_on": "eval:doc.ukuran_hasil_sounding_kg_2 && doc.berat_jenis_suhu_2"
   },
   {
    "fieldname": "video_2",
    "fieldtype": "Attach",
-   "label": "Video"
+   "label": "Video",
+   "mandatory_depends_on": "eval:doc.ukuran_hasil_sounding_kg_2 && doc.berat_jenis_suhu_2"
   },
   {
    "fieldname": "section_break_uilc",
@@ -376,6 +404,96 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "uhst1",
+   "fieldtype": "Float",
+   "label": "Ukuran Hasil Sounding Titik 1 (CM)",
+   "precision": "1"
+  },
+  {
+   "default": "0",
+   "fieldname": "uhst2",
+   "fieldtype": "Float",
+   "label": "Ukuran Hasil Sounding Titik 2 (CM)",
+   "precision": "1"
+  },
+  {
+   "default": "0",
+   "fieldname": "uhst3",
+   "fieldtype": "Float",
+   "label": "Ukuran Hasil Sounding Titik 3 (CM)",
+   "precision": "1"
+  },
+  {
+   "default": "0",
+   "fieldname": "hst1",
+   "fieldtype": "Float",
+   "label": "Hasil Suhu Titik 1 (Derajat)",
+   "options": "Ukuran Berat Jenis",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "fieldname": "hst2",
+   "fieldtype": "Float",
+   "label": "Hasil Suhu Titik 2 (Derajat)",
+   "options": "Ukuran Berat Jenis",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "fieldname": "hst3",
+   "fieldtype": "Float",
+   "label": "Hasil Suhu Titik 3 (Derajat)",
+   "options": "Ukuran Berat Jenis",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "fieldname": "uhst1_2",
+   "fieldtype": "Float",
+   "label": "Ukuran Hasil Sounding Titik 1 (CM)",
+   "precision": "1"
+  },
+  {
+   "default": "0",
+   "fieldname": "uhst2_2",
+   "fieldtype": "Float",
+   "label": "Ukuran Hasil Sounding Titik 2 (CM)",
+   "precision": "1"
+  },
+  {
+   "default": "0",
+   "fieldname": "uhst3_2",
+   "fieldtype": "Float",
+   "label": "Ukuran Hasil Sounding Titik 3 (CM)",
+   "precision": "1"
+  },
+  {
+   "default": "0",
+   "fieldname": "hst1_2",
+   "fieldtype": "Float",
+   "label": "Hasil Suhu Titik 1 (Derajat)",
+   "options": "Ukuran Berat Jenis",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "fieldname": "hst2_2",
+   "fieldtype": "Float",
+   "label": "Hasil Suhu Titik 2 (Derajat)",
+   "options": "Ukuran Berat Jenis",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "fieldname": "hst3_2",
+   "fieldtype": "Float",
+   "label": "Hasil Suhu Titik 2 (Derajat)",
+   "options": "Ukuran Berat Jenis",
+   "precision": "2"
   }
  ],
  "grid_page_length": 50,
@@ -387,7 +505,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-04-17 08:39:24.738470",
+ "modified": "2026-07-07 09:59:32.813168",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

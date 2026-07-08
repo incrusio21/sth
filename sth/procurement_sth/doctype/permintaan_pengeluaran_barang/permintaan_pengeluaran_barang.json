@@ -173,12 +173,14 @@
   {
    "fieldname": "persetujuan_1",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Persetujuan 1",
    "options": "User"
   },
   {
    "fieldname": "persetujuan_2",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Persetujuan 2",
    "options": "User"
   },
@@ -194,7 +196,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-04 00:31:28.532850",
+ "modified": "2026-06-30 10:19:52.703503",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",

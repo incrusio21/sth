@@ -113,6 +113,24 @@ frappe.ui.form.on("Purchase Receipt", {
                 }
             };
         });
+        if(frm.doc.docstatus == 1){
+            frm.page.remove_inner_button(__('Purchase Invoice'), __('Create'));
+            frm.add_custom_button(__('Purchase Invoice'), () => {
+                frappe.model.open_mapped_doc({
+                    method: "sth.overrides.purchase_receipt.make_purchase_invoice",
+                    frm: cur_frm,
+                });
+            }, __('Create'));
+        }
+
+        
+    },
+
+    make_purchase_invoice() {
+        frappe.model.open_mapped_doc({
+            method: "sth.overrides.purchase_receipt.make_purchase_invoice",
+            frm: cur_frm,
+        });
     },
 
     purchase_type(frm) {

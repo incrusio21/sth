@@ -14,7 +14,9 @@
   "fields",
   "column_break_lrvf",
   "account_tab",
-  "hutang_usaha_proposal_type"
+  "hutang_usaha_proposal_type",
+  "hutang_invoice_proposal_type",
+  "uang_muka_proposal_type"
  ],
  "fields": [
   {
@@ -65,12 +67,26 @@
    "fieldtype": "Table",
    "label": "Hutang Usaha Proposal Type",
    "options": "Hutang Usaha Proposal Type"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "hutang_invoice_proposal_type",
+   "fieldtype": "Table",
+   "label": "Hutang Invoice Proposal Type",
+   "options": "Hutang Invoice Proposal Type"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "uang_muka_proposal_type",
+   "fieldtype": "Table",
+   "label": "Uang Muka Proposal Type",
+   "options": "Uang Muka Proposal Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-31 17:29:27.786504",
+ "modified": "2026-06-09 15:52:55.141913",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal Type",

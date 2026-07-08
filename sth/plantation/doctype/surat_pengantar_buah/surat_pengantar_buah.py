@@ -15,6 +15,10 @@ force_item_fields = (
 class SuratPengantarBuah(Document):
 	
 	def validate(self):
+		for row in self.details:
+			if row.total_janjang and not row.qty:
+				row.qty = row.total_janjang
+
 		self.remove_input_pks()
 		self.set_missing_value()
 		self.validate_recap_panen()

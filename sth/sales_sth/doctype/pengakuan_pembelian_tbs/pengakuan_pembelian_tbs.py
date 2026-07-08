@@ -325,20 +325,78 @@ class PengakuanPembelianTBS(Document):
 
 
 @frappe.whitelist()
-def get_rate(jarak):
-	return frappe.get_value("Item Price",{"item_code":"TBS","price_list": jarak},["price_list_rate"])
+def get_rate(jarak,item_code="TBS"):
+	return frappe.get_value("Item Price",{"item_code":item_code,"price_list": jarak},["price_list_rate"])
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
-	
+
 	def set_missing_values(source, target):
+		target.invoice_type = "Pengakuan Pembelian TBS"
+		target.document_no = source.name
+
+		expense_account = frappe.db.get_value(
+			"Procurement Settings Pengakuan Pembelian TBS Account",
+			{"parent": "Procurement Settings", "company": source.company},
+			"account"
+		)
+
+		target.items = []
+		item = target.append("items", {})
+		item.item_code = source.item_code
+		item.qty = flt(source.total_terima)
+		item.rate = flt(source.harga)
+		item.expense_account = expense_account
+
+		CHARGES_MARKER = "__from_charges__"
+
+		if flt(source.total_bonus):
+			charge = target.append("charges_purchase_invoice", {})
+			charge.total = flt(source.total_bonus)
+			charge.account = "6511001 - PEMBELIAN TBS LUAR - TML"
+
+			tax_charge = target.append("taxes", {})
+			tax_charge.charge_type = "Actual"
+			tax_charge.category = "Total"
+			tax_charge.add_deduct_tax = "Add"
+			tax_charge.account_head = charge.account
+			tax_charge.tax_amount = charge.total
+			tax_charge.tax_amount_after_discount_amount = charge.total
+			tax_charge.description = CHARGES_MARKER
+
+		PPH_TYPE = "PPh 22 0.25%"
+		PPH_LAINNYA_MARKER = "__from_pph_lainnya__"
+
+		tax_rate_doc = frappe.get_doc("Tax Rate", PPH_TYPE)
+		pph_account = next(
+			(r.account for r in tax_rate_doc.tax_rate_account if r.tipe == "PPh" and r.company == source.company),
+			None
+		)
+		pph_percentage = flt(tax_rate_doc.rate)
+
+		item_total = flt(source.total_terima) * flt(source.harga)
+		pph_amount = item_total * pph_percentage / 100
+
+		pph = target.append("pph_lainnya", {})
+		pph.type = PPH_TYPE
+		pph.tax_type = "PPH"
+		pph.account = pph_account
+		pph.percentage = pph_percentage
+		pph.amount = pph_amount
+
+		tax_row = target.append("taxes", {})
+		tax_row.account_head = pph_account
+		tax_row.charge_type = "Actual"
+		tax_row.add_deduct_tax = "Add"
+		tax_row.category = "Total"
+		tax_row.tax_amount = pph_amount * -1
+		tax_row.description = f"{PPH_LAINNYA_MARKER}{PPH_TYPE}"
+
+		target.total_pph_lainnya = sum(flt(r.amount) for r in target.pph_lainnya)
+
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-	
-	def update_item(source, target, source_parent):
-		target.qty = source.qty
-		target.rate = source.rate
-		
+
 	doclist = get_mapped_doc(
 		"Pengakuan Pembelian TBS",
 		source_name,
@@ -353,26 +411,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 					"docstatus": ["=", 1]
 				}
 			},
-			"Pengakuan Pembelian TBS Item": {  # Child table name
-				"doctype": "Purchase Invoice Item",
-				"field_map": {
-					"item_code": "item_code",
-					"item_name": "item_name",
-					"qty": "qty",
-					"uom": "uom",
-					"rate": "rate",
-					"amount": "amount",
-					# Add other item field mappings
-					# "warehouse": "warehouse",
-					# "expense_account": "expense_account",
-				},
-				"postprocess": update_item
-			}
 		},
 		target_doc,
 		set_missing_values
 	)
-	
+
 	return doclist
 
 

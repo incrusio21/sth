@@ -235,7 +235,7 @@
    "fieldtype": "Select",
    "in_preview": 1,
    "label": "Tipe Pembayaran",
-   "options": "Cash\nTransfer"
+   "options": "Cash\nTransfer/Bill Payment"
   },
   {
    "fetch_from": "company.abbr",
@@ -245,17 +245,17 @@
    "label": "Abbr"
   },
   {
-   "depends_on": "eval:doc.tipe_pembayaran == \"Transfer\"",
+   "depends_on": "eval:doc.tipe_pembayaran == \"Transfer/Bill Payment\"",
    "fieldname": "no_rekening_tujuan",
    "fieldtype": "Data",
-   "label": "No Rekening Tujuan"
+   "label": "No Rekening Atau Kode Billing Tujuan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-20 09:36:59.728959",
+ "modified": "2026-06-11 11:46:22.685300",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Pengajuan Pembayaran",

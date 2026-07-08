@@ -1,6 +1,28 @@
-// Client Script for Stock Reconciliation Item
+
+frappe.ui.form.on("Stock Reconciliation",{
+    onload:function(frm){
+        const original_link_formatter = frappe.form.formatters.Link;
+
+        frappe.form.formatters.Link = function(value, docfield, options, doc) {
+            // Tampilkan plain text untuk Procurement Settings
+            if (docfield) {
+                return value || "";
+            }
+            // Doctype lain tetap pakai formatter asli
+            return original_link_formatter(value, docfield, options, doc);
+        };
+        frm.fields_dict["items"].grid.refresh();
+    },
+    refresh(frm) {
+        set_unit_filter(frm);
+    },
+    company(frm) {
+        set_unit_filter(frm);
+    }
+});
 
 frappe.ui.form.on('Stock Reconciliation Item', {
+
     retain_amount: function(frm, cdt, cdn) {
         let item = locals[cdt][cdn];
         if (item.retain_amount) {
@@ -50,5 +72,21 @@ function calculate_valuation_from_amount(frm, cdt, cdn) {
     } else if (item.retain_amount && (!item.current_amount || !item.qty)) {
         frappe.model.set_value(cdt, cdn, 'valuation_rate', 0);
         frappe.model.set_value(cdt, cdn, 'amount', 0);
+    }
+}
+
+function set_unit_filter(frm) {
+    if (frm.doc.company) {
+        frm.set_query('unit', function() {
+            return {
+                filters: {
+                    'company': frm.doc.company
+                }
+            };
+        });
+    } else {
+        frm.set_query('unit', function() {
+            return {};
+        });
     }
 }

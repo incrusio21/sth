@@ -84,6 +84,9 @@ class BukuKerjaMandorPremi(Document):
 			total_emp += 1
 			amount += amm
 
+		if not total_emp:
+			total_emp = 1
+
 		self.amount = amount
 		if self.method == "Average":
 			amount = amount / total_emp

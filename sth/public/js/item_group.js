@@ -20,6 +20,7 @@ frappe.ui.form.on("Item Group", {
                 frm.set_df_property('persetujuan_1', 'read_only', 1);
             }
         }
+        set_account_filter(frm)
     },
     
     parent_item_group: function(frm){
@@ -52,5 +53,28 @@ function generate_kode_item_group_from_parent(frm) {
                 frappe.msgprint(__('Could not generate code. Parent group may not have a code.'));
             }
         }
+    });
+}
+
+function set_account_filter(frm){
+    frm.set_query("account", "account_persediaan_kelompok_barang", function (doc, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        return {
+            filters: {
+                company: row.company,
+                is_group: 0 
+            }
+        };
+    });
+    frm.set_query("account", "kelompok_barang_account_pengeluaran_barang", function (doc, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        return {
+            filters: {
+                company: row.company,
+                is_group: 0 
+            }
+        };
     });
 }

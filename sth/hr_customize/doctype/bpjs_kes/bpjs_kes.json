@@ -1,5 +1,4 @@
 {
- "_comments": "[{\"comment\": \"Action Failed<br><br><pre><code>Traceback (most recent call last):\\n  File \\\"apps/frappe/frappe/mod...\", \"by\": \"Administrator\", \"name\": \"n7o02g1ifq\"}]",
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:no_daftar_bpjs",
@@ -15,6 +14,7 @@
   "posting_date",
   "grand_total",
   "outstanding_amount",
+  "no_rekening_tujuan",
   "section_break_cnsi",
   "expense_total",
   "amended_from"
@@ -92,6 +92,11 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "no_rekening_tujuan",
+   "fieldtype": "Data",
+   "label": "No Rekening Tujuan"
   }
  ],
  "grid_page_length": 50,
@@ -99,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-29 02:56:59.054247",
+ "modified": "2026-06-04 14:11:41.733619",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "BPJS KES",

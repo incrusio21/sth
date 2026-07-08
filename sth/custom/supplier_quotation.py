@@ -51,5 +51,5 @@ def get_taxes_template(company):
     return data
 
 @frappe.whitelist()
-def get_account_tax_rate(name,company):
-    return frappe.db.get_value("Tax Rate Account",{"parent":name,"company": company},["account"])
+def get_account_tax_rate(name,company,tipe="Masukan"):
+    return frappe.db.get_value("Tax Rate Account",{"parent":name,"company": company,"tipe":tipe},["account"])

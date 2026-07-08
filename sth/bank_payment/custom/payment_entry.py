@@ -90,7 +90,7 @@ def get_mandiri_kcm_data(doc):
 
     return {
         "ft_service_code": ft_service_code,
-        "beneficiary_name": beneficiary_name,
+        "beneficiary_name": beneficiary_name or beneficiary_bank_name,
         "beneficiary_bank_code": beneficiary_bank_code,
         "beneficiary_bank_name": beneficiary_bank_name
     }
@@ -139,6 +139,7 @@ def get_mandiri_kcm_warnings(payment_entry):
         "IBU": {
             "debit_account": doc.no_rekening_asal,
             "beneficiary_account": doc.beneficary_account,
+            "beneficiary_name": data["beneficiary_name"],
             "amount": doc.paid_amount,
             "currency": doc.paid_from_account_currency,
         },
@@ -189,7 +190,13 @@ def get_mandiri_kcm_warnings(payment_entry):
 
         "VIA": {
             "beneficiary_account": doc.beneficary_account,
-        }
+        },
+
+        "UBP": {
+            "debit_account": doc.no_rekening_asal,
+            "bill_code": doc.bill_code,
+            "bill_no": doc.bill_no,
+        },
     }
 
     fields = required_fields.get(
@@ -373,6 +380,11 @@ def create_kcm_from_pe(doc, method=None):
         "In Progress"
     )
 
+    doc.db_set(
+        "kcm_response",
+        ""
+    )
+
     return kcm.name
 
 def create_kcm_ubp(doc, data):
@@ -406,13 +418,14 @@ def create_kcm_ubp(doc, data):
 
     row.biller_code = doc.bill_code
     row.bill_key_1 = doc.bill_no
+    row.bill_key_2 = doc.paid_amount
 
     row.amount = doc.paid_amount
     row.currency = doc.paid_from_account_currency
     row.remarks = doc.remarks
 
     kcm.insert(ignore_permissions=True)
-    # kcm.submit()
+    kcm.submit()
 
     doc.db_set("kcm_reference", kcm.name)
     doc.db_set("payment_status", "In Progress")

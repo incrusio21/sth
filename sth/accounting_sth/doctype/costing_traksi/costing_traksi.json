@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-06-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "periode_dari",
+  "column_break_1",
+  "periode_sampai",
+  "section_pengeluaran",
+  "pengeluaran_barang_items",
+  "total_pengeluaran_barang",
+  "section_bkmt",
+  "bkmt_items",
+  "total_bkmt",
+  "section_summary",
+  "grand_total"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokumen",
+   "options": "CT-.YYYY.-.####"
+  },
+  {
+   "fieldname": "periode_dari",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periode_sampai",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_pengeluaran",
+   "fieldtype": "Section Break",
+   "label": "Pengeluaran Barang Traksi"
+  },
+  {
+   "fieldname": "pengeluaran_barang_items",
+   "fieldtype": "Table",
+   "label": "Pengeluaran Barang",
+   "options": "Costing Traksi Table"
+  },
+  {
+   "fieldname": "total_pengeluaran_barang",
+   "fieldtype": "Currency",
+   "label": "Total Pengeluaran Barang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_bkmt",
+   "fieldtype": "Section Break",
+   "label": "Buku Kerja Mandor Traksi"
+  },
+  {
+   "fieldname": "bkmt_items",
+   "fieldtype": "Table",
+   "label": "Buku Kerja Mandor Traksi",
+   "options": "Costing Traksi Table"
+  },
+  {
+   "fieldname": "total_bkmt",
+   "fieldtype": "Currency",
+   "label": "Total Upah Traksi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_summary",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Traksi",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

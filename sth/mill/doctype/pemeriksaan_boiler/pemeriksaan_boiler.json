@@ -16,6 +16,12 @@
   "shift_proses",
   "stasiun",
   "mesin",
+  "section_break_atgy",
+  "latitude",
+  "longitude",
+  "column_break_bmcb",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_fnwx",
   "tanggal_scan",
   "column_break_lhgv",
@@ -105,7 +111,8 @@
   {
    "fieldname": "foto_hasil_tekanan_boiler",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Tekanan Boiler"
+   "label": "Foto Hasil Tekanan Boiler",
+   "reqd": 1
   },
   {
    "fieldname": "steam_flow_section",
@@ -121,7 +128,8 @@
   {
    "fieldname": "foto_hasil_tekanan_steam_flow",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Tekanan Steam Flow"
+   "label": "Foto Hasil Tekanan Steam Flow",
+   "reqd": 1
   },
   {
    "fieldname": "water_flow_section",
@@ -137,7 +145,8 @@
   {
    "fieldname": "foto_hasil_tekanan_water_flow",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Tekanan Water Flow"
+   "label": "Foto Hasil Tekanan Water Flow",
+   "reqd": 1
   },
   {
    "fieldname": "shoot_blowing_boiler_section",
@@ -175,7 +184,8 @@
   {
    "fieldname": "upload_foto",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "drain_air_boiler_manual__blowdown_section",
@@ -190,12 +200,14 @@
   {
    "fieldname": "upload_video_manual_blowdown",
    "fieldtype": "Attach",
-   "label": "Upload Video Manual Blowdown"
+   "label": "Upload Video Manual Blowdown",
+   "reqd": 1
   },
   {
    "fieldname": "upload_foto_double_dumper",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Double Dumper"
+   "label": "Upload Foto Double Dumper",
+   "reqd": 1
   },
   {
    "fieldname": "double_dumper_section",
@@ -257,15 +269,48 @@
    "label": "Shift Proses",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_atgy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bmcb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:38:29.192146",
+ "modified": "2026-07-08 09:50:26.067708",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Boiler",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

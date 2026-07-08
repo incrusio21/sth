@@ -34,4 +34,24 @@ function set_akun_query(frm, cdt, cdn) {
             }
         };
     });
+     frm.set_query("account", "hutang_invoice_proposal_type", function (doc, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        return {
+            filters: {
+                company: row.company,
+                is_group: 0 
+            }
+        };
+    });
+      frm.set_query("account", "uang_muka_proposal_type", function (doc, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        return {
+            filters: {
+                company: row.company,
+                is_group: 0 
+            }
+        };
+    });
 }

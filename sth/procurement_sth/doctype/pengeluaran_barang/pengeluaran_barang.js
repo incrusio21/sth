@@ -179,49 +179,114 @@ function apply_account_filter_from_kegiatan(frm, cdt, cdn) {
 }
 
 
-// ─── Helper: filter dari Station Master (MILL) ────────────────────────────────
-function apply_account_filter_from_station(frm, cdt, cdn) {
-	const row = locals[cdt][cdn];
-
+// ─── Helper: filter dari Procurement Settings > Sub Unit Traksi (TRAKSI) ─────
+function apply_account_filter_from_traksi_settings(frm, cdt, cdn) {
 	frappe.call({
 		method: "frappe.client.get",
-		args: { doctype: "Station Master", name: row.stasiun },
+		args: { doctype: "Procurement Settings", name: "Procurement Settings" },
 		callback(r) {
 			if (!r.message) {
-				frappe.msgprint({ title: __("Error"), message: __("Data Station Master tidak ditemukan untuk stasiun: ") + row.stasiun, indicator: "red" });
+				frappe.msgprint({ title: __("Error"), message: __("Procurement Settings tidak ditemukan."), indicator: "red" });
 				return;
 			}
 
-			const procurement_settings = r.message.station_procurement_settings || [];
-			if (!procurement_settings.length) {
-				frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Station Procurement Settings</b> pada stasiun <b>") + row.stasiun + "</b>.", indicator: "orange" });
+			const traksi_rows = (r.message.sub_unit_traksi_procurement_settings || []);
+			if (!traksi_rows.length) {
+				frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada konfigurasi <b>Sub Unit Traksi</b> di Procurement Settings."), indicator: "orange" });
 				return;
 			}
 
-			const valid_companies = [...new Set(procurement_settings.map((s) => s.company).filter(Boolean))];
-			const valid_accounts  = [...new Set(procurement_settings.map((s) => s.account).filter(Boolean))];
+			const company = frm.doc.pt_pemilik_barang;
+			const filtered = company
+				? traksi_rows.filter((r) => r.company === company)
+				: traksi_rows;
 
+			if (!filtered.length) {
+				frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Account</b> untuk company <b>") + company + __("</b> di Sub Unit Traksi Procurement Settings."), indicator: "orange" });
+				return;
+			}
+
+			const valid_accounts = [...new Set(filtered.map((r) => r.account).filter(Boolean))];
 			if (!valid_accounts.length) {
-				frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Account</b> di Station Procurement Settings stasiun <b>") + row.stasiun + "</b>.", indicator: "orange" });
+				frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Account</b> yang dikonfigurasi di Sub Unit Traksi Procurement Settings."), indicator: "orange" });
 				return;
-			}
-
-			let company_filter = valid_companies;
-			if (frm.doc.pt_pemilik_barang) {
-				if (valid_companies.includes(frm.doc.pt_pemilik_barang)) {
-					company_filter = [frm.doc.pt_pemilik_barang];
-				} else {
-					frappe.msgprint({ title: __("Perhatian"), message: __("PT Pemilik Barang <b>") + frm.doc.pt_pemilik_barang + __("</b> tidak terdaftar di Station Procurement Settings stasiun <b>") + row.stasiun + "</b>.", indicator: "orange" });
-				}
 			}
 
 			_row_account_filters[cdn] = {
-				filters: { company: ["in", company_filter], name: ["in", valid_accounts], is_group: 0 },
+				filters: { name: ["in", valid_accounts], is_group: 0 },
 			};
-			frappe.model.set_value(cdt, cdn, "account", null);
-			frappe.show_alert({ message: __("Filter <b>Account</b> diperbarui dari stasiun <b>") + row.stasiun + "</b>.", indicator: "green" });
+			frappe.model.set_value(cdt, cdn, "account", valid_accounts[0]);
+			frappe.show_alert({ message: __("Filter <b>Account</b> diperbarui dari Sub Unit Traksi Procurement Settings."), indicator: "green" });
 		},
 	});
+}
+
+
+
+// ─── Helper: filter dari Procurement Settings > Sub Unit Traksi (TRAKSI) ─────
+function apply_account_filter_from_traksi_settings(frm, cdt, cdn) {
+    const row = locals[cdt][cdn];
+
+    if (!row.kode_barang) {
+        frappe.msgprint({ title: __("Perhatian"), message: __("Pilih <b>Kode Barang</b> terlebih dahulu."), indicator: "orange" });
+        return;
+    }
+
+    frappe.call({
+        method: "frappe.client.get",
+        args: { doctype: "Item", name: row.kode_barang },
+        callback(r) {
+            if (!r.message) {
+                frappe.msgprint({ title: __("Error"), message: __("Item tidak ditemukan: ") + row.kode_barang, indicator: "red" });
+                return;
+            }
+
+            const item_group = r.message.kelompok_barang;
+            if (!item_group) {
+                frappe.msgprint({ title: __("Perhatian"), message: __("Item <b>") + row.kode_barang + __("</b> tidak memiliki Kelompok Barang."), indicator: "orange" });
+                return;
+            }
+
+            frappe.call({
+                method: "frappe.client.get",
+                args: { doctype: "Item Group", name: item_group },
+                callback(r2) {
+                    if (!r2.message) {
+                        frappe.msgprint({ title: __("Error"), message: __("Item Group tidak ditemukan: ") + item_group, indicator: "red" });
+                        return;
+                    }
+
+                    const account_rows = (r2.message.kelompok_barang_account_pengeluaran_barang || []);
+                    if (!account_rows.length) {
+                        frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Account</b> di kelompok barang <b>") + item_group + "</b>.", indicator: "orange" });
+                        return;
+                    }
+
+                    const company = frm.doc.pt_pemilik_barang;
+                    const filtered = company
+                        ? account_rows.filter((a) => a.company === company)
+                        : account_rows;
+
+                    if (!filtered.length) {
+                        frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Account</b> untuk company <b>") + company + __("</b> di kelompok barang <b>") + item_group + "</b>.", indicator: "orange" });
+                        return;
+                    }
+
+                    const valid_accounts = [...new Set(filtered.map((a) => a.account).filter(Boolean))];
+                    if (!valid_accounts.length) {
+                        frappe.msgprint({ title: __("Perhatian"), message: __("Tidak ada <b>Account</b> yang dikonfigurasi di kelompok barang <b>") + item_group + "</b>.", indicator: "orange" });
+                        return;
+                    }
+
+                    _row_account_filters[cdn] = {
+                        filters: { name: ["in", valid_accounts], is_group: 0 },
+                    };
+                    frappe.model.set_value(cdt, cdn, "account", valid_accounts[0]);
+                    frappe.show_alert({ message: __("Account diisi dari kelompok barang <b>") + item_group + "</b>.", indicator: "green" });
+                }
+            });
+        }
+    });
 }
 
 
@@ -237,7 +302,7 @@ function resolve_account_filter(frm, cdt, cdn) {
 			apply_account_filter_from_station(frm, cdt, cdn);
 		}
 	} else if (sub_unit == "TRAKSI") {
-		apply_account_filter_by_prefix(frm, cdt, cdn, "41120");
+		apply_account_filter_from_traksi_settings(frm, cdt, cdn);
 	} else if (sub_unit == "KANTOR") {
 		apply_account_filter_by_prefix(frm, cdt, cdn, "71");
 	} else {

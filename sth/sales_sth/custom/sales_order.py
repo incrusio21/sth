@@ -81,6 +81,8 @@ def make_delivery_order(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		target.mulai_tanggal_pengiriman = source.delivery_date
+		target.akhir_tanggal_pengiriman = source.end_delivery_date
 		# target.run_method("calculate_taxes_and_totals")
 
 	def get_do_qty_map(sales_order_name):
@@ -142,3 +144,38 @@ def make_delivery_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+@frappe.whitelist()
+def update_per_delivery_ordered(sales_order_name):
+	so_items = frappe.db.sql("""
+		SELECT name, qty
+		FROM `tabSales Order Item`
+		WHERE parent = %s
+	""", sales_order_name, as_dict=True)
+
+	total_so_qty = sum(item.qty for item in so_items)
+	if not total_so_qty:
+		return
+
+	so_detail_names = [item.name for item in so_items]
+	total_do_qty = frappe.db.sql("""
+		SELECT COALESCE(SUM(doi.qty), 0)
+		FROM `tabDelivery Order Item` doi
+		INNER JOIN `tabDelivery Order` do ON do.name = doi.parent
+		WHERE doi.so_detail IN %s
+		AND do.docstatus = 1
+	""", [so_detail_names])[0][0] or 0
+
+	per_delivery_ordered = min((total_do_qty / total_so_qty) * 100, 100)
+	frappe.db.set_value("Sales Order", sales_order_name, "per_delivery_ordered", per_delivery_ordered)
+
+
+def update_per_delivery_ordered_on_submit_cancel(doc, method):
+	sales_orders = list(set(
+		item.against_sales_order
+		for item in doc.items
+		if item.against_sales_order
+	))
+	for so_name in sales_orders:
+		update_per_delivery_ordered(so_name)

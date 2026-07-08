@@ -99,6 +99,7 @@ function calculate_sisa(frm) {
 
 	frm.set_value('sisa_dpp', sisa_dpp < 0 ? 0 : sisa_dpp);
 	frm.set_value('sisa_ppn', sisa_ppn < 0 ? 0 : sisa_ppn);
+	frm.set_value('grandtotal', frm.doc.sisa_dpp+frm.doc.sisa_ppn);
 }
 
 // ── Cek sisa DP, kalau sudah habis tampilkan dialog bulan ──────────────
@@ -408,7 +409,7 @@ async function make_payment_entry(frm) {
 		if (!frm.doc.unit) {
 			frappe.throw(__("Field Unit kosong, tidak bisa mengambil akun bank."));
 		}
-
+		
 		const unit_doc     = await frappe.db.get_doc("Unit", frm.doc.unit);
 		const bank_account = unit_doc.bank_account;
 		if (!bank_account) {

@@ -25,6 +25,8 @@ class NotaPiutang(Document):
 	def validate(self):
 		self.validate_duplikat()
 
+		self.grandtotal = self.sisa_dpp + self.sisa_ppn
+
 	def validate_duplikat(self):
 		if not self.tipe or not self.no_kontrak:
 			return

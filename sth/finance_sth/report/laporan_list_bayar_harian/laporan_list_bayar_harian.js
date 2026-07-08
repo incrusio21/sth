@@ -8,7 +8,7 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 
-		if (column.fieldname === "submit_button") {
+		if (column.fieldname === "submit_button" && data.submit_button) {
 			return `
 					<button 
 						class="btn btn-primary btn-xs submit-btn"
@@ -91,6 +91,62 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 							reference_date: values.reference_date
 						},
 						callback: function () {
+							frappe.show_alert({
+								message: __("Berhasil submit {0} Payment Entry", [selected_names.length]),
+								indicator: "green"
+							});
+
+							frappe.query_report.refresh();
+						}
+					});
+				},
+				"Input Pembayaran",
+				"Submit"
+			);
+		});
+
+		report.page.add_inner_button(__("Submit Selected"), function () {
+			let selected_names = [];
+
+			$(".payment-row:checked").each(function () {
+				selected_names.push($(this).data("name"));
+			});
+
+			if (!selected_names.length) {
+				frappe.msgprint("Pilih data terlebih dahulu");
+				return;
+			}
+
+			frappe.prompt(
+				[
+					{
+						fieldname: "reference_no",
+						label: "No Referensi",
+						fieldtype: "Data",
+						reqd: 1
+					},
+					{
+						fieldname: "reference_date",
+						label: "Tanggal Bayar",
+						fieldtype: "Date",
+						reqd: 1,
+						default: frappe.datetime.get_today()
+					}
+				],
+				function (values) {
+					frappe.call({
+						method: "sth.api.submit_payment_entry",
+						args: {
+							docname: selected_names,
+							reference_no: values.reference_no,
+							reference_date: values.reference_date
+						},
+						callback: function () {
+							frappe.show_alert({
+								message: __("Berhasil submit {0} Payment Entry", [selected_names.length]),
+								indicator: "green"
+							});
+
 							frappe.query_report.refresh();
 						}
 					});

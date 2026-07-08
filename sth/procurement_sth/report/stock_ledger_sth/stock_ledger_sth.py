@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, flt, get_datetime
+from pypika import Table
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -261,10 +262,29 @@ def get_columns(filters):
 				"width": 150,
 			},
 			{
-				"label": _("Item Group"),
-				"fieldname": "item_group",
+				"label": _("Kode Kelompok Barang"),
+				"fieldname": "kode_kelompok_barang",
 				"fieldtype": "Link",
 				"options": "Item Group",
+				"width": 100,
+			},
+			{
+				"label": _("Kelompok Barang"),
+				"fieldname": "kelompok_barang",
+				"fieldtype": "Data",
+				"width": 100,
+			},
+			{
+				"label": _("Kode Sub Kelompok Barang"),
+				"fieldname": "kode_sub_kelompok_barang",
+				"fieldtype": "Link",
+				"options": "Item Group",
+				"width": 100,
+			},
+			{
+				"label": _("Sub Kelompok Barang"),
+				"fieldname": "sub_kelompok_barang",
+				"fieldtype": "Data",
 				"width": 100,
 			},
 			{
@@ -483,9 +503,30 @@ def get_item_details(items, sl_entries, include_uom):
 		return item_details
 
 	item = frappe.qb.DocType("Item")
+	ig_kelompok = Table("tabItem Group").as_("ig_kelompok")
+	ig_sub_kelompok = Table("tabItem Group").as_("ig_sub_kelompok")
+
 	query = (
 		frappe.qb.from_(item)
-		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.left_join(ig_kelompok)
+		.on(ig_kelompok.name == item.kelompok_barang)
+		.left_join(ig_sub_kelompok)
+		.on(ig_sub_kelompok.name == item.item_group)
+		.select(
+    	item.name, 
+     	item.item_name, 
+      item.description,
+      
+			item.kode_kelompok_barang,
+			ig_kelompok.item_group_name.as_("kelompok_barang"),
+
+			item.kode_sub_kelompok_barang,
+			ig_sub_kelompok.item_group_name.as_("sub_kelompok_barang"),
+      
+      item.item_group, 
+      item.brand, 
+      item.stock_uom
+    )
 		.where(item.name.isin(items))
 	)
 

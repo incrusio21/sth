@@ -9,9 +9,9 @@
   "header_section",
   "naming_series",
   "tanggal",
+  "tanggal_proses",
   "jam",
   "column_break_kfwz",
-  "status",
   "company",
   "unit",
   "section_break_hckz",
@@ -40,7 +40,7 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
+   "label": "Tanggal Transaksi",
    "read_only": 1
   },
   {
@@ -67,13 +67,6 @@
   {
    "fieldname": "column_break_kfwz",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
   },
   {
    "fieldname": "section_break_hckz",
@@ -112,13 +105,20 @@
   {
    "fieldname": "column_break_uisu",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_proses",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Proses"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 11:29:00.985652",
+ "modified": "2026-07-03 13:19:35.627226",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO di BST-1",

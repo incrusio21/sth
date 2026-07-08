@@ -1,20 +1,22 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:biller_code",
+ "autoname": "field:biller_name",
  "creation": "2026-06-02 16:37:43.648585",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
   "biller_code",
-  "biller_name"
+  "biller_name",
+  "open_channel_mcm"
  ],
  "fields": [
   {
    "fieldname": "biller_code",
    "fieldtype": "Data",
-   "label": "Biller Code",
-   "unique": 1
+   "label": "Biller Code"
   },
   {
    "fieldname": "biller_name",
@@ -24,13 +26,29 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Biller Name"
+   "label": "Biller Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "open_channel_mcm",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Open Channel MCM"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-02 16:52:46.771116",
+ "modified": "2026-06-10 14:37:18.128185",
  "modified_by": "Administrator",
  "module": "Bank Payment",
  "name": "Biller Code",
@@ -53,6 +71,5 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "title_field": "biller_name"
+ "states": []
 }

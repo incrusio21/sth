@@ -6,6 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
   "section_break_njhz",
   "tanggal",
   "tipe",
@@ -17,6 +20,7 @@
   "company",
   "unit",
   "keterangan",
+  "trans_no",
   "amended_from",
   "informasi_data_section",
   "tanggal_panen",
@@ -85,9 +89,11 @@
   "f_rd",
   "section_break_bwaa",
   "brondolan",
+  "brd_bsk",
   "restan",
   "column_break_upjg",
   "p_brd",
+  "brd_b_perc",
   "p_rst",
   "column_break_aqio",
   "std_brd",
@@ -126,6 +132,7 @@
   "tm_e",
   "tbs",
   "brd_e",
+  "brd_e_b",
   "column_break_wimj",
   "buah_mengkal_kg",
   "kg_tp",
@@ -134,6 +141,7 @@
   "buah_restan_kg",
   "kg_mk",
   "kg_brd",
+  "kg_brd_b",
   "column_break_wbnt",
   "f_bm",
   "f_tpe",
@@ -142,6 +150,7 @@
   "f_br",
   "f_tbsk",
   "f_brde",
+  "f_brde_b",
   "section_break_rmuu",
   "column_break_ogaz",
   "column_break_mbgz",
@@ -172,6 +181,7 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Unit",
    "options": "Unit",
    "read_only": 1
@@ -664,7 +674,7 @@
    "default": "0",
    "fieldname": "brd_e",
    "fieldtype": "Float",
-   "label": "Berondolan"
+   "label": "Brondolan"
   },
   {
    "default": "0",
@@ -719,7 +729,7 @@
    "fieldname": "kg_brd",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Berondolan Kg",
+   "label": "Brondolan Kg",
    "read_only": 1
   },
   {
@@ -1120,13 +1130,75 @@
    "fieldtype": "Float",
    "label": "Isi Komidel",
    "precision": "2"
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "warning message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "brd_e_b",
+   "fieldtype": "Float",
+   "label": "Brondolan Busuk"
+  },
+  {
+   "default": "0",
+   "fieldname": "kg_brd_b",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Brondolan Busuk Kg",
+   "read_only": 1
+  },
+  {
+   "fieldname": "f_brde_b",
+   "fieldtype": "Attach Image",
+   "in_preview": 1,
+   "label": "Foto Brondolan Busuk"
+  },
+  {
+   "default": "0",
+   "description": "Dalam Satuan KG",
+   "fieldname": "brd_bsk",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Brondolan Busuk"
+  },
+  {
+   "default": "0",
+   "description": "Persentase",
+   "fieldname": "brd_b_perc",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Brondolan Busuk",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-23 23:37:08.200027",
+ "modified": "2026-07-01 11:17:58.946176",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",

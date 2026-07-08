@@ -26,16 +26,19 @@
    "options": "Mill Master"
   },
   {
+   "fetch_from": "pabrik.company",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 13:37:57.874456",
+ "modified": "2026-06-08 08:54:04.325046",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Master Kompartemen atau Bunker",

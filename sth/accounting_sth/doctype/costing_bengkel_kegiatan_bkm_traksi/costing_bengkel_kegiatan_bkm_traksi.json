@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-06 11:32:13.379178",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bkm_traksi",
+  "no_coa",
+  "debit",
+  "credit",
+  "keterangan",
+  "kode_vra"
+ ],
+ "fields": [
+  {
+   "fieldname": "no_coa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No COA",
+   "options": "Account"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "kode_vra",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kode VRA"
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Debit"
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Credit"
+  },
+  {
+   "fieldname": "bkm_traksi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BKM Traksi",
+   "options": "Buku Kerja Mandor Traksi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-06 11:41:54.816802",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Bengkel Kegiatan BKM Traksi",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

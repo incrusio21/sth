@@ -13,16 +13,26 @@ frappe.ui.form.on('Driver', {
         });
     },
     transporter: function (frm, cdt, cdn) {
-		// // this assumes that supplier's address has same title as supplier's name
-		// frappe.db
-		// 	.get_doc("Address", null, { address_title: frm.doc.transporter })
-		// 	.then((r) => {
-		// 		frappe.model.set_value(cdt, cdn, "address", r.name);
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log(err);
-		// 	});
-	},
+        // // this assumes that supplier's address has same title as supplier's name
+        // frappe.db
+        // 	.get_doc("Address", null, { address_title: frm.doc.transporter })
+        // 	.then((r) => {
+        // 		frappe.model.set_value(cdt, cdn, "address", r.name);
+        // 	})
+        // 	.catch((err) => {
+        // 		console.log(err);
+        // 	});
+    },
+    unit(frm) {
+        frm.set_query("supplier", () => {
+            return {
+                filters: {
+                    unit: frm.doc.unit,
+                    is_supplier_tbs: 1
+                }
+            };
+        });
+    }
 });
 
 function render_qr(frm) {

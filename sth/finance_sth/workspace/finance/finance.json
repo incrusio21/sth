@@ -175,36 +175,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Posisi Saldo Bank",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Posisi Saldo",
-   "link_count": 0,
-   "link_to": "POSISI SALDO",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Posisi Saldo",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Summary Posisi Saldo",
-   "link_count": 0,
-   "link_to": "Summary Posisi Saldo",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Payment",
    "link_count": 1,
    "link_type": "DocType",
@@ -220,55 +190,6 @@
    "link_type": "Report",
    "onboard": 0,
    "report_ref_doctype": "Payment Entry",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "PDO",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Plafon PDO",
-   "link_count": 0,
-   "link_to": "Plafon PDO",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jenis PDO",
-   "link_count": 0,
-   "link_to": "Expense Claim Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Permintaan Dana Operasional",
-   "link_count": 0,
-   "link_to": "Permintaan Dana Operasional",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Laporan Permintaan Dana Operasional",
-   "link_count": 0,
-   "link_to": "Laporan Permintaan Dana Operasional",
-   "link_type": "Report",
-   "onboard": 0,
    "type": "Link"
   },
   {
@@ -368,9 +289,67 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Posisi Saldo Bank",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Posisi Saldo",
+   "link_count": 0,
+   "link_to": "Posisi Saldo",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Summary Posisi Saldo",
+   "link_count": 0,
+   "link_to": "Summary Posisi Saldo",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "PDO",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Permintaan Dana Operasional",
+   "link_count": 0,
+   "link_to": "Permintaan Dana Operasional",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Laporan Permintaan Dana Operasional",
+   "link_count": 0,
+   "link_to": "Laporan Permintaan Dana Operasional",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-05-22 10:17:00.565287",
+ "modified": "2026-07-03 11:43:38.072552",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",
@@ -380,7 +359,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 31.0,
+ "sequence_id": 45.0,
  "shortcuts": [],
  "title": "Finance"
 }

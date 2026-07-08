@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "creation": "2026-06-12 00:21:54.569315",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bapp",
+  "supplier",
+  "supplier_name",
+  "proposal",
+  "project",
+  "grand_total",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bapp",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BAPP",
+   "options": "BAPP",
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fetch_from": "bapp.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "proposal",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Proposal",
+   "options": "Proposal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Capitalization BAPP Item",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-12 00:21:54.569315",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Asset Capitalization BAPP Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

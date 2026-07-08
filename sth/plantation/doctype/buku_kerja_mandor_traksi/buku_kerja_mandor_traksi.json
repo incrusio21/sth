@@ -13,6 +13,8 @@
   "unit",
   "mandor",
   "designation",
+  "trans_no",
+  "rkh_no",
   "column_break_kkgv",
   "posting_date",
   "posting_time",
@@ -275,7 +277,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "kendaraan.jns_alt",
+   "fetch_from": "kendaraan.jenis",
    "fieldname": "jenis_alat",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -423,7 +425,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Premi Tranport Total",
+   "label": "Premi Transport Total",
    "read_only": 1
   },
   {
@@ -446,13 +448,27 @@
    "label": "Premi Transport Salary Component",
    "options": "Salary Component",
    "read_only": 1
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rkh_no",
+   "fieldtype": "Data",
+   "label": "RKH No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-17 14:07:04.378968",
+ "modified": "2026-06-17 09:45:41.090049",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

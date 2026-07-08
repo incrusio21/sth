@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 
 
 class DataPemindahanTransplantingBibit(Document):
@@ -60,3 +61,15 @@ class DataPemindahanTransplantingBibit(Document):
 	
 	def on_cancel(self):
 		self.recalculate_qty_data_penyemaian_bibit()
+
+
+@frappe.whitelist()
+def get_available_qty(data_penyemaian_bibit):
+
+    qty, transplanting_qty = frappe.db.get_value(
+        "Data Penyemaian Bibit",
+        data_penyemaian_bibit,
+        ["qty", "transplanting_qty"]
+    )
+
+    return flt(qty) - flt(transplanting_qty)

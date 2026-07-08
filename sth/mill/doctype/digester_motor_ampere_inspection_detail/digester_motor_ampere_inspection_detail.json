@@ -16,7 +16,8 @@
    "fieldname": "foto_upload",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Upload"
+   "label": "Foto Upload",
+   "reqd": 1
   },
   {
    "description": "Satuan Derajat Celcius",
@@ -31,7 +32,8 @@
    "fieldname": "upt",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Upload"
+   "label": "Foto Upload",
+   "reqd": 1
   },
   {
    "fieldname": "level_digester",
@@ -47,7 +49,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-24 14:08:41.365622",
+ "modified": "2026-06-05 14:15:00.471177",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Digester Motor Ampere Inspection Detail",

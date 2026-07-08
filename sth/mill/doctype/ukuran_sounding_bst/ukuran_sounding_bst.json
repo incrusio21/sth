@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:{nama_bst}/{pabrik}",
+ "autoname": "format:{nama_bst}-{pabrik}",
  "creation": "2026-03-11 10:05:09.584302",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -20,8 +20,7 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Nama BST",
-   "options": "Master BST",
-   "unique": 1
+   "options": "Master BST"
   },
   {
    "fieldname": "details",
@@ -56,7 +55,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-02 16:48:09.982810",
+ "modified": "2026-06-08 11:25:29.199814",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Sounding BST",

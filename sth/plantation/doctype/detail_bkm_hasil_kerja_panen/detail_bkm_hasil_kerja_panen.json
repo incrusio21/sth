@@ -15,9 +15,11 @@
   "quantity_section",
   "jumlah_janjang",
   "qty_brondolan",
+  "jumlah_output",
   "column_break_rlyc",
   "bjr",
   "qty",
+  "satuan",
   "rate_section",
   "rate",
   "brondolan",
@@ -25,8 +27,8 @@
   "denda",
   "column_break_kngi",
   "brondolan_amount",
-  "amount",
   "sub_total",
+  "amount",
   "jumlah_janjang_sesuai_kriteria",
   "jumlah_janjang_tidak_sesuai_kriteria",
   "denda_section",
@@ -50,6 +52,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -90,8 +93,10 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Amount",
    "read_only": 1
   },
@@ -244,6 +249,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "sub_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -297,13 +303,24 @@
    "fieldname": "jumlah_janjang_tidak_sesuai_kriteria",
    "fieldtype": "Float",
    "label": "Jumlah Janjang Tidak Sesuai Kriteria"
+  },
+  {
+   "fieldname": "jumlah_output",
+   "fieldtype": "Float",
+   "label": "Jumlah Output"
+  },
+  {
+   "fieldname": "satuan",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-20 01:21:40.996492",
+ "modified": "2026-06-12 14:10:07.162198",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Detail BKM Hasil Kerja Panen",

@@ -60,12 +60,18 @@ def get_columns():
 			"fieldtype": "Data",
 			"width": 130,
 		},
+		# {
+		# 	"fieldname": "submit_button",
+		# 	"label": _("ACTION"),
+		# 	"fieldtype": "Data",
+		# 	"width": 120,
+		# },
 		{
-			"fieldname": "submit_button",
-			"label": _("ACTION"),
-			"fieldtype": "Data",
-			"width": 120,
-		},
+			"label": "Select",
+			"fieldname": "select_row",
+			"fieldtype": "HTML",
+			"width": 60,
+		}
 	]
 
 
@@ -135,8 +141,14 @@ def get_data(filters=None):
 			"no_reff_mcm": pe.reference_no,
 			"nilai_tagihan": flt(pe.outstanding_amount),
 			"payment_schedule": pe.request_release_date,
-			"submit_button": pe.name,  # JS will render a button using this
+			"submit_button": pe.name,
 		}
+
+		row["select_row"] = f"""
+			<input type="checkbox"
+					class="payment-row"
+					data-name="{pe.name}">
+		"""
 
 		if pe.get("payment_type") == "Internal Transfer":
 			row["jenis_transaksi"] = "PINDAH DANA"

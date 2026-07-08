@@ -5,7 +5,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "premi"
+  "premi_tab",
+  "premi",
+  "multiple_check_in_tab",
+  "multiple_check_in_attendance_settings"
  ],
  "fields": [
   {
@@ -13,13 +16,29 @@
    "fieldtype": "Table",
    "label": "Premi",
    "options": "Attendace Premi Settings"
+  },
+  {
+   "fieldname": "multiple_check_in_tab",
+   "fieldtype": "Tab Break",
+   "label": "Multiple Check In"
+  },
+  {
+   "fieldname": "multiple_check_in_attendance_settings",
+   "fieldtype": "Table",
+   "label": "Multiple Check In Attendance Settings",
+   "options": "Multiple Check In Attendance Settings"
+  },
+  {
+   "fieldname": "premi_tab",
+   "fieldtype": "Tab Break",
+   "label": "Premi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-24 12:55:05.138381",
+ "modified": "2026-06-10 15:27:50.877974",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Attendance Settings",

@@ -166,3 +166,15 @@ def get_outstanding_of_references_with_proposal_payment_term(references=None):
 	return {(row.parenttype, row.parent, row.payment_term): row.outstanding for row in response}
 
 payment_entry.get_references_outstanding_amount = get_references_outstanding_amount
+
+import erpnext.accounts.general_ledger as general_ledger
+from sth.overrides.general_ledger import validate_accounting_period
+
+general_ledger.validate_accounting_period = validate_accounting_period
+
+import erpnext.accounts.doctype.accounting_period.accounting_period as accounting_period
+from sth.overrides.accounting_period import validate_accounting_period_on_doc_save
+
+accounting_period.validate_accounting_period_on_doc_save = validate_accounting_period_on_doc_save
+
+

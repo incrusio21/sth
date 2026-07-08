@@ -19,9 +19,9 @@
   "blok",
   "ket",
   "column_break_vcrf",
+  "batch",
   "data_penyemaian_bibit",
   "item_code",
-  "batch",
   "available_qty",
   "qty"
  ],
@@ -44,18 +44,18 @@
    "fetch_from": "blok.divisi",
    "fieldname": "divisi",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Divisi",
-   "options": "Divisi",
-   "reqd": 1
+   "options": "Divisi"
   },
   {
    "fieldname": "blok",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Blok",
-   "options": "Blok",
-   "reqd": 1
+   "options": "Blok"
   },
   {
    "fieldname": "column_break_onba",
@@ -73,13 +73,11 @@
    "reqd": 1
   },
   {
-   "fetch_from": "data_penyemaian_bibit.batch",
    "fieldname": "batch",
    "fieldtype": "Link",
    "label": "Batch",
    "no_copy": 1,
-   "options": "Batch",
-   "read_only": 1,
+   "options": "Batch Bibit",
    "reqd": 1
   },
   {
@@ -134,6 +132,7 @@
    "label": "Data Penyemaian Bibit",
    "no_copy": 1,
    "options": "Data Penyemaian Bibit",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
@@ -162,7 +161,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-25 10:02:35.210093",
+ "modified": "2026-06-22 13:29:50.960971",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Pemindahan Transplanting Bibit",

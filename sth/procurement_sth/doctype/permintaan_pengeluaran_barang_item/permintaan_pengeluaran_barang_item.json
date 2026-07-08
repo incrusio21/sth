@@ -14,13 +14,13 @@
   "stasiun",
   "column_break_lfrt",
   "blok",
-  "kendaraan",
-  "project",
-  "km",
   "kegiatan",
   "nama_kegiatan",
-  "jumlah_keluar",
-  "account"
+  "kendaraan",
+  "km",
+  "project",
+  "account",
+  "jumlah_keluar"
  ],
  "fields": [
   {
@@ -86,7 +86,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Blok",
-   "options": "Blok"
+   "options": "Blok",
+   "read_only_depends_on": "eval:[\"TRAKSI\", \"MILL\"].includes(doc.sub_unit)"
   },
   {
    "columns": 1,
@@ -94,7 +95,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Kegiatan",
-   "options": "Kegiatan"
+   "options": "Kegiatan",
+   "read_only_depends_on": "eval:[\"TRAKSI\", \"MILL\"].includes(doc.sub_unit)"
   },
   {
    "default": "0",
@@ -133,7 +135,9 @@
    "fieldname": "stasiun",
    "fieldtype": "Link",
    "label": "Stasiun",
-   "options": "Station Master"
+   "mandatory_depends_on": "eval:[\"MILL\"].includes(doc.sub_unit)",
+   "options": "Station Master",
+   "read_only_depends_on": "eval:![\"MILL\"].includes(doc.sub_unit)"
   },
   {
    "columns": 1,
@@ -141,14 +145,15 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Account",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-04 00:31:12.342674",
+ "modified": "2026-07-08 11:34:31.037920",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

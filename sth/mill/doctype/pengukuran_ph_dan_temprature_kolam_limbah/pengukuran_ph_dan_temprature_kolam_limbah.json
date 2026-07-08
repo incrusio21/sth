@@ -108,7 +108,8 @@
    "fieldname": "upload_foto_klm_pdgn",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "kolam_pengasaman_tab",
@@ -131,7 +132,8 @@
    "fieldname": "upload_foto_klm_pgsm",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "kolam_anaerobik_tab",
@@ -154,7 +156,8 @@
    "fieldname": "upload_foto_klm_anaerobik",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "kolam_aerobik_tab",
@@ -177,7 +180,8 @@
    "fieldname": "upload_foto_klm_aerobik",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "kolam_pembuangan_akhir_tab",
@@ -200,7 +204,8 @@
    "fieldname": "upload_foto_klm_pa",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.unit",
@@ -215,7 +220,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:47:11.930149",
+ "modified": "2026-06-05 13:22:30.820251",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pengukuran PH dan Temprature kolam limbah",

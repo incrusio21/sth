@@ -18,12 +18,13 @@ def get_purchase_invoice(dt, dn, party_amount=None, bank_account=None, bank_amou
 
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.supplier = doc.supplier
-	pi.custom_reference_doctype = dt
-	pi.custom_reference_name = dn
+	pi.document_type = dt
+	pi.document_no = dn
+
 
 	for costing in doc.custom_costing:
 		expense_claim_type = frappe.get_doc("Expense Claim Type", costing.expense_type)
-		item = frappe.get_doc("Item", expense_claim_type.custom_item)
+		item = frappe.get_doc("Item", "20102005")
 
 		pi.append(
 			"items",

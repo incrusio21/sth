@@ -31,6 +31,8 @@
   "retensi_paid",
   "retensi",
   "amended_from",
+  "kontraktor_yang_dibayar_section",
+  "kontraktor_proposal",
   "section_break_fghk",
   "supplier_address_active",
   "column_break_bqcj",
@@ -1293,6 +1295,7 @@
   {
    "fieldname": "proposal_type",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Proposal Type",
    "options": "Proposal Type",
    "reqd": 1
@@ -1464,13 +1467,24 @@
   {
    "fieldname": "column_break_murt",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kontraktor_yang_dibayar_section",
+   "fieldtype": "Section Break",
+   "label": "Kontraktor yang Dibayar"
+  },
+  {
+   "fieldname": "kontraktor_proposal",
+   "fieldtype": "Table",
+   "label": "Kontraktor Proposal",
+   "options": "Kontraktor Proposal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-29 12:34:46.783421",
+ "modified": "2026-06-09 23:12:10.986708",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",

@@ -16,7 +16,7 @@
   "company",
   "voucher_no",
   "select_item",
-  "purchase_receipt_item",
+  "pengeluaran_barang_item",
   "item_code",
   "batch",
   "amount",
@@ -26,9 +26,14 @@
   "qty_dobletone",
   "qty_after_afkir",
   "column_break_ddbb",
-  "qty",
   "transplanting_qty",
   "planting_qty",
+  "column_break_mcus",
+  "qty",
+  "journal_settings_section",
+  "debit_account",
+  "column_break_rhhv",
+  "credit_account",
   "reference_section",
   "stock_entry",
   "connection_tab"
@@ -62,17 +67,8 @@
   },
   {
    "fieldname": "batch",
-   "fieldtype": "Link",
-   "label": "Batch",
-   "options": "Batch",
-   "read_only": 1
-  },
-  {
-   "fieldname": "voucher_no",
-   "fieldtype": "Link",
-   "label": "Purchase Receipt",
-   "options": "Purchase Receipt",
-   "reqd": 1
+   "fieldtype": "Data",
+   "label": "Batch"
   },
   {
    "fieldname": "company",
@@ -82,6 +78,7 @@
    "reqd": 1
   },
   {
+   "bold": 1,
    "description": "(Qty Planting  +  Qty Dobletone - Qty After Afkir)",
    "fieldname": "qty",
    "fieldtype": "Float",
@@ -113,7 +110,7 @@
   {
    "fieldname": "detail_qty_section",
    "fieldtype": "Section Break",
-   "label": "Detail Qty"
+   "label": "Detail Informasi Qty"
   },
   {
    "fieldname": "qty_planting",
@@ -198,13 +195,6 @@
    "label": "Select Item"
   },
   {
-   "fieldname": "purchase_receipt_item",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Purchase Receipt Item",
-   "read_only": 1
-  },
-  {
    "fieldname": "connection_tab",
    "fieldtype": "Tab Break",
    "label": "Connection",
@@ -216,6 +206,44 @@
    "label": "Series",
    "options": "DPB-",
    "reqd": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Link",
+   "label": "Pengeluaran Barang",
+   "options": "Pengeluaran Barang"
+  },
+  {
+   "fieldname": "pengeluaran_barang_item",
+   "fieldtype": "Data",
+   "label": "Pengeluaran Barang Item",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Journal Settings"
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_rhhv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_mcus",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -238,7 +266,7 @@
    "link_fieldname": "data_penyemaian_bibit"
   }
  ],
- "modified": "2025-11-25 10:03:13.323109",
+ "modified": "2026-06-22 13:06:37.500755",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penyemaian Bibit",

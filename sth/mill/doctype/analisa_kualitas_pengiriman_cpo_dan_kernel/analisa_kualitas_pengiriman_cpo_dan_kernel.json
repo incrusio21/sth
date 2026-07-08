@@ -6,6 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
   "header_section",
   "naming_series",
   "tanggal",
@@ -27,8 +30,10 @@
   "input_kualitas_broken",
   "column_break_yseb",
   "input_kualitas_moisture",
+  "input_kualitas_kk_",
   "column_break_juvd",
   "input_kualitas_dirt",
+  "input_kualitas_ka_",
   "amended_from"
  ],
  "fields": [
@@ -179,7 +184,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.tipe == \"KERNEL\"",
    "fieldname": "input_kualitas_broken",
    "fieldtype": "Percent",
    "label": "Input Kualitas Broken % "
@@ -192,22 +196,59 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.tipe == \"CPO\"",
    "fieldname": "input_kualitas_moisture",
    "fieldtype": "Percent",
+   "in_preview": 1,
    "label": "Input Kualitas Moisture %"
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.tipe == \"CPO\"",
    "fieldname": "input_kualitas_dirt",
    "fieldtype": "Percent",
    "label": "Input Kualitas Dirt %"
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe == \"KERNEL\"",
+   "fieldname": "input_kualitas_ka_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Input Kualitas KA %"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe == \"KERNEL\"",
+   "fieldname": "input_kualitas_kk_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Input Kualitas KK %"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-27 14:18:28.927740",
+ "modified": "2026-07-08 09:02:53.073639",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas Pengiriman CPO dan KERNEL",

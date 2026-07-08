@@ -89,6 +89,77 @@ class Asset(Asset):
 
 			# if create_vra_progress and not self.operator:
 			# 	frappe.throw("Asset Category membuat VRA Progress. Operator wajib diisi")
+
+	def on_submit(self):
+		super().on_submit()
+		self.make_gl_entry()
+
+	def make_gl_entry(self):
+		if not self.asset_category:
+			return
+
+		asset_category_doc = frappe.get_doc("Asset Category", self.asset_category)
+
+		fixed_asset_account = None
+		cwip_account = None
+
+		for row in asset_category_doc.accounts:
+			if row.company_name == self.company:
+				fixed_asset_account = row.fixed_asset_account
+				cwip_account = row.capital_work_in_progress_account
+				break
+
+		if not fixed_asset_account:
+			frappe.throw(f"Fixed Asset Account tidak ditemukan untuk company {self.company} di Asset Category {self.asset_category}")
+
+		if not cwip_account:
+			frappe.throw(f"Capital Work In Progress Account tidak ditemukan untuk company {self.company} di Asset Category {self.asset_category}")
+
+		amount = self.gross_purchase_amount or self.total_asset_cost
+
+		gl_entries = [
+			frappe._dict(
+				doctype="GL Entry",
+				posting_date=self.purchase_date,
+				account=fixed_asset_account,
+				debit=amount,
+				credit=0,
+				debit_in_account_currency=amount,
+				credit_in_account_currency=0,
+				against=cwip_account,
+				voucher_type=self.doctype,
+				voucher_no=self.name,
+				company=self.company,
+				cost_center=self.cost_center,
+				remarks=f"Asset capitalization - {self.asset_name}",
+			),
+			frappe._dict(
+				doctype="GL Entry",
+				posting_date=self.purchase_date,
+				account=cwip_account,
+				debit=0,
+				credit=amount,
+				debit_in_account_currency=0,
+				credit_in_account_currency=amount,
+				against=fixed_asset_account,
+				voucher_type=self.doctype,
+				voucher_no=self.name,
+				company=self.company,
+				cost_center=self.cost_center,
+				remarks=f"Asset capitalization - {self.asset_name}",
+			),
+		]
+
+		from erpnext.accounts.general_ledger import make_gl_entries
+		make_gl_entries(gl_entries)
+
+	def on_cancel(self):
+		super().on_cancel()
+		self.make_reverse_gl_entry()
+
+	def make_reverse_gl_entry(self):
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 				
 	def make_asset_movement(self):
 		reference_doctype = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
@@ -239,10 +310,10 @@ def make_vra_progress_from_asset(asset):
 		"jns_alt": jenis_alat,
 		"kode_item": asset.item_code,
 		"nama_item": asset.item_name,
-		"kode_unit": asset.unit,
+		"unit": asset.unit,
 		"uom": uom,
 		"asset": asset.name,
-		"kode_divisi": divisi,
+		"divis": divisi,
 		"operator": asset.operator,
 		"kmhm_akhir": 0,
 		"api_status": "Aktif"

@@ -36,10 +36,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "TBS",
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Item Code",
    "options": "Item"
   },
@@ -167,7 +165,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-15 21:49:47.827361",
+ "modified": "2026-06-25 10:03:11.603165",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Harga Beli TBS",

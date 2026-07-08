@@ -8,10 +8,12 @@
   "section_break_egur",
   "tanggal",
   "jam",
+  "column_break_llli",
   "company",
   "unit",
-  "kalibrasi_timbangan_dinas_metrologi_table",
-  "amended_from"
+  "amended_from",
+  "section_break_izkd",
+  "kalibrasi_timbangan_dinas_metrologi_table"
  ],
  "fields": [
   {
@@ -63,13 +65,21 @@
    "fieldtype": "Table",
    "label": "Timbangan",
    "options": "Kalibrasi Timbangan Dinas Metrologi Table"
+  },
+  {
+   "fieldname": "column_break_llli",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_izkd",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 14:29:30.350147",
+ "modified": "2026-06-05 14:10:45.282343",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kalibrasi Timbangan Dinas Metrologi",

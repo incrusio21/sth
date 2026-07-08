@@ -3,7 +3,7 @@
  "allow_rename": 1,
  "autoname": "format:{YYYY}{MM}{DD}/{unit}/{###}",
  "creation": "2025-12-09 11:42:17.877354",
- "default_view": "Report",
+ "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -16,6 +16,7 @@
   "jarak_ring",
   "jarak",
   "column_break_kiin",
+  "item_code",
   "harga",
   "beban_pph_22",
   "percent",
@@ -29,17 +30,19 @@
   "amended_from",
   "section_break_eofa",
   "total_bruto",
-  "total_terima",
-  "total_pembayaran_ke_supplier",
-  "column_break_imqg",
+  "subtotal",
+  "column_break_scmq",
   "total_tarra",
   "total_bonus",
-  "column_break_ybsa",
+  "column_break_imqg",
   "total_netto",
   "total_seluruhnya",
-  "column_break_owad",
+  "column_break_ybsa",
   "total_potkg",
-  "total_pajak_pph_22"
+  "total_pajak_pph_22",
+  "column_break_owad",
+  "total_terima",
+  "total_pembayaran_ke_supplier"
  ],
  "fields": [
   {
@@ -206,17 +209,19 @@
   {
    "fieldname": "total_potkg",
    "fieldtype": "Float",
-   "label": "Total POT(KG)",
+   "label": "Total POT(Kg)",
    "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "total_terima",
    "fieldtype": "Float",
-   "label": "Total Terima",
+   "label": "Total Terima (Kg)",
    "precision": "0",
    "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "total_pembayaran_ke_supplier",
    "fieldtype": "Currency",
    "label": "Total Pembayaran Ke Supplier",
@@ -244,13 +249,29 @@
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "label": "Subtotal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_scmq",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-04 11:31:50.984584",
+ "modified": "2026-06-29 16:18:33.598093",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Pengakuan Pembelian TBS",

@@ -19,6 +19,7 @@
   "pabrik_type",
   "tujuan_pks",
   "blok",
+  "trans_no",
   "amended_from",
   "section_break_soyq",
   "tipe_kendaraan",
@@ -27,6 +28,7 @@
   "driver_eksternal",
   "column_break_lcgj",
   "no_polisi",
+  "driver_code",
   "section_break_xfoy",
   "column_break_dwtw",
   "in_time",
@@ -340,13 +342,27 @@
   {
    "fieldname": "column_break_lcgj",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "driver_code",
+   "fieldtype": "Link",
+   "label": "Sopir/Operator",
+   "options": "Employee",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-28 10:27:18.955232",
+ "modified": "2026-06-12 14:46:14.394365",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

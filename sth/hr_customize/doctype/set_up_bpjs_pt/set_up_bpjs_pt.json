@@ -7,12 +7,15 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
   "kode",
   "pt",
   "unit",
+  "column_break_cqps",
   "jenis_bpjs",
   "npp__no_bu",
   "golongan",
+  "section_break_eptw",
   "set_up_bpjs_pt_table"
  ],
  "fields": [
@@ -41,6 +44,7 @@
    "options": "\nBPJS KES\nBPJS TK"
   },
   {
+   "fetch_from": "pt.npp",
    "fieldname": "npp__no_bu",
    "fieldtype": "Data",
    "label": "NPP / No BU"
@@ -56,12 +60,26 @@
    "fieldtype": "Table",
    "label": "Set Up BPJS PT Table",
    "options": "Set Up BPJS PT Table"
+  },
+  {
+   "fieldname": "column_break_cqps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_eptw",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 10:54:26.645412",
+ "modified": "2026-06-11 11:01:07.996981",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Set Up BPJS PT",

@@ -1,3 +1,123 @@
+// Copyright (c) 2025, DAS and contributors
+// For license information, please see license.txt
+
+
+erpnext.utils.update_progress_received = function (opts) {
+	const frm = opts.frm;
+	const child_meta = frappe.get_meta(opts.child_doctype);
+	const benchmark_fieldname = frm.doc.__onload.progress_benchmark || "item_code"
+	const benchmark_field = child_meta.fields.find((f) => f.fieldname == benchmark_fieldname)
+	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
+
+	this.data = frm.doc[opts.child_docname].map((d) => {
+		return {
+			docname: d.name,
+			name: d.name,
+			[benchmark_fieldname]: d[benchmark_fieldname],
+			qty: d.qty,
+			uom: d.uom,
+			rate: d.rate,
+			progress_received: d.progress_received
+		};
+	});
+
+	const fields = [
+		{
+			fieldtype: "Data",
+			fieldname: "docname",
+			read_only: 1,
+			hidden: 1,
+		},
+		{
+			fieldtype: benchmark_field.fieldtype,
+			fieldname: benchmark_field.fieldname,
+			options: benchmark_field.options,
+			in_list_view: 1,
+			read_only: 1,
+			disabled: 0,
+			columns: 5,
+			label: __(benchmark_field.label)
+		},
+		{
+			fieldtype: "Float",
+			fieldname: "qty",
+			in_list_view: 1,
+			read_only: 1,
+			columns: 1,
+			label: __("Qty"),
+		},
+		{
+			fieldtype: "Link",
+			fieldname: "uom",
+			options: "UOM",
+			in_list_view: 1,
+			read_only: 1,
+			columns: 1,
+			label: __("UOM"),
+		},
+		{
+			fieldtype: "Currency",
+			fieldname: "rate",
+			options: "currency",
+			default: 0,
+			read_only: 1,
+			in_list_view: 1,
+			label: __("Rate"),
+			precision: get_precision("rate"),
+		},
+		{
+			fieldtype: "Float",
+			fieldname: "progress_received",
+			default: 0,
+			read_only: 0,
+			in_list_view: 1,
+			columns: 1,
+			label: __("Progress"),
+			precision: get_precision("progress_received"),
+		},
+	];
+
+	let dialog = new frappe.ui.Dialog({
+		title: __("Update Progress"),
+		size: "extra-large",
+		fields: [
+			{
+				fieldname: "trans_items",
+				fieldtype: "Table",
+				label: "Items",
+				cannot_add_rows: true,
+				cannot_delete_rows: true,
+				in_place_edit: false,
+				reqd: 1,
+				data: this.data,
+				get_data: () => {
+					return this.data;
+				},
+				fields: fields,
+			},
+		],
+		primary_action: function () {
+			frappe.call({
+				method: "sth.buying_sth.custom.purchase_order.update_progress_item",
+				freeze: true,
+				args: {
+					parent_doctype: frm.doc.doctype,
+					trans_items: this.get_values()["trans_items"],
+					parent_doctype_name: frm.doc.name,
+					child_docname: opts.child_docname,
+				},
+				callback: function () {
+					frm.reload_doc();
+				},
+			});
+			this.hide();
+			refresh_field("items");
+		},
+		primary_action_label: __("Update"),
+	});
+
+	dialog.show();
+};
 
 
 erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController extends (
@@ -132,7 +252,6 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 							}
 						}
 					}
-					// Please do not add precision in the below flt function
 					if (flt(doc.per_billed) < 100)
 						this.frm.add_custom_button(
 							__("Purchase Invoice"),
@@ -455,33 +574,17 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 		cur_frm.cscript.update_status("Re-open", "Submitted");
 	}
 
-	// close_purchase_order() {
-	// 	cur_frm.cscript.update_status("Close", "Closed");
-	// }
-
 	close_purchase_order() {
-		// Check for Uang Muka GL Entry with Payment Entry
 		frappe.call({
 			method: 'sth.buying_sth.custom.purchase_order.check_uang_muka_payment_entry',
 			args: {
 				purchase_order: cur_frm.doc.name
 			},
 			callback: function (r) {
-
 				if (r.message && r.message.has_payment_entry) {
 					frappe.throw(
 						'This Purchase Order has a GL Entry for Uang Muka with Payment Entry. Purchase Order cannot be closed.',
 					)
-					//     function() {
-					//         cur_frm.cscript.update_status("Close", "Closed");
-					//     },
-					//     function() {
-					//         frappe.show_alert({
-					//             message: __('Close Purchase Order cancelled'),
-					//             indicator: 'info'
-					//         });
-					//     }
-					// );
 				} else {
 					cur_frm.cscript.update_status("Close", "Closed");
 				}
@@ -502,6 +605,346 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 	}
 };
 
-// for backward compatibility: combine new and previous states
 extend_cscript(cur_frm.cscript, new erpnext.buying.PurchaseOrderControllerCustom({ frm: cur_frm }));
 
+
+frappe.ui.form.on("Purchase Order", {
+	setup(frm) {
+		sth.form.setup_fieldname_select(frm, "items")
+		frm.set_query("lokasi_pengiriman", function (doc) {
+			return {
+				filters: {
+					company: doc.company
+				}
+			}
+		})
+
+		frm.set_query("type", "pph_lainnya", function (doc) {
+			return {
+				filters: {
+					name: ["like", "%PPh%"]
+				}
+			}
+		})
+
+		frm.set_query("type", "ppn", function (doc) {
+			return {
+				filters: {
+					name: ["like", "%PPN%"]
+				}
+			}
+		})
+	},
+
+	refresh(frm) {
+		frm.trigger('get_tax_template')
+		frm.page.sidebar.hide()
+		frm.set_query("purchase_type", () => {
+			return {
+				filters: {
+					document_type: frm.doctype
+				}
+			}
+		})
+
+		frm.trigger("set_query_field")
+		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
+	},
+
+	onload_post_render(frm) {
+		frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent('Get Items From')}"]`).remove()
+	},
+
+	purchase_type(frm) {
+		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
+	},
+
+	set_query_field(frm) {
+		if (frm.doc.docstatus == 1 && !["Closed", "Delivered"].includes(frm.doc.status)) {
+			if (
+				frm.doc.status !== "Closed" &&
+				flt(frm.doc.per_received) < 100 &&
+				flt(frm.doc.per_billed) < 100 &&
+				frm.doc.__onload.check_progress
+			) {
+				frm.add_custom_button(__("Update Progress"), () => {
+					erpnext.utils.update_progress_received({
+						frm: frm,
+						child_docname: "items",
+						child_doctype: "Purchase Order Item",
+					});
+				});
+			}
+		}
+	},
+
+	validate(frm) {
+		if (frm.doc.docstatus == 0) {
+			sync_to_taxes(frm)
+		}
+	},
+
+	company(frm) {
+		frm.trigger('get_tax_template')
+	},
+
+	waktu_penyerahan(frm) {
+		const day = frm.doc.waktu_penyerahan ? frm.doc.waktu_penyerahan.split(' ')[0] : 0
+		frm.set_value('accept_day', parseInt(day))
+	},
+
+	ppn_biaya_ongkos(frm) {
+		frm.trigger('calculate_total_biaya_angkut')
+	},
+
+	is_ppn_ongkos(frm) {
+		if (!frm.doc.is_ppn_ongkos) {
+			frm.doc.ppn_biaya_ongkos = 0
+		}
+		frm.trigger('calculate_total_biaya_angkut')
+	},
+
+	biaya_ongkos(frm) {
+		frm.trigger('calculate_total_biaya_angkut')
+	},
+
+	total_biaya_ongkos_angkut(frm) { sync_to_taxes(frm) },
+	pph_22(frm) { sync_to_taxes(frm) },
+	pbbkb(frm) { sync_to_taxes(frm) },
+	cost(frm) { sync_to_taxes(frm) },
+
+	is_pph_22(frm) {
+		if (!frm.doc.is_pph_22) frm.set_value('pph_22', 0)
+	},
+
+	get_tax_template(frm) {
+		frappe.provide('frappe.refererence.__ref_tax')
+		if (Object.keys(frappe.refererence.__ref_tax).length === 0 && frm.doc.docstatus == 0) {
+			if (!frm.doc.company) return
+
+			frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
+				for (const row of res) {
+					frappe.refererence.__ref_tax[row.type] = row
+				}
+				sync_to_taxes(frm)
+			})
+		}
+	},
+
+	calculate_total_biaya_angkut(frm) {
+		const ppn_biaya = frm.doc.ppn_biaya_ongkos
+		const is_ppn = frm.doc.is_ppn_ongkos
+		const biaya_ongkos = is_ppn ? (ppn_biaya / 100 * frm.doc.biaya_ongkos) + frm.doc.biaya_ongkos : frm.doc.biaya_ongkos
+		frm.set_value("total_biaya_ongkos_angkut", biaya_ongkos)
+	},
+
+	calculate_total_pph_lainnya(frm) {
+		let total = 0
+		for (const row of frm.doc.pph_lainnya) {
+			total += row.amount
+		}
+		frm.set_value("total_pph_lainnya", total)
+	},
+
+	calculate_total_ppn(frm) {
+		let total = 0
+		for (const row of frm.doc.ppn) {
+			total += row.amount
+		}
+		frm.set_value("total_ppn", total)
+	},
+
+	set_value_dpp_and_taxes(frm) {
+		frm.doc.dpp = frm.doc.net_total
+
+		let total_ppn = 0
+		let total_pph = 0
+		let total_lainnya = 0
+		for (const row of frm.doc.taxes) {
+			if (row.tipe_pajak == "PPN") {
+				total_ppn += row.tax_amount
+			} else if (row.tipe_pajak == "PPH") {
+				total_pph += row.tax_amount
+			} else {
+				total_lainnya += row.tax_amount
+			}
+		}
+
+		frm.doc.ppn = total_ppn
+		frm.doc.pph = total_pph
+		frm.doc.biaya_lainnya = total_lainnya
+		frm.refresh_fields()
+	},
+});
+
+
+frappe.ui.form.on("VAT Detail", {
+	pph_lainnya_add(frm, dt, dn) {
+		sync_to_taxes(frm)
+	},
+
+	ppn_add(frm, dt, dn) {
+		sync_to_taxes(frm)
+	},
+
+	ph_lainnya_remove(frm, dt, dn) {
+        sync_to_taxes(frm);
+        frm.trigger('calculate_total_pph_lainnya')
+        frm.trigger('calculate_total_ppn')
+        frm.trigger('calculate_taxes_and_totals')
+    },
+
+    ppn_remove(frm, dt, dn) {
+        sync_to_taxes(frm);
+        frm.trigger('calculate_total_pph_lainnya')
+        frm.trigger('calculate_total_ppn')
+        frm.trigger('calculate_taxes_and_totals')
+    },
+
+	type(frm, dt, dn) {
+        let row = locals[dt][dn]
+        if (!frm.doc.company) {
+            frappe.throw("Silahkan isi company lebih dahulu")
+        }
+        const tipe = row.parentfield == "ppn" ? "Masukan" : "PPh"
+        frappe.xcall("sth.custom.supplier_quotation.get_account_tax_rate", { name: row.type, company: frm.doc.company, tipe: tipe }).then((res) => {
+            frappe.model.set_value(dt, dn, "account", res)
+            if(tipe == "PPh"){
+                row.tax_type= "PPH"
+            }
+            else{
+                row.tax_type="PPN"
+            }
+            frm.refresh_field(row.parentfield)
+            sync_to_taxes(frm)
+        })
+    },
+
+
+	amount(frm, dt, dn) {
+		let row = locals[dt][dn]
+		if (!row.ref_child_doc || !row.ref_child_name) return
+		frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", row.amount || 0)
+		frm.trigger('calculate_total_pph_lainnya')
+		frm.trigger('calculate_total_ppn')
+		sync_to_taxes(frm)
+	},
+
+	percentage(frm, dt, dn) {
+		let row = locals[dt][dn]
+		const base = frm.doc.total || 0
+		const amount = base * (row.percentage || 0) / 100
+
+		frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
+		frappe.model.set_value(dt, dn, "amount", amount)
+		frm.trigger('calculate_total_pph_lainnya')
+		frm.trigger('calculate_total_ppn')
+		sync_to_taxes(frm)
+	}
+});
+
+
+// ─── Sync Taxes ──────────────────────────────────────────────────────────────
+
+const PO_FIELD_MAP = [
+    { key: "Ongkos Angkut", marker: "__ongkos_angkut__", field: "total_biaya_ongkos_angkut" },
+    { key: "PPH 22",        marker: "__pph_22__",         field: "pph_22" },
+    { key: "PBBKB",         marker: "__pbbkb__",          field: "pbbkb" },
+    { key: "Cost",          marker: "__cost__",            field: "cost" },
+]
+
+const CHARGES_MARKER = "__from_charges__";
+const PB_MARKER = "__from_pb__";
+
+function sync_to_taxes(frm){
+    frm.doc.taxes = []
+    sync_diskon_to_taxes(frm, true)
+    sync_ppn_to_taxes(frm, true)
+    sync_all_to_taxes(frm)
+
+    frm.refresh_field("taxes");
+    frm.trigger("calculate_taxes_and_totals");
+}
+
+function sync_ppn_to_taxes(frm, skip_recalc = false) {
+    const PPN_MARKER = "__from_ppn__";
+
+    for (const row of (frm.doc.ppn || [])) {
+        if (!row.amount || !row.type) continue;
+
+        let tax = frm.add_child("taxes");
+        tax.account_head = row.account
+        tax.charge_type = "Actual";
+        tax.add_deduct_tax = "Add";
+        tax.category = "Total";
+        tax.tax_amount = row.amount || 0;
+        tax.description = `${PPN_MARKER}${row.type || ""}`;
+    }
+
+    frm.refresh_field("taxes");
+    frm.trigger("calculate_taxes_and_totals");
+}
+
+function sync_diskon_to_taxes(frm, skip_recalc = false) {
+
+    const DISKON_MARKER = "__diskon__"
+
+    // bersihkan row diskon lama dulu
+    frm.doc.taxes = (frm.doc.taxes || []).filter(
+        row => !(row.description || "").startsWith(DISKON_MARKER)
+    )
+
+    const jumlah_diskon = frm.doc.jumlah_diskon || 0
+    const diskon_account = frm._diskon_account
+    if (jumlah_diskon && diskon_account) {
+        let diskon_row = frm.add_child("taxes")
+        diskon_row.charge_type = "Actual"
+        diskon_row.category = "Total"
+        diskon_row.account_head = diskon_account
+        diskon_row.tax_amount = -jumlah_diskon
+        diskon_row.add_deduct_tax = "Add"
+        diskon_row.description = DISKON_MARKER
+    }
+}
+
+function sync_all_to_taxes(frm) {
+    const ref_tax = frappe.refererence.__ref_tax || {}
+    const field_map = [
+        { key: "Ongkos Angkut", value: frm.doc.total_biaya_ongkos_angkut, add_deduct: "Add" },
+        { key: "PPH 22",        value: frm.doc.pph_22,                     add_deduct: "Add" },
+        { key: "PBBKB",         value: frm.doc.pbbkb,                      add_deduct: "Add" },
+        { key: "Cost",          value: frm.doc.cost,                        add_deduct: "Add" },
+    ]
+
+    for (const { key, value, add_deduct } of field_map) {
+        const ref = ref_tax[key]
+        if (!ref) continue
+
+        let tax = (frm.doc.taxes || []).find(r => r.account_head == ref.account)
+        if (!tax) {
+            tax = frm.add_child("taxes")
+            tax.account_head = ref.account
+            tax.charge_type = "Actual"
+            tax.add_deduct_tax = add_deduct
+            tax.category = "Total"
+        }
+        frappe.model.set_value(tax.doctype, tax.name, "tax_amount", value || 0)
+    }
+}
+
+function calculate_sub_total(frm) {
+    let sub_total = 0;
+    if (frm.doc.voucher_type === "Non Voucher Match") {
+        sub_total = (frm.doc.non_voucher_match || []).reduce((sum, r) => sum + (r.total || 0), 0);
+    } else {
+        const total_items = (frm.doc.items || []).reduce((sum, r) => sum + (r.amount || 0), 0);
+        const total_charges = (frm.doc.charges_purchase_invoice || []).reduce((sum, r) => sum + (r.total || 0), 0);
+        const total_pb = (frm.doc.purchase_invoice_pengeluaran_barang || []).reduce((sum, r) => sum + (r.amount || 0), 0);
+        sub_total = total_items + total_charges - total_pb;
+    }
+    frm.set_value("sub_total", sub_total);
+}
+
+frappe.form.link_formatters['Item'] = function (value, doc) {
+	return value
+}

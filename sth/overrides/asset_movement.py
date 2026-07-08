@@ -56,7 +56,7 @@ class AssetMovement(AssetMovement):
 			self.log_asset_activity(d.asset, current_location, current_employee)
 
 	def get_latest_location_and_custodian_custom(self, asset):
-		current_location, current_employee = "", ""
+		current_location, current_employee, current_unit = "", "", ""
 		cond = "1=1"
 
 		# latest entry corresponds to current document's location, employee when transaction date > previous dates

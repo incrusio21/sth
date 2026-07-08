@@ -72,3 +72,12 @@ def filter_divisi(doctype, txt, searchfield, start, page_len, filters):
 		""",
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
 	)
+
+@frappe.whitelist()
+def get_akun_kredit_bibitan(company):
+    settings = frappe.get_single('Plantation Settings')
+    match = next(
+        (r.account for r in settings.plantation_settings_akun_kredit_penyemaian_bibit if r.company == company),
+        None
+    )
+    return match

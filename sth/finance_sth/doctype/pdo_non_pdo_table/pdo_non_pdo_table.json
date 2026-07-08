@@ -11,16 +11,16 @@
   "sub_detail",
   "routine_type",
   "type",
-  "debit_to",
   "item_code",
   "item_name",
-  "uom",
   "qty",
+  "uom",
   "price",
+  "total",
+  "needs",
+  "column_break_ggoi",
   "revised_qty",
   "revised_price",
-  "needs",
-  "total",
   "revised_total"
  ],
  "fields": [
@@ -30,8 +30,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Pengguna",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "columns": 1,
@@ -83,22 +82,21 @@
    "fieldname": "price",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Harga",
-   "reqd": 1
+   "label": "Harga"
   },
   {
    "fieldname": "revised_qty",
    "fieldtype": "Float",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "Qty Revisi",
-   "reqd": 1
+   "label": "Qty Revisi"
   },
   {
    "fieldname": "revised_price",
    "fieldtype": "Currency",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "Harga Revisi",
-   "reqd": 1
+   "label": "Harga Revisi"
   },
   {
    "fieldname": "needs",
@@ -107,21 +105,21 @@
    "label": "Kebutuhan"
   },
   {
+   "bold": 1,
    "columns": 2,
    "fieldname": "total",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "revised_total",
    "fieldtype": "Currency",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Total Revisi",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "sub_detail",
@@ -136,20 +134,15 @@
    "options": "\nRutin\nTidak Rutin"
   },
   {
-   "fieldname": "debit_to",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Debit To",
-   "options": "Account",
-   "read_only": 1,
-   "reqd": 1
+   "fieldname": "column_break_ggoi",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-01 22:38:08.613796",
+ "modified": "2026-07-07 16:52:14.254945",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO NON PDO Table",

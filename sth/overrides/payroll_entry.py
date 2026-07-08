@@ -269,13 +269,6 @@ class PayrollEntry(PayrollEntry):
 		}
 	
 	def make_payroll_gl_entries(self):
-		"""
-		Membuat GL Entry untuk Payroll Entry:
-		  - Debit  : Akun 6211002 (Gaji, Tunjangan dan Manfaat) sesuai company
-		  - Credit : payroll_payable_account
-		Nilai diambil dari total net_pay seluruh Salary Slip yang terhubung.
-		Hanya menghasilkan 2 baris GL Entry.
-		"""
 
 		# ── 1. Hitung total dari semua Salary Slip yang terhubung ──────────────
 		total_amount = frappe.db.sql(
@@ -295,16 +288,16 @@ class PayrollEntry(PayrollEntry):
 				)
 			)
 
-		# ── 2. Ambil akun debit 6211002 berdasarkan company ───────────────────
-		debit_account = frappe.db.get_value(
-			"Account",
-			{"account_number": "6211002", "company": self.company},
-			"name",
-		)
+		debit_account = ""
+		# ── 2. Ambil akun debit berdasarkan company ───────────────────\
+		sth_accounting_settings = frappe.get_single("STH Accounting Settings")
+		for row in sth_accounting_settings.sth_accounting_settings_payroll:
+			if row.company == self.company:
+				debit_account = row.account
 
 		if not debit_account:
 			frappe.throw(
-				_("Akun dengan nomor 6211002 tidak ditemukan untuk perusahaan {0}").format(
+				_("Akun di STH Accounting Setting Payroll tidak ditemukan untuk perusahaan {0}").format(
 					self.company
 				)
 			)
@@ -580,7 +573,7 @@ def get_filtered_employees_custom(
 
 	print(query.get_sql())
 
-	return query.run(as_dict=as_dict)
+	return query.run(as_dict=as_dict, debug=1)
 
 
 # def get_filtered_employees_custom(

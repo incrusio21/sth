@@ -6,6 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
   "header_section",
   "naming_series",
   "tanggal",
@@ -16,18 +19,18 @@
   "company",
   "unit",
   "section_break_dh6y",
-  "fiber_press_",
-  "fiber_bunch_press_",
-  "nut_press_",
+  "fiber_press",
+  "fiber_bunch_press",
+  "nut_press",
   "empty_bunch_",
   "usb_",
   "solid_decanter_",
   "column_break_eqhe",
-  "air_rebusan_",
+  "air_rebusan",
   "finall_effluent_",
   "heavy_phase_decanter_",
   "heavy_phase_separator_",
-  "heavy_phase_sludge_centrifuge_",
+  "heavy_phase_sludge_centrifuge",
   "amended_from",
   "oil_losess_tab",
   "kernel_losess_tab"
@@ -100,21 +103,6 @@
    "label": "Detail"
   },
   {
-   "fieldname": "fiber_press_",
-   "fieldtype": "Percent",
-   "label": "Fiber Press (%)"
-  },
-  {
-   "fieldname": "fiber_bunch_press_",
-   "fieldtype": "Percent",
-   "label": "Fiber Bunch Press (%)"
-  },
-  {
-   "fieldname": "nut_press_",
-   "fieldtype": "Percent",
-   "label": "Nut Press (%)"
-  },
-  {
    "fieldname": "empty_bunch_",
    "fieldtype": "Percent",
    "label": "Empty Bunch (%)"
@@ -144,11 +132,6 @@
    "label": "Heavy Phase Separator (%)"
   },
   {
-   "fieldname": "heavy_phase_sludge_centrifuge_",
-   "fieldtype": "Percent",
-   "label": "Heavy Phase Sludge Centrifuge (%)"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -157,12 +140,6 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "air_rebusan_",
-   "fieldtype": "Percent",
-   "in_preview": 1,
-   "label": "Air Rebusan (%)"
   },
   {
    "fieldname": "oil_losess_tab",
@@ -179,13 +156,57 @@
    "fieldtype": "Percent",
    "in_preview": 1,
    "label": "Finall Effluent (%)"
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "air_rebusan",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Air Rebusan (%)"
+  },
+  {
+   "fieldname": "fiber_bunch_press",
+   "fieldtype": "Percent",
+   "label": "Fiber Bunch Press (%)"
+  },
+  {
+   "fieldname": "fiber_press",
+   "fieldtype": "Percent",
+   "label": "Fiber Press (%)"
+  },
+  {
+   "fieldname": "nut_press",
+   "fieldtype": "Percent",
+   "label": "Nut Press (%)"
+  },
+  {
+   "fieldname": "heavy_phase_sludge_centrifuge",
+   "fieldtype": "Percent",
+   "label": "Heavy Phase Sludge Centrifuge (%)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-16 11:37:31.165005",
+ "modified": "2026-06-25 11:23:33.148667",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Oil Losess On Sampel",

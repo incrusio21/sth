@@ -8,6 +8,16 @@ from frappe.model.mapper import get_mapped_doc
 class PengeluaranBarang(Document):
 	def validate(self):
 		self.validate_qty()
+		akun_expense = ""
+		procurement_settings = frappe.get_single("Procurement Settings")
+		
+		for row in procurement_settings.akun_pengeluaran_table:
+			if row.company == self.pt_pemilik_barang:
+				akun_expense = row.akun_pengeluaran
+
+		# for row in self.items:
+		# 	if not row.account:
+		# 		row.account = akun_expense
 
 	def on_submit(self):
 		self.create_ste()
@@ -17,6 +27,7 @@ class PengeluaranBarang(Document):
 		if frappe.db.exists("Stock Entry",{"references": self.name}):
 			ste = frappe.get_doc("Stock Entry",{"references": self.name})
 			ste.cancel()
+		self.cancel_permintaan_pengeluaran()
 
 	def validate_qty(self):
 		for row in self.items:
@@ -35,6 +46,12 @@ class PengeluaranBarang(Document):
 		
 		frappe.get_doc("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran).update_status()
 
+	def cancel_permintaan_pengeluaran(self):
+		for row in self.items:
+			jumlah_keluar = frappe.db.get_value("Permintaan Pengeluaran Barang Item",row.reference,"jumlah_keluar")
+			frappe.db.set_value("Permintaan Pengeluaran Barang Item",row.reference,"jumlah_keluar",jumlah_keluar - row.jumlah,update_modified=False)
+		
+		frappe.get_doc("Permintaan Pengeluaran Barang",self.no_permintaan_pengeluaran).update_status()
 
 	def update_return_percentage(self):
 		qty = 0

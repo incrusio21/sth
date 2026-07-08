@@ -242,6 +242,7 @@ def _create_asset_draft(pr_doc, item_row, asset_category, sequence, total_qty):
 	asset.asset_category     = asset_category
 	asset.company            = pr_doc.company
 	asset.purchase_date      = pr_doc.posting_date or today()
+	asset.total_depreciation_fiscal = 12
 
 	asset.gross_purchase_amount = flt(item_row.get("base_rate") or 0)
 

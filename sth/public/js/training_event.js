@@ -9,6 +9,8 @@ frappe.ui.form.on("Training Event", {
     //     __("Create"),
     //   );
     // }
+    filter_unit(frm);
+    
     if (frm.doc.docstatus === 1 && !frm.doc.custom_purchase_invoice) {
       frm.add_custom_button(
         __("Purchase Invoice"),
@@ -58,6 +60,24 @@ frappe.ui.form.on("Training Event Costing", {
     calculate_total_costing(frm);
   }
 });
+
+function filter_unit(frm) {
+    frm.set_query("unit", function () {
+        return {
+            filters: {
+                company: frm.doc.company
+            }
+        };
+    });
+
+    frm.set_query("employee", "employees", function () {
+        return {
+            filters: {
+                unit: frm.doc.unit
+            }
+        };
+    });
+}
 
 function calculate_total_costing(frm) {
   let total = 0;

@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 11,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-02-11 12:01:38.960886",
+ "modified": "2026-07-03 15:59:17.949368",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Penerimaan TBS Mill",
@@ -28,6 +28,30 @@
   },
   {
    "role": "Sales Manager"
+  },
+  {
+   "role": "KEPALA TATA USAHA MILL"
+  },
+  {
+   "role": "KERANI PRODUKSI"
+  },
+  {
+   "role": "MILL TECHNICAL ANALYS"
+  },
+  {
+   "role": "TECHNICAL CONTROLLER"
+  },
+  {
+   "role": "Mill Manager"
+  },
+  {
+   "role": "TIMBANGAN"
+  },
+  {
+   "role": "KERANI PRODUKSI"
+  },
+  {
+   "role": "ASISTEN KEPALA MILL"
   }
  ],
  "timeout": 0

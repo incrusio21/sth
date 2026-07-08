@@ -8,8 +8,6 @@
  "field_order": [
   "jenis_transaksi",
   "jenis_pertanggungan",
-  "tarik_purchase_invoice",
-  "tanggal_invoice",
   "column_break_zrru",
   "periode_from",
   "periode_to",
@@ -17,6 +15,8 @@
   "company",
   "section_break_kfuj",
   "nama_vendor",
+  "tarik_purchase_invoice",
+  "tanggal_invoice",
   "column_break_jkym",
   "premi",
   "deposit",
@@ -123,11 +123,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "premi",
    "fieldtype": "Currency",
    "in_preview": 1,
-   "label": "Premi",
-   "read_only": 1
+   "label": "Premi"
   },
   {
    "depends_on": "eval:doc.jenis_transaksi != \"SEWA\"",
@@ -261,12 +261,12 @@
    "label": "Nama Pemilik"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.jenis_transaksi == \"SEWA\"",
    "fieldname": "deposit",
    "fieldtype": "Currency",
    "in_preview": 1,
-   "label": "Deposit",
-   "read_only": 1
+   "label": "Deposit"
   },
   {
    "fetch_from": "tarik_purchase_invoice.posting_date",
@@ -516,7 +516,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 13:55:24.738825",
+ "modified": "2026-07-06 13:15:46.870708",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Transaksi Berulang",

@@ -11,10 +11,17 @@ class Attendance(Attendance):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 
+		if self.status not in ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"]:
+			leave_type = self.status
+			self.status = "On Leave"
+			self.leave_type = leave_type
+
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"])
 		validate_active_employee(self.employee)
 		self.validate_attendance_date()
-		self.validate_duplicate_record()
+		if self.designation not in ["NS29","NS30","NS08"]:
+			self.validate_duplicate_record()
+			
 		self.validate_overlapping_shift_attendance()
 		self.validate_employee_status()
 		self.check_leave_record()

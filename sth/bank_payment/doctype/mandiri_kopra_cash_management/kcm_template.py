@@ -208,19 +208,41 @@ def mtfu_consolidated(self):
 #     return "\r\n".join(lines)
 
 def mtfu_bill_separated(self):
-    return (
-        "M;2;20260515;2;1;;20260515;1680001067568;88042;;880421234151093;180000;;IDR;Payment;UBP;Payment;osokida@gmail.com;;;EPD1;E\r\n"
-        "M;1;;;;;;1680001067568;88047;;880471234151093;;;IDR;Payment;UBP;Payment;osokida@gmail.com;;;EPD2;E\r\n"
-    )
-    # return (
-    #     "M;2;20260507;2;1;;20260507;1150015101993;88042;Bank Mandiri;880421234151093;;50000;IDR;Payment;UBP;Payment;riskyaghata@gmail.com;;;EPD1;E\r\n"
-    #     "M;2;20260507;2;1;;20260507;1150015101993;88047;Bank Mandiri - CMD;880471234151093;;75000;IDR;Payment;UBP;Payment;riskyaghata@gmail.com;;;EPD2;E\r\n"
-    # )
-    # return (
-    #     "P;1680001067568;7;2;20171015;2;1;;20171020\r\n"
-    #     "88042;Bank Mandiri;880421234151093;50000;;IDR;Payment;UBP;Payment;riskyaghata@gmail.com;;;EPD1;E\r\n"
-    #     "88047;Bank Mandiri - CMD;880471234151093;;;IDR;Payment;UBP;Payment;riskyaghata@gmail.com;;;EPD2;E\r\n"
-    # )
+
+    lines = []
+
+    def safe(v, default=""):
+        return default if v is None else v
+
+    for row in self.bill_detail:
+
+        payload = {
+            "instruction_mode": "1",
+            "debit_account": safe(row.debit_account),
+            "biller_code": safe(row.biller_code),
+            "bill_key_1": safe(row.bill_key_1),
+            "bill_key_2": safe(row.bill_key_2),
+            "bill_key_3": safe(row.bill_key_3),
+            "currency": safe(row.currency, "IDR"),
+            "transaction_reference": safe(
+                row.transaction_reference,
+                "Payment"
+            ),
+            "remark": safe(
+                row.remark,
+                "Payment"
+            ),
+            "email": safe(row.email),
+            "extended_payment_detail": safe(
+                row.extended_payment_detail
+            )
+        }
+
+        lines.append(
+            build_bill_detail(payload)
+        )
+
+    return "\r\n".join(lines)
 
 def mtfu_payroll(self):
 
@@ -611,32 +633,123 @@ def build_consolidated_detail(data: dict):
     return ";".join(fields)
 
 def build_bill_detail(data: dict):
+
     fields = [""] * 22
 
     fields[0] = "M"
-    fields[1] = val(data, "instruction_mode", 1, default="1")
-    fields[2] = val(data, "instruction_date", 8)   # WAJIB kalau schema ada
-    fields[3] = val(data, "session", 10)
-    fields[4] = val(data, "recurring_type", 10)
-    fields[5] = val(data, "recurring_interval", 10)
-    fields[6] = val(data, "recurring_end_date", 8)
 
-    fields[7] = val(data, "debit_account", 40, numeric=True)
-    fields[8] = val(data, "biller_code", 10)
-    fields[9] = ""  # jangan skip
+    fields[1] = val(
+        data,
+        "instruction_mode",
+        1,
+        default="1"
+    )
 
-    fields[10] = val(data, "bill_key_1", 50)
-    fields[11] = val(data, "bill_key_2", 50)
-    fields[12] = val(data, "bill_key_3", 50)
+    fields[2] = val(
+        data,
+        "instruction_date",
+        8
+    )
 
-    fields[13] = val(data, "currency", 3, upper=True, default="IDR")
-    fields[14] = val(data, "transaction_reference", 19, default="Payment")
+    fields[3] = val(
+        data,
+        "session",
+        10
+    )
+
+    fields[4] = val(
+        data,
+        "recurring_type",
+        10
+    )
+
+    fields[5] = val(
+        data,
+        "recurring_interval",
+        10
+    )
+
+    fields[6] = val(
+        data,
+        "recurring_end_date",
+        8
+    )
+
+    fields[7] = val(
+        data,
+        "debit_account",
+        40,
+        numeric=True
+    )
+
+    fields[8] = val(
+        data,
+        "biller_code",
+        10
+    )
+
+    fields[9] = ""
+
+    fields[10] = val(
+        data,
+        "bill_key_1",
+        50
+    )
+
+    fields[11] = val(
+        data,
+        "bill_key_2",
+        50
+    )
+
+    fields[12] = val(
+        data,
+        "bill_key_3",
+        50
+    )
+
+    fields[13] = val(
+        data,
+        "currency",
+        3,
+        upper=True,
+        default="IDR"
+    )
+
+    fields[14] = val(
+        data,
+        "transaction_reference",
+        20,
+        default="Payment"
+    )
 
     fields[15] = "UBP"
-    fields[16] = val(data, "remark", 20)
-    fields[17] = val(data, "email", 100)
 
-    fields[20] = val(data, "extended_payment_detail", 999)
+    fields[16] = val(
+        data,
+        "remark",
+        20,
+        default="Payment"
+    )
+
+    fields[17] = val(
+        data,
+        "email",
+        100
+    )
+
+    fields[18] = ""
+    fields[19] = ""
+
+    fields[20] = val(
+        data,
+        "extended_payment_detail",
+        999
+    )
+
     fields[21] = "E"
 
-    return ";".join(str(f or "") for f in fields)
+    return ",".join(
+        str(v or "")
+        for v in fields
+    )

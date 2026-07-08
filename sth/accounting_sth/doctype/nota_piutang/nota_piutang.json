@@ -39,6 +39,7 @@
   "column_break_hkyb",
   "nilai_kontrak",
   "total_dp",
+  "grandtotal",
   "section_break_vwzw",
   "reclass_pengakuan_penjualan"
  ],
@@ -288,13 +289,22 @@
    "label": "Qty DO Belum Terkirim",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "grandtotal",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Grandtotal",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-21 11:18:02.739733",
+ "modified": "2026-06-11 09:02:28.911185",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

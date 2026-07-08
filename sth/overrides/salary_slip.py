@@ -901,7 +901,7 @@ class SalarySlip(SalarySlip):
 				& (Attendance.status == "Present")
 			)
 		)
-
+		print(query.run()[0][0])
 		return query.run()[0][0]
 
 	def _get_dinas_days(self) -> float:
@@ -1576,6 +1576,8 @@ class SalarySlip(SalarySlip):
 			current_date += timedelta(days=1)
 
 		# ubah ump_harian ke gaji pokok dibagi hari
+		print(data.base)
+		print(data.total_hari)
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
@@ -1583,9 +1585,7 @@ class SalarySlip(SalarySlip):
 		data.unit = emp_doc.unit
 
 		data.berapa_hari_senin_jumat_tanpa_libur = default_data.berapa_hari_senin_jumat_tanpa_libur = berapa_hari_senin_jumat_tanpa_libur - self.holiday_days
-		
-
-
+	
 		return data, default_data
 
 	def add_structure_component(self, struct_row, component_type):
@@ -1636,8 +1636,8 @@ class SalarySlip(SalarySlip):
 
 @frappe.whitelist()
 def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/HR-EMP-00924/00001")
-	doc.calculate_holidays()
+	doc = frappe.get_doc("Salary Slip","Sal Slip/1506020101950014/00001")
+	doc.validate()
 
 # @frappe.whitelist()
 # def make_payment_entry(source_name, target_doc=None):

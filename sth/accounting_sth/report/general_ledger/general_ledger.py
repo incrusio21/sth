@@ -162,15 +162,15 @@ def get_gl_entries(filters, accounting_dimensions):
 		else:
 			select_fields += """,remarks"""
 
-	order_by_statement = "order by posting_date, account, creation"
+	order_by_statement = "order by posting_date, account, CASE WHEN debit > 0 THEN 0 ELSE 1 END, creation"
 
 	if filters.get("include_dimensions"):
-		order_by_statement = "order by posting_date, creation"
+		order_by_statement = "order by posting_date, CASE WHEN debit > 0 THEN 0 ELSE 1 END, creation"
 
 	if filters.get("categorize_by") == "Categorize by Voucher":
-		order_by_statement = "order by posting_date, voucher_type, voucher_no"
+		order_by_statement = "order by posting_date, voucher_type, voucher_no, CASE WHEN debit > 0 THEN 0 ELSE 1 END"
 	if filters.get("categorize_by") == "Categorize by Account":
-		order_by_statement = "order by account, posting_date, creation"
+		order_by_statement = "order by account, posting_date, CASE WHEN debit > 0 THEN 0 ELSE 1 END, creation"
 
 	if filters.get("include_default_book_entries"):
 		filters["company_fb"] = frappe.get_cached_value(
@@ -365,11 +365,48 @@ def set_bill_no(gl_entries):
 		gl["bill_no"] = inv_details.get(gl.get("against_voucher"), "")
 
 
+def set_party_name(gl_entries):
+	party_type_map = {}
+	for gle in gl_entries:
+		if gle.party_type and gle.party:
+			party_type_map.setdefault(gle.party_type, set()).add(gle.party)
+
+	party_name_map = {}
+
+	if party_type_map.get("Supplier"):
+		for row in frappe.db.get_all(
+			"Supplier",
+			filters={"name": ("in", list(party_type_map["Supplier"]))},
+			fields=["name", "supplier_name"],
+		):
+			party_name_map[("Supplier", row.name)] = row.supplier_name
+
+	if party_type_map.get("Customer"):
+		for row in frappe.db.get_all(
+			"Customer",
+			filters={"name": ("in", list(party_type_map["Customer"]))},
+			fields=["name", "customer_name"],
+		):
+			party_name_map[("Customer", row.name)] = row.customer_name
+
+	if party_type_map.get("Employee"):
+		for row in frappe.db.get_all(
+			"Employee",
+			filters={"name": ("in", list(party_type_map["Employee"]))},
+			fields=["name", "employee_name"],
+		):
+			party_name_map[("Employee", row.name)] = row.employee_name
+
+	for gle in gl_entries:
+		gle["party_name"] = party_name_map.get((gle.party_type, gle.party), "")
+
+
 def get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries):
 	data = []
 	totals_dict = get_totals_dict()
 
 	set_bill_no(gl_entries)
+	set_party_name(gl_entries)
 
 	gle_map = initialize_gle_map(gl_entries, filters, totals_dict)
 
@@ -531,6 +568,8 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, tot
 					gle.get("party_type"),
 					gle.get("party"),
 					gle.get("voucher_detail_no"),
+					gle.get("debit"),
+					gle.get("credit"),
 				]
 
 				if immutable_ledger:
@@ -695,7 +734,8 @@ def get_columns(filters):
 		},
 		{"label": _("Against Account"), "fieldname": "against", "width": 120},
 		{"label": _("Party Type"), "fieldname": "party_type", "width": 100},
-		{"label": _("Party"), "fieldname": "party", "width": 100},
+		{"label": _("Party"), "fieldname": "party", "width": 100, "hidden": 1},
+		{"label": _("Party Name"), "fieldname": "party_name", "fieldtype": "Data", "width": 150},
 		{
 			"label": _("Unit"),
 			"fieldname": "unit",

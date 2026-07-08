@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-23 12:06:40.701037",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payroll_no",
+  "no_coa",
+  "amount",
+  "keterangan",
+  "kode_vra"
+ ],
+ "fields": [
+  {
+   "fieldname": "no_coa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No COA",
+   "options": "Account"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "kode_vra",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kode VRA"
+  },
+  {
+   "fieldname": "payroll_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payroll No",
+   "options": "Payroll Entry"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-23 14:04:39.227550",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Bengkel Payslip Karyawan Bengkel",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

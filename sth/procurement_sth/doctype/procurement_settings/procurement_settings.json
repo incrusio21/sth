@@ -26,10 +26,13 @@
   "hutang_invoice_proposal",
   "uang_muka_proposal",
   "persediaan_dalam_perjalanan_tab",
-  "persediaan_dalam_perjalanan_procurement_settings"
+  "persediaan_dalam_perjalanan_procurement_settings",
+  "pengakuan_pembelian_tbs_tab",
+  "procurement_settings_pengakuan_pembelian_tbs_account"
  ],
  "fields": [
   {
+   "allow_bulk_edit": 1,
    "fieldname": "default_account",
    "fieldtype": "Table",
    "label": "Default Account",
@@ -41,6 +44,7 @@
    "label": "Pengeluaran Barang"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "akun_pengeluaran_table",
    "fieldtype": "Table",
    "label": "Akun Pengeluaran Table",
@@ -52,6 +56,7 @@
    "label": "Barang Terima Lebih"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "item_overreceipt_procurement_settings",
    "fieldtype": "Table",
    "label": "Item Overreceipt Procurement Settings",
@@ -63,6 +68,7 @@
    "label": "Notifikasi Penerimaan"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "receipt_notification_procurement_settings",
    "fieldtype": "Table",
    "label": "Receipt Notification Procurement Settings",
@@ -79,18 +85,21 @@
    "label": "Purchase Order Barang"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "ap_in_transit_po_barang",
    "fieldtype": "Table",
    "label": "AP in Transit PO Barang",
    "options": "AP In Transit Procurement Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "hutang_invoice_po_barang",
    "fieldtype": "Table",
    "label": "Hutang Invoice PO Barang",
    "options": "Hutang Leasing Procurement Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "uang_muka_po_barang",
    "fieldtype": "Table",
    "label": "Uang Muka PO Barang",
@@ -102,12 +111,14 @@
    "label": "Purchase Order Jasa"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "ap_in_transit_po_jasa",
    "fieldtype": "Table",
    "label": "AP in Transit PO Jasa",
    "options": "AP In Transit Procurement Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "hutang_invoice_po_jasa",
    "fieldtype": "Table",
    "label": "Hutang Invoice PO Jasa",
@@ -116,27 +127,32 @@
   {
    "fieldname": "proposal_borongan_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Proposal Borongan"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "ap_in_transit_proposal",
    "fieldtype": "Table",
    "label": "AP in Transit Proposal",
    "options": "AP In Transit Procurement Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "hutang_invoice_proposal",
    "fieldtype": "Table",
    "label": "Hutang Invoice Proposal",
    "options": "Hutang Leasing Procurement Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "uang_muka_po_jasa",
    "fieldtype": "Table",
    "label": "Uang Muka PO Jasa",
    "options": "Uang Muka Procurement Settings"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "uang_muka_proposal",
    "fieldtype": "Table",
    "label": "Uang Muka Proposal",
@@ -148,17 +164,29 @@
    "label": "Persediaan Dalam Perjalanan"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "persediaan_dalam_perjalanan_procurement_settings",
    "fieldtype": "Table",
    "label": "Persediaan Dalam Perjalanan Procurement Settings",
    "options": "Persediaan Dalam Perjalanan Procurement Settings"
+  },
+  {
+   "fieldname": "pengakuan_pembelian_tbs_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pengakuan Pembelian TBS"
+  },
+  {
+   "fieldname": "procurement_settings_pengakuan_pembelian_tbs_account",
+   "fieldtype": "Table",
+   "label": "Procurement Settings Pengakuan Pembelian TBS Account",
+   "options": "Procurement Settings Pengakuan Pembelian TBS Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-04 11:20:07.131378",
+ "modified": "2026-06-27 00:02:34.347681",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Procurement Settings",

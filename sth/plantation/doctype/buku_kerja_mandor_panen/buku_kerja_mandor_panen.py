@@ -6,7 +6,7 @@ from frappe.utils import flt, format_date, get_link_to_form
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
-
+from frappe import _
 
 class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def __init__(self, *args, **kwargs):
@@ -28,19 +28,19 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			{
 				"target_amount": "kontanan_amount",
 				"target_salary_component": "kontanan_salary_component",
-                "component_type": "Kontanan",
+				"component_type": "Kontanan",
 				"removed_if_zero": True
 			},
 			{
 				"target_amount": "denda",
 				"target_salary_component": "denda_salary_component",
-                "component_type": "Denda",
+				"component_type": "Denda",
 				"removed_if_zero": True
 			},
 			{
 				"target_amount": "brondolan_amount",
 				"target_salary_component": "brondolan_salary_component",
-                "component_type": "Brondolan",
+				"component_type": "Brondolan",
 				"removed_if_zero": True
 			}
 		])
@@ -53,6 +53,30 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self._bkm_name = "Panen"
 
 	def validate(self):
+		if self.trans_no:
+			trans_no = self.trans_no
+			karyawan = self.hasil_kerja[0].employee
+			blok = self.hasil_kerja[0].blok
+
+			duplikat = frappe.db.sql("""
+				SELECT bkmp.name
+				FROM `tabBuku Kerja Mandor Panen` bkmp
+				INNER JOIN `tabDetail BKM Hasil Kerja Panen` hk ON hk.parent = bkmp.name
+				WHERE bkmp.trans_no = %s
+					AND hk.employee = %s
+					AND hk.blok = %s
+					AND bkmp.name != %s
+				LIMIT 1
+			""", (trans_no, karyawan, blok, self.name))
+
+			if duplikat:
+				frappe.throw(
+					f"Data sudah ada dengan Trans No <b>{trans_no}</b>, "
+					f"Karyawan <b>{karyawan}</b>, dan Blok <b>{blok}</b>. "
+					f"Referensi: {duplikat[0][0]}"
+				)
+
+
 		self.reset_automated_data()
 		
 		super().validate()
@@ -72,6 +96,85 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def on_submit(self):
 		super().on_submit()
 		self.create_recap_panen_by_blok()
+		# self.make_gl_entries()
+
+	def on_cancel(self):
+		super().on_cancel()
+		self.cancel_gl_entries()
+
+	def make_gl_entries(self, method=None):
+		gl_entries = []
+		akun_debit = self.kegiatan_account
+		akun_kredit = ""
+
+		single_doc = frappe.get_single("Plantation Settings")
+		for row in single_doc.plantation_settings_akun_kredit_bkm:
+			if row.company == self.company:
+				akun_kredit = row.account
+
+		if not akun_kredit:
+			frappe.throw(
+				_("Account Kredit BKM untuk company <b>{0}</b> tidak ditemukan. "
+				  "Pastikan akun tersebut sudah dipasang di Plantation Settings").format(self.company)
+			)
+
+		gl_entries.append(
+			frappe.get_doc({
+				"doctype": "GL Entry",
+				"posting_date": self.posting_date,
+				"account": akun_debit,
+				"debit": self.grand_total,
+				"credit": 0.0,
+				"debit_in_account_currency": self.grand_total,
+				"credit_in_account_currency": 0.0,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company,
+				"remarks": f"BKM Panen - {self.name}",
+				"cost_center": frappe.get_doc("Company", self.company).cost_center
+			})
+		)
+
+		# --- CREDIT ---
+		gl_entries.append(
+			frappe.get_doc({
+				"doctype": "GL Entry",
+				"posting_date": self.posting_date,
+				"account": akun_kredit,
+				"debit": 0.0,
+				"credit": self.grand_total,
+				"debit_in_account_currency": 0.0,
+				"credit_in_account_currency": self.grand_total,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company,
+				"remarks": f"BKM Panen - {self.name}",
+				"cost_center": frappe.get_doc("Company", self.company).cost_center
+			})
+		)
+
+		# Simpan semua GL Entry
+		for gl in gl_entries:
+			gl.flags.ignore_permissions = True
+			gl.insert()
+
+		frappe.msgprint(_("GL Entry berhasil dibuat."), indicator="green", alert=True)
+
+	def cancel_gl_entries(doc, method=None):
+		"""
+		Batalkan (reverse) GL Entry saat dokumen di-cancel.
+		"""
+		frappe.db.sql(
+			"""
+			UPDATE `tabGL Entry`
+			SET is_cancelled = 1
+			WHERE voucher_type = %s
+			  AND voucher_no   = %s
+			  AND is_cancelled = 0
+			""",
+			(doc.doctype, doc.name),
+		)
+		frappe.msgprint(_("GL Entry berhasil dibatalkan."), indicator="orange", alert=True)
 
 	def create_recap_panen_by_blok(self):
 		blok_dict = {}
@@ -107,10 +210,6 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		if message:
 			frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
-
-	def on_cancel(self):
-		super().on_cancel()
-		self.delete_recap_panen()
 
 	def delete_recap_panen(self):
 		for epl in frappe.get_all(
@@ -177,3 +276,5 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		self.create_or_update_payment_log(update_payment_log, "Upah")
 		self.create_or_update_mandor_premi()
+		self.make_gl_entries()
+

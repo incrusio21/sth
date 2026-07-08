@@ -16,6 +16,12 @@
   "column_break_kcak",
   "stasiun",
   "mesin",
+  "section_break_ivmx",
+  "latitude",
+  "longitude",
+  "column_break_kvoh",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_fnwx",
   "tanggal_scan",
   "column_break_wxbv",
@@ -134,7 +140,8 @@
   {
    "fieldname": "upload_foto_daya_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Daya Genset 1"
+   "label": "Upload Foto Daya Genset 1",
+   "mandatory_depends_on": "eval:doc.daya_genset_1"
   },
   {
    "description": "(Dalam satuan KwH)",
@@ -145,7 +152,8 @@
   {
    "fieldname": "upload_foto_kwh_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Kwh Genset 1"
+   "label": "Upload Foto Kwh Genset 1",
+   "mandatory_depends_on": "eval:doc.kwh_genset_1"
   },
   {
    "description": "(Dalam satuan Ampere)",
@@ -156,7 +164,9 @@
   {
    "fieldname": "upload_foto_ampere_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Ampere Genset 1"
+   "label": "Upload Foto Ampere Genset 1",
+   "mandatory_depends_on": "eval:doc.ampere_genset_1",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Hz)",
@@ -167,7 +177,9 @@
   {
    "fieldname": "upload_foto_frekwensi_genset_1",
    "fieldtype": "Attach",
-   "label": "Upload Foto Frekwensi Genset 1"
+   "label": "Upload Foto Frekwensi Genset 1",
+   "mandatory_depends_on": "eval:doc.frekwensi_genset_1",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Volt)",
@@ -178,7 +190,9 @@
   {
    "fieldname": "upload_foto_tegangan_rst_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Tegangan RST Genset 1"
+   "label": "Upload Foto Tegangan RST Genset 1",
+   "mandatory_depends_on": "eval:doc.tegangan_r_s_t_genset_1",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan HM)",
@@ -189,7 +203,9 @@
   {
    "fieldname": "upload_foto_jam_operasional_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Jam Operasional Genset 1"
+   "label": "Upload Foto Jam Operasional Genset 1",
+   "mandatory_depends_on": "eval:doc.jam_operasional_genset_1",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan \u00b0C)",
@@ -200,7 +216,9 @@
   {
    "fieldname": "upload_foto_temperatur_oil_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Temperatur Oil Genset 1"
+   "label": "Upload Foto Temperatur Oil Genset 1",
+   "mandatory_depends_on": "eval:doc.temperatur_oil_genset_1",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Psi)",
@@ -211,7 +229,9 @@
   {
    "fieldname": "upload_foto_pressure_oil_genset_1",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Pressure Oil Genset 1"
+   "label": "Upload Foto Pressure Oil Genset 1",
+   "mandatory_depends_on": "eval:doc.pressure_oil_genset_1",
+   "reqd": 1
   },
   {
    "fieldname": "genset_no_2_column",
@@ -227,7 +247,8 @@
   {
    "fieldname": "upload_foto_daya_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Daya Genset 2"
+   "label": "Upload Foto Daya Genset 2",
+   "mandatory_depends_on": "eval:doc.daya_genset_2"
   },
   {
    "description": "(Dalam satuan KwH)",
@@ -238,7 +259,8 @@
   {
    "fieldname": "upload_foto_kwh_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Kwh Genset 2"
+   "label": "Upload Foto Kwh Genset 2",
+   "mandatory_depends_on": "eval:doc.kwh_genset_2"
   },
   {
    "description": "(Dalam satuan Ampere)",
@@ -249,7 +271,9 @@
   {
    "fieldname": "upload_foto_ampere_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Ampere Genset 2"
+   "label": "Upload Foto Ampere Genset 2",
+   "mandatory_depends_on": "eval:doc.ampere_genset_2",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Hz)",
@@ -260,7 +284,9 @@
   {
    "fieldname": "upload_foto_frekwensi_genset_2",
    "fieldtype": "Attach",
-   "label": "Upload Foto Frekwensi Genset 2"
+   "label": "Upload Foto Frekwensi Genset 2",
+   "mandatory_depends_on": "eval:doc.frekwensi_genset_2",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Volt)",
@@ -271,7 +297,9 @@
   {
    "fieldname": "upload_foto_tegangan_rst_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Tegangan RST Genset 2"
+   "label": "Upload Foto Tegangan RST Genset 2",
+   "mandatory_depends_on": "eval:doc.tegangan_r_s_t_genset_2",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan HM)",
@@ -282,7 +310,9 @@
   {
    "fieldname": "upload_foto_jam_operasional_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Jam Operasional Genset 2"
+   "label": "Upload Foto Jam Operasional Genset 2",
+   "mandatory_depends_on": "eval:doc.jam_operasional_genset_2",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan \u00b0C)",
@@ -293,7 +323,9 @@
   {
    "fieldname": "upload_foto_temperatur_oil_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Temperatur Oil Genset 2"
+   "label": "Upload Foto Temperatur Oil Genset 2",
+   "mandatory_depends_on": "eval:doc.temperatur_oil_genset_2",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Psi)",
@@ -304,7 +336,9 @@
   {
    "fieldname": "upload_foto_pressure_oil_genset_2",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Pressure Oil Genset 2"
+   "label": "Upload Foto Pressure Oil Genset 2",
+   "mandatory_depends_on": "eval:doc.pressure_oil_genset_2",
+   "reqd": 1
   },
   {
    "fieldname": "genset_3_column",
@@ -318,9 +352,11 @@
    "label": "Daya Genset 3"
   },
   {
+   "depends_on": "eval:doc.daya_genset_3",
    "fieldname": "upload_foto_daya_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Daya Genset 3"
+   "label": "Upload Foto Daya Genset 3",
+   "mandatory_depends_on": "eval:doc.daya_genset_3"
   },
   {
    "description": "(Dalam satuan KwH)",
@@ -331,7 +367,8 @@
   {
    "fieldname": "upload_foto_kwh_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Kwh Genset 3"
+   "label": "Upload Foto Kwh Genset 3",
+   "mandatory_depends_on": "eval:doc.kwh_genset_3"
   },
   {
    "description": "(Dalam satuan Ampere)",
@@ -342,7 +379,9 @@
   {
    "fieldname": "upload_foto_ampere_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Ampere Genset 3"
+   "label": "Upload Foto Ampere Genset 3",
+   "mandatory_depends_on": "eval:doc.ampere_genset_3",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Hz)",
@@ -353,7 +392,9 @@
   {
    "fieldname": "upload_foto_frekwensi_genset_3",
    "fieldtype": "Attach",
-   "label": "Upload Foto Frekwensi Genset 3"
+   "label": "Upload Foto Frekwensi Genset 3",
+   "mandatory_depends_on": "eval:doc.frekwensi_genset_3",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Volt)",
@@ -364,7 +405,9 @@
   {
    "fieldname": "upload_foto_tegangan_rst_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Tegangan RST Genset 3"
+   "label": "Upload Foto Tegangan RST Genset 3",
+   "mandatory_depends_on": "eval:doc.tegangan_r_s_t_genset_3",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan HM)",
@@ -375,7 +418,9 @@
   {
    "fieldname": "upload_foto_jam_operasional_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Jam Operasional Genset 3"
+   "label": "Upload Foto Jam Operasional Genset 3",
+   "mandatory_depends_on": "eval:doc.jam_operasional_genset_3",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan \u00b0C)",
@@ -386,7 +431,9 @@
   {
    "fieldname": "upload_foto_temperatur_oil_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Temperatur Oil Genset 3"
+   "label": "Upload Foto Temperatur Oil Genset 3",
+   "mandatory_depends_on": "eval:doc.temperatur_oil_genset_3",
+   "reqd": 1
   },
   {
    "description": "(Dalam satuan Psi)",
@@ -397,7 +444,9 @@
   {
    "fieldname": "upload_foto_pressure_oil_genset_3",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto Pressure Oil Genset 3"
+   "label": "Upload Foto Pressure Oil Genset 3",
+   "mandatory_depends_on": "eval:doc.pressure_oil_genset_3",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_fnwx",
@@ -458,12 +507,44 @@
   {
    "fieldname": "column_break_kcak",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ivmx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kvoh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:37:41.607141",
+ "modified": "2026-07-06 09:57:24.849216",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Genset",

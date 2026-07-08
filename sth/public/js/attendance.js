@@ -7,10 +7,20 @@ frappe.ui.form.on('Attendance', {
         // check_and_set_leave_type(frm);
         frm.set_df_property('status', 'options', [
             'Present',
+            'On Leave',
             'Absent',
             'Work From Home',
             '7th Day Off'
         ].join('\n'));
+
+        frappe.form.formatters.Link = function(value, docfield, options, doc) {
+            if (doc) {
+                return value || "";
+            }
+            // Doctype lain tetap pakai formatter asli
+            return original_link_formatter(value, docfield, options, doc);
+        };
+
     },
     
     employee: function(frm) {

@@ -108,6 +108,9 @@ class PaymentEntry(EmployeePaymentEntry):
 		unallocated_amount: DF.Currency
 	# end: auto-generated types
 
+	def autoname(self):
+		self.naming_series = "ACC-PAY-.YYYY.-"
+
 	def onload(self):
 		for d in self.get("references"):
 
@@ -117,6 +120,26 @@ class PaymentEntry(EmployeePaymentEntry):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._payment_settings = get_payment_settings()
+
+	def validate(self):
+		for row in self.references:
+			if row.reference_doctype == "Pengajuan Panen Kontanan":
+				single_doc = frappe.get_single("Plantation Settings")
+				debit_account = next(
+					(row.account for row in single_doc.plantation_settings_pengajuan_panen_kontanan
+					 if row.company == self.company),
+					None,
+				)
+
+				if not debit_account:
+					frappe.throw(
+						frappe._(
+							"Akun Piutang Karyawan Pengajuan Panen Kontanan untuk company <b>{0}</b> tidak ditemukan. "
+							"Pastikan akun tersebut sudah dipasang di Plantation Settings."
+						).format(self.company)
+					)
+
+				self.paid_to = debit_account
 
 	def get_valid_reference_doctypes(self):
 		
@@ -422,6 +445,9 @@ class PaymentEntry(EmployeePaymentEntry):
 	def build_gl_map(self):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
+		elif self.payment_type in ("Internal Transfer") and not self.get("party_account_field"):
+			self.setup_party_account_field()
+
 		self.set_transaction_currency_and_rate()
 
 		gl_entries = []
@@ -432,11 +458,131 @@ class PaymentEntry(EmployeePaymentEntry):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, self)
+
+		print(str(gl_entries))
 		return gl_entries
+
+	def before_cancel(self):
+		delete_kriteria_upload_payment(self)
+		super().before_cancel()
+
+	def on_trash(self):
+		delete_kriteria_upload_payment(self)
+
+	def on_submit(self):
+		super().on_submit()
+		check_ref = 0
+		self.on_submit_pdo()
+		# for row in self.references:
+		# 	if row.reference_doctype == "Pengajuan Panen Kontanan":
+		# 		check_ref = 1
+
+		# if check_ref == 1:
+		# 	self.make_kontanan_gl_entries()
+
+	def on_submit_pdo(self):
+		if self.permintaan_dana_operasional:
+			update_permintaan_dana_operasional(self)
+
+			if self.tipe_transfer == 'Realisasi PDO' and self.payment_voucher_kas_pdo:
+
+				update_outstanding_amount_per_tipe(
+					self, self.permintaan_dana_operasional,
+					self.payment_voucher_kas_pdo[0].tipe_pdo, self.paid_amount, operation='subtract'
+				)
+
+		if self.payment_voucher_kas_pdo:
+			update_outstanding_pdo(self)
+			update_tipe_pdo_outstanding(self)
+			# update_pdo_non_pdo_table(self)
+			# check_plafon_and_split_excess(self)
+
+	def on_cancel(self):
+		super().on_cancel()
+		check_ref = 0
+		# for row in self.references:
+		# 	if row.reference_doctype == "Pengajuan Panen Kontanan":
+		# 		check_ref = 1
+
+		# if check_ref == 1:
+		# 	self.reverse_kontanan_gl_entries()
+
+	def make_kontanan_gl_entries(self):
+		check_ref = 0
+		no_pengajuan_panen_kontanan = ""
+		for row in self.references:
+			if row.reference_doctype == "Pengajuan Panen Kontanan":
+				no_pengajuan_panen_kontanan = row.reference_name
+
+		pengajuan = frappe.get_doc("Pengajuan Panen Kontanan", no_pengajuan_panen_kontanan)
+
+		if not pengajuan.salary_account:
+			frappe.throw(
+				_("Salary Account belum diisi di Pengajuan Panen Kontanan <b>{0}</b>.").format(
+					no_pengajuan_panen_kontanan
+				)
+			)
+
+		amount = flt(pengajuan.grand_total)
+		cost_center = pengajuan.cost_center or frappe.get_cached_value("Company", self.company, "cost_center")
+		remarks = _("Payment Entry {0}").format(self.name)
+
+		debit_currency = get_account_currency(pengajuan.salary_account)
+		credit_currency = get_account_currency(self.paid_to)
+
+		for entry in [
+			{
+				"account": pengajuan.salary_account,
+				"debit": amount,
+				"debit_in_account_currency": amount,
+				"credit": 0,
+				"credit_in_account_currency": 0,
+				"against": self.paid_to,
+				"account_currency": debit_currency,
+			},
+			{
+				"account": self.paid_to,
+				"credit": amount,
+				"credit_in_account_currency": amount,
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"against": pengajuan.salary_account,
+				"account_currency": credit_currency,
+			},
+		]:
+			gl = frappe.get_doc({
+				"doctype": "GL Entry",
+				"posting_date": self.posting_date,
+				"voucher_type": "Pengajuan Panen Kontanan",
+				"voucher_no": pengajuan.name,
+				"against_voucher_type": "Pengajuan Panen Kontanan",
+				"against_voucher": pengajuan.name,
+				"cost_center": cost_center,
+				"company": self.company,
+				"remarks": remarks,
+				"is_cancelled": 0,
+				**entry,
+			})
+			gl.flags.ignore_permissions = True
+			gl.flags.ignore_links = True
+			gl.submit()
+
+	def reverse_kontanan_gl_entries(self):
+		check_ref = 0
+		no_pengajuan_panen_kontanan = ""
+		for row in self.references:
+			if row.reference_doctype == "Pengajuan Panen Kontanan":
+				no_pengajuan_panen_kontanan = row.reference_name
+
+		make_reverse_gl_entries(
+			voucher_type="Pengajuan Panen Kontanan",
+			voucher_no=no_pengajuan_panen_kontanan,
+		)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = self.build_gl_map()
 		gl_entries = process_gl_map(gl_entries)
+		
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 		if cancel:
 			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
@@ -445,6 +591,128 @@ class PaymentEntry(EmployeePaymentEntry):
 
 		self.make_advance_gl_entries(cancel=cancel)
 
+	def add_party_gl_entries(self, gl_entries):
+		if not self.party_account:
+			return
+
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_doctypes")
+
+		if self.payment_type == "Receive":
+			against_account = self.paid_to
+		else:
+			against_account = self.paid_from
+
+		party_account_type = frappe.db.get_value("Party Type", self.party_type, "account_type")
+
+		party_gl_dict = self.get_gl_dict(
+			{
+				"account": self.party_account,
+				"party_type": self.party_type,
+				"party": self.party,
+				"against": against_account,
+				"account_currency": self.party_account_currency,
+				"cost_center": self.cost_center,
+			},
+			item=self,
+		)
+
+		for d in self.get("references"):
+			# re-defining dr_or_cr for every reference in order to avoid the last value affecting calculation of reverse
+			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+			cost_center = self.cost_center
+			if d.reference_doctype == "Sales Invoice" and not cost_center:
+				cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
+
+			gle = party_gl_dict.copy()
+
+			allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
+
+			if (
+				d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]
+				and d.allocated_amount < 0
+				and (
+					(party_account_type == "Receivable" and self.payment_type == "Pay")
+					or (party_account_type == "Payable" and self.payment_type == "Receive")
+				)
+			):
+				# reversing dr_cr because because it will get reversed in gl processing due to negative amount
+				dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
+			gle.update(
+				self.get_gl_dict(
+					{
+						"account": self.party_account,
+						"party_type": self.party_type,
+						"party": self.party,
+						"against": against_account,
+						"account_currency": self.party_account_currency,
+						"cost_center": cost_center,
+						dr_or_cr + "_in_account_currency": d.allocated_amount,
+						dr_or_cr: allocated_amount_in_company_currency,
+						dr_or_cr + "_in_transaction_currency": d.allocated_amount
+						if self.transaction_currency == self.party_account_currency
+						else allocated_amount_in_company_currency / self.transaction_exchange_rate,
+					},
+					item=self,
+				)
+			)
+
+			if self.book_advance_payments_in_separate_party_account:
+				if d.reference_doctype in advance_payment_doctypes:
+					# Upon reconciliation, whole ledger will be reposted. So, reference to SO/PO is fine
+					gle.update(
+						{
+							"against_voucher_type": d.reference_doctype,
+							"against_voucher": d.reference_name,
+						}
+					)
+				else:
+					# Do not reference Invoices while Advance is in separate party account
+					gle.update({"against_voucher_type": self.doctype, "against_voucher": self.name})
+			else:
+				gle.update(
+					{
+						"against_voucher_type": d.reference_doctype,
+						"against_voucher": d.reference_name,
+					}
+				)
+
+			gl_entries.append(gle)
+
+		if self.unallocated_amount:
+			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+			exchange_rate = self.get_exchange_rate()
+			base_unallocated_amount = self.unallocated_amount * exchange_rate
+
+			gle = party_gl_dict.copy()
+
+			gle.update(
+				self.get_gl_dict(
+					{
+						"account": self.party_account,
+						"party_type": self.party_type,
+						"party": self.party,
+						"against": against_account,
+						"account_currency": self.party_account_currency,
+						"cost_center": self.cost_center,
+						dr_or_cr + "_in_account_currency": self.unallocated_amount,
+						dr_or_cr + "_in_transaction_currency": self.unallocated_amount
+						if self.party_account_currency == self.transaction_currency
+						else base_unallocated_amount / self.transaction_exchange_rate,
+						dr_or_cr: base_unallocated_amount,
+					},
+					item=self,
+				)
+			)
+			if self.book_advance_payments_in_separate_party_account:
+				gle.update(
+					{
+						"against_voucher_type": "Payment Entry",
+						"against_voucher": self.name,
+					}
+				)
+			gl_entries.append(gle)
+			
 	def add_bank_gl_entries(self, gl_entries):
 		if self.payment_type in ("Pay", "Internal Transfer"):
 			gl_entries.append(
@@ -457,7 +725,7 @@ class PaymentEntry(EmployeePaymentEntry):
 						"credit_in_transaction_currency": self.paid_amount
 						if self.paid_from_account_currency == self.transaction_currency
 						else self.base_paid_amount / self.transaction_exchange_rate,
-						"credit": self.base_paid_amount,
+						"credit": self.paid_amount or self.base_paid_amount,
 						"cost_center": self.cost_center,
 						"post_net_value": True,
 					},
@@ -476,7 +744,7 @@ class PaymentEntry(EmployeePaymentEntry):
 						"debit_in_transaction_currency": self.received_amount
 						if self.paid_to_account_currency == self.transaction_currency
 						else self.base_received_amount / self.transaction_exchange_rate,
-						"debit": self.base_received_amount,
+						"debit": self.base_received_amount or self.received_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -496,7 +764,7 @@ class PaymentEntry(EmployeePaymentEntry):
 							"debit_in_transaction_currency": self.received_amount
 							if self.paid_to_account_currency == self.transaction_currency
 							else self.base_received_amount / self.transaction_exchange_rate,
-							"debit": self.base_received_amount,
+							"debit": self.base_received_amount or self.received_amount,
 							"cost_center": self.cost_center,
 						},
 						item=self,
@@ -514,7 +782,7 @@ class PaymentEntry(EmployeePaymentEntry):
 							"debit_in_transaction_currency": self.received_amount
 							if self.paid_to_account_currency == self.transaction_currency
 							else self.base_received_amount / self.transaction_exchange_rate,
-							"debit": self.base_received_amount,
+							"debit": self.base_received_amount or self.received_amount,
 							"cost_center": self.cost_center,
 						},
 						item=self,
@@ -581,16 +849,32 @@ class PaymentEntry(EmployeePaymentEntry):
 								)
 
 			elif self.tipe_transfer == "Realisasi PDO":
+				# for satu_pdo in self.payment_voucher_kas_pdo:
+				# 	gl_entries.append(
+				# 		self.get_gl_dict(
+				# 			{
+				# 				"account": satu_pdo.debit_to,
+				# 				"account_currency": self.paid_to_account_currency,
+				# 				"against": self.party if self.payment_type == "Receive" else self.paid_from,
+				# 				"debit_in_account_currency": satu_pdo.total,
+				# 				"debit_in_transaction_currency": satu_pdo.total,
+				# 				"debit": satu_pdo.total,
+				# 				"cost_center": self.cost_center or frappe.get_doc("Company", self.company).cost_center,
+				# 			},
+				# 			item=self,
+				# 		)
+				# 	)
+
 				for satu_pdo in self.payment_voucher_kas_pdo:
 					gl_entries.append(
 						self.get_gl_dict(
 							{
-								"account": satu_pdo.debit_to,
+								"account": self.paid_to,
 								"account_currency": self.paid_to_account_currency,
 								"against": self.party if self.payment_type == "Receive" else self.paid_from,
-								"debit_in_account_currency": satu_pdo.total,
-								"debit_in_transaction_currency": satu_pdo.total,
-								"debit": satu_pdo.total,
+								"debit_in_account_currency": self.paid_amount,
+								"debit_in_transaction_currency": self.paid_amount,
+								"debit": self.paid_amount,
 								"cost_center": self.cost_center or frappe.get_doc("Company", self.company).cost_center,
 							},
 							item=self,
@@ -640,19 +924,25 @@ def get_reference_details_by_payment_settings(reference_doctype, reference_name,
 		}
 	)
 
-def on_submit_pdo(self,method):
-	if self.permintaan_dana_operasional:
-		update_permintaan_dana_operasional(self)
+def delete_kriteria_upload_payment(self, method=None):
+	linked = frappe.get_all(
+		"Kriteria Upload Payment",
+		filters={"voucher_no": self.name},
+		pluck="name"
+	)
+	for name in linked:
+		frappe.delete_doc("Kriteria Upload Payment", name, force=True, ignore_permissions=True)
 
-	if self.payment_voucher_kas_pdo:
-		update_outstanding_pdo(self)
-		update_tipe_pdo_outstanding(self)
-		# update_pdo_non_pdo_table(self)
-		# check_plafon_and_split_excess(self)
 
 def on_cancel_pdo(self,method):
 	if self.permintaan_dana_operasional:
 		clear_permintaan_dana_operasional(self)
+
+		if self.tipe_transfer == 'Realisasi PDO' and self.payment_voucher_kas_pdo:
+			update_outstanding_amount_per_tipe(
+				self, self.permintaan_dana_operasional,
+				self.payment_voucher_kas_pdo[0].tipe_pdo, self.paid_amount, operation='add'
+			)
 
 	if self.payment_voucher_kas_pdo:
 		update_outstanding_pdo(self)
@@ -681,7 +971,7 @@ def recalculate_pdo_outstanding(no_pdo):
 	# Sum all submitted Payment Entry amounts linked to this PDO
 	# via the Payment Voucher Kas PDO child table
 	result = frappe.db.sql("""
-		SELECT SUM(pvk.total)
+		SELECT SUM(pe.paid_amount)
 		FROM `tabPayment Entry` pe
 		JOIN `tabPayment Voucher Kas PDO` pvk ON pvk.parent = pe.name
 		WHERE pvk.no_pdo = %s
@@ -824,41 +1114,133 @@ def update_tipe_pdo_outstanding(self):
 		key = (row.no_pdo, row.tipe_pdo)
 		if key not in pdo_payments:
 			pdo_payments[key] = 0
-		pdo_payments[key] += row.total or 0
+		pdo_payments[key] += self.paid_amount
 	
 	# Update each PDO
 	for (pdo_name, tipe_pdo), total_paid in pdo_payments.items():
 		update_outstanding_amount_per_tipe(self, pdo_name, tipe_pdo, total_paid, operation='subtract')
 
+def get_employee_from_tipe(pdo, tipe_pdo):
+	tipe_table_map = {
+		'Bahan Bakar': 'pdo_bahan_bakar',
+		'Perjalanan Dinas': 'pdo_perjalanan_dinas',
+		'Kas': 'pdo_kas',
+	}
+	table_name = tipe_table_map.get(tipe_pdo)
+	if not table_name:
+		return None, None
+
+	rows = pdo.get(table_name, [])
+	if not rows:
+		return None, None
+
+	employee = getattr(rows[0], 'employee', None)
+	jabatan = None
+	if employee:
+		try:
+			emp_doc = frappe.get_doc('Employee', employee)
+			jabatan = emp_doc.designation
+		except Exception:
+			pass
+	return employee, jabatan
+
 def update_outstanding_amount_per_tipe(self, pdo_name, tipe_pdo, amount, operation='subtract'):
-		
 	tipe_mapping = {
 		'Bahan Bakar': 'outstanding_amount_bahan_bakar',
 		'Perjalanan Dinas': 'outstanding_amount_perjalanan_dinas',
 		'Kas': 'outstanding_amount_kas',
 		'Dana Cadangan': 'outstanding_amount_dana_cadangan'
 	}
-	
+
+	tipe_table_map = {
+		'Bahan Bakar': 'pdo_bahan_bakar',
+		'Perjalanan Dinas': 'pdo_perjalanan_dinas',
+		'Kas': 'pdo_kas',
+	}
+
 	if tipe_pdo not in tipe_mapping:
 		frappe.log_error(f"Unknown tipe_pdo: {tipe_pdo}", "Payment Voucher Kas Outstanding Update")
 		return
-	
+
 	outstanding_field = tipe_mapping[tipe_pdo]
-	
 	try:
 		pdo = frappe.get_doc("Permintaan Dana Operasional", pdo_name)
+
+		# Cek penerima dari payment_voucher_kas_pdo row yang cocok
+		if operation == 'subtract':
+			penerima = None
+			debit_to = None
+			for row in self.get('payment_voucher_kas_pdo', []):
+				if row.no_pdo == pdo_name and row.tipe_pdo == tipe_pdo:
+					penerima = getattr(row, 'penerima', None)
+					debit_to = getattr(row, 'debit_to', None)
+					break
+
+			penerima_doc = frappe.get_doc("Employee", penerima)
+			penerima_name = penerima_doc.employee_name
+
+			table_name = tipe_table_map.get(tipe_pdo)
+			if penerima_name and table_name:
+				employees_in_pdo = [getattr(r, 'employee', None) for r in pdo.get(table_name, [])]
+				if penerima_name not in employees_in_pdo:
+					# Penerima tidak terdaftar di tabel PDO → langsung non-PDO
+					jabatan = None
+					try:
+						emp_doc = penerima_doc
+						jabatan = emp_doc.designation
+					except Exception:
+						print("GAGAL {}".format(penerima_name))
+						pass
+					add_to_non_pdo(self, pdo_doc=pdo, employee=penerima, jabatan=jabatan,
+						debit_to=debit_to, amount=amount,
+						reason=f"Penerima {penerima_name} tidak terdaftar di {tipe_pdo} PDO {pdo_name}")
+					pdo.flags.ignore_permissions = True
+					pdo.flags.ignore_validate = True
+					pdo.flags.ignore_mandatory = True
+					pdo.save()
+					return
+			elif penerima_name and tipe_pdo == "Dana Cadangan" and pdo.outstanding_amount_dana_cadangan == 0:
+				jabatan = None
+				try:
+					emp_doc = penerima_doc
+					jabatan = emp_doc.designation
+				except Exception:
+					print("GAGAL {}".format(penerima_name))
+					pass
+				add_to_non_pdo(self, pdo_doc=pdo, employee=penerima, jabatan=jabatan,
+					debit_to=debit_to, amount=amount,
+					reason=f"Penerima {penerima_name} tidak terdaftar di {tipe_pdo} PDO {pdo_name}")
+				pdo.flags.ignore_permissions = True
+				pdo.flags.ignore_validate = True
+				pdo.flags.ignore_mandatory = True
+				pdo.save()
+				return
+
+
 		current_outstanding = getattr(pdo, outstanding_field, 0) or 0
-		
+
 		if operation == 'subtract':
 			new_outstanding = current_outstanding - amount
 		else:  # add
 			new_outstanding = current_outstanding + amount
-		
-		# Ensure outstanding doesn't go negative
-		new_outstanding = max(0, new_outstanding)
-		
-		pdo.db_set(outstanding_field, new_outstanding)
-		
+
+		overflow = 0
+		if new_outstanding < 0:
+			overflow = -new_outstanding
+			new_outstanding = 0
+
+		if overflow > 0:
+			setattr(pdo, outstanding_field, new_outstanding)
+			employee, jabatan = get_employee_from_tipe(pdo, tipe_pdo)
+			add_to_non_pdo(self, pdo_doc=pdo, employee=employee, jabatan=jabatan, debit_to=None,
+				amount=overflow, reason=f"Selisih outstanding {tipe_pdo}")
+			pdo.flags.ignore_permissions = True
+			pdo.flags.ignore_validate = True
+			pdo.flags.ignore_mandatory = True
+			pdo.save()
+		else:
+			pdo.db_set(outstanding_field, new_outstanding)
+
 	except Exception as e:
 		frappe.log_error(
 			message=frappe.get_traceback(),
@@ -1143,3 +1525,4 @@ def calculate_total_usage(self, designation, unit, month, year, exclude_realisas
 				continue
 	
 	return total
+

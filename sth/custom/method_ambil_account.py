@@ -1,5 +1,5 @@
 import frappe
-
+from frappe import _, throw
 def ambil_ap_in_transit_procurement(tipe, company):
 	proc_settings = frappe.get_single("Procurement Settings")
 	
@@ -27,7 +27,7 @@ def ambil_ap_in_transit_procurement(tipe, company):
 
 	return akun_expense
 
-def ambil_uang_muka_procurement():
+def ambil_uang_muka_procurement(tipe, company):
 
 	proc_settings = frappe.get_single("Procurement Settings")
 	
@@ -55,7 +55,7 @@ def ambil_uang_muka_procurement():
 
 	return akun_expense
 
-def ambil_hutang_invoice_procurement():
+def ambil_hutang_invoice_procurement(tipe, company):
 
 	proc_settings = frappe.get_single("Procurement Settings")
 	
@@ -79,6 +79,58 @@ def ambil_hutang_invoice_procurement():
 		frappe.throw(
 			_("Account Hutang Invoice untuk company <b>{0}</b> tidak ditemukan. "
 			  "Pastikan akun tersebut sudah dipasang di Procurement Settings").format(self.company)
+		)
+
+	return akun_expense
+
+def ambil_proposal_hutang_usaha(proposal, company):
+	akun_expense = ''
+	proposal_doc = frappe.get_doc("Proposal", proposal)
+	proposal_type_doc = frappe.get_doc("Proposal Type", proposal_doc.proposal_type)
+
+	for row in proposal_type_doc.hutang_usaha_proposal_type:
+		if row.company == company:
+			akun_expense = row.account
+
+	if not akun_expense:
+		frappe.throw(
+			_("Account Hutang Usaha untuk proposal tipe <b>{0}</b> company <b>{1}</b> tidak ditemukan. "
+			  "Pastikan akun tersebut sudah dipasang di Proposal Type").format(proposal_doc.proposal_type, company)
+		)
+
+	return akun_expense
+
+def ambil_proposal_hutang_invoice(proposal, company):
+	akun_expense = ''
+	proposal_doc = frappe.get_doc("Proposal", proposal)
+	proposal_type_doc = frappe.get_doc("Proposal Type", proposal_doc.proposal_type)
+
+	for row in proposal_type_doc.hutang_invoice_proposal_type:
+		if row.company == company:
+			akun_expense = row.account
+
+	if not akun_expense:
+		frappe.throw(
+			_("Account Hutang Invoice untuk proposal tipe <b>{0}</b> company <b>{1}</b> tidak ditemukan. "
+			  "Pastikan akun tersebut sudah dipasang di Proposal Type").format(proposal_doc.proposal_type, company)
+		)
+
+	return akun_expense
+
+
+def ambil_proposal_uang_muka(proposal, company):
+	akun_expense = ''
+	proposal_doc = frappe.get_doc("Proposal", proposal)
+	proposal_type_doc = frappe.get_doc("Proposal Type", proposal_doc.proposal_type)
+
+	for row in proposal_type_doc.uang_muka_proposal_type:
+		if row.company == company:
+			akun_expense = row.account
+
+	if not akun_expense:
+		frappe.throw(
+			_("Account Uang Muka untuk proposal tipe <b>{0}</b> company <b>{1}</b> tidak ditemukan. "
+			  "Pastikan akun tersebut sudah dipasang di Proposal Type").format(proposal_doc.proposal_type, company)
 		)
 
 	return akun_expense

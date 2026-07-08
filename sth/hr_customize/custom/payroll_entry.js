@@ -4,6 +4,8 @@ frappe.ui.form.off("Payroll Entry")
 
 frappe.ui.form.on("Payroll Entry", {
 	onload: function (frm) {
+
+		link_for(frm)
 		frm.ignore_doctypes_on_cancel_all = ["Salary Slip", "Journal Entry"];
 
 		if (!frm.doc.posting_date) {
@@ -24,6 +26,7 @@ frappe.ui.form.on("Payroll Entry", {
 		frappe.realtime.on("completed_salary_slip_submission", function () {
 			frm.reload_doc();
 		});
+
 	},
 
 	department_filters: function (frm) {
@@ -549,3 +552,25 @@ const submit_salary_slips = function (frm) {
 	);
 };
 
+function link_for(frm) {
+	const original_link_formatter = frappe.form.formatters.Link;
+	console.log(original_link_formatter)
+	frappe.form.formatters.Link = function (value, docfield, options, doc) {
+
+		if (doc) {
+
+			if (!value) return "";
+
+			// doctype tujuan diambil dari options field Link
+			const doctype = docfield.options;
+			if (!doctype) return value;
+
+			// bangun route ke form doctype tsb
+			const route = frappe.utils.get_form_link(doctype, value);
+
+			return `<a href="${route}">${frappe.utils.escape_html(value)}</a>`;
+		}
+		// Doctype lain tetap pakai formatter asli
+		return original_link_formatter(value, docfield, options, doc);
+	};
+}

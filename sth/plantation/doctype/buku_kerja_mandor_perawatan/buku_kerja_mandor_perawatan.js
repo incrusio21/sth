@@ -18,8 +18,25 @@ frappe.ui.form.on("Buku Kerja Mandor Perawatan", {
     kategori_kegiatan(frm) {
         frm.set_value({"blok": "", "batch": ""})
     },
-
+    refresh(frm){
+        show_gl_button(frm)
+    }
 });
+
+function show_gl_button(frm){
+    if(frm.doc.docstatus == 1){
+        frm.add_custom_button(__('GL Entry'), () => {
+            frappe.route_options = {
+                voucher_no: frm.doc.name,
+                voucher_type: frm.doc.doctype,
+                from_date: frm.doc.posting_date,
+                to_date: frm.doc.posting_date,
+                company: frm.doc.company
+            };
+            frappe.set_route('query-report', 'General Ledger');
+        }, __('View'));
+    }
+}
 
 sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends sth.plantation.BKMController {
     setup(doc) {
@@ -41,6 +58,14 @@ sth.plantation.BukuKerjaMandorPerawatan = class BukuKerjaMandorPerawatan extends
             return {
                 filters: {
                     is_perawatan: 1
+                }
+            }
+        })
+
+        this.frm.set_query("blok", function (doc) {
+            return {
+                filters: {
+                    status: ["=", doc.kategori_kegiatan],
                 }
             }
         })

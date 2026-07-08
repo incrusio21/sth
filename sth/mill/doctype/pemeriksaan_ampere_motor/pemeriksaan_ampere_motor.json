@@ -6,6 +6,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_wmxo",
+  "column_break_kgiq",
+  "warning_message",
+  "warning_list",
   "section_break_bapn",
   "naming_series",
   "posting_date",
@@ -18,6 +22,12 @@
   "shift_proses",
   "stasiun",
   "mesin",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_nwok",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "time_stamp_section",
   "user_scan",
   "column_break_tiry",
@@ -171,13 +181,67 @@
   {
    "fieldname": "column_break_xcel",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nwok",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kgiq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message"
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_break_wmxo",
+   "fieldtype": "Section Break",
+   "hidden": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-03 09:21:11.166059",
+ "modified": "2026-06-15 15:40:21.869020",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Ampere Motor",

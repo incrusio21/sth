@@ -25,6 +25,26 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
             })
     },
 
+    calculate_avg_sounding_1(frm) {
+        average = (frm.doc.uhst1 + frm.doc.uhst2 + frm.doc.uhst3) / 3
+        frm.set_value("ukuran_hasil_sounding", average)
+    },
+
+    calculate_avg_sounding_2(frm) {
+        average = (frm.doc.uhst1_2 + frm.doc.uhst2_2 + frm.doc.uhst3_2) / 3
+        frm.set_value("ukuran_hasil_sounding_2", average)
+    },
+
+    calculate_avg_suhu_1(frm) {
+        average = (frm.doc.hst1 + frm.doc.hst2 + frm.doc.hst3) / 3
+        frm.set_value("hasil_suhu", average)
+    },
+
+    calculate_avg_suhu_2(frm) {
+        average = (frm.doc.hst1_2 + frm.doc.hst2_2 + frm.doc.hst3_2) / 3
+        frm.set_value("hasil_suhu_2", average)
+    },
+
     get_ukuran_sounding(tinggi, bst, pabrik) {
         const method = frappe.model.get_server_module_name(cur_frm.doctype) + ".get_ukuran_sounding"
         return frappe.xcall(method, { tinggi, bst, pabrik })
@@ -34,6 +54,23 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
         const method = frappe.model.get_server_module_name(cur_frm.doctype) + ".get_berat_jenis"
         return frappe.xcall(method, { pabrik, suhu })
     },
+
+
+    uhst1: (frm) => frm.trigger('calculate_avg_sounding_1'),
+    uhst2: (frm) => frm.trigger('calculate_avg_sounding_1'),
+    uhst3: (frm) => frm.trigger('calculate_avg_sounding_1'),
+
+    hst1: (frm) => frm.trigger('calculate_avg_suhu_1'),
+    hst2: (frm) => frm.trigger('calculate_avg_suhu_1'),
+    hst3: (frm) => frm.trigger('calculate_avg_suhu_1'),
+
+    uhst1_2: (frm) => frm.trigger('calculate_avg_sounding_2'),
+    uhst2_2: (frm) => frm.trigger('calculate_avg_sounding_2'),
+    uhst3_2: (frm) => frm.trigger('calculate_avg_sounding_2'),
+
+    hst1_2: (frm) => frm.trigger('calculate_avg_suhu_2'),
+    hst2_2: (frm) => frm.trigger('calculate_avg_suhu_2'),
+    hst3_2: (frm) => frm.trigger('calculate_avg_suhu_2'),
 
     ukuran_hasil_sounding(frm) {
         frm.events.get_ukuran_sounding(frm.doc.ukuran_hasil_sounding, "BST 01", frm.doc.pabrik || '').then((res) => {

@@ -11,6 +11,7 @@ from frappe.query_builder import Order
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
+from pypika import Table
 
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -233,6 +234,12 @@ class StockBalanceReport:
 			{
 				"item_code": entry.item_code,
 				"warehouse": entry.warehouse,
+
+				"kode_kelompok_barang": entry.kode_kelompok_barang,
+				"kelompok_barang": entry.kelompok_barang,
+				"kode_sub_kelompok_barang": entry.kode_sub_kelompok_barang,
+				"sub_kelompok_barang": entry.sub_kelompok_barang,
+
 				"item_group": entry.item_group,
 				"company": entry.company,
 				"currency": self.company_currency,
@@ -292,10 +299,17 @@ class StockBalanceReport:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item_table = frappe.qb.DocType("Item")
 
+		ig_kelompok = Table("tabItem Group").as_("ig_kelompok")
+		ig_sub_kelompok = Table("tabItem Group").as_("ig_sub_kelompok")
+
 		query = (
 			frappe.qb.from_(sle)
 			.inner_join(item_table)
 			.on(sle.item_code == item_table.name)
+			.left_join(ig_kelompok)
+			.on(ig_kelompok.name == item_table.kelompok_barang)
+			.left_join(ig_sub_kelompok)
+			.on(ig_sub_kelompok.name == item_table.item_group)
 			.select(
 				sle.item_code,
 				sle.warehouse,
@@ -313,6 +327,13 @@ class StockBalanceReport:
 				sle.serial_no,
 				sle.serial_and_batch_bundle,
 				sle.has_serial_no,
+
+				item_table.kode_kelompok_barang,
+				ig_kelompok.item_group_name.as_("kelompok_barang"),
+
+				item_table.kode_sub_kelompok_barang,
+				ig_sub_kelompok.item_group_name.as_("sub_kelompok_barang"),
+
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
@@ -391,10 +412,29 @@ class StockBalanceReport:
 			},
 			{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
 			{
-				"label": _("Item Group"),
-				"fieldname": "item_group",
+				"label": _("Kode Kelompok Barang"),
+				"fieldname": "kode_kelompok_barang",
 				"fieldtype": "Link",
 				"options": "Item Group",
+				"width": 100,
+			},
+			{
+				"label": _("Kelompok Barang"),
+				"fieldname": "kelompok_barang",
+				"fieldtype": "Data",
+				"width": 100,
+			},
+			{
+				"label": _("Kode Sub Kelompok Barang"),
+				"fieldname": "kode_sub_kelompok_barang",
+				"fieldtype": "Link",
+				"options": "Item Group",
+				"width": 100,
+			},
+			{
+				"label": _("Sub Kelompok Barang"),
+				"fieldname": "sub_kelompok_barang",
+				"fieldtype": "Data",
 				"width": 100,
 			},
 			{
@@ -627,6 +667,12 @@ def filter_items_with_no_transactions(
 				"item_code",
 				"warehouse",
 				"item_name",
+    
+				"kode_kelompok_barang",
+				"kelompok_barang",
+				"kode_sub_kelompok_barang",
+				"sub_kelompok_barang",
+
 				"item_group",
 				"project",
 				"stock_uom",

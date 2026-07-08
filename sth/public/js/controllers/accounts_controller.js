@@ -12,7 +12,7 @@ sth.plantation.AccountsController = class AccountsController extends frappe.ui.f
 					from_date: me.frm.doc.posting_date,
 					to_date: moment(me.frm.doc.modified).format('YYYY-MM-DD'),
 					company: me.frm.doc.company,
-					categorize_by: "Categorize by Voucher (Consolidated)",
+					// categorize_by: "Categorize by Voucher (Consolidated)",
 					show_cancelled_entries: me.frm.doc.docstatus === 2,
 					ignore_prepared_report: true
 				};

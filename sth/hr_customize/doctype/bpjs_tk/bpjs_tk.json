@@ -14,6 +14,7 @@
   "posting_date",
   "grand_total",
   "outstanding_amount",
+  "no_rekening_tujuan",
   "amended_from",
   "section_break_cnsi",
   "expense_total"
@@ -81,6 +82,11 @@
    "fieldtype": "JSON",
    "label": "Expense Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "no_rekening_tujuan",
+   "fieldtype": "Data",
+   "label": "No Rekening Tujuan"
   }
  ],
  "grid_page_length": 50,
@@ -88,7 +94,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-15 11:46:31.222566",
+ "modified": "2026-06-04 14:11:23.206976",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "BPJS TK",

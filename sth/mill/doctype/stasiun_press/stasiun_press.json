@@ -7,6 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "header_tab",
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
+  "section_break_qunn",
   "naming_series",
   "tanggal",
   "jam",
@@ -17,6 +21,12 @@
   "shift_proses",
   "mesin",
   "stasiun",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_gzye",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_fcqk",
   "tanggal_scan",
   "column_break_aadm",
@@ -185,13 +195,68 @@
    "label": "Shift Proses",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_gzye",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_break_qunn",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-03 11:42:30.215511",
+ "modified": "2026-06-17 14:22:55.398534",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Stasiun Press",

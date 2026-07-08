@@ -12,8 +12,9 @@ app_license = "mit"
 # include js, css files in header of desk.html
 app_include_css = ["/assets/sth/css/lib/tabulator.min.css","sth.bundle.css"]
 app_include_js = [
-    "/assets/sth/js/lib/tabulator.min.js",
-    "sth.bundle.js"
+	"/assets/sth/js/lib/tabulator.min.js",
+	"sth.bundle.js",
+	"/assets/sth/js/payment_entry_list.js?v=1018",
 ]
 
 # include js, css files in header of web template
@@ -32,6 +33,7 @@ page_js = {"print" : "public/js/override/print_override.js"}
 
 # include js in doctype views
 doctype_js = {
+	"Accounting Period": "public/js/accounting_period.js",
 	"Asset": "public/js/asset.js",
 	"Asset Capitalization": "public/js/asset_capitalization.js",
 	"Attendance": "public/js/attendance.js",
@@ -51,18 +53,28 @@ doctype_js = {
 	"Leave Application": "public/js/leave_application.js",
 	"Material Request": "public/js/material_request.js",
 	"Payroll Entry": "hr_customize/custom/payroll_entry.js",
-	"Payment Entry": ["hr_customize/custom/payment_entry.js",
-					  "public/js/payment_entry.js","public/js/payment_entry_leasing.js"],
+	# "Payment Entry": ["hr_customize/custom/payment_entry.js",
+	# 				  "public/js/payment_entry.js","public/js/payment_entry_leasing.js"],
+	"Payment Entry": ["public/js/payment_entry.js","public/js/payment_entry_leasing.js"],
 	"Project": "legal/custom/project.js",
+	# "Purchase Invoice": [
+	#     "buying_sth/custom/purchase_invoice.js", 
+	#     "legal/custom/purchase_invoice.js", 
+	#     "accounting_sth/custom/non_voucher_match.js",
+	#     "accounting_sth/custom/override_purchase_invoice.js",
+	#     "public/js/purchase_invoice.js",
+	#     "procurement_sth/custom_js/purchase_invoice_custom_charges.js", 
+	# ],
 	"Purchase Invoice": [
-        "buying_sth/custom/purchase_invoice.js", 
-        "legal/custom/purchase_invoice.js", 
-        "accounting_sth/custom/non_voucher_match.js",
-        "accounting_sth/custom/override_purchase_invoice.js",
-        "public/js/purchase_invoice.js"
-    ],
-	"Purchase Order": ["buying_sth/custom/purchase_order.js","public/js/purchase_order.js"],
-	"Purchase Receipt": ["buying_sth/custom/purchase_receipt.js", "legal/custom/purchase_receipt.js", "public/js/purchase_receipt.js"],
+		"accounting_sth/custom/override_purchase_invoice.js",
+		"public/js/purchase_invoice.js",
+	],
+	# "Purchase Order": ["buying_sth/custom/purchase_order.js","public/js/purchase_order.js"],
+	"Purchase Order": "public/js/purchase_order.js",
+	"Purchase Receipt": [
+		"buying_sth/custom/purchase_receipt.js", 
+		"legal/custom/purchase_receipt.js",
+		"public/js/purchase_receipt.js"],
 	"Quotation": "public/js/quotation.js",
 	"Request for Quotation" : "public/js/request_for_quotation.js",
 	"Salary Slip": "hr_customize/custom/salary_slip.js",
@@ -74,12 +86,13 @@ doctype_js = {
 	"Training Event": "public/js/training_event.js",
 	"Travel Request": "public/js/travel_request.js",
 	"Task": "public/js/task.js",
+	"Expense Claim Type": "public/js/expense_claim_type.js",
 }
 
 doctype_list_js = {
 	"Attendance" : "hr_customize/custom/attendance_list.js",
 	"Request for Quotation" : "public/js/listview/request_for_quotation_list.js",
-    "Material Request" : "public/js/listview/material_request_list.js",
+	"Material Request" : "public/js/listview/material_request_list.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -189,6 +202,7 @@ standard_queries = {
 
 override_doctype_class = {
 	# "Loan Application": "sth.overrides.loan_application.LoanApplication",
+	"Accounting Period": "sth.overrides.accounting_period.SthAccountingPeriod",
 	"Asset": "sth.overrides.asset.Asset",
 	"Asset Capitalization": "sth.overrides.asset_capitalization.AssetCapitalization",
 	"Asset Depreciation Schedule": "sth.overrides.asset_depreciation_schedule.AssetDepreciationSchedule",
@@ -214,9 +228,11 @@ override_doctype_class = {
 	"Sales Invoice": "sth.overrides.sales_invoice.SalesInvoice",
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
+	"Stock Reconciliation": "sth.overrides.stock_reconciliation.StockReconciliation",
 	"Supplier": "sth.overrides.supplier.Supplier",
-    "Supplier Quotation": "sth.overrides.supplier_quotation.STHSupplierQuotation",
+	"Supplier Quotation": "sth.overrides.supplier_quotation.STHSupplierQuotation",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
+	"Expense Claim Type": "sth.overrides.expense_claim_type.ExpenseClaimType",
 }
 
 # Document Events
@@ -226,21 +242,25 @@ override_doctype_class = {
 doc_events = {
 	# untuk kriteria upload
 	"*": {
+		"after_insert": "sth.custom.api.approve_api",
 		"on_update": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_upload_document",
 		"before_submit": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document",
-        "on_trash": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.delete_kriteria_upload_document",
-        "on_submit":"sth.custom.payment_entry.check_payment_notification"
+		"on_trash": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.delete_kriteria_upload_document",
+		"on_submit":"sth.custom.payment_entry.check_payment_notification"
 	},
 
 	"Accounting Period":{
-		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period"
+		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period",
+		# "on_submit": ["sth.overrides.accounting_period.create_costing_bengkel_on_submit","sth.overrides.accounting_period.cancel_costing_bengkel_on_cancel"]
 	},
 
 	"Asset": {
 		"validate": ["sth.accounting_sth.custom.asset.cek_prec_untuk_asset",
-               "sth.overrides.asset.validate_company",
-               "sth.utils.qr_generator.validate_create_qr",
-               "sth.finance_sth.custom.asset.calculate_penyusutan_fiscal"],
+			   "sth.overrides.asset.validate_company",
+			   "sth.utils.qr_generator.validate_create_qr",
+			  
+			   ],
+		"on_update":  "sth.finance_sth.custom.asset.calculate_penyusutan_fiscal",
 		"on_update_after_submit":"sth.sales_sth.custom.asset.track_insurance_changes",
 		"on_submit": "sth.overrides.asset.validate_asset_for_vra_progress"
 	},
@@ -257,9 +277,9 @@ doc_events = {
 			"sth.custom.delivery_note.update_ke_stock_in_transit_account",
 			"sth.custom.delivery_note.update_kontrak_penjualan"
 		],
-        "before_submit": "sth.custom.delivery_note.update_delivered_do",
-        "before_cancel": "sth.custom.delivery_note.update_delivered_do",
-        "after_insert": "sth.custom.delivery_note.create_kriteria_upload_document"
+		"before_submit": "sth.custom.delivery_note.update_delivered_do",
+		"before_cancel": "sth.custom.delivery_note.update_delivered_do",
+		"after_insert": "sth.custom.delivery_note.create_kriteria_upload_document"
 	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
@@ -317,32 +337,32 @@ doc_events = {
 		"validate": [
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
-            "sth.custom.payment_entry.update_check_book",
-            "sth.custom.payment_entry.set_no_rekening",
-            "sth.custom.payment_entry.validate_payment_voucher_kas_pdo"
+			"sth.custom.payment_entry.update_check_book",
+			"sth.custom.payment_entry.set_no_rekening",
+			"sth.custom.payment_entry.validate_payment_voucher_kas_pdo",
+			"sth.custom.payment_entry.set_reference_no"
 		],
 		"on_submit": [
-            "sth.custom.payment_entry.update_check_book", 
+			"sth.custom.payment_entry.update_check_book", 
 			"sth.custom.payment_entry.update_status_deposito", 
 			"sth.custom.payment_entry.update_status_loan_bank", 
 			"sth.custom.payment_entry.update_status_dividen", 
 			"sth.custom.payment_entry.update_payment_voucher_ppd", 
-			"sth.overrides.payment_entry.on_submit_pdo",
 			"sth.custom.payment_entry.payment_entry_notification",
-            "sth.custom.payment_entry.update_pesangon_from_payment",
-            "sth.custom.payment_entry.pasang_nota_piutang",
-            "sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
-            "sth.custom.payment_entry_leasing.on_payment_entry_submit"
-        ],
+			"sth.custom.payment_entry.update_pesangon_from_payment",
+			"sth.custom.payment_entry.pasang_nota_piutang",
+			"sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
+			"sth.custom.payment_entry_leasing.on_payment_entry_submit"
+		],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
-                "sth.custom.payment_entry.update_status_deposito", 
-                "sth.custom.payment_entry.update_status_loan_bank", 
-                "sth.custom.payment_entry.update_status_dividen", 
-                "sth.overrides.payment_entry.on_cancel_pdo",
-                "sth.custom.payment_entry.update_pesangon_from_payment",
-                "sth.custom.payment_entry.pasang_nota_piutang",
-                "sth.custom.payment_entry_leasing.on_payment_entry_cancel"
-                ],
+				"sth.custom.payment_entry.update_status_deposito", 
+				"sth.custom.payment_entry.update_status_loan_bank", 
+				"sth.custom.payment_entry.update_status_dividen", 
+				"sth.overrides.payment_entry.on_cancel_pdo",
+				"sth.custom.payment_entry.update_pesangon_from_payment",
+				"sth.custom.payment_entry.pasang_nota_piutang",
+				"sth.custom.payment_entry_leasing.on_payment_entry_cancel"
+				],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
 	"Period Closing Voucher": {
@@ -358,7 +378,7 @@ doc_events = {
 		"on_update": "sth.legal.custom.project.Project",
 		"on_trash": "sth.legal.custom.project.Project",
 	},
-    "Purchase Order": {
+	"Purchase Order": {
 		"before_save": "sth.buying_sth.custom.purchase_order.set_accept_day"
 	},
 	"Purchase Receipt": {
@@ -369,7 +389,7 @@ doc_events = {
 	"Purchase Invoice": {
 		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim","sth.custom.purchase_invoice.validate_qty_against_purchase_receipt"],
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice",
-  		"before_save": "sth.custom.purchase_invoice.update_keterangan",
+		"before_save": "sth.custom.purchase_invoice.update_keterangan",
 	},
 	"Quotation": {
 		# "validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.procurement_sth.custom.item.check_persetujuan"],
@@ -399,30 +419,31 @@ doc_events = {
 	# 	"on_cancel": "sth.custom.training_event.delete_journal_entry",
 	# },
 	"Travel Request": {
-		"on_submit": "sth.custom.travel_request.create_employee_advance",
+		"on_submit": ["sth.custom.travel_request.create_employee_advance", "sth.custom.travel_request.create_attendance"],
 		"on_cancel": "sth.custom.travel_request.cancel_employee_advance"
 	},
 	
 	"Request for Quotation": {
 		"before_save": "sth.custom.request_for_quotation.update_unit_in_table",
-        "on_submit": "sth.custom.material_request.calculate_percent_quoted"
+		"on_submit": "sth.custom.material_request.calculate_percent_quoted"
 	},
-    ("Proposal", "BAPP"): {
-        "before_validate": "sth.legal.custom.tax_validation.validate_custom_tax",
-        "validate": "sth.legal.custom.tax_validation.validate_custom_tax"
+	("Proposal", "BAPP"): {
+		"before_validate": "sth.legal.custom.tax_validation.validate_custom_tax",
+		"validate": "sth.legal.custom.tax_validation.validate_custom_tax"
 	},
-    ("Delivery Note","Sales Invoice","Purchase Receipt","Purchase Invoice","Stock Entry"): {
-        "validate": "sth.custom.stock_ledger.validate_posting_date"
+	("Delivery Note","Sales Invoice","Purchase Receipt","Purchase Invoice","Stock Entry"): {
+		"validate": "sth.custom.stock_ledger.validate_posting_date"
 	},
-    "Delivery Order": {
+	"Delivery Order": {
 		"validate": "sth.sales_sth.custom.delivery_order.set_default_tax_fields",
 	},
-    "GL Entry": {
-        "validate": "sth.custom.gl_entry.set_unit_from_parent"
-    },
-    "Warehouse": {
-    	"autoname": "sth.custom.warehouse.autoname_warehouse"
-    }
+	"GL Entry": {
+		"autoname": "sth.custom.gl_entry.autoname_gl_entry",
+		"validate": "sth.custom.gl_entry.set_unit_from_parent"
+	},
+	"Warehouse": {
+		"autoname": "sth.custom.warehouse.autoname_warehouse"
+	}
 }
 
 
@@ -439,7 +460,7 @@ scheduler_events = {
 		"sth.accounting_sth.doctype.transaksi_berulang.transaksi_berulang.process_scheduled_je",
 		# "sth.accounting_sth.doctype.transaksi_berulang.transaksi_berulang.process_scheduled_pe_leasing"
 	],
-    "daily_long": [
+	"daily_long": [
 		"sth.hr_customize.doctype.employee_update_log.employee_update_log.repost_entries",
 	],
 	"hourly": [
@@ -451,7 +472,7 @@ scheduler_events = {
 	"monthly": [
 		"sth.tasks.employee.update_employee_employment_tenure"
 	],
-    "cron": {
+	"cron": {
 		# "*/2 * * * *": [
 		# 	"sth.bank_payment.doctype.mandiri_kopra_cash_management.mandiri_kopra_cash_management.get_payment_status"
 		# ],
@@ -472,14 +493,14 @@ scheduler_events = {
 override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
-    "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry": "sth.legal.custom.payment_entry.get_payment_entry",
-    "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account": "sth.overrides.sales_invoice.get_bank_cash_account",
+	"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry": "sth.legal.custom.payment_entry.get_payment_entry",
+	"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account": "sth.overrides.sales_invoice.get_bank_cash_account",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
 	"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",
 	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "sth.buying_sth.custom.purchase_order.make_purchase_receipt",
 	"erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq": "sth.overrides.request_for_quotation.make_supplier_quotation_from_rfq",
 	"erpnext.stock.doctype.material_request.material_request.make_supplier_quotation": "sth.overrides.material_request.make_supplier_quotation",
-    "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation": "sth.overrides.material_request.make_request_for_quotation",
+	"erpnext.stock.doctype.material_request.material_request.make_request_for_quotation": "sth.overrides.material_request.make_request_for_quotation",
 	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
 	"frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
 	"hrms.overrides.employee_payment_entry.get_payment_entry_for_employee": "sth.overrides.employee_advance.get_payment_entry_for_employee",
@@ -503,6 +524,7 @@ override_doctype_dashboards = {
 # -----------------------------------------------------------
 
 # ignore_links_on_delete = ["Communication", "ToDo"]
+ignore_links_on_delete = ["TBS Ledger Entry"]
 
 # Request Events
 # ----------------

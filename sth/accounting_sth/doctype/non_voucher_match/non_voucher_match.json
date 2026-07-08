@@ -6,8 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "coa",
+  "kendaraan",
   "column_break_expd",
+  "pilih_ppn",
   "persen_ppn",
+  "pilih_pph",
   "persen_pph",
   "section_break_ghqs",
   "dpp",
@@ -33,16 +36,20 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "pilih_ppn.rate",
    "fieldname": "persen_ppn",
-   "fieldtype": "Select",
-   "label": "%PPN",
-   "options": "\n11\n1.1"
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "PPN Rate",
+   "read_only": 1
   },
   {
+   "fetch_from": "pilih_pph.rate",
    "fieldname": "persen_pph",
-   "fieldtype": "Select",
-   "label": "%PPH",
-   "options": "\n0.25\n0.3\n1.75\n2\n2.5\n2.65\n4\n10\n15\n22\n25\n30"
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "PPH Rate",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_ghqs",
@@ -57,40 +64,50 @@
   },
   {
    "columns": 1,
+   "default": "0",
    "fieldname": "dpp_nilai_lainnya",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "DPP Nilai Lainnya"
+   "label": "DPP Nilai Lainnya",
+   "read_only": 1
   },
   {
    "columns": 1,
+   "default": "0",
    "fieldname": "ppn",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "PPN"
+   "label": "PPN",
+   "read_only": 1
   },
   {
    "columns": 1,
+   "default": "0",
    "fieldname": "pph",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "PPh"
+   "label": "PPh",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_sfxb",
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "advance_payment",
    "fieldtype": "Currency",
    "label": "Advance Payment"
   },
   {
+   "bold": 1,
    "columns": 1,
+   "default": "0",
    "fieldname": "total",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Total"
+   "label": "Subtotal",
+   "read_only": 1
   },
   {
    "columns": 2,
@@ -98,13 +115,33 @@
    "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Description"
+  },
+  {
+   "fieldname": "kendaraan",
+   "fieldtype": "Link",
+   "label": "Kendaraan",
+   "options": "Alat Berat Dan Kendaraan"
+  },
+  {
+   "fieldname": "pilih_ppn",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "PPN",
+   "options": "Tax Rate"
+  },
+  {
+   "fieldname": "pilih_pph",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "PPH",
+   "options": "Tax Rate"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-19 11:33:10.928167",
+ "modified": "2026-07-07 15:52:06.319384",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Non Voucher Match",

@@ -9,9 +9,10 @@
   "section_break_r54a",
   "tanggal",
   "jam",
+  "live_weight",
+  "column_break_zuce",
   "company",
   "unit",
-  "live_weight",
   "section_break_rfsa",
   "column_break_fhox",
   "beban_berat_1",
@@ -123,37 +124,43 @@
    "fieldname": "foto_kalibrasi_1",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Kalibrasi 1"
+   "label": "Foto Kalibrasi 1",
+   "reqd": 1
   },
   {
    "fieldname": "foto_kalibrasi_2",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Kalibrasi 2"
+   "label": "Foto Kalibrasi 2",
+   "reqd": 1
   },
   {
    "fieldname": "foto_kalibrasi_3",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Kalibrasi 3"
+   "label": "Foto Kalibrasi 3",
+   "reqd": 1
   },
   {
    "fieldname": "foto_kalibrasi_4",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Kalibrasi 4"
+   "label": "Foto Kalibrasi 4",
+   "reqd": 1
   },
   {
    "fieldname": "foto_kalibrasi_5",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Kalibrasi 5"
+   "label": "Foto Kalibrasi 5",
+   "reqd": 1
   },
   {
    "fieldname": "foto_kalibrasi_6",
    "fieldtype": "Attach Image",
    "in_preview": 1,
-   "label": "Foto Kalibrasi 6"
+   "label": "Foto Kalibrasi 6",
+   "reqd": 1
   },
   {
    "default": "Now",
@@ -224,13 +231,17 @@
    "fieldname": "gateweight6",
    "fieldtype": "Button",
    "label": "GateWeight"
+  },
+  {
+   "fieldname": "column_break_zuce",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-26 14:12:59.256939",
+ "modified": "2026-06-05 14:10:06.072160",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kalibrasi Timbangan Internal",

@@ -1,10 +1,11 @@
 # Copyright (c) 2026, DAS and contributors
 # For license information, please see license.txt
 
-import frappe
+import frappe,math
 from frappe.model.document import Document
 from frappe.utils import today,flt,getdate
 from frappe.model.mapper import get_mapped_doc
+
 
 class SoundingStockCPOdiBST(Document):
 	def before_validate(self):
@@ -125,13 +126,26 @@ class SoundingStockCPOdiBST(Document):
 
 @frappe.whitelist()
 def get_ukuran_sounding(tinggi,bst,pabrik):
-	res = frappe.db.sql("""
+	
+	desimal, bulat = math.modf(flt(tinggi))
+
+	ukuran_sounding = frappe.db.sql("""
 		select usbd.volume from `tabUkuran Sounding BST` usb
 		join `tabUkuran Sounding BST Detail` usbd on usbd.parent = usb.name
-		where usb.name = %s and usbd.tinggi = %s and usb.pabrik = %s
-	""",(bst,tinggi,pabrik),as_dict=True)
+		where usb.nama_bst = %s and usbd.tinggi = %s and usb.pabrik = %s
+	""",(bst,bulat,pabrik),as_dict=True)
+	volume_sounding = ukuran_sounding[0].volume if ukuran_sounding else 0
+	desimal = round(desimal * 10,1) 
+	if desimal > 0:
+		ukuran_cincin = frappe.db.sql("""
+			select ucbd.liter from `tabUkuran Cincin BST` ucb
+			join `tabUkuran Cincin BST Detail` ucbd on ucbd.parent = ucb.name
+			where ucb.sampai_ukuran >= %s and %s >= ucb.dari_ukuran and ucb.nama_bst = %s and ucbd.mm = %s and ucb.pabrik = %s
+		""",(bulat,bulat,bst,desimal,pabrik),as_dict=True)
+		print(ukuran_cincin)
+		volume_sounding += ukuran_cincin[0].liter if ukuran_cincin else 0
 
-	return res[0].volume if res else 0
+	return volume_sounding
 
 @frappe.whitelist()
 def get_warehouse_bst(unit):

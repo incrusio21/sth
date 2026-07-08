@@ -32,7 +32,19 @@
   "sc_incentive_output",
   "incentive_output",
   "penyemaian_tab",
-  "akun_penyemaian"
+  "plantation_settings_akun_debit_penyemaian_bibit",
+  "plantation_settings_akun_kredit_penyemaian_bibit",
+  "penanaman_tab",
+  "plantation_settings_akun_debit_penanaman_bibit",
+  "plantation_settings_akun_kredit_penanaman_bibit",
+  "bkm_tab",
+  "plantation_settings_akun_transit_upah_bkm_traksi",
+  "plantation_settings_akun_upah_bkm_traksi",
+  "plantation_settings_akun_transit_premi_bkm_traksi",
+  "plantation_settings_akun_kredit_bkm",
+  "plantation_settings_akun_kendaraan_dialokasi_bkm_traksi",
+  "pengajuan_panen_kontanan_tab",
+  "plantation_settings_pengajuan_panen_kontanan"
  ],
  "fields": [
   {
@@ -184,17 +196,95 @@
    "label": "Penyemaian"
   },
   {
-   "fieldname": "akun_penyemaian",
+   "fieldname": "bkm_tab",
+   "fieldtype": "Tab Break",
+   "label": "BKM"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_kredit_bkm",
    "fieldtype": "Table",
-   "label": "Akun Penyemaian",
-   "options": "Akun Penyemaian Table"
+   "label": "Plantation Settings Akun Kredit BKM ( Kredit )",
+   "options": "Plantation Settings Akun Kredit BKM"
+  },
+  {
+   "fieldname": "pengajuan_panen_kontanan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pengajuan Panen Kontanan"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_pengajuan_panen_kontanan",
+   "fieldtype": "Table",
+   "label": "Plantation Settings Piutang Karyawan Pengajuan Panen Kontanan ( Debit )",
+   "options": "Plantation Settings Pengajuan Panen Kontanan"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_upah_bkm_traksi",
+   "fieldtype": "Table",
+   "label": "Plantation Settings Akun Upah BKM Traksi ( Kredit )",
+   "options": "Plantation Settings Akun Upah BKM Traksi"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_transit_premi_bkm_traksi",
+   "fieldtype": "Table",
+   "label": "Plantation Settings Akun Transit Premi BKM Traksi ( Debit )",
+   "options": "Plantation Settings Akun Transit Premi BKM Traksi"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_transit_upah_bkm_traksi",
+   "fieldtype": "Table",
+   "label": "Plantation Settings Akun Transit Upah BKM Traksi ( Debit )",
+   "options": "Plantation Settings Akun Transit Upah BKM Traksi"
+  },
+  {
+   "fieldname": "penanaman_tab",
+   "fieldtype": "Tab Break",
+   "label": "Penanaman"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_debit_penanaman_bibit",
+   "fieldtype": "Table",
+   "label": "Akun Debit Penanaman Bibit",
+   "options": "Plantation Settings Akun Debit Penanaman Bibit"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_kredit_penanaman_bibit",
+   "fieldtype": "Table",
+   "label": "Akun Kredit Penanaman Bibit",
+   "options": "Plantation Settings Akun Kredit Penanaman Bibit"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_debit_penyemaian_bibit",
+   "fieldtype": "Table",
+   "label": "Akun Debit Penyemaian Bibit",
+   "options": "Plantation Settings Akun Debit Penyemaian Bibit"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "plantation_settings_akun_kredit_penyemaian_bibit",
+   "fieldtype": "Table",
+   "label": "Akun Kredit Penyemaian Bibit",
+   "options": "Plantation Settings Akun Kredit Penyemaian Bibit"
+  },
+  {
+   "fieldname": "plantation_settings_akun_kendaraan_dialokasi_bkm_traksi",
+   "fieldtype": "Table",
+   "label": "Plantation Settings Akun Kendaraan Dialokasi BKM Traksi",
+   "options": "Plantation Settings Akun Kendaraan Dialokasi BKM Traksi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-25 15:48:01.888694",
+ "modified": "2026-07-02 09:51:22.698417",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Plantation Settings",

@@ -144,8 +144,9 @@ class Proposal(BuyingController):
 			if item.item_code:
 				continue
 
+			# frappe.throw(item.item_code)
 			if item.kegiatan:
-				item.item_code = frappe.get_cached_value("Kegiatan", item.kegiatan, "item_code")
+				item.item_code = frappe.get_value("Kegiatan", item.kegiatan, "item_code")
 			
 			if not item.item_code:
 				item.item_code = legal_item 
@@ -434,10 +435,11 @@ class Proposal(BuyingController):
 def validate_for_items(doc) -> None:
 	items = []
 	for d in doc.get("items"):
-		item = validate_item_and_get_basic_data(row=d)
-		validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
+		if d.kegiatan_name:
+			item = validate_item_and_get_basic_data(row=d)
+			validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
 
-		items.append(cstr(d.item_code))
+			items.append(cstr(d.item_code))
 
 	if (
 		items
@@ -587,7 +589,7 @@ def get_kegiatan_item(kegiatan):
 	keg_doc = frappe.get_cached_doc("Kegiatan", kegiatan)
 
 	return {
-		"kegiatan_name": keg_doc.nm_kgt,
+		# "kegiatan_name": keg_doc.nm_kgt,
 		"uom": keg_doc.uom
 	}
 

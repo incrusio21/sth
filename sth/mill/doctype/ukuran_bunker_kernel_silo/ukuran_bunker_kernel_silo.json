@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:UBKS-{abbr}-{pabrik}-{###}",
+ "autoname": "format:{kompartemen_bunker}-{pabrik}",
  "creation": "2026-04-06 09:16:26.091814",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -18,6 +18,7 @@
  ],
  "fields": [
   {
+   "fetch_from": "pabrik.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -65,13 +66,13 @@
    "default": "0",
    "fieldname": "default",
    "fieldtype": "Check",
-   "label": "default "
+   "label": "Default "
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-10 16:24:44.552930",
+ "modified": "2026-06-08 09:10:04.687481",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Bunker Kernel Silo",

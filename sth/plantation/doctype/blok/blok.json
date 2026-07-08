@@ -19,11 +19,11 @@
   "deskripsi",
   "api_status",
   "column_break_yfnz",
+  "status",
   "luas_areal",
   "tahun_tanam",
   "sph",
   "jumlah_pokok",
-  "jenis",
   "seed_code",
   "varietas",
   "type",
@@ -115,11 +115,6 @@
    "fieldname": "deskripsi",
    "fieldtype": "Data",
    "label": "Deskripsi"
-  },
-  {
-   "fieldname": "jenis",
-   "fieldtype": "Data",
-   "label": "Jenis"
   },
   {
    "fieldname": "type",
@@ -225,12 +220,19 @@
    "fieldname": "tahun",
    "fieldtype": "Int",
    "label": "Tahun"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Status",
+   "options": "Kategori Kegiatan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-15 13:55:59.570221",
+ "modified": "2026-06-10 16:23:50.519283",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

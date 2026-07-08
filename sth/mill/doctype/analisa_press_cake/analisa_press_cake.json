@@ -6,6 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
   "header_section",
   "naming_series",
   "tanggal",
@@ -16,9 +19,9 @@
   "company",
   "unit",
   "section_break_3ibl",
-  "nut_pecah_press_cake_",
+  "nut_pecah_press_cake",
   "column_break_ifwk",
-  "nut_to_press_cake_",
+  "nut_to_press_cake",
   "column_break_zzya",
   "fiber_",
   "amended_from"
@@ -91,16 +94,6 @@
    "label": "Detail"
   },
   {
-   "fieldname": "nut_pecah_press_cake_",
-   "fieldtype": "Percent",
-   "label": "Nut Pecah Press Cake (%)"
-  },
-  {
-   "fieldname": "nut_to_press_cake_",
-   "fieldtype": "Percent",
-   "label": "Nut to Press Cake (%)"
-  },
-  {
    "fieldname": "fiber_",
    "fieldtype": "Percent",
    "label": "Fiber (%)"
@@ -122,13 +115,41 @@
   {
    "fieldname": "column_break_zzya",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "nut_pecah_press_cake",
+   "fieldtype": "Percent",
+   "label": "Nut Pecah Press Cake (%)"
+  },
+  {
+   "fieldname": "nut_to_press_cake",
+   "fieldtype": "Percent",
+   "label": "Nut to Press Cake (%)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 11:24:10.563254",
+ "modified": "2026-06-23 11:52:20.658377",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Press Cake",

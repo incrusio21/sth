@@ -17,6 +17,12 @@
   "shift_proses",
   "stasiun",
   "mesin",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_uqnc",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_fnwx",
   "tanggal_scan",
   "column_break_winw",
@@ -101,7 +107,8 @@
   {
    "fieldname": "foto_hasil_temperatur_ks_1",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (KS 1)"
+   "label": "Foto Hasil Temperatur (KS 1)",
+   "reqd": 1
   },
   {
    "fieldname": "kernel_silo_no2_section",
@@ -117,7 +124,8 @@
   {
    "fieldname": "foto_hasil_temperatur_ks_2",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (KS 2)"
+   "label": "Foto Hasil Temperatur (KS 2)",
+   "reqd": 1
   },
   {
    "fieldname": "kernel_silo_no3_section",
@@ -133,7 +141,8 @@
   {
    "fieldname": "foto_hasil_temperatur_ks_3",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (KS 3)"
+   "label": "Foto Hasil Temperatur (KS 3)",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_fnwx",
@@ -190,12 +199,45 @@
    "label": "Shift Proses",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_uqnc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:39:59.684306",
+ "modified": "2026-06-08 11:45:44.511897",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Temperatur Kernel Silo",

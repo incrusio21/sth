@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-23 12:08:00.898936",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "no_coa",
+  "debit",
+  "credit",
+  "keterangan",
+  "kode_vra"
+ ],
+ "fields": [
+  {
+   "fieldname": "no_coa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No COA",
+   "options": "Account"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "kode_vra",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kode VRA"
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Debit"
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Credit"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-02 02:31:32.591271",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Bengkel Closing Bengkel",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

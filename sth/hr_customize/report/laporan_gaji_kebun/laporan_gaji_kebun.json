@@ -11,7 +11,7 @@
  "is_standard": "Yes",
  "json": "{}",
  "letterhead": null,
- "modified": "2026-05-20 14:20:15.115846",
+ "modified": "2026-07-01 16:16:47.452205",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan Gaji Kebun",
@@ -53,6 +53,9 @@
   },
   {
    "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "KEPALA TATA USAHA MILL"
   }
  ],
  "timeout": 0

@@ -19,6 +19,7 @@
   "jenis",
   "kap_kg",
   "pemilik",
+  "keterangan",
   "column_break_vypn",
   "unit",
   "nama_unit",
@@ -90,7 +91,6 @@
    "label": "KM/HM Akhir"
   },
   {
-   "depends_on": "eval:doc.tipe_master == \"Kendaraan Umum\"",
    "fieldname": "no_pol",
    "fieldtype": "Data",
    "label": "No Polisi"
@@ -127,7 +127,7 @@
   {
    "fieldname": "kode_item",
    "fieldtype": "Data",
-   "label": "Kode Item",
+   "label": "Kode VRA",
    "reqd": 1,
    "unique": 1
   },
@@ -135,7 +135,7 @@
    "fieldname": "nama_item",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nama Item",
+   "label": "Nama VRA",
    "reqd": 1
   },
   {
@@ -231,12 +231,18 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "in_preview": 1,
+   "label": "Keterangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-01 19:27:09.126662",
+ "modified": "2026-07-08 12:00:17.044990",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",

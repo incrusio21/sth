@@ -29,14 +29,16 @@
   "no_polisi",
   "supplier",
   "purchase_order",
-  "lokasi_pos",
   "column_break_nccm",
   "company",
+  "lokasi_pos",
   "unit",
   "divisi",
   "vehicle_entry_time",
   "vehicle_exit_time",
   "exit",
+  "trans_no",
+  "rkh_no",
   "driver_data_tab",
   "driver_details_section",
   "driver_name",
@@ -280,7 +282,6 @@
    "fieldname": "spb",
    "fieldtype": "Link",
    "label": "SPB",
-   "mandatory_depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "options": "Surat Pengantar Buah"
   },
   {
@@ -305,14 +306,13 @@
    "options": "Company"
   },
   {
-   "fetch_from": "qr_code_scan.unit",
+   "fetch_from": "lokasi_pos.unit",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Unit",
-   "options": "Unit",
-   "reqd": 1
+   "options": "Unit"
   },
   {
    "fetch_from": "qr_code_scan.custom_driver_image_upload",
@@ -402,8 +402,9 @@
   },
   {
    "fieldname": "lokasi_pos",
-   "fieldtype": "Data",
-   "label": "Lokasi POS"
+   "fieldtype": "Link",
+   "label": "Lokasi POS",
+   "options": "Security Location"
   },
   {
    "fieldname": "catatan",
@@ -443,13 +444,27 @@
    "hidden": 1,
    "label": "Items DO Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rkh_no",
+   "fieldtype": "Data",
+   "label": "RKH No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 15:25:41.678267",
+ "modified": "2026-07-01 13:33:15.039789",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

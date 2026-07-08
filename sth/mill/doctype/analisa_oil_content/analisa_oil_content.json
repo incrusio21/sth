@@ -6,6 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
   "header_section",
   "naming_series",
   "tanggal",
@@ -233,12 +236,30 @@
   {
    "fieldname": "column_break_wldw",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:46:01.608016",
+ "modified": "2026-06-22 09:33:41.212521",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Oil Content",

@@ -10,15 +10,17 @@
   "naming_series",
   "tanggal",
   "jam",
+  "column_break_bpcy",
   "company",
   "unit",
-  "column_break_fbxe",
-  "status",
   "section_break_lrjm",
-  "nik",
   "nama_karyawan",
-  "jabatan_karyawan",
+  "kode_jabatan",
+  "jabatan_karyawan_copy",
+  "nik",
+  "column_break_dkmj",
   "nama_unit_mesin_yang_diperbaiki",
+  "kode_stasiun",
   "lokasi_statsiun",
   "jenis_perbaikan",
   "jam_mulai",
@@ -68,46 +70,35 @@
    "options": "Unit"
   },
   {
-   "fieldname": "column_break_fbxe",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
    "fieldname": "section_break_lrjm",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Detail"
   },
   {
+   "fetch_from": "nama_karyawan.no_ktp",
    "fieldname": "nik",
    "fieldtype": "Data",
-   "label": "NIK"
+   "label": "NIK",
+   "read_only": 1
   },
   {
    "fieldname": "nama_karyawan",
-   "fieldtype": "Data",
-   "label": "Nama Karyawan"
-  },
-  {
-   "fieldname": "jabatan_karyawan",
-   "fieldtype": "Data",
-   "label": "Jabatan Karyawan"
+   "fieldtype": "Link",
+   "label": "Nama Karyawan",
+   "options": "Employee"
   },
   {
    "fieldname": "nama_unit_mesin_yang_diperbaiki",
    "fieldtype": "Link",
    "label": "Nama Unit Mesin yang Diperbaiki",
-   "options": "Mesin"
+   "options": "Mill Machine"
   },
   {
+   "fetch_from": "kode_stasiun.machine_name",
    "fieldname": "lokasi_statsiun",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Lokasi Statsiun",
-   "options": "Station Master"
+   "read_only": 1
   },
   {
    "fieldname": "jenis_perbaikan",
@@ -139,16 +130,50 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_bpcy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dkmj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "nama_karyawan.designation",
+   "fieldname": "kode_jabatan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Kode Jabatan",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "kode_jabatan.designation_name",
+   "fieldname": "jabatan_karyawan_copy",
+   "fieldtype": "Data",
+   "label": "Jabatan Karyawan",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "nama_unit_mesin_yang_diperbaiki.station",
+   "fieldname": "kode_stasiun",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Kode Stasiun",
+   "options": "Station Master",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-11 22:29:49.408066",
+ "modified": "2026-07-02 15:58:15.550091",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Buku Kerja Mekanik",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

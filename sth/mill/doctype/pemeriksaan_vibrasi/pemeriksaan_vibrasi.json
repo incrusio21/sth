@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:PVB-{unit}-{#####}",
+ "creation": "2026-06-05 12:51:07.205711",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "tanggal",
+  "jam",
+  "tanggal_pengujian_dari",
+  "column_break_zalz",
+  "company",
+  "unit",
+  "mesin",
+  "keterangan",
+  "turbine_tab",
+  "turbine",
+  "gearbox_tab",
+  "gearbox",
+  "generator_tab",
+  "generator"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Input",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "jam",
+   "fieldtype": "Time",
+   "label": "Jam",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_pengujian_dari",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Pengujian"
+  },
+  {
+   "fieldname": "column_break_zalz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "mesin",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Mesin",
+   "options": "Mill Machine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "turbine_tab",
+   "fieldtype": "Tab Break",
+   "label": "Turbine"
+  },
+  {
+   "fieldname": "turbine",
+   "fieldtype": "Table",
+   "label": "Turbine",
+   "options": "Detail Vibrasi Turbine"
+  },
+  {
+   "fieldname": "gearbox_tab",
+   "fieldtype": "Tab Break",
+   "label": "Gearbox"
+  },
+  {
+   "fieldname": "generator_tab",
+   "fieldtype": "Tab Break",
+   "label": "Alternator"
+  },
+  {
+   "fieldname": "gearbox",
+   "fieldtype": "Table",
+   "label": "Gearbox",
+   "options": "Detail Vibrasi Gearbox"
+  },
+  {
+   "fieldname": "generator",
+   "fieldtype": "Table",
+   "label": "Alternator",
+   "options": "Detail Vibrasi Alternator"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-06-05 13:46:03.308506",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Pemeriksaan Vibrasi",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

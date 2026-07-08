@@ -30,6 +30,8 @@
   "is_bapp_retensi",
   "retensi",
   "amended_from",
+  "kontraktor_yang_dibayar_section",
+  "kontraktor_proposal",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1276,13 +1278,25 @@
    "label": "Proposal",
    "options": "Proposal",
    "read_only": 1
+  },
+  {
+   "fieldname": "kontraktor_yang_dibayar_section",
+   "fieldtype": "Section Break",
+   "label": "Kontraktor yang Dibayar"
+  },
+  {
+   "fieldname": "kontraktor_proposal",
+   "fieldtype": "Table",
+   "label": "Kontraktor Proposal",
+   "options": "Kontraktor Proposal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-20 01:55:23.445099",
+ "modified": "2026-06-09 23:13:08.869901",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",

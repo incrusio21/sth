@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "header_section",
   "set_up_bpjs",
   "pt",
   "unit",
@@ -13,6 +14,7 @@
   "jenis_bpjs",
   "npp__no_bu",
   "golongan",
+  "no_rekening_tujuan",
   "amended_from",
   "section_break_ngrj",
   "start_periode",
@@ -115,13 +117,23 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "no_rekening_tujuan",
+   "fieldtype": "Data",
+   "label": "No Rekening Atau Kode Billing Tujuan"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-29 00:28:33.294433",
+ "modified": "2026-06-11 11:21:35.426816",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Daftar BPJS",

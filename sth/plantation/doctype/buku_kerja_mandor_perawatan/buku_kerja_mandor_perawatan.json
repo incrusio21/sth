@@ -28,6 +28,8 @@
   "manual_hk",
   "amended_from",
   "kemandoran",
+  "trans_no",
+  "rkh_no",
   "section_break_wzob",
   "kegiatan_account",
   "volume_basis",
@@ -130,7 +132,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Batch",
-   "options": "Batch"
+   "options": "Batch Bibit"
   },
   {
    "fieldname": "hasil_kerja_tab",
@@ -420,13 +422,27 @@
    "fieldname": "kebun",
    "fieldtype": "Data",
    "label": "Kebun"
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rkh_no",
+   "fieldtype": "Data",
+   "label": "RKH No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-17 13:56:09.293668",
+ "modified": "2026-06-19 11:32:30.770984",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

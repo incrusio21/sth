@@ -15,7 +15,7 @@ frappe.ui.form.on('Delivery Order', {
 					get_query_filters: {
 						docstatus: 1,
 						status: ["not in", ["Closed", "On Hold"]],
-						per_delivered: ["<", 99.99],
+						per_delivery_ordered: ["<", 99.99],
 						company: frm.doc.company
 					}
 				});

@@ -8,14 +8,14 @@ import erpnext
 from frappe import _, throw
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, getdate, get_link_to_form
-
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice,make_regional_gl_entries, get_purchase_document_details
-
+from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	update_billed_amount_based_on_po,
 )
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
-	get_total_in_party_account_currency, 
+	get_total_in_party_account_currency,
 	is_overdue
 )
 
@@ -59,7 +59,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				"overflow_type": "billing",
 			}
 		)
-	
+
 	def before_submit(self):
 		pass
 
@@ -70,19 +70,25 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			bukan_dp = 1
 		service = 0
 
+		ada_po = 0
+		ada_pro = 0
+
 		for item in self.items:
 			if item.purchase_order:
+				ada_po = 1
 				po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
 				if po_doc.sub_purchase_type == "Service Request":
 					service = 1
 
 				akun_expense = ""
 
-				if bukan_dp == 0:	
+				if bukan_dp == 0:
 					if service == 1:
 						akun_expense = method_ambil_account.ambil_ap_in_transit_procurement("jasa", self.company)
+						self.credit_to = method_ambil_account.ambil_hutang_invoice_procurement("jasa", self.company)
 					else:
 						akun_expense = method_ambil_account.ambil_ap_in_transit_procurement("barang", self.company)
+						self.credit_to = method_ambil_account.ambil_hutang_invoice_procurement("barang", self.company)
 
 					# print(akun_expense)
 					item.expense_account = akun_expense
@@ -90,28 +96,185 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				else:
 					if service == 1:
 						akun_expense = method_ambil_account.ambil_uang_muka_procurement("jasa", self.company)
+						self.credit_to = method_ambil_account.ambil_hutang_invoice_procurement("jasa", self.company)
 					else:
 						akun_expense = method_ambil_account.ambil_uang_muka_procurement("barang", self.company)
+						self.credit_to = method_ambil_account.ambil_hutang_invoice_procurement("barang", self.company)
 
 					item.expense_account = akun_expense
+					self.credit_amount = method_ambil_account.ambil_hutang_invoice_procurement(po_doc.name,self.company)
 
 			if item.proposal:
+				ada_pro = 1
 				po_doc = frappe.get_doc("Proposal", item.proposal)
-				pro_type = frappe.get_doc("Proposal Type", po_doc.proposal_type)
-				akun_expense = ""
-				for row in pro_type.hutang_usaha_proposal_type:
-					if row.company == self.company:
-						akun_expense = row.account
 
-				if not akun_expense:
-					frappe.throw("Proposal Type {} belum ada Hutang Usaha Proposal Type untuk company {}. Bisa dimasukkan dahulu di account.".format(pro_type.name, self.company))
+				if bukan_dp == 0:
+					item.expense_account = method_ambil_account.ambil_proposal_hutang_usaha(po_doc.name,self.company)
+				else:
+					item.expense_account = method_ambil_account.ambil_proposal_uang_muka(po_doc.name,self.company)
 
-				item.expense_account = akun_expense
+				self.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(po_doc.name,self.company)
+
+			if ada_po == 0 and ada_pro == 0:
+				for item in self.items:
+					doc_item = frappe.get_doc("Item", item.item_code)
+					for row_item in doc_item.item_defaults:
+						if self.company == row_item.company:
+							item.expense_account = row_item.expense_account
 
 		super().validate()
 		self.validate_term()
 		self.set_retensi_amount()
-		
+		self.set_charges_total()
+
+	def set_expense_account(self, for_validate=False):
+		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
+
+		if auto_accounting_for_stock:
+			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
+			stock_items = self.get_stock_items()
+
+		self.asset_received_but_not_billed = None
+
+		if self.update_stock:
+			self.validate_item_code()
+			self.validate_warehouse(for_validate)
+			if auto_accounting_for_stock:
+				warehouse_account = get_warehouse_account_map(self.company)
+
+		for item in self.get("items"):
+			# in case of auto inventory accounting,
+			# expense account is always "Stock Received But Not Billed" for a stock item
+			# except opening entry, drop-ship entry and fixed asset items
+			if (
+				auto_accounting_for_stock
+				and item.item_code in stock_items
+				and self.is_opening == "No"
+				and not item.is_fixed_asset
+				and (
+					not item.po_detail
+					or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")
+				)
+			):
+				if self.update_stock and item.warehouse and (not item.from_warehouse):
+					if (
+						for_validate
+						and item.expense_account
+						and item.expense_account != warehouse_account[item.warehouse]["account"]
+					):
+						msg = _(
+							"Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
+						).format(
+							item.idx,
+							frappe.bold(warehouse_account[item.warehouse]["account"]),
+							frappe.bold(item.expense_account),
+							frappe.bold(item.warehouse),
+						)
+						# frappe.msgprint(msg, title=_("Expense Head Changed"))
+					# item.expense_account = warehouse_account[item.warehouse]["account"]
+				else:
+					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
+					if item.purchase_receipt:
+						negative_expense_booked_in_pr = frappe.db.sql(
+							"""select name from `tabGL Entry`
+							where voucher_type='Purchase Receipt' and voucher_no=%s and account = %s""",
+							(item.purchase_receipt, stock_not_billed_account),
+						)
+
+						if negative_expense_booked_in_pr:
+							if (
+								for_validate
+								and item.expense_account
+								and item.expense_account != stock_not_billed_account
+							):
+								msg = _(
+									"Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
+								).format(
+									item.idx,
+									frappe.bold(stock_not_billed_account),
+									frappe.bold(item.purchase_receipt),
+								)
+								# frappe.msgprint(msg, title=_("Expense Head Changed"))
+
+							# item.expense_account = stock_not_billed_account
+					else:
+						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
+						# This is done in cases when Purchase Invoice is created before Purchase Receipt
+						if (
+							for_validate
+							and item.expense_account
+							and item.expense_account != stock_not_billed_account
+						):
+							msg = _(
+								"Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
+							).format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code)
+							)
+							msg += "<br>"
+							msg += _(
+								"This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
+							)
+							# frappe.msgprint(msg, title=_("Expense Head Changed"))
+
+						# item.expense_account = stock_not_billed_account
+			elif item.is_fixed_asset:
+				account = None
+				if not item.pr_detail and item.po_detail:
+					receipt_item = frappe.get_cached_value(
+						"Purchase Receipt Item",
+						{
+							"purchase_order": item.purchase_order,
+							"purchase_order_item": item.po_detail,
+							"docstatus": 1,
+						},
+						["name", "parent"],
+						as_dict=1,
+					)
+					if receipt_item:
+						item.pr_detail = receipt_item.name
+						item.purchase_receipt = receipt_item.parent
+
+				if item.pr_detail:
+					if not self.asset_received_but_not_billed:
+						self.asset_received_but_not_billed = self.get_company_default(
+							"asset_received_but_not_billed"
+						)
+
+					# check if 'Asset Received But Not Billed' account is credited in Purchase receipt or not
+					arbnb_booked_in_pr = frappe.db.get_value(
+						"GL Entry",
+						{
+							"voucher_type": "Purchase Receipt",
+							"voucher_no": item.purchase_receipt,
+							"account": self.asset_received_but_not_billed,
+						},
+						"name",
+					)
+					if arbnb_booked_in_pr:
+						account = self.asset_received_but_not_billed
+
+				if not account:
+					account_type = (
+						"capital_work_in_progress_account"
+						if is_cwip_accounting_enabled(item.asset_category)
+						else "fixed_asset_account"
+					)
+					account = get_asset_category_account(
+						account_type, item=item.item_code, company=self.company
+					)
+					if not account:
+						form_link = get_link_to_form("Asset Category", item.asset_category)
+						throw(
+							_("Please set Fixed Asset Account in {} against {}.").format(
+								form_link, self.company
+							),
+							title=_("Missing Account"),
+						)
+				# item.expense_account = account
+			elif not item.expense_account and for_validate:
+				print(str(frappe.as_json(item)))
+				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
+				
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc(
 			{
@@ -137,21 +300,25 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				},
 				"Proposal": {
 					"ref_dn_field": "proposal",
-					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					# "compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					"compare_fields": [["company", "="], ["currency", "="]],
 				},
 				"Proposal Item": {
 					"ref_dn_field": "proposal_detail",
-					"compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
+					# "compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
+					"compare_fields": [["project", "="], ["kegiatan", "="], ["uom", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True,
 				},
 				"BAPP": {
 					"ref_dn_field": "bapp",
-					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					# "compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					"compare_fields": [["company", "="], ["currency", "="]],
 				},
 				"BAPP Item": {
 					"ref_dn_field": "bapp_detail",
-					"compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
+					# "compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
+					"compare_fields": [["project", "="], ["kegiatan", "="], ["uom", "="]],
 					"is_child_table": True,
 				},
 			}
@@ -170,7 +337,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					["BAPP", "bapp", "bapp_detail"],
 				]
 			)
-	
+
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
 			if frappe.get_value(
@@ -190,7 +357,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Order"))
-						 
+
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == "Yes":
@@ -242,8 +409,8 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					d.bapp,
 				)
 				if not submitted:
-					frappe.throw(_("BAPP {0} is not submitted").format(d.bapp))   
-	
+					frappe.throw(_("BAPP {0} is not submitted").format(d.bapp))
+
 	def update_billing_status_in_pr(self, update_modified=True):
 		if self.is_return and not self.update_billed_amount_in_purchase_receipt:
 			return
@@ -335,37 +502,40 @@ class SthPurchaseInvoice(PurchaseInvoice):
 	# def set_retensi_amount(self):
 	# 	self.retensi_amount = flt(self.net_total * self.retensi/100, self.precision("retensi_amount"))
 
+	def set_charges_total(self):
+		self.total_charges = sum(
+			flt(row.total) for row in self.get("charges_purchase_invoice")
+		)
+
 	def set_retensi_amount(self):
 		self.retensi_amount = flt(self.rounded_total or self.grand_total) \
 			if self.term_detail and self.payment_term in ("Retensi") \
 			else flt(
-				self.net_total * flt(self.retensi)/100, 
+				self.net_total * flt(self.retensi)/100,
 				self.precision("retensi_amount")
-			) 
+			)
 
 	def validate_term(self):
 		if not self.term_detail:
 			self.payment_term = ""
 			return
-		
+
 		term, self.payment_term = frappe.db.get_value("Proposal Schedule", self.term_detail, ["term_used", "payment_term"], for_update=1)
 		if term:
 			frappe.throw(f"Term {self.payment_term} already used")
 
 	def on_submit(self):
 		super().on_submit()
-		self.make_pengeluaran_barang_gl_entries()
 		self.update_term_used()
 
 	def on_cancel(self):
 		super().on_cancel()
-		self.cancel_pengeluaran_barang_gl_entries()
 		self.update_term_used(cancel=1)
 
 	def update_term_used(self, cancel=0):
 		if not self.term_detail:
 			return
-			
+
 		frappe.db.set_value("Proposal Schedule", self.term_detail, "term_used", not cancel)
 
 	def set_status(self, update=False, status=None, update_modified=True):
@@ -377,7 +547,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
 		total = get_total_in_party_account_currency(self)
 
-		# ceck jika ada retensi dan 
+		# ceck jika ada retensi dan
 		if self.retensi and not self.retensi_paid and outstanding_amount < self.retensi_amount:
 			frappe.throw(f"Outstanding can't less than {self.retensi_amount} because there is still a Restan to confirm")
 
@@ -423,26 +593,31 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 		if self.invoice_type == "SPK":
 			self.make_item_gl_entries_spk(gl_entries)
+			self.make_tax_gl_entries(gl_entries)
+			# self.make_charges_gl_entries(gl_entries)
 
 			gl_entries = merge_similar_entries(gl_entries)
-			
+
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
 		elif self.invoice_type == "Leasing" or self.invoice_type == "Sewa":
 			self.make_item_gl_entries_leasing(gl_entries)
+			self.make_tax_gl_entries(gl_entries)
+			# self.make_charges_gl_entries(gl_entries)
 
 			gl_entries = merge_similar_entries(gl_entries)
-			
+
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
 		else:
 			self.make_supplier_gl_entry(gl_entries)
-
+			
 			if self.invoice_type == "Purchase Order":
 				self.make_item_gl_entries_custom(gl_entries)
 			else:
-				self.make_item_gl_entries(gl_entries)
+				self.make_item_gl_entries_custom(gl_entries)
 
+			
 			self.make_precision_loss_gl_entry(gl_entries)
 
 			# Tax di-skip untuk SPK
@@ -451,7 +626,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				self.make_internal_transfer_gl_entries(gl_entries)
 				self.make_gl_entries_for_tax_withholding(gl_entries)
 
-			# print(gl_entries)
+			
 			gl_entries = make_regional_gl_entries(gl_entries, self)
 			gl_entries = merge_similar_entries(gl_entries)
 			self.make_payment_gl_entries(gl_entries)
@@ -459,66 +634,9 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.make_gle_for_rounding_adjustment(gl_entries)
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
+		
+
 		return gl_entries
-
-	def make_pengeluaran_barang_gl_entries(doc):
-		pb_field = next(
-			(f.fieldname for f in frappe.get_meta("Purchase Invoice").fields
-			 if f.fieldtype == "Table" and f.options == "Purchase Invoice Pengeluaran Barang"),
-			None,
-		)
-		if not pb_field:
-			return
-
-		rows = doc.get(pb_field) or []
-		if not rows:
-			return
-
-		gl_entries = []
-		for row in rows:
-			if not row.amount or not row.account:
-				continue
-
-			gl_entries.append(
-				doc.get_gl_dict({
-					"account": row.account,
-					"credit": row.amount,
-					"credit_in_account_currency": row.amount,
-					"against": doc.credit_to,
-					"voucher_type": doc.doctype,
-					"voucher_no": doc.name,
-					"cost_center": doc.cost_center or frappe.db.get_value(
-						"Company", doc.company, "cost_center"
-					),
-					"remarks": f"Pengeluaran Barang: {row.pengeluaran_barang_item}",
-					"is_opening": "No",
-				})
-			)
-
-			gl_entries.append(
-				doc.get_gl_dict({
-					"account": doc.credit_to,
-					"debit": row.amount,
-					"debit_in_account_currency": row.amount,
-					"against": row.account,
-					"party_type": "Supplier",
-					"party": doc.supplier,
-					"voucher_type": doc.doctype,
-					"voucher_no": doc.name,
-					"cost_center": doc.cost_center or frappe.db.get_value(
-						"Company", doc.company, "cost_center"
-					),
-					"remarks": f"Pengeluaran Barang: {row.pengeluaran_barang_item}",
-					"is_opening": "No",
-				})
-			)
-
-		if gl_entries:
-			make_gl_entries(gl_entries)
-
-
-	def cancel_pengeluaran_barang_gl_entries(doc):
-		make_reverse_gl_entries(voucher_type=doc.doctype, voucher_no=doc.name)
 
 	def make_supplier_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
@@ -533,6 +651,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.precision("base_grand_total"),
 		)
 
+
+		base_grand_total = flt(base_grand_total, self.precision("base_grand_total"))
+		grand_total = flt(grand_total, self.precision("grand_total"))
+
 		if grand_total and not self.is_internal_transfer():
 			self.add_supplier_gl_entry(gl_entries, base_grand_total, grand_total)
 
@@ -543,41 +665,110 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		if self.is_return and self.return_against and not self.update_outstanding_for_self:
 			against_voucher = self.return_against
 
-		total_qty = sum(item.qty for item in self.items)
+		# total_qty = 0
+		# total_pph_qty = 0
+		# for item in self.items:
+		# 	if item.pph == 1:
+		# 		total_pph_qty += item.qty
 
-		for item in self.items:
-			if not total_qty:
+		# 	total_qty += item.qty
+
+		# for item in self.items:
+		# 	if not total_qty:
+		# 		continue
+
+		# 	qty_fraction = 1
+		# 	if total_pph_qty:
+		# 		qty_fraction = item.qty / total_pph_qty
+
+		# 	item_base_credit = item.qty * item.base_rate
+		# 	item_credit = item.qty * item.rate
+
+		# 	if item.pph == 1:
+		# 		item_base_credit -= (self.total_pph_lainnya) * qty_fraction
+		# 		item_credit -= (self.total_pph_lainnya) * qty_fraction
+
+			# gl = {
+			# 	"account": self.credit_to,
+			# 	"party_type": "Supplier",
+			# 	"party": self.supplier,
+			# 	"due_date": self.due_date,
+			# 	"against": against_account or self.against_expense_account,
+			# 	"credit": item_base_credit,
+			# 	"credit_in_account_currency": item_base_credit
+			# 	if self.party_account_currency == self.company_currency
+			# 	else item_credit,
+			# 	"credit_in_transaction_currency": item_credit,
+			# 	"against_voucher": against_voucher,
+			# 	"against_voucher_type": self.doctype,
+			# 	"project": item.project or self.project,
+			# 	"cost_center": self.cost_center or frappe.db.get_value(
+			# 			"Company", self.company, "cost_center"
+			# 		),
+			# 	"_skip_merge": skip_merge,
+			# 	"voucher_detail_no": item.name
+			# }
+			# if remarks:
+			# 	gl["remarks"] = remarks
+
+			# gl_entries.append(self.get_gl_dict(gl, self.party_account_currency, item=item))
+
+		gl = {
+			"account": self.credit_to,
+			"party_type": "Supplier",
+			"party": self.supplier,
+			"due_date": self.due_date,
+			"against": against_account or self.against_expense_account,
+			"credit": self.grand_total,
+			"credit_in_account_currency": self.grand_total
+			if self.party_account_currency == self.company_currency
+			else self.grand_total,
+			"credit_in_transaction_currency": self.grand_total,
+			"against_voucher": against_voucher,
+			"against_voucher_type": self.doctype,
+			"project": self.project,
+			"cost_center": self.cost_center or frappe.db.get_value(
+					"Company", self.company, "cost_center"
+				),
+			"_skip_merge": skip_merge
+		}
+		if remarks:
+			gl["remarks"] = remarks
+
+		gl_entries.append(self.get_gl_dict(gl, self.party_account_currency))
+
+	def make_charges_gl_entries(self, gl_entries):
+		for tax in self.get("taxes"):			
+			if tax.description != "__from_charges__":
 				continue
 
-			qty_fraction = item.qty / total_qty
+			amount = tax.tax_amount
+			base_amount = tax.tax_amount
 
-			item_base_credit = base_grand_total * qty_fraction
-			item_credit = grand_total * qty_fraction
+			if not flt(base_amount):
+				continue
 
-			gl = {
-				"account": self.credit_to,
-				"party_type": "Supplier",
-				"party": self.supplier,
-				"due_date": self.due_date,
-				"against": against_account or self.against_expense_account,
-				"credit": item_base_credit,
-				"credit_in_account_currency": item_base_credit
-				if self.party_account_currency == self.company_currency
-				else item_credit,
-				"credit_in_transaction_currency": item_credit,
-				"against_voucher": against_voucher,
-				"against_voucher_type": self.doctype,
-				"project": item.project or self.project,
-				"cost_center": self.cost_center or frappe.db.get_value(
-						"Company", self.company, "cost_center"
-					),
-				"_skip_merge": skip_merge,
-				"voucher_detail_no": item.name
-			}
-			if remarks:
-				gl["remarks"] = remarks
+			account_currency = get_account_currency(tax.account_head)
+			dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 
-			gl_entries.append(self.get_gl_dict(gl, self.party_account_currency, item=item))
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": tax.account_head,
+						"against": self.supplier,
+						dr_or_cr: base_amount,
+						dr_or_cr + "_in_account_currency": base_amount
+						if account_currency == self.company_currency
+						else amount,
+						dr_or_cr + "_in_transaction_currency": amount,
+						"cost_center": tax.cost_center or self.cost_center or frappe.db.get_value(
+							"Company", self.company, "cost_center"
+						),
+					},
+					account_currency,
+					item=tax,
+				)
+			)
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
@@ -585,10 +776,17 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 		for tax in self.get("taxes"):
 			amount, base_amount = self.get_tax_amounts(tax, None)
-			if tax.category in ("Total", "Valuation and Total") and flt(base_amount) and "PPH 21" in tax.account_head:
+			if tax.category in ("Total", "Valuation and Total") and flt(base_amount) and (
+				"__from_pph_lainnya__" in (tax.description or "")
+				or "__from_ppn__" in (tax.description or "")
+				or "__from_charges__" in (tax.description or "")
+				or "__from_pb__" in (tax.description or "")
+			):
 				account_currency = get_account_currency(tax.account_head)
 
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+				# if "__from_charges__" in tax.description:
+				# 	base_amount = base_amount * -1
 
 				gl_entries.append(
 					self.get_gl_dict(
@@ -663,7 +861,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 		if self.auto_accounting_for_stock and self.update_stock and valuation_tax:
 			for tax in self.get("taxes"):
-				if valuation_tax.get(tax.name) and "PPH 21" in tax.account_head:
+				if valuation_tax.get(tax.name) and ("PPH 21" in tax.account_head or "__from_charges__" in tax.description):
 					gl_entries.append(
 						self.get_gl_dict(
 							{
@@ -686,20 +884,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 
 	def make_item_gl_entries_spk(self, gl_entries):
-		"""
-		GL Entries untuk Purchase Invoice dengan invoice_type == 'SPK'.
-
-		Aturan:
-		  - Tax TIDAK masuk ke jurnal (make_tax_gl_entries di-skip dari get_gl_entries).
-		  - DEBIT  : expense_account per baris item  → sebesar base_amount masing-masing
-		  - CREDIT : credit_to (hutang supplier)      → sebesar total semua base_amount
-		  - Keduanya balance karena tidak ada tax offset.
-
-		Catatan:
-		  Karena tax di-skip, nilai yang tercatat adalah net (sebelum pajak).
-		  Jika kontrak / BAPP memang gross (pajak ditanggung vendor), pastikan
-		  base_amount item sudah mencerminkan nilai yang benar.
-		"""
+		
 		remarks = self.get("remarks") or _(
 			"Accounting Entry for {0} {1}"
 		).format(self.doctype, self.name)
@@ -721,7 +906,6 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 			# Untuk multi-currency: amount_in_account_currency = amount (mata uang transaksi)
 			amount_in_txn_currency = flt(item.amount)
-
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -733,7 +917,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 							else base_amount
 						),
 						"against"                    : self.credit_to,
-						
+
 						"cost_center"				 : self.cost_center or frappe.db.get_value(
 														"Company", self.company, "cost_center"
 													   ),
@@ -750,6 +934,21 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		if not total_debit:
 			return
 
+		total_charges_pp = 0
+		for tax in self.taxes:
+			if ("__from_pph_lainnya__" in (tax.description or "")
+				or "__from_ppn__" in (tax.description or "")
+				or "__from_charges__" in (tax.description or "")
+				or "__from_pb__" in (tax.description or "")):
+
+				if "__from_charges__" in (tax.description or ""):
+					total_charges_pp += tax.tax_amount * -1
+				else:
+					total_charges_pp += tax.tax_amount
+
+		# Kurangi credit_to dengan total charges (charges punya GL entry sendiri via make_charges_gl_entries)
+		credit_amount = flt(total_debit + total_charges_pp, self.precision("base_grand_total"))
+
 		# ── CREDIT : credit_to (hutang ke supplier) ──────────────────────────── #
 		# Kumpulkan semua expense_account unik sebagai "against" label
 		against_accounts = ", ".join(
@@ -758,12 +957,12 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 		# Nilai credit dalam mata uang party (jika multi-currency)
 		if self.party_account_currency == self.company_currency:
-			credit_in_party_currency = total_debit
+			credit_in_party_currency = credit_amount
 		else:
-			# Hitung ulang dari item.amount (mata uang transaksi)
+			# Hitung ulang dari item.amount (mata uang transaksi) dikurangi charges
 			credit_in_party_currency = flt(
 				sum(flt(item.amount) for item in self.get("items") if flt(item.amount))
-			)
+			) - flt(self.total_charges)
 
 		gl_entries.append(
 			self.get_gl_dict(
@@ -771,11 +970,11 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					"account"                   : self.credit_to,
 					"party_type"                : "Supplier",
 					"party"                     : self.supplier,
-					"credit"                    : total_debit,               # base (IDR)
+					"credit"                    : credit_amount,              # base (IDR)
 					"credit_in_account_currency": credit_in_party_currency,  # mata uang party
 					"against"                   : against_accounts,
 					"remarks"                   : remarks,
-					
+
 					"cost_center": self.cost_center or frappe.db.get_value(
 						"Company", self.company, "cost_center"
 					),
@@ -787,20 +986,16 @@ class SthPurchaseInvoice(PurchaseInvoice):
 	def make_item_gl_entries_leasing(self, gl_entries):
 		"""
 		GL Entries untuk Purchase Invoice dengan invoice_type == 'Leasing'.
+		Charges dikurangi dari base_amount; GL entry charges dibuat via make_charges_gl_entries.
 		"""
 		remarks = (
 			"Keterangan {2}. Accounting Entry for {0} {1}. "
 		).format(self.doctype, self.name, self.keterangan)
 
-		total_debit = 0.0
-
+		grand_total = flt(self.grand_total)
 		base_amount = flt(self.grand_total)
 
-		service = 0
-		for item in self.items:
-			po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
-			if po_doc.sub_purchase_type == "Service Request":
-				service = 1
+		service = 1
 
 		supplier_hutang_leasing_account = ""
 		if service == 1:
@@ -814,39 +1009,73 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		else:
 			supplier_ap_in_transit_account = method_ambil_account.ambil_ap_in_transit_procurement("barang", self.company)
 
-		gl_entries.append(
-			self.get_gl_dict(
-				{
-					"account"                    : supplier_ap_in_transit_account,
-					"debit"                      : base_amount,
-					"debit_in_account_currency"  : base_amount,
-					"against"                    : supplier_hutang_leasing_account,
-					"cost_center"                : self.cost_center,
-					"project"                    : self.project,
-					"remarks"                    : remarks,
-					"party_type"                 : "Supplier",
-					"party"                      : self.supplier,
-				},
-				self.company_currency,
+		acc_doc = frappe.get_doc("Account", supplier_ap_in_transit_account)
+		if acc_doc.account_type == "Payable":
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account"                    : supplier_ap_in_transit_account,
+						"debit"                      : base_amount,
+						"debit_in_account_currency"  : base_amount,
+						"against"                    : supplier_hutang_leasing_account,
+						"cost_center"                : self.cost_center,
+						"project"                    : self.project,
+						"remarks"                    : remarks,
+						"party_type"                 : "Supplier",
+						"party"                      : self.supplier,
+					},
+					self.company_currency,
+				)
 			)
-		)
+		else:
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account"                    : supplier_ap_in_transit_account,
+						"debit"                      : base_amount,
+						"debit_in_account_currency"  : base_amount,
+						"against"                    : supplier_hutang_leasing_account,
+						"cost_center"                : self.cost_center,
+						"project"                    : self.project,
+						"remarks"                    : remarks,
+					},
+					self.company_currency,
+				)
+			)
 
-		gl_entries.append(
-			self.get_gl_dict(
-				{
-					"account"                    : supplier_hutang_leasing_account,
-					"credit"                     : base_amount,
-					"credit_in_account_currency" : base_amount,
-					"against"                    : supplier_ap_in_transit_account,
-					"cost_center"                : self.cost_center,
-					"project"                    : self.project,
-					"remarks"                    : remarks,
-					"party_type"                 : "Supplier",
-					"party"                      : self.supplier,
-				},
-				self.company_currency,
+		acc_doc = frappe.get_doc("Account", supplier_hutang_leasing_account)
+		if acc_doc.account_type == "Payable":
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account"                    : supplier_hutang_leasing_account,
+						"credit"                     : grand_total,
+						"credit_in_account_currency" : grand_total,
+						"against"                    : supplier_ap_in_transit_account,
+						"cost_center"                : self.cost_center,
+						"project"                    : self.project,
+						"remarks"                    : remarks,
+						"party_type"                 : "Supplier",
+						"party"                      : self.supplier,
+					},
+					self.company_currency,
+				)
 			)
-		)		
+		else:
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account"                    : supplier_hutang_leasing_account,
+						"credit"                     : grand_total,
+						"credit_in_account_currency" : grand_total,
+						"against"                    : supplier_ap_in_transit_account,
+						"cost_center"                : self.cost_center,
+						"project"                    : self.project,
+						"remarks"                    : remarks,
+					},
+					self.company_currency,
+				)
+			)
 
 	def make_item_gl_entries_custom(self, gl_entries):
 		# item gl entries
@@ -1080,7 +1309,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 						self.make_provisional_gl_entry(gl_entries, item)
 
 					if not self.is_internal_transfer():
-						
+
 						acc_doc = frappe.get_doc("Account", item.expense_account)
 
 						total_taxes = 0
@@ -1163,54 +1392,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 										item=item,
 									)
 								)
-			# if (
-			# 	self.auto_accounting_for_stock
-			# 	and self.is_opening == "No"
-			# 	and item.item_code in stock_items
-			# 	and item.item_tax_amount
-			# ):
-			# 	# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-			# 	if item.purchase_receipt and valuation_tax_accounts:
-			# 		negative_expense_booked_in_pr = frappe.db.sql(
-			# 			"""select name from `tabGL Entry`
-			# 				where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
-			# 			(item.purchase_receipt, valuation_tax_accounts),
-			# 		)
-
-			# 		# stock_rbnb = (
-			# 		# 	self.get_company_default("asset_received_but_not_billed")
-			# 		# 	if item.is_fixed_asset
-			# 		# 	else self.stock_received_but_not_billed
-			# 		# )
-
-			# 		stock_rbnb = self.items[0].expense_account
-
-			# 		if not negative_expense_booked_in_pr:
-			# 			gl_entries.append(
-			# 				self.get_gl_dict(
-			# 					{
-			# 						"account": stock_rbnb,
-			# 						"against": self.supplier,
-			# 						"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-			# 						"debit_in_transaction_currency": flt(
-			# 							item.item_tax_amount / self.conversion_rate,
-			# 							item.precision("item_tax_amount"),
-			# 						),
-			# 						"remarks": self.remarks or _("Accounting Entry for Stock"),
-			# 						"cost_center": self.cost_center,
-			# 						"project": item.project or self.project,
-			# 					},
-			# 					item=item,
-			# 				)
-			# 			)
-
-			# 			self.negative_expense_to_be_booked += flt(
-			# 				item.item_tax_amount, item.precision("item_tax_amount")
-			# 			)
 
 			if item.is_fixed_asset and item.landed_cost_voucher_amount:
 				self.update_gross_purchase_amount_for_linked_assets(item)
-					  
+
 @frappe.whitelist()
 def get_all_training_event_by_supplier(supplier):
   events = frappe.get_all(
@@ -1231,22 +1416,61 @@ def get_all_training_event_by_supplier(supplier):
   return events
 
 @frappe.whitelist()
+def get_all_training_event():
+    return frappe.db.sql("""
+        SELECT
+            te.name,
+            te.custom_posting_date,
+            te.supplier,
+			te.unit
+        FROM `tabTraining Event` te
+        WHERE
+            te.docstatus = 1
+            AND NOT EXISTS (
+                SELECT 1
+                FROM `tabPurchase Invoice` pi
+                WHERE
+                    pi.docstatus = 1
+                    AND pi.document_type = 'Training Event'
+                    AND pi.document_no = te.name
+            )
+        ORDER BY te.custom_posting_date DESC
+    """, as_dict=True)
+
+# @frappe.whitelist()
+# def get_item_costing_in_training_events(training_events):
+#   training_events = frappe.parse_json(training_events)
+#   return frappe.db.sql("""
+# 	SELECT
+# 	i.name as item,
+# 	i.item_name as item_code,
+# 	i.stock_uom as stock_uom,
+# 	SUM(tec.total_amount) as total_amount
+# 	FROM `tabTraining Event Costing` as tec
+# 	JOIN `tabExpense Claim Type` as ect ON ect.name = tec.expense_type
+# 	JOIN `tabItem` as i ON i.name = "20102005"
+# 	WHERE tec.parent IN %(training_events)s
+# 	GROUP BY i.name, i.item_name, i.stock_uom;
+#   """, {"training_events": tuple(training_events)}, as_dict=True)
+
+@frappe.whitelist()
 def get_item_costing_in_training_events(training_events):
-  training_events = frappe.parse_json(training_events)
-  return frappe.db.sql("""
-	SELECT
-	tec.parent,
-	tec.name,
-	tec.expense_type,
-	i.name as item,
-	i.item_name as item_code,
-	i.stock_uom as stock_uom,
-	tec.total_amount
-	FROM `tabTraining Event Costing` as tec
-	JOIN `tabExpense Claim Type` as ect ON ect.name = tec.expense_type
-	JOIN `tabItem` as i ON i.name = ect.custom_item
-	WHERE tec.parent IN %(training_events)s;
-  """, {"training_events": tuple(training_events)}, as_dict=True)
+    training_events = frappe.parse_json(training_events)
+
+    return frappe.db.sql("""
+        SELECT
+            i.name AS item,
+            i.item_name AS item_code,
+            i.stock_uom,
+            tec.total_amount,
+			tec.expense_type
+        FROM `tabTraining Event Costing` tec
+        JOIN `tabItem` i
+            ON i.name = "20102005"
+        WHERE tec.parent IN %(training_events)s
+    """, {
+        "training_events": tuple(training_events)
+    }, as_dict=True)
 
 
 def update_cwip_expense_accounts(doc):
@@ -1258,7 +1482,7 @@ def update_cwip_expense_accounts(doc):
 			if row.company_name == doc.company:
 				if row.capital_work_in_progress_account:
 					cwip_account = row.capital_work_in_progress_account
-		
+
 		if not cwip_account:
 			frappe.throw(
 				_('Capital Work in Progress Account is not set for Company {0}').format(doc.company),
@@ -1272,68 +1496,68 @@ def update_cwip_expense_accounts(doc):
 @frappe.validate_and_sanitize_search_inputs
 def get_purchase_receipt_with_po(doctype, txt, searchfield, start, page_len, filters):
 	"""
-	Custom query untuk mendapatkan Purchase Receipt yang itemnya 
+	Custom query untuk mendapatkan Purchase Receipt yang itemnya
 	mengandung Purchase Order tertentu
 	"""
-	
+
 	purchase_order = filters.get("purchase_order")
 	company = filters.get("company")
 	status_not_in = filters.get("status", ["Closed", "Completed", "Return Issued"])
-	
+
 	conditions = []
 	values = []
-	
+
 	# Base conditions
 	if company:
 		conditions.append("pr.company = %s")
 		values.append(company)
-	
+
 	conditions.append("pr.docstatus = 1")
 	conditions.append("pr.is_return = 0")
-	
+
 	# Status filter
 	if status_not_in:
 		placeholders = ", ".join(["%s"] * len(status_not_in))
 		conditions.append(f"pr.status NOT IN ({placeholders})")
 		values.extend(status_not_in)
-	
+
 	# Search filter
 	if txt:
 		conditions.append("pr.name LIKE %s")
 		values.append(f"%{txt}%")
-	
+
 	# Filter berdasarkan Purchase Order di items
 	po_condition = ""
 	if purchase_order:
 		po_condition = """
 		AND EXISTS (
-			SELECT 1 
+			SELECT 1
 			FROM `tabPurchase Receipt Item` pri
 			WHERE pri.parent = pr.name
 			AND pri.purchase_order = %s
 		)
 		"""
 		values.append(purchase_order)
-	
+
 	where_clause = " AND ".join(conditions) if conditions else "1=1"
-	
+
 	query = f"""
 		SELECT DISTINCT
 			pr.name,
 			pr.supplier,
 			pr.posting_date,
 			pr.grand_total
-		FROM 
+		FROM
 			`tabPurchase Receipt` pr
-		WHERE 
+		WHERE
 			{where_clause}
 			{po_condition}
-		ORDER BY 
+		ORDER BY
 			pr.posting_date DESC, pr.name DESC
-		LIMIT 
+		LIMIT
 			{start}, {page_len}
 	"""
-	
+
 	return frappe.db.sql(query, tuple(values))
 
 
@@ -1343,15 +1567,15 @@ def get_purchase_receipts_by_po(purchase_order):
 	Alternative method: Get list of Purchase Receipts containing specific PO
 	Returns list of PR names
 	"""
-	
+
 	if not purchase_order:
 		return []
-	
+
 	pr_list = frappe.db.sql("""
 		SELECT DISTINCT parent
 		FROM `tabPurchase Receipt Item`
 		WHERE purchase_order = %s
 		AND docstatus = 1
 	""", purchase_order, as_dict=1)
-	
+
 	return [pr.parent for pr in pr_list]

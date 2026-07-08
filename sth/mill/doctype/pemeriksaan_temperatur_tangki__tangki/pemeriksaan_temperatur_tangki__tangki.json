@@ -6,6 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_seyf",
+  "warning_message",
+  "warning_list",
   "header_section",
   "naming_series",
   "tanggal",
@@ -18,6 +21,12 @@
   "column_break_kgot",
   "stasiun",
   "mesin",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_grtb",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "time_stamp_section",
   "user_scan",
   "column_break_qboc",
@@ -114,13 +123,14 @@
   {
    "description": "(Satuan dalam \u00b0C)",
    "fieldname": "temperatur_cot",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Temperatur (COT)"
   },
   {
    "fieldname": "foto_hasil_temperatur_cot",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (COT)"
+   "label": "Foto Hasil Temperatur (COT)",
+   "reqd": 1
   },
   {
    "fieldname": "sand_trap_tank_section",
@@ -136,7 +146,8 @@
   {
    "fieldname": "foto_hasil_temperatur_stt",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (STT)"
+   "label": "Foto Hasil Temperatur (STT)",
+   "reqd": 1
   },
   {
    "fieldname": "pure_oil_tank__pot__section",
@@ -152,7 +163,8 @@
   {
    "fieldname": "foto_hasil_temperatur",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur"
+   "label": "Foto Hasil Temperatur",
+   "reqd": 1
   },
   {
    "fieldname": "sludge_tank_section",
@@ -168,7 +180,8 @@
   {
    "fieldname": "foto_hasil_temperatur_st",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (ST)"
+   "label": "Foto Hasil Temperatur (ST)",
+   "reqd": 1
   },
   {
    "fieldname": "continuous_settling_tank__cst__section",
@@ -178,19 +191,20 @@
   {
    "description": "(Satuan dalam \u00b0C)",
    "fieldname": "temperatur_cst",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Temperatur (CST)"
   },
   {
    "description": "(Satuan dalam Cm) dilakukan setiap 1 x 1 jam",
    "fieldname": "ketebalan_minyak",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Ketebalan Minyak"
   },
   {
    "fieldname": "foto_hasil_temperatur_cst",
    "fieldtype": "Attach Image",
-   "label": "Foto Hasil Temperatur (CST)"
+   "label": "Foto Hasil Temperatur (CST)",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -306,13 +320,64 @@
    "label": "Shift Proses",
    "options": "Monitoring Proses Control",
    "reqd": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_grtb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_seyf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "warning_message",
+   "fieldtype": "HTML",
+   "label": "Warning Message",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "warning_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Warning List",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-03 11:41:27.407540",
+ "modified": "2026-06-25 11:26:41.125920",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Temperatur Tangki- Tangki",

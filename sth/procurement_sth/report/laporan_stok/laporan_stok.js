@@ -1,85 +1,121 @@
-// Copyright (c) 2025, DAS and contributors
-// For license information, please see license.txt
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+// License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Laporan Stok"] = {
-	"filters": [
+	filters: [
 		{
 			fieldname: "company",
-			label: __("Perusahaan"),
+			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1,
-			default: frappe.defaults.get_default("Company"),
-		},
-		{
-			fieldname: "unit",
-			label: __("Unit"),
-			fieldtype: "Link",
-			options: "Unit",
-			get_query: () => {
-				let company = frappe.query_report.get_filter_value("company");
-				return {
-					filters: {
-						...(company && { company }),
-					},
-				};
-			},
 		},
 		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
+			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			reqd: 1,
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
 			reqd: 1,
 		},
 		{
-			fieldname: "item_group",
-			label: __("Kelompok Barang"),
+			fieldname: "warehouse",
+			label: __("Warehouse"),
 			fieldtype: "Link",
-			options: "Item Group"
+			options: "Warehouse",
+			get_query: function () {
+				const company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: { company: company },
+				};
+			},
 		},
 		{
 			fieldname: "item_code",
-			label: __("Nama Barang"),
+			label: __("Item"),
 			fieldtype: "Link",
-			options: "Item"
+			options: "Item",
+			get_query: function () {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+				};
+			},
 		},
 		{
-			fieldname: "gudang",
-			label: __("Gudang"),
+			fieldname: "item_group",
+			label: __("Item Group"),
 			fieldtype: "Link",
-			options: "Warehouse",
-			get_query: () => {
-				let company = frappe.query_report.get_filter_value("company");
-				return {
-					filters: {
-						is_group: 0,
-						...(company && { company })
-					},
-				};
-			}
+			options: "Item Group",
+		},
+		{
+			fieldname: "batch_no",
+			label: __("Batch No"),
+			fieldtype: "Link",
+			options: "Batch",
+			on_change() {
+				const batch_no = frappe.query_report.get_filter_value("batch_no");
+				if (batch_no) {
+					frappe.query_report.set_filter_value("segregate_serial_batch_bundle", 1);
+				} else {
+					frappe.query_report.set_filter_value("segregate_serial_batch_bundle", 0);
+				}
+			},
+		},
+		{
+			fieldname: "brand",
+			label: __("Brand"),
+			fieldtype: "Link",
+			options: "Brand",
+		},
+		{
+			fieldname: "voucher_no",
+			label: __("Voucher #"),
+			fieldtype: "Data",
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Link",
+			options: "Project",
+		},
+		{
+			fieldname: "include_uom",
+			label: __("Include UOM"),
+			fieldtype: "Link",
+			options: "UOM",
+		},
+		{
+			fieldname: "valuation_field_type",
+			label: __("Valuation Field Type"),
+			fieldtype: "Select",
+			width: "80",
+			options: "Currency\nFloat",
+			default: "Currency",
+		},
+		{
+			fieldname: "segregate_serial_batch_bundle",
+			label: __("Segregate Serial / Batch Bundle"),
+			fieldtype: "Check",
+			default: 0,
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
-
-		if (column.fieldname == "nama_barang" && data) {
-			let filters = frappe.query_report.get_values();
-
-			value = `
-				<a 
-					href="/app/query-report/Laporan%20Histori%20Stok?company=${encodeURIComponent(filters.company)}&from_date=${filters.from_date}&to_date=${filters.to_date}&item_code=${encodeURIComponent(data.kode_barang)}"
-					target="_blank"
-				>
-					${data.nama_barang}
-				</a>
-			`;
+		if (column.fieldname == "out_qty" && data && data.out_qty < 0) {
+			value = "<span style='color:red'>" + value + "</span>";
+		} else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
 		}
+
 		return value;
 	},
 };
+
+erpnext.utils.add_inventory_dimensions("Stock Ledger", 10);

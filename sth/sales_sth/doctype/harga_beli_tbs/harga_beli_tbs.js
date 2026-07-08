@@ -1,4 +1,22 @@
 frappe.ui.form.on("Harga Beli TBS", {
+	setup(frm){
+		if (!frm.doc.item_code) {
+
+			frappe.db.get_list("Item", {
+				filters: {
+					tipe_barang: "TBS"
+				},
+				fields: ["name"],
+				limit: 1
+			}).then(r => {
+
+				if (r.length) {
+					frm.set_value("item_code", r[0].name);
+				}
+
+			});
+		}
+	},
 	onload(frm) {
 		frm.set_query("uom", () => {
 			if (!frm.doc.item_code) return {};
@@ -26,7 +44,15 @@ frappe.ui.form.on("Harga Beli TBS", {
 		});
 	},
 	refresh(frm){
-		frm.disable_save();
+		frm.set_query("item_code", function() {
+			return {
+				filters: {
+					tipe_barang: "TBS"
+				}
+			};
+		});
+		
+		// frm.disable_save();
 		frm.events.load_price_history(frm);
 		 frm.set_value('tanggal', frappe.datetime.get_today());
 

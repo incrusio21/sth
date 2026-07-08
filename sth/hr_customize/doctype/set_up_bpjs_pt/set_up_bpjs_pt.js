@@ -3,6 +3,22 @@ frappe.ui.form.on('Set Up BPJS PT', {
         // Disable add row button for the child table
         frm.fields_dict['set_up_bpjs_pt_table'].grid.cannot_add_rows = true;
         frm.refresh_field('set_up_bpjs_pt_table');
+
+        frm.set_query('unit', function() {
+            return {
+                filters: {
+                    company: frm.doc.pt
+                }
+            };
+        });
+
+        frm.set_query('expense_account', 'set_up_bpjs_pt_table', function() {
+            return {
+                filters: {
+                    company: frm.doc.pt
+                }
+            };
+        });
     },
     
     jenis_bpjs: function(frm) {

@@ -17,6 +17,12 @@
   "unit",
   "stasiun",
   "mesin",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_jdtm",
+  "stasiun_latitude",
+  "stasiun_longitude",
   "section_break_fnwx",
   "tanggal_scan",
   "column_break_dklm",
@@ -120,7 +126,8 @@
   {
    "fieldname": "uf",
    "fieldtype": "Attach Image",
-   "label": "Upload Foto"
+   "label": "Upload Foto",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_fnwx",
@@ -167,13 +174,46 @@
   {
    "fieldname": "column_break_fiud",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jdtm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stasiun_latitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stasiun_longitude",
+   "fieldtype": "Data",
+   "label": "Stasiun Longitude",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-23 13:50:39.468592",
+ "modified": "2026-06-08 11:22:26.234386",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Effisiensi Ripple Mill",

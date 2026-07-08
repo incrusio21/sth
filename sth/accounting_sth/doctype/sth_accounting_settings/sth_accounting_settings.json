@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-23 13:56:02.989499",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sth_accounting_settings_payroll",
+  "sth_accounting_settings_alokasi_gaji_bengkel",
+  "sth_accounting_settings_reparasi_bengkel_account",
+  "sth_accounting_settings_biaya_bengkel_dialokasi"
+ ],
+ "fields": [
+  {
+   "fieldname": "sth_accounting_settings_payroll",
+   "fieldtype": "Table",
+   "label": "STH Accounting Settings Payroll",
+   "options": "STH Accounting Settings Payroll"
+  },
+  {
+   "fieldname": "sth_accounting_settings_alokasi_gaji_bengkel",
+   "fieldtype": "Table",
+   "label": "STH Accounting Settings Alokasi Gaji Bengkel",
+   "options": "STH Accounting Settings Alokasi Gaji Bengkel"
+  },
+  {
+   "fieldname": "sth_accounting_settings_biaya_bengkel_dialokasi",
+   "fieldtype": "Table",
+   "label": "STH Accounting Settings Biaya Bengkel Dialokasi",
+   "options": "STH Accounting Settings Biaya Bengkel Dialokasi"
+  },
+  {
+   "fieldname": "sth_accounting_settings_reparasi_bengkel_account",
+   "fieldtype": "Table",
+   "label": "STH Accounting Settings Reparasi Bengkel Account",
+   "options": "STH Accounting Settings Reparasi Bengkel Account"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-02 02:29:14.408237",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "STH Accounting Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

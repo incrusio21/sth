@@ -32,6 +32,8 @@
   "do_no",
   "delivery_note",
   "purchase_order",
+  "trans_no",
+  "rkh_no",
   "section_break_mnhe",
   "isi_komidel",
   "jumlah_janjang",
@@ -53,8 +55,10 @@
   "kualitas_broken_",
   "column_break_etfh",
   "kualitas_moisture_",
+  "kualitas_kk_",
   "column_break_pnhx",
   "kualitas_dirt_",
+  "kualitas_ka_",
   "section_break_rtij",
   "kode_barang",
   "column_break_fcyg",
@@ -104,10 +108,11 @@
    "reqd": 1
   },
   {
-   "default": "now",
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time"
+   "label": "Posting Time",
+   "read_only": 1
   },
   {
    "fieldname": "driver_data_tab",
@@ -135,6 +140,7 @@
    "depends_on": "eval:doc.receive_type == 'TBS Internal'",
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Unit",
    "options": "Unit",
    "read_only": 1
@@ -168,8 +174,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Isi Komidel",
-   "precision": "2",
-   "read_only": 1
+   "precision": "2"
   },
   {
    "fieldname": "driver_section",
@@ -259,6 +264,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Posting Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -271,6 +277,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "ticket_number.spb",
    "fieldname": "spb",
    "fieldtype": "Link",
    "label": "SPB",
@@ -400,8 +407,7 @@
    "fieldname": "spb_detail",
    "fieldtype": "Table",
    "label": "SPB Detail",
-   "options": "Timbangan SPB Detail",
-   "read_only": 1
+   "options": "Timbangan SPB Detail"
   },
   {
    "default": "Now",
@@ -457,10 +463,9 @@
   },
   {
    "fieldname": "tujuan_pks",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Tujuan PKS",
-   "options": "Unit"
+   "label": "Tujuan PKS"
   },
   {
    "fieldname": "total_janjang",
@@ -551,13 +556,43 @@
    "in_preview": 1,
    "label": "Delivery Note",
    "read_only": 1
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rkh_no",
+   "fieldtype": "Data",
+   "label": "RKH No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kualitas_kk_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Kualitas KK %",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kualitas_ka_",
+   "fieldtype": "Percent",
+   "in_preview": 1,
+   "label": "Kualitas KA %",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-30 09:59:41.099995",
+ "modified": "2026-07-08 09:08:52.601681",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

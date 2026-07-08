@@ -29,11 +29,18 @@ frappe.ui.form.on("Timbangan", {
 		});
 
 		set_field_visibility(frm)
+		set_scan_nfc(frm)
 	},
 
 	receive_type(frm) {
-		if (frm.doc.receive_type == "TBS Internal" || frm.doc.receive_type == "TBS Eksternal") {
-			frm.set_value("kode_barang", "TBS")
+		if (["TBS Internal", "TBS Eksternal"].includes(frm.doc.receive_type)) {
+			frappe.db.get_value("Item", {
+				tipe_barang: "TBS",
+				status: "Aktif"
+			}, ["name"]
+			).then((res) => {
+				frm.set_value("kode_barang", res.message.name)
+			})
 		}
 	},
 
@@ -111,6 +118,8 @@ frappe.ui.form.on("Timbangan", {
 			})
 	},
 
+
+
 	no_segel(frm) {
 		frm.set_value("jumlah_segel", frm.doc.no_segel.length)
 	},
@@ -167,6 +176,9 @@ frappe.ui.form.on("Timbangan", {
 	},
 	potongan_sortasi(frm) {
 		frm.trigger('calculate_weight')
+	},
+	onload(frm){
+		link_for(frm)
 	}
 })
 
@@ -219,6 +231,82 @@ function make_transaction_button(frm) {
 			}, __('Create'));
 		}
 	}
+}
+
+function set_scan_nfc(frm){
+	frm.add_custom_button(__('Scan NFC'), function() {
+        let d = new frappe.ui.Dialog({
+            title: 'Input Data NFC',
+            fields: [
+                {
+                    fieldtype: 'Small Text',
+                    fieldname: 'qr_data',
+                    label: 'Data NFC',
+                    reqd: 1
+                }
+            ],
+            primary_action_label: 'Proses',
+            primary_action: function(values) {
+                decode_gzip_base64(values.qr_data.trim())
+                    .then(decoded => {
+                        const trans_no = decoded.split('#')[0];
+
+                        frappe.db.get_value(
+                            'Surat Pengantar Buah',
+                            { trans_no: trans_no },
+                            'name'
+                        ).then(r => {
+                            if (r.message && r.message.name) {
+                                frm.set_value('spb', r.message.name);
+                                d.hide();
+                            } else {
+                                frappe.msgprint(__('Surat Pengantar Buah dengan Trans No <b>{0}</b> tidak ditemukan.', [trans_no]));
+                            }
+                        });
+                    })
+                    .catch(err => {
+                        frappe.msgprint(__('Gagal mendecode data: ') + err);
+                    });
+            }
+        });
+
+        d.show();
+    });
+}
+
+
+function decode_gzip_base64(base64str) {
+    return new Promise((resolve, reject) => {
+        try {
+            const binary = atob(base64str);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+
+            const ds = new DecompressionStream('gzip');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+
+            writer.write(bytes);
+            writer.close();
+
+            let result = '';
+            const decoder = new TextDecoder();
+
+            reader.read().then(function process({ done, value }) {
+                if (done) {
+                    resolve(result);
+                    return;
+                }
+                result += decoder.decode(value, { stream: true });
+                return reader.read().then(process);
+            }).catch(reject);
+
+        } catch (e) {
+            reject(e.message);
+        }
+    });
 }
 
 function set_field_visibility(frm) {
@@ -284,3 +372,23 @@ function set_field_visibility(frm) {
 // 	console.log(value);
 // 	return value
 // }
+
+function link_for(frm) {
+	const original_link_formatter = frappe.form.formatters.Link;
+	frappe.form.formatters.Link = function (value, docfield, options, doc) {
+		if (doc) {
+			if (!value) return "";
+
+			// doctype tujuan diambil dari options field Link
+			const doctype = docfield.options;
+			if (!doctype) return value;
+
+			// bangun route ke form doctype tsb
+			const route = frappe.utils.get_form_link(doctype, value);
+
+			return `<a href="${route}">${frappe.utils.escape_html(value)}</a>`;
+		}
+		// Doctype lain tetap pakai formatter asli
+		return original_link_formatter(value, docfield, options, doc);
+	};
+}
