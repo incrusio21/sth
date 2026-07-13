@@ -45,7 +45,7 @@ def debug_list():
 		frappe.get_doc("Delivery Order",no_doc).on_submit()
 
 def rename_item(dry_run=False):
-	frappe.rename_doc("Item Group","30102","30102")
+	frappe.rename_doc("Item Group","30102","31102")
 	frappe.rename_doc("Item Group","30201","31201")
 	frappe.rename_doc("Item Group","30202","31202")
 	frappe.rename_doc("Item Group","30203","31203")
