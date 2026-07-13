@@ -187,12 +187,12 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def on_submit(self):
 		super().on_submit()
-		self.make_gl_entry()
-		# self.update_kendaraan_field()
+		# self.make_gl_entry()
+		self.update_kendaraan_field()
 
 	def on_cancel(self):
 		super().on_cancel()
-		self.make_gl_entry()
+		# self.make_gl_entry()
 		self.update_kendaraan_field(cancel=1)
 	
 	def update_kendaraan_field(self, cancel=0):

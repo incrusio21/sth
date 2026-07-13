@@ -59,7 +59,7 @@
    "fieldname": "loricycle",
    "fieldtype": "Select",
    "label": "Lori/Cycle",
-   "options": "Lori\nCycle"
+   "options": "Lorry\nCycle"
   },
   {
    "fieldname": "tinggi_lubang_ukur",
@@ -89,7 +89,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-08 11:43:44.987197",
+ "modified": "2026-07-11 12:43:50.860950",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Master",

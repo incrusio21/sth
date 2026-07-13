@@ -40,17 +40,16 @@
   },
   {
    "fieldname": "payroll_no",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Payroll No",
-   "options": "Payroll Entry"
+   "label": "Payroll No"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-02 02:15:43.821512",
+ "modified": "2026-07-09 15:36:09.066922",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Costing Bengkel Payslip Operator VRA",

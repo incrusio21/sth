@@ -425,10 +425,9 @@
   },
   {
    "fieldname": "payment_voucher",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Payment Voucher HO",
    "no_copy": 1,
-   "options": "Payment Entry",
    "read_only": 1
   },
   {
@@ -491,10 +490,9 @@
   },
   {
    "fieldname": "payment_voucher_kebun",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Payment Voucher Kebun",
    "no_copy": 1,
-   "options": "Payment Entry",
    "read_only": 1
   },
   {
@@ -525,7 +523,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-08 13:12:56.696230",
+ "modified": "2026-07-09 14:31:50.975353",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

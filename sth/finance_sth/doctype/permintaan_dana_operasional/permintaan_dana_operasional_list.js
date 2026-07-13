@@ -25,6 +25,15 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 				fieldtype: "Link",
 				options: "Unit",
 				reqd: 1,
+				get_query() {
+					const company = new_d.get_value("company");
+
+					return {
+						filters: {
+							company: company
+						}
+					};
+				}
 			},
 			{
 				label: __("Months"),
@@ -32,6 +41,13 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 				fieldtype: "Link",
 				options: "Months",
 				reqd: 1,
+				get_query() {
+					return {
+						filters: {
+							month_number: [">", new Date().getMonth() + 1]
+						}
+					};
+				}
 			},
 			{
 				label: __("Fiscal Year"),
@@ -39,6 +55,15 @@ frappe.listview_settings["Permintaan Dana Operasional"] = {
 				fieldtype: "Link",
 				options: "Fiscal Year",
 				reqd: 1,
+				get_query() {
+					const current_year = frappe.datetime.get_today().split("-")[0];
+
+					return {
+						filters: {
+							name: current_year
+						}
+					};
+				}
 			},
 		];
 

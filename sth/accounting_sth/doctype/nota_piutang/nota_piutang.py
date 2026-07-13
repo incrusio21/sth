@@ -114,9 +114,14 @@ class NotaPiutang(Document):
 			frappe.throw("Account PPN tidak ditemukan di Sales Taxes and Charges.")
 
 		if taxes and taxes[0].included_in_print_rate:
-			total_amount = self.nilai_dp 
+			total_amount = self.nilai_dp
+			paid_received_amount = self.nilai_dp - ppn_amount
 		else:
 			total_amount = self.nilai_dp + ppn_amount
+			paid_received_amount = self.nilai_dp
+
+		print(ppn_amount)
+		print(total_amount)
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type     = "Receive"
@@ -126,9 +131,19 @@ class NotaPiutang(Document):
 		pe.company			= self.company
 		pe.unit				= self.unit
 		pe.paid_from        = self.akun_uang_muka
+		pe.party_account    = self.akun_uang_muka
 		pe.paid_to          = self.akun_kas_bank
+		pe.base_paid_amount = total_amount 
 		pe.paid_amount      = total_amount
-		pe.received_amount  = total_amount
+		pe.base_received_amount = total_amount
+		pe.received_amount      = total_amount
+		pe.unallocated_amount  = paid_received_amount
+
+		pe.paid_from_account_currency = "IDR"
+		pe.paid_to_account_currency   = "IDR"
+		pe.source_exchange_rate       = 1
+		pe.target_exchange_rate       = 1
+
 		pe.nota_piutang_pemenuhan_kontrak  = self.name
 		pe.reference_no     = self.name
 		pe.reference_date   = nowdate()
@@ -146,7 +161,7 @@ class NotaPiutang(Document):
 				"cost_center" : frappe.db.get_value("Company", self.company, "cost_center"),
 				"amount"      : ppn_amount * -1,
 			})
-		print(pe.paid_from)
+		print(frappe.as_json(pe))
 		# pe.insert(ignore_permissions=True)
 		pe.submit()
 

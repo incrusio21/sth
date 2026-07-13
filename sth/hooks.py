@@ -13,6 +13,10 @@ app_license = "mit"
 app_include_css = ["/assets/sth/css/lib/tabulator.min.css","sth.bundle.css"]
 app_include_js = [
 	"/assets/sth/js/lib/tabulator.min.js",
+	"/assets/sth/js/lib/xlsx.full.min.js",
+	"/assets/sth/js/lib/jspdf.min.js",
+	"/assets/sth/js/lib/jspdf.plugin.autotable.js",
+	"/assets/sth/js/lib/html2pdf.bundle.min.js",
 	"sth.bundle.js",
 	"/assets/sth/js/payment_entry_list.js?v=1018",
 ]
@@ -251,7 +255,7 @@ doc_events = {
 
 	"Accounting Period":{
 		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period",
-		# "on_submit": ["sth.overrides.accounting_period.create_costing_bengkel_on_submit","sth.overrides.accounting_period.cancel_costing_bengkel_on_cancel"]
+		"on_submit": ["sth.overrides.accounting_period.create_costing_bengkel_on_submit","sth.overrides.accounting_period.cancel_costing_bengkel_on_cancel"]
 	},
 
 	"Asset": {

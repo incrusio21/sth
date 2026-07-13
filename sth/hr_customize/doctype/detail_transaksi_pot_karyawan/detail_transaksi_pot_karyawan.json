@@ -43,7 +43,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Jenis Potongan",
-   "options": "Setup Jenis Potongan",
+   "options": "Jenis Potongan",
    "reqd": 1
   },
   {
@@ -51,7 +51,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "jp.rp",
+   "fetch_from": "jp.default_rate",
    "fieldname": "rupiah",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -71,7 +71,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-02 08:59:53.503157",
+ "modified": "2026-07-09 09:23:25.057281",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Detail Transaksi Pot Karyawan",

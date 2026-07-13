@@ -8,7 +8,7 @@ ACCOUNT_CODE_FIELD_MAP = {
 	"4111004": "pemakaian_barang_bengkel",
 	"4111005": "alokasi_biaya_umum_bengkel",
 	"4112001": "gaji_pengemudi",
-	"4112002": "premi_lembur_kendaraan",
+	"9999999": "premi_lembur_kendaraan",
 	"4112003": "bahan_bakar_pelumas",
 	"4112004": "bahan_suku_cadang",
 	"4112005": "reparasi_bengkel",
@@ -74,6 +74,7 @@ def get_data(filters):
 
 	condition_sql = ("AND " + " AND ".join(conditions)) if conditions else ""
 
+	# AGK dan AGO dipisah karena keduanya pakai COA 4111001 — dibedakan dari tabel sumbernya.
 	rows = frappe.db.sql("""
 		SELECT t.kode_vra AS kode_vra, t.no_coa AS no_coa,
 			SUM(t.debit) AS debit, SUM(t.credit) AS credit
@@ -92,41 +93,33 @@ def get_data(filters):
 
 			UNION ALL
 
-			SELECT agk.kode_vra, agk.no_coa, agk.amount, 0
-			FROM `tabCosting Bengkel Alokasi Gaji Karyawan Bengkel` agk
-			JOIN `tabCosting Bengkel` cb ON cb.name = agk.parent
-			WHERE cb.docstatus != 2 {condition_sql}
-
-			UNION ALL
-
-			SELECT ago.kode_vra, ago.no_coa, ago.amount, 0
-			FROM `tabCosting Bengkel Alokasi Gaji Operator VRA` ago
-			JOIN `tabCosting Bengkel` cb ON cb.name = ago.parent
-			WHERE cb.docstatus != 2 {condition_sql}
-
-			UNION ALL
-
 			SELECT clb.kode_vra, clb.no_coa, clb.debit, clb.credit
 			FROM `tabCosting Bengkel Closing Bengkel` clb
 			JOIN `tabCosting Bengkel` cb ON cb.name = clb.parent
 			WHERE cb.docstatus != 2 {condition_sql}
 
-			UNION ALL
 
-			SELECT glt.kode_vra, glt.no_coa, glt.debit, glt.credit
-			FROM `tabCosting Bengkel GL BKM Traksi` glt
-			JOIN `tabCosting Bengkel` cb ON cb.name = glt.parent
-			WHERE cb.docstatus != 2 {condition_sql}
-
-			UNION ALL
-
-			SELECT clv.kode_vra, clv.no_coa, clv.debit, clv.credit
-			FROM `tabCosting Bengkel Closing VRA` clv
-			JOIN `tabCosting Bengkel` cb ON cb.name = clv.parent
-			WHERE cb.docstatus != 2 {condition_sql}
 		) t
 		WHERE t.kode_vra IS NOT NULL AND t.kode_vra != ''
 		GROUP BY t.kode_vra, t.no_coa
+	""".format(condition_sql=condition_sql), values, as_dict=True)
+
+	agk_rows = frappe.db.sql("""
+		SELECT agk.kode_vra, SUM(agk.amount) AS total
+		FROM `tabCosting Bengkel Alokasi Gaji Karyawan Bengkel` agk
+		JOIN `tabCosting Bengkel` cb ON cb.name = agk.parent
+		WHERE cb.docstatus != 2 {condition_sql}
+		  AND agk.kode_vra IS NOT NULL AND agk.kode_vra != ''
+		GROUP BY agk.kode_vra
+	""".format(condition_sql=condition_sql), values, as_dict=True)
+
+	ago_rows = frappe.db.sql("""
+		SELECT ago.kode_vra, SUM(ago.amount) AS total
+		FROM `tabCosting Bengkel Alokasi Gaji Operator VRA` ago
+		JOIN `tabCosting Bengkel` cb ON cb.name = ago.parent
+		WHERE cb.docstatus != 2 {condition_sql}
+		  AND ago.kode_vra IS NOT NULL AND ago.kode_vra != ''
+		GROUP BY ago.kode_vra
 	""".format(condition_sql=condition_sql), values, as_dict=True)
 
 	vehicles = {}
@@ -138,18 +131,25 @@ def get_data(filters):
 			vehicles[kode_vra] = row
 		return vehicles[kode_vra]
 
+	coa_map_tanpa_4111001 = {k: v for k, v in ACCOUNT_CODE_FIELD_MAP.items() if k not in ("4111001", "4112001", "4112099")}
+
 	for r in rows:
 		net = (r.debit or 0) - (r.credit or 0)
 		row = get_row(r.kode_vra)
 		account = r.no_coa or ""
 
-		if account.startswith("411"):
-			row["total_biaya_bengkel"] += net
-
-		for code, fieldname in ACCOUNT_CODE_FIELD_MAP.items():
+		for code, fieldname in coa_map_tanpa_4111001.items():
 			if account.startswith(code):
 				row[fieldname] += net
 				break
+
+	for r in agk_rows:
+		row = get_row(r.kode_vra)
+		row["gaji_karyawan_bengkel"] += r.total or 0
+
+	for r in ago_rows:
+		row = get_row(r.kode_vra)
+		row["gaji_pengemudi"] += r.total or 0
 
 	# Total KM/HM VRA — dari semua Buku Kerja Mandor Traksi yang submitted.
 	# Jika filter costing_bengkel diisi, company & periode ikut dari dokumen tersebut.
@@ -224,7 +224,24 @@ def get_data(filters):
 		no_pol_map = {r.name: r.no_pol for r in no_pol_rows if r.no_pol}
 
 	for kode_vra, row in vehicles.items():
-		row["biaya_kendaraan_dialokasi"] = abs(row["biaya_kendaraan_dialokasi"])
+		row["total_biaya_bengkel"] = (
+			row["gaji_karyawan_bengkel"]
+			+ row["premi_lembur_bengkel"]
+			+ row["pemeliharaan_bengkel"]
+			+ row["pemakaian_barang_bengkel"]
+			+ row["alokasi_biaya_umum_bengkel"]
+		)
+		row["biaya_kendaraan_dialokasi"] = (
+			row["gaji_pengemudi"]
+			+ row["premi_lembur_kendaraan"]
+			+ row["bahan_bakar_pelumas"]
+			+ row["bahan_suku_cadang"]
+			+ row["reparasi_bengkel"]
+			+ row["reparasi_external"]
+			+ row["pajak_asuransi"]
+			+ row["penyusutan_kendaraan"]
+			+ row["alokasi_biaya_umum_kendaraan"]
+		)
 		if row["total_kmhm_vra"]:
 			row["total_cost_per_kmhm"] = row["biaya_kendaraan_dialokasi"] / row["total_kmhm_vra"]
 		row["kode_kendaraan"] = no_pol_map.get(kode_vra, kode_vra)

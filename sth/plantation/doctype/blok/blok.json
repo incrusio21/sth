@@ -27,6 +27,7 @@
   "seed_code",
   "varietas",
   "type",
+  "jenis",
   "section_break_xxdp",
   "bulan",
   "tahun",
@@ -227,12 +228,17 @@
    "in_preview": 1,
    "label": "Status",
    "options": "Kategori Kegiatan"
+  },
+  {
+   "fieldname": "jenis",
+   "fieldtype": "Data",
+   "label": "Jenis"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-10 16:23:50.519283",
+ "modified": "2026-07-10 11:43:56.204528",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

@@ -71,8 +71,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Tipe Kegiatan",
-   "options": "Tipe Kegiatan",
-   "reqd": 1
+   "options": "Tipe Kegiatan"
   },
   {
    "fieldname": "column_break_lrzd",
@@ -243,7 +242,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-02-26 10:52:06.973951",
+ "modified": "2026-07-09 15:01:54.918123",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

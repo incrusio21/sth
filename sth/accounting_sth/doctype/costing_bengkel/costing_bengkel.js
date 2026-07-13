@@ -50,7 +50,7 @@ function ambil_data_bengkel(frm) {
         }),
         frappe.call({
             method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_payslip_operator_vra_bengkel",
-            args
+            args: { ...args, unit: frm.doc.unit }
         }),
         frappe.call({
             method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_wkt_prb_bengkel",
@@ -67,8 +67,16 @@ function ambil_data_bengkel(frm) {
         frappe.call({
             method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_coa_biaya_bengkel_dialokasi",
             args: { company: frm.doc.company }
+        }),
+        frappe.call({
+            method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_alokasi_gaji_opr_vra_bengkel",
+            args: { ...args, unit: frm.doc.unit }
+        }),
+        frappe.call({
+            method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_coa_gaji_pengemudi",
+            args: { company: frm.doc.company }
         })
-    ]).then(([pb_res, pb_solar_res, payslip_res, payslip_opr_res, wkt_prb_res, coa_res, coa_reparasi_res, coa_dialokasi_res]) => {
+    ]).then(([pb_res, pb_solar_res, payslip_res, payslip_opr_res, wkt_prb_res, coa_res, coa_reparasi_res, coa_dialokasi_res, alokasi_opr_res, coa_gaji_pengemudi_res]) => {
         const pb_rows = pb_res.message || [];
         const pb_solar_rows = pb_solar_res.message || [];
         const payslip_rows = payslip_res.message || [];
@@ -77,6 +85,8 @@ function ambil_data_bengkel(frm) {
         const coa_alokasi = coa_res.message || null;
         const coa_reparasi = coa_reparasi_res.message || null;
         const coa_dialokasi = coa_dialokasi_res.message || null;
+        const alokasi_opr_map = alokasi_opr_res.message || {};
+        const coa_gaji_pengemudi = coa_gaji_pengemudi_res.message || null;
 
         // Pengeluaran Barang Suku Cadang
         frm.clear_table("costing_bengkel_pengeluaran_barang");
@@ -170,18 +180,15 @@ function ambil_data_bengkel(frm) {
             d.keterangan = row.keterangan;
         });
 
-        // Alokasi Gaji Operator VRA — auto hitung, menggunakan kendaraan dari Pengeluaran Barang Solar
+        // Alokasi Gaji Operator VRA — per employee proporsional KM/HM per kendaraan (dihitung server)
         frm.clear_table("costing_bengkel_alokasi_gaji_operator_vra");
-        const unique_vra_solar = [...new Set(pb_solar_rows.map(r => r.kode_vra).filter(Boolean))];
         const total_payslip_opr = payslip_opr_rows.reduce((s, r) => s + (r.amount || 0), 0);
-        const jumlah_kendaraan_solar = unique_vra_solar.length;
-        const amount_per_kendaraan_opr = jumlah_kendaraan_solar > 0 ? total_payslip_opr / jumlah_kendaraan_solar : 0;
 
-        unique_vra_solar.forEach(kendaraan => {
+        Object.entries(alokasi_opr_map).forEach(([kendaraan, amount]) => {
             let d = frm.add_child("costing_bengkel_alokasi_gaji_operator_vra");
             d.kode_vra = kendaraan;
-            d.no_coa = coa_alokasi;
-            d.amount = amount_per_kendaraan_opr;
+            d.no_coa = coa_gaji_pengemudi;
+            d.amount = amount;
             d.keterangan = "ALOKASI GAJI OPERATOR VRA";
         });
 
@@ -189,7 +196,7 @@ function ambil_data_bengkel(frm) {
         const total_pb = pb_rows.reduce((s, r) => s + (r.amount || 0), 0);
         const total_pb_solar = pb_solar_rows.reduce((s, r) => s + (r.amount || 0), 0);
         const total_alokasi = Object.values(alokasi_gaji_map).reduce((s, v) => s + (v || 0), 0);
-        const total_alokasi_opr = amount_per_kendaraan_opr * jumlah_kendaraan_solar;
+        const total_alokasi_opr = total_payslip_opr;
 
         frm.set_value("total_pengeluaran_barang", total_pb);
         frm.set_value("total_pengeluaran_barang_solar", total_pb_solar);
@@ -198,36 +205,34 @@ function ambil_data_bengkel(frm) {
         frm.set_value("total_payslip_operator_vra", total_payslip_opr);
         frm.set_value("total_alokasi_gaji_operator_vra", total_alokasi_opr);
 
-        // GL BKM Traksi & Closing VRA — diambil dari SEMUA BKM Traksi company/unit pada periode tsb,
-        // tidak lagi bergantung pada kendaraan yang muncul di Pengeluaran Barang Solar.
-        // Closing VRA — account diambil dari task -> kegiatan -> items Kegiatan, dipasangkan credit ke 4112099
+        const second_args = {
+            periode_dari: frm.doc.periode_dari,
+            periode_sampai: frm.doc.periode_sampai,
+            company: frm.doc.company,
+            unit: frm.doc.unit
+        };
+
         Promise.all([
             frappe.call({
                 method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_closing_vra_bengkel",
-                args: {
-                    periode_dari: frm.doc.periode_dari,
-                    periode_sampai: frm.doc.periode_sampai,
-                    company: frm.doc.company,
-                    unit: frm.doc.unit
-                }
+                args: second_args
             }),
             frappe.call({
                 method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_gl_bkm_traksi_bengkel",
-                args: {
-                    periode_dari: frm.doc.periode_dari,
-                    periode_sampai: frm.doc.periode_sampai,
-                    company: frm.doc.company,
-                    unit: frm.doc.unit
-                }
+                args: second_args
+            }),
+            frappe.call({
+                method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_bkm_traksi_list_bengkel",
+                args: second_args
             })
-        ]).then(([closing_vra_res, gl_bkm_traksi_res]) => {
+        ]).then(([closing_vra_res, gl_bkm_traksi_res, bkm_traksi_list_res]) => {
             const closing_vra_rows = closing_vra_res.message || [];
             const gl_bkm_traksi_rows = gl_bkm_traksi_res.message || [];
+            const bkm_traksi_list = bkm_traksi_list_res.message || [];
 
             frm.clear_table("costing_bengkel_closing_vra");
             closing_vra_rows.forEach(row => {
                 let d = frm.add_child("costing_bengkel_closing_vra");
-                d.bkm_traksi = row.bkm_traksi;
                 d.no_coa = row.no_coa;
                 d.debit = row.debit;
                 d.credit = row.credit;
@@ -238,7 +243,6 @@ function ambil_data_bengkel(frm) {
             frm.clear_table("costing_bengkel_gl_bkm_traksi");
             gl_bkm_traksi_rows.forEach(row => {
                 let d = frm.add_child("costing_bengkel_gl_bkm_traksi");
-                d.bkm_traksi = row.bkm_traksi;
                 d.no_coa = row.no_coa;
                 d.debit = row.debit;
                 d.credit = row.credit;
@@ -252,12 +256,6 @@ function ambil_data_bengkel(frm) {
             frm.set_value("total_gl_bkm_traksi", total_gl_bkm_traksi);
 
             frm.set_value("grand_total", total_pb + total_pb_solar + total_payslip + total_alokasi + total_payslip_opr + total_alokasi_opr);
-
-            // Kegiatan BKM Traksi — per baris task dari BKM Traksi yang sudah terambil di
-            // costing_bengkel_gl_bkm_traksi. Debit = (kmhm_akhir - kmhm_awal) task tsb x Total Cost
-            // Per KM/HM kendaraan (dihitung server dari Closing Bengkel + Closing VRA + GL BKM Traksi),
-            // account debit dari Kegiatan sesuai company, credit dipasangkan ke 4112099.
-            const bkm_traksi_list = [...new Set(gl_bkm_traksi_rows.map(r => r.bkm_traksi).filter(Boolean))];
 
             frappe.call({
                 method: "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.get_kegiatan_bkm_traksi_bengkel",

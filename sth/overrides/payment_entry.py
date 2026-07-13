@@ -466,8 +466,25 @@ class PaymentEntry(EmployeePaymentEntry):
 		delete_kriteria_upload_payment(self)
 		super().before_cancel()
 
+	# def on_trash(self):
+	# 	delete_kriteria_upload_payment(self)
+
 	def on_trash(self):
 		delete_kriteria_upload_payment(self)
+
+		if self.docstatus == 2:
+			self.delete_gl_entry()
+
+
+	def delete_gl_entry(self):
+
+		frappe.db.delete(
+			"GL Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name
+			}
+		)
 
 	def on_submit(self):
 		super().on_submit()

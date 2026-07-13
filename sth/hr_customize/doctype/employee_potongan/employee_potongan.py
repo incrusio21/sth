@@ -85,20 +85,55 @@ class EmployeePotongan(AccountsController):
 
 			d.db_set("additional_salary", "")
 		
+	# @frappe.whitelist()
+	# def get_employee(self):
+	# 	jenis_potongan = frappe.get_value("Jenis Potongan", self.jenis_potongan ,'default_rate')
+	# 	# emp_list = frappe.get_all("Employee", filters={"status": "Active", "employment_type": self.employment_type}, fields=["name", "employee_name"])
+	# 	emp_list = frappe.db.sql("""
+	# 		SELECT 
+	# 		e.name,
+	# 		e.employee_name
+	# 		FROM `tabEmployee` as e
+	# 		JOIN `tabEmployee Jenis Potongan` as ejp ON ejp.parent = e.name
+	# 		WHERE e.status = 'Active' AND e.grade = %(grade)s AND ejp.jenis_potongan = %(jenis_potongan)s;
+    # """, {"grade": self.employee_grade, "jenis_potongan": self.jenis_potongan}, as_dict=True)
+
+	# 	self.details = []
+	# 	for d in emp_list:
+	# 		self.append("details", {
+	# 			"employee": d.name,
+	# 			"employee_name": d.employee_name,
+	# 			"rate": jenis_potongan
+	# 		})
+
 	@frappe.whitelist()
 	def get_employee(self):
-		jenis_potongan = frappe.get_value("Jenis Potongan", self.jenis_potongan ,'default_rate')
-		# emp_list = frappe.get_all("Employee", filters={"status": "Active", "employment_type": self.employment_type}, fields=["name", "employee_name"])
+		jenis_potongan = frappe.get_value(
+			"Jenis Potongan",
+			self.jenis_potongan,
+			"default_rate"
+		)
+
 		emp_list = frappe.db.sql("""
-			SELECT 
-			e.name,
-			e.employee_name
-			FROM `tabEmployee` as e
-			JOIN `tabEmployee Jenis Potongan` as ejp ON ejp.parent = e.name
-			WHERE e.status = 'Active' AND e.grade = %(grade)s AND ejp.jenis_potongan = %(jenis_potongan)s;
-    """, {"grade": self.employee_grade, "jenis_potongan": self.jenis_potongan}, as_dict=True)
+			SELECT
+				e.name,
+				e.employee_name
+			FROM `tabEmployee` AS e
+			JOIN `tabEmployee Jenis Potongan` AS ejp
+				ON ejp.parent = e.name
+			WHERE
+				e.status = 'Active'
+				AND e.grade = %(grade)s
+				AND e.unit = %(unit)s
+				AND ejp.jenis_potongan = %(jenis_potongan)s
+		""", {
+			"grade": self.employee_grade,
+			"unit": self.unit,
+			"jenis_potongan": self.jenis_potongan,
+		}, as_dict=True)
 
 		self.details = []
+
 		for d in emp_list:
 			self.append("details", {
 				"employee": d.name,

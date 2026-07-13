@@ -1080,12 +1080,6 @@ function show_popup(frm, employee_atau_barang) {
 					hidden: 1
 				},
 				{
-					fieldname: 'uom',
-					label: __('Satuan'),
-					fieldtype: 'Data',
-					reqd: 1
-				},
-				{
 					fieldname: 'qty',
 					label: __('Qty'),
 					fieldtype: 'Float',
@@ -1096,6 +1090,12 @@ function show_popup(frm, employee_atau_barang) {
 						let price = d.get_value('price') || 0;
 						d.set_value('total', qty * price);
 					}
+				},
+				{
+					fieldname: 'uom',
+					label: __('UOM'),
+					fieldtype: 'Data',
+					reqd: 1
 				},
 				{
 					fieldname: 'price',

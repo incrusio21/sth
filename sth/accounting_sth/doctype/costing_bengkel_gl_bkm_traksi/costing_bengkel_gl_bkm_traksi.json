@@ -1,12 +1,11 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-07-02 00:00:00.000000",
+ "creation": "2026-07-02 11:25:32.513677",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "bkm_traksi",
   "no_coa",
   "debit",
   "credit",
@@ -44,20 +43,13 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Credit"
-  },
-  {
-   "fieldname": "bkm_traksi",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "BKM Traksi",
-   "options": "Buku Kerja Mandor Traksi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-02 00:00:00.000000",
+ "modified": "2026-07-10 11:10:49.377454",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Costing Bengkel GL BKM Traksi",

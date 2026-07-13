@@ -12,7 +12,6 @@
   "employee_grade",
   "jenis_potongan",
   "employee",
-  "get_employee",
   "persetujuan_1",
   "persetujuan_2",
   "column_break_dpdy",
@@ -22,16 +21,18 @@
   "no_rekening",
   "bank_account",
   "amended_from",
-  "accounting_dimension_section",
-  "cost_center",
-  "section_break_josg",
-  "details",
   "section_break_jkoh",
   "status",
   "column_break_qdnv",
   "grand_total",
   "outstanding_amount",
+  "detail_karyawan_tab",
+  "get_employee",
+  "details",
   "more_info_tab",
+  "accounting_dimension_section",
+  "cost_center",
+  "section_break_frfu",
   "credit_to",
   "expense_account"
  ],
@@ -87,10 +88,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_josg",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "details",
    "fieldtype": "Table",
    "label": "Details",
@@ -143,12 +140,14 @@
   {
    "fieldname": "persetujuan_1",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Persetujuan 1",
    "options": "User"
   },
   {
    "fieldname": "persetujuan_2",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Persetujuan 2",
    "options": "User"
   },
@@ -216,13 +215,22 @@
    "label": "Expense Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "detail_karyawan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Detail Karyawan"
+  },
+  {
+   "fieldname": "section_break_frfu",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-02 09:29:45.241012",
+ "modified": "2026-07-10 09:25:26.397183",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Potongan",

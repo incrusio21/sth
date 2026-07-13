@@ -517,7 +517,7 @@ class ReceivablePayableReport:
 					"company": self.filters.company,
 					"docstatus": 1,
 				},
-				fields=["name", "due_date", "bill_no", "bill_date"],
+				fields=["name", "due_date", "no_fp", "bill_no", "bill_date"],
 			)
 
 			for pi in invoices:
@@ -1180,6 +1180,7 @@ class ReceivablePayableReport:
 		self.add_column(label=_("Due Date"), fieldname="due_date", fieldtype="Date")
 
 		if self.account_type == "Payable":
+			self.add_column(label=_("No Faktur Pajak"), fieldname="no_fp", fieldtype="Data")
 			self.add_column(label=_("Nomor Supplier Invoice"), fieldname="bill_no", fieldtype="Data")
 			self.add_column(label=_("Bill Date"), fieldname="bill_date", fieldtype="Date")
 

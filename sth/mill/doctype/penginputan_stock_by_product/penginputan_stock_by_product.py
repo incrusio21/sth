@@ -57,6 +57,10 @@ class PenginputanStockByProduct(Document):
 
 		if not fields: return
 		data_mass_balance = frappe.get_all("Mass Balance",filters={"docstatus": 1},fields=fields,order_by="date desc, jam desc",limit=1)
+		
+		if not data_mass_balance:
+			self.produksi = 0
+			return
 
 		result = 0
 		for field in fields:

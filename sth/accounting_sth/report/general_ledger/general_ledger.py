@@ -144,6 +144,8 @@ def get_result(filters, account_details):
 
 	gl_entries = get_gl_entries(filters, accounting_dimensions)
 
+	set_reversal_cancel_flag(gl_entries)
+
 	data = get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries)
 
 	result = get_result_as_list(data, filters)
@@ -187,11 +189,27 @@ def get_gl_entries(filters, accounting_dimensions):
 			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
 		)
 
+	# gl_entries = frappe.db.sql(
+	# 	f"""
+	# 	select
+	# 		name as gl_entry, posting_date, account, party_type, party,
+	# 		voucher_type, voucher_subtype, voucher_no, unit, {dimension_fields}
+	# 		cost_center, project, {transaction_currency_fields}
+	# 		against_voucher_type, against_voucher, account_currency,
+	# 		against, is_opening, creation {select_fields}, voucher_detail_no
+	# 	from `tabGL Entry`
+	# 	where company=%(company)s {get_conditions(filters)}
+	# 	{order_by_statement}
+	# """,
+	# 	filters,
+	# 	as_dict=1,
+	# )
+
 	gl_entries = frappe.db.sql(
 		f"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
-			voucher_type, voucher_subtype, voucher_no, unit, {dimension_fields}
+			voucher_type, voucher_subtype, voucher_no, is_cancelled, unit, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
 			against, is_opening, creation {select_fields}, voucher_detail_no
@@ -208,6 +226,106 @@ def get_gl_entries(filters, accounting_dimensions):
 	else:
 		return gl_entries
 
+
+def set_reversal_cancel_flag(gl_entries):
+	from decimal import Decimal
+	from collections import defaultdict
+	
+	"""
+	Mark only GL Entries generated as reversal during cancel.
+	"""
+
+	# default
+	for gle in gl_entries:
+		gle["is_reversal_cancel"] = 0
+
+	# group by voucher
+	grouped = defaultdict(list)
+
+	for gle in gl_entries:
+		grouped[(gle.voucher_type, gle.voucher_no)].append(gle)
+
+	# process each voucher
+	for rows in grouped.values():
+
+		used = set()
+
+		for i, a in enumerate(rows):
+
+			if i in used:
+				continue
+
+			for j, b in enumerate(rows):
+
+				if i == j or j in used:
+					continue
+
+				if (
+					a.account == b.account
+					and Decimal(str(a.debit or 0)) == Decimal(str(b.credit or 0))
+					and Decimal(str(a.credit or 0)) == Decimal(str(b.debit or 0))
+				):
+
+					# yang dibuat belakangan adalah reversal
+					if a.creation > b.creation:
+						a.is_reversal_cancel = 1
+					else:
+						b.is_reversal_cancel = 1
+
+					used.add(i)
+					used.add(j)
+					break
+
+
+def is_reversal_document(voucher_type, voucher_no):
+	"""
+	Check whether voucher is a reversal document.
+	"""
+
+	# Journal Entry reversal
+	if voucher_type == "Journal Entry":
+
+		reversal_of = frappe.db.get_value(
+			"Journal Entry",
+			voucher_no,
+			"reversal_of"
+		)
+
+		if reversal_of:
+			return 1
+
+	return 0
+
+def set_purchase_invoice_info(gl_entries):
+	"""
+	Set Supplier Invoice Number (bill_no) dan No Faktur Pajak (no_fp)
+	untuk GL Entry yang berasal dari Purchase Invoice.
+	"""
+
+	pi_map = {}
+
+	pi_list = {
+		d.voucher_no
+		for d in gl_entries
+		if d.voucher_type == "Purchase Invoice"
+	}
+
+	if pi_list:
+		for d in frappe.get_all(
+			"Purchase Invoice",
+			filters={"name": ("in", list(pi_list))},
+			fields=["name", "bill_no", "no_fp"],
+		):
+			pi_map[d.name] = d
+
+	for gle in gl_entries:
+		gle["bill_no"] = ""
+		gle["tax_invoice_no"] = ""
+
+		if gle.voucher_type == "Purchase Invoice":
+			if pi := pi_map.get(gle.voucher_no):
+				gle["bill_no"] = pi.bill_no
+				gle["tax_invoice_no"] = pi.no_fp
 
 def get_conditions(filters):
 	conditions = []
@@ -407,6 +525,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 
 	set_bill_no(gl_entries)
 	set_party_name(gl_entries)
+	set_purchase_invoice_info(gl_entries)
 
 	gle_map = initialize_gle_map(gl_entries, filters, totals_dict)
 
@@ -732,6 +851,12 @@ def get_columns(filters):
 			"options": "voucher_type",
 			"width": 180,
 		},
+		{	
+			"label": _("Jurnal Pembalik Atas Cancel"),
+			"fieldname": "is_reversal_cancel",
+			"fieldtype": "Check",
+			"width": 150,
+		},
 		{"label": _("Against Account"), "fieldname": "against", "width": 120},
 		{"label": _("Party Type"), "fieldname": "party_type", "width": 100},
 		{"label": _("Party"), "fieldname": "party", "width": 100, "hidden": 1},
@@ -767,6 +892,12 @@ def get_columns(filters):
 				"width": 100,
 			},
 			{"label": _("Supplier Invoice No"), "fieldname": "bill_no", "fieldtype": "Data", "width": 100},
+			{
+				"label": _("No Faktur Pajak"),
+				"fieldname": "tax_invoice_no",
+				"fieldtype": "Data",
+				"width": 180,
+			},
 		]
 	)
 
@@ -774,3 +905,96 @@ def get_columns(filters):
 		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
 
 	return columns
+
+
+def test_gl_cancel():
+	from pprint import pformat
+
+	voucher_type = "Sales Invoice"
+	voucher_no = "ACC-SINV-2026-00066"
+
+	result = {}
+
+	result["gl_entries"] = frappe.db.get_all(
+		"GL Entry",
+		filters={
+			"voucher_type": voucher_type,
+			"voucher_no": voucher_no,
+		},
+		fields=[
+			"name",
+			"posting_date",
+			"creation",
+			"voucher_type",
+			"voucher_no",
+			"account",
+			"debit",
+			"credit",
+			"is_cancelled",
+			"against",
+			"against_voucher",
+			"against_voucher_type",
+			"is_opening",
+			"remarks",
+		],
+		order_by="creation asc",
+	)
+
+	try:
+		doc = frappe.get_doc(voucher_type, voucher_no)
+
+		meta = frappe.get_meta(voucher_type)
+
+		doc_info = {}
+
+		for field in [
+			"docstatus",
+			"amended_from",
+			"reversal_of",
+			"is_return",
+			"return_against",
+		]:
+			if meta.has_field(field):
+				doc_info[field] = doc.get(field)
+
+		result["voucher"] = doc_info
+
+	except Exception as e:
+		result["voucher"] = str(e)
+
+	print(pformat(result))
+
+	return result
+
+
+
+
+@frappe.whitelist()
+def inspect_cancel():
+	from pprint import pformat
+
+	voucher_type = "Sales Invoice"
+	voucher_no = "ACC-SINV-2026-00066"
+
+	result = {}
+
+	try:
+		doc = frappe.get_doc(voucher_type, voucher_no)
+		result["voucher"] = doc.as_dict()
+	except Exception as e:
+		result["voucher_error"] = str(e)
+
+	# Semua GL Entry
+	result["gl_entries"] = frappe.get_all(
+		"GL Entry",
+		filters={
+			"voucher_type": voucher_type,
+			"voucher_no": voucher_no,
+		},
+		fields=["*"],
+		order_by="creation asc",
+	)
+
+	print(pformat(result, width=200))
+
+	return result

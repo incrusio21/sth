@@ -21,6 +21,12 @@
   "akun_kas_bank",
   "nota_hutang_pemenuhan_kontrak",
   "amended_from",
+  "informasi_pajak_section",
+  "no_faktur_pajak",
+  "tanggal_faktur_pajak",
+  "column_break_jqqp",
+  "no_faktur_pajak_pengganti",
+  "keterangan",
   "list_pemenuhan_kontrak_section",
   "master_barang_placeholder_ppn",
   "nota_hutang_pemenuhan_kontrak_table",
@@ -186,6 +192,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.tipe !=\"Nota DP\"",
    "fieldname": "section_break_ffbg",
    "fieldtype": "Section Break"
   },
@@ -298,13 +305,49 @@
    "label": "Grandtotal",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "no_faktur_pajak",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "No Faktur Pajak"
+  },
+  {
+   "fieldname": "informasi_pajak_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Pajak"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tanggal_faktur_pajak",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Faktur Pajak"
+  },
+  {
+   "fieldname": "column_break_jqqp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "no_faktur_pajak_pengganti",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "No Faktur Pajak Pengganti"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-11 09:02:28.911185",
+ "modified": "2026-07-13 10:11:42.938540",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

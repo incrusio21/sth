@@ -5,11 +5,12 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-	conditions = get_condition(filters)
+	conditions_pi = get_condition_pi(filters)
+	conditions_np = get_condition_np(filters)
 	columns = get_columns(filters)
 	data = []
 
-	query_l_equalisasi_pajak = frappe.db.sql(f"""
+	query_l_equalisasi_pajak_pi = frappe.db.sql(f"""
 		SELECT
 			pi.voucher_type as tipe_voucher,
 			nvm.name as nvm,
@@ -60,12 +61,46 @@ def execute(filters=None):
 			ON nvm.parent = pi.name
 			AND nvm.pph != 0
 		WHERE pi.docstatus = 1
-		{conditions}
+		{conditions_pi}
 	""", filters, as_dict=True)
+
+	query_l_equalisasi_pajak_np = frappe.db.sql(f"""
+		SELECT
+			np.name AS doc_name,
+			pe.posting_date AS tanggal_bayar,
+			so.customer_name AS nama_vendor,
+			gle.account AS kode_akun,
+			np.sisa_dpp AS dpp,
+			np.sisa_ppn AS ppn,
+			np.name AS no_invoice,
+			np.no_faktur_pajak AS no_faktur,
+			np.no_faktur_pajak_pengganti AS no_faktur_pengganti,
+			np.date AS tanggal_invoice,
+			'PPN 12%%' AS jenis_pajak,
+			np.docstatus AS status
+		FROM `tabNota Piutang` np
+		LEFT JOIN `tabPayment Entry` pe
+			ON pe.nota_piutang_pemenuhan_kontrak = np.name
+		LEFT JOIN `tabSales Order` so
+			ON so.name = np.no_kontrak
+		LEFT JOIN (
+			SELECT
+					nppkt.parent,
+					MIN(gle.account) AS account
+			FROM `tabNota Piutang Pemenuhan Kontrak Table` nppkt
+			INNER JOIN `tabGL Entry` gle
+					ON gle.voucher_no = nppkt.pengakuan_penjualan
+			WHERE gle.debit <> 0
+			GROUP BY nppkt.parent
+		) gle
+			ON gle.parent = np.name
+		WHERE np.docstatus = 1
+		{conditions_np}
+  """, filters, as_dict=True)
 
 	seen = set()
 
-	for row in query_l_equalisasi_pajak:
+	for row in query_l_equalisasi_pajak_pi:
 			jenis_pajak = get_jenis_pajak(
 					row.get("pi_name"),
 					row.get("tipe_voucher"),
@@ -105,6 +140,7 @@ def execute(filters=None):
 
 			row["jenis_pajak"] = jenis_pajak_str
 			row["tanggal_bayar"] = get_oldest_payment_date(row.get("pi_name"))
+			row["tipe_transaksi"] = "Purchase Invoice"
 
 			if row.get("tipe_voucher") == "Voucher Match":
 				row["dpp"] = get_dpp_voucher_match(row.get("pi_name"))
@@ -114,9 +150,20 @@ def execute(filters=None):
    
 			data.append(row)
 
+	for row in query_l_equalisasi_pajak_np:
+		row["tipe_transaksi"] = "Nota Piutang"
+		row["status"] = "Submitted" if row.get("status") == 1 else "Draft" 
+
+		# filter by parent_tax_rate
+		if filters.get("jenis_pajak"):
+			if row.jenis_pajak != filters.get("jenis_pajak"):
+				continue
+
+		data.append(row)
+ 
 	return columns, data
 
-def get_condition(filters):
+def get_condition_pi(filters):
 	conditions = ""
 
 	if filters.get("company"):
@@ -138,12 +185,31 @@ def get_condition(filters):
 
 	return conditions
 
+def get_condition_np(filters):
+	conditions = ""
+
+	if filters.get("company"):
+		conditions += " AND np.company = %(company)s"
+
+	if filters.get("unit"):
+		conditions += " AND np.unit = %(unit)s"
+
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " AND np.date BETWEEN %(from_date)s AND %(to_date)s"
+
+	return conditions
+
 def get_columns(filters):
 	columns = [
 		{
 			"label": _("Tanggal Bayar"),
 			"fieldtype": "Date",
 			"fieldname": "tanggal_bayar",
+		},
+		{
+			"label": _("Tipe Transaksi"),
+			"fieldtype": "Data",
+			"fieldname": "tipe_transaksi",
 		},
 		{
 			"label": _("Nama Vendor"),
