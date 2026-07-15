@@ -37,6 +37,7 @@
   "rupiah_basis",
   "upah_brondolan",
   "premi_kontanan_basis",
+  "cost_center",
   "section_break_wzob",
   "hasil_kerja_jumlah_janjang",
   "hasil_kerja_qty_brondolan",
@@ -533,13 +534,20 @@
    "fieldname": "rkh_no",
    "fieldtype": "Data",
    "label": "RKH No"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-12 11:06:57.483611",
+ "modified": "2026-07-14 13:33:54.109253",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",

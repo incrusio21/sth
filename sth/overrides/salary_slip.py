@@ -901,7 +901,7 @@ class SalarySlip(SalarySlip):
 				& (Attendance.status == "Present")
 			)
 		)
-		print(query.run()[0][0])
+		# print(query.run()[0][0])
 		return query.run()[0][0]
 
 	def _get_dinas_days(self) -> float:
@@ -1019,10 +1019,10 @@ class SalarySlip(SalarySlip):
 			self.compute_income_tax_breakup()
 
 		
-		pprint.pprint([row.amount for row in self.earnings])
-		pprint.pprint([row.amount for row in self.deductions])
+		# pprint.pprint([row.amount for row in self.earnings])
+		# pprint.pprint([row.amount for row in self.deductions])
 	
-		print("ini net {}".format(self.net_pay))
+		# print("ini net {}".format(self.net_pay))
 
 	def set_net_pay(self):
 		self.total_deduction = self.get_component_totals("deductions")
@@ -1197,16 +1197,16 @@ class SalarySlip(SalarySlip):
 	def set_addons_premi(self):
 		if getdate(self.end_date) != getdate(self.actual_end_date):
 			return
-		
+
 		designation = frappe.get_cached_doc("Designation", self.designation)
+
 		for premi in designation.premi:
 			if premi.company == self.company and premi.premi_type not in ("Tutup Buku"):
 				continue
-			
 			salary_component = premi.salary_component \
 				or get_premi_attendance_settings(premi.premi_type) \
 				or designation.salary_component
-
+			print(salary_component)
 			key = (salary_component, "earnings")
 			self._employee_payment.setdefault(key, {
 				"account": {},
@@ -1326,7 +1326,7 @@ class SalarySlip(SalarySlip):
 			criteria.sort(key=lambda x: x["min_output"], reverse=True)
 			# check apah qty di tanggal terpilih telah memenuhi berat minimum
 			for d in criteria:
-				print(output, d["min_output"]) 
+				# print(output, d["min_output"]) 
 				if flt(output, 2) < d["min_output"]:
 					continue
 
@@ -1576,8 +1576,8 @@ class SalarySlip(SalarySlip):
 			current_date += timedelta(days=1)
 
 		# ubah ump_harian ke gaji pokok dibagi hari
-		print(data.base)
-		print(data.total_hari)
+		# print(data.base)
+		# print(data.total_hari)
 		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
@@ -1635,8 +1635,8 @@ class SalarySlip(SalarySlip):
 				)
 
 @frappe.whitelist()
-def debug_holiday():
-	doc = frappe.get_doc("Salary Slip","Sal Slip/1506020101950014/00001")
+def debug():
+	doc = frappe.get_doc("Salary Slip","Sal Slip/1509090411870002/00002")
 	doc.validate()
 
 # @frappe.whitelist()

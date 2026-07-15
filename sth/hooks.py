@@ -495,6 +495,7 @@ scheduler_events = {
 # ------------------------------
 #
 override_whitelisted_methods = {
+	# "frappe.desk.desktop.get_workspace_sidebar_items": "sth.overrides.workspace.get_workspace_sidebar_items",
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry": "sth.legal.custom.payment_entry.get_payment_entry",

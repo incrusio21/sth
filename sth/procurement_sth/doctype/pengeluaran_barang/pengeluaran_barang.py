@@ -15,9 +15,29 @@ class PengeluaranBarang(Document):
 			if row.company == self.pt_pemilik_barang:
 				akun_expense = row.akun_pengeluaran
 
+		self.isi_cost_center()
 		# for row in self.items:
 		# 	if not row.account:
 		# 		row.account = akun_expense
+	def isi_cost_center(self):
+		for row in self.items:
+			unit_doc = frappe.get_doc("Divisi", row.sub_unit)
+
+			if row.sub_unit == "TRAKSI":
+				if row.kendaraan:
+					row.cost_center = "{} - {}".format(row.kendaraan, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
+			elif row.sub_unit == "BENGKEL":
+				if row.kendaraan:
+					row.cost_center = "{} - {}".format(row.kendaraan, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
+			elif unit_doc.plantation == 1:
+				if row.blok:
+					row.cost_center = "{} - {}".format(row.blok, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
+			elif unit_doc.mill == 1:
+				if row.stasiun:
+					row.cost_center = "{} - {}".format(row.stasiun, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
+			# row.db_update()
+			# frappe.db.commit()
+
 
 	def on_submit(self):
 		self.create_ste()
@@ -149,7 +169,8 @@ class PengeluaranBarang(Document):
 					"jumlah": "qty",
 					"kendaraan":"custom_alat_berat_dan_kendaraan",
 					"satuan": "uom",
-					"account": "expense_account"
+					"account": "expense_account",
+					"cost_center": "cost_center"
 				},
 				"postprocess": update_item
 			}

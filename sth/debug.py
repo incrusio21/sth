@@ -36,13 +36,30 @@ def debug_ap():
 	create_costing_bengkel_on_submit(frappe.get_doc("Accounting Period",no_doc),"on_submit")
 
 def debug_list():
-	li = frappe.db.sql(""" SELECT name FROM `tabDelivery Order` WHERE docstatus = 1 and grand_total > 0 """)
+	li = frappe.db.sql(""" SELECT name FROM `tabStation Master` """)
 	for row in li:
 		no_doc = row[0]
 		# frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
+		# frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
+		# frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
+		frappe.get_doc("Station Master",no_doc).create_cost_centers()
+
+def debug_listb():
+	li = frappe.db.sql(""" SELECT name FROM `tabStock Entry` WHERE name = "MAT-STE-2026-00090" """)
+	for row in li:
+		no_doc = row[0]
+		doc = frappe.get_doc("Stock Entry",no_doc)
+		for row_item in doc.items:
+			if row_item.custom_alat_berat_dan_kendaraan:
+				row_item.cost_center = "{} - {}".format(row_item.custom_alat_berat_dan_kendaraan, frappe.get_doc("Company",doc.company).abbr)
+				row_item.db_update()
+				frappe.db.commit()	
+
+		frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 		frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 		frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-		frappe.get_doc("Delivery Order",no_doc).on_submit()
+		frappe.get_doc("Stock Entry",no_doc).on_submit()
+
 
 def rename_item(dry_run=False):
 	frappe.rename_doc("Item Group","30102","31102")
@@ -59,3 +76,32 @@ def rename_item(dry_run=False):
 	frappe.rename_doc("Item Group","30403","31403")
 	frappe.rename_doc("Item Group","30404","31404")
 	frappe.rename_doc("Item Group","30405","31405")
+
+def submit_timbangan():
+
+	doc = frappe.get_doc("Timbangan","TBG-9518")
+	doc.make_dn()
+
+import frappe
+
+def debug_user():
+	frappe.set_user("tpre.em01@sthgroup.com")  # impersonate user itu
+
+	from frappe.desk.desktop import get_workspace_sidebar_items
+	result = get_workspace_sidebar_items()
+	# import json
+	# print(json.dumps(result, indent=2))
+
+def check_alur_user():
+	frappe.set_user("tpre.em01@sthgroup.com")
+
+	# 1. Lihat semua DocType yang tergabung di module "Procurement STH"
+	doctypes = frappe.get_all("DocType", filters={"module": "Procurement STH"}, pluck="name")
+	print(doctypes)
+
+	# 2. Cek apakah user punya permission read ke salah satu doctype itu
+	for dt in doctypes:
+		print(dt, "->", frappe.has_permission(dt, "read"))
+
+	# 3. Cek role yang dimiliki user
+	print(frappe.get_roles("tpre.em01@sthgroup.com"))

@@ -335,7 +335,7 @@
    "fieldtype": "Percent",
    "in_preview": 1,
    "label": "OER Netto 1",
-   "precision": "0",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -344,7 +344,7 @@
    "fieldtype": "Percent",
    "in_preview": 1,
    "label": "OER Netto 2",
-   "precision": "0",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -505,7 +505,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-07-07 09:59:32.813168",
+ "modified": "2026-07-15 09:19:27.736905",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

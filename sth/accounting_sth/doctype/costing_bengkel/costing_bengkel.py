@@ -109,7 +109,7 @@ def get_or_create_cost_center(kode_vra, company):
 
     cc = frappe.new_doc("Cost Center")
     cc.cost_center_name = kode_vra
-    cc.parent_cost_center = "Main - {0}".format(company_doc.abbr)
+    cc.parent_cost_center = "VRA - {0}".format(company_doc.abbr)
     cc.company = company
     cc.is_group = 0
     cc.flags.ignore_permissions = True

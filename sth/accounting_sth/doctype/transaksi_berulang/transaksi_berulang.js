@@ -298,12 +298,7 @@ function hitung_bulan(frm) {
 }
 
 async function set_pi_filter(frm) {
-    const map = {
-        'ASURANSI': 'Asuransi',
-        'SEWA': 'Sewa',
-        'LEASING': 'Leasing'
-    };
-
+    const jenis_transaksi = (frm.doc.jenis_transaksi || '').toLowerCase();
     const is_leasing = frm.doc.jenis_transaksi === 'LEASING';
 
     // Ambil semua PI yang sudah dipakai di Transaksi Berulang lain
@@ -347,8 +342,11 @@ async function set_pi_filter(frm) {
     frm.set_query('tarik_purchase_invoice', function () {
         return {
             filters: {
-...(frm.doc.nama_vendor && { supplier: frm.doc.nama_vendor }),
-                ...(used_pi.length && { name: ['not in', used_pi] })
+                ...(frm.doc.nama_vendor && { supplier: frm.doc.nama_vendor }),
+                ...(used_pi.length && { name: ['not in', used_pi] }),
+                ...((jenis_transaksi === 'sewa' || jenis_transaksi === 'asuransi') && {
+                    invoice_type: jenis_transaksi
+                })
             }
         };
     });

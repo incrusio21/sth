@@ -112,7 +112,7 @@ class DataPenanamanBibit(Document):
 
 		debit_cost_center = self.get_cost_center_by_name(str(tahun_tanam))
 		credit_cost_center = self.get_cost_center_by_name(self.batch)
-		print(debit_cost_center)
+		
 		gl_entries.append(
 			frappe.get_doc({
 				"doctype": "GL Entry",

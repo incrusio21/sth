@@ -122,6 +122,11 @@ class SthPurchaseInvoice(PurchaseInvoice):
 						if self.company == row_item.company:
 							item.expense_account = row_item.expense_account
 
+		if self.voucher_type == "Non Voucher Match":
+			for row in self.non_voucher_match:
+				if row.kendaraan:
+					self.cost_center = get_or_create_cost_center(row.kendaraan, self.company)
+
 		super().validate()
 		self.validate_term()
 		self.set_retensi_amount()
@@ -633,8 +638,6 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.make_write_off_gl_entry(gl_entries)
 			self.make_gle_for_rounding_adjustment(gl_entries)
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
-
-		
 
 		return gl_entries
 
@@ -1579,3 +1582,25 @@ def get_purchase_receipts_by_po(purchase_order):
 	""", purchase_order, as_dict=1)
 
 	return [pr.parent for pr in pr_list]
+
+def get_or_create_cost_center(kode_vra, company):
+    """
+    Ambil Cost Center dengan nama = kode_vra untuk company terkait.
+    Kalau belum ada (mis. kendaraan belum sempat membuat cost center-nya sendiri),
+    buat otomatis mengikuti pola yang sama seperti Alat Berat Dan Kendaraan.
+    """
+    existing = frappe.db.get_value("Cost Center", {"cost_center_name": kode_vra, "company": company}, "name")
+    if existing:
+        return existing
+
+    company_doc = frappe.get_cached_doc("Company", company)
+
+    cc = frappe.new_doc("Cost Center")
+    cc.cost_center_name = kode_vra
+    cc.parent_cost_center = "VRA - {0}".format(company_doc.abbr)
+    cc.company = company
+    cc.is_group = 0
+    cc.flags.ignore_permissions = True
+    cc.insert()
+
+    return cc.name

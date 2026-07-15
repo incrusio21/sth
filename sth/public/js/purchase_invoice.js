@@ -47,6 +47,7 @@ frappe.ui.form.on("Purchase Invoice", {
         }
 
         sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
+        toggle_kegiatan_unit_columns(frm)
         frm.trigger("setup_queries")
 
         toggle_non_voucher_section(frm)
@@ -200,6 +201,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
     invoice_type(frm) {
         sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
+        toggle_kegiatan_unit_columns(frm)
     },
 
     setup_queries(frm) {
@@ -333,6 +335,10 @@ frappe.ui.form.on("Purchase Invoice", {
         if (!frm.doc.is_pph_22) {
             frm.set_value('pph_22', 0)
         }
+    },
+
+    pakai_ppn(frm) {
+        toggle_ppn_12(frm)
     },
 
     pph_22(frm) {
@@ -621,10 +627,28 @@ frappe.ui.form.on("VAT Detail", {
 // ─── Purchase Invoice Item ────────────────────────────────────────────────────
 
 frappe.ui.form.on("Purchase Invoice Item", {
+    qty(frm, cdt, cdn) {
+        recalculate_item_amount(frm, cdt, cdn);
+    },
+
+    rate(frm, cdt, cdn) {
+        recalculate_item_amount(frm, cdt, cdn);
+    },
+
     amount(frm) {
         calculate_sub_total(frm);
     }
 });
+
+function recalculate_item_amount(frm, cdt, cdn) {
+    const row = locals[cdt][cdn];
+    const amount = flt(row.qty) * flt(row.rate);
+
+    // frappe.model.set_value triggers the "amount" handler above, which
+    // in turn calls calculate_sub_total -> recalculate_vat_details, so
+    // sub_total and the ppn/pph_lainnya tables stay in sync with qty/rate.
+    frappe.model.set_value(cdt, cdn, "amount", amount);
+}
 
 
 // ─── Purchase Invoice Pengeluaran Barang ──────────────────────────────────────
@@ -794,6 +818,38 @@ function toggle_non_voucher_section(frm) {
     frm.refresh_fields();
 }
 
+function toggle_kegiatan_unit_columns(frm) {
+    const hidden = frm.doc.invoice_type !== "SPK" ? 1 : 0;
+
+    ["kegiatan", "kegiatan_name", "unit"].forEach(fieldname => {
+        frm.fields_dict.items.grid.update_docfield_property(fieldname, "hidden", hidden);
+    });
+
+    frm.fields_dict.items.grid.refresh();
+}
+
+function toggle_ppn_12(frm) {
+    const PPN_TYPE = "PPN 12%";
+    const PPN_PERCENTAGE = 12;
+
+    if (frm.doc.pakai_ppn) {
+        const exists = (frm.doc.ppn || []).some(row => row.type === PPN_TYPE);
+        if (!exists) {
+            let row = frm.add_child("ppn");
+            row.type = PPN_TYPE;
+            row.percentage = PPN_PERCENTAGE;
+            frm.refresh_field("ppn");
+            frm.script_manager.trigger("type", row.doctype, row.name);
+            frm.script_manager.trigger("percentage", row.doctype, row.name);
+        }
+    } else {
+        frm.clear_table("ppn");
+        frm.refresh_field("ppn");
+        frm.trigger('calculate_total_ppn');
+        sync_to_taxes(frm);
+    }
+}
+
 function set_coa_filter(frm) {
     frm.set_query('coa', 'non_voucher_match', function (doc) {
         return {
@@ -834,54 +890,95 @@ function process_non_voucher_entries(frm) {
                 return;
             }
 
-            frm.clear_table('items');
-
-            frm.doc.taxes = (frm.doc.taxes || []).filter(
-                row => (row.description || "").startsWith(CHARGES_MARKER)
-            );
-
-            let total_dpp = 0;
+            // Bangun dulu data items/taxes yang seharusnya ada, tanpa
+            // menyentuh frm.doc, supaya bisa dibandingkan dengan data yang
+            // sudah ada. clear_table + add_child SELALU membuat form dirty
+            // walau isinya sama persis, dan validate() ini juga jalan saat
+            // submit, sehingga tiap submit selalu mengubah dokumen lagi dan
+            // memaksa save ulang tanpa henti. Rebuild hanya dilakukan kalau
+            // datanya benar-benar berbeda.
+            let new_items = [];
             let total_ppn = 0;
             let total_pph = 0;
 
             frm.doc.non_voucher_match.forEach((nv_row) => {
-                let item_row = frm.add_child('items');
-                item_row.item_code = company.account_default_item;
-                item_row.item_name = company.account_default_item;
-                item_row.description = nv_row.description || 'Non Voucher Entry';
-                item_row.qty = 1;
-                item_row.rate = nv_row.dpp || 0;
-                item_row.amount = nv_row.dpp || 0;
-                item_row.uom = "Nos";
-                item_row.expense_account = nv_row.coa;
+                new_items.push({
+                    item_code: company.account_default_item,
+                    item_name: company.account_default_item,
+                    description: nv_row.description || 'Non Voucher Entry',
+                    qty: 1,
+                    rate: nv_row.dpp || 0,
+                    amount: nv_row.dpp || 0,
+                    uom: "Nos",
+                    expense_account: nv_row.coa,
+                });
 
-                total_dpp += (nv_row.dpp || 0);
                 total_ppn += (nv_row.ppn || 0);
                 total_pph += (nv_row.pph || 0);
             });
 
+            const kept_taxes = (frm.doc.taxes || []).filter(
+                row => (row.description || "").startsWith(CHARGES_MARKER)
+            );
+
+            let new_tax_rows = [];
             if (total_ppn != 0) {
-                let ppn_row = frm.add_child('taxes');
-                ppn_row.charge_type = 'Actual';
-                ppn_row.account_head = company.ppn_account;
-                ppn_row.description = 'PPN';
-                ppn_row.tax_amount = total_ppn;
-                ppn_row.tipe_pajak = "PPN";
+                new_tax_rows.push({
+                    charge_type: 'Actual',
+                    account_head: company.ppn_account,
+                    description: 'PPN',
+                    tax_amount: total_ppn,
+                    tipe_pajak: "PPN",
+                });
+            }
+            if (total_pph != 0) {
+                new_tax_rows.push({
+                    charge_type: 'Actual',
+                    account_head: company.pph_account,
+                    description: 'PPh',
+                    tax_amount: -total_pph,
+                    tipe_pajak: "PPH",
+                });
             }
 
-            if (total_pph != 0) {
-                let pph_row = frm.add_child('taxes');
-                pph_row.charge_type = 'Actual';
-                pph_row.account_head = company.pph_account;
-                pph_row.description = 'PPh';
-                pph_row.tax_amount = -total_pph;
-                pph_row.tipe_pajak = "PPH";
-            }
+            const current_taxes = (frm.doc.taxes || []).filter(
+                row => !(row.description || "").startsWith(CHARGES_MARKER)
+            );
+
+            const item_fields = ["item_code", "description", "qty", "rate", "amount", "uom", "expense_account"];
+            const tax_fields = ["charge_type", "account_head", "description", "tax_amount", "tipe_pajak"];
+
+            const needs_rebuild =
+                !rows_match(frm.doc.items, new_items, item_fields) ||
+                !rows_match(current_taxes, new_tax_rows, tax_fields);
+
+            if (!needs_rebuild) return;
+
+            frm.clear_table('items');
+            frm.doc.taxes = kept_taxes;
+
+            new_items.forEach((data) => Object.assign(frm.add_child('items'), data));
+            new_tax_rows.forEach((data) => Object.assign(frm.add_child('taxes'), data));
 
             frm.refresh_field('items');
             frm.refresh_field('taxes');
         }
     });
+}
+
+function rows_match(existing, incoming, fields) {
+    const rows = existing || [];
+    if (rows.length !== incoming.length) return false;
+
+    return rows.every((row, i) =>
+        fields.every((f) => {
+            const a = row[f];
+            const b = incoming[i][f];
+            return typeof a === "number" || typeof b === "number"
+                ? flt(a || 0) === flt(b || 0)
+                : (a || "") === (b || "");
+        })
+    );
 }
 
 function calculate_non_voucher_row(frm, cdt, cdn) {
@@ -1004,6 +1101,13 @@ function calculate_sub_total(frm) {
         sub_total = total_items + total_charges - total_pb;
     }
     frm.set_value("sub_total", sub_total);
+
+    // frm.set_value('jumlah_diskon', ...) di handler sub_total() hanya memicu
+    // trigger jumlah_diskon->recalculate_vat_details kalau nilainya berubah.
+    // Kalau diskon 0%, nilainya tetap sama sehingga tabel ppn/pph_lainnya
+    // tidak ikut ter-update saat qty/amount items berubah. Panggil langsung
+    // di sini supaya selalu tersinkron.
+    frm.trigger('recalculate_vat_details');
 }
 
 function _apply_credit_to_filter(frm) {

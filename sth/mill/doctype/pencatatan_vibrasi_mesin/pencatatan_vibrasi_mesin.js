@@ -4,25 +4,28 @@
 frappe.ui.form.on("Pencatatan Vibrasi Mesin", {
     onload(frm) {
         if (frm.is_new()) {
-            new frappe.ui.Scanner({
-                dialog: true,
-                multiple: false,
-                on_scan(data) {
-                    if (data && data.result && data.result.text) {
-                        const scan_data = JSON.parse(data.result.text)
-                        frm.set_value("nama_stasiun", scan_data.stasiun);
-                        frm.set_value("stasiun_latitude", scan_data.latitude);
-                        frm.set_value("stasiun_longitude", scan_data.longitude);
-
-                        frm.set_value("tanggal_scan", frappe.datetime.get_today())
-                        frm.set_value("jam_scan", moment().format('HH:mm:ss'))
-                        frm.set_value("user_scan", frappe.session.user)
-                    }
-                },
-            })
-
+            // frm.trigger('scan_barcode')
             frm.trigger('get_location')
         }
+    },
+
+    scan_barcode(frm) {
+        new frappe.ui.Scanner({
+            dialog: true,
+            multiple: false,
+            on_scan(data) {
+                if (data && data.result && data.result.text) {
+                    const scan_data = JSON.parse(data.result.text)
+                    frm.set_value("nama_stasiun", scan_data.stasiun);
+                    frm.set_value("stasiun_latitude", scan_data.latitude);
+                    frm.set_value("stasiun_longitude", scan_data.longitude);
+
+                    frm.set_value("tanggal_scan", frappe.datetime.get_today())
+                    frm.set_value("jam_scan", moment().format('HH:mm:ss'))
+                    frm.set_value("user_scan", frappe.session.user)
+                }
+            },
+        })
     },
 
     get_location(frm) {

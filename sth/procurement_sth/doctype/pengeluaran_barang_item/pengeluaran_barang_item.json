@@ -15,7 +15,9 @@
   "blok",
   "stasiun",
   "jumlah_maksimal",
+  "cost_center",
   "column_break_lfrt",
+  "tipe_asset",
   "kendaraan",
   "km",
   "kegiatan",
@@ -78,10 +80,11 @@
   {
    "columns": 1,
    "fieldname": "kendaraan",
-   "fieldtype": "Link",
+   "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "Asset",
-   "options": "Alat Berat Dan Kendaraan"
+   "options": "tipe_asset",
+   "read_only_depends_on": "eval:doc.sub_unit=='BENGKEL'"
   },
   {
    "columns": 1,
@@ -178,13 +181,25 @@
    "fieldtype": "Float",
    "label": "Penyemaian Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "tipe_asset",
+   "fieldtype": "Select",
+   "label": "Tipe Asset",
+   "options": "Asset\nAlat Berat Dan Kendaraan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-23 13:10:00.010277",
+ "modified": "2026-07-15 12:05:35.781384",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang Item",

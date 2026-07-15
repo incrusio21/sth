@@ -345,24 +345,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 		item = target.append("items", {})
 		item.item_code = source.item_code
 		item.qty = flt(source.total_terima)
-		item.rate = flt(source.harga)
+		item.rate = flt(source.harga) + flt(source.subsidi_angkut)
 		item.expense_account = expense_account
-
-		CHARGES_MARKER = "__from_charges__"
-
-		if flt(source.total_bonus):
-			charge = target.append("charges_purchase_invoice", {})
-			charge.total = flt(source.total_bonus)
-			charge.account = "6511001 - PEMBELIAN TBS LUAR - TML"
-
-			tax_charge = target.append("taxes", {})
-			tax_charge.charge_type = "Actual"
-			tax_charge.category = "Total"
-			tax_charge.add_deduct_tax = "Add"
-			tax_charge.account_head = charge.account
-			tax_charge.tax_amount = charge.total
-			tax_charge.tax_amount_after_discount_amount = charge.total
-			tax_charge.description = CHARGES_MARKER
 
 		PPH_TYPE = "PPh 22 0.25%"
 		PPH_LAINNYA_MARKER = "__from_pph_lainnya__"
@@ -374,7 +358,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		)
 		pph_percentage = flt(tax_rate_doc.rate)
 
-		item_total = flt(source.total_terima) * flt(source.harga)
+		item_total = flt(source.total_terima) * flt(item.rate)
 		pph_amount = item_total * pph_percentage / 100
 
 		pph = target.append("pph_lainnya", {})

@@ -4,6 +4,9 @@
 // Cache filter per baris: { [cdn]: { filters: {...} } }
 const _row_account_filters = {};
 
+// Cache filter kendaraan per baris, diisi berdasarkan Divisi dari sub_unit
+const _row_kendaraan_filters = {};
+
 frappe.ui.form.on("Pengeluaran Barang", {
 
 	setup(frm) {
@@ -35,10 +38,12 @@ frappe.ui.form.on("Pengeluaran Barang", {
 			}
 		})
 
-		frm.set_query("kendaraan", "items", function (doc) {
+		frm.set_query("kendaraan", "items", function (doc, cdt, cdn) {
+			const cached = _row_kendaraan_filters[cdn];
 			return {
 				filters: {
-					company: doc.pt_pemilik_barang
+					company: doc.pt_pemilik_barang,
+					...(cached ? cached.filters : {}),
 				}
 			}
 		})
@@ -72,6 +77,7 @@ frappe.ui.form.on("Pengeluaran Barang", {
 	onload(frm) {
 		(frm.doc.items || []).forEach((row) => {
 			resolve_account_filter(frm, row.doctype, row.name);
+			apply_divisi_rules(frm, row.doctype, row.name);
 		});
 	},
 
@@ -108,6 +114,7 @@ frappe.ui.form.on('Pengeluaran Barang Item', {
 
 	sub_unit(frm, cdt, cdn) {
 		resolve_account_filter(frm, cdt, cdn);
+		apply_divisi_rules(frm, cdt, cdn);
 	},
 
 	stasiun(frm, cdt, cdn) {
@@ -287,6 +294,71 @@ function apply_account_filter_from_traksi_settings(frm, cdt, cdn) {
             });
         }
     });
+}
+
+
+// ─── Helper: simpan filter account berdasarkan daftar account_number tetap ───
+function apply_account_filter_by_account_number(frm, cdt, cdn, account_numbers) {
+	_row_account_filters[cdn] = {
+		filters: {
+			company: frm.doc.pt_pemilik_barang,
+			account_number: ["in", account_numbers],
+			is_group: 0,
+		},
+	};
+	frappe.show_alert({
+		message: __("Filter <b>Account</b> menampilkan akun ") + account_numbers.join(", ") + ".",
+		indicator: "blue",
+	});
+}
+
+
+// ─── Helper: toggle read_only kendaraan hanya untuk baris tertentu ───────────
+function toggle_kendaraan_readonly(frm, cdn, read_only) {
+	const grid_row = frm.fields_dict['items'].grid.grid_rows_by_docname[cdn];
+	if (!grid_row) return;
+
+	grid_row.toggle_editable('kendaraan', !read_only);
+
+	// toggle_editable saja tidak selalu memicu re-render baris,
+	// sehingga status read_only lama bisa "nempel" di DOM. Paksa refresh.
+	if (typeof grid_row.refresh_field === 'function') {
+		grid_row.refresh_field('kendaraan');
+	} else {
+		grid_row.refresh();
+	}
+}
+
+
+// ─── Helper: tentukan tipe_asset & aturan kendaraan/account dari Divisi ──────
+// mill=1 & kantor=1 → tipe_asset "Asset", kendaraan difilter asset_category = MESIN-MESIN
+// traksi=1          → tipe_asset "Alat Berat Dan Kendaraan"
+// bengkel=1         → kendaraan read only, account hanya 4111003 / 4111004
+function apply_divisi_rules(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+
+	delete _row_kendaraan_filters[cdn];
+	toggle_kendaraan_readonly(frm, cdn, false);
+
+	if (!row.sub_unit) return;
+
+	frappe.db.get_value('Divisi', row.sub_unit, ['mill', 'kantor', 'traksi', 'bengkel'])
+		.then(({ message }) => {
+			if (!message) return;
+			const { mill, kantor, traksi, bengkel } = message;
+
+			if (mill && kantor) {
+				frappe.model.set_value(cdt, cdn, 'tipe_asset', 'Asset');
+				_row_kendaraan_filters[cdn] = { filters: { asset_category: 'MESIN-MESIN' } };
+			} else if (traksi) {
+				frappe.model.set_value(cdt, cdn, 'tipe_asset', 'Alat Berat Dan Kendaraan');
+			}
+
+			if (bengkel) {
+				toggle_kendaraan_readonly(frm, cdn, true);
+				apply_account_filter_by_account_number(frm, cdt, cdn, ['4111003', '4111004']);
+			}
+		});
 }
 
 

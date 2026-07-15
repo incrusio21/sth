@@ -40,6 +40,7 @@
   "column_break_hvgf",
   "tahun_tanam",
   "luas_blok",
+  "cost_center",
   "section_break_cepw",
   "hasil_kerja_qty",
   "column_break_qnwo",
@@ -436,13 +437,20 @@
    "label": "RKH No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-19 11:32:30.770984",
+ "modified": "2026-07-14 13:28:27.500514",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Perawatan",

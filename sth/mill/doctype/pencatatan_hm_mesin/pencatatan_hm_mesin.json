@@ -13,7 +13,6 @@
   "company",
   "unit",
   "column_break_nghe",
-  "status",
   "nama_stasiun",
   "nama_mesin",
   "keterangan",
@@ -44,8 +43,7 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
+   "label": "Tanggal"
   },
   {
    "default": "Now",
@@ -71,13 +69,6 @@
   {
    "fieldname": "column_break_nghe",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
   },
   {
    "fieldname": "section_break_ctos",
@@ -151,7 +142,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-05 14:51:19.765833",
+ "modified": "2026-07-14 11:20:27.339992",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pencatatan HM Mesin",

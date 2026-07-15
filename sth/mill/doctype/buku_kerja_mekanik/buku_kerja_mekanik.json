@@ -104,7 +104,7 @@
    "fieldname": "jenis_perbaikan",
    "fieldtype": "Select",
    "label": "Jenis Perbaikan",
-   "options": "\nBreakdown\nPreventive Maintenance"
+   "options": "\nBreakdown\nPreventive Maintenance\nMajor Maintenance"
   },
   {
    "fieldname": "jam_mulai",
@@ -169,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-02 15:58:15.550091",
+ "modified": "2026-07-15 15:50:55.303276",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Buku Kerja Mekanik",

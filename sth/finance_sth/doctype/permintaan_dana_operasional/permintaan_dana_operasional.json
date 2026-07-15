@@ -360,6 +360,7 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:doc.docstatus == 1",
    "fieldname": "pdo_non_pdo_tab",
    "fieldtype": "Tab Break",
    "label": "Non PDO"
@@ -523,7 +524,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-09 14:31:50.975353",
+ "modified": "2026-07-15 21:18:37.776890",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Permintaan Dana Operasional",

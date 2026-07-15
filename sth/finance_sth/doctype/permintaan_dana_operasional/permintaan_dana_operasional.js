@@ -7,6 +7,9 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 	setup(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["PDO Bahan Bakar Vtwo", "PDO Perjalanan Dinas Vtwo", "PDO Kas Vtwo", "PDO Dana Cadangan Vtwo", "PDO NON PDO Vtwo"];
 	},
+	onload(frm) {
+		recalculateOutstandingAmount(frm);
+	},
 	refresh(frm) {
 		make_pdo_kas_readonly(frm);
 		make_pdo_bahan_bakar_readonly(frm);
@@ -498,6 +501,17 @@ function calculateGrandTotal(frm) {
 		frm.set_value("grand_total_pdo", grandTotalPdo);
 		frm.set_value("outstanding_amount", grandTotalPdo);
 	}
+}
+
+function recalculateOutstandingAmount(frm) {
+	let outstandingTotal = 0;
+
+	for (const pdo of pdoCategories) {
+		const fieldname = pdo.toLocaleLowerCase().replaceAll(" ", "_");
+		outstandingTotal += frm.doc[`outstanding_amount_${fieldname}`] || 0;
+	}
+
+	frm.set_value("outstanding_amount", outstandingTotal);
 }
 
 function processFilterSubDetail(frm) {
@@ -1205,6 +1219,7 @@ function make_pdo_bahan_bakar_readonly(frm) {
 
 	frm.refresh_field('pdo_bahan_bakar');
 }
+
 
 function make_jenis_filter(frm) {
 	frm.set_query('jenis_bahan_bakar', function () {

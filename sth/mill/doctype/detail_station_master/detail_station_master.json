@@ -10,6 +10,7 @@
   "unit",
   "latitude",
   "longitude",
+  "cost_center",
   "column_break_cjgs",
   "qr_code",
   "qr_preview"
@@ -57,13 +58,21 @@
    "fieldtype": "HTML",
    "in_preview": 1,
    "label": "QR Preview"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-05 13:47:23.305261",
+ "modified": "2026-07-14 13:39:54.331147",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Detail Station Master",

@@ -73,6 +73,7 @@ def execute(filters=None):
 			np.sisa_dpp AS dpp,
 			np.sisa_ppn AS ppn,
 			np.name AS no_invoice,
+			np.no_kontrak AS no_invoice_eksternal,
 			np.no_faktur_pajak AS no_faktur,
 			np.no_faktur_pajak_pengganti AS no_faktur_pengganti,
 			np.date AS tanggal_invoice,
@@ -159,6 +160,9 @@ def execute(filters=None):
 			if row.jenis_pajak != filters.get("jenis_pajak"):
 				continue
 
+		if row['ppn'] == 0:
+			continue
+
 		data.append(row)
  
 	return columns, data
@@ -235,6 +239,11 @@ def get_columns(filters):
 			"label": _("No Invoice"),
 			"fieldtype": "Data",
 			"fieldname": "no_invoice",
+		},
+		{
+			"label": _("No Invoice Eksternal"),
+			"fieldtype": "Data",
+			"fieldname": "no_invoice_eksternal",
 		},
 		{
 			"label": _("No Faktur"),

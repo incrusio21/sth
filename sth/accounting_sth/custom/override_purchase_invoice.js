@@ -1,4 +1,74 @@
 frappe.provide("erpnext.utils");
+frappe.provide("sth.overrides");
+
+// Custom MultiSelectDialog for "Get Items From > Purchase Receipt":
+// - "Name" column header shown as "No. Purchase Receipt"
+// - Supplier column shows supplier_name instead of the supplier code
+sth.overrides.PurchaseReceiptSelectDialog = class extends frappe.ui.form.MultiSelectDialog {
+	get_datatable_columns() {
+		return ["name", "supplier", "posting_date", "purchase_order"];
+	}
+
+	get_args_for_search() {
+		const args = super.get_args_for_search();
+		if (!args.filter_fields.includes("supplier_name")) {
+			args.filter_fields = [...args.filter_fields, "supplier_name"];
+		}
+		return args;
+	}
+
+	make_list_row(result = {}) {
+		const me = this;
+		const head = Object.keys(result).length === 0;
+
+		const column_labels = {
+			name: __("No. Purchase Receipt"),
+			supplier: __("Supplier"),
+			posting_date: __("Posting Date"),
+			purchase_order: __("Purchase Order"),
+		};
+
+		let contents = ``;
+		this.get_datatable_columns().forEach(function (column) {
+			let column_label = frappe.utils.escape_html(
+				column_labels[column] || __(frappe.model.unscrub(column))
+			);
+			let raw_value = column === "supplier" ? result.supplier_name || result.supplier : result[column];
+			let value = frappe.utils.escape_html(__(raw_value || ""));
+			let id_href = frappe.utils.escape_html(
+				"/desk/" + frappe.router.slug(me.doctype) + "/" + (result.name || "")
+			);
+			contents += `<div class="list-item__content ellipsis">
+				${
+					head
+						? `<span class="ellipsis text-muted" title="${column_label}">${column_label}</span>`
+						: column !== "name"
+						? `<span class="ellipsis result-row" title="${value}">${value}</span>`
+						: `<a href="${id_href}" class="list-id ellipsis" title="${value}">${value}</a>`
+				}
+			</div>`;
+		});
+
+		let $row = $(`<div class="list-item py-2 px-2 border-bottom">
+			<div class="list-item__content" style="flex: 0 0 10px;">
+				<input type="checkbox" class="list-row-check" data-item-name="${frappe.utils.escape_html(
+					result.name
+				)}" ${result.checked ? "checked" : ""}>
+			</div>
+			${contents}
+		</div>`);
+
+		head
+			? $row.addClass("list-item--head")
+			: ($row = $(
+					`<div class="list-item-container m-0" data-item-name="${frappe.utils.escape_html(
+						result.name
+					)}"></div>`
+			  ).append($row));
+
+		return $row;
+	}
+};
 
 erpnext.utils.map_current_doc_original = erpnext.utils.map_current_doc;
 
@@ -136,7 +206,12 @@ erpnext.utils.map_current_doc = function (opts) {
 				});
 			}
 		}
-		const d = new frappe.ui.form.MultiSelectDialog({
+		const DialogClass =
+			opts.source_doctype === "Purchase Receipt"
+				? sth.overrides.PurchaseReceiptSelectDialog
+				: frappe.ui.form.MultiSelectDialog;
+
+		const d = new DialogClass({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
@@ -587,6 +662,35 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
 			frm: frm,
+		});
+	}
+
+	make_payment_entry() {
+		// Untuk Non Voucher Match, bawa "kendaraan" dari baris non_voucher_match
+		// ke field "no_kendaraan" di Payment Entry hasil mapping. Kasus lain
+		// tetap pakai perilaku bawaan ERPNext.
+		if (this.frm.doc.voucher_type !== "Non Voucher Match") {
+			return super.make_payment_entry();
+		}
+
+		const me = this;
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+			args: {
+				dt: me.frm.doc.doctype,
+				dn: me.frm.doc.name,
+			},
+			callback: function (r) {
+				if (!r.message) return;
+
+				const kendaraan_row = (me.frm.doc.non_voucher_match || []).find((row) => row.kendaraan);
+				if (kendaraan_row) {
+					r.message.no_kendaraan = kendaraan_row.kendaraan;
+				}
+
+				const doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			},
 		});
 	}
 

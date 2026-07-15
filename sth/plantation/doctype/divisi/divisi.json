@@ -22,6 +22,10 @@
   "plantation",
   "mill",
   "plasma",
+  "column_break_axry",
+  "kantor",
+  "traksi",
+  "bengkel",
   "setting_coa_default_section",
   "account_default_divisi",
   "column_break_mnfw"
@@ -135,12 +139,34 @@
    "fieldname": "plasma",
    "fieldtype": "Check",
    "label": "Plasma"
+  },
+  {
+   "fieldname": "column_break_axry",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "traksi",
+   "fieldtype": "Check",
+   "label": "Traksi"
+  },
+  {
+   "default": "0",
+   "fieldname": "bengkel",
+   "fieldtype": "Check",
+   "label": "Bengkel"
+  },
+  {
+   "default": "0",
+   "fieldname": "kantor",
+   "fieldtype": "Check",
+   "label": "Kantor"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-17 09:23:01.190119",
+ "modified": "2026-07-15 15:06:29.765169",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Divisi",

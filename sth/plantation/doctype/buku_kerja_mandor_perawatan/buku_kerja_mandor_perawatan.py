@@ -31,6 +31,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		self._mandor_dict = []
 
 	def validate(self):
+		self.isi_cost_center()
 		if self.trans_no:
 			trans_no = self.trans_no
 			karyawan = self.hasil_kerja[0].employee
@@ -54,6 +55,22 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 		self.validate_hasil_kerja_harian()
 		super().validate()
+
+
+	def isi_cost_center(self):
+		if self.kategori_kegiatan == "BBT":
+			cost_center = "{} - {}".format(self.batch, frappe.get_doc("Company",self.company).abbr)
+
+		elif self.kategori_kegiatan == "TM":
+			cost_center = "{} - {}".format(self.blok, frappe.get_doc("Company",self.company).abbr)
+
+		elif self.kategori_kegiatan == "TBM":
+			cost_center = "{} - {}".format(self.tahun_tanam, frappe.get_doc("Company",self.company).abbr)
+
+		# print(cost_center)
+		# self.cost_center=cost_center
+		# self.db_update()
+		# frappe.db.commit()
 		
 	def validate_hasil_kerja_harian(self):
 		if self.get("is_bibitan"):
@@ -170,40 +187,53 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 				  "Pastikan akun tersebut sudah dipasang di Plantation Settings").format(self.company)
 			)
 
-		gl_entries.append(
-			frappe.get_doc({
-				"doctype": "GL Entry",
-				"posting_date": self.posting_date,
-				"account": akun_debit,
-				"debit": self.grand_total,
-				"credit": 0.0,
-				"debit_in_account_currency": self.grand_total,
-				"credit_in_account_currency": 0.0,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"company": self.company,
-				"remarks": f"BKM Perawatan - {self.name}",
-				"cost_center": frappe.get_doc("Company", self.company).cost_center
-			})
-		)
+		cost_center = ""
+		if self.kategori_kegiatan == "BBT":
+			cost_center = "{} - {}".format(self.batch, frappe.get_doc("Company",self.company).abbr)
 
-		# --- CREDIT ---
-		gl_entries.append(
-			frappe.get_doc({
-				"doctype": "GL Entry",
-				"posting_date": self.posting_date,
-				"account": akun_kredit,
-				"debit": 0.0,
-				"credit": self.grand_total,
-				"debit_in_account_currency": 0.0,
-				"credit_in_account_currency": self.grand_total,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"company": self.company,
-				"remarks": f"BKM Perawatan - {self.name}",
-				"cost_center": frappe.get_doc("Company", self.company).cost_center
-			})
-		)
+		elif self.kategori_kegiatan == "TM":
+			cost_center = "{} - {}".format(self.blok, frappe.get_doc("Company",self.company).abbr)
+
+		elif self.kategori_kegiatan == "TBM":
+			cost_center = "{} - {}".format(self.tahun_tanam, frappe.get_doc("Company",self.company).abbr)
+
+
+		if self.grand_total and cost_center:
+
+			gl_entries.append(
+				frappe.get_doc({
+					"doctype": "GL Entry",
+					"posting_date": self.posting_date,
+					"account": akun_debit,
+					"debit": self.grand_total,
+					"credit": 0.0,
+					"debit_in_account_currency": self.grand_total,
+					"credit_in_account_currency": 0.0,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"company": self.company,
+					"remarks": f"BKM Perawatan - {self.name}",
+					"cost_center": cost_center
+				})
+			)
+
+			# --- CREDIT ---
+			gl_entries.append(
+				frappe.get_doc({
+					"doctype": "GL Entry",
+					"posting_date": self.posting_date,
+					"account": akun_kredit,
+					"debit": 0.0,
+					"credit": self.grand_total,
+					"debit_in_account_currency": 0.0,
+					"credit_in_account_currency": self.grand_total,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"company": self.company,
+					"remarks": f"BKM Perawatan - {self.name}",
+					"cost_center": cost_center
+				})
+			)
 
 		# Simpan semua GL Entry
 		for gl in gl_entries:

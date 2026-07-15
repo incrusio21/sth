@@ -61,7 +61,11 @@ def make_purchase_receipt(source_name, target_doc=None):
                 )
                 and doc.delivered_by_supplier != 1,
             },
-            "Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+            "Purchase Taxes and Charges": {
+                "doctype": "Purchase Taxes and Charges",
+                "reset_value": True,
+                "condition": lambda doc: not (doc.description or "").startswith("__from_ppn__"),
+            },
         },
         target_doc,
         set_missing_values,

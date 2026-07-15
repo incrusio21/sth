@@ -22,7 +22,20 @@ class Timbangan(Document):
 			for row in unit:
 				if row.company == self.company:
 					self.unit = row.name
-
+	
+	def make_dn(self):
+		if self.type == "Dispatch":
+			delivery_note = make_delivery_note(self.name)
+			delivery_note.insert()
+			delivery_note.submit()
+			
+			self.db_set('delivery_note', delivery_note.name)
+			
+			frappe.msgprint(
+				msg=f"Delivery Note {delivery_note.name} has been created and submitted",
+				title="Delivery Note Created",
+				indicator="green"
+			)
 
 	def on_submit(self):
 		if self.type == "Receive" and self.receive_type != "Lain - Lain":
@@ -131,9 +144,6 @@ def make_delivery_note(source_name, target_doc=None):
 	
 	def set_missing_values(source, target):
 		target.set_posting_time = 1
-		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
-
 
 		if source.driver_name:
 			# Cari driver berdasarkan driver_name
@@ -180,6 +190,9 @@ def make_delivery_note(source_name, target_doc=None):
 					new_item.pop(f, None)
 	
 				target.append("items",new_item)
+		
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	
 	doclist = get_mapped_doc(
@@ -201,6 +214,13 @@ def make_delivery_note(source_name, target_doc=None):
 		target_doc,
 		set_missing_values
 	)
+
+	for row in doclist.items:
+		if row.item_code:
+			item_doc = frappe.get_doc("Item", row.item_code)
+			for row_item in item_doc.item_defaults:
+				if row_item.company == doclist.company:
+					row.warehouse = row_item.default_warehouse
 	
 	return doclist
 @frappe.whitelist()

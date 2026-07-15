@@ -13,7 +13,6 @@
   "company",
   "unit",
   "column_break_tdai",
-  "status",
   "tanggal_scan",
   "jam_scan",
   "user_scan",
@@ -26,6 +25,7 @@
   "section_break_ptwp",
   "nama_stasiun",
   "nama_mesin",
+  "column_break_lbhc",
   "hasil_vibrasi_vertikal",
   "uf_ver",
   "hasil_vibrasi_horizontal",
@@ -75,13 +75,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_preview": 1,
-   "label": "Status",
-   "options": "Proses\nSelesai"
-  },
-  {
    "fieldname": "section_break_ptwp",
    "fieldtype": "Section Break"
   },
@@ -100,7 +93,7 @@
    "fieldname": "nama_mesin",
    "fieldtype": "Link",
    "label": "Nama Mesin",
-   "options": "Mesin"
+   "options": "Mill Machine"
   },
   {
    "description": "Satuan Dalam mm/s",
@@ -211,13 +204,17 @@
    "fieldtype": "Data",
    "label": "Stasiun Longitude",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lbhc",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 11:49:28.527235",
+ "modified": "2026-07-14 10:49:43.425003",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pencatatan Vibrasi Mesin",

@@ -7,6 +7,7 @@ from frappe import _
 from frappe.query_builder import Tuple
 
 from erpnext.controllers import status_updater
+from sth.overrides import user_permissions
 
 status_updater.status_map["Proposal"] = [
 	["Draft", None],

@@ -116,9 +116,9 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 
-		self.stock_akhir = get_total_stock[0].qty if get_total_stock else 0
+		self.stock_awal = get_total_stock[0].qty if get_total_stock else 0
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
-		self.stock_awal = flt(self.stock_akhir) - flt(self.pengiriman_palm)
+		self.stock_akhir = flt(self.stock_awal) - flt(self.pengiriman)
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
 

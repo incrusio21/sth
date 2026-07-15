@@ -53,6 +53,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self._bkm_name = "Panen"
 
 	def validate(self):
+		self.isi_cost_center()
 		if self.trans_no:
 			trans_no = self.trans_no
 			karyawan = self.hasil_kerja[0].employee
@@ -80,6 +81,11 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		self.reset_automated_data()
 		
 		super().validate()
+	
+	def isi_cost_center(self):
+		self.cost_center = "{} - {}".format(self.hasil_kerja[0].blok, frappe.get_doc("Company",self.company).abbr)
+		# self.db_update()
+		# frappe.db.commit()
 
 	def reset_automated_data(self):
 		self.transfered_janjang = self.transfered_brondolan = \
@@ -118,40 +124,42 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 				  "Pastikan akun tersebut sudah dipasang di Plantation Settings").format(self.company)
 			)
 
-		gl_entries.append(
-			frappe.get_doc({
-				"doctype": "GL Entry",
-				"posting_date": self.posting_date,
-				"account": akun_debit,
-				"debit": self.grand_total,
-				"credit": 0.0,
-				"debit_in_account_currency": self.grand_total,
-				"credit_in_account_currency": 0.0,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"company": self.company,
-				"remarks": f"BKM Panen - {self.name}",
-				"cost_center": frappe.get_doc("Company", self.company).cost_center
-			})
-		)
+		if self.grand_total:
 
-		# --- CREDIT ---
-		gl_entries.append(
-			frappe.get_doc({
-				"doctype": "GL Entry",
-				"posting_date": self.posting_date,
-				"account": akun_kredit,
-				"debit": 0.0,
-				"credit": self.grand_total,
-				"debit_in_account_currency": 0.0,
-				"credit_in_account_currency": self.grand_total,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"company": self.company,
-				"remarks": f"BKM Panen - {self.name}",
-				"cost_center": frappe.get_doc("Company", self.company).cost_center
-			})
-		)
+			gl_entries.append(
+				frappe.get_doc({
+					"doctype": "GL Entry",
+					"posting_date": self.posting_date,
+					"account": akun_debit,
+					"debit": self.grand_total,
+					"credit": 0.0,
+					"debit_in_account_currency": self.grand_total,
+					"credit_in_account_currency": 0.0,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"company": self.company,
+					"remarks": f"BKM Panen - {self.name}",
+					"cost_center": self.cost_center
+				})
+			)
+
+			# --- CREDIT ---
+			gl_entries.append(
+				frappe.get_doc({
+					"doctype": "GL Entry",
+					"posting_date": self.posting_date,
+					"account": akun_kredit,
+					"debit": 0.0,
+					"credit": self.grand_total,
+					"debit_in_account_currency": 0.0,
+					"credit_in_account_currency": self.grand_total,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"company": self.company,
+					"remarks": f"BKM Panen - {self.name}",
+					"cost_center": self.cost_center
+				})
+			)
 
 		# Simpan semua GL Entry
 		for gl in gl_entries:

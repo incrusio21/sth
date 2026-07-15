@@ -40,7 +40,11 @@
   "is_akp",
   "akp_at",
   "total_male",
-  "total_female"
+  "total_female",
+  "amended_from",
+  "account_tab",
+  "account_tm",
+  "account_tbm"
  ],
  "fields": [
   {
@@ -227,18 +231,47 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Status",
-   "options": "Kategori Kegiatan"
+   "options": "Kategori Kegiatan",
+   "read_only": 1
   },
   {
    "fieldname": "jenis",
    "fieldtype": "Data",
    "label": "Jenis"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Blok",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "account_tab",
+   "fieldtype": "Tab Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "account_tm",
+   "fieldtype": "Link",
+   "label": "Account TM",
+   "options": "Account"
+  },
+  {
+   "fieldname": "account_tbm",
+   "fieldtype": "Link",
+   "label": "Account TBM",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-07-10 11:43:56.204528",
+ "modified": "2026-07-14 13:16:01.664705",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

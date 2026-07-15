@@ -1459,3 +1459,19 @@ function show_realisasi_pdo_selector(frm) {
 		}
 	});
 }
+
+function sum_payment_voucher_kas_pdo(frm) {
+	let sum = (frm.doc.payment_voucher_kas_pdo || [])
+		.reduce((s, r) => s + flt(r.total), 0);
+	frm.set_value("paid_amount", sum);
+	frm.set_value("received_amount", sum);
+}
+
+frappe.ui.form.on("Payment Voucher Kas PDO", {
+	total(frm, cdt, cdn) {
+		sum_payment_voucher_kas_pdo(frm);
+	},
+	payment_voucher_kas_pdo_remove(frm) {
+		sum_payment_voucher_kas_pdo(frm);
+	}
+});
