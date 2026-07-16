@@ -118,6 +118,9 @@ class BukuKerjaMandorController(PlantationController):
 
     def create_or_update_payment_log(self, hasil_kerja_list=[], component_type=None):
 
+        if self.get("is_kontanan") == 1:
+            return
+
         removed_epl = []
         for emp in self.hasil_kerja:
             # check apakah ada list khusus untuk d update

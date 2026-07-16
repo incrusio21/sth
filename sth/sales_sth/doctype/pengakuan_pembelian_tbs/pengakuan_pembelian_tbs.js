@@ -115,7 +115,7 @@ function update_subsidi_angkut_child(frm) {
 
             let total_seluruhnya = (rate + bonus + subsidi) * terima;
             frappe.model.set_value(row.doctype, row.name, "total_seluruhnya", total_seluruhnya);
-            frappe.model.set_value(row.doctype, row.name, "rupiah_pajak_pph_22", row.terima * row.rate * percent_pph22 / 100);
+            frappe.model.set_value(row.doctype, row.name, "rupiah_pajak_pph_22", total_seluruhnya * percent_pph22 / 100);
             frappe.model.set_value(row.doctype, row.name, "total", total_seluruhnya - (total_seluruhnya * percent_pph22 / 100));
         });
     }
@@ -218,5 +218,5 @@ function calculate_parent_totals(frm) {
     frm.set_value("total_seluruhnya", total_seluruhnya);
     frm.set_value("total_pembayaran_ke_supplier", total_pembayaran);
     frm.set_value("subtotal", subtotal);
-    frm.set_value("total_pajak_pph_22", flt(subtotal * 0.25 / 100));
+    frm.set_value("total_pajak_pph_22", flt(total_seluruhnya * 0.25 / 100));
 }

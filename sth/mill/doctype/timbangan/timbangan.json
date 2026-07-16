@@ -23,6 +23,7 @@
   "weight_in_time",
   "weight_out_time",
   "ticket_number",
+  "api_ticket_number",
   "type",
   "receive_type",
   "dispatch_type",
@@ -99,11 +100,12 @@
   },
   {
    "fetch_from": "ticket_number.transaction_type",
+   "fetch_if_empty": 1,
    "fieldname": "type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "options": "\nReceive\nDispatch\nReturn",
+   "options": "\nReceive\nDispatch\nReturn\nWb Pabrik",
    "read_only": 1,
    "reqd": 1
   },
@@ -586,13 +588,20 @@
    "in_preview": 1,
    "label": "Kualitas KA %",
    "read_only": 1
+  },
+  {
+   "fieldname": "api_ticket_number",
+   "fieldtype": "Data",
+   "label": "API Ticket Number",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-08 09:08:52.601681",
+ "modified": "2026-07-16 13:05:46.708229",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

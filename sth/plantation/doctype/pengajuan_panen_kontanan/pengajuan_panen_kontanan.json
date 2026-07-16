@@ -43,6 +43,7 @@
   "column_break_yfhd",
   "supervisi_component",
   "against_kontanan_component",
+  "premi_kontanan_component",
   "column_break_qzgl",
   "employee",
   "cost_center"
@@ -300,13 +301,19 @@
    "label": "Duplicate Key",
    "read_only": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "premi_kontanan_component",
+   "fieldtype": "Link",
+   "label": "Premi Kontanan Component",
+   "options": "Salary Component"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-08 09:16:16.242063",
+ "modified": "2026-07-16 12:16:49.195021",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Pengajuan Panen Kontanan",

@@ -55,6 +55,7 @@ class SalarySlip(SalarySlip):
 			self.get_working_days_details(lwp=self.leave_without_pay)
 
 		self.set_salary_structure_assignment()
+
 		self.calculate_net_pay()
 
 		self.set_pesangon_amount_from_periode()
@@ -981,9 +982,13 @@ class SalarySlip(SalarySlip):
 		self.set_addons_premi()
 		self.set_harvest_incentive()
 
-		# hapus component against terlebih dahulu untuk d create ulang
+		# # hapus component against terlebih dahulu untuk d create ulang
 		self.remove_flexibel_payment()
 		self.calculate_employee_payment()
+
+
+		# print(frappe.as_json(self.deductions))
+
 
 		if self.salary_structure:
 			self.calculate_component_amounts("earnings")
@@ -1166,7 +1171,7 @@ class SalarySlip(SalarySlip):
 		
 		self._employee_payment = {}
 		self._against_employee_payment = {}
-
+		# print(str(emp_pl))
 		for pl in emp_pl:
 			# throw jika status payment log belum approved (document belum fix)
 			if pl.status != "Approved":
@@ -1206,7 +1211,7 @@ class SalarySlip(SalarySlip):
 			salary_component = premi.salary_component \
 				or get_premi_attendance_settings(premi.premi_type) \
 				or designation.salary_component
-			print(salary_component)
+			# print(salary_component)
 			key = (salary_component, "earnings")
 			self._employee_payment.setdefault(key, {
 				"account": {},
@@ -1367,6 +1372,7 @@ class SalarySlip(SalarySlip):
 			)
 
 		for component, total_amount in self._against_employee_payment.items():
+			print(self._against_employee_payment)
 			component_type = "earnings" if total_amount > 0 else "deductions"
 			self.add_component_custom(
 				component, 
@@ -1637,6 +1643,7 @@ class SalarySlip(SalarySlip):
 @frappe.whitelist()
 def debug():
 	doc = frappe.get_doc("Salary Slip","Sal Slip/1509090411870002/00002")
+	doc.deductions=[]
 	doc.validate()
 
 # @frappe.whitelist()

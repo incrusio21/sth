@@ -17,11 +17,11 @@ class Attendance(Attendance):
 			self.leave_type = leave_type
 
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"])
-		validate_active_employee(self.employee)
+		# validate_active_employee(self.employee)
 		self.validate_attendance_date()
 		if self.designation not in ["NS29","NS30","NS08"]:
 			self.validate_duplicate_record()
 			
 		self.validate_overlapping_shift_attendance()
-		self.validate_employee_status()
+		# self.validate_employee_status()
 		self.check_leave_record()

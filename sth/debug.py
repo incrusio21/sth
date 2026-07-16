@@ -105,3 +105,11 @@ def check_alur_user():
 
 	# 3. Cek role yang dimiliki user
 	print(frappe.get_roles("tpre.em01@sthgroup.com"))
+
+def debug_panen_k():
+	no_doc = "PPK-00003"
+	frappe.db.sql(""" DELETE FROM `tabEmployee Payment Log` WHERE voucher_no = "{}" """.format(no_doc))
+	# frappe.db.sql(""" DELETE FROM `tabRecap Panen by Blok` WHERE blok = "A24s" """.format(no_doc))
+	
+	doc = frappe.get_doc("Pengajuan Panen Kontanan", no_doc)
+	doc.on_submit()

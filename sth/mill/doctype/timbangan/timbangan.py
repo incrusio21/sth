@@ -11,7 +11,8 @@ from frappe.model.mapper import get_mapped_doc
 
 class Timbangan(Document):
 	def validate(self):
-		self.validate_ticket()
+		# self.validate_ticket()
+		self.map_api_ticket_number()
 		self.validate_qty_do()
 
 		if self.do_no and not self.storage:
@@ -83,6 +84,13 @@ class Timbangan(Document):
 		
 		if sort_doc:=frappe.db.get_value("Sortasi",{"no_timbangan": self.name}):
 			frappe.get_doc("Sortasi",sort_doc).cancel()
+
+	def map_api_ticket_number(self):
+		if self.owner and "api@sth" in self.owner:
+			self.api_ticket_number = self.ticket_number
+			spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.ticket_number}, "name")
+			if spb_name:
+				self.ticket_number = spb_name
 
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
