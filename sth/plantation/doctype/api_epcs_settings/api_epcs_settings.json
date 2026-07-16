@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-16 14:55:40.485691",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bibit",
+  "material",
+  "apd"
+ ],
+ "fields": [
+  {
+   "fieldname": "bibit",
+   "fieldtype": "Table",
+   "label": "Bibit",
+   "options": "Daftar Bibit"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Material",
+   "options": "Daftar Material"
+  },
+  {
+   "fieldname": "apd",
+   "fieldtype": "Table",
+   "label": "APD",
+   "options": "Daftar APD"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-16 14:59:39.825121",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "API EPCS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
