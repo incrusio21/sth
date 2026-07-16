@@ -62,31 +62,30 @@ def _get_item_group_list(kelompok_barang):
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_item_bibit():
 	return _get_item_list(_get_kelompok_barang("bibit", "kelompok_bibit"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_kelompok_bibit():
 	return _get_item_group_list(_get_kelompok_barang("bibit", "kelompok_bibit"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_item_material():
 	return _get_item_list(_get_kelompok_barang("material", "kelompok_material"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_kelompok_material():
 	return _get_item_group_list(_get_kelompok_barang("material", "kelompok_material"))
 
-
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_item_apd():
 	return _get_item_list(_get_kelompok_barang("apd", "daftar_apd"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_kelompok_apd():
 	return _get_item_group_list(_get_kelompok_barang("apd", "daftar_apd"))
