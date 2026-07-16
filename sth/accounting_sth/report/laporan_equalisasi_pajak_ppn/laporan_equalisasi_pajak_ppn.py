@@ -49,6 +49,7 @@ def execute(filters=None):
 					ELSE 0 
 			END as ppn,
 			pi.name as no_invoice,
+			pi.bill_no as no_invoice_eksternal,
 			pi.no_fp as no_faktur,
 			pi.no_faktur_pajak_pengganti as no_faktur_pengganti,
 			pi.posting_date as tanggal_invoice,
@@ -73,7 +74,7 @@ def execute(filters=None):
 			np.sisa_dpp AS dpp,
 			np.sisa_ppn AS ppn,
 			np.name AS no_invoice,
-			np.no_kontrak AS no_invoice_eksternal,
+			np.nomor_invoice_buyer AS no_invoice_eksternal,
 			np.no_faktur_pajak AS no_faktur,
 			np.no_faktur_pajak_pengganti AS no_faktur_pengganti,
 			np.date AS tanggal_invoice,
@@ -164,6 +165,12 @@ def execute(filters=None):
 			continue
 
 		data.append(row)
+  
+	if filters.get("tipe_transaksi"):
+		data = [
+			row for row in data
+			if row.get("tipe_transaksi") == filters.get("tipe_transaksi")
+		]
  
 	return columns, data
 

@@ -9,6 +9,15 @@ sth.overrides.PurchaseReceiptSelectDialog = class extends frappe.ui.form.MultiSe
 		return ["name", "supplier", "posting_date", "purchase_order"];
 	}
 
+	get_primary_filters() {
+		const fields = super.get_primary_filters();
+		const search_field = fields.find((f) => f.fieldname === "search_term");
+		if (search_field) {
+			search_field.label = __("No. Purchase Receipt");
+		}
+		return fields;
+	}
+
 	get_args_for_search() {
 		const args = super.get_args_for_search();
 		if (!args.filter_fields.includes("supplier_name")) {

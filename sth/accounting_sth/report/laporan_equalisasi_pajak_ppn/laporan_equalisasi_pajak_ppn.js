@@ -29,6 +29,12 @@ frappe.query_reports["Laporan Equalisasi Pajak PPN"] = {
 			}
 		},
 		{
+			"fieldname": "tipe_transaksi",
+			"label": __("Tipe Transaksi"),
+			"fieldtype": "Select",
+			"options": "\nPurchase Invoice\nNota Piutang",
+		},
+		{
 			"fieldname": "from_date",
 			"label": __("Tanggal Dari"),
 			"fieldtype": "Date",

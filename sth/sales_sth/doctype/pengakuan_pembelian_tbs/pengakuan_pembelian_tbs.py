@@ -345,7 +345,16 @@ def make_purchase_invoice(source_name, target_doc=None):
 		item = target.append("items", {})
 		item.item_code = source.item_code
 		item.qty = flt(source.total_terima)
-		item.rate = flt(source.harga) + flt(source.subsidi_angkut)
+		# item.rate = flt(source.harga) + flt(source.subsidi_angkut)
+		bonus = 0
+		if source.items:
+			bonus = flt(source.items[0].bonus)
+
+		item.rate = (
+			flt(source.harga)
+			+ flt(source.subsidi_angkut)
+			+ bonus
+		)
 		item.expense_account = expense_account
 
 		PPH_TYPE = "PPh 22 0.25%"

@@ -9,6 +9,10 @@ frappe.ui.form.on("Purchase Invoice", {
     onload(frm) {
         frm.trigger('set_due_date')
 
+        if (frm.is_new() && frm.doc.pakai_ppn === undefined) {
+            frm.set_value('pakai_ppn', 1)
+        }
+
         frm.set_query("type", "ppn", function (doc, cdt, cdn) {
             return { filters: { type: "PPN" } };
         });
@@ -44,6 +48,15 @@ frappe.ui.form.on("Purchase Invoice", {
 
         if ((frm.doc.items || []).length) {
             calculate_sub_total(frm)
+
+            // "Get Items From" (Purchase Receipt / Pengakuan Pembelian TBS) uses
+            // erpnext.utils.map_current_doc, which replaces frm.doc in bulk via
+            // frappe.model.sync + frm.refresh() instead of adding rows one by one,
+            // so the "items_add" child-table event never fires for that flow.
+            // Re-sync the PPN 12% row here so pakai_ppn isn't left empty.
+            if (frm.doc.pakai_ppn && !(frm.doc.ppn || []).some(row => row.type === "PPN 12%")) {
+                frm.trigger('pakai_ppn')
+            }
         }
 
         sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
@@ -341,6 +354,10 @@ frappe.ui.form.on("Purchase Invoice", {
         toggle_ppn_12(frm)
     },
 
+    items_add(frm) {
+        frm.trigger('pakai_ppn')
+    },
+
     pph_22(frm) {
         sync_to_taxes(frm)
     },
@@ -399,23 +416,38 @@ frappe.ui.form.on("Purchase Invoice", {
         const base_pph = frm.doc.sub_total || 0
         const base_ppn = (frm.doc.sub_total || 0) - (frm.doc.jumlah_diskon || 0)
 
+        // Hanya panggil set_value & sync_to_taxes kalau nilainya benar-benar
+        // berubah. frappe.model.set_value dan sync_to_taxes (yang membongkar
+        // ulang child table "taxes") SELALU menandai form dirty walau
+        // nilainya persis sama dengan yang sudah tersimpan. Karena fungsi
+        // ini juga dipanggil dari refresh() -> calculate_sub_total() setiap
+        // dokumen dibuka, tanpa guard ini form langsung jadi "Not Saved"
+        // padahal belum ada perubahan apa pun.
+        let changed = false
+
         for (const row of (frm.doc.pph_lainnya || [])) {
             if (!row.percentage) continue
             const amount = base_pph * row.percentage / 100
+            if (flt(row.amount) === flt(amount)) continue
             frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
             frappe.model.set_value(row.doctype, row.name, "amount", amount)
+            changed = true
         }
 
         for (const row of (frm.doc.ppn || [])) {
             if (!row.percentage) continue
             const amount = base_ppn * row.percentage / 100
+            if (flt(row.amount) === flt(amount)) continue
             frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
             frappe.model.set_value(row.doctype, row.name, "amount", amount)
+            changed = true
         }
 
         frm.trigger('calculate_total_pph_lainnya')
         frm.trigger('calculate_total_ppn')
-        sync_to_taxes(frm)
+        if (changed) {
+            sync_to_taxes(frm)
+        }
     },
 
     calculate_total_biaya_angkut(frm) {
@@ -463,24 +495,32 @@ frappe.ui.form.on("Purchase Invoice", {
         frm.refresh_fields()
     },
 
-    before_save(frm) {
+    async before_save(frm) {
         if ((frm.doc.items || []).length) {
             calculate_sub_total(frm)
         }
 
-        frappe.db.get_value('Account',
+        // Must await this: before_save has to resolve only after the
+        // account lookup + expense_account updates are applied. Previously
+        // this used a callback, so save() completed before the callback
+        // ran; frappe.model.set_value then fired *after* save and marked
+        // the form dirty again, which made submit keep asking to save in
+        // a loop.
+        const r = await frappe.db.get_value('Account',
             { account_number: '1156099', company: frm.doc.company },
-            'name',
-            function (r) {
-                if (r && r.name) {
-                    let account = r.name;
-                    frm.doc.items.forEach(function (row) {
-                        frappe.model.set_value(row.doctype, row.name, 'expense_account', account);
-                    });
-                    frm.refresh_field('items');
-                }
-            }
+            'name'
         );
+        const account = r && r.message && r.message.name;
+        if (!account) return;
+
+        let changed = false;
+        frm.doc.items.forEach(function (row) {
+            if (row.expense_account !== account) {
+                frappe.model.set_value(row.doctype, row.name, 'expense_account', account);
+                changed = true;
+            }
+        });
+        if (changed) frm.refresh_field('items');
     },
 
     validate(frm) {
@@ -1100,14 +1140,21 @@ function calculate_sub_total(frm) {
         const total_pb = (frm.doc.purchase_invoice_pengeluaran_barang || []).reduce((sum, r) => sum + (r.amount || 0), 0);
         sub_total = total_items + total_charges - total_pb;
     }
-    frm.set_value("sub_total", sub_total);
 
     // frm.set_value('jumlah_diskon', ...) di handler sub_total() hanya memicu
     // trigger jumlah_diskon->recalculate_vat_details kalau nilainya berubah.
     // Kalau diskon 0%, nilainya tetap sama sehingga tabel ppn/pph_lainnya
     // tidak ikut ter-update saat qty/amount items berubah. Panggil langsung
-    // di sini supaya selalu tersinkron.
-    frm.trigger('recalculate_vat_details');
+    // di sini supaya selalu tersinkron. Tapi ini juga dipanggil dari
+    // refresh() setiap dokumen dibuka, jadi hanya trigger kalau sub_total
+    // memang berubah dari yang tersimpan — kalau tidak, form akan langsung
+    // jadi "Not Saved" begitu dokumen dibuka walau belum ada yang diedit.
+    const sub_total_changed = flt(frm.doc.sub_total || 0) !== flt(sub_total);
+    frm.set_value("sub_total", sub_total);
+
+    if (sub_total_changed) {
+        frm.trigger('recalculate_vat_details');
+    }
 }
 
 function _apply_credit_to_filter(frm) {

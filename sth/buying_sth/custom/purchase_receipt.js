@@ -66,6 +66,8 @@ frappe.ui.form.on("Purchase Receipt", {
                 filters: { name: po_name }
             }).then((po) => {
                 for (const tax of (po.taxes || [])) {
+                    if ((tax.description || "").includes("__from_ppn__")) continue
+
                     // Cek apakah account_head sudah ada (hindari duplikat jika multi-PO)
                     const exists = (frm.doc.taxes || []).find(
                         (t) => t.account_head === tax.account_head

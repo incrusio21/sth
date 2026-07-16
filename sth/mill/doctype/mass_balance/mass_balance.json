@@ -33,7 +33,7 @@
   "ltds_1nut",
   "ltds_2nut",
   "wet_shellnut",
-  "kerneltbs",
+  "shelltbs",
   "dry_matter_fiberfiber_press_",
   "kernelbrondolan_"
  ],
@@ -154,11 +154,6 @@
    "label": "Wet Shell/Nut (%)"
   },
   {
-   "fieldname": "kerneltbs",
-   "fieldtype": "Percent",
-   "label": "Kernel/TBS (%)"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -200,13 +195,18 @@
   {
    "fieldname": "column_break_gkwp",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shelltbs",
+   "fieldtype": "Percent",
+   "label": "Shell/TBS (%)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-06 09:58:29.030936",
+ "modified": "2026-07-16 10:07:01.375068",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mass Balance",

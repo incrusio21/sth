@@ -1,0 +1,273 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-16 11:11:11.733810",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "estate_code",
+  "trans_no",
+  "column_break_uyzp",
+  "wb_in_at",
+  "wb_out_at",
+  "column_break_zpaw",
+  "wb_in_by",
+  "wb_out_by",
+  "section_break_fpox",
+  "is_external",
+  "supplier_code",
+  "supplier_name",
+  "column_break_kzac",
+  "spb_no",
+  "spb_date",
+  "is_contract",
+  "column_break_nuxh",
+  "veh_code",
+  "veh_regno",
+  "driver_code",
+  "driver_name",
+  "section_break_pvpo",
+  "total_jjg",
+  "total_brd",
+  "column_break_qult",
+  "bruto",
+  "tarra",
+  "netto",
+  "column_break_rnoe",
+  "trans_type",
+  "latitude",
+  "longitude",
+  "satelite_count",
+  "column_break_qzub",
+  "created_at",
+  "created_by",
+  "created_by_code",
+  "wb_type",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "estate_code",
+   "fieldtype": "Link",
+   "label": "Estate Code",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No"
+  },
+  {
+   "fieldname": "column_break_uyzp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wb_in_at",
+   "fieldtype": "Date",
+   "label": "WB In At"
+  },
+  {
+   "fieldname": "wb_out_at",
+   "fieldtype": "Date",
+   "label": "WB Out At"
+  },
+  {
+   "fieldname": "column_break_zpaw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wb_in_by",
+   "fieldtype": "Link",
+   "label": "WB In By",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "wb_out_by",
+   "fieldtype": "Link",
+   "label": "WB Out By",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "section_break_fpox",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_external",
+   "fieldtype": "Check",
+   "label": "Is External"
+  },
+  {
+   "fieldname": "supplier_code",
+   "fieldtype": "Link",
+   "label": "Supplier Code",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name"
+  },
+  {
+   "fieldname": "column_break_kzac",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "spb_no",
+   "fieldtype": "Link",
+   "label": "SPB No",
+   "options": "Surat Pengantar Buah"
+  },
+  {
+   "fieldname": "spb_date",
+   "fieldtype": "Date",
+   "label": "SPB Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_contract",
+   "fieldtype": "Check",
+   "label": "Is Contract"
+  },
+  {
+   "fieldname": "column_break_nuxh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "veh_code",
+   "fieldtype": "Link",
+   "label": "VEH Code",
+   "options": "Alat Berat Dan Kendaraan"
+  },
+  {
+   "fieldname": "veh_regno",
+   "fieldtype": "Data",
+   "label": "VEH RegNo"
+  },
+  {
+   "fieldname": "driver_code",
+   "fieldtype": "Link",
+   "label": "Driver Code",
+   "options": "Driver"
+  },
+  {
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
+  },
+  {
+   "fieldname": "section_break_pvpo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_jjg",
+   "fieldtype": "Float",
+   "label": "Total JJG"
+  },
+  {
+   "fieldname": "total_brd",
+   "fieldtype": "Float",
+   "label": "Total BRD"
+  },
+  {
+   "fieldname": "column_break_qult",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bruto",
+   "fieldtype": "Float",
+   "label": "Bruto"
+  },
+  {
+   "fieldname": "tarra",
+   "fieldtype": "Float",
+   "label": "Tarra"
+  },
+  {
+   "fieldname": "netto",
+   "fieldtype": "Float",
+   "label": "Netto"
+  },
+  {
+   "fieldname": "column_break_rnoe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trans_type",
+   "fieldtype": "Data",
+   "label": "Trans Type"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude"
+  },
+  {
+   "fieldname": "satelite_count",
+   "fieldtype": "Data",
+   "label": "Satelite Count"
+  },
+  {
+   "fieldname": "column_break_qzub",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "created_at",
+   "fieldtype": "Datetime",
+   "label": "Created At"
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Data",
+   "label": "Created By"
+  },
+  {
+   "fieldname": "created_by_code",
+   "fieldtype": "Data",
+   "label": "Created By Code"
+  },
+  {
+   "fieldname": "wb_type",
+   "fieldtype": "Select",
+   "label": "WB Type",
+   "options": "0\n1"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-16 11:16:47.815094",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "WB",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

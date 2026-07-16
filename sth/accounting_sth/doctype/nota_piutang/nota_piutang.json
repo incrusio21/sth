@@ -22,6 +22,7 @@
   "nota_hutang_pemenuhan_kontrak",
   "amended_from",
   "informasi_pajak_section",
+  "nomor_invoice_buyer",
   "no_faktur_pajak",
   "tanggal_faktur_pajak",
   "column_break_jqqp",
@@ -341,13 +342,20 @@
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "label": "Keterangan"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "nomor_invoice_buyer",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor Invoice Buyer"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-13 10:11:42.938540",
+ "modified": "2026-07-16 10:26:35.112318",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

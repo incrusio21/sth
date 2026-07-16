@@ -90,7 +90,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		for row in self.rekap_hasil:
 			netto += row.netto
 
-		self.volume_sounding = netto
+		self.volume_sounding = round(netto,-1)
 
 	@frappe.whitelist()
 	def get_stock(self):
