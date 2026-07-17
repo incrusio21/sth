@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kode",
- "creation": "2025-07-04 13:27:04.067417",
+ "creation": "2026-07-17 15:26:43.976151",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -13,7 +13,9 @@
   "deskripsi",
   "tipe_transport",
   "amended_from",
-  "api_status"
+  "api_status",
+  "section_break_premi",
+  "premi"
  ],
  "fields": [
   {
@@ -59,15 +61,27 @@
    "fieldname": "nama",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Nama",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "section_break_premi",
+   "fieldtype": "Section Break",
+   "label": "Premi"
+  },
+  {
+   "fieldname": "premi",
+   "fieldtype": "Table",
+   "label": "Premi",
+   "options": "Kategori Alat Premi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-23 00:44:39.802275",
+ "modified": "2026-07-17 15:37:50.154574",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kategori Alat",

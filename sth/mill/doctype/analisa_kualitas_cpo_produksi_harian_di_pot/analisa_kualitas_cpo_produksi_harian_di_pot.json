@@ -154,14 +154,15 @@
    "description": "Kadar Kotoran Vacuum Drier",
    "fieldname": "dirt",
    "fieldtype": "Percent",
-   "label": "Dirt (%)"
+   "label": "Dirt (%)",
+   "precision": "3"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-25 14:07:34.926749",
+ "modified": "2026-07-17 15:29:20.304887",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO Produksi Harian di POT",

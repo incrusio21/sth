@@ -8,11 +8,12 @@ from frappe.model.mapper import get_mapped_doc
 
 class PenginputanStockByProduct(Document):
 	def on_submit(self):
+		if flt(self.produksi) > 0:
+			self.create_ste("In")
+			
 		if flt(self.input_dipakai_pabrik) > 0:
 			self.create_ste("Out")
 		
-		if flt(self.produksi) > 0:
-			self.create_ste("In")
 
 	def on_cancel(self):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})

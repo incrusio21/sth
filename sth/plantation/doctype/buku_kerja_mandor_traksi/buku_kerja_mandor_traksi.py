@@ -118,19 +118,19 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		)
 
 	def validate_upah_kegiatan(self):
-		jenis_alat = frappe.get_cached_doc("Jenis Alat", self.jenis_alat).as_dict() \
+		kategori_alat = frappe.get_cached_doc("Kategori Alat", self.jenis_alat).as_dict() \
 			if self.tipe_master_kendaraan in ("Alat Berat") else {}
-		
+
 		kmhm_akhir = self.kmhm_awal
 		for tk in self.task:
 			tk.amount = flt(tk.hasil_kerja) * flt(tk.upah_hasil)
 			tk.last_name = tk.name
-			
+
 			tk.premi_heavy_equipment = 0
-			if jenis_alat.get("premi"):
+			if kategori_alat.get("premi"):
 				selisih_kmhm = tk.kmhm_akhir - kmhm_akhir
 				last_end = 0
-				for premi in jenis_alat.premi:
+				for premi in kategori_alat.premi:
 					# hentikan jika selisih sudah lebih kecil sama dengan 0
 					if selisih_kmhm < (premi.start_time - last_end):
 						break
