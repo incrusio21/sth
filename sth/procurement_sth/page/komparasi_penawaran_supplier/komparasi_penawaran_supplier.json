@@ -3,8 +3,8 @@
  "creation": "2026-01-17 09:39:04.264456",
  "docstatus": 0,
  "doctype": "Page",
- "idx": 8,
- "modified": "2026-05-07 11:30:15.344654",
+ "idx": 13,
+ "modified": "2026-07-16 16:30:20.597501",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "komparasi-penawaran-supplier",
@@ -12,7 +12,10 @@
  "page_name": "komparasi-penawaran-supplier",
  "roles": [
   {
-   "role": "ASISTEN DIVISI"
+   "role": "PROCUREMENT SPV"
+  },
+  {
+   "role": "PROCUREMENT STAFF"
   }
  ],
  "script": null,

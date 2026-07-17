@@ -9,16 +9,6 @@ frappe.ui.form.on("Timbangan", {
 				query: frappe.model.get_server_module_name(doc.doctype) + ".get_spb_available"
 			}
 		})
-
-		frm.set_query("no_do_2", (doc) => {
-			return {
-				query: frappe.model.get_server_module_name(doc.doctype) + ".get_do_2_available",
-				filters: {
-					do_no: doc.do_no,
-					kode_barang: doc.kode_barang
-				}
-			}
-		})
 	},
 
 	refresh(frm) {
@@ -132,18 +122,6 @@ frappe.ui.form.on("Timbangan", {
 
 	no_segel(frm) {
 		frm.set_value("jumlah_segel", frm.doc.no_segel.length)
-	},
-
-	no_do_2(frm) {
-		if (!frm.doc.no_do_2 || !frm.doc.kode_barang) {
-			frm.set_value("sisa_do_2", 0)
-			return
-		}
-		const method = frappe.model.get_server_module_name(frm.doctype) + ".get_sisa_do_2"
-		frappe.xcall(method, { do_no: frm.doc.no_do_2, item_code: frm.doc.kode_barang })
-			.then((r) => {
-				frm.set_value("sisa_do_2", r)
-			})
 	},
 
 	reference_do_item(frm) {

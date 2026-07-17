@@ -344,7 +344,6 @@
    "label": "Keterangan"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "nomor_invoice_buyer",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -355,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-16 10:26:35.112318",
+ "modified": "2026-07-16 15:35:31.998070",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

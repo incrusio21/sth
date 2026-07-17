@@ -31,9 +31,7 @@
   "supplier",
   "spb",
   "do_no",
-  "no_do_2",
   "delivery_note",
-  "delivery_note_2",
   "purchase_order",
   "trans_no",
   "rkh_no",
@@ -46,7 +44,6 @@
   "delivery_order",
   "tujuan",
   "sisa_do",
-  "sisa_do_2",
   "reference_do_item",
   "column_break_gypo",
   "no_segel",
@@ -76,8 +73,6 @@
   "column_break_ttdq",
   "netto",
   "netto_2",
-  "qty_do",
-  "qty_do_2",
   "driver_data_tab",
   "driver_section",
   "driver_name",
@@ -322,40 +317,6 @@
    "options": "Delivery Order"
   },
   {
-   "depends_on": "eval:doc.type == \"Return\" || doc.type == \"Dispatch\"",
-   "fieldname": "no_do_2",
-   "fieldtype": "Link",
-   "label": "Delivery Order No 2",
-   "options": "Delivery Order"
-  },
-  {
-   "fieldname": "delivery_note_2",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Delivery Note 2",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "qty_do",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Qty DO 1",
-   "no_copy": 1,
-   "precision": "0",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "qty_do_2",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Qty DO 2",
-   "no_copy": 1,
-   "precision": "0",
-   "read_only": 1
-  },
-  {
    "fetch_from": "ticket_number.return_type",
    "fieldname": "return_type",
    "fieldtype": "Select",
@@ -534,16 +495,6 @@
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Sisa DO",
-   "precision": "0",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.no_do_2",
-   "fieldname": "sisa_do_2",
-   "fieldtype": "Data",
-   "in_preview": 1,
-   "label": "Sisa DO 2",
    "precision": "0",
    "read_only": 1
   },

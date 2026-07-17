@@ -26,13 +26,33 @@ class Timbangan(Document):
 	
 	def make_dn(self):
 		if self.type == "Dispatch":
-			self.create_delivery_notes()
+			delivery_note = make_delivery_note(self.name)
+			delivery_note.insert()
+			delivery_note.submit()
+			
+			self.db_set('delivery_note', delivery_note.name)
+			
+			frappe.msgprint(
+				msg=f"Delivery Note {delivery_note.name} has been created and submitted",
+				title="Delivery Note Created",
+				indicator="green"
+			)
 
 	def on_submit(self):
 		if self.type == "Receive" and self.receive_type != "Lain - Lain":
 			self.make_tbs_ledger()
 		elif self.type == "Dispatch":
-			self.create_delivery_notes()
+			delivery_note = make_delivery_note(self.name)
+			delivery_note.insert()
+			delivery_note.submit()
+			
+			self.db_set('delivery_note', delivery_note.name)
+			
+			frappe.msgprint(
+				msg=f"Delivery Note {delivery_note.name} has been created and submitted",
+				title="Delivery Note Created",
+				indicator="green"
+			)
 		if self.receive_type == "TBS Internal":
 			if self.spb:
 				spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
@@ -77,54 +97,14 @@ class Timbangan(Document):
 			frappe.throw("Ticket has been used before")
 	
 	def validate_qty_do(self):
-		if not self.do_no:
-			self.qty_do = 0
-			self.qty_do_2 = 0
-			return
+		if self.do_no:
+			qty_do = frappe.db.get_value("Delivery Order Item",{"item_code":self.kode_barang,"parent": self.do_no},["qty"])
+			qty_timbangan = frappe.db.get_value("Timbangan",filters={"do_no":self.do_no,"name":["!=",self.name],"kode_barang": self.kode_barang},fieldname=["sum(netto) as qty"])
 
-		sisa_do_1 = self.get_sisa_do_available(self.do_no)
-		self.qty_do = min(flt(self.netto_2), sisa_do_1)
-		remaining = flt(self.netto_2) - self.qty_do
-
-		if remaining > 0:
-			if not self.no_do_2:
-				frappe.throw(f"Jumlah Netto melebihi qty DO {self.do_no} (sisa: {sisa_do_1}). Isi Delivery Order No 2 untuk menampung kelebihannya.")
-
-			sisa_do_2 = self.get_sisa_do_available(self.no_do_2)
-			if remaining > sisa_do_2:
-				frappe.throw(f"Jumlah Netto melebihi qty DO {self.do_no} dan {self.no_do_2}. Kelebihan: {remaining - sisa_do_2}")
-
-			self.qty_do_2 = remaining
-		else:
-			self.qty_do_2 = 0
-
-	def get_sisa_do_available(self, do_no):
-		qty_do = frappe.db.get_value("Delivery Order Item",{"item_code":self.kode_barang,"parent": do_no},["qty"])
-		qty_timbangan = frappe.db.get_value("Timbangan",filters={"do_no":do_no,"name":["!=",self.name],"kode_barang": self.kode_barang,"docstatus":["!=",2]},fieldname=["sum(netto_2) as qty"])
-		qty_timbangan_2 = frappe.db.get_value("Timbangan",filters={"no_do_2":do_no,"name":["!=",self.name],"kode_barang": self.kode_barang,"docstatus":["!=",2]},fieldname=["sum(qty_do_2) as qty"])
-		return flt(qty_do) - flt(qty_timbangan) - flt(qty_timbangan_2)
-
-	def create_delivery_notes(self):
-		dn_names = []
-
-		dn1 = make_delivery_note(self.name, do_no=self.do_no, qty=self.qty_do or self.netto_2)
-		dn1.insert()
-		dn1.submit()
-		self.db_set('delivery_note', dn1.name)
-		dn_names.append(dn1.name)
-
-		if self.no_do_2 and flt(self.qty_do_2) > 0:
-			dn2 = make_delivery_note(self.name, do_no=self.no_do_2, qty=self.qty_do_2)
-			dn2.insert()
-			dn2.submit()
-			self.db_set('delivery_note_2', dn2.name)
-			dn_names.append(dn2.name)
-
-		frappe.msgprint(
-			msg=f"Delivery Note {', '.join(dn_names)} has been created and submitted",
-			title="Delivery Note Created",
-			indicator="green"
-		)
+			diff_qty = flt(qty_do) - (flt(qty_timbangan) + flt(self.netto)) 
+			print(diff_qty)
+			if diff_qty < 0:
+				frappe.throw(f"Jumlah Netto melebihi qty DO: {diff_qty}")
 
 	def make_tbs_ledger(self):
 		create_tbs_ledger(frappe._dict({
@@ -168,11 +148,10 @@ def get_spb_available(doctype, txt, searchfield, start, page_len, filters):
 	""",params)
 	
 @frappe.whitelist()
-def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
-
+def make_delivery_note(source_name, target_doc=None):
+	
 	def set_missing_values(source, target):
 		target.set_posting_time = 1
-		effective_do_no = do_no or source.do_no
 
 		if source.driver_name:
 			# Cari driver berdasarkan driver_name
@@ -180,18 +159,17 @@ def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 			if driver:
 				target.driver = driver
 				target.driver_name = source.driver_name
-
+		
 		if source.transportir:
 			# Cari transporter berdasarkan transportir
 			transporter = frappe.db.get_value('Supplier', {'supplier_name': source.transportir, 'is_transporter': 1}, 'name')
 			if transporter:
 				target.transporter = transporter
 				target.transporter_name = source.transportir
-
-		# Set values from Delivery Order if effective_do_no exists
-		if effective_do_no:
-			do_doc = frappe.get_doc("Delivery Order", effective_do_no)
-			target.delivery_order = effective_do_no
+		
+		# Set values from Delivery Order if do_no exists
+		if source.do_no:
+			do_doc = frappe.get_doc("Delivery Order", source.do_no)
 			target.customer = do_doc.customer
 			target.penandatangan = do_doc.penandatangan
 			target.jabatan_penandatangan = do_doc.jabatan_penandatangan
@@ -206,25 +184,25 @@ def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 						'parameter': row.parameter,
 						'keterangan': row.keterangan
 					})
-
+			
 			if source.kode_barang and source.netto:
 				fields_to_remove = ["doctype", "name", "owner","creation", "modified", "modified_by","idx"]
 				item = next((r for r in do_doc.items if r.item_code == source.kode_barang),[])
 				new_item = copy.deepcopy(item)
 				new_item = new_item.as_dict()
-				new_item.qty = flt(qty) if qty is not None else source.netto_2
+				new_item.qty = source.netto_2
 				new_item.timbangan = source.name
 				new_item.delivery_order_item = item.name
 
 				for f in fields_to_remove:
 					new_item.pop(f, None)
-
+	
 				target.append("items",new_item)
-
+		
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-
+	
 	doclist = get_mapped_doc(
 		"Timbangan",
 		source_name,
@@ -236,7 +214,7 @@ def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 					"company": "company",
 					"driver_name": "driver_name",
 					"transportir": "transporter_name",
-					"license_number": "lr_no",
+					"license_number": "lr_no", 
 					"do_no": "delivery_order"
 				}
 			},
@@ -297,39 +275,3 @@ def get_timbangan_settings():
 def get_sisa_do(reference):
 	delivered,qty = frappe.db.get_value("Delivery Order Item",reference,["delivered_qty","qty"])
 	return flt(qty) - flt(delivered)
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_do_2_available(doctype, txt, searchfield, start, page_len, filters):
-	do_no = filters.get("do_no")
-	kode_barang = filters.get("kode_barang")
-	customer = frappe.db.get_value("Delivery Order", do_no, "customer") if do_no else None
-
-	conditions = ["do.name LIKE %(txt)s", "do.docstatus = 1"]
-	params = {"txt": f"%{txt}%", "start": start, "page_len": page_len}
-
-	if customer:
-		conditions.append("do.customer = %(customer)s")
-		params["customer"] = customer
-	if kode_barang:
-		conditions.append("doi.item_code = %(kode_barang)s")
-		params["kode_barang"] = kode_barang
-	if do_no:
-		conditions.append("do.name != %(do_no)s")
-		params["do_no"] = do_no
-
-	return frappe.db.sql(f"""
-		select do.name, do.customer
-		from `tabDelivery Order` do
-		join `tabDelivery Order Item` doi on doi.parent = do.name
-		where {" and ".join(conditions)}
-		group by do.name
-		limit %(start)s, %(page_len)s
-	""", params)
-
-@frappe.whitelist()
-def get_sisa_do_2(do_no, item_code):
-	item = frappe.db.get_value("Delivery Order Item", {"parent": do_no, "item_code": item_code}, ["delivered_qty", "qty"], as_dict=True)
-	if not item:
-		return 0
-	return flt(item.qty) - flt(item.delivered_qty)

@@ -13,7 +13,9 @@
   "employee_name",
   "pkp_status",
   "unit",
+  "divisi",
   "employment_type",
+  "department",
   "natura_price",
   "is_holiday",
   "column_break_pphu",
@@ -191,13 +193,28 @@
    "label": "Unit",
    "options": "Unit",
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.divisi",
+   "fieldname": "divisi",
+   "fieldtype": "Data",
+   "label": "Divisi",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-27 10:45:16.451399",
+ "modified": "2026-07-17 10:42:29.882912",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Lembur List",

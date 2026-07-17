@@ -6,10 +6,12 @@ from frappe.model.document import Document
 
 ITEM_FIELDS = [
 	"name",
+	"item_name",
 	"kelompok_barang",
 	"nama_kelompok_barang",
 	"item_group",
 	"nama_sub_kelompok_barang",
+	"stock_uom",
 	"description",
 	"status",
 	"owner",

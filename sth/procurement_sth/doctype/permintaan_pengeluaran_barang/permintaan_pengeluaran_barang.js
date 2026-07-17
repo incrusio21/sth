@@ -155,7 +155,7 @@ frappe.ui.form.on('Permintaan Pengeluaran Barang Item', {
 
     stasiun(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
-        if ((row.sub_unit || "").trim() == "MILL") {
+        if ((row.sub_unit || "").trim().toUpperCase().includes("MILL")) {
             resolve_account_filter(frm, cdt, cdn);
         }
     },
@@ -317,19 +317,19 @@ function apply_divisi_rules(frm, cdt, cdn) {
 function resolve_account_filter(frm, cdt, cdn) {
     const row = locals[cdt][cdn];
     const sub_unit = (row.sub_unit || "").trim();
-    if (sub_unit === "MILL") {
+    if (sub_unit.includes("MILL")) {
         if (!row.stasiun) {
             apply_account_filter_by_prefix(frm, cdt, cdn, "72");
         } else {
             apply_account_filter_from_station(frm, cdt, cdn);
         }
-    } else if (sub_unit === "TRAKSI") {
+    } else if (sub_unit.includes("TRAKSI")) {
        apply_account_filter_by_account_number(frm, cdt, cdn, ["4112003", "4112004"]);
     } else if (sub_unit === "KANTOR") {
         apply_account_filter_by_prefix(frm, cdt, cdn, "71");
     } else if (sub_unit === "BIBITAN") {
         apply_account_filter_from_bibitan_settings(frm, cdt, cdn);
-    } else if (sub_unit === "BENGKEL") {
+    } else if (sub_unit.includes("BENGKEL")) {
         apply_account_filter_by_account_number(frm, cdt, cdn, ["4111003", "4111004"]);
     } else {
         apply_account_filter_from_kegiatan(frm, cdt, cdn);
