@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 13,
- "modified": "2026-07-16 16:30:20.597501",
+ "modified": "2026-07-17 14:57:16.657250",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "komparasi-penawaran-supplier",
@@ -16,6 +16,15 @@
   },
   {
    "role": "PROCUREMENT STAFF"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase Master Manager"
+  },
+  {
+   "role": "Purchase User"
   }
  ],
  "script": null,

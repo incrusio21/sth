@@ -106,7 +106,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self.validate_used_task()
 
 	def set_posting_datetime(self):
-		self.posting_datetime = f"{self.posting_date} {self.posting_time}"
+		posting_date = cstr(self.posting_date).split(" ")[0]
+		self.posting_datetime = f"{posting_date} {self.posting_time}"
 	
 	def set_salary_account(self):
 		self.salary_account = frappe.db.get_value(

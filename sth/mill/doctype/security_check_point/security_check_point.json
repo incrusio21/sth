@@ -239,6 +239,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Receive Type",
+   "no_copy": 1,
    "options": "\nTBS Internal\nTBS Eksternal\nLain - Lain"
   },
   {
@@ -464,7 +465,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-01 13:33:15.039789",
+ "modified": "2026-07-17 14:11:08.301676",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

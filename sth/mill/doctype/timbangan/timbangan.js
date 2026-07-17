@@ -185,6 +185,9 @@ frappe.ui.form.on("Timbangan", {
 	},
 
 	type(frm) {
+		if (frm.doc.type != "Receive") {
+			frm.set_value("receive_type", "")
+		}
 		set_field_visibility(frm)
 	},
 

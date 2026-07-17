@@ -122,7 +122,7 @@
    "fieldname": "tipe_master",
    "fieldtype": "Select",
    "label": "Tipe Master",
-   "options": "\nAlat Berat\nKendaraan Umum\nDump Truck\nMesin & Peralatan Workshop",
+   "options": "\nAlat Berat\nKendaraan Umum\nDump Truck\nMesin Dan Peralatan Workshop",
    "reqd": 1
   },
   {
@@ -250,7 +250,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-16 11:26:06.776171",
+ "modified": "2026-07-17 13:41:07.011518",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",
