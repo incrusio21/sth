@@ -644,7 +644,7 @@ class SalarySlip(SalarySlip):
 			results = query.run()
 			
 			for row in results:
-				if row[0]:  
+				if row[0] not in unique_dates:  
 					unique_dates.add(row[0])
 		
 		self.hari_kegiatan = len(unique_dates)

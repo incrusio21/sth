@@ -17,12 +17,12 @@ def debug_gl():
 	frappe.get_doc("Costing Bengkel",no_doc).save()
 
 def debug_bkm():
-	lis = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Traksi` WHERE docstatus = 1 """)
+	lis = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Panen` WHERE docstatus = 1 and name = "BKM-PNN-00472" """)
 	for row in lis:
 		no_doc = row[0]
-		frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
-		frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-		frappe.get_doc("Buku Kerja Mandor Traksi",no_doc).on_submit()
+		# frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
+		# frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
+		frappe.get_doc("Buku Kerja Mandor Panen",no_doc).make_attendance()
 	
 def debug_zero():
 	# frappe.db.sql(""" UPDATE `tabPengeluaran Barang` SET docstatus=0, workflow_state="Butuh Persetujuan 1" WHERE name = "PB-020726-0002" """)
@@ -107,9 +107,9 @@ def check_alur_user():
 	print(frappe.get_roles("tpre.em01@sthgroup.com"))
 
 def debug_panen_k():
-	no_doc = "PPK-00003"
-	frappe.db.sql(""" DELETE FROM `tabEmployee Payment Log` WHERE voucher_no = "{}" """.format(no_doc))
+	no_doc = "SSPKDBK-0017"
+	# frappe.db.sql(""" DELETE FROM `tabEmployee Payment Log` WHERE voucher_no = "{}" """.format(no_doc))
 	# frappe.db.sql(""" DELETE FROM `tabRecap Panen by Blok` WHERE blok = "A24s" """.format(no_doc))
 	
-	doc = frappe.get_doc("Pengajuan Panen Kontanan", no_doc)
-	doc.on_submit()
+	doc = frappe.get_doc("Sounding Stock Palm Kernel di Bunker Kernel", no_doc)
+	doc.get_stock()

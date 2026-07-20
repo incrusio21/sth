@@ -1425,8 +1425,10 @@ def get_all_training_event():
             te.name,
             te.custom_posting_date,
             te.supplier,
+            s.supplier_name,
 			te.unit
         FROM `tabTraining Event` te
+        LEFT JOIN `tabSupplier` s ON s.name = te.supplier
         WHERE
             te.docstatus = 1
             AND NOT EXISTS (

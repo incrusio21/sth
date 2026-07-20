@@ -218,6 +218,7 @@ class BukuKerjaMandorController(PlantationController):
 
     def make_attendance(self):
         employee = self.hasil_kerja + self.get_mandor_details()
+        print(employee)
         for emp in employee:
             attendance_detail = {
                 "employee": emp.employee, "company": self.company, "attendance_date": self.posting_date
@@ -225,6 +226,7 @@ class BukuKerjaMandorController(PlantationController):
 
             add_att = "add_attendance"
             try:
+                print("nyoba")
                 frappe.db.savepoint(add_att)
                 attendance = frappe.get_doc({
                     "doctype": "Attendance",
@@ -234,6 +236,7 @@ class BukuKerjaMandorController(PlantationController):
                 attendance.flags.ignore_permissions = 1
                 attendance.submit()
             except DuplicateAttendanceError:
+
                 if frappe.message_log:
                     frappe.message_log.pop()
                     

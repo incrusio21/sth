@@ -1381,8 +1381,9 @@ async function showTrainingEventSelector(frm) {
     // }
 
     const fields = [
-        { fieldtype: 'Link', fieldname: 'name', label: 'Training Event', in_list_view: true },
-        { fieldtype: 'Link', fieldname: 'supplier', label: 'Supplier', in_list_view: true },
+        { fieldtype: 'Link', fieldname: 'name', label: 'No. Training Event', in_list_view: true },
+        { fieldtype: 'Data', fieldname: 'supplier_name', label: 'Nama Supplier', in_list_view: true },
+        { fieldtype: 'Link', fieldname: 'supplier', label: 'Supplier', hidden: 1 },
         { fieldtype: 'Date', fieldname: 'custom_posting_date', label: 'Posting Date', in_list_view: true },
     ];
 

@@ -15,6 +15,7 @@
   "unit",
   "estate",
   "cost_center",
+  "naik_tm_journal_entry",
   "nama",
   "deskripsi",
   "api_status",
@@ -89,6 +90,14 @@
    "label": "Nama Blok",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "naik_tm_journal_entry",
+   "fieldtype": "Link",
+   "label": "Naik TM Journal Entry",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "fieldname": "sph",
@@ -271,7 +280,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-14 13:16:01.664705",
+ "modified": "2026-07-20 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",

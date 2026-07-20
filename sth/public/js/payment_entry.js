@@ -604,6 +604,28 @@ frappe.ui.form.on("Payment Entry Reference", {
 				}
 			},
 		});
+	},
+
+	reference_name(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.reference_doctype !== "Ganti Rugi Lahan" || !row.reference_name) return;
+
+		frappe.call({
+			method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_next_payment_schedule",
+			args: {
+				reference_doctype: row.reference_doctype,
+				reference_name: row.reference_name,
+				exclude_payment_entry: frm.doc.name,
+			},
+			callback: function(r) {
+				if (!r.message) return;
+
+				frappe.model.set_value(cdt, cdn, "payment_term", r.message.payment_term);
+				frappe.model.set_value(cdt, cdn, "allocated_amount", r.message.allocated_amount);
+				frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message.payment_term_outstanding);
+			},
+		});
 	}
 });
 

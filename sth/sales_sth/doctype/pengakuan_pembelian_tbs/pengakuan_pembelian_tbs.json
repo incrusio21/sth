@@ -12,6 +12,7 @@
   "tanggal_timbangan",
   "company",
   "nama_supplier",
+  "nama_supplier_name",
   "unit",
   "jarak_ring",
   "jarak",
@@ -73,6 +74,14 @@
    "label": "Vendor",
    "options": "Supplier",
    "reqd": 1
+  },
+  {
+   "fetch_from": "nama_supplier.supplier_name",
+   "fieldname": "nama_supplier_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Nama Supplier",
+   "read_only": 1
   },
   {
    "fieldname": "unit",

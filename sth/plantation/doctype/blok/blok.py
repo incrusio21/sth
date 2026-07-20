@@ -1,6 +1,8 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today
@@ -94,8 +96,70 @@ class Blok(Document):
 				)
 
 
+def _parse_list(val):
+	if isinstance(val, str):
+		return json.loads(val)
+	return val or []
+
+
+def _hitung_alokasi(blok, selected_bloks):
+	"""Hitung X (biaya per hektar) dan Y (total luas Blok yang dipilih),
+	nilai JE = X * Y. X & Y dihitung dari SEMUA Blok TBM di tahun tanam + unit
+	yang sama (satu kelompok/cohort), sedangkan Y hanya menjumlahkan luas
+	dari Blok yang dipilih user."""
+
+	if not blok.tahun_tanam or not blok.unit:
+		frappe.throw("Tahun Tanam dan Unit harus diisi.")
+
+	if not blok.cost_center:
+		frappe.throw("Cost Center belum diatur pada Blok ini.")
+
+	cohort = frappe.get_all("Blok", filters={
+		"tahun_tanam": blok.tahun_tanam,
+		"unit": blok.unit,
+		"workflow_state": "TBM",
+	}, fields=["name", "blok", "luas_areal"])
+
+	if not cohort:
+		frappe.throw("Tidak ada Blok TBM yang dapat dinaikkan.")
+
+	cohort_by_name = {c.name: c for c in cohort}
+
+	if not selected_bloks:
+		frappe.throw("Pilih minimal satu Blok yang akan dinaikkan ke TM.")
+
+	invalid = [s for s in selected_bloks if s not in cohort_by_name]
+	if invalid:
+		frappe.throw(f"Blok berikut bukan Blok TBM di Tahun Tanam/Unit yang sama: {', '.join(invalid)}")
+
+	total_biaya = frappe.db.sql("""
+		SELECT COALESCE(SUM(debit), 0)
+		FROM `tabGL Entry`
+		WHERE cost_center = %s
+		  AND is_cancelled = 0
+	""", (blok.cost_center,))[0][0] or 0
+
+	total_hektar = sum(c.luas_areal or 0 for c in cohort)
+	if not total_hektar:
+		frappe.throw("Total Luas Areal Blok TBM di Tahun Tanam ini adalah 0.")
+
+	x_per_hektar = total_biaya / total_hektar
+	y_luas_dipilih = sum(cohort_by_name[s].luas_areal or 0 for s in selected_bloks)
+	total = x_per_hektar * y_luas_dipilih
+
+	return {
+		"cohort": cohort,
+		"selected": [cohort_by_name[s] for s in selected_bloks],
+		"total_biaya": total_biaya,
+		"total_hektar": total_hektar,
+		"x_per_hektar": x_per_hektar,
+		"y_luas_dipilih": y_luas_dipilih,
+		"total": total,
+	}
+
+
 @frappe.whitelist()
-def naikkan_ke_tm(blok_name):
+def get_tbm_bloks_for_selection(blok_name):
 	blok = frappe.get_doc("Blok", blok_name)
 
 	if blok.get("workflow_state") != "TBM":
@@ -104,35 +168,60 @@ def naikkan_ke_tm(blok_name):
 	if not blok.tahun_tanam or not blok.unit:
 		frappe.throw("Tahun Tanam dan Unit harus diisi.")
 
-	blok_list = frappe.get_all("Blok", filters={
+	cohort = frappe.get_all("Blok", filters={
 		"tahun_tanam": blok.tahun_tanam,
 		"unit": blok.unit,
 		"workflow_state": "TBM",
-	}, fields=["name", "blok"])
+	}, fields=["name", "blok", "luas_areal"], order_by="blok asc")
 
-	if not blok_list:
-		frappe.throw("Tidak ada Blok TBM yang dapat dinaikkan.")
+	return {
+		"tahun_tanam": blok.tahun_tanam,
+		"unit": blok.unit,
+		"bloks": cohort,
+	}
+
+
+@frappe.whitelist()
+def preview_naikkan_ke_tm(blok_name, selected_bloks):
+	blok = frappe.get_doc("Blok", blok_name)
+	selected_bloks = _parse_list(selected_bloks)
+
+	alokasi = _hitung_alokasi(blok, selected_bloks)
 
 	unit_doc = frappe.get_doc("Unit", blok.unit)
 	company = unit_doc.company
-	company_abbr = frappe.db.get_value("Company", company, "abbr")
 
-	if not blok.cost_center:
-		frappe.throw("Cost Center belum diatur pada Blok ini.")
+	debit_account = frappe.db.get_value("Account", {"account_number": "1271301", "company": company}, "name") or "1271301 - TANAMAN MENGHASILKAN"
+	credit_account = frappe.db.get_value("Account", {"account_number": "1273005", "company": company}, "name") or "1273005 - ASET DALAM PENYELESAIAN - LAINNYA"
 
-	# total = frappe.db.sql("""
-	# 	SELECT COALESCE(SUM(debit) - SUM(credit), 0)
-	# 	FROM `tabGL Entry`
-	# 	WHERE cost_center = %s
-	# 	  AND is_cancelled = 0
-	# """, (blok.cost_center,))[0][0] or 0
+	return {
+		"jumlah_blok": len(alokasi["selected"]),
+		"jumlah_blok_cohort": len(alokasi["cohort"]),
+		"total_biaya": alokasi["total_biaya"],
+		"total_hektar": alokasi["total_hektar"],
+		"luas_dipilih": alokasi["y_luas_dipilih"],
+		"total": alokasi["total"],
+		"debit_account": debit_account,
+		"credit_account": credit_account,
+		"tahun_tanam": blok.tahun_tanam,
+		"unit": blok.unit,
+	}
 
-	total = frappe.db.sql("""
-		SELECT COALESCE(SUM(debit), 0)
-		FROM `tabGL Entry`
-		WHERE cost_center = %s
-		  AND is_cancelled = 0
-	""", (blok.cost_center,))[0][0] or 0
+
+@frappe.whitelist()
+def naikkan_ke_tm(blok_name, selected_bloks):
+	blok = frappe.get_doc("Blok", blok_name)
+	selected_bloks = _parse_list(selected_bloks)
+
+	if blok.get("workflow_state") != "TBM":
+		frappe.throw("Blok ini tidak dalam status TBM.")
+
+	alokasi = _hitung_alokasi(blok, selected_bloks)
+	total = alokasi["total"]
+	selected = alokasi["selected"]
+
+	unit_doc = frappe.get_doc("Unit", blok.unit)
+	company = unit_doc.company
 
 	debit_account = frappe.db.get_value("Account", {
 		"account_number": "1271301",
@@ -148,96 +237,46 @@ def naikkan_ke_tm(blok_name):
 	if not credit_account:
 		frappe.throw(f"Akun 1273005 tidak ditemukan untuk company {company}.")
 
-	for b in blok_list:
-		frappe.db.set_value("Blok", b.name, "workflow_state", "TM", update_modified=False)
-
-		blok_cc = frappe.db.get_value(
-			"Cost Center",
-			{"cost_center_name": b.blok, "company": company},
-			"name"
-		)
-		if not blok_cc:
-			new_cc = frappe.new_doc("Cost Center")
-			new_cc.cost_center_name = b.blok
-			new_cc.parent_cost_center = f"Blok - {company_abbr}"
-			new_cc.company = company
-			new_cc.is_group = 0
-			new_cc.flags.ignore_permissions = True
-			new_cc.insert()
-			frappe.db.commit()
-			blok_cc = new_cc.name
-
-		frappe.db.set_value("Blok", b.name, "cost_center", blok_cc, update_modified=False)
+	tahun_cc = blok.cost_center
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
 	je.posting_date = today()
 	je.company = company
-	je.user_remark = f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit}"
+	nama_blok_dipilih = ", ".join(b.blok for b in selected)
+	je.user_remark = (
+		f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit} - Blok: {nama_blok_dipilih}"
+	)
 
 	je.append("accounts", {
 		"account": debit_account,
 		"debit_in_account_currency": total,
 		"credit_in_account_currency": 0,
-		"cost_center": blok.cost_center,
+		"cost_center": tahun_cc,
 	})
 	je.append("accounts", {
 		"account": credit_account,
 		"debit_in_account_currency": 0,
 		"credit_in_account_currency": total,
-		"cost_center": blok.cost_center,
+		"cost_center": tahun_cc,
 	})
 
 	je.flags.ignore_permissions = True
 	je.insert()
 	je.submit()
 
+	for b in selected:
+		frappe.db.set_value("Blok", b.name, {
+			"workflow_state": "TM",
+			"naik_tm_journal_entry": je.name,
+		}, update_modified=False)
+
 	frappe.db.commit()
 
 	return {
-		"blok_diproses": len(blok_list),
+		"blok_diproses": len(selected),
 		"journal_entry": je.name,
 		"total": total,
-	}
-
-
-@frappe.whitelist()
-def preview_naikkan_ke_tm(blok_name):
-	blok = frappe.get_doc("Blok", blok_name)
-
-	blok_list = frappe.get_all("Blok", filters={
-		"tahun_tanam": blok.tahun_tanam,
-		"unit": blok.unit,
-		"workflow_state": "TBM",
-	}, fields=["name"])
-
-	# total = frappe.db.sql("""
-	# 	SELECT COALESCE(SUM(debit) - SUM(credit), 0)
-	# 	FROM `tabGL Entry`
-	# 	WHERE cost_center = %s
-	# 	  AND is_cancelled = 0
-	# """, (blok.cost_center,))[0][0] or 0
-
-	total = frappe.db.sql("""
-		SELECT COALESCE(SUM(debit), 0)
-		FROM `tabGL Entry`
-		WHERE cost_center = %s
-		  AND is_cancelled = 0
-	""", (blok.cost_center,))[0][0] or 0
-
-	unit_doc = frappe.get_doc("Unit", blok.unit)
-	company = unit_doc.company
-
-	debit_account = frappe.db.get_value("Account", {"account_number": "1271301", "company": company}, "name") or "1271301 - TANAMAN MENGHASILKAN"
-	credit_account = frappe.db.get_value("Account", {"account_number": "1273005", "company": company}, "name") or "1273005 - ASET DALAM PENYELESAIAN - LAINNYA"
-
-	return {
-		"jumlah_blok": len(blok_list),
-		"total": total,
-		"debit_account": debit_account,
-		"credit_account": credit_account,
-		"tahun_tanam": blok.tahun_tanam,
-		"unit": blok.unit,
 	}
 
 
@@ -248,33 +287,29 @@ def kembalikan_ke_tbm(blok_name):
 	if blok.get("workflow_state") != "TM":
 		frappe.throw("Blok ini tidak dalam status TM.")
 
-	if not blok.tahun_tanam or not blok.unit:
-		frappe.throw("Tahun Tanam dan Unit harus diisi.")
+	if not blok.naik_tm_journal_entry:
+		frappe.throw("Journal Entry Naik TM terkait tidak ditemukan pada Blok ini.")
 
-	# Cari JE yang dibuat saat naik TM (ambil yang terbaru)
-	result = frappe.db.sql("""
-		SELECT name FROM `tabJournal Entry`
-		WHERE user_remark = %s AND docstatus = 1
-		ORDER BY creation DESC LIMIT 1
-	""", (f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit}",))
-
-	if not result:
-		frappe.throw("Journal Entry terkait tidak ditemukan. Pastikan Journal Entry Naik TM belum dibatalkan.")
-
-	je_name = result[0][0]
-
-	je = frappe.get_doc("Journal Entry", je_name)
-	je.flags.ignore_permissions = True
-	je.cancel()
+	je_name = blok.naik_tm_journal_entry
 
 	blok_list = frappe.get_all("Blok", filters={
-		"tahun_tanam": blok.tahun_tanam,
-		"unit": blok.unit,
+		"naik_tm_journal_entry": je_name,
 		"workflow_state": "TM",
 	}, fields=["name"])
 
+	if not blok_list:
+		frappe.throw("Tidak ada Blok TM yang terkait dengan Journal Entry ini.")
+
+	je = frappe.get_doc("Journal Entry", je_name)
+	if je.docstatus == 1:
+		je.flags.ignore_permissions = True
+		je.cancel()
+
 	for b in blok_list:
-		frappe.db.set_value("Blok", b.name, "workflow_state", "TBM", update_modified=False)
+		frappe.db.set_value("Blok", b.name, {
+			"workflow_state": "TBM",
+			"naik_tm_journal_entry": None,
+		}, update_modified=False)
 
 	frappe.db.commit()
 

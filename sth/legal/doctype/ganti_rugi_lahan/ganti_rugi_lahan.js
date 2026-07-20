@@ -6,6 +6,7 @@ frappe.provide("sth.legal");
 frappe.ui.form.on("Ganti Rugi Lahan", {
 	refresh(frm) {
         frm.events.set_no_rekening(frm);
+        frm.events.calculate_payment_schedule_total(frm);
 	},
     company(frm) {
         frm.cscript.get_details_account({
@@ -25,6 +26,21 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
                 childrens: frm.doc.items.length > 0 ? frm.doc.items : null,
             }
         })
+    },
+
+    calculate_payment_schedule_total(frm) {
+        let total_invoice_portion = 0
+        let total_payment_amount = 0
+
+        for (const d of frm.doc.payment_schedule || []) {
+            total_invoice_portion += flt(d.invoice_portion)
+            total_payment_amount += flt(d.payment_amount)
+        }
+
+        frm.doc.total_invoice_portion = flt(total_invoice_portion)
+        frm.doc.total_payment_amount = flt(total_payment_amount)
+        frm.refresh_field("total_invoice_portion")
+        frm.refresh_field("total_payment_amount")
     },
 
     set_no_rekening(frm) {
@@ -87,6 +103,35 @@ frappe.ui.form.on("Ganti Rugi Lahan Item", {
         })
 
         frm.events.set_no_rekening(frm)
+    }
+});
+
+frappe.ui.form.on("Proposal Schedule", {
+    invoice_portion(frm, cdt, cdn) {
+        let row = locals[cdt][cdn]
+
+        let total_portion = 0
+        for (const d of frm.doc.payment_schedule) {
+            total_portion += flt(d.invoice_portion)
+        }
+
+        if (total_portion > 100) {
+            frappe.msgprint(__("Total Invoice Portion tidak boleh lebih dari 100%"))
+            frappe.model.set_value(cdt, cdn, "invoice_portion", 0)
+            return
+        }
+
+        if (row.invoice_portion) {
+            frappe.model.set_value(cdt, cdn, "payment_amount", flt(row.invoice_portion) * flt(frm.doc.grand_total) / 100)
+        }
+
+        frm.events.calculate_payment_schedule_total(frm)
+    },
+    payment_amount(frm) {
+        frm.events.calculate_payment_schedule_total(frm)
+    },
+    payment_schedule_remove(frm) {
+        frm.events.calculate_payment_schedule_total(frm)
     }
 });
 

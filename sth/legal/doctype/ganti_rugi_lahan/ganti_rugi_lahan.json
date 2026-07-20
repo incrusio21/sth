@@ -35,6 +35,10 @@
   "outstanding_amount",
   "term_tab",
   "payment_schedule",
+  "section_break_total_ps",
+  "total_invoice_portion",
+  "column_break_total_ps",
+  "total_payment_amount",
   "more_information_tab",
   "accounts_details_section",
   "employee",
@@ -228,6 +232,26 @@
    "fieldtype": "Table",
    "label": "Payment Schedule",
    "options": "Proposal Schedule"
+  },
+  {
+   "fieldname": "section_break_total_ps",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_invoice_portion",
+   "fieldtype": "Percent",
+   "label": "Total Invoice Portion",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_total_ps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Total Payment Amount",
+   "read_only": 1
   },
   {
    "collapsible": 1,

@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.utils import get_stock_balance
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def before_save(self):
@@ -101,13 +102,6 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			where i.tipe_barang = 'Palm Kernel' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
-		get_total_stock = frappe.db.sql("""
-			select b.actual_qty as qty from `tabBin` b
-			join `tabItem` i on b.item_code = i.name
-			join `tabWarehouse` w on w.name = b.warehouse
-			where i.tipe_barang = 'Palm Kernel' and w.unit = %s and w.name = %s
-		""",(self.unit,get_warehouse_palm(self.unit)),as_dict=True)
-
 		data_sortasi = frappe.db.sql("""
 			select sum(coalesce(netto - netto_2,0)) as qty
 			from `tabTimbangan` t
@@ -115,8 +109,11 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			where i.tipe_barang = 'TBS' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
+		warehouse = get_warehouse_palm(self.unit)
+		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
 
-		self.stock_awal = get_total_stock[0].qty if get_total_stock else 0
+		self.stock_awal = get_stock_balance(item_code, warehouse, self.tanggal_proses, "23:59:59") if warehouse and item_code else 0
+		
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
 		self.stock_akhir = flt(self.stock_awal) - flt(self.pengiriman)
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0

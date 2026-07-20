@@ -1,82 +1,130 @@
 frappe.provide("erpnext.utils");
 frappe.provide("sth.overrides");
 
-// Custom MultiSelectDialog for "Get Items From > Purchase Receipt":
-// - "Name" column header shown as "No. Purchase Receipt"
-// - Supplier column shows supplier_name instead of the supplier code
-sth.overrides.PurchaseReceiptSelectDialog = class extends frappe.ui.form.MultiSelectDialog {
-	get_datatable_columns() {
-		return ["name", "supplier", "posting_date", "purchase_order"];
-	}
-
-	get_primary_filters() {
-		const fields = super.get_primary_filters();
-		const search_field = fields.find((f) => f.fieldname === "search_term");
-		if (search_field) {
-			search_field.label = __("No. Purchase Receipt");
-		}
-		return fields;
-	}
-
-	get_args_for_search() {
-		const args = super.get_args_for_search();
-		if (!args.filter_fields.includes("supplier_name")) {
-			args.filter_fields = [...args.filter_fields, "supplier_name"];
-		}
-		return args;
-	}
-
-	make_list_row(result = {}) {
-		const me = this;
-		const head = Object.keys(result).length === 0;
-
-		const column_labels = {
-			name: __("No. Purchase Receipt"),
-			supplier: __("Supplier"),
+// Custom MultiSelectDialog for "Get Items From" so it behaves like the
+// existing Purchase Receipt flow:
+// - "Name" column header shown as "No. <Source Doctype>"
+// - the supplier column shows the supplier's name instead of its code
+//
+// Each entry maps a source_doctype to the columns to show, their labels,
+// and which fieldname/name-fieldname pair resolves the supplier display
+// value (the doctype must already have a fetched "..._name" field, the
+// same pattern ERPNext uses for Purchase Receipt.supplier_name and this
+// app uses for BAPP.supplier_name / Pengakuan Pembelian TBS.nama_supplier_name).
+sth.overrides.GET_ITEMS_DIALOG_CONFIG = {
+	"Purchase Receipt": {
+		name_label: __("No. Purchase Receipt"),
+		columns: ["name", "supplier", "posting_date", "purchase_order"],
+		column_labels: {
+			supplier: __("Nama Supplier"),
 			posting_date: __("Posting Date"),
 			purchase_order: __("Purchase Order"),
-		};
+		},
+		supplier_fieldname: "supplier",
+		supplier_name_fieldname: "supplier_name",
+	},
+	"Pengakuan Pembelian TBS": {
+		name_label: __("No. Pengakuan Pembelian TBS"),
+		columns: ["name", "nama_supplier", "unit", "tanggal"],
+		column_labels: {
+			nama_supplier: __("Nama Supplier"),
+			unit: __("Unit"),
+			tanggal: __("Tanggal"),
+		},
+		supplier_fieldname: "nama_supplier",
+		supplier_name_fieldname: "nama_supplier_name",
+	},
+	BAPP: {
+		name_label: __("No. BAPP"),
+		columns: ["name", "supplier", "posting_date"],
+		column_labels: {
+			supplier: __("Nama Supplier"),
+			posting_date: __("Posting Date"),
+		},
+		supplier_fieldname: "supplier",
+		supplier_name_fieldname: "supplier_name",
+	},
+};
 
-		let contents = ``;
-		this.get_datatable_columns().forEach(function (column) {
-			let column_label = frappe.utils.escape_html(
-				column_labels[column] || __(frappe.model.unscrub(column))
-			);
-			let raw_value = column === "supplier" ? result.supplier_name || result.supplier : result[column];
-			let value = frappe.utils.escape_html(__(raw_value || ""));
-			let id_href = frappe.utils.escape_html(
-				"/desk/" + frappe.router.slug(me.doctype) + "/" + (result.name || "")
-			);
-			contents += `<div class="list-item__content ellipsis">
-				${
-					head
-						? `<span class="ellipsis text-muted" title="${column_label}">${column_label}</span>`
-						: column !== "name"
-						? `<span class="ellipsis result-row" title="${value}">${value}</span>`
-						: `<a href="${id_href}" class="list-id ellipsis" title="${value}">${value}</a>`
-				}
-			</div>`;
-		});
+sth.overrides.make_get_items_dialog_class = function (config) {
+	return class extends frappe.ui.form.MultiSelectDialog {
+		get_datatable_columns() {
+			return config.columns;
+		}
 
-		let $row = $(`<div class="list-item py-2 px-2 border-bottom">
-			<div class="list-item__content" style="flex: 0 0 10px;">
-				<input type="checkbox" class="list-row-check" data-item-name="${frappe.utils.escape_html(
-					result.name
-				)}" ${result.checked ? "checked" : ""}>
-			</div>
-			${contents}
-		</div>`);
+		get_primary_filters() {
+			const fields = super.get_primary_filters();
+			const search_field = fields.find((f) => f.fieldname === "search_term");
+			if (search_field) {
+				search_field.label = config.name_label;
+			}
+			return fields;
+		}
 
-		head
-			? $row.addClass("list-item--head")
-			: ($row = $(
-					`<div class="list-item-container m-0" data-item-name="${frappe.utils.escape_html(
+		get_args_for_search() {
+			const args = super.get_args_for_search();
+			if (
+				config.supplier_name_fieldname &&
+				!args.filter_fields.includes(config.supplier_name_fieldname)
+			) {
+				args.filter_fields = [...args.filter_fields, config.supplier_name_fieldname];
+			}
+			return args;
+		}
+
+		make_list_row(result = {}) {
+			const me = this;
+			const head = Object.keys(result).length === 0;
+
+			const column_labels = {
+				name: config.name_label,
+				...config.column_labels,
+			};
+
+			let contents = ``;
+			this.get_datatable_columns().forEach(function (column) {
+				let column_label = frappe.utils.escape_html(
+					column_labels[column] || __(frappe.model.unscrub(column))
+				);
+				let raw_value =
+					column === config.supplier_fieldname
+						? result[config.supplier_name_fieldname] || result[column]
+						: result[column];
+				let value = frappe.utils.escape_html(__(raw_value || ""));
+				let id_href = frappe.utils.escape_html(
+					"/desk/" + frappe.router.slug(me.doctype) + "/" + (result.name || "")
+				);
+				contents += `<div class="list-item__content ellipsis">
+					${
+						head
+							? `<span class="ellipsis text-muted" title="${column_label}">${column_label}</span>`
+							: column !== "name"
+							? `<span class="ellipsis result-row" title="${value}">${value}</span>`
+							: `<a href="${id_href}" class="list-id ellipsis" title="${value}">${value}</a>`
+					}
+				</div>`;
+			});
+
+			let $row = $(`<div class="list-item py-2 px-2 border-bottom">
+				<div class="list-item__content" style="flex: 0 0 10px;">
+					<input type="checkbox" class="list-row-check" data-item-name="${frappe.utils.escape_html(
 						result.name
-					)}"></div>`
-			  ).append($row));
+					)}" ${result.checked ? "checked" : ""}>
+				</div>
+				${contents}
+			</div>`);
 
-		return $row;
-	}
+			head
+				? $row.addClass("list-item--head")
+				: ($row = $(
+						`<div class="list-item-container m-0" data-item-name="${frappe.utils.escape_html(
+							result.name
+						)}"></div>`
+				  ).append($row));
+
+			return $row;
+		}
+	};
 };
 
 erpnext.utils.map_current_doc_original = erpnext.utils.map_current_doc;
@@ -215,10 +263,10 @@ erpnext.utils.map_current_doc = function (opts) {
 				});
 			}
 		}
-		const DialogClass =
-			opts.source_doctype === "Purchase Receipt"
-				? sth.overrides.PurchaseReceiptSelectDialog
-				: frappe.ui.form.MultiSelectDialog;
+		const dialog_config = sth.overrides.GET_ITEMS_DIALOG_CONFIG[opts.source_doctype];
+		const DialogClass = dialog_config
+			? sth.overrides.make_get_items_dialog_class(dialog_config)
+			: frappe.ui.form.MultiSelectDialog;
 
 		const d = new DialogClass({
 			doctype: opts.source_doctype,

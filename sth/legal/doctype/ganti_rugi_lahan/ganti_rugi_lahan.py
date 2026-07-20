@@ -20,6 +20,7 @@ class GantiRugiLahan(AccountsController):
 		self.validate_duplicate_sppt()
 		self.calculate_total()
 		self.set_no_rekening()
+		self.validate_payment_schedule()
 		super().validate()
 
 	def set_no_rekening(self):
@@ -70,6 +71,19 @@ class GantiRugiLahan(AccountsController):
 			grand_total += i.amount
 
 		self.grand_total = flt(grand_total)
+
+	def validate_payment_schedule(self):
+		total_portion = 0
+		total_payment = 0
+		for d in self.payment_schedule:
+			total_portion += flt(d.invoice_portion)
+			total_payment += flt(d.payment_amount)
+
+		if total_portion > 100:
+			frappe.throw(f"Total Invoice Portion tidak boleh lebih dari 100% (saat ini {total_portion}%)")
+
+		self.total_invoice_portion = flt(total_portion)
+		self.total_payment_amount = flt(total_payment)
 
 	def on_submit(self):
 		self.make_gl_entry()
@@ -172,6 +186,48 @@ def get_details_jenis_biaya(childrens, company, sppt_update=False, as_dict=False
 		ress = childrens
 
 	return ress
+
+@frappe.whitelist()
+def get_next_payment_schedule(reference_doctype, reference_name, exclude_payment_entry=None):
+	schedule = frappe.get_all(
+		"Proposal Schedule",
+		filters={"parenttype": reference_doctype, "parent": reference_name},
+		fields=["name", "payment_term", "payment_amount", "outstanding"],
+		order_by="idx asc",
+	)
+
+	if not schedule:
+		frappe.throw(f"Payment Schedule tidak ditemukan untuk {reference_doctype} {reference_name}")
+
+	per = frappe.qb.DocType("Payment Entry Reference")
+	pe = frappe.qb.DocType("Payment Entry")
+
+	query = (
+		frappe.qb.from_(per)
+		.join(pe).on(pe.name == per.parent)
+		.select(per.name)
+		.where(
+			(per.reference_doctype == reference_doctype)
+			& (per.reference_name == reference_name)
+			& (pe.docstatus == 1)
+		)
+	)
+
+	if exclude_payment_entry:
+		query = query.where(pe.name != exclude_payment_entry)
+
+	used_count = len(query.run())
+
+	if used_count >= len(schedule):
+		frappe.throw(f"Semua Payment Schedule untuk {reference_name} sudah digunakan")
+
+	term = schedule[used_count]
+
+	return {
+		"payment_term": term.payment_term,
+		"allocated_amount": flt(term.outstanding or term.payment_amount),
+		"payment_term_outstanding": flt(term.outstanding),
+	}
 
 @frappe.whitelist()
 def fetch_company_account(company, childrens=None):
