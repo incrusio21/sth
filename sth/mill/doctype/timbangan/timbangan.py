@@ -72,6 +72,11 @@ class Timbangan(Document):
 			spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.api_ticket_number}, "name")
 			self.spb = spb_name or ""
 
+			if self.type == "Wb Pabrik":
+				self.type = "Receive"
+				self.receive_type = "TBS Internal" 
+
+
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
 			frappe.throw("Ticket has been used before")
