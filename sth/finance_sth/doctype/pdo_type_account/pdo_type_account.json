@@ -1,13 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-11-26 15:24:22.528537",
+ "creation": "2026-07-21 11:44:37.072757",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "column_break_gwtk",
   "account"
  ],
  "fields": [
@@ -17,10 +16,6 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company"
-  },
-  {
-   "fieldname": "column_break_gwtk",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "account",
@@ -34,10 +29,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-21 13:40:33.989538",
+ "modified": "2026-07-21 11:45:15.867223",
  "modified_by": "Administrator",
- "module": "Legal",
- "name": "Account Ganti Rugi Lahan",
+ "module": "Finance STH",
+ "name": "PDO Type Account",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

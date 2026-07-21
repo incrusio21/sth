@@ -3,6 +3,9 @@
 
 frappe.ui.form.on("Blok", {
 	refresh(frm) {
+		// frm.disable_save();
+		frm.page.btn_secondary.hide();
+
 		frm.set_query("status", function() {
 			return {
 				filters: {

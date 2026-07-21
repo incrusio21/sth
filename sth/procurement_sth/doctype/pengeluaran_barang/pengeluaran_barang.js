@@ -113,8 +113,13 @@ frappe.ui.form.on('Pengeluaran Barang Item', {
 	},
 
 	sub_unit(frm, cdt, cdn) {
+		frappe.model.set_value(cdt, cdn, 'cost_center', '');
 		resolve_account_filter(frm, cdt, cdn);
 		apply_divisi_rules(frm, cdt, cdn);
+	},
+
+	kendaraan(frm, cdt, cdn) {
+		apply_km_from_kendaraan(frm, cdt, cdn);
 	},
 
 	stasiun(frm, cdt, cdn) {
@@ -122,6 +127,7 @@ frappe.ui.form.on('Pengeluaran Barang Item', {
 		if ((row.sub_unit || "").trim() == "MILL") {
 			resolve_account_filter(frm, cdt, cdn);
 		}
+		apply_tipe_asset_mill_machine(frm, cdt, cdn);
 	},
 
 	kegiatan(frm, cdt, cdn) {
@@ -358,7 +364,64 @@ function apply_divisi_rules(frm, cdt, cdn) {
 				toggle_kendaraan_readonly(frm, cdn, true);
 				apply_account_filter_by_account_number(frm, cdt, cdn, ['4111003', '4111004']);
 			}
+
+			apply_tipe_asset_mill_machine(frm, cdt, cdn);
 		});
+
+	apply_cost_center_from_divisi(frm, cdt, cdn);
+}
+
+// ─── Helper: isi KM/HM sesuai doctype target dari kendaraan (Dynamic Link) ───
+// Tiap tipe_asset menyimpan KM/HM di field yang berbeda-beda:
+// Alat Berat Dan Kendaraan → kmhm_akhir, Mill Machine → hour_meters, Asset → (belum ada).
+const KM_FIELD_BY_TIPE_ASSET = {
+	"Alat Berat Dan Kendaraan": "kmhm_akhir",
+	"Mill Machine": "hour_meters",
+};
+
+function apply_km_from_kendaraan(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+
+	if (!row.kendaraan || !row.tipe_asset) {
+		frappe.model.set_value(cdt, cdn, 'km', 0);
+		return;
+	}
+
+	const km_fieldname = KM_FIELD_BY_TIPE_ASSET[row.tipe_asset];
+	if (!km_fieldname) {
+		frappe.model.set_value(cdt, cdn, 'km', 0);
+		return;
+	}
+
+	frappe.db.get_value(row.tipe_asset, row.kendaraan, km_fieldname)
+		.then(({ message }) => {
+			frappe.model.set_value(cdt, cdn, 'km', (message && message[km_fieldname]) || 0);
+		});
+}
+
+// ─── Helper: sub_unit MILL + stasiun terisi → tipe_asset "Mill Machine" ──────
+function apply_tipe_asset_mill_machine(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	if ((row.sub_unit || "").trim() == "MILL" && row.stasiun) {
+		frappe.model.set_value(cdt, cdn, 'tipe_asset', 'Mill Machine');
+	}
+}
+
+// ─── Helper: isi Cost Center dari Divisi.cost_center, fallback ke UMUM ───────
+// Hanya mengisi bila cost_center baris masih kosong — nilai spesifik dari
+// kendaraan/blok/stasiun (lihat isi_cost_center di pengeluaran_barang.py)
+// tetap jadi prioritas dan dihitung ulang saat dokumen disimpan.
+function apply_cost_center_from_divisi(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	if (!row.sub_unit || row.cost_center) return;
+
+	frappe.call({
+		method: 'sth.procurement_sth.utils.get_cost_center_from_divisi',
+		args: { sub_unit: row.sub_unit, company: frm.doc.pt_pemilik_barang },
+		callback(r) {
+			frappe.model.set_value(cdt, cdn, 'cost_center', r.message || '');
+		},
+	});
 }
 
 

@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-09-10 13:48:54.435027",
+ "creation": "2026-07-19 21:17:07.101282",
  "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -139,9 +139,8 @@
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "in_preview": 1,
-   "label": "Credit To",
+   "label": "Account GRL",
    "options": "Account",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -238,6 +237,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_invoice_portion",
    "fieldtype": "Percent",
    "label": "Total Invoice Portion",
@@ -248,6 +248,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_payment_amount",
    "fieldtype": "Currency",
    "label": "Total Payment Amount",
@@ -282,7 +283,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-08 15:52:58.049311",
+ "modified": "2026-07-21 13:42:40.935109",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

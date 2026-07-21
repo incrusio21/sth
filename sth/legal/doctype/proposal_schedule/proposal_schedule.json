@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2026-02-24 12:58:11.913341",
+ "creation": "2026-07-20 11:47:53.280659",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -8,6 +8,8 @@
   "payment_term",
   "column_break_wvff",
   "term_used",
+  "diajukan",
+  "ajukan",
   "section_break_15",
   "description",
   "section_break_4",
@@ -177,12 +179,30 @@
    "fieldtype": "Check",
    "label": "Term Used",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.doctype == 'Ganti Rugi Lahan'",
+   "fieldname": "diajukan",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Diajukan",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:parent.doctype == 'Ganti Rugi Lahan' && parent.docstatus == 1 && !doc.diajukan",
+   "fieldname": "ajukan",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Ajukan"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-10 13:59:04.910318",
+ "modified": "2026-07-21 13:22:43.454113",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal Schedule",

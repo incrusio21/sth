@@ -66,11 +66,12 @@ class Timbangan(Document):
 			frappe.get_doc("Sortasi",sort_doc).cancel()
 
 	def map_api_ticket_number(self):
-		if self.owner and "api@sth" in self.owner:
-			self.api_ticket_number = self.ticket_number
-			spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.ticket_number}, "name")
+		if self.owner and "api@sth" in self.owner and self.trans_no == self.ticket_number:
+			self.api_ticket_number = self.spb
+			self.ticket_number = ""
+			spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.api_ticket_number}, "name")
 			if spb_name:
-				self.ticket_number = spb_name
+				self.spb = spb_name
 
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):

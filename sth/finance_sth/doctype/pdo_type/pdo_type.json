@@ -9,7 +9,8 @@
  "field_order": [
   "employee_atau_barang",
   "type_name",
-  "pdo_category_type"
+  "pdo_category_type",
+  "pdo_type_account"
  ],
  "fields": [
   {
@@ -33,12 +34,18 @@
    "fieldtype": "Select",
    "label": "Employee atau Barang",
    "options": "\nEmployee\nBarang"
+  },
+  {
+   "fieldname": "pdo_type_account",
+   "fieldtype": "Table",
+   "label": "PDO Type Account",
+   "options": "PDO Type Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-14 01:44:48.786802",
+ "modified": "2026-07-21 11:45:34.068696",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Type",

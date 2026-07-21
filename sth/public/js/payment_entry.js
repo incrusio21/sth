@@ -203,6 +203,7 @@ frappe.ui.form.on("Payment Entry", {
 				query: query,
 				filters: {
 					reference: child.reference_name,
+					reference_doctype: child.reference_doctype,
 				},
 			};
 		});
@@ -624,10 +625,18 @@ frappe.ui.form.on("Payment Entry Reference", {
 				frappe.model.set_value(cdt, cdn, "payment_term", r.message.payment_term);
 				frappe.model.set_value(cdt, cdn, "allocated_amount", r.message.allocated_amount);
 				frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message.payment_term_outstanding);
+
+				sync_paid_amount_from_references(frm);
 			},
 		});
 	}
 });
+
+function sync_paid_amount_from_references(frm) {
+	const total_allocated = (frm.doc.references || []).reduce((sum, d) => sum + flt(d.allocated_amount), 0);
+	frm.set_value("paid_amount", total_allocated);
+	frm.set_value("received_amount", total_allocated);
+}
 
 
 function set_no_rekening(frm) {

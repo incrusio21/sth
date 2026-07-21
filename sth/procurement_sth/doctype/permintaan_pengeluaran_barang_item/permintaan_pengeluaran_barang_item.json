@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-10 20:44:31.623630",
+ "creation": "2026-07-20 11:56:09.198447",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -64,7 +64,6 @@
   },
   {
    "columns": 1,
-   "fetch_from": "kendaraan.kmhm_akhir",
    "fieldname": "km",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -96,7 +95,7 @@
    "in_list_view": 1,
    "label": "Kegiatan",
    "options": "Kegiatan",
-   "read_only_depends_on": "eval:[\"TRAKSI\", \"MILL\"].includes(doc.sub_unit)"
+   "read_only_depends_on": "eval:(doc.sub_unit || \"\").toUpperCase().includes(\"TRAKSI\") || (doc.sub_unit || \"\").toUpperCase().includes(\"MILL\")"
   },
   {
    "default": "0",
@@ -159,14 +158,14 @@
    "fieldname": "tipe_asset",
    "fieldtype": "Select",
    "label": "Tipe Asset",
-   "options": "Alat Berat Dan Kendaraan\nAsset"
+   "options": "Alat Berat Dan Kendaraan\nAsset\nMill Machine"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-17 10:07:26.173263",
+ "modified": "2026-07-20 12:06:34.894944",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

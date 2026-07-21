@@ -5,6 +5,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
+from sth.procurement_sth.utils import get_cost_center_from_divisi
+
 class PengeluaranBarang(Document):
 	def validate(self):
 		self.validate_qty()
@@ -21,6 +23,9 @@ class PengeluaranBarang(Document):
 		# 		row.account = akun_expense
 	def isi_cost_center(self):
 		for row in self.items:
+			if not row.sub_unit:
+				continue
+
 			unit_doc = frappe.get_doc("Divisi", row.sub_unit)
 
 			if row.sub_unit == "TRAKSI":
@@ -35,6 +40,10 @@ class PengeluaranBarang(Document):
 			elif unit_doc.mill == 1:
 				if row.stasiun:
 					row.cost_center = "{} - {}".format(row.stasiun, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
+
+			# Belum ada Cost Center spesifik (kendaraan/blok/stasiun) → pakai Cost Center di Divisi, atau UMUM.
+			if not row.cost_center:
+				row.cost_center = get_cost_center_from_divisi(row.sub_unit, self.pt_pemilik_barang)
 			# row.db_update()
 			# frappe.db.commit()
 

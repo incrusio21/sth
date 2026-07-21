@@ -32,7 +32,8 @@
   },
   {
    "fieldname": "section_break_vajf",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "company_account",
@@ -56,7 +57,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:12:32.856448",
+ "modified": "2026-07-21 13:40:43.627492",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Jenis Biaya Ganti Rugi Lahan",

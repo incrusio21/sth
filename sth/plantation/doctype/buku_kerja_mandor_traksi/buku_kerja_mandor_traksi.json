@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-07-08 14:51:56.691429",
+ "creation": "2026-07-17 15:27:41.911250",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -48,6 +48,7 @@
   "blok",
   "column_break_yztk",
   "batch",
+  "stasiun",
   "column_break_ianz",
   "project",
   "section_break_rfba",
@@ -462,13 +463,19 @@
    "label": "RKH No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "label": "Stasiun",
+   "options": "Station Master"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-16 11:25:51.645186",
+ "modified": "2026-07-21 11:09:06.302892",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

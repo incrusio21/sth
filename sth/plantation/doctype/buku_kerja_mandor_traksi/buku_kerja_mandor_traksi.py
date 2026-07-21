@@ -711,3 +711,41 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 
 	
 	return childrens
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_unit_query(doctype, txt, searchfield, start, page_len, filters):
+
+    user_permissions = frappe.get_all(
+        "User Permission",
+        filters={
+            "user": frappe.session.user,
+            "allow": "Unit"
+        },
+        pluck="for_value"
+    )
+
+    conditions = [
+        "company = %(company)s",
+        "(plantation = 1 OR mill = 1)",
+        f"{searchfield} LIKE %(txt)s",
+    ]
+
+    values = {
+        "company": filters.get("company"),
+        "txt": f"%{txt}%",
+        "start": start,
+        "page_len": page_len,
+    }
+
+    if user_permissions:
+        conditions.append("name IN %(units)s")
+        values["units"] = tuple(user_permissions)
+
+    return frappe.db.sql(f"""
+        SELECT name
+        FROM `tabUnit`
+        WHERE {' AND '.join(conditions)}
+        ORDER BY name
+        LIMIT %(start)s, %(page_len)s
+    """, values)

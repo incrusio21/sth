@@ -1,0 +1,73 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2026-07-20 16:17:27.409911",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2026-07-20 16:17:27.409911",
+ "modified_by": "Administrator",
+ "module": "Mill",
+ "name": "Laporan Pengiriman Produk",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Timbangan",
+ "report_name": "Laporan Pengiriman Produk",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Mill UAT"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Admin Sales"
+  },
+  {
+   "role": "Mill Engineering"
+  },
+  {
+   "role": "Mill Manager"
+  },
+  {
+   "role": "MILL TECHNICAL ANALYS"
+  },
+  {
+   "role": "ASISTEN KEPALA MILL"
+  },
+  {
+   "role": "ASISTEN MAINTENANCE"
+  },
+  {
+   "role": "ASISTEN PROSES"
+  },
+  {
+   "role": "ASISTEN LAB"
+  },
+  {
+   "role": "ASISTEN SORTASI"
+  },
+  {
+   "role": "KEPALA TATA USAHA MILL"
+  },
+  {
+   "role": "TIMBANGAN"
+  },
+  {
+   "role": "TECHNICAL CONTROLLER"
+  },
+  {
+   "role": "KERANI PRODUKSI"
+  }
+ ],
+ "timeout": 0
+}

@@ -601,10 +601,10 @@ class PaymentEntry(EmployeePaymentEntry):
 		gl_entries = process_gl_map(gl_entries)
 		
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
-		if cancel:
-			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
-		else:
-			self.make_exchange_gain_loss_journal()
+		# if cancel:
+		# 	cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+		# else:
+		# 	self.make_exchange_gain_loss_journal()
 
 		self.make_advance_gl_entries(cancel=cancel)
 
@@ -621,11 +621,14 @@ class PaymentEntry(EmployeePaymentEntry):
 
 		party_account_type = frappe.db.get_value("Party Type", self.party_type, "account_type")
 
+		party_account_gl_account_type = frappe.db.get_value("Account", self.party_account, "account_type")
+		use_party = party_account_gl_account_type in ("Receivable", "Payable")
+
 		party_gl_dict = self.get_gl_dict(
 			{
 				"account": self.party_account,
-				"party_type": self.party_type,
-				"party": self.party,
+				"party_type": self.party_type if use_party else None,
+				"party": self.party if use_party else None,
 				"against": against_account,
 				"account_currency": self.party_account_currency,
 				"cost_center": self.cost_center,
@@ -659,8 +662,8 @@ class PaymentEntry(EmployeePaymentEntry):
 				self.get_gl_dict(
 					{
 						"account": self.party_account,
-						"party_type": self.party_type,
-						"party": self.party,
+						"party_type": self.party_type if use_party else None,
+						"party": self.party if use_party else None,
 						"against": against_account,
 						"account_currency": self.party_account_currency,
 						"cost_center": cost_center,
@@ -707,8 +710,8 @@ class PaymentEntry(EmployeePaymentEntry):
 				self.get_gl_dict(
 					{
 						"account": self.party_account,
-						"party_type": self.party_type,
-						"party": self.party,
+						"party_type": self.party_type if use_party else None,
+						"party": self.party if use_party else None,
 						"against": against_account,
 						"account_currency": self.party_account_currency,
 						"cost_center": self.cost_center,

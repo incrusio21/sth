@@ -470,7 +470,8 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 			'amount_field': 'revised_price_total',
 			'grand_total_field': 'grand_total_bahan_bakar',
 			'outstanding_field': 'outstanding_amount_bahan_bakar',
-			'before_amount_field': 'price_total'
+			'before_amount_field': 'price_total',
+			'detail_field': None
 		},
 		'Perjalanan Dinas': {
 			'child_table': 'pdo_perjalanan_dinas',
@@ -480,7 +481,8 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 			'amount_field': 'revised_total',
 			'grand_total_field': 'grand_total_perjalanan_dinas',
 			'outstanding_field': 'outstanding_amount_perjalanan_dinas',
-			'before_amount_field': 'total'
+			'before_amount_field': 'total',
+			'detail_field': None
 		},
 		'Kas': {
 			'child_table': 'pdo_kas',
@@ -490,7 +492,8 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 			'amount_field': 'revised_total',
 			'grand_total_field': 'grand_total_kas',
 			'outstanding_field': 'outstanding_amount_kas',
-			'before_amount_field': 'total'
+			'before_amount_field': 'total',
+			'detail_field': 'type'
 		},
 		'Dana Cadangan': {
 			'child_table': 'pdo_dana_cadangan',
@@ -500,7 +503,8 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 			'amount_field': 'revised_amount',
 			'grand_total_field': 'grand_total_dana_cadangan',
 			'outstanding_field': 'outstanding_amount_dana_cadangan',
-			'before_amount_field': 'amount'
+			'before_amount_field': 'amount',
+			'detail_field': None
 		}
 	}
 	
@@ -512,6 +516,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 	debit_account_field = mapping['debit_account_field']
 	header_debit_field = mapping['header_debit_field']
 	employee_field = mapping['employee_field']
+	detail_field = mapping['detail_field']
 
 	amount_field = mapping['amount_field']
 	before_amount_field = mapping['before_amount_field']
@@ -605,7 +610,8 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 				'penerima': employee,
 				'total': amount,
 				'debit_to': debit_account,  # Add debit account
-				'pdo_child_name': row.name
+				'pdo_child_name': row.name,
+				'nama_barang': detail_field
 			})
 			# if not header_debit_field:
 			# 	target.paid_to = debit_account
@@ -629,15 +635,16 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 	
 	total = 0
 	for row in doclist.payment_voucher_kas_pdo:
-		pdo_doc = frappe.get_doc("Permintaan Dana Operasional", row.no_pdo)
-		if row.tipe_pdo == "Bahan Bakar":
-			total += pdo_doc.outstanding_amount_bahan_bakar
-		elif row.tipe_pdo == "Perjalanan Dinas":
-			total += pdo_doc.outstanding_amount_perjalanan_dinas
-		elif row.tipe_pdo == "Kas":
-			total += pdo_doc.outstanding_amount_kas
-		elif row.tipe_pdo == "Dana Cadangan":
-			total += pdo_doc.outstanding_amount_dana_cadangan
+		total += row.total
+		# pdo_doc = frappe.get_doc("Permintaan Dana Operasional", row.no_pdo)
+		# if row.tipe_pdo == "Bahan Bakar":
+		# 	total += pdo_doc.outstanding_amount_bahan_bakar
+		# elif row.tipe_pdo == "Perjalanan Dinas":
+		# 	total += pdo_doc.outstanding_amount_perjalanan_dinas
+		# elif row.tipe_pdo == "Kas":
+		# 	total += pdo_doc.outstanding_amount_kas
+		# elif row.tipe_pdo == "Dana Cadangan":
+		# 	total += pdo_doc.outstanding_amount_dana_cadangan
 
 	doclist.paid_amount = total
 	doclist.received_amount = total

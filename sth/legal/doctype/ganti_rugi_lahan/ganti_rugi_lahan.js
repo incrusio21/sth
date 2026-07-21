@@ -7,7 +7,19 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
 	refresh(frm) {
         frm.events.set_no_rekening(frm);
         frm.events.calculate_payment_schedule_total(frm);
+        frm.events.make_payment_entry_button(frm);
 	},
+
+    make_payment_entry_button(frm) {
+        if (frm.doc.docstatus !== 1) return;
+
+        frm.add_custom_button(__("Payment"), () => {
+            frappe.model.open_mapped_doc({
+                method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.make_payment_entry",
+                frm: frm,
+            });
+        }, __("Create"));
+    },
     company(frm) {
         frm.cscript.get_details_account({
             method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.fetch_company_account",
@@ -132,6 +144,37 @@ frappe.ui.form.on("Proposal Schedule", {
     },
     payment_schedule_remove(frm) {
         frm.events.calculate_payment_schedule_total(frm)
+    },
+    ajukan(frm, cdt, cdn) {
+        let row = locals[cdt][cdn]
+
+        let first_not_diajukan = (frm.doc.payment_schedule || [])
+            .slice()
+            .sort((a, b) => a.idx - b.idx)
+            .find((d) => !d.diajukan)
+
+        if (first_not_diajukan && first_not_diajukan.name !== row.name) {
+            frappe.msgprint(__("Termin harus diajukan secara berurutan, mulai dari baris pertama yang belum diajukan."))
+            return
+        }
+
+        frappe.confirm(
+            __("Ajukan termin ini agar bisa dibuatkan Payment Entry?"),
+            () => {
+                frappe.call({
+                    method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.ajukan_termin",
+                    args: { name: row.name },
+                    freeze: true,
+                    freeze_message: __("Mengajukan..."),
+                    callback: function (r) {
+                        if (!r.exc) {
+                            frappe.model.set_value(cdt, cdn, "diajukan", 1)
+                            frappe.show_alert({ message: __("Termin berhasil diajukan."), indicator: "green" })
+                        }
+                    }
+                })
+            }
+        )
     }
 });
 
@@ -147,7 +190,6 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
     }
     
     refresh() {
-        this.show_general_ledger()
         this.set_query_field()
         this.set_dynamic_labels()
     }

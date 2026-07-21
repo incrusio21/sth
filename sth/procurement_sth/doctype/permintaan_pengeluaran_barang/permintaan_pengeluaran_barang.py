@@ -4,14 +4,23 @@
 import frappe
 from frappe.model.document import Document
 from sth.controllers.queries import get_fields
+from sth.procurement_sth.utils import get_cost_center_from_divisi
 from frappe.desk.reportview import get_filters_cond
 from frappe.utils import flt
 
 class PermintaanPengeluaranBarang(Document):
 	def validate(self):
 		self.validate_stock()
+		self.isi_cost_center()
 		# if len(self.items) > 1:
 		# 	frappe.throw("Pengeluaran lebih dari 1 jenis barang tidak diperbolehkan.")
+
+	def isi_cost_center(self):
+		for row in self.items:
+			if not row.sub_unit:
+				continue
+
+			row.cost_center = get_cost_center_from_divisi(row.sub_unit, self.pt_pemilik_barang)
 
 	def on_submit(self):
 		self.db_set("status","Submitted")

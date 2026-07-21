@@ -62,7 +62,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			cost_center = "{} - {}".format(self.batch, frappe.get_doc("Company",self.company).abbr)
 
 		elif self.kategori_kegiatan == "TM":
-			cost_center = "{} - {}".format(self.blok, frappe.get_doc("Company",self.company).abbr)
+			cost_center = "{} - {}".format(frappe.get_doc("Blok",self.blok).deskripsi, frappe.get_doc("Company",self.company).abbr)
 
 		elif self.kategori_kegiatan == "TBM":
 			cost_center = "{} - {}".format(self.tahun_tanam, frappe.get_doc("Company",self.company).abbr)
@@ -192,7 +192,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			cost_center = "{} - {}".format(self.batch, frappe.get_doc("Company",self.company).abbr)
 
 		elif self.kategori_kegiatan == "TM":
-			cost_center = "{} - {}".format(self.blok, frappe.get_doc("Company",self.company).abbr)
+			cost_center = "{} - {}".format(frappe.get_doc("Blok",self.blok).deskripsi, frappe.get_doc("Company",self.company).abbr)
 
 		elif self.kategori_kegiatan == "TBM":
 			cost_center = "{} - {}".format(self.tahun_tanam, frappe.get_doc("Company",self.company).abbr)

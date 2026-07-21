@@ -45,46 +45,16 @@ class Blok(Document):
 		abbr = company_doc.abbr
 
 		# --- Cost Center Tahun Tanam (group, parent dari blok CC) ---
-		tahun_cc_existing = frappe.db.get_value(
-			"Cost Center",
-			{"cost_center_name": str(self.tahun_tanam), "company": company},
-			["name", "is_group"],
-			as_dict=True
-		)
+		tahun_cc = _ensure_tahun_tanam_cost_center(company, abbr, self.tahun_tanam)
 
-		if tahun_cc_existing:
-			tahun_cc = tahun_cc_existing.name
-			
-		else:
-			cc = frappe.new_doc("Cost Center")
-			cc.cost_center_name = str(self.tahun_tanam)
-			cc.parent_cost_center = f"Tahun Tanam - {abbr}"
-			cc.company = company
-			cc.is_group = 0
-			cc.flags.ignore_permissions = True
-			cc.insert()
-			frappe.db.commit()
-			tahun_cc = cc.name
-
-		if self.cost_center != tahun_cc:
+		# Jangan timpa cost_center kalau Blok sudah TM (cost_center-nya sudah
+		# diarahkan ke Cost Center per-Blok saat naik TM, lihat naikkan_ke_tm()).
+		if self.get("workflow_state") != "TM" and self.cost_center != tahun_cc:
 			self.db_set("cost_center", tahun_cc, update_modified=False)
 
-		# --- Cost Center Blok (child dari Tahun Tanam CC) ---
-		blok_cc_existing = frappe.db.get_value(
-			"Cost Center",
-			{"cost_center_name": self.blok, "company": company},
-			"name"
-		)
-
-		if not blok_cc_existing:
-			blok_cc = frappe.new_doc("Cost Center")
-			blok_cc.cost_center_name = self.blok
-			blok_cc.parent_cost_center = "Blok - {}".format(frappe.get_doc("Company", company).abbr)
-			blok_cc.company = company
-			blok_cc.is_group = 0
-			blok_cc.flags.ignore_permissions = True
-			blok_cc.insert()
-			frappe.db.commit()
+		# --- Cost Center Blok (child dari Tahun Tanam CC), nama pakai Deskripsi Blok ---
+		if self.deskripsi:
+			_ensure_blok_cost_center(company, abbr, self.deskripsi)
 
 	def set_periode_bjr(self):
 		if self.bulan and self.tahun:
@@ -94,6 +64,52 @@ class Blok(Document):
 				self.periode_bjr = "{}-{:02d}-01 00:00:00".format(
 					int(self.tahun), bulan_angka
 				)
+
+
+def _ensure_tahun_tanam_cost_center(company, abbr, tahun_tanam):
+	"""Pastikan Cost Center Tahun Tanam (group, parent dari blok CC) ada, lalu kembalikan namanya."""
+	tahun_cc_existing = frappe.db.get_value(
+		"Cost Center",
+		{"cost_center_name": str(tahun_tanam), "company": company},
+		"name"
+	)
+
+	if tahun_cc_existing:
+		return tahun_cc_existing
+
+	cc = frappe.new_doc("Cost Center")
+	cc.cost_center_name = str(tahun_tanam)
+	cc.parent_cost_center = f"Tahun Tanam - {abbr}"
+	cc.company = company
+	cc.is_group = 0
+	cc.flags.ignore_permissions = True
+	cc.insert()
+	frappe.db.commit()
+
+	return cc.name
+
+
+def _ensure_blok_cost_center(company, abbr, deskripsi):
+	"""Pastikan Cost Center Blok (nama = Deskripsi Blok) ada, lalu kembalikan namanya."""
+	blok_cc_existing = frappe.db.get_value(
+		"Cost Center",
+		{"cost_center_name": deskripsi, "company": company},
+		"name"
+	)
+
+	if blok_cc_existing:
+		return blok_cc_existing
+
+	blok_cc = frappe.new_doc("Cost Center")
+	blok_cc.cost_center_name = deskripsi
+	blok_cc.parent_cost_center = f"Blok - {abbr}"
+	blok_cc.company = company
+	blok_cc.is_group = 0
+	blok_cc.flags.ignore_permissions = True
+	blok_cc.insert()
+	frappe.db.commit()
+
+	return blok_cc.name
 
 
 def _parse_list(val):
@@ -118,7 +134,7 @@ def _hitung_alokasi(blok, selected_bloks):
 		"tahun_tanam": blok.tahun_tanam,
 		"unit": blok.unit,
 		"workflow_state": "TBM",
-	}, fields=["name", "blok", "luas_areal"])
+	}, fields=["name", "blok", "deskripsi", "luas_areal"])
 
 	if not cohort:
 		frappe.throw("Tidak ada Blok TBM yang dapat dinaikkan.")
@@ -222,6 +238,14 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 
 	unit_doc = frappe.get_doc("Unit", blok.unit)
 	company = unit_doc.company
+	abbr = frappe.get_doc("Company", company).abbr
+
+	missing_deskripsi = [b.blok for b in selected if not b.deskripsi]
+	if missing_deskripsi:
+		frappe.throw(
+			f"Deskripsi belum diisi pada Blok berikut: {', '.join(missing_deskripsi)}. "
+			"Deskripsi dibutuhkan untuk penamaan Cost Center saat naik TM."
+		)
 
 	debit_account = frappe.db.get_value("Account", {
 		"account_number": "1271301",
@@ -237,7 +261,10 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 	if not credit_account:
 		frappe.throw(f"Akun 1273005 tidak ditemukan untuk company {company}.")
 
-	tahun_cc = blok.cost_center
+	if not frappe.db.exists("Kategori Kegiatan", "TM"):
+		frappe.throw('Kategori Kegiatan "TM" tidak ditemukan.')
+
+	tahun_cc = _ensure_tahun_tanam_cost_center(company, abbr, blok.tahun_tanam)
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
@@ -261,14 +288,20 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 		"cost_center": tahun_cc,
 	})
 
+	for b in selected:
+		je.append("naik_tm_bloks", {"blok": b.name})
+
 	je.flags.ignore_permissions = True
 	je.insert()
 	je.submit()
 
 	for b in selected:
+		blok_cc = _ensure_blok_cost_center(company, abbr, b.deskripsi)
 		frappe.db.set_value("Blok", b.name, {
 			"workflow_state": "TM",
 			"naik_tm_journal_entry": je.name,
+			"cost_center": blok_cc,
+			"status": "TM",
 		}, update_modified=False)
 
 	frappe.db.commit()
@@ -300,16 +333,22 @@ def kembalikan_ke_tbm(blok_name):
 	if not blok_list:
 		frappe.throw("Tidak ada Blok TM yang terkait dengan Journal Entry ini.")
 
-	je = frappe.get_doc("Journal Entry", je_name)
-	if je.docstatus == 1:
-		je.flags.ignore_permissions = True
-		je.cancel()
+	unit_doc = frappe.get_doc("Unit", blok.unit)
+	company = unit_doc.company
+	abbr = frappe.get_doc("Company", company).abbr
+	tahun_cc = _ensure_tahun_tanam_cost_center(company, abbr, blok.tahun_tanam)
 
 	for b in blok_list:
 		frappe.db.set_value("Blok", b.name, {
 			"workflow_state": "TBM",
 			"naik_tm_journal_entry": None,
+			"cost_center": tahun_cc,
 		}, update_modified=False)
+
+	je = frappe.get_doc("Journal Entry", je_name)
+	if je.docstatus == 1:
+		je.flags.ignore_permissions = True
+		je.cancel()
 
 	frappe.db.commit()
 

@@ -303,9 +303,13 @@ def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibit
 def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len, filters) -> list:
 	terms = []
 	if filters:
+		schedule_filters = {"parent": filters.get("reference")}
+		if filters.get("reference_doctype") == "Ganti Rugi Lahan":
+			schedule_filters["diajukan"] = 1
+
 		terms = frappe.db.get_all(
 			"Proposal Schedule",
-			filters={"parent": filters.get("reference")},
+			filters=schedule_filters,
 			fields=["payment_term"],
 			limit=page_len,
 			as_list=1,
@@ -402,6 +406,38 @@ def unit_query(doctype, txt, searchfield, start, page_len, filters,reference_doc
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions) if filters else "",
 				"custom_cond":custom_cond
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}
+	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def unit_plantation_or_mill_query(doctype, txt, searchfield, start, page_len, filters, reference_doctype: str | None = None):
+	doctype = "Unit"
+	conditions = []
+	fields = get_fields(doctype, ["name"])
+	filters = filters or {}
+
+	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
+
+	return frappe.db.sql(
+		"""
+			select {fields} from `tabUnit`
+			where `tabUnit`.{key} like %(txt)s
+				and (`tabUnit`.plantation = 1 or `tabUnit`.mill = 1)
+				{fcond}
+			order by
+				(case when locate(%(_txt)s, `tabUnit`.name) > 0 then locate(%(_txt)s, `tabUnit`.name) else 99999 end),
+				`tabUnit`.idx desc,
+				`tabUnit`.name
+			limit %(page_len)s offset %(start)s
+		""".format(
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"fcond": fcond,
 			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len}

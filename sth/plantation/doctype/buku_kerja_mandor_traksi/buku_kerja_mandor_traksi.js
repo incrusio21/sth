@@ -8,6 +8,30 @@ const field_map = {
 	"Angkut": "premi_angkut_amount",
 }
 
+const MILL_KEGIATAN = [
+	"6310400001",
+	"6310400002",
+	"6310400003",
+	"6310400004",
+	"6310400005",
+	"6310400006",
+	"6310400007",
+	"6310400008",
+	"6310400009",
+	"6310400010",
+	"6310400011",
+	"6310400012",
+	"6310400013",
+	"6310400014",
+	"6310400015",
+	"6310600001",
+	"6310600002",
+	"6320105001",
+	"6320105002",
+	"6320105003",
+	"7111405003",
+]
+
 frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 	posting_date(frm){
 		frm.cscript.get_details_data({
@@ -20,6 +44,16 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 	},
 	company(frm){
 		frm.cscript.get_kegiatan(frm.doc.task)
+	},
+	unit(frm){
+		if(!frm.doc.unit){
+			frm.doc.__is_mill = 0
+			return
+		}
+
+		frappe.db.get_value("Unit", frm.doc.unit, "mill", (r) => {
+			frm.doc.__is_mill = cint(r && r.mill)
+		})
 	},
 	kendaraan(frm){
 		frappe.call({
@@ -257,10 +291,29 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 	refresh() {
 		super.refresh()
 		this.show_general_ledger()
+
+		if(this.frm.doc.unit && this.frm.doc.__is_mill === undefined){
+			frappe.db.get_value("Unit", this.frm.doc.unit, "mill", (r) => {
+				this.frm.doc.__is_mill = cint(r && r.mill)
+			})
+		}
 	}
 
   	set_query_field() {
 		super.set_query_field()
+
+		this.frm.set_query("unit", function (doc) {
+			if (!doc.company) {
+				frappe.throw("Please Select Company First")
+			}
+
+			return {
+				query: "sth.controllers.queries.unit_plantation_or_mill_query",
+				filters: {
+					company: doc.company
+				}
+			};
+		});
 
 		this.frm.set_query("blok", function (doc) {
 			return {
@@ -288,7 +341,15 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			};
 		});
 
-		this.frm.set_query("kegiatan", "task", function () {
+		this.frm.set_query("kegiatan", "task", function (doc) {
+			if(doc.__is_mill){
+				return {
+					filters: {
+						name: ["in", MILL_KEGIATAN]
+					}
+				};
+			}
+
             return {
               	filters: {
 					tipe_kegiatan: "Traksi"

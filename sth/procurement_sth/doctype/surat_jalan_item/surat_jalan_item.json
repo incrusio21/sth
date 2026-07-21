@@ -12,6 +12,7 @@
   "no_po",
   "column_break_eime",
   "no_purchase_request",
+  "jumlah_saat_ini",
   "jumlah",
   "satuan",
   "jenis"
@@ -40,7 +41,7 @@
    "fieldname": "kode_barang",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kode Barang",
+   "label": "Nama Barang",
    "options": "Item"
   },
   {
@@ -53,7 +54,7 @@
    "options": "UOM"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "no_po",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -61,7 +62,7 @@
    "options": "Purchase Order"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "no_penerimaan",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -79,15 +80,22 @@
    "fetch_from": "kode_barang.item_name",
    "fieldname": "nama_barang",
    "fieldtype": "Data",
+   "label": "Detil Barang"
+  },
+  {
+   "columns": 1,
+   "fieldname": "jumlah_saat_ini",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Nama Barang"
+   "label": "Jumlah Saat Ini",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-14 13:33:49.477424",
+ "modified": "2026-07-21 10:35:19.074676",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan Item",

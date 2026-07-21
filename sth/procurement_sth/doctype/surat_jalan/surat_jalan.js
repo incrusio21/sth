@@ -1,6 +1,20 @@
 // Copyright (c) 2025, DAS and contributors
 // For license information, please see license.txt
 
+frappe.ui.form.on("Surat Jalan Item",{
+    kode_barang(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (frm.doc.gudang_asal && row.kode_barang) {
+            frappe.xcall("sth.api.get_stock_item", { item_code: row.kode_barang, warehouse: frm.doc.gudang_asal })
+                .then((res) => {
+                    frappe.model.set_value(row.doctype, row.name, "jumlah_saat_ini", res || 0)
+                })
+        } else if (!frm.doc.gudang_asal) {
+            frappe.msgprint(__('Please select Gudang first'));
+            frappe.model.set_value(cdt, cdn, 'gudang_asal', '');
+        }
+    },
+})
 frappe.ui.form.on("Surat Jalan", {
     setup(frm) {
         const wh_fields = ["gudang_tujuan", "gudang_asal"]

@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe.utils import flt
+from frappe.model.mapper import get_mapped_doc
 
 import erpnext
 from erpnext.accounts.general_ledger import merge_similar_entries
@@ -86,12 +87,11 @@ class GantiRugiLahan(AccountsController):
 		self.total_payment_amount = flt(total_payment)
 
 	def on_submit(self):
-		self.make_gl_entry()
+		pass
 
 	def on_cancel(self):
 		super().on_cancel()
-		self.make_gl_entry()
-	
+
 	def get_gl_entries(self):
 		gl_entries = []
 
@@ -188,16 +188,48 @@ def get_details_jenis_biaya(childrens, company, sppt_update=False, as_dict=False
 	return ress
 
 @frappe.whitelist()
+def ajukan_termin(name):
+	row = frappe.get_doc("Proposal Schedule", name)
+
+	if row.parenttype != "Ganti Rugi Lahan":
+		frappe.throw("Termin ini bukan bagian dari Ganti Rugi Lahan.")
+
+	if frappe.db.get_value("Ganti Rugi Lahan", row.parent, "docstatus") != 1:
+		frappe.throw("Dokumen Ganti Rugi Lahan harus berstatus Submitted sebelum termin bisa diajukan.")
+
+	if row.diajukan:
+		frappe.throw("Termin ini sudah diajukan.")
+
+	first_not_diajukan = frappe.get_all(
+		"Proposal Schedule",
+		filters={"parenttype": "Ganti Rugi Lahan", "parent": row.parent, "diajukan": 0},
+		fields=["name"],
+		order_by="idx asc",
+		limit=1,
+	)
+
+	if first_not_diajukan and first_not_diajukan[0].name != name:
+		frappe.throw("Termin harus diajukan secara berurutan, mulai dari baris pertama yang belum diajukan.")
+
+	frappe.db.set_value("Proposal Schedule", name, "diajukan", 1)
+
+	return True
+
+@frappe.whitelist()
 def get_next_payment_schedule(reference_doctype, reference_name, exclude_payment_entry=None):
+	filters = {"parenttype": reference_doctype, "parent": reference_name}
+	if reference_doctype == "Ganti Rugi Lahan":
+		filters["diajukan"] = 1
+
 	schedule = frappe.get_all(
 		"Proposal Schedule",
-		filters={"parenttype": reference_doctype, "parent": reference_name},
+		filters=filters,
 		fields=["name", "payment_term", "payment_amount", "outstanding"],
 		order_by="idx asc",
 	)
 
 	if not schedule:
-		frappe.throw(f"Payment Schedule tidak ditemukan untuk {reference_doctype} {reference_name}")
+		frappe.throw(f"Belum ada termin yang diajukan untuk {reference_doctype} {reference_name}")
 
 	per = frappe.qb.DocType("Payment Entry Reference")
 	pe = frappe.qb.DocType("Payment Entry")
@@ -219,7 +251,7 @@ def get_next_payment_schedule(reference_doctype, reference_name, exclude_payment
 	used_count = len(query.run())
 
 	if used_count >= len(schedule):
-		frappe.throw(f"Semua Payment Schedule untuk {reference_name} sudah digunakan")
+		frappe.throw(f"Semua termin yang diajukan untuk {reference_name} sudah digunakan")
 
 	term = schedule[used_count]
 
@@ -234,8 +266,56 @@ def fetch_company_account(company, childrens=None):
 	accounts_dict = {
 		"credit_to": frappe.get_cached_value("Company", company, "ganti_rugi_lahan_account"),
 	}
-	
+
 	if childrens:
 		accounts_dict.update(get_details_jenis_biaya(childrens, company))
 
 	return accounts_dict
+
+@frappe.whitelist()
+def make_payment_entry(source_name, target_doc=None):
+	def post_process(source, target):
+		if not source.items:
+			frappe.throw("Ganti Rugi Lahan tidak memiliki items")
+
+		schedule = get_next_payment_schedule("Ganti Rugi Lahan", source.name)
+		# expense_account = source.items[0].expense_account
+		expense_account = source.credit_to
+		party_account_currency = frappe.get_cached_value("Account", expense_account, "account_currency")
+
+		target.payment_type = "Pay"
+		target.party_type = "Employee"
+		target.party = source.employee
+		target.naming_series = "ACC-PAY-.YYYY.-"
+		target.party_name = frappe.get_cached_value("Employee", source.employee, "employee_name")
+		target.paid_to = expense_account
+		target.paid_to_account_currency = party_account_currency
+		target.paid_amount = schedule.get("allocated_amount")
+		target.received_amount = schedule.get("allocated_amount")
+
+		target.append("references", {
+			"reference_doctype": "Ganti Rugi Lahan",
+			"reference_name": source.name,
+			"payment_term": schedule.get("payment_term"),
+			"total_amount": source.grand_total,
+			"outstanding_amount": schedule.get("payment_term_outstanding"),
+			"allocated_amount": schedule.get("allocated_amount"),
+		})
+
+	doclist = get_mapped_doc(
+		"Ganti Rugi Lahan",
+		source_name,
+		{
+			"Ganti Rugi Lahan": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"company": "company",
+					"cost_center": "cost_center",
+				},
+			}
+		},
+		target_doc,
+		post_process,
+	)
+
+	return doclist
