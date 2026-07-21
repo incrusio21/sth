@@ -10,6 +10,20 @@ from frappe import _, delete_doc
 from frappe.model.mapper import get_mapped_doc
 
 class Timbangan(Document):
+
+	def before_insert(self):
+		# API sering kirim docstatus 1 langsung saat insert. Kalau dibiarkan,
+		# Frappe hanya menulis docstatus=1 ke DB tanpa menjalankan lifecycle
+		# submit (before_submit/on_submit tidak terpanggil). Jadi paksa masuk
+		# sebagai draft dulu, lalu submit ulang secara eksplisit di after_insert.
+		if self.owner and "api@sth" in self.owner and self.docstatus == 1:
+			self.flags.submit_after_insert = True
+			self.docstatus = 0
+
+	def after_insert(self):
+		if self.flags.get("submit_after_insert"):
+			self.submit()
+
 	def validate(self):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
@@ -75,7 +89,7 @@ class Timbangan(Document):
 			if self.type == "Wb Pabrik":
 				self.type = "Receive"
 				self.receive_type = "TBS Internal" 
-
+				self.jumlah_janjang = self.total_janjang
 
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
