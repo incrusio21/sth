@@ -1,41 +1,28 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:nama",
- "creation": "2026-06-17 15:29:58.302870",
+ "autoname": "field:type",
+ "creation": "2026-07-21 14:58:08.557848",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "nama",
-  "field_di_security_check_point",
-  "transaction_type"
+  "type"
  ],
  "fields": [
   {
-   "fieldname": "nama",
+   "fieldname": "type",
    "fieldtype": "Data",
-   "label": "Nama",
+   "label": "Type",
    "unique": 1
-  },
-  {
-   "fieldname": "field_di_security_check_point",
-   "fieldtype": "Data",
-   "label": "Field di Security Check Point"
-  },
-  {
-   "fieldname": "transaction_type",
-   "fieldtype": "Table MultiSelect",
-   "label": "Transaction Type",
-   "options": "Security Check Point Multi Select"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-21 15:01:18.811904",
+ "modified": "2026-07-21 14:58:37.629615",
  "modified_by": "Administrator",
  "module": "Plantation",
- "name": "Transaction Type",
+ "name": "Security Transaction Type",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

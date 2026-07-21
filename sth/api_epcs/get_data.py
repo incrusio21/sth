@@ -93,17 +93,9 @@ def get_kelompok_apd():
 
 @frappe.whitelist(allow_guest=True)
 def get_security_transaction_type():
-	hasil = {
-	  "data": [
-		{
-		  "name": "Receive", "receive_type": ["TBS Internal","TBS Eksternal","Lain - Lain"]
-		},
-		{
-		  "name": "Dispatch", "dispatch_type": ["Product","By Product","Lain - Lain"]
-		},
-		{
-		  "name": "Return", "return_type": ["Product","By Product","Lain - Lain"]
-		}
-	  ]
-	}
-	return hasil
+	data = frappe.get_all(
+		"Transaction Type",
+		fields=["name", "field_di_security_check_point", "transaction_type"],
+		limit_page_length=0,
+	)
+	return {"data": data}
