@@ -93,9 +93,19 @@ def get_kelompok_apd():
 
 @frappe.whitelist(allow_guest=True)
 def get_security_transaction_type():
-	data = frappe.get_all(
+	transaction_types = frappe.get_all(
 		"Transaction Type",
-		fields=["name", "field_di_security_check_point", "transaction_type"],
+		fields=["name", "field_di_security_check_point"],
 		limit_page_length=0,
 	)
-	return {"data": data}
+
+	for row in transaction_types:
+		row["transaction_type"] = frappe.get_all(
+			"Security Check Point Multi Select",
+			filters={"parenttype": "Transaction Type", "parent": row["name"]},
+			fields=["security_transaction_type"],
+			order_by="idx",
+			pluck="security_transaction_type",
+		)
+
+	return {"data": transaction_types}
