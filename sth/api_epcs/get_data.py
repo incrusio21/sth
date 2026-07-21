@@ -87,7 +87,23 @@ def get_kelompok_material():
 def get_item_apd():
 	return _get_item_list(_get_kelompok_barang("apd", "daftar_apd"))
 
-
 @frappe.whitelist(allow_guest=True)
 def get_kelompok_apd():
 	return _get_item_group_list(_get_kelompok_barang("apd", "daftar_apd"))
+
+@frappe.whitelist(allow_guest=True)
+def get_security_transaction_type():
+	hasil = {
+	  "data": [
+		{
+		  "name": "Receive", "receive_type": ["TBS Internal","TBS Eksternal","Lain - Lain"]
+		},
+		{
+		  "name": "Dispatch", "dispatch_type": ["Product","By Product","Lain - Lain"]
+		},
+		{
+		  "name": "Return", "return_type": ["Product","By Product","Lain - Lain"]
+		}
+	  ]
+	}
+	return hasil
