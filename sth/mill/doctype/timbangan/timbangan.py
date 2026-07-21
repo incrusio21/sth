@@ -70,8 +70,7 @@ class Timbangan(Document):
 			self.api_ticket_number = self.spb
 			self.ticket_number = ""
 			spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.api_ticket_number}, "name")
-			if spb_name:
-				self.spb = spb_name
+			self.spb = spb_name or ""
 
 	def validate_ticket(self):
 		if frappe.db.exists("Timbangan",{"ticket_number": self.ticket_number,"docstatus":1}):
