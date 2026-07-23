@@ -534,7 +534,7 @@ override_doctype_dashboards = {
 # -----------------------------------------------------------
 
 # ignore_links_on_delete = ["Communication", "ToDo"]
-ignore_links_on_delete = ["TBS Ledger Entry"]
+ignore_links_on_delete = ["TBS Ledger Entry","Workflow Action"]
 
 # Request Events
 # ----------------
