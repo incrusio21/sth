@@ -196,25 +196,36 @@ class SuratPengantarBuah(Document):
 			d.total_weight = flt(self.total_weight * d.total_janjang / self.total_janjang, precision)
 
 @frappe.whitelist()
-def create_or_update(args):
-	if isinstance(args, str):
-		args = json.loads(args)
-
-	details = args.get("details") or []
+def create_or_update(**kwargs):
+	args = kwargs
 	trans_no = args.get("trans_no")
+	details = args.get("details") or []
 
 	existing_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": trans_no}, "name") if trans_no else None
 
 	if not existing_name:
 		doc = frappe.get_doc(dict(args, doctype="Surat Pengantar Buah"))
+
+		submit_after_insert = doc.docstatus == 1
+		if submit_after_insert:
+			doc.docstatus = 0
+
 		doc.insert(ignore_permissions=True)
+
+		if submit_after_insert:
+			doc.submit()
+
 		return doc
 
 	doc = frappe.get_doc("Surat Pengantar Buah", existing_name)
-	doc.set("details", [])
+	existing_by_harvest_no = {d.harvest_no: d for d in doc.details if d.harvest_no}
+
 	for d in details:
-		doc.append("details", {
-			"harvest_no": d.get("harvest_no"),
+		harvest_no = d.get("harvest_no")
+		row = existing_by_harvest_no.get(harvest_no) or doc.append("details", {})
+
+		row.update({
+			"harvest_no": harvest_no,
 			"blok": d.get("blok"),
 			"panen_date": d.get("panen_date"),
 			"total_janjang": flt(d.get("total_janjang")),
