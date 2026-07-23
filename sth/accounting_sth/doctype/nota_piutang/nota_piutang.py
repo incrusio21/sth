@@ -5,6 +5,49 @@ import frappe
 from frappe.utils import nowdate, flt
 from frappe.model.document import Document
 
+# Nomor akun (Account.account_number) untuk jurnal Nota Piutang tipe "Others"
+AKUN_PIUTANG_LAIN_NUMBER       = "1162099"
+AKUN_DISPOSAL_ASSET_NUMBER     = "9190201"
+AKUN_DISPOSAL_NON_STOK_NUMBER  = "9190399"
+
+
+def get_nilai_disposal_asset(asset, akun_lawan):
+	"""SUM debit akun `akun_lawan` pada Journal Entry submitted dengan referensi Asset ini."""
+	if not asset or not akun_lawan:
+		return 0
+
+	nilai = frappe.db.sql("""
+		SELECT COALESCE(SUM(jea.debit), 0)
+		FROM `tabJournal Entry Account` jea
+		JOIN `tabJournal Entry` je ON je.name = jea.parent
+		WHERE je.docstatus = 1
+		  AND jea.reference_type = 'Asset'
+		  AND jea.reference_name = %(asset)s
+		  AND jea.account = %(account)s
+	""", {"asset": asset, "account": akun_lawan})[0][0]
+
+	return flt(nilai)
+
+
+@frappe.whitelist()
+def get_nilai_x_asset(asset, company):
+	if not asset or not company:
+		return 0
+
+	akun_lawan = frappe.db.get_value(
+		"Account",
+		{"account_number": AKUN_DISPOSAL_ASSET_NUMBER, "company": company},
+		"name"
+	)
+
+	if not akun_lawan:
+		frappe.throw(
+			f"Account dengan nomor <b>{AKUN_DISPOSAL_ASSET_NUMBER}</b> tidak ditemukan "
+			f"untuk Company <b>{company}</b>"
+		)
+
+	return get_nilai_disposal_asset(asset, akun_lawan)
+
 
 class NotaPiutang(Document):
 	def autoname(self):
@@ -17,6 +60,8 @@ class NotaPiutang(Document):
 			prefix = f"NDP-{period}-"
 		elif self.tipe == "Pemenuhan Kontrak":
 			prefix = f"PK-{period}-"
+		elif self.tipe == "Others":
+			prefix = f"OTH-{period}-"
 		else:
 			frappe.throw("Tipe Nota tidak valid")
 
@@ -25,7 +70,30 @@ class NotaPiutang(Document):
 	def validate(self):
 		self.validate_duplikat()
 
+		if self.tipe == "Others":
+			self.validate_others()
+
 		self.grandtotal = self.sisa_dpp + self.sisa_ppn
+
+	def validate_others(self):
+		if not self.sub_tipe_others:
+			frappe.throw("Sub Tipe wajib diisi untuk Tipe <b>Others</b>")
+
+		if self.sub_tipe_others == "Asset":
+			if not self.asset:
+				frappe.throw("Asset wajib diisi untuk Sub Tipe <b>Asset</b>")
+
+			asset_status = frappe.db.get_value("Asset", self.asset, "status")
+			if asset_status != "Scrapped":
+				frappe.throw(
+					f"Asset <b>{self.asset}</b> harus berstatus <b>Scrapped</b>, "
+					f"saat ini berstatus <b>{asset_status}</b>"
+				)
+		elif self.sub_tipe_others == "Barang Non Stok":
+			if not flt(self.nilai_barang_non_stok) > 0:
+				frappe.throw("Nilai Barang Non Stok wajib diisi dan harus lebih besar dari 0")
+		else:
+			frappe.throw("Sub Tipe Others tidak valid")
 
 	def validate_duplikat(self):
 		if not self.tipe or not self.no_kontrak:
@@ -56,7 +124,104 @@ class NotaPiutang(Document):
 				self.create_payment_entry()
 		if self.tipe == "Pemenuhan Kontrak":
 			self.create_ppn_invoices()
+		if self.tipe == "Others":
+			self.create_others_journal_entry()
 
+	def get_account_by_number(self, account_number):
+		account = frappe.db.get_value(
+			"Account",
+			{"account_number": account_number, "company": self.company},
+			"name"
+		)
+
+		if not account:
+			frappe.throw(
+				f"Account dengan nomor <b>{account_number}</b> tidak ditemukan "
+				f"untuk Company <b>{self.company}</b>"
+			)
+
+		return account
+
+	def create_others_journal_entry(self):
+		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+		akun_piutang_lain = self.get_account_by_number(AKUN_PIUTANG_LAIN_NUMBER)
+
+		reference_type = None
+		reference_name = None
+
+		if self.sub_tipe_others == "Asset":
+			akun_lawan = self.get_account_by_number(AKUN_DISPOSAL_ASSET_NUMBER)
+			nilai = get_nilai_disposal_asset(self.asset, akun_lawan)
+
+			if nilai <= 0:
+				frappe.throw(
+					f"Tidak ditemukan nilai debit akun <b>{akun_lawan}</b> pada Journal Entry "
+					f"dengan referensi Asset <b>{self.asset}</b>."
+				)
+
+			reference_type = "Asset"
+			reference_name = self.asset
+			remarks = f"Nota Piutang Others (Asset) - {self.name} - {self.asset}"
+		else:
+			akun_lawan = self.get_account_by_number(AKUN_DISPOSAL_NON_STOK_NUMBER)
+			nilai = flt(self.nilai_barang_non_stok)
+			remarks = f"Nota Piutang Others (Barang Non Stok) - {self.name}"
+
+		je = frappe.new_doc("Journal Entry")
+		je.voucher_type = "Journal Entry"
+		je.company      = self.company
+		je.posting_date = self.date or nowdate()
+		je.user_remark  = remarks
+		je.nota_piutang = self.name  # custom field, sesuaikan jika nama berbeda
+
+		je.append("accounts", {
+			"account"                   : akun_piutang_lain,
+			"debit_in_account_currency" : nilai,
+			"credit_in_account_currency": 0,
+			"cost_center"               : cost_center,
+			"reference_type"            : reference_type,
+			"reference_name"            : reference_name,
+			"user_remark"               : remarks,
+		})
+		je.append("accounts", {
+			"account"                   : akun_lawan,
+			"debit_in_account_currency" : 0,
+			"credit_in_account_currency": nilai,
+			"cost_center"               : cost_center,
+			"reference_type"            : reference_type,
+			"reference_name"            : reference_name,
+			"user_remark"               : remarks,
+		})
+
+		je.insert(ignore_permissions=True)
+		je.submit()
+
+		frappe.msgprint(
+			f"Journal Entry <b>{je.name}</b> berhasil dibuat.",
+			alert=True
+		)
+
+	def cancel_others_journal_entry(self):
+		je_name = frappe.db.get_value(
+			"Journal Entry",
+			{"nota_piutang": self.name, "docstatus": 1},
+			"name"
+		)
+
+		if not je_name:
+			frappe.msgprint(
+				"Tidak ada Journal Entry yang perlu di-cancel.",
+				alert=True
+			)
+			return
+
+		je = frappe.get_doc("Journal Entry", je_name)
+		je.cancel()
+
+		frappe.msgprint(
+			f"Journal Entry <b>{je_name}</b> berhasil di-cancel.",
+			alert=True
+		)
 
 	def create_payment_entry(self):
 		customer = frappe.db.get_value("Sales Order", self.no_kontrak, "customer")
@@ -178,6 +343,9 @@ class NotaPiutang(Document):
 
 		if self.tipe == "Pemenuhan Kontrak":
 			self.cancel_ppn_invoices()
+
+		if self.tipe == "Others":
+			self.cancel_others_journal_entry()
 
 	def cancel_payment_entry(self):
 		# Cari PE yang linked ke Nota Piutang ini

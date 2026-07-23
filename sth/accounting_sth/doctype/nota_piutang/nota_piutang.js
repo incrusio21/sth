@@ -74,6 +74,38 @@ frappe.ui.form.on('Nota Piutang', {
 		if (frm.doc.tipe === 'Pemenuhan Kontrak' && frm.doc.no_kontrak) {
 			cek_dp_lalu_dialog(frm);
 		}
+	},
+
+	asset: function(frm) {
+		if (!frm.doc.asset || frm.doc.sub_tipe_others !== 'Asset') {
+			frm.set_value('nilai_x_asset', 0);
+			return;
+		}
+
+		if (!frm.doc.company) {
+			frappe.msgprint(__('Company wajib diisi terlebih dahulu.'));
+			frm.set_value('asset', '');
+			return;
+		}
+
+		frappe.call({
+			method: 'sth.accounting_sth.doctype.nota_piutang.nota_piutang.get_nilai_x_asset',
+			args: {
+				asset: frm.doc.asset,
+				company: frm.doc.company,
+			},
+			callback: function(r) {
+				frm.set_value('nilai_x_asset', r.message || 0);
+			}
+		});
+	},
+
+	sub_tipe_others: function(frm) {
+		if (frm.doc.sub_tipe_others === 'Asset' && frm.doc.asset) {
+			frm.trigger('asset');
+		} else {
+			frm.set_value('nilai_x_asset', 0);
+		}
 	}
 });
 
@@ -288,6 +320,13 @@ function setup_filter(frm) {
 				['Account', 'is_group', '=', 0],
 				['Account', 'account_type', 'in', ["Cash","Bank"]],
 				['Account', 'company', '=', frm.doc.company]
+			]
+		};
+	});
+	frm.set_query('asset', function() {
+		return {
+			filters: [
+				['Asset', 'status', '=', 'Scrapped']
 			]
 		};
 	});

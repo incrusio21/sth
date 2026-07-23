@@ -22,7 +22,12 @@ frappe.ui.form.on('Asset', {
                 };
                 frappe.set_route("query-report", "General Ledger");
             }, __("View"));
-        
+
+            if (frm.doc.status === "Scrapped") {
+                frm.add_custom_button(__("Nota Piutang"), function() {
+                    make_nota_piutang(frm);
+                }, __("Buat"));
+            }
         }
 	},
 	company: function(frm) {
@@ -64,6 +69,34 @@ function set_unit_filter(frm) {
 			return {};
 		});
 	}
+}
+
+function make_nota_piutang(frm) {
+	frappe.db.get_list("Nota Piutang", {
+		filters: {
+			asset: frm.doc.name,
+			docstatus: ["!=", 2],
+		},
+		fields: ["name"],
+		limit: 1,
+	}).then((existing) => {
+		if (existing && existing.length) {
+			frappe.msgprint(
+				__("Nota Piutang {0} untuk Asset ini sudah ada.", [
+					`<a href="/app/nota-piutang/${existing[0].name}">${existing[0].name}</a>`,
+				])
+			);
+			return;
+		}
+
+		frappe.new_doc("Nota Piutang", {
+			tipe: "Others",
+			sub_tipe_others: "Asset",
+			asset: frm.doc.name,
+			company: frm.doc.company,
+			date: frappe.datetime.get_today(),
+		});
+	});
 }
 
 erpnext.asset.transfer_asset = function () {
