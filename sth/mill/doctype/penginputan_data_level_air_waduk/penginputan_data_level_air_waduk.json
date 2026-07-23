@@ -28,7 +28,7 @@
    "label": "Ketinggian Level Air Waduk"
   },
   {
-   "description": "(Satuan dalam M\u00b2)",
+   "description": "(Satuan dalam M\u00b3)",
    "fieldname": "volume_air_waduk",
    "fieldtype": "Float",
    "label": "Volume Air Waduk"
@@ -107,7 +107,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:44:27.855520",
+ "modified": "2026-07-22 10:05:41.592148",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Penginputan Data Level Air Waduk",

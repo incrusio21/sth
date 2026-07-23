@@ -6,6 +6,7 @@ frappe.ui.form.on("Supplier Quotation", {
 
         sth.form.override_class_function(frm.cscript, "refresh", () => {
             frm.trigger("create_custom_buttons")
+            frm.set_df_property("supplier_name", "hidden", 1)
         })
 
         frm.set_query("type", "pph_lainnya", function (doc) {

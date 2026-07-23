@@ -13,7 +13,7 @@ force_item_fields = (
 )
 
 class SuratPengantarBuah(Document):
-	
+
 	def validate(self):
 		for row in self.details:
 			if row.total_janjang and not row.qty:
@@ -93,18 +93,21 @@ class SuratPengantarBuah(Document):
 
 	def calculate_janjang(self):
 		total_janjang = 0.0
+		total_brondolan = 0.0
 		for d in self.details:
-			
+
 			if not d.blok_restan:
 				d.qty_restan = 0
 
 			d.total_janjang = (d.qty or 0) + d.qty_restan
 
 			total_janjang += d.total_janjang
+			total_brondolan += flt(d.brondolan_terkirim)
 
 			d.total_weight = 0.0
 
 		self.total_janjang = total_janjang
+		self.total_brondolan = total_brondolan
 
 	def on_submit(self):
 		self.update_transfered_bkm_panen()
@@ -191,6 +194,46 @@ class SuratPengantarBuah(Document):
 		)
 		for d in self.details:
 			d.total_weight = flt(self.total_weight * d.total_janjang / self.total_janjang, precision)
+
+@frappe.whitelist()
+def create_or_update(args):
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	details = args.get("details") or []
+	trans_no = args.get("trans_no")
+
+	existing_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": trans_no}, "name") if trans_no else None
+
+	if not existing_name:
+		doc = frappe.get_doc(dict(args, doctype="Surat Pengantar Buah"))
+		doc.insert(ignore_permissions=True)
+		return doc
+
+	doc = frappe.get_doc("Surat Pengantar Buah", existing_name)
+	doc.set("details", [])
+	for d in details:
+		doc.append("details", {
+			"harvest_no": d.get("harvest_no"),
+			"blok": d.get("blok"),
+			"panen_date": d.get("panen_date"),
+			"total_janjang": flt(d.get("total_janjang")),
+			"janjang_sisa": flt(d.get("janjang_sisa")),
+			"brondolan_terkirim": flt(d.get("brondolan_terkirim")),
+			"brondolan_sisa": flt(d.get("brondolan_sisa")),
+		})
+
+	total_janjang = sum(flt(d.total_janjang) for d in doc.details)
+	total_brondolan = sum(flt(d.brondolan_terkirim) for d in doc.details)
+
+	doc.update_child_table("details")
+	doc.db_set({
+		"total_janjang": total_janjang,
+		"total_brondolan": total_brondolan
+	}, notify=False)
+	frappe.db.commit()
+
+	return doc
 
 @frappe.whitelist()
 def get_recap_panen(blok, posting_date):

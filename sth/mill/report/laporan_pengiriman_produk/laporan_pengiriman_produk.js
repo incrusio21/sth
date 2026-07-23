@@ -41,12 +41,14 @@ frappe.query_reports["Laporan Pengiriman Produk"] = {
 			"fieldname": "from_date",
 			"label": __("Tanggal Dari"),
 			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
 			"reqd": 0
 		},
 		{
 			"fieldname": "to_date",
 			"label": __("Tanggal Sampai"),
 			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
 			"reqd": 0
 		},
 	]

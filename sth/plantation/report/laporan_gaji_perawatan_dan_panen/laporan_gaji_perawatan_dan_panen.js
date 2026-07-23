@@ -35,6 +35,13 @@ frappe.query_reports["Laporan Gaji Perawatan Dan Panen"] = {
 			"fieldtype": "Link",
 			"options": "Employee",
 			"default": ""
+		},
+		{
+			"fieldname": "bkm",
+			"label": __("Buku Kerja Mandor"),
+			"fieldtype": "Select",
+			"options": ["All", "Panen", "Perawatan"],
+			"default": "All"
 		}
 	],
 	"formatter": function (value, row, column, data, default_formatter) {

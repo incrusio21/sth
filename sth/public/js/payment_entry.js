@@ -592,19 +592,37 @@ frappe.ui.form.on("Payment Entry Reference", {
 	payment_term(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
-		frappe.call({
-			method: "sth.hr_customize.custom.payment_entry.get_payment_term_outstanding",
-			args: {
-				doctype: row.reference_doctype,
-				reference: row.reference_name,
-				payment_term: row.payment_term,
-			},
-			callback: function(r) {
-				if (r.message) {
-					frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message);
-				}
-			},
-		});
+		if (row.reference_doctype === "Ganti Rugi Lahan" && row.reference_name && row.payment_term) {
+			frappe.call({
+				method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_next_payment_schedule",
+				args: {
+					reference_doctype: row.reference_doctype,
+					reference_name: row.reference_name,
+				},
+				callback: function(r) {
+					if (r.message && r.message.payment_term && r.message.payment_term !== row.payment_term) {
+						frappe.msgprint({
+							title: __("Termin Tidak Berurutan"),
+							message: __(
+								"Termin harus dibayar berurutan. Termin berikutnya yang harus dibayar untuk <b>{0}</b> adalah <b>{1}</b>.",
+								[row.reference_name, r.message.payment_term]
+							),
+							indicator: "red"
+						});
+
+						frappe.model.set_value(cdt, cdn, "payment_term", r.message.payment_term);
+						frappe.model.set_value(cdt, cdn, "allocated_amount", r.message.allocated_amount);
+						frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message.payment_term_outstanding);
+						return;
+					}
+
+					fetch_payment_term_outstanding(frm, cdt, cdn);
+				},
+			});
+			return;
+		}
+
+		fetch_payment_term_outstanding(frm, cdt, cdn);
 	},
 
 	reference_name(frm, cdt, cdn) {
@@ -617,7 +635,6 @@ frappe.ui.form.on("Payment Entry Reference", {
 			args: {
 				reference_doctype: row.reference_doctype,
 				reference_name: row.reference_name,
-				exclude_payment_entry: frm.doc.name,
 			},
 			callback: function(r) {
 				if (!r.message) return;
@@ -626,11 +643,33 @@ frappe.ui.form.on("Payment Entry Reference", {
 				frappe.model.set_value(cdt, cdn, "allocated_amount", r.message.allocated_amount);
 				frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message.payment_term_outstanding);
 
+				if (r.message.no_rekening) {
+					frm.set_value("no_rekening_tujuan", r.message.no_rekening);
+				}
+
 				sync_paid_amount_from_references(frm);
 			},
 		});
 	}
 });
+
+function fetch_payment_term_outstanding(frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+
+	frappe.call({
+		method: "sth.hr_customize.custom.payment_entry.get_payment_term_outstanding",
+		args: {
+			doctype: row.reference_doctype,
+			reference: row.reference_name,
+			payment_term: row.payment_term,
+		},
+		callback: function(r) {
+			if (r.message) {
+				frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message);
+			}
+		},
+	});
+}
 
 function sync_paid_amount_from_references(frm) {
 	const total_allocated = (frm.doc.references || []).reduce((sum, d) => sum + flt(d.allocated_amount), 0);

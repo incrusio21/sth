@@ -129,7 +129,6 @@
   {
    "fieldname": "status",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Status",
    "read_only": 1
   },
@@ -185,7 +184,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-18 14:05:42.100428",
+ "modified": "2026-07-22 11:17:34.344792",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Pengeluaran Barang",

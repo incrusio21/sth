@@ -167,3 +167,62 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 			),
 			ClosedAccountingPeriod,
 		)
+
+	# frappe.throw(
+	# 	title=_("Closing Periode Tidak Dapat Dilanjutkan"),
+	# 	msg=_("""
+	# 		<p>Closing periode tidak dapat dilanjutkan karena:</p>
+	# 		{msg}
+	# 		<p style="margin-top:12px;">Silakan selesaikan item-item di atas sebelum melakukan closing.</p>
+	# 	""").format(msg=msg)
+	# )
+
+
+@frappe.whitelist()
+def check_unsubmitted_salary_slip(self, method):
+	"""
+	Cek Salary Slip yang masih Draft (belum disubmit) dalam periode Accounting Period.
+	Accounting Period tidak boleh disubmit selama masih ada Salary Slip Draft di periode tsb.
+	"""
+	result = frappe.db.sql("""
+		SELECT ss.name, ss.employee, ss.employee_name, ss.start_date, ss.end_date
+		FROM `tabSalary Slip` ss
+		WHERE ss.docstatus = 0
+		  AND ss.company = %(company)s
+		  AND ss.unit = %(unit)s
+		  AND ss.start_date <= %(end)s
+		  AND ss.end_date >= %(start)s
+	""", {
+		'company': self.company,
+		'unit': self.unit,
+		'start': self.start_date,
+		'end': self.end_date,
+	}, as_dict=True)
+
+	if not result:
+		return
+
+	rows = "".join([
+		f"<tr><td>{r.name}</td><td>{r.employee} - {r.employee_name}</td><td>{r.start_date}</td><td>{r.end_date}</td></tr>"
+		for r in result
+	])
+
+	frappe.throw(
+		title=_("Salary Slip Belum Disubmit"),
+		msg=_("""
+			<p>Accounting Period tidak dapat disubmit. Masih terdapat <b>Salary Slip</b> berstatus Draft
+			dalam periode ini:</p>
+			<table class="table table-bordered table-sm" style="margin-top:8px;">
+				<thead>
+					<tr>
+						<th>Salary Slip</th>
+						<th>Employee</th>
+						<th>Start Date</th>
+						<th>End Date</th>
+					</tr>
+				</thead>
+				<tbody>{rows}</tbody>
+			</table>
+			<p>Silakan submit atau batalkan Salary Slip tersebut terlebih dahulu.</p>
+		""").format(rows=rows)
+	)

@@ -30,9 +30,22 @@ class DataPenanamanBibit(Document):
 		if(self.qty<0):
 			frappe.throw(f"Jumlah Bibit must not be less than 0")
 
+	def get_base_rupiah_basis(self):
+		"""Harga dasar bibit per unit, diambil dari Data Penyemaian Bibit (bukan dari field rupiah_basis
+		yang sekarang jadi field hasil hitungan total_jurnal / qty)."""
+		if not self.data_penyemaian_bibit:
+			return 0
+
+		d = frappe.db.get_value(
+			"Data Penyemaian Bibit", self.data_penyemaian_bibit, ["qty", "amount"], as_dict=True
+		)
+		if not d or not d.qty:
+			return 0
+		return flt(d.amount) / flt(d.qty)
+
 	def calculate_totals(self):
 		qty = flt(self.qty)
-		basis = flt(self.rupiah_basis)
+		basis = self.get_base_rupiah_basis()
 		available_qty = flt(self.available_qty)
 		total_bkm = flt(self.total_bkm)
 
@@ -43,6 +56,8 @@ class DataPenanamanBibit(Document):
 			self.actual_amount_bkm = (qty / available_qty) * total_bkm
 
 		self.total_jurnal = self.total_bibit + self.actual_amount_bkm
+
+		self.rupiah_basis = (self.total_jurnal / qty) if qty else 0
   
 	def validate(self):
 		# self.get_available_qty()

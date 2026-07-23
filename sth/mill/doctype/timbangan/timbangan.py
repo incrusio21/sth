@@ -52,7 +52,7 @@ class Timbangan(Document):
 				spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
 				spb_doc.in_weight = self.bruto
 				spb_doc.out_weight = self.tara
-				spb_doc.total_weight = self.netto
+				spb_doc.total_weight = self.netto or self.bruto - self.tara
 				spb_doc.in_time = self.weight_in_time
 				spb_doc.out_time = self.weight_out_time
 				spb_doc.workflow_state = "Weighed"

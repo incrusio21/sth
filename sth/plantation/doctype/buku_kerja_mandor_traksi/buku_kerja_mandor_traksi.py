@@ -59,7 +59,20 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self._clear_fields = ["blok", "divisi", "batch", "project"]
 		self._bkm_name = "Traksi"
 		self._used_task = set()
-		
+
+	def before_insert(self):
+		# Data dari API kadang masuk dengan docstatus=1 langsung, sehingga
+		# proses insert tidak pernah melewati siklus submit (on_submit tidak jalan).
+		# Di sini docstatus dipaksa jadi draft dulu, lalu submit() dipanggil manual
+		# di after_insert supaya validate/before_submit/on_submit tetap dieksekusi.
+		if self.docstatus == 1:
+			self.flags.submit_after_insert = True
+			self.docstatus = 0
+
+	def after_insert(self):
+		if self.flags.get("submit_after_insert"):
+			self.submit()
+
 	def validate(self):
 		self.set_posting_datetime()
 		self.set_salary_account()

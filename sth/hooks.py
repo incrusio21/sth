@@ -195,6 +195,7 @@ standard_queries = {
 	"Item Group": "sth.controllers.queries.item_group_query",
 	"Kegiatan": "sth.controllers.queries.kegiatan_query",
 	"Months": "sth.controllers.queries.month_query",
+	"Monitoring Proses Control": "sth.controllers.queries.monitoring_proses_control_query",
 	# "Unit": "sth.controllers.queries.unit_query_by_company",
 	# "Unit": "sth.controllers.queries.unit_query",
 }
@@ -255,6 +256,7 @@ doc_events = {
 
 	"Accounting Period":{
 		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period",
+		"before_submit": "sth.custom.period_closing_voucher.check_unsubmitted_salary_slip",
 		"on_submit": ["sth.overrides.accounting_period.create_costing_bengkel_on_submit","sth.overrides.accounting_period.cancel_costing_bengkel_on_cancel"]
 	},
 
@@ -344,7 +346,8 @@ doc_events = {
 			"sth.custom.payment_entry.update_check_book",
 			"sth.custom.payment_entry.set_no_rekening",
 			"sth.custom.payment_entry.validate_payment_voucher_kas_pdo",
-			"sth.custom.payment_entry.set_reference_no"
+			"sth.custom.payment_entry.set_reference_no",
+			"sth.custom.payment_entry.validate_ganti_rugi_lahan_term_order"
 		],
 		"on_submit": [
 			"sth.custom.payment_entry.update_check_book", 
@@ -356,7 +359,8 @@ doc_events = {
 			"sth.custom.payment_entry.update_pesangon_from_payment",
 			"sth.custom.payment_entry.pasang_nota_piutang",
 			"sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
-			"sth.custom.payment_entry_leasing.on_payment_entry_submit"
+			"sth.custom.payment_entry_leasing.on_payment_entry_submit",
+			"sth.custom.payment_entry.update_ganti_rugi_lahan_term"
 		],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
 				"sth.custom.payment_entry.update_status_deposito", 
@@ -365,7 +369,8 @@ doc_events = {
 				"sth.overrides.payment_entry.on_cancel_pdo",
 				"sth.custom.payment_entry.update_pesangon_from_payment",
 				"sth.custom.payment_entry.pasang_nota_piutang",
-				"sth.custom.payment_entry_leasing.on_payment_entry_cancel"
+				"sth.custom.payment_entry_leasing.on_payment_entry_cancel",
+				"sth.custom.payment_entry.update_ganti_rugi_lahan_term"
 				],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},

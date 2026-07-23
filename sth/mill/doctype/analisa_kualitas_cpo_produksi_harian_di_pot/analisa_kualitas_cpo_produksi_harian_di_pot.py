@@ -3,7 +3,7 @@
 
 import frappe,json
 from frappe.model.document import Document
-
+from frappe.utils import flt
 
 class AnalisaKualitasCPOProduksiHariandiPOT(Document):
 	def validate(self):
@@ -12,13 +12,13 @@ class AnalisaKualitasCPOProduksiHariandiPOT(Document):
 	def validate_rules(self):
 		
 		rules = [
-			(self.tekanan_vacuum_drier < -0.6 , "Tekanan Vacuum Drier kurang dari -0.6 kg/cm2"),
-			(self.tekanan_vacuum_drier > -0.9 , "Tekanan Vacuum Drier lebih besar dari -0.9 kg/cm2"),
-			(self.ffa > 5 , "Presentase ALB Vacuum Drier(FFA) lebih besar dari 5%"),
-			(self.moisture > 0.5 , "Presentase Moisture lebih besar dari 0.5%"),
-			(self.dirt > 0.05 , "Presentase Dirt lebih besar dari 0.05%"),
-			(self.dobi < 2.31 , "Presentase Dobi kurang dari 2.31%"),
-			(self.dobi > 3.24 , "Presentase Dobi lebih besar dari 3.24%"),
+			(flt(self.tekanan_vacuum_drier) < -0.6, "Tekanan Vacuum Drier kurang dari -0.6 kg/cm2"),
+			(flt(self.tekanan_vacuum_drier) > -0.9, "Tekanan Vacuum Drier lebih besar dari -0.9 kg/cm2"),
+			(flt(self.ffa) > 5, "Presentase ALB Vacuum Drier(FFA) lebih besar dari 5%"),
+			(flt(self.moisture) > 0.5, "Presentase Moisture lebih besar dari 0.5%"),
+			(flt(self.dirt) > 0.05, "Presentase Dirt lebih besar dari 0.05%"),
+			(flt(self.dobi) < 2.31, "Presentase Dobi kurang dari 2.31%"),
+			(flt(self.dobi) > 3.24, "Presentase Dobi lebih besar dari 3.24%"),
 		]
 
 		errors = []

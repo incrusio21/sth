@@ -9,6 +9,9 @@ from frappe.desk.reportview import get_filters_cond
 from frappe.utils import flt
 
 class PermintaanPengeluaranBarang(Document):
+	def after_insert(self):
+		self.db_set("status","Draft")
+
 	def validate(self):
 		self.validate_stock()
 		self.isi_cost_center()
@@ -25,6 +28,9 @@ class PermintaanPengeluaranBarang(Document):
 	def on_submit(self):
 		self.db_set("status","Submitted")
 	
+	def on_cancel(self):
+		self.db_set("status","Cancelled")
+
 	def validate_stock(self):
 		for row in self.items:
 			if flt(row.jumlah) == 0:

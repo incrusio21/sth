@@ -36,13 +36,13 @@ def debug_ap():
 	create_costing_bengkel_on_submit(frappe.get_doc("Accounting Period",no_doc),"on_submit")
 
 def debug_list():
-	li = frappe.db.sql(""" SELECT name FROM `tabStation Master` """)
+	li = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Panen` WHERE posting_date IN ('2026-07-17','2026-07-18','2026-07-20') and owner LIKE "api%" """)
 	for row in li:
 		no_doc = row[0]
 		# frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 		# frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 		# frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-		frappe.get_doc("Station Master",no_doc).create_cost_centers()
+		frappe.get_doc("Buku Kerja Mandor Panen",no_doc).cancel()
 
 def debug_listb():
 	li = frappe.db.sql(""" SELECT name FROM `tabStock Entry` WHERE name = "MAT-STE-2026-00090" """)

@@ -110,12 +110,14 @@
    "search_index": 1
   },
   {
+   "default": "0",
    "description": "Satuan kg/cm2",
    "fieldname": "tekanan_vacuum_drier",
    "fieldtype": "Float",
    "label": "Tekanan Vacuum Drier"
   },
   {
+   "default": "0",
    "fieldname": "dobi",
    "fieldtype": "Percent",
    "label": "DOBI (%)"
@@ -139,18 +141,22 @@
    "no_copy": 1
   },
   {
+   "default": "0",
    "description": "ALB Vacuum Drier",
    "fieldname": "ffa",
    "fieldtype": "Percent",
-   "label": "FFA (%)"
+   "label": "FFA (%)",
+   "precision": "2"
   },
   {
+   "default": "0",
    "description": "Kadar Air Vacuum Drier",
    "fieldname": "moisture",
    "fieldtype": "Percent",
    "label": "Moisture (%)"
   },
   {
+   "default": "0",
    "description": "Kadar Kotoran Vacuum Drier",
    "fieldname": "dirt",
    "fieldtype": "Percent",
@@ -162,7 +168,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-17 15:29:20.304887",
+ "modified": "2026-07-22 10:12:35.945349",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas CPO Produksi Harian di POT",

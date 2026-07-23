@@ -252,54 +252,58 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 		"company": company,
 	}, "name")
 	credit_account = frappe.db.get_value("Account", {
-		"account_number": "1273005",
+		"account_number": "1269999",
 		"company": company,
 	}, "name")
 
 	if not debit_account:
 		frappe.throw(f"Akun 1271301 tidak ditemukan untuk company {company}.")
 	if not credit_account:
-		frappe.throw(f"Akun 1273005 tidak ditemukan untuk company {company}.")
+		frappe.throw(f"Akun 1269999 tidak ditemukan untuk company {company}.")
 
 	if not frappe.db.exists("Kategori Kegiatan", "TM"):
 		frappe.throw('Kategori Kegiatan "TM" tidak ditemukan.')
 
-	tahun_cc = _ensure_tahun_tanam_cost_center(company, abbr, blok.tahun_tanam)
+	je_name = None
 
-	je = frappe.new_doc("Journal Entry")
-	je.voucher_type = "Journal Entry"
-	je.posting_date = today()
-	je.company = company
-	nama_blok_dipilih = ", ".join(b.blok for b in selected)
-	je.user_remark = (
-		f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit} - Blok: {nama_blok_dipilih}"
-	)
+	if total:
+		tahun_cc = _ensure_tahun_tanam_cost_center(company, abbr, blok.tahun_tanam)
 
-	je.append("accounts", {
-		"account": debit_account,
-		"debit_in_account_currency": total,
-		"credit_in_account_currency": 0,
-		"cost_center": tahun_cc,
-	})
-	je.append("accounts", {
-		"account": credit_account,
-		"debit_in_account_currency": 0,
-		"credit_in_account_currency": total,
-		"cost_center": tahun_cc,
-	})
+		je = frappe.new_doc("Journal Entry")
+		je.voucher_type = "Journal Entry"
+		je.posting_date = today()
+		je.company = company
+		nama_blok_dipilih = ", ".join(b.blok for b in selected)
+		je.user_remark = (
+			f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit} - Blok: {nama_blok_dipilih}"
+		)
 
-	for b in selected:
-		je.append("naik_tm_bloks", {"blok": b.name})
+		je.append("accounts", {
+			"account": debit_account,
+			"debit_in_account_currency": total,
+			"credit_in_account_currency": 0,
+			"cost_center": tahun_cc,
+		})
+		je.append("accounts", {
+			"account": credit_account,
+			"debit_in_account_currency": 0,
+			"credit_in_account_currency": total,
+			"cost_center": tahun_cc,
+		})
 
-	je.flags.ignore_permissions = True
-	je.insert()
-	je.submit()
+		for b in selected:
+			je.append("naik_tm_bloks", {"blok": b.name})
+
+		je.flags.ignore_permissions = True
+		je.insert()
+		je.submit()
+		je_name = je.name
 
 	for b in selected:
 		blok_cc = _ensure_blok_cost_center(company, abbr, b.deskripsi)
 		frappe.db.set_value("Blok", b.name, {
 			"workflow_state": "TM",
-			"naik_tm_journal_entry": je.name,
+			"naik_tm_journal_entry": je_name,
 			"cost_center": blok_cc,
 			"status": "TM",
 		}, update_modified=False)
@@ -308,9 +312,17 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 
 	return {
 		"blok_diproses": len(selected),
-		"journal_entry": je.name,
+		"journal_entry": je_name,
 		"total": total,
 	}
+
+
+@frappe.whitelist()
+def naikkan_ke_tm_1_blok(blok_name):
+	"""Naikkan satu Blok ke TM saja (alokasi biaya tetap dihitung dari
+	seluruh cohort Blok TBM di Tahun Tanam + Unit yang sama, tapi hanya
+	Blok ini yang diproses naik TM)."""
+	return naikkan_ke_tm(blok_name, [blok_name])
 
 
 @frappe.whitelist()
@@ -320,15 +332,15 @@ def kembalikan_ke_tbm(blok_name):
 	if blok.get("workflow_state") != "TM":
 		frappe.throw("Blok ini tidak dalam status TM.")
 
-	if not blok.naik_tm_journal_entry:
-		frappe.throw("Journal Entry Naik TM terkait tidak ditemukan pada Blok ini.")
-
 	je_name = blok.naik_tm_journal_entry
 
-	blok_list = frappe.get_all("Blok", filters={
-		"naik_tm_journal_entry": je_name,
-		"workflow_state": "TM",
-	}, fields=["name"])
+	if je_name:
+		blok_list = frappe.get_all("Blok", filters={
+			"naik_tm_journal_entry": je_name,
+			"workflow_state": "TM",
+		}, fields=["name"])
+	else:
+		blok_list = [{"name": blok.name}]
 
 	if not blok_list:
 		frappe.throw("Tidak ada Blok TM yang terkait dengan Journal Entry ini.")
@@ -345,10 +357,11 @@ def kembalikan_ke_tbm(blok_name):
 			"cost_center": tahun_cc,
 		}, update_modified=False)
 
-	je = frappe.get_doc("Journal Entry", je_name)
-	if je.docstatus == 1:
-		je.flags.ignore_permissions = True
-		je.cancel()
+	if je_name:
+		je = frappe.get_doc("Journal Entry", je_name)
+		if je.docstatus == 1:
+			je.flags.ignore_permissions = True
+			je.cancel()
 
 	frappe.db.commit()
 

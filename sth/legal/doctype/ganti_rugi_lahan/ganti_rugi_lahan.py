@@ -216,8 +216,8 @@ def ajukan_termin(name):
 	return True
 
 @frappe.whitelist()
-def get_next_payment_schedule(reference_doctype, reference_name, exclude_payment_entry=None):
-	filters = {"parenttype": reference_doctype, "parent": reference_name}
+def get_next_payment_schedule(reference_doctype, reference_name):
+	filters = {"parenttype": reference_doctype, "parent": reference_name, "term_used": 0}
 	if reference_doctype == "Ganti Rugi Lahan":
 		filters["diajukan"] = 1
 
@@ -226,40 +226,24 @@ def get_next_payment_schedule(reference_doctype, reference_name, exclude_payment
 		filters=filters,
 		fields=["name", "payment_term", "payment_amount", "outstanding"],
 		order_by="idx asc",
+		limit=1,
 	)
 
 	if not schedule:
-		frappe.throw(f"Belum ada termin yang diajukan untuk {reference_doctype} {reference_name}")
+		frappe.throw(f"Semua termin yang diajukan untuk {reference_name} sudah digunakan/dibayar")
 
-	per = frappe.qb.DocType("Payment Entry Reference")
-	pe = frappe.qb.DocType("Payment Entry")
+	term = schedule[0]
 
-	query = (
-		frappe.qb.from_(per)
-		.join(pe).on(pe.name == per.parent)
-		.select(per.name)
-		.where(
-			(per.reference_doctype == reference_doctype)
-			& (per.reference_name == reference_name)
-			& (pe.docstatus == 1)
-		)
-	)
-
-	if exclude_payment_entry:
-		query = query.where(pe.name != exclude_payment_entry)
-
-	used_count = len(query.run())
-
-	if used_count >= len(schedule):
-		frappe.throw(f"Semua termin yang diajukan untuk {reference_name} sudah digunakan")
-
-	term = schedule[used_count]
-
-	return {
+	result = {
 		"payment_term": term.payment_term,
 		"allocated_amount": flt(term.outstanding or term.payment_amount),
 		"payment_term_outstanding": flt(term.outstanding),
 	}
+
+	if reference_doctype == "Ganti Rugi Lahan":
+		result["no_rekening"] = frappe.db.get_value("Ganti Rugi Lahan", reference_name, "no_rekening")
+
+	return result
 
 @frappe.whitelist()
 def fetch_company_account(company, childrens=None):
@@ -292,6 +276,8 @@ def make_payment_entry(source_name, target_doc=None):
 		target.paid_to_account_currency = party_account_currency
 		target.paid_amount = schedule.get("allocated_amount")
 		target.received_amount = schedule.get("allocated_amount")
+		if schedule.get("no_rekening"):
+			target.no_rekening_tujuan = schedule.get("no_rekening")
 
 		target.append("references", {
 			"reference_doctype": "Ganti Rugi Lahan",

@@ -52,9 +52,9 @@ frappe.ui.form.on("Data Penanaman Bibit", {
 			return {
 				"filters": [
 					["company",  "=", doc.company],
-					["docstatus",  "=", 1],                    
+					["docstatus",  "=", 1],
 				]
-			};            
+			};
 		});
 		set_batch_filters(frm)
 		if(frm.is_new()){
@@ -63,24 +63,21 @@ frappe.ui.form.on("Data Penanaman Bibit", {
 		if(frm.doc.docstatus == 1){
 			show_gl_button(frm)
 		}
+		if (frm.doc.data_penyemaian_bibit && frm._base_rupiah_basis === undefined) {
+			fetch_base_rupiah_basis(frm);
+		}
 	},
 	data_penyemaian_bibit: function(frm) {
 	    if (!frm.doc.data_penyemaian_bibit) {
+	        frm._base_rupiah_basis = 0;
 	        frm.set_value('qty', 0);
 	        frm.set_value('rupiah_basis', 0);
 	        return;
 	    }
-	    frappe.call({
-	        method: 'sth.plantation.doctype.data_penanaman_bibit.data_penanaman_bibit.get_data_penyemaian',
-	        args: { data_penyemaian_bibit: frm.doc.data_penyemaian_bibit },
-	        callback: (r) => {
-	            if (r.message) {
-	                frm.set_value('qty', r.message.qty);
-	                frm.set_value('available_qty', r.message.qty);
-	                frm.set_value('rupiah_basis', r.message.rupiah_basis);
-	                hitung_total(frm);
-	            }
-	        }
+	    fetch_base_rupiah_basis(frm, (r) => {
+	        frm.set_value('qty', r.message.qty);
+	        frm.set_value('available_qty', r.message.qty);
+	        hitung_total(frm);
 	    });
 	},
 	batch: function(frm) {
@@ -140,10 +137,6 @@ frappe.ui.form.on("Data Penanaman Bibit", {
 		hitung_total(frm);
 	},
 
-	rupiah_basis: function(frm) {
-		hitung_total(frm);
-	},
-
 	item_code: function(frm){
 		set_batch_filters(frm)
 	}
@@ -156,9 +149,22 @@ frappe.ui.form.on("Data Penanaman Bibit", {
 // 	frm.set_value('total_jurnal', frm.doc.total_bibit + frm.doc.total_bkm);
 // }
 
+function fetch_base_rupiah_basis(frm, then) {
+    frappe.call({
+        method: 'sth.plantation.doctype.data_penanaman_bibit.data_penanaman_bibit.get_data_penyemaian',
+        args: { data_penyemaian_bibit: frm.doc.data_penyemaian_bibit },
+        callback: (r) => {
+            if (r.message) {
+                frm._base_rupiah_basis = flt(r.message.rupiah_basis);
+                if (then) then(r);
+            }
+        }
+    });
+}
+
 function hitung_total(frm) {
     const qty = flt(frm.doc.qty);
-    const basis = flt(frm.doc.rupiah_basis);
+    const basis = flt(frm._base_rupiah_basis);
     const available_qty = flt(frm.doc.available_qty);
     const total_bkm = flt(frm.doc.total_bkm);
 
@@ -169,9 +175,12 @@ function hitung_total(frm) {
         actual_amount_bkm = (qty / available_qty) * total_bkm;
     }
 
+    const total_jurnal = total_bibit + actual_amount_bkm;
+
     frm.set_value('total_bibit', total_bibit);
     frm.set_value('actual_amount_bkm', actual_amount_bkm);
-    frm.set_value('total_jurnal', total_bibit + actual_amount_bkm);
+    frm.set_value('total_jurnal', total_jurnal);
+    frm.set_value('rupiah_basis', qty ? total_jurnal / qty : 0);
 }
 
 function set_batch_filters(frm){

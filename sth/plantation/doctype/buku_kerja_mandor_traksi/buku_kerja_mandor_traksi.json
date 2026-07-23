@@ -148,7 +148,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Tipe Master Kendaraan",
-   "options": "\nAlat Berat\nKendaraan Umum\nDump Truck",
+   "options": "\nAlat Berat\nKendaraan Umum\nDump Truck\nMesin Dan Peralatan Workshop",
    "reqd": 1
   },
   {
@@ -475,7 +475,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-21 11:09:06.302892",
+ "modified": "2026-07-22 09:07:27.310976",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Traksi",

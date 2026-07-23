@@ -52,6 +52,19 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		])
 		self._bkm_name = "Panen"
 
+	def before_insert(self):
+		# Data dari API kadang masuk dengan docstatus=1 langsung, sehingga
+		# proses insert tidak pernah melewati siklus submit (on_submit tidak jalan).
+		# Di sini docstatus dipaksa jadi draft dulu, lalu submit() dipanggil manual
+		# di after_insert supaya validate/before_submit/on_submit tetap dieksekusi.
+		if self.docstatus == 1:
+			self.flags.submit_after_insert = True
+			self.docstatus = 0
+
+	def after_insert(self):
+		if self.flags.get("submit_after_insert"):
+			self.submit()
+
 	def validate(self):
 		self.isi_cost_center()
 		if self.trans_no:

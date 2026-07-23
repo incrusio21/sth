@@ -39,7 +39,7 @@ class PengeluaranBarang(Document):
 					row.cost_center = "{} - {}".format(row.blok, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
 			elif unit_doc.mill == 1:
 				if row.stasiun:
-					row.cost_center = "{} - {}".format(row.stasiun, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
+					row.cost_center = "{} - {}".format(frappe.get_doc("Station Master",row.stasiun).machine_name, frappe.get_doc("Company", self.pt_pemilik_barang).abbr)
 
 			# Belum ada Cost Center spesifik (kendaraan/blok/stasiun) → pakai Cost Center di Divisi, atau UMUM.
 			if not row.cost_center:
@@ -100,7 +100,7 @@ class PengeluaranBarang(Document):
 		if not self.validate_document_permintaan():
 			return
 
-		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","jumlah_saat_ini","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","blok","name as reference","project","account"])
+		items = frappe.get_all("Permintaan Pengeluaran Barang Item",{"parent":self.no_permintaan_pengeluaran},["kode_barang","satuan","(jumlah - jumlah_keluar) as jumlah","jumlah_saat_ini","tipe_asset","kendaraan","km","kegiatan","nama_kegiatan","sub_unit","stasiun","blok","name as reference","project","account"])
 
 		for row in items:
 			child = self.append("items",row)

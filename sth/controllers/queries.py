@@ -303,7 +303,7 @@ def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibit
 def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len, filters) -> list:
 	terms = []
 	if filters:
-		schedule_filters = {"parent": filters.get("reference")}
+		schedule_filters = {"parent": filters.get("reference"), "term_used": 0}
 		if filters.get("reference_doctype") == "Ganti Rugi Lahan":
 			schedule_filters["diajukan"] = 1
 
@@ -593,6 +593,18 @@ def get_wh_prec(doctype, txt, searchfield, start, page_len, filters):
 		if filters.get("unit"):
 			fcond += " AND u.name = %(unit)s"
 			params["unit"] = filters.get("unit")
+
+	user_permissions = frappe.get_all(
+		"User Permission",
+		filters={
+			"user": frappe.session.user,
+			"allow": "Unit"
+		},
+		pluck="for_value"
+	)
+	if user_permissions:
+		fcond += " AND u.name IN %(units)s"
+		params["units"] = tuple(user_permissions)
 
 	return frappe.db.sql(f"""
 		SELECT w.name

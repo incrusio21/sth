@@ -2,7 +2,7 @@ import frappe
 import json
 
 from frappe import _, qb
-from frappe.utils import getdate, nowdate
+from frappe.utils import flt, getdate, nowdate
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_orders_to_be_billed, split_invoices_based_on_payment_terms, get_negative_outstanding_invoices
 from erpnext.controllers.accounts_controller import get_supplier_block_status
 from erpnext.accounts.utils import get_account_currency, get_outstanding_invoices
@@ -89,7 +89,94 @@ def update_status_loan_bank(self, method):
 
 def update_status_dividen(self, method):
 	update_dividen_payment_entry(self, method)
-	
+
+def validate_ganti_rugi_lahan_term_order(doc, method=None):
+	for row in doc.get("references") or []:
+		if row.reference_doctype != "Ganti Rugi Lahan" or not row.reference_name or not row.payment_term:
+			continue
+
+		next_term = frappe.db.get_value(
+			"Proposal Schedule",
+			{
+				"parenttype": "Ganti Rugi Lahan",
+				"parent": row.reference_name,
+				"diajukan": 1,
+				"term_used": 0,
+			},
+			"payment_term",
+			order_by="idx asc",
+		)
+
+		if next_term and next_term != row.payment_term:
+			frappe.throw(
+				_(
+					"Row #{0}: Termin untuk Ganti Rugi Lahan <b>{1}</b> harus dibayar berurutan. "
+					"Termin berikutnya yang harus dibayar adalah <b>{2}</b>, bukan <b>{3}</b>."
+				).format(row.idx, row.reference_name, next_term, row.payment_term)
+			)
+
+def update_ganti_rugi_lahan_term(doc, method):
+	touched_parents = set()
+
+	for row in doc.get("references") or []:
+		if row.reference_doctype != "Ganti Rugi Lahan" or not row.reference_name:
+			continue
+
+		if method == "on_submit":
+			schedule = frappe.db.get_value(
+				"Proposal Schedule",
+				{
+					"parenttype": "Ganti Rugi Lahan",
+					"parent": row.reference_name,
+					"payment_term": row.payment_term,
+					"term_used": 0,
+				},
+				["name", "paid_amount", "outstanding"],
+				order_by="idx asc",
+				as_dict=True,
+			)
+			if schedule:
+				allocated = flt(row.allocated_amount)
+				frappe.db.set_value(
+					"Proposal Schedule", schedule.name,
+					{
+						"term_used": 1,
+						"payment_entry": doc.name,
+						"paid_amount": flt(schedule.paid_amount) + allocated,
+						"outstanding": max(flt(schedule.outstanding) - allocated, 0),
+						"base_outstanding": max(flt(schedule.outstanding) - allocated, 0),
+					},
+				)
+				touched_parents.add(row.reference_name)
+		elif method == "on_cancel":
+			schedule = frappe.db.get_value(
+				"Proposal Schedule",
+				{
+					"parenttype": "Ganti Rugi Lahan",
+					"parent": row.reference_name,
+					"payment_term": row.payment_term,
+					"payment_entry": doc.name,
+				},
+				["name", "paid_amount", "outstanding"],
+				as_dict=True,
+			)
+			if schedule:
+				allocated = flt(row.allocated_amount)
+				frappe.db.set_value(
+					"Proposal Schedule", schedule.name,
+					{
+						"term_used": 0,
+						"payment_entry": None,
+						"paid_amount": max(flt(schedule.paid_amount) - allocated, 0),
+						"outstanding": flt(schedule.outstanding) + allocated,
+						"base_outstanding": flt(schedule.outstanding) + allocated,
+					},
+				)
+				touched_parents.add(row.reference_name)
+
+	for parent in touched_parents:
+		frappe.get_doc("Ganti Rugi Lahan", parent).notify_update()
+
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args, validate=False):
