@@ -662,3 +662,31 @@ def get_non_stock_non_asset_items(doctype, txt, searchfield, start, page_len, fi
 # 		ORDER BY name
 # 		LIMIT %(start)s, %(page_len)s
 # 	""", values)
+
+@frappe.whitelist()
+def monitoring_proses_control_query(
+	doctype,
+	txt,
+	searchfield,
+	start,
+	page_len,
+	filters,
+):
+	return frappe.db.sql(
+		f"""
+		SELECT
+			name
+		FROM `tabMonitoring Proses Control`
+		WHERE
+			docstatus < 2
+			AND ({searchfield} LIKE %(txt)s OR name LIKE %(txt)s)
+		ORDER BY
+			tgl DESC
+		LIMIT %(start)s, %(page_len)s
+		""",
+		{
+			"txt": f"%{txt}%",
+			"start": start,
+			"page_len": page_len,
+		},
+	)

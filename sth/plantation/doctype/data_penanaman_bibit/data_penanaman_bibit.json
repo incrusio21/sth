@@ -29,8 +29,8 @@
   "available_qty",
   "qty",
   "rupiah_basis",
-  "total_bibit",
   "column_break_tusk",
+  "total_bibit",
   "total_bkm",
   "actual_amount_bkm",
   "total_jurnal",
@@ -309,7 +309,6 @@
    "fieldname": "nama_sopir",
    "fieldtype": "Data",
    "label": "Nama Sopir",
-   "options": "Employee",
    "read_only": 1,
    "reqd": 1
   },
@@ -318,9 +317,7 @@
    "fieldname": "nama_assisten",
    "fieldtype": "Data",
    "label": "Nama Assisten",
-   "options": "Employee",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_rttq",
@@ -331,7 +328,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-22 15:10:57.783381",
+ "modified": "2026-07-24 09:18:52.654430",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Penanaman Bibit",
