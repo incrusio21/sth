@@ -19,6 +19,7 @@
   "tujuan_pks",
   "total_janjang",
   "total_brondolan",
+  "wb_type",
   "column_break_ckwi",
   "weight_in_time",
   "weight_out_time",
@@ -85,7 +86,12 @@
   "column_break_opyq",
   "transportir",
   "no_polisi",
-  "amended_from"
+  "amended_from",
+  "section_break_yqcy",
+  "latitude",
+  "longitude",
+  "satelite_count",
+  "gps_acc"
  ],
  "fields": [
   {
@@ -645,13 +651,50 @@
    "label": "API Ticket Number",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_yqcy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "satelite_count",
+   "fieldtype": "Data",
+   "label": "Satelite Count",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "gps_acc",
+   "fieldtype": "Data",
+   "label": "GPS Acc",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "wb_type",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "WB Type",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-17 14:51:18.414007",
+ "modified": "2026-07-27 03:32:49.156726",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

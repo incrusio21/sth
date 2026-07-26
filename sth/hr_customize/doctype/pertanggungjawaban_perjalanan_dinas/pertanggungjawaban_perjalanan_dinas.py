@@ -7,17 +7,62 @@ import frappe
 from frappe.model.mapper import get_mapped_doc
 from sth.controllers.accounts_controller import AccountsController
 from frappe import _
+from frappe.utils import flt
 class PertanggungjawabanPerjalananDinas(AccountsController):
 	def validate(self):
 		# self.set_missing_value()
 		super().validate()
+		if self.sumber_pertanggungjawaban == "PDO":
+			self.validate_pdo()
+
+	def validate_pdo(self):
+		if not self.no_pdo:
+			return
+
+		duplikat = frappe.db.get_value(
+			"Pertanggungjawaban Perjalanan Dinas",
+			{
+				"no_pdo": self.no_pdo,
+				"docstatus": ["!=", 2],
+				"name": ["!=", self.name],
+			},
+			"name",
+		)
+		if duplikat:
+			frappe.throw(
+				_("PDO {0} sudah dipertanggungjawabkan pada {1}.").format(self.no_pdo, duplikat),
+				title=_("Duplikasi Pertanggungjawaban"),
+			)
+
+		for row in self.costings:
+			if flt(row.jumlah_verifikasi_hrd) > flt(row.amount):
+				frappe.throw(
+					_("Baris {0}: Jumlah Verifikasi HRD tidak boleh melebihi Jumlah Pengajuan {1}.").format(
+						row.idx, frappe.format_value(row.amount, {"fieldtype": "Currency"})
+					)
+				)
 
 	def on_submit(self):
+		# Sumber PDO tidak membuat jurnal sendiri, potongannya dijurnal saat Realisasi PDO
+		if self.sumber_pertanggungjawaban == "PDO":
+			return
+
 		if self.status_selisih != "Tidak Ada Selisih":
 			self.make_gl_entries()
 
+	def before_cancel(self):
+		if self.sumber_pertanggungjawaban == "PDO" and self.realisasi_payment_entry:
+			frappe.throw(
+				_("Dokumen ini sudah dipakai pada Realisasi PDO {0}. Batalkan Payment Entry tersebut terlebih dahulu.").format(
+					self.realisasi_payment_entry
+				)
+			)
+
 	def on_cancel(self):
 		super().on_cancel()
+		if self.sumber_pertanggungjawaban == "PDO":
+			return
+
 		if self.status_selisih != "Tidak Ada Selisih":
 			self.cancel_gl_entries()
 
@@ -124,6 +169,15 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 		self.set_status_selisih()
 	
 	def set_status_selisih(self):
+		if self.sumber_pertanggungjawaban == "PDO":
+			# Tidak ada uang muka: seluruh realisasi jadi potongan saat Realisasi PDO
+			self.total_down_amount = 0
+			self.status_selisih = "Tidak Ada Selisih"
+			self.total_selisih = 0
+			self.grand_total = self.total_sanctioned_amount or 0
+			self.outstanding_amount = 0
+			return
+
 		tda = self.total_down_amount or 0
 		tsa = self.total_sanctioned_amount or 0
 
@@ -140,6 +194,11 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 
 	@frappe.whitelist()
 	def get_data_perjalanan_dinas(self):
+		if self.sumber_pertanggungjawaban == "PDO":
+			self.get_data_pdo()
+			return
+
+		self.no_pdo = None
 		travel = frappe.get_doc("Travel Request", self.no_spd)
 		emp_advance = frappe.get_doc("Employee Advance", travel.get("custom_employee_advance"))
 
@@ -162,7 +221,49 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 
 		self.total_down_amount = emp_advance.get("advance_amount", 0) if emp_advance else 0
 		self.advance_account = emp_advance.get("advance_account")
-  
+
+	def get_data_pdo(self):
+		"""Tarik seluruh baris List Perjalanan Dinas dari PDO menjadi costings."""
+		pdo = frappe.get_doc("Permintaan Dana Operasional", self.no_pdo)
+
+		if not pdo.get("pdo_perjalanan_dinas"):
+			frappe.throw(_("PDO {0} tidak memiliki data List Perjalanan Dinas.").format(pdo.name))
+
+		# field yang hanya relevan untuk sumber SPD
+		self.no_spd = None
+		self.travel_for = None
+		self.employee = None
+		self.nik = None
+		self.grade = None
+		self.designation = None
+		self.department = None
+		self.itinerary = []
+		self.guests = []
+		self.advance_account = None
+		self.total_down_amount = 0
+
+		self.company = pdo.company
+		self.cost_center = pdo.perjalanan_dinas_cost_center
+		self.credit_to = pdo.perjalanan_dinas_credit_to
+
+		self.costings = []
+
+		for row in pdo.pdo_perjalanan_dinas:
+			amount = row.revised_total or row.total or 0
+
+			self.append("costings", {
+				"expense_type": row.type,
+				"pengguna": row.employee,
+				"description": row.needs,
+				"amount": amount,
+				"sanctioned_amount": 0,
+				"jumlah_verifikasi_hrd": 0,
+				"pdo_child_name": row.name,
+			})
+
+		self.total_claimed_amount = 0
+		self.total_sanctioned_amount = 0
+
 	def get_data_employee(self, travel):
 		employee = frappe.get_doc("Employee", travel.get("employee"))
 		designation = frappe.get_doc("Designation", employee.designation)

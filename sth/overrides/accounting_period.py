@@ -199,30 +199,45 @@ def check_unsubmitted_salary_slip(self, method):
 		'end': self.end_date,
 	}, as_dict=True)
 
-	if not result:
-		return
+	if result:
+		rows = "".join([
+			f"<tr><td>{r.name}</td><td>{r.employee} - {r.employee_name}</td><td>{r.start_date}</td><td>{r.end_date}</td></tr>"
+			for r in result
+		])
 
-	rows = "".join([
-		f"<tr><td>{r.name}</td><td>{r.employee} - {r.employee_name}</td><td>{r.start_date}</td><td>{r.end_date}</td></tr>"
-		for r in result
-	])
+		frappe.throw(
+			title=_("Salary Slip Belum Disubmit"),
+			msg=_("""
+				<p>Accounting Period tidak dapat disubmit. Masih terdapat <b>Salary Slip</b> berstatus Draft
+				dalam periode ini:</p>
+				<table class="table table-bordered table-sm" style="margin-top:8px;">
+					<thead>
+						<tr>
+							<th>Salary Slip</th>
+							<th>Employee</th>
+							<th>Start Date</th>
+							<th>End Date</th>
+						</tr>
+					</thead>
+					<tbody>{rows}</tbody>
+				</table>
+				<p>Silakan submit atau batalkan Salary Slip tersebut terlebih dahulu.</p>
+			""").format(rows=rows)
+		)
 
-	frappe.throw(
-		title=_("Salary Slip Belum Disubmit"),
-		msg=_("""
-			<p>Accounting Period tidak dapat disubmit. Masih terdapat <b>Salary Slip</b> berstatus Draft
-			dalam periode ini:</p>
-			<table class="table table-bordered table-sm" style="margin-top:8px;">
-				<thead>
-					<tr>
-						<th>Salary Slip</th>
-						<th>Employee</th>
-						<th>Start Date</th>
-						<th>End Date</th>
-					</tr>
-				</thead>
-				<tbody>{rows}</tbody>
-			</table>
-			<p>Silakan submit atau batalkan Salary Slip tersebut terlebih dahulu.</p>
-		""").format(rows=rows)
-	)
+	submitted_count = frappe.db.count("Salary Slip", {
+		"docstatus": 1,
+		"company": self.company,
+		"unit": self.unit,
+		"start_date": ["<=", self.end_date],
+		"end_date": [">=", self.start_date],
+	})
+
+	if not submitted_count:
+		frappe.throw(
+			title=_("Salary Slip Belum Ada"),
+			msg=_("""
+				<p>Accounting Period tidak dapat disubmit. Belum ada <b>Salary Slip</b> berstatus Submitted
+				dalam periode ini.</p>
+			""")
+		)

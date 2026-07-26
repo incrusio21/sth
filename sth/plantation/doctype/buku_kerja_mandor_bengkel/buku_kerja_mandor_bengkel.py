@@ -6,19 +6,35 @@ from frappe.model.document import Document
 from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 class BukuKerjaMandorBengkel(Document):
+	def validate(self):
+		self.update_kendaraan_field()
+
 	def on_submit(self):
 		self.make_attendance()
-		self.update_kendaraan_field(self.kmhm_akhir)
 		self.make_attendance()
-  
-	def on_cancel(self):
-		self.update_kendaraan_field(self.kmhm_awal)
 
-	def update_kendaraan_field(self, km_value):
+	def on_cancel(self):
+		self.update_kendaraan_field(cancel=1)
+
+	def on_trash(self):
+		self.update_kendaraan_field(cancel=1)
+
+	def update_kendaraan_field(self, cancel=0):
 		if not self.kd_kndr:
 			return
 
-		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kd_kndr, "kmhm_akhir", km_value)
+		from sth.plantation.doctype.alat_berat_dan_kendaraan.alat_berat_dan_kendaraan import sync_kmhm_akhir
+
+		if cancel:
+			# doc dibatalkan/dihapus, jangan ikut dihitung sebagai kandidat
+			sync_kmhm_akhir(self.kd_kndr, exclude=self.name)
+		else:
+			sync_kmhm_akhir(
+				self.kd_kndr,
+				candidate_kmhm_akhir=self.kmhm_akhir,
+				candidate_sort_dt=f"{self.posting_date} 23:59:59",
+				exclude=self.name,
+			)
 
 	def make_attendance(self):
 		for emp in self.hasil_kerja:

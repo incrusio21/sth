@@ -10,9 +10,11 @@
   "item_code",
   "kendaraan",
   "km_hm",
+  "stock",
   "jumlah",
   "uom",
-  "stock",
+  "harga_satuan",
+  "total",
   "column_break_ssjq",
   "note",
   "foto"
@@ -99,13 +101,28 @@
    "in_list_view": 1,
    "label": "Stock saat ini ",
    "read_only": 1
+  },
+  {
+   "fieldname": "harga_satuan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Harga Satuan"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-09 16:07:52.427788",
+ "modified": "2026-07-24 10:15:39.600171",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara Detail",

@@ -90,10 +90,35 @@ class NotaPiutang(Document):
 					f"saat ini berstatus <b>{asset_status}</b>"
 				)
 		elif self.sub_tipe_others == "Barang Non Stok":
-			if not flt(self.nilai_barang_non_stok) > 0:
-				frappe.throw("Nilai Barang Non Stok wajib diisi dan harus lebih besar dari 0")
+			self.calculate_barang_non_stok_table()
 		else:
 			frappe.throw("Sub Tipe Others tidak valid")
+
+	def calculate_barang_non_stok_table(self):
+		if not self.get("barang_non_stok_table"):
+			frappe.throw("Item Barang Non Stok wajib diisi minimal 1 baris")
+
+		total_grand_total = 0
+
+		for row in self.barang_non_stok_table:
+			if not row.item:
+				frappe.throw(f"Nama Barang wajib diisi pada baris {row.idx}")
+
+			if not flt(row.qty) > 0:
+				frappe.throw(f"Qty pada baris {row.idx} harus lebih besar dari 0")
+
+			if not flt(row.harga_satuan) > 0:
+				frappe.throw(f"Harga Satuan pada baris {row.idx} harus lebih besar dari 0")
+
+			row.total = flt(row.qty) * flt(row.harga_satuan)
+			row.grand_total = row.total + flt(row.ppn)
+
+			total_grand_total += row.grand_total
+
+		if not total_grand_total > 0:
+			frappe.throw("Nilai Barang Non Stok harus lebih besar dari 0")
+
+		self.nilai_barang_non_stok = total_grand_total
 
 	def validate_duplikat(self):
 		if not self.tipe or not self.no_kontrak:

@@ -16,6 +16,7 @@
   "asset",
   "detail_section",
   "table_klkc",
+  "subtotal",
   "amended_from",
   "signature_section",
   "make",
@@ -125,13 +126,22 @@
    "fieldname": "kriteria_upload_html",
    "fieldtype": "HTML",
    "label": "Kriteria Upload HTML"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "depends_on": "eval:doc.asset == 1",
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "label": "Subtotal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-13 11:49:48.829630",
+ "modified": "2026-07-24 10:30:26.595837",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara",

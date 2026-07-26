@@ -115,6 +115,40 @@ frappe.ui.form.on('Nota Piutang Reclass Table', {
 	}
 });
 
+frappe.ui.form.on('Nota Piutang Barang Non Stok Table', {
+	qty: function(frm, cdt, cdn) {
+		calculate_barang_non_stok_row(frm, cdt, cdn);
+	},
+	harga_satuan: function(frm, cdt, cdn) {
+		calculate_barang_non_stok_row(frm, cdt, cdn);
+	},
+	ppn: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		row.grand_total = flt(row.total) + flt(row.ppn);
+		frm.refresh_field('barang_non_stok_table');
+		calculate_nilai_barang_non_stok(frm);
+	},
+	barang_non_stok_table_remove: function(frm) {
+		calculate_nilai_barang_non_stok(frm);
+	}
+});
+
+function calculate_barang_non_stok_row(frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	row.total = flt(row.qty) * flt(row.harga_satuan);
+	row.ppn = row.total * 11 / 100;
+	row.grand_total = row.total + row.ppn;
+	frm.refresh_field('barang_non_stok_table');
+	calculate_nilai_barang_non_stok(frm);
+}
+
+function calculate_nilai_barang_non_stok(frm) {
+	let total = (frm.doc.barang_non_stok_table || []).reduce((sum, row) => {
+		return sum + flt(row.grand_total);
+	}, 0);
+	frm.set_value('nilai_barang_non_stok', total);
+}
+
 function calculate_sisa(frm) {
 	// Base sisa_dpp = sum outstanding_amount dari tabel pemenuhan kontrak
 	let table_total = (frm.doc.nota_hutang_pemenuhan_kontrak_table || []).reduce((sum, row) => {

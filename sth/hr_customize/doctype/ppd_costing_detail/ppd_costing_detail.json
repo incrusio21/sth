@@ -8,10 +8,12 @@
  "field_order": [
   "tanggal",
   "expense_type",
+  "pengguna",
   "description",
   "amount",
   "sanctioned_amount",
-  "jumlah_verifikasi_hrd"
+  "jumlah_verifikasi_hrd",
+  "pdo_child_name"
  ],
  "fields": [
   {
@@ -54,6 +56,21 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Jumlah Verifikasi HRD"
+  },
+  {
+   "fieldname": "pengguna",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Pengguna",
+   "read_only": 1
+  },
+  {
+   "description": "Nama baris PDO Perjalanan Dinas Table asal, dipakai saat Realisasi PDO",
+   "fieldname": "pdo_child_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "PDO Child Name",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

@@ -85,6 +85,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self.set_details_diffrence(raise_error=True)
 		super().validate()
 
+		self.update_kendaraan_field()
+
 	def validate_used_task(self):
 		# cek apakah butuh perhitungan ulang krn ada kegiatan yang belum terhitung
 		re_calculate = False
@@ -202,35 +204,41 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def on_submit(self):
 		super().on_submit()
 		# self.make_gl_entry()
-		self.update_kendaraan_field()
 
 	def on_cancel(self):
 		super().on_cancel()
 		# self.make_gl_entry()
 		self.update_kendaraan_field(cancel=1)
-	
+
+	def on_trash(self):
+		self.update_kendaraan_field(cancel=1)
+
 	def update_kendaraan_field(self, cancel=0):
 		if not self.kendaraan:
 			return
-			
+
 		# cek apakah terdapat future pemakaian kendaraan
-		if future_bkm := frappe.get_value(
-			"Buku Kerja Mandor Traksi", 
-			{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]}, 
+		if not cancel and (future_bkm := frappe.get_value(
+			"Buku Kerja Mandor Traksi",
+			{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]},
 			"name",
 			order_by="posting_datetime"
-		):
-			status = "Submitted" if not cancel else "Canceled"
-			frappe.throw(f"Document cannot be {status} because Document {future_bkm} with a future date and time already exists.")
-		
-		# # memastikan kmhm sesuai dengan yang ada pata keendaraan
-		# if not cancel and alat_kendaraan.kmhm_akhir != self.kmhm_awal:
-		# 	frappe.throw(f"Initial KM/HM on the document does not match the final KM/HM on {self.kendaraan}. Save to get newest Data")
-		
-		# ubah nilai pada kendaraan sesuai dengan document
-		new_value = self.kmhm_awal if cancel else self.kmhm_akhir
-		frappe.db.set_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", new_value)
-	
+		)):
+			frappe.throw(f"Document cannot be Submitted because Document {future_bkm} with a future date and time already exists.")
+
+		from sth.plantation.doctype.alat_berat_dan_kendaraan.alat_berat_dan_kendaraan import sync_kmhm_akhir
+
+		if cancel:
+			# doc dibatalkan/dihapus, jangan ikut dihitung sebagai kandidat
+			sync_kmhm_akhir(self.kendaraan, exclude=self.name)
+		else:
+			sync_kmhm_akhir(
+				self.kendaraan,
+				candidate_kmhm_akhir=self.kmhm_akhir,
+				candidate_sort_dt=self.posting_datetime,
+				exclude=self.name,
+			)
+
 	def make_gl_entry(self, gl_entries=None):
 		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 

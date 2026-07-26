@@ -715,6 +715,24 @@ function show_realisasi_dialog(frm) {
 						options: options.join('\n'),
 						reqd: 1,
 						description: __('Only types with outstanding amounts are shown')
+					},
+					{
+						fieldname: 'ppd',
+						label: __('Pertanggungjawaban Perjalanan Dinas'),
+						fieldtype: 'Link',
+						options: 'Pertanggungjawaban Perjalanan Dinas',
+						depends_on: 'eval:doc.tipe_pdo == "Perjalanan Dinas"',
+						description: __('Dipakai sebagai DP: nilai realisasi menggantikan plafon PDO'),
+						get_query: function () {
+							return {
+								filters: {
+									no_pdo: frm.doc.name,
+									sumber_pertanggungjawaban: 'PDO',
+									docstatus: 1,
+									realisasi_payment_entry: ['is', 'not set']
+								}
+							};
+						}
 					}
 				],
 				primary_action_label: __('Create Payment Voucher Kas'),
@@ -731,7 +749,8 @@ function show_realisasi_dialog(frm) {
 						method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
 						args: {
 							source_name: frm.doc.name,
-							tipe_pdo: values.tipe_pdo
+							tipe_pdo: values.tipe_pdo,
+							ppd: values.tipe_pdo == 'Perjalanan Dinas' ? values.ppd : null
 						},
 						callback: function (r) {
 							if (r.message) {

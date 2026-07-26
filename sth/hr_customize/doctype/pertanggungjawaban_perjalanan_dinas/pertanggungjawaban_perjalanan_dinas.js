@@ -11,7 +11,17 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
           }
         };
       });
-      fetchAccount(frm);
+      frm.set_query("no_pdo", function () {
+        return {
+          filters: {
+            docstatus: 1,
+            grand_total_perjalanan_dinas: [">", 0]
+          }
+        };
+      });
+      if (frm.doc.sumber_pertanggungjawaban !== "PDO") {
+        fetchAccount(frm);
+      }
     }
 
     frm.fields_dict["costings"].grid.update_docfield_property(
@@ -42,39 +52,53 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
     frm.refresh_field("costings");
     createPayment(frm);
   },
+  sumber_pertanggungjawaban(frm) {
+    frm.set_value("no_spd", null);
+    frm.set_value("no_pdo", null);
+    frm.clear_table("costings");
+    frm.clear_table("itinerary");
+    frm.clear_table("guests");
+    frm.set_value("total_claimed_amount", 0);
+    frm.set_value("total_sanctioned_amount", 0);
+    frm.set_value("total_down_amount", 0);
+    frm.refresh_fields();
+  },
   no_spd(frm) {
-    // frm.call("get_data_perjalanan_dinas", { throw_if_missing: true })
-    //   .then(r => {
-    //     if (r.message) {
-    //       let linked_doc = r.message;
-    //     }
-    //   });
-    frm.disable_save();
-    frappe.show_alert({
-      message: __("please wait..."),
-      indicator: "blue"
-    }, 5);
-
-    frappe.call({
-      doc: frm.doc,
-      method: 'get_data_perjalanan_dinas',
-      freeze: true,
-      freeze_message: __('Fetching perjalanan dinas data...'),
-      callback: function (r) {
-        frm.enable_save();
-        frm.refresh_fields();
-        frm.dirty();
-      },
-      error: function () {
-        frm.enable_save();
-        frappe.show_alert({
-          message: __('Error load perjalanan dinas'),
-          indicator: 'red'
-        }, 5);
-      }
-    });
+    if (!frm.doc.no_spd) return;
+    fetch_perjalanan_dinas(frm);
+  },
+  no_pdo(frm) {
+    if (!frm.doc.no_pdo) return;
+    fetch_perjalanan_dinas(frm);
   }
 });
+
+function fetch_perjalanan_dinas(frm) {
+  frm.disable_save();
+  frappe.show_alert({
+    message: __("please wait..."),
+    indicator: "blue"
+  }, 5);
+
+  frappe.call({
+    doc: frm.doc,
+    method: 'get_data_perjalanan_dinas',
+    freeze: true,
+    freeze_message: __('Fetching perjalanan dinas data...'),
+    callback: function (r) {
+      frm.enable_save();
+      frm.refresh_fields();
+      frm.dirty();
+    },
+    error: function () {
+      frm.enable_save();
+      frappe.show_alert({
+        message: __('Error load perjalanan dinas'),
+        indicator: 'red'
+      }, 5);
+    }
+  });
+}
 
 frappe.ui.form.on("PPD Costing Detail", {
   sanctioned_amount(frm, cdt, cdn) {
@@ -86,6 +110,9 @@ frappe.ui.form.on("PPD Costing Detail", {
 });
 
 function createPayment(frm) {
+  // Sumber PDO tidak dibayar dari sini, potongannya diambil saat Realisasi PDO
+  if (frm.doc.sumber_pertanggungjawaban == "PDO") return;
+
   if (
     frm.doc.docstatus == 1 &&
     frm.doc.outstanding_amount > 0 &&

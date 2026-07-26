@@ -340,7 +340,7 @@ def kembalikan_ke_tbm(blok_name):
 			"workflow_state": "TM",
 		}, fields=["name"])
 	else:
-		blok_list = [{"name": blok.name}]
+		blok_list = [frappe._dict({"name": blok.name})]
 
 	if not blok_list:
 		frappe.throw("Tidak ada Blok TM yang terkait dengan Journal Entry ini.")

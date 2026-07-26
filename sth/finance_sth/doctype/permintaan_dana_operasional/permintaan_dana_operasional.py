@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt
 
 from sth.finance_sth.doctype.pdo_bahan_bakar_vtwo.pdo_bahan_bakar_vtwo import process_pdo_bahan_bakar
 from sth.finance_sth.doctype.pdo_perjalanan_dinas_vtwo.pdo_perjalanan_dinas_vtwo import process_pdo_perjalanan_dinas
@@ -457,9 +458,14 @@ def create_payment_voucher_kebun(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
-	"""Create Payment Voucher Kas from Permintaan Dana Operasional"""
-	
+def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None):
+	"""Create Payment Voucher Kas from Permintaan Dana Operasional
+
+	Bila `ppd` (Pertanggungjawaban Perjalanan Dinas) diisi, nilai tiap baris diambil dari
+	realisasi PPD tersebut, bukan dari plafon PDO. Dengan begitu PPD berfungsi sebagai DP
+	dan realisasi yang dibayarkan otomatis terpotong.
+	"""
+
 	# Map tipe_pdo to child table and field mappings
 	tipe_mapping = {
 		'Bahan Bakar': {
@@ -525,7 +531,12 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	outstanding_amount = getattr(source_doc, outstanding_field, 0)
-	
+
+	if ppd and tipe_pdo != "Perjalanan Dinas":
+		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas hanya berlaku untuk tipe Perjalanan Dinas"))
+
+	realisasi_per_baris = get_realisasi_ppd(ppd, source_name) if ppd else None
+
 	# if outstanding_amount <= 0:
 	# 	frappe.throw(_("{0} has been fully paid. Outstanding amount: {1}").format(
 	# 		tipe_pdo, 
@@ -551,6 +562,10 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		target.payment_voucher_kas_pdo = []
 
 		target.remarks = _("Realisasi PDO tipe {1} for Permintaan Dana Operasional {0}").format(source.name, tipe_pdo)
+
+		if ppd:
+			target.pertanggungjawaban_perjalanan_dinas = ppd
+			target.remarks += _(" - potongan DP dari Pertanggungjawaban Perjalanan Dinas {0}").format(ppd)
 
 		# target.paid_to = payment_voucher.paid_to
 
@@ -583,8 +598,15 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		# Add rows to payment_voucher_kas_pdo table
 		for row in child_data:
 			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
-			amount = getattr(row, amount_field, 0) or getattr(row, before_amount_field, 0)
-			
+
+			if realisasi_per_baris is not None:
+				# Nilai dibayar = realisasi PPD, sisa plafon tidak ikut dicairkan
+				amount = flt(realisasi_per_baris.get(row.name))
+				if amount <= 0:
+					continue
+			else:
+				amount = getattr(row, amount_field, 0) or getattr(row, before_amount_field, 0)
+
 			if debit_account_field and row.get(debit_account_field):
 				debit_account = row.get(debit_account_field)
 			elif header_debit_account:
@@ -633,6 +655,11 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 		set_missing_values
 	)
 	
+	if ppd and not doclist.payment_voucher_kas_pdo:
+		frappe.throw(
+			_("Pertanggungjawaban Perjalanan Dinas {0} tidak memiliki nilai realisasi yang bisa dicairkan.").format(ppd)
+		)
+
 	total = 0
 	for row in doclist.payment_voucher_kas_pdo:
 		total += row.total
@@ -651,6 +678,39 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None):
 	doclist.permintaan_dana_operasional = ""
 
 	return doclist
+
+def get_realisasi_ppd(ppd, source_name):
+	"""Peta {nama baris pdo_perjalanan_dinas: nilai realisasi} dari sebuah PPD."""
+	doc = frappe.get_doc("Pertanggungjawaban Perjalanan Dinas", ppd)
+
+	if doc.docstatus != 1:
+		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas {0} belum disubmit.").format(ppd))
+
+	if doc.no_pdo != source_name:
+		frappe.throw(
+			_("Pertanggungjawaban Perjalanan Dinas {0} bukan milik PDO {1}.").format(ppd, source_name)
+		)
+
+	if doc.realisasi_payment_entry:
+		frappe.throw(
+			_("Pertanggungjawaban Perjalanan Dinas {0} sudah direalisasi pada {1}.").format(
+				ppd, doc.realisasi_payment_entry
+			)
+		)
+
+	realisasi = {}
+	for row in doc.costings:
+		if not row.pdo_child_name:
+			continue
+		realisasi[row.pdo_child_name] = flt(realisasi.get(row.pdo_child_name)) + flt(row.jumlah_verifikasi_hrd)
+
+	if not realisasi:
+		frappe.throw(
+			_("Costings pada {0} tidak terhubung ke baris List Perjalanan Dinas PDO. Muat ulang data dari PDO.").format(ppd)
+		)
+
+	return realisasi
+
 
 @frappe.whitelist()
 def get_available_tipe_pdo(source_name):

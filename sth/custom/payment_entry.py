@@ -912,6 +912,24 @@ def update_payment_voucher_ppd(doc, method=None):
 				)
 
 
+def update_realisasi_ppd(doc, method=None):
+	"""Tandai / lepas PPD yang dipakai sebagai DP pada Payment Entry Realisasi PDO."""
+	ppd = doc.get("pertanggungjawaban_perjalanan_dinas")
+	if not ppd:
+		return
+
+	terpakai = frappe.db.get_value("Pertanggungjawaban Perjalanan Dinas", ppd, "realisasi_payment_entry")
+
+	if doc.docstatus == 1:
+		if terpakai and terpakai != doc.name:
+			frappe.throw(
+				_("Pertanggungjawaban Perjalanan Dinas {0} sudah direalisasi pada {1}.").format(ppd, terpakai)
+			)
+		frappe.db.set_value("Pertanggungjawaban Perjalanan Dinas", ppd, "realisasi_payment_entry", doc.name)
+	elif terpakai == doc.name:
+		frappe.db.set_value("Pertanggungjawaban Perjalanan Dinas", ppd, "realisasi_payment_entry", None)
+
+
 @frappe.whitelist()
 def is_mandiri_kcm(account):
 

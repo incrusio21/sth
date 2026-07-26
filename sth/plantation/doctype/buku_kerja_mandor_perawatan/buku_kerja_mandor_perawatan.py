@@ -135,24 +135,27 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		else:
 			frappe.throw("Account Kegiatan tidak boleh kosong.")
 
+		ada_item = 0
+
 		for d in self.material:
+			if d.item:
+				ada_item = 1
 			ste.append("items", {
 				"s_warehouse": d.warehouse,
 				"item_code": d.item,
 				"qty": d.qty,
 				"expense_account": account_kegiatan
 			})
-		
-		ste.submit()
+		if ada_item == 1:
+			ste.submit()
+			self.stock_entry = ste.name
+			for index, item in enumerate(ste.items):
+				self.material[index].update({
+					"stock_entry_detail": item.name,
+					"rate": item.basic_rate,
+				})
 
-		self.stock_entry = ste.name
-		for index, item in enumerate(ste.items):
-			self.material[index].update({
-				"stock_entry_detail": item.name,
-				"rate": item.basic_rate,
-			})
-
-		self.set_material_rate(get_valuation_rate=False)
+			self.set_material_rate(get_valuation_rate=False)
 
 	def set_material_rate(self, get_valuation_rate=True):
 		if get_valuation_rate:

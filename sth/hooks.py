@@ -256,7 +256,7 @@ doc_events = {
 
 	"Accounting Period":{
 		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period",
-		"before_submit": "sth.custom.period_closing_voucher.check_unsubmitted_salary_slip",
+		"before_submit": "sth.overrides.accounting_period.check_unsubmitted_salary_slip",
 		"on_submit": ["sth.overrides.accounting_period.create_costing_bengkel_on_submit","sth.overrides.accounting_period.cancel_costing_bengkel_on_cancel"]
 	},
 

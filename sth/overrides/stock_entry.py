@@ -7,7 +7,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
 class StockEntry(StockEntry):
     def calculate_rate_and_amount(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
-        self.set_basic_rate(reset_outgoing_rate, raise_error_if_no_rate)
+        self.set_basic_rate(reset_outgoing_rate, False)
         init_landed_taxes_and_totals(self)
         self.distribute_additional_costs()
         self.update_valuation_rate()

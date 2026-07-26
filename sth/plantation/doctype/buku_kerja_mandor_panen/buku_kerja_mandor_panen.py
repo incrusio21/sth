@@ -96,9 +96,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		super().validate()
 	
 	def isi_cost_center(self):
-		self.cost_center = "{} - {}".format(self.hasil_kerja[0].blok, frappe.get_doc("Company",self.company).abbr)
-		self.db_update()
-		frappe.db.commit()
+		self.cost_center = "{} - {}".format(frappe.get_doc("Blok",self.hasil_kerja[0].blok).deskripsi, frappe.get_doc("Company",self.company).abbr)
 
 	def reset_automated_data(self):
 		self.transfered_janjang = self.transfered_brondolan = \
