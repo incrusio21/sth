@@ -1,7 +1,7 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
-import frappe,copy
+import frappe,copy,random
 from frappe.utils import add_days
 from frappe.model.document import Document
 from frappe.utils import get_datetime,flt
@@ -19,6 +19,16 @@ class Timbangan(Document):
 		if self.owner and "api@sth" in self.owner and self.docstatus == 1:
 			self.flags.submit_after_insert = True
 			self.docstatus = 0
+
+		if not self.trans_no:
+			# self.trans_no = self.generate_trans_no()
+			self.name
+
+	def generate_trans_no(self):
+		while True:
+			trans_no = "TMBTML" + "".join(str(random.randint(0, 9)) for _ in range(18))
+			if not frappe.db.exists("Timbangan", {"trans_no": trans_no}):
+				return trans_no
 
 	def after_insert(self):
 		if self.flags.get("submit_after_insert"):
@@ -56,9 +66,7 @@ class Timbangan(Document):
 				spb_doc.in_time = self.weight_in_time
 				spb_doc.out_time = self.weight_out_time
 				spb_doc.workflow_state = "Weighed"
-				if spb_doc.total_janjang:
-					spb_doc.bjr = spb_doc.total_weight / spb_doc.total_janjang
-				
+				spb_doc.bjr = spb_doc.total_weight / spb_doc.total_janjang
 				for row in spb_doc.details:
 					row.total_weight = self.netto
 					row.db_update()

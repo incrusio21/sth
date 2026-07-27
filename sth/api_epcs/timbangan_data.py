@@ -186,7 +186,7 @@ def _build_data(timbangan_rows):
 
 		data.append({
 			"estate_code": row.get("unit"),
-			"trans_no": row.get("trans_no"),
+			"trans_no": row.get("name"),
 			"wb_in_at": _combine_datetime(row.get("posting_date"), row.get("weight_in_time")),
 			"wb_out_at": _combine_datetime(row.get("posting_date"), row.get("weight_out_time")),
 			"wb_in_by": row.get("owner"),
