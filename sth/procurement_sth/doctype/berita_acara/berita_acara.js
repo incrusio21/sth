@@ -23,9 +23,14 @@ frappe.ui.form.on("Berita Acara", {
         }
 
         frm.fields_dict.table_klkc.grid.update_docfield_property(
+            "kendaraan",
+            "read_only",
+            frm.doc.asset
+        );
+        frm.fields_dict.table_klkc.grid.update_docfield_property(
             "harga_satuan",
             "read_only",
-            1
+            !frm.doc.asset
         );
     },
 

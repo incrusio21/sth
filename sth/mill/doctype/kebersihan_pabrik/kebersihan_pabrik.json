@@ -70,8 +70,10 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_pduv",
@@ -81,7 +83,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:19:32.885543",
+ "modified": "2026-07-27 15:11:01.403120",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Kebersihan Pabrik",

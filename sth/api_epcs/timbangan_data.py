@@ -31,6 +31,7 @@ TIMBANGAN_FIELDS = [
 	"creation",
 	"wb_type",
 	"docstatus",
+	"receive_type"
 ]
 
 SPB_FIELDS = [
@@ -73,7 +74,7 @@ def _map_by_name(doctype, names, fields):
 	return {row["name"]: row for row in rows}
 
 
-def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after):
+def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after,date):
 	filters = []
 
 	if estate_code:
@@ -82,6 +83,8 @@ def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_af
 		filters.append(["posting_date", ">=", getdate(from_date)])
 	if to_date:
 		filters.append(["posting_date", "<=", getdate(to_date)])
+	if date:
+		filters.append(["posting_date", "=", getdate(date)])
 	if spb_no:
 		filters.append(["spb", "=", spb_no])
 	if wb_type is not None and wb_type != "":
@@ -93,22 +96,43 @@ def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_af
 
 
 @frappe.whitelist()
-def get_timbangan(trans_no):
-	"""Kembalikan satu data Timbangan berdasarkan trans_no, atau None kalau tidak ada."""
-	if not trans_no:
-		frappe.throw(_("Parameter trans_no wajib diisi."))
+def get_timbangan(trans_no=None, date=None, from_date=None, to_date=None):
+	"""Kembalikan data Timbangan berdasarkan trans_no, atau berdasarkan tanggal.
+
+	- trans_no diisi   : kembalikan satu data (dict) atau None kalau tidak ada.
+	- date diisi       : kembalikan list data pada tanggal tersebut saja.
+	- from_date/to_date: kembalikan list data dalam rentang tanggal (boleh salah satu saja).
+
+	Salah satu dari trans_no, date, atau from_date/to_date wajib diisi.
+	"""
+	if not trans_no and not date and not from_date and not to_date:
+		frappe.throw(_("Parameter trans_no, date, atau from_date/to_date wajib diisi."))
+
+	if trans_no:
+		filters = [["trans_no", "=", trans_no]]
+	elif date:
+		filters = [["posting_date", "=", getdate(date)]]
+	else:
+		filters = []
+		if from_date:
+			filters.append(["posting_date", ">=", getdate(from_date)])
+		if to_date:
+			filters.append(["posting_date", "<=", getdate(to_date)])
 
 	timbangan_rows = frappe.get_all(
 		"Timbangan",
-		filters=[["trans_no", "=", trans_no]],
+		filters=filters,
 		fields=TIMBANGAN_FIELDS,
-		order_by="creation asc",
-		limit_page_length=1,
+		order_by="posting_date asc, creation asc",
+		limit_page_length=1 if trans_no else 0,
 	)
 
 	data = _build_data(timbangan_rows)
 
-	return data[0] if data else None
+	if trans_no:
+		return data[0] if data else None
+
+	return data
 
 
 @frappe.whitelist()
@@ -120,6 +144,7 @@ def get_all_timbangan(
 	wb_type=None,
 	modified_after=None,
 	limit=None,
+	date=None,
 	offset=0,
 ):
 	"""Kembalikan daftar data Timbangan beserta data turunannya.
@@ -135,7 +160,7 @@ def get_all_timbangan(
 	"""
 	timbangan_rows = frappe.get_all(
 		"Timbangan",
-		filters=_build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after),
+		filters=_build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after, date),
 		fields=TIMBANGAN_FIELDS,
 		order_by="posting_date asc, creation asc",
 		limit_page_length=int(limit) if limit else 0,
@@ -184,6 +209,10 @@ def _build_data(timbangan_rows):
 
 		is_external = 1 if spb.get("tipe_kendaraan") == "Eksternal" else 0
 
+		trans_type = 0
+		if row.get("receive_type") == "TBS Eksternal":
+			trans_type = 2
+
 		data.append({
 			"estate_code": row.get("unit"),
 			"trans_no": row.get("name"),
@@ -207,7 +236,7 @@ def _build_data(timbangan_rows):
 			"bruto": row.get("bruto"),
 			"tarra": row.get("tara"),
 			"netto": row.get("netto"),
-			"trans_type": is_external,
+			"trans_type": trans_type,
 			"latitude": row.get("latitude"),
 			"longitude": row.get("longitude"),
 			"satelite_count": row.get("satelite_count"),
@@ -215,7 +244,7 @@ def _build_data(timbangan_rows):
 			"created_at": row.get("creation"),
 			"created_by": user.get("full_name"),
 			"created_by_code": row.get("owner"),
-			"wb_type": row.get("wb_type"),
+			"wb_type": 0 if row.get("docstatus", 0) < 1 else 1,
 			"is_active": 1 if row.get("docstatus", 0) < 2 else 0,
 		})
 
