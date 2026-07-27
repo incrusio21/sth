@@ -20,10 +20,6 @@ class Timbangan(Document):
 			self.flags.submit_after_insert = True
 			self.docstatus = 0
 
-		if not self.trans_no:
-			# self.trans_no = self.generate_trans_no()
-			self.trans_no = self.name
-
 	def generate_trans_no(self):
 		while True:
 			trans_no = "TMBTML" + "".join(str(random.randint(0, 9)) for _ in range(18))
@@ -31,7 +27,12 @@ class Timbangan(Document):
 				return trans_no
 
 	def after_insert(self):
-		if self.flags.get("submit_after_insert"):
+		if not self.trans_no:
+			# self.trans_no = self.generate_trans_no()
+			self.trans_no = self.name
+			self.db_update()
+
+		elif self.flags.get("submit_after_insert"):
 			self.submit()
 
 	def validate(self):
