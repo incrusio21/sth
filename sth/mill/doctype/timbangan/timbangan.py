@@ -22,7 +22,7 @@ class Timbangan(Document):
 
 		if not self.trans_no:
 			# self.trans_no = self.generate_trans_no()
-			self.name
+			self.trans_no = self.name
 
 	def generate_trans_no(self):
 		while True:
