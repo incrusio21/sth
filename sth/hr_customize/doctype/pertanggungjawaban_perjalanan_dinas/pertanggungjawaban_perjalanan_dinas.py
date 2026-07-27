@@ -122,25 +122,26 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 
 		sisa = total_debit - uang_muka
 		# --- CREDIT ---
-		gl_entries.append(
-			frappe.get_doc({
-				"doctype": "GL Entry",
-				"posting_date": doc.posting_date,
-				"account": doc.credit_to,
-				"debit": 0.0,
-				"credit": sisa,
-				"debit_in_account_currency": 0.0,
-				"credit_in_account_currency": sisa,
-				"voucher_type": doc.doctype,
-				"voucher_no": doc.name,
-				"company": doc.company,
-				"remarks": f"Pertanggungjawaban Perjalanan Dinas - {doc.name}",
-				"is_opening": "No",
-				"cost_center": frappe.get_doc("Company", doc.company).cost_center,
-				"party_type": "Employee",
-				"party": doc.employee
-			})
-		)
+		if sisa > 0:
+			gl_entries.append(
+				frappe.get_doc({
+					"doctype": "GL Entry",
+					"posting_date": doc.posting_date,
+					"account": doc.credit_to,
+					"debit": 0.0,
+					"credit": sisa,
+					"debit_in_account_currency": 0.0,
+					"credit_in_account_currency": sisa,
+					"voucher_type": doc.doctype,
+					"voucher_no": doc.name,
+					"company": doc.company,
+					"remarks": f"Pertanggungjawaban Perjalanan Dinas - {doc.name}",
+					"is_opening": "No",
+					"cost_center": frappe.get_doc("Company", doc.company).cost_center,
+					"party_type": "Employee",
+					"party": doc.employee
+				})
+			)
 
 		# Simpan semua GL Entry
 		for gl in gl_entries:

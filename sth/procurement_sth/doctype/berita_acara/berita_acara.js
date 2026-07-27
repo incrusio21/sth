@@ -21,6 +21,12 @@ frappe.ui.form.on("Berita Acara", {
         if (frm.is_new()) {
             frm.set_value("make", frappe.session.user)
         }
+
+        frm.fields_dict.table_klkc.grid.update_docfield_property(
+            "harga_satuan",
+            "read_only",
+            1
+        );
     },
 
     unit(frm) {
@@ -40,7 +46,17 @@ frappe.ui.form.on("Berita Acara", {
     },
 
     asset(frm) {
-        console.log(frm.doc.asset);
+        frm.fields_dict.table_klkc.grid.update_docfield_property(
+            "kendaraan",
+            "read_only",
+            frm.doc.asset
+        );
+        frm.fields_dict.table_klkc.grid.update_docfield_property(
+            "harga_satuan",
+            "read_only",
+            !frm.doc.asset
+        );
+        // console.log(frm.doc.asset);
     }
 });
 
@@ -62,6 +78,12 @@ frappe.ui.form.on("Berita Acara Detail", {
         get_stock_item(row.item_code, frm.doc.unit).then((res) => {
             frappe.model.set_value(dt, dn, "stock", res)
         })
+    },
+    jumlah(frm, dt, dn) {
+        calculate_total(frm, dt, dn)
+    },
+    harga_satuan(frm, dt, dn) {
+        calculate_total(frm, dt, dn)
     }
 })
 
@@ -73,4 +95,13 @@ function get_stock_item(item_code = "", unit = "") {
             resolve(res)
         })
     })
+}
+
+function calculate_total(frm, dt, dn) {
+    let row = locals[dt][dn]
+    let total = row.jumlah * row.harga_satuan
+
+    frappe.model.set_value(dt, dn, "total", total)
+
+    frm.set_value("subtotal", frm.doc.table_klkc.reduce((acc, row) => acc + row.total, 0))
 }

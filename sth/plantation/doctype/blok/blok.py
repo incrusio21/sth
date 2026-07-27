@@ -148,18 +148,38 @@ def _hitung_alokasi(blok, selected_bloks):
 	if invalid:
 		frappe.throw(f"Blok berikut bukan Blok TBM di Tahun Tanam/Unit yang sama: {', '.join(invalid)}")
 
-	total_biaya = frappe.db.sql("""
-		SELECT COALESCE(SUM(debit), 0)
+	# JE "Naik TM" yang pernah dibuat sebelumnya ditandai dengan cost_center
+	# yang sama (Tahun Tanam CC). Biaya yang sudah dipindahkan lewat JE
+	# tersebut harus dikurangkan dari pool (bukan cuma dikecualikan), supaya
+	# batch berikutnya menghitung dari SISA biaya yang belum dialokasikan —
+	# kalau tidak, sisa Blok TBM terakhir akan kembali mendapat porsi dari
+	# total biaya awal (dobel), bukan dari sisa yang sebenarnya.
+	naik_tm_je_names = frappe.get_all(
+		"Blok Naik TM Detail",
+		filters={"parenttype": "Journal Entry"},
+		pluck="parent",
+		distinct=True,
+	) or [""]
+
+	pool_row = frappe.db.sql("""
+		SELECT
+			COALESCE(SUM(CASE WHEN NOT (voucher_type = 'Journal Entry' AND voucher_no IN %(je_names)s)
+				THEN debit ELSE 0 END), 0) AS pool_awal,
+			COALESCE(SUM(CASE WHEN voucher_type = 'Journal Entry' AND voucher_no IN %(je_names)s
+				THEN debit ELSE 0 END), 0) AS sudah_dialokasikan
 		FROM `tabGL Entry`
-		WHERE cost_center = %s
+		WHERE cost_center = %(cost_center)s
 		  AND is_cancelled = 0
-	""", (blok.cost_center,))[0][0] or 0
+	""", {"cost_center": blok.cost_center, "je_names": tuple(naik_tm_je_names)}, as_dict=True)[0]
+
+	total_biaya = pool_row.pool_awal or 0
+	sisa_biaya = total_biaya - (pool_row.sudah_dialokasikan or 0)
 
 	total_hektar = sum(c.luas_areal or 0 for c in cohort)
 	if not total_hektar:
 		frappe.throw("Total Luas Areal Blok TBM di Tahun Tanam ini adalah 0.")
 
-	x_per_hektar = total_biaya / total_hektar
+	x_per_hektar = sisa_biaya / total_hektar
 	y_luas_dipilih = sum(cohort_by_name[s].luas_areal or 0 for s in selected_bloks)
 	total = x_per_hektar * y_luas_dipilih
 
@@ -208,7 +228,7 @@ def preview_naikkan_ke_tm(blok_name, selected_bloks):
 	company = unit_doc.company
 
 	debit_account = frappe.db.get_value("Account", {"account_number": "1271301", "company": company}, "name") or "1271301 - TANAMAN MENGHASILKAN"
-	credit_account = frappe.db.get_value("Account", {"account_number": "1273005", "company": company}, "name") or "1273005 - ASET DALAM PENYELESAIAN - LAINNYA"
+	credit_account = frappe.db.get_value("Account", {"account_number": "1269999", "company": company}, "name") or "1269999 - ASET DALAM PENYELESAIAN - LAINNYA"
 
 	return {
 		"jumlah_blok": len(alokasi["selected"]),

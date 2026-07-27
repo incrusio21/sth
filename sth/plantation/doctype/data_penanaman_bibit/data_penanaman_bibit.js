@@ -124,7 +124,7 @@ frappe.ui.form.on("Data Penanaman Bibit", {
 		}
 		frappe.call({
 			method: 'sth.plantation.doctype.data_penanaman_bibit.data_penanaman_bibit.get_rupiah_basis_by_batch',
-			args: { batch: frm.doc.batch },
+			args: { batch: frm.doc.batch, name: frm.doc.name },
 			callback: (r) => {
 				if (r.message) {
 					frm.set_value('total_bkm', r.message.total_bkm);

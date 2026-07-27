@@ -224,14 +224,30 @@ class DataPenanamanBibit(Document):
 
 
 @frappe.whitelist()
-def get_rupiah_basis_by_batch(batch):
+def get_rupiah_basis_by_batch(batch, name=None):
 	bkm = frappe.db.get_all(
 		'Buku Kerja Mandor Perawatan',
 		filters={'batch': batch},
 		fields=['grand_total']
 	)
+	total_bkm = sum(r.grand_total or 0 for r in bkm)
+
+	filters = {
+		'batch': batch,
+		'docstatus': 1
+	}
+	if name:
+		filters['name'] = ['!=', name]
+
+	existing = frappe.db.get_all(
+		'Data Penanaman Bibit',
+		filters=filters,
+		fields=['actual_amount_bkm']
+	)
+	used_bkm = sum(r.actual_amount_bkm or 0 for r in existing)
+
 	return {
-		'total_bkm': sum(r.grand_total or 0 for r in bkm)
+		'total_bkm': total_bkm - used_bkm
 	}
 	
 @frappe.whitelist()

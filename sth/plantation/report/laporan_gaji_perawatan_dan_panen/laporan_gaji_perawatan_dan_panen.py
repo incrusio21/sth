@@ -733,8 +733,44 @@ def get_conditions_epl(filters):
 def get_panen_data(filters):
 	conditions = get_conditions_panen(filters)
 
+	# query = """
+	# 	SELECT
+	# 		bkmp.name as voucher_no,
+	# 		dbhkp.blok as blok,
+	# 		e.no_ktp as nik,
+	# 		dbhkp.employee as employee,
+	# 		e.employee_name as employee_name,
+	# 		e.bank_ac_no as norek_karyawan,
+	# 		bkmp.posting_date as posting_date,
+	# 		bkmp.kegiatan_account as kegiatan,
+	# 		dbhkp.jumlah_janjang as hasil_kerja_qty,
+	# 		bkmp.hasil_kerja_qty_brondolan as brondolan,
+	# 		0 as total_tonase,
+	# 		k.uom as satuan,
+	# 		bkmp.volume_basis as basis,
+	# 		bkmp.rupiah_basis as rupiah_satuan,
+	# 		0 as rp_premi,
+	# 		bkmp.status_panen as kondisi,
+	# 		IF(bkmp.manual_hk = 1, 'Manual', '') AS tipe,
+	# 		0 as p_upah,
+	# 		0 as p_premi,
+	# 		0 as total,
+	# 		'Buku Kerja Mandor Panen' as voucher_type
+	# 	FROM `tabDetail BKM Hasil Kerja Panen` as dbhkp
+	# 	JOIN `tabBuku Kerja Mandor Panen` as bkmp ON bkmp.name = dbhkp.parent
+	# 	JOIN `tabEmployee` as e ON e.name = dbhkp.employee
+	# 	JOIN `tabKegiatan` as k ON k.name = bkmp.kegiatan
+	# 	WHERE bkmp.docstatus = 1
+	# 	{conditions}
+	# 	ORDER BY e.employee_name
+	# """.format(conditions=conditions)
+
 	query = """
 		SELECT
+			epl_upah.name as log_name,
+			epl_upah.amount as log_amount,
+			epl_upah.name as log_name,
+			epl_upah.amount as log_amount,
 			bkmp.name as voucher_no,
 			dbhkp.blok as blok,
 			e.no_ktp as nik,
@@ -752,17 +788,32 @@ def get_panen_data(filters):
 			0 as rp_premi,
 			bkmp.status_panen as kondisi,
 			IF(bkmp.manual_hk = 1, 'Manual', '') AS tipe,
-			0 as p_upah,
-			0 as p_premi,
-			0 as total,
+			IFNULL(SUM(epl_upah.amount), 0) AS p_upah,
+			IFNULL(SUM(epl_premi.amount), 0) AS p_premi,
+			
+			IFNULL(SUM(epl_upah.amount), 0) + IFNULL(SUM(epl_premi.amount), 0) AS total,
 			'Buku Kerja Mandor Panen' as voucher_type
 		FROM `tabDetail BKM Hasil Kerja Panen` as dbhkp
 		JOIN `tabBuku Kerja Mandor Panen` as bkmp ON bkmp.name = dbhkp.parent
 		JOIN `tabEmployee` as e ON e.name = dbhkp.employee
 		JOIN `tabKegiatan` as k ON k.name = bkmp.kegiatan
+		LEFT JOIN `tabEmployee Payment Log` as epl_upah
+			ON epl_upah.employee = e.name
+			AND epl_upah.voucher_type = 'Buku Kerja Mandor Panen'
+			AND epl_upah.status = 'Approved'
+			AND epl_upah.component_type = 'Upah'
+			AND epl_upah.voucher_no = bkmp.name
+
+		LEFT JOIN `tabEmployee Payment Log` as epl_premi
+			ON epl_premi.employee = e.name
+			AND epl_premi.voucher_type = 'Buku Kerja Mandor Panen'
+			AND epl_premi.status = 'Approved'
+			AND epl_premi.component_type = 'Premi'
+			AND epl_premi.voucher_no = bkmp.name
 		WHERE bkmp.docstatus = 1
 		{conditions}
-		ORDER BY e.employee_name
+		GROUP BY e.employee_name, dbhkp.blok
+		ORDER BY e.employee_name;
 	""".format(conditions=conditions)
 
 	rows = frappe.db.sql(query, filters, as_dict=1)

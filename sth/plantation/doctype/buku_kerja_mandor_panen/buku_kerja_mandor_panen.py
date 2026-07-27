@@ -118,6 +118,11 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def on_cancel(self):
 		super().on_cancel()
 		self.cancel_gl_entries()
+		self.delete_recap_panen()
+
+	def on_trash(self):
+		super().on_trash()
+		self.delete_recap_panen()
 
 	def make_gl_entries(self, method=None):
 		gl_entries = []

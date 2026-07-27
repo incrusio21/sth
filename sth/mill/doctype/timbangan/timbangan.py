@@ -56,7 +56,9 @@ class Timbangan(Document):
 				spb_doc.in_time = self.weight_in_time
 				spb_doc.out_time = self.weight_out_time
 				spb_doc.workflow_state = "Weighed"
-				spb_doc.bjr = spb_doc.total_weight / spb_doc.total_janjang
+				if spb_doc.total_janjang:
+					spb_doc.bjr = spb_doc.total_weight / spb_doc.total_janjang
+				
 				for row in spb_doc.details:
 					row.total_weight = self.netto
 					row.db_update()
