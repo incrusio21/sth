@@ -22,6 +22,19 @@ frappe.ui.form.on("Berita Acara", {
             frm.set_value("make", frappe.session.user)
         }
 
+        frappe.db.get_value(
+            "Unit",
+            frm.doc.unit,
+            "ho"
+        ).then(r => {
+            console.log(r.message.ho);
+            frm.fields_dict.table_klkc.grid.update_docfield_property(
+                "km_hm",
+                "read_only",
+                !r.message.ho
+            );
+        });
+
         frm.fields_dict.table_klkc.grid.update_docfield_property(
             "kendaraan",
             "read_only",
@@ -40,6 +53,19 @@ frappe.ui.form.on("Berita Acara", {
                 frappe.model.set_value(row.doctype, row.name, "stock", res)
             })
         })
+
+        frappe.db.get_value(
+            "Unit",
+            frm.doc.unit,
+            "ho"
+        ).then(r => {
+            console.log(r.message.ho);
+            frm.fields_dict.table_klkc.grid.update_docfield_property(
+                "km_hm",
+                "read_only",
+                !r.message.ho
+            );
+        });
 
         frm.refresh_field('table_klkc')
     },
@@ -69,7 +95,6 @@ frappe.ui.form.on("Berita Acara Detail", {
     form_render(frm, dt, dn) {
         frm.get_field('table_klkc').$wrapper.find(".grid-duplicate-row").off("click")
     },
-
     item_code(frm, dt, dn) {
         let row = locals[dt][dn]
         let exist = frm.doc.table_klkc.find((data) => row.item_code == data.item_code && row.idx != data.idx)
@@ -89,6 +114,18 @@ frappe.ui.form.on("Berita Acara Detail", {
     },
     harga_satuan(frm, dt, dn) {
         calculate_total(frm, dt, dn)
+    },
+    kendaraan(frm, dt, dn) {
+        let row = locals[dt][dn];
+
+        frappe.db.get_value(
+            "Alat Berat Dan Kendaraan",
+            row.kendaraan,
+            "kmhm_akhir"
+        ).then(r => {
+            console.log(r.message.kmhm_akhir);
+            frappe.model.set_value(dt, dn, "km_hm", r.message.kmhm_akhir);
+        });
     }
 })
 

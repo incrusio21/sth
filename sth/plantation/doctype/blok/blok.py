@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import today
+from frappe.utils import flt, today
 
 BULAN_MAP = {
 	"Januari": 1,
@@ -161,12 +161,17 @@ def _hitung_alokasi(blok, selected_bloks):
 		distinct=True,
 	) or [""]
 
+	# "Sudah dialokasikan" dihitung dari sisi KREDIT (bukan debit), karena
+	# sejak debit JE "Naik TM" dipecah per Cost Center Blok (nama = Deskripsi
+	# Blok), baris debit sudah tidak lagi berada di Cost Center Tahun Tanam.
+	# Baris kredit JE "Naik TM" selalu tetap di Cost Center Tahun Tanam,
+	# jadi itu yang jadi acuan berapa yang sudah terpakai dari pool.
 	pool_row = frappe.db.sql("""
 		SELECT
 			COALESCE(SUM(CASE WHEN NOT (voucher_type = 'Journal Entry' AND voucher_no IN %(je_names)s)
 				THEN debit ELSE 0 END), 0) AS pool_awal,
 			COALESCE(SUM(CASE WHEN voucher_type = 'Journal Entry' AND voucher_no IN %(je_names)s
-				THEN debit ELSE 0 END), 0) AS sudah_dialokasikan
+				THEN credit ELSE 0 END), 0) AS sudah_dialokasikan
 		FROM `tabGL Entry`
 		WHERE cost_center = %(cost_center)s
 		  AND is_cancelled = 0
@@ -285,6 +290,7 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 		frappe.throw('Kategori Kegiatan "TM" tidak ditemukan.')
 
 	je_name = None
+	x_per_hektar = alokasi["x_per_hektar"]
 
 	if total:
 		tahun_cc = _ensure_tahun_tanam_cost_center(company, abbr, blok.tahun_tanam)
@@ -298,12 +304,24 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 			f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit} - Blok: {nama_blok_dipilih}"
 		)
 
-		je.append("accounts", {
-			"account": debit_account,
-			"debit_in_account_currency": total,
-			"credit_in_account_currency": 0,
-			"cost_center": tahun_cc,
-		})
+		# Debit per Blok, cost center pakai Cost Center Blok (nama = Deskripsi Blok).
+		# Dibulatkan per baris; sisa pembulatan diserap baris terakhir supaya
+		# Total Debit == Total Credit persis (hindari ValidationError).
+		sisa_total = flt(total, precision=2)
+		for i, b in enumerate(selected):
+			blok_cc = _ensure_blok_cost_center(company, abbr, b.deskripsi)
+			if i == len(selected) - 1:
+				debit_amount = sisa_total
+			else:
+				debit_amount = flt(x_per_hektar * (b.luas_areal or 0), precision=2)
+				sisa_total = flt(sisa_total - debit_amount, precision=2)
+			je.append("accounts", {
+				"account": debit_account,
+				"debit_in_account_currency": debit_amount,
+				"credit_in_account_currency": 0,
+				"cost_center": blok_cc,
+			})
+
 		je.append("accounts", {
 			"account": credit_account,
 			"debit_in_account_currency": 0,

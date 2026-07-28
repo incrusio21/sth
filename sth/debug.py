@@ -1,12 +1,12 @@
 import frappe
 from frappe import _
 def debug():
-	no_doc = "CB-2026-0003"
-	frappe.db.sql(""" DELETE FROM `tabPDO NON PDO Table` WHERE parent = "PDO-00070" and idx = 5 """.format())
+	no_doc = "DPB-00010"
+	# frappe.db.sql(""" DELETE FROM `tabPDO NON PDO Table` WHERE parent = "PDO-00070" and idx = 5 """.format())
 	# frappe.db.sql(""" UPDATE `tabPurchase Invoice` SET docstatus=0 WHERE name = "{}" """.format(no_doc))
-	frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
+	# frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 	frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-	frappe.get_doc("Payment Entry",no_doc).on_submit()
+	frappe.get_doc("Data Penyemaian Bibit",no_doc).make_gl_entry()
 
 def debug_gl():
 	no_doc = "CB-2026-0003"

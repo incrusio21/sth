@@ -281,6 +281,10 @@ def comparasion_create_sq(pr_sr,items):
 		
 	return new_doc.name
 
+@frappe.whitelist()
+def get_allowed_roles():
+	return frappe.db.get_all("Has Role",{"parent":"Procurement Settings"},"role",pluck="role")
+
 def debug_create_po():
 	pr_sr = "MAT-MR-2025-00006"
 	items = [

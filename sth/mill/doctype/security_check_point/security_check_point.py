@@ -8,7 +8,21 @@ from frappe.desk.reportview import get_filters_cond, get_match_cond
 from erpnext.controllers.queries import get_fields
 
 class SecurityCheckPoint(Document):
-	pass
+
+	def validate(self):
+		self.map_api_spb_trans_no()
+
+	def map_api_spb_trans_no(self):
+		if not (self.owner and "api@sth" in self.owner and self.spb):
+			return
+
+		spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.spb}, "name")
+
+		if spb_name:
+			self.spb = spb_name
+		else:
+			self.spb_trans_no = self.spb
+			self.spb = ""
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

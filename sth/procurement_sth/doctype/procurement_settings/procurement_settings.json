@@ -28,7 +28,9 @@
   "persediaan_dalam_perjalanan_tab",
   "persediaan_dalam_perjalanan_procurement_settings",
   "pengakuan_pembelian_tbs_tab",
-  "procurement_settings_pengakuan_pembelian_tbs_account"
+  "procurement_settings_pengakuan_pembelian_tbs_account",
+  "setting_hak_akses_komparasi_tab",
+  "setting_role_komparasi"
  ],
  "fields": [
   {
@@ -180,13 +182,24 @@
    "fieldtype": "Table",
    "label": "Procurement Settings Pengakuan Pembelian TBS Account",
    "options": "Procurement Settings Pengakuan Pembelian TBS Account"
+  },
+  {
+   "fieldname": "setting_hak_akses_komparasi_tab",
+   "fieldtype": "Tab Break",
+   "label": "Setting Hak Akses Komparasi"
+  },
+  {
+   "fieldname": "setting_role_komparasi",
+   "fieldtype": "Table",
+   "label": "Setting Role Komparasi",
+   "options": "Has Role"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-27 00:02:34.347681",
+ "modified": "2026-07-28 11:38:13.113393",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Procurement Settings",

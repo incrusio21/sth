@@ -24,6 +24,7 @@ class SupplierComparasion {
 		this.data = []
 		this.selected_items = []
 		this.selected_suppliers = ""
+		this.set_permissions_role()
 
 		// console.log(this.page);
 		this.content_wrapper = $(`
@@ -65,6 +66,8 @@ class SupplierComparasion {
 				return {
 					filters: {
 						"company": me.company,
+						"docstatus": 1,
+						"per_ordered": ["<", 100]
 					}
 				};
 			},
@@ -360,6 +363,13 @@ class SupplierComparasion {
 
 	}
 
+	set_permissions_role() {
+		const me = this
+		frappe.xcall("sth.api.get_allowed_roles").then((res) => {
+			me.can_create_po = frappe.user_roles.find((r) => res.includes(r))
+		})
+	}
+
 	generateColumns() {
 		const me = this
 		let column_suppliers = this.suppliers.map((name) => {
@@ -386,7 +396,7 @@ class SupplierComparasion {
 						width: 60,
 						formatter: function (cell, formatterParams) {
 							const row = cell.getRow().getData()
-							if (!row[`${initials}_child_name`] || row[`${initials}_workflow_state`] == "Draft") {
+							if (!row[`${initials}_child_name`] || row[`${initials}_workflow_state`] == "Draft" || !me.can_create_po) {
 								return ""
 							} else {
 								return "<i class='fa fa-plus' style='color: #0b680b'></i>";
@@ -757,7 +767,7 @@ class SupplierComparasion {
 			return
 		}
 		frappe.xcall("sth.api.submit_sq", { "name": this.supllier_quotation, freeze: true, freeze_message: "Approving" })
-			.then(() => {
+			.then((res) => {
 				frappe.show_alert({
 					message: __(`Document ${this.supllier_quotation} successfully approved`),
 					indicator: 'green'

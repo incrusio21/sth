@@ -103,8 +103,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 					del self.hasil_kerja[0]._kegiatan_list
 				re_calculate = True
 				continue
+			else:
+				continue
 
-			frappe.throw(f"Plase include {d.kegiatan} in Row#{d.idx} for Employee")
+			frappe.throw(f"Please include {d.kegiatan} in Row#{d.idx} for Employee")
 
 		if re_calculate:
 			self.calculate()

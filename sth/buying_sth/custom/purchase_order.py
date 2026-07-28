@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
+from frappe.utils import flt,cint
     
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
@@ -105,7 +105,7 @@ def check_uang_muka_payment_entry(purchase_order):
     }
 
 def set_accept_day(doc,method):
-    doc.accept_day = int(doc.syarat_pembayaran.split(' ')[0]) if doc.syarat_pembayaran else 0
+    doc.accept_day = cint(doc.syarat_pembayaran.split(' ')[0]) if doc.syarat_pembayaran else 0
 
 @frappe.whitelist()
 def get_history_purchase_item(nama_barang):

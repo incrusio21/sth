@@ -4,6 +4,12 @@ frappe.ui.form.on('Sales Invoice', {
 		set_komoditi_filter(frm);
 		set_query_unit(frm)
 		toggle_qty_timbang_column(frm);
+
+		if (frm.doc.docstatus === 0) {
+			frm.add_custom_button(__('Ambil Asset'), function() {
+				show_pilih_asset_dialog(frm);
+			}, __('Get Items From'));
+		}
 	},
 	jenis_penagihan: function(frm) {
 		toggle_qty_timbang_column(frm);
@@ -149,6 +155,82 @@ function set_query_unit(frm){
 			}
 		};
 	});
+}
+
+function show_pilih_asset_dialog(frm) {
+	let dialog = new frappe.ui.Dialog({
+		title: __('Pilih Asset untuk Dijual'),
+		fields: [
+			{
+				fieldname: 'asset',
+				fieldtype: 'Link',
+				options: 'Asset',
+				label: __('Asset'),
+				reqd: 1,
+				get_query: function() {
+					let filters = [
+						['docstatus', '=', 1],
+						['status', '!=', 'Scrapped']
+					];
+					if (frm.doc.company) {
+						filters.push(['company', '=', frm.doc.company]);
+					}
+					return { filters: filters };
+				}
+			}
+		],
+		primary_action_label: __('Ambil'),
+		primary_action: function(values) {
+			frappe.call({
+				method: 'frappe.client.get_value',
+				args: {
+					doctype: 'Asset',
+					filters: values.asset,
+					fieldname: ['item_code', 'asset_name', 'unit', 'company']
+				},
+				callback: function(r) {
+					if (!r.message) return;
+					let asset = r.message;
+
+					if (frm.doc.company && asset.company && asset.company !== frm.doc.company) {
+						frappe.msgprint(__('Company Asset ({0}) berbeda dengan Company Sales Invoice ({1}).', [asset.company, frm.doc.company]));
+						return;
+					}
+
+					let row = frm.add_child('items');
+					row.item_code = asset.item_code;
+					row.is_fixed_asset = 1;
+					row.asset = values.asset;
+					row.qty = 1;
+					frm.refresh_field('items');
+
+					frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
+						frappe.model.set_value(row.doctype, row.name, 'item_code', asset.item_code);
+						frappe.model.set_value(row.doctype, row.name, 'is_fixed_asset', 1);
+						frappe.model.set_value(row.doctype, row.name, 'asset', values.asset).then(function() {
+							frm.script_manager.trigger('asset', row.doctype, row.name);
+						});
+					});
+
+					frm.set_value('jenis_penagihan', 'Disposal');
+					if (asset.unit) {
+						frm.set_value('unit', asset.unit);
+					}
+
+					frappe.db.get_value('Account', { account_number: '1131004', company: frm.doc.company }, 'name').then((r) => {
+						if (r.message && r.message.name) {
+							frm.set_value('debit_to', r.message.name);
+						}
+					});
+
+					frm.refresh_field('items');
+					dialog.hide();
+				}
+			});
+		}
+	});
+
+	dialog.show();
 }
 
 erpnext.accounts.SalesInvoiceControllerCustom = class SalesInvoiceController extends (

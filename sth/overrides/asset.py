@@ -193,6 +193,30 @@ class Asset(Asset):
 		asset_movement.submit()
 
 @frappe.whitelist()
+def make_sales_invoice(asset, item_code, company, serial_no=None):
+	"""Override tombol 'Sell' di Asset. Isi Unit dari Asset dan set
+	Jenis Penagihan = Disposal, supaya field Jenis Penagihan tidak
+	kosong (yang defaultnya kebaca UI sebagai 'Pengiriman', opsi
+	pertama di select) dan memicu validasi 'Sales Order wajib
+	dipasang di Sales Invoice Pengiriman' saat disimpan."""
+	from erpnext.assets.doctype.asset.asset import make_sales_invoice as _make_sales_invoice
+
+	si = _make_sales_invoice(asset, item_code, company, serial_no=serial_no)
+
+	asset_doc = frappe.get_cached_doc("Asset", asset)
+	si.jenis_penagihan = "Disposal"
+	si.unit = asset_doc.unit
+
+	receivable_account = frappe.db.get_value(
+		"Account", {"account_number": "1131004", "company": company}, "name"
+	)
+	if receivable_account:
+		si.debit_to = receivable_account
+
+	return si
+
+
+@frappe.whitelist()
 def make_asset_movement(assets, purpose=None):
 	import json
 

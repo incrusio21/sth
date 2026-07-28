@@ -90,8 +90,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "KM / HM",
-   "read_only": 1
+   "label": "KM / HM"
   },
   {
    "columns": 1,
@@ -122,7 +121,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-24 10:15:39.600171",
+ "modified": "2026-07-28 09:48:06.350224",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Berita Acara Detail",
