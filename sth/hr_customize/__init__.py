@@ -86,11 +86,23 @@ def update_payment_log(voucher_type, voucher_no=None, filters=None):
 	meta = frappe.get_meta(voucher_type)
 	tracked = [f for f in ("rupiah_basis", "hasil_kerja_amount", "hasil_kerja_premi_amount", "grand_total") if meta.has_field(f)]
 
+	state_field = None
+	if workflow := meta.get_workflow():
+		state_field = frappe.get_cached_value("Workflow", workflow, "workflow_state_field") or "workflow_state"
+
 	docs = frappe.get_all(voucher_type, filters=filters, pluck="name")
 	changed = []
+	posted = []
 
 	for d in docs:
 		doc = frappe.get_doc(voucher_type, d)
+
+		# dokumen Posted sudah masuk buku besar, nilainya tidak boleh berubah lagi.
+		# dilewati, bukan di-throw, supaya satu dokumen tidak menggagalkan seluruh batch
+		if state_field and doc.get(state_field) == "Posted":
+			posted.append(d)
+			continue
+
 		before = {f: doc.get(f) for f in tracked}
 
 		doc.run_method("repair_employee_payment_log")
@@ -100,20 +112,25 @@ def update_payment_log(voucher_type, voucher_no=None, filters=None):
 			changed.append((d, doc.docstatus, diff))
 
 	frappe.msgprint(
-		get_update_payment_log_summary(voucher_type, filters, len(docs), changed),
+		get_update_payment_log_summary(voucher_type, filters, len(docs) - len(posted), changed, posted),
 		title=f"Re-calculate {voucher_type}",
 		wide=True
 	)
 
 	return [c[0] for c in changed]
 
-def get_update_payment_log_summary(voucher_type, filters, total, changed):
+def get_update_payment_log_summary(voucher_type, filters, total, changed, posted=None):
 	status_label = {0: "Draft", 1: "Submitted"}
 
 	html = [
 		f"<p>{len(changed)} dari {total} dokumen berubah.</p>",
 		f"<p style='color: var(--text-muted)'>Filter: <code>{frappe.utils.escape_html(str(filters))}</code></p>"
 	]
+
+	if posted:
+		html.append(
+			f"<p style='color: var(--text-muted)'>{len(posted)} dokumen dilewati karena sudah <b>Posted</b>.</p>"
+		)
 
 	if not total:
 		html.append("<p>Tidak ada dokumen yang cocok dengan filter di atas. Periksa rentang tanggal, dan pastikan <code>docstatus</code> mencakup draft bila yang dicari draft.</p>")

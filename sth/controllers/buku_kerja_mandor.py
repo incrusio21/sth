@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.exceptions import DoesNotExistError
 from frappe.query_builder.functions import Sum
 
@@ -15,6 +16,10 @@ force_item_fields = (
 	"voucher_type",
 	"voucher_no"
 )
+
+# state workflow terakhir BKM. GL Entry baru dibuat saat dokumen mencapai state ini,
+# bukan saat submit, karena nilai dokumen masih bisa berubah selama periode berjalan.
+POSTED = "Posted"
 
 class BukuKerjaMandorController(PlantationController):
     def __init__(self, *args, **kwargs):
@@ -301,10 +306,87 @@ class BukuKerjaMandorController(PlantationController):
     def update_rkb_realization(self):
         frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
 
+    def get_workflow_state(self):
+        """State workflow dokumen, atau None kalau doctype belum punya workflow aktif."""
+        workflow = self.meta.get_workflow()
+        if not workflow:
+            return None
+
+        fieldname = frappe.get_cached_value("Workflow", workflow, "workflow_state_field")
+
+        return self.get(fieldname or "workflow_state")
+
+    def is_posted(self):
+        return self.get_workflow_state() == POSTED
+
+    def allow_gl_entry(self):
+        """
+        Tanpa workflow aktif dokumen submitted langsung dianggap final (perilaku lama).
+        Dengan workflow, GL Entry baru boleh dibuat setelah state Posted.
+        """
+        state = self.get_workflow_state()
+
+        return state is None or state == POSTED
+
+    def has_gl_entry(self):
+        return bool(frappe.db.exists("GL Entry", {
+            "voucher_type": self.doctype,
+            "voucher_no": self.name,
+            "is_cancelled": 0
+        }))
+
+    def make_gl_entry_on_submit(self):
+        if self.allow_gl_entry():
+            self.make_gl_entry()
+
+    def on_update_after_submit(self):
+        self.make_gl_entry_on_post()
+
+    def make_gl_entry_on_post(self):
+        """GL Entry dibuat sekali saat dokumen berpindah ke Posted."""
+        if not self.is_posted() or self.has_gl_entry():
+            return
+
+        self.make_gl_entry()
+
+    def set_as_posted(self):
+        """
+        Dipakai saat Accounting Period disubmit: dokumen yang masih Submitted
+        dipindahkan ke Posted lalu GL Entry-nya dibuat.
+        """
+        if self.docstatus != 1 or self.is_posted():
+            return False
+
+        workflow = self.meta.get_workflow()
+        if not workflow:
+            return False
+
+        fieldname = frappe.get_cached_value("Workflow", workflow, "workflow_state_field") or "workflow_state"
+        self.db_set(fieldname, POSTED, update_modified=False)
+
+        # alert per dokumen hanya jadi noise saat posting massal
+        self.flags.no_gl_alert = True
+        self.make_gl_entry_on_post()
+
+        return True
+
+    def show_gl_alert(self, message, indicator="green"):
+        if self.flags.re_calculate or self.flags.no_gl_alert:
+            return
+
+        frappe.msgprint(message, indicator=indicator, alert=True)
+
     def repair_employee_payment_log(self):
         # cancelled tidak pernah dihitung ulang
         if self.docstatus > 1:
             return
+
+        # dokumen Posted sudah masuk buku besar dan periodenya ditutup,
+        # nilainya tidak boleh berubah lagi
+        if self.is_posted():
+            frappe.throw(
+                _("{0} sudah Posted, upah dan premi tidak bisa dihitung ulang").format(frappe.bold(self.name))
+            )
 
         is_submitted = self.docstatus == 1
 
@@ -328,5 +410,24 @@ class BukuKerjaMandorController(PlantationController):
         self.repair_gl_entry()
 
     def repair_gl_entry(self):
-        # set on child class if needed
-        pass
+        # GL Entry lama diganti, bukan di-reverse, karena nilai dokumen memang
+        # diperbaiki di tanggal yang sama. dokumen yang belum punya GL Entry
+        # (belum Posted) tidak perlu disentuh.
+        if not self.has_gl_entry():
+            return
+
+        self.delete_gl_entry()
+        self.make_gl_entry()
+
+    def delete_gl_entry(self):
+        for gl in frappe.get_all(
+            "GL Entry",
+            filters={
+                "voucher_type": self.doctype,
+                "voucher_no": self.name,
+                "is_cancelled": 0
+            },
+            pluck="name"
+        ):
+            # entry hasil reverse dari cancel sebelumnya sengaja tidak disentuh
+            frappe.delete_doc("GL Entry", gl, ignore_permissions=True)

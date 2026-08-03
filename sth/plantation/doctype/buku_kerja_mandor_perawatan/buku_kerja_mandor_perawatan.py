@@ -138,8 +138,9 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		else:
 			self.create_ste_issue()
 
-		self.make_gl_entry()
-			
+		# GL Entry baru dibuat saat dokumen Posted, lihat BukuKerjaMandorController
+		self.make_gl_entry_on_submit()
+
 	def create_ste_issue(self):
 		ste = frappe.new_doc("Stock Entry")
 		ste.company = self.company
@@ -203,25 +204,6 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		self.db_set("stock_entry", "")
 
 		ste.delete()
-
-	def repair_gl_entry(self):
-		# saat re-calculate GL Entry lama diganti, bukan di-reverse, karena nilai
-		# dokumen memang diperbaiki di tanggal yang sama
-		self.delete_gl_entry()
-		self.make_gl_entry()
-
-	def delete_gl_entry(self):
-		for gl in frappe.get_all(
-			"GL Entry",
-			filters={
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"is_cancelled": 0
-			},
-			pluck="name"
-		):
-			# entry hasil reverse dari cancel sebelumnya sengaja tidak disentuh
-			frappe.delete_doc("GL Entry", gl, ignore_permissions=True)
 
 	def make_gl_entry(self, method=None):
 		gl_entries = []
@@ -292,9 +274,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			gl.flags.ignore_permissions = True
 			gl.insert()
 
-		# saat re-calculate massal, alert per dokumen hanya jadi noise
-		if not self.flags.re_calculate:
-			frappe.msgprint(_("GL Entry berhasil dibuat."), indicator="green", alert=True)
+		self.show_gl_alert(_("GL Entry berhasil dibuat."))
 
 	def make_reverse_gl_entry(self, method=None):
 		"""

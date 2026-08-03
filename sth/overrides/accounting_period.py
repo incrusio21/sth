@@ -43,6 +43,7 @@ class SthAccountingPeriod(AccountingPeriod):
 				OverlapError,
 			)
 	def on_submit(self):
+		post_bkm_on_submit(self)
 		create_costing_bengkel_on_submit(self)
 
 	def on_cancel(self):
@@ -50,6 +51,81 @@ class SthAccountingPeriod(AccountingPeriod):
 
 	def on_trash(self):
 		delete_costing_bengkel_on_trash(self)
+
+# BKM yang GL Entry-nya baru dibuat saat periodenya ditutup
+BKM_POSTED_ON_PERIOD_SUBMIT = ("Buku Kerja Mandor Panen", "Buku Kerja Mandor Perawatan")
+
+
+def post_bkm_on_submit(doc, method=None):
+	"""
+	Saat Accounting Period disubmit (workflow_state = "Submitted"), semua BKM Panen &
+	Perawatan pada company/unit/periode yang sama dipindahkan ke state Posted sekaligus
+	membuat GL Entry-nya.
+	"""
+	if doc.get("workflow_state") != "Submitted":
+		return
+
+	failed = []
+
+	for doctype in BKM_POSTED_ON_PERIOD_SUBMIT:
+		workflow = frappe.get_meta(doctype).get_workflow()
+		if not workflow:
+			# tanpa workflow, GL Entry sudah dibuat sejak submit
+			continue
+
+		state_field = frappe.get_cached_value("Workflow", workflow, "workflow_state_field") or "workflow_state"
+
+		bkm_list = frappe.get_all(
+			doctype,
+			filters={
+				"company": doc.company,
+				"unit": doc.unit,
+				"posting_date": ["between", [doc.start_date, doc.end_date]],
+				"docstatus": 1,
+			},
+			# dokumen lama (sebelum workflow dipasang) state-nya kosong, bukan "Submitted",
+			# dan tetap harus ikut ditandai Posted
+			or_filters=[
+				[doctype, state_field, "!=", "Posted"],
+				[doctype, state_field, "is", "not set"],
+			],
+			pluck="name"
+		)
+
+		for name in bkm_list:
+			posting_savepoint = "post_bkm"
+			try:
+				frappe.db.savepoint(posting_savepoint)
+
+				bkm = frappe.get_doc(doctype, name)
+				bkm.flags.ignore_permissions = True
+				bkm.set_as_posted()
+			except Exception as e:
+				# pesan error per dokumen dirangkum di bawah, jangan ditampilkan dua kali
+				if frappe.message_log:
+					frappe.message_log.pop()
+
+				frappe.db.rollback(save_point=posting_savepoint)
+				failed.append((doctype, name, str(e)))
+
+	if failed:
+		rows = "".join(
+			f"<tr><td>{dt}</td><td>{name}</td><td>{frappe.utils.escape_html(msg)}</td></tr>"
+			for dt, name, msg in failed
+		)
+
+		frappe.throw(
+			title=_("BKM Gagal Diposting"),
+			msg=_("""
+				<p>Accounting Period tidak dapat disubmit. Dokumen berikut gagal dipindahkan
+				ke state <b>Posted</b>:</p>
+				<table class="table table-bordered table-sm" style="margin-top:8px;">
+					<thead><tr><th>Doctype</th><th>Document</th><th>Error</th></tr></thead>
+					<tbody>{rows}</tbody>
+				</table>
+			""").format(rows=rows)
+		)
+
 
 def create_costing_bengkel_on_submit(doc, method=None):
 	"""

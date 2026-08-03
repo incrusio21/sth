@@ -113,7 +113,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def on_submit(self):
 		super().on_submit()
 		self.create_recap_panen_by_blok()
-		# self.make_gl_entries()
+		# GL Entry dibuat saat dokumen Posted / saat BJR masuk, lihat update_hasil_kerja_bjr
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -124,7 +124,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		super().on_trash()
 		self.delete_recap_panen()
 
-	def make_gl_entries(self, method=None):
+	def make_gl_entry(self, method=None):
 		gl_entries = []
 		akun_debit = self.kegiatan_account
 		akun_kredit = ""
@@ -182,7 +182,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			gl.flags.ignore_permissions = True
 			gl.insert()
 
-		frappe.msgprint(_("GL Entry berhasil dibuat."), indicator="green", alert=True)
+		self.show_gl_alert(_("GL Entry berhasil dibuat."))
 
 	def cancel_gl_entries(doc, method=None):
 		"""
@@ -300,5 +300,11 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		self.create_or_update_payment_log(update_payment_log, "Upah")
 		self.create_or_update_mandor_premi()
-		self.make_gl_entries()
+
+		# BJR bisa datang sebelum atau sesudah dokumen Posted. kalau GL Entry sudah ada
+		# nilainya diperbaiki, kalau belum Posted GL Entry-nya menyusul saat posting.
+		if self.has_gl_entry():
+			self.repair_gl_entry()
+		else:
+			self.make_gl_entry_on_submit()
 
