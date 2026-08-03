@@ -7,6 +7,9 @@ from frappe.utils import flt
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
 
 class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
+	# draft ikut dihitung ulang oleh tombol Re-calculate Premi
+	# repair_include_draft = True
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
@@ -92,11 +95,25 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		if self.uom == "HA" and self.hasil_kerja_qty > self.luas_blok:
 			frappe.throw("Hasil Kerja exceeds Luas Blok")
 
+	def calculate(self):
+		# have_premi diisi lewat fetch_from, yang hanya jalan saat save(). re-calculate
+		# memakai db_update_all sehingga nilainya perlu diambil ulang dari master Kegiatan.
+		if self.flags.re_calculate and self.kegiatan:
+			self.have_premi = frappe.get_cached_value("Kegiatan", self.kegiatan, "have_premi")
+
+		super().calculate()
+
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
 			return
 		
-		item.rate = item.get("rate") or self.rupiah_basis
+		# saat re-calculate, upah diambil ulang dari master kegiatan supaya perubahan
+		# rupiah_basis ikut terpakai. penyimpanan biasa tetap menghormati input manual.
+		if self.flags.re_calculate and self.rupiah_basis:
+			item.rate = self.rupiah_basis
+		else:
+			item.rate = item.get("rate") or self.rupiah_basis
+
 		item.premi_amount = 0
 
 		if not self.manual_hk:
@@ -187,6 +204,25 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 		ste.delete()
 
+	def repair_gl_entry(self):
+		# saat re-calculate GL Entry lama diganti, bukan di-reverse, karena nilai
+		# dokumen memang diperbaiki di tanggal yang sama
+		self.delete_gl_entry()
+		self.make_gl_entry()
+
+	def delete_gl_entry(self):
+		for gl in frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"is_cancelled": 0
+			},
+			pluck="name"
+		):
+			# entry hasil reverse dari cancel sebelumnya sengaja tidak disentuh
+			frappe.delete_doc("GL Entry", gl, ignore_permissions=True)
+
 	def make_gl_entry(self, method=None):
 		gl_entries = []
 		akun_debit = self.kegiatan_account
@@ -256,7 +292,9 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			gl.flags.ignore_permissions = True
 			gl.insert()
 
-		frappe.msgprint(_("GL Entry berhasil dibuat."), indicator="green", alert=True)
+		# saat re-calculate massal, alert per dokumen hanya jadi noise
+		if not self.flags.re_calculate:
+			frappe.msgprint(_("GL Entry berhasil dibuat."), indicator="green", alert=True)
 
 	def make_reverse_gl_entry(self, method=None):
 		"""

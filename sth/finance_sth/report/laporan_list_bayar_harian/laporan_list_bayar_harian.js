@@ -68,27 +68,27 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 
 			frappe.prompt(
 				[
-					{
-						fieldname: "reference_no",
-						label: "No Referensi",
-						fieldtype: "Data",
-						reqd: 1
-					},
-					{
-						fieldname: "reference_date",
-						label: "Tanggal Bayar",
-						fieldtype: "Date",
-						reqd: 1,
-						default: frappe.datetime.get_today()
-					}
+					// {
+					// 	fieldname: "reference_no",
+					// 	label: "No Referensi",
+					// 	fieldtype: "Data",
+					// 	reqd: 1
+					// },
+					// {
+					// 	fieldname: "reference_date",
+					// 	label: "Tanggal Bayar",
+					// 	fieldtype: "Date",
+					// 	reqd: 1,
+					// 	default: frappe.datetime.get_today()
+					// }
 				],
 				function (values) {
 					frappe.call({
 						method: "sth.api.submit_payment_entry",
 						args: {
 							docname: docname,
-							reference_no: values.reference_no,
-							reference_date: values.reference_date
+							// reference_no: values.reference_no,
+							// reference_date: values.reference_date
 						},
 						callback: function () {
 							frappe.show_alert({
@@ -117,43 +117,128 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 				return;
 			}
 
-			frappe.prompt(
-				[
+
+			let d = new frappe.ui.Dialog({
+				title: "Konfirmasi",
+				fields: [
 					{
-						fieldname: "reference_no",
-						label: "No Referensi",
-						fieldtype: "Data",
-						reqd: 1
-					},
-					{
-						fieldname: "reference_date",
-						label: "Tanggal Bayar",
-						fieldtype: "Date",
-						reqd: 1,
-						default: frappe.datetime.get_today()
+						fieldtype: "HTML",
+						options: "<p>Apakah Anda yakin?</p>"
 					}
 				],
-				function (values) {
+				primary_action_label: "Disetujui",
+				primary_action() {
+					d.hide();
+
 					frappe.call({
 						method: "sth.api.submit_payment_entry",
 						args: {
 							docname: selected_names,
-							reference_no: values.reference_no,
-							reference_date: values.reference_date
+							status: "Approved"
 						},
-						callback: function () {
-							frappe.show_alert({
-								message: __("Berhasil submit {0} Payment Entry", [selected_names.length]),
-								indicator: "green"
-							});
-
+						callback() {
 							frappe.query_report.refresh();
 						}
 					});
-				},
-				"Input Pembayaran",
-				"Submit"
-			);
+				}
+			});
+
+			d.add_custom_action("Ditolak", () => {
+				d.hide();
+
+				frappe.call({
+					method: "sth.api.submit_payment_entry",
+					args: {
+						docname: selected_names,
+						status: "Rejected"
+					},
+					callback() {
+						frappe.query_report.refresh();
+					}
+				});
+			});
+
+			d.$wrapper.find(".custom-actions .btn-secondary")
+				.removeClass("btn-secondary")
+				.addClass("btn-danger");
+
+			d.show();
+
+			// frappe.confirm(
+			// 	__("Apakah data ini akan disetujui?"),
+			// 	function () {
+			// 		frappe.call({
+			// 			method: "sth.api.submit_payment_entry",
+			// 			args: {
+			// 				docname: selected_names,
+			// 				status: "Approved"
+			// 			},
+			// 			callback: function () {
+			// 				frappe.show_alert({
+			// 					message: __("Berhasil menyetujui {0} data", [selected_names.length]),
+			// 					indicator: "green"
+			// 				});
+
+			// 				frappe.query_report.refresh();
+			// 			}
+			// 		});
+			// 	},
+			// 	function () {
+			// 		frappe.call({
+			// 			method: "sth.api.submit_payment_entry",
+			// 			args: {
+			// 				docname: selected_names,
+			// 				status: "Rejected"
+			// 			},
+			// 			callback: function () {
+			// 				frappe.show_alert({
+			// 					message: __("Berhasil menolak {0} data", [selected_names.length]),
+			// 					indicator: "orange"
+			// 				});
+
+			// 				frappe.query_report.refresh();
+			// 			}
+			// 		});
+			// 	}
+			// );
+
+			// frappe.prompt(
+			// 	[
+			// 		// {
+			// 		// 	fieldname: "reference_no",
+			// 		// 	label: "No Referensi",
+			// 		// 	fieldtype: "Data",
+			// 		// 	reqd: 1
+			// 		// },
+			// 		// {
+			// 		// 	fieldname: "reference_date",
+			// 		// 	label: "Tanggal Bayar",
+			// 		// 	fieldtype: "Date",
+			// 		// 	reqd: 1,
+			// 		// 	default: frappe.datetime.get_today()
+			// 		// }
+			// 	],
+			// 	function (values) {
+			// 		frappe.call({
+			// 			method: "sth.api.submit_payment_entry",
+			// 			args: {
+			// 				docname: selected_names,
+			// 				// reference_no: values.reference_no,
+			// 				// reference_date: values.reference_date
+			// 			},
+			// 			callback: function () {
+			// 				frappe.show_alert({
+			// 					message: __("Berhasil submit {0} Payment Entry", [selected_names.length]),
+			// 					indicator: "green"
+			// 				});
+
+			// 				frappe.query_report.refresh();
+			// 			}
+			// 		});
+			// 	},
+			// 	"Input Pembayaran",
+			// 	"Submit"
+			// );
 		});
 	}
 };

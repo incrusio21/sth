@@ -29,7 +29,7 @@ class FormSupplier {
     }
 
     initDefValue() {
-        $("select[name='lokasi_pengiriman']").val('{{ lokasi_pengiriman }}')
+        $("select[name='lokasi_pengiriman']").val(`{{ lokasi_pengiriman }}`)
     }
 
     initEvent() {
@@ -46,7 +46,7 @@ class FormSupplier {
         this.dt.estimated_date?.selectDate(new Date('{{ required_date }}'))
 
         this.initSelect2("select[name='country[]']");
-        $("select[name='country[]']").val("").trigger("change")
+        // $("select[name='country[]']").val("").trigger("change")
         AutoNumeric.multiple('.number-format', this.opt);
         // AutoNumeric.getAutoNumericElement('input[name="ppn_ongkos_angkut"]').set(11);
     }

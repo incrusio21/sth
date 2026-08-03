@@ -13,7 +13,7 @@ class SupplierComparasion {
 			})
 	}
 
-	init() {
+	async init() {
 		this.page = frappe.ui.make_app_page({
 			parent: this.wrapper,
 			title: 'Komparasi Penawaran Harga Supplier',
@@ -24,7 +24,7 @@ class SupplierComparasion {
 		this.data = []
 		this.selected_items = []
 		this.selected_suppliers = ""
-		this.set_permissions_role()
+		await this.set_permissions_role()
 
 		// console.log(this.page);
 		this.content_wrapper = $(`
@@ -35,7 +35,9 @@ class SupplierComparasion {
 		`)
 		this.page.main.append(this.content_wrapper)
 		this.setupSearchField()
-		this.setupCustomField()
+		if (this.can_create_po) {
+			this.setupChoosenButton()
+		}
 		this.initTable()
 	}
 
@@ -118,40 +120,8 @@ class SupplierComparasion {
 		})
 	}
 
-	setupCustomField() {
+	setupChoosenButton() {
 		var me = this;
-
-		this.sq_field = this.page.add_field({
-			fieldtype: "Link",
-			fieldname: "sq",
-			options: "Supplier Quotation",
-			label: __("SQ Number"),
-			get_query: function () {
-				return {
-					filters: {
-						"company": me.company,
-						"workflow_state": "Need To Compare"
-					}
-				};
-			},
-			change: function () {
-				me.supllier_quotation = this.value
-			},
-		})
-		this.btn_approve = this.page.add_button("Approve", () => {
-			if (!this.supllier_quotation) {
-				return
-			}
-
-			frappe.confirm(`Apakah anda yakin ingin approve document ${this.supllier_quotation} ?`,
-				() => {
-					me.approve_sq()
-				}, () => {
-					// action to perform if No is selected
-				})
-		}, {
-			btn_class: "btn-success"
-		})
 
 		this.btn_chosen_items = this.page.add_button("Choosen items", () => {
 			frappe.xcall("sth.api.get_sq_item_details", { names: [...new Set(this.selected_items.map(r => r.child_name))] }).then((res) => {
@@ -160,24 +130,12 @@ class SupplierComparasion {
 		}, {
 			btn_class: "btn-default"
 		})
-		this.page.page_form.append(this.btn_approve)
 		this.page.page_form.append(this.btn_chosen_items)
-
-		this.sq_field.$wrapper.css({
-			"margin-left": "auto",
-			"display": "none"
-		})
-
-		this.btn_approve.css({
-			"align-self": "center",
-			"display": "none"
-		})
 
 		this.btn_chosen_items.css({
 			"align-self": "center",
 			"margin-left": "auto"
 		})
-		// "margin-left": "10px", jika nanti btn approve tidak di hide 
 
 	}
 
@@ -363,11 +321,10 @@ class SupplierComparasion {
 
 	}
 
-	set_permissions_role() {
+	async set_permissions_role() {
 		const me = this
-		frappe.xcall("sth.api.get_allowed_roles").then((res) => {
-			me.can_create_po = frappe.user_roles.find((r) => res.includes(r))
-		})
+		const res = await frappe.xcall("sth.api.get_allowed_roles")
+		this.can_create_po = frappe.user_roles.some((r) => res.includes(r))
 	}
 
 	generateColumns() {

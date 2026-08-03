@@ -302,10 +302,14 @@ class BukuKerjaMandorController(PlantationController):
         frappe.get_doc(self.voucher_type, self.voucher_no).calculate_used_and_realized()
 
     def repair_employee_payment_log(self):
-        if self.docstatus != 1:
+        # cancelled tidak pernah dihitung ulang
+        if self.docstatus > 1:
             return
-        
-        self.delete_payment_log()
+
+        is_submitted = self.docstatus == 1
+
+        if is_submitted:
+            self.delete_payment_log()
 
         self.flags.re_calculate = 1
         for hk in self.hasil_kerja:
@@ -314,5 +318,15 @@ class BukuKerjaMandorController(PlantationController):
         self.calculate()
         self.db_update_all()
 
+        # draft belum punya Employee Payment Log, cukup perbarui nilai dokumennya.
+        # log akan dibuat seperti biasa saat dokumen di-submit.
+        if not is_submitted:
+            return
+
         self.create_or_update_payment_log()
         self.create_or_update_mandor_premi()
+        self.repair_gl_entry()
+
+    def repair_gl_entry(self):
+        # set on child class if needed
+        pass

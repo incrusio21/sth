@@ -384,7 +384,7 @@ function resolve_account_filter(frm, cdt, cdn) {
             apply_account_filter_from_station(frm, cdt, cdn);
         }
     } else if (sub_unit.includes("TRAKSI")) {
-       apply_account_filter_by_account_number(frm, cdt, cdn, ["4112003", "4112004"]);
+        apply_account_filter_by_account_number(frm, cdt, cdn, ["4112003", "4112004"]);
     } else if (sub_unit === "KANTOR") {
         apply_account_filter_by_prefix(frm, cdt, cdn, "71");
     } else if (sub_unit === "BIBITAN") {

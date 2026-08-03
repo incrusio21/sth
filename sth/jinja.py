@@ -105,3 +105,7 @@ def get_account_balance(account, posting_date):
     """, (account, end_of_month), as_dict=1)
  
     return result[0].balance if result else 0
+
+def strip_html(text):
+    import re
+    return re.sub(r'<[^>]+>', '', text)

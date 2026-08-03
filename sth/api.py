@@ -705,33 +705,27 @@ def get_previous_kriteria_documents(doctype, docname):
 	return results
 
 @frappe.whitelist()
-def submit_payment_entry(docname, reference_no, reference_date):
+def submit_payment_entry(docname, status):
 	if isinstance(docname, str):
 		try:
 			docnames = json.loads(docname)
-
 			if not isinstance(docnames, list):
 				docnames = [docname]
-
 		except Exception:
 			docnames = [docname]
-
-	elif isinstance(docname, list):
-		docnames = docname
-
 	else:
-		docnames = [docname]
+		docnames = docname if isinstance(docname, list) else [docname]
 
-	for payment_entry_name in docnames:
-		doc = frappe.get_doc("Payment Entry", payment_entry_name)
+	for name in docnames:
+		doc = frappe.get_doc("Payment Entry", name)
 
-		doc.reference_no = reference_no
-		doc.reference_date = reference_date
+		doc.workflow_state = status
 
-		doc.save()
-
-		if doc.docstatus == 0:
-			doc.submit()
+		if status == "Approved":
+			if doc.docstatus == 0:
+				doc.submit()
+		else:
+			doc.save()
 
 	frappe.db.commit()
 
@@ -739,8 +733,6 @@ def submit_payment_entry(docname, reference_no, reference_date):
 		"success": True,
 		"count": len(docnames)
 	}
-
-
 
 @frappe.whitelist()
 def get_pengeluaran_barang_bibit(doctype, txt, searchfield, start, page_len, filters):

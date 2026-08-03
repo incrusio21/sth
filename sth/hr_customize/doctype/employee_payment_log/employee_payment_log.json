@@ -28,7 +28,8 @@
   "against_salary_component",
   "account",
   "column_break_nxan",
-  "salary_slip"
+  "salary_slip",
+  "amended_from"
  ],
  "fields": [
   {
@@ -176,13 +177,23 @@
    "fieldtype": "Data",
    "label": "Component Type",
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Payment Log",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-19 15:31:33.021103",
+ "modified": "2026-08-03 13:28:34.231405",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Payment Log",

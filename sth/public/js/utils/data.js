@@ -140,7 +140,8 @@ sth.form = {
                     args: {
                         voucher_type: doctype,
                         filters: {
-                            [field_date]: ["between", [data.from_date, data.to_date]]
+                            [field_date]: ["between", [data.from_date, data.to_date]],
+                            ["docstatus"]: ["in", [0, 1]]
                         }
                     },
                     freeze: true,

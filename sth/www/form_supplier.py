@@ -11,18 +11,7 @@ def get_context(context):
     csrf_token = frappe.sessions.get_csrf_token()
     context["csrf_token"] = csrf_token
     params = frappe.form_dict
-    payment_terms = [
-        "7 hari setelah barang dan invoice diterima (Credit)",
-        "14 hari setelah barang dan invoice diterima (Credit)",
-        "30 hari setelah barang dan invoice diterima (Credit)",
-        "45 hari setelah barang dan invoice diterima (Credit)",
-        "60 hari setelah barang dan invoice diterima (Credit)",
-        "90 hari setelah barang dan invoice diterima (Credit)",
-        "120 hari setelah barang dan invoice diterima (Credit)",
-        "CASH (CASH)",
-        "CASH BEFORE DELIVERY (CASH)"
-        "Panjar / Down Payment (CASH)"
-    ]
+    payment_terms = frappe.get_meta("Supplier Quotation").get_field("syarat_pembayaran").options.strip().split('\n')
 
     if params.get("supp") and params.get("name"):
         supplier = params.get("supp") or ""

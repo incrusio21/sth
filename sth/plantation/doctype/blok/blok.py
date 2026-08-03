@@ -166,15 +166,21 @@ def _hitung_alokasi(blok, selected_bloks):
 	# Blok), baris debit sudah tidak lagi berada di Cost Center Tahun Tanam.
 	# Baris kredit JE "Naik TM" selalu tetap di Cost Center Tahun Tanam,
 	# jadi itu yang jadi acuan berapa yang sudah terpakai dari pool.
+	# Pool biaya TBM hanya diambil dari akun 126x (Aset Dalam Penyelesaian /
+	# TBM). Patokannya `account_number` (sama seperti filter field Account TBM
+	# di blok.js), dengan fallback ke prefix nama akun untuk akun yang
+	# account_number-nya kosong tapi namanya sudah diawali nomor.
 	pool_row = frappe.db.sql("""
 		SELECT
-			COALESCE(SUM(CASE WHEN NOT (voucher_type = 'Journal Entry' AND voucher_no IN %(je_names)s)
-				THEN debit ELSE 0 END), 0) AS pool_awal,
-			COALESCE(SUM(CASE WHEN voucher_type = 'Journal Entry' AND voucher_no IN %(je_names)s
-				THEN credit ELSE 0 END), 0) AS sudah_dialokasikan
-		FROM `tabGL Entry`
-		WHERE cost_center = %(cost_center)s
-		  AND is_cancelled = 0
+			COALESCE(SUM(CASE WHEN NOT (gle.voucher_type = 'Journal Entry' AND gle.voucher_no IN %(je_names)s)
+				THEN gle.debit ELSE 0 END), 0) AS pool_awal,
+			COALESCE(SUM(CASE WHEN gle.voucher_type = 'Journal Entry' AND gle.voucher_no IN %(je_names)s
+				THEN gle.credit ELSE 0 END), 0) AS sudah_dialokasikan
+		FROM `tabGL Entry` gle
+		INNER JOIN `tabAccount` acc ON acc.name = gle.account
+		WHERE gle.cost_center = %(cost_center)s
+		  AND gle.is_cancelled = 0
+		  AND (acc.account_number LIKE '126%%' OR gle.account LIKE '126%%')
 	""", {"cost_center": blok.cost_center, "je_names": tuple(naik_tm_je_names)}, as_dict=True)[0]
 
 	total_biaya = pool_row.pool_awal or 0

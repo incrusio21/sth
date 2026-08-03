@@ -8,29 +8,53 @@ const field_map = {
 	"Angkut": "premi_angkut_amount",
 }
 
+// const MILL_KEGIATAN = [
+// 	"6310400001",
+// 	"6310400002",
+// 	"6310400003",
+// 	"6310400004",
+// 	"6310400005",
+// 	"6310400006",
+// 	"6310400007",
+// 	"6310400008",
+// 	"6310400009",
+// 	"6310400010",
+// 	"6310400011",
+// 	"6310400012",
+// 	"6310400013",
+// 	"6310400014",
+// 	"6310400015",
+// 	"6310600001",
+// 	"6310600002",
+// 	"6320105001",
+// 	"6320105002",
+// 	"6320105003",
+// 	"7111405003",
+// ]
+
 const MILL_KEGIATAN = [
-	"6310400001",
-	"6310400002",
-	"6310400003",
-	"6310400004",
-	"6310400005",
-	"6310400006",
-	"6310400007",
-	"6310400008",
-	"6310400009",
-	"6310400010",
-	"6310400011",
-	"6310400012",
-	"6310400013",
-	"6310400014",
-	"6310400015",
-	"6310600001",
-	"6310600002",
-	"6320105001",
-	"6320105002",
-	"6320105003",
-	"7111405003",
+
 ]
+
+
+// kegiatan UMM bertipe Traksi, diambil dari doctype Kegiatan (cache 1x per load)
+let UMM_TRAKSI_KEGIATAN = null
+
+function get_umm_traksi_kegiatan(){
+	if(UMM_TRAKSI_KEGIATAN) return Promise.resolve(UMM_TRAKSI_KEGIATAN)
+
+	return frappe.db.get_list("Kegiatan", {
+		filters: {
+			kategori_kegiatan: "UMM",
+			tipe_kegiatan: "Traksi",
+		},
+		pluck: "name",
+		limit: 0,
+	}).then((names) => {
+		UMM_TRAKSI_KEGIATAN = names || []
+		return UMM_TRAKSI_KEGIATAN
+	})
+}
 
 frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 	posting_date(frm){
@@ -302,6 +326,8 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
   	set_query_field() {
 		super.set_query_field()
 
+		get_umm_traksi_kegiatan()
+
 		this.frm.set_query("unit", function (doc) {
 			if (!doc.company) {
 				frappe.throw("Please Select Company First")
@@ -345,7 +371,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			if(doc.__is_mill){
 				return {
 					filters: {
-						name: ["in", MILL_KEGIATAN]
+						name: ["in", MILL_KEGIATAN.concat(UMM_TRAKSI_KEGIATAN || [])]
 					}
 				};
 			}

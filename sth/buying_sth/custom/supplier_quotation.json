@@ -941,7 +941,7 @@
    "name": "Supplier Quotation-syarat_pembayaran",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "\n7 hari setelah barang dan invoice diterima (Credit)\n14 hari setelah barang dan invoice diterima (Credit)\n30 hari setelah barang dan invoice diterima (Credit)\n45 hari setelah barang dan invoice diterima (Credit)\n60 hari setelah barang dan invoice diterima (Credit)\n90 hari setelah barang dan invoice diterima (Credit)\n120 hari setelah barang dan invoice diterima (Credit)\nCASH (CASH)\nPanjar / Down Payment (CASH)",
+   "options": "\n7 hari setelah barang dan invoice diterima (Credit)\n14 hari setelah barang dan invoice diterima (Credit)\n30 hari setelah barang dan invoice diterima (Credit)\n45 hari setelah barang dan invoice diterima (Credit)\n60 hari setelah barang dan invoice diterima (Credit)\n90 hari setelah barang dan invoice diterima (Credit)\n120 hari setelah barang dan invoice diterima (Credit)\nCASH (CASH)\nPanjar / Down Payment (CASH)\nCash Before Deliver (CASH)",
    "owner": "Administrator",
    "permlevel": 0,
    "placeholder": null,

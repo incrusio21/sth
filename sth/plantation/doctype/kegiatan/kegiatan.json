@@ -242,7 +242,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-07-09 15:01:54.918123",
+ "modified": "2026-07-29 16:29:05.786157",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",
@@ -270,5 +270,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "nm_kgt"
+ "title_field": "nm_kgt",
+ "track_changes": 1
 }

@@ -136,7 +136,7 @@ jinja = {
 		"sth.jinja.get_payment_entry_ledger_preview",
 		"sth.jinja.get_account_balance",
 	],
-	# "filters": "sth.utils.jinja_filters"
+	"filters": "sth.jinja.strip_html"
 }
 
 # Installation
@@ -247,7 +247,7 @@ override_doctype_class = {
 doc_events = {
 	# untuk kriteria upload
 	"*": {
-		"after_insert": "sth.custom.api.approve_api",
+		# "after_insert": "sth.custom.api.approve_api",
 		"on_update": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_upload_document",
 		"before_submit": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document",
 		"on_trash": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.delete_kriteria_upload_document",

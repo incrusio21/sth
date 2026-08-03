@@ -438,3 +438,60 @@ def test():
 	doc = frappe.get_doc("Mandiri Kopra Cash Management", "TMTL0011404052026000006")
 	content = doc.create_content()
 	print(content)
+
+
+@frappe.whitelist()
+def generate_mft_file(kcm_name):
+	import os
+
+	# Fungsi untuk generate ulang file TXT dan PGP
+	# bila pihak Mandiri meminta file untuk pengecekan
+	# bench execute sth.bank_payment.doctype.mandiri_kopra_cash_management.mandiri_kopra_cash_management.generate_mft_file --kwargs "{'kcm_name':'TMTL0011531072026000004'}"
+	doc = frappe.get_doc("Mandiri Kopra Cash Management", kcm_name)
+
+	folder = os.path.dirname(os.path.abspath(__file__))
+
+	# ==========================
+	# Generate Plain TXT
+	# ==========================
+	plain_content = doc.create_content()
+
+	txt_path = os.path.join(folder, f"{doc.name}.txt")
+	with open(txt_path, "w", encoding="utf-8") as f:
+		f.write(plain_content)
+
+	# ==========================
+	# Generate PGP
+	# ==========================
+	pgp_path = None
+
+	mpk = frappe.get_value(
+		"Mandiri Public Key",
+		doc.public_key,
+		["recipient_email", "public_key"],
+		as_dict=1
+	)
+
+	if mpk and mpk.public_key:
+		encrypted_content = doc.encrypt_in_memory(
+			plain_content,
+			mpk.public_key,
+			mpk.recipient_email
+		)
+
+		pgp_path = os.path.join(folder, f"{doc.name}.pgp")
+
+		with open(pgp_path, "wb") as f:
+			f.write(encrypted_content)
+
+	frappe.msgprint(
+		f"""
+		TXT : {txt_path}<br>
+		PGP : {pgp_path or 'Public Key tidak tersedia'}
+		"""
+	)
+
+	return {
+		"txt": txt_path,
+		"pgp": pgp_path
+	}

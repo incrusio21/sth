@@ -8,7 +8,7 @@ frappe.ui.form.off("Payment Entry", "mode_of_payment");
 
 frappe.ui.form.on("Payment Entry", {
 	setup(frm) {
-		frm.set_query('path', function() {
+		frm.set_query('path', function () {
 			return {
 				filters: {
 					disabled: 0
@@ -17,7 +17,7 @@ frappe.ui.form.on("Payment Entry", {
 		});
 	},
 
-	before_workflow_action: async function(frm) {
+	before_workflow_action: async function (frm) {
 		if (
 			frm.doc.workflow_state === "Butuh Persetujuan 2" &&
 			frm.selected_workflow_action === "Approve"
@@ -26,7 +26,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	tipe_transfer: function(frm) {
+	tipe_transfer: function (frm) {
 		if (frm.doc.tipe_transfer == 'PDO') {
 			show_pdo_selector(frm);
 		} else if (frm.doc.tipe_transfer == 'Realisasi PDO') {
@@ -36,11 +36,11 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	no_kendaraan: function(frm) {
+	no_kendaraan: function (frm) {
 		filter_paid_to_by_kendaraan(frm);
 	},
 
-	party: function(frm) {
+	party: function (frm) {
 		// Clear contact fields
 		if (frm.doc.contact_email || frm.doc.contact_person) {
 			frm.set_value("contact_email", "");
@@ -55,7 +55,7 @@ frappe.ui.form.on("Payment Entry", {
 		set_no_rekening(frm);
 
 		// Re-apply filter dengan customer baru
-		frm.set_query("no_kontrak_penjualan", function() {
+		frm.set_query("no_kontrak_penjualan", function () {
 			return {
 				filters: {
 					customer: frm.doc.party || "",
@@ -85,7 +85,7 @@ frappe.ui.form.on("Payment Entry", {
 					date: frm.doc.posting_date,
 					cost_center: frm.doc.cost_center,
 				},
-				callback: function(r, rt) {
+				callback: function (r, rt) {
 					if (r.message) {
 						frappe.run_serially([
 							() => {
@@ -127,7 +127,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
 		// Set reference_date pada dokumen baru
 		if (
 			frm.doc.__islocal &&
@@ -137,7 +137,7 @@ frappe.ui.form.on("Payment Entry", {
 			frm.set_value("reference_date", frm.doc.posting_date);
 		}
 
-		frm.set_query("no_kontrak_penjualan", function() {
+		frm.set_query("no_kontrak_penjualan", function () {
 			return {
 				filters: {
 					customer: frm.doc.party || "",
@@ -149,12 +149,12 @@ frappe.ui.form.on("Payment Entry", {
 		});
 
 		if (frm.doc.docstatus == 0) {
-			frm.add_custom_button(__("Pilih Nota Piutang"), function() {
+			frm.add_custom_button(__("Pilih Nota Piutang"), function () {
 				pick_nota_piutang(frm);
 			}, __("Buat"));
 		}
 
-		frm.set_query("reference_doctype", "references", function() {
+		frm.set_query("reference_doctype", "references", function () {
 			return {
 				query: "sth.hr_customize.custom.payment_entry.get_payment_reference",
 				filters: {
@@ -190,7 +190,7 @@ frappe.ui.form.on("Payment Entry", {
 			};
 		});
 
-		frm.set_query("payment_term", "references", function(frm, cdt, cdn) {
+		frm.set_query("payment_term", "references", function (frm, cdt, cdn) {
 			const child = locals[cdt][cdn];
 			let query = "sth.controllers.queries.get_payment_terms_for_references";
 			if (
@@ -208,7 +208,7 @@ frappe.ui.form.on("Payment Entry", {
 			};
 		});
 
-		frm.set_query('reference_name', "references", function(doc, cdt, cdn) {
+		frm.set_query('reference_name', "references", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 
 			if (row.reference_doctype) {
@@ -252,15 +252,19 @@ frappe.ui.form.on("Payment Entry", {
 		toggle_paid_from_readonly(frm);
 	},
 
-	party_type: function(frm) {
+	party_type: function (frm) {
 		frm.set_value("internal_employee", 0);
 		set_no_rekening(frm);
 	},
 
-	unit: function(frm) {
+	unit: function (frm) {
 		pasang_company_account(frm);
 		if (!frm.doc.unit) return;
 		filter_bank_accounts(frm);
+	},
+
+	payment_type: function (frm) {
+		pasang_company_account(frm)
 	},
 
 	mode_of_payment(frm) {
@@ -280,16 +284,16 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_df_property('paid_from', 'read_only', 0);
 	},
 
-	paid_from: function(frm) {
+	paid_from: function (frm) {
 		check_mandiri_kcm(frm);
 		set_ft_service(frm);
 	},
 
-	paid_to: function(frm) {
+	paid_to: function (frm) {
 		set_ft_service(frm);
 	},
 
-	ft_service: function(frm) {
+	ft_service: function (frm) {
 		if (frm.doc.ft_service === "UBP") {
 			frm.set_value("path", "MCM_BillPaymentSingle");
 		} else {
@@ -297,8 +301,8 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	company: function(frm) {
-		frm.set_query("no_kontrak_penjualan", function() {
+	company: function (frm) {
+		frm.set_query("no_kontrak_penjualan", function () {
 			return {
 				filters: {
 					customer: frm.doc.party || "",
@@ -324,12 +328,12 @@ frappe.ui.form.on("Payment Entry", {
 				const d = r.message;
 
 				frm.set_value("payment_type", "Internal Transfer");
-				frm.set_value("company",                  d.company);
-				frm.set_value("paid_to",                  d.paid_to);
+				frm.set_value("company", d.company);
+				frm.set_value("paid_to", d.paid_to);
 				frm.set_value("paid_to_account_currency", d.paid_to_account_currency);
-				frm.set_value("paid_amount",              d.paid_amount);
-				frm.set_value("received_amount",          d.received_amount);
-				frm.set_value("remarks",                  d.remarks);
+				frm.set_value("paid_amount", d.paid_amount);
+				frm.set_value("received_amount", d.received_amount);
+				frm.set_value("remarks", d.remarks);
 
 				if (d.cost_center) {
 					frm.set_value("cost_center", d.cost_center);
@@ -338,7 +342,7 @@ frappe.ui.form.on("Payment Entry", {
 		});
 	},
 
-	no_kontrak_penjualan: function(frm) {
+	no_kontrak_penjualan: function (frm) {
 		if (!frm.doc.no_kontrak_penjualan) return;
 		frm.set_value("paid_from", "");
 		frappe.db.get_doc("Sales Order", frm.doc.no_kontrak_penjualan).then(so => {
@@ -433,8 +437,8 @@ frappe.ui.form.on("Payment Entry", {
 		});
 	},
 
-	validate_reference_document: function(frm, row) {
-		var _validate = function(i, row) {
+	validate_reference_document: function (frm, row) {
+		var _validate = function (i, row) {
 			if (!row.reference_doctype) {
 				return;
 			}
@@ -475,7 +479,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	get_outstanding_documents: function(frm, filters, get_outstanding_invoices, get_orders_to_be_billed) {
+	get_outstanding_documents: function (frm, filters, get_outstanding_invoices, get_orders_to_be_billed) {
 		frm.clear_table("references");
 
 		if (!frm.doc.party) {
@@ -517,11 +521,11 @@ frappe.ui.form.on("Payment Entry", {
 			args: {
 				args: args,
 			},
-			callback: function(r, rt) {
+			callback: function (r, rt) {
 				if (r.message) {
 					var total_positive_outstanding = 0;
 					var total_negative_outstanding = 0;
-					$.each(r.message, function(i, d) {
+					$.each(r.message, function (i, d) {
 						var c = frm.add_child("references");
 						c.reference_doctype = d.voucher_type;
 						c.reference_name = d.voucher_no;
@@ -599,7 +603,7 @@ frappe.ui.form.on("Payment Entry Reference", {
 					reference_doctype: row.reference_doctype,
 					reference_name: row.reference_name,
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message && r.message.payment_term && r.message.payment_term !== row.payment_term) {
 						frappe.msgprint({
 							title: __("Termin Tidak Berurutan"),
@@ -636,7 +640,7 @@ frappe.ui.form.on("Payment Entry Reference", {
 				reference_doctype: row.reference_doctype,
 				reference_name: row.reference_name,
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (!r.message) return;
 
 				frappe.model.set_value(cdt, cdn, "payment_term", r.message.payment_term);
@@ -663,7 +667,7 @@ function fetch_payment_term_outstanding(frm, cdt, cdn) {
 			reference: row.reference_name,
 			payment_term: row.payment_term,
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (r.message) {
 				frappe.model.set_value(cdt, cdn, "payment_term_outstanding", r.message);
 			}
@@ -695,12 +699,12 @@ function set_no_rekening(frm) {
 			permintaan_dana_operasional: frm.doc.permintaan_dana_operasional,
 			payment_type: frm.doc.payment_type
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (r.message) {
-				frm.set_value("no_rekening",         r.message.no_rekening || "");
-				frm.set_value("nama_bank",           r.message.nama_bank || "");
-				frm.set_value("no_rekening_tujuan",  r.message.no_rekening_tujuan || "");
-				frm.set_value("bank_tujuan",         r.message.bank_tujuan || "");
+				frm.set_value("no_rekening", r.message.no_rekening || "");
+				frm.set_value("nama_bank", r.message.nama_bank || "");
+				frm.set_value("no_rekening_tujuan", r.message.no_rekening_tujuan || "");
+				frm.set_value("bank_tujuan", r.message.bank_tujuan || "");
 			} else {
 				frm.set_value("no_rekening", "");
 				frm.set_value("nama_bank", "");
@@ -822,7 +826,7 @@ async function apply_nota_piutang(frm, nota_piutang_name) {
 
 function pasang_company_account(frm) {
 	if (frm.doc.unit) {
-		frappe.db.get_value('Unit', frm.doc.unit, 'default_bank_account', function(r) {
+		frappe.db.get_value('Unit', frm.doc.unit, 'default_bank_account', function (r) {
 			if (r && r.default_bank_account) {
 				frm.set_value('bank_account', r.default_bank_account);
 			} else {
@@ -846,7 +850,7 @@ function make_pdo_preview(frm) {
 
 	if (uniquePDO.length === 0) return;
 
-	frm.add_custom_button(__('Check Preview'), function() {
+	frm.add_custom_button(__('Check Preview'), function () {
 		show_pdo_preview(uniquePDO);
 	}, __('PDO'));
 }
@@ -895,7 +899,7 @@ function check_mandiri_kcm(frm) {
 		args: {
 			account: frm.doc.paid_from
 		},
-		callback: function(r) {
+		callback: function (r) {
 			let is_mandiri_kcm = r.message ? 0 : 1;
 			frm.set_df_property('mandiri_kcm', 'hidden', is_mandiri_kcm);
 		}
@@ -1078,7 +1082,7 @@ function filter_bank_accounts(frm) {
 
 function filter_paid_to_by_kendaraan(frm) {
 	if (!frm.doc.no_kendaraan) {
-		frm.set_query('paid_to', function() {
+		frm.set_query('paid_to', function () {
 			return { filters: { is_group: 0 } };
 		});
 		return;
@@ -1087,7 +1091,7 @@ function filter_paid_to_by_kendaraan(frm) {
 	frappe.db.get_value('Alat Berat Dan Kendaraan', frm.doc.no_kendaraan, 'tipe_master', (r) => {
 		let prefix = (r && r.tipe_master === 'Kendaraan Umum') ? '7' : '4';
 
-		frm.set_query('paid_to', function() {
+		frm.set_query('paid_to', function () {
 			return {
 				filters: {
 					is_group: 0,
@@ -1106,7 +1110,7 @@ function filter_paid_to_by_kendaraan(frm) {
 function apply_account(frm, account) {
 	if (frm.doc.payment_type == 'Receive' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Penerimaan Dana PDO" || frm.doc.tipe_transfer == "Dividen Receive"))) {
 
-		frm.set_query('paid_to', function() {
+		frm.set_query('paid_to', function () {
 			return account ? { filters: { name: account } } : {};
 		});
 
@@ -1114,7 +1118,7 @@ function apply_account(frm, account) {
 
 	} else if (frm.doc.payment_type == 'Pay' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Payroll Entry" || frm.doc.tipe_transfer == "Realisasi PDO" || frm.doc.tipe_transfer == "PDO" || frm.doc.tipe_transfer == "Dividen Sent" || frm.doc.tipe_transfer == "Leasing"))) {
 
-		frm.set_query('paid_from', function() {
+		frm.set_query('paid_from', function () {
 			return account ? { filters: { name: account } } : {};
 		});
 
@@ -1132,14 +1136,14 @@ function show_pdo_selector(frm) {
 				['payment_voucher', '=', '']
 			],
 			fields: ['name', 'posting_date', 'unit',
-					 'grand_total_bahan_bakar',
-					 'grand_total_perjalanan_dinas',
-					 'grand_total_kas',
-					 'grand_total_dana_cadangan',
-					 'grand_total_non_pdo'],
+				'grand_total_bahan_bakar',
+				'grand_total_perjalanan_dinas',
+				'grand_total_kas',
+				'grand_total_dana_cadangan',
+				'grand_total_non_pdo'],
 			limit: 50
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (!r.message || r.message.length === 0) {
 				frappe.msgprint({
 					title: __('No PDO Available'),
@@ -1152,10 +1156,10 @@ function show_pdo_selector(frm) {
 
 			let rows = r.message.map(d => {
 				let total = (d.grand_total_bahan_bakar || 0) +
-							(d.grand_total_perjalanan_dinas || 0) +
-							(d.grand_total_kas || 0) +
-							(d.grand_total_dana_cadangan || 0) +
-							(d.grand_total_non_pdo || 0);
+					(d.grand_total_perjalanan_dinas || 0) +
+					(d.grand_total_kas || 0) +
+					(d.grand_total_dana_cadangan || 0) +
+					(d.grand_total_non_pdo || 0);
 				return `
 					<tr class="pdo-row"
 						data-name="${d.name}"
@@ -1164,7 +1168,7 @@ function show_pdo_selector(frm) {
 						<td style="padding:8px; border-bottom:1px solid #eee;">${d.unit || '-'}</td>
 						<td style="padding:8px; border-bottom:1px solid #eee;">${d.posting_date}</td>
 						<td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">
-							${frappe.format(total, {fieldtype: 'Currency'})}
+							${frappe.format(total, { fieldtype: 'Currency' })}
 						</td>
 					</tr>
 				`;
@@ -1193,7 +1197,7 @@ function show_pdo_selector(frm) {
 
 			dialog.show();
 
-			dialog.$wrapper.find('.pdo-row').on('click', function() {
+			dialog.$wrapper.find('.pdo-row').on('click', function () {
 				let selected_name = $(this).data('name');
 				dialog.hide();
 
@@ -1204,7 +1208,7 @@ function show_pdo_selector(frm) {
 					},
 					freeze: true,
 					freeze_message: __('Creating Payment Voucher...'),
-					callback: function(r) {
+					callback: function (r) {
 						if (r.message) {
 							var doc = r.message;
 							frappe.model.sync(doc);
@@ -1227,7 +1231,7 @@ function fetch_pdo_details(frm, pdo_name) {
 			doctype: 'Permintaan Dana Operasional',
 			name: name
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (r.message) {
 				let pdo = r.message;
 				frm.set_value('paid_amount', pdo.grand_total_pdo);
@@ -1255,16 +1259,16 @@ function show_realisasi_sisa(frm) {
 			'outstanding_amount_bahan_bakar', 'outstanding_amount_perjalanan_dinas',
 			'outstanding_amount_kas', 'outstanding_amount_dana_cadangan'
 		],
-		function(d) {
+		function (d) {
 			if (!d) return;
 
 			let paid = flt(frm.doc.paid_amount);
 
 			let tipes = [
-				{ label: 'Bahan Bakar',      grand: d.grand_total_bahan_bakar,       outstanding: d.outstanding_amount_bahan_bakar },
-				{ label: 'Perjalanan Dinas', grand: d.grand_total_perjalanan_dinas,  outstanding: d.outstanding_amount_perjalanan_dinas },
-				{ label: 'Kas',              grand: d.grand_total_kas,               outstanding: d.outstanding_amount_kas },
-				{ label: 'Dana Cadangan',    grand: d.grand_total_dana_cadangan,     outstanding: d.outstanding_amount_dana_cadangan },
+				{ label: 'Bahan Bakar', grand: d.grand_total_bahan_bakar, outstanding: d.outstanding_amount_bahan_bakar },
+				{ label: 'Perjalanan Dinas', grand: d.grand_total_perjalanan_dinas, outstanding: d.outstanding_amount_perjalanan_dinas },
+				{ label: 'Kas', grand: d.grand_total_kas, outstanding: d.outstanding_amount_kas },
+				{ label: 'Dana Cadangan', grand: d.grand_total_dana_cadangan, outstanding: d.outstanding_amount_dana_cadangan },
 			].filter(t => flt(t.grand) > 0);
 
 			let total_outstanding = tipes.reduce((s, t) => s + flt(t.outstanding), 0);
@@ -1344,7 +1348,7 @@ function show_realisasi_pdo_selector(frm) {
 			],
 			limit: 50
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (!r.message || r.message.length === 0) {
 				frappe.msgprint({
 					title: __('No PDO Available'),
@@ -1357,9 +1361,9 @@ function show_realisasi_pdo_selector(frm) {
 
 			let available_pdos = r.message.filter(d => {
 				return (d.outstanding_amount_bahan_bakar > 0) ||
-					   (d.outstanding_amount_perjalanan_dinas > 0) ||
-					   (d.outstanding_amount_kas > 0) ||
-					   (d.outstanding_amount_dana_cadangan > 0);
+					(d.outstanding_amount_perjalanan_dinas > 0) ||
+					(d.outstanding_amount_kas > 0) ||
+					(d.outstanding_amount_dana_cadangan > 0);
 			});
 
 			if (available_pdos.length === 0) {
@@ -1374,14 +1378,14 @@ function show_realisasi_pdo_selector(frm) {
 
 			let rows = available_pdos.map(d => {
 				let grand_total = (d.grand_total_bahan_bakar || 0) +
-								  (d.grand_total_perjalanan_dinas || 0) +
-								  (d.grand_total_kas || 0) +
-								  (d.grand_total_dana_cadangan || 0);
+					(d.grand_total_perjalanan_dinas || 0) +
+					(d.grand_total_kas || 0) +
+					(d.grand_total_dana_cadangan || 0);
 
 				let outstanding = (d.outstanding_amount_bahan_bakar || 0) +
-								  (d.outstanding_amount_perjalanan_dinas || 0) +
-								  (d.outstanding_amount_kas || 0) +
-								  (d.outstanding_amount_dana_cadangan || 0);
+					(d.outstanding_amount_perjalanan_dinas || 0) +
+					(d.outstanding_amount_kas || 0) +
+					(d.outstanding_amount_dana_cadangan || 0);
 
 				return `
 					<tr class="pdo-row"
@@ -1395,10 +1399,10 @@ function show_realisasi_pdo_selector(frm) {
 						<td style="padding:8px; border-bottom:1px solid #eee;">${d.unit || '-'}</td>
 						<td style="padding:8px; border-bottom:1px solid #eee;">${d.posting_date}</td>
 						<td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">
-							${frappe.format(grand_total, {fieldtype: 'Currency'})}
+							${frappe.format(grand_total, { fieldtype: 'Currency' })}
 						</td>
 						<td style="padding:8px; border-bottom:1px solid #eee; text-align:right; color: #e74c3c;">
-							${frappe.format(outstanding, {fieldtype: 'Currency'})}
+							${frappe.format(outstanding, { fieldtype: 'Currency' })}
 						</td>
 					</tr>
 				`;
@@ -1428,7 +1432,7 @@ function show_realisasi_pdo_selector(frm) {
 
 			dialog.show();
 
-			dialog.$wrapper.find('.pdo-row').on('click', function() {
+			dialog.$wrapper.find('.pdo-row').on('click', function () {
 				let selected_name = $(this).data('name');
 				let outstanding_bb = $(this).data('bb');
 				let outstanding_pd = $(this).data('pd');
@@ -1462,16 +1466,16 @@ function show_realisasi_pdo_selector(frm) {
 						}
 					],
 					primary_action_label: __('Create Realisasi'),
-					primary_action: function(values) {
+					primary_action: function (values) {
 						tipe_dialog.hide();
 
 						// Kalau PE sudah tersimpan, isi langsung — jangan buat PE baru
 						if (!frm.doc.__islocal) {
 							let amount_map = {
-								'Bahan Bakar':      flt(outstanding_bb),
+								'Bahan Bakar': flt(outstanding_bb),
 								'Perjalanan Dinas': flt(outstanding_pd),
-								'Kas':              flt(outstanding_kas),
-								'Dana Cadangan':    flt(outstanding_dc),
+								'Kas': flt(outstanding_kas),
+								'Dana Cadangan': flt(outstanding_dc),
 							};
 							let amount = amount_map[values.tipe_pdo] || 0;
 
@@ -1479,21 +1483,21 @@ function show_realisasi_pdo_selector(frm) {
 								frm.clear_table('payment_voucher_kas_pdo');
 
 								let tipe_table_map = {
-									'Bahan Bakar':      'pdo_bahan_bakar',
+									'Bahan Bakar': 'pdo_bahan_bakar',
 									'Perjalanan Dinas': 'pdo_perjalanan_dinas',
-									'Kas':              'pdo_kas',
-									'Dana Cadangan':    'pdo_dana_cadangan',
+									'Kas': 'pdo_kas',
+									'Dana Cadangan': 'pdo_dana_cadangan',
 								};
 								let table_name = tipe_table_map[values.tipe_pdo];
 								let rows = (table_name && pdo[table_name]) || [];
 
 								rows.forEach(row => {
 									frm.add_child('payment_voucher_kas_pdo', {
-										no_pdo:   selected_name,
+										no_pdo: selected_name,
 										tipe_pdo: values.tipe_pdo,
 										debit_to: row.debit_to,
 										penerima: row.employee,
-										total:    row.total,
+										total: row.total,
 									});
 								});
 
@@ -1513,7 +1517,7 @@ function show_realisasi_pdo_selector(frm) {
 							},
 							freeze: true,
 							freeze_message: __('Creating Realisasi PDO...'),
-							callback: function(r) {
+							callback: function (r) {
 								if (r.message) {
 									var doc = r.message;
 									frappe.model.sync(doc);

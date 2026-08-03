@@ -1,8 +1,70 @@
 // Copyright (c) 2026, DAS and contributors
 // For license information, please see license.txt
 
+// Tampilan link title (title field) dimatikan selama berada di Pertanggungjawaban
+// Perjalanan Dinas, supaya field link menampilkan nama dokumen aslinya.
+// frappe.utils bersifat global dan desk tidak reload saat pindah menu, jadi fungsi
+// aslinya disimpan lalu dikembalikan begitu route keluar dari doctype ini.
+const PPD_DOCTYPE = "Pertanggungjawaban Perjalanan Dinas";
+// Kosongkan untuk semua doctype, atau isi mis. ["Travel Request"] untuk membatasi.
+const PPD_HIDE_LINK_TITLE_FOR = [];
+
+let ppd_original_link_title = null;
+
+function ppd_is_link_title_hidden(doctype) {
+  return !PPD_HIDE_LINK_TITLE_FOR.length || PPD_HIDE_LINK_TITLE_FOR.includes(doctype);
+}
+
+function ppd_hide_link_title() {
+  if (ppd_original_link_title) return;
+
+  ppd_original_link_title = {
+    get: frappe.utils.get_link_title,
+    fetch: frappe.utils.fetch_link_title
+  };
+
+  // Mengembalikan name apa adanya; formatter Link menganggapnya "tanpa title".
+  frappe.utils.get_link_title = function (doctype, name) {
+    if (ppd_is_link_title_hidden(doctype)) return name;
+    return ppd_original_link_title.get.apply(this, arguments);
+  };
+
+  frappe.utils.fetch_link_title = function (doctype, name) {
+    if (ppd_is_link_title_hidden(doctype)) return Promise.resolve(name);
+    return ppd_original_link_title.fetch.apply(this, arguments);
+  };
+}
+
+function ppd_restore_link_title() {
+  if (!ppd_original_link_title) return;
+
+  frappe.utils.get_link_title = ppd_original_link_title.get;
+  frappe.utils.fetch_link_title = ppd_original_link_title.fetch;
+  ppd_original_link_title = null;
+}
+
+function ppd_sync_link_title() {
+  const route = frappe.get_route() || [];
+  if (route[1] === PPD_DOCTYPE) {
+    ppd_hide_link_title();
+  } else {
+    ppd_restore_link_title();
+  }
+}
+
+if (!frappe.__ppd_link_title_watcher) {
+  frappe.__ppd_link_title_watcher = true;
+  frappe.router.on("change", ppd_sync_link_title);
+}
+
 frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
+  onload(frm) {
+    // dipanggil sebelum field dirender, supaya link tidak sempat tampil sebagai title
+    ppd_sync_link_title();
+  },
   refresh(frm) {
+    ppd_sync_link_title();
+
     if (frm.doc.docstatus === 0 || frm.is_new()) {
       frm.set_query("no_spd", function () {
         return {

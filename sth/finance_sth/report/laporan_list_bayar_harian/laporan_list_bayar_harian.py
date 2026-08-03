@@ -21,44 +21,44 @@ def get_columns():
 			"fieldname": "pt",
 			"label": _("PT"),
 			"fieldtype": "Data",
-			"width": 160,
+			"width": 250,
 		},
 		{
 			"fieldname": "uraian",
 			"label": _("URAIAN - VENDOR - PT UNIT"),
 			"fieldtype": "Data",
-			"width": 200,
+			"width": 300,
 		},
 		{
 			"fieldname": "no_payment_voucher",
 			"label": _("NO. PAYMENT VOUCHER"),
 			"fieldtype": "Link",
 			"options": "Payment Entry",
-			"width": 180,
+			"width": 250,
 		},
 		{
 			"fieldname": "no_reff_mcm",
 			"label": _("NO REFF MCM"),
 			"fieldtype": "Data",
-			"width": 150,
+			"width": 250,
 		},
 		{
 			"fieldname": "nilai_tagihan",
 			"label": _("NILAI TAGIHAN"),
 			"fieldtype": "Currency",
-			"width": 150,
+			"width": 250,
 		},
 		{
 			"fieldname": "payment_schedule",
 			"label": _("PAYMENT SCHEDULE"),
 			"fieldtype": "Data",
-			"width": 150,
+			"width": 250,
 		},
 		{
 			"fieldname": "payment_status",
 			"label": _("PAYMENT STATUS"),
 			"fieldtype": "Data",
-			"width": 130,
+			"width": 250,
 		},
 		# {
 		# 	"fieldname": "submit_button",
@@ -88,6 +88,7 @@ def get_data(filters=None):
 			cf.abbr as company_from,
 			ct.abbr as company_to,
 			pe.company,
+			pe.party_type,
 			pe.party,
 			pe.reference_no,
 			pi.invoice_type,
@@ -114,7 +115,7 @@ def get_data(filters=None):
 		LEFT JOIN
 			`tabCompany` ct ON ct.name = at.company
 		WHERE
-			pe.docstatus = 0 AND pe.tipe_transfer = '' AND pe.permintaan_dana_operasional IS NULL
+			pe.docstatus = 0 AND pe.permintaan_dana_operasional IS NULL
 		ORDER BY
 			FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
 			pe.company,
@@ -133,10 +134,18 @@ def get_data(filters=None):
 
 	for pe in payment_entries:
 		ref_type = pe.reference_doctype or ""
+  
+		party_doc = frappe.get_doc(pe.party_type, pe.party)
 
 		row = {
 			"pt": pe.company,
-			"uraian": pe.party,
+			"uraian": (
+				party_doc.supplier_name
+				if pe.party_type == "Supplier"
+				else party_doc.first_name
+				if pe.party_type == "Employee"
+				else pe.party
+			),
 			"no_payment_voucher": pe.name,
 			"no_reff_mcm": pe.reference_no,
 			"nilai_tagihan": flt(pe.outstanding_amount),
@@ -185,6 +194,10 @@ def get_data(filters=None):
 			row["jenis_transaksi"] = "TAGIHAN SUPPLIER"
 			row["payment_status"] = ""
 			supplier_rows.append(row)
+		# elif ref_type == "Purchase Invoice":
+		# 	row["jenis_transaksi"] = "TAGIHAN SUPPLIER"
+		# 	row["payment_status"] = ""
+		# 	supplier_rows.append(row)
 
 	data = []
 	grand_total = 0

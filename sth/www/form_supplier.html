@@ -139,13 +139,14 @@
                                         <td data-field="country">
                                             <select class="form-select" name="country[]" required>
                                                 {% for data in country %}
-                                                <option value="{{ data }}">{{ data }}</option>
+                                                <option value="{{ data }}" {{ "selected" if data==item.country }}>{{
+                                                    data }}</option>
                                                 {% endfor %}
                                             </select>
                                         </td>
                                         <td data-field="desc">
                                             <textarea class="form-control form-control-sm" name="desc[]" rows="1"
-                                                required>{{ item.description }}</textarea>
+                                                required>{{ item.description | strip_html }}</textarea>
                                         </td>
                                         <td data-field="qty">
                                             <input type="number" min="1" name="qty[]"
@@ -262,7 +263,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">Lokasi Pengiriman</label>
-                            <textarea class="form-control" rows="2" readonly>{{ lokasi_pengiriman or "" }}</textarea>
+                            <textarea class="form-control" rows="2">{{ lokasi_pengiriman or "" }}</textarea>
                         </div>
                     </div>
                     <div class="mb-3 row">
