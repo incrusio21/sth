@@ -632,6 +632,12 @@ frappe.ui.form.on("Payment Entry Reference", {
 	reference_name(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
+		if (row.reference_doctype === "Purchase Invoice" && row.reference_name) {
+			allocate_outstanding_amount(frm, cdt, cdn);
+			set_note_from_purchase_invoice(frm);
+			return;
+		}
+
 		if (row.reference_doctype !== "Ganti Rugi Lahan" || !row.reference_name) return;
 
 		frappe.call({
@@ -654,6 +660,19 @@ frappe.ui.form.on("Payment Entry Reference", {
 				sync_paid_amount_from_references(frm);
 			},
 		});
+	},
+
+	references_remove(frm) {
+		// hanya PE berbasis Purchase Invoice yang ditulis ulang otomatis, supaya PE dari
+		// PDO / Ganti Rugi Lahan tidak ikut berubah saat barisnya dihapus
+		const has_purchase_invoice = (frm.doc.references || []).some(
+			(d) => d.reference_doctype === "Purchase Invoice"
+		);
+
+		if (!has_purchase_invoice && !frm.__note_from_purchase_invoice) return;
+
+		set_note_from_purchase_invoice(frm);
+		sync_paid_amount_from_references(frm);
 	}
 });
 
@@ -673,6 +692,80 @@ function fetch_payment_term_outstanding(frm, cdt, cdn) {
 			}
 		},
 	});
+}
+
+// Purchase Invoice yang dipilih manual di references langsung dialokasi penuh sebesar
+// outstanding-nya, lalu paid_amount mengikuti total alokasi. kalau mau bayar sebagian,
+// allocated_amount tinggal diubah manual.
+function allocate_outstanding_amount(frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+
+	// outstanding dihitung terhadap party account, jadi party harus sudah terisi
+	if (!frm.doc.party_type || !frm.doc.party) return;
+
+	frappe.call({
+		method: "sth.overrides.payment_entry.get_payment_reference_details",
+		args: {
+			reference_doctype: row.reference_doctype,
+			reference_name: row.reference_name,
+			party_account_currency:
+				frm.doc.payment_type == "Receive"
+					? frm.doc.paid_from_account_currency
+					: frm.doc.paid_to_account_currency,
+			party_type: frm.doc.party_type,
+			party: frm.doc.party,
+		},
+		callback: function (r) {
+			if (!r.message) return;
+
+			frappe.model.set_value(cdt, cdn, "allocated_amount", flt(r.message.outstanding_amount));
+
+			sync_paid_amount_from_references(frm);
+		},
+	});
+}
+
+// Keterangan diisi ulang dari nama barang tiap Purchase Invoice yang direferensikan,
+// satu baris per invoice, jadi menambah/mengganti/menghapus invoice selalu menghasilkan
+// keterangan yang konsisten.
+async function set_note_from_purchase_invoice(frm) {
+	const invoices = (frm.doc.references || [])
+		.filter((d) => d.reference_doctype === "Purchase Invoice" && d.reference_name)
+		.map((d) => d.reference_name);
+
+	if (!invoices.length) {
+		// keterangan yang diketik manual tidak ikut dihapus
+		if (frm.__note_from_purchase_invoice) {
+			frm.set_value("note", "");
+			frm.__note_from_purchase_invoice = false;
+		}
+
+		return;
+	}
+
+	const lines = [];
+	for (const invoice of invoices) {
+		const pinv = await frappe.db.get_doc("Purchase Invoice", invoice);
+		const item_names = [];
+
+		for (const item of pinv.items || []) {
+			const item_name = item.item_name || item.item_code;
+
+			// barang yang sama di beberapa baris invoice cukup ditulis sekali
+			if (item_name && !item_names.includes(item_name)) {
+				item_names.push(item_name);
+			}
+		}
+
+		if (item_names.length) {
+			lines.push(`${invoice}: ${item_names.join(", ")}`);
+		}
+	}
+
+	if (!lines.length) return;
+
+	frm.set_value("note", lines.join("\n"));
+	frm.__note_from_purchase_invoice = true;
 }
 
 function sync_paid_amount_from_references(frm) {
