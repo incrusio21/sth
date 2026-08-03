@@ -3,7 +3,24 @@
 
 frappe.query_reports["Laporan List Bayar Harian"] = {
 	"filters": [
-
+		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+		},
+		{
+			"fieldname": "supplier",
+			"label": __("Supplier"),
+			"fieldtype": "Link",
+			"options": "Supplier",
+		},
+		{
+			"fieldname": "from_date",
+			"label": __("Tanggal Dari"),
+			"fieldtype": "Date",
+			"reqd": 0
+		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);

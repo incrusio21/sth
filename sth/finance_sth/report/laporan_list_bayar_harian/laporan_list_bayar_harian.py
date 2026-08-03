@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, today
 
 
 def execute(filters=None):
@@ -77,8 +77,9 @@ def get_columns():
 
 def get_data(filters=None):
 	# Fetch all Draft Payment Entries with their references
+	conditions = get_condition(filters)
 	payment_entries = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			pe.name,
 			pe.payment_type,
@@ -116,11 +117,13 @@ def get_data(filters=None):
 			`tabCompany` ct ON ct.name = at.company
 		WHERE
 			pe.docstatus = 0 AND pe.permintaan_dana_operasional IS NULL
+			{conditions}
 		ORDER BY
 			FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
 			pe.company,
 			pe.name
 		""",
+		filters,
 		as_dict=True,
 	)
 
@@ -340,3 +343,19 @@ def get_data(filters=None):
 	)
 
 	return data
+
+def get_condition(filters):
+	conditions = ""
+
+	if filters.get("company"):
+		conditions += " AND pe.company = %(company)s"
+
+	if filters.get("supplier"):
+		conditions += " AND pe.party = %(supplier)s"
+
+
+	if filters.get("from_date"):
+		filters["to_date"] = today()
+		conditions += " AND pe.request_release_date BETWEEN %(from_date)s AND %(to_date)s"
+
+	return conditions

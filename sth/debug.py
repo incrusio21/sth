@@ -120,3 +120,37 @@ def debug_panen_k():
 	
 	doc = frappe.get_doc("Sounding Stock Palm Kernel di Bunker Kernel", no_doc)
 	doc.get_stock()
+
+
+def debug_payment_reference():
+    pi = frappe.db.get_value(
+        'Purchase Invoice',
+        'ACC-PINV-2026-00133',
+        ['grand_total', 'rounded_total', 'rounding_adjustment', 'outstanding_amount'],
+        as_dict=True
+    )
+
+    pe = frappe.db.get_value(
+        'Payment Entry',
+        'ACC-PAY-2026-00273',
+        ['name', 'paid_amount', 'received_amount', 'difference_amount', 'docstatus'],
+        as_dict=True
+    )
+
+    refs = frappe.get_all(
+        'Payment Entry Reference',
+        filters={'parent': 'ACC-PAY-2026-00273'},
+        fields=[
+            'reference_doctype',
+            'reference_name',
+            'total_amount',
+            'outstanding_amount',
+            'allocated_amount'
+        ]
+    )
+
+    return {
+        'purchase_invoice': pi,
+        'payment_entry': pe,
+        'references': refs
+    }

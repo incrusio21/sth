@@ -1,5 +1,5 @@
 import frappe
-from frappe.model.naming import make_autoname
+from frappe.model.naming import getseries
 from frappe import _
 
 def set_unit_from_parent(doc, method):
@@ -15,33 +15,15 @@ def set_unit_from_parent(doc, method):
 	if hasattr(parent, "unit"):
 		doc.unit = parent.unit
 
+GL_SERIES_KEY = "GL-."
+
+
 def autoname_gl_entry(doc, method=None):
-    # Ensure the series row exists
-    frappe.db.sql(
-        "INSERT IGNORE INTO `tabSeries` (name, current) VALUES ('GL-.', 0)"
-    )
-
-    # Lock the series row so concurrent inserts queue up here
-    frappe.db.sql(
-        "SELECT current FROM `tabSeries` WHERE name = 'GL-.' FOR UPDATE"
-    )
-
-    # Read the real max from the table — fills gaps left by deletions
-    last = frappe.db.sql(
-        """SELECT COALESCE(MAX(CAST(SUBSTRING(name, 4) AS UNSIGNED)), 0)
-           FROM `tabGL Entry`
-           WHERE name REGEXP '^GL-[0-9]{8}$'"""
-    )[0][0]
-
-    next_num = int(last) + 1
-
-    # Keep tabSeries in sync (useful for monitoring / manual checks)
-    frappe.db.sql(
-        "UPDATE `tabSeries` SET current = %s WHERE name = 'GL-.'",
-        (next_num,),
-    )
-
-    doc.name = "GL-{:08d}".format(next_num)
+    # Nomor diambil dari counter di `tabSeries`, bukan dari MAX(`tabGL Entry`).
+    # getseries() melakukan SELECT ... FOR UPDATE lalu UPDATE current = current + 1,
+    # jadi nilainya selalu versi terbaru yang ter-commit dan row lock-nya ditahan
+    # sampai transaksi selesai -- request paralel antre di sini, tidak bisa dobel.
+    doc.name = "GL-" + getseries(GL_SERIES_KEY, 8)
 
 
 
