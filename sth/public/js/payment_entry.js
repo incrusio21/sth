@@ -1527,10 +1527,6 @@ function show_realisasi_pdo_selector(frm) {
 
 			dialog.$wrapper.find('.pdo-row').on('click', function () {
 				let selected_name = $(this).data('name');
-				let outstanding_bb = $(this).data('bb');
-				let outstanding_pd = $(this).data('pd');
-				let outstanding_kas = $(this).data('kas');
-				let outstanding_dc = $(this).data('dc');
 
 				dialog.hide();
 
@@ -1540,89 +1536,135 @@ function show_realisasi_pdo_selector(frm) {
 				tipe_options.push('Kas');
 				tipe_options.push('Dana Cadangan');
 
-				let tipe_dialog = new frappe.ui.Dialog({
-					title: __('Select Tipe PDO'),
-					fields: [
-						{
-							fieldtype: 'HTML',
-							fieldname: 'pdo_info',
-							options: `<p style="margin-bottom:10px;">
-										PDO: <strong>${selected_name}</strong>
-									  </p>`
-						},
-						{
-							label: __('Tipe PDO'),
-							fieldname: 'tipe_pdo',
-							fieldtype: 'Select',
-							options: tipe_options.join('\n'),
-							reqd: 1
-						}
-					],
-					primary_action_label: __('Create Realisasi'),
-					primary_action: function (values) {
-						tipe_dialog.hide();
-
-						// Kalau PE sudah tersimpan, isi langsung — jangan buat PE baru
-						if (!frm.doc.__islocal) {
-							let amount_map = {
-								'Bahan Bakar': flt(outstanding_bb),
-								'Perjalanan Dinas': flt(outstanding_pd),
-								'Kas': flt(outstanding_kas),
-								'Dana Cadangan': flt(outstanding_dc),
-							};
-							let amount = amount_map[values.tipe_pdo] || 0;
-
-							frappe.db.get_doc('Permintaan Dana Operasional', selected_name).then(pdo => {
-								frm.clear_table('payment_voucher_kas_pdo');
-
-								let tipe_table_map = {
-									'Bahan Bakar': 'pdo_bahan_bakar',
-									'Perjalanan Dinas': 'pdo_perjalanan_dinas',
-									'Kas': 'pdo_kas',
-									'Dana Cadangan': 'pdo_dana_cadangan',
-								};
-								let table_name = tipe_table_map[values.tipe_pdo];
-								let rows = (table_name && pdo[table_name]) || [];
-
-								rows.forEach(row => {
-									frm.add_child('payment_voucher_kas_pdo', {
-										no_pdo: selected_name,
-										tipe_pdo: values.tipe_pdo,
-										debit_to: row.debit_to,
-										penerima: row.employee,
-										total: row.total,
-									});
-								});
-
-								frm.refresh_field('payment_voucher_kas_pdo');
-								frm.set_value('permintaan_dana_operasional', selected_name);
-								frm.set_value('paid_amount', amount);
-								frm.set_value('received_amount', amount);
-							});
-							return;
-						}
-
-						frappe.call({
-							method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
-							args: {
-								source_name: selected_name,
-								tipe_pdo: values.tipe_pdo
-							},
-							freeze: true,
-							freeze_message: __('Creating Realisasi PDO...'),
-							callback: function (r) {
-								if (r.message) {
-									var doc = r.message;
-									frappe.model.sync(doc);
-									frappe.set_route('Form', 'Payment Entry', doc.name);
-								}
-							}
-						});
+				// Nama barang List Kas yang belum direalisasi, supaya tipe Kas bisa
+				// dicentang satu per satu persis seperti tombol Realisasi di PDO.
+				frappe.call({
+					method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+					args: { source_name: selected_name },
+					callback: function (res) {
+						show_tipe_dialog(frm, selected_name, tipe_options, res.message || []);
 					}
 				});
-
-				tipe_dialog.show();
 			});
+		}
+	});
+}
+
+function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang) {
+	let fields = [
+		{
+			fieldtype: 'HTML',
+			fieldname: 'pdo_info',
+			options: `<p style="margin-bottom:10px;">
+						PDO: <strong>${selected_name}</strong>
+					  </p>`
+		},
+		{
+			label: __('Tipe PDO'),
+			fieldname: 'tipe_pdo',
+			fieldtype: 'Select',
+			options: tipe_options.join('\n'),
+			reqd: 1
+		}
+	];
+
+	if (kas_nama_barang.length) {
+		fields.push({
+			fieldname: 'nama_barang',
+			label: __('Nama Barang'),
+			fieldtype: 'MultiCheck',
+			columns: 1,
+			depends_on: 'eval:doc.tipe_pdo == "Kas"',
+			description: __('Satu baris Payment Entry per nama barang yang dicentang'),
+			options: kas_nama_barang.map(function (item) {
+				return { label: item.label, value: item.value, checked: 0 };
+			})
+		});
+	}
+
+	let tipe_dialog = new frappe.ui.Dialog({
+		title: __('Select Tipe PDO'),
+		fields: fields,
+		primary_action_label: __('Create Realisasi'),
+		primary_action: function (values) {
+			let nama_barang = [];
+
+			if (values.tipe_pdo == 'Kas') {
+				if (!kas_nama_barang.length) {
+					frappe.msgprint(__('Semua nama barang di List Kas sudah direalisasi'));
+					return;
+				}
+
+				nama_barang = tipe_dialog.get_value('nama_barang') || [];
+
+				if (!nama_barang.length) {
+					frappe.msgprint(__('Pilih minimal satu Nama Barang'));
+					return;
+				}
+			}
+
+			tipe_dialog.hide();
+
+			let args = {
+				source_name: selected_name,
+				tipe_pdo: values.tipe_pdo,
+				nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null
+			};
+
+			// Kalau PE sudah tersimpan, isi langsung — jangan buat PE baru
+			if (!frm.doc.__islocal) {
+				isi_baris_realisasi(frm, selected_name, args);
+				return;
+			}
+
+			frappe.call({
+				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
+				args: args,
+				freeze: true,
+				freeze_message: __('Creating Realisasi PDO...'),
+				callback: function (r) {
+					if (r.message) {
+						var doc = r.message;
+						frappe.model.sync(doc);
+						frappe.set_route('Form', 'Payment Entry', doc.name);
+					}
+				}
+			});
+		}
+	});
+
+	tipe_dialog.show();
+}
+
+function isi_baris_realisasi(frm, selected_name, args) {
+	// Barisnya dibangun di server, sama seperti tombol Realisasi di PDO. Dulu
+	// bagian ini menyusun sendiri dari pdo[table_name] dan karena itu melewatkan
+	// revised_total, akun dari Expense Claim Type, dan penjagaan realisasi ganda.
+	frappe.call({
+		method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_baris_realisasi',
+		args: args,
+		freeze: true,
+		freeze_message: __('Mengambil baris realisasi...'),
+		callback: function (r) {
+			if (!r.message) return;
+
+			frm.clear_table('payment_voucher_kas_pdo');
+
+			(r.message.rows || []).forEach(row => {
+				frm.add_child('payment_voucher_kas_pdo', row);
+			});
+
+			frm.refresh_field('payment_voucher_kas_pdo');
+			frm.set_value('permintaan_dana_operasional', selected_name);
+
+			if (r.message.note) {
+				frm.set_value('note', r.message.note);
+			}
+
+			// Dibayar sebesar yang ditarik, bukan seluruh outstanding tipe itu —
+			// kalau cuma sebagian barang yang dicentang, sisanya belum dibayar.
+			frm.set_value('paid_amount', flt(r.message.total));
+			frm.set_value('received_amount', flt(r.message.total));
 		}
 	});
 }

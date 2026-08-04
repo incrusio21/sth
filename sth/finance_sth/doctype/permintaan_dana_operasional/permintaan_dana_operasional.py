@@ -457,6 +457,225 @@ def create_payment_voucher_kebun(source_name, target_doc=None):
 	return doclist
 
 
+# Peta tipe PDO ke child table dan nama field-nya. Di level modul karena dipakai
+# dua jalur realisasi: tombol di PDO dan tombol di Payment Entry.
+TIPE_MAPPING = {
+	'Bahan Bakar': {
+		'child_table': 'pdo_bahan_bakar',
+		'debit_account_field': None,  # Uses header field instead
+		'header_debit_field': 'bahan_bakar_debit_to',  # Account at header level
+		'employee_field': 'employee',
+		'amount_field': 'revised_price_total',
+		'grand_total_field': 'grand_total_bahan_bakar',
+		'outstanding_field': 'outstanding_amount_bahan_bakar',
+		'before_amount_field': 'price_total',
+		'detail_field': None
+	},
+	'Perjalanan Dinas': {
+		'child_table': 'pdo_perjalanan_dinas',
+		'debit_account_field': 'debit_to',  # Field in child table
+		'header_debit_field': None,  # No header field
+		'employee_field': 'employee',
+		'amount_field': 'revised_total',
+		'grand_total_field': 'grand_total_perjalanan_dinas',
+		'outstanding_field': 'outstanding_amount_perjalanan_dinas',
+		'before_amount_field': 'total',
+		'detail_field': None
+	},
+	'Kas': {
+		'child_table': 'pdo_kas',
+		'debit_account_field': 'debit_to',  # Field in child table
+		'header_debit_field': None,
+		'employee_field': 'employee',
+		'amount_field': 'revised_total',
+		'grand_total_field': 'grand_total_kas',
+		'outstanding_field': 'outstanding_amount_kas',
+		'before_amount_field': 'total',
+		'detail_field': 'type'
+	},
+	'Dana Cadangan': {
+		'child_table': 'pdo_dana_cadangan',
+		'debit_account_field': 'fund_type',  # Field in child table
+		'header_debit_field': None,
+		'employee_field': 'employee',
+		'amount_field': 'revised_amount',
+		'grand_total_field': 'grand_total_dana_cadangan',
+		'outstanding_field': 'outstanding_amount_dana_cadangan',
+		'before_amount_field': 'amount',
+		'detail_field': None
+	}
+}
+
+# Satu baris realisasi gabungan bisa mewakili beberapa baris PDO sekaligus,
+# jadi pdo_child_name menyimpan daftar yang dipisah tanda ini.
+PEMISAH_CHILD = ","
+
+
+def gabung_per_item_barang(rows):
+	"""Gabungkan baris realisasi jadi satu baris per nama barang. Fungsi murni.
+
+	Dikelompokkan bersama penerima, bukan nama barang saja. Untuk tipe Kas
+	`debit_to` selalu sama dalam satu nama barang karena diambil dari Expense
+	Claim Type, tapi penerimanya bisa berbeda — dan penerima dipakai
+	`validate_payment_voucher_kas_pdo` untuk membandingkan dengan plafon per
+	pegawai. Melebur dua pegawai jadi satu baris akan membuat perbandingan itu
+	menuduh orang yang salah.
+	"""
+	gabungan = {}
+	urutan = []
+
+	for row in rows:
+		kunci = (row.get("item_barang"), row.get("penerima"))
+
+		if kunci not in gabungan:
+			gabungan[kunci] = dict(row, total=0.0, pdo_child_name=[])
+			urutan.append(kunci)
+
+		baris = gabungan[kunci]
+		baris["total"] = flt(baris["total"]) + flt(row.get("total"))
+
+		if row.get("pdo_child_name"):
+			baris["pdo_child_name"].append(row["pdo_child_name"])
+
+	hasil = []
+	for kunci in urutan:
+		baris = gabungan[kunci]
+		baris["pdo_child_name"] = PEMISAH_CHILD.join(baris["pdo_child_name"])
+		hasil.append(baris)
+
+	return hasil
+
+
+def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
+	"""Baris `payment_voucher_kas_pdo` untuk satu realisasi PDO.
+
+	Satu tempat untuk dua jalur: tombol Realisasi di PDO dan tombol Realisasi PDO
+	di Payment Entry. Sebelumnya jalur kedua membangun barisnya sendiri di JS dan
+	melewatkan `revised_total`, akun dari Expense Claim Type, serta penjagaan
+	terhadap realisasi ganda.
+
+	Balikan: {"rows": [...], "note": str|None, "paid_to": str|None}
+	"""
+	if tipe_pdo not in TIPE_MAPPING:
+		frappe.throw(_("Invalid Tipe PDO selected"))
+
+	if ppd and tipe_pdo != "Perjalanan Dinas":
+		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas hanya berlaku untuk tipe Perjalanan Dinas"))
+
+	nama_terpilih = nama_barang
+	if isinstance(nama_terpilih, str):
+		# frappe.call mengirim null sebagai string kosong, bukan None
+		nama_terpilih = frappe.parse_json(nama_terpilih) if nama_terpilih.strip() else None
+
+	if nama_terpilih and tipe_pdo != "Kas":
+		frappe.throw(_("Pilihan Nama Barang hanya berlaku untuk tipe Kas"))
+
+	mapping = TIPE_MAPPING[tipe_pdo]
+	debit_account_field = mapping['debit_account_field']
+	header_debit_field = mapping['header_debit_field']
+	employee_field = mapping['employee_field']
+	detail_field = mapping['detail_field']
+	amount_field = mapping['amount_field']
+	before_amount_field = mapping['before_amount_field']
+
+	child_data = getattr(source_doc, mapping['child_table'], [])
+	if not child_data:
+		frappe.throw(_("No data found in {0} table").format(tipe_pdo))
+
+	if nama_terpilih:
+		# baris yang sudah masuk realisasi sebelumnya tidak boleh ikut lagi
+		sudah_realisasi = get_realisasi_pdo_child_names(source_doc.name, tipe_pdo)
+		child_data = [
+			row for row in child_data
+			if row.get(detail_field) in nama_terpilih and row.name not in sudah_realisasi
+		]
+
+		if not child_data:
+			frappe.throw(_("Tidak ada baris List Kas yang cocok dengan Nama Barang yang dipilih"))
+
+	realisasi_per_baris = get_realisasi_ppd(ppd, source_doc.name) if ppd else None
+
+	header_debit_account = getattr(source_doc, header_debit_field, None) if header_debit_field else None
+
+	# For Bahan Bakar, get debit account from header
+	if header_debit_field and not header_debit_account:
+		frappe.throw(_("Debit account field {0} not found in source document").format(header_debit_field))
+
+	paid_to = header_debit_account
+	rincian_nama_barang = {}
+	rows = []
+
+	for row in child_data:
+		employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
+
+		if realisasi_per_baris is not None:
+			# Nilai dibayar = realisasi PPD, sisa plafon tidak ikut dicairkan
+			amount = flt(realisasi_per_baris.get(row.name))
+			if amount <= 0:
+				continue
+		else:
+			amount = getattr(row, amount_field, 0) or getattr(row, before_amount_field, 0)
+
+		if debit_account_field and row.get(debit_account_field):
+			debit_account = row.get(debit_account_field)
+		elif header_debit_account:
+			debit_account = header_debit_account
+		else:
+			debit_account = None
+
+		if tipe_pdo in ("Perjalanan Dinas", "Kas"):
+			ex_claim_doc = frappe.get_doc("Expense Claim Type", row.type)
+
+			for ex_claim_row in ex_claim_doc.accounts:
+				if ex_claim_row.company == source_doc.company:
+					debit_account = ex_claim_row.default_account
+					if not header_debit_account:
+						header_debit_account = ex_claim_row.default_account
+						paid_to = header_debit_account
+
+		item_barang = row.get(detail_field) if detail_field else None
+		if item_barang:
+			rincian_nama_barang[item_barang] = flt(rincian_nama_barang.get(item_barang)) + flt(amount)
+
+		rows.append({
+			'no_pdo': source_doc.name,
+			'tipe_pdo': tipe_pdo,
+			'penerima': employee,
+			'total': flt(amount),
+			'debit_to': debit_account,
+			'pdo_child_name': row.name,
+			'item_barang': item_barang
+		})
+
+	note = None
+	if nama_terpilih:
+		# Satu baris per centangan. Penggabungan hanya untuk jalur nama barang —
+		# tipe lain tetap satu baris per baris PDO seperti sebelumnya.
+		rows = gabung_per_item_barang(rows)
+
+		if rincian_nama_barang:
+			note = "\n".join(
+				"{0}: {1}".format(nama, frappe.format_value(total, {"fieldtype": "Currency"}))
+				for nama, total in rincian_nama_barang.items()
+			)
+
+	return {"rows": rows, "note": note, "paid_to": paid_to}
+
+
+@frappe.whitelist()
+def get_baris_realisasi(source_name, tipe_pdo, ppd=None, nama_barang=None):
+	"""Baris realisasi untuk Payment Entry yang sudah tersimpan.
+
+	PE yang belum tersimpan memakai `create_payment_voucher_alokasi` yang membuat
+	dokumen baru; yang sudah tersimpan cuma perlu isi tabelnya.
+	"""
+	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	hasil = build_baris_realisasi(source_doc, tipe_pdo, ppd, nama_barang)
+	hasil["total"] = flt(sum(flt(row["total"]) for row in hasil["rows"]))
+
+	return hasil
+
+
 @frappe.whitelist()
 def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None):
 	"""Create Payment Voucher Kas from Permintaan Dana Operasional
@@ -466,107 +685,21 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 	dan realisasi yang dibayarkan otomatis terpotong.
 
 	Bila `nama_barang` diisi (khusus tipe Kas), hanya baris List Kas dengan nama barang
-	tersebut yang direalisasi, dan rinciannya ditulis ke field Keterangan.
+	tersebut yang direalisasi, jadi satu baris Payment Entry per nama barang yang
+	dicentang, dan rinciannya ditulis ke field Keterangan.
 	"""
 
-	# Map tipe_pdo to child table and field mappings
-	tipe_mapping = {
-		'Bahan Bakar': {
-			'child_table': 'pdo_bahan_bakar',
-			'debit_account_field': None,  # Uses header field instead
-			'header_debit_field': 'bahan_bakar_debit_to',  # Account at header level
-			'employee_field': 'employee',
-			'amount_field': 'revised_price_total',
-			'grand_total_field': 'grand_total_bahan_bakar',
-			'outstanding_field': 'outstanding_amount_bahan_bakar',
-			'before_amount_field': 'price_total',
-			'detail_field': None
-		},
-		'Perjalanan Dinas': {
-			'child_table': 'pdo_perjalanan_dinas',
-			'debit_account_field': 'debit_to',  # Field in child table
-			'header_debit_field': None,  # No header field
-			'employee_field': 'employee',
-			'amount_field': 'revised_total',
-			'grand_total_field': 'grand_total_perjalanan_dinas',
-			'outstanding_field': 'outstanding_amount_perjalanan_dinas',
-			'before_amount_field': 'total',
-			'detail_field': None
-		},
-		'Kas': {
-			'child_table': 'pdo_kas',
-			'debit_account_field': 'debit_to',  # Field in child table
-			'header_debit_field': None,
-			'employee_field': 'employee',
-			'amount_field': 'revised_total',
-			'grand_total_field': 'grand_total_kas',
-			'outstanding_field': 'outstanding_amount_kas',
-			'before_amount_field': 'total',
-			'detail_field': 'type'
-		},
-		'Dana Cadangan': {
-			'child_table': 'pdo_dana_cadangan',
-			'debit_account_field': 'fund_type',  # Field in child table
-			'header_debit_field': None,
-			'employee_field': 'employee',
-			'amount_field': 'revised_amount',
-			'grand_total_field': 'grand_total_dana_cadangan',
-			'outstanding_field': 'outstanding_amount_dana_cadangan',
-			'before_amount_field': 'amount',
-			'detail_field': None
-		}
-	}
-	
-	if tipe_pdo not in tipe_mapping:
+	if tipe_pdo not in TIPE_MAPPING:
 		frappe.throw(_("Invalid Tipe PDO selected"))
-	
-	mapping = tipe_mapping[tipe_pdo]
-	child_table_name = mapping['child_table']
-	debit_account_field = mapping['debit_account_field']
-	header_debit_field = mapping['header_debit_field']
-	employee_field = mapping['employee_field']
-	detail_field = mapping['detail_field']
 
-	amount_field = mapping['amount_field']
-	before_amount_field = mapping['before_amount_field']
-
-	outstanding_field = mapping['outstanding_field']
-
-	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
-	outstanding_amount = getattr(source_doc, outstanding_field, 0)
-
-	if ppd and tipe_pdo != "Perjalanan Dinas":
-		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas hanya berlaku untuk tipe Perjalanan Dinas"))
-
-	nama_barang_terpilih = nama_barang
-
-	if isinstance(nama_barang_terpilih, str):
-		# frappe.call mengirim null sebagai string kosong, bukan None
-		nama_barang_terpilih = frappe.parse_json(nama_barang_terpilih) if nama_barang_terpilih.strip() else None
-
-	if nama_barang_terpilih and tipe_pdo != "Kas":
-		frappe.throw(_("Pilihan Nama Barang hanya berlaku untuk tipe Kas"))
-
-	realisasi_per_baris = get_realisasi_ppd(ppd, source_name) if ppd else None
-
-	# if outstanding_amount <= 0:
-	# 	frappe.throw(_("{0} has been fully paid. Outstanding amount: {1}").format(
-	# 		tipe_pdo, 
-	# 		frappe.format_value(outstanding_amount, {'fieldtype': 'Currency'})
-	# 	))
-	
 	def set_missing_values(source, target):
 		# Get Payment Voucher to fetch paid_to account
 		if not source.payment_voucher:
 			frappe.throw(_("Payment Voucher not found for this PDO"))
-		
-		payment_voucher = frappe.get_doc("Payment Entry", source.payment_voucher)
-		
+
 		# Set basic fields
 		target.payment_type = "Internal Transfer"
 		target.source_exchange_rate = 1
-		target.paid_amount = amount_field
-		target.received_amount = amount_field
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
 		target.tipe_transfer = "Realisasi PDO"
@@ -579,100 +712,23 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 			target.pertanggungjawaban_perjalanan_dinas = ppd
 			target.remarks += _(" - potongan DP dari Pertanggungjawaban Perjalanan Dinas {0}").format(ppd)
 
-		# target.paid_to = payment_voucher.paid_to
-
 		unit_doc = frappe.get_doc("Unit", source.unit)
 		if not unit_doc.bank_account:
 			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
 		target.paid_from = unit_doc.bank_account
 		target.mode_of_payment = "Bank Draft"
-		
-		# Get child table data
-		child_data = getattr(source, child_table_name, [])
-		
-		if not child_data:
-			frappe.throw(_("No data found in {0} table").format(tipe_pdo))
 
-		if nama_barang_terpilih:
-			# baris yang sudah masuk realisasi sebelumnya tidak boleh ikut lagi
-			sudah_realisasi = get_realisasi_pdo_child_names(source.name, tipe_pdo)
-			child_data = [
-				row for row in child_data
-				if row.get(detail_field) in nama_barang_terpilih and row.name not in sudah_realisasi
-			]
+		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang)
 
-			if not child_data:
-				frappe.throw(_("Tidak ada baris List Kas yang cocok dengan Nama Barang yang dipilih"))
+		if hasil["paid_to"]:
+			target.paid_to = hasil["paid_to"]
 
-		rincian_nama_barang = {}
+		for baris in hasil["rows"]:
+			target.append('payment_voucher_kas_pdo', baris)
 
-		header_debit_account = getattr(source, header_debit_field, None) if header_debit_field else None
-			
-		# For Bahan Bakar, get debit account from header
-		if header_debit_field:
-			if not header_debit_account:
-				frappe.throw(_("Debit account field {0} not found in source document").format(header_debit_field))
-			target.paid_to = header_debit_account
-		
-		settings = frappe.get_doc("PDO Account Settings")
-		account_row = next(
-			(row for row in settings.pdo_account_settings_table if row.company == target.company),
-			None
-		)	
+		if hasil["note"]:
+			target.note = hasil["note"]
 
-		# Add rows to payment_voucher_kas_pdo table
-		for row in child_data:
-			employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
-
-			if realisasi_per_baris is not None:
-				# Nilai dibayar = realisasi PPD, sisa plafon tidak ikut dicairkan
-				amount = flt(realisasi_per_baris.get(row.name))
-				if amount <= 0:
-					continue
-			else:
-				amount = getattr(row, amount_field, 0) or getattr(row, before_amount_field, 0)
-
-			if debit_account_field and row.get(debit_account_field):
-				debit_account = row.get(debit_account_field)
-			elif header_debit_account:
-				debit_account = header_debit_account
-			else:
-				debit_account = None
-
-			if tipe_pdo == "Perjalanan Dinas" or tipe_pdo == "Kas":
-				ex_claim_type = row.type
-				ex_claim_doc = frappe.get_doc("Expense Claim Type", ex_claim_type)
-
-				for ex_claim_row in ex_claim_doc.accounts:
-					if ex_claim_row.company == source_doc.company:
-						debit_account = ex_claim_row.default_account
-						if not header_debit_account:
-							header_debit_account = ex_claim_row.default_account
-							target.paid_to = header_debit_account
-
-			# frappe.throw(str(debit_account))
-			nama_barang_row = row.get(detail_field) if detail_field else None
-			if nama_barang_row:
-				rincian_nama_barang[nama_barang_row] = flt(rincian_nama_barang.get(nama_barang_row)) + flt(amount)
-
-			target.append('payment_voucher_kas_pdo', {
-				'no_pdo': source.name,
-				'tipe_pdo': tipe_pdo,
-				'penerima': employee,
-				'total': amount,
-				'debit_to': debit_account,  # Add debit account
-				'pdo_child_name': row.name,
-				'nama_barang': nama_barang_row
-			})
-			# if not header_debit_field:
-			# 	target.paid_to = debit_account
-
-		if nama_barang_terpilih and rincian_nama_barang:
-			target.note = "\n".join(
-				"{0}: {1}".format(nama, frappe.format_value(total, {"fieldtype": "Currency"}))
-				for nama, total in rincian_nama_barang.items()
-			)
-	
 	# Map document
 	doclist = get_mapped_doc(
 		"Permintaan Dana Operasional",
@@ -749,7 +805,12 @@ def get_realisasi_ppd(ppd, source_name):
 
 def get_realisasi_pdo_child_names(source_name, tipe_pdo):
 	"""Baris PDO yang sudah ditarik ke Payment Entry realisasi (draft maupun submit).
-	PE yang dibatalkan tidak dihitung, jadi barisnya bebas dipakai lagi."""
+	PE yang dibatalkan tidak dihitung, jadi barisnya bebas dipakai lagi.
+
+	Satu baris Payment Entry bisa mewakili beberapa baris PDO sekaligus sejak
+	penggabungan per nama barang, jadi isinya dipecah dulu. Baris lama yang cuma
+	berisi satu nama tetap terbaca — memecah string tanpa pemisah menghasilkan
+	string itu sendiri."""
 	rows = frappe.get_all(
 		"Payment Voucher Kas PDO",
 		filters={
@@ -760,7 +821,13 @@ def get_realisasi_pdo_child_names(source_name, tipe_pdo):
 		pluck="pdo_child_name"
 	)
 
-	return {row for row in rows if row}
+	names = set()
+	for row in rows:
+		if not row:
+			continue
+		names.update(nama.strip() for nama in row.split(PEMISAH_CHILD) if nama.strip())
+
+	return names
 
 
 @frappe.whitelist()

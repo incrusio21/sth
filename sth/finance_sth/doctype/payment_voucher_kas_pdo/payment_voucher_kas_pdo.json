@@ -50,8 +50,9 @@
    "label": "Total"
   },
   {
+   "description": "Baris PDO yang diwakili baris ini, dipisah koma. Satu baris bisa mewakili beberapa baris PDO sejak digabung per nama barang, jadi Data (140 karakter) tidak lagi cukup.",
    "fieldname": "pdo_child_name",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 1,
    "label": "PDO Child Name",
    "read_only": 1

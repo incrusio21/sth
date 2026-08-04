@@ -780,7 +780,7 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
 			fieldtype: 'MultiCheck',
 			columns: 1,
 			depends_on: 'eval:doc.tipe_pdo == "Kas"',
-			description: __('Hanya nama barang yang dipilih yang direalisasi dan masuk ke Keterangan'),
+			description: __('Satu baris Payment Entry per nama barang yang dicentang, rinciannya masuk ke Keterangan'),
 			options: kas_nama_barang.map(function (item) {
 				return { label: item.label, value: item.value, checked: 0 };
 			})
