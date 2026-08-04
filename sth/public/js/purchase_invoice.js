@@ -46,7 +46,12 @@ frappe.ui.form.on("Purchase Invoice", {
         frm.trigger('get_tax_template')
         frm.page.sidebar.hide()
 
-        if ((frm.doc.items || []).length) {
+        // Hanya untuk draft. Di dokumen submitted/cancelled, perhitungan ini menulis
+        // ulang sub_total dan baris ppn/pph/taxes; hasil aritmetika JS di sini tidak
+        // dibulatkan seperti perhitungan server, jadi nilainya selalu meleset sedikit
+        // dan form langsung ditandai dirty -> indicator "Not Saved" yang tidak bisa
+        // dihilangkan karena dokumen sudah tidak boleh disimpan.
+        if (frm.doc.docstatus === 0 && (frm.doc.items || []).length) {
             calculate_sub_total(frm)
 
             // "Get Items From" (Purchase Receipt / Pengakuan Pembelian TBS) uses

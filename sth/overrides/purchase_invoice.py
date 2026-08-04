@@ -64,6 +64,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		pass
 
 	def validate(self):
+		self.disable_rounded_total = 1
 		update_cwip_expense_accounts(self)
 		bukan_dp = 0
 		if self.termin == "DP":

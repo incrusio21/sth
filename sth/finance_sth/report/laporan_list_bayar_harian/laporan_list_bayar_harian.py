@@ -353,9 +353,7 @@ def get_condition(filters):
 	if filters.get("supplier"):
 		conditions += " AND pe.party = %(supplier)s"
 
-
-	if filters.get("from_date"):
-		filters["to_date"] = today()
-		conditions += " AND pe.request_release_date BETWEEN %(from_date)s AND %(to_date)s"
+	if filters.get("to_date"):
+			conditions += " AND pe.request_release_date <= %(to_date)s"
 
 	return conditions

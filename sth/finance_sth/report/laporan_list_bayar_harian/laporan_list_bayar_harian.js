@@ -16,8 +16,8 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 			"options": "Supplier",
 		},
 		{
-			"fieldname": "from_date",
-			"label": __("Tanggal Dari"),
+			"fieldname": "to_date",
+			"label": __("Tanggal Sampai"),
 			"fieldtype": "Date",
 			"reqd": 0
 		},
