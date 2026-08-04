@@ -193,13 +193,37 @@ class Asset(Asset):
 		asset_movement.submit()
 
 @frappe.whitelist()
+def scrap_asset(asset_name, **kwargs):
+	"""Scrap hanya boleh jalan lewat Asset Scrap Request yang sudah lolos 5 lapis
+	approval. Tanpa penjaga ini, tombol/API bawaan ERPNext bisa melewati approval."""
+	from erpnext.assets.doctype.asset.depreciation import scrap_asset as _scrap_asset
+
+	if not frappe.flags.get("ignore_asset_scrap_request"):
+		frappe.throw(
+			_("Scrap Asset {0} harus lewat Asset Scrap Request yang sudah disetujui").format(asset_name),
+			title=_("Butuh Approval")
+		)
+
+	return _scrap_asset(asset_name, **kwargs)
+
+
+@frappe.whitelist()
 def make_sales_invoice(asset, item_code, company, serial_no=None):
 	"""Override tombol 'Sell' di Asset. Isi Unit dari Asset dan set
 	Jenis Penagihan = Disposal, supaya field Jenis Penagihan tidak
 	kosong (yang defaultnya kebaca UI sebagai 'Pengiriman', opsi
 	pertama di select) dan memicu validasi 'Sales Order wajib
-	dipasang di Sales Invoice Pengiriman' saat disimpan."""
+	dipasang di Sales Invoice Pengiriman' saat disimpan.
+
+	Penjualan hanya boleh setelah asset discrap lewat Asset Scrap Request."""
 	from erpnext.assets.doctype.asset.asset import make_sales_invoice as _make_sales_invoice
+
+	status = frappe.db.get_value("Asset", asset, "status")
+	if status != "Scrapped":
+		frappe.throw(
+			_("Asset {0} harus discrap dulu sebelum bisa dijual. Status sekarang: {1}").format(asset, status),
+			title=_("Belum Discrap")
+		)
 
 	si = _make_sales_invoice(asset, item_code, company, serial_no=serial_no)
 

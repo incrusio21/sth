@@ -7,3 +7,4 @@ sth.patches.merge_duplicate_spb_trans_no
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
 sth.patches.set_nama_pengguna_pdo_kas
+sth.patches.create_asset_scrap_request_workflow

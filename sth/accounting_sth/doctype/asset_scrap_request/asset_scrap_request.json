@@ -1,0 +1,202 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-08-04 13:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "asset",
+  "asset_name",
+  "asset_category",
+  "column_break_head",
+  "posting_date",
+  "company",
+  "unit",
+  "detail_section",
+  "alasan",
+  "lampiran",
+  "column_break_detail",
+  "gross_purchase_amount",
+  "nilai_buku",
+  "hasil_section",
+  "journal_entry_for_scrap",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ASR-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Asset",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "asset.asset_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Asset",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "asset.asset_category",
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "label": "Kategori Asset",
+   "options": "Asset Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_head",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Tanggal Pengajuan",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "asset.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "asset.unit",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Pengajuan"
+  },
+  {
+   "fieldname": "alasan",
+   "fieldtype": "Small Text",
+   "label": "Alasan Scrap",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lampiran",
+   "fieldtype": "Attach",
+   "label": "Lampiran"
+  },
+  {
+   "fieldname": "column_break_detail",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "asset.gross_purchase_amount",
+   "fieldname": "gross_purchase_amount",
+   "fieldtype": "Currency",
+   "label": "Harga Perolehan",
+   "read_only": 1
+  },
+  {
+   "description": "Nilai buku saat pengajuan dibuat",
+   "fieldname": "nilai_buku",
+   "fieldtype": "Currency",
+   "label": "Nilai Buku",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.journal_entry_for_scrap",
+   "fieldname": "hasil_section",
+   "fieldtype": "Section Break",
+   "label": "Hasil Scrap"
+  },
+  {
+   "fieldname": "journal_entry_for_scrap",
+   "fieldtype": "Link",
+   "label": "Journal Entry Scrap",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Scrap Request",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-04 13:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Asset Scrap Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

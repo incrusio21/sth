@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-04 14:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "lapis",
+  "label",
+  "role"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "description": "Nomor urut approval. Baris dengan lapis sama berarti salah satu role-nya boleh menyetujui.",
+   "fieldname": "lapis",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Lapis",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 4,
+   "description": "Dipakai sebagai nama state, mis. Manager Unit menjadi \"Menunggu Approval Manager Unit\"",
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Lapis"
+  },
+  {
+   "columns": 4,
+   "fieldname": "role",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Role",
+   "options": "Role",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-04 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Asset Scrap Approval Level",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

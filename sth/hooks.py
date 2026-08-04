@@ -501,6 +501,7 @@ scheduler_events = {
 #
 override_whitelisted_methods = {
 	"erpnext.assets.doctype.asset.asset.make_sales_invoice": "sth.overrides.asset.make_sales_invoice",
+	"erpnext.assets.doctype.asset.depreciation.scrap_asset": "sth.overrides.asset.scrap_asset",
 	# "frappe.desk.desktop.get_workspace_sidebar_items": "sth.overrides.workspace.get_workspace_sidebar_items",
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",

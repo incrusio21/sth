@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-04 14:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "role_pemohon",
+  "section_lapis",
+  "lapis_approval"
+ ],
+ "fields": [
+  {
+   "default": "Accounts User",
+   "description": "Role yang boleh membuat dan mengajukan Asset Scrap Request",
+   "fieldname": "role_pemohon",
+   "fieldtype": "Link",
+   "label": "Role Pemohon",
+   "options": "Role",
+   "reqd": 1
+  },
+  {
+   "description": "Workflow dibangun ulang setiap setting ini disimpan",
+   "fieldname": "section_lapis",
+   "fieldtype": "Section Break",
+   "label": "Lapis Approval"
+  },
+  {
+   "fieldname": "lapis_approval",
+   "fieldtype": "Table",
+   "label": "Lapis Approval",
+   "options": "Asset Scrap Approval Level",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-04 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Asset Scrap Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -12,6 +12,24 @@ frappe.ui.form.on('Asset', {
         );
 
         if (frm.doc.docstatus === 1) {
+            // scrap wajib lewat Asset Scrap Request (approval berlapis) dan
+            // jual hanya boleh setelah discrap, jadi dua tombol bawaan
+            // ERPNext ini dibuang lalu dipasang ulang sesuai status
+            frm.remove_custom_button(__("Scrap Asset"), __("Manage"));
+            frm.remove_custom_button(__("Sell Asset"), __("Manage"));
+
+            if (!["Draft", "Cancelled", "Sold", "Scrapped", "Capitalized", "Decapitalized"].includes(frm.doc.status)) {
+                frm.add_custom_button(__("Ajukan Scrap"), function() {
+                    ajukan_scrap(frm);
+                }, __("Manage"));
+            }
+
+            if (frm.doc.status === "Scrapped") {
+                frm.add_custom_button(__("Sell Asset"), function() {
+                    sell_asset(frm);
+                }, __("Manage"));
+            }
+
             frm.add_custom_button(__("GL Entry"), function() {
                 frappe.route_options = {
                     voucher_no: frm.doc.name,
@@ -38,6 +56,45 @@ frappe.ui.form.on('Asset', {
 		set_unit_filter(frm);
 	},
 });
+
+function sell_asset(frm) {
+	frappe.call({
+		method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
+		args: {
+			asset: frm.doc.name,
+			item_code: frm.doc.item_code,
+			company: frm.doc.company,
+			serial_no: frm.doc.serial_no
+		},
+		freeze: true,
+		callback: function(r) {
+			if (r.message) {
+				const doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		}
+	});
+}
+
+function ajukan_scrap(frm) {
+	frappe.db.get_value(
+		"Asset Scrap Request",
+		{ asset: frm.doc.name, docstatus: ["<", 2] },
+		"name"
+	).then(({ message }) => {
+		if (message && message.name) {
+			frappe.msgprint({
+				title: __("Sudah Diajukan"),
+				message: __("Asset ini sudah punya pengajuan scrap yang berjalan: {0}",
+					[frappe.utils.get_form_link("Asset Scrap Request", message.name, true)]),
+				indicator: "orange"
+			});
+			return;
+		}
+
+		frappe.new_doc("Asset Scrap Request", { asset: frm.doc.name });
+	});
+}
 
 function render_qr(frm) {
 	if (!frm.doc.qr) return;
