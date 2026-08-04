@@ -348,7 +348,8 @@
    "fieldtype": "Data",
    "label": "Trans No",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "driver_code",

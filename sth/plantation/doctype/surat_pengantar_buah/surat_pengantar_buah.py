@@ -2,11 +2,13 @@
 # For license information, please see license.txt
 
 import json
+import re
 import frappe
 from frappe import unscrub
 from frappe.model.meta import get_field_precision
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 from frappe.model.document import Document
+from frappe.utils.synchronization import filelock
 
 force_item_fields = (
 	"recap_panen"
@@ -198,12 +200,43 @@ class SuratPengantarBuah(Document):
 @frappe.whitelist()
 def create_or_update(**kwargs):
 	args = kwargs
-	trans_no = args.get("trans_no")
-	details = args.get("details") or []
+	trans_no = cstr(args.get("trans_no")).strip()
 
-	existing_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": trans_no}, "name") if trans_no else None
+	if not trans_no:
+		return _insert_spb(args)
 
-	if not existing_name:
+	# Dua panggilan API dengan trans_no yang sama bisa masuk barengan. Tanpa lock
+	# keduanya sama-sama melihat "belum ada" lalu masing-masing insert SPB baru.
+	with filelock(_trans_no_lock_name(trans_no), timeout=60):
+		# Mulai transaksi baru supaya baris yang baru saja di-commit oleh request
+		# yang antre sebelum kita ikut terbaca (bukan snapshot lama).
+		frappe.db.commit()
+
+		existing_name = _get_spb_by_trans_no(trans_no)
+
+		if not existing_name:
+			doc = _insert_spb(args, catch_duplicate=True)
+
+			if doc:
+				# commit selagi lock masih dipegang, supaya request berikutnya
+				# pasti melihat SPB ini dan masuk ke jalur update.
+				frappe.db.commit()
+				return doc
+
+			existing_name = _get_spb_by_trans_no(trans_no)
+			if not existing_name:
+				frappe.throw(f"Failed to create Surat Pengantar Buah for Trans No {trans_no}")
+
+		return _update_spb(existing_name, args.get("details") or [])
+
+def _trans_no_lock_name(trans_no):
+	return "spb-trans-no-" + re.sub(r"[^A-Za-z0-9]+", "-", trans_no)[:64]
+
+def _get_spb_by_trans_no(trans_no):
+	return frappe.db.get_value("Surat Pengantar Buah", {"trans_no": trans_no}, "name")
+
+def _insert_spb(args, catch_duplicate=False):
+	def _insert():
 		doc = frappe.get_doc(dict(args, doctype="Surat Pengantar Buah"))
 
 		submit_after_insert = doc.docstatus == 1
@@ -217,6 +250,21 @@ def create_or_update(**kwargs):
 
 		return doc
 
+	if not catch_duplicate:
+		return _insert()
+
+	# Unique index pada trans_no adalah penjaga terakhir kalau lock tidak berlaku
+	# (mis. worker jalan di node lain). Rollback ke savepoint supaya transaksi
+	# request ini tetap bisa dipakai untuk jalur update.
+	save_point = "spb_insert"
+	frappe.db.sql(f"savepoint {save_point}")
+	try:
+		return _insert()
+	except (frappe.UniqueValidationError, frappe.DuplicateEntryError):
+		frappe.db.sql(f"rollback to savepoint {save_point}")
+		return None
+
+def _update_spb(existing_name, details):
 	doc = frappe.get_doc("Surat Pengantar Buah", existing_name)
 	existing_by_harvest_no = {d.harvest_no: d for d in doc.details if d.harvest_no}
 
