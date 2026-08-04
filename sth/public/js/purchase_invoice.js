@@ -60,6 +60,7 @@ frappe.ui.form.on("Purchase Invoice", {
         }
 
         sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
+        sth.form.toggle_pph_22(frm)
         toggle_kegiatan_unit_columns(frm)
         frm.trigger("setup_queries")
 
@@ -358,6 +359,10 @@ frappe.ui.form.on("Purchase Invoice", {
         frm.trigger('pakai_ppn')
     },
 
+    items_remove(frm) {
+        sth.form.toggle_pph_22(frm)
+    },
+
     pph_22(frm) {
         sync_to_taxes(frm)
     },
@@ -652,6 +657,14 @@ frappe.ui.form.on("VAT Detail", {
 // ─── Purchase Invoice Item ────────────────────────────────────────────────────
 
 frappe.ui.form.on("Purchase Invoice Item", {
+    item_code(frm) {
+        sth.form.toggle_pph_22(frm);
+    },
+
+    item_name(frm) {
+        sth.form.toggle_pph_22(frm);
+    },
+
     qty(frm, cdt, cdn) {
         recalculate_item_amount(frm, cdt, cdn);
     },

@@ -649,6 +649,7 @@ frappe.ui.form.on("Purchase Order", {
 
 		frm.trigger("set_query_field")
 		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
+		sth.form.toggle_pph_22(frm)
 	},
 
 	onload_post_render(frm) {
@@ -717,6 +718,10 @@ frappe.ui.form.on("Purchase Order", {
 		if (!frm.doc.is_pph_22) frm.set_value('pph_22', 0)
 	},
 
+	items_remove(frm) {
+		sth.form.toggle_pph_22(frm)
+	},
+
 	get_tax_template(frm) {
 		frappe.provide('frappe.refererence.__ref_tax')
 		if (Object.keys(frappe.refererence.__ref_tax).length === 0 && frm.doc.docstatus == 0) {
@@ -775,6 +780,17 @@ frappe.ui.form.on("Purchase Order", {
 		frm.doc.biaya_lainnya = total_lainnya
 		frm.refresh_fields()
 	},
+});
+
+
+frappe.ui.form.on("Purchase Order Item", {
+	item_code(frm) {
+		sth.form.toggle_pph_22(frm)
+	},
+
+	item_name(frm) {
+		sth.form.toggle_pph_22(frm)
+	}
 });
 
 
