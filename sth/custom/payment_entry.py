@@ -824,6 +824,13 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 
 	for row in doc.payment_voucher_kas_pdo:
 		if row.tipe_pdo.lower() != "dana cadangan":
+			if not row.penerima:
+				# Baris gabungan per nama barang yang penerimanya lebih dari satu.
+				# Plafon di PDO disimpan per pegawai, jadi baris begini tidak punya
+				# pembanding — memaksakannya menghasilkan plafon 0 dan peringatan
+				# "melebihi batas" yang selalu keliru.
+				continue
+
 			no_pdo = row.no_pdo
 			tipe_pdo = row.tipe_pdo
 			penerima = row.penerima

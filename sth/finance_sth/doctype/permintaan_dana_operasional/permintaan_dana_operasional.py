@@ -514,18 +514,19 @@ PEMISAH_CHILD = ","
 def gabung_per_item_barang(rows):
 	"""Gabungkan baris realisasi jadi satu baris per nama barang. Fungsi murni.
 
-	Dikelompokkan bersama penerima, bukan nama barang saja. Untuk tipe Kas
-	`debit_to` selalu sama dalam satu nama barang karena diambil dari Expense
-	Claim Type, tapi penerimanya bisa berbeda — dan penerima dipakai
-	`validate_payment_voucher_kas_pdo` untuk membandingkan dengan plafon per
-	pegawai. Melebur dua pegawai jadi satu baris akan membuat perbandingan itu
-	menuduh orang yang salah.
+	Kuncinya `item_barang` saja: satu centangan = satu baris, apa pun isinya.
+	`debit_to` aman ikut digabung karena untuk tipe Kas selalu diambil dari
+	Expense Claim Type, jadi sama untuk satu nama barang.
+
+	`penerima` hanya dibawa kalau semua baris yang digabung memang orang yang
+	sama. Kalau berbeda, dikosongkan — mengisi salah satu nama akan membuat baris
+	itu seolah-olah milik satu pegawai padahal uangnya untuk beberapa orang.
 	"""
 	gabungan = {}
 	urutan = []
 
 	for row in rows:
-		kunci = (row.get("item_barang"), row.get("penerima"))
+		kunci = row.get("item_barang")
 
 		if kunci not in gabungan:
 			gabungan[kunci] = dict(row, total=0.0, pdo_child_name=[])
@@ -533,6 +534,9 @@ def gabung_per_item_barang(rows):
 
 		baris = gabungan[kunci]
 		baris["total"] = flt(baris["total"]) + flt(row.get("total"))
+
+		if baris.get("penerima") != row.get("penerima"):
+			baris["penerima"] = None
 
 		if row.get("pdo_child_name"):
 			baris["pdo_child_name"].append(row["pdo_child_name"])
