@@ -538,7 +538,11 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 	if ppd and tipe_pdo != "Perjalanan Dinas":
 		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas hanya berlaku untuk tipe Perjalanan Dinas"))
 
-	nama_barang_terpilih = frappe.parse_json(nama_barang) if isinstance(nama_barang, str) else nama_barang
+	nama_barang_terpilih = nama_barang
+
+	if isinstance(nama_barang_terpilih, str):
+		# frappe.call mengirim null sebagai string kosong, bukan None
+		nama_barang_terpilih = frappe.parse_json(nama_barang_terpilih) if nama_barang_terpilih.strip() else None
 
 	if nama_barang_terpilih and tipe_pdo != "Kas":
 		frappe.throw(_("Pilihan Nama Barang hanya berlaku untuk tipe Kas"))
