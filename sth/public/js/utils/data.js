@@ -102,13 +102,7 @@ sth.form = {
         frm.set_value("is_pph_22", 0)
     },
     toggle_pph_22: function (frm) {
-        const allowed = this.is_solar_only(frm)
-
-        frm.set_df_property("is_pph_22", "read_only", allowed ? 0 : 1)
-        frm.set_df_property(
-            "is_pph_22", "description",
-            allowed ? "" : __("Hanya bisa dicentang kalau items terisi dan semua item mengandung SOLAR")
-        )
+        frm.set_df_property("is_pph_22", "read_only", this.is_solar_only(frm) ? 0 : 1)
 
         this.enforce_pph_22(frm)
     },
