@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
+  "nama_pengguna",
   "designation",
   "type",
   "routine_type",
@@ -27,7 +28,17 @@
   {
    "fieldname": "employee",
    "fieldtype": "Data",
+   "in_list_view": 0,
    "label": "Pengguna"
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:doc.employee",
+   "fieldname": "nama_pengguna",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Pengguna",
+   "read_only": 1
   },
   {
    "fetch_from": "employee.designation",
@@ -143,7 +154,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-30 10:08:19.814903",
+ "modified": "2026-08-04 11:20:00.000000",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "PDO Kas Table",

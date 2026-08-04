@@ -207,6 +207,9 @@ frappe.ui.form.on("PDO Kas Table", {
 		const curRow = locals[cdt][cdn]
 		getExpenseAccount(frm, curRow, cdt, cdn)
 		set_field_properties_kas(frm, cdt, cdn, curRow.type);
+	},
+	employee(frm, cdt, cdn) {
+		set_nama_pengguna(frm, cdt, cdn);
 	}
 });
 
@@ -627,6 +630,22 @@ function set_field_properties(frm, cdt, cdn, jenis) {
 
 	grid_row.refresh();
 }
+
+// 'employee' di baris kas diisi kode employee, jadi nama lengkapnya ditarik
+// ke kolom terpisah biar kelihatan siapa penggunanya
+function set_nama_pengguna(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+
+	if (!row.employee) {
+		frappe.model.set_value(cdt, cdn, "nama_pengguna", "");
+		return;
+	}
+
+	frappe.db.get_value("Employee", row.employee, "employee_name", (r) => {
+		frappe.model.set_value(cdt, cdn, "nama_pengguna", r?.employee_name || "");
+	});
+}
+
 
 function set_field_properties_kas(frm, cdt, cdn, jenis) {
 	let grid_row = frm.fields_dict['pdo_kas'].grid.grid_rows_by_docname[cdn];
