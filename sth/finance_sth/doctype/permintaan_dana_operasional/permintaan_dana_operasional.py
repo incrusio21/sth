@@ -458,12 +458,15 @@ def create_payment_voucher_kebun(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None):
+def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None):
 	"""Create Payment Voucher Kas from Permintaan Dana Operasional
 
 	Bila `ppd` (Pertanggungjawaban Perjalanan Dinas) diisi, nilai tiap baris diambil dari
 	realisasi PPD tersebut, bukan dari plafon PDO. Dengan begitu PPD berfungsi sebagai DP
 	dan realisasi yang dibayarkan otomatis terpotong.
+
+	Bila `nama_barang` diisi (khusus tipe Kas), hanya baris List Kas dengan nama barang
+	tersebut yang direalisasi, dan rinciannya ditulis ke field Keterangan.
 	"""
 
 	# Map tipe_pdo to child table and field mappings
@@ -535,6 +538,11 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 	if ppd and tipe_pdo != "Perjalanan Dinas":
 		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas hanya berlaku untuk tipe Perjalanan Dinas"))
 
+	nama_barang_terpilih = frappe.parse_json(nama_barang) if isinstance(nama_barang, str) else nama_barang
+
+	if nama_barang_terpilih and tipe_pdo != "Kas":
+		frappe.throw(_("Pilihan Nama Barang hanya berlaku untuk tipe Kas"))
+
 	realisasi_per_baris = get_realisasi_ppd(ppd, source_name) if ppd else None
 
 	# if outstanding_amount <= 0:
@@ -580,7 +588,20 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 		
 		if not child_data:
 			frappe.throw(_("No data found in {0} table").format(tipe_pdo))
-		
+
+		if nama_barang_terpilih:
+			# baris yang sudah masuk realisasi sebelumnya tidak boleh ikut lagi
+			sudah_realisasi = get_realisasi_pdo_child_names(source.name, tipe_pdo)
+			child_data = [
+				row for row in child_data
+				if row.get(detail_field) in nama_barang_terpilih and row.name not in sudah_realisasi
+			]
+
+			if not child_data:
+				frappe.throw(_("Tidak ada baris List Kas yang cocok dengan Nama Barang yang dipilih"))
+
+		rincian_nama_barang = {}
+
 		header_debit_account = getattr(source, header_debit_field, None) if header_debit_field else None
 			
 		# For Bahan Bakar, get debit account from header
@@ -626,6 +647,10 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 							target.paid_to = header_debit_account
 
 			# frappe.throw(str(debit_account))
+			nama_barang_row = row.get(detail_field) if detail_field else None
+			if nama_barang_row:
+				rincian_nama_barang[nama_barang_row] = flt(rincian_nama_barang.get(nama_barang_row)) + flt(amount)
+
 			target.append('payment_voucher_kas_pdo', {
 				'no_pdo': source.name,
 				'tipe_pdo': tipe_pdo,
@@ -633,10 +658,16 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 				'total': amount,
 				'debit_to': debit_account,  # Add debit account
 				'pdo_child_name': row.name,
-				'nama_barang': detail_field
+				'nama_barang': nama_barang_row
 			})
 			# if not header_debit_field:
 			# 	target.paid_to = debit_account
+
+		if nama_barang_terpilih and rincian_nama_barang:
+			target.note = "\n".join(
+				"{0}: {1}".format(nama, frappe.format_value(total, {"fieldtype": "Currency"}))
+				for nama, total in rincian_nama_barang.items()
+			)
 	
 	# Map document
 	doclist = get_mapped_doc(
@@ -710,6 +741,49 @@ def get_realisasi_ppd(ppd, source_name):
 		)
 
 	return realisasi
+
+
+def get_realisasi_pdo_child_names(source_name, tipe_pdo):
+	"""Baris PDO yang sudah ditarik ke Payment Entry realisasi (draft maupun submit).
+	PE yang dibatalkan tidak dihitung, jadi barisnya bebas dipakai lagi."""
+	rows = frappe.get_all(
+		"Payment Voucher Kas PDO",
+		filters={
+			"no_pdo": source_name,
+			"tipe_pdo": tipe_pdo,
+			"docstatus": ["<", 2]
+		},
+		pluck="pdo_child_name"
+	)
+
+	return {row for row in rows if row}
+
+
+@frappe.whitelist()
+def get_kas_nama_barang(source_name):
+	"""Nama barang di List Kas yang belum direalisasi, dikelompokkan beserta totalnya."""
+	doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	sudah_realisasi = get_realisasi_pdo_child_names(source_name, "Kas")
+
+	rincian = {}
+	for row in doc.pdo_kas:
+		if not row.type or row.name in sudah_realisasi:
+			continue
+
+		amount = flt(row.revised_total) or flt(row.total)
+		if amount <= 0:
+			continue
+
+		rincian[row.type] = flt(rincian.get(row.type)) + amount
+
+	return [
+		{
+			"value": nama,
+			"label": "{0} ({1})".format(nama, frappe.format_value(total, {"fieldtype": "Currency"})),
+			"amount": total
+		}
+		for nama, total in rincian.items()
+	]
 
 
 @frappe.whitelist()

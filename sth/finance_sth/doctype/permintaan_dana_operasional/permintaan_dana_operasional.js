@@ -715,76 +715,127 @@ function show_realisasi_dialog(frm) {
 				return;
 			}
 
-			// Build options string for select field
-			let options = [''];
-			let option_labels = {};
+			if (!r.message.some((item) => item.value === 'Kas')) {
+				build_realisasi_dialog(frm, r.message, []);
+				return;
+			}
 
-			r.message.forEach(function (item) {
-				options.push(item.value);
-				option_labels[item.value] = item.label;
-			});
-
-			let dialog = new frappe.ui.Dialog({
-				title: __('Realisasi PDO'),
-				fields: [
-					{
-						fieldname: 'tipe_pdo',
-						label: __('Pilih Tipe PDO'),
-						fieldtype: 'Select',
-						options: options.join('\n'),
-						reqd: 1,
-						description: __('Only types with outstanding amounts are shown')
-					},
-					{
-						fieldname: 'ppd',
-						label: __('Pertanggungjawaban Perjalanan Dinas'),
-						fieldtype: 'Link',
-						options: 'Pertanggungjawaban Perjalanan Dinas',
-						depends_on: 'eval:doc.tipe_pdo == "Perjalanan Dinas"',
-						description: __('Dipakai sebagai DP: nilai realisasi menggantikan plafon PDO'),
-						get_query: function () {
-							return {
-								filters: {
-									no_pdo: frm.doc.name,
-									sumber_pertanggungjawaban: 'PDO',
-									docstatus: 1,
-									realisasi_payment_entry: ['is', 'not set']
-								}
-							};
-						}
-					}
-				],
-				primary_action_label: __('Create Payment Voucher Kas'),
-				primary_action: function (values) {
-					if (!values.tipe_pdo) {
-						frappe.msgprint(__('Please select a type'));
-						return;
-					}
-
-					dialog.hide();
-
-					// Call the method with tipe_pdo parameter
-					frappe.call({
-						method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
-						args: {
-							source_name: frm.doc.name,
-							tipe_pdo: values.tipe_pdo,
-							ppd: values.tipe_pdo == 'Perjalanan Dinas' ? values.ppd : null
-						},
-						callback: function (r) {
-							if (r.message) {
-								// Open the created document
-								frappe.model.sync(r.message);
-								frappe.set_route('Form', r.message.doctype, r.message.name);
-							}
-						}
-					});
+			// tipe Kas masih ada sisa, ambil nama barang yang belum direalisasi
+			frappe.call({
+				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+				args: {
+					source_name: frm.doc.name
+				},
+				callback: function (res) {
+					build_realisasi_dialog(frm, r.message, res.message || []);
 				}
 			});
-
-			dialog.show();
 		}
 	});
+}
+
+function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
+	// Build options string for select field
+	let options = [''];
+	let option_labels = {};
+
+	tipe_list.forEach(function (item) {
+		options.push(item.value);
+		option_labels[item.value] = item.label;
+	});
+
+	let fields = [
+		{
+			fieldname: 'tipe_pdo',
+			label: __('Pilih Tipe PDO'),
+			fieldtype: 'Select',
+			options: options.join('\n'),
+			reqd: 1,
+			description: __('Only types with outstanding amounts are shown')
+		},
+		{
+			fieldname: 'ppd',
+			label: __('Pertanggungjawaban Perjalanan Dinas'),
+			fieldtype: 'Link',
+			options: 'Pertanggungjawaban Perjalanan Dinas',
+			depends_on: 'eval:doc.tipe_pdo == "Perjalanan Dinas"',
+			description: __('Dipakai sebagai DP: nilai realisasi menggantikan plafon PDO'),
+			get_query: function () {
+				return {
+					filters: {
+						no_pdo: frm.doc.name,
+						sumber_pertanggungjawaban: 'PDO',
+						docstatus: 1,
+						realisasi_payment_entry: ['is', 'not set']
+					}
+				};
+			}
+		}
+	];
+
+	if (kas_nama_barang.length) {
+		fields.push({
+			fieldname: 'nama_barang',
+			label: __('Nama Barang'),
+			fieldtype: 'MultiCheck',
+			columns: 1,
+			depends_on: 'eval:doc.tipe_pdo == "Kas"',
+			description: __('Hanya nama barang yang dipilih yang direalisasi dan masuk ke Keterangan'),
+			options: kas_nama_barang.map(function (item) {
+				return { label: item.label, value: item.value, checked: 0 };
+			})
+		});
+	}
+
+	let dialog = new frappe.ui.Dialog({
+		title: __('Realisasi PDO'),
+		fields: fields,
+		primary_action_label: __('Create Payment Voucher Kas'),
+		primary_action: function (values) {
+			if (!values.tipe_pdo) {
+				frappe.msgprint(__('Please select a type'));
+				return;
+			}
+
+			let nama_barang = [];
+
+			if (values.tipe_pdo == 'Kas') {
+				if (!kas_nama_barang.length) {
+					frappe.msgprint(__('Semua nama barang di List Kas sudah direalisasi'));
+					return;
+				}
+
+				nama_barang = dialog.get_value('nama_barang') || [];
+
+				if (!nama_barang.length) {
+					frappe.msgprint(__('Pilih minimal satu Nama Barang'));
+					return;
+				}
+			}
+
+			dialog.hide();
+
+			// Call the method with tipe_pdo parameter
+			frappe.call({
+				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_alokasi',
+				args: {
+					source_name: frm.doc.name,
+					tipe_pdo: values.tipe_pdo,
+					ppd: values.tipe_pdo == 'Perjalanan Dinas' ? values.ppd : null,
+					nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null
+				},
+				callback: function (r) {
+					if (r.message) {
+						// Open the created document
+						frappe.model.sync(r.message);
+						frappe.set_route('Form', r.message.doctype, r.message.name);
+					}
+				}
+			});
+		}
+	});
+
+	dialog.show();
 }
 
 function hide_revisi_field(frm) {
