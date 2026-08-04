@@ -64,6 +64,16 @@ class AssetScrapRequest(Document):
 
 		self.nilai_buku = flt(nilai_buku, self.precision("nilai_buku"))
 
+	def on_update(self):
+		# dipanggil di tiap transisi workflow, termasuk saat submit
+		self.update_status_scrap()
+
+	def update_status_scrap(self, kosongkan=False):
+		"""Cerminkan state pengajuan ke Asset supaya kelihatan di list view."""
+		status = "" if kosongkan else (self.get("workflow_state") or "")
+
+		frappe.db.set_value("Asset", self.asset, "status_scrap", status, update_modified=False)
+
 	def on_submit(self):
 		# workflow punya dua state ber-docstatus 1: Approved dan Rejected.
 		# yang boleh menjalankan scrap cuma Approved.
@@ -95,6 +105,11 @@ class AssetScrapRequest(Document):
 					self.asset
 				)
 			)
+
+		self.update_status_scrap(kosongkan=True)
+
+	def on_trash(self):
+		self.update_status_scrap(kosongkan=True)
 
 
 def get_pengajuan_berjalan(asset):
