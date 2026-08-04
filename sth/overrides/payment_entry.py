@@ -141,6 +141,52 @@ class PaymentEntry(EmployeePaymentEntry):
 
 				self.paid_to = debit_account
 
+		self.validate_paid_amount_with_outstanding()
+
+	def validate_paid_amount_with_outstanding(self):
+		"""
+		Pembayaran tagihan tidak boleh melebihi total outstanding-nya.
+
+		Hanya berlaku kalau seluruh reference-nya Purchase Invoice. PE tipe lain (uang muka,
+		PDO, dsb) memang boleh punya sisa yang tidak teralokasi.
+		"""
+		references = [d for d in self.get("references") if d.reference_name]
+		if not references or any(d.reference_doctype != "Purchase Invoice" for d in references):
+			return
+
+		# outstanding dinyatakan dalam mata uang party account. kalau rekening pembayaran
+		# beda mata uang, nilainya tidak sebanding jadi tidak dibandingkan
+		party_account_currency = (
+			self.paid_to_account_currency if self.payment_type == "Pay" else self.paid_from_account_currency
+		)
+		paid_account_currency = (
+			self.paid_from_account_currency if self.payment_type == "Pay" else self.paid_to_account_currency
+		)
+
+		if party_account_currency != paid_account_currency:
+			return
+
+		# diambil ulang dari invoice, bukan dari snapshot di baris reference, supaya
+		# pembayaran lain yang masuk setelah reference dipilih ikut terhitung. invoice yang
+		# dipecah jadi beberapa baris termin cukup dihitung sekali
+		total_outstanding = 0.0
+		for invoice in {d.reference_name for d in references}:
+			total_outstanding += flt(
+				frappe.db.get_value("Purchase Invoice", invoice, "outstanding_amount")
+			)
+
+		precision = self.precision("paid_amount")
+		if flt(self.paid_amount, precision) <= flt(total_outstanding, precision):
+			return
+
+		frappe.throw(
+			_("Paid Amount {0} melebihi total outstanding Purchase Invoice {1}").format(
+				fmt_money(self.paid_amount, precision, paid_account_currency),
+				fmt_money(total_outstanding, precision, party_account_currency),
+			),
+			title=_("Pembayaran Melebihi Tagihan"),
+		)
+
 	def get_valid_reference_doctypes(self):
 		
 		doc_ref = []
