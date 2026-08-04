@@ -36,20 +36,20 @@ class AssetScrapRequest(Document):
 			)
 
 	def validate_duplikat(self):
+		# yang dilarang cuma pengajuan yang masih berjalan. pengajuan yang ditolak
+		# berdocstatus 1, jadi asetnya tetap bisa diajukan ulang
 		pengajuan_lain = frappe.db.exists(
 			"Asset Scrap Request",
 			{
 				"asset": self.asset,
-				"docstatus": ["<", 2],
+				"docstatus": 0,
 				"name": ["!=", self.name]
 			}
 		)
 
 		if pengajuan_lain:
 			frappe.throw(
-				_("Asset {0} sudah punya pengajuan scrap yang berjalan di {1}").format(
-					self.asset, pengajuan_lain
-				)
+				_("Asset {0} sudah punya pengajuan scrap yang berjalan").format(self.asset)
 			)
 
 	def set_nilai_buku(self):
@@ -95,3 +95,77 @@ class AssetScrapRequest(Document):
 					self.asset
 				)
 			)
+
+
+def get_pengajuan_berjalan(asset):
+	return frappe.db.get_value("Asset Scrap Request", {"asset": asset, "docstatus": 0}, "name")
+
+
+@frappe.whitelist()
+def get_status_scrap(asset):
+	"""Dipakai form Asset. Semua approval dikerjakan dari sana, dokumen
+	Asset Scrap Request cuma pencatat di belakang layar."""
+	from frappe.model.workflow import get_transitions
+
+	asset_doc = frappe.db.get_value("Asset", asset, ["docstatus", "status"], as_dict=True)
+	if not asset_doc:
+		return None
+
+	hasil = {
+		"name": None,
+		"workflow_state": None,
+		"actions": [],
+		"bisa_ajukan": (
+			asset_doc.docstatus == 1 and asset_doc.status not in STATUS_TIDAK_BISA_SCRAP
+		)
+	}
+
+	nama = get_pengajuan_berjalan(asset)
+	if not nama:
+		return hasil
+
+	doc = frappe.get_doc("Asset Scrap Request", nama)
+
+	hasil["name"] = doc.name
+	hasil["workflow_state"] = doc.get("workflow_state")
+	hasil["actions"] = [transisi.action for transisi in get_transitions(doc, raise_exception=False)]
+	hasil["bisa_ajukan"] = False
+
+	return hasil
+
+
+@frappe.whitelist()
+def ajukan_scrap(asset, alasan, lampiran=None):
+	"""Buat pengajuan lalu langsung dorong ke lapis approval pertama."""
+	from frappe.model.workflow import apply_workflow, get_transitions
+
+	if get_pengajuan_berjalan(asset):
+		frappe.throw(_("Asset {0} sudah punya pengajuan scrap yang berjalan").format(asset))
+
+	doc = frappe.new_doc("Asset Scrap Request")
+	doc.asset = asset
+	doc.alasan = alasan
+	doc.lampiran = lampiran
+	doc.insert()
+
+	transisi = get_transitions(doc, raise_exception=False)
+	if transisi:
+		apply_workflow(doc, transisi[0].action)
+
+	return doc.get("workflow_state")
+
+
+@frappe.whitelist()
+def proses_scrap(asset, action):
+	"""Jalankan aksi workflow (Approve/Reject) dari form Asset.
+	apply_workflow yang memeriksa apakah role user boleh menjalankannya."""
+	from frappe.model.workflow import apply_workflow
+
+	nama = get_pengajuan_berjalan(asset)
+	if not nama:
+		frappe.throw(_("Tidak ada pengajuan scrap yang berjalan untuk Asset {0}").format(asset))
+
+	doc = frappe.get_doc("Asset Scrap Request", nama)
+	apply_workflow(doc, action)
+
+	return doc.get("workflow_state")

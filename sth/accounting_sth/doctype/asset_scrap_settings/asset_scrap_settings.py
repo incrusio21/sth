@@ -105,6 +105,8 @@ def build_workflow():
 	pastikan_workflow_state([nama_state(baris[1]) for baris in lapis])
 	pastikan_workflow_action()
 
+	beri_permission(role_pemohon, boleh_buat=True)
+
 	for _nomor, _label, roles in lapis:
 		for role in roles:
 			beri_permission(role)
@@ -167,12 +169,17 @@ def pastikan_workflow_action():
 		}).insert(ignore_permissions=True)
 
 
-def beri_permission(role):
+def beri_permission(role, boleh_buat=False):
 	# role approval harus bisa baca, mengubah state, dan submit karena state
-	# Approved dan Rejected berdocstatus 1
+	# Approved dan Rejected berdocstatus 1. role pemohon perlu create juga
+	# karena dokumennya dibuat atas namanya dari form Asset
 	add_permission(DOCTYPE, role, 0)
 
-	for ptype in ("read", "write", "submit", "report", "email", "print", "share"):
+	ptypes = ["read", "write", "submit", "report", "email", "print", "share"]
+	if boleh_buat:
+		ptypes.append("create")
+
+	for ptype in ptypes:
 		update_permission_property(DOCTYPE, role, 0, ptype, 1)
 
 

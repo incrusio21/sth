@@ -18,11 +18,7 @@ frappe.ui.form.on('Asset', {
             frm.remove_custom_button(__("Scrap Asset"), __("Manage"));
             frm.remove_custom_button(__("Sell Asset"), __("Manage"));
 
-            if (!["Draft", "Cancelled", "Sold", "Scrapped", "Capitalized", "Decapitalized"].includes(frm.doc.status)) {
-                frm.add_custom_button(__("Ajukan Scrap"), function() {
-                    ajukan_scrap(frm);
-                }, __("Manage"));
-            }
+            setup_approval_scrap(frm);
 
             if (frm.doc.status === "Scrapped") {
                 frm.add_custom_button(__("Sell Asset"), function() {
@@ -76,23 +72,99 @@ function sell_asset(frm) {
 	});
 }
 
-function ajukan_scrap(frm) {
-	frappe.db.get_value(
-		"Asset Scrap Request",
-		{ asset: frm.doc.name, docstatus: ["<", 2] },
-		"name"
-	).then(({ message }) => {
-		if (message && message.name) {
-			frappe.msgprint({
-				title: __("Sudah Diajukan"),
-				message: __("Asset ini sudah punya pengajuan scrap yang berjalan: {0}",
-					[frappe.utils.get_form_link("Asset Scrap Request", message.name, true)]),
-				indicator: "orange"
-			});
-			return;
-		}
+const SCRAP_API = "sth.accounting_sth.doctype.asset_scrap_request.asset_scrap_request";
 
-		frappe.new_doc("Asset Scrap Request", { asset: frm.doc.name });
+// Seluruh approval scrap dikerjakan dari form Asset. Dokumen Asset Scrap
+// Request cuma pencatat di belakang layar, user tidak perlu membukanya.
+function setup_approval_scrap(frm) {
+	frappe.call({
+		method: SCRAP_API + ".get_status_scrap",
+		args: { asset: frm.doc.name },
+		callback: function(r) {
+			const info = r.message;
+			if (!info) return;
+
+			if (!info.name) {
+				if (info.bisa_ajukan) {
+					frm.add_custom_button(__("Ajukan Scrap"), function() {
+						dialog_ajukan_scrap(frm);
+					}, __("Manage"));
+				}
+				return;
+			}
+
+			frm.dashboard.add_indicator(__("Scrap: {0}", [info.workflow_state]), "orange");
+
+			(info.actions || []).forEach(function(action) {
+				frm.add_custom_button(__(action), function() {
+					proses_approval_scrap(frm, action);
+				}, __("Approval Scrap"));
+			});
+		}
+	});
+}
+
+function dialog_ajukan_scrap(frm) {
+	const dialog = new frappe.ui.Dialog({
+		title: __("Ajukan Scrap Asset"),
+		fields: [
+			{
+				fieldname: "alasan",
+				label: __("Alasan Scrap"),
+				fieldtype: "Small Text",
+				reqd: 1
+			},
+			{
+				fieldname: "lampiran",
+				label: __("Lampiran"),
+				fieldtype: "Attach"
+			}
+		],
+		primary_action_label: __("Ajukan"),
+		primary_action(values) {
+			dialog.hide();
+
+			frappe.call({
+				method: SCRAP_API + ".ajukan_scrap",
+				args: {
+					asset: frm.doc.name,
+					alasan: values.alasan,
+					lampiran: values.lampiran
+				},
+				freeze: true,
+				freeze_message: __("Mengajukan scrap..."),
+				callback: function(r) {
+					frappe.show_alert({
+						message: __("Pengajuan scrap dikirim ke {0}", [r.message]),
+						indicator: "green"
+					});
+					frm.refresh();
+				}
+			});
+		}
+	});
+
+	dialog.show();
+}
+
+function proses_approval_scrap(frm, action) {
+	frappe.confirm(__("Jalankan {0} untuk pengajuan scrap asset ini?", [__(action)]), function() {
+		frappe.call({
+			method: SCRAP_API + ".proses_scrap",
+			args: {
+				asset: frm.doc.name,
+				action: action
+			},
+			freeze: true,
+			freeze_message: __("Memproses approval..."),
+			callback: function(r) {
+				frappe.show_alert({
+					message: __("Status pengajuan sekarang: {0}", [r.message]),
+					indicator: "green"
+				});
+				frm.reload_doc();
+			}
+		});
 	});
 }
 
