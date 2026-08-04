@@ -200,4 +200,29 @@ def get_payment_entry(
     if not created_from_payment_request:
         allocate_open_payment_requests_to_references(pe.references, pe.precision("paid_amount"))
 
+    set_note_from_purchase_invoice(pe, dt, dn, doc)
+
     return pe
+
+
+def set_note_from_purchase_invoice(pe, dt, dn, doc):
+    """
+    Keterangan PV diisi nama barang dari invoice-nya. Formatnya disamakan dengan pengisian
+    otomatis di form PV (satu baris per invoice), supaya keterangan tetap konsisten kalau
+    nanti ada invoice lain ditambahkan manual di tabel references.
+    """
+    if dt != "Purchase Invoice":
+        return
+
+    item_names = []
+    for item in doc.get("items") or []:
+        item_name = item.get("item_name") or item.get("item_code")
+
+        # barang yang sama di beberapa baris invoice cukup ditulis sekali
+        if item_name and item_name not in item_names:
+            item_names.append(item_name)
+
+    if not item_names:
+        return
+
+    pe.note = "{0}: {1}".format(dn, ", ".join(item_names))
