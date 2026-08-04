@@ -81,11 +81,25 @@ sth.form = {
         }
     },
     // PPh 22 cuma berlaku untuk pembelian solar, jadi centangannya dikunci
-    // selama masih ada item yang bukan solar
+    // selama items masih kosong atau ada item yang bukan solar
     is_solar_only: function (frm) {
         const items = (frm.doc.items || []).filter((row) => row.item_name)
 
         return items.length > 0 && items.every((row) => row.item_name.toUpperCase().includes("SOLAR"))
+    },
+    // read only cuma menahan di tampilan, ini yang memantulkan nilainya balik
+    // kalau tetap kecentang (mis. terbawa dari dokumen sumber)
+    enforce_pph_22: function (frm) {
+        if (!frm.doc.is_pph_22 || frm.doc.docstatus !== 0 || this.is_solar_only(frm)) {
+            return
+        }
+
+        frappe.show_alert({
+            message: __("PPh 22 hanya bisa dicentang kalau items terisi dan semua item mengandung SOLAR"),
+            indicator: "orange"
+        })
+
+        frm.set_value("is_pph_22", 0)
     },
     toggle_pph_22: function (frm) {
         const allowed = this.is_solar_only(frm)
@@ -93,12 +107,10 @@ sth.form = {
         frm.set_df_property("is_pph_22", "read_only", allowed ? 0 : 1)
         frm.set_df_property(
             "is_pph_22", "description",
-            allowed ? "" : __("Hanya bisa dicentang kalau semua item mengandung SOLAR")
+            allowed ? "" : __("Hanya bisa dicentang kalau items terisi dan semua item mengandung SOLAR")
         )
 
-        if (!allowed && frm.doc.is_pph_22 && frm.doc.docstatus === 0) {
-            frm.set_value("is_pph_22", 0)
-        }
+        this.enforce_pph_22(frm)
     },
     override_class_function: function(obj, func_name, fn){
         const superFn = obj[func_name]

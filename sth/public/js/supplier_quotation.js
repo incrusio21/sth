@@ -81,6 +81,8 @@ frappe.ui.form.on("Supplier Quotation", {
     },
 
     is_pph_22(frm) {
+        sth.form.enforce_pph_22(frm)
+
         if (!frm.doc.is_pph_22) {
             frm.set_value('pph_22', 0)
         }

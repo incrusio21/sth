@@ -351,6 +351,8 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     is_pph_22(frm) {
+        sth.form.enforce_pph_22(frm)
+
         if (!frm.doc.is_pph_22) {
             frm.set_value('pph_22', 0)
         }
