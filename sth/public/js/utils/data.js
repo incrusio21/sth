@@ -80,6 +80,26 @@ sth.form = {
             frm.fields_dict[fields].grid.reset_grid();
         }
     },
+    // PPh 22 cuma berlaku untuk pembelian solar, jadi centangannya dikunci
+    // selama masih ada item yang bukan solar
+    is_solar_only: function (frm) {
+        const items = (frm.doc.items || []).filter((row) => row.item_name)
+
+        return items.length > 0 && items.every((row) => row.item_name.toUpperCase().includes("SOLAR"))
+    },
+    toggle_pph_22: function (frm) {
+        const allowed = this.is_solar_only(frm)
+
+        frm.set_df_property("is_pph_22", "read_only", allowed ? 0 : 1)
+        frm.set_df_property(
+            "is_pph_22", "description",
+            allowed ? "" : __("Hanya bisa dicentang kalau semua item mengandung SOLAR")
+        )
+
+        if (!allowed && frm.doc.is_pph_22 && frm.doc.docstatus === 0) {
+            frm.set_value("is_pph_22", 0)
+        }
+    },
     override_class_function: function(obj, func_name, fn){
         const superFn = obj[func_name]
 

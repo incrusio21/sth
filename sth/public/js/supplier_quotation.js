@@ -34,6 +34,7 @@ frappe.ui.form.on("Supplier Quotation", {
     refresh(frm) {
         frm.trigger('get_tax_template')
         frm.page.btn_secondary.hide()
+        sth.form.toggle_pph_22(frm)
         if (frm.doc.workflow_state == "Approved") {
             frm.add_custom_button(__("Re open"), function () {
                 let rfq = frm.doc.items[0].request_for_quotation
@@ -83,6 +84,10 @@ frappe.ui.form.on("Supplier Quotation", {
         if (!frm.doc.is_pph_22) {
             frm.set_value('pph_22', 0)
         }
+    },
+
+    items_remove(frm) {
+        sth.form.toggle_pph_22(frm)
     },
 
     pph_22(frm) {
@@ -168,6 +173,17 @@ frappe.ui.form.on("Supplier Quotation", {
             btn_get_material_request(frm)
             btn_get_rfq(frm)
         }
+    }
+})
+
+
+frappe.ui.form.on("Supplier Quotation Item", {
+    item_code(frm) {
+        sth.form.toggle_pph_22(frm)
+    },
+
+    item_name(frm) {
+        sth.form.toggle_pph_22(frm)
     }
 })
 
