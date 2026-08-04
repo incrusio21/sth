@@ -3,7 +3,10 @@
 
 frappe.ui.form.on("Perhitungan KUD", {
 	setup(frm) {
-		frm.set_query("unit", "unit", () => ({
+		// Dua argumen, bukan tiga. Bentuk set_query(field, parentfield, fn) itu
+		// untuk grid child table dan mencari `.grid` — Table MultiSelect tidak
+		// punya itu, jadi bentuk tiga argumen melempar error saat form dibuka.
+		frm.set_query("unit", () => ({
 			filters: { company: frm.doc.company, plasma: 1 },
 		}));
 	},
