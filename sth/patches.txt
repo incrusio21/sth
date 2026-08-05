@@ -8,3 +8,4 @@ sth.patches.merge_duplicate_spb_trans_no
 # Patches added in this section will be executed after doctypes are migrated
 sth.patches.set_nama_pengguna_pdo_kas
 sth.patches.create_asset_scrap_request_workflow
+sth.patches.tambah_jalur_approval_realisasi_tambahan

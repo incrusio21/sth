@@ -896,6 +896,28 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 
 				)
 
+def set_realisasi_tambahan(doc, method=None):
+	"""Tandai Realisasi PDO yang memuat baris di luar PDO.
+
+	Baris hasil tarik dari PDO selalu membawa pdo_child_name; baris yang
+	ditambah manual di grid tidak punya, dan baris begitulah yang saat submit
+	masuk ke tabel NON PDO lewat update_pdo_non_pdo_table. Penanda ini yang
+	dipakai Workflow Approval Payment Voucher untuk memilih jalur approval.
+	"""
+	if not doc.meta.has_field("realisasi_tambahan"):
+		return
+
+	tambahan = 0
+
+	if doc.tipe_transfer == "Realisasi PDO":
+		for row in doc.get("payment_voucher_kas_pdo") or []:
+			if not row.pdo_child_name:
+				tambahan = 1
+				break
+
+	doc.realisasi_tambahan = tambahan
+
+
 def update_payment_voucher_ppd(doc, method=None):
 	if not doc.references:
 		return
