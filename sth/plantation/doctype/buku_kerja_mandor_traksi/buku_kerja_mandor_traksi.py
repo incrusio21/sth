@@ -163,9 +163,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def set_details_diffrence(self, kmhm_awal=None, raise_error=False):
 		if not self.kendaraan:
 			return
-		
-		if not kmhm_awal:
-			kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", for_update=self.docstatus)
+			
+		kmhm_awal = self.kmhm_awal
+		# if not kmhm_awal:
+		# 	kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", for_update=self.docstatus)
 		
 		self.kmhm_awal = kmhm_awal
 
