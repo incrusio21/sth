@@ -6,6 +6,7 @@ from frappe.utils import add_days
 from frappe.model.document import Document
 from frappe.utils import get_datetime,flt
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
+from sth.custom.api import submit_after_insert
 from frappe import _, delete_doc
 from frappe.model.mapper import get_mapped_doc
 
@@ -33,7 +34,7 @@ class Timbangan(Document):
 			self.db_update()
 
 		elif self.flags.get("submit_after_insert"):
-			self.submit()
+			submit_after_insert(self)
 
 	def validate(self):
 		# self.validate_ticket()

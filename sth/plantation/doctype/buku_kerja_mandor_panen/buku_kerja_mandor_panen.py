@@ -6,6 +6,7 @@ from frappe.utils import flt, format_date, get_link_to_form
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
+from sth.custom.api import submit_after_insert
 from frappe import _
 
 class BukuKerjaMandorPanen(BukuKerjaMandorController):
@@ -63,7 +64,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 	def after_insert(self):
 		if self.flags.get("submit_after_insert"):
-			self.submit()
+			submit_after_insert(self)
 
 	def validate(self):
 		self.isi_cost_center()

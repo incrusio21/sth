@@ -10,6 +10,7 @@ import erpnext
 from erpnext.accounts.general_ledger import merge_similar_entries
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
+from sth.custom.api import submit_after_insert
 
 
 field_map = {
@@ -71,7 +72,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 	def after_insert(self):
 		if self.flags.get("submit_after_insert"):
-			self.submit()
+			submit_after_insert(self)
 
 	def validate(self):
 		self.set_posting_datetime()

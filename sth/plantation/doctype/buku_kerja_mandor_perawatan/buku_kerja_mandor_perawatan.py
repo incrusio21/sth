@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
+from sth.custom.api import submit_after_insert
 
 class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 	# draft ikut dihitung ulang oleh tombol Re-calculate Premi
@@ -44,7 +45,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 	def after_insert(self):
 		if self.flags.get("submit_after_insert"):
-			self.submit()
+			submit_after_insert(self)
 
 	def validate(self):
 		self.isi_cost_center()

@@ -1,5 +1,23 @@
 import frappe
 
+def submit_after_insert(doc):
+	"""Submit dokumen dari dalam hook after_insert.
+
+	Hanya untuk dipanggil dari after_insert. submit() -> _save() ->
+	check_if_latest() menyetel doc._action = "submit". Setelah after_insert
+	selesai, insert() masih menjalankan run_post_save_methods() pada objek yang
+	sama dan membaca _action tersebut, sehingga on_submit terpanggil untuk kedua
+	kali. Turunkan _action kembali ke "save" supaya pass kedua itu hanya
+	menjalankan on_update (yang sebelumnya juga sudah jalan dua kali, jadi bukan
+	perubahan perilaku).
+
+	Gejalanya dulu: BKM Panen dari API gagal dengan "List Blok already used"
+	karena create_recap_panen_by_blok() jalan dua kali dan kena unique index
+	(blok, company, posting_date) pada Recap Panen by Blok.
+	"""
+	doc.submit()
+	doc._action = "save"
+
 @frappe.whitelist()
 def approve_api(self,method):
 	if self.owner != "api@sth.com":
@@ -10,4 +28,4 @@ def approve_api(self,method):
 	if not self.meta.is_submittable or self.docstatus != 0:
 		return
 
-	self.submit()
+	submit_after_insert(self)
