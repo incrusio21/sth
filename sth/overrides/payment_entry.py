@@ -141,7 +141,35 @@ class PaymentEntry(EmployeePaymentEntry):
 
 				self.paid_to = debit_account
 
+		self.set_paid_to_uang_muka_po()
 		self.validate_paid_amount_with_outstanding()
+
+	def set_paid_to_uang_muka_po(self):
+		"""Pembayaran terhadap Purchase Order masuk ke akun Uang Muka.
+
+		PO belum punya tagihan, jadi uangnya uang muka dan bukan pelunasan hutang
+		usaha. Akunnya diambil dari Procurement Settings sesuai jenis PO.
+
+		Dipasang di sini, bukan cuma di tombol Payment pada PO, supaya PE yang
+		barisnya dipilih manual ikut memakai akun yang sama.
+
+		Akun uang muka bukan Payable sehingga party-nya tidak boleh ikut ke jurnal;
+		add_party_gl_entries yang mengurusnya lewat use_party. Supplier tetap
+		terpasang di dokumen supaya baris referensi ke PO tetap sah.
+		"""
+		if self.payment_type != "Pay":
+			return
+
+		references = [d for d in self.get("references") if d.reference_name]
+		if not references or any(d.reference_doctype != "Purchase Order" for d in references):
+			return
+
+		from sth.buying_sth.custom.purchase_order import akun_uang_muka_po
+
+		self.paid_to = akun_uang_muka_po({d.reference_name for d in references}, self.company)
+		self.paid_to_account_currency = frappe.db.get_value(
+			"Account", self.paid_to, "account_currency"
+		)
 
 	def validate_paid_amount_with_outstanding(self):
 		"""

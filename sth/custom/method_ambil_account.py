@@ -49,8 +49,8 @@ def ambil_uang_muka_procurement(tipe, company):
 
 	if not akun_expense:
 		frappe.throw(
-			_("Account Uang Muka untuk company <b>{0}</b> tidak ditemukan. "
-			  "Pastikan akun tersebut sudah dipasang di Procurement Settings").format(self.company)
+			_("Account Uang Muka {0} untuk company <b>{1}</b> tidak ditemukan. "
+			  "Pastikan akun tersebut sudah dipasang di Procurement Settings").format(tipe, company)
 		)
 
 	return akun_expense

@@ -135,6 +135,19 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 		super.setup();
 	}
 
+	get_method_for_payment() {
+		// Kalau Accounts Settings memilih pembayaran lewat Journal Entry, biarkan
+		// jalur bawaannya - akun uang muka tidak berlaku di sana.
+		if (this.frm.doc.__onload && this.frm.doc.__onload.make_payment_via_journal_entry) {
+			return super.get_method_for_payment();
+		}
+
+		// Pembayaran terhadap PO masuk ke akun Uang Muka per jenis PO dari
+		// Procurement Settings, bukan hutang usaha supplier yang dipasang
+		// get_payment_entry bawaan ERPNext.
+		return "sth.buying_sth.custom.purchase_order.get_payment_entry_uang_muka";
+	}
+
 	refresh(doc, cdt, cdn) {
 		var me = this;
 		super.refresh();

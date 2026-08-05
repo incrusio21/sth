@@ -104,6 +104,88 @@ def check_uang_muka_payment_entry(purchase_order):
         'has_payment_entry': has_payment_entry
     }
 
+def tipe_procurement_po(sub_purchase_type):
+    """Jenis PO dalam istilah tabel Procurement Settings.
+
+    Patokan yang sama dipakai Purchase Invoice saat memilih akun uang muka termin
+    DP: hanya Service Request yang dihitung jasa. PO Capex tidak mengisi
+    sub_purchase_type sama sekali, jadi ikut barang.
+    """
+    return "jasa" if sub_purchase_type == "Service Request" else "barang"
+
+
+def akun_uang_muka_po(purchase_orders, company):
+    """Akun Uang Muka untuk sekumpulan PO, dari Procurement Settings.
+
+    Melempar kalau PO barang dan jasa dicampur dalam satu pembayaran — akun uang
+    muka keduanya berbeda, jadi tidak ada satu akun yang benar untuk dipakai.
+    """
+    from sth.custom.method_ambil_account import ambil_uang_muka_procurement
+
+    tipe = {
+        tipe_procurement_po(
+            frappe.db.get_value("Purchase Order", nama, "sub_purchase_type")
+        )
+        for nama in purchase_orders
+    }
+
+    if len(tipe) > 1:
+        frappe.throw(
+            _("Purchase Order barang dan jasa tidak bisa dibayar dalam satu Payment Entry "
+              "karena akun uang mukanya berbeda. Pisahkan pembayarannya."),
+            title=_("Jenis PO Bercampur"),
+        )
+
+    return ambil_uang_muka_procurement(tipe.pop(), company)
+
+
+@frappe.whitelist()
+def get_payment_entry_uang_muka(
+    dt,
+    dn,
+    party_amount=None,
+    bank_account=None,
+    bank_amount=None,
+    party_type=None,
+    payment_type=None,
+    reference_date=None,
+):
+    """Payment Entry dari Purchase Order dengan paid_to akun Uang Muka.
+
+    get_payment_entry bawaan ERPNext memasang akun hutang usaha supplier di
+    paid_to. Pembayaran terhadap PO belum ada tagihannya — uangnya uang muka,
+    jadi akunnya diambil dari Procurement Settings sesuai jenis PO.
+
+    Supplier-nya tetap terpasang supaya baris referensi ke PO tetap sah; akun
+    uang muka bukan Payable sehingga party-nya dilepas saat jurnal dibuat oleh
+    add_party_gl_entries.
+
+    Parameternya ditulis satu per satu, bukan **kwargs: frappe meneruskan seluruh
+    form_dict ke fungsi ber-**kwargs, termasuk cmd, dan get_payment_entry tidak
+    menerimanya.
+    """
+    from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+    pe = get_payment_entry(
+        dt,
+        dn,
+        party_amount=party_amount,
+        bank_account=bank_account,
+        bank_amount=bank_amount,
+        party_type=party_type,
+        payment_type=payment_type,
+        reference_date=reference_date,
+    )
+
+    if dt == "Purchase Order":
+        pe.paid_to = akun_uang_muka_po([dn], pe.company)
+        pe.paid_to_account_currency = frappe.db.get_value(
+            "Account", pe.paid_to, "account_currency"
+        )
+
+    return pe
+
+
 def set_accept_day(doc,method):
     doc.accept_day = cint(doc.syarat_pembayaran.split(' ')[0]) if doc.syarat_pembayaran else 0
 
