@@ -170,7 +170,7 @@ function show_pilih_asset_dialog(frm) {
 				get_query: function() {
 					let filters = [
 						['docstatus', '=', 1],
-						['status', '!=', 'Scrapped']
+						['status', '=', 'Scrapped']
 					];
 					if (frm.doc.company) {
 						filters.push(['company', '=', frm.doc.company]);
