@@ -720,7 +720,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 		if not unit_doc.bank_account:
 			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
 		target.paid_from = unit_doc.bank_account
-		target.mode_of_payment = "Bank Draft"
+		target.mode_of_payment = "Kas"
 
 		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang)
 

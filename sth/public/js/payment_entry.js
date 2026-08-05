@@ -1122,7 +1122,7 @@ function filter_bank_accounts(frm) {
 		['bank_account', 'account_for_cash'],
 		(unit_res) => {
 			let mop = frm.doc.mode_of_payment.toLowerCase();
-			let is_cash = mop.includes("cash");
+			let is_cash = mop.includes("kas") || mop.includes("cash");
 
 			let selected_account = null;
 
@@ -1656,6 +1656,10 @@ function isi_baris_realisasi(frm, selected_name, args) {
 
 			frm.refresh_field('payment_voucher_kas_pdo');
 			frm.set_value('permintaan_dana_operasional', selected_name);
+
+			// Realisasi PDO selalu dibayar lewat Kas, sama seperti PE yang dibuat
+			// dari tombol Realisasi di PDO (create_payment_voucher_alokasi).
+			frm.set_value('mode_of_payment', 'Kas');
 
 			if (r.message.note) {
 				frm.set_value('note', r.message.note);
