@@ -204,11 +204,23 @@ function show_pilih_asset_dialog(frm) {
 					row.qty = 1;
 					frm.refresh_field('items');
 
+					// Sekali ambil, dipakai dua kali: debit_to sekarang dan expense_account
+					// setelah trigger asset selesai.
+					let akun_penjualan_asset = ambil_akun_penjualan_asset(frm);
+
 					frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
 						frappe.model.set_value(row.doctype, row.name, 'item_code', asset.item_code);
 						frappe.model.set_value(row.doctype, row.name, 'is_fixed_asset', 1);
 						frappe.model.set_value(row.doctype, row.name, 'asset', values.asset).then(function() {
-							frm.script_manager.trigger('asset', row.doctype, row.name);
+							frm.script_manager.trigger('asset', row.doctype, row.name).then(function() {
+								// Harus setelah trigger asset selesai, kalau tidak akan ditimpa
+								// expense account bawaan (disposal account dari Company).
+								akun_penjualan_asset.then((akun) => {
+									if (akun.expense_account) {
+										frappe.model.set_value(row.doctype, row.name, 'expense_account', akun.expense_account);
+									}
+								});
+							});
 						});
 					});
 
@@ -217,9 +229,9 @@ function show_pilih_asset_dialog(frm) {
 						frm.set_value('unit', asset.unit);
 					}
 
-					frappe.db.get_value('Account', { account_number: '1131004', company: frm.doc.company }, 'name').then((r) => {
-						if (r.message && r.message.name) {
-							frm.set_value('debit_to', r.message.name);
+					akun_penjualan_asset.then((akun) => {
+						if (akun.piutang_account) {
+							frm.set_value('debit_to', akun.piutang_account);
 						}
 					});
 
@@ -231,6 +243,21 @@ function show_pilih_asset_dialog(frm) {
 	});
 
 	dialog.show();
+}
+
+function ambil_akun_penjualan_asset(frm) {
+	return frappe.call({
+		method: 'sth.accounting_sth.doctype.sth_accounting_settings.sth_accounting_settings.get_akun_penjualan_asset',
+		args: { company: frm.doc.company }
+	}).then((r) => {
+		let akun = (r && r.message) || {};
+
+		if (!akun.piutang_account || !akun.expense_account) {
+			frappe.msgprint(__('Akun Penjualan Asset untuk company {0} belum lengkap di STH Accounting Settings.', [frm.doc.company]));
+		}
+
+		return akun;
+	});
 }
 
 erpnext.accounts.SalesInvoiceControllerCustom = class SalesInvoiceController extends (

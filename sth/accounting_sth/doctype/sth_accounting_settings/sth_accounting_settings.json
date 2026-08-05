@@ -8,7 +8,8 @@
   "sth_accounting_settings_payroll",
   "sth_accounting_settings_alokasi_gaji_bengkel",
   "sth_accounting_settings_reparasi_bengkel_account",
-  "sth_accounting_settings_biaya_bengkel_dialokasi"
+  "sth_accounting_settings_biaya_bengkel_dialokasi",
+  "sth_accounting_settings_penjualan_asset"
  ],
  "fields": [
   {
@@ -34,13 +35,19 @@
    "fieldtype": "Table",
    "label": "STH Accounting Settings Reparasi Bengkel Account",
    "options": "STH Accounting Settings Reparasi Bengkel Account"
+  },
+  {
+   "fieldname": "sth_accounting_settings_penjualan_asset",
+   "fieldtype": "Table",
+   "label": "Penjualan Asset",
+   "options": "STH Accounting Settings Penjualan Asset"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-02 02:29:14.408237",
+ "modified": "2026-08-05 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "STH Accounting Settings",

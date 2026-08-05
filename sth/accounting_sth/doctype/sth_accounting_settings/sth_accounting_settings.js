@@ -44,9 +44,21 @@ function set_account_filters(frm){
 		return {
 			filters: {
 				company: row.company,
-				is_group: 0 
+				is_group: 0
 			}
 		};
+	});
+	["piutang_account", "expense_account"].forEach((fieldname) => {
+		frm.set_query(fieldname, "sth_accounting_settings_penjualan_asset", function (doc, cdt, cdn) {
+			let row = locals[cdt][cdn];
+
+			return {
+				filters: {
+					company: row.company,
+					is_group: 0
+				}
+			};
+		});
 	});
 }
 
