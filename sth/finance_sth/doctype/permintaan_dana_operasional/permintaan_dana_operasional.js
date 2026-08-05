@@ -704,37 +704,35 @@ function make_realisasi_pdo(frm) {
 
 function show_realisasi_dialog(frm) {
 	// Get available types first
-	frappe.call({
-		method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_available_tipe_pdo',
-		args: {
-			source_name: frm.doc.name
-		},
-		callback: function (r) {
-			if (!r.message || r.message.length === 0) {
-				frappe.msgprint(__('All types have been fully paid'));
-				return;
-			}
-
-			if (!r.message.some((item) => item.value === 'Kas')) {
-				build_realisasi_dialog(frm, r.message, []);
-				return;
-			}
-
-			// tipe Kas masih ada sisa, ambil nama barang yang belum direalisasi
-			frappe.call({
-				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
-				args: {
-					source_name: frm.doc.name
-				},
-				callback: function (res) {
-					build_realisasi_dialog(frm, r.message, res.message || []);
-				}
-			});
+	frappe.xcall(
+		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_available_tipe_pdo',
+		{ source_name: frm.doc.name }
+	).then(function (tipe_list) {
+		if (!tipe_list || tipe_list.length === 0) {
+			frappe.msgprint(__('All types have been fully paid'));
+			return;
 		}
+
+		let ada = (tipe) => tipe_list.some((item) => item.value === tipe);
+
+		// Kas dicentang per nama barang, Bahan Bakar per pengguna. Keduanya hanya
+		// diambil kalau tipenya memang masih punya sisa.
+		return Promise.all([
+			ada('Kas') ? frappe.xcall(
+				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+				{ source_name: frm.doc.name }
+			) : [],
+			ada('Bahan Bakar') ? frappe.xcall(
+				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_bahan_bakar_pengguna',
+				{ source_name: frm.doc.name }
+			) : []
+		]).then(function (res) {
+			build_realisasi_dialog(frm, tipe_list, res[0] || [], res[1] || []);
+		});
 	});
 }
 
-function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
+function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pengguna) {
 	// Build options string for select field
 	let options = [''];
 	let option_labels = {};
@@ -787,6 +785,20 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
 		});
 	}
 
+	if (bahan_bakar_pengguna.length) {
+		fields.push({
+			fieldname: 'pengguna',
+			label: __('Pengguna'),
+			fieldtype: 'MultiCheck',
+			columns: 1,
+			depends_on: 'eval:doc.tipe_pdo == "Bahan Bakar"',
+			description: __('Satu baris Payment Entry per pengguna yang dicentang. Nominalnya diisi manual, sisa plafon masuk ke Keterangan sebagai acuan'),
+			options: bahan_bakar_pengguna.map(function (item) {
+				return { label: item.label, value: item.value, checked: 0 };
+			})
+		});
+	}
+
 	let dialog = new frappe.ui.Dialog({
 		title: __('Realisasi PDO'),
 		fields: fields,
@@ -798,6 +810,7 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
 			}
 
 			let nama_barang = [];
+			let pengguna = [];
 
 			if (values.tipe_pdo == 'Kas') {
 				if (!kas_nama_barang.length) {
@@ -813,6 +826,20 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
 				}
 			}
 
+			if (values.tipe_pdo == 'Bahan Bakar') {
+				if (!bahan_bakar_pengguna.length) {
+					frappe.msgprint(__('Tidak ada pengguna di List Bahan Bakar'));
+					return;
+				}
+
+				pengguna = dialog.get_value('pengguna') || [];
+
+				if (!pengguna.length) {
+					frappe.msgprint(__('Pilih minimal satu Pengguna'));
+					return;
+				}
+			}
+
 			dialog.hide();
 
 			// Call the method with tipe_pdo parameter
@@ -822,7 +849,8 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang) {
 					source_name: frm.doc.name,
 					tipe_pdo: values.tipe_pdo,
 					ppd: values.tipe_pdo == 'Perjalanan Dinas' ? values.ppd : null,
-					nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null
+					nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null,
+					pengguna: values.tipe_pdo == 'Bahan Bakar' ? pengguna : null
 				},
 				callback: function (r) {
 					if (r.message) {

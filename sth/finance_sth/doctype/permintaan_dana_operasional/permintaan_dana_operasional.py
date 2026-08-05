@@ -512,11 +512,12 @@ PEMISAH_CHILD = ","
 
 
 def gabung_per_item_barang(rows):
-	"""Gabungkan baris realisasi jadi satu baris per nama barang. Fungsi murni.
+	"""Gabungkan baris realisasi jadi satu baris per `item_barang`. Fungsi murni.
 
-	Kuncinya `item_barang` saja: satu centangan = satu baris, apa pun isinya.
-	`debit_to` aman ikut digabung karena untuk tipe Kas selalu diambil dari
-	Expense Claim Type, jadi sama untuk satu nama barang.
+	`item_barang` berisi nama barang untuk tipe Kas dan nama pengguna untuk tipe
+	Bahan Bakar: satu centangan = satu baris, apa pun isinya. `debit_to` aman ikut
+	digabung karena untuk tipe Kas selalu diambil dari Expense Claim Type dan untuk
+	Bahan Bakar dari satu field di header, jadi sama untuk satu kunci.
 
 	`penerima` hanya dibawa kalau semua baris yang digabung memang orang yang
 	sama. Kalau berbeda, dikosongkan — mengisi salah satu nama akan membuat baris
@@ -550,7 +551,15 @@ def gabung_per_item_barang(rows):
 	return hasil
 
 
-def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
+def parse_pilihan(nilai):
+	"""Daftar centangan dari dialog. frappe.call mengirim null sebagai string kosong."""
+	if isinstance(nilai, str):
+		return frappe.parse_json(nilai) if nilai.strip() else None
+
+	return nilai or None
+
+
+def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, pengguna=None):
 	"""Baris `payment_voucher_kas_pdo` untuk satu realisasi PDO.
 
 	Satu tempat untuk dua jalur: tombol Realisasi di PDO dan tombol Realisasi PDO
@@ -566,13 +575,14 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
 	if ppd and tipe_pdo != "Perjalanan Dinas":
 		frappe.throw(_("Pertanggungjawaban Perjalanan Dinas hanya berlaku untuk tipe Perjalanan Dinas"))
 
-	nama_terpilih = nama_barang
-	if isinstance(nama_terpilih, str):
-		# frappe.call mengirim null sebagai string kosong, bukan None
-		nama_terpilih = frappe.parse_json(nama_terpilih) if nama_terpilih.strip() else None
+	nama_terpilih = parse_pilihan(nama_barang)
+	pengguna_terpilih = parse_pilihan(pengguna)
 
 	if nama_terpilih and tipe_pdo != "Kas":
 		frappe.throw(_("Pilihan Nama Barang hanya berlaku untuk tipe Kas"))
+
+	if pengguna_terpilih and tipe_pdo != "Bahan Bakar":
+		frappe.throw(_("Pilihan Pengguna hanya berlaku untuk tipe Bahan Bakar"))
 
 	mapping = TIPE_MAPPING[tipe_pdo]
 	debit_account_field = mapping['debit_account_field']
@@ -597,6 +607,14 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
 		if not child_data:
 			frappe.throw(_("Tidak ada baris List Kas yang cocok dengan Nama Barang yang dipilih"))
 
+	if pengguna_terpilih:
+		# Sengaja tidak menyaring baris yang sudah pernah ditarik: Bahan Bakar boleh
+		# dicairkan bertahap, jadi satu pengguna bisa muncul di beberapa Payment Entry.
+		child_data = [row for row in child_data if row.get(employee_field) in pengguna_terpilih]
+
+		if not child_data:
+			frappe.throw(_("Tidak ada baris List Bahan Bakar yang cocok dengan Pengguna yang dipilih"))
+
 	realisasi_per_baris = get_realisasi_ppd(ppd, source_doc.name) if ppd else None
 
 	header_debit_account = getattr(source_doc, header_debit_field, None) if header_debit_field else None
@@ -612,7 +630,11 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
 	for row in child_data:
 		employee = getattr(row, employee_field, None) if hasattr(row, employee_field) else None
 
-		if realisasi_per_baris is not None:
+		if pengguna_terpilih:
+			# Nominalnya diketik manual di Payment Entry. Plafon PDO cuma acuan —
+			# realisasi bahan bakar jarang sama persis dengan plafonnya.
+			amount = 0
+		elif realisasi_per_baris is not None:
 			# Nilai dibayar = realisasi PPD, sisa plafon tidak ikut dicairkan
 			amount = flt(realisasi_per_baris.get(row.name))
 			if amount <= 0:
@@ -641,10 +663,18 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
 		if item_barang:
 			rincian_nama_barang[item_barang] = flt(rincian_nama_barang.get(item_barang)) + flt(amount)
 
+		penerima = employee
+		if pengguna_terpilih:
+			# Pengguna jadi kunci penggabungan, ditulis apa adanya ke item_barang.
+			# penerima cuma diisi kalau pengguna itu memang Employee — untuk kategori
+			# Biaya Umum / Operasional isinya teks bebas, bukan pegawai.
+			item_barang = employee
+			penerima = cari_employee(employee)
+
 		rows.append({
 			'no_pdo': source_doc.name,
 			'tipe_pdo': tipe_pdo,
-			'penerima': employee,
+			'penerima': penerima,
 			'total': flt(amount),
 			'debit_to': debit_account,
 			'pdo_child_name': row.name,
@@ -652,36 +682,146 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None):
 		})
 
 	note = None
-	if nama_terpilih:
-		# Satu baris per centangan. Penggabungan hanya untuk jalur nama barang —
-		# tipe lain tetap satu baris per baris PDO seperti sebelumnya.
+	if nama_terpilih or pengguna_terpilih:
+		# Satu baris per centangan. Penggabungan hanya untuk jalur nama barang dan
+		# pengguna — tipe lain tetap satu baris per baris PDO seperti sebelumnya.
 		rows = gabung_per_item_barang(rows)
 
-		if rincian_nama_barang:
-			note = "\n".join(
-				"{0}: {1}".format(nama, frappe.format_value(total, {"fieldtype": "Currency"}))
-				for nama, total in rincian_nama_barang.items()
+	if nama_terpilih and rincian_nama_barang:
+		note = "\n".join(
+			"{0}: {1}".format(nama, frappe.format_value(total, {"fieldtype": "Currency"}))
+			for nama, total in rincian_nama_barang.items()
+		)
+	elif pengguna_terpilih:
+		# Nominalnya masih kosong, jadi sisa plafon ditulis sebagai acuan pengisian.
+		sisa = {p["pengguna"]: p["sisa"] for p in hitung_plafon_bahan_bakar(source_doc)}
+		note = "\n".join(
+			"Sisa plafon {0}: {1}".format(
+				nama, frappe.format_value(flt(sisa.get(nama)), {"fieldtype": "Currency"})
 			)
+			for nama in pengguna_terpilih
+		)
 
 	return {"rows": rows, "note": note, "paid_to": paid_to}
 
 
+def cari_employee(nama):
+	"""ID Employee dari isi kolom Pengguna, atau None kalau bukan pegawai.
+
+	Kolom Pengguna di List Bahan Bakar bertipe Data: untuk kategori Tunjangan
+	isinya nama pegawai, untuk Biaya Umum / Operasional teks bebas (kendaraan,
+	genset, dsb). `penerima` bertipe Link Employee, jadi teks bebas tidak boleh
+	dipaksakan ke sana.
+	"""
+	if not nama:
+		return None
+
+	if frappe.db.exists("Employee", nama):
+		return nama
+
+	cocok = frappe.get_all("Employee", filters={"employee_name": nama}, pluck="name", limit=2)
+
+	# Nama yang dipakai dua pegawai tidak bisa ditentukan siapa yang dimaksud
+	return cocok[0] if len(cocok) == 1 else None
+
+
+def hitung_plafon_bahan_bakar(source_doc):
+	"""[{pengguna, plafon, terpakai, sisa}] dari List Bahan Bakar sebuah PDO.
+
+	Bahan Bakar boleh dicairkan bertahap, jadi patokannya nilai yang sudah ditarik
+	ke Payment Entry realisasi — bukan baris PDO mana yang sudah dipakai seperti
+	pada tipe Kas.
+	"""
+	plafon = {}
+	urutan = []
+
+	for row in source_doc.pdo_bahan_bakar:
+		if not row.employee:
+			continue
+
+		if row.employee not in plafon:
+			plafon[row.employee] = 0
+			urutan.append(row.employee)
+
+		plafon[row.employee] += flt(row.revised_price_total) or flt(row.price_total)
+
+	terpakai = {}
+	realisasi = frappe.get_all(
+		"Payment Voucher Kas PDO",
+		filters={
+			"no_pdo": source_doc.name,
+			"tipe_pdo": "Bahan Bakar",
+			"docstatus": ["<", 2]
+		},
+		fields=["item_barang", "penerima", "total"]
+	)
+
+	for row in realisasi:
+		# Baris lama (sebelum ada pilihan pengguna) tidak mengisi item_barang
+		kunci = row.item_barang or row.penerima
+		if not kunci:
+			continue
+		terpakai[kunci] = flt(terpakai.get(kunci)) + flt(row.total)
+
+	hasil = []
+	for nama in urutan:
+		sudah = flt(terpakai.get(nama))
+
+		employee = cari_employee(nama)
+		if employee and employee != nama:
+			sudah += flt(terpakai.get(employee))
+
+		hasil.append({
+			"pengguna": nama,
+			"plafon": flt(plafon[nama]),
+			"terpakai": sudah,
+			"sisa": flt(plafon[nama]) - sudah
+		})
+
+	return hasil
+
+
 @frappe.whitelist()
-def get_baris_realisasi(source_name, tipe_pdo, ppd=None, nama_barang=None):
+def get_bahan_bakar_pengguna(source_name):
+	"""Pengguna di List Bahan Bakar beserta sisa plafonnya, untuk dialog realisasi."""
+	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+
+	daftar = []
+	for baris in hitung_plafon_bahan_bakar(source_doc):
+		if baris["sisa"] > 0:
+			keterangan = _("sisa {0}").format(
+				frappe.format_value(baris["sisa"], {"fieldtype": "Currency"})
+			)
+		else:
+			keterangan = _("plafon {0}, sudah terpakai semua").format(
+				frappe.format_value(baris["plafon"], {"fieldtype": "Currency"})
+			)
+
+		daftar.append({
+			"value": baris["pengguna"],
+			"label": "{0} ({1})".format(baris["pengguna"], keterangan),
+			"amount": baris["sisa"]
+		})
+
+	return daftar
+
+
+@frappe.whitelist()
+def get_baris_realisasi(source_name, tipe_pdo, ppd=None, nama_barang=None, pengguna=None):
 	"""Baris realisasi untuk Payment Entry yang sudah tersimpan.
 
 	PE yang belum tersimpan memakai `create_payment_voucher_alokasi` yang membuat
 	dokumen baru; yang sudah tersimpan cuma perlu isi tabelnya.
 	"""
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
-	hasil = build_baris_realisasi(source_doc, tipe_pdo, ppd, nama_barang)
+	hasil = build_baris_realisasi(source_doc, tipe_pdo, ppd, nama_barang, pengguna)
 	hasil["total"] = flt(sum(flt(row["total"]) for row in hasil["rows"]))
 
 	return hasil
 
 
 @frappe.whitelist()
-def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None):
+def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None, pengguna=None):
 	"""Create Payment Voucher Kas from Permintaan Dana Operasional
 
 	Bila `ppd` (Pertanggungjawaban Perjalanan Dinas) diisi, nilai tiap baris diambil dari
@@ -691,6 +831,10 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 	Bila `nama_barang` diisi (khusus tipe Kas), hanya baris List Kas dengan nama barang
 	tersebut yang direalisasi, jadi satu baris Payment Entry per nama barang yang
 	dicentang, dan rinciannya ditulis ke field Keterangan.
+
+	Bila `pengguna` diisi (khusus tipe Bahan Bakar), satu baris Payment Entry per
+	pengguna yang dicentang dengan nominal kosong — diketik manual — dan sisa
+	plafon tiap pengguna ditulis ke field Keterangan sebagai acuan.
 	"""
 
 	if tipe_pdo not in TIPE_MAPPING:
@@ -722,7 +866,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 		target.paid_from = unit_doc.bank_account
 		target.mode_of_payment = "Kas"
 
-		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang)
+		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang, pengguna)
 
 		if hasil["paid_to"]:
 			target.paid_to = hasil["paid_to"]

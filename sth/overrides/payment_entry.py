@@ -1243,9 +1243,11 @@ def update_outstanding_amount_per_tipe(self, pdo_name, tipe_pdo, amount, operati
 					break
 
 			# Baris gabungan per nama barang penerimanya lebih dari satu sehingga
-			# sengaja dikosongkan. Tanpa penerima tidak ada yang bisa dicocokkan ke
-			# tabel PDO, jadi lewati pengecekannya dan lanjut ke pengurangan
-			# outstanding biasa — kelebihannya tetap dilempar ke non-PDO.
+			# sengaja dikosongkan. Begitu juga baris per pengguna Bahan Bakar kategori
+			# Biaya Umum / Operasional, yang isinya kendaraan dan bukan pegawai. Tanpa
+			# penerima tidak ada yang bisa dicocokkan ke tabel PDO, jadi lewati
+			# pengecekannya dan lanjut ke pengurangan outstanding biasa —
+			# kelebihannya tetap dilempar ke non-PDO.
 			penerima_doc = frappe.get_doc("Employee", penerima) if penerima else None
 			penerima_name = penerima_doc.employee_name if penerima_doc else None
 

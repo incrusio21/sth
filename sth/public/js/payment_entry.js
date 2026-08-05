@@ -1536,21 +1536,26 @@ function show_realisasi_pdo_selector(frm) {
 				tipe_options.push('Kas');
 				tipe_options.push('Dana Cadangan');
 
-				// Nama barang List Kas yang belum direalisasi, supaya tipe Kas bisa
-				// dicentang satu per satu persis seperti tombol Realisasi di PDO.
-				frappe.call({
-					method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
-					args: { source_name: selected_name },
-					callback: function (res) {
-						show_tipe_dialog(frm, selected_name, tipe_options, res.message || []);
-					}
+				// Centangan per nama barang (Kas) dan per pengguna (Bahan Bakar),
+				// persis seperti tombol Realisasi di PDO.
+				Promise.all([
+					frappe.xcall(
+						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+						{ source_name: selected_name }
+					),
+					frappe.xcall(
+						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_bahan_bakar_pengguna',
+						{ source_name: selected_name }
+					)
+				]).then(function (res) {
+					show_tipe_dialog(frm, selected_name, tipe_options, res[0] || [], res[1] || []);
 				});
 			});
 		}
 	});
 }
 
-function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang) {
+function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bahan_bakar_pengguna) {
 	let fields = [
 		{
 			fieldtype: 'HTML',
@@ -1582,12 +1587,27 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang) {
 		});
 	}
 
+	if (bahan_bakar_pengguna.length) {
+		fields.push({
+			fieldname: 'pengguna',
+			label: __('Pengguna'),
+			fieldtype: 'MultiCheck',
+			columns: 1,
+			depends_on: 'eval:doc.tipe_pdo == "Bahan Bakar"',
+			description: __('Satu baris Payment Entry per pengguna yang dicentang, nominalnya diisi manual'),
+			options: bahan_bakar_pengguna.map(function (item) {
+				return { label: item.label, value: item.value, checked: 0 };
+			})
+		});
+	}
+
 	let tipe_dialog = new frappe.ui.Dialog({
 		title: __('Select Tipe PDO'),
 		fields: fields,
 		primary_action_label: __('Create Realisasi'),
 		primary_action: function (values) {
 			let nama_barang = [];
+			let pengguna = [];
 
 			if (values.tipe_pdo == 'Kas') {
 				if (!kas_nama_barang.length) {
@@ -1603,12 +1623,27 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang) {
 				}
 			}
 
+			if (values.tipe_pdo == 'Bahan Bakar') {
+				if (!bahan_bakar_pengguna.length) {
+					frappe.msgprint(__('Tidak ada pengguna di List Bahan Bakar'));
+					return;
+				}
+
+				pengguna = tipe_dialog.get_value('pengguna') || [];
+
+				if (!pengguna.length) {
+					frappe.msgprint(__('Pilih minimal satu Pengguna'));
+					return;
+				}
+			}
+
 			tipe_dialog.hide();
 
 			let args = {
 				source_name: selected_name,
 				tipe_pdo: values.tipe_pdo,
-				nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null
+				nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null,
+				pengguna: values.tipe_pdo == 'Bahan Bakar' ? pengguna : null
 			};
 
 			// Kalau PE sudah tersimpan, isi langsung — jangan buat PE baru
