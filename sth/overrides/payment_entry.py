@@ -516,6 +516,22 @@ class PaymentEntry(EmployeePaymentEntry):
 		# 	if not self.reference_no or not self.reference_date:
 		# 		frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
+	def get_gl_dict(self, args, account_currency=None, item=None):
+		"""Jurnal Payment Entry bertanggal Request Release Date kalau diisi.
+
+		posting_date dokumennya sendiri tidak diubah — itu tanggal permintaannya.
+		Yang berpindah cuma tanggal jurnalnya, supaya kas tercatat keluar pada saat
+		dana benar-benar dirilis.
+
+		Disisipkan lewat args, bukan langsung ke gl_dict, supaya fiscal_year ikut
+		dihitung dari tanggal yang sama — get_gl_dict induk mengambil keduanya dari
+		args. Pemanggil yang sudah menentukan posting_date sendiri tidak ditimpa.
+		"""
+		if self.get("request_release_date") and not args.get("posting_date"):
+			args = dict(args, posting_date=self.request_release_date)
+
+		return super().get_gl_dict(args, account_currency=account_currency, item=item)
+
 	def build_gl_map(self):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
