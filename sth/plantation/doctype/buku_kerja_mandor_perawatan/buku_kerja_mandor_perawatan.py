@@ -48,7 +48,6 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			submit_after_insert(self)
 
 	def validate(self):
-		self.isi_cost_center()
 		if self.trans_no:
 			trans_no = self.trans_no
 			karyawan = self.hasil_kerja[0].employee
@@ -74,21 +73,29 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		super().validate()
 
 
-	def isi_cost_center(self):
+	def get_cost_center(self):
+		"""Cost center dokumen ini: dari batch, blok, atau tahun tanam sesuai kategori.
+
+		Satu tempat untuk dua pemakai — GL Entry dan Stock Entry material — supaya
+		biaya upah dan biaya materialnya tidak bisa jatuh ke cost center berbeda.
+
+		Balikan "" kalau sumbernya belum terisi. make_gl_entry memang tidak membuat
+		jurnal untuk keadaan itu, dan Stock Entry dibiarkan memakai default company.
+		"""
+		abbr = frappe.get_cached_value("Company", self.company, "abbr")
+
 		if self.kategori_kegiatan == "BBT":
-			cost_center = "{} - {}".format(self.batch, frappe.get_doc("Company",self.company).abbr)
+			return "{} - {}".format(self.batch, abbr) if self.batch else ""
 
-		elif self.kategori_kegiatan == "TM":
-			cost_center = "{} - {}".format(frappe.get_doc("Blok",self.blok).deskripsi, frappe.get_doc("Company",self.company).abbr)
+		if self.kategori_kegiatan == "TM":
+			deskripsi = frappe.get_cached_value("Blok", self.blok, "deskripsi") if self.blok else None
+			return "{} - {}".format(deskripsi, abbr) if deskripsi else ""
 
-		elif self.kategori_kegiatan == "TBM":
-			cost_center = "{} - {}".format(self.tahun_tanam, frappe.get_doc("Company",self.company).abbr)
+		if self.kategori_kegiatan == "TBM":
+			return "{} - {}".format(self.tahun_tanam, abbr) if self.tahun_tanam else ""
 
-		# print(cost_center)
-		# self.cost_center=cost_center
-		# self.db_update()
-		# frappe.db.commit()
-		
+		return ""
+
 	def validate_hasil_kerja_harian(self):
 		if self.get("is_bibitan"):
 			return
@@ -156,15 +163,27 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 		ada_item = 0
 
+		# Cost center dibawa ke baris Stock Entry, bukan ke headernya: di ERPNext
+		# cost_center memang milik Stock Entry Detail dan itu yang dipakai saat
+		# menjurnal expense_account.
+		cost_center = self.get_cost_center()
+
 		for d in self.material:
 			if d.item:
 				ada_item = 1
-			ste.append("items", {
+
+			item = {
 				"s_warehouse": d.warehouse,
 				"item_code": d.item,
 				"qty": d.qty,
 				"expense_account": account_kegiatan
-			})
+			}
+
+			# kalau kosong, biarkan ERPNext memakai default company seperti sebelumnya
+			if cost_center:
+				item["cost_center"] = cost_center
+
+			ste.append("items", item)
 		if ada_item == 1:
 			ste.submit()
 			self.stock_entry = ste.name
@@ -206,6 +225,16 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 
 		ste.delete()
 
+	def get_nilai_gl_entry(self):
+		"""Nilai jurnal BKM: upah dan preminya saja, tanpa material.
+
+		Bukan grand_total. Material sudah dijurnal Stock Entry "Material Used" ke
+		akun kegiatan yang sama, sedangkan calculate_grand_total menjumlahkan semua
+		field ber-"amount" termasuk material_amount — memakai grand_total membuat
+		akun kegiatan terdebit dua kali sebesar nilai materialnya.
+		"""
+		return flt(self.hasil_kerja_amount) + flt(self.hasil_kerja_premi_amount)
+
 	def make_gl_entry(self, method=None):
 		gl_entries = []
 		akun_debit = self.kegiatan_account
@@ -222,27 +251,19 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 				  "Pastikan akun tersebut sudah dipasang di Plantation Settings").format(self.company)
 			)
 
-		cost_center = ""
-		if self.kategori_kegiatan == "BBT":
-			cost_center = "{} - {}".format(self.batch, frappe.get_doc("Company",self.company).abbr)
+		cost_center = self.get_cost_center()
+		nilai = self.get_nilai_gl_entry()
 
-		elif self.kategori_kegiatan == "TM":
-			cost_center = "{} - {}".format(frappe.get_doc("Blok",self.blok).deskripsi, frappe.get_doc("Company",self.company).abbr)
-
-		elif self.kategori_kegiatan == "TBM":
-			cost_center = "{} - {}".format(self.tahun_tanam, frappe.get_doc("Company",self.company).abbr)
-
-
-		if self.grand_total and cost_center:
+		if nilai and cost_center:
 
 			gl_entries.append(
 				frappe.get_doc({
 					"doctype": "GL Entry",
 					"posting_date": self.posting_date,
 					"account": akun_debit,
-					"debit": self.grand_total,
+					"debit": nilai,
 					"credit": 0.0,
-					"debit_in_account_currency": self.grand_total,
+					"debit_in_account_currency": nilai,
 					"credit_in_account_currency": 0.0,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
@@ -259,9 +280,9 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 					"posting_date": self.posting_date,
 					"account": akun_kredit,
 					"debit": 0.0,
-					"credit": self.grand_total,
+					"credit": nilai,
 					"debit_in_account_currency": 0.0,
-					"credit_in_account_currency": self.grand_total,
+					"credit_in_account_currency": nilai,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"company": self.company,
