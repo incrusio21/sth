@@ -55,8 +55,10 @@ def set_account_disposal(doc):
 def set_account_from_item_default(doc):
 	"""Ambil expense dan income account dari Item Default milik company dokumen ini.
 
-	Field yang itemnya tidak punya default dibiarkan apa adanya — nilai yang sudah
-	diisi ERPNext (default company atau isian manual) tetap dipakai.
+	Item yang belum punya default ditolak, tidak dibiarkan memakai nilai lama:
+	ERPNext sudah mengisi kedua field itu dari default company lewat rantai
+	Item Default -> Item Group -> Company, jadi membiarkannya berarti jurnalnya
+	diam-diam jatuh ke akun default company.
 	"""
 	for item in doc.items:
 		if not item.item_code:
@@ -71,13 +73,26 @@ def set_account_from_item_default(doc):
 			},
 			["expense_account", "income_account"],
 			as_dict=True
-		)
+		) or frappe._dict()
 
-		if not default:
-			continue
+		kosong = [
+			label for label, akun in (
+				("Income Account", default.income_account),
+				("Expense Account", default.expense_account),
+			) if not akun
+		]
 
-		if default.expense_account:
-			item.expense_account = default.expense_account
+		if kosong:
+			frappe.throw(
+				_("Baris {0}: Item {1} belum punya {2} di Item Defaults untuk company {3}. "
+				  "Lengkapi dulu di master Item.").format(
+					item.idx,
+					frappe.bold(item.item_code),
+					frappe.bold(" dan ".join(kosong)),
+					frappe.bold(doc.company)
+				),
+				title=_("Item Default Belum Lengkap")
+			)
 
-		if default.income_account:
-			item.income_account = default.income_account
+		item.expense_account = default.expense_account
+		item.income_account = default.income_account
