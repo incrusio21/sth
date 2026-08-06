@@ -1,5 +1,20 @@
 import frappe
 
+# Mandor pada data BKM dari API kadang terkirim sebagai ID User, bukan Employee.
+# Petakan ke NIK karyawan yang benar supaya link Employee-nya valid.
+MANDOR_API_MAP = {
+	"USR251015341": "1506012411940004",
+	"USR251015035": "1206010909900006",
+}
+
+
+def fix_mandor_from_api(doc):
+	"""Ganti nilai mandor yang berupa ID User dengan NIK Employee-nya."""
+	mandor = doc.get("mandor")
+	if mandor in MANDOR_API_MAP:
+		doc.mandor = MANDOR_API_MAP[mandor]
+
+
 def submit_after_insert(doc):
 	"""Submit dokumen dari dalam hook after_insert.
 
