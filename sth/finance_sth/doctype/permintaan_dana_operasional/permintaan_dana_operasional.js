@@ -715,8 +715,8 @@ function show_realisasi_dialog(frm) {
 
 		let ada = (tipe) => tipe_list.some((item) => item.value === tipe);
 
-		// Kas dicentang per nama barang, Bahan Bakar per pengguna. Keduanya hanya
-		// diambil kalau tipenya memang masih punya sisa.
+		// Kas dicentang per nama barang, Bahan Bakar dan Perjalanan Dinas per
+		// pengguna. Semuanya hanya diambil kalau tipenya memang masih punya sisa.
 		return Promise.all([
 			ada('Kas') ? frappe.xcall(
 				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
@@ -725,14 +725,18 @@ function show_realisasi_dialog(frm) {
 			ada('Bahan Bakar') ? frappe.xcall(
 				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_bahan_bakar_pengguna',
 				{ source_name: frm.doc.name }
+			) : [],
+			ada('Perjalanan Dinas') ? frappe.xcall(
+				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_perjalanan_dinas_pengguna',
+				{ source_name: frm.doc.name }
 			) : []
 		]).then(function (res) {
-			build_realisasi_dialog(frm, tipe_list, res[0] || [], res[1] || []);
+			build_realisasi_dialog(frm, tipe_list, res[0] || [], res[1] || [], res[2] || []);
 		});
 	});
 }
 
-function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pengguna) {
+function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
 	// Build options string for select field
 	let options = [''];
 	let option_labels = {};
@@ -799,6 +803,33 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 		});
 	}
 
+	if (perjalanan_dinas_pengguna.length) {
+		fields.push({
+			fieldname: 'pengguna_pd',
+			label: __('Nama'),
+			fieldtype: 'MultiCheck',
+			columns: 1,
+			depends_on: 'eval:doc.tipe_pdo == "Perjalanan Dinas"',
+			description: __('Satu baris Payment Entry per nama yang dicentang. Centang dulu di sini supaya Uang Muka orang itu bisa dipilih'),
+			options: perjalanan_dinas_pengguna.map(function (item) {
+				return { label: item.label, value: item.value, checked: 0 };
+			}),
+			on_change: function () {
+				muat_uang_muka(frm, dialog);
+			}
+		});
+
+		fields.push({
+			fieldname: 'uang_muka',
+			label: __('Uang Muka'),
+			fieldtype: 'MultiCheck',
+			columns: 1,
+			depends_on: 'eval:doc.tipe_pdo == "Perjalanan Dinas"',
+			description: __('Employee Advance atau PPD milik nama yang dicentang. Nilai yang dibayar mengikuti dokumen ini, menggantikan plafon PDO'),
+			options: []
+		});
+	}
+
 	let dialog = new frappe.ui.Dialog({
 		title: __('Realisasi PDO'),
 		fields: fields,
@@ -811,6 +842,7 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 
 			let nama_barang = [];
 			let pengguna = [];
+			let uang_muka = [];
 
 			if (values.tipe_pdo == 'Kas') {
 				if (!kas_nama_barang.length) {
@@ -840,6 +872,18 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 				}
 			}
 
+			if (values.tipe_pdo == 'Perjalanan Dinas') {
+				// Nama boleh dikosongkan: itu jalur lama yang menarik seluruh baris
+				// List Perjalanan Dinas sekaligus, dengan atau tanpa field PPD.
+				pengguna = dialog.get_value('pengguna_pd') || [];
+				uang_muka = pengguna.length ? (dialog.get_value('uang_muka') || []) : [];
+
+				if (uang_muka.length && values.ppd) {
+					frappe.msgprint(__('Pilih salah satu: field Pertanggungjawaban Perjalanan Dinas atau centangan Uang Muka'));
+					return;
+				}
+			}
+
 			dialog.hide();
 
 			// Call the method with tipe_pdo parameter
@@ -850,7 +894,8 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 					tipe_pdo: values.tipe_pdo,
 					ppd: values.tipe_pdo == 'Perjalanan Dinas' ? values.ppd : null,
 					nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null,
-					pengguna: values.tipe_pdo == 'Bahan Bakar' ? pengguna : null
+					pengguna: pengguna.length ? pengguna : null,
+					uang_muka: uang_muka.length ? uang_muka : null
 				},
 				callback: function (r) {
 					if (r.message) {
@@ -864,6 +909,33 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 	});
 
 	dialog.show();
+}
+
+// Uang muka baru bisa dicari setelah namanya dicentang, karena dokumennya dicocokkan
+// lewat Employee milik nama tersebut. Kolom Pengguna di PDO bertipe Data, jadi nama
+// yang bukan pegawai tidak akan memunculkan pilihan apa pun.
+function muat_uang_muka(frm, dialog) {
+	let field = dialog.fields_dict.uang_muka;
+	if (!field) return;
+
+	let pengguna = dialog.get_value('pengguna_pd') || [];
+
+	let selesai = function (opsi) {
+		field.df.options = (opsi || []).map(function (item) {
+			return { label: item.label, value: item.value, checked: 0 };
+		});
+		field.refresh();
+	};
+
+	if (!pengguna.length) {
+		selesai([]);
+		return;
+	}
+
+	frappe.xcall(
+		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_uang_muka_pengguna',
+		{ source_name: frm.doc.name, pengguna: pengguna }
+	).then(selesai);
 }
 
 function hide_revisi_field(frm) {
