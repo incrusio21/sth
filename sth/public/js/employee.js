@@ -7,6 +7,35 @@ frappe.ui.form.on("Employee", {
         }
       }
     })
+
+    // didaftarkan di setup, bukan hanya di trigger unit, supaya filternya tetap
+    // jalan saat form dibuka ulang dengan unit yang sudah terisi
+    frm.set_query("stasiun", function () {
+      return {
+        query: "sth.custom.employee.get_stasiun_by_unit",
+        filters: {
+          unit: frm.doc.unit
+        }
+      };
+    });
+
+    frm.set_query("coa_stasiun", function () {
+      return {
+        query: "sth.custom.employee.get_account_by_station_and_company",
+        filters: {
+          station: frm.doc.stasiun,
+          company: frm.doc.company
+        }
+      };
+    });
+  },
+
+  refresh(frm) {
+    toggle_stasiun_fields(frm);
+  },
+
+  unit(frm) {
+    toggle_stasiun_fields(frm);
   },
 
   stasiun(frm) {
@@ -26,8 +55,24 @@ frappe.ui.form.on("Employee", {
   }
 });
 
-// COA Stasiun diambil dari tabel Station Procurement Settings milik stasiun,
-// barisnya dipilih berdasarkan company karyawan.
+// stasiun hanya relevan untuk unit yang berupa mill
+function toggle_stasiun_fields(frm) {
+  if (!frm.doc.unit) {
+    frm.set_df_property("stasiun", "hidden", 1);
+    frm.set_df_property("coa_stasiun", "hidden", 1);
+
+    return;
+  }
+
+  frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
+    frm.set_df_property("stasiun", "hidden", !doc.mill);
+    frm.set_df_property("coa_stasiun", "hidden", !doc.mill);
+  });
+}
+
+// COA Stasiun diambil dari akun operasional milik stasiun sesuai company.
+// Kalau pilihannya cuma satu langsung diisi, kalau lebih user memilih sendiri
+// lewat daftar yang sudah difilter.
 function set_coa_stasiun(frm) {
   if (!frm.doc.stasiun) {
     frm.set_value("coa_stasiun", null);
@@ -35,24 +80,33 @@ function set_coa_stasiun(frm) {
   }
 
   frappe.call({
-    method: "frappe.client.get",
-    args: { doctype: "Station Master", name: frm.doc.stasiun },
+    method: "sth.custom.employee.get_coa_stasiun_options",
+    args: {
+      station: frm.doc.stasiun,
+      company: frm.doc.company
+    },
     callback(r) {
-      if (!r.message) return;
+      const options = r.message || [];
 
-      const settings = r.message.station_procurement_settings || [];
-      const row = settings.find((s) => s.company === frm.doc.company);
+      if (options.length === 1) {
+        frm.set_value("coa_stasiun", options[0]);
+        return;
+      }
 
-      frm.set_value("coa_stasiun", (row && row.account) || null);
-
-      if (!row) {
+      if (!options.length) {
+        frm.set_value("coa_stasiun", null);
         frappe.show_alert({
-          message: __("Stasiun {0} belum punya akun untuk company {1} di Station Procurement Settings.", [
+          message: __("Stasiun {0} belum punya akun operasional untuk company {1}.", [
             frm.doc.stasiun,
             frm.doc.company
           ]),
           indicator: "orange"
         });
+        return;
+      }
+
+      if (!options.includes(frm.doc.coa_stasiun)) {
+        frm.set_value("coa_stasiun", null);
       }
     }
   });
