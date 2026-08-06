@@ -9,20 +9,50 @@ from erpnext.controllers.queries import get_fields
 
 class SecurityCheckPoint(Document):
 
-	def validate(self):
+	def before_insert(self):
 		self.map_api_spb_trans_no()
 
 	def map_api_spb_trans_no(self):
+		"""Field spb dari API berisi trans_no SPB, bukan nama dokumennya.
+
+		Nilai asli disimpan di spb_trans_no, lalu spb diisi nama dokumen SPB supaya
+		timbangan bisa menarik nomornya lewat Security Check Point ini
+		(get_spb_available menyambung lewat scp.spb = spb.name).
+
+		Dijalankan di before_insert, bukan validate, karena _validate_links()
+		jalan lebih dulu daripada validate: selama field spb masih berisi
+		trans_no di titik itu, insert ditolak "Could not find SPB".
+		"""
 		if not (self.owner and "api@sth" in self.owner and self.spb):
 			return
 
-		spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": self.spb}, "name")
+		trans_no = self.spb
 
+		self.spb_trans_no = trans_no
+		self.spb = self.get_or_create_spb(trans_no)
+
+	def get_or_create_spb(self, trans_no):
+		"""Nama dokumen SPB untuk trans_no ini, dibuatkan dulu kalau belum ada.
+
+		SPB baru dibuat sebagai draft tanpa detail blok — cukup sebagai pegangan
+		nomor buat timbangan. Data panennya menyusul lewat API SPB, yang memakai
+		trans_no yang sama sehingga jatuh ke dokumen ini juga.
+		"""
+		spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": trans_no}, "name")
 		if spb_name:
-			self.spb = spb_name
-		else:
-			self.spb_trans_no = self.spb
-			self.spb = ""
+			return spb_name
+
+		from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import create_or_update
+
+		doc = create_or_update(
+			trans_no=trans_no,
+			company=self.company,
+			unit=self.unit,
+			divisi=self.divisi,
+			posting_date=self.tanggal_panen or self.posting_date,
+		)
+
+		return doc.name
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
