@@ -127,8 +127,46 @@ frappe.ui.form.on('Sales Invoice Item', {
 				baris.sub_total_timbang = baris.rate * baris.qty_timbang_customer
 			}
 		}
+	},
+	item_code: function(frm, cdt, cdn) {
+		cek_item_default_account(frm, cdt, cdn);
 	}
 })
+
+// Untuk Jenis Penagihan Others kedua akun wajib datang dari Item Defaults, dan save
+// ditolak kalau belum ada. Pengecekannya diulang di sini supaya ketahuan sejak
+// itemnya dipilih, bukan setelah seluruh invoice selesai diisi.
+function cek_item_default_account(frm, cdt, cdn) {
+	if (frm.doc.jenis_penagihan != 'Others') return;
+
+	let baris = locals[cdt][cdn];
+	if (!baris.item_code || !frm.doc.company) return;
+
+	frappe.xcall(
+		'sth.sales_sth.custom.sales_invoice.get_item_default_accounts',
+		{ item_code: baris.item_code, company: frm.doc.company }
+	).then(function (akun) {
+		let kosong = [];
+		if (!akun.income_account) kosong.push(__('Income Account'));
+		if (!akun.expense_account) kosong.push(__('Expense Account'));
+
+		if (kosong.length) {
+			frappe.msgprint({
+				title: __('Item Default Belum Lengkap'),
+				indicator: 'red',
+				message: __('Item {0} belum punya {1} di Item Defaults untuk company {2}. Lengkapi dulu di master Item, kalau tidak invoice ini tidak bisa disimpan.', [
+					baris.item_code.bold(), kosong.join(__(' dan ')).bold(), frm.doc.company.bold()
+				])
+			});
+			return;
+		}
+
+		// Disamakan sekarang juga supaya yang tampil di form sama dengan yang
+		// nanti ditulis server saat save
+		frappe.model.set_value(cdt, cdn, 'income_account', akun.income_account);
+		frappe.model.set_value(cdt, cdn, 'expense_account', akun.expense_account);
+	});
+}
 
 function set_komoditi_filter(frm) {
 	if (frm.doc.quotation_to == "Customer" && frm.doc.party_name) {

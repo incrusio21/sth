@@ -52,6 +52,30 @@ def set_account_disposal(doc):
 		item.income_account = account
 
 
+@frappe.whitelist()
+def get_item_default_accounts(item_code, company):
+	"""Income dan expense account dari Item Default untuk company tertentu.
+
+	Balikan selalu punya kedua key, isinya None kalau belum diisi — dipakai sisi
+	client untuk memperingatkan sejak item dipilih, bukan menunggu save ditolak.
+	"""
+	default = frappe.db.get_value(
+		"Item Default",
+		{
+			"parent": item_code,
+			"parenttype": "Item",
+			"company": company,
+		},
+		["expense_account", "income_account"],
+		as_dict=True
+	) or frappe._dict()
+
+	return {
+		"income_account": default.income_account,
+		"expense_account": default.expense_account,
+	}
+
+
 def set_account_from_item_default(doc):
 	"""Ambil expense dan income account dari Item Default milik company dokumen ini.
 
@@ -64,21 +88,12 @@ def set_account_from_item_default(doc):
 		if not item.item_code:
 			continue
 
-		default = frappe.db.get_value(
-			"Item Default",
-			{
-				"parent": item.item_code,
-				"parenttype": "Item",
-				"company": doc.company,
-			},
-			["expense_account", "income_account"],
-			as_dict=True
-		) or frappe._dict()
+		default = get_item_default_accounts(item.item_code, doc.company)
 
 		kosong = [
 			label for label, akun in (
-				("Income Account", default.income_account),
-				("Expense Account", default.expense_account),
+				("Income Account", default["income_account"]),
+				("Expense Account", default["expense_account"]),
 			) if not akun
 		]
 
@@ -94,5 +109,5 @@ def set_account_from_item_default(doc):
 				title=_("Item Default Belum Lengkap")
 			)
 
-		item.expense_account = default.expense_account
-		item.income_account = default.income_account
+		item.expense_account = default["expense_account"]
+		item.income_account = default["income_account"]
