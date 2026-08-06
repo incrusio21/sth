@@ -1,5 +1,62 @@
+// Tampilan link title (title field) dimatikan selama berada di Sales Invoice,
+// supaya field link menampilkan nama dokumen aslinya.
+// frappe.utils bersifat global dan desk tidak reload saat pindah menu, jadi fungsi
+// aslinya disimpan lalu dikembalikan begitu route keluar dari doctype ini.
+const SI_DOCTYPE = "Sales Invoice";
+// Kosongkan untuk semua doctype, atau isi mis. ["Customer"] untuk membatasi.
+const SI_HIDE_LINK_TITLE_FOR = [];
+
+let si_original_link_title = null;
+
+function si_is_link_title_hidden(doctype) {
+	return !SI_HIDE_LINK_TITLE_FOR.length || SI_HIDE_LINK_TITLE_FOR.includes(doctype);
+}
+
+function si_hide_link_title() {
+	if (si_original_link_title) return;
+
+	si_original_link_title = {
+		get: frappe.utils.get_link_title,
+		fetch: frappe.utils.fetch_link_title
+	};
+
+	// Mengembalikan name apa adanya; formatter Link menganggapnya "tanpa title".
+	frappe.utils.get_link_title = function (doctype, name) {
+		if (si_is_link_title_hidden(doctype)) return name;
+		return si_original_link_title.get.apply(this, arguments);
+	};
+
+	frappe.utils.fetch_link_title = function (doctype, name) {
+		if (si_is_link_title_hidden(doctype)) return Promise.resolve(name);
+		return si_original_link_title.fetch.apply(this, arguments);
+	};
+}
+
+function si_restore_link_title() {
+	if (!si_original_link_title) return;
+
+	frappe.utils.get_link_title = si_original_link_title.get;
+	frappe.utils.fetch_link_title = si_original_link_title.fetch;
+	si_original_link_title = null;
+}
+
+function si_sync_link_title() {
+	const route = frappe.get_route() || [];
+	if (route[1] === SI_DOCTYPE) {
+		si_hide_link_title();
+	} else {
+		si_restore_link_title();
+	}
+}
+
+if (!frappe.__si_link_title_watcher) {
+	frappe.__si_link_title_watcher = true;
+	frappe.router.on("change", si_sync_link_title);
+}
+
 frappe.ui.form.on('Sales Invoice', {
 	refresh: function(frm) {
+		si_sync_link_title();
 		set_rate_precision(frm)
 		set_komoditi_filter(frm);
 		set_query_unit(frm)
@@ -43,6 +100,8 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 	onload: function(frm){
+		// dipanggil sebelum field dirender, supaya link tidak sempat tampil sebagai title
+		si_sync_link_title();
 		set_query_unit(frm)
 	},
 	company: function(frm){
