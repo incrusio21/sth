@@ -220,7 +220,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def update_kendaraan_field(self, cancel=0):
 		if not self.kendaraan:
 			return
-
+		
 		# cek apakah terdapat future pemakaian kendaraan
 		if not cancel and (future_bkm := frappe.get_value(
 			"Buku Kerja Mandor Traksi",

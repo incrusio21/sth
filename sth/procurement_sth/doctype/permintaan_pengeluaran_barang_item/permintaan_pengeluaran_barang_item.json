@@ -158,14 +158,14 @@
    "fieldname": "tipe_asset",
    "fieldtype": "Select",
    "label": "Tipe Asset",
-   "options": "Alat Berat Dan Kendaraan\nAsset\nMill Machine"
+   "options": "Alat Berat Dan Kendaraan\nMill Machine"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-20 12:06:34.894944",
+ "modified": "2026-08-06 10:05:55.785096",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang Item",

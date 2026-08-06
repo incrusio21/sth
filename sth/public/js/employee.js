@@ -8,7 +8,12 @@ frappe.ui.form.on("Employee", {
       }
     })
   },
+  refresh(frm) {
+    if (!frm.doc.unit) {
+      frm.set_df_property("stasiun", "hidden", 1);
+      frm.set_df_property("coa_stasiun", "hidden", 1);
 
+<<<<<<< Updated upstream
   stasiun(frm) {
     set_coa_stasiun(frm);
   },
@@ -19,6 +24,49 @@ frappe.ui.form.on("Employee", {
     }
   },
 
+=======
+      return;
+    }
+
+    frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
+      frm.set_df_property("stasiun", "hidden", !doc.mill);
+      frm.set_df_property("coa_stasiun", "hidden", !doc.mill);
+    });
+  },
+  unit(frm) {
+    if (!frm.doc.unit) {
+      frm.set_df_property("stasiun", "hidden", 1);
+      frm.set_df_property("coa_stasiun", "hidden", 1);
+
+      return;
+    }
+
+    frappe.db.get_doc("Unit", frm.doc.unit).then(doc => {
+      frm.set_df_property("stasiun", "hidden", !doc.mill);
+      frm.set_df_property("coa_stasiun", "hidden", !doc.mill);
+
+      frm.set_query("stasiun", function () {
+        return {
+          query: "sth.custom.employee.get_stasiun_by_unit",
+          filters: {
+            unit: frm.doc.unit
+          }
+        };
+      });
+    });
+  },
+  stasiun(frm) {
+    frm.set_query("coa_stasiun", function () {
+      return {
+        query: "sth.custom.employee.get_account_by_station_and_company",
+        filters: {
+          station: frm.doc.stasiun,
+          company: frm.doc.company,
+        }
+      };
+    });
+  },
+>>>>>>> Stashed changes
   date_of_joining(frm) {
     if (frm.doc.date_of_joining) {
       frm.set_value("custom_employment_tenure", getMonthDifference(frm.doc.date_of_joining));
