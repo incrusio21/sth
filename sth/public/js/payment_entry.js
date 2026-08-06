@@ -632,9 +632,14 @@ frappe.ui.form.on("Payment Entry Reference", {
 	reference_name(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
-		if (row.reference_doctype === "Purchase Invoice" && row.reference_name) {
+		if (["Purchase Invoice", "Purchase Order"].includes(row.reference_doctype) && row.reference_name) {
 			allocate_outstanding_amount(frm, cdt, cdn);
-			set_note_from_purchase_invoice(frm);
+
+			// keterangan hanya diambil dari invoice; PO belum tentu jadi tagihan
+			if (row.reference_doctype === "Purchase Invoice") {
+				set_note_from_purchase_invoice(frm);
+			}
+
 			return;
 		}
 
@@ -663,13 +668,13 @@ frappe.ui.form.on("Payment Entry Reference", {
 	},
 
 	references_remove(frm) {
-		// hanya PE berbasis Purchase Invoice yang ditulis ulang otomatis, supaya PE dari
-		// PDO / Ganti Rugi Lahan tidak ikut berubah saat barisnya dihapus
-		const has_purchase_invoice = (frm.doc.references || []).some(
-			(d) => d.reference_doctype === "Purchase Invoice"
+		// hanya PE berbasis Purchase Invoice / Purchase Order yang ditulis ulang otomatis,
+		// supaya PE dari PDO / Ganti Rugi Lahan tidak ikut berubah saat barisnya dihapus
+		const has_pembelian = (frm.doc.references || []).some((d) =>
+			["Purchase Invoice", "Purchase Order"].includes(d.reference_doctype)
 		);
 
-		if (!has_purchase_invoice && !frm.__note_from_purchase_invoice) return;
+		if (!has_pembelian && !frm.__note_from_purchase_invoice) return;
 
 		set_note_from_purchase_invoice(frm);
 		sync_paid_amount_from_references(frm);
@@ -694,8 +699,9 @@ function fetch_payment_term_outstanding(frm, cdt, cdn) {
 	});
 }
 
-// Purchase Invoice yang dipilih manual di references langsung dialokasi penuh sebesar
-// outstanding-nya, lalu paid_amount mengikuti total alokasi. kalau mau bayar sebagian,
+// Purchase Invoice / Purchase Order yang dipilih manual di references langsung dialokasi
+// penuh sebesar outstanding-nya, lalu paid_amount mengikuti total alokasi. outstanding PO
+// adalah grand total dikurangi uang muka yang sudah dibayar. kalau mau bayar sebagian,
 // allocated_amount tinggal diubah manual.
 function allocate_outstanding_amount(frm, cdt, cdn) {
 	let row = locals[cdt][cdn];
