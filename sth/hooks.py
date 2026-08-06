@@ -411,6 +411,9 @@ doc_events = {
 		"onload": "sth.sales_sth.custom.sales_order.check_dn_pending",
 	},
 	"Sales Invoice": {
+		# debit_to disetel di before_validate supaya validate_debit_to_acc bawaan
+		# ERPNext ikut memeriksa akun yang kita pasang, bukan akun sebelumnya
+		"before_validate": ["sth.sales_sth.custom.sales_invoice.set_debit_to"],
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.sales_sth.custom.sales_invoice.validate_expense_account"],
 	},
 	"Supplier": {

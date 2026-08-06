@@ -12,6 +12,8 @@ from frappe.utils import (
 	today,
 )
 
+from sth.sales_sth.custom.sales_invoice import AKUN_PIUTANG_LAIN
+
 class Asset(Asset):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -231,8 +233,12 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 	si.jenis_penagihan = "Disposal"
 	si.unit = asset_doc.unit
 
+	# Piutangnya juga dipaksa lagi di before_validate Sales Invoice; di sini supaya
+	# form yang terbuka sudah menampilkan akun yang benar sebelum disimpan
 	receivable_account = frappe.db.get_value(
-		"Account", {"account_number": "1131004", "company": company}, "name"
+		"Account",
+		{"account_number": AKUN_PIUTANG_LAIN, "company": company, "is_group": 0},
+		"name"
 	)
 	if receivable_account:
 		si.debit_to = receivable_account

@@ -6,6 +6,49 @@ from frappe import _
 # selalu berakhiran singkatan company (mis. "9190201 - ... - TML").
 AKUN_DISPOSAL = "9190201"
 
+# Piutang untuk penjualan di luar penjualan barang biasa
+AKUN_PIUTANG_LAIN = "1131004"
+
+# Jenis Penagihan yang piutangnya tidak mengikuti default Customer/Company
+JENIS_PENAGIHAN_PIUTANG_LAIN = ("Others", "Disposal")
+
+
+def set_debit_to(self, method=None):
+	"""Piutang untuk Jenis Penagihan Others dan Disposal.
+
+	Dipasang di before_validate supaya validate_debit_to_acc bawaan ERPNext ikut
+	memeriksa akun ini — kalau disetel setelah validate, party_account_currency
+	dan pemeriksaan tipe akunnya masih memakai akun yang lama.
+	"""
+	if self.jenis_penagihan not in JENIS_PENAGIHAN_PIUTANG_LAIN:
+		return
+
+	self.debit_to = cari_akun(self.company, AKUN_PIUTANG_LAIN, _("piutang penjualan {0}").format(self.jenis_penagihan))
+
+
+def cari_akun(company, account_number, keperluan):
+	"""Nama dokumen Account dari nomor akunnya untuk sebuah company."""
+	account = frappe.db.get_value(
+		"Account",
+		{
+			"account_number": account_number,
+			"company": company,
+			"is_group": 0,
+		},
+		"name"
+	)
+
+	if not account:
+		frappe.throw(
+			_("Akun dengan nomor {0} tidak ditemukan di company {1}. "
+			  "Akun tersebut dibutuhkan sebagai {2}.").format(
+				frappe.bold(account_number), frappe.bold(company), keperluan
+			)
+		)
+
+	return account
+
+
 def validate_expense_account(self, method):
 	if self.jenis_penagihan == "Uang Muka":
 		default_account = frappe.db.get_value(
@@ -29,23 +72,7 @@ def set_account_disposal(doc):
 	Dipasang di sini, bukan hanya di sisi client, supaya invoice yang dibuat lewat
 	tombol Sell di Asset atau lewat API tetap kena akun yang sama.
 	"""
-	account = frappe.db.get_value(
-		"Account",
-		{
-			"account_number": AKUN_DISPOSAL,
-			"company": doc.company,
-			"is_group": 0,
-		},
-		"name"
-	)
-
-	if not account:
-		frappe.throw(
-			_("Akun dengan nomor {0} tidak ditemukan di company {1}. "
-			  "Akun tersebut dibutuhkan untuk Sales Invoice penjualan asset.").format(
-				frappe.bold(AKUN_DISPOSAL), frappe.bold(doc.company)
-			)
-		)
+	account = cari_akun(doc.company, AKUN_DISPOSAL, _("akun Sales Invoice penjualan asset"))
 
 	for item in doc.items:
 		item.expense_account = account
