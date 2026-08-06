@@ -1122,14 +1122,24 @@ function filter_bank_accounts(frm) {
 		return;
 	}
 
+	// tunai atau bank ditentukan dari field Type di Mode of Payment, bukan dari namanya,
+	// supaya mode pembayaran bebas dinamai. Type yang kosong masih ditebak dari nama.
+	frappe.db.get_value('Mode of Payment', frm.doc.mode_of_payment, 'type', (mop_res) => {
+		const mop_type = (mop_res && mop_res.type) || "";
+		const is_cash = mop_type
+			? mop_type === "Cash"
+			: /kas|cash/i.test(frm.doc.mode_of_payment);
+
+		set_account_by_payment_mode(frm, is_cash);
+	});
+}
+
+function set_account_by_payment_mode(frm, is_cash) {
 	frappe.db.get_value(
 		'Unit',
 		frm.doc.unit,
 		['bank_account', 'account_for_cash'],
 		(unit_res) => {
-			let mop = frm.doc.mode_of_payment.toLowerCase();
-			let is_cash = mop.includes("kas") || mop.includes("cash");
-
 			let selected_account = null;
 
 			if (is_cash) {
@@ -1698,9 +1708,12 @@ function isi_baris_realisasi(frm, selected_name, args) {
 			frm.refresh_field('payment_voucher_kas_pdo');
 			frm.set_value('permintaan_dana_operasional', selected_name);
 
-			// Realisasi PDO selalu dibayar lewat Kas, sama seperti PE yang dibuat
-			// dari tombol Realisasi di PDO (create_payment_voucher_alokasi).
-			frm.set_value('mode_of_payment', 'Kas');
+			// Realisasi PDO selalu dibayar tunai. Mode of Payment-nya ditentukan di
+			// server dari type Cash, sama seperti PE yang dibuat dari tombol Realisasi
+			// di PDO (create_payment_voucher_alokasi), jadi namanya tidak dipatok "Kas".
+			if (r.message.mode_of_payment) {
+				frm.set_value('mode_of_payment', r.message.mode_of_payment);
+			}
 
 			if (r.message.note) {
 				frm.set_value('note', r.message.note);

@@ -816,8 +816,46 @@ def get_baris_realisasi(source_name, tipe_pdo, ppd=None, nama_barang=None, pengg
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	hasil = build_baris_realisasi(source_doc, tipe_pdo, ppd, nama_barang, pengguna)
 	hasil["total"] = flt(sum(flt(row["total"]) for row in hasil["rows"]))
+	hasil["mode_of_payment"] = get_mode_of_payment_tunai(source_doc.company)
 
 	return hasil
+
+
+def get_mode_of_payment_tunai(company=None):
+	"""Mode of Payment bertipe Cash untuk realisasi PDO.
+
+	Realisasi PDO selalu dibayar tunai, tapi namanya tidak dipatok "Kas" supaya
+	tiap company bebas menamai Mode of Payment-nya. Kalau ada lebih dari satu yang
+	bertipe Cash, yang sudah punya akun untuk company ini didahulukan.
+	"""
+	modes = frappe.get_all(
+		"Mode of Payment",
+		filters={"type": "Cash", "enabled": 1},
+		pluck="name",
+		order_by="name",
+	)
+
+	if not modes:
+		frappe.throw(
+			_("Tidak ada Mode of Payment aktif yang bertipe Cash. "
+			  "Buat atau aktifkan satu Mode of Payment bertipe Cash dulu."),
+			title=_("Mode of Payment Tunai Tidak Ditemukan"),
+		)
+
+	if len(modes) > 1 and company:
+		punya_akun = set(
+			frappe.get_all(
+				"Mode of Payment Account",
+				filters={"parent": ["in", modes], "company": company},
+				pluck="parent",
+			)
+		)
+
+		for mode in modes:
+			if mode in punya_akun:
+				return mode
+
+	return modes[0]
 
 
 @frappe.whitelist()
@@ -864,7 +902,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 		if not unit_doc.bank_account:
 			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
 		target.paid_from = unit_doc.bank_account
-		target.mode_of_payment = "Kas"
+		target.mode_of_payment = get_mode_of_payment_tunai(source.company)
 
 		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang, pengguna)
 
