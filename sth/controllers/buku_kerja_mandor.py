@@ -56,8 +56,8 @@ class BukuKerjaMandorController(PlantationController):
         self.get_employee_payment_account()
         super().validate()
         
-        self.validate_emp_hari_kerja()
-    
+        # self.validate_emp_hari_kerja()
+
     def calculate(self):
         self.get_plantation_setting()
         
