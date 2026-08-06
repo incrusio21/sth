@@ -4,29 +4,6 @@ def autoname_employee(self,method):
 	self.finger_id = self.no_ktp[:14]
 	self.name = self.no_ktp
 
-<<<<<<< Updated upstream
-
-def set_coa_stasiun(self, method=None):
-	"""Isi COA Stasiun dari Station Procurement Settings sesuai company karyawan.
-
-	Dipasang di server supaya data yang masuk lewat import atau API ikut terisi,
-	bukan hanya yang diinput dari form.
-	"""
-	if not self.get("stasiun"):
-		self.coa_stasiun = None
-		return
-
-	self.coa_stasiun = frappe.db.get_value(
-		"Station Procurement Settings",
-		{
-			"parent": self.stasiun,
-			"parenttype": "Station Master",
-			"parentfield": "station_procurement_settings",
-			"company": self.company,
-		},
-		"account",
-	)
-=======
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_stasiun_by_unit(doctype, txt, searchfield, start, page_len, filters):
@@ -48,7 +25,7 @@ def get_stasiun_by_unit(doctype, txt, searchfield, start, page_len, filters):
 		"start": start,
 		"page_len": page_len,
 	})
- 
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_account_by_station_and_company(doctype, txt, searchfield, start, page_len, filters):
@@ -76,4 +53,51 @@ def get_account_by_station_and_company(doctype, txt, searchfield, start, page_le
 		"start": start,
 		"page_len": page_len,
 	})
->>>>>>> Stashed changes
+
+@frappe.whitelist()
+def get_coa_stasiun_options(station, company):
+	"""Akun operasional milik satu stasiun untuk satu company.
+
+	Rantainya sama dengan pencarian coa_stasiun di atas: akun anak dari account
+	yang dipasang di Station Procurement Settings. Dipisah supaya bisa dipakai
+	tanpa paging, baik oleh form (isi otomatis) maupun oleh validate.
+	"""
+	if not station or not company:
+		return []
+
+	return frappe.db.sql_list("""
+		SELECT
+			ca.name
+		FROM `tabStation Procurement Settings` sps
+		INNER JOIN `tabAccount` a
+			ON a.name = sps.account
+		INNER JOIN `tabAccount` ca
+			ON ca.parent_account = a.name
+		WHERE
+			sps.parent = %(station)s
+			AND sps.parenttype = 'Station Master'
+			AND sps.company = %(company)s
+			AND ca.name LIKE '%%OPERASIONAL%%'
+		ORDER BY ca.name
+	""", {
+		"station": station,
+		"company": company,
+	})
+
+def set_coa_stasiun(self, method=None):
+	"""Isi COA Stasiun sesuai stasiun dan company karyawan.
+
+	Kalau akun operasionalnya cuma satu, langsung diisi. Kalau lebih dari satu,
+	pilihan user dihormati selama masih cocok dengan stasiun/company sekarang.
+	Dipasang di server supaya data dari import atau API ikut terisi.
+	"""
+	if not self.get("stasiun"):
+		self.coa_stasiun = None
+		return
+
+	options = get_coa_stasiun_options(self.stasiun, self.company)
+
+	if len(options) == 1:
+		self.coa_stasiun = options[0]
+	elif self.coa_stasiun not in options:
+		self.coa_stasiun = None
