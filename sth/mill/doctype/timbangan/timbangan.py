@@ -60,19 +60,33 @@ class Timbangan(Document):
 		elif self.type == "Dispatch":
 			self.create_delivery_notes()
 		if self.receive_type == "TBS Internal":
-			if self.spb:
-				spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
-				spb_doc.in_weight = self.bruto
-				spb_doc.out_weight = self.tara
-				spb_doc.total_weight = self.netto or self.bruto - self.tara
-				spb_doc.in_time = self.weight_in_time
-				spb_doc.out_time = self.weight_out_time
-				spb_doc.workflow_state = "Weighed"
-				spb_doc.bjr = spb_doc.total_weight / spb_doc.total_janjang
-				for row in spb_doc.details:
-					row.total_weight = self.netto
-					row.db_update()
-				spb_doc.db_update()
+			self.update_spb_weight()
+
+	def update_spb_weight(self):
+		"""Salin hasil timbang ke SPB.
+
+		Dipisah dari on_submit supaya bisa dipanggil ulang saat janjang di SPB
+		berubah sesudah timbangan disubmit (lihat create_or_update di Surat
+		Pengantar Buah) — tanpa ikut menjalankan lagi make_tbs_ledger yang akan
+		menggandakan TBS Ledger Entry.
+		"""
+		if not self.spb:
+			return
+
+		spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
+		spb_doc.in_weight = self.bruto
+		spb_doc.out_weight = self.tara
+		spb_doc.total_weight = self.netto or self.bruto - self.tara
+		spb_doc.in_time = self.weight_in_time
+		spb_doc.out_time = self.weight_out_time
+		spb_doc.workflow_state = "Weighed"
+		# SPB yang dibuat otomatis dari Security Check Point belum punya detail
+		# blok, jadi total_janjang-nya masih 0 saat ditimbang
+		spb_doc.bjr = flt(spb_doc.total_weight / spb_doc.total_janjang) if spb_doc.total_janjang else 0
+		for row in spb_doc.details:
+			row.total_weight = self.netto
+			row.db_update()
+		spb_doc.db_update()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (

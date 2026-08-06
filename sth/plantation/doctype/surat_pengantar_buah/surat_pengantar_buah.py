@@ -6,7 +6,7 @@ import re
 import frappe
 from frappe import unscrub
 from frappe.model.meta import get_field_precision
-from frappe.utils import cstr, flt
+from frappe.utils import cint, cstr, flt
 from frappe.model.document import Document
 from frappe.utils.synchronization import filelock
 
@@ -227,7 +227,7 @@ def create_or_update(**kwargs):
 			if not existing_name:
 				frappe.throw(f"Failed to create Surat Pengantar Buah for Trans No {trans_no}")
 
-		return _update_spb(existing_name, args.get("details") or [])
+		return _update_spb(existing_name, args)
 
 def _trans_no_lock_name(trans_no):
 	return "spb-trans-no-" + re.sub(r"[^A-Za-z0-9]+", "-", trans_no)[:64]
@@ -264,8 +264,51 @@ def _insert_spb(args, catch_duplicate=False):
 		frappe.db.sql(f"rollback to savepoint {save_point}")
 		return None
 
-def _update_spb(existing_name, details):
+# Field yang tidak boleh ikut ditimpa args saat memperbarui SPB draft: identitas
+# dokumen, penanda transaksi, dan detail yang punya jalur pembaruannya sendiri.
+_SKIP_HEADER_FIELDS = {
+	"doctype", "name", "owner", "creation", "modified", "modified_by",
+	"naming_series", "amended_from", "trans_no", "docstatus", "details",
+}
+
+def _update_spb(existing_name, args):
 	doc = frappe.get_doc("Surat Pengantar Buah", existing_name)
+	details = args.get("details") or []
+
+	if doc.docstatus == 0:
+		# SPB draft bisa berasal dari stub yang dibuat Security Check Point, yang
+		# baru berisi company/unit/divisi. Data panen yang sebenarnya baru datang
+		# di panggilan ini, jadi header ikut diperbarui, bukan cuma detailnya.
+		_apply_header(doc, args)
+		_apply_details(doc, details)
+		doc.save(ignore_permissions=True)
+
+		if cint(args.get("docstatus")) == 1:
+			doc.submit()
+	else:
+		# Dokumen sudah submit: hanya detail dan totalnya yang boleh disentuh,
+		# lewat db_set supaya tidak kena validate_update_after_submit.
+		_apply_details(doc, details)
+
+		doc.update_child_table("details")
+		doc.db_set({
+			"total_janjang": sum(flt(d.total_janjang) for d in doc.details),
+			"total_brondolan": sum(flt(d.brondolan_terkirim) for d in doc.details)
+		}, notify=False)
+
+	_resync_timbangan(doc.name)
+
+	frappe.db.commit()
+
+	return doc
+
+def _apply_header(doc, args):
+	doc.update({
+		key: value for key, value in args.items()
+		if key not in _SKIP_HEADER_FIELDS and doc.meta.has_field(key)
+	})
+
+def _apply_details(doc, details):
 	existing_by_harvest_no = {d.harvest_no: d for d in doc.details if d.harvest_no}
 
 	for d in details:
@@ -282,17 +325,18 @@ def _update_spb(existing_name, details):
 			"brondolan_sisa": flt(d.get("brondolan_sisa")),
 		})
 
-	total_janjang = sum(flt(d.total_janjang) for d in doc.details)
-	total_brondolan = sum(flt(d.brondolan_terkirim) for d in doc.details)
+def _resync_timbangan(spb_name):
+	"""Hitung ulang data timbang di SPB kalau truknya sudah pernah ditimbang.
 
-	doc.update_child_table("details")
-	doc.db_set({
-		"total_janjang": total_janjang,
-		"total_brondolan": total_brondolan
-	}, notify=False)
-	frappe.db.commit()
+	Berat, jam timbang, dan BJR diisi Timbangan saat submit. Untuk SPB yang
+	dibuat otomatis dari Security Check Point, janjangnya baru datang sesudah
+	itu — tanpa hitung ulang, BJR-nya tertinggal 0.
+	"""
+	timbangan = frappe.db.get_value("Timbangan", {"spb": spb_name, "docstatus": 1}, "name")
+	if not timbangan:
+		return
 
-	return doc
+	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
 
 @frappe.whitelist()
 def get_recap_panen(blok, posting_date):
