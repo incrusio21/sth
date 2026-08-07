@@ -57,14 +57,20 @@ class SuratPengantarBuah(Document):
 				_apply_recap(d, suffix="_restan")
 
 	def validate_recap_panen(self):
+		# SPB bisa dibuat sebagai stub tanpa detail (mis. dari Security Check Point),
+		# dan isin([]) menghasilkan "IN ()" yang bukan SQL valid di MariaDB.
+		recap_panen = list({d.recap_panen for d in self.details if d.recap_panen})
+		if not recap_panen:
+			return
+
 		rpb = frappe.qb.DocType("Recap Panen by Blok")
 
 		query = (
 			frappe.qb.from_(rpb)
 			.select(rpb.kontanan, rpb.voucher_no)
 			.where(
-				(rpb.voucher_type == "Buku Kerja Mandor Panen") & 
-				(rpb.name.isin([d.recap_panen for d in self.details]))
+				(rpb.voucher_type == "Buku Kerja Mandor Panen") &
+				(rpb.name.isin(recap_panen))
 			)
 		).run(as_dict=True)
 
