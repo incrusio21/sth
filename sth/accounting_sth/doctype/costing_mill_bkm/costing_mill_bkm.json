@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-07 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sumber",
+  "reference_doctype",
+  "no_dokumen",
+  "stasiun",
+  "no_coa",
+  "amount",
+  "keterangan"
+ ],
+ "fields": [
+  {
+   "fieldname": "sumber",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sumber",
+   "options": "\nBKM Bengkel\nBKM Traksi"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Reference Doctype",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "no_dokumen",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "No Dokumen",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stasiun",
+   "options": "Station Master"
+  },
+  {
+   "fieldname": "no_coa",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "No COA",
+   "options": "Account"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Data",
+   "label": "Keterangan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-07 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Mill BKM",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,197 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-08-07 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "column_break_1",
+  "company",
+  "unit",
+  "section_break_periode",
+  "periode_dari",
+  "column_break_periode",
+  "periode_sampai",
+  "section_gaji_karyawan",
+  "costing_mill_gaji_karyawan",
+  "total_gaji_karyawan",
+  "section_pengeluaran_barang",
+  "costing_mill_pengeluaran_barang",
+  "total_pengeluaran_barang",
+  "section_bkm",
+  "costing_mill_bkm",
+  "total_bkm",
+  "section_stasiun",
+  "costing_mill_stasiun",
+  "section_summary",
+  "grand_total",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokumen",
+   "options": "CM-.YYYY.-.####"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "description": "Hanya Unit dengan centang Mill",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_break_periode",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "periode_dari",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_periode",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periode_sampai",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_gaji_karyawan",
+   "fieldtype": "Section Break",
+   "label": "A. Gaji Karyawan Mill"
+  },
+  {
+   "fieldname": "costing_mill_gaji_karyawan",
+   "fieldtype": "Table",
+   "label": "Gaji Karyawan Mill",
+   "options": "Costing Mill Gaji Karyawan"
+  },
+  {
+   "fieldname": "total_gaji_karyawan",
+   "fieldtype": "Currency",
+   "label": "Total Gaji Karyawan Mill",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_pengeluaran_barang",
+   "fieldtype": "Section Break",
+   "label": "B. Pengeluaran Barang Mill"
+  },
+  {
+   "fieldname": "costing_mill_pengeluaran_barang",
+   "fieldtype": "Table",
+   "label": "Pengeluaran Barang Mill",
+   "options": "Costing Mill Pengeluaran Barang"
+  },
+  {
+   "fieldname": "total_pengeluaran_barang",
+   "fieldtype": "Currency",
+   "label": "Total Pengeluaran Barang Mill",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_bkm",
+   "fieldtype": "Section Break",
+   "label": "C. BKM Bengkel & BKM Traksi"
+  },
+  {
+   "fieldname": "costing_mill_bkm",
+   "fieldtype": "Table",
+   "label": "BKM Bengkel & Traksi",
+   "options": "Costing Mill BKM"
+  },
+  {
+   "fieldname": "total_bkm",
+   "fieldtype": "Currency",
+   "label": "Total BKM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_stasiun",
+   "fieldtype": "Section Break",
+   "label": "D. Rekap Per Stasiun"
+  },
+  {
+   "fieldname": "costing_mill_stasiun",
+   "fieldtype": "Table",
+   "label": "Rekap Per Stasiun",
+   "options": "Costing Mill Stasiun",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_summary",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Costing Mill",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-07 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Mill",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

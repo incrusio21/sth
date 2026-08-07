@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-07 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "stasiun",
+  "nama_stasiun",
+  "cost_center",
+  "no_coa",
+  "total_gaji_karyawan",
+  "total_pengeluaran_barang",
+  "total_bkm",
+  "total"
+ ],
+ "fields": [
+  {
+   "fieldname": "stasiun",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stasiun",
+   "options": "Station Master"
+  },
+  {
+   "fieldname": "nama_stasiun",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Stasiun",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "no_coa",
+   "fieldtype": "Link",
+   "label": "No COA",
+   "options": "Account"
+  },
+  {
+   "fieldname": "total_gaji_karyawan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Gaji Karyawan (A)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_pengeluaran_barang",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Pengeluaran Barang (B)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_bkm",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "BKM (C)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-07 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Mill Stasiun",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
