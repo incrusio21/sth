@@ -12,6 +12,8 @@
   "company",
   "posting_date",
   "kontanan",
+  "section_break_nhyc",
+  "voucher_recap",
   "section_break_dydc",
   "jumlah_janjang",
   "jumlah_brondolan",
@@ -152,13 +154,23 @@
    "fieldtype": "Check",
    "label": "Kontanan",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_nhyc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "voucher_recap",
+   "fieldtype": "Table",
+   "label": "Voucher Recap",
+   "options": "Rekap Panen Voucher"
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-13 23:09:02.383761",
+ "modified": "2026-08-06 14:39:00.565902",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Recap Panen by Blok",

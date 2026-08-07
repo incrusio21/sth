@@ -209,11 +209,11 @@ class Proposal(BuyingController):
 		
 		self.compare_values(
 			{"Proposal": [self.from_proposal]}, 
-			[["supplier", "="], ["company", "="], ["currency", "="], ["need_project", "="]]
+			[["supplier", "="], ["company", "="], ["currency", "="]]
 		)
 		for d in self.items:
 			self.compare_values(
-				{"Proposal Item": [d.from_proposal_item]}, 
+				{"Proposal Item": [d.from_proposal]}, 
 				[
 					["project", "="],
 					["item_code", "="],
@@ -865,7 +865,7 @@ def make_proposal_revision(source_name, target_doc=None):
 			"Proposal Item": {
 				"doctype": "Proposal Item",
 				"field_map": {
-					"name": "from_order_item",
+					"name": "from_proposal",
 					"material_request": "material_request",
 					"material_request_item": "material_request_item",
 					"sales_order": "sales_order",

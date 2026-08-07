@@ -8,6 +8,21 @@ from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt, format_date
 
 class RecapPanenbyBlok(Document):
+	def validate(self):
+		self.calculate_total_janjang()
+
+	def calculate_total_janjang(self):
+		self.jumlah_janjang = self.jumlah_brondolan = 0
+		same_voucher = []
+		for vc in self.voucher_recap:
+			key = (vc.voucher_type, vc.voucher_no)
+			if key in same_voucher:
+				frappe.throw(f"{vc.voucher_type} {vc.voucher_no} already in Table")
+
+			self.jumlah_janjang += vc.jumlah_janjang
+			self.jumlah_brondolan += vc.jumlah_brondolan
+			same_voucher.append(key)
+
 	def on_trash(self):
 		self.remove_document()
 

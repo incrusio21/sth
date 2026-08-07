@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-04 09:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "masa_no",
+  "tanggal_mulai",
+  "tanggal_selesai",
+  "tahun_tanam",
+  "netto_kg",
+  "harga",
+  "total",
+  "masa_shu"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "masa_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Masa",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "tanggal_mulai",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal Mulai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tanggal_selesai",
+   "fieldtype": "Date",
+   "label": "Tanggal Selesai",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "netto_kg",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Netto (Kg)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "description": "0 berarti harga masa ini belum ditetapkan di Master Harga SHU.",
+   "fieldname": "harga",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Harga per Kg",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "masa_shu",
+   "fieldtype": "Link",
+   "label": "Masa SHU",
+   "options": "Masa SHU",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-06 14:50:12.579245",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Perhitungan KUD Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

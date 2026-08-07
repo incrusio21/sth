@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-30 01:46:04.392736",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bulan_no",
+  "masa_no",
+  "tahun_tanam",
+  "harga",
+  "tanggal_mulai",
+  "tanggal_selesai",
+  "masa_shu"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "bulan_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bulan",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "masa_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Masa",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "tahun_tanam",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Tahun Tanam",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "harga",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Harga per Kg"
+  },
+  {
+   "description": "Disalin dari Masa SHU tiap kali disimpan.",
+   "fieldname": "tanggal_mulai",
+   "fieldtype": "Date",
+   "label": "Tanggal Mulai",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tanggal_selesai",
+   "fieldtype": "Date",
+   "label": "Tanggal Selesai",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "masa_shu",
+   "fieldtype": "Link",
+   "label": "Masa SHU",
+   "options": "Masa SHU",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-06 14:50:39.100455",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Master Harga SHU Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

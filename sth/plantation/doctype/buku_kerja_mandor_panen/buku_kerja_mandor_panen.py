@@ -115,17 +115,17 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 	def on_submit(self):
 		super().on_submit()
-		self.create_recap_panen_by_blok()
+		self.create_or_update_recap_panen_by_blok()
 		# GL Entry dibuat saat dokumen Posted / saat BJR masuk, lihat update_hasil_kerja_bjr
 
 	def on_cancel(self):
 		super().on_cancel()
 		self.cancel_gl_entries()
-		self.delete_recap_panen()
+		self.remove_bkm_from_recap_panen()
 
 	def on_trash(self):
 		super().on_trash()
-		self.delete_recap_panen()
+		self.remove_bkm_from_recap_panen()
 
 	def make_gl_entry(self, method=None):
 		gl_entries = []
@@ -203,19 +203,16 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		)
 		frappe.msgprint(_("GL Entry berhasil dibatalkan."), indicator="orange", alert=True)
 
-	def create_recap_panen_by_blok(self):
+	def create_or_update_recap_panen_by_blok(self):
 		blok_dict = {}
 		for hk in self.hasil_kerja:
 			blok = blok_dict.setdefault(hk.blok, {
 				"voucher_type": self.doctype, 
 				"voucher_no": self.name,
-				"company": self.company,
-				"posting_date": self.posting_date,
 				"jumlah_janjang": 0,
 				"jumlah_brondolan": 0,
-				"kontanan": self.is_kontanan
 			})
-
+			
 			blok["jumlah_janjang"] += hk.jumlah_janjang
 			blok["jumlah_brondolan"] += hk.qty_brondolan
 		
@@ -225,26 +222,41 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			try:
 				frappe.db.savepoint(rekap_panen)
 				rpb = frappe.new_doc("Recap Panen by Blok")
-				rpb.blok = b
-				rpb.update(value)
+				rpb.update({
+					"company": self.company,
+					"posting_date": self.posting_date,
+					"blok": b,
+					"kontanan": self.is_kontanan,
+				})
+
+				rpb.append("voucher_recap", value)
 				rpb.save()
 			except frappe.UniqueValidationError:
 				if frappe.message_log:
 					frappe.message_log.pop()
-					
+				
 				frappe.db.rollback(save_point=rekap_panen)  # preserve transaction in postgres
-				message += f"<br>{b}"
+				rpb = frappe.get_last_doc("Recap Panen by Blok", {"company": self.company, "posting_date": self.posting_date, "blok": b})
+				rpb.append("voucher_recap", value)
+				rpb.save()
+				# message += f"<br>{b}"
 
-		if message:
-			frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
+		# if message:
+		# 	frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
 
-	def delete_recap_panen(self):
+	def remove_bkm_from_recap_panen(self):
 		for epl in frappe.get_all(
-			"Recap Panen by Blok", 
+			"Rekap Panen Voucher", 
 			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
-			pluck="name"
+			pluck="parent"
 		):
-			frappe.delete_doc("Recap Panen by Blok", epl, flags=frappe._dict(transaction_panen=True))
+			rpb = frappe.get_doc("Recap Panen by Blok", epl)
+			for vc in rpb.voucher_recap:
+				if vc.voucher_type == self.doctype and vc.voucher_no == self.name:
+					rpb.remove(vc)
+					break
+
+			rpb.save()
 		
 	def update_rate_or_qty_value(self, item, precision):
 		if item.parentfield != "hasil_kerja":
