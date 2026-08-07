@@ -12,9 +12,67 @@ from frappe.model.mapper import get_mapped_doc
 
 
 class SuratJalan(Document):
+    def validate(self):
+        self.set_user_from_penerima()
+
     def on_submit(self):
         self.create_ste_issue()
         self.db_set("status", "Terkirim")
+        self.kirim_notifikasi_penerima()
+
+    # ------------------------------------------------------------------ #
+    #  User penerima: ambil User ID dari Employee di "Diterima Oleh"      #
+    # ------------------------------------------------------------------ #
+    def set_user_from_penerima(self):
+        # Kalau sudah diisi manual, jangan ditimpa.
+        if self.user or not self.diterima_oleh:
+            return
+
+        self.user = frappe.db.get_value("Employee", self.diterima_oleh, "user_id")
+
+    # ------------------------------------------------------------------ #
+    #  Notifikasi ke user penerima saat Surat Jalan dikirim               #
+    # ------------------------------------------------------------------ #
+    def kirim_notifikasi_penerima(self):
+        if not self.user:
+            frappe.msgprint(
+                f"Karyawan {self.diterima_oleh} belum punya User ID, "
+                "notifikasi penerimaan tidak dikirim. Isi field User Penerima secara manual.",
+                indicator="orange",
+                alert=True,
+            )
+            return
+
+        if not frappe.db.get_value("User", self.user, "enabled"):
+            return
+
+        exists = frappe.db.exists(
+            "Notification Log",
+            {
+                "for_user": self.user,
+                "document_type": self.doctype,
+                "document_name": self.name,
+            }
+        )
+        if exists:
+            return
+
+        notification = frappe.get_doc({
+            "doctype": "Notification Log",
+            "subject": f"Surat Jalan {self.name} dikirim ke {self.gudang_tujuan}, menunggu konfirmasi penerimaan",
+            "for_user": self.user,
+            "type": "Alert",
+            "document_type": self.doctype,
+            "document_name": self.name,
+        }).insert(ignore_permissions=True)
+
+        notification.notify_update()
+
+        frappe.publish_realtime(
+            event="notification",
+            message={"type": "Alert"},
+            user=self.user
+        )
 
     def on_cancel(self):
         # Cancel semua STE terkait (Issue maupun Receipt)

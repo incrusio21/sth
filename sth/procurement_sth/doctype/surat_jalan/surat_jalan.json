@@ -168,6 +168,9 @@
    "read_only": 1
   },
   {
+   "description": "Diambil otomatis dari User ID milik karyawan pada Diterima Oleh. Isi manual jika karyawan tersebut belum punya User ID.",
+   "fetch_from": "diterima_oleh.user_id",
+   "fetch_if_empty": 1,
    "fieldname": "user",
    "fieldtype": "Link",
    "label": "User",
@@ -178,7 +181,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 15:40:05.788848",
+ "modified": "2026-08-07 16:10:00.000000",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Surat Jalan",
