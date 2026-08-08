@@ -74,6 +74,8 @@ frappe.ui.form.on("Purchase Invoice", {
             set_coa_filter(frm)
         }
 
+        frm.trigger('set_grand_total_setelah_dp')
+
         frm.fields_dict["charges_purchase_invoice"].grid.update_docfield_property(
             "account", "get_query", function () {
                 return {
@@ -470,6 +472,22 @@ frappe.ui.form.on("Purchase Invoice", {
         frm.set_value("total_ppn", total)
     },
 
+    set_grand_total_setelah_dp(frm) {
+        // Nilai final ditulis server saat validate; ini hanya supaya angkanya
+        // ikut bergerak selama draft saat baris advance ditambah/diubah.
+        // Sengaja tidak pakai frm.set_value supaya form tidak jadi dirty.
+        if (frm.doc.docstatus !== 0) return
+
+        // Dihitung dari tabel advances, bukan dari frm.doc.total_advance, supaya
+        // tidak bergantung pada urutan handler erpnext yang mengisi total_advance.
+        const total_advance = (frm.doc.advances || []).reduce(
+            (total, row) => total + flt(row.allocated_amount), 0
+        )
+
+        frm.doc.grand_total_setelah_dp = flt(frm.doc.rounded_total || frm.doc.grand_total) - total_advance
+        frm.refresh_field('grand_total_setelah_dp')
+    },
+
     set_value_dpp_and_taxes(frm) {
         frm.doc.dpp = frm.doc.net_total
 
@@ -785,6 +803,18 @@ frappe.ui.form.on("Charges Purchase Invoice", {
     },
     charges_purchase_invoice_remove(frm) {
         sync_to_taxes(frm);
+    }
+});
+
+
+// ─── Purchase Invoice Advance ─────────────────────────────────────────────────
+
+frappe.ui.form.on("Purchase Invoice Advance", {
+    allocated_amount(frm) {
+        frm.trigger('set_grand_total_setelah_dp')
+    },
+    advances_remove(frm) {
+        frm.trigger('set_grand_total_setelah_dp')
     }
 });
 

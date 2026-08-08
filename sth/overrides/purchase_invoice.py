@@ -132,6 +132,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.validate_term()
 		self.set_retensi_amount()
 		self.set_charges_total()
+		self.set_grand_total_setelah_dp()
 
 	def set_expense_account(self, for_validate=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
@@ -511,6 +512,16 @@ class SthPurchaseInvoice(PurchaseInvoice):
 	def set_charges_total(self):
 		self.total_charges = sum(
 			flt(row.total) for row in self.get("charges_purchase_invoice")
+		)
+
+	def set_grand_total_setelah_dp(self):
+		# total_advance sudah diisi calculate_taxes_and_totals() di dalam
+		# super().validate(), jadi method ini harus dipanggil setelahnya.
+		# rounded_total dimatikan di validate (disable_rounded_total = 1),
+		# jadi fallback ke grand_total seperti set_retensi_amount.
+		self.grand_total_setelah_dp = flt(
+			flt(self.rounded_total or self.grand_total) - flt(self.total_advance),
+			self.precision("grand_total_setelah_dp"),
 		)
 
 	def set_retensi_amount(self):
