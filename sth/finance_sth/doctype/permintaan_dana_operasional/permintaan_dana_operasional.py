@@ -517,6 +517,21 @@ PEMISAH_UANG_MUKA = "::"
 # Tipe PDO yang barisnya dipilih per nama pengguna, bukan sekaligus satu tabel
 TIPE_PILIH_PENGGUNA = ("Bahan Bakar", "Perjalanan Dinas")
 
+# sub_detail di List Kas tidak wajib diisi. Baris yang kosong tetap harus bisa
+# direalisasi, jadi diwakili nilai ini di saringan PDO Type dialog realisasi.
+KAS_TANPA_PDO_TYPE = "__tanpa_pdo_type__"
+
+
+def cocok_pdo_type(row, pdo_type):
+	"""Apakah baris List Kas termasuk PDO Type yang dipilih di dialog realisasi."""
+	if not pdo_type:
+		return True
+
+	if pdo_type == KAS_TANPA_PDO_TYPE:
+		return not row.get("sub_detail")
+
+	return row.get("sub_detail") == pdo_type
+
 
 def gabung_per_item_barang(rows):
 	"""Gabungkan baris realisasi jadi satu baris per `item_barang`. Fungsi murni.
@@ -566,7 +581,7 @@ def parse_pilihan(nilai):
 	return nilai or None
 
 
-def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, pengguna=None, uang_muka=None):
+def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, pengguna=None, uang_muka=None, pdo_type=None):
 	"""Baris `payment_voucher_kas_pdo` untuk satu realisasi PDO.
 
 	Satu tempat untuk dua jalur: tombol Realisasi di PDO dan tombol Realisasi PDO
@@ -617,6 +632,17 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, peng
 	child_data = getattr(source_doc, mapping['child_table'], [])
 	if not child_data:
 		frappe.throw(_("No data found in {0} table").format(tipe_pdo))
+
+	if pdo_type:
+		if tipe_pdo != "Kas":
+			frappe.throw(_("Pilihan PDO Type hanya berlaku untuk tipe Kas"))
+
+		# Disaring duluan: satu Jenis bisa dipakai beberapa PDO Type, jadi tanpa ini
+		# centangan Jenis akan ikut menarik baris dari PDO Type yang tidak dipilih.
+		child_data = [row for row in child_data if cocok_pdo_type(row, pdo_type)]
+
+		if not child_data:
+			frappe.throw(_("Tidak ada baris List Kas untuk PDO Type yang dipilih"))
 
 	if nama_terpilih:
 		# baris yang sudah masuk realisasi sebelumnya tidak boleh ikut lagi
@@ -1004,14 +1030,14 @@ def get_bahan_bakar_pengguna(source_name):
 
 
 @frappe.whitelist()
-def get_baris_realisasi(source_name, tipe_pdo, ppd=None, nama_barang=None, pengguna=None, uang_muka=None):
+def get_baris_realisasi(source_name, tipe_pdo, ppd=None, nama_barang=None, pengguna=None, uang_muka=None, pdo_type=None):
 	"""Baris realisasi untuk Payment Entry yang sudah tersimpan.
 
 	PE yang belum tersimpan memakai `create_payment_voucher_alokasi` yang membuat
 	dokumen baru; yang sudah tersimpan cuma perlu isi tabelnya.
 	"""
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
-	hasil = build_baris_realisasi(source_doc, tipe_pdo, ppd, nama_barang, pengguna, uang_muka)
+	hasil = build_baris_realisasi(source_doc, tipe_pdo, ppd, nama_barang, pengguna, uang_muka, pdo_type)
 	hasil["total"] = flt(sum(flt(row["total"]) for row in hasil["rows"]))
 	hasil["mode_of_payment"] = get_mode_of_payment_tunai(source_doc.company)
 
@@ -1075,20 +1101,22 @@ def get_akun_mode_of_payment(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None, pengguna=None, uang_muka=None):
+def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None, pengguna=None, uang_muka=None, pdo_type=None):
 	"""Create Payment Voucher Kas from Permintaan Dana Operasional
 
 	Bila `ppd` (Pertanggungjawaban Perjalanan Dinas) diisi, nilai tiap baris diambil dari
 	realisasi PPD tersebut, bukan dari plafon PDO. Dengan begitu PPD berfungsi sebagai DP
 	dan realisasi yang dibayarkan otomatis terpotong.
 
+	Bila `pdo_type` diisi (khusus tipe Kas), hanya baris List Kas dengan PDO Type
+	tersebut yang ikut — saringan pertama sebelum `nama_barang`.
+
 	Bila `nama_barang` diisi (khusus tipe Kas), hanya baris List Kas dengan nama barang
 	tersebut yang direalisasi, jadi satu baris Payment Entry per nama barang yang
 	dicentang, dan rinciannya ditulis ke field Keterangan.
 
 	Bila `pengguna` diisi (khusus tipe Bahan Bakar), satu baris Payment Entry per
-	pengguna yang dicentang dengan nominal kosong — diketik manual — dan sisa
-	plafon tiap pengguna ditulis ke field Keterangan sebagai acuan.
+	pengguna yang dicentang dengan nominal kosong — diketik manual.
 	"""
 
 	if tipe_pdo not in TIPE_MAPPING:
@@ -1133,7 +1161,7 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 				frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
 			target.paid_from = unit_doc.bank_account
 
-		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang, pengguna, uang_muka)
+		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang, pengguna, uang_muka, pdo_type)
 
 		if hasil["paid_to"]:
 			target.paid_to = hasil["paid_to"]
@@ -1257,14 +1285,51 @@ def get_realisasi_pdo_child_names(source_name, tipe_pdo):
 
 
 @frappe.whitelist()
-def get_kas_nama_barang(source_name):
-	"""Nama barang di List Kas yang belum direalisasi, dikelompokkan beserta totalnya."""
+def get_kas_pdo_type(source_name):
+	"""PDO Type di List Kas yang masih punya baris belum direalisasi.
+
+	Dipakai sebagai saringan pertama di dialog realisasi: Jenis-nya (Expense Claim
+	Type) baru muncul setelah PDO Type dipilih, karena Jenis yang sama bisa dipakai
+	oleh lebih dari satu PDO Type.
+	"""
+	doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
+	sudah_realisasi = get_realisasi_pdo_child_names(source_name, "Kas")
+
+	urutan = []
+	for row in doc.pdo_kas:
+		if not row.type or row.name in sudah_realisasi:
+			continue
+
+		if flt(row.revised_total) or flt(row.total):
+			nilai = row.sub_detail or KAS_TANPA_PDO_TYPE
+			if nilai not in urutan:
+				urutan.append(nilai)
+
+	return [
+		{
+			"value": nilai,
+			"label": _("Tanpa PDO Type") if nilai == KAS_TANPA_PDO_TYPE else nilai
+		}
+		for nilai in urutan
+	]
+
+
+@frappe.whitelist()
+def get_kas_nama_barang(source_name, pdo_type=None):
+	"""Jenis di List Kas yang belum direalisasi, disaring per PDO Type.
+
+	Nilai rupiah tidak ikut ditampilkan di label — yang dipilih di sini Jenis-nya,
+	nominalnya sudah terbaca di List Kas.
+	"""
 	doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	sudah_realisasi = get_realisasi_pdo_child_names(source_name, "Kas")
 
 	rincian = {}
 	for row in doc.pdo_kas:
 		if not row.type or row.name in sudah_realisasi:
+			continue
+
+		if not cocok_pdo_type(row, pdo_type):
 			continue
 
 		amount = flt(row.revised_total) or flt(row.total)
@@ -1276,7 +1341,7 @@ def get_kas_nama_barang(source_name):
 	return [
 		{
 			"value": nama,
-			"label": "{0} ({1})".format(nama, frappe.format_value(total, {"fieldtype": "Currency"})),
+			"label": nama,
 			"amount": total
 		}
 		for nama, total in rincian.items()

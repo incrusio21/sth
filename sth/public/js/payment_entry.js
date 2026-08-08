@@ -1552,11 +1552,11 @@ function show_realisasi_pdo_selector(frm) {
 				tipe_options.push('Kas');
 				tipe_options.push('Dana Cadangan');
 
-				// Centangan per nama barang (Kas) dan per pengguna (Bahan Bakar dan
-				// Perjalanan Dinas), persis seperti tombol Realisasi di PDO.
+				// Kas disaring per PDO Type dulu, centangan per pengguna untuk Bahan
+				// Bakar dan Perjalanan Dinas — persis seperti tombol Realisasi di PDO.
 				Promise.all([
 					frappe.xcall(
-						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_pdo_type',
 						{ source_name: selected_name }
 					),
 					frappe.xcall(
@@ -1575,7 +1575,7 @@ function show_realisasi_pdo_selector(frm) {
 	});
 }
 
-function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
+function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
 	let fields = [
 		{
 			fieldtype: 'HTML',
@@ -1593,7 +1593,21 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 		}
 	];
 
-	if (kas_nama_barang.length) {
+	if (kas_pdo_type.length) {
+		fields.push({
+			fieldname: 'pdo_type',
+			label: __('PDO Type'),
+			fieldtype: 'Select',
+			depends_on: 'eval:doc.tipe_pdo == "Kas"',
+			description: __('Pilih dulu di sini, Nama Barang menyusul sesuai PDO Type ini'),
+			options: [{ label: '', value: '' }].concat(kas_pdo_type.map(function (item) {
+				return { label: item.label, value: item.value };
+			})),
+			onchange: function () {
+				muat_kas_nama_barang_pdo(selected_name, tipe_dialog);
+			}
+		});
+
 		fields.push({
 			fieldname: 'nama_barang',
 			label: __('Nama Barang'),
@@ -1601,9 +1615,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 			columns: 1,
 			depends_on: 'eval:doc.tipe_pdo == "Kas"',
 			description: __('Satu baris Payment Entry per nama barang yang dicentang'),
-			options: kas_nama_barang.map(function (item) {
-				return { label: item.label, value: item.value, checked: 0 };
-			})
+			options: []
 		});
 	}
 
@@ -1658,8 +1670,13 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 			let uang_muka = [];
 
 			if (values.tipe_pdo == 'Kas') {
-				if (!kas_nama_barang.length) {
+				if (!kas_pdo_type.length) {
 					frappe.msgprint(__('Semua nama barang di List Kas sudah direalisasi'));
+					return;
+				}
+
+				if (!values.pdo_type) {
+					frappe.msgprint(__('Pilih PDO Type dulu'));
 					return;
 				}
 
@@ -1697,6 +1714,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 			let args = {
 				source_name: selected_name,
 				tipe_pdo: values.tipe_pdo,
+				pdo_type: values.tipe_pdo == 'Kas' ? values.pdo_type : null,
 				nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null,
 				pengguna: pengguna.length ? pengguna : null,
 				uang_muka: uang_muka.length ? uang_muka : null
@@ -1729,6 +1747,32 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 
 // Kembaran muat_uang_muka() di form PDO: uang muka baru bisa dicari setelah namanya
 // dicentang, karena dokumennya dicocokkan lewat Employee milik nama tersebut.
+// Jenis di List Kas baru dimunculkan setelah PDO Type dipilih: Jenis yang sama bisa
+// dipakai beberapa PDO Type, jadi tanpa saringan ini centangannya ambigu.
+function muat_kas_nama_barang_pdo(selected_name, tipe_dialog) {
+	let field = tipe_dialog.fields_dict.nama_barang;
+	if (!field) return;
+
+	let pdo_type = tipe_dialog.get_value('pdo_type');
+
+	let selesai = function (opsi) {
+		field.df.options = (opsi || []).map(function (item) {
+			return { label: item.label, value: item.value, checked: 0 };
+		});
+		field.refresh();
+	};
+
+	if (!pdo_type) {
+		selesai([]);
+		return;
+	}
+
+	frappe.xcall(
+		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+		{ source_name: selected_name, pdo_type: pdo_type }
+	).then(selesai);
+}
+
 function muat_uang_muka_pdo(selected_name, tipe_dialog) {
 	let field = tipe_dialog.fields_dict.uang_muka;
 	if (!field) return;

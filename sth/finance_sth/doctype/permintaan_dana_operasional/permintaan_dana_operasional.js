@@ -715,11 +715,12 @@ function show_realisasi_dialog(frm) {
 
 		let ada = (tipe) => tipe_list.some((item) => item.value === tipe);
 
-		// Kas dicentang per nama barang, Bahan Bakar dan Perjalanan Dinas per
-		// pengguna. Semuanya hanya diambil kalau tipenya memang masih punya sisa.
+		// Kas disaring per PDO Type dulu — Jenis-nya menyusul setelah PDO Type
+		// dipilih. Bahan Bakar dan Perjalanan Dinas dicentang per pengguna.
+		// Semuanya hanya diambil kalau tipenya memang masih punya sisa.
 		return Promise.all([
 			ada('Kas') ? frappe.xcall(
-				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+				'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_pdo_type',
 				{ source_name: frm.doc.name }
 			) : [],
 			ada('Bahan Bakar') ? frappe.xcall(
@@ -736,7 +737,7 @@ function show_realisasi_dialog(frm) {
 	});
 }
 
-function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
+function build_realisasi_dialog(frm, tipe_list, kas_pdo_type, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
 	// Build options string for select field
 	let options = [''];
 
@@ -773,7 +774,21 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 		}
 	];
 
-	if (kas_nama_barang.length) {
+	if (kas_pdo_type.length) {
+		fields.push({
+			fieldname: 'pdo_type',
+			label: __('PDO Type'),
+			fieldtype: 'Select',
+			depends_on: 'eval:doc.tipe_pdo == "Kas"',
+			description: __('Pilih dulu di sini, Nama Barang menyusul sesuai PDO Type ini'),
+			options: [{ label: '', value: '' }].concat(kas_pdo_type.map(function (item) {
+				return { label: item.label, value: item.value };
+			})),
+			onchange: function () {
+				muat_kas_nama_barang(frm, dialog);
+			}
+		});
+
 		fields.push({
 			fieldname: 'nama_barang',
 			label: __('Nama Barang'),
@@ -781,9 +796,7 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 			columns: 1,
 			depends_on: 'eval:doc.tipe_pdo == "Kas"',
 			description: __('Satu baris Payment Entry per nama barang yang dicentang, rinciannya masuk ke Keterangan'),
-			options: kas_nama_barang.map(function (item) {
-				return { label: item.label, value: item.value, checked: 0 };
-			})
+			options: []
 		});
 	}
 
@@ -843,8 +856,13 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 			let uang_muka = [];
 
 			if (values.tipe_pdo == 'Kas') {
-				if (!kas_nama_barang.length) {
+				if (!kas_pdo_type.length) {
 					frappe.msgprint(__('Semua nama barang di List Kas sudah direalisasi'));
+					return;
+				}
+
+				if (!values.pdo_type) {
+					frappe.msgprint(__('Pilih PDO Type dulu'));
 					return;
 				}
 
@@ -891,6 +909,7 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 					source_name: frm.doc.name,
 					tipe_pdo: values.tipe_pdo,
 					ppd: values.tipe_pdo == 'Perjalanan Dinas' ? values.ppd : null,
+					pdo_type: values.tipe_pdo == 'Kas' ? values.pdo_type : null,
 					nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null,
 					pengguna: pengguna.length ? pengguna : null,
 					uang_muka: uang_muka.length ? uang_muka : null
@@ -907,6 +926,32 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 	});
 
 	dialog.show();
+}
+
+// Jenis di List Kas baru dimunculkan setelah PDO Type dipilih: Jenis yang sama bisa
+// dipakai beberapa PDO Type, jadi tanpa saringan ini centangannya ambigu.
+function muat_kas_nama_barang(frm, dialog) {
+	let field = dialog.fields_dict.nama_barang;
+	if (!field) return;
+
+	let pdo_type = dialog.get_value('pdo_type');
+
+	let selesai = function (opsi) {
+		field.df.options = (opsi || []).map(function (item) {
+			return { label: item.label, value: item.value, checked: 0 };
+		});
+		field.refresh();
+	};
+
+	if (!pdo_type) {
+		selesai([]);
+		return;
+	}
+
+	frappe.xcall(
+		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+		{ source_name: frm.doc.name, pdo_type: pdo_type }
+	).then(selesai);
 }
 
 // Uang muka baru bisa dicari setelah namanya dicentang, karena dokumennya dicocokkan
