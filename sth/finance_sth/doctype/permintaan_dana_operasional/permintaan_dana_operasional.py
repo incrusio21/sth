@@ -734,15 +734,8 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, peng
 			)
 			for nama, total in uang_muka_per_nama.items()
 		)
-	elif pengguna_terpilih and tipe_pdo == "Bahan Bakar":
-		# Nominalnya masih kosong, jadi sisa plafon ditulis sebagai acuan pengisian.
-		sisa = {p["pengguna"]: p["sisa"] for p in hitung_plafon_bahan_bakar(source_doc)}
-		note = "\n".join(
-			"Sisa plafon {0}: {1}".format(
-				nama, frappe.format_value(flt(sisa.get(nama)), {"fieldtype": "Currency"})
-			)
-			for nama in pengguna_terpilih
-		)
+	# Bahan Bakar tidak menulis apa pun ke Keterangan: nominalnya diisi manual dan
+	# sisa plafon yang dulu ditulis di sini malah terbaca sebagai nilai tagihan.
 
 	return {"rows": rows, "note": note, "paid_to": paid_to}
 
@@ -986,23 +979,24 @@ def hitung_plafon_bahan_bakar(source_doc):
 
 @frappe.whitelist()
 def get_bahan_bakar_pengguna(source_name):
-	"""Pengguna di List Bahan Bakar beserta sisa plafonnya, untuk dialog realisasi."""
+	"""Pengguna di List Bahan Bakar untuk dialog realisasi.
+
+	Nilai rupiah sengaja tidak ditampilkan di label: nominal Bahan Bakar diisi
+	manual saat realisasi, jadi angka plafon di sini cuma jadi acuan yang salah
+	dibaca sebagai nilai yang akan dibayar. `amount` tetap dikirim untuk pemakai
+	lain dari method ini.
+	"""
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 
 	daftar = []
 	for baris in hitung_plafon_bahan_bakar(source_doc):
-		if baris["sisa"] > 0:
-			keterangan = _("sisa {0}").format(
-				frappe.format_value(baris["sisa"], {"fieldtype": "Currency"})
-			)
-		else:
-			keterangan = _("plafon {0}, sudah terpakai semua").format(
-				frappe.format_value(baris["plafon"], {"fieldtype": "Currency"})
-			)
+		label = baris["pengguna"]
+		if baris["sisa"] <= 0:
+			label = "{0} ({1})".format(label, _("sudah terpakai semua"))
 
 		daftar.append({
 			"value": baris["pengguna"],
-			"label": "{0} ({1})".format(baris["pengguna"], keterangan),
+			"label": label,
 			"amount": baris["sisa"]
 		})
 
@@ -1061,6 +1055,25 @@ def get_mode_of_payment_tunai(company=None):
 	return modes[0]
 
 
+def get_akun_mode_of_payment(mode_of_payment, company):
+	"""Default Account sebuah Mode of Payment untuk company tertentu."""
+	akun = frappe.db.get_value(
+		"Mode of Payment Account",
+		{"parent": mode_of_payment, "company": company},
+		"default_account",
+	)
+
+	if not akun:
+		frappe.throw(
+			_("Mode of Payment {0} belum punya Default Account untuk company {1}.").format(
+				mode_of_payment, company
+			),
+			title=_("Akun Mode of Payment Tidak Ditemukan"),
+		)
+
+	return akun
+
+
 @frappe.whitelist()
 def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=None, nama_barang=None, pengguna=None, uang_muka=None):
 	"""Create Payment Voucher Kas from Permintaan Dana Operasional
@@ -1107,11 +1120,18 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 		if len(ppd_terpilih) == 1:
 			target.pertanggungjawaban_perjalanan_dinas = ppd_terpilih[0]
 
-		unit_doc = frappe.get_doc("Unit", source.unit)
-		if not unit_doc.bank_account:
-			frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
-		target.paid_from = unit_doc.bank_account
-		target.mode_of_payment = get_mode_of_payment_tunai(source.company)
+		mode_of_payment = get_mode_of_payment_tunai(source.company)
+		target.mode_of_payment = mode_of_payment
+
+		if tipe_pdo == "Kas":
+			# Kas keluar dari akun kas Mode of Payment-nya, bukan rekening bank Unit:
+			# realisasi Kas dibayar tunai dari kas yang dipegang unit, bukan transfer.
+			target.paid_from = get_akun_mode_of_payment(mode_of_payment, source.company)
+		else:
+			unit_doc = frappe.get_doc("Unit", source.unit)
+			if not unit_doc.bank_account:
+				frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
+			target.paid_from = unit_doc.bank_account
 
 		hasil = build_baris_realisasi(source, tipe_pdo, ppd, nama_barang, pengguna, uang_muka)
 
@@ -1284,9 +1304,14 @@ def get_available_tipe_pdo(source_name):
 		
 		# Show option if there's a grand total and outstanding amount > 0
 		if grand_total > 0 and outstanding > 0:
+			# Bahan Bakar tanpa nominal: nilainya diisi manual saat realisasi, jadi
+			# outstanding di label cuma menyesatkan. Tipe lain tetap menampilkannya.
+			label = tipe if tipe == 'Bahan Bakar' else \
+				f'{tipe} (Outstanding: {frappe.format_value(outstanding, {"fieldtype": "Currency"})})'
+
 			available_types.append({
 				'value': tipe,
-				'label': f'{tipe} (Outstanding: {frappe.format_value(outstanding, {"fieldtype": "Currency"})})'
+				'label': label
 			})
 	
 	return available_types

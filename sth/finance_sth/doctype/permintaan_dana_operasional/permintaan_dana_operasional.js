@@ -739,11 +739,9 @@ function show_realisasi_dialog(frm) {
 function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
 	// Build options string for select field
 	let options = [''];
-	let option_labels = {};
 
 	tipe_list.forEach(function (item) {
 		options.push(item.value);
-		option_labels[item.value] = item.label;
 	});
 
 	let fields = [
@@ -796,7 +794,7 @@ function build_realisasi_dialog(frm, tipe_list, kas_nama_barang, bahan_bakar_pen
 			fieldtype: 'MultiCheck',
 			columns: 1,
 			depends_on: 'eval:doc.tipe_pdo == "Bahan Bakar"',
-			description: __('Satu baris Payment Entry per pengguna yang dicentang. Nominalnya diisi manual, sisa plafon masuk ke Keterangan sebagai acuan'),
+			description: __('Satu baris Payment Entry per pengguna yang dicentang. Nominalnya diisi manual'),
 			options: bahan_bakar_pengguna.map(function (item) {
 				return { label: item.label, value: item.value, checked: 0 };
 			})
