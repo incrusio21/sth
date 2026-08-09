@@ -87,13 +87,20 @@ function setup_approval_scrap(frm) {
 			if (!info.name) {
 				if (info.bisa_ajukan) {
 					frm.add_custom_button(__("Ajukan Scrap"), function() {
-						dialog_ajukan_scrap(frm);
+						dialog_ajukan_scrap(frm, info.asset_quantity || 1);
 					}, __("Manage"));
 				}
 				return;
 			}
 
-			frm.dashboard.add_indicator(__("Scrap: {0}", [info.workflow_state]), "orange");
+			let label_state = info.workflow_state;
+			if (info.qty_scrap && info.asset_quantity > 1) {
+				label_state = __("{0} (qty {1} dari {2})", [
+					info.workflow_state, info.qty_scrap, info.asset_quantity
+				]);
+			}
+
+			frm.dashboard.add_indicator(__("Scrap: {0}", [label_state]), "orange");
 
 			(info.actions || []).forEach(function(action) {
 				frm.add_custom_button(__(action), function() {
@@ -104,22 +111,39 @@ function setup_approval_scrap(frm) {
 	});
 }
 
-function dialog_ajukan_scrap(frm) {
+function dialog_ajukan_scrap(frm, asset_quantity) {
+	const fields = [];
+
+	// asset dengan qty lebih dari satu boleh discrap sebagian. asetnya baru
+	// dipecah saat approval terakhir, jadi di sini cukup qty-nya saja
+	if (asset_quantity > 1) {
+		fields.push({
+			fieldname: "qty_scrap",
+			label: __("Qty Discrap"),
+			fieldtype: "Int",
+			default: asset_quantity,
+			reqd: 1,
+			description: __("Qty asset ini {0}. Isi lebih kecil untuk scrap sebagian.", [asset_quantity])
+		});
+	}
+
+	fields.push(
+		{
+			fieldname: "alasan",
+			label: __("Alasan Scrap"),
+			fieldtype: "Small Text",
+			reqd: 1
+		},
+		{
+			fieldname: "lampiran",
+			label: __("Lampiran"),
+			fieldtype: "Attach"
+		}
+	);
+
 	const dialog = new frappe.ui.Dialog({
 		title: __("Ajukan Scrap Asset"),
-		fields: [
-			{
-				fieldname: "alasan",
-				label: __("Alasan Scrap"),
-				fieldtype: "Small Text",
-				reqd: 1
-			},
-			{
-				fieldname: "lampiran",
-				label: __("Lampiran"),
-				fieldtype: "Attach"
-			}
-		],
+		fields: fields,
 		primary_action_label: __("Ajukan"),
 		primary_action(values) {
 			dialog.hide();
@@ -129,7 +153,8 @@ function dialog_ajukan_scrap(frm) {
 				args: {
 					asset: frm.doc.name,
 					alasan: values.alasan,
-					lampiran: values.lampiran
+					lampiran: values.lampiran,
+					qty_scrap: values.qty_scrap || asset_quantity
 				},
 				freeze: true,
 				freeze_message: __("Mengajukan scrap..."),

@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 STATE_APPROVED = "Approved"
 
@@ -17,6 +17,7 @@ class AssetScrapRequest(Document):
 	def validate(self):
 		self.validate_asset()
 		self.validate_duplikat()
+		self.validate_qty()
 		self.set_nilai_buku()
 
 	def validate_asset(self):
@@ -52,6 +53,27 @@ class AssetScrapRequest(Document):
 				_("Asset {0} sudah punya pengajuan scrap yang berjalan").format(self.asset)
 			)
 
+	def validate_qty(self):
+		# asset_quantity ikut fetch_from, tapi asset lama bisa saja masih kosong
+		total = cint(self.asset_quantity) or cint(
+			frappe.db.get_value("Asset", self.asset, "asset_quantity")
+		) or 1
+		self.asset_quantity = total
+
+		if not cint(self.qty_scrap):
+			# tanpa pengisian, perlakuannya seperti sebelum ada scrap sebagian
+			self.qty_scrap = total
+
+		if cint(self.qty_scrap) < 1:
+			frappe.throw(_("Qty Discrap minimal 1"))
+
+		if cint(self.qty_scrap) > total:
+			frappe.throw(
+				_("Qty Discrap {0} melebihi qty Asset {1} yang cuma {2}").format(
+					self.qty_scrap, self.asset, total
+				)
+			)
+
 	def set_nilai_buku(self):
 		asset = frappe.get_doc("Asset", self.asset)
 
@@ -61,6 +83,11 @@ class AssetScrapRequest(Document):
 			nilai_buku = flt(asset.value_after_depreciation) or (
 				flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation)
 			)
+
+		total = cint(self.asset_quantity) or 1
+		if cint(self.qty_scrap) < total:
+			# yang ditampilkan nilai buku sebanyak qty yang discrap saja
+			nilai_buku = nilai_buku * cint(self.qty_scrap) / total
 
 		self.nilai_buku = flt(nilai_buku, self.precision("nilai_buku"))
 
@@ -88,21 +115,45 @@ class AssetScrapRequest(Document):
 
 		self.validate_asset()
 
+		asset = self.pisahkan_qty_yang_discrap()
+
 		frappe.flags.ignore_asset_scrap_request = True
 		try:
-			scrap_asset(self.asset)
+			scrap_asset(asset)
 		finally:
 			frappe.flags.ignore_asset_scrap_request = False
 
-		journal_entry = frappe.db.get_value("Asset", self.asset, "journal_entry_for_scrap")
+		journal_entry = frappe.db.get_value("Asset", asset, "journal_entry_for_scrap")
 		if journal_entry:
 			self.db_set("journal_entry_for_scrap", journal_entry)
+
+	def pisahkan_qty_yang_discrap(self):
+		"""Nama Asset yang benar-benar discrap.
+
+		Kalau qty-nya sebagian, asetnya dipecah dulu jadi asset baru sebanyak qty
+		yang disetujui lalu pecahan itu yang discrap. Pemecahan sengaja ditunda
+		sampai approval terakhir supaya pengajuan yang ditolak tidak meninggalkan
+		asset pecahan."""
+		from erpnext.assets.doctype.asset.asset import split_asset
+
+		total = cint(self.asset_quantity) or 1
+		qty = cint(self.qty_scrap) or total
+
+		if qty >= total:
+			return self.asset
+
+		asset_baru = split_asset(self.asset, qty)
+		nama = asset_baru if isinstance(asset_baru, str) else asset_baru.get("name")
+
+		self.db_set("asset_hasil_split", nama)
+
+		return nama
 
 	def on_cancel(self):
 		if self.journal_entry_for_scrap:
 			frappe.throw(
 				_("Asset {0} sudah discrap. Batalkan lewat tombol Restore Asset di Asset tersebut.").format(
-					self.asset
+					self.asset_hasil_split or self.asset
 				)
 			)
 
@@ -122,7 +173,9 @@ def get_status_scrap(asset):
 	Asset Scrap Request cuma pencatat di belakang layar."""
 	from frappe.model.workflow import get_transitions
 
-	asset_doc = frappe.db.get_value("Asset", asset, ["docstatus", "status"], as_dict=True)
+	asset_doc = frappe.db.get_value(
+		"Asset", asset, ["docstatus", "status", "asset_quantity"], as_dict=True
+	)
 	if not asset_doc:
 		return None
 
@@ -130,6 +183,8 @@ def get_status_scrap(asset):
 		"name": None,
 		"workflow_state": None,
 		"actions": [],
+		"asset_quantity": cint(asset_doc.asset_quantity) or 1,
+		"qty_scrap": None,
 		"bisa_ajukan": (
 			asset_doc.docstatus == 1 and asset_doc.status not in STATUS_TIDAK_BISA_SCRAP
 		)
@@ -144,13 +199,14 @@ def get_status_scrap(asset):
 	hasil["name"] = doc.name
 	hasil["workflow_state"] = doc.get("workflow_state")
 	hasil["actions"] = [transisi.action for transisi in get_transitions(doc, raise_exception=False)]
+	hasil["qty_scrap"] = cint(doc.qty_scrap)
 	hasil["bisa_ajukan"] = False
 
 	return hasil
 
 
 @frappe.whitelist()
-def ajukan_scrap(asset, alasan, lampiran=None):
+def ajukan_scrap(asset, alasan, lampiran=None, qty_scrap=None):
 	"""Buat pengajuan lalu langsung dorong ke lapis approval pertama."""
 	from frappe.model.workflow import apply_workflow, get_transitions
 
@@ -161,6 +217,7 @@ def ajukan_scrap(asset, alasan, lampiran=None):
 	doc.asset = asset
 	doc.alasan = alasan
 	doc.lampiran = lampiran
+	doc.qty_scrap = cint(qty_scrap)
 	doc.insert()
 
 	transisi = get_transitions(doc, raise_exception=False)
