@@ -164,8 +164,15 @@ def ajukan_scrap(asset, alasan, lampiran=None):
 	doc.insert()
 
 	transisi = get_transitions(doc, raise_exception=False)
-	if transisi:
-		apply_workflow(doc, transisi[0].action)
+	if not transisi:
+		# jalur approval unit ini belum ada, atau role user tidak boleh mengajukan
+		frappe.throw(
+			_("Belum ada jalur approval scrap yang cocok untuk unit {0}. Atur di Asset Scrap Settings.").format(
+				doc.unit or "-"
+			)
+		)
+
+	apply_workflow(doc, transisi[0].action)
 
 	return doc.get("workflow_state")
 
