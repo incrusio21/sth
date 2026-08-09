@@ -11,7 +11,7 @@ from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	hitung_shu,
 	kelompokkan_netto,
 	normalisasi_tahun_tanam,
-	pecah_berat_baris,
+	pecah_netto_tiket,
 )
 
 # Pembagian masa Januari 2026 yang sungguhan, sama dengan test_masa_shu.
@@ -37,21 +37,41 @@ MASA_JANUARI = [
 ]
 
 
-def baris_spb(**kwargs):
-	"""Baris SPB minimal. Field yang tidak disebut diisi nilai netral."""
+def baris_timbangan(**kwargs):
+	"""Satu baris tiket timbangan. Field yang tidak disebut diisi nilai netral.
+
+	`netto_2` dan `total_janjang` milik tiket, jadi nilainya sama di semua baris
+	satu tiket — persis seperti hasil join di ambil_baris_timbangan.
+	"""
 	row = {
+		"timbangan": "TBG-0001",
 		"posting_date": date(2026, 1, 5),
-		"qty": 100.0,
-		"qty_restan": 0.0,
+		"netto_2": 1000.0,
 		"total_janjang": 100.0,
-		"total_weight": 1000.0,
+		"jumlah_janjang": 100.0,
 		"blok": "A01",
-		"blok_restan": None,
 		"tahun_tanam": "2012",
-		"tahun_tanam_restan": None,
 	}
 	row.update(kwargs)
 	return row
+
+
+def tiket(nomor, posting_date=date(2026, 1, 5), netto_2=1000.0, baris=None):
+	"""Satu tiket berisi beberapa blok. `baris` = [(tahun_tanam, janjang), ...]"""
+	baris = baris or [("2012", 100.0)]
+	total_janjang = sum(janjang for _, janjang in baris)
+
+	return [
+		baris_timbangan(
+			timbangan=nomor,
+			posting_date=posting_date,
+			netto_2=netto_2,
+			total_janjang=total_janjang,
+			jumlah_janjang=janjang,
+			tahun_tanam=tahun_tanam,
+		)
+		for tahun_tanam, janjang in baris
+	]
 
 
 class TestNormalisasiTahunTanam(FrappeTestCase):
@@ -65,78 +85,65 @@ class TestNormalisasiTahunTanam(FrappeTestCase):
 			self.assertEqual(normalisasi_tahun_tanam(nilai), 0)
 
 
-class TestPecahBeratBaris(FrappeTestCase):
-	def test_tanpa_restan_berat_utuh_ke_satu_tahun_tanam(self):
-		hasil = pecah_berat_baris(baris_spb())
+class TestPecahNettoTiket(FrappeTestCase):
+	def test_satu_blok_netto_utuh_ke_satu_tahun_tanam(self):
+		hasil = pecah_netto_tiket(tiket("TBG-0001"))
 		self.assertEqual(hasil, [(2012, 1000.0)])
 
-	def test_berat_nol_tidak_menghasilkan_baris(self):
-		self.assertEqual(pecah_berat_baris(baris_spb(total_weight=0)), [])
+	def test_netto_nol_tidak_menghasilkan_baris(self):
+		self.assertEqual(pecah_netto_tiket(tiket("TBG-0001", netto_2=0)), [])
 
-	def test_restan_tahun_tanam_sama_tidak_dipecah(self):
-		# Dipecah pun akan digabung lagi; memecah hanya menambah peluang salah bulat.
-		hasil = pecah_berat_baris(
-			baris_spb(
-				blok_restan="A02",
-				qty=70.0,
-				qty_restan=30.0,
-				tahun_tanam_restan="2012",
-			)
-		)
-		self.assertEqual(hasil, [(2012, 1000.0)])
+	def test_tiket_kosong_tidak_meledak(self):
+		self.assertEqual(pecah_netto_tiket([]), [])
 
-	def test_restan_tahun_tanam_beda_dipecah_menurut_janjang(self):
-		hasil = pecah_berat_baris(
-			baris_spb(
-				blok_restan="B01",
-				qty=70.0,
-				qty_restan=30.0,
-				tahun_tanam_restan="2018",
-			)
+	def test_dua_blok_dibagi_menurut_janjang(self):
+		hasil = pecah_netto_tiket(
+			tiket("TBG-0001", baris=[("2012", 70.0), ("2018", 30.0)])
 		)
 		self.assertEqual(hasil, [(2012, 700.0), (2018, 300.0)])
 
-	def test_sisa_pembulatan_diserap_blok_utama(self):
+	def test_sisa_pembulatan_diserap_baris_terakhir(self):
 		# 1000 dibagi 2:1 tidak habis. Yang dijaga: jumlah pecahan tetap persis 1000.
-		hasil = pecah_berat_baris(
-			baris_spb(
-				blok_restan="B01",
-				qty=2.0,
-				qty_restan=1.0,
-				total_janjang=3.0,
-				tahun_tanam_restan="2018",
-			)
+		hasil = pecah_netto_tiket(
+			tiket("TBG-0001", baris=[("2012", 2.0), ("2018", 1.0)])
 		)
 		self.assertEqual(len(hasil), 2)
 		self.assertEqual(flt(sum(berat for _, berat in hasil), 3), 1000.0)
-		self.assertEqual(hasil[1], (2018, 333.333))
 		self.assertEqual(hasil[0], (2012, 666.667))
+		self.assertEqual(hasil[1], (2018, 333.333))
 
-	def test_total_janjang_nol_tidak_bikin_pembagian_nol(self):
-		hasil = pecah_berat_baris(
-			baris_spb(
-				blok_restan="B01",
-				qty=0.0,
-				qty_restan=0.0,
-				total_janjang=0.0,
-				tahun_tanam_restan="2018",
-			)
-		)
-		self.assertEqual(hasil, [(2012, 1000.0)])
+	def test_baris_yang_tersaring_keluar_tidak_ikut_menyerap_netto(self):
+		# Tiket 100 janjang tapi cuma 70 janjang yang unitnya plasma: yang
+		# terhitung 70 persennya saja, sisanya bukan hak mitra ini.
+		baris = [
+			baris_timbangan(total_janjang=100.0, jumlah_janjang=70.0),
+		]
+
+		self.assertEqual(pecah_netto_tiket(baris), [(2012, 700.0)])
+
+	def test_janjang_nol_tidak_bikin_pembagian_nol(self):
+		baris = [baris_timbangan(total_janjang=0.0, jumlah_janjang=0.0)]
+
+		self.assertEqual(pecah_netto_tiket(baris), [(2012, 1000.0)])
 
 	def test_blok_tanpa_tahun_tanam_masuk_kelompok_nol(self):
-		hasil = pecah_berat_baris(baris_spb(tahun_tanam=None))
+		hasil = pecah_netto_tiket(tiket("TBG-0001", baris=[(None, 100.0)]))
 		self.assertEqual(hasil, [(0, 1000.0)])
 
 
 class TestKelompokkanNetto(FrappeTestCase):
 	def test_gabung_per_masa_dan_tahun_tanam(self):
-		rows = [
-			baris_spb(posting_date=date(2026, 1, 1), total_weight=500.0),
-			baris_spb(posting_date=date(2026, 1, 2), total_weight=300.0),
-			baris_spb(posting_date=date(2026, 1, 5), total_weight=200.0),
-			baris_spb(posting_date=date(2026, 1, 5), total_weight=100.0, tahun_tanam="2018"),
-		]
+		rows = (
+			tiket("TBG-0001", posting_date=date(2026, 1, 1), netto_2=500.0)
+			+ tiket("TBG-0002", posting_date=date(2026, 1, 2), netto_2=300.0)
+			+ tiket("TBG-0003", posting_date=date(2026, 1, 5), netto_2=200.0)
+			+ tiket(
+				"TBG-0004",
+				posting_date=date(2026, 1, 5),
+				netto_2=100.0,
+				baris=[("2018", 100.0)],
+			)
+		)
 
 		hasil, terlewat = kelompokkan_netto(rows, MASA_JANUARI)
 
@@ -146,23 +153,34 @@ class TestKelompokkanNetto(FrappeTestCase):
 			[(1, 2012, 800.0), (2, 2012, 200.0), (2, 2018, 100.0)],
 		)
 
+	def test_dua_baris_satu_tiket_tidak_terhitung_dua_kali(self):
+		# Inti pindah ke netto_2: netto dicatat sekali per tiket, bukan per baris.
+		rows = tiket(
+			"TBG-0001",
+			posting_date=date(2026, 1, 1),
+			netto_2=1000.0,
+			baris=[("2012", 60.0), ("2012", 40.0)],
+		)
+
+		hasil, _ = kelompokkan_netto(rows, MASA_JANUARI)
+
+		self.assertEqual([(b["tahun_tanam"], b["netto_kg"]) for b in hasil], [(2012, 1000.0)])
+
 	def test_tanggal_masa_ikut_terbawa_dari_masa_shu(self):
-		hasil, _ = kelompokkan_netto([baris_spb(posting_date=date(2026, 1, 9))], MASA_JANUARI)
+		hasil, _ = kelompokkan_netto(
+			tiket("TBG-0001", posting_date=date(2026, 1, 9)), MASA_JANUARI
+		)
 
 		self.assertEqual(hasil[0]["tanggal_mulai"], date(2026, 1, 9))
 		self.assertEqual(hasil[0]["tanggal_selesai"], date(2026, 1, 15))
 		self.assertEqual(hasil[0]["masa_shu"], "MS-TML-2026-01")
 
-	def test_restan_bisa_jatuh_ke_dua_tahun_tanam_dalam_satu_masa(self):
-		rows = [
-			baris_spb(
-				posting_date=date(2026, 1, 1),
-				blok_restan="B01",
-				qty=70.0,
-				qty_restan=30.0,
-				tahun_tanam_restan="2018",
-			)
-		]
+	def test_satu_tiket_bisa_jatuh_ke_dua_tahun_tanam_dalam_satu_masa(self):
+		rows = tiket(
+			"TBG-0001",
+			posting_date=date(2026, 1, 1),
+			baris=[("2012", 70.0), ("2018", 30.0)],
+		)
 
 		hasil, _ = kelompokkan_netto(rows, MASA_JANUARI)
 
@@ -172,7 +190,7 @@ class TestKelompokkanNetto(FrappeTestCase):
 		)
 
 	def test_tanggal_di_luar_semua_masa_dilaporkan_bukan_dibuang_diam_diam(self):
-		rows = [baris_spb(posting_date=date(2026, 1, 20))]
+		rows = tiket("TBG-0001", posting_date=date(2026, 1, 20))
 
 		hasil, terlewat = kelompokkan_netto(rows, MASA_JANUARI)
 

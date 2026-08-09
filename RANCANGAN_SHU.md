@@ -366,69 +366,75 @@ Sheet Excel menandai sendiri dua input manual: `GANTI ANGKA` di sebelah Biaya Pe
 ## 8. Sumber netto, dan tiga risiko di jalurnya
 
 ```
-Surat Pengantar Buah          docstatus = 1
+Timbangan                     docstatus = 1
 ├─ company                                              ← filter
-├─ unit  →  Unit.plasma = 1                             ← filter
 ├─ posting_date                                         ← pengelompokan masa
-├─ total_weight = in_weight − out_weight − mill_cut     surat_pengantar_buah.py:178
-└─ details (SPB Timbangan Pabrik)
-     ├─ blok  →  Blok.tahun_tanam
-     └─ total_weight = header.total_weight × total_janjang ÷ header.total_janjang
-                                                        surat_pengantar_buah.py:196
+├─ netto_2                                              ← netto tiket
+├─ total_janjang                                        ← dasar pembagian
+└─ spb_detail (Timbangan SPB Detail)
+     ├─ unit  →  Unit.plasma = 1                        ← filter
+     ├─ tahun_tanam                                     ← tercatat di tiket
+     └─ jumlah_janjang                                  ← porsi baris
 ```
 
 ```sql
-SELECT b.tahun_tanam, SUM(d.total_weight) AS netto
-FROM `tabSPB Timbangan Pabrik` d
-INNER JOIN `tabSurat Pengantar Buah` s ON d.parent = s.name
-INNER JOIN `tabBlok` b ON d.blok = b.name
-INNER JOIN `tabUnit` u ON s.unit = u.name
-WHERE s.docstatus = 1
-  AND s.company = %(company)s
+SELECT t.name AS timbangan, t.posting_date, t.netto_2, t.total_janjang,
+       d.blok, d.tahun_tanam, d.jumlah_janjang
+FROM `tabTimbangan SPB Detail` d
+INNER JOIN `tabTimbangan` t ON d.parent = t.name
+INNER JOIN `tabUnit` u ON d.unit = u.name
+WHERE t.docstatus = 1
+  AND t.company = %(company)s
   AND u.plasma = 1
-  AND s.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
-GROUP BY b.tahun_tanam
+  AND d.unit IN %(units)s
+  AND t.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
 ```
 
 Rentang tanggalnya **diambil dari Masa SHU**, jangan dihitung di sini.
 
-### Tiga risiko — ketiganya sudah ditangani di `perhitungan_kud.py`
+Unit dibaca dari **baris tiket**, bukan dari kepala tiket: `Timbangan.unit` berisi PKS
+penerima, sedangkan `Timbangan SPB Detail.unit` berisi unit kebun asal buahnya.
 
-**1. Satu baris child punya dua blok.** `blok` dan `blok_restan` ada di baris yang sama,
-`total_janjang = qty + qty_restan` (py:102), tapi berat dialokasikan ke baris — tidak
-dipecah antar kedua blok. Kalau tahun tanamnya beda, netto masuk ke tahun tanam yang
-salah lalu dikali harga yang salah.
+### Kenapa netto tidak dibaca dari SPB
 
-**2. Sisa pembulatan alokasi tidak diserap** (py:196). Tiap baris dibulatkan sendiri
-sehingga `Σ child.total_weight ≠ header.total_weight`. Pola yang benar sudah dipakai di
-`naikkan_ke_tm` pada `sth/plantation/doctype/blok/blok.py` — baris terakhir menyerap sisa.
+`Timbangan.update_spb_weight()` menyalin `netto` tiket ke **setiap** baris SPB
+(`for row in spb_doc.details: row.total_weight = self.netto`). Satu tiket dengan tiga
+blok menaruh netto penuh tiga kali, jadi membaca `SPB Timbangan Pabrik.total_weight`
+menghitung buah satu truk berkali-kali. Netto yang dipakai SHU diambil dari `netto_2`
+tiketnya, sekali per tiket.
 
-**3. `Blok.tahun_tanam` bertipe Data, bukan Int** (`blok.json:70`). `"2010"` dan `"2010 "`
-jadi dua tahun tanam berbeda saat `GROUP BY`, dan yang tidak cocok mengembalikan harga 0
-tanpa suara. Normalisasi (strip + cast int) di satu tempat saat menarik produksi.
+### Dua risiko yang ditangani di `perhitungan_kud.py`
 
-Ketiganya menghasilkan angka yang tetap terlihat wajar — tidak ketahuan saat input,
+**1. Satu tiket memuat beberapa blok dengan tahun tanam berbeda.** Netto dibagi menurut
+janjang di `pecah_netto_tiket()`, dan **baris terakhir menyerap sisa pembulatan** supaya
+jumlah pecahan persis sama dengan netto tiketnya. Kalau sebagian baris tiket tersaring
+keluar — misal ada blok dari unit non plasma — tidak ada yang menyerap sisa, jadi yang
+terhitung hanya sebesar porsinya.
+
+**2. `tahun_tanam` bertipe Data, bukan Int.** `"2010"` dan `"2010 "` jadi dua tahun tanam
+berbeda saat dijumlahkan, dan yang tidak cocok mengembalikan harga 0 tanpa suara.
+Normalisasi (strip + cast int) ada di satu tempat, `normalisasi_tahun_tanam()` di
+`master_harga_shu.py`, dipakai baik oleh Master Harga SHU maupun Perhitungan KUD.
+
+Keduanya menghasilkan angka yang tetap terlihat wajar — tidak ketahuan saat input,
 hanya saat rekap tidak cocok.
-
-Penanganannya di `pecah_berat_baris()`: berat baris dibagi menurut janjang, **blok
-utama menyerap sisa pembulatan** sehingga jumlah kedua pecahan selalu persis sama
-dengan berat barisnya. Kalau tahun tanam kedua blok kebetulan sama, baris tidak
-dipecah sama sekali — memecah hanya menambah peluang salah bulat.
-
-Perbaikan ini **lokal untuk SHU**. `SPB Timbangan Pabrik.total_weight` di database
-tetap tidak dipecah — risiko 1 dan 2 masih ada untuk pembaca lain dari field itu.
 
 ---
 
 ## 9. Dua keputusan yang sudah diambil (4 Agustus 2026)
 
-**Penanganan restan → pecah menurut janjang.** `blok` dapat porsi `qty/total_janjang`,
-`blok_restan` sisanya. Tiap kg masuk ke tahun tanam yang sebenarnya. Diimplementasikan
-di `pecah_berat_baris()`.
+**Pembagian netto satu tiket → menurut janjang.** Tiap baris tiket dapat porsi
+`jumlah_janjang/total_janjang`, baris terakhir menyerap sisa. Tiap kg masuk ke tahun
+tanam yang sebenarnya. Diimplementasikan di `pecah_netto_tiket()`.
 
-**Tanggal penentu masa → `spb.posting_date`** (tanggal timbang). Satu SPB jatuh utuh ke
-satu masa, dan harga SHU sendiri ditetapkan mengikuti masa timbang. `panen_date` dan
-`panen_date_restan` di baris child sengaja tidak dipakai. Kalau perjanjian dengan
-Bumdes ternyata menyebut tanggal panen, yang berubah cuma kolom tanggal di
-`ambil_baris_spb()` dan `kelompokkan_netto()` — tapi ingat restan punya
-`panen_date_restan` sendiri yang bisa jatuh ke bulan lain.
+**Tanggal penentu masa → `timbangan.posting_date`** (tanggal timbang). Satu tiket jatuh
+utuh ke satu masa, dan harga SHU sendiri ditetapkan mengikuti masa timbang. Tanggal
+panen di baris SPB sengaja tidak dipakai. Kalau perjanjian dengan Bumdes ternyata
+menyebut tanggal panen, yang berubah cuma kolom tanggal di `ambil_baris_timbangan()`
+dan `kelompokkan_netto()`.
+
+**Tahun tanam Master Harga SHU → dari tiket timbangan, bukan ketikan.** Tabel Tahun
+Tanam diisi `sinkron_tahun_tanam()` saat simpan, dan kolom matriks tiap bulan hanya
+menampilkan tahun tanam yang benar-benar ada buahnya di bulan itu. Tahun tanam yang
+sudah terlanjur punya harga tetap ditampilkan supaya angka lama tidak hilang dari layar
+kalau tiketnya berubah.

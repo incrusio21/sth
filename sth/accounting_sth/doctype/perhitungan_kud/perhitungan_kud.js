@@ -67,7 +67,7 @@ function jalankan(frm) {
 		doc: frm.doc,
 		method: "tarik_produksi",
 		freeze: true,
-		freeze_message: __("Menarik produksi dari SPB..."),
+		freeze_message: __("Menarik produksi dari timbangan..."),
 		callback(r) {
 			frm.refresh();
 
@@ -75,7 +75,7 @@ function jalankan(frm) {
 
 			if (!r.message.jumlah_baris) {
 				frappe.msgprint(
-					__("Tidak ada SPB tersubmit di rentang tanggal ini untuk unit yang dipilih.")
+					__("Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih.")
 				);
 				return;
 			}

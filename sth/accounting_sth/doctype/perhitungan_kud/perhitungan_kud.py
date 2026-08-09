@@ -4,10 +4,14 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt, getdate
+from frappe.utils import cint, flt, getdate
 
 from sth.plantation.doctype.blok.blok import BULAN_MAP
-from sth.accounting_sth.doctype.master_harga_shu.master_harga_shu import get_harga_shu, masa_setahun
+from sth.accounting_sth.doctype.master_harga_shu.master_harga_shu import (
+	get_harga_shu,
+	masa_setahun,
+	normalisasi_tahun_tanam,
+)
 
 # Semua uang dibulatkan dengan aturan yang sama. Excel lama membulatkan Management
 # Fee ke rupiah penuh tapi PPh 22 tidak — perbedaannya tidak punya alasan, jadi
@@ -16,49 +20,50 @@ PRESISI_UANG = 2
 PRESISI_BERAT = 3
 
 
-def normalisasi_tahun_tanam(nilai):
-	"""`Blok.tahun_tanam` bertipe Data, jadi "2010" dan "2010 " bisa hidup berdampingan.
+def pecah_netto_tiket(rows):
+	"""Bagi netto satu tiket timbangan ke tahun tanam baris-barisnya. Fungsi murni.
 
-	Tanpa normalisasi keduanya jadi dua kelompok berbeda saat dijumlahkan, dan
-	yang tidak cocok dengan Master Harga SHU mengembalikan harga 0 tanpa suara.
-	"""
-	return cint(cstr(nilai).strip())
+	Netto dicatat sekali per tiket (`netto_2`), sedangkan satu tiket bisa memuat
+	beberapa blok dengan tahun tanam berbeda. Pembagiannya mengikuti janjang.
 
-
-def pecah_berat_baris(row):
-	"""Pecah berat satu baris SPB antara blok dan blok_restan. Fungsi murni.
-
-	`total_weight` dialokasikan ke baris, bukan ke blok — padahal satu baris bisa
-	memuat dua blok dengan tahun tanam berbeda (`blok` dan `blok_restan`).
-	Pembagiannya mengikuti janjang, dan blok utama menyerap sisa pembulatan
-	supaya jumlah kedua pecahan selalu persis sama dengan berat barisnya.
+	Kalau semua baris tiket ikut terhitung, baris terakhir menyerap sisa
+	pembulatan supaya jumlah pecahan persis sama dengan netto tiketnya. Kalau
+	sebagian barisnya tersaring keluar — misalnya ada blok dari unit non plasma —
+	tidak ada yang menyerap sisa, jadi yang terhitung hanya sebesar porsinya.
 
 	Balikan: list of (tahun_tanam, berat).
 	"""
-	berat = flt(row.get("total_weight"))
-	if not berat:
+	if not rows:
 		return []
 
-	tt_utama = normalisasi_tahun_tanam(row.get("tahun_tanam"))
-	qty_restan = flt(row.get("qty_restan"))
+	netto = flt(rows[0].get("netto_2"))
+	if not netto:
+		return []
 
-	if not row.get("blok_restan") or qty_restan <= 0:
-		return [(tt_utama, berat)]
+	janjang_baris = sum(flt(row.get("jumlah_janjang")) for row in rows)
+	pembagi = flt(rows[0].get("total_janjang")) or janjang_baris
 
-	tt_restan = normalisasi_tahun_tanam(row.get("tahun_tanam_restan"))
-	if tt_restan == tt_utama:
-		# Tahun tanamnya sama — dipecah pun akan digabung lagi, dan pemecahan
-		# hanya menambah kesempatan salah bulat.
-		return [(tt_utama, berat)]
+	if pembagi <= 0:
+		# tanpa janjang tidak ada dasar pembagian sama sekali
+		return [(normalisasi_tahun_tanam(rows[0].get("tahun_tanam")), netto)]
 
-	total_janjang = flt(row.get("total_janjang")) or (flt(row.get("qty")) + qty_restan)
-	if total_janjang <= 0:
-		return [(tt_utama, berat)]
+	semua_baris_ikut = abs(janjang_baris - pembagi) < 0.001
 
-	berat_restan = flt(berat * qty_restan / total_janjang, PRESISI_BERAT)
-	berat_utama = flt(berat - berat_restan, PRESISI_BERAT)
+	hasil = []
+	terbagi = 0.0
 
-	return [(tt_utama, berat_utama), (tt_restan, berat_restan)]
+	for row in rows[:-1] if semua_baris_ikut else rows:
+		berat = flt(netto * flt(row.get("jumlah_janjang")) / pembagi, PRESISI_BERAT)
+		terbagi += berat
+		hasil.append((normalisasi_tahun_tanam(row.get("tahun_tanam")), berat))
+
+	if semua_baris_ikut:
+		hasil.append((
+			normalisasi_tahun_tanam(rows[-1].get("tahun_tanam")),
+			flt(netto - terbagi, PRESISI_BERAT),
+		))
+
+	return hasil
 
 
 def cari_masa(masa_rows, tanggal):
@@ -72,8 +77,18 @@ def cari_masa(masa_rows, tanggal):
 	return None
 
 
-def kelompokkan_netto(baris_spb, masa_rows):
-	"""Kelompokkan netto SPB per (masa, tahun tanam). Fungsi murni — tanpa database.
+def kelompokkan_per_tiket(baris):
+	"""Baris timbangan dikelompokkan per tiket, urutannya dipertahankan. Fungsi murni."""
+	tiket = {}
+
+	for row in baris:
+		tiket.setdefault(row.get("timbangan"), []).append(row)
+
+	return list(tiket.values())
+
+
+def kelompokkan_netto(baris_timbangan, masa_rows):
+	"""Kelompokkan netto timbangan per (masa, tahun tanam). Fungsi murni — tanpa database.
 
 	Balikan: (hasil, terlewat). `hasil` urut menurut masa lalu tahun tanam.
 	`terlewat` berisi baris yang tanggalnya tidak masuk masa manapun — seharusnya
@@ -82,13 +97,13 @@ def kelompokkan_netto(baris_spb, masa_rows):
 	ember = {}
 	terlewat = []
 
-	for row in baris_spb:
-		masa = cari_masa(masa_rows, row.get("posting_date"))
+	for rows in kelompokkan_per_tiket(baris_timbangan):
+		masa = cari_masa(masa_rows, rows[0].get("posting_date"))
 		if not masa:
-			terlewat.append(row)
+			terlewat.extend(rows)
 			continue
 
-		for tahun_tanam, berat in pecah_berat_baris(row):
+		for tahun_tanam, berat in pecah_netto_tiket(rows):
 			kunci = (cint(masa["masa_no"]), tahun_tanam)
 			if kunci not in ember:
 				ember[kunci] = {
@@ -148,33 +163,35 @@ def hitung_shu(
 	}
 
 
-def ambil_baris_spb(company, units, tanggal_mulai, tanggal_selesai):
-	"""Baris SPB mentah dalam rentang tanggal, belum dipecah dan belum dikelompokkan.
+def ambil_baris_timbangan(company, units, tanggal_mulai, tanggal_selesai):
+	"""Baris timbangan mentah dalam rentang tanggal, belum dipecah dan belum dikelompokkan.
 
-	Pengelompokan sengaja tidak dilakukan di SQL: berat satu baris bisa jatuh ke
-	dua tahun tanam sekaligus, dan pemecahannya harus bisa dites tanpa database.
+	Netto diambil dari `netto_2` tiket timbangan, bukan dari berat yang tersalin
+	ke SPB — satu tiket menyalin netto yang sama ke semua baris SPB-nya, jadi
+	kalau dibaca dari sana buah satu truk bisa terhitung berkali-kali.
+
+	Tahun tanam ikut yang tercatat di tiket, dan unitnya dibaca dari baris
+	tiket karena unit di kepala tiket berisi PKS penerimanya.
+
+	Pengelompokan sengaja tidak dilakukan di SQL: netto satu tiket bisa jatuh ke
+	beberapa tahun tanam, dan pemecahannya harus bisa dites tanpa database.
 	"""
 	if not units:
 		return []
 
 	return frappe.db.sql(
 		"""
-		SELECT s.name AS spb, s.posting_date,
-		       d.qty, d.qty_restan, d.total_janjang, d.total_weight,
-		       d.blok, d.blok_restan,
-		       b.tahun_tanam AS tahun_tanam,
-		       br.tahun_tanam AS tahun_tanam_restan
-		FROM `tabSPB Timbangan Pabrik` d
-		INNER JOIN `tabSurat Pengantar Buah` s ON d.parent = s.name
-		INNER JOIN `tabUnit` u ON s.unit = u.name
-		LEFT JOIN `tabBlok` b ON d.blok = b.name
-		LEFT JOIN `tabBlok` br ON d.blok_restan = br.name
-		WHERE s.docstatus = 1
-		  AND s.company = %(company)s
+		SELECT t.name AS timbangan, t.posting_date, t.netto_2, t.total_janjang,
+		       d.blok, d.tahun_tanam, d.jumlah_janjang
+		FROM `tabTimbangan SPB Detail` d
+		INNER JOIN `tabTimbangan` t ON d.parent = t.name
+		INNER JOIN `tabUnit` u ON d.unit = u.name
+		WHERE t.docstatus = 1
+		  AND t.company = %(company)s
 		  AND u.plasma = 1
-		  AND s.unit IN %(units)s
-		  AND s.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
-		ORDER BY s.posting_date, s.name
+		  AND d.unit IN %(units)s
+		  AND t.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+		ORDER BY t.posting_date, t.name, d.idx
 		""",
 		{
 			"company": company,
@@ -330,18 +347,18 @@ class PerhitunganKUD(Document):
 
 	@frappe.whitelist()
 	def tarik_produksi(self):
-		"""Isi ulang detail dari SPB yang sudah disubmit. Tombol di form."""
+		"""Isi ulang detail dari tiket timbangan yang sudah disubmit. Tombol di form."""
 		self.set_periode()
 		self.validate_unit()
 
 		masa_rows = self.masa_bulan_ini()
-		baris_spb = ambil_baris_spb(
+		baris_timbangan = ambil_baris_timbangan(
 			self.company,
 			[row.unit for row in self.unit],
 			self.tanggal_mulai,
 			self.tanggal_selesai,
 		)
-		netto, terlewat = kelompokkan_netto(baris_spb, masa_rows)
+		netto, terlewat = kelompokkan_netto(baris_timbangan, masa_rows)
 
 		self.set("detail", [])
 		for baris in netto:
@@ -359,10 +376,10 @@ class PerhitunganKUD(Document):
 
 		if terlewat:
 			frappe.msgprint(
-				_("{0} baris SPB tanggalnya tidak masuk masa manapun dan tidak ikut dihitung.").format(
+				_("{0} baris timbangan tanggalnya tidak masuk masa manapun dan tidak ikut dihitung.").format(
 					len(terlewat)
 				),
-				title=_("Ada SPB di Luar Masa"),
+				title=_("Ada Timbangan di Luar Masa"),
 				indicator="orange",
 			)
 
