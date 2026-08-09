@@ -38,12 +38,12 @@ jadi harus dibaca lewat `GetAttribute('id', 'http://schemas.openxmlformats.org/o
 ### Selesai — `Masa SHU`
 
 ```
-sth/plantation/doctype/masa_shu/masa_shu.json
-sth/plantation/doctype/masa_shu/masa_shu.py
-sth/plantation/doctype/masa_shu/masa_shu.js
-sth/plantation/doctype/masa_shu/test_masa_shu.py
-sth/plantation/doctype/masa_shu_detail/masa_shu_detail.json
-sth/plantation/doctype/masa_shu_detail/masa_shu_detail.py
+sth/accounting_sth/doctype/masa_shu/masa_shu.json
+sth/accounting_sth/doctype/masa_shu/masa_shu.py
+sth/accounting_sth/doctype/masa_shu/masa_shu.js
+sth/accounting_sth/doctype/masa_shu/test_masa_shu.py
+sth/accounting_sth/doctype/masa_shu_detail/masa_shu_detail.json
+sth/accounting_sth/doctype/masa_shu_detail/masa_shu_detail.py
 ```
 
 Modul **Plantation** (bukan Sales STH). Alasannya: masa terikat operasional kebun.
@@ -66,10 +66,10 @@ Isi `masa_shu.py`:
 ### Selesai — `Master Harga SHU`
 
 ```
-sth/plantation/doctype/master_harga_shu/{json,py,js,test_}
-sth/plantation/doctype/master_harga_shu_tahun_tanam/
-sth/plantation/doctype/master_harga_shu_detail/
-sth/plantation/doctype/master_harga_shu_penetapan/
+sth/accounting_sth/doctype/master_harga_shu/{json,py,js,test_}
+sth/accounting_sth/doctype/master_harga_shu_tahun_tanam/
+sth/accounting_sth/doctype/master_harga_shu_detail/
+sth/accounting_sth/doctype/master_harga_shu_penetapan/
 ```
 
 Fungsi murni di `master_harga_shu.py` (semuanya tanpa database, jadi bisa dites langsung):
@@ -106,7 +106,7 @@ tapi bukan penggantinya: normalisasi tetap harus dilakukan juga saat menarik pro
 tersedia di mesin ini. Jalankan dulu sebelum lanjut:
 
 ```bash
-bench --site <site> run-tests --module sth.plantation.doctype.masa_shu.test_masa_shu
+bench --site <site> run-tests --module sth.accounting_sth.doctype.masa_shu.test_masa_shu
 ```
 
 Doctype-nya juga belum pernah dimigrasikan. `bench migrate` dulu.
@@ -134,9 +134,9 @@ karena doctype-nya belum ada — **hapus penjagaan itu setelah Master Harga SHU 
 ### Selesai — `Perhitungan KUD`
 
 ```
-sth/plantation/doctype/perhitungan_kud/{json,py,js,test_}
-sth/plantation/doctype/perhitungan_kud_detail/
-sth/plantation/doctype/perhitungan_kud_unit/
+sth/accounting_sth/doctype/perhitungan_kud/{json,py,js,test_}
+sth/accounting_sth/doctype/perhitungan_kud_detail/
+sth/accounting_sth/doctype/perhitungan_kud_unit/
 ```
 
 **Submittable** — ini dokumen uang yang dicetak dan ditandatangani.
