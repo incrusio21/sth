@@ -58,10 +58,12 @@
    "label": "Tahun Tanam"
   },
   {
+   "description": "Terisi otomatis dari tahun tanam yang tercatat di tiket timbangan tahun ini. Tidak perlu diketik manual.",
    "fieldname": "tahun_tanam",
    "fieldtype": "Table",
    "label": "Tahun Tanam",
-   "options": "Master Harga SHU Tahun Tanam"
+   "options": "Master Harga SHU Tahun Tanam",
+   "read_only": 1
   },
   {
    "fieldname": "matriks_section",

@@ -11,3 +11,4 @@ sth.patches.create_asset_scrap_request_workflow
 sth.patches.tambah_jalur_approval_realisasi_tambahan
 sth.patches.gl_bkm_perawatan_tanpa_material
 sth.patches.asset_scrap_approval_per_unit
+sth.patches.bulan_romawi_master_harga_shu

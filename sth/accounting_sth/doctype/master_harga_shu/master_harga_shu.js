@@ -3,6 +3,14 @@
 
 frappe.provide("sth.shu");
 
+// Bulan di matriks ditulis dengan angka romawi, sejajar dengan BULAN_ROMAWI
+// di master_harga_shu.py
+const BULAN_ROMAWI = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+
+function bulan_romawi(bulan_no) {
+	return BULAN_ROMAWI[cint(bulan_no)] || bulan_no;
+}
+
 frappe.ui.form.on("Master Harga SHU", {
 	refresh(frm) {
 		frm.trigger("muat_matriks");
@@ -30,32 +38,47 @@ frappe.ui.form.on("Master Harga SHU", {
 			method: "sth.accounting_sth.doctype.master_harga_shu.master_harga_shu.get_masa_setahun",
 			args: { company: frm.doc.company, tahun: frm.doc.tahun },
 			callback(r) {
-				frm.matriks = new sth.shu.MatriksHarga(wrapper, frm, r.message || []);
+				const masa = r.message || [];
+
+				frappe.call({
+					method:
+						"sth.accounting_sth.doctype.master_harga_shu.master_harga_shu.get_tahun_tanam_per_bulan",
+					args: { company: frm.doc.company, tahun: frm.doc.tahun },
+					callback(r2) {
+						frm.matriks = new sth.shu.MatriksHarga(wrapper, frm, masa, r2.message || {});
+					},
+				});
 			},
 		});
 	},
 });
 
-frappe.ui.form.on("Master Harga SHU Tahun Tanam", {
-	tahun_tanam(frm) {
-		frm.trigger("muat_matriks");
-	},
-	tahun_tanam_remove(frm) {
-		frm.trigger("muat_matriks");
-	},
-});
-
 sth.shu.MatriksHarga = class MatriksHarga {
-	constructor(wrapper, frm, masa) {
+	constructor(wrapper, frm, masa, tt_per_bulan) {
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.masa = masa;
+		this.tt_per_bulan = tt_per_bulan || {};
 		this.render();
 	}
 
 	tahun_tanam() {
 		return (this.frm.doc.tahun_tanam || [])
 			.map((r) => cint(r.tahun_tanam))
+			.filter(Boolean)
+			.sort((a, b) => b - a);
+	}
+
+	// Kolom sebuah bulan: tahun tanam yang benar-benar ada buahnya di bulan itu,
+	// ditambah yang sudah terlanjur punya harga supaya angka lama tidak hilang
+	// dari layar begitu tiketnya berubah.
+	tahun_tanam_bulan(bulan_no) {
+		const dari_timbangan = (this.tt_per_bulan[bulan_no] || []).map(cint);
+		const berharga = (this.frm.doc.harga || [])
+			.filter((r) => cint(r.bulan_no) === cint(bulan_no))
+			.map((r) => cint(r.tahun_tanam));
+
+		return Array.from(new Set([...dari_timbangan, ...berharga]))
 			.filter(Boolean)
 			.sort((a, b) => b - a);
 	}
@@ -104,8 +127,6 @@ sth.shu.MatriksHarga = class MatriksHarga {
 	}
 
 	render() {
-		const tts = this.tahun_tanam();
-
 		if (!this.masa.length) {
 			this.wrapper.html(
 				`<p class="text-muted">${__("Belum ada Masa SHU yang disubmit untuk tahun ini.")}</p>`
@@ -113,26 +134,25 @@ sth.shu.MatriksHarga = class MatriksHarga {
 			return;
 		}
 
-		if (!tts.length) {
-			this.wrapper.html(`<p class="text-muted">${__("Tambahkan tahun tanam dulu.")}</p>`);
+		if (!this.tahun_tanam().length) {
+			this.wrapper.html(
+				`<p class="text-muted">${__("Belum ada tahun tanam di tiket timbangan tahun ini.")}</p>`
+			);
 			return;
 		}
 
 		const terkunci = this.bulan_terkunci();
 		const per_bulan = {};
 		this.masa.forEach((m) => {
-			(per_bulan[m.bulan_no] = per_bulan[m.bulan_no] || { bulan: m.bulan, baris: [] }).baris.push(m);
+			(per_bulan[m.bulan_no] = per_bulan[m.bulan_no] || {
+				bulan: bulan_romawi(m.bulan_no),
+				baris: [],
+			}).baris.push(m);
 		});
 
-		let html = `<div class="shu-matriks" style="overflow-x:auto">
-			<table class="table table-bordered" style="table-layout:fixed;margin-bottom:0">
-			<thead><tr><th style="width:190px">${__("Masa")}</th>`;
-
-		tts.forEach((tt) => {
-			html += `<th style="width:120px;text-align:center">${tt}
-				<div class="text-muted small">${cint(this.frm.doc.tahun) - tt}TH</div></th>`;
-		});
-		html += "</tr></thead><tbody>";
+		// Tiap bulan dapat tabelnya sendiri karena kolom tahun tanamnya
+		// mengikuti buah yang masuk di bulan itu, jadi bisa berbeda antar bulan.
+		let html = `<div class="shu-matriks">`;
 
 		Object.keys(per_bulan)
 			.map(cint)
@@ -140,15 +160,33 @@ sth.shu.MatriksHarga = class MatriksHarga {
 			.forEach((bulan_no) => {
 				const bl = per_bulan[bulan_no];
 				const kunci = terkunci.has(bulan_no);
+				const tts = this.tahun_tanam_bulan(bulan_no);
 
-				html += `<tr class="shu-bulan"><td colspan="${tts.length + 1}"
-					style="background:var(--control-bg);font-weight:500">
-					${bl.bulan}
-					<span class="text-muted small" style="margin-left:8px">${bl.baris.length} ${__("masa")}</span>
-					${kunci ? `<span class="indicator-pill green" style="margin-left:8px">${__("Ditetapkan")}</span>` : ""}
-					<button class="btn btn-xs btn-default shu-toggle" data-bulan="${bulan_no}"
-						style="float:right">${kunci ? __("Buka") : __("Tetapkan")}</button>
-				</td></tr>`;
+				html += `<div style="margin-bottom:14px">
+					<div style="background:var(--control-bg);font-weight:500;padding:6px 8px;border:1px solid var(--border-color);border-bottom:0">
+						${bl.bulan}
+						<span class="text-muted small" style="margin-left:8px">${bl.baris.length} ${__("masa")}</span>
+						${kunci ? `<span class="indicator-pill green" style="margin-left:8px">${__("Ditetapkan")}</span>` : ""}
+						<button class="btn btn-xs btn-default shu-toggle" data-bulan="${bulan_no}"
+							style="float:right">${kunci ? __("Buka") : __("Tetapkan")}</button>
+					</div>`;
+
+				if (!tts.length) {
+					html += `<div class="text-muted small"
+						style="padding:8px;border:1px solid var(--border-color)">
+						${__("Tidak ada buah masuk di bulan ini.")}</div></div>`;
+					return;
+				}
+
+				html += `<div style="overflow-x:auto">
+					<table class="table table-bordered" style="table-layout:fixed;margin-bottom:0">
+					<thead><tr><th style="width:190px">${__("Masa")}</th>`;
+
+				tts.forEach((tt) => {
+					html += `<th style="width:120px;text-align:center">${tt}
+						<div class="text-muted small">${cint(this.frm.doc.tahun) - tt}TH</div></th>`;
+				});
+				html += "</tr></thead><tbody>";
 
 				bl.baris.forEach((m) => {
 					html += `<tr><td><b>${__("Masa")} ${m.masa_no}</b>
@@ -161,14 +199,17 @@ sth.shu.MatriksHarga = class MatriksHarga {
 						html += `<td style="padding:0${ada ? "" : ";background:var(--bg-yellow)"}">
 							<input class="shu-sel form-control" style="border:0;text-align:right;background:transparent"
 								data-bulan="${bulan_no}" data-masa="${m.masa_no}" data-tt="${tt}"
+								data-kolom="${tts.length}"
 								${kunci ? "readonly" : ""}
 								value="${ada ? format_number(v, null, 2) : ""}"></td>`;
 					});
 					html += "</tr>";
 				});
+
+				html += "</tbody></table></div></div>";
 			});
 
-		html += "</tbody></table></div>";
+		html += "</div>";
 		this.wrapper.html(html);
 		this.pasang();
 	}
@@ -176,7 +217,6 @@ sth.shu.MatriksHarga = class MatriksHarga {
 	pasang() {
 		const me = this;
 		const sel = this.wrapper.find(".shu-sel");
-		const kolom = this.tahun_tanam().length;
 
 		this.wrapper.find(".shu-toggle").on("click", function () {
 			me.ganti_penetapan(cint($(this).data("bulan")));
@@ -201,6 +241,10 @@ sth.shu.MatriksHarga = class MatriksHarga {
 				$el.val(angka === undefined ? "" : format_number(angka, null, 2));
 				$el.closest("td").css("background", angka === undefined ? "var(--bg-yellow)" : "");
 			});
+
+			// jumlah kolom berbeda antar bulan, jadi lompatan atas-bawah
+			// mengikuti lebar tabel bulan tempat sel ini berada
+			const kolom = cint($el.data("kolom")) || 1;
 
 			$el.on("keydown", function (e) {
 				let j = null;

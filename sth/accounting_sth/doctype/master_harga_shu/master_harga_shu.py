@@ -4,14 +4,74 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate, now_datetime
-
-from sth.plantation.doctype.blok.blok import BULAN_MAP
+from frappe.utils import cint, cstr, flt, getdate, now_datetime
 
 STATUS_DRAFT = "Draft"
 STATUS_DITETAPKAN = "Ditetapkan"
 
-NAMA_BULAN = {no: nama for nama, no in BULAN_MAP.items()}
+# Di Master Harga SHU bulan ditulis dengan angka romawi: Januari jadi I.
+# Masa SHU tetap memakai nama bulan.
+BULAN_ROMAWI = {
+	1: "I",
+	2: "II",
+	3: "III",
+	4: "IV",
+	5: "V",
+	6: "VI",
+	7: "VII",
+	8: "VIII",
+	9: "IX",
+	10: "X",
+	11: "XI",
+	12: "XII",
+}
+
+
+def nama_bulan(bulan_no):
+	"""Label bulan yang dipakai Master Harga SHU."""
+	return BULAN_ROMAWI.get(cint(bulan_no), bulan_no)
+
+
+def normalisasi_tahun_tanam(nilai):
+	"""Tahun tanam ditulis sebagai Data, jadi "2010" dan "2010 " bisa hidup berdampingan.
+
+	Tanpa normalisasi keduanya jadi dua kelompok berbeda saat dijumlahkan, dan
+	yang tidak cocok dengan Master Harga SHU mengembalikan harga 0 tanpa suara.
+	"""
+	return cint(cstr(nilai).strip())
+
+
+def tahun_tanam_per_bulan(company, tahun):
+	"""{bulan_no: [tahun tanam, ...]} dari tiket timbangan sepanjang tahun itu.
+
+	Tahun tanam tidak diketik ulang di sini, yang dipakai adalah yang sudah
+	tercatat di tiket timbangan. Unitnya dibaca dari baris tiket karena unit di
+	kepala tiket berisi PKS penerimanya.
+	"""
+	rows = frappe.db.sql(
+		"""
+		SELECT MONTH(t.posting_date) AS bulan_no, d.tahun_tanam
+		FROM `tabTimbangan SPB Detail` d
+		INNER JOIN `tabTimbangan` t ON d.parent = t.name
+		INNER JOIN `tabUnit` u ON d.unit = u.name
+		WHERE t.docstatus = 1
+		  AND t.company = %(company)s
+		  AND u.plasma = 1
+		  AND YEAR(t.posting_date) = %(tahun)s
+		""",
+		{"company": company, "tahun": cint(tahun)},
+		as_dict=True,
+	)
+
+	per_bulan = {}
+	for row in rows:
+		tt = normalisasi_tahun_tanam(row.tahun_tanam)
+		if not tt:
+			continue
+
+		per_bulan.setdefault(cint(row.bulan_no), set()).add(tt)
+
+	return {bulan: sorted(tts, reverse=True) for bulan, tts in sorted(per_bulan.items())}
 
 
 def check_tahun_tanam(rows, tahun):
@@ -51,7 +111,7 @@ def check_harga_rows(rows):
 		if flt(row.get("harga")) < 0:
 			errors.append(
 				_("Bulan {0} Masa {1} tahun tanam {2}: harga tidak boleh negatif.").format(
-					NAMA_BULAN.get(bulan_no, bulan_no), masa_no, tt
+					nama_bulan(bulan_no), masa_no, tt
 				)
 			)
 
@@ -59,7 +119,7 @@ def check_harga_rows(rows):
 		if kunci in sudah:
 			errors.append(
 				_("Bulan {0} Masa {1} tahun tanam {2}: barisnya ganda.").format(
-					NAMA_BULAN.get(bulan_no, bulan_no), masa_no, tt
+					nama_bulan(bulan_no), masa_no, tt
 				)
 			)
 		sudah.add(kunci)
@@ -91,18 +151,18 @@ def check_baris_terkunci(rows_lama, rows_baru, bulan_terkunci):
 
 	for kunci, harga_lama in lama.items():
 		bulan_no, masa_no, tt = kunci
-		nama_bulan = NAMA_BULAN.get(bulan_no, bulan_no)
+		label_bulan = nama_bulan(bulan_no)
 
 		if kunci not in baru:
 			errors.append(
 				_("{0} sudah ditetapkan: harga Masa {1} tahun tanam {2} tidak boleh dihapus.").format(
-					nama_bulan, masa_no, tt
+					label_bulan, masa_no, tt
 				)
 			)
 		elif baru[kunci] != harga_lama:
 			errors.append(
 				_("{0} sudah ditetapkan: harga Masa {1} tahun tanam {2} tidak boleh diubah ({3} menjadi {4}).").format(
-					nama_bulan, masa_no, tt, harga_lama, baru[kunci]
+					label_bulan, masa_no, tt, harga_lama, baru[kunci]
 				)
 			)
 
@@ -111,7 +171,7 @@ def check_baris_terkunci(rows_lama, rows_baru, bulan_terkunci):
 			bulan_no, masa_no, tt = kunci
 			errors.append(
 				_("{0} sudah ditetapkan: tidak boleh menambah harga Masa {1} tahun tanam {2}.").format(
-					NAMA_BULAN.get(bulan_no, bulan_no), masa_no, tt
+					nama_bulan(bulan_no), masa_no, tt
 				)
 			)
 
@@ -146,12 +206,48 @@ class MasterHargaSHU(Document):
 		self.name = f"MHS-{abbr}-{cint(self.tahun):04d}"
 
 	def validate(self):
+		self.set_label_bulan()
+		self.sinkron_tahun_tanam()
 		self.set_umur_tahun_tanam()
 		self.validate_tahun_tanam()
+
+	def set_label_bulan(self):
+		"""Baris penetapan dibuat sekali lalu dipakai terus, jadi labelnya ditulis
+		ulang tiap simpan supaya ikut aturan penulisan yang berlaku sekarang."""
+		for row in self.penetapan:
+			row.bulan = nama_bulan(row.bulan_no)
 		self.validate_harga()
 		self.sinkron_dan_validasi_masa()
 		self.validate_baris_terkunci()
 		self.set_ringkasan()
+
+	def sinkron_tahun_tanam(self):
+		"""Isi tabel tahun tanam dari tiket timbangan, bukan dari ketikan tangan."""
+		if not self.company or not self.tahun:
+			return
+
+		per_bulan = tahun_tanam_per_bulan(self.company, self.tahun)
+		dari_timbangan = {tt for daftar in per_bulan.values() for tt in daftar}
+
+		# tahun tanam yang sudah terlanjur punya harga tetap dipertahankan, kalau
+		# tidak barisnya lenyap begitu tiketnya dibatalkan dan harganya ikut hilang
+		sudah_berharga = {cint(row.tahun_tanam) for row in self.harga if cint(row.tahun_tanam)}
+
+		semua = dari_timbangan | sudah_berharga
+		kelewat_tahun = sorted(tt for tt in semua if tt > cint(self.tahun))
+
+		self.set("tahun_tanam", [])
+		for tt in sorted(semua - set(kelewat_tahun), reverse=True):
+			self.append("tahun_tanam", {"tahun_tanam": tt})
+
+		if kelewat_tahun:
+			frappe.msgprint(
+				_("Tahun tanam {0} di tiket timbangan melebihi tahun dokumen ({1}) dan tidak ikut dipakai. Perbaiki tahun tanamnya di tiket.").format(
+					", ".join(str(tt) for tt in kelewat_tahun), cint(self.tahun)
+				),
+				title=_("Tahun Tanam Tidak Wajar"),
+				indicator="orange",
+			)
 
 	def set_umur_tahun_tanam(self):
 		for row in self.tahun_tanam:
@@ -194,7 +290,7 @@ class MasterHargaSHU(Document):
 
 		if hilang:
 			daftar = ", ".join(
-				_("{0} Masa {1}").format(NAMA_BULAN.get(b, b), m) for b, m in sorted(set(hilang))
+				_("{0} Masa {1}").format(nama_bulan(b), m) for b, m in sorted(set(hilang))
 			)
 			frappe.throw(
 				_("Masa berikut tidak ada di Masa SHU yang sudah disubmit: {0}").format(daftar),
@@ -239,7 +335,7 @@ class MasterHargaSHU(Document):
 			"penetapan",
 			{
 				"bulan_no": cint(bulan_no),
-				"bulan": NAMA_BULAN.get(cint(bulan_no), ""),
+				"bulan": nama_bulan(bulan_no),
 				"status": STATUS_DRAFT,
 			},
 		)
@@ -252,13 +348,19 @@ def get_masa_setahun(company, tahun):
 
 
 @frappe.whitelist()
+def get_tahun_tanam_per_bulan(company, tahun):
+	"""Kolom matriks per bulan. Dipanggil kontrol matriks di sisi klien."""
+	return tahun_tanam_per_bulan(company, tahun)
+
+
+@frappe.whitelist()
 def tetapkan_bulan(nama, bulan_no):
 	"""Kunci satu bulan. Sel kosong dibiarkan — penetapan sebagian itu normal."""
 	doc = frappe.get_doc("Master Harga SHU", nama)
 	baris = doc.baris_penetapan(bulan_no, buat_kalau_belum_ada=True)
 
 	if baris.status == STATUS_DITETAPKAN:
-		frappe.throw(_("{0} sudah ditetapkan.").format(NAMA_BULAN.get(cint(bulan_no), bulan_no)))
+		frappe.throw(_("{0} sudah ditetapkan.").format(nama_bulan(bulan_no)))
 
 	baris.status = STATUS_DITETAPKAN
 	baris.ditetapkan_oleh = frappe.session.user
@@ -266,7 +368,7 @@ def tetapkan_bulan(nama, bulan_no):
 	baris.catatan = None
 
 	doc.save()
-	return {"bulan": NAMA_BULAN.get(cint(bulan_no), bulan_no)}
+	return {"bulan": nama_bulan(bulan_no)}
 
 
 @frappe.whitelist()
@@ -276,7 +378,7 @@ def buka_bulan(nama, bulan_no, alasan=None):
 	baris = doc.baris_penetapan(bulan_no)
 
 	if not baris or baris.status != STATUS_DITETAPKAN:
-		frappe.throw(_("{0} belum ditetapkan.").format(NAMA_BULAN.get(cint(bulan_no), bulan_no)))
+		frappe.throw(_("{0} belum ditetapkan.").format(nama_bulan(bulan_no)))
 
 	baris.status = STATUS_DRAFT
 	baris.catatan = _("Dibuka kembali oleh {0} pada {1}. Alasan: {2}").format(
@@ -284,7 +386,7 @@ def buka_bulan(nama, bulan_no, alasan=None):
 	)
 
 	doc.save()
-	return {"bulan": NAMA_BULAN.get(cint(bulan_no), bulan_no)}
+	return {"bulan": nama_bulan(bulan_no)}
 
 
 @frappe.whitelist()
