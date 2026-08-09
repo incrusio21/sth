@@ -29,6 +29,33 @@ def get_nilai_disposal_asset(asset, akun_lawan):
 	return flt(nilai)
 
 
+def get_nilai_sales_invoice(sales_invoice):
+	"""DPP, PPN, dan grand total dari Sales Invoice penjualan asset."""
+	si = frappe.db.get_value(
+		"Sales Invoice",
+		sales_invoice,
+		["net_total", "total_taxes_and_charges", "grand_total"],
+		as_dict=True
+	)
+
+	if not si:
+		return {"dpp": 0, "ppn": 0, "nilai": 0}
+
+	return {
+		"dpp": flt(si.net_total),
+		"ppn": flt(si.total_taxes_and_charges),
+		"nilai": flt(si.grand_total),
+	}
+
+
+@frappe.whitelist()
+def get_nilai_jual_asset(sales_invoice):
+	if not sales_invoice:
+		return {"dpp": 0, "ppn": 0, "nilai": 0}
+
+	return get_nilai_sales_invoice(sales_invoice)
+
+
 @frappe.whitelist()
 def get_nilai_x_asset(asset, company):
 	if not asset or not company:
@@ -89,10 +116,61 @@ class NotaPiutang(Document):
 					f"Asset <b>{self.asset}</b> harus berstatus <b>Scrapped</b>, "
 					f"saat ini berstatus <b>{asset_status}</b>"
 				)
+		elif self.sub_tipe_others == "Jual Asset":
+			self.validate_jual_asset()
 		elif self.sub_tipe_others == "Barang Non Stok":
 			self.calculate_barang_non_stok_table()
 		else:
 			frappe.throw("Sub Tipe Others tidak valid")
+
+	def validate_jual_asset(self):
+		if not self.sales_invoice:
+			frappe.throw("Sales Invoice wajib diisi untuk Sub Tipe <b>Jual Asset</b>")
+
+		si = frappe.db.get_value(
+			"Sales Invoice",
+			self.sales_invoice,
+			["company", "docstatus", "jenis_penagihan"],
+			as_dict=True
+		)
+
+		if si.docstatus != 1:
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> harus sudah disubmit"
+			)
+
+		if si.jenis_penagihan != "Disposal":
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> bukan penjualan asset. "
+				f"Jenis Penagihannya <b>{si.jenis_penagihan or '-'}</b>, yang dibutuhkan <b>Disposal</b>."
+			)
+
+		if self.company and si.company != self.company:
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> milik Company <b>{si.company}</b>, "
+				f"tidak sama dengan Company nota ini"
+			)
+
+		dipakai = frappe.db.exists(
+			"Nota Piutang",
+			{
+				"sales_invoice": self.sales_invoice,
+				"name": ("!=", self.name),
+				"docstatus": ("!=", 2),
+			}
+		)
+
+		if dipakai:
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> sudah dipakai Nota Piutang <b>{dipakai}</b>",
+				title="Duplikat Tidak Diizinkan"
+			)
+
+		# diambil ulang di server supaya nilainya tidak bisa dikarang dari sisi client
+		nilai = get_nilai_sales_invoice(self.sales_invoice)
+		self.dpp_jual_asset  = nilai["dpp"]
+		self.ppn_jual_asset  = nilai["ppn"]
+		self.nilai_jual_asset = nilai["nilai"]
 
 	def calculate_barang_non_stok_table(self):
 		if not self.get("barang_non_stok_table"):
@@ -168,6 +246,11 @@ class NotaPiutang(Document):
 		return account
 
 	def create_others_journal_entry(self):
+		if self.sub_tipe_others == "Jual Asset":
+			# piutang, akun disposal, dan PPN keluarannya sudah diposting Sales
+			# Invoice-nya sendiri. Jurnal tambahan untuk sub tipe ini menyusul.
+			return
+
 		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		akun_piutang_lain = self.get_account_by_number(AKUN_PIUTANG_LAIN_NUMBER)
 
@@ -227,6 +310,10 @@ class NotaPiutang(Document):
 		)
 
 	def cancel_others_journal_entry(self):
+		if self.sub_tipe_others == "Jual Asset":
+			# tidak pernah membuat jurnal, jadi tidak ada yang perlu dibatalkan
+			return
+
 		je_name = frappe.db.get_value(
 			"Journal Entry",
 			{"nota_piutang": self.name, "docstatus": 1},

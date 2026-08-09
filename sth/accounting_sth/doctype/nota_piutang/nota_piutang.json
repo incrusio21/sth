@@ -15,6 +15,10 @@
   "sub_tipe_others",
   "asset",
   "nilai_x_asset",
+  "sales_invoice",
+  "dpp_jual_asset",
+  "ppn_jual_asset",
+  "nilai_jual_asset",
   "nilai_barang_non_stok",
   "payment_entry",
   "dibuat_dari_payment_voucher",
@@ -120,7 +124,7 @@
    "fieldname": "sub_tipe_others",
    "fieldtype": "Select",
    "label": "Sub Tipe",
-   "options": "Asset\nBarang Non Stok"
+   "options": "Asset\nJual Asset\nBarang Non Stok"
   },
   {
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Asset\"",
@@ -135,6 +139,42 @@
    "fieldname": "nilai_x_asset",
    "fieldtype": "Currency",
    "label": "Nilai (Akun 9190201)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Jual Asset\"",
+   "description": "Sales Invoice penjualan asset (Jenis Penagihan Disposal) yang sudah disubmit. Nilainya, termasuk PPN keluaran, ditarik dari invoice ini.",
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Penjualan Asset",
+   "options": "Sales Invoice"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Jual Asset\"",
+   "fieldname": "dpp_jual_asset",
+   "fieldtype": "Currency",
+   "label": "DPP Penjualan Asset",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Jual Asset\"",
+   "description": "Total pajak Sales Invoice tersebut",
+   "fieldname": "ppn_jual_asset",
+   "fieldtype": "Currency",
+   "label": "PPN Keluaran",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Jual Asset\"",
+   "fieldname": "nilai_jual_asset",
+   "fieldtype": "Currency",
+   "label": "Nilai Penjualan Asset",
    "no_copy": 1,
    "read_only": 1
   },
