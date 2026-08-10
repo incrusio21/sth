@@ -24,8 +24,10 @@ def execute():
 	nilai dari dua tipe lain tersimpan sebagai link yang menggantung.
 	"""
 	buat_field_tipe_asset()
-	ubah_jadi_dynamic_link()
+	# Backfill duluan: tipenya ditebak dari isi kolom asset, jadi dibaca selagi
+	# field aslinya masih utuh, sebelum dibuat ulang di langkah berikutnya.
 	backfill_tipe_asset()
+	ubah_jadi_dynamic_link()
 
 
 def buat_field_tipe_asset():
@@ -65,8 +67,19 @@ def ubah_jadi_dynamic_link():
 	if doc.fieldtype == "Dynamic Link" and doc.options == FIELD_TIPE:
 		return
 
-	doc.fieldtype = "Dynamic Link"
-	doc.options = FIELD_TIPE
+	# Link -> Dynamic Link tidak ada di ALLOWED_FIELDTYPE_CHANGE, jadi save()
+	# selalu ditolak validate. Satu-satunya jalan adalah membuang Custom Field-nya
+	# lalu memasang ulang. Menghapus Custom Field tidak ikut men-drop kolom di
+	# tabel, dan Link maupun Dynamic Link sama-sama varchar(140), jadi isi kolom
+	# custom_alat_berat_dan_kendaraan tetap utuh.
+	props = doc.as_dict(no_default_fields=True)
+	props.update({
+		"doctype": "Custom Field",
+		"dt": DOCTYPE,
+		"fieldname": FIELD_ASSET,
+		"fieldtype": "Dynamic Link",
+		"options": FIELD_TIPE,
+	})
 
 	# Kalau field tipe sudah ada dari sebelumnya dan justru bersandar pada field
 	# ini, jangan dibalik — insert_after yang saling menunjuk bikin form gagal
@@ -75,9 +88,10 @@ def ubah_jadi_dynamic_link():
 		"Custom Field", {"dt": DOCTYPE, "fieldname": FIELD_TIPE}, "insert_after"
 	)
 	if tipe_insert_after != FIELD_ASSET:
-		doc.insert_after = FIELD_TIPE
+		props["insert_after"] = FIELD_TIPE
 
-	doc.save(ignore_permissions=True)
+	frappe.delete_doc("Custom Field", name, ignore_permissions=True, force=True)
+	frappe.get_doc(props).insert(ignore_permissions=True)
 
 
 def backfill_tipe_asset():
