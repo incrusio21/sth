@@ -8,11 +8,12 @@
  "field_order": [
   "bulan_no",
   "masa_no",
-  "tahun_tanam",
+  "kelompok_umur",
+  "umur_min",
+  "umur_max",
   "harga",
   "tanggal_mulai",
-  "tanggal_selesai",
-  "masa_shu"
+  "tanggal_selesai"
  ],
  "fields": [
   {
@@ -33,11 +34,27 @@
   },
   {
    "columns": 2,
-   "fieldname": "tahun_tanam",
-   "fieldtype": "Int",
+   "fieldname": "kelompok_umur",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Tahun Tanam",
+   "label": "Kelompok Umur",
    "read_only": 1
+  },
+  {
+   "description": "Umur terkecil yang masuk kelompok ini.",
+   "fieldname": "umur_min",
+   "fieldtype": "Int",
+   "label": "Umur Min",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Umur terbesar yang masuk kelompok ini. Kelompok terakhir menampung yang lebih tua.",
+   "fieldname": "umur_max",
+   "fieldtype": "Int",
+   "label": "Umur Max",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "columns": 2,
@@ -47,7 +64,7 @@
    "label": "Harga per Kg"
   },
   {
-   "description": "Disalin dari Masa SHU tiap kali disimpan.",
+   "description": "Disalin dari tabel Masa tiap kali disimpan.",
    "fieldname": "tanggal_mulai",
    "fieldtype": "Date",
    "label": "Tanggal Mulai",
@@ -60,20 +77,13 @@
    "label": "Tanggal Selesai",
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "masa_shu",
-   "fieldtype": "Link",
-   "label": "Masa SHU",
-   "options": "Masa SHU",
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-06 14:50:39.100455",
+ "modified": "2026-08-11 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Master Harga SHU Detail",

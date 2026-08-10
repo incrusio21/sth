@@ -92,7 +92,7 @@ def kelompokkan_netto(baris_timbangan, masa_rows):
 
 	Balikan: (hasil, terlewat). `hasil` urut menurut masa lalu tahun tanam.
 	`terlewat` berisi baris yang tanggalnya tidak masuk masa manapun — seharusnya
-	kosong, karena Masa SHU wajib menutup satu bulan penuh.
+	kosong, karena pembagian masa wajib menutup satu bulan penuh.
 	"""
 	ember = {}
 	terlewat = []
@@ -107,7 +107,7 @@ def kelompokkan_netto(baris_timbangan, masa_rows):
 			kunci = (cint(masa["masa_no"]), tahun_tanam)
 			if kunci not in ember:
 				ember[kunci] = {
-					"masa_shu": masa.get("masa_shu"),
+					"master_harga_shu": masa.get("master_harga_shu"),
 					"masa_no": cint(masa["masa_no"]),
 					"tanggal_mulai": masa["tanggal_mulai"],
 					"tanggal_selesai": masa["tanggal_selesai"],
@@ -224,7 +224,7 @@ class PerhitunganKUD(Document):
 		self.validate_semua_baris_berharga()
 
 	def masa_bulan_ini(self):
-		"""Masa bulan ini dari Masa SHU. Rentang tanggal tidak pernah dihitung sendiri."""
+		"""Masa bulan ini dari Master Harga SHU. Rentang tanggal tidak pernah dihitung sendiri."""
 		bulan_no = BULAN_MAP.get(self.bulan)
 		return [m for m in masa_setahun(self.company, self.tahun) if cint(m.bulan_no) == cint(bulan_no)]
 
@@ -237,10 +237,11 @@ class PerhitunganKUD(Document):
 		if not masa_rows:
 			frappe.throw(
 				_(
-					"Masa SHU {0} {1} untuk {2} belum ada atau belum disubmit. "
-					"Buat dan submit dulu di sana — rentang tanggal perhitungan ini diambil dari situ."
+					"Pembagian masa {0} {1} untuk {2} belum ada. "
+					"Isi dulu tabel Masa di Master Harga SHU tahun itu — rentang tanggal "
+					"perhitungan ini diambil dari situ."
 				).format(self.bulan, self.tahun, self.company),
-				title=_("Masa SHU Belum Ada"),
+				title=_("Masa Belum Ada"),
 			)
 
 		self.tanggal_mulai = min(getdate(m.tanggal_mulai) for m in masa_rows)

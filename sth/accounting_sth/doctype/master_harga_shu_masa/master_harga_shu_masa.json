@@ -1,17 +1,35 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-07-30 01:34:38.187153",
+ "creation": "2026-08-11 09:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "bulan",
+  "bulan_no",
   "masa_no",
   "tanggal_mulai",
   "tanggal_selesai",
   "jumlah_hari"
  ],
  "fields": [
+  {
+   "columns": 2,
+   "fieldname": "bulan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Bulan",
+   "options": "\nJanuari\nFebruari\nMaret\nApril\nMei\nJuni\nJuli\nAgustus\nSeptember\nOktober\nNovember\nDesember",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bulan_no",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Bulan No",
+   "read_only": 1
+  },
   {
    "columns": 1,
    "fieldname": "masa_no",
@@ -49,10 +67,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-06 14:51:06.886059",
+ "modified": "2026-08-11 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
- "name": "Masa SHU Detail",
+ "name": "Master Harga SHU Masa",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

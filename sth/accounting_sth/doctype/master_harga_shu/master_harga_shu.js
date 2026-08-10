@@ -3,17 +3,64 @@
 
 frappe.provide("sth.shu");
 
-// Bulan di matriks ditulis dengan angka romawi, sejajar dengan BULAN_ROMAWI
-// di master_harga_shu.py
-const BULAN_ROMAWI = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+const SHU_API = "sth.accounting_sth.doctype.master_harga_shu.master_harga_shu";
 
-function bulan_romawi(bulan_no) {
-	return BULAN_ROMAWI[cint(bulan_no)] || bulan_no;
+// Sejajar dengan BULAN_MAP di blok.py — indeks 1 sampai 12.
+const BULAN = [
+	"",
+	"Januari",
+	"Februari",
+	"Maret",
+	"April",
+	"Mei",
+	"Juni",
+	"Juli",
+	"Agustus",
+	"September",
+	"Oktober",
+	"November",
+	"Desember",
+];
+
+function nama_bulan(bulan_no) {
+	return BULAN[cint(bulan_no)] || bulan_no;
+}
+
+function nomor_bulan(bulan) {
+	const i = BULAN.indexOf(bulan);
+	return i > 0 ? i : 0;
+}
+
+// Cerminan set_periode_masa() di sisi server: nomor masa diambil dari urutan
+// baris dalam satu bulan. Dihitung ulang di sini supaya matriks tetap benar
+// sebelum dokumennya disimpan.
+function masa_dari_doc(frm) {
+	const urutan = {};
+
+	return (frm.doc.masa || [])
+		.map((row) => {
+			const bulan_no = nomor_bulan(row.bulan);
+			if (!bulan_no) return null;
+
+			urutan[bulan_no] = (urutan[bulan_no] || 0) + 1;
+
+			return {
+				bulan_no: bulan_no,
+				bulan: row.bulan,
+				masa_no: urutan[bulan_no],
+				tanggal_mulai: row.tanggal_mulai,
+				tanggal_selesai: row.tanggal_selesai,
+			};
+		})
+		.filter(Boolean)
+		.sort((a, b) => a.bulan_no - b.bulan_no || a.masa_no - b.masa_no);
 }
 
 frappe.ui.form.on("Master Harga SHU", {
 	refresh(frm) {
 		frm.trigger("muat_matriks");
+
+		frm.add_custom_button(__("Bagi Rata Jadi N Masa"), () => bagi_rata(frm));
 	},
 
 	company(frm) {
@@ -35,52 +82,113 @@ frappe.ui.form.on("Master Harga SHU", {
 		}
 
 		frappe.call({
-			method: "sth.accounting_sth.doctype.master_harga_shu.master_harga_shu.get_masa_setahun",
-			args: { company: frm.doc.company, tahun: frm.doc.tahun },
+			method: SHU_API + ".get_kelompok_umur",
 			callback(r) {
-				const masa = r.message || [];
-
-				frappe.call({
-					method:
-						"sth.accounting_sth.doctype.master_harga_shu.master_harga_shu.get_tahun_tanam_per_bulan",
-					args: { company: frm.doc.company, tahun: frm.doc.tahun },
-					callback(r2) {
-						frm.matriks = new sth.shu.MatriksHarga(wrapper, frm, masa, r2.message || {});
-					},
-				});
+				frm.matriks = new sth.shu.MatriksHarga(wrapper, frm, masa_dari_doc(frm), r.message || []);
 			},
 		});
 	},
 });
 
+// Matriks membaca tabel Masa di dokumen ini, jadi tiap perubahan pembagian masa
+// harus langsung tercermin di sana.
+frappe.ui.form.on("Master Harga SHU Masa", {
+	masa_add: (frm) => frm.trigger("muat_matriks"),
+	masa_remove: (frm) => frm.trigger("muat_matriks"),
+	masa_move: (frm) => frm.trigger("muat_matriks"),
+	bulan: (frm) => frm.trigger("muat_matriks"),
+	tanggal_mulai: (frm) => frm.trigger("muat_matriks"),
+	tanggal_selesai: (frm) => frm.trigger("muat_matriks"),
+});
+
+function bagi_rata(frm) {
+	if (!frm.doc.tahun) {
+		frappe.msgprint(__("Isi Tahun dulu."));
+		return;
+	}
+
+	frappe.prompt(
+		[
+			{
+				fieldname: "bulan",
+				label: __("Bulan"),
+				fieldtype: "Select",
+				options: BULAN.slice(1).join("\n"),
+				reqd: 1,
+			},
+			{
+				fieldname: "jumlah",
+				label: __("Jumlah Masa"),
+				fieldtype: "Int",
+				reqd: 1,
+				default: 4,
+				description: __("Cuma usulan awal — tanggalnya bisa digeser setelah dibuat."),
+			},
+		],
+		(nilai) => {
+			const ada = (frm.doc.masa || []).some((r) => r.bulan === nilai.bulan);
+
+			if (!ada) {
+				isi_masa(frm, nilai.bulan, nilai.jumlah);
+				return;
+			}
+
+			frappe.confirm(
+				__("Pembagian masa {0} yang sekarang akan diganti. Lanjutkan?", [nilai.bulan]),
+				() => isi_masa(frm, nilai.bulan, nilai.jumlah)
+			);
+		},
+		__("Bagi Rata Jadi N Masa"),
+		__("Buat")
+	);
+}
+
+function isi_masa(frm, bulan, jumlah) {
+	frappe.call({
+		method: SHU_API + ".usulan_bagi_rata",
+		args: { tahun: frm.doc.tahun, bulan: bulan, jumlah: jumlah },
+		callback(r) {
+			if (!r.message) return;
+
+			// bulan lain tidak ikut terganggu — pembagiannya berdiri sendiri
+			frm.doc.masa = (frm.doc.masa || []).filter((row) => row.bulan !== bulan);
+			frm.doc.masa.forEach((row, i) => {
+				row.idx = i + 1;
+			});
+
+			r.message.forEach((row) => {
+				const baris = frm.add_child("masa");
+				baris.bulan = bulan;
+				baris.bulan_no = nomor_bulan(bulan);
+				baris.masa_no = row.masa_no;
+				baris.tanggal_mulai = row.tanggal_mulai;
+				baris.tanggal_selesai = row.tanggal_selesai;
+				baris.jumlah_hari = row.jumlah_hari;
+			});
+
+			frm.refresh_field("masa");
+			frm.trigger("muat_matriks");
+
+			frappe.show_alert({
+				message: __("{0} masa dibuat untuk {1}. Geser tanggalnya sesuai keputusan bulan ini.", [
+					jumlah,
+					bulan,
+				]),
+				indicator: "green",
+			});
+		},
+	});
+}
+
 sth.shu.MatriksHarga = class MatriksHarga {
-	constructor(wrapper, frm, masa, tt_per_bulan) {
+	// Kolomnya kelompok umur yang paten, sama untuk semua bulan — daftarnya
+	// datang dari server supaya cuma ada satu sumber.
+	constructor(wrapper, frm, masa, kelompok) {
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.masa = masa;
-		this.tt_per_bulan = tt_per_bulan || {};
+		this.kelompok = kelompok || [];
 		this.render();
-	}
-
-	tahun_tanam() {
-		return (this.frm.doc.tahun_tanam || [])
-			.map((r) => cint(r.tahun_tanam))
-			.filter(Boolean)
-			.sort((a, b) => b - a);
-	}
-
-	// Kolom sebuah bulan: tahun tanam yang benar-benar ada buahnya di bulan itu,
-	// ditambah yang sudah terlanjur punya harga supaya angka lama tidak hilang
-	// dari layar begitu tiketnya berubah.
-	tahun_tanam_bulan(bulan_no) {
-		const dari_timbangan = (this.tt_per_bulan[bulan_no] || []).map(cint);
-		const berharga = (this.frm.doc.harga || [])
-			.filter((r) => cint(r.bulan_no) === cint(bulan_no))
-			.map((r) => cint(r.tahun_tanam));
-
-		return Array.from(new Set([...dari_timbangan, ...berharga]))
-			.filter(Boolean)
-			.sort((a, b) => b - a);
 	}
 
 	bulan_terkunci() {
@@ -93,19 +201,23 @@ sth.shu.MatriksHarga = class MatriksHarga {
 
 	// Sel yang tidak punya baris di child table berarti belum ditetapkan.
 	// Kosong dan nol sengaja dibedakan.
-	nilai(bulan_no, masa_no, tt) {
+	nilai(bulan_no, masa_no, umur) {
 		const baris = (this.frm.doc.harga || []).find(
 			(r) =>
-				cint(r.bulan_no) === bulan_no && cint(r.masa_no) === masa_no && cint(r.tahun_tanam) === tt
+				cint(r.bulan_no) === bulan_no &&
+				cint(r.masa_no) === masa_no &&
+				r.kelompok_umur === umur
 		);
 		return baris ? baris.harga : undefined;
 	}
 
-	tulis(bulan_no, masa_no, tt, nilai) {
+	tulis(bulan_no, masa_no, umur, nilai) {
 		const harga = this.frm.doc.harga || [];
 		const idx = harga.findIndex(
 			(r) =>
-				cint(r.bulan_no) === bulan_no && cint(r.masa_no) === masa_no && cint(r.tahun_tanam) === tt
+				cint(r.bulan_no) === bulan_no &&
+				cint(r.masa_no) === masa_no &&
+				r.kelompok_umur === umur
 		);
 
 		if (nilai === undefined) {
@@ -116,10 +228,13 @@ sth.shu.MatriksHarga = class MatriksHarga {
 		if (idx >= 0) {
 			harga[idx].harga = nilai;
 		} else {
+			const kelompok = this.kelompok.find((k) => k.label === umur) || {};
 			const baru = this.frm.add_child("harga");
 			baru.bulan_no = bulan_no;
 			baru.masa_no = masa_no;
-			baru.tahun_tanam = tt;
+			baru.kelompok_umur = umur;
+			baru.umur_min = kelompok.umur_min;
+			baru.umur_max = kelompok.umur_max;
 			baru.harga = nilai;
 		}
 
@@ -129,14 +244,14 @@ sth.shu.MatriksHarga = class MatriksHarga {
 	render() {
 		if (!this.masa.length) {
 			this.wrapper.html(
-				`<p class="text-muted">${__("Belum ada Masa SHU yang disubmit untuk tahun ini.")}</p>`
+				`<p class="text-muted">${__("Belum ada pembagian masa. Isi tabel Masa di atas dulu.")}</p>`
 			);
 			return;
 		}
 
-		if (!this.tahun_tanam().length) {
+		if (!this.kelompok.length) {
 			this.wrapper.html(
-				`<p class="text-muted">${__("Belum ada tahun tanam di tiket timbangan tahun ini.")}</p>`
+				`<p class="text-muted">${__("Daftar kelompok umur belum termuat.")}</p>`
 			);
 			return;
 		}
@@ -145,7 +260,7 @@ sth.shu.MatriksHarga = class MatriksHarga {
 		const per_bulan = {};
 		this.masa.forEach((m) => {
 			(per_bulan[m.bulan_no] = per_bulan[m.bulan_no] || {
-				bulan: bulan_romawi(m.bulan_no),
+				bulan: nama_bulan(m.bulan_no),
 				baris: [],
 			}).baris.push(m);
 		});
@@ -160,7 +275,7 @@ sth.shu.MatriksHarga = class MatriksHarga {
 			.forEach((bulan_no) => {
 				const bl = per_bulan[bulan_no];
 				const kunci = terkunci.has(bulan_no);
-				const tts = this.tahun_tanam_bulan(bulan_no);
+				const kolom = this.kelompok;
 
 				html += `<div style="margin-bottom:14px">
 					<div style="background:var(--control-bg);font-weight:500;padding:6px 8px;border:1px solid var(--border-color);border-bottom:0">
@@ -171,20 +286,17 @@ sth.shu.MatriksHarga = class MatriksHarga {
 							style="float:right">${kunci ? __("Buka") : __("Tetapkan")}</button>
 					</div>`;
 
-				if (!tts.length) {
-					html += `<div class="text-muted small"
-						style="padding:8px;border:1px solid var(--border-color)">
-						${__("Tidak ada buah masuk di bulan ini.")}</div></div>`;
-					return;
-				}
-
 				html += `<div style="overflow-x:auto">
 					<table class="table table-bordered" style="table-layout:fixed;margin-bottom:0">
 					<thead><tr><th style="width:190px">${__("Masa")}</th>`;
 
-				tts.forEach((tt) => {
-					html += `<th style="width:120px;text-align:center">${tt}
-						<div class="text-muted small">${cint(this.frm.doc.tahun) - tt}TH</div></th>`;
+				kolom.forEach((k) => {
+					const keterangan =
+						k.umur_max >= 999
+							? __("{0} th ke atas", [k.umur_min])
+							: __("umur {0} th", [k.label]);
+					html += `<th style="width:120px;text-align:center">${k.label}
+						<div class="text-muted small">${keterangan}</div></th>`;
 				});
 				html += "</tr></thead><tbody>";
 
@@ -193,13 +305,13 @@ sth.shu.MatriksHarga = class MatriksHarga {
 						<span class="text-muted small"> ${frappe.datetime.str_to_user(m.tanggal_mulai)}
 						&ndash; ${frappe.datetime.str_to_user(m.tanggal_selesai)}</span></td>`;
 
-					tts.forEach((tt) => {
-						const v = this.nilai(bulan_no, m.masa_no, tt);
+					kolom.forEach((k) => {
+						const v = this.nilai(bulan_no, m.masa_no, k.label);
 						const ada = v !== undefined;
 						html += `<td style="padding:0${ada ? "" : ";background:var(--bg-yellow)"}">
 							<input class="shu-sel form-control" style="border:0;text-align:right;background:transparent"
-								data-bulan="${bulan_no}" data-masa="${m.masa_no}" data-tt="${tt}"
-								data-kolom="${tts.length}"
+								data-bulan="${bulan_no}" data-masa="${m.masa_no}" data-umur="${k.label}"
+								data-kolom="${kolom.length}"
 								${kunci ? "readonly" : ""}
 								value="${ada ? format_number(v, null, 2) : ""}"></td>`;
 					});
@@ -225,8 +337,11 @@ sth.shu.MatriksHarga = class MatriksHarga {
 		sel.each(function (i) {
 			const $el = $(this);
 
+			// label kelompok dibaca lewat attr(), bukan data(): jQuery mengubah
+			// "3" jadi angka tapi "10 - 20" tetap string, dan perbandingannya
+			// dengan isi child table jadi meleset
 			$el.on("focus", function () {
-				const v = me.nilai(cint($el.data("bulan")), cint($el.data("masa")), cint($el.data("tt")));
+				const v = me.nilai(cint($el.data("bulan")), cint($el.data("masa")), $el.attr("data-umur"));
 				$el.val(v === undefined ? "" : v);
 			});
 
@@ -235,7 +350,7 @@ sth.shu.MatriksHarga = class MatriksHarga {
 				me.tulis(
 					cint($el.data("bulan")),
 					cint($el.data("masa")),
-					cint($el.data("tt")),
+					$el.attr("data-umur"),
 					angka
 				);
 				$el.val(angka === undefined ? "" : format_number(angka, null, 2));
@@ -292,7 +407,7 @@ sth.shu.MatriksHarga = class MatriksHarga {
 					if (angka === undefined) return;
 
 					const $t = $(target);
-					this.tulis(cint($t.data("bulan")), cint($t.data("masa")), cint($t.data("tt")), angka);
+					this.tulis(cint($t.data("bulan")), cint($t.data("masa")), $t.attr("data-umur"), angka);
 					$t.val(format_number(angka, null, 2));
 					$t.closest("td").css("background", "");
 				});
@@ -309,7 +424,7 @@ sth.shu.MatriksHarga = class MatriksHarga {
 
 		if (!terkunci) {
 			frappe.call({
-				method: "sth.accounting_sth.doctype.master_harga_shu.master_harga_shu.tetapkan_bulan",
+				method: SHU_API + ".tetapkan_bulan",
 				args: { nama: this.frm.doc.name, bulan_no: bulan_no },
 				callback: () => this.frm.reload_doc(),
 			});
@@ -325,7 +440,7 @@ sth.shu.MatriksHarga = class MatriksHarga {
 			},
 			(nilai) => {
 				frappe.call({
-					method: "sth.accounting_sth.doctype.master_harga_shu.master_harga_shu.buka_bulan",
+					method: SHU_API + ".buka_bulan",
 					args: { nama: this.frm.doc.name, bulan_no: bulan_no, alasan: nilai.alasan },
 					callback: () => this.frm.reload_doc(),
 				});

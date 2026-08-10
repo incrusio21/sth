@@ -9,9 +9,10 @@
   "company",
   "tahun",
   "column_break_head",
+  "jumlah_masa",
   "jumlah_sel_terisi",
-  "tahun_tanam_section",
-  "tahun_tanam",
+  "masa_section",
+  "masa",
   "matriks_section",
   "matriks",
   "harga_section",
@@ -46,26 +47,31 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "jumlah_masa",
+   "fieldtype": "Data",
+   "label": "Pembagian Masa",
+   "read_only": 1
+  },
+  {
    "fieldname": "jumlah_sel_terisi",
    "fieldtype": "Data",
    "label": "Sel Terisi",
    "read_only": 1
   },
   {
-   "description": "Menentukan kolom matriks. Umur dan label dihitung dari tahun dokumen.",
-   "fieldname": "tahun_tanam_section",
+   "description": "Pembagian tanggal jadi masa, per bulan. Jumlah masa bebas tiap bulan — yang wajib adalah menutup penuh bulan itu tanpa celah dan tanpa tumpang tindih. Bulan yang tidak diisi berarti belum ada masanya.",
+   "fieldname": "masa_section",
    "fieldtype": "Section Break",
-   "label": "Tahun Tanam"
+   "label": "Pembagian Masa"
   },
   {
-   "description": "Terisi otomatis dari tahun tanam yang tercatat di tiket timbangan tahun ini. Tidak perlu diketik manual.",
-   "fieldname": "tahun_tanam",
+   "fieldname": "masa",
    "fieldtype": "Table",
-   "label": "Tahun Tanam",
-   "options": "Master Harga SHU Tahun Tanam",
-   "read_only": 1
+   "label": "Masa",
+   "options": "Master Harga SHU Masa"
   },
   {
+   "description": "Kolomnya kelompok umur yang sudah paten. Umur dihitung dari tahun dokumen dikurangi tahun tanam yang tercatat di tiket timbangan.",
    "fieldname": "matriks_section",
    "fieldtype": "Section Break",
    "label": "Matriks Harga"
@@ -105,7 +111,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-06 14:49:38.096775",
+ "modified": "2026-08-11 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Master Harga SHU",

@@ -4,5 +4,5 @@
 from frappe.model.document import Document
 
 
-class MasaSHUDetail(Document):
+class MasterHargaSHUMasa(Document):
 	pass

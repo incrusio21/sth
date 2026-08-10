@@ -14,22 +14,22 @@ from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	pecah_netto_tiket,
 )
 
-# Pembagian masa Januari 2026 yang sungguhan, sama dengan test_masa_shu.
+# Pembagian masa Januari 2026 yang sungguhan, sama dengan test_master_harga_shu.
 MASA_JANUARI = [
 	{
-		"masa_shu": "MS-TML-2026-01",
+		"master_harga_shu": "MHS-TML-2026",
 		"masa_no": 1,
 		"tanggal_mulai": date(2026, 1, 1),
 		"tanggal_selesai": date(2026, 1, 2),
 	},
 	{
-		"masa_shu": "MS-TML-2026-01",
+		"master_harga_shu": "MHS-TML-2026",
 		"masa_no": 2,
 		"tanggal_mulai": date(2026, 1, 3),
 		"tanggal_selesai": date(2026, 1, 8),
 	},
 	{
-		"masa_shu": "MS-TML-2026-01",
+		"master_harga_shu": "MHS-TML-2026",
 		"masa_no": 3,
 		"tanggal_mulai": date(2026, 1, 9),
 		"tanggal_selesai": date(2026, 1, 15),
@@ -166,14 +166,14 @@ class TestKelompokkanNetto(FrappeTestCase):
 
 		self.assertEqual([(b["tahun_tanam"], b["netto_kg"]) for b in hasil], [(2012, 1000.0)])
 
-	def test_tanggal_masa_ikut_terbawa_dari_masa_shu(self):
+	def test_tanggal_masa_ikut_terbawa_dari_master_harga_shu(self):
 		hasil, _ = kelompokkan_netto(
 			tiket("TBG-0001", posting_date=date(2026, 1, 9)), MASA_JANUARI
 		)
 
 		self.assertEqual(hasil[0]["tanggal_mulai"], date(2026, 1, 9))
 		self.assertEqual(hasil[0]["tanggal_selesai"], date(2026, 1, 15))
-		self.assertEqual(hasil[0]["masa_shu"], "MS-TML-2026-01")
+		self.assertEqual(hasil[0]["master_harga_shu"], "MHS-TML-2026")
 
 	def test_satu_tiket_bisa_jatuh_ke_dua_tahun_tanam_dalam_satu_masa(self):
 		rows = tiket(

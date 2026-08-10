@@ -97,7 +97,7 @@
    "read_only": 1
   },
   {
-   "description": "Diambil dari Masa SHU bulan ini, tidak dihitung sendiri.",
+   "description": "Diambil dari tabel Masa di Master Harga SHU, tidak dihitung sendiri.",
    "fieldname": "tanggal_mulai",
    "fieldtype": "Date",
    "label": "Tanggal Mulai",
@@ -295,7 +295,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-06 15:53:08.389426",
+ "modified": "2026-08-11 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",
