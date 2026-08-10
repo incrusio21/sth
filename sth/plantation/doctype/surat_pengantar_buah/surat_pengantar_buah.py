@@ -10,10 +10,6 @@ from frappe.utils import cint, cstr, flt
 from frappe.model.document import Document
 from frappe.utils.synchronization import filelock
 
-force_item_fields = (
-	"recap_panen"
-)
-
 class SuratPengantarBuah(Document):
 
 	def validate(self):
@@ -31,30 +27,10 @@ class SuratPengantarBuah(Document):
 		self.in_weight = self.in_weight_internal = self.out_weight = self.out_weight_internal = self.mill_cut = 0
 
 	def set_missing_value(self):
-		def _apply_recap(detail, suffix=""):
-			blok = detail.get(f"blok{suffix}")
-			panen_date = detail.get(f"panen_date{suffix}")
-			
-			ret = get_recap_panen(blok, panen_date)
-			
-			for fieldname, value in ret.items():
-				target_field = f"{fieldname}{suffix}"
-				
-				if not (detail.meta.get_field(target_field) and value is not None):
-					continue
-				
-				if detail.get(target_field) is None or target_field in force_item_fields:
-					detail.set(target_field, value)
-
-		doctype, fieldname, nopol = ["Driver", "kendaraan_eksternal", "custom_license_plate"]if self.tipe_kendaraan == "External" else ["Alat Berat Dan Kendaraan", "kendaraan", "no_pol"] 
+		doctype, fieldname, nopol = ["Driver", "kendaraan_eksternal", "custom_license_plate"]if self.tipe_kendaraan == "External" else ["Alat Berat Dan Kendaraan", "kendaraan", "no_pol"]
 		self.no_polisi = frappe.get_value(doctype, self.get(fieldname), nopol)
 
-		for d in self.details:
-			_apply_recap(d)
-
-			# Process restan recap if exists
-			if d.blok_restan and d.panen_date_restan:
-				_apply_recap(d, suffix="_restan")
+		set_recap_panen_in_details(self.details)
 
 	def validate_recap_panen(self):
 		# SPB bisa dibuat sebagai stub tanpa detail (mis. dari Security Check Point),
@@ -293,8 +269,10 @@ def _update_spb(existing_name, args):
 			doc.submit()
 	else:
 		# Dokumen sudah submit: hanya detail dan totalnya yang boleh disentuh,
-		# lewat db_set supaya tidak kena validate_update_after_submit.
+		# lewat db_set supaya tidak kena validate_update_after_submit. validate
+		# tidak jalan di jalur ini, jadi recap_panen diisi manual di sini.
 		_apply_details(doc, details)
+		set_recap_panen_in_details(doc.details)
 
 		doc.update_child_table("details")
 		doc.db_set({
@@ -343,6 +321,38 @@ def _resync_timbangan(spb_name):
 		return
 
 	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
+
+def set_recap_panen_in_details(details):
+	"""Isi recap_panen tiap baris detail dari blok + tanggal panennya.
+
+	Dipakai dua-duanya oleh validate dan oleh jalur API, supaya SPB yang masuk
+	tanpa lewat form tetap nyambung ke Recap Panen by Blok — form punya trigger
+	JS-nya, request API tidak.
+	"""
+	for d in details:
+		_apply_recap(d)
+
+		# Process restan recap if exists
+		if d.blok_restan and d.panen_date_restan:
+			_apply_recap(d, suffix="_restan")
+
+def _apply_recap(detail, suffix=""):
+	"""Sambungkan satu baris detail ke recap-nya. Hanya link-nya, bukan qty.
+
+	Satu blok di tanggal yang sama bisa dipecah jadi beberapa baris detail, dan
+	pembagian janjangnya datang dari pengirim. get_recap_panen() mengembalikan
+	sisa janjang blok itu untuk dipakai form (satu baris, diisi manual); kalau
+	nilai itu ikut ditulis ke tiap baris, Recap Panen by Blok menjumlahkan qty
+	semua baris yang menunjuk dirinya dan totalnya jadi berlipat saat submit.
+	"""
+	blok = detail.get(f"blok{suffix}")
+	panen_date = detail.get(f"panen_date{suffix}")
+
+	recap_panen = get_recap_panen(blok, panen_date).get("recap_panen")
+	if not recap_panen:
+		return
+
+	detail.set(f"recap_panen{suffix}", recap_panen)
 
 @frappe.whitelist()
 def get_recap_panen(blok, posting_date):
