@@ -1301,7 +1301,7 @@ def get_kas_pdo_type(source_name):
 			continue
 
 		if flt(row.revised_total) or flt(row.total):
-			nilai = row.sub_detail or KAS_TANPA_PDO_TYPE
+			nilai = frappe.get_doc("Expense Claim Type", row.sub_detail).pdo_type or KAS_TANPA_PDO_TYPE
 			if nilai not in urutan:
 				urutan.append(nilai)
 
