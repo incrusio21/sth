@@ -12,3 +12,4 @@ sth.patches.tambah_jalur_approval_realisasi_tambahan
 sth.patches.gl_bkm_perawatan_tanpa_material
 sth.patches.asset_scrap_approval_per_unit
 sth.patches.bulan_romawi_master_harga_shu
+sth.patches.custom_alat_berat_dan_kendaraan_dynamic_link

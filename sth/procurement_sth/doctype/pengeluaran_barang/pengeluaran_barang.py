@@ -176,6 +176,9 @@ class PengeluaranBarang(Document):
 				"field_map": {
 					"kode_barang":"item_code",
 					"jumlah": "qty",
+					# kendaraan itu Dynamic Link yang doctype-nya ditentukan tipe_asset,
+					# jadi keduanya harus ikut supaya link di Stock Entry tidak menggantung.
+					"tipe_asset":"custom_tipe_asset",
 					"kendaraan":"custom_alat_berat_dan_kendaraan",
 					"satuan": "uom",
 					"account": "expense_account",
