@@ -1,5 +1,9 @@
 import frappe
 
+# User yang dipakai sistem luar waktu mengirim dokumen lewat REST API. Dipakai
+# untuk membedakan kiriman mesin dari input manusia.
+USER_API = "api@sth.com"
+
 # Mandor pada data BKM dari API kadang terkirim sebagai ID User, bukan Employee.
 # Petakan ke NIK karyawan yang benar supaya link Employee-nya valid.
 MANDOR_API_MAP = {
@@ -35,7 +39,7 @@ def submit_after_insert(doc):
 
 @frappe.whitelist()
 def approve_api(self,method):
-	if self.owner != "api@sth.com":
+	if self.owner != USER_API:
 		return
 
 	# hook terpasang untuk semua doctype, lewati yang tidak submittable

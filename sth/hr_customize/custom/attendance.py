@@ -22,6 +22,9 @@ class Attendance:
 
                 self.validate_attendance_is_holiday()
                 self.validate_premi_amount_and_component()
+                # status_code diturunkan dari status, jadi ikut dihitung ulang:
+                # kiriman API bisa mengubah status Attendance yang sudah disubmit
+                self.validate_status_code()
                 self.doc.db_update()
 
                 self.create_or_update_payment_log()
