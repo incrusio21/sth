@@ -517,9 +517,23 @@ PEMISAH_UANG_MUKA = "::"
 # Tipe PDO yang barisnya dipilih per nama pengguna, bukan sekaligus satu tabel
 TIPE_PILIH_PENGGUNA = ("Bahan Bakar", "Perjalanan Dinas")
 
-# sub_detail di List Kas tidak wajib diisi. Baris yang kosong tetap harus bisa
-# direalisasi, jadi diwakili nilai ini di saringan PDO Type dialog realisasi.
+# Jenis di List Kas tidak wajib bernaung di bawah PDO Type. Baris seperti itu
+# tetap harus bisa direalisasi, jadi diwakili nilai ini di saringan PDO Type.
 KAS_TANPA_PDO_TYPE = "__tanpa_pdo_type__"
+
+
+def pdo_type_baris_kas(row):
+	"""PDO Type yang menaungi Jenis di satu baris List Kas.
+
+	Dibaca dari Expense Claim Type, bukan dari `sub_detail` yang bisa saja belum
+	terisi. Satu-satunya tempat pemetaan ini dilakukan, supaya daftar PDO Type di
+	dialog dan penyaring barisnya tidak pernah berbeda pendapat — kalau berbeda,
+	sebuah PDO Type bisa muncul di dialog lalu tidak memunculkan Jenis satu pun.
+	"""
+	if not row.get("type"):
+		return None
+
+	return frappe.get_cached_value("Expense Claim Type", row.get("type"), "custom_pdo_type")
 
 
 def cocok_pdo_type(row, pdo_type):
@@ -527,10 +541,12 @@ def cocok_pdo_type(row, pdo_type):
 	if not pdo_type:
 		return True
 
-	if pdo_type == KAS_TANPA_PDO_TYPE:
-		return not row.get("sub_detail")
+	pdo_type_baris = pdo_type_baris_kas(row)
 
-	return row.get("sub_detail") == pdo_type
+	if pdo_type == KAS_TANPA_PDO_TYPE:
+		return not pdo_type_baris
+
+	return pdo_type_baris == pdo_type
 
 
 def gabung_per_item_barang(rows):
@@ -1301,14 +1317,7 @@ def get_kas_pdo_type(source_name):
 			continue
 
 		if flt(row.revised_total) or flt(row.total):
-			# Jenis-nya ada di row.type, dan sudah dijamin terisi oleh continue di
-			# atas. PDO Type yang menaunginya dibaca dari Expense Claim Type itu,
-			# bukan dari sub_detail yang bisa saja belum terisi.
-			pdo_type = frappe.get_cached_value(
-				"Expense Claim Type", row.type, "custom_pdo_type"
-			)
-
-			nilai = pdo_type or KAS_TANPA_PDO_TYPE
+			nilai = pdo_type_baris_kas(row) or KAS_TANPA_PDO_TYPE
 			if nilai not in urutan:
 				urutan.append(nilai)
 
