@@ -1301,10 +1301,11 @@ def get_kas_pdo_type(source_name):
 			continue
 
 		if flt(row.revised_total) or flt(row.total):
-			# sub_detail berisi Jenis-nya, PDO Type yang menaunginya dibaca dari sana.
-			# Baris tanpa Jenis tetap boleh ada, jadi jangan dibaca kalau kosong.
-			pdo_type = row.sub_detail and frappe.get_cached_value(
-				"Expense Claim Type", row.sub_detail, "pdo_type"
+			# Jenis-nya ada di row.type, dan sudah dijamin terisi oleh continue di
+			# atas. PDO Type yang menaunginya dibaca dari Expense Claim Type itu,
+			# bukan dari sub_detail yang bisa saja belum terisi.
+			pdo_type = frappe.get_cached_value(
+				"Expense Claim Type", row.type, "custom_pdo_type"
 			)
 
 			nilai = pdo_type or KAS_TANPA_PDO_TYPE
