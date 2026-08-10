@@ -100,6 +100,12 @@ class Asset(Asset):
 		if not self.asset_category:
 			return
 
+		if self.split_from:
+			# asset pecahan cuma memindahkan sebagian nilai asset asalnya, yang
+			# jurnal kapitalisasinya sudah diposting waktu asset itu disubmit.
+			# tanpa penjaga ini akun aset tetap kelebihan sebesar nilai pecahan
+			return
+
 		asset_category_doc = frappe.get_doc("Asset Category", self.asset_category)
 
 		fixed_asset_account = None
@@ -207,6 +213,62 @@ def scrap_asset(asset_name, **kwargs):
 		)
 
 	return _scrap_asset(asset_name, **kwargs)
+
+
+# Basis rasio pemecahan asset. split_asset bawaan ERPNext memakai
+# split_qty/asset_quantity sebagai rasio pembagi semua nilai; dengan basis 10000
+# rasio itu bisa diisi persentase sampai dua angka di belakang koma.
+BASIS_SPLIT = 10000
+
+
+def split_asset_by_persentase(asset_name, persentase, qty_split=1):
+	"""Pecah Asset berdasarkan persentase nilai, bukan rasio qty.
+
+	Dipakai scrap sebagian: asset ber-qty 1 pun bisa dipecah, misalnya bangunan
+	yang rusak 30%. Fungsi bawaan ERPNext (create_new_asset_after_split dan
+	update_existing_asset) tetap dipakai supaya jadwal penyusutan dan referensi
+	Journal Entry ikut terbagi persis seperti split biasa; yang diganti cuma
+	rasionya, lewat asset_quantity dokumen di memori. Qty yang sebenarnya
+	dipasang ulang ke DB setelah pemecahan selesai.
+
+	Mengembalikan nama Asset baru yang berisi bagian sebesar persentase itu."""
+	from erpnext.assets.doctype.asset.asset import (
+		create_new_asset_after_split,
+		update_existing_asset,
+	)
+
+	persentase = flt(persentase)
+	if persentase <= 0 or persentase >= 100:
+		frappe.throw(
+			_("Persentase pemecahan Asset harus di antara 0 dan 100, bukan {0}").format(persentase)
+		)
+
+	bagian = cint(round(BASIS_SPLIT * persentase / 100.0))
+	if bagian < 1 or bagian >= BASIS_SPLIT:
+		frappe.throw(_("Persentase {0} terlalu kecil untuk memecah Asset {1}").format(persentase, asset_name))
+
+	asset = frappe.get_doc("Asset", asset_name)
+	qty_total = cint(asset.asset_quantity) or 1
+
+	qty_split = cint(qty_split) or 1
+	if qty_total > 1:
+		# asset sisa harus tetap punya qty, jadi pecahan paling banyak qty - 1
+		qty_split = min(qty_split, qty_total - 1)
+	qty_sisa = max(qty_total - qty_split, 1)
+
+	# rasio pembagi kedua fungsi bawaan dibaca dari dokumen di memori ini
+	asset.asset_quantity = BASIS_SPLIT
+
+	asset_baru = create_new_asset_after_split(asset, bagian)
+	update_existing_asset(asset, BASIS_SPLIT - bagian, asset_baru.name)
+
+	# kedua fungsi di atas ikut menyimpan qty berbasis 10000 tadi, jadi qty yang
+	# sebenarnya dipasang ulang di sini. ditulis langsung supaya tidak memicu
+	# validasi Asset yang sudah disubmit
+	frappe.db.set_value("Asset", asset_baru.name, "asset_quantity", qty_split, update_modified=False)
+	frappe.db.set_value("Asset", asset_name, "asset_quantity", qty_sisa, update_modified=False)
+
+	return asset_baru.name
 
 
 @frappe.whitelist()

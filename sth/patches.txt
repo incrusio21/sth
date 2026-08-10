@@ -13,3 +13,4 @@ sth.patches.gl_bkm_perawatan_tanpa_material
 sth.patches.asset_scrap_approval_per_unit
 sth.patches.bulan_romawi_master_harga_shu
 sth.patches.custom_alat_berat_dan_kendaraan_dynamic_link
+sth.patches.isi_persentase_asset_scrap_request

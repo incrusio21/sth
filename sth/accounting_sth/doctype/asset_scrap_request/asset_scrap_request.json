@@ -11,6 +11,7 @@
   "asset_name",
   "asset_category",
   "asset_quantity",
+  "persentase_scrap",
   "qty_scrap",
   "column_break_head",
   "posting_date",
@@ -69,12 +70,23 @@
    "read_only": 1
   },
   {
+   "default": "100",
+   "description": "Bagian nilai asset yang discrap. Isi lebih kecil dari 100 untuk scrap sebagian: asetnya dipecah sesuai persentase ini saat approval terakhir dan yang discrap hanya pecahannya.",
+   "fieldname": "persentase_scrap",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Persentase Discrap",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
    "depends_on": "eval:doc.asset_quantity > 1",
-   "description": "Jumlah unit yang discrap. Kalau lebih kecil dari Qty Asset, asetnya dipecah dulu saat approval terakhir dan yang discrap hanya pecahannya.",
+   "description": "Perkiraan jumlah unit yang discrap, dihitung dari persentase. Pembagian nilainya tetap memakai persentase, bukan qty ini.",
    "fieldname": "qty_scrap",
    "fieldtype": "Int",
    "label": "Qty Discrap",
-   "non_negative": 1
+   "non_negative": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_head",
@@ -175,7 +187,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-04 13:00:00.000000",
+ "modified": "2026-08-11 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Asset Scrap Request",

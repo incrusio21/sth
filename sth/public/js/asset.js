@@ -94,9 +94,9 @@ function setup_approval_scrap(frm) {
 			}
 
 			let label_state = info.workflow_state;
-			if (info.qty_scrap && info.asset_quantity > 1) {
-				label_state = __("{0} (qty {1} dari {2})", [
-					info.workflow_state, info.qty_scrap, info.asset_quantity
+			if (info.persentase_scrap && info.persentase_scrap < 100) {
+				label_state = __("{0} ({1}% dari nilai asset)", [
+					info.workflow_state, info.persentase_scrap
 				]);
 			}
 
@@ -112,22 +112,22 @@ function setup_approval_scrap(frm) {
 }
 
 function dialog_ajukan_scrap(frm, asset_quantity) {
-	const fields = [];
+	// scrap sebagian dihitung dari persentase nilai asset, jadi asset ber-qty 1
+	// pun bisa (misalnya bangunan yang rusak sebagian). asetnya baru dipecah
+	// saat approval terakhir
+	const keterangan_qty = asset_quantity > 1
+		? __("Qty asset ini {0}, nilainya dibagi sesuai persentase di atas.", [asset_quantity])
+		: __("Nilai asset dibagi sesuai persentase ini, sisanya tetap jadi asset aktif.");
 
-	// asset dengan qty lebih dari satu boleh discrap sebagian. asetnya baru
-	// dipecah saat approval terakhir, jadi di sini cukup qty-nya saja
-	if (asset_quantity > 1) {
-		fields.push({
-			fieldname: "qty_scrap",
-			label: __("Qty Discrap"),
-			fieldtype: "Int",
-			default: asset_quantity,
+	const fields = [
+		{
+			fieldname: "persentase_scrap",
+			label: __("Persentase Discrap"),
+			fieldtype: "Percent",
+			default: 100,
 			reqd: 1,
-			description: __("Qty asset ini {0}. Isi lebih kecil untuk scrap sebagian.", [asset_quantity])
-		});
-	}
-
-	fields.push(
+			description: __("Isi lebih kecil dari 100 untuk scrap sebagian. {0}", [keterangan_qty])
+		},
 		{
 			fieldname: "alasan",
 			label: __("Alasan Scrap"),
@@ -139,13 +139,20 @@ function dialog_ajukan_scrap(frm, asset_quantity) {
 			label: __("Lampiran"),
 			fieldtype: "Attach"
 		}
-	);
+	];
 
 	const dialog = new frappe.ui.Dialog({
 		title: __("Ajukan Scrap Asset"),
 		fields: fields,
 		primary_action_label: __("Ajukan"),
 		primary_action(values) {
+			const persentase = flt(values.persentase_scrap);
+
+			if (persentase <= 0 || persentase > 100) {
+				frappe.msgprint(__("Persentase Discrap harus di antara 0 dan 100"));
+				return;
+			}
+
 			dialog.hide();
 
 			frappe.call({
@@ -154,7 +161,7 @@ function dialog_ajukan_scrap(frm, asset_quantity) {
 					asset: frm.doc.name,
 					alasan: values.alasan,
 					lampiran: values.lampiran,
-					qty_scrap: values.qty_scrap || asset_quantity
+					persentase_scrap: persentase
 				},
 				freeze: true,
 				freeze_message: __("Mengajukan scrap..."),

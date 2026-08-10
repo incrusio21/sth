@@ -17,7 +17,7 @@ class AssetScrapRequest(Document):
 	def validate(self):
 		self.validate_asset()
 		self.validate_duplikat()
-		self.validate_qty()
+		self.validate_persentase()
 		self.set_nilai_buku()
 
 	def validate_asset(self):
@@ -53,26 +53,48 @@ class AssetScrapRequest(Document):
 				_("Asset {0} sudah punya pengajuan scrap yang berjalan").format(self.asset)
 			)
 
-	def validate_qty(self):
+	def validate_persentase(self):
 		# asset_quantity ikut fetch_from, tapi asset lama bisa saja masih kosong
 		total = cint(self.asset_quantity) or cint(
 			frappe.db.get_value("Asset", self.asset, "asset_quantity")
 		) or 1
 		self.asset_quantity = total
 
-		if not cint(self.qty_scrap):
-			# tanpa pengisian, perlakuannya seperti sebelum ada scrap sebagian
-			self.qty_scrap = total
-
-		if cint(self.qty_scrap) < 1:
-			frappe.throw(_("Qty Discrap minimal 1"))
-
-		if cint(self.qty_scrap) > total:
-			frappe.throw(
-				_("Qty Discrap {0} melebihi qty Asset {1} yang cuma {2}").format(
-					self.qty_scrap, self.asset, total
+		if not flt(self.persentase_scrap):
+			if cint(self.qty_scrap):
+				# pengajuan yang dibuat sebelum ada input persentase: rasionya
+				# diambil dari qty supaya nilainya tidak berubah di tengah approval
+				self.persentase_scrap = flt(
+					cint(self.qty_scrap) * 100 / total, self.precision("persentase_scrap")
 				)
-			)
+			else:
+				# tanpa pengisian, perlakuannya seperti sebelum ada scrap sebagian
+				self.persentase_scrap = 100
+
+		if flt(self.persentase_scrap) <= 0:
+			frappe.throw(_("Persentase Discrap harus lebih besar dari 0"))
+
+		if flt(self.persentase_scrap) > 100:
+			frappe.throw(_("Persentase Discrap tidak boleh lebih dari 100"))
+
+		self.qty_scrap = self.hitung_qty_scrap()
+
+	def hitung_qty_scrap(self):
+		"""Qty yang mewakili persentase, cuma untuk ditampilkan dan dipasang ke
+		asset pecahan. Yang menentukan pembagian nilai tetap persentasenya."""
+		total = cint(self.asset_quantity) or 1
+		persentase = flt(self.persentase_scrap)
+
+		if persentase >= 100:
+			return total
+
+		qty = cint(round(total * persentase / 100.0)) or 1
+
+		if total > 1:
+			# asset sisa harus tetap punya qty
+			qty = min(qty, total - 1)
+
+		return qty
 
 	def set_nilai_buku(self):
 		asset = frappe.get_doc("Asset", self.asset)
@@ -84,10 +106,10 @@ class AssetScrapRequest(Document):
 				flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation)
 			)
 
-		total = cint(self.asset_quantity) or 1
-		if cint(self.qty_scrap) < total:
-			# yang ditampilkan nilai buku sebanyak qty yang discrap saja
-			nilai_buku = nilai_buku * cint(self.qty_scrap) / total
+		persentase = flt(self.persentase_scrap) or 100
+		if persentase < 100:
+			# yang ditampilkan nilai buku sebesar bagian yang discrap saja
+			nilai_buku = nilai_buku * persentase / 100.0
 
 		self.nilai_buku = flt(nilai_buku, self.precision("nilai_buku"))
 
@@ -115,7 +137,7 @@ class AssetScrapRequest(Document):
 
 		self.validate_asset()
 
-		asset = self.pisahkan_qty_yang_discrap()
+		asset = self.pisahkan_bagian_yang_discrap()
 
 		frappe.flags.ignore_asset_scrap_request = True
 		try:
@@ -127,23 +149,26 @@ class AssetScrapRequest(Document):
 		if journal_entry:
 			self.db_set("journal_entry_for_scrap", journal_entry)
 
-	def pisahkan_qty_yang_discrap(self):
+		if asset != self.asset:
+			# yang discrap cuma pecahannya. asset asalnya masih aktif dengan sisa
+			# nilainya, jadi penanda scrap di list Asset dilepas dari sana
+			frappe.db.set_value("Asset", self.asset, "status_scrap", "", update_modified=False)
+
+	def pisahkan_bagian_yang_discrap(self):
 		"""Nama Asset yang benar-benar discrap.
 
-		Kalau qty-nya sebagian, asetnya dipecah dulu jadi asset baru sebanyak qty
-		yang disetujui lalu pecahan itu yang discrap. Pemecahan sengaja ditunda
-		sampai approval terakhir supaya pengajuan yang ditolak tidak meninggalkan
-		asset pecahan."""
-		from erpnext.assets.doctype.asset.asset import split_asset
+		Kalau scrapnya sebagian, asetnya dipecah dulu sesuai persentase yang
+		disetujui lalu pecahan itu yang discrap. Pemecahan sengaja ditunda sampai
+		approval terakhir supaya pengajuan yang ditolak tidak meninggalkan asset
+		pecahan."""
+		from sth.overrides.asset import split_asset_by_persentase
 
-		total = cint(self.asset_quantity) or 1
-		qty = cint(self.qty_scrap) or total
+		persentase = flt(self.persentase_scrap) or 100
 
-		if qty >= total:
+		if persentase >= 100:
 			return self.asset
 
-		asset_baru = split_asset(self.asset, qty)
-		nama = asset_baru if isinstance(asset_baru, str) else asset_baru.get("name")
+		nama = split_asset_by_persentase(self.asset, persentase, self.hitung_qty_scrap())
 
 		self.db_set("asset_hasil_split", nama)
 
@@ -184,6 +209,7 @@ def get_status_scrap(asset):
 		"workflow_state": None,
 		"actions": [],
 		"asset_quantity": cint(asset_doc.asset_quantity) or 1,
+		"persentase_scrap": None,
 		"qty_scrap": None,
 		"bisa_ajukan": (
 			asset_doc.docstatus == 1 and asset_doc.status not in STATUS_TIDAK_BISA_SCRAP
@@ -199,6 +225,7 @@ def get_status_scrap(asset):
 	hasil["name"] = doc.name
 	hasil["workflow_state"] = doc.get("workflow_state")
 	hasil["actions"] = [transisi.action for transisi in get_transitions(doc, raise_exception=False)]
+	hasil["persentase_scrap"] = flt(doc.persentase_scrap)
 	hasil["qty_scrap"] = cint(doc.qty_scrap)
 	hasil["bisa_ajukan"] = False
 
@@ -206,7 +233,7 @@ def get_status_scrap(asset):
 
 
 @frappe.whitelist()
-def ajukan_scrap(asset, alasan, lampiran=None, qty_scrap=None):
+def ajukan_scrap(asset, alasan, lampiran=None, persentase_scrap=None):
 	"""Buat pengajuan lalu langsung dorong ke lapis approval pertama."""
 	from frappe.model.workflow import apply_workflow, get_transitions
 
@@ -217,7 +244,7 @@ def ajukan_scrap(asset, alasan, lampiran=None, qty_scrap=None):
 	doc.asset = asset
 	doc.alasan = alasan
 	doc.lampiran = lampiran
-	doc.qty_scrap = cint(qty_scrap)
+	doc.persentase_scrap = flt(persentase_scrap)
 	doc.insert()
 
 	transisi = get_transitions(doc, raise_exception=False)
