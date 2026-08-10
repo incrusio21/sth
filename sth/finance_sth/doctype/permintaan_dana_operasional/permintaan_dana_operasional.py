@@ -1301,7 +1301,13 @@ def get_kas_pdo_type(source_name):
 			continue
 
 		if flt(row.revised_total) or flt(row.total):
-			nilai = frappe.get_doc("Expense Claim Type", row.sub_detail).pdo_type or KAS_TANPA_PDO_TYPE
+			# sub_detail berisi Jenis-nya, PDO Type yang menaunginya dibaca dari sana.
+			# Baris tanpa Jenis tetap boleh ada, jadi jangan dibaca kalau kosong.
+			pdo_type = row.sub_detail and frappe.get_cached_value(
+				"Expense Claim Type", row.sub_detail, "pdo_type"
+			)
+
+			nilai = pdo_type or KAS_TANPA_PDO_TYPE
 			if nilai not in urutan:
 				urutan.append(nilai)
 
