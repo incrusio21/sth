@@ -167,6 +167,7 @@
    "read_only": 1
   },
   {
+   "description": "Cuma terisi untuk scrap 100%, yang jurnalnya dibuat ERPNext. Scrap sebagian tidak membuat Journal Entry — hapus bukunya diposting sebagai GL Entry milik Asset-nya.",
    "fieldname": "journal_entry_for_scrap",
    "fieldtype": "Link",
    "label": "Journal Entry Scrap",

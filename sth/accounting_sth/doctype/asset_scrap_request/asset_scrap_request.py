@@ -171,8 +171,7 @@ class AssetScrapRequest(Document):
 		Sales Invoice Disposal."""
 		asset = frappe.get_doc("Asset", self.asset)
 
-		je = self.buat_jurnal_hapus_buku(asset)
-		self.db_set("journal_entry_for_scrap", je)
+		self.posting_gl_hapus_buku(asset, 1)
 
 		self.geser_nilai_asset(asset, -1)
 
@@ -227,7 +226,31 @@ class AssetScrapRequest(Document):
 			"cost_center": asset.cost_center or cost_center,
 		})
 
-	def buat_jurnal_hapus_buku(self, asset):
+	def filter_gl_hapus_buku(self):
+		"""Penunjuk baris GL milik pengajuan ini di antara GL voucher Asset-nya."""
+		return {
+			"voucher_type": "Asset",
+			"voucher_no": self.asset,
+			"against_voucher_type": self.doctype,
+			"against_voucher": self.name,
+			"is_cancelled": 0,
+		}
+
+	def posting_gl_hapus_buku(self, asset, arah):
+		"""Hapus buku porsi yang discrap, diposting sebagai GL Entry milik Asset.
+
+		Bukan Journal Entry tersendiri. Kapitalisasi asset pun diposting begitu
+		(lihat sth/overrides/asset.py), jadi seluruh riwayat nilai asset terbaca di
+		satu voucher, dan barisnya tidak lagi tersangka sebagai bagian jurnal
+		penjualan waktu Sales Invoice Disposal-nya dibaca berdampingan.
+
+		Barisnya ditandai against_voucher ke pengajuan ini supaya pembatalan tahu
+		persis mana yang miliknya — voucher Asset juga memuat baris kapitalisasi
+		yang tidak boleh ikut tersentuh.
+
+		`arah` -1 memposting kebalikannya untuk pembatalan, sejalan dengan
+		geser_nilai_asset() yang juga memakai arah.
+		"""
 		akun = self.akun_scrap(asset)
 		gross, akumulasi, nilai_buku = self.porsi_yang_discrap()
 
@@ -244,38 +267,48 @@ class AssetScrapRequest(Document):
 		keterangan = _("Scrap {0}% Asset {1} - {2}").format(
 			flt(self.persentase_scrap), self.asset, self.name
 		)
+		if arah < 0:
+			keterangan = _("Pembatalan") + " " + keterangan
 
-		je = frappe.new_doc("Journal Entry")
-		je.voucher_type = "Journal Entry"
-		je.company      = self.company
-		je.posting_date = self.posting_date or nowdate()
-		je.user_remark  = keterangan
+		gl_entries = []
 
-		def baris_jurnal(account, debit=0, credit=0):
-			je.append("accounts", {
-				"account"                   : account,
-				"debit_in_account_currency" : debit,
-				"credit_in_account_currency": credit,
-				"cost_center"               : akun.cost_center,
-				"reference_type"            : "Asset",
-				"reference_name"            : asset.name,
-				"user_remark"               : keterangan,
-			})
+		def baris_gl(account, lawan, debit=0, credit=0):
+			if arah < 0:
+				debit, credit = credit, debit
+
+			gl_entries.append(frappe._dict(
+				doctype="GL Entry",
+				posting_date=self.posting_date or nowdate(),
+				account=account,
+				against=lawan,
+				debit=debit,
+				credit=credit,
+				debit_in_account_currency=debit,
+				credit_in_account_currency=credit,
+				cost_center=akun.cost_center,
+				voucher_type="Asset",
+				voucher_no=asset.name,
+				against_voucher_type=self.doctype,
+				against_voucher=self.name,
+				company=self.company,
+				remarks=keterangan,
+			))
 
 		if akumulasi > 0:
-			baris_jurnal(akun.akumulasi, debit=akumulasi)
+			baris_gl(akun.akumulasi, akun.aset_tetap, debit=akumulasi)
 
 		if nilai_buku > 0:
-			baris_jurnal(akun.pelepasan, debit=nilai_buku)
+			baris_gl(akun.pelepasan, akun.aset_tetap, debit=nilai_buku)
 
-		baris_jurnal(akun.aset_tetap, credit=gross)
+		baris_gl(akun.aset_tetap, akun.akumulasi or akun.pelepasan, credit=gross)
 
-		je.insert(ignore_permissions=True)
-		je.submit()
+		from erpnext.accounts.general_ledger import make_gl_entries
+		make_gl_entries(gl_entries)
 
-		frappe.msgprint(f"Journal Entry <b>{je.name}</b> berhasil dibuat.", alert=True)
-
-		return je.name
+		frappe.msgprint(
+			_("GL hapus buku scrap diposting ke Asset {0}.").format(asset.name),
+			alert=True
+		)
 
 	def geser_nilai_asset(self, asset, arah):
 		"""Kurangi (arah -1) atau kembalikan (arah 1) nilai asset sebesar porsi yang
@@ -314,8 +347,20 @@ class AssetScrapRequest(Document):
 				update_modified=False
 			)
 
-	def on_cancel(self):
+	def sudah_hapus_buku(self):
+		"""Pengajuan yang hapus bukunya sudah diposting.
+
+		Dua bentuk: GL Entry milik Asset, dan — untuk pengajuan sebelum GL-nya
+		dipindah ke Asset — Journal Entry tersendiri. Pengajuan yang ditolak
+		berdocstatus 1 juga tapi tidak pernah memposting apa pun.
+		"""
 		if self.journal_entry_for_scrap:
+			return True
+
+		return bool(frappe.db.exists("GL Entry", self.filter_gl_hapus_buku()))
+
+	def on_cancel(self):
+		if self.sudah_hapus_buku():
 			if flt(self.persentase_scrap) >= 100:
 				frappe.throw(
 					_("Asset {0} sudah discrap seluruhnya. Batalkan lewat tombol Restore Asset "
@@ -336,12 +381,21 @@ class AssetScrapRequest(Document):
 				  "dibatalkan.").format(self.asset)
 			)
 
-		je = frappe.get_doc("Journal Entry", self.journal_entry_for_scrap)
-		if je.docstatus == 1:
-			je.cancel()
+		asset = frappe.get_doc("Asset", self.asset)
 
-		self.geser_nilai_asset(frappe.get_doc("Asset", self.asset), 1)
-		self.db_set("journal_entry_for_scrap", None)
+		if self.journal_entry_for_scrap:
+			# pengajuan lama, hapus bukunya masih berupa Journal Entry tersendiri
+			je = frappe.get_doc("Journal Entry", self.journal_entry_for_scrap)
+			if je.docstatus == 1:
+				je.cancel()
+
+			self.db_set("journal_entry_for_scrap", None)
+		else:
+			# GL-nya dibalik, bukan dihapus, supaya jejak scrap dan pembatalannya
+			# sama-sama tinggal di buku besar
+			self.posting_gl_hapus_buku(asset, -1)
+
+		self.geser_nilai_asset(asset, 1)
 
 	def on_trash(self):
 		self.update_status_scrap(kosongkan=True)
