@@ -632,6 +632,11 @@ frappe.ui.form.on("Payment Entry Reference", {
 	reference_name(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
+		if (row.reference_doctype === "Sales Invoice" && row.reference_name) {
+			tarik_ppn_nota_piutang(frm, row.reference_name);
+			return;
+		}
+
 		if (["Purchase Invoice", "Purchase Order"].includes(row.reference_doctype) && row.reference_name) {
 			allocate_outstanding_amount(frm, cdt, cdn);
 
@@ -772,6 +777,61 @@ async function set_note_from_purchase_invoice(frm) {
 
 	frm.set_value("note", lines.join("\n"));
 	frm.__note_from_purchase_invoice = true;
+}
+
+// PPN penjualan asset ditagihkan lewat Journal Entry tersendiri, jadi tidak ikut
+// muncul di Get Outstanding Invoices. Begitu nomor Sales Invoice-nya diisi, jurnal
+// PPN yang masih menggantung ditarik jadi baris referensi berikutnya supaya pokok
+// dan PPN terbayar sekaligus.
+function tarik_ppn_nota_piutang(frm, sales_invoice) {
+	if (frm.doc.payment_type !== "Receive") return;
+	if (!frm.doc.party || !frm.doc.paid_from) return;
+
+	frappe.call({
+		method: "sth.legal.custom.payment_entry.get_je_ppn_nota_piutang",
+		args: {
+			sales_invoice: sales_invoice,
+			party: frm.doc.party,
+			account: frm.doc.paid_from,
+			payment_entry: frm.doc.name,
+		},
+		callback(r) {
+			if (!r.message || !r.message.length) return;
+
+			const sudah_ada = (frm.doc.references || [])
+				.filter((d) => d.reference_doctype === "Journal Entry")
+				.map((d) => d.reference_name);
+
+			const ditambah = [];
+
+			r.message.forEach((je) => {
+				if (sudah_ada.includes(je.name)) return;
+
+				const baris = frm.add_child("references");
+				baris.reference_doctype = "Journal Entry";
+				baris.reference_name = je.name;
+				baris.total_amount = je.total;
+				baris.outstanding_amount = je.sisa;
+				baris.allocated_amount = je.sisa;
+
+				ditambah.push(je.name);
+			});
+
+			if (!ditambah.length) return;
+
+			frm.refresh_field("references");
+
+			// alokasi baris invoicenya sendiri diisi ERPNext lewat panggilan lain yang
+			// jalan berbarengan. paid_amount baru dijumlah setelah keduanya selesai,
+			// kalau tidak angkanya cuma sebesar PPN-nya
+			frappe.after_ajax(() => sync_paid_amount_from_references(frm));
+
+			frappe.show_alert({
+				message: __("PPN Nota Piutang ikut ditarik: {0}", [ditambah.join(", ")]),
+				indicator: "green",
+			});
+		},
+	});
 }
 
 function sync_paid_amount_from_references(frm) {
