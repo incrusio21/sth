@@ -633,7 +633,7 @@ frappe.ui.form.on("Payment Entry Reference", {
 		let row = locals[cdt][cdn];
 
 		if (row.reference_doctype === "Sales Invoice" && row.reference_name) {
-			tarik_ppn_nota_piutang(frm, row.reference_name);
+			isi_baris_sales_invoice(frm, row.reference_name);
 			return;
 		}
 
@@ -779,13 +779,22 @@ async function set_note_from_purchase_invoice(frm) {
 	frm.__note_from_purchase_invoice = true;
 }
 
-// PPN penjualan asset ditagihkan lewat Journal Entry tersendiri, jadi tidak ikut
-// muncul di Get Outstanding Invoices. Begitu nomor Sales Invoice-nya diisi, jurnal
-// PPN yang masih menggantung ditarik jadi baris referensi berikutnya supaya pokok
-// dan PPN terbayar sekaligus.
-function tarik_ppn_nota_piutang(frm, sales_invoice) {
-	if (frm.doc.payment_type !== "Receive") return;
-	if (!frm.doc.party || !frm.doc.paid_from) return;
+// Sales Invoice yang dipilih manual di references langsung dialokasi penuh sebesar
+// outstanding-nya, sejalan dengan perlakuan Purchase Invoice / Purchase Order.
+//
+// Sekalian menarik jurnal PPN Nota Piutang kalau ada: PPN penjualan asset ditagihkan
+// lewat Journal Entry tersendiri, jadi tidak ikut muncul di Get Outstanding Invoices,
+// dan ditarik ke sini supaya pokok dan PPN terbayar sekaligus. Alokasinya tetap
+// dijalankan walau tidak ada PPN — invoice biasa juga harus terisi otomatis.
+function isi_baris_sales_invoice(frm, sales_invoice) {
+	// ERPNext mengisi outstanding baris invoicenya lewat panggilan lain yang jalan
+	// berbarengan, jadi alokasi baru dihitung setelah semuanya selesai
+	const alokasikan = () => frappe.after_ajax(() => alokasikan_sesuai_outstanding(frm));
+
+	if (frm.doc.payment_type !== "Receive" || !frm.doc.party || !frm.doc.paid_from) {
+		alokasikan();
+		return;
+	}
 
 	frappe.call({
 		method: "sth.legal.custom.payment_entry.get_je_ppn_nota_piutang",
@@ -796,15 +805,13 @@ function tarik_ppn_nota_piutang(frm, sales_invoice) {
 			payment_entry: frm.doc.name,
 		},
 		callback(r) {
-			if (!r.message || !r.message.length) return;
-
 			const sudah_ada = (frm.doc.references || [])
 				.filter((d) => d.reference_doctype === "Journal Entry")
 				.map((d) => d.reference_name);
 
 			const ditambah = [];
 
-			r.message.forEach((je) => {
+			(r.message || []).forEach((je) => {
 				if (sudah_ada.includes(je.name)) return;
 
 				const baris = frm.add_child("references");
@@ -817,18 +824,16 @@ function tarik_ppn_nota_piutang(frm, sales_invoice) {
 				ditambah.push(je.name);
 			});
 
-			if (!ditambah.length) return;
+			if (ditambah.length) {
+				frm.refresh_field("references");
 
-			frm.refresh_field("references");
+				frappe.show_alert({
+					message: __("PPN Nota Piutang ikut ditarik: {0}", [ditambah.join(", ")]),
+					indicator: "green",
+				});
+			}
 
-			// outstanding baris invoicenya diisi ERPNext lewat panggilan lain yang jalan
-			// berbarengan, jadi alokasinya baru dihitung setelah keduanya selesai
-			frappe.after_ajax(() => alokasikan_sesuai_outstanding(frm));
-
-			frappe.show_alert({
-				message: __("PPN Nota Piutang ikut ditarik: {0}", [ditambah.join(", ")]),
-				indicator: "green",
-			});
+			alokasikan();
 		},
 	});
 }
