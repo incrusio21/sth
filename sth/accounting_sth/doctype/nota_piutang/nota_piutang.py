@@ -341,14 +341,15 @@ class NotaPiutang(Document):
 		je.sales_invoice  = self.sales_invoice
 
 		# Debit piutang customer, mengikuti akun piutang Sales Invoice-nya.
-		# Referensinya diisi supaya PPN ini menambah outstanding invoice itu,
-		# bukan berdiri sebagai piutang lepas di akun yang sama.
+		# Sengaja tanpa reference ke Sales Invoice: reference bikin PPN ini
+		# menambah outstanding invoice sehingga tidak lagi sama dengan grand
+		# total-nya. Tagihan PPN ini berdiri sendiri di akun piutang yang sama,
+		# dan ikut tertarik otomatis waktu invoice itu dibayarkan lewat Payment
+		# Entry (lihat sth.legal.custom.payment_entry.tambah_je_ppn_nota_piutang)
 		je.append("accounts", {
 			"account"                   : si.debit_to,
 			"party_type"                : "Customer",
 			"party"                     : si.customer,
-			"reference_type"            : "Sales Invoice",
-			"reference_name"            : self.sales_invoice,
 			"debit_in_account_currency" : ppn,
 			"credit_in_account_currency": 0,
 			"cost_center"               : cost_center,
