@@ -83,9 +83,15 @@ class Timbangan(Document):
 		# SPB yang dibuat otomatis dari Security Check Point belum punya detail
 		# blok, jadi total_janjang-nya masih 0 saat ditimbang
 		spb_doc.bjr = flt(spb_doc.total_weight / spb_doc.total_janjang) if spb_doc.total_janjang else 0
+
+		# netto dibagi menurut persentase tiap baris, bukan disalin utuh ke semua
+		# baris. dulu tiap baris membawa netto penuh, jadi dua baris blok yang sama
+		# sama-sama terhitung sebesar satu truk
+		spb_doc.bagi_berat_ke_baris(spb_doc.total_weight)
+
 		for row in spb_doc.details:
-			row.total_weight = self.netto
 			row.db_update()
+
 		spb_doc.db_update()
 
 	def on_cancel(self):
