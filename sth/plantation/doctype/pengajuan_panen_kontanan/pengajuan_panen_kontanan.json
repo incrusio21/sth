@@ -201,7 +201,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "bkm_panen.mandor",
+   "fetch_from": "bkm_panen.kode_mandor",
    "fieldname": "mandor",
    "fieldtype": "Link",
    "label": "Mandor",

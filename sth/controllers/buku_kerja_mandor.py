@@ -45,7 +45,12 @@ class BukuKerjaMandorController(PlantationController):
         ]
 
         self._clear_fields = []
-        self._mandor_dict = [{"fieldname": "mandor"}]
+        # kode_mandor, bukan mandor: field mandor menyimpan nilai mentah kiriman API
+        # yang bisa berupa ID User sistem luar. Employee-nya ada di kode_mandor.
+        #
+        # mandor_type tetap "mandor" supaya Buku Kerja Mandor Premi yang sudah ada
+        # tetap ketemu — kuncinya ikut nilai ini, bukan nama fieldnya
+        self._mandor_dict = [{"fieldname": "kode_mandor", "mandor_type": "mandor"}]
 
     def validate(self):
         self.clear_fields()
@@ -193,14 +198,16 @@ class BukuKerjaMandorController(PlantationController):
             mandor = self.get(d["fieldname"])
             if not mandor:
                 continue
-            
+
+            mandor_type = d.get("mandor_type") or d["fieldname"]
+
             bkm_mandor_creation_savepoint = "create_bkm_mandor"
             try:
                 frappe.db.savepoint(bkm_mandor_creation_savepoint)
                 bkm_obj = frappe.get_doc(
                     doctype="Buku Kerja Mandor Premi", 
                     employee=mandor, buku_kerja_mandor=self._bkm_name, company=self.company, posting_date=date,
-                    mandor_type=d["fieldname"]
+                    mandor_type=mandor_type
                 )
                 bkm_obj.flags.ignore_permissions = 1
                 bkm_obj.flags.transaction_employee = 1
@@ -213,7 +220,7 @@ class BukuKerjaMandorController(PlantationController):
                 
                 bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
                     "employee": mandor,
-                    "mandor_type": d["fieldname"],
+                    "mandor_type": mandor_type,
                     "company": self.company, 
                     "posting_date": date,
                     "buku_kerja_mandor": self._bkm_name

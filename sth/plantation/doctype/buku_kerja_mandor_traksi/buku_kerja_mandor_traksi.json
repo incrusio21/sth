@@ -12,6 +12,7 @@
   "naming_series",
   "unit",
   "mandor",
+  "kode_mandor",
   "designation",
   "trans_no",
   "rkh_no",
@@ -165,9 +166,17 @@
   },
   {
    "fieldname": "mandor",
+   "fieldtype": "Data",
+   "label": "Mandor (Kiriman)",
+   "read_only": 1,
+   "description": "Nilai mentah dari kiriman API. Bisa berupa ID User sistem luar, jadi tidak dijadikan link Employee."
+  },
+  {
+   "fieldname": "kode_mandor",
    "fieldtype": "Link",
    "label": "Mandor",
-   "options": "Employee"
+   "options": "Employee",
+   "description": "Employee yang jadi mandor. Untuk kiriman API diisi dari pemetaan ID User di MANDOR_API_MAP."
   },
   {
    "default": "Today",

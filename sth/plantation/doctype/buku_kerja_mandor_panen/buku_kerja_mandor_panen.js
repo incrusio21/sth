@@ -76,7 +76,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
 			}
 		})
 
-		for (const fieldname of ["mandor", "mandor1", "kerani"]) {
+		for (const fieldname of ["kode_mandor", "mandor1", "kerani"]) {
 			this.frm.set_query(fieldname, function () {
 				return {
 					query: "sth.controllers.queries.employee_designation_query",

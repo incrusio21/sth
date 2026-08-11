@@ -23,6 +23,7 @@
   "is_kontanan",
   "mandor1",
   "mandor",
+  "kode_mandor",
   "kerani_panen",
   "kerani",
   "status_panen",
@@ -139,9 +140,17 @@
   },
   {
    "fieldname": "mandor",
+   "fieldtype": "Data",
+   "label": "Mandor Panen (Kiriman)",
+   "read_only": 1,
+   "description": "Nilai mentah dari kiriman API. Bisa berupa ID User sistem luar, jadi tidak dijadikan link Employee."
+  },
+  {
+   "fieldname": "kode_mandor",
    "fieldtype": "Link",
    "label": "Mandor Panen",
-   "options": "Employee"
+   "options": "Employee",
+   "description": "Employee yang jadi mandor. Untuk kiriman API diisi dari pemetaan ID User di MANDOR_API_MAP."
   },
   {
    "fieldname": "mandor1",

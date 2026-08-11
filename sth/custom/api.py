@@ -18,38 +18,31 @@ MANDOR_API_MAP = {
 
 
 def fix_mandor_from_api(doc):
-	"""Ganti nilai mandor yang berupa ID User dengan NIK Employee-nya.
+	"""Isi `kode_mandor` (Link Employee) dari nilai `mandor` yang dikirim API.
 
-	Dipanggil dari before_insert, jadi penggantiannya sudah selesai sebelum link
-	Employee divalidasi.
+	`mandor` sengaja bertipe Data, bukan Link: sistem luar mengirim ID User-nya
+	sendiri dan payload itu tidak bisa diubah, jadi nilainya harus boleh masuk apa
+	adanya tanpa divalidasi sebagai Employee. Employee sebenarnya disimpan terpisah
+	di `kode_mandor`, dan itulah yang dibaca seluruh logika BKM.
 
-	ID yang belum terdaftar ditolak dengan pesannya sendiri. Tanpa itu yang muncul
-	cuma LinkValidationError "Could not find Mandor: USR..." yang tidak memberi
-	petunjuk bahwa yang kurang adalah entri di MANDOR_API_MAP.
+	ID yang belum terdaftar di MANDOR_API_MAP tidak menggagalkan dokumen — dulu
+	justru itu yang memblokir seluruh kiriman. `kode_mandor` dibiarkan kosong, dan
+	kode mentahnya tetap terbaca di `mandor` untuk ditelusuri.
 	"""
+	if doc.get("kode_mandor"):
+		return
+
 	mandor = doc.get("mandor")
 	if not mandor:
 		return
 
 	if mandor in MANDOR_API_MAP:
-		doc.mandor = MANDOR_API_MAP[mandor]
+		doc.kode_mandor = MANDOR_API_MAP[mandor]
 		return
 
-	# input manusia sudah dijaga link field-nya sendiri; yang diperiksa cuma
-	# kiriman mesin, yang nilainya tidak bisa dikoreksi lewat form
-	if doc.owner != USER_API:
-		return
-
+	# dokumen lama dan input manusia mengirim NIK Employee di field yang sama
 	if frappe.db.exists("Employee", mandor):
-		return
-
-	frappe.throw(
-		_("Mandor {0} belum dipetakan ke NIK karyawan, dan tidak ada Employee dengan "
-		  "kode itu. Tambahkan pemetaannya di MANDOR_API_MAP pada sth/custom/api.py — "
-		  "ID User sistem luar tidak tersimpan di ERP, jadi tidak bisa dicari sendiri."
-		  ).format(frappe.bold(mandor)),
-		title=_("Mandor Belum Dipetakan")
-	)
+		doc.kode_mandor = mandor
 
 
 def submit_after_insert(doc):
