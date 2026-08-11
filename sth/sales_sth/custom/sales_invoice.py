@@ -97,19 +97,48 @@ def matikan_pembulatan(doc):
 	doc.base_rounded_total = 0
 
 
+def validate_tanpa_potongan_tambahan(doc):
+	"""Jurnal penjualan asset dirakit sendiri jadi dua baris — piutang lawan akun
+	penjualan aset — di SalesInvoice.get_gl_entries_disposal().
+
+	Pajak dan write-off tidak ikut dijurnal di sana, jadi kalau invoicenya punya
+	salah satunya kedua sisi jurnal tidak akan seimbang dan submit gagal dengan
+	pesan yang tidak menjelaskan apa-apa. Ditolak di sini selagi masih jelas
+	sebabnya. PPN penjualan asset memang ditagih terpisah lewat Nota Piutang.
+	"""
+	masalah = []
+
+	if doc.get("taxes"):
+		masalah.append(_("baris pajak di tabel Taxes and Charges"))
+
+	if flt(doc.get("write_off_amount")):
+		masalah.append(_("Write Off Amount"))
+
+	if masalah:
+		frappe.throw(
+			_("Sales Invoice penjualan asset tidak boleh punya {0}. Jurnalnya cuma piutang "
+			  "lawan akun penjualan aset. PPN-nya ditagih lewat Nota Piutang, bukan dari sini.").format(
+				frappe.bold(" dan ".join(masalah))
+			),
+			title=_("Jurnal Penjualan Asset Harus Dua Baris")
+		)
+
+
 def validate_penjualan_asset(self, method=None):
-	"""Penjualan asset hanya boleh sebanyak qty yang sudah discrap, dan jurnalnya
-	cuma piutang lawan akun penjualan asset di baris item.
+	"""Penjualan asset hanya boleh sebanyak qty yang sudah discrap.
 
 	Nilai buku asetnya sudah dihapus waktu discrap lewat Asset Scrap Request, jadi
-	jurnal pelepasan bawaan ERPNext — akumulasi penyusutan, akun aset tetap, dan
-	laba/rugi pelepasan — tidak boleh terbentuk lagi dari invoice ini. Caranya
-	dengan melepas penanda is_fixed_asset di barisnya; link Asset-nya tetap
-	disimpan untuk jejak dan perhitungan sisa qty yang boleh dijual."""
+	perlakuan aset tetap bawaan ERPNext tidak boleh jalan lagi dari invoice ini.
+	Penanda is_fixed_asset dilepas untuk itu; link Asset-nya tetap disimpan untuk
+	jejak dan perhitungan sisa qty yang boleh dijual.
+
+	Jurnalnya sendiri tidak bergantung pada penanda ini — SalesInvoice
+	.get_gl_entries_disposal() menulis dua barisnya sendiri."""
 	if self.jenis_penagihan != "Disposal":
 		return
 
 	matikan_pembulatan(self)
+	validate_tanpa_potongan_tambahan(self)
 
 	from sth.overrides.asset import sisa_qty_scrap
 
