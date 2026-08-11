@@ -1,6 +1,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 # Akun penjualan asset. Dicari lewat nomor akun, bukan nama, karena nama akun
 # selalu berakhiran singkatan company (mis. "9190201 - ... - TML").
@@ -77,6 +78,42 @@ def set_account_disposal(doc):
 	for item in doc.items:
 		item.expense_account = account
 		item.income_account = account
+
+
+def validate_penjualan_asset(self, method=None):
+	"""Penjualan asset hanya boleh sebanyak qty yang sudah discrap, dan jurnalnya
+	cuma piutang lawan akun penjualan asset di baris item.
+
+	Nilai buku asetnya sudah dihapus waktu discrap lewat Asset Scrap Request, jadi
+	jurnal pelepasan bawaan ERPNext — akumulasi penyusutan, akun aset tetap, dan
+	laba/rugi pelepasan — tidak boleh terbentuk lagi dari invoice ini. Caranya
+	dengan melepas penanda is_fixed_asset di barisnya; link Asset-nya tetap
+	disimpan untuk jejak dan perhitungan sisa qty yang boleh dijual."""
+	if self.jenis_penagihan != "Disposal":
+		return
+
+	from sth.overrides.asset import sisa_qty_scrap
+
+	for item in self.items:
+		if not item.asset:
+			frappe.throw(
+				_("Baris {0}: Asset yang dijual wajib dipilih untuk Sales Invoice Disposal.").format(
+					item.idx
+				)
+			)
+
+		sisa = sisa_qty_scrap(item.asset, kecuali_sales_invoice=self.name)
+
+		if flt(item.qty) > sisa:
+			frappe.throw(
+				_("Baris {0}: Asset {1} yang sudah discrap dan belum terjual tinggal {2}, "
+				  "tidak bisa dijual sebanyak {3}.").format(
+					item.idx, frappe.bold(item.asset), sisa, flt(item.qty)
+				),
+				title=_("Melebihi Qty Discrap")
+			)
+
+		item.is_fixed_asset = 0
 
 
 @frappe.whitelist()

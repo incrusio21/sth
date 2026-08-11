@@ -20,7 +20,9 @@ frappe.ui.form.on('Asset', {
 
             setup_approval_scrap(frm);
 
-            if (frm.doc.status === "Scrapped") {
+            // scrap sebagian tidak mengubah status jadi Scrapped, cuma mencatat
+            // qty yang boleh dijual di qty_scrapped
+            if (frm.doc.status === "Scrapped" || frm.doc.qty_scrapped > 0) {
                 frm.add_custom_button(__("Sell Asset"), function() {
                     sell_asset(frm);
                 }, __("Manage"));
@@ -37,6 +39,8 @@ frappe.ui.form.on('Asset', {
                 frappe.set_route("query-report", "General Ledger");
             }, __("View"));
 
+            // Nota Piutang sub tipe Asset mensyaratkan asset berstatus Scrapped,
+            // jadi tombolnya tidak ikut dibuka untuk scrap sebagian
             if (frm.doc.status === "Scrapped") {
                 frm.add_custom_button(__("Nota Piutang"), function() {
                     make_nota_piutang(frm);
