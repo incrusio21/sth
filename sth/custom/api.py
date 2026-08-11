@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 
 # User yang dipakai sistem luar waktu mengirim dokumen lewat REST API. Dipakai
 # untuk membedakan kiriman mesin dari input manusia.
@@ -6,6 +7,10 @@ USER_API = "api@sth.com"
 
 # Mandor pada data BKM dari API kadang terkirim sebagai ID User, bukan Employee.
 # Petakan ke NIK karyawan yang benar supaya link Employee-nya valid.
+#
+# Ditulis di sini, bukan dicari ke database, karena ID User sistem luar memang
+# tidak tersimpan di mana pun di ERP — tidak ada field Employee yang memuatnya.
+# Mandor baru harus ditambahkan ke daftar ini dan butuh deploy.
 MANDOR_API_MAP = {
 	"USR251015341": "1506012411940004",
 	"USR251015035": "1206010909900006",
@@ -13,10 +18,38 @@ MANDOR_API_MAP = {
 
 
 def fix_mandor_from_api(doc):
-	"""Ganti nilai mandor yang berupa ID User dengan NIK Employee-nya."""
+	"""Ganti nilai mandor yang berupa ID User dengan NIK Employee-nya.
+
+	Dipanggil dari before_insert, jadi penggantiannya sudah selesai sebelum link
+	Employee divalidasi.
+
+	ID yang belum terdaftar ditolak dengan pesannya sendiri. Tanpa itu yang muncul
+	cuma LinkValidationError "Could not find Mandor: USR..." yang tidak memberi
+	petunjuk bahwa yang kurang adalah entri di MANDOR_API_MAP.
+	"""
 	mandor = doc.get("mandor")
+	if not mandor:
+		return
+
 	if mandor in MANDOR_API_MAP:
 		doc.mandor = MANDOR_API_MAP[mandor]
+		return
+
+	# input manusia sudah dijaga link field-nya sendiri; yang diperiksa cuma
+	# kiriman mesin, yang nilainya tidak bisa dikoreksi lewat form
+	if doc.owner != USER_API:
+		return
+
+	if frappe.db.exists("Employee", mandor):
+		return
+
+	frappe.throw(
+		_("Mandor {0} belum dipetakan ke NIK karyawan, dan tidak ada Employee dengan "
+		  "kode itu. Tambahkan pemetaannya di MANDOR_API_MAP pada sth/custom/api.py — "
+		  "ID User sistem luar tidak tersimpan di ERP, jadi tidak bisa dicari sendiri."
+		  ).format(frappe.bold(mandor)),
+		title=_("Mandor Belum Dipetakan")
+	)
 
 
 def submit_after_insert(doc):
