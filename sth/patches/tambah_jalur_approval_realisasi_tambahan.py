@@ -72,8 +72,8 @@ def buat_custom_field():
 		"insert_after": "tipe_transfer",
 		"read_only": 1,
 		"no_copy": 1,
+		"hidden": 0,
 		"depends_on": "eval:doc.tipe_transfer == 'Realisasi PDO'",
-		"description": "Terisi otomatis kalau ada baris realisasi yang tidak berasal dari PDO. Menentukan jalur approval.",
 	}, ignore_validate=True)
 
 

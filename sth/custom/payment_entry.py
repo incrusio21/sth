@@ -805,104 +805,169 @@ def get_no_rekening(party_type=None, party=None,
 
 	return result
 
-def validate_payment_voucher_kas_pdo(doc, method=None):
-
-	TABLE_TOTAL_FIELDS = {
-		"pdo_bahan_bakar": {
-			"revised": "revised_price_total",
-			"normal": "price_total"
-		},
-		"pdo_perjalanan_dinas": {
-			"revised": "revised_total",
-			"normal": "total"
-		},
-		"pdo_kas": {
-			"revised": "revised_total",
-			"normal": "total"
-		}
+# Field total per tabel PDO. "revised" dipakai kalau terisi, kalau tidak jatuh
+# ke "normal" — plafon hasil revisi yang menang.
+TABLE_TOTAL_FIELDS = {
+	"pdo_bahan_bakar": {
+		"revised": "revised_price_total",
+		"normal": "price_total"
+	},
+	"pdo_perjalanan_dinas": {
+		"revised": "revised_total",
+		"normal": "total"
+	},
+	"pdo_kas": {
+		"revised": "revised_total",
+		"normal": "total"
 	}
+}
 
-	for row in doc.payment_voucher_kas_pdo:
-		if row.tipe_pdo.lower() != "dana cadangan":
-			if not row.penerima:
-				# Baris gabungan per nama barang yang penerimanya lebih dari satu.
-				# Plafon di PDO disimpan per pegawai, jadi baris begini tidak punya
-				# pembanding — memaksakannya menghasilkan plafon 0 dan peringatan
-				# "melebihi batas" yang selalu keliru.
-				continue
 
-			no_pdo = row.no_pdo
-			tipe_pdo = row.tipe_pdo
-			penerima = row.penerima
+def nama_tabel_pdo(tipe_pdo):
+	"""Contoh: "Bahan Bakar" -> "pdo_bahan_bakar"."""
+	return "pdo_" + (tipe_pdo or "").lower().replace(" ", "_")
 
-			# Ambil nama table dari tipe_pdo
-			# Contoh: "Bahan Bakar" -> "pdo_bahan_bakar"
-			table_name = "pdo_" + tipe_pdo.lower().replace(" ", "_")
 
-			# Ambil total harga dari PDO untuk penerima ini
-			pdo_doc = frappe.get_doc("Permintaan Dana Operasional", no_pdo)
-			
-			table_name = "pdo_" + tipe_pdo.lower().replace(" ", "_")
+def ambil_plafon_pdo(no_pdo, tipe_pdo, penerima):
+	"""Total yang dianggarkan PDO untuk satu penerima pada satu tipe.
 
-			# Ambil field names untuk table ini
-			field_config = TABLE_TOTAL_FIELDS.get(table_name)
-			if not field_config:
-				frappe.throw(f"Tipe PDO <b>{tipe_pdo}</b> tidak dikenali.")
+	Mengembalikan None kalau tipe_pdo tidak dikenali; pemanggil yang memutuskan
+	apakah itu perlu dilempar sebagai error atau cukup dilewati.
+	"""
+	table_name = nama_tabel_pdo(tipe_pdo)
+	field_config = TABLE_TOTAL_FIELDS.get(table_name)
+	if not field_config:
+		return None
 
-			revised_field = field_config["revised"]
-			normal_field = field_config["normal"]
+	pdo_doc = frappe.get_doc("Permintaan Dana Operasional", no_pdo)
 
-			total_harga_pdo = 0
-			for pdo_row in pdo_doc.get(table_name):
-				if pdo_row.employee == penerima:
-					total_harga_pdo += (
-						getattr(pdo_row, revised_field) or getattr(pdo_row, normal_field) or 0
-					)
+	total = 0
+	for pdo_row in pdo_doc.get(table_name) or []:
+		if pdo_row.employee == penerima:
+			total += (
+				getattr(pdo_row, field_config["revised"], 0)
+				or getattr(pdo_row, field_config["normal"], 0)
+				or 0
+			)
 
-			# if total_harga_pdo == 0:
-			# 	frappe.throw(
-			# 		f"Penerima <b>{penerima}</b> tidak ditemukan di tabel <b>{table_name}</b> "
-			# 		f"pada PDO <b>{no_pdo}</b>."
-			# 	)
+	return total
 
-			# Hitung total Payment Entry yang sudah ada (diluar doc ini)
-			existing_entries = frappe.db.sql("""
-				SELECT SUM(pe.paid_amount) as total_dibayar
-				FROM `tabPayment Entry` pe
-				INNER JOIN `tabPayment Voucher Kas PDO` pvkp ON pvkp.parent = pe.name
-				WHERE pvkp.no_pdo = %s
-				  AND pvkp.tipe_pdo = %s
-				  AND pvkp.penerima = %s
-				  AND pe.docstatus = 1
-				  AND pe.name != %s
-			""", (no_pdo, tipe_pdo, penerima, doc.name), as_dict=True)
 
-			total_sudah_dibayar = existing_entries[0].total_dibayar or 0
+def total_realisasi_lain(no_pdo, tipe_pdo, penerima, exclude_pe):
+	"""Total yang sudah direalisasi Payment Entry lain yang sudah tersubmit.
 
-			# Tambah total dari doc saat ini (semua row yang cocok)
-			total_doc_ini = doc.paid_amount
+	Yang dijumlahkan total per baris, bukan paid_amount milik PE-nya: satu PE
+	bisa memuat banyak baris untuk PDO maupun penerima yang berbeda-beda.
+	"""
+	hasil = frappe.db.sql("""
+		select coalesce(sum(baris.total), 0)
+		from `tabPayment Voucher Kas PDO` baris
+		inner join `tabPayment Entry` pe on pe.name = baris.parent
+		where baris.parenttype = 'Payment Entry'
+			and baris.no_pdo = %s
+			and baris.tipe_pdo = %s
+			and baris.penerima = %s
+			and pe.docstatus = 1
+			and pe.name != %s
+	""", (no_pdo, tipe_pdo, penerima, exclude_pe or ""))
 
-			total_keseluruhan = total_sudah_dibayar + total_doc_ini
+	return flt(hasil[0][0]) if hasil else 0
 
-			if total_keseluruhan > total_harga_pdo:
-				frappe.msgprint(
-					f"Total pembayaran untuk penerima <b>{penerima}</b> "
-					f"pada PDO <b>{no_pdo}</b> ({tipe_pdo}) "
-					f"melebihi batas yang ditentukan.<br>"
-					f"Total PDO: <b>Rp {frappe.format(total_harga_pdo, 'Currency')}</b><br>"
-					f"Sudah dibayar: <b>Rp {frappe.format(total_sudah_dibayar, 'Currency')}</b><br>"
-					f"Akan dibayar sekarang: <b>Rp {frappe.format(total_doc_ini, 'Currency')}</b><br>"
-					f"Akan masuk ke non PDO sejumlah: <b>Rp {frappe.format(total_sudah_dibayar + total_doc_ini - total_harga_pdo, 'Currency')}</b><br>"
 
-				)
+def kelompokkan_baris_pdo(doc, hanya_dari_pdo=False):
+	"""Jumlahkan baris grid per (no_pdo, tipe_pdo, penerima).
+
+	Plafon di PDO disimpan per penerima, bukan per baris, jadi perbandingan apa
+	pun harus dilakukan atas jumlah per penerima — satu penerima bisa muncul di
+	beberapa baris grid sekaligus.
+
+	hanya_dari_pdo=True menyisakan baris hasil tarik dari PDO saja; dipakai
+	set_realisasi_tambahan, yang baris manualnya sudah tertangkap lebih dulu.
+	"""
+	per_penerima = {}
+
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if (row.tipe_pdo or "").lower() == "dana cadangan":
+			# Dana cadangan memang tidak berplafon.
+			continue
+
+		if hanya_dari_pdo and not row.pdo_child_name:
+			continue
+
+		if not (row.no_pdo and row.penerima):
+			# Baris gabungan per nama barang yang penerimanya lebih dari satu.
+			# Plafon di PDO disimpan per pegawai, jadi baris begini tidak punya
+			# pembanding — memaksakannya menghasilkan plafon 0 dan peringatan
+			# "melebihi batas" yang selalu keliru.
+			continue
+
+		kunci = (row.no_pdo, row.tipe_pdo, row.penerima)
+		per_penerima[kunci] = per_penerima.get(kunci, 0) + flt(row.total)
+
+	return per_penerima
+
+
+def validate_payment_voucher_kas_pdo(doc, method=None):
+	"""Peringatkan kalau realisasi seorang penerima melewati plafonnya di PDO.
+
+	Peringatan muncul sekali per penerima, bukan sekali per baris grid.
+	"""
+	for (no_pdo, tipe_pdo, penerima), total_doc_ini in kelompokkan_baris_pdo(doc).items():
+		# Plafon dihitung helper yang sama dengan set_realisasi_tambahan supaya
+		# kedua tempat memakai angka batas yang persis sama.
+		total_harga_pdo = ambil_plafon_pdo(no_pdo, tipe_pdo, penerima)
+		if total_harga_pdo is None:
+			frappe.throw(f"Tipe PDO <b>{tipe_pdo}</b> tidak dikenali.")
+
+		total_sudah_dibayar = total_realisasi_lain(no_pdo, tipe_pdo, penerima, doc.name)
+		total_keseluruhan = total_sudah_dibayar + total_doc_ini
+
+		# Dibulatkan dulu supaya selisih pecahan sen tidak dianggap kelebihan.
+		if flt(total_keseluruhan, 2) <= flt(total_harga_pdo, 2):
+			continue
+
+		frappe.msgprint(
+			f"Total pembayaran untuk penerima <b>{penerima}</b> "
+			f"pada PDO <b>{no_pdo}</b> ({tipe_pdo}) "
+			f"melebihi batas yang ditentukan.<br>"
+			f"Total PDO: <b>Rp {frappe.format(total_harga_pdo, 'Currency')}</b><br>"
+			f"Sudah dibayar: <b>Rp {frappe.format(total_sudah_dibayar, 'Currency')}</b><br>"
+			f"Akan dibayar sekarang: <b>Rp {frappe.format(total_doc_ini, 'Currency')}</b><br>"
+			f"Akan masuk ke non PDO sejumlah: <b>Rp {frappe.format(total_keseluruhan - total_harga_pdo, 'Currency')}</b><br>"
+		)
+
+
+def ada_baris_melebihi_plafon(doc):
+	"""True kalau ada penerima yang realisasinya melewati plafon di PDO."""
+	for (no_pdo, tipe_pdo, penerima), total_doc_ini in kelompokkan_baris_pdo(doc, hanya_dari_pdo=True).items():
+		plafon = ambil_plafon_pdo(no_pdo, tipe_pdo, penerima)
+		if plafon is None:
+			continue
+
+		sudah_dibayar = total_realisasi_lain(no_pdo, tipe_pdo, penerima, doc.name)
+
+		# Dibulatkan dulu supaya selisih pecahan sen tidak dianggap kelebihan.
+		if flt(sudah_dibayar + total_doc_ini, 2) > flt(plafon, 2):
+			return True
+
+	return False
+
 
 def set_realisasi_tambahan(doc, method=None):
-	"""Tandai Realisasi PDO yang memuat baris di luar PDO.
+	"""Tandai Realisasi PDO yang pada akhirnya mengisi tabel NON PDO.
 
-	Baris hasil tarik dari PDO selalu membawa pdo_child_name; baris yang
-	ditambah manual di grid tidak punya, dan baris begitulah yang saat submit
-	masuk ke tabel NON PDO lewat update_pdo_non_pdo_table. Penanda ini yang
-	dipakai Workflow Approval Payment Voucher untuk memilih jalur approval.
+	Dua hal yang dihitung tambahan, keduanya berakhir sama di NON PDO:
+
+	1. Baris yang ditambah manual di grid. Baris hasil tarik dari PDO selalu
+	   membawa pdo_child_name, yang manual tidak, dan baris begitulah yang saat
+	   submit dipindahkan update_pdo_non_pdo_table.
+	2. Baris yang memang berasal dari PDO tapi nilainya, digabung realisasi
+	   sebelumnya, melewati plafon penerima di PDO. Kelebihannya juga jatuh ke
+	   NON PDO, jadi tidak masuk akal kalau jalur approval-nya lebih longgar
+	   daripada nomor 1.
+
+	Penanda ini yang dipakai Workflow Approval Payment Voucher untuk memilih
+	jalur approval.
 	"""
 	if not doc.meta.has_field("realisasi_tambahan"):
 		return
@@ -910,10 +975,12 @@ def set_realisasi_tambahan(doc, method=None):
 	tambahan = 0
 
 	if doc.tipe_transfer == "Realisasi PDO":
-		for row in doc.get("payment_voucher_kas_pdo") or []:
-			if not row.pdo_child_name:
-				tambahan = 1
-				break
+		baris = doc.get("payment_voucher_kas_pdo") or []
+
+		if any(not row.pdo_child_name for row in baris):
+			tambahan = 1
+		elif ada_baris_melebihi_plafon(doc):
+			tambahan = 1
 
 	doc.realisasi_tambahan = tambahan
 
