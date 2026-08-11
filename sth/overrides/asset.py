@@ -221,15 +221,114 @@ def scrap_asset(asset_name, **kwargs):
 BASIS_SPLIT = 10000
 
 
+def finance_book_tanpa_jadwal_aktif(asset):
+	"""Baris finance book Asset yang tidak punya Asset Depreciation Schedule
+	berstatus Active.
+
+	Kedua fungsi split bawaan ERPNext menyalin jadwal penyusutan asset asal ke
+	pecahannya tanpa memeriksa jadwalnya ada atau tidak, jadi baris seperti ini
+	bikin pemecahan gagal dengan TypeError 'NoneType' object is not iterable."""
+	from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+		get_asset_depr_schedule_doc,
+	)
+
+	return [
+		row
+		for row in asset.get("finance_books") or []
+		if not get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
+	]
+
+
+def pecah_asset_tanpa_jadwal(asset, bagian, sisa):
+	"""Pemecahan untuk Asset yang tidak punya jadwal penyusutan aktif sama sekali.
+
+	Isinya create_new_asset_after_split dan update_existing_asset bawaan ERPNext
+	tanpa bagian penyalinan jadwal penyusutan dan referensi Journal Entry-nya,
+	karena di asset seperti ini memang tidak ada yang bisa disalin. Tambahannya
+	cuma value_after_depreciation, yang di bawaannya tidak ikut dibagi karena
+	asset berjadwal selalu bernilai 0 di field itu; di asset tanpa jadwal, field
+	itulah nilai bukunya dan dipakai jurnal scrap.
+
+	Mengembalikan dokumen Asset baru berisi `bagian` dari nilai asset asal."""
+	from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+
+	total = asset.asset_quantity
+
+	def porsi(nilai, pembilang):
+		return flt((flt(nilai) * pembilang) / total)
+
+	asset_baru = frappe.copy_doc(asset)
+	asset_baru.gross_purchase_amount = porsi(asset.gross_purchase_amount, bagian)
+	if asset.purchase_amount:
+		asset_baru.purchase_amount = asset_baru.gross_purchase_amount
+	asset_baru.opening_accumulated_depreciation = porsi(asset.opening_accumulated_depreciation, bagian)
+	asset_baru.value_after_depreciation = porsi(asset.value_after_depreciation, bagian)
+	asset_baru.asset_quantity = bagian
+	asset_baru.split_from = asset.name
+
+	for row in asset_baru.get("finance_books"):
+		row.value_after_depreciation = porsi(row.value_after_depreciation, bagian)
+		row.expected_value_after_useful_life = porsi(row.expected_value_after_useful_life, bagian)
+
+	asset_baru.insert()
+	add_asset_activity(
+		asset_baru.name,
+		_("Asset created after being split from Asset {0}").format(get_link_to_form("Asset", asset.name)),
+	)
+	asset_baru.submit()
+	asset_baru.set_status()
+
+	if not asset_baru.calculate_depreciation:
+		# set_missing_values ERPNext mengisi finance book dari Asset Category ke tiap
+		# asset baru yang tabelnya masih kosong, dan prepare_depreciation_data yang
+		# biasanya membuangnya lagi dilewati karena split_from terisi. baris nyasar
+		# itu yang bikin fungsi split bawaan error, jadi dibersihkan dari pecahannya
+		frappe.db.delete("Asset Finance Book", {"parent": asset_baru.name, "parenttype": "Asset"})
+
+	frappe.db.set_value(
+		"Asset",
+		asset.name,
+		{
+			"gross_purchase_amount": porsi(asset.gross_purchase_amount, sisa),
+			"opening_accumulated_depreciation": porsi(asset.opening_accumulated_depreciation, sisa),
+			"value_after_depreciation": porsi(asset.value_after_depreciation, sisa),
+			"asset_quantity": sisa,
+		},
+	)
+
+	for row in asset.get("finance_books"):
+		frappe.db.set_value(
+			"Asset Finance Book",
+			row.name,
+			{
+				"value_after_depreciation": porsi(row.value_after_depreciation, sisa),
+				"expected_value_after_useful_life": porsi(row.expected_value_after_useful_life, sisa),
+			},
+		)
+
+	add_asset_activity(
+		asset.name,
+		_("Asset updated after being split into Asset {0}").format(
+			get_link_to_form("Asset", asset_baru.name)
+		),
+	)
+
+	return asset_baru
+
+
 def split_asset_by_persentase(asset_name, persentase, qty_split=1):
 	"""Pecah Asset berdasarkan persentase nilai, bukan rasio qty.
 
 	Dipakai scrap sebagian: asset ber-qty 1 pun bisa dipecah, misalnya bangunan
 	yang rusak 30%. Fungsi bawaan ERPNext (create_new_asset_after_split dan
-	update_existing_asset) tetap dipakai supaya jadwal penyusutan dan referensi
-	Journal Entry ikut terbagi persis seperti split biasa; yang diganti cuma
-	rasionya, lewat asset_quantity dokumen di memori. Qty yang sebenarnya
-	dipasang ulang ke DB setelah pemecahan selesai.
+	update_existing_asset) tetap dipakai selama asetnya punya jadwal penyusutan
+	aktif, supaya jadwal penyusutan dan referensi Journal Entry ikut terbagi
+	persis seperti split biasa; yang diganti cuma rasionya, lewat asset_quantity
+	dokumen di memori. Qty yang sebenarnya dipasang ulang ke DB setelah
+	pemecahan selesai.
+
+	Asset tanpa jadwal penyusutan aktif dipecah lewat pecah_asset_tanpa_jadwal,
+	karena fungsi bawaannya error di asset seperti itu.
 
 	Mengembalikan nama Asset baru yang berisi bagian sebesar persentase itu."""
 	from erpnext.assets.doctype.asset.asset import (
@@ -259,8 +358,29 @@ def split_asset_by_persentase(asset_name, persentase, qty_split=1):
 	# rasio pembagi kedua fungsi bawaan dibaca dari dokumen di memori ini
 	asset.asset_quantity = BASIS_SPLIT
 
-	asset_baru = create_new_asset_after_split(asset, bagian)
-	update_existing_asset(asset, BASIS_SPLIT - bagian, asset_baru.name)
+	finance_books = asset.get("finance_books") or []
+	tanpa_jadwal = finance_book_tanpa_jadwal_aktif(asset)
+
+	if finance_books and not tanpa_jadwal:
+		asset_baru = create_new_asset_after_split(asset, bagian)
+		update_existing_asset(asset, BASIS_SPLIT - bagian, asset_baru.name)
+	elif len(tanpa_jadwal) == len(finance_books):
+		# tidak ada satu pun jadwal penyusutan yang bisa disalin ke pecahannya,
+		# termasuk asset yang memang tidak disusutkan (tanpa baris finance book)
+		asset_baru = pecah_asset_tanpa_jadwal(asset, bagian, BASIS_SPLIT - bagian)
+	else:
+		# sebagian buku punya jadwal, sebagian tidak. dibagi sendiri hasilnya
+		# pasti timpang, jadi lebih baik berhenti dan minta jadwalnya dibereskan
+		frappe.throw(
+			_(
+				"Asset {0} punya finance book tanpa jadwal penyusutan aktif: {1}. "
+				"Lengkapi dulu Asset Depreciation Schedule-nya sebelum discrap sebagian."
+			).format(
+				asset_name,
+				", ".join(row.finance_book or _("(tanpa finance book)") for row in tanpa_jadwal),
+			),
+			title=_("Jadwal Penyusutan Tidak Lengkap"),
+		)
 
 	# kedua fungsi di atas ikut menyimpan qty berbasis 10000 tadi, jadi qty yang
 	# sebenarnya dipasang ulang di sini. ditulis langsung supaya tidak memicu

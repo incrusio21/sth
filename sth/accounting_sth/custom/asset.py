@@ -5,7 +5,14 @@ def cek_prec_untuk_asset(doc, method):
 
     if not doc.purchase_receipt:
         return
-    
+
+    if doc.split_from:
+        # asset pecahan tidak menambah apa pun terhadap Purchase Receipt-nya:
+        # nilainya dipotong dari asset asal yang sudah ikut terhitung di sini.
+        # tanpa penjaga ini, scrap sebagian selalu ditolak karena jumlah asset
+        # jadi melebihi qty PR
+        return
+
     pr_item = frappe.db.get_value(
         "Purchase Receipt Item",
         doc.purchase_receipt_item,
@@ -19,7 +26,8 @@ def cek_prec_untuk_asset(doc, method):
     filters = {
         "purchase_receipt": doc.purchase_receipt,
         "purchase_receipt_item": doc.purchase_receipt_item,
-        "docstatus": ["!=", 2]  # Exclude cancelled assets
+        "docstatus": ["!=", 2],  # Exclude cancelled assets
+        "split_from": ["is", "not set"]  # pecahan bukan asset tambahan
     }
     
     if not doc.is_new():
