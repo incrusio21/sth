@@ -166,11 +166,16 @@ class NotaPiutang(Document):
 				title="Duplikat Tidak Diizinkan"
 			)
 
-		# diambil ulang di server supaya nilainya tidak bisa dikarang dari sisi client
+		# DPP diambil ulang di server supaya tidak bisa dikarang dari sisi client.
+		# PPN Keluaran dibiarkan sesuai isian user karena fieldnya boleh diubah,
+		# dan nilai penjualannya mengikuti DPP + PPN yang berlaku.
 		nilai = get_nilai_sales_invoice(self.sales_invoice)
-		self.dpp_jual_asset  = nilai["dpp"]
-		self.ppn_jual_asset  = nilai["ppn"]
-		self.nilai_jual_asset = nilai["nilai"]
+		self.dpp_jual_asset = nilai["dpp"]
+
+		if flt(self.ppn_jual_asset) < 0:
+			frappe.throw("PPN Keluaran tidak boleh bernilai negatif")
+
+		self.nilai_jual_asset = flt(self.dpp_jual_asset) + flt(self.ppn_jual_asset)
 
 	def calculate_barang_non_stok_table(self):
 		if not self.get("barang_non_stok_table"):

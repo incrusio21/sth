@@ -162,12 +162,11 @@
   {
    "default": "0",
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Jual Asset\"",
-   "description": "Total pajak Sales Invoice tersebut",
+   "description": "Terisi otomatis dari total pajak Sales Invoice tersebut, boleh diubah bila nilainya berbeda. Nilai Penjualan Asset ikut menyesuaikan.",
    "fieldname": "ppn_jual_asset",
    "fieldtype": "Currency",
    "label": "PPN Keluaran",
-   "no_copy": 1,
-   "read_only": 1
+   "no_copy": 1
   },
   {
    "default": "0",

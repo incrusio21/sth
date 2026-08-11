@@ -120,6 +120,15 @@ frappe.ui.form.on('Nota Piutang', {
 		});
 	},
 
+	ppn_jual_asset: function(frm) {
+		if (frm.doc.sub_tipe_others !== 'Jual Asset') return;
+
+		frm.set_value(
+			'nilai_jual_asset',
+			flt(frm.doc.dpp_jual_asset) + flt(frm.doc.ppn_jual_asset)
+		);
+	},
+
 	sub_tipe_others: function(frm) {
 		if (frm.doc.sub_tipe_others === 'Asset' && frm.doc.asset) {
 			frm.trigger('asset');
