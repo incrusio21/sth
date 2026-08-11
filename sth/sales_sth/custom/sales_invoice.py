@@ -80,6 +80,23 @@ def set_account_disposal(doc):
 		item.income_account = account
 
 
+def matikan_pembulatan(doc):
+	"""Jurnal penjualan asset harus persis dua baris: piutang lawan akun penjualan.
+
+	Pembulatan grand_total memunculkan baris ketiga ke akun Round Off company.
+	Selain menyalakan disable_rounded_total, angka pembulatan yang terlanjur
+	dihitung sisi client ikut dinolkan — validate ERPNext tidak dipanggil di
+	override Sales Invoice, jadi tidak ada yang menghitung ulang field ini di
+	server. Tanpa dinolkan, make_gle_for_rounding_adjustment() tetap membaca
+	rounding_adjustment yang lama dan barisnya tetap terbentuk.
+	"""
+	doc.disable_rounded_total = 1
+	doc.rounding_adjustment = 0
+	doc.base_rounding_adjustment = 0
+	doc.rounded_total = 0
+	doc.base_rounded_total = 0
+
+
 def validate_penjualan_asset(self, method=None):
 	"""Penjualan asset hanya boleh sebanyak qty yang sudah discrap, dan jurnalnya
 	cuma piutang lawan akun penjualan asset di baris item.
@@ -91,6 +108,8 @@ def validate_penjualan_asset(self, method=None):
 	disimpan untuk jejak dan perhitungan sisa qty yang boleh dijual."""
 	if self.jenis_penagihan != "Disposal":
 		return
+
+	matikan_pembulatan(self)
 
 	from sth.overrides.asset import sisa_qty_scrap
 

@@ -4,6 +4,28 @@ from frappe.utils import get_last_day,flt
 
 class SalesInvoice(SalesInvoice):
 	def validate(self):
+		# PENJAGA: validate() ini tidak memanggil super().validate(), jadi seluruh
+		# validate ERPNext dilewati. Sebelum mengembalikannya, sadari tiga hal di
+		# dalamnya yang akan hidup lagi dan mematahkan alur Sales Invoice Disposal
+		# (penjualan asset):
+		#
+		# - validate_fixed_asset() menolak submit kalau assetnya berstatus
+		#   Scrapped, padahal alur kita justru mewajibkan discrap dulu lewat
+		#   Asset Scrap Request sebelum boleh dijual
+		# - set_income_account_for_fixed_assets() menimpa income_account baris item
+		#   dengan Company.disposal_account, bukan akun penjualan asset yang
+		#   dipasang set_account_disposal()
+		# - set_missing_values() memaksa is_fixed_asset balik ke 1 karena field itu
+		#   ada di force_item_fields, sehingga jurnal pelepasan bawaan ERPNext
+		#   (akumulasi penyusutan, akun aset, laba/rugi) terbentuk lagi
+		#
+		# Lihat sth/sales_sth/custom/sales_invoice.py:validate_penjualan_asset —
+		# jurnal Disposal harus tetap dua baris, piutang lawan akun penjualan.
+		#
+		# Sisi lain dari dilewatinya validate ERPNext: total dan pajak tidak pernah
+		# dihitung ulang di server, jadi nilainya sepenuhnya bergantung pada apa
+		# yang dikirim client. Kalau super().validate() dipulihkan demi itu, alur
+		# Disposal harus diuji ulang dari awal.
 		if self.is_return == 1:
 			for row in self.items:
 				if row.qty > 0:
