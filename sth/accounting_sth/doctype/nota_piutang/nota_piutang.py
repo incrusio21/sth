@@ -48,12 +48,32 @@ def get_nilai_sales_invoice(sales_invoice):
 	}
 
 
+def get_ppn_dari_tax_rate(dpp, tax_rate):
+	"""PPN dari tarif Tax Rate yang dipilih.
+
+	Mengembalikan None kalau tarifnya tidak diisi, supaya pemanggilnya tahu harus
+	memakai PPN dari Sales Invoice-nya."""
+	if not tax_rate:
+		return None
+
+	rate = frappe.db.get_value("Tax Rate", tax_rate, "rate")
+
+	return flt(dpp) * flt(rate) / 100.0
+
+
 @frappe.whitelist()
-def get_nilai_jual_asset(sales_invoice):
+def get_nilai_jual_asset(sales_invoice, tax_rate=None):
 	if not sales_invoice:
 		return {"dpp": 0, "ppn": 0, "nilai": 0}
 
-	return get_nilai_sales_invoice(sales_invoice)
+	nilai = get_nilai_sales_invoice(sales_invoice)
+
+	ppn = get_ppn_dari_tax_rate(nilai["dpp"], tax_rate)
+	if ppn is not None:
+		nilai["ppn"] = ppn
+		nilai["nilai"] = flt(nilai["dpp"]) + flt(ppn)
+
+	return nilai
 
 
 @frappe.whitelist()
@@ -166,16 +186,13 @@ class NotaPiutang(Document):
 				title="Duplikat Tidak Diizinkan"
 			)
 
-		# DPP diambil ulang di server supaya tidak bisa dikarang dari sisi client.
-		# PPN Keluaran dibiarkan sesuai isian user karena fieldnya boleh diubah,
-		# dan nilai penjualannya mengikuti DPP + PPN yang berlaku.
-		nilai = get_nilai_sales_invoice(self.sales_invoice)
+		# dihitung ulang di server supaya nilainya tidak bisa dikarang dari sisi
+		# client. PPN mengikuti Tax Rate yang dipilih; tanpa Tax Rate, dipakai
+		# pajak Sales Invoice-nya seperti sebelum ada field itu
+		nilai = get_nilai_jual_asset(self.sales_invoice, self.tax_rate_jual_asset)
 		self.dpp_jual_asset = nilai["dpp"]
-
-		if flt(self.ppn_jual_asset) < 0:
-			frappe.throw("PPN Keluaran tidak boleh bernilai negatif")
-
-		self.nilai_jual_asset = flt(self.dpp_jual_asset) + flt(self.ppn_jual_asset)
+		self.ppn_jual_asset = nilai["ppn"]
+		self.nilai_jual_asset = nilai["nilai"]
 
 	def calculate_barang_non_stok_table(self):
 		if not self.get("barang_non_stok_table"):

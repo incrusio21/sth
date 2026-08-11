@@ -101,32 +101,11 @@ frappe.ui.form.on('Nota Piutang', {
 	},
 
 	sales_invoice: function(frm) {
-		if (!frm.doc.sales_invoice || frm.doc.sub_tipe_others !== 'Jual Asset') {
-			kosongkan_nilai_jual_asset(frm);
-			return;
-		}
-
-		frappe.call({
-			method: 'sth.accounting_sth.doctype.nota_piutang.nota_piutang.get_nilai_jual_asset',
-			args: {
-				sales_invoice: frm.doc.sales_invoice,
-			},
-			callback: function(r) {
-				const d = r.message || {};
-				frm.set_value('dpp_jual_asset', d.dpp || 0);
-				frm.set_value('ppn_jual_asset', d.ppn || 0);
-				frm.set_value('nilai_jual_asset', d.nilai || 0);
-			}
-		});
+		hitung_nilai_jual_asset(frm);
 	},
 
-	ppn_jual_asset: function(frm) {
-		if (frm.doc.sub_tipe_others !== 'Jual Asset') return;
-
-		frm.set_value(
-			'nilai_jual_asset',
-			flt(frm.doc.dpp_jual_asset) + flt(frm.doc.ppn_jual_asset)
-		);
+	tax_rate_jual_asset: function(frm) {
+		hitung_nilai_jual_asset(frm);
 	},
 
 	sub_tipe_others: function(frm) {
@@ -136,13 +115,30 @@ frappe.ui.form.on('Nota Piutang', {
 			frm.set_value('nilai_x_asset', 0);
 		}
 
-		if (frm.doc.sub_tipe_others === 'Jual Asset' && frm.doc.sales_invoice) {
-			frm.trigger('sales_invoice');
-		} else {
-			kosongkan_nilai_jual_asset(frm);
-		}
+		hitung_nilai_jual_asset(frm);
 	}
 });
+
+function hitung_nilai_jual_asset(frm) {
+	if (frm.doc.sub_tipe_others !== 'Jual Asset' || !frm.doc.sales_invoice) {
+		kosongkan_nilai_jual_asset(frm);
+		return;
+	}
+
+	frappe.call({
+		method: 'sth.accounting_sth.doctype.nota_piutang.nota_piutang.get_nilai_jual_asset',
+		args: {
+			sales_invoice: frm.doc.sales_invoice,
+			tax_rate: frm.doc.tax_rate_jual_asset,
+		},
+		callback: function(r) {
+			const d = r.message || {};
+			frm.set_value('dpp_jual_asset', d.dpp || 0);
+			frm.set_value('ppn_jual_asset', d.ppn || 0);
+			frm.set_value('nilai_jual_asset', d.nilai || 0);
+		}
+	});
+}
 
 function kosongkan_nilai_jual_asset(frm) {
 	frm.set_value('dpp_jual_asset', 0);
