@@ -19,6 +19,15 @@ from sth.accounting_sth.doctype.master_harga_shu.master_harga_shu import (
 PRESISI_UANG = 2
 PRESISI_BERAT = 3
 
+# Biaya yang ditanggung mitra, per jenis Buku Kerja Mandor. Ketiganya persis
+# bagian-bagian label "Biaya Perawatan, Panen & Transport": traksi yang jadi
+# transportnya.
+BKM_BIAYA = (
+	("Buku Kerja Mandor Perawatan", "biaya_bkm_perawatan"),
+	("Buku Kerja Mandor Panen", "biaya_bkm_panen"),
+	("Buku Kerja Mandor Traksi", "biaya_bkm_traksi"),
+)
+
 
 def pecah_netto_tiket(rows):
 	"""Bagi netto satu tiket timbangan ke tahun tanam baris-barisnya. Fungsi murni.
@@ -203,6 +212,53 @@ def ambil_baris_timbangan(company, units, tanggal_mulai, tanggal_selesai):
 	)
 
 
+def ambil_biaya_bkm(company, units, tanggal_mulai, tanggal_selesai):
+	"""Jumlah nilai tiap jenis BKM di unit plasma sepanjang rentang tanggal itu.
+
+	Yang dijumlahkan `grand_total`, yaitu nilai penuh BKM — upah, premi, dan
+	khusus perawatan materialnya juga. Bukan nilai jurnalnya: BKM Perawatan
+	sengaja membuang material dari GL Entry karena sudah dijurnal Stock Entry,
+	sedangkan mitra tetap ditagih material yang dipakai di kebunnya.
+
+	Dokumen dihitung sejak disubmit, tidak menunggu workflow Posted. Posted baru
+	terjadi saat Accounting Period ditutup, jauh sesudah perhitungan bulanan ini
+	dibuat — menunggunya berarti biaya selalu nol.
+
+	Balikan: dict fieldname → total, satu untuk tiap jenis BKM.
+	"""
+	hasil = {fieldname: 0.0 for _, fieldname in BKM_BIAYA}
+
+	if not units:
+		return hasil
+
+	nilai = {
+		"company": company,
+		"units": tuple(units),
+		"tanggal_mulai": getdate(tanggal_mulai),
+		"tanggal_selesai": getdate(tanggal_selesai),
+	}
+
+	for doctype, fieldname in BKM_BIAYA:
+		# nama doctype berasal dari BKM_BIAYA, bukan dari masukan pengguna
+		total = frappe.db.sql(
+			f"""
+			SELECT SUM(b.grand_total)
+			FROM `tab{doctype}` b
+			INNER JOIN `tabUnit` u ON b.unit = u.name
+			WHERE b.docstatus = 1
+			  AND b.company = %(company)s
+			  AND u.plasma = 1
+			  AND b.unit IN %(units)s
+			  AND b.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+			""",
+			nilai,
+		)[0][0]
+
+		hasil[fieldname] = flt(total, PRESISI_UANG)
+
+	return hasil
+
+
 class PerhitunganKUD(Document):
 	def autoname(self):
 		abbr = frappe.get_cached_value("Company", self.company, "abbr")
@@ -296,13 +352,28 @@ class PerhitunganKUD(Document):
 			row.netto_kg = flt(row.netto_kg, PRESISI_BERAT)
 			row.total = flt(flt(row.netto_kg) * flt(row.harga), PRESISI_UANG)
 
+	def hitung_biaya(self):
+		"""Biaya Perawatan selalu jumlah ketiga nilai BKM, tidak pernah diketik tangan.
+
+		Lain-lain tetap manual dan ikut terpotong lewat totalnya — kalau tidak,
+		angka yang diketik di situ tidak berpengaruh apa-apa.
+		"""
+		self.biaya_perawatan = flt(
+			sum(flt(self.get(fieldname)) for _, fieldname in BKM_BIAYA), PRESISI_UANG
+		)
+		self.total_biaya_perawatan_panen_dan_transport = flt(
+			self.biaya_perawatan + flt(self.lain_lain), PRESISI_UANG
+		)
+
 	def hitung_rekap(self):
 		self.total_netto = flt(sum(flt(row.netto_kg) for row in self.detail), PRESISI_BERAT)
 		self.jumlah_produksi = flt(sum(flt(row.total) for row in self.detail), PRESISI_UANG)
 
+		self.hitung_biaya()
+
 		hasil = hitung_shu(
 			self.jumlah_produksi,
-			self.biaya_perawatan,
+			self.total_biaya_perawatan_panen_dan_transport,
 			self.persen_management_fee,
 			self.persen_pph22,
 			self.persen_bagi_hasil,
@@ -348,14 +419,16 @@ class PerhitunganKUD(Document):
 
 	@frappe.whitelist()
 	def tarik_produksi(self):
-		"""Isi ulang detail dari tiket timbangan yang sudah disubmit. Tombol di form."""
+		"""Isi ulang detail dari tiket timbangan, dan biayanya dari BKM. Tombol di form."""
 		self.set_periode()
 		self.validate_unit()
+
+		units = [row.unit for row in self.unit]
 
 		masa_rows = self.masa_bulan_ini()
 		baris_timbangan = ambil_baris_timbangan(
 			self.company,
-			[row.unit for row in self.unit],
+			units,
 			self.tanggal_mulai,
 			self.tanggal_selesai,
 		)
@@ -370,6 +443,10 @@ class PerhitunganKUD(Document):
 					"harga": get_harga_shu(self.company, baris["tanggal_mulai"], baris["tahun_tanam"]),
 				},
 			)
+
+		self.update(
+			ambil_biaya_bkm(self.company, units, self.tanggal_mulai, self.tanggal_selesai)
+		)
 
 		self.hitung_baris()
 		self.hitung_rekap()
@@ -394,7 +471,11 @@ class PerhitunganKUD(Document):
 				indicator="orange",
 			)
 
-		return {"jumlah_baris": len(self.detail), "status_harga": self.status_harga}
+		return {
+			"jumlah_baris": len(self.detail),
+			"status_harga": self.status_harga,
+			"biaya_perawatan": self.biaya_perawatan,
+		}
 
 
 @frappe.whitelist()

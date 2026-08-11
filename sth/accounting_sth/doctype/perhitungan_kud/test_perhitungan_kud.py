@@ -3,10 +3,12 @@
 
 from datetime import date
 
+import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
+	BKM_BIAYA,
 	cari_masa,
 	hitung_shu,
 	kelompokkan_netto,
@@ -201,6 +203,47 @@ class TestKelompokkanNetto(FrappeTestCase):
 		self.assertEqual(cari_masa(MASA_JANUARI, date(2026, 1, 2))["masa_no"], 1)
 		self.assertEqual(cari_masa(MASA_JANUARI, date(2026, 1, 3))["masa_no"], 2)
 		self.assertIsNone(cari_masa(MASA_JANUARI, date(2026, 1, 31)))
+
+
+class TestHitungBiaya(FrappeTestCase):
+	"""Biaya Perawatan dirakit dari nilai BKM, bukan diketik tangan."""
+
+	def doc(self, **kwargs):
+		doc = frappe.new_doc("Perhitungan KUD")
+		doc.update(kwargs)
+		return doc
+
+	def test_biaya_perawatan_jumlah_ketiga_nilai_bkm(self):
+		doc = self.doc(biaya_bkm_perawatan=10.0, biaya_bkm_panen=20.0, biaya_bkm_traksi=5.0)
+		doc.hitung_biaya()
+
+		self.assertEqual(doc.biaya_perawatan, 35.0)
+
+	def test_angka_ketikan_di_biaya_perawatan_ditimpa(self):
+		# Fieldnya read-only di form, tapi jalur lain (API, impor) masih bisa
+		# mengisinya. Yang berlaku tetap nilai BKM-nya.
+		doc = self.doc(biaya_perawatan=999.0, biaya_bkm_perawatan=10.0)
+		doc.hitung_biaya()
+
+		self.assertEqual(doc.biaya_perawatan, 10.0)
+
+	def test_lain_lain_masuk_lewat_total(self):
+		doc = self.doc(biaya_bkm_perawatan=10.0, lain_lain=4.0)
+		doc.hitung_biaya()
+
+		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 14.0)
+
+	def test_lain_lain_ikut_terpotong_di_biaya_operasional(self):
+		# Kalau lain-lain tidak sampai ke hitung_shu, angkanya cuma hiasan.
+		doc = self.doc(biaya_bkm_perawatan=1000.0, lain_lain=250.0, persen_management_fee=0)
+		doc.hitung_rekap()
+
+		self.assertEqual(doc.jumlah_biaya_operasional, 1250.0)
+
+	def test_semua_fieldname_bkm_ada_di_doctype(self):
+		meta = frappe.get_meta("Perhitungan KUD")
+		for _doctype, fieldname in BKM_BIAYA:
+			self.assertTrue(meta.has_field(fieldname), msg=fieldname)
 
 
 class TestHitungSHU(FrappeTestCase):

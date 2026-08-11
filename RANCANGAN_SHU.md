@@ -349,7 +349,11 @@ Perhitungan KUD              autoname: format:PK-{mitra}-{tahun}-{bulan_no}
 ├─ persen_management_fee   Percent  default 2,5
 ├─ persen_pph22            Percent  default 0,25
 ├─ persen_bagi_hasil       Percent  default 50
-├─ biaya_perawatan         Currency          ← INPUT MANUAL
+├─ biaya_bkm_perawatan     Currency          ← Σ grand_total BKM Perawatan
+├─ biaya_bkm_panen         Currency          ← Σ grand_total BKM Panen
+├─ biaya_bkm_traksi        Currency          ← Σ grand_total BKM Traksi
+├─ biaya_perawatan         Currency          ← jumlah ketiganya
+├─ lain_lain               Currency          ← INPUT MANUAL
 ├─ [Tombol] Tarik Produksi
 └─ detail (Child)
      tahun_tanam | masa_no | tanggal_mulai | netto_kg | harga | total
@@ -361,7 +365,9 @@ Perhitungan KUD              autoname: format:PK-{mitra}-{tahun}-{bulan_no}
 Total per baris      = netto × harga
 Jumlah Produksi TBS  = Σ total                    → 78.458.951  (netto 22.501 kg)
 
-Biaya Perawatan, Panen & Transport                → 31.654.532  ← manual
+Biaya Perawatan, Panen & Transport                → 31.654.532  ← dari BKM
+Lain-lain                                                        ← manual
+Total Biaya Perawatan, Panen & Transport          = keduanya
 Management Fee 2,5%  = 2,5%  × Jumlah Produksi    →  1.961.474
 Jumlah Biaya Op      = keduanya                   → 33.616.006
 
@@ -389,7 +395,45 @@ selisihnya membesar.
 walaupun persentasenya diubah jadi angka yang tidak habis dibagi.
 
 Sheet Excel menandai sendiri dua input manual: `GANTI ANGKA` di sebelah Biaya Perawatan,
-`GANTI TANGGAL` di tanggal tanda tangan.
+`GANTI TANGGAL` di tanggal tanda tangan. Yang pertama tidak lagi diketik — lihat §7a.
+
+---
+
+## 7a. Sumber Biaya Perawatan, Panen & Transport
+
+Excel mengetiknya tangan. Di sini angkanya dirakit dari Buku Kerja Mandor unit plasma,
+ditarik oleh tombol yang sama dengan produksinya:
+
+```sql
+SELECT SUM(b.grand_total)
+FROM `tab<Buku Kerja Mandor ...>` b
+INNER JOIN `tabUnit` u ON b.unit = u.name
+WHERE b.docstatus = 1
+  AND b.company = %(company)s
+  AND u.plasma = 1
+  AND b.unit IN %(units)s
+  AND b.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+```
+
+Tiga jenis BKM, satu field masing-masing supaya angkanya bisa ditelusuri:
+Perawatan, Panen, dan Traksi sebagai bagian transportnya.
+
+**Yang dijumlahkan `grand_total`, bukan nilai jurnalnya.** BKM Perawatan sengaja
+membuang material dari GL Entry-nya (`get_nilai_gl_entry()`) karena material sudah
+dijurnal Stock Entry "Material Used" ke akun kegiatan yang sama. Mitra tetap ditagih
+material yang dipakai di kebunnya, jadi di sini yang dipakai nilai penuh dokumen.
+BKM Panen sendiri sudah mengurangi denda di `after_calculate_grand_total()`.
+
+**Cukup `docstatus = 1`, tidak menunggu workflow Posted.** BKM baru Posted saat
+Accounting Period ditutup — jauh sesudah perhitungan bulanan ini dibuat. Menunggunya
+berarti biayanya selalu nol saat dibutuhkan.
+
+`unit` di BKM Traksi tidak wajib diisi. BKM Traksi tanpa unit tidak akan pernah
+terhitung di sini, sama seperti BKM milik unit non plasma.
+
+`lain_lain` tetap manual, dan berpengaruh lewat
+`total_biaya_perawatan_panen_dan_transport` yang jadi masukan `hitung_shu()` —
+bukan `biaya_perawatan`.
 
 ---
 

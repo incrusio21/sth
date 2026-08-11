@@ -53,8 +53,9 @@ function isi_unit_plasma(frm) {
 
 function tarik_produksi(frm) {
 	if ((frm.doc.detail || []).length) {
-		frappe.confirm(__("Detail produksi yang sekarang akan diganti. Lanjutkan?"), () =>
-			jalankan(frm)
+		frappe.confirm(
+			__("Detail produksi dan biaya BKM yang sekarang akan diganti. Lanjutkan?"),
+			() => jalankan(frm)
 		);
 		return;
 	}
@@ -67,22 +68,28 @@ function jalankan(frm) {
 		doc: frm.doc,
 		method: "tarik_produksi",
 		freeze: true,
-		freeze_message: __("Menarik produksi dari timbangan..."),
+		freeze_message: __("Menarik produksi dari timbangan dan biaya dari BKM..."),
 		callback(r) {
 			frm.refresh();
 
 			if (!r.message) return;
 
+			const biaya = frappe.format(r.message.biaya_perawatan, { fieldtype: "Currency" });
+
 			if (!r.message.jumlah_baris) {
 				frappe.msgprint(
-					__("Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih.")
+					__(
+						"Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih. Biaya dari BKM tetap ditarik: {0}.",
+						[biaya]
+					)
 				);
 				return;
 			}
 
 			frappe.show_alert({
-				message: __("{0} baris ditarik. {1}", [
+				message: __("{0} baris ditarik, biaya BKM {1}. {2}", [
 					r.message.jumlah_baris,
+					biaya,
 					r.message.status_harga,
 				]),
 				indicator: "green",

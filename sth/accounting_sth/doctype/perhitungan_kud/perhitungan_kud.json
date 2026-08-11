@@ -25,6 +25,9 @@
   "column_break_ringkasan",
   "jumlah_produksi",
   "biaya_section",
+  "biaya_bkm_perawatan",
+  "biaya_bkm_panen",
+  "biaya_bkm_traksi",
   "biaya_perawatan",
   "lain_lain",
   "total_biaya_perawatan_panen_dan_transport",
@@ -180,10 +183,32 @@
    "label": "Biaya Operasional"
   },
   {
-   "description": "Diisi manual \u2014 di Excel ditandai GANTI ANGKA.",
+   "description": "Jumlah grand total Buku Kerja Mandor Perawatan unit plasma di bulan ini.",
+   "fieldname": "biaya_bkm_perawatan",
+   "fieldtype": "Currency",
+   "label": "Biaya BKM Perawatan",
+   "read_only": 1
+  },
+  {
+   "description": "Jumlah grand total Buku Kerja Mandor Panen unit plasma di bulan ini.",
+   "fieldname": "biaya_bkm_panen",
+   "fieldtype": "Currency",
+   "label": "Biaya BKM Panen",
+   "read_only": 1
+  },
+  {
+   "description": "Jumlah grand total Buku Kerja Mandor Traksi unit plasma di bulan ini \u2014 bagian transportnya.",
+   "fieldname": "biaya_bkm_traksi",
+   "fieldtype": "Currency",
+   "label": "Biaya BKM Traksi",
+   "read_only": 1
+  },
+  {
+   "description": "Jumlah ketiga nilai BKM di atas. Terisi lewat tombol Tarik Produksi, tidak diketik tangan.",
    "fieldname": "biaya_perawatan",
    "fieldtype": "Currency",
-   "label": "Biaya Perawatan, Panen & Transport"
+   "label": "Biaya Perawatan, Panen & Transport",
+   "read_only": 1
   },
   {
    "default": "2.5",
