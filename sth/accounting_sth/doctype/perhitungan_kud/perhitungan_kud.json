@@ -36,6 +36,8 @@
   "column_break_biaya",
   "jumlah_biaya_operasional",
   "setelah_biaya_operasional",
+  "detail_biaya_section",
+  "detail_biaya",
   "bagi_hasil_section",
   "persen_pph22",
   "pph22",
@@ -237,6 +239,20 @@
    "fieldname": "setelah_biaya_operasional",
    "fieldtype": "Currency",
    "label": "Setelah Dipotong Biaya Operasional",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "detail_biaya_section",
+   "fieldtype": "Section Break",
+   "label": "Rincian Biaya BKM"
+  },
+  {
+   "description": "Semua BKM tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi — ketiga angka Biaya BKM di atas dijumlah dari daftar ini.",
+   "fieldname": "detail_biaya",
+   "fieldtype": "Table",
+   "label": "Rincian Biaya BKM",
+   "options": "Perhitungan KUD Biaya BKM",
    "read_only": 1
   },
   {

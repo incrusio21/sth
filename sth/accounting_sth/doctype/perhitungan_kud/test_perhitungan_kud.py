@@ -11,10 +11,27 @@ from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	BKM_BIAYA,
 	cari_masa,
 	hitung_shu,
+	jenis_bkm,
 	kelompokkan_netto,
 	normalisasi_tahun_tanam,
 	pecah_netto_tiket,
+	rekap_biaya_bkm,
 )
+
+
+def baris_bkm(doctype, nilai, **kwargs):
+	"""Satu baris rincian BKM, sebentuk dengan yang dihasilkan ambil_baris_bkm."""
+	row = {
+		"voucher_type": doctype,
+		"jenis": jenis_bkm(doctype),
+		"voucher_no": "BKM-0001",
+		"posting_date": date(2026, 1, 5),
+		"unit": "UNIT-PLASMA",
+		"divisi": "DIV-01",
+		"nilai": nilai,
+	}
+	row.update(kwargs)
+	return row
 
 # Pembagian masa Januari 2026 yang sungguhan, sama dengan test_master_harga_shu.
 MASA_JANUARI = [
@@ -205,37 +222,86 @@ class TestKelompokkanNetto(FrappeTestCase):
 		self.assertIsNone(cari_masa(MASA_JANUARI, date(2026, 1, 31)))
 
 
-class TestHitungBiaya(FrappeTestCase):
-	"""Biaya Perawatan dirakit dari nilai BKM, bukan diketik tangan."""
+class TestRekapBiayaBKM(FrappeTestCase):
+	def test_dikelompokkan_per_jenis_bkm(self):
+		baris = [
+			baris_bkm("Buku Kerja Mandor Perawatan", 10.0),
+			baris_bkm("Buku Kerja Mandor Perawatan", 15.0),
+			baris_bkm("Buku Kerja Mandor Panen", 20.0),
+			baris_bkm("Buku Kerja Mandor Traksi", 5.0),
+		]
 
-	def doc(self, **kwargs):
+		self.assertEqual(
+			rekap_biaya_bkm(baris),
+			{
+				"biaya_bkm_perawatan": 25.0,
+				"biaya_bkm_panen": 20.0,
+				"biaya_bkm_traksi": 5.0,
+			},
+		)
+
+	def test_tanpa_baris_semuanya_nol(self):
+		self.assertEqual(set(rekap_biaya_bkm([]).values()), {0.0})
+
+	def test_jenis_dipakai_cuma_sebagai_label(self):
+		# Pengelompokan berpatokan voucher_type, bukan label Jenis-nya, supaya
+		# label yang salah ketik tidak memindahkan angka ke kelompok lain.
+		baris = [baris_bkm("Buku Kerja Mandor Panen", 20.0, jenis="Perawatan")]
+
+		self.assertEqual(rekap_biaya_bkm(baris)["biaya_bkm_panen"], 20.0)
+
+
+class TestHitungBiaya(FrappeTestCase):
+	"""Biaya Perawatan dirakit dari rincian BKM, bukan diketik tangan."""
+
+	def doc(self, baris=None, **kwargs):
 		doc = frappe.new_doc("Perhitungan KUD")
 		doc.update(kwargs)
+
+		for row in baris or []:
+			doc.append("detail_biaya", row)
+
 		return doc
 
 	def test_biaya_perawatan_jumlah_ketiga_nilai_bkm(self):
-		doc = self.doc(biaya_bkm_perawatan=10.0, biaya_bkm_panen=20.0, biaya_bkm_traksi=5.0)
+		doc = self.doc([
+			baris_bkm("Buku Kerja Mandor Perawatan", 10.0),
+			baris_bkm("Buku Kerja Mandor Panen", 20.0),
+			baris_bkm("Buku Kerja Mandor Traksi", 5.0),
+		])
 		doc.hitung_biaya()
 
+		self.assertEqual(doc.biaya_bkm_perawatan, 10.0)
+		self.assertEqual(doc.biaya_bkm_panen, 20.0)
+		self.assertEqual(doc.biaya_bkm_traksi, 5.0)
 		self.assertEqual(doc.biaya_perawatan, 35.0)
 
-	def test_angka_ketikan_di_biaya_perawatan_ditimpa(self):
+	def test_angka_ketikan_ditimpa_hasil_rekap_rincian(self):
 		# Fieldnya read-only di form, tapi jalur lain (API, impor) masih bisa
-		# mengisinya. Yang berlaku tetap nilai BKM-nya.
-		doc = self.doc(biaya_perawatan=999.0, biaya_bkm_perawatan=10.0)
+		# mengisinya. Yang berlaku tetap rincian BKM-nya.
+		doc = self.doc(
+			[baris_bkm("Buku Kerja Mandor Perawatan", 10.0)],
+			biaya_perawatan=999.0,
+			biaya_bkm_panen=888.0,
+		)
 		doc.hitung_biaya()
 
+		self.assertEqual(doc.biaya_bkm_panen, 0.0)
 		self.assertEqual(doc.biaya_perawatan, 10.0)
 
 	def test_lain_lain_masuk_lewat_total(self):
-		doc = self.doc(biaya_bkm_perawatan=10.0, lain_lain=4.0)
+		doc = self.doc([baris_bkm("Buku Kerja Mandor Perawatan", 10.0)], lain_lain=4.0)
 		doc.hitung_biaya()
 
 		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 14.0)
 
 	def test_lain_lain_ikut_terpotong_di_biaya_operasional(self):
 		# Kalau lain-lain tidak sampai ke hitung_shu, angkanya cuma hiasan.
-		doc = self.doc(biaya_bkm_perawatan=1000.0, lain_lain=250.0, persen_management_fee=0)
+		doc = self.doc(
+			[baris_bkm("Buku Kerja Mandor Perawatan", 1000.0)],
+			lain_lain=250.0,
+			persen_management_fee=0,
+		)
 		doc.hitung_rekap()
 
 		self.assertEqual(doc.jumlah_biaya_operasional, 1250.0)
@@ -244,6 +310,12 @@ class TestHitungBiaya(FrappeTestCase):
 		meta = frappe.get_meta("Perhitungan KUD")
 		for _doctype, fieldname in BKM_BIAYA:
 			self.assertTrue(meta.has_field(fieldname), msg=fieldname)
+
+	def test_doctype_bkm_yang_didaftar_benar_ada(self):
+		# Salah ketik nama doctype bikin SQL-nya menyebut tabel yang tidak ada,
+		# dan itu baru ketahuan saat tombol ditekan.
+		for doctype, _fieldname in BKM_BIAYA:
+			self.assertTrue(frappe.db.exists("DocType", doctype), msg=doctype)
 
 
 class TestHitungSHU(FrappeTestCase):

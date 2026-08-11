@@ -79,16 +79,17 @@ function jalankan(frm) {
 			if (!r.message.jumlah_baris) {
 				frappe.msgprint(
 					__(
-						"Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih. Biaya dari BKM tetap ditarik: {0}.",
-						[biaya]
+						"Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih. Biaya dari {0} BKM tetap ditarik: {1}.",
+						[r.message.jumlah_bkm, biaya]
 					)
 				);
 				return;
 			}
 
 			frappe.show_alert({
-				message: __("{0} baris ditarik, biaya BKM {1}. {2}", [
+				message: __("{0} baris ditarik, {1} BKM senilai {2}. {3}", [
 					r.message.jumlah_baris,
+					r.message.jumlah_bkm,
 					biaya,
 					r.message.status_harga,
 				]),

@@ -352,6 +352,7 @@ Perhitungan KUD              autoname: format:PK-{mitra}-{tahun}-{bulan_no}
 ├─ biaya_bkm_perawatan     Currency          ← Σ grand_total BKM Perawatan
 ├─ biaya_bkm_panen         Currency          ← Σ grand_total BKM Panen
 ├─ biaya_bkm_traksi        Currency          ← Σ grand_total BKM Traksi
+├─ detail_biaya (Child)                      ← daftar BKM-nya satu per satu
 ├─ biaya_perawatan         Currency          ← jumlah ketiganya
 ├─ lain_lain               Currency          ← INPUT MANUAL
 ├─ [Tombol] Tarik Produksi
@@ -417,6 +418,12 @@ WHERE b.docstatus = 1
 
 Tiga jenis BKM, satu field masing-masing supaya angkanya bisa ditelusuri:
 Perawatan, Panen, dan Traksi sebagai bagian transportnya.
+
+Dokumennya **tidak langsung dijumlah di SQL**. Yang diambil daftarnya, lalu disimpan
+utuh di child table `detail_biaya` (`Perhitungan KUD Biaya BKM`): jenis, nomor BKM
+(Dynamic Link, bisa diklik), tanggal, unit, divisi, nilai. Ketiga field ringkasan
+dijumlah ulang dari daftar itu tiap validate lewat `rekap_biaya_bkm()`, jadi angka
+di atas tidak pernah bisa menyimpang dari daftar di bawahnya.
 
 **Yang dijumlahkan `grand_total`, bukan nilai jurnalnya.** BKM Perawatan sengaja
 membuang material dari GL Entry-nya (`get_nilai_gl_entry()`) karena material sudah

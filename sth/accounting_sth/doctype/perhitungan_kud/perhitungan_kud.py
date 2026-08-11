@@ -212,24 +212,28 @@ def ambil_baris_timbangan(company, units, tanggal_mulai, tanggal_selesai):
 	)
 
 
-def ambil_biaya_bkm(company, units, tanggal_mulai, tanggal_selesai):
-	"""Jumlah nilai tiap jenis BKM di unit plasma sepanjang rentang tanggal itu.
+def jenis_bkm(doctype):
+	"""Label pendek untuk kolom Jenis: "Buku Kerja Mandor Panen" → "Panen"."""
+	return doctype.replace("Buku Kerja Mandor ", "")
 
-	Yang dijumlahkan `grand_total`, yaitu nilai penuh BKM — upah, premi, dan
-	khusus perawatan materialnya juga. Bukan nilai jurnalnya: BKM Perawatan
-	sengaja membuang material dari GL Entry karena sudah dijurnal Stock Entry,
-	sedangkan mitra tetap ditagih material yang dipakai di kebunnya.
+
+def ambil_baris_bkm(company, units, tanggal_mulai, tanggal_selesai):
+	"""Dokumen BKM yang jadi biaya mitra, satu baris per dokumen.
+
+	Yang diambil `grand_total`, yaitu nilai penuh BKM — upah, premi, dan khusus
+	perawatan materialnya juga. Bukan nilai jurnalnya: BKM Perawatan sengaja
+	membuang material dari GL Entry karena sudah dijurnal Stock Entry, sedangkan
+	mitra tetap ditagih material yang dipakai di kebunnya.
 
 	Dokumen dihitung sejak disubmit, tidak menunggu workflow Posted. Posted baru
 	terjadi saat Accounting Period ditutup, jauh sesudah perhitungan bulanan ini
 	dibuat — menunggunya berarti biaya selalu nol.
 
-	Balikan: dict fieldname → total, satu untuk tiap jenis BKM.
+	Dokumennya didaftar utuh, bukan langsung dijumlah di SQL, supaya angka yang
+	muncul di nota bisa ditelusuri sampai ke BKM-nya satu per satu.
 	"""
-	hasil = {fieldname: 0.0 for _, fieldname in BKM_BIAYA}
-
 	if not units:
-		return hasil
+		return []
 
 	nilai = {
 		"company": company,
@@ -238,11 +242,14 @@ def ambil_biaya_bkm(company, units, tanggal_mulai, tanggal_selesai):
 		"tanggal_selesai": getdate(tanggal_selesai),
 	}
 
-	for doctype, fieldname in BKM_BIAYA:
+	baris = []
+
+	for doctype, _fieldname in BKM_BIAYA:
 		# nama doctype berasal dari BKM_BIAYA, bukan dari masukan pengguna
-		total = frappe.db.sql(
+		rows = frappe.db.sql(
 			f"""
-			SELECT SUM(b.grand_total)
+			SELECT b.name AS voucher_no, b.posting_date, b.unit, b.divisi,
+			       b.grand_total AS nilai
 			FROM `tab{doctype}` b
 			INNER JOIN `tabUnit` u ON b.unit = u.name
 			WHERE b.docstatus = 1
@@ -250,13 +257,37 @@ def ambil_biaya_bkm(company, units, tanggal_mulai, tanggal_selesai):
 			  AND u.plasma = 1
 			  AND b.unit IN %(units)s
 			  AND b.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+			ORDER BY b.posting_date, b.name
 			""",
 			nilai,
-		)[0][0]
+			as_dict=True,
+		)
 
-		hasil[fieldname] = flt(total, PRESISI_UANG)
+		for row in rows:
+			row["voucher_type"] = doctype
+			row["jenis"] = jenis_bkm(doctype)
+			row["nilai"] = flt(row["nilai"], PRESISI_UANG)
+			baris.append(row)
 
-	return hasil
+	return baris
+
+
+def rekap_biaya_bkm(baris):
+	"""Total per jenis BKM dari daftar barisnya. Fungsi murni — tanpa database.
+
+	Balikan: dict fieldname → total, satu untuk tiap jenis BKM. Dipakai baik
+	untuk baris mentah dari SQL maupun untuk baris child table yang tersimpan,
+	supaya angka ringkasan tidak pernah beda dari daftarnya.
+	"""
+	fieldname_per_doctype = dict(BKM_BIAYA)
+	hasil = {fieldname: 0.0 for fieldname in fieldname_per_doctype.values()}
+
+	for row in baris:
+		fieldname = fieldname_per_doctype.get(row.get("voucher_type"))
+		if fieldname:
+			hasil[fieldname] += flt(row.get("nilai"))
+
+	return {fieldname: flt(total, PRESISI_UANG) for fieldname, total in hasil.items()}
 
 
 class PerhitunganKUD(Document):
@@ -355,9 +386,14 @@ class PerhitunganKUD(Document):
 	def hitung_biaya(self):
 		"""Biaya Perawatan selalu jumlah ketiga nilai BKM, tidak pernah diketik tangan.
 
+		Ketiga nilai itu sendiri dijumlah ulang dari daftar BKM-nya, jadi angka
+		ringkasan tidak bisa menyimpang dari daftar yang ditampilkan.
+
 		Lain-lain tetap manual dan ikut terpotong lewat totalnya — kalau tidak,
 		angka yang diketik di situ tidak berpengaruh apa-apa.
 		"""
+		self.update(rekap_biaya_bkm(self.detail_biaya))
+
 		self.biaya_perawatan = flt(
 			sum(flt(self.get(fieldname)) for _, fieldname in BKM_BIAYA), PRESISI_UANG
 		)
@@ -444,8 +480,9 @@ class PerhitunganKUD(Document):
 				},
 			)
 
-		self.update(
-			ambil_biaya_bkm(self.company, units, self.tanggal_mulai, self.tanggal_selesai)
+		self.set(
+			"detail_biaya",
+			ambil_baris_bkm(self.company, units, self.tanggal_mulai, self.tanggal_selesai),
 		)
 
 		self.hitung_baris()
@@ -473,6 +510,7 @@ class PerhitunganKUD(Document):
 
 		return {
 			"jumlah_baris": len(self.detail),
+			"jumlah_bkm": len(self.detail_biaya),
 			"status_harga": self.status_harga,
 			"biaya_perawatan": self.biaya_perawatan,
 		}
