@@ -791,11 +791,51 @@ function isi_baris_sales_invoice(frm, sales_invoice) {
 	// berbarengan, jadi alokasi baru dihitung setelah semuanya selesai
 	const alokasikan = () => frappe.after_ajax(() => alokasikan_sesuai_outstanding(frm));
 
-	if (frm.doc.payment_type !== "Receive" || !frm.doc.party || !frm.doc.paid_from) {
+	if (frm.doc.payment_type !== "Receive" || !frm.doc.party) {
 		alokasikan();
 		return;
 	}
 
+	set_paid_from_dari_invoice(frm, sales_invoice).then(() => {
+		if (!frm.doc.paid_from) {
+			alokasikan();
+			return;
+		}
+
+		tarik_ppn_nota_piutang(frm, sales_invoice, alokasikan);
+	});
+}
+
+// Piutang penjualan asset tidak memakai akun default customer — debit_to-nya dipaksa
+// ke akun piutang lain-lain. paid_from harus mengikuti akun invoicenya, kalau tidak
+// alokasinya jatuh ke akun yang salah dan jurnal PPN Nota Piutang tidak ketemu:
+// pencariannya mencocokkan akun baris jurnal dengan paid_from.
+function set_paid_from_dari_invoice(frm, sales_invoice) {
+	return frappe.db
+		.get_value("Sales Invoice", sales_invoice, ["debit_to", "party_account_currency"])
+		.then((r) => {
+			const si = r.message || {};
+
+			if (!si.debit_to || si.debit_to === frm.doc.paid_from) return;
+
+			// bendera yang sama dipakai ERPNext waktu mengisi akun party sendiri. tanpa
+			// itu, mengubah paid_from memicu get_outstanding_documents yang mengosongkan
+			// tabel references — termasuk baris yang barusan diisi
+			frm.set_party_account_based_on_party = true;
+
+			return frm
+				.set_value({
+					paid_from: si.debit_to,
+					paid_from_account_currency:
+						si.party_account_currency || frm.doc.paid_from_account_currency,
+				})
+				.then(() => {
+					frm.set_party_account_based_on_party = false;
+				});
+		});
+}
+
+function tarik_ppn_nota_piutang(frm, sales_invoice, alokasikan) {
 	frappe.call({
 		method: "sth.legal.custom.payment_entry.get_je_ppn_nota_piutang",
 		args: {
