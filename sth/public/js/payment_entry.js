@@ -821,16 +821,35 @@ function tarik_ppn_nota_piutang(frm, sales_invoice) {
 
 			frm.refresh_field("references");
 
-			// alokasi baris invoicenya sendiri diisi ERPNext lewat panggilan lain yang
-			// jalan berbarengan. paid_amount baru dijumlah setelah keduanya selesai,
-			// kalau tidak angkanya cuma sebesar PPN-nya
-			frappe.after_ajax(() => sync_paid_amount_from_references(frm));
+			// outstanding baris invoicenya diisi ERPNext lewat panggilan lain yang jalan
+			// berbarengan, jadi alokasinya baru dihitung setelah keduanya selesai
+			frappe.after_ajax(() => alokasikan_sesuai_outstanding(frm));
 
 			frappe.show_alert({
 				message: __("PPN Nota Piutang ikut ditarik: {0}", [ditambah.join(", ")]),
 				indicator: "green",
 			});
 		},
+	});
+}
+
+// Tiap baris dialokasi sebesar outstanding-nya sendiri, tidak dibagi rata dari atas.
+//
+// Mengubah paid_amount membuat ERPNext menjalankan allocate_party_amount_against_ref_docs,
+// yang menolkan semua alokasi lalu membaginya ulang mulai dari baris teratas — akibatnya
+// baris invoice menyerap jatah baris PPN di bawahnya. Karena itu paid_amount diisi lebih
+// dulu, baru alokasinya ditulis; kalau urutannya dibalik, yang baru ditulis langsung
+// tertimpa pembagian ulang itu.
+function alokasikan_sesuai_outstanding(frm) {
+	const total = (frm.doc.references || []).reduce((sum, d) => sum + flt(d.outstanding_amount), 0);
+
+	frm.set_value({ paid_amount: total, received_amount: total }).then(() => {
+		(frm.doc.references || []).forEach((row) => {
+			row.allocated_amount = flt(row.outstanding_amount);
+		});
+
+		frm.refresh_field("references");
+		frm.events.set_total_allocated_amount(frm);
 	});
 }
 
