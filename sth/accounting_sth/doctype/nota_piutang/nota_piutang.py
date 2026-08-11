@@ -267,10 +267,114 @@ class NotaPiutang(Document):
 
 		return account
 
+	def get_akun_ppn_keluaran(self):
+		"""Akun PPN Keluaran milik Tax Rate yang dipilih, untuk company nota ini."""
+		akun = frappe.db.get_value(
+			"Tax Rate Account",
+			{
+				"parent": self.tax_rate_jual_asset,
+				"company": self.company,
+				"tipe": "Keluaran",
+			},
+			"account"
+		)
+
+		if not akun:
+			frappe.throw(
+				f"Tax Rate <b>{self.tax_rate_jual_asset}</b> belum punya akun bertipe "
+				f"<b>Keluaran</b> untuk Company <b>{self.company}</b>."
+			)
+
+		return akun
+
+	def create_jual_asset_journal_entry(self):
+		"""Tagihkan PPN keluaran penjualan asset: piutang didebit, akun PPN dikredit.
+
+		DPP, akun disposal, dan piutang pokoknya sudah diposting Sales Invoice-nya
+		sendiri. Yang belum cuma PPN-nya, karena tarifnya baru ditentukan di nota
+		ini lewat Tax Rate.
+
+		Akun piutangnya `debit_to` Sales Invoice itu juga, bukan Piutang Lain-lain,
+		supaya PPN menempel di piutang customer yang sama dengan pokoknya.
+
+		Tanpa Tax Rate tidak ada jurnal: PPN-nya berarti ikut yang di Sales Invoice,
+		dan itu sudah dijurnal Sales Invoice-nya sendiri.
+		"""
+		ppn = flt(self.ppn_jual_asset)
+
+		if ppn <= 0:
+			frappe.msgprint(
+				"PPN penjualan asset nol, tidak ada Journal Entry yang dibuat.",
+				alert=True
+			)
+			return
+
+		if not self.tax_rate_jual_asset:
+			frappe.msgprint(
+				f"Tax Rate tidak dipilih, jadi PPN <b>{ppn}</b> di nota ini mengikuti "
+				f"Sales Invoice <b>{self.sales_invoice}</b> yang sudah menjurnalnya sendiri. "
+				f"Tidak ada Journal Entry PPN yang dibuat. Pilih Tax Rate kalau PPN-nya "
+				f"memang harus ditagihkan dari nota ini.",
+				title="Tanpa Tax Rate, Tanpa Jurnal PPN",
+				indicator="orange"
+			)
+			return
+
+		akun_ppn = self.get_akun_ppn_keluaran()
+
+		si = frappe.db.get_value(
+			"Sales Invoice",
+			self.sales_invoice,
+			["customer", "debit_to"],
+			as_dict=True
+		)
+
+		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+		remarks = f"PPN Keluaran Jual Asset - {self.name} - {self.sales_invoice}"
+
+		je = frappe.new_doc("Journal Entry")
+		je.voucher_type   = "Journal Entry"
+		je.company        = self.company
+		je.posting_date   = self.date or nowdate()
+		je.user_remark    = remarks
+		je.nota_piutang   = self.name
+		je.sales_invoice  = self.sales_invoice
+
+		# Debit piutang customer, mengikuti akun piutang Sales Invoice-nya.
+		# Referensinya diisi supaya PPN ini menambah outstanding invoice itu,
+		# bukan berdiri sebagai piutang lepas di akun yang sama.
+		je.append("accounts", {
+			"account"                   : si.debit_to,
+			"party_type"                : "Customer",
+			"party"                     : si.customer,
+			"reference_type"            : "Sales Invoice",
+			"reference_name"            : self.sales_invoice,
+			"debit_in_account_currency" : ppn,
+			"credit_in_account_currency": 0,
+			"cost_center"               : cost_center,
+			"user_remark"               : remarks,
+		})
+
+		# Credit akun PPN keluaran dari Tax Rate
+		je.append("accounts", {
+			"account"                   : akun_ppn,
+			"debit_in_account_currency" : 0,
+			"credit_in_account_currency": ppn,
+			"cost_center"               : cost_center,
+			"user_remark"               : remarks,
+		})
+
+		je.insert(ignore_permissions=True)
+		je.submit()
+
+		frappe.msgprint(
+			f"Journal Entry PPN <b>{je.name}</b> berhasil dibuat.",
+			alert=True
+		)
+
 	def create_others_journal_entry(self):
 		if self.sub_tipe_others == "Jual Asset":
-			# piutang, akun disposal, dan PPN keluarannya sudah diposting Sales
-			# Invoice-nya sendiri. Jurnal tambahan untuk sub tipe ini menyusul.
+			self.create_jual_asset_journal_entry()
 			return
 
 		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
@@ -332,10 +436,6 @@ class NotaPiutang(Document):
 		)
 
 	def cancel_others_journal_entry(self):
-		if self.sub_tipe_others == "Jual Asset":
-			# tidak pernah membuat jurnal, jadi tidak ada yang perlu dibatalkan
-			return
-
 		je_name = frappe.db.get_value(
 			"Journal Entry",
 			{"nota_piutang": self.name, "docstatus": 1},
