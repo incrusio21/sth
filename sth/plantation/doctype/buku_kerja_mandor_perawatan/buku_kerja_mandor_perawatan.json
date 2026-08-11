@@ -160,15 +160,13 @@
    "fieldname": "mandor",
    "fieldtype": "Data",
    "label": "Mandor (Kiriman)",
-   "read_only": 1,
-   "description": "Nilai mentah dari kiriman API. Bisa berupa ID User sistem luar, jadi tidak dijadikan link Employee."
+   "read_only": 1
   },
   {
    "fieldname": "kode_mandor",
    "fieldtype": "Link",
    "label": "Mandor",
-   "options": "Employee",
-   "description": "Employee yang jadi mandor. Untuk kiriman API diisi dari pemetaan ID User di MANDOR_API_MAP."
+   "options": "Employee"
   },
   {
    "fieldname": "mandor1",
