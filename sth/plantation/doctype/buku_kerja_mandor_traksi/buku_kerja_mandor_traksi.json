@@ -12,6 +12,7 @@
   "naming_series",
   "unit",
   "mandor",
+  "kode_mandor",
   "designation",
   "trans_no",
   "rkh_no",
@@ -165,6 +166,12 @@
   },
   {
    "fieldname": "mandor",
+   "fieldtype": "Data",
+   "label": "Mandor (Kiriman)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kode_mandor",
    "fieldtype": "Link",
    "label": "Mandor",
    "options": "Employee"

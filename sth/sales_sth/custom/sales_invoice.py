@@ -1,6 +1,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 # Akun penjualan asset. Dicari lewat nomor akun, bukan nama, karena nama akun
 # selalu berakhiran singkatan company (mis. "9190201 - ... - TML").
@@ -77,6 +78,90 @@ def set_account_disposal(doc):
 	for item in doc.items:
 		item.expense_account = account
 		item.income_account = account
+
+
+def matikan_pembulatan(doc):
+	"""Jurnal penjualan asset harus persis dua baris: piutang lawan akun penjualan.
+
+	Pembulatan grand_total memunculkan baris ketiga ke akun Round Off company.
+	Selain menyalakan disable_rounded_total, angka pembulatan yang terlanjur
+	dihitung sisi client ikut dinolkan — validate ERPNext tidak dipanggil di
+	override Sales Invoice, jadi tidak ada yang menghitung ulang field ini di
+	server. Tanpa dinolkan, make_gle_for_rounding_adjustment() tetap membaca
+	rounding_adjustment yang lama dan barisnya tetap terbentuk.
+	"""
+	doc.disable_rounded_total = 1
+	doc.rounding_adjustment = 0
+	doc.base_rounding_adjustment = 0
+	doc.rounded_total = 0
+	doc.base_rounded_total = 0
+
+
+def validate_tanpa_potongan_tambahan(doc):
+	"""Jurnal penjualan asset dirakit sendiri jadi dua baris — piutang lawan akun
+	penjualan aset — di SalesInvoice.get_gl_entries_disposal().
+
+	Pajak dan write-off tidak ikut dijurnal di sana, jadi kalau invoicenya punya
+	salah satunya kedua sisi jurnal tidak akan seimbang dan submit gagal dengan
+	pesan yang tidak menjelaskan apa-apa. Ditolak di sini selagi masih jelas
+	sebabnya. PPN penjualan asset memang ditagih terpisah lewat Nota Piutang.
+	"""
+	masalah = []
+
+	if doc.get("taxes"):
+		masalah.append(_("baris pajak di tabel Taxes and Charges"))
+
+	if flt(doc.get("write_off_amount")):
+		masalah.append(_("Write Off Amount"))
+
+	if masalah:
+		frappe.throw(
+			_("Sales Invoice penjualan asset tidak boleh punya {0}. Jurnalnya cuma piutang "
+			  "lawan akun penjualan aset. PPN-nya ditagih lewat Nota Piutang, bukan dari sini.").format(
+				frappe.bold(" dan ".join(masalah))
+			),
+			title=_("Jurnal Penjualan Asset Harus Dua Baris")
+		)
+
+
+def validate_penjualan_asset(self, method=None):
+	"""Penjualan asset hanya boleh sebanyak qty yang sudah discrap.
+
+	Nilai buku asetnya sudah dihapus waktu discrap lewat Asset Scrap Request, jadi
+	perlakuan aset tetap bawaan ERPNext tidak boleh jalan lagi dari invoice ini.
+	Penanda is_fixed_asset dilepas untuk itu; link Asset-nya tetap disimpan untuk
+	jejak dan perhitungan sisa qty yang boleh dijual.
+
+	Jurnalnya sendiri tidak bergantung pada penanda ini — SalesInvoice
+	.get_gl_entries_disposal() menulis dua barisnya sendiri."""
+	if self.jenis_penagihan != "Disposal":
+		return
+
+	matikan_pembulatan(self)
+	validate_tanpa_potongan_tambahan(self)
+
+	from sth.overrides.asset import sisa_qty_scrap
+
+	for item in self.items:
+		if not item.asset:
+			frappe.throw(
+				_("Baris {0}: Asset yang dijual wajib dipilih untuk Sales Invoice Disposal.").format(
+					item.idx
+				)
+			)
+
+		sisa = sisa_qty_scrap(item.asset, kecuali_sales_invoice=self.name)
+
+		if flt(item.qty) > sisa:
+			frappe.throw(
+				_("Baris {0}: Asset {1} yang sudah discrap dan belum terjual tinggal {2}, "
+				  "tidak bisa dijual sebanyak {3}.").format(
+					item.idx, frappe.bold(item.asset), sisa, flt(item.qty)
+				),
+				title=_("Melebihi Qty Discrap")
+			)
+
+		item.is_fixed_asset = 0
 
 
 @frappe.whitelist()

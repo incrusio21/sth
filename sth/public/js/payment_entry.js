@@ -632,6 +632,11 @@ frappe.ui.form.on("Payment Entry Reference", {
 	reference_name(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
+		if (row.reference_doctype === "Sales Invoice" && row.reference_name) {
+			isi_baris_sales_invoice(frm, row.reference_name);
+			return;
+		}
+
 		if (["Purchase Invoice", "Purchase Order"].includes(row.reference_doctype) && row.reference_name) {
 			allocate_outstanding_amount(frm, cdt, cdn);
 
@@ -772,6 +777,125 @@ async function set_note_from_purchase_invoice(frm) {
 
 	frm.set_value("note", lines.join("\n"));
 	frm.__note_from_purchase_invoice = true;
+}
+
+// Sales Invoice yang dipilih manual di references langsung dialokasi penuh sebesar
+// outstanding-nya, sejalan dengan perlakuan Purchase Invoice / Purchase Order.
+//
+// Sekalian menarik jurnal PPN Nota Piutang kalau ada: PPN penjualan asset ditagihkan
+// lewat Journal Entry tersendiri, jadi tidak ikut muncul di Get Outstanding Invoices,
+// dan ditarik ke sini supaya pokok dan PPN terbayar sekaligus. Alokasinya tetap
+// dijalankan walau tidak ada PPN — invoice biasa juga harus terisi otomatis.
+function isi_baris_sales_invoice(frm, sales_invoice) {
+	// ERPNext mengisi outstanding baris invoicenya lewat panggilan lain yang jalan
+	// berbarengan, jadi alokasi baru dihitung setelah semuanya selesai
+	const alokasikan = () => frappe.after_ajax(() => alokasikan_sesuai_outstanding(frm));
+
+	if (frm.doc.payment_type !== "Receive" || !frm.doc.party) {
+		alokasikan();
+		return;
+	}
+
+	set_paid_from_dari_invoice(frm, sales_invoice).then(() => {
+		if (!frm.doc.paid_from) {
+			alokasikan();
+			return;
+		}
+
+		tarik_ppn_nota_piutang(frm, sales_invoice, alokasikan);
+	});
+}
+
+// Piutang penjualan asset tidak memakai akun default customer — debit_to-nya dipaksa
+// ke akun piutang lain-lain. paid_from harus mengikuti akun invoicenya, kalau tidak
+// alokasinya jatuh ke akun yang salah dan jurnal PPN Nota Piutang tidak ketemu:
+// pencariannya mencocokkan akun baris jurnal dengan paid_from.
+function set_paid_from_dari_invoice(frm, sales_invoice) {
+	return frappe.db
+		.get_value("Sales Invoice", sales_invoice, ["debit_to", "party_account_currency"])
+		.then((r) => {
+			const si = r.message || {};
+
+			if (!si.debit_to || si.debit_to === frm.doc.paid_from) return;
+
+			// bendera yang sama dipakai ERPNext waktu mengisi akun party sendiri. tanpa
+			// itu, mengubah paid_from memicu get_outstanding_documents yang mengosongkan
+			// tabel references — termasuk baris yang barusan diisi
+			frm.set_party_account_based_on_party = true;
+
+			return frm
+				.set_value({
+					paid_from: si.debit_to,
+					paid_from_account_currency:
+						si.party_account_currency || frm.doc.paid_from_account_currency,
+				})
+				.then(() => {
+					frm.set_party_account_based_on_party = false;
+				});
+		});
+}
+
+function tarik_ppn_nota_piutang(frm, sales_invoice, alokasikan) {
+	frappe.call({
+		method: "sth.legal.custom.payment_entry.get_je_ppn_nota_piutang",
+		args: {
+			sales_invoice: sales_invoice,
+			party: frm.doc.party,
+			account: frm.doc.paid_from,
+			payment_entry: frm.doc.name,
+		},
+		callback(r) {
+			const sudah_ada = (frm.doc.references || [])
+				.filter((d) => d.reference_doctype === "Journal Entry")
+				.map((d) => d.reference_name);
+
+			const ditambah = [];
+
+			(r.message || []).forEach((je) => {
+				if (sudah_ada.includes(je.name)) return;
+
+				const baris = frm.add_child("references");
+				baris.reference_doctype = "Journal Entry";
+				baris.reference_name = je.name;
+				baris.total_amount = je.total;
+				baris.outstanding_amount = je.sisa;
+				baris.allocated_amount = je.sisa;
+
+				ditambah.push(je.name);
+			});
+
+			if (ditambah.length) {
+				frm.refresh_field("references");
+
+				frappe.show_alert({
+					message: __("PPN Nota Piutang ikut ditarik: {0}", [ditambah.join(", ")]),
+					indicator: "green",
+				});
+			}
+
+			alokasikan();
+		},
+	});
+}
+
+// Tiap baris dialokasi sebesar outstanding-nya sendiri, tidak dibagi rata dari atas.
+//
+// Mengubah paid_amount membuat ERPNext menjalankan allocate_party_amount_against_ref_docs,
+// yang menolkan semua alokasi lalu membaginya ulang mulai dari baris teratas — akibatnya
+// baris invoice menyerap jatah baris PPN di bawahnya. Karena itu paid_amount diisi lebih
+// dulu, baru alokasinya ditulis; kalau urutannya dibalik, yang baru ditulis langsung
+// tertimpa pembagian ulang itu.
+function alokasikan_sesuai_outstanding(frm) {
+	const total = (frm.doc.references || []).reduce((sum, d) => sum + flt(d.outstanding_amount), 0);
+
+	frm.set_value({ paid_amount: total, received_amount: total }).then(() => {
+		(frm.doc.references || []).forEach((row) => {
+			row.allocated_amount = flt(row.outstanding_amount);
+		});
+
+		frm.refresh_field("references");
+		frm.events.set_total_allocated_amount(frm);
+	});
 }
 
 function sync_paid_amount_from_references(frm) {
@@ -1552,11 +1676,11 @@ function show_realisasi_pdo_selector(frm) {
 				tipe_options.push('Kas');
 				tipe_options.push('Dana Cadangan');
 
-				// Centangan per nama barang (Kas) dan per pengguna (Bahan Bakar dan
-				// Perjalanan Dinas), persis seperti tombol Realisasi di PDO.
+				// Kas disaring per PDO Type dulu, centangan per pengguna untuk Bahan
+				// Bakar dan Perjalanan Dinas — persis seperti tombol Realisasi di PDO.
 				Promise.all([
 					frappe.xcall(
-						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_pdo_type',
 						{ source_name: selected_name }
 					),
 					frappe.xcall(
@@ -1575,7 +1699,7 @@ function show_realisasi_pdo_selector(frm) {
 	});
 }
 
-function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
+function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_bakar_pengguna, perjalanan_dinas_pengguna) {
 	let fields = [
 		{
 			fieldtype: 'HTML',
@@ -1593,7 +1717,21 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 		}
 	];
 
-	if (kas_nama_barang.length) {
+	if (kas_pdo_type.length) {
+		fields.push({
+			fieldname: 'pdo_type',
+			label: __('PDO Type'),
+			fieldtype: 'Select',
+			depends_on: 'eval:doc.tipe_pdo == "Kas"',
+			description: __('Pilih dulu di sini, Nama Barang menyusul sesuai PDO Type ini'),
+			options: [{ label: '', value: '' }].concat(kas_pdo_type.map(function (item) {
+				return { label: item.label, value: item.value };
+			})),
+			onchange: function () {
+				muat_kas_nama_barang_pdo(selected_name, tipe_dialog);
+			}
+		});
+
 		fields.push({
 			fieldname: 'nama_barang',
 			label: __('Nama Barang'),
@@ -1601,9 +1739,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 			columns: 1,
 			depends_on: 'eval:doc.tipe_pdo == "Kas"',
 			description: __('Satu baris Payment Entry per nama barang yang dicentang'),
-			options: kas_nama_barang.map(function (item) {
-				return { label: item.label, value: item.value, checked: 0 };
-			})
+			options: []
 		});
 	}
 
@@ -1658,8 +1794,13 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 			let uang_muka = [];
 
 			if (values.tipe_pdo == 'Kas') {
-				if (!kas_nama_barang.length) {
+				if (!kas_pdo_type.length) {
 					frappe.msgprint(__('Semua nama barang di List Kas sudah direalisasi'));
+					return;
+				}
+
+				if (!values.pdo_type) {
+					frappe.msgprint(__('Pilih PDO Type dulu'));
 					return;
 				}
 
@@ -1697,6 +1838,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 			let args = {
 				source_name: selected_name,
 				tipe_pdo: values.tipe_pdo,
+				pdo_type: values.tipe_pdo == 'Kas' ? values.pdo_type : null,
 				nama_barang: values.tipe_pdo == 'Kas' ? nama_barang : null,
 				pengguna: pengguna.length ? pengguna : null,
 				uang_muka: uang_muka.length ? uang_muka : null
@@ -1729,6 +1871,32 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_nama_barang, bah
 
 // Kembaran muat_uang_muka() di form PDO: uang muka baru bisa dicari setelah namanya
 // dicentang, karena dokumennya dicocokkan lewat Employee milik nama tersebut.
+// Jenis di List Kas baru dimunculkan setelah PDO Type dipilih: Jenis yang sama bisa
+// dipakai beberapa PDO Type, jadi tanpa saringan ini centangannya ambigu.
+function muat_kas_nama_barang_pdo(selected_name, tipe_dialog) {
+	let field = tipe_dialog.fields_dict.nama_barang;
+	if (!field) return;
+
+	let pdo_type = tipe_dialog.get_value('pdo_type');
+
+	let selesai = function (opsi) {
+		field.df.options = (opsi || []).map(function (item) {
+			return { label: item.label, value: item.value, checked: 0 };
+		});
+		field.refresh();
+	};
+
+	if (!pdo_type) {
+		selesai([]);
+		return;
+	}
+
+	frappe.xcall(
+		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
+		{ source_name: selected_name, pdo_type: pdo_type }
+	).then(selesai);
+}
+
 function muat_uang_muka_pdo(selected_name, tipe_dialog) {
 	let field = tipe_dialog.fields_dict.uang_muka;
 	if (!field) return;

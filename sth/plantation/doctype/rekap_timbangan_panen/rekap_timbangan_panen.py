@@ -48,9 +48,10 @@ class RekapTimbanganPanen(Document):
 			doc = frappe.get_doc("Recap Panen by Blok", rb)
 			doc.set_data_rekap_weight()
 
-			voucher_data.setdefault(
-				(doc.voucher_type, doc.voucher_no), {}
-			).setdefault(doc.blok, doc.bjr)
+			for vc in doc.voucher_recap:
+				voucher_data.setdefault(
+					(vc.voucher_type, vc.voucher_no), {}
+				).setdefault(doc.blok, doc.bjr)
 
 		for (v_type, v_no), blok in voucher_data.items():
 			voucher_obj = frappe.get_doc(v_type, v_no)

@@ -100,14 +100,51 @@ frappe.ui.form.on('Nota Piutang', {
 		});
 	},
 
+	sales_invoice: function(frm) {
+		hitung_nilai_jual_asset(frm);
+	},
+
+	tax_rate_jual_asset: function(frm) {
+		hitung_nilai_jual_asset(frm);
+	},
+
 	sub_tipe_others: function(frm) {
 		if (frm.doc.sub_tipe_others === 'Asset' && frm.doc.asset) {
 			frm.trigger('asset');
 		} else {
 			frm.set_value('nilai_x_asset', 0);
 		}
+
+		hitung_nilai_jual_asset(frm);
 	}
 });
+
+function hitung_nilai_jual_asset(frm) {
+	if (frm.doc.sub_tipe_others !== 'Jual Asset' || !frm.doc.sales_invoice) {
+		kosongkan_nilai_jual_asset(frm);
+		return;
+	}
+
+	frappe.call({
+		method: 'sth.accounting_sth.doctype.nota_piutang.nota_piutang.get_nilai_jual_asset',
+		args: {
+			sales_invoice: frm.doc.sales_invoice,
+			tax_rate: frm.doc.tax_rate_jual_asset,
+		},
+		callback: function(r) {
+			const d = r.message || {};
+			frm.set_value('dpp_jual_asset', d.dpp || 0);
+			frm.set_value('ppn_jual_asset', d.ppn || 0);
+			frm.set_value('nilai_jual_asset', d.nilai || 0);
+		}
+	});
+}
+
+function kosongkan_nilai_jual_asset(frm) {
+	frm.set_value('dpp_jual_asset', 0);
+	frm.set_value('ppn_jual_asset', 0);
+	frm.set_value('nilai_jual_asset', 0);
+}
 
 frappe.ui.form.on('Nota Piutang Reclass Table', {
 	reclass: function(frm, cdt, cdn){
@@ -361,6 +398,15 @@ function setup_filter(frm) {
 		return {
 			filters: [
 				['Asset', 'status', '=', 'Scrapped']
+			]
+		};
+	});
+	frm.set_query('sales_invoice', function() {
+		return {
+			filters: [
+				['Sales Invoice', 'jenis_penagihan', '=', 'Disposal'],
+				['Sales Invoice', 'docstatus', '=', 1],
+				['Sales Invoice', 'company', '=', frm.doc.company]
 			]
 		};
 	});

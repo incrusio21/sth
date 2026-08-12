@@ -10,6 +10,9 @@
   "asset",
   "asset_name",
   "asset_category",
+  "asset_quantity",
+  "persentase_scrap",
+  "qty_scrap",
   "column_break_head",
   "posting_date",
   "company",
@@ -21,6 +24,7 @@
   "gross_purchase_amount",
   "nilai_buku",
   "hasil_section",
+  "asset_hasil_split",
   "journal_entry_for_scrap",
   "amended_from"
  ],
@@ -55,6 +59,33 @@
    "fieldtype": "Link",
    "label": "Kategori Asset",
    "options": "Asset Category",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.asset_quantity > 1",
+   "fetch_from": "asset.asset_quantity",
+   "fieldname": "asset_quantity",
+   "fieldtype": "Int",
+   "label": "Qty Asset",
+   "read_only": 1
+  },
+  {
+   "default": "100",
+   "description": "Bagian nilai asset yang discrap. Isi lebih kecil dari 100 untuk scrap sebagian: asetnya dipecah sesuai persentase ini saat approval terakhir dan yang discrap hanya pecahannya.",
+   "fieldname": "persentase_scrap",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Persentase Discrap",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.asset_quantity > 1",
+   "description": "Perkiraan jumlah unit yang discrap, dihitung dari persentase. Pembagian nilainya tetap memakai persentase, bukan qty ini.",
+   "fieldname": "qty_scrap",
+   "fieldtype": "Int",
+   "label": "Qty Discrap",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -121,12 +152,22 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.journal_entry_for_scrap",
+   "depends_on": "eval:doc.journal_entry_for_scrap || doc.asset_hasil_split",
    "fieldname": "hasil_section",
    "fieldtype": "Section Break",
    "label": "Hasil Scrap"
   },
   {
+   "description": "Diisi kalau scrapnya sebagian. Asset inilah yang berstatus Scrapped, asset asalnya tinggal sisa qty-nya.",
+   "fieldname": "asset_hasil_split",
+   "fieldtype": "Link",
+   "label": "Asset Hasil Split",
+   "no_copy": 1,
+   "options": "Asset",
+   "read_only": 1
+  },
+  {
+   "description": "Cuma terisi untuk scrap 100%, yang jurnalnya dibuat ERPNext. Scrap sebagian tidak membuat Journal Entry — hapus bukunya diposting sebagai GL Entry milik Asset-nya.",
    "fieldname": "journal_entry_for_scrap",
    "fieldtype": "Link",
    "label": "Journal Entry Scrap",
@@ -147,7 +188,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-04 13:00:00.000000",
+ "modified": "2026-08-11 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Asset Scrap Request",

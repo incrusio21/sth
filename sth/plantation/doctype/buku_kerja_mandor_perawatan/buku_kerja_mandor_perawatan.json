@@ -23,6 +23,7 @@
   "posting_date",
   "payroll_date",
   "mandor",
+  "kode_mandor",
   "mandor1",
   "kerani",
   "manual_hk",
@@ -157,6 +158,12 @@
   },
   {
    "fieldname": "mandor",
+   "fieldtype": "Data",
+   "label": "Mandor (Kiriman)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kode_mandor",
    "fieldtype": "Link",
    "label": "Mandor",
    "options": "Employee"

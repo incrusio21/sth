@@ -1,6 +1,8 @@
 # Copyright (c) 2026, DAS and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -37,10 +39,43 @@ class AssetScrapSettings(Document):
 			if row.lapis < 1:
 				frappe.throw(_("Baris {0}: Lapis harus diisi minimal 1").format(row.idx))
 
-			if (row.lapis, row.role) in terpakai:
-				frappe.throw(_("Role {0} ditulis dua kali di lapis {1}").format(row.role, row.lapis))
+			if (row.unit, row.lapis, row.role) in terpakai:
+				frappe.throw(
+					_("Role {0} ditulis dua kali di lapis {1} {2}").format(
+						row.role, row.lapis, keterangan_unit(row.unit)
+					)
+				)
 
-			terpakai.add((row.lapis, row.role))
+			terpakai.add((row.unit, row.lapis, row.role))
+
+		self.validate_ada_jalur_default()
+		self.validate_label_unik()
+
+	def validate_ada_jalur_default(self):
+		"""Unit yang tidak ditulis di sini ikut jalur default. Tanpa jalur default
+		pengajuannya nyangkut di Draft karena tidak ada transisi yang cocok."""
+		if any(not row.unit for row in self.lapis_approval):
+			return
+
+		frappe.throw(
+			_("Harus ada minimal satu baris tanpa Unit sebagai jalur default untuk unit yang tidak diatur khusus")
+		)
+
+	def validate_label_unik(self):
+		"""Satu label jadi satu state. Kalau dalam satu unit ada label yang sama
+		di dua lapis, alurnya berputar balik ke lapis sebelumnya."""
+		for unit, lapis in get_lapis_per_unit(self).items():
+			terpakai = {}
+
+			for nomor, label, _roles in lapis:
+				if label in terpakai:
+					frappe.throw(
+						_("Nama Lapis {0} dipakai di lapis {1} dan {2} {3}. Bedakan namanya.").format(
+							label, terpakai[label], nomor, keterangan_unit(unit)
+						)
+					)
+
+				terpakai[label] = nomor
 
 	def validate_state_masih_dipakai(self):
 		"""Kalau ada pengajuan yang sedang berhenti di sebuah state lalu state itu
@@ -49,7 +84,7 @@ class AssetScrapSettings(Document):
 			return
 
 		state_baru = {STATE_DRAFT, STATE_APPROVED, STATE_REJECTED}
-		state_baru.update(nama_state(lapis[1]) for lapis in get_lapis(self))
+		state_baru.update(semua_state(get_lapis_per_unit(self)))
 
 		dipakai = frappe.get_all(
 			DOCTYPE,
@@ -72,12 +107,20 @@ def nama_state(label):
 	return "Menunggu Approval {0}".format(label)
 
 
-def get_lapis(settings=None):
-	"""[(nomor lapis, label, [role, ...]), ...] urut dari lapis terkecil."""
+def keterangan_unit(unit):
+	return "di unit {0}".format(unit) if unit else "di jalur default"
+
+
+def get_lapis_per_unit(settings=None):
+	"""{unit atau None: [(nomor lapis, label, [role, ...]), ...]}
+
+	Kunci None adalah jalur default, dipakai unit yang tidak diatur khusus.
+	Tiap daftar sudah urut dari lapis terkecil."""
 	settings = settings or frappe.get_single("Asset Scrap Settings")
 
-	kelompok = {}
+	per_unit = {}
 	for row in settings.lapis_approval:
+		kelompok = per_unit.setdefault(row.unit or None, {})
 		data = kelompok.setdefault(row.lapis, {"label": None, "roles": []})
 
 		if row.label and not data["label"]:
@@ -86,30 +129,73 @@ def get_lapis(settings=None):
 		if row.role not in data["roles"]:
 			data["roles"].append(row.role)
 
-	return [
-		(nomor, kelompok[nomor]["label"] or "Lapis {0}".format(nomor), kelompok[nomor]["roles"])
-		for nomor in sorted(kelompok)
-	]
+	return {
+		unit: [
+			(nomor, kelompok[nomor]["label"] or "Lapis {0}".format(nomor), kelompok[nomor]["roles"])
+			for nomor in sorted(kelompok)
+		]
+		for unit, kelompok in per_unit.items()
+	}
+
+
+def get_lapis(settings=None, unit=None):
+	"""Lapis yang berlaku untuk sebuah unit, jatuh ke jalur default kalau
+	unitnya tidak diatur khusus."""
+	per_unit = get_lapis_per_unit(settings)
+
+	return per_unit.get(unit) or per_unit.get(None) or []
+
+
+def urutan_unit(per_unit):
+	"""Jalur default duluan supaya urutan state di workflow tetap stabil."""
+	return ([None] if None in per_unit else []) + sorted(unit for unit in per_unit if unit)
+
+
+def semua_state(per_unit):
+	"""State approval dari semua jalur, tanpa duplikat, urut kemunculan."""
+	hasil = []
+
+	for unit in urutan_unit(per_unit):
+		for _nomor, label, _roles in per_unit[unit]:
+			state = nama_state(label)
+			if state not in hasil:
+				hasil.append(state)
+
+	return hasil
+
+
+def kondisi_unit(unit, unit_khusus):
+	"""Kondisi transisi supaya satu workflow bisa memuat banyak jalur sekaligus."""
+	if unit:
+		return "doc.unit == {0}".format(json.dumps(unit))
+
+	if not unit_khusus:
+		# semua unit lewat jalur default, tidak perlu disaring
+		return None
+
+	return "doc.unit not in {0}".format(json.dumps(unit_khusus))
 
 
 def build_workflow():
 	"""Bangun ulang Workflow dari isi Asset Scrap Settings."""
 	settings = frappe.get_single("Asset Scrap Settings")
-	lapis = get_lapis(settings)
+	per_unit = get_lapis_per_unit(settings)
 
-	if not lapis:
+	if not per_unit:
 		return
 
 	role_pemohon = settings.role_pemohon or "Accounts User"
+	unit_khusus = sorted(unit for unit in per_unit if unit)
 
-	pastikan_workflow_state([nama_state(baris[1]) for baris in lapis])
+	pastikan_workflow_state(semua_state(per_unit))
 	pastikan_workflow_action()
 
 	beri_permission(role_pemohon, boleh_buat=True)
 
-	for _nomor, _label, roles in lapis:
-		for role in roles:
-			beri_permission(role)
+	for lapis in per_unit.values():
+		for _nomor, _label, roles in lapis:
+			for role in roles:
+				beri_permission(role)
 
 	if frappe.db.exists("Workflow", WORKFLOW):
 		doc = frappe.get_doc("Workflow", WORKFLOW)
@@ -125,19 +211,36 @@ def build_workflow():
 	doc.transitions = []
 
 	tambah_state(doc, STATE_DRAFT, 0, role_pemohon)
-	for _nomor, label, roles in lapis:
-		tambah_state(doc, nama_state(label), 0, roles[0])
+
+	# state yang labelnya sama dipakai bersama lintas unit, yang membedakan
+	# jalurnya adalah kondisi di tiap transisi
+	pemilik_state = {}
+	for unit in urutan_unit(per_unit):
+		for _nomor, label, roles in per_unit[unit]:
+			state = nama_state(label)
+			if state in pemilik_state:
+				continue
+
+			pemilik_state[state] = roles[0]
+			tambah_state(doc, state, 0, roles[0])
+
 	tambah_state(doc, STATE_APPROVED, 1, "System Manager")
 	tambah_state(doc, STATE_REJECTED, 1, "System Manager")
 
-	tambah_transition(doc, STATE_DRAFT, ACTION_AJUKAN, nama_state(lapis[0][1]), role_pemohon)
+	for unit in urutan_unit(per_unit):
+		lapis = per_unit[unit]
+		kondisi = kondisi_unit(unit, unit_khusus)
 
-	for idx, (_nomor, label, roles) in enumerate(lapis):
-		berikutnya = nama_state(lapis[idx + 1][1]) if idx + 1 < len(lapis) else STATE_APPROVED
+		tambah_transition(
+			doc, STATE_DRAFT, ACTION_AJUKAN, nama_state(lapis[0][1]), role_pemohon, kondisi
+		)
 
-		for role in roles:
-			tambah_transition(doc, nama_state(label), ACTION_APPROVE, berikutnya, role)
-			tambah_transition(doc, nama_state(label), ACTION_REJECT, STATE_REJECTED, role)
+		for idx, (_nomor, label, roles) in enumerate(lapis):
+			berikutnya = nama_state(lapis[idx + 1][1]) if idx + 1 < len(lapis) else STATE_APPROVED
+
+			for role in roles:
+				tambah_transition(doc, nama_state(label), ACTION_APPROVE, berikutnya, role, kondisi)
+				tambah_transition(doc, nama_state(label), ACTION_REJECT, STATE_REJECTED, role, kondisi)
 
 	doc.flags.ignore_permissions = True
 	doc.save()
@@ -191,11 +294,12 @@ def tambah_state(doc, state, doc_status, allow_edit):
 	})
 
 
-def tambah_transition(doc, state, action, next_state, allowed):
+def tambah_transition(doc, state, action, next_state, allowed, condition=None):
 	doc.append("transitions", {
 		"state": state,
 		"action": action,
 		"next_state": next_state,
 		"allowed": allowed,
+		"condition": condition,
 		"allow_self_approval": 1
 	})

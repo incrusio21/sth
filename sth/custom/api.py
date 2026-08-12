@@ -1,7 +1,16 @@
 import frappe
+from frappe import _
+
+# User yang dipakai sistem luar waktu mengirim dokumen lewat REST API. Dipakai
+# untuk membedakan kiriman mesin dari input manusia.
+USER_API = "api@sth.com"
 
 # Mandor pada data BKM dari API kadang terkirim sebagai ID User, bukan Employee.
 # Petakan ke NIK karyawan yang benar supaya link Employee-nya valid.
+#
+# Ditulis di sini, bukan dicari ke database, karena ID User sistem luar memang
+# tidak tersimpan di mana pun di ERP — tidak ada field Employee yang memuatnya.
+# Mandor baru harus ditambahkan ke daftar ini dan butuh deploy.
 MANDOR_API_MAP = {
 	"USR251015341": "1506012411940004",
 	"USR251015035": "1206010909900006",
@@ -9,10 +18,31 @@ MANDOR_API_MAP = {
 
 
 def fix_mandor_from_api(doc):
-	"""Ganti nilai mandor yang berupa ID User dengan NIK Employee-nya."""
+	"""Isi `kode_mandor` (Link Employee) dari nilai `mandor` yang dikirim API.
+
+	`mandor` sengaja bertipe Data, bukan Link: sistem luar mengirim ID User-nya
+	sendiri dan payload itu tidak bisa diubah, jadi nilainya harus boleh masuk apa
+	adanya tanpa divalidasi sebagai Employee. Employee sebenarnya disimpan terpisah
+	di `kode_mandor`, dan itulah yang dibaca seluruh logika BKM.
+
+	ID yang belum terdaftar di MANDOR_API_MAP tidak menggagalkan dokumen — dulu
+	justru itu yang memblokir seluruh kiriman. `kode_mandor` dibiarkan kosong, dan
+	kode mentahnya tetap terbaca di `mandor` untuk ditelusuri.
+	"""
+	if doc.get("kode_mandor"):
+		return
+
 	mandor = doc.get("mandor")
+	if not mandor:
+		return
+
 	if mandor in MANDOR_API_MAP:
-		doc.mandor = MANDOR_API_MAP[mandor]
+		doc.kode_mandor = MANDOR_API_MAP[mandor]
+		return
+
+	# dokumen lama dan input manusia mengirim NIK Employee di field yang sama
+	if frappe.db.exists("Employee", mandor):
+		doc.kode_mandor = mandor
 
 
 def submit_after_insert(doc):
@@ -35,7 +65,7 @@ def submit_after_insert(doc):
 
 @frappe.whitelist()
 def approve_api(self,method):
-	if self.owner != "api@sth.com":
+	if self.owner != USER_API:
 		return
 
 	# hook terpasang untuk semua doctype, lewati yang tidak submittable

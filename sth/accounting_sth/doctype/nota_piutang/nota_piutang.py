@@ -29,6 +29,53 @@ def get_nilai_disposal_asset(asset, akun_lawan):
 	return flt(nilai)
 
 
+def get_nilai_sales_invoice(sales_invoice):
+	"""DPP, PPN, dan grand total dari Sales Invoice penjualan asset."""
+	si = frappe.db.get_value(
+		"Sales Invoice",
+		sales_invoice,
+		["net_total", "total_taxes_and_charges", "grand_total"],
+		as_dict=True
+	)
+
+	if not si:
+		return {"dpp": 0, "ppn": 0, "nilai": 0}
+
+	return {
+		"dpp": flt(si.net_total),
+		"ppn": flt(si.total_taxes_and_charges),
+		"nilai": flt(si.grand_total),
+	}
+
+
+def get_ppn_dari_tax_rate(dpp, tax_rate):
+	"""PPN dari tarif Tax Rate yang dipilih.
+
+	Mengembalikan None kalau tarifnya tidak diisi, supaya pemanggilnya tahu harus
+	memakai PPN dari Sales Invoice-nya."""
+	if not tax_rate:
+		return None
+
+	rate = frappe.db.get_value("Tax Rate", tax_rate, "rate")
+
+	return flt(dpp) * flt(rate) / 100.0
+
+
+@frappe.whitelist()
+def get_nilai_jual_asset(sales_invoice, tax_rate=None):
+	if not sales_invoice:
+		return {"dpp": 0, "ppn": 0, "nilai": 0}
+
+	nilai = get_nilai_sales_invoice(sales_invoice)
+
+	ppn = get_ppn_dari_tax_rate(nilai["dpp"], tax_rate)
+	if ppn is not None:
+		nilai["ppn"] = ppn
+		nilai["nilai"] = flt(nilai["dpp"]) + flt(ppn)
+
+	return nilai
+
+
 @frappe.whitelist()
 def get_nilai_x_asset(asset, company):
 	if not asset or not company:
@@ -89,10 +136,63 @@ class NotaPiutang(Document):
 					f"Asset <b>{self.asset}</b> harus berstatus <b>Scrapped</b>, "
 					f"saat ini berstatus <b>{asset_status}</b>"
 				)
+		elif self.sub_tipe_others == "Jual Asset":
+			self.validate_jual_asset()
 		elif self.sub_tipe_others == "Barang Non Stok":
 			self.calculate_barang_non_stok_table()
 		else:
 			frappe.throw("Sub Tipe Others tidak valid")
+
+	def validate_jual_asset(self):
+		if not self.sales_invoice:
+			frappe.throw("Sales Invoice wajib diisi untuk Sub Tipe <b>Jual Asset</b>")
+
+		si = frappe.db.get_value(
+			"Sales Invoice",
+			self.sales_invoice,
+			["company", "docstatus", "jenis_penagihan"],
+			as_dict=True
+		)
+
+		if si.docstatus != 1:
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> harus sudah disubmit"
+			)
+
+		if si.jenis_penagihan != "Disposal":
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> bukan penjualan asset. "
+				f"Jenis Penagihannya <b>{si.jenis_penagihan or '-'}</b>, yang dibutuhkan <b>Disposal</b>."
+			)
+
+		if self.company and si.company != self.company:
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> milik Company <b>{si.company}</b>, "
+				f"tidak sama dengan Company nota ini"
+			)
+
+		dipakai = frappe.db.exists(
+			"Nota Piutang",
+			{
+				"sales_invoice": self.sales_invoice,
+				"name": ("!=", self.name),
+				"docstatus": ("!=", 2),
+			}
+		)
+
+		if dipakai:
+			frappe.throw(
+				f"Sales Invoice <b>{self.sales_invoice}</b> sudah dipakai Nota Piutang <b>{dipakai}</b>",
+				title="Duplikat Tidak Diizinkan"
+			)
+
+		# dihitung ulang di server supaya nilainya tidak bisa dikarang dari sisi
+		# client. PPN mengikuti Tax Rate yang dipilih; tanpa Tax Rate, dipakai
+		# pajak Sales Invoice-nya seperti sebelum ada field itu
+		nilai = get_nilai_jual_asset(self.sales_invoice, self.tax_rate_jual_asset)
+		self.dpp_jual_asset = nilai["dpp"]
+		self.ppn_jual_asset = nilai["ppn"]
+		self.nilai_jual_asset = nilai["nilai"]
 
 	def calculate_barang_non_stok_table(self):
 		if not self.get("barang_non_stok_table"):
@@ -167,7 +267,117 @@ class NotaPiutang(Document):
 
 		return account
 
+	def get_akun_ppn_keluaran(self):
+		"""Akun PPN Keluaran milik Tax Rate yang dipilih, untuk company nota ini."""
+		akun = frappe.db.get_value(
+			"Tax Rate Account",
+			{
+				"parent": self.tax_rate_jual_asset,
+				"company": self.company,
+				"tipe": "Keluaran",
+			},
+			"account"
+		)
+
+		if not akun:
+			frappe.throw(
+				f"Tax Rate <b>{self.tax_rate_jual_asset}</b> belum punya akun bertipe "
+				f"<b>Keluaran</b> untuk Company <b>{self.company}</b>."
+			)
+
+		return akun
+
+	def create_jual_asset_journal_entry(self):
+		"""Tagihkan PPN keluaran penjualan asset: piutang didebit, akun PPN dikredit.
+
+		DPP, akun disposal, dan piutang pokoknya sudah diposting Sales Invoice-nya
+		sendiri. Yang belum cuma PPN-nya, karena tarifnya baru ditentukan di nota
+		ini lewat Tax Rate.
+
+		Akun piutangnya `debit_to` Sales Invoice itu juga, bukan Piutang Lain-lain,
+		supaya PPN menempel di piutang customer yang sama dengan pokoknya.
+
+		Tanpa Tax Rate tidak ada jurnal: PPN-nya berarti ikut yang di Sales Invoice,
+		dan itu sudah dijurnal Sales Invoice-nya sendiri.
+		"""
+		ppn = flt(self.ppn_jual_asset)
+
+		if ppn <= 0:
+			frappe.msgprint(
+				"PPN penjualan asset nol, tidak ada Journal Entry yang dibuat.",
+				alert=True
+			)
+			return
+
+		if not self.tax_rate_jual_asset:
+			frappe.msgprint(
+				f"Tax Rate tidak dipilih, jadi PPN <b>{ppn}</b> di nota ini mengikuti "
+				f"Sales Invoice <b>{self.sales_invoice}</b> yang sudah menjurnalnya sendiri. "
+				f"Tidak ada Journal Entry PPN yang dibuat. Pilih Tax Rate kalau PPN-nya "
+				f"memang harus ditagihkan dari nota ini.",
+				title="Tanpa Tax Rate, Tanpa Jurnal PPN",
+				indicator="orange"
+			)
+			return
+
+		akun_ppn = self.get_akun_ppn_keluaran()
+
+		si = frappe.db.get_value(
+			"Sales Invoice",
+			self.sales_invoice,
+			["customer", "debit_to"],
+			as_dict=True
+		)
+
+		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+		remarks = f"PPN Keluaran Jual Asset - {self.name} - {self.sales_invoice}"
+
+		je = frappe.new_doc("Journal Entry")
+		je.voucher_type   = "Journal Entry"
+		je.company        = self.company
+		je.posting_date   = self.date or nowdate()
+		je.user_remark    = remarks
+		je.nota_piutang   = self.name
+		je.sales_invoice  = self.sales_invoice
+
+		# Debit piutang customer, mengikuti akun piutang Sales Invoice-nya.
+		# Sengaja tanpa reference ke Sales Invoice: reference bikin PPN ini
+		# menambah outstanding invoice sehingga tidak lagi sama dengan grand
+		# total-nya. Tagihan PPN ini berdiri sendiri di akun piutang yang sama,
+		# dan ikut tertarik otomatis waktu invoice itu dibayarkan lewat Payment
+		# Entry (lihat sth.legal.custom.payment_entry.tambah_je_ppn_nota_piutang)
+		je.append("accounts", {
+			"account"                   : si.debit_to,
+			"party_type"                : "Customer",
+			"party"                     : si.customer,
+			"debit_in_account_currency" : ppn,
+			"credit_in_account_currency": 0,
+			"cost_center"               : cost_center,
+			"user_remark"               : remarks,
+		})
+
+		# Credit akun PPN keluaran dari Tax Rate
+		je.append("accounts", {
+			"account"                   : akun_ppn,
+			"debit_in_account_currency" : 0,
+			"credit_in_account_currency": ppn,
+			"cost_center"               : cost_center,
+			"user_remark"               : remarks,
+		})
+
+		je.insert(ignore_permissions=True)
+		je.submit()
+
+		frappe.msgprint(
+			f"Journal Entry PPN <b>{je.name}</b> berhasil dibuat.",
+			alert=True
+		)
+
 	def create_others_journal_entry(self):
+		if self.sub_tipe_others == "Jual Asset":
+			self.create_jual_asset_journal_entry()
+			return
+
 		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		akun_piutang_lain = self.get_account_by_number(AKUN_PIUTANG_LAIN_NUMBER)
 

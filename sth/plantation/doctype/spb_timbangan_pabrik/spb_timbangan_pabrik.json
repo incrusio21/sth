@@ -20,6 +20,7 @@
   "recap_panen_restan",
   "section_break_trza",
   "total_janjang",
+  "persentase",
   "janjang_sisa",
   "column_break_mxsp",
   "brondolan_terkirim",
@@ -81,6 +82,13 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Janjang",
+   "read_only": 1
+  },
+  {
+   "description": "Porsi berat baris ini, dihitung dari jumlah janjang. Dasar pembagian netto ke tiap blok.",
+   "fieldname": "persentase",
+   "fieldtype": "Percent",
+   "label": "Persentase",
    "read_only": 1
   },
   {

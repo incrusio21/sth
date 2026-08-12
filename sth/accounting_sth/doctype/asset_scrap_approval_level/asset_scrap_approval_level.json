@@ -6,14 +6,24 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "unit",
   "lapis",
   "label",
   "role"
  ],
  "fields": [
   {
+   "columns": 2,
+   "description": "Kosongkan untuk jalur default, yaitu jalur yang dipakai semua unit yang tidak diatur khusus di sini.",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
    "columns": 1,
-   "description": "Nomor urut approval. Baris dengan lapis sama berarti salah satu role-nya boleh menyetujui.",
+   "description": "Nomor urut approval. Baris dengan unit dan lapis sama berarti salah satu role-nya boleh menyetujui.",
    "fieldname": "lapis",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -22,7 +32,7 @@
    "reqd": 1
   },
   {
-   "columns": 4,
+   "columns": 3,
    "description": "Dipakai sebagai nama state, mis. Manager Unit menjadi \"Menunggu Approval Manager Unit\"",
    "fieldname": "label",
    "fieldtype": "Data",
@@ -30,7 +40,7 @@
    "label": "Nama Lapis"
   },
   {
-   "columns": 4,
+   "columns": 3,
    "fieldname": "role",
    "fieldtype": "Link",
    "in_list_view": 1,

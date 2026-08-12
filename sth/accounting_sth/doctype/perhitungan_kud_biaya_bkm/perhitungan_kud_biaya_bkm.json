@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-11 12:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "jenis",
+  "voucher_no",
+  "posting_date",
+  "unit",
+  "divisi",
+  "nilai",
+  "voucher_type"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "jenis",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Jenis",
+   "read_only": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Buku Kerja Mandor",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "description": "Grand Total dokumen BKM-nya.",
+   "fieldname": "nilai",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Nilai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-11 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Perhitungan KUD Biaya BKM",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

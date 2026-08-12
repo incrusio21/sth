@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 from sth.controllers.accounts_controller import AccountsController
@@ -35,9 +36,30 @@ class PlantationController(AccountsController):
                     self.kegiatan_fetch_fieldname.append(fieldname)
 
             if self.kegiatan_fetch_fieldname:
-                self.update(
-                    fetch_kegiatan_company(self.kegiatan, self.company, self.kegiatan_fetch_fieldname)
-                )
+                nilai = fetch_kegiatan_company(self.kegiatan, self.company, self.kegiatan_fetch_fieldname)
+
+                # tanpa baris Kegiatan Company tidak ada akun maupun tarifnya, jadi
+                # upah dan jurnalnya pasti salah. dulu ini lolos sampai self.update(None)
+                # dan meledak jadi TypeError yang tidak menjelaskan apa-apa
+                if not nilai:
+                    self.throw_kegiatan_company_kosong()
+
+                self.update(nilai)
+
+    def throw_kegiatan_company_kosong(self):
+        """Pesan yang menyebut mana yang kurang: kegiatannya, atau baris company-nya."""
+        if not frappe.db.exists("Kegiatan", self.kegiatan):
+            frappe.throw(
+                _("Kegiatan {0} tidak ditemukan.").format(frappe.bold(self.kegiatan)),
+                title=_("Kegiatan Tidak Dikenali")
+            )
+
+        frappe.throw(
+            _("Kegiatan {0} belum punya baris untuk Company {1} di tabel Kegiatan Company. "
+              "Lengkapi dulu di master Kegiatan — akun dan tarif upahnya diambil dari situ."
+              ).format(frappe.bold(self.kegiatan), frappe.bold(self.company)),
+            title=_("Kegiatan Belum Diatur untuk Company Ini")
+        )
 
     def calculate(self):
         self.fetch_kegiatan_data()

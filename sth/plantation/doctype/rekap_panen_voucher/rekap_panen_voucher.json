@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-06 14:36:44.652318",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_no",
+  "column_break_cfzt",
+  "jumlah_janjang",
+  "jumlah_brondolan"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cfzt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jumlah_janjang",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Janjang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jumlah_brondolan",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jumlah Brondolan",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-06 14:38:12.802999",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Rekap Panen Voucher",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

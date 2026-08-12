@@ -15,11 +15,11 @@ class Project:
 
         match self.method:
             case "before_insert":
+                self.validate_order_adendum()
                 self.set_capex_serial_no()
             case "validate":
                 self.validate_status_project()
                 self.validate_spk_type()
-                self.validate_order_adendum()
                 self.set_missing_value()
                 self.set_note()
             case "on_update":
@@ -188,8 +188,12 @@ class Project:
         for item in po.items:
             task = frappe.new_doc("Task")
 
+            subject = item.kegiatan_name or item.item_name
+            if item.kegiatan:
+                subject = frappe.get_value("Kegiatan", "nm_kgt")
+
             task.update({
-                "subject": frappe.get_doc("Kegiatan",item.kegiatan).nm_kgt or item.kegiatan_name or item.item_name,
+                "subject": subject,
                 "project": self.doc.name,
                 "proposal": self.doc.proposal,
                 "proposal_item": item.name,

@@ -20,7 +20,9 @@ frappe.ui.form.on('Asset', {
 
             setup_approval_scrap(frm);
 
-            if (frm.doc.status === "Scrapped") {
+            // scrap sebagian tidak mengubah status jadi Scrapped, cuma mencatat
+            // qty yang boleh dijual di qty_scrapped
+            if (frm.doc.status === "Scrapped" || frm.doc.qty_scrapped > 0) {
                 frm.add_custom_button(__("Sell Asset"), function() {
                     sell_asset(frm);
                 }, __("Manage"));
@@ -37,6 +39,8 @@ frappe.ui.form.on('Asset', {
                 frappe.set_route("query-report", "General Ledger");
             }, __("View"));
 
+            // Nota Piutang sub tipe Asset mensyaratkan asset berstatus Scrapped,
+            // jadi tombolnya tidak ikut dibuka untuk scrap sebagian
             if (frm.doc.status === "Scrapped") {
                 frm.add_custom_button(__("Nota Piutang"), function() {
                     make_nota_piutang(frm);
@@ -87,13 +91,20 @@ function setup_approval_scrap(frm) {
 			if (!info.name) {
 				if (info.bisa_ajukan) {
 					frm.add_custom_button(__("Ajukan Scrap"), function() {
-						dialog_ajukan_scrap(frm);
+						dialog_ajukan_scrap(frm, info.asset_quantity || 1);
 					}, __("Manage"));
 				}
 				return;
 			}
 
-			frm.dashboard.add_indicator(__("Scrap: {0}", [info.workflow_state]), "orange");
+			let label_state = info.workflow_state;
+			if (info.persentase_scrap && info.persentase_scrap < 100) {
+				label_state = __("{0} ({1}% dari nilai asset)", [
+					info.workflow_state, info.persentase_scrap
+				]);
+			}
+
+			frm.dashboard.add_indicator(__("Scrap: {0}", [label_state]), "orange");
 
 			(info.actions || []).forEach(function(action) {
 				frm.add_custom_button(__(action), function() {
@@ -104,24 +115,48 @@ function setup_approval_scrap(frm) {
 	});
 }
 
-function dialog_ajukan_scrap(frm) {
+function dialog_ajukan_scrap(frm, asset_quantity) {
+	// scrap sebagian dihitung dari persentase nilai asset, jadi asset ber-qty 1
+	// pun bisa (misalnya bangunan yang rusak sebagian). asetnya baru dipecah
+	// saat approval terakhir
+	const keterangan_qty = asset_quantity > 1
+		? __("Qty asset ini {0}, nilainya dibagi sesuai persentase di atas.", [asset_quantity])
+		: __("Nilai asset dibagi sesuai persentase ini, sisanya tetap jadi asset aktif.");
+
+	const fields = [
+		{
+			fieldname: "persentase_scrap",
+			label: __("Persentase Discrap"),
+			fieldtype: "Percent",
+			default: 100,
+			reqd: 1,
+			description: __("Isi lebih kecil dari 100 untuk scrap sebagian. {0}", [keterangan_qty])
+		},
+		{
+			fieldname: "alasan",
+			label: __("Alasan Scrap"),
+			fieldtype: "Small Text",
+			reqd: 1
+		},
+		{
+			fieldname: "lampiran",
+			label: __("Lampiran"),
+			fieldtype: "Attach"
+		}
+	];
+
 	const dialog = new frappe.ui.Dialog({
 		title: __("Ajukan Scrap Asset"),
-		fields: [
-			{
-				fieldname: "alasan",
-				label: __("Alasan Scrap"),
-				fieldtype: "Small Text",
-				reqd: 1
-			},
-			{
-				fieldname: "lampiran",
-				label: __("Lampiran"),
-				fieldtype: "Attach"
-			}
-		],
+		fields: fields,
 		primary_action_label: __("Ajukan"),
 		primary_action(values) {
+			const persentase = flt(values.persentase_scrap);
+
+			if (persentase <= 0 || persentase > 100) {
+				frappe.msgprint(__("Persentase Discrap harus di antara 0 dan 100"));
+				return;
+			}
+
 			dialog.hide();
 
 			frappe.call({
@@ -129,7 +164,8 @@ function dialog_ajukan_scrap(frm) {
 				args: {
 					asset: frm.doc.name,
 					alasan: values.alasan,
-					lampiran: values.lampiran
+					lampiran: values.lampiran,
+					persentase_scrap: persentase
 				},
 				freeze: true,
 				freeze_message: __("Mengajukan scrap..."),

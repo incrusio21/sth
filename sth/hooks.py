@@ -414,7 +414,7 @@ doc_events = {
 		# debit_to disetel di before_validate supaya validate_debit_to_acc bawaan
 		# ERPNext ikut memeriksa akun yang kita pasang, bukan akun sebelumnya
 		"before_validate": ["sth.sales_sth.custom.sales_invoice.set_debit_to"],
-		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.sales_sth.custom.sales_invoice.validate_expense_account"],
+		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.sales_sth.custom.sales_invoice.validate_expense_account","sth.sales_sth.custom.sales_invoice.validate_penjualan_asset"],
 	},
 	"Supplier": {
 		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],

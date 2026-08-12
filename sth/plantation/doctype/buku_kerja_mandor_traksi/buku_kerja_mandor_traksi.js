@@ -349,7 +349,7 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			};
 		});
 
-		this.frm.set_query("mandor", function () {
+		this.frm.set_query("kode_mandor", function () {
             return {
 				query: "sth.controllers.queries.employee_designation_query",
               	filters: {

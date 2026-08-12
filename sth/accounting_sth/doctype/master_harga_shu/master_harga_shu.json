@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-30 01:45:47.236421",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "company",
+  "tahun",
+  "column_break_head",
+  "jumlah_masa",
+  "jumlah_sel_terisi",
+  "masa_section",
+  "masa",
+  "matriks_section",
+  "matriks",
+  "harga_section",
+  "harga",
+  "penetapan_section",
+  "penetapan"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tahun",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Tahun",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_head",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jumlah_masa",
+   "fieldtype": "Data",
+   "label": "Pembagian Masa",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jumlah_sel_terisi",
+   "fieldtype": "Data",
+   "label": "Sel Terisi",
+   "read_only": 1
+  },
+  {
+   "description": "Pembagian tanggal jadi masa, per bulan. Jumlah masa bebas tiap bulan — yang wajib adalah menutup penuh bulan itu tanpa celah dan tanpa tumpang tindih. Bulan yang tidak diisi berarti belum ada masanya.",
+   "fieldname": "masa_section",
+   "fieldtype": "Section Break",
+   "label": "Pembagian Masa"
+  },
+  {
+   "fieldname": "masa",
+   "fieldtype": "Table",
+   "label": "Masa",
+   "options": "Master Harga SHU Masa"
+  },
+  {
+   "description": "Kolomnya kelompok umur yang sudah paten. Umur dihitung dari tahun dokumen dikurangi tahun tanam yang tercatat di tiket timbangan.",
+   "fieldname": "matriks_section",
+   "fieldtype": "Section Break",
+   "label": "Matriks Harga"
+  },
+  {
+   "fieldname": "matriks",
+   "fieldtype": "HTML",
+   "label": "Matriks"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "harga_section",
+   "fieldtype": "Section Break",
+   "label": "Data Harga"
+  },
+  {
+   "description": "Terisi otomatis dari matriks. Sel yang tidak diisi tidak menghasilkan baris \u2014 kosong bukan nol.",
+   "fieldname": "harga",
+   "fieldtype": "Table",
+   "label": "Harga",
+   "options": "Master Harga SHU Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "penetapan_section",
+   "fieldtype": "Section Break",
+   "label": "Penetapan per Bulan"
+  },
+  {
+   "fieldname": "penetapan",
+   "fieldtype": "Table",
+   "label": "Penetapan",
+   "options": "Master Harga SHU Penetapan",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-11 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Master Harga SHU",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

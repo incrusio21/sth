@@ -10,10 +10,6 @@ from frappe.utils import cint, cstr, flt
 from frappe.model.document import Document
 from frappe.utils.synchronization import filelock
 
-force_item_fields = (
-	"recap_panen"
-)
-
 class SuratPengantarBuah(Document):
 
 	def validate(self):
@@ -25,36 +21,17 @@ class SuratPengantarBuah(Document):
 		self.set_missing_value()
 		self.validate_recap_panen()
 		self.calculate_janjang()
+		self.hitung_persentase_dari_janjang()
 
 	def remove_input_pks(self):
 		self.in_time = self.out_time = self.in_time_internal = self.out_time_internal = ""
 		self.in_weight = self.in_weight_internal = self.out_weight = self.out_weight_internal = self.mill_cut = 0
 
 	def set_missing_value(self):
-		def _apply_recap(detail, suffix=""):
-			blok = detail.get(f"blok{suffix}")
-			panen_date = detail.get(f"panen_date{suffix}")
-			
-			ret = get_recap_panen(blok, panen_date)
-			
-			for fieldname, value in ret.items():
-				target_field = f"{fieldname}{suffix}"
-				
-				if not (detail.meta.get_field(target_field) and value is not None):
-					continue
-				
-				if detail.get(target_field) is None or target_field in force_item_fields:
-					detail.set(target_field, value)
-
-		doctype, fieldname, nopol = ["Driver", "kendaraan_eksternal", "custom_license_plate"]if self.tipe_kendaraan == "External" else ["Alat Berat Dan Kendaraan", "kendaraan", "no_pol"] 
+		doctype, fieldname, nopol = ["Driver", "kendaraan_eksternal", "custom_license_plate"]if self.tipe_kendaraan == "External" else ["Alat Berat Dan Kendaraan", "kendaraan", "no_pol"]
 		self.no_polisi = frappe.get_value(doctype, self.get(fieldname), nopol)
 
-		for d in self.details:
-			_apply_recap(d)
-
-			# Process restan recap if exists
-			if d.blok_restan and d.panen_date_restan:
-				_apply_recap(d, suffix="_restan")
+		set_recap_panen_in_details(self.details)
 
 	def validate_recap_panen(self):
 		# SPB bisa dibuat sebagai stub tanpa detail (mis. dari Security Check Point),
@@ -116,6 +93,69 @@ class SuratPengantarBuah(Document):
 
 		self.total_janjang = total_janjang
 		self.total_brondolan = total_brondolan
+
+	def hitung_persentase_dari_janjang(self):
+		"""Porsi janjang tiap baris dalam persen, dasar pembagian beratnya.
+
+		Dihitung ulang tiap kali disimpan, tidak pernah diisi tangan — janjang yang
+		datang belakangan lewat API jadi tetap terikut, tidak meninggalkan pembagian
+		yang basi.
+
+		Baris terakhir menyerap sisa pembulatan supaya jumlahnya persis 100 —
+		tiga baris sama besar kalau tidak begitu cuma berjumlah 99,999.
+		"""
+		if not self.details:
+			return
+
+		# SPB dari Security Check Point belum punya janjang sama sekali
+		if not self.total_janjang:
+			for d in self.details:
+				d.persentase = 0
+			return
+
+		presisi = self.details[0].precision("persentase")
+		terbagi = 0.0
+
+		for d in self.details[:-1]:
+			d.persentase = flt(flt(d.total_janjang) * 100 / self.total_janjang, presisi)
+			terbagi += d.persentase
+
+		self.details[-1].persentase = flt(100 - terbagi, presisi)
+
+	def bagi_berat_ke_baris(self, total_weight):
+		"""Bagi berat ke baris-baris blok menurut persentasenya.
+
+		Satu-satunya tempat berat dipecah ke baris, dipakai jalur timbang pabrik
+		maupun jalur Timbangan. Baris berpersentase yang terakhir menyerap sisa
+		pembulatan supaya jumlah seluruh baris persis sama dengan beratnya.
+		"""
+		if not self.details:
+			return
+
+		# SPB lama belum punya persentase tersimpan; dihitung di tempat supaya
+		# beratnya tidak jatuh nol semua
+		if not any(flt(d.persentase) for d in self.details):
+			self.hitung_persentase_dari_janjang()
+
+		presisi = get_field_precision(
+			frappe.get_meta("SPB Timbangan Pabrik").get_field("total_weight")
+		)
+
+		for d in self.details:
+			d.total_weight = 0.0
+
+		berbagi = [d for d in self.details if flt(d.persentase)]
+		if not berbagi:
+			return
+
+		total_weight = flt(total_weight)
+		terbagi = 0.0
+
+		for d in berbagi[:-1]:
+			d.total_weight = flt(total_weight * flt(d.persentase) / 100, presisi)
+			terbagi += d.total_weight
+
+		berbagi[-1].total_weight = flt(total_weight - terbagi, presisi)
 
 	def on_submit(self):
 		self.update_transfered_bkm_panen()
@@ -197,11 +237,7 @@ class SuratPengantarBuah(Document):
 			frappe.throw("Out weight is greater than In weight")
 
 	def calculate_weight_in_blok(self):
-		precision = get_field_precision(
-			frappe.get_meta("SPB Timbangan Pabrik").get_field("total_weight")
-		)
-		for d in self.details:
-			d.total_weight = flt(self.total_weight * d.total_janjang / self.total_janjang, precision)
+		self.bagi_berat_ke_baris(self.total_weight)
 
 @frappe.whitelist()
 def create_or_update(**kwargs):
@@ -293,8 +329,10 @@ def _update_spb(existing_name, args):
 			doc.submit()
 	else:
 		# Dokumen sudah submit: hanya detail dan totalnya yang boleh disentuh,
-		# lewat db_set supaya tidak kena validate_update_after_submit.
+		# lewat db_set supaya tidak kena validate_update_after_submit. validate
+		# tidak jalan di jalur ini, jadi recap_panen diisi manual di sini.
 		_apply_details(doc, details)
+		set_recap_panen_in_details(doc.details)
 
 		doc.update_child_table("details")
 		doc.db_set({
@@ -343,6 +381,38 @@ def _resync_timbangan(spb_name):
 		return
 
 	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
+
+def set_recap_panen_in_details(details):
+	"""Isi recap_panen tiap baris detail dari blok + tanggal panennya.
+
+	Dipakai dua-duanya oleh validate dan oleh jalur API, supaya SPB yang masuk
+	tanpa lewat form tetap nyambung ke Recap Panen by Blok — form punya trigger
+	JS-nya, request API tidak.
+	"""
+	for d in details:
+		_apply_recap(d)
+
+		# Process restan recap if exists
+		if d.blok_restan and d.panen_date_restan:
+			_apply_recap(d, suffix="_restan")
+
+def _apply_recap(detail, suffix=""):
+	"""Sambungkan satu baris detail ke recap-nya. Hanya link-nya, bukan qty.
+
+	Satu blok di tanggal yang sama bisa dipecah jadi beberapa baris detail, dan
+	pembagian janjangnya datang dari pengirim. get_recap_panen() mengembalikan
+	sisa janjang blok itu untuk dipakai form (satu baris, diisi manual); kalau
+	nilai itu ikut ditulis ke tiap baris, Recap Panen by Blok menjumlahkan qty
+	semua baris yang menunjuk dirinya dan totalnya jadi berlipat saat submit.
+	"""
+	blok = detail.get(f"blok{suffix}")
+	panen_date = detail.get(f"panen_date{suffix}")
+
+	recap_panen = get_recap_panen(blok, panen_date).get("recap_panen")
+	if not recap_panen:
+		return
+
+	detail.set(f"recap_panen{suffix}", recap_panen)
 
 @frappe.whitelist()
 def get_recap_panen(blok, posting_date):

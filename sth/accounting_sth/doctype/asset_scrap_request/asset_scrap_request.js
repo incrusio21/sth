@@ -14,11 +14,23 @@ frappe.ui.form.on("Asset Scrap Request", {
 	},
 
 	refresh(frm) {
-		if (frm.doc.docstatus === 1 && frm.doc.journal_entry_for_scrap) {
-			frm.add_custom_button(__("Asset"), function () {
-				frappe.set_route("Form", "Asset", frm.doc.asset);
-			}, __("View"));
+		if (frm.doc.docstatus !== 1) return;
 
+		frm.add_custom_button(__("Asset"), function () {
+			frappe.set_route("Form", "Asset", frm.doc.asset);
+		}, __("View"));
+
+		// Hapus buku scrap sebagian diposting sebagai GL Entry milik Asset, bukan
+		// Journal Entry tersendiri — jadi jejaknya dibuka lewat buku besar
+		frm.add_custom_button(__("General Ledger"), function () {
+			frappe.set_route("query-report", "General Ledger", {
+				company: frm.doc.company,
+				voucher_no: frm.doc.asset,
+			});
+		}, __("View"));
+
+		// cuma ada untuk scrap 100%, yang jurnalnya dibuat ERPNext
+		if (frm.doc.journal_entry_for_scrap) {
 			frm.add_custom_button(__("Journal Entry"), function () {
 				frappe.set_route("Form", "Journal Entry", frm.doc.journal_entry_for_scrap);
 			}, __("View"));

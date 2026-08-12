@@ -177,6 +177,8 @@ def get_payment_entry(
                     },
                 )
 
+    tambah_je_ppn_nota_piutang(pe, dt, dn)
+
     pe.setup_party_account_field()
     pe.set_missing_values()
     pe.set_missing_ref_details()
@@ -203,6 +205,88 @@ def get_payment_entry(
     set_note_from_purchase_invoice(pe, dt, dn, doc)
 
     return pe
+
+
+@frappe.whitelist()
+def get_je_ppn_nota_piutang(sales_invoice, party, account, payment_entry=None):
+    """Journal Entry PPN Nota Piutang Jual Asset yang masih menggantung untuk invoice ini.
+
+    PPN penjualan asset ditagihkan lewat Journal Entry tersendiri, bukan lewat Sales
+    Invoice-nya, supaya outstanding invoice tetap sama dengan grand total. Jurnal itu
+    tidak akan muncul di Get Outstanding Invoices, jadi harus ditarik terpisah.
+
+    Balikan: list of dict {name, total, sisa}. `sisa` sudah dikurangi alokasi di
+    Payment Entry lain — termasuk yang masih draft — supaya jurnal yang sama tidak
+    tertagih dua kali. Payment Entry yang sedang dibuka dikecualikan lewat
+    `payment_entry`, supaya barisnya bisa ditarik ulang setelah sempat dihapus.
+    """
+    if not (sales_invoice and party and account):
+        return []
+
+    je_list = frappe.db.sql("""
+        SELECT je.name, SUM(jea.debit_in_account_currency) AS total
+        FROM `tabJournal Entry` je
+        JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
+        JOIN `tabNota Piutang` np ON np.name = je.nota_piutang
+        WHERE je.docstatus = 1
+          AND np.docstatus = 1
+          AND np.sub_tipe_others = 'Jual Asset'
+          AND np.sales_invoice = %(sales_invoice)s
+          AND jea.party_type = 'Customer'
+          AND jea.party = %(party)s
+          AND jea.account = %(account)s
+        GROUP BY je.name
+    """, {
+        "sales_invoice": sales_invoice,
+        "party": party,
+        "account": account,
+    }, as_dict=True)
+
+    hasil = []
+
+    for je in je_list:
+        dialokasikan = frappe.db.sql("""
+            SELECT COALESCE(SUM(per.allocated_amount), 0)
+            FROM `tabPayment Entry Reference` per
+            JOIN `tabPayment Entry` pe ON pe.name = per.parent
+            WHERE per.reference_doctype = 'Journal Entry'
+              AND per.reference_name = %(je)s
+              AND pe.docstatus != 2
+              AND pe.name != %(payment_entry)s
+        """, {"je": je.name, "payment_entry": payment_entry or ""})[0][0]
+
+        sisa = flt(je.total) - flt(dialokasikan)
+
+        if sisa <= 0:
+            continue
+
+        hasil.append({"name": je.name, "total": flt(je.total), "sisa": sisa})
+
+    return hasil
+
+
+def tambah_je_ppn_nota_piutang(pe, dt, dn):
+    """Ikutkan Journal Entry PPN Nota Piutang ke pembayaran yang dibuat dari invoicenya.
+
+    Jalur tombol Payment di Sales Invoice. Yang diketik manual di form Payment Entry
+    ditarik sisi client lewat get_je_ppn_nota_piutang() yang sama.
+    """
+    if dt != "Sales Invoice" or pe.payment_type != "Receive":
+        return
+
+    for je in get_je_ppn_nota_piutang(dn, pe.party, pe.paid_from):
+        pe.append("references", {
+            "reference_doctype": "Journal Entry",
+            "reference_name": je["name"],
+            "total_amount": je["total"],
+            "outstanding_amount": je["sisa"],
+            "allocated_amount": je["sisa"],
+        })
+
+        # paid_amount tadi dihitung dari outstanding invoicenya saja, jadi PPN ini
+        # ditambahkan supaya tidak ada selisih yang menggantung
+        pe.paid_amount = flt(pe.paid_amount) + je["sisa"]
+        pe.received_amount = flt(pe.received_amount) + je["sisa"]
 
 
 def set_note_from_purchase_invoice(pe, dt, dn, doc):

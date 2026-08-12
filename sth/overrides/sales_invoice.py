@@ -1,9 +1,24 @@
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from frappe import _
 from frappe.utils import get_last_day,flt
 
 class SalesInvoice(SalesInvoice):
 	def validate(self):
+		# PENJAGA: validate() ini tidak memanggil super().validate(), jadi seluruh
+		# validate ERPNext dilewati. Yang paling berdampak kalau dikembalikan:
+		# validate_fixed_asset() menolak submit invoice untuk asset berstatus
+		# Scrapped, padahal alur penjualan asset di sini justru mewajibkan discrap
+		# dulu lewat Asset Scrap Request sebelum boleh dijual.
+		#
+		# Jurnalnya sendiri sudah aman: get_gl_entries_disposal() merakit dua
+		# barisnya sendiri dan tidak lagi bergantung pada is_fixed_asset maupun
+		# income_account bawaan.
+		#
+		# Sisi lain dari dilewatinya validate ERPNext: total dan pajak tidak pernah
+		# dihitung ulang di server, jadi nilainya sepenuhnya bergantung pada apa
+		# yang dikirim client. Kalau super().validate() dipulihkan demi itu, alur
+		# Disposal harus diuji ulang dari awal.
 		if self.is_return == 1:
 			for row in self.items:
 				if row.qty > 0:
@@ -31,6 +46,9 @@ class SalesInvoice(SalesInvoice):
 		super().on_cancel()
 
 	def get_gl_entries(self, warehouse_account=None):
+		if self.jenis_penagihan == "Disposal":
+			return self.get_gl_entries_disposal()
+
 		if self.jenis_penagihan == "Pengiriman":
 			self._apply_timbang_qty()
 
@@ -38,6 +56,72 @@ class SalesInvoice(SalesInvoice):
 		# frappe.throw("{}-{}-{}".format(self.grand_total, self.base_grand_total, self,total_akhir_timbang))
 		if self.jenis_penagihan == "Pengiriman":
 			self._restore_original_qty()
+
+		return gl_entries
+
+	def get_gl_entries_disposal(self):
+		"""Jurnal penjualan asset: piutang lawan akun penjualan aset, itu saja.
+
+		Nilai buku, akumulasi penyusutan, dan laba/rugi pelepasan asetnya sudah
+		dihapusbukukan waktu discrap lewat Asset Scrap Request, jadi jurnal
+		pelepasan bawaan ERPNext tidak boleh terbentuk lagi dari invoice ini.
+
+		Dirakit sendiri, bukan hasil saringan super().get_gl_entries(). Melepas
+		penanda is_fixed_asset saja tidak cukup diandalkan: field itu ada di
+		force_item_fields ERPNext, jadi set_missing_values() bisa memulihkannya
+		jadi 1 kapan saja dan jurnal pelepasannya terbentuk lagi tanpa terlihat.
+		Di sini barisnya memang cuma dua yang ditulis, tidak peduli nilai
+		is_fixed_asset.
+
+		Kalau invoice ini suatu saat harus berpajak, jurnalnya tidak bisa lagi
+		cuma dua baris — lihat penjaga di validate_penjualan_asset().
+		"""
+		gl_entries = []
+
+		akun_penjualan = ", ".join(
+			sorted({item.income_account for item in self.items if item.income_account})
+		)
+
+		# Debit piutang. against_voucher wajib diisi, itu yang dipakai ERPNext
+		# menghitung outstanding_amount invoice ini
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"due_date": self.due_date,
+					"against": akun_penjualan,
+					"debit": flt(self.base_grand_total, self.precision("base_grand_total")),
+					"debit_in_account_currency": flt(self.grand_total, self.precision("grand_total")),
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center,
+				},
+				self.party_account_currency,
+				item=self,
+			)
+		)
+
+		# Kredit akun penjualan aset, satu baris per item
+		for item in self.items:
+			if not flt(item.base_net_amount, item.precision("base_net_amount")):
+				continue
+
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": item.income_account,
+						"against": self.customer,
+						"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
+						"credit_in_account_currency": flt(
+							item.net_amount, item.precision("net_amount")
+						),
+						"cost_center": item.cost_center,
+					},
+					item=item,
+				)
+			)
 
 		return gl_entries
 

@@ -45,7 +45,12 @@ class BukuKerjaMandorController(PlantationController):
         ]
 
         self._clear_fields = []
-        self._mandor_dict = [{"fieldname": "mandor"}]
+        # kode_mandor, bukan mandor: field mandor menyimpan nilai mentah kiriman API
+        # yang bisa berupa ID User sistem luar. Employee-nya ada di kode_mandor.
+        #
+        # mandor_type tetap "mandor" supaya Buku Kerja Mandor Premi yang sudah ada
+        # tetap ketemu — kuncinya ikut nilai ini, bukan nama fieldnya
+        self._mandor_dict = [{"fieldname": "kode_mandor", "mandor_type": "mandor"}]
 
     def validate(self):
         self.clear_fields()
@@ -193,14 +198,43 @@ class BukuKerjaMandorController(PlantationController):
             mandor = self.get(d["fieldname"])
             if not mandor:
                 continue
-            
-            bkm_mandor_creation_savepoint = "create_bkm_mandor"
+
+            mandor_type = d.get("mandor_type") or d["fieldname"]
+
+            # kunci ini harus sama persis dengan unique index yang dibentuk
+            # on_doctype_update milik Buku Kerja Mandor Premi
+            kunci = {
+                "employee": mandor,
+                "mandor_type": mandor_type,
+                "company": self.company,
+                "posting_date": date,
+                "buku_kerja_mandor": self._bkm_name
+            }
+
+            # Cari dulu, jangan andalkan insert yang gagal. Karena posting_date
+            # dinormalkan ke tanggal 1, baris premi memang cuma satu per mandor
+            # per bulan, jadi BKM kedua dan seterusnya dalam sebulan selalu
+            # jatuh ke jalur "sudah ada" -- itu jalur normal, bukan kekecualian.
+            #
+            # Menyisipkan lebih dulu berarti tiap submit BKM menulis baris lalu
+            # menariknya kembali lewat rollback ke savepoint. Justru pola tulis-
+            # lalu-batalkan itu yang bikin objek di memori bisa memegang modified
+            # yang lebih baru daripada barisnya di database, dan save() berikutnya
+            # gagal dengan TimestampMismatchError.
+            nama_premi = frappe.db.get_value("Buku Kerja Mandor Premi", kunci)
+            if nama_premi:
+                self.simpan_mandor_premi(nama_premi)
+                continue
+
+            # savepoint dinamai per peran supaya rollback satu peran tidak
+            # menyentuh peran yang sudah tersimpan di iterasi sebelumnya
+            bkm_mandor_creation_savepoint = "create_bkm_mandor_{0}".format(mandor_type)
             try:
                 frappe.db.savepoint(bkm_mandor_creation_savepoint)
                 bkm_obj = frappe.get_doc(
-                    doctype="Buku Kerja Mandor Premi", 
+                    doctype="Buku Kerja Mandor Premi",
                     employee=mandor, buku_kerja_mandor=self._bkm_name, company=self.company, posting_date=date,
-                    mandor_type=d["fieldname"]
+                    mandor_type=mandor_type
                 )
                 bkm_obj.flags.ignore_permissions = 1
                 bkm_obj.flags.transaction_employee = 1
@@ -210,16 +244,28 @@ class BukuKerjaMandorController(PlantationController):
                 if frappe.message_log:
                     frappe.message_log.pop()
                 frappe.db.rollback(save_point=bkm_mandor_creation_savepoint)  # preserve transaction in postgres
-                
-                bkm_obj = frappe.get_last_doc("Buku Kerja Mandor Premi", {
-                    "employee": mandor,
-                    "mandor_type": d["fieldname"],
-                    "company": self.company, 
-                    "posting_date": date,
-                    "buku_kerja_mandor": self._bkm_name
-                })
-                bkm_obj.flags.transaction_employee = 1
-                bkm_obj.save()
+
+                # Sampai di sini artinya ada baris yang bentrok tapi kuncinya
+                # tidak sama dengan yang barusan dicari. Dua sebabnya: dua
+                # permintaan menyisipkan bersamaan, atau unique index di
+                # database masih yang basi dan lebih ketat dari kunci di atas
+                # (lihat patch perbaiki_unique_index_bkm_premi).
+                nama_premi = frappe.db.get_value("Buku Kerja Mandor Premi", kunci)
+                if not nama_premi:
+                    frappe.throw(
+                        _("Buku Kerja Mandor Premi untuk {0} sebagai {1} pada {2} ditolak database, tetapi barisnya tidak ditemukan.").format(
+                            mandor, mandor_type, date
+                        )
+                        + "<br>"
+                        + _("Periksa unique index tabel Buku Kerja Mandor Premi.")
+                    )
+
+                self.simpan_mandor_premi(nama_premi)
+
+    def simpan_mandor_premi(self, nama_premi):
+        bkm_obj = frappe.get_doc("Buku Kerja Mandor Premi", nama_premi)
+        bkm_obj.flags.transaction_employee = 1
+        bkm_obj.save()
 
     def make_attendance(self):
         employee = self.hasil_kerja + self.get_mandor_details()

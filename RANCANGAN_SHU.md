@@ -10,13 +10,20 @@ berikutnya bisa lanjut tanpa mengulang analisis.
 Perhitungan bagi hasil TBS antara company (mis. PT Trimitra Lestari) dan mitra
 Bumdes/KUD (mis. Bumdes Jabung Cipta Usaha). Sekarang dikerjakan di Excel.
 
-Tiga doctype baru:
+Dua doctype baru:
 
 | Doctype | Cakupan | Peran |
 |---|---|---|
-| `Masa SHU` | per (company, tahun, bulan), **submittable** | Pembagian tanggal jadi masa |
-| `Master Harga SHU` | per (company, tahun), **tidak submittable** | Matriks harga masa × tahun tanam |
+| `Master Harga SHU` | per (company, tahun), **tidak submittable** | Pembagian masa **dan** matriks harga masa × kelompok umur |
 | `Perhitungan KUD` | per (company, mitra, bulan) | Dokumen hasil, dicetak & ditandatangani |
+
+> **Perubahan 11 Agustus 2026.** Dulu pembagian masa berdiri sebagai doctype
+> `Masa SHU` sendiri (per bulan, submittable). Sekarang dilebur jadi child table
+> `masa` di `Master Harga SHU`, karena keduanya selalu diisi bersamaan dan
+> penguncian per bulan sudah ada di sini. Dua perubahan lain menyertainya: kolom
+> matriks berubah dari tahun tanam jadi **kelompok umur yang paten**, dan bulan
+> ditulis dengan **nama Indonesia** (sempat jadi angka romawi, lalu dikembalikan).
+> Migrasinya di `sth/patches/gabung_masa_shu_ke_master_harga_shu.py`.
 
 Ditambah satu laporan **Tanggal Tanpa Harga SHU** yang statusnya wajib (alasannya di §5).
 
@@ -35,50 +42,42 @@ jadi harus dibaca lewat `GetAttribute('id', 'http://schemas.openxmlformats.org/o
 
 ## 2. Status: apa yang sudah jadi
 
-### Selesai — `Masa SHU`
-
-```
-sth/plantation/doctype/masa_shu/masa_shu.json
-sth/plantation/doctype/masa_shu/masa_shu.py
-sth/plantation/doctype/masa_shu/masa_shu.js
-sth/plantation/doctype/masa_shu/test_masa_shu.py
-sth/plantation/doctype/masa_shu_detail/masa_shu_detail.json
-sth/plantation/doctype/masa_shu_detail/masa_shu_detail.py
-```
-
-Modul **Plantation** (bukan Sales STH). Alasannya: masa terikat operasional kebun.
-Kalau mau dipindah, cukup ganti field `module` dan folder induknya.
-
-Isi `masa_shu.py`:
-
-- `check_masa_rows(rows, bulan_mulai, bulan_selesai)` — **fungsi murni**, tanpa database.
-  Delapan aturan validasi. Balikannya list pesan kesalahan.
-- `bagi_rata_masa(awal, akhir, jumlah)` — **fungsi murni**. Usulan pembagian sama rata;
-  sisa hari masuk ke masa terdepan sehingga hasilnya dijamin lolos `check_masa_rows`.
-- `rentang_bulan(tahun, bulan)` — nama bulan Indonesia ke (tanggal 1, akhir bulan).
-- `usulan_bagi_rata()` — whitelist, dipakai tombol di JS.
-- `get_masa(company, tanggal)` — whitelist. **Ini pintu masuk untuk doctype lain.**
-  Master Harga SHU dan Perhitungan KUD wajib lewat sini, jangan hitung tanggal sendiri
-  (alasannya di §6).
-
-`BULAN_MAP` diimpor dari `sth/plantation/doctype/blok/blok.py` — jangan bikin salinan kedua.
-
 ### Selesai — `Master Harga SHU`
 
 ```
-sth/plantation/doctype/master_harga_shu/{json,py,js,test_}
-sth/plantation/doctype/master_harga_shu_tahun_tanam/
-sth/plantation/doctype/master_harga_shu_detail/
-sth/plantation/doctype/master_harga_shu_penetapan/
+sth/accounting_sth/doctype/master_harga_shu/{json,py,js,test_}
+sth/accounting_sth/doctype/master_harga_shu_masa/
+sth/accounting_sth/doctype/master_harga_shu_detail/
+sth/accounting_sth/doctype/master_harga_shu_penetapan/
 ```
 
 Fungsi murni di `master_harga_shu.py` (semuanya tanpa database, jadi bisa dites langsung):
 
-- `check_tahun_tanam(rows, tahun)` — aturan 1 dan 2
+- `check_masa_rows(rows, bulan_mulai, bulan_selesai)` — delapan aturan pembagian masa
+  satu bulan. Balikannya list pesan kesalahan.
+- `check_masa_setahun(rows, tahun)` — pembungkusnya: kelompokkan per bulan lalu
+  jalankan `check_masa_rows`. Bulan yang tidak punya baris dilewat.
+- `bagi_rata_masa(awal, akhir, jumlah)` — usulan pembagian sama rata; sisa hari masuk
+  ke masa terdepan sehingga hasilnya dijamin lolos `check_masa_rows`.
+- `rentang_bulan(tahun, bulan)` — nama bulan Indonesia **atau nomornya** ke
+  (tanggal 1, akhir bulan).
+- `kelompok_untuk_umur(umur)` — umur ke kelompok kolom matriks.
 - `check_harga_rows(rows)` — aturan 3 dan 4
-- `check_baris_terkunci(rows_lama, rows_baru, bulan_terkunci)` — aturan 6
+- `check_baris_terkunci(rows_lama, rows_baru, bulan_terkunci)` — aturan 6, sisi harga
+- `check_masa_terkunci(rows_lama, rows_baru, bulan_terkunci)` — aturan 6, sisi masa.
+  Ini yang menggantikan submit `Masa SHU`: tanggal masa di bulan yang sudah ditetapkan
+  tidak boleh digeser, ditambah, maupun dihapus.
 
-Whitelist: `get_masa_setahun()`, `tetapkan_bulan()`, `buka_bulan()`, `get_harga_shu()`.
+Whitelist: `usulan_bagi_rata()`, `get_masa_setahun()`, `get_kelompok_umur()`,
+`tetapkan_bulan()`, `buka_bulan()`, `get_harga_shu()`.
+
+`get_masa(company, tanggal)` dan `masa_setahun(company, tahun)` **adalah pintu masuk
+untuk doctype lain** — Perhitungan KUD wajib lewat sini, jangan hitung tanggal sendiri
+(alasannya di §6).
+
+`BULAN_MAP` diimpor dari `sth/plantation/doctype/blok/blok.py` — jangan bikin salinan
+kedua. `NAMA_BULAN` di sini cuma pembalikannya. Di sisi JS daftar bulan memang ditulis
+ulang, tapi daftar kelompok umur tidak: JS mengambilnya lewat `get_kelompok_umur()`.
 
 **Tiga hal yang berbeda dari rencana awal di §4, dan alasannya:**
 
@@ -91,27 +90,25 @@ Whitelist: `get_masa_setahun()`, `tetapkan_bulan()`, `buka_bulan()`, `get_harga_
 3. **`get_harga_shu()` ikut ditulis di sini**, bukan jadi langkah terpisah — tempatnya
    memang di file ini dan cuma 30 baris.
 
-`sinkron_dan_validasi_masa()` menyalin ulang `tanggal_mulai`/`tanggal_selesai` dari Masa SHU
+`sinkron_masa_ke_harga()` menyalin ulang `tanggal_mulai`/`tanggal_selesai` dari tabel masa
 **setiap kali disimpan**, jadi salinan denormalisasi itu menyembuhkan dirinya sendiri.
 
-`get_harga_shu()` menormalkan `tahun_tanam` dengan `cint()` — meredam sebagian risiko 3 di §8,
-tapi bukan penggantinya: normalisasi tetap harus dilakukan juga saat menarik produksi.
+`get_harga_shu()` menormalkan `tahun_tanam` dengan `normalisasi_tahun_tanam()` — meredam
+sebagian risiko 3 di §8, tapi bukan penggantinya: normalisasi tetap harus dilakukan juga
+saat menarik produksi.
 
-**Status pengujian:** fungsi murni sudah dijalankan lewat stub, **19 pemeriksaan lolos**.
-`test_master_harga_shu.py` belum pernah dijalankan lewat bench.
-
-**Status pengujian:** logika kedua fungsi murni sudah dijalankan lewat stub dan
-**21 pemeriksaan lolos**, termasuk pembagian Januari 2026 asli dari Excel.
-`test_masa_shu.py` **belum pernah dijalankan lewat bench** karena Python/frappe tidak
-tersedia di mesin ini. Jalankan dulu sebelum lanjut:
+**Status pengujian:** fungsi murni `master_harga_shu.py` dan `perhitungan_kud.py` dijalankan
+lewat stub (`runner.py` di scratchpad, frappe dipalsukan): **78 pemeriksaan lolos**, termasuk
+pembagian Januari 2026 asli dari Excel. Belum pernah dijalankan lewat bench karena Python
+frappe tidak tersedia di mesin ini. Jalankan dulu sebelum lanjut:
 
 ```bash
-bench --site <site> run-tests --module sth.plantation.doctype.masa_shu.test_masa_shu
+bench --site <site> run-tests --module sth.accounting_sth.doctype.master_harga_shu.test_master_harga_shu
 ```
 
 Doctype-nya juga belum pernah dimigrasikan. `bench migrate` dulu.
 
-### Delapan aturan validasi `Masa SHU`
+### Delapan aturan validasi pembagian masa
 
 1. Minimal ada 1 masa
 2. `masa_no` berurutan 1..n
@@ -122,21 +119,28 @@ Doctype-nya juga belum pernah dimigrasikan. `bench migrate` dulu.
 7. Tanpa tumpang tindih
 8. Semua tanggal berada di dalam bulan itu
 
+Kedelapan aturan berlaku **per bulan**, dan cuma untuk bulan yang punya baris. Bulan yang
+belum diisi sama sekali itu sah — `check_masa_setahun()` melewatinya. Yang ditolak adalah
+bulan yang terisi setengah.
+
 Tidak satu pun mengandaikan jumlah masa tertentu. Januari boleh 6 masa, Februari 4,
 Maret 8 — itu keputusan user tiap bulan, bukan rumus.
 
-Plus `before_cancel`: tolak pembatalan kalau sudah ada harga berstatus Ditetapkan
-yang memakai masa ini. Sekarang masih dijaga oleh `frappe.db.exists("DocType", "Master Harga SHU")`
-karena doctype-nya belum ada — **hapus penjagaan itu setelah Master Harga SHU jadi**.
+Nomor masa tidak diketik: `set_periode_masa()` menomori ulang tiap simpan menurut urutan
+baris dalam bulannya, jadi menggeser baris di grid sudah cukup untuk menomori ulang.
+
+Pengganti submit `Masa SHU` adalah `check_masa_terkunci()`: begitu satu bulan berstatus
+Ditetapkan, tanggal masanya ikut terkunci. Tanpa itu, harga yang sudah disepakati bisa
+dipindahkan ke rentang tanggal lain tanpa jejak.
 
 ---
 
 ### Selesai — `Perhitungan KUD`
 
 ```
-sth/plantation/doctype/perhitungan_kud/{json,py,js,test_}
-sth/plantation/doctype/perhitungan_kud_detail/
-sth/plantation/doctype/perhitungan_kud_unit/
+sth/accounting_sth/doctype/perhitungan_kud/{json,py,js,test_}
+sth/accounting_sth/doctype/perhitungan_kud_detail/
+sth/accounting_sth/doctype/perhitungan_kud_unit/
 ```
 
 **Submittable** — ini dokumen uang yang dicetak dan ditandatangani.
@@ -180,9 +184,9 @@ persis Hasil Bersih.
 1. **Laporan Tanggal Tanpa Harga SHU** — wajib, alasannya di §5
 2. **Print format `Perhitungan KUD`** — dokumen ini dicetak dan ditandatangani
 
-Sebelum keduanya: `bench migrate` lalu jalankan ketiga modul tes, dan coba alur
-lengkapnya sekali di UI — buat Masa SHU Januari, submit, isi matriks harganya,
-tetapkan bulannya, lalu Tarik Produksi di Perhitungan KUD.
+Sebelum keduanya: `bench migrate` lalu jalankan kedua modul tes, dan coba alur
+lengkapnya sekali di UI — buka Master Harga SHU tahun berjalan, bagi rata masa Januari,
+isi matriks harganya, tetapkan bulannya, lalu Tarik Produksi di Perhitungan KUD.
 
 ---
 
@@ -193,45 +197,61 @@ Master Harga SHU              autoname: format:MHS-{company_abbr}-{tahun}
                               unique: (company, tahun)
 ├─ company       Link Company  reqd
 ├─ tahun         Int           reqd
-├─ tahun_tanam (Child)                            ← penentu KOLOM
-│    tahun_tanam  Int   reqd
-│    umur         Int   read_only   = tahun − tahun_tanam
-│    label        Data  read_only   = "{umur}TH"
+├─ masa (Child)                                   ← penentu BARIS
+│    bulan           Select   reqd    nama bulan Indonesia
+│    bulan_no        Int      read_only
+│    masa_no         Int      read_only  ← urutan baris dalam bulannya
+│    tanggal_mulai   Date     reqd
+│    tanggal_selesai Date     reqd
+│    jumlah_hari     Int      read_only
 ├─ matriks       HTML                             ← grid yang diketik user
 ├─ harga (Child)                                  ← hasil flatten, hidden
-│    masa_shu        Link Masa SHU
 │    bulan_no        Int
 │    masa_no         Int
-│    tanggal_mulai   Date      ← disalin dari Masa SHU
-│    tanggal_selesai Date      ← disalin dari Masa SHU
-│    tahun_tanam     Int
+│    kelompok_umur   Data      ← "3", "10 - 20", …
+│    umur_min        Int       ← disalin dari KELOMPOK_UMUR
+│    umur_max        Int
+│    tanggal_mulai   Date      ← disalin dari tabel masa
+│    tanggal_selesai Date      ← disalin dari tabel masa
 │    harga           Currency
 └─ penetapan (Child)                              ← penguncian per bulan
-     bulan_no | status | ditetapkan_oleh | ditetapkan_pada
+     bulan_no | bulan | status | ditetapkan_oleh | ditetapkan_pada | catatan
 ```
 
 ### Kenapa bentuknya begini
 
 **Tidak submittable.** Dokumennya setahun tapi diisi bulan demi bulan. Kalau submit,
 seluruh tahun terkunci dan harus amend 12 kali setahun. Penguncian turun ke level bulan
-lewat `penetapan`.
+lewat `penetapan` — dan sejak masa ikut pindah ke sini, penguncian itu menjaga tanggal
+masa juga (`check_masa_terkunci`).
 
-**Tanggal disalin ke baris harga** supaya `get_harga_shu()` cukup satu query tanpa join.
-Salinan itu bisa basi kalau Masa SHU diamend — itulah yang dicegah `before_cancel` di
-Masa SHU. Dua hal ini satu paket, jangan ambil salah satunya saja.
+**Masa dan harga satu dokumen.** Keduanya selalu diisi bersamaan dan dikunci bersamaan.
+Waktu terpisah, tanggal masa harus disalin lintas doctype dan pembatalan `Masa SHU` perlu
+penjaga sendiri; sekarang salinannya cuma dari child table ke child table di dokumen yang
+sama.
 
-**Simpan tahun tanam, hitung umur.** `2012 = 14TH` itu 2026−2012. Kalau `"14TH"` disimpan,
-tahun depan datanya bohong. Sheet Excel-nya sendiri mengonfirmasi rumus ini di blok
-bantuan H2:J5 (`TAHUN − TT = USIA`).
+**Tanggal tetap disalin ke baris harga** supaya `get_harga_shu()` cukup satu query tanpa
+join ke tabel masa.
 
-### Enam aturan validasi
+**Kolom = kelompok umur, bukan tahun tanam.** Beberapa umur sengaja dihargai sama, jadi
+umur 15 dan 16 sama-sama masuk kolom `10 - 20`. Daftarnya paten di `KELOMPOK_UMUR`:
+3, 4, 5, 6, 7, 8, 9, `10 - 20`, `21 - 24`, 25. Kelompok terakhir menampung yang lebih tua
+dari 25 (`umur_max` 999) supaya kebun tua tidak jatuh ke harga 0; di bawah 3 tahun memang
+tidak punya kolom.
 
-1. `tahun_tanam` tidak boleh duplikat dalam satu dokumen
-2. `tahun_tanam <= tahun`
+**Simpan tahun tanam di transaksi, hitung umur saat mencari harga.** `2012 = 14TH` itu
+2026−2012. Kalau `"14TH"` disimpan, tahun depan datanya bohong. `get_harga_shu()` yang
+menghitung `m.tahun − tahun_tanam` lalu mencocokkannya ke `umur_min..umur_max`.
+
+### Aturan validasi
+
+1. Pembagian masa: delapan aturan di §2, berlaku per bulan yang terisi
+2. `kelompok_umur` harus ada di daftar `KELOMPOK_UMUR`
 3. `harga >= 0`
-4. Kombinasi (`bulan_no`, `masa_no`, `tahun_tanam`) unik
-5. Bulan yang punya baris harga wajib punya `Masa SHU` ber-`docstatus=1`
-6. Baris di bulan berstatus Ditetapkan tidak boleh diubah nilainya maupun dihapus
+4. Kombinasi (`bulan_no`, `masa_no`, `kelompok_umur`) unik
+5. Bulan yang punya baris harga wajib punya barisnya di tabel masa
+6. Di bulan berstatus Ditetapkan: baris harga **dan** tanggal masa tidak boleh diubah,
+   ditambah, maupun dihapus
 
 Aturan 6 meniru `validate_approved_rows()` di
 `sth/sales_sth/doctype/harga_beli_tbs/harga_beli_tbs.py` — bandingkan dengan
@@ -243,14 +263,19 @@ Bulan boleh ditetapkan walaupun masih ada sel kosong. **Sengaja** — lihat §5.
 
 Prototipe interaktifnya sudah disetujui user di sesi ini. Perilaku yang harus ada:
 
-- Baris = masa (dikelompokkan per bulan), kolom = tahun tanam
+- Baris = masa (dikelompokkan per bulan), kolom = kelompok umur
 - Navigasi panah / Tab / Enter antar sel
 - **Tempel dari Excel** — parse TSV multi-baris multi-kolom; format Indonesia
   (`3.406,67`) harus terbaca: buang titik, ganti koma jadi titik
 - Sel kosong diberi warna, **bukan diisi nol**. Kosong = belum ditetapkan,
   nol = harganya memang nol. Dua hal berbeda.
-- Kolom bisa ditambah/dihapus, label umur menyesuaikan sendiri
-- Bulan yang belum punya Masa SHU: tampilkan keterangan, jangan tampilkan baris
+- Kolomnya sama untuk semua bulan dan tidak bisa ditambah — daftarnya paten
+- Barisnya dibaca dari tabel masa di dokumen yang sama, jadi ikut berubah begitu
+  pembagian masanya diedit, tanpa perlu disimpan dulu
+
+Label kelompok dibaca lewat `attr("data-umur")`, bukan `data("data-umur")`: jQuery
+mengubah `"3"` jadi angka tapi `"10 - 20"` tetap string, dan perbandingannya dengan isi
+child table jadi meleset.
 
 Preseden grid custom di STH: `sth/public/js/controllers/komoditi_editor.js` —
 `frappe.ui.form.make_control` dirender ke wrapper HTML field.
@@ -268,7 +293,10 @@ Jangan tanyakan ulang.
 | Penguncian | **Per bulan**, bukan per masa |
 | Kolom catatan per masa | **Tidak perlu** |
 | Jumlah masa | **Bebas tiap bulan**, ditentukan manual |
-| Nama doctype masa | **`Masa SHU`** (bukan `Kalender Masa` — khusus SHU) |
+| Tempat masa | **Child table di `Master Harga SHU`** (11 Agu 2026). Dulu doctype `Masa SHU` sendiri |
+| Kolom matriks | **Kelompok umur yang paten** (11 Agu 2026), bukan tahun tanam yang ditarik dari tiket timbangan |
+| Umur di luar 3–25 | **Di atas 25 ikut kelompok 25**; di bawah 3 tidak punya kolom, jadi harganya 0 |
+| Penulisan bulan | **Nama Indonesia.** Sempat diubah jadi angka romawi, lalu dikembalikan (11 Agu 2026) |
 | Harga per mitra | **Tidak.** Seragam untuk semua Bumdes di bawah satu company |
 | Dimensi company | **Perlu**, karena Perhitungan KUD antar dua pihak |
 
@@ -304,8 +332,10 @@ Bulan itu kebetulan tidak ketahuan karena masa I dan II sama-sama berharga 3.406
 Kalau perubahan harga jatuh di 2 Januari, dua sheet menghasilkan angka berbeda.
 Sheet KUD juga punya baris masa I dua kali (baris 10 dan 11) — 7 baris untuk 6 masa.
 
-**Inilah alasan `Masa SHU` berdiri sendiri.** Master Harga SHU dan Perhitungan KUD
-harus sama-sama membaca `get_masa()`, tidak boleh menghitung rentang tanggal sendiri.
+**Inilah alasan masa cuma boleh punya satu definisi.** Dulu itu diwujudkan dengan doctype
+`Masa SHU` yang berdiri sendiri; sekarang dengan child table `masa` yang jadi satu-satunya
+tempat tanggal masa ditulis. Perhitungan KUD tetap wajib membacanya lewat `masa_setahun()`
+atau `get_masa()`, tidak boleh menghitung rentang tanggal sendiri.
 
 ---
 
@@ -319,7 +349,12 @@ Perhitungan KUD              autoname: format:PK-{mitra}-{tahun}-{bulan_no}
 ├─ persen_management_fee   Percent  default 2,5
 ├─ persen_pph22            Percent  default 0,25
 ├─ persen_bagi_hasil       Percent  default 50
-├─ biaya_perawatan         Currency          ← INPUT MANUAL
+├─ biaya_bkm_perawatan     Currency          ← Σ grand_total BKM Perawatan
+├─ biaya_bkm_panen         Currency          ← Σ grand_total BKM Panen
+├─ biaya_bkm_traksi        Currency          ← Σ grand_total BKM Traksi
+├─ detail_biaya (Child)                      ← daftar BKM-nya satu per satu
+├─ biaya_perawatan         Currency          ← jumlah ketiganya
+├─ lain_lain               Currency          ← INPUT MANUAL
 ├─ [Tombol] Tarik Produksi
 └─ detail (Child)
      tahun_tanam | masa_no | tanggal_mulai | netto_kg | harga | total
@@ -331,7 +366,9 @@ Perhitungan KUD              autoname: format:PK-{mitra}-{tahun}-{bulan_no}
 Total per baris      = netto × harga
 Jumlah Produksi TBS  = Σ total                    → 78.458.951  (netto 22.501 kg)
 
-Biaya Perawatan, Panen & Transport                → 31.654.532  ← manual
+Biaya Perawatan, Panen & Transport                → 31.654.532  ← dari BKM
+Lain-lain                                                        ← manual
+Total Biaya Perawatan, Panen & Transport          = keduanya
 Management Fee 2,5%  = 2,5%  × Jumlah Produksi    →  1.961.474
 Jumlah Biaya Op      = keduanya                   → 33.616.006
 
@@ -359,76 +396,127 @@ selisihnya membesar.
 walaupun persentasenya diubah jadi angka yang tidak habis dibagi.
 
 Sheet Excel menandai sendiri dua input manual: `GANTI ANGKA` di sebelah Biaya Perawatan,
-`GANTI TANGGAL` di tanggal tanda tangan.
+`GANTI TANGGAL` di tanggal tanda tangan. Yang pertama tidak lagi diketik — lihat §7a.
+
+---
+
+## 7a. Sumber Biaya Perawatan, Panen & Transport
+
+Excel mengetiknya tangan. Di sini angkanya dirakit dari Buku Kerja Mandor unit plasma,
+ditarik oleh tombol yang sama dengan produksinya:
+
+```sql
+SELECT SUM(b.grand_total)
+FROM `tab<Buku Kerja Mandor ...>` b
+INNER JOIN `tabUnit` u ON b.unit = u.name
+WHERE b.docstatus = 1
+  AND b.company = %(company)s
+  AND u.plasma = 1
+  AND b.unit IN %(units)s
+  AND b.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+```
+
+Tiga jenis BKM, satu field masing-masing supaya angkanya bisa ditelusuri:
+Perawatan, Panen, dan Traksi sebagai bagian transportnya.
+
+Dokumennya **tidak langsung dijumlah di SQL**. Yang diambil daftarnya, lalu disimpan
+utuh di child table `detail_biaya` (`Perhitungan KUD Biaya BKM`): jenis, nomor BKM
+(Dynamic Link, bisa diklik), tanggal, unit, divisi, nilai. Ketiga field ringkasan
+dijumlah ulang dari daftar itu tiap validate lewat `rekap_biaya_bkm()`, jadi angka
+di atas tidak pernah bisa menyimpang dari daftar di bawahnya.
+
+**Yang dijumlahkan `grand_total`, bukan nilai jurnalnya.** BKM Perawatan sengaja
+membuang material dari GL Entry-nya (`get_nilai_gl_entry()`) karena material sudah
+dijurnal Stock Entry "Material Used" ke akun kegiatan yang sama. Mitra tetap ditagih
+material yang dipakai di kebunnya, jadi di sini yang dipakai nilai penuh dokumen.
+BKM Panen sendiri sudah mengurangi denda di `after_calculate_grand_total()`.
+
+**Cukup `docstatus = 1`, tidak menunggu workflow Posted.** BKM baru Posted saat
+Accounting Period ditutup — jauh sesudah perhitungan bulanan ini dibuat. Menunggunya
+berarti biayanya selalu nol saat dibutuhkan.
+
+`unit` di BKM Traksi tidak wajib diisi. BKM Traksi tanpa unit tidak akan pernah
+terhitung di sini, sama seperti BKM milik unit non plasma.
+
+`lain_lain` tetap manual, dan berpengaruh lewat
+`total_biaya_perawatan_panen_dan_transport` yang jadi masukan `hitung_shu()` —
+bukan `biaya_perawatan`.
 
 ---
 
 ## 8. Sumber netto, dan tiga risiko di jalurnya
 
 ```
-Surat Pengantar Buah          docstatus = 1
+Timbangan                     docstatus = 1
 ├─ company                                              ← filter
-├─ unit  →  Unit.plasma = 1                             ← filter
 ├─ posting_date                                         ← pengelompokan masa
-├─ total_weight = in_weight − out_weight − mill_cut     surat_pengantar_buah.py:178
-└─ details (SPB Timbangan Pabrik)
-     ├─ blok  →  Blok.tahun_tanam
-     └─ total_weight = header.total_weight × total_janjang ÷ header.total_janjang
-                                                        surat_pengantar_buah.py:196
+├─ netto_2                                              ← netto tiket
+├─ total_janjang                                        ← dasar pembagian
+└─ spb_detail (Timbangan SPB Detail)
+     ├─ unit  →  Unit.plasma = 1                        ← filter
+     ├─ tahun_tanam                                     ← tercatat di tiket
+     └─ jumlah_janjang                                  ← porsi baris
 ```
 
 ```sql
-SELECT b.tahun_tanam, SUM(d.total_weight) AS netto
-FROM `tabSPB Timbangan Pabrik` d
-INNER JOIN `tabSurat Pengantar Buah` s ON d.parent = s.name
-INNER JOIN `tabBlok` b ON d.blok = b.name
-INNER JOIN `tabUnit` u ON s.unit = u.name
-WHERE s.docstatus = 1
-  AND s.company = %(company)s
+SELECT t.name AS timbangan, t.posting_date, t.netto_2, t.total_janjang,
+       d.blok, d.tahun_tanam, d.jumlah_janjang
+FROM `tabTimbangan SPB Detail` d
+INNER JOIN `tabTimbangan` t ON d.parent = t.name
+INNER JOIN `tabUnit` u ON d.unit = u.name
+WHERE t.docstatus = 1
+  AND t.company = %(company)s
   AND u.plasma = 1
-  AND s.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
-GROUP BY b.tahun_tanam
+  AND d.unit IN %(units)s
+  AND t.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
 ```
 
 Rentang tanggalnya **diambil dari Masa SHU**, jangan dihitung di sini.
 
-### Tiga risiko — ketiganya sudah ditangani di `perhitungan_kud.py`
+Unit dibaca dari **baris tiket**, bukan dari kepala tiket: `Timbangan.unit` berisi PKS
+penerima, sedangkan `Timbangan SPB Detail.unit` berisi unit kebun asal buahnya.
 
-**1. Satu baris child punya dua blok.** `blok` dan `blok_restan` ada di baris yang sama,
-`total_janjang = qty + qty_restan` (py:102), tapi berat dialokasikan ke baris — tidak
-dipecah antar kedua blok. Kalau tahun tanamnya beda, netto masuk ke tahun tanam yang
-salah lalu dikali harga yang salah.
+### Kenapa netto tidak dibaca dari SPB
 
-**2. Sisa pembulatan alokasi tidak diserap** (py:196). Tiap baris dibulatkan sendiri
-sehingga `Σ child.total_weight ≠ header.total_weight`. Pola yang benar sudah dipakai di
-`naikkan_ke_tm` pada `sth/plantation/doctype/blok/blok.py` — baris terakhir menyerap sisa.
+`Timbangan.update_spb_weight()` menyalin `netto` tiket ke **setiap** baris SPB
+(`for row in spb_doc.details: row.total_weight = self.netto`). Satu tiket dengan tiga
+blok menaruh netto penuh tiga kali, jadi membaca `SPB Timbangan Pabrik.total_weight`
+menghitung buah satu truk berkali-kali. Netto yang dipakai SHU diambil dari `netto_2`
+tiketnya, sekali per tiket.
 
-**3. `Blok.tahun_tanam` bertipe Data, bukan Int** (`blok.json:70`). `"2010"` dan `"2010 "`
-jadi dua tahun tanam berbeda saat `GROUP BY`, dan yang tidak cocok mengembalikan harga 0
-tanpa suara. Normalisasi (strip + cast int) di satu tempat saat menarik produksi.
+### Dua risiko yang ditangani di `perhitungan_kud.py`
 
-Ketiganya menghasilkan angka yang tetap terlihat wajar — tidak ketahuan saat input,
+**1. Satu tiket memuat beberapa blok dengan tahun tanam berbeda.** Netto dibagi menurut
+janjang di `pecah_netto_tiket()`, dan **baris terakhir menyerap sisa pembulatan** supaya
+jumlah pecahan persis sama dengan netto tiketnya. Kalau sebagian baris tiket tersaring
+keluar — misal ada blok dari unit non plasma — tidak ada yang menyerap sisa, jadi yang
+terhitung hanya sebesar porsinya.
+
+**2. `tahun_tanam` bertipe Data, bukan Int.** `"2010"` dan `"2010 "` jadi dua tahun tanam
+berbeda saat dijumlahkan, dan yang tidak cocok mengembalikan harga 0 tanpa suara.
+Normalisasi (strip + cast int) ada di satu tempat, `normalisasi_tahun_tanam()` di
+`master_harga_shu.py`, dipakai baik oleh Master Harga SHU maupun Perhitungan KUD.
+
+Keduanya menghasilkan angka yang tetap terlihat wajar — tidak ketahuan saat input,
 hanya saat rekap tidak cocok.
-
-Penanganannya di `pecah_berat_baris()`: berat baris dibagi menurut janjang, **blok
-utama menyerap sisa pembulatan** sehingga jumlah kedua pecahan selalu persis sama
-dengan berat barisnya. Kalau tahun tanam kedua blok kebetulan sama, baris tidak
-dipecah sama sekali — memecah hanya menambah peluang salah bulat.
-
-Perbaikan ini **lokal untuk SHU**. `SPB Timbangan Pabrik.total_weight` di database
-tetap tidak dipecah — risiko 1 dan 2 masih ada untuk pembaca lain dari field itu.
 
 ---
 
 ## 9. Dua keputusan yang sudah diambil (4 Agustus 2026)
 
-**Penanganan restan → pecah menurut janjang.** `blok` dapat porsi `qty/total_janjang`,
-`blok_restan` sisanya. Tiap kg masuk ke tahun tanam yang sebenarnya. Diimplementasikan
-di `pecah_berat_baris()`.
+**Pembagian netto satu tiket → menurut janjang.** Tiap baris tiket dapat porsi
+`jumlah_janjang/total_janjang`, baris terakhir menyerap sisa. Tiap kg masuk ke tahun
+tanam yang sebenarnya. Diimplementasikan di `pecah_netto_tiket()`.
 
-**Tanggal penentu masa → `spb.posting_date`** (tanggal timbang). Satu SPB jatuh utuh ke
-satu masa, dan harga SHU sendiri ditetapkan mengikuti masa timbang. `panen_date` dan
-`panen_date_restan` di baris child sengaja tidak dipakai. Kalau perjanjian dengan
-Bumdes ternyata menyebut tanggal panen, yang berubah cuma kolom tanggal di
-`ambil_baris_spb()` dan `kelompokkan_netto()` — tapi ingat restan punya
-`panen_date_restan` sendiri yang bisa jatuh ke bulan lain.
+**Tanggal penentu masa → `timbangan.posting_date`** (tanggal timbang). Satu tiket jatuh
+utuh ke satu masa, dan harga SHU sendiri ditetapkan mengikuti masa timbang. Tanggal
+panen di baris SPB sengaja tidak dipakai. Kalau perjanjian dengan Bumdes ternyata
+menyebut tanggal panen, yang berubah cuma kolom tanggal di `ambil_baris_timbangan()`
+dan `kelompokkan_netto()`.
+
+**Tahun tanam Master Harga SHU → dari tiket timbangan, bukan ketikan.** ~~Tabel Tahun
+Tanam diisi `sinkron_tahun_tanam()` saat simpan.~~ **Dibatalkan 11 Agustus 2026:** kolom
+matriks tidak lagi mengikuti tahun tanam yang kebetulan ada di tiket, melainkan daftar
+kelompok umur yang paten (§4). Tabel Tahun Tanam beserta query ke tiket timbangan dibuang;
+tahun tanam tetap dibaca dari tiket, tapi cuma saat Perhitungan KUD menarik produksi dan
+memanggil `get_harga_shu()`.

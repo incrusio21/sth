@@ -100,6 +100,12 @@ class Asset(Asset):
 		if not self.asset_category:
 			return
 
+		if self.split_from:
+			# asset pecahan cuma memindahkan sebagian nilai asset asalnya, yang
+			# jurnal kapitalisasinya sudah diposting waktu asset itu disubmit.
+			# tanpa penjaga ini akun aset tetap kelebihan sebesar nilai pecahan
+			return
+
 		asset_category_doc = frappe.get_doc("Asset Category", self.asset_category)
 
 		fixed_asset_account = None
@@ -209,6 +215,42 @@ def scrap_asset(asset_name, **kwargs):
 	return _scrap_asset(asset_name, **kwargs)
 
 
+def sisa_qty_scrap(asset, kecuali_sales_invoice=None):
+	"""Qty asset yang sudah discrap dan belum terjual.
+
+	Asset yang discrap seluruhnya berstatus Scrapped, jadi seluruh qty-nya boleh
+	dijual. Scrap sebagian tidak memecah asset, cuma menambah qty_scrapped, dan
+	yang boleh dijual sebanyak angka itu saja. Sales Invoice Disposal yang masih
+	draft ikut dihitung supaya dua invoice tidak sama-sama menghabiskan jatah."""
+	doc = frappe.db.get_value(
+		"Asset", asset, ["status", "asset_quantity", "qty_scrapped"], as_dict=True
+	)
+
+	if not doc:
+		return 0
+
+	# asset yang discrap seluruhnya berstatus Scrapped, jadi sisa qty-nya ikut
+	# boleh dijual di samping bagian yang sudah discrap sebagian sebelumnya
+	discrap = cint(doc.qty_scrapped)
+	if doc.status == "Scrapped":
+		discrap += cint(doc.asset_quantity) or 1
+
+	if not discrap:
+		return 0
+
+	terjual = frappe.db.sql("""
+		SELECT COALESCE(SUM(sii.qty), 0)
+		FROM `tabSales Invoice Item` sii
+		JOIN `tabSales Invoice` si ON si.name = sii.parent
+		WHERE sii.asset = %(asset)s
+		  AND si.docstatus != 2
+		  AND si.jenis_penagihan = 'Disposal'
+		  AND si.name != %(kecuali)s
+	""", {"asset": asset, "kecuali": kecuali_sales_invoice or ""})[0][0]
+
+	return max(discrap - flt(terjual), 0)
+
+
 @frappe.whitelist()
 def make_sales_invoice(asset, item_code, company, serial_no=None):
 	"""Override tombol 'Sell' di Asset. Isi Unit dari Asset dan set
@@ -217,13 +259,16 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 	pertama di select) dan memicu validasi 'Sales Order wajib
 	dipasang di Sales Invoice Pengiriman' saat disimpan.
 
-	Penjualan hanya boleh setelah asset discrap lewat Asset Scrap Request."""
+	Penjualan hanya boleh setelah asset discrap lewat Asset Scrap Request, dan
+	paling banyak sebanyak qty yang sudah discrap."""
 	from erpnext.assets.doctype.asset.asset import make_sales_invoice as _make_sales_invoice
 
-	status = frappe.db.get_value("Asset", asset, "status")
-	if status != "Scrapped":
+	sisa = sisa_qty_scrap(asset)
+	if not sisa:
+		status = frappe.db.get_value("Asset", asset, "status")
 		frappe.throw(
-			_("Asset {0} harus discrap dulu sebelum bisa dijual. Status sekarang: {1}").format(asset, status),
+			_("Asset {0} harus discrap dulu sebelum bisa dijual, dan bagian yang discrap "
+			  "belum tentu masih ada sisanya. Status sekarang: {1}").format(asset, status),
 			title=_("Belum Discrap")
 		)
 
@@ -232,6 +277,10 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 	asset_doc = frappe.get_cached_doc("Asset", asset)
 	si.jenis_penagihan = "Disposal"
 	si.unit = asset_doc.unit
+
+	# qty bawaannya selalu 1; yang boleh dijual sebanyak yang sudah discrap
+	for item in si.items:
+		item.qty = sisa
 
 	# Piutangnya juga dipaksa lagi di before_validate Sales Invoice; di sini supaya
 	# form yang terbuka sudah menampilkan akun yang benar sebelum disimpan

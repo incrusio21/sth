@@ -321,52 +321,6 @@ class PaymentVoucherKas(AccountsController):
 				)
 				
 
-	def update_pdo_non_pdo_table(self):
-
-		new_rows = []
-		for row in self.get('payment_voucher_kas_pdo', []):
-			if not row.pdo_child_name:
-				new_rows.append(row)
-		
-		if not new_rows:
-			return
-			
-		for row in new_rows:
-
-			pdo_doc = frappe.get_doc('Permintaan Dana Operasional', row.no_pdo)
-			employee_doc = frappe.get_doc('Employee', row.penerima) if row.penerima else None
-			jabatan = employee_doc.designation if employee_doc else None
-			
-			existing = False
-			for pdo_row in pdo_doc.get('pdo_non_pdo', []):
-				if (pdo_row.employee == row.penerima and 
-					pdo_row.debit_to == row.debit_to and 
-					pdo_row.total == row.total):
-					existing = True
-					break
-			
-			if not existing:
-				pdo_doc.append('pdo_non_pdo', {
-					'employee': row.penerima,
-					'jabatan': jabatan,
-					'debit_to': row.debit_to,
-					'price': row.total,
-					'qty': 1,
-					'total': row.total,
-					'revised_qty': 1,
-					'revised_price': row.total,
-					'revised_total': row.total
-
-				})
-		
-			pdo_doc.flags.ignore_permissions = True
-			pdo_doc.save()
-		
-			frappe.msgprint(
-				msg=f'Successfully added {len(new_rows)} non-PDO entries to {row.no_pdo}',
-				title='PDO Updated',
-				indicator='green'
-			)
 	def on_cancel(self):
 		super().on_cancel()
 		self.make_gl_entry()

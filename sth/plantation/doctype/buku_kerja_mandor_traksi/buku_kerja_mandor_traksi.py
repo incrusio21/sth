@@ -10,7 +10,7 @@ import erpnext
 from erpnext.accounts.general_ledger import merge_similar_entries
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
-from sth.custom.api import submit_after_insert
+from sth.custom.api import fix_mandor_from_api, submit_after_insert
 
 
 field_map = {
@@ -62,6 +62,8 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		self._used_task = set()
 
 	def before_insert(self):
+		fix_mandor_from_api(self)
+
 		# Data dari API kadang masuk dengan docstatus=1 langsung, sehingga
 		# proses insert tidak pernah melewati siklus submit (on_submit tidak jalan).
 		# Di sini docstatus dipaksa jadi draft dulu, lalu submit() dipanggil manual
