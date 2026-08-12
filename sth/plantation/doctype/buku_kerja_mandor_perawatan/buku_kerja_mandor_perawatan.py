@@ -3,9 +3,90 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
-from sth.custom.api import fix_kegiatan_from_api, fix_mandor_from_api, submit_after_insert
+from sth.custom.api import USER_API, fix_kegiatan_from_api, fix_mandor_from_api, submit_after_insert
+
+# Isi baris hasil kerja yang diambil dari kiriman API waktu digabung. Sisanya —
+# amount, premi_amount, sub_total, dan dua Link Employee Payment Log — dihitung
+# ulang atau dipasang sistem, jadi tidak pernah ikut disalin.
+FIELD_HASIL_KERJA_API = ("employee", "attendance_status", "qty", "hari_kerja", "rate")
+
+
+def cari_bkm_setrans_no(kiriman):
+	"""BKM Perawatan yang sudah ada untuk trans_no kiriman ini, atau None.
+
+	Company dan posting_date ikut dicocokkan: kalau sistem luar sampai memakai
+	ulang trans_no untuk data yang berbeda, kirimannya jadi dokumen baru seperti
+	dulu — bukan digabung diam-diam ke dokumen yang bukan pasangannya.
+
+	Dokumen batal (docstatus 2) sengaja dilewat. Kiriman sesudahnya harus
+	membentuk dokumen baru, bukan menghidupkan yang sudah dibatalkan.
+	"""
+	if not kiriman.trans_no:
+		return None
+
+	return frappe.db.get_value(
+		"Buku Kerja Mandor Perawatan",
+		{
+			"trans_no": kiriman.trans_no,
+			"company": kiriman.company,
+			"posting_date": getdate(kiriman.posting_date),
+			"docstatus": ("<", 2),
+		},
+		"name",
+		order_by="creation",
+	)
+
+
+def baris_hasil_kerja_baru(doc, kiriman):
+	"""Baris hasil kerja kiriman yang employee-nya belum ada di dokumen.
+
+	Employee yang sudah ada dilewati, bukan ditolak: satu buku kerja dikirim
+	sebagai beberapa request terpisah, dan request yang diulang karena jaringan
+	harus berakhir tanpa menambah apa-apa — bukan jadi error di sisi pengirim.
+	"""
+	sudah_ada = {hk.employee for hk in doc.hasil_kerja}
+
+	baris = []
+	for hk in kiriman.hasil_kerja:
+		if not hk.employee or hk.employee in sudah_ada:
+			continue
+
+		sudah_ada.add(hk.employee)
+		baris.append({field: hk.get(field) for field in FIELD_HASIL_KERJA_API})
+
+	return baris
+
+
+def gabung_ke_bkm(nama, kiriman):
+	"""Satukan hasil kerja kiriman API ke BKM Perawatan yang sudah ada.
+
+	Tabel `material` kiriman sengaja tidak ikut. Sistem luar mengulang seluruh
+	isi header — termasuk material — di tiap request, sedangkan Stock Entry-nya
+	sudah dibuat request yang pertama. Menggabungkannya berarti mengeluarkan
+	barang yang sama berkali-kali.
+	"""
+	doc = frappe.get_doc("Buku Kerja Mandor Perawatan", nama)
+
+	baris_baru = baris_hasil_kerja_baru(doc, kiriman)
+	if not baris_baru:
+		# kiriman ulang: dokumennya sudah memuat semua employee kiriman ini
+		return doc
+
+	if doc.docstatus == 0:
+		# masih draft, jadi jalur biasa masih terbuka: validate ikut jalan dan
+		# on_submit belum pernah jalan sama sekali
+		for baris in baris_baru:
+			doc.append("hasil_kerja", baris)
+
+		doc.save()
+		return doc
+
+	doc.tambah_hasil_kerja_setelah_submit(baris_baru)
+
+	return doc
+
 
 class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 	# draft ikut dihitung ulang oleh tombol Re-calculate Premi
@@ -33,6 +114,26 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		])
 
 		self._mandor_dict = []
+
+	def insert(self, *args, **kwargs):
+		"""Kiriman API dengan trans_no yang sudah ada digabung, bukan jadi dokumen baru.
+
+		Sistem luar mengirim satu request per employee dengan trans_no yang sama
+		untuk semuanya. Tanpa ini tiap employee jadi satu BKM Perawatan sendiri,
+		padahal yang dimaksud satu buku kerja berisi beberapa employee — dan
+		validate() tidak menangkapnya karena yang dicek trans_no *dan* employee.
+
+		Sengaja dibatasi ke user API. Dari UI dan data import dokumen baru tetap
+		dokumen baru; di sana trans_no memang read-only dan tidak pernah terisi.
+		"""
+		if frappe.session.user != USER_API:
+			return super().insert(*args, **kwargs)
+
+		nama = cari_bkm_setrans_no(self)
+		if not nama:
+			return super().insert(*args, **kwargs)
+
+		return gabung_ke_bkm(nama, self)
 
 	def before_insert(self):
 		fix_mandor_from_api(self)
@@ -75,6 +176,67 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		self.validate_hasil_kerja_harian()
 		super().validate()
 
+	def tambah_hasil_kerja_setelah_submit(self, baris_baru):
+		"""Sisipkan baris hasil kerja ke dokumen yang sudah disubmit.
+
+		save() tidak bisa dipakai — `hasil_kerja` bukan allow_on_submit — jadi
+		barisnya ditulis lewat db_update_all, cara yang sama dipakai
+		update_hasil_kerja_bjr di BKM Panen waktu BJR menyusul setelah submit.
+
+		Karena jalur save() dan submit() dilewati, yang biasanya dikerjakan
+		validate dan on_submit dipanggil sendiri di sini — dan hanya sekali,
+		untuk baris yang benar-benar baru:
+
+		    Employee Payment Log  cuma untuk baris baru, lewat daftar nama.
+		                          Baris lama sudah punya log dan nilainya tidak
+		                          berubah — upah dan premi perawatan dihitung
+		                          per baris, tidak bergantung baris lain.
+		    Premi mandor          dicari dulu baru disimpan, aman diulang.
+		                          Untuk Perawatan _mandor_dict memang kosong,
+		                          jadi ini no-op — dipanggil supaya tetap sejalan
+		                          kalau nanti perannya diisi.
+		    Attendance            hanya untuk employee baru. Employee lama sudah
+		                          punya Attendance dari kiriman sebelumnya.
+		    GL Entry              diperbaiki, bukan ditambah. repair_gl_entry
+		                          tidak menyentuh dokumen yang belum berjurnal —
+		                          di site ber-workflow jurnalnya menyusul saat
+		                          Posted.
+		"""
+		if self.is_posted():
+			frappe.throw(
+				_("{0} sudah Posted, hasil kerja baru tidak bisa ditambahkan lagi").format(
+					frappe.bold(self.name)
+				)
+			)
+
+		baris_ditambah = []
+		for baris in baris_baru:
+			hk = self.append("hasil_kerja", baris)
+			# append selalu memberi docstatus draft; barisnya harus seragam dengan
+			# induknya supaya cancel dan laporan yang menyaring docstatus melihatnya
+			hk.docstatus = self.docstatus
+			baris_ditambah.append(hk)
+
+		self.calculate()
+		# hasil_kerja_qty sekarang total gabungan, jadi batas luas blok diperiksa
+		# ulang terhadap seluruh isi dokumen, bukan cuma baris yang baru masuk
+		self.validate_hasil_kerja_harian()
+
+		# baris baru belum punya nama sampai di sini: db_update_all yang
+		# menyisipkannya, karena db_update jatuh ke db_insert untuk baris lokal
+		self.db_update_all()
+
+		for hk in baris_ditambah:
+			# barisnya sudah ada di database, jadi tandanya dilepas — db_update_all
+			# berikutnya harus meng-update, bukan menyisipkan baris kembar
+			hk.set("__islocal", 0)
+
+		self.create_or_update_payment_log([hk.name for hk in baris_ditambah])
+		self.create_or_update_mandor_premi()
+		self.make_attendance(baris_ditambah)
+		self.check_emp_hari_kerja()
+
+		self.repair_gl_entry()
 
 	def get_cost_center(self):
 		"""Cost center dokumen ini: dari batch, blok, atau tahun tanam sesuai kategori.
