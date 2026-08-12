@@ -65,7 +65,7 @@ def fix_kegiatan_from_api(doc):
 
 
 def fix_item_from_api(doc):
-	"""Ganti kode item baris material kiriman API dengan kode Item yang dituju.
+	"""Rapikan baris material kiriman API: kode itemnya, lalu nama barangnya.
 
 	Hanya kode yang terdaftar di ITEM_API_MAP yang diganti; sisanya lewat apa
 	adanya, sama seperti fix_kegiatan_from_api. Kode tak terdaftar yang ternyata
@@ -74,6 +74,15 @@ def fix_item_from_api(doc):
 
 	Dipanggil sebelum Stock Entry dibuat, karena create_ste_issue mengeluarkan
 	barang memakai `item` baris ini apa adanya.
+
+	`nama_barang` diisi dari master Item. Field itu tidak punya fetch_from dan
+	sistem luar tidak pernah mengirimnya, jadi tanpa ini seluruh baris material
+	dari API kosong namanya. Baris yang kodenya diterjemahkan selalu ditimpa —
+	nama kiriman, kalau ada, menerangkan kode yang lama. Sisanya cuma diisi kalau
+	memang masih kosong, supaya nama yang sengaja dikirim tidak tertimpa.
+
+	Item yang tidak ketemu dibiarkan tanpa nama; validasi Link yang menolak
+	dokumennya, dan pesannya menyebut kode itemnya sendiri.
 	"""
 	for baris in doc.get("material") or []:
 		item = baris.get("item")
@@ -83,6 +92,9 @@ def fix_item_from_api(doc):
 		pengganti = ITEM_API_MAP.get(str(item).strip())
 		if pengganti:
 			baris.item = pengganti
+
+		if pengganti or not baris.get("nama_barang"):
+			baris.nama_barang = frappe.db.get_value("Item", baris.item, "item_name")
 
 
 def fix_mandor_from_api(doc):
