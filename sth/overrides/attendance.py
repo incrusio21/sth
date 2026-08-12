@@ -28,6 +28,20 @@ FIELD_TIDAK_DITIMPA = {
 	"amended_from",
 }
 
+# Mesin absensi mengirim company sebagai singkatan, bukan nama Company-nya.
+# Dipetakan di sini supaya kiriman tetap nyambung ke Link Company yang benar.
+COMPANY_DARI_SINGKATAN = {
+	"TML": "PT. TRIMITRA LESTARI",
+}
+
+
+def normalisasi_company(nilai):
+	"""Ubah singkatan company kiriman API jadi nama Company yang sebenarnya."""
+	if isinstance(nilai, str):
+		return COMPANY_DARI_SINGKATAN.get(nilai.strip().upper(), nilai)
+
+	return nilai
+
 
 def cari_attendance_kembar(doc):
 	"""Attendance lain untuk employee dan tanggal yang sama, atau None.
@@ -80,6 +94,9 @@ def timpa_field_dari_api(doc, kiriman):
 		if nilai in (None, ""):
 			continue
 
+		if field == "company":
+			nilai = normalisasi_company(nilai)
+
 		doc.set(field, nilai)
 
 
@@ -119,6 +136,8 @@ class Attendance(Attendance):
 		"""
 		if frappe.session.user != USER_API:
 			return super().insert(*args, **kwargs)
+
+		self.company = normalisasi_company(self.company)
 
 		kembar = cari_attendance_kembar(self)
 		if kembar:
