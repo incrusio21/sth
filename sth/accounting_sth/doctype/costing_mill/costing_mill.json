@@ -2,29 +2,35 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-08-07 00:00:00.000000",
+ "creation": "2026-08-12 09:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "column_break_1",
-  "company",
-  "unit",
   "section_break_periode",
   "periode_dari",
   "column_break_periode",
   "periode_sampai",
+  "column_break_company",
+  "company",
+  "unit",
   "section_gaji_karyawan",
   "costing_mill_gaji_karyawan",
   "total_gaji_karyawan",
+  "section_gaji_operator_bengkel",
+  "costing_mill_gaji_operator_bengkel",
+  "total_gaji_operator_bengkel",
+  "section_hm_stasiun",
+  "costing_mill_hm_stasiun",
+  "total_hm",
+  "column_break_hm",
+  "total_alokasi_bengkel",
   "section_pengeluaran_barang",
   "costing_mill_pengeluaran_barang",
   "total_pengeluaran_barang",
-  "section_bkm",
-  "costing_mill_bkm",
-  "total_bkm",
-  "section_stasiun",
-  "costing_mill_stasiun",
+  "section_closing",
+  "costing_mill_closing",
+  "total_closing",
   "section_summary",
   "grand_total",
   "amended_from"
@@ -35,25 +41,6 @@
    "fieldtype": "Select",
    "label": "No Dokumen",
    "options": "CM-.YYYY.-.####"
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "description": "Hanya Unit dengan centang Mill",
-   "fieldname": "unit",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Unit",
-   "options": "Unit"
   },
   {
    "fieldname": "section_break_periode",
@@ -80,9 +67,28 @@
    "reqd": 1
   },
   {
+   "fieldname": "column_break_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
    "fieldname": "section_gaji_karyawan",
    "fieldtype": "Section Break",
-   "label": "A. Gaji Karyawan Mill"
+   "label": "Gaji Karyawan Mill"
   },
   {
    "fieldname": "costing_mill_gaji_karyawan",
@@ -97,9 +103,56 @@
    "read_only": 1
   },
   {
+   "fieldname": "section_gaji_operator_bengkel",
+   "fieldtype": "Section Break",
+   "label": "Gaji Operator Bengkel Mill"
+  },
+  {
+   "fieldname": "costing_mill_gaji_operator_bengkel",
+   "fieldtype": "Table",
+   "label": "Gaji Operator Bengkel Mill",
+   "options": "Costing Mill Gaji Operator Bengkel"
+  },
+  {
+   "description": "Pool biaya yang dibagi ke stasiun secara proporsional terhadap HM.",
+   "fieldname": "total_gaji_operator_bengkel",
+   "fieldtype": "Currency",
+   "label": "Total Gaji Operator Bengkel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_hm_stasiun",
+   "fieldtype": "Section Break",
+   "label": "Aktivitas (HM) per Stasiun"
+  },
+  {
+   "fieldname": "costing_mill_hm_stasiun",
+   "fieldtype": "Table",
+   "label": "HM per Stasiun",
+   "options": "Costing Mill HM Stasiun"
+  },
+  {
+   "fieldname": "total_hm",
+   "fieldtype": "Float",
+   "label": "Total HM",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_alokasi_bengkel",
+   "fieldtype": "Currency",
+   "label": "Total Alokasi ke Stasiun",
+   "read_only": 1
+  },
+  {
+   "description": "Nilainya sudah dijurnal sendiri oleh Stock Entry dari Pengeluaran Barang, jadi tidak ikut diposting ulang di sini. Tabel ini hanya melengkapi gambaran biaya per stasiun.",
    "fieldname": "section_pengeluaran_barang",
    "fieldtype": "Section Break",
-   "label": "B. Pengeluaran Barang Mill"
+   "label": "Pengeluaran Barang Mill (Informasi)"
   },
   {
    "fieldname": "costing_mill_pengeluaran_barang",
@@ -114,32 +167,20 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_bkm",
+   "fieldname": "section_closing",
    "fieldtype": "Section Break",
-   "label": "C. BKM Bengkel & BKM Traksi"
+   "label": "Closing (Jurnal per Stasiun)"
   },
   {
-   "fieldname": "costing_mill_bkm",
+   "fieldname": "costing_mill_closing",
    "fieldtype": "Table",
-   "label": "BKM Bengkel & Traksi",
-   "options": "Costing Mill BKM"
+   "label": "Closing",
+   "options": "Costing Mill Closing"
   },
   {
-   "fieldname": "total_bkm",
+   "fieldname": "total_closing",
    "fieldtype": "Currency",
-   "label": "Total BKM",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_stasiun",
-   "fieldtype": "Section Break",
-   "label": "D. Rekap Per Stasiun"
-  },
-  {
-   "fieldname": "costing_mill_stasiun",
-   "fieldtype": "Table",
-   "label": "Rekap Per Stasiun",
-   "options": "Costing Mill Stasiun",
+   "label": "Total Closing",
    "read_only": 1
   },
   {
@@ -150,7 +191,7 @@
   {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total",
+   "label": "Grand Total Biaya Mill",
    "read_only": 1
   },
   {
@@ -160,15 +201,14 @@
    "no_copy": 1,
    "options": "Costing Mill",
    "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 00:00:00.000000",
+ "modified": "2026-08-12 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Costing Mill",

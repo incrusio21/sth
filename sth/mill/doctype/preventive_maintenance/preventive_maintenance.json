@@ -29,6 +29,7 @@
   "jam_selesai",
   "column_break_apih",
   "total_jam",
+  "total_jam_desimal",
   "list_karyawan_tab",
   "list_karyawan"
  ],
@@ -181,6 +182,14 @@
    "fieldtype": "Select",
    "label": "Status Pekerjaan",
    "options": "-\nPending\nSelesai"
+  },
+  {
+   "description": "Jam kerja dalam angka desimal, dipakai sebagai basis alokasi HM di Costing Mill.",
+   "fieldname": "total_jam_desimal",
+   "fieldtype": "Float",
+   "label": "Total Jam (Desimal)",
+   "precision": "2",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

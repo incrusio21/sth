@@ -1,9 +1,11 @@
 # Copyright (c) 2026, DAS and contributors
 # For license information, please see license.txt
 
-# import frappe
 from frappe.model.document import Document
+
+from sth.mill.utils import set_total_jam_desimal
 
 
 class BukuKerjaMekanik(Document):
-	pass
+	def validate(self):
+		set_total_jam_desimal(self)

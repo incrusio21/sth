@@ -26,6 +26,7 @@
   "jam_mulai",
   "jam_selesai",
   "total_jam",
+  "total_jam_desimal",
   "amended_from"
  ],
  "fields": [
@@ -162,6 +163,14 @@
    "hidden": 1,
    "label": "Kode Stasiun",
    "options": "Station Master",
+   "read_only": 1
+  },
+  {
+   "description": "Jam kerja dalam angka desimal, dipakai sebagai basis alokasi HM di Costing Mill.",
+   "fieldname": "total_jam_desimal",
+   "fieldtype": "Float",
+   "label": "Total Jam (Desimal)",
+   "precision": "2",
    "read_only": 1
   }
  ],

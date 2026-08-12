@@ -4,5 +4,5 @@
 from frappe.model.document import Document
 
 
-class CostingMillGajiKaryawan(Document):
+class CostingMillHMStasiun(Document):
 	pass

@@ -9,8 +9,7 @@
   "salary_slip",
   "employee",
   "employee_name",
-  "stasiun",
-  "no_coa",
+  "designation",
   "amount",
   "keterangan"
  ],
@@ -24,7 +23,7 @@
    "options": "Salary Slip"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -39,23 +38,15 @@
    "label": "Nama Karyawan"
   },
   {
-   "columns": 1,
-   "fieldname": "stasiun",
+   "columns": 2,
+   "fieldname": "designation",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Stasiun",
-   "options": "Station Master"
+   "label": "Jabatan",
+   "options": "Designation"
   },
   {
    "columns": 2,
-   "fieldname": "no_coa",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "No COA",
-   "options": "Account"
-  },
-  {
-   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -75,7 +66,7 @@
  "modified": "2026-08-12 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
- "name": "Costing Mill Gaji Karyawan",
+ "name": "Costing Mill Gaji Operator Bengkel",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

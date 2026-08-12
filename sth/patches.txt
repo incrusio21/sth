@@ -21,3 +21,5 @@ sth.patches.gabung_bkm_perawatan_trans_no
 sth.patches.gabung_bkm_perawatan_material_dobel
 sth.patches.arsipkan_bkm_perawatan_batal
 sth.patches.isi_qty_scrapped_asset
+sth.patches.isi_total_jam_desimal_mill
+sth.patches.hapus_costing_mill_lama
