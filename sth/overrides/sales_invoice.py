@@ -40,10 +40,37 @@ class SalesInvoice(SalesInvoice):
 		if self.jenis_penagihan == "Pengiriman" and self.is_return == 0:
 			try:
 				self.cancel_timbang_journal_entry()
-				self.cancel_dp_payment_journal_entry()		
+				self.cancel_dp_payment_journal_entry()
 			except:
 				pass
 		super().on_cancel()
+
+		if self.jenis_penagihan == "Disposal":
+			self.pulihkan_asset()
+
+	def pulihkan_asset(self):
+		"""Kembalikan asset ke keadaan sebelum dijual.
+
+		ERPNext menandai asset "Sold" dan mengisi disposal_date waktu invoicenya
+		disubmit, tapi pengembaliannya menumpang di get_gl_entries() — yang untuk
+		Disposal diganti get_gl_entries_disposal() dan tidak pernah memanggil
+		super(). Akibatnya asetnya tersangkut di status Sold dengan disposal_date
+		yang masih terisi, dan tidak bisa dijual lagi.
+
+		Qty yang boleh dijual sendiri tidak diutak-atik di sini: qty_scrapped
+		dicatat waktu Asset Scrap Request disetujui dan tetap utuh, sementara
+		sisa_qty_scrap() sudah tidak menghitung invoice yang dibatalkan.
+		"""
+		for item in self.items:
+			if not item.asset:
+				continue
+
+			asset = frappe.get_doc("Asset", item.asset)
+			if asset.docstatus != 1:
+				continue
+
+			asset.db_set("disposal_date", None, update_modified=False)
+			asset.set_status()
 
 	def get_gl_entries(self, warehouse_account=None):
 		if self.jenis_penagihan == "Disposal":

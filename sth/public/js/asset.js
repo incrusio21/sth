@@ -20,9 +20,11 @@ frappe.ui.form.on('Asset', {
 
             setup_approval_scrap(frm);
 
-            // scrap sebagian tidak mengubah status jadi Scrapped, cuma mencatat
-            // qty yang boleh dijual di qty_scrapped
-            if (frm.doc.status === "Scrapped" || frm.doc.qty_scrapped > 0) {
+            // qty_scrapped adalah satu-satunya penentu hak jual, baik scrap
+            // sebagian maupun seluruhnya. Status tidak dipakai lagi di sini:
+            // status berubah jadi "Sold" begitu asetnya dijual, dan invoice yang
+            // dibatalkan tidak mengembalikannya ke "Scrapped"
+            if (frm.doc.qty_scrapped > 0) {
                 frm.add_custom_button(__("Sell Asset"), function() {
                     sell_asset(frm);
                 }, __("Manage"));

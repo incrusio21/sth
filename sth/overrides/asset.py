@@ -218,22 +218,22 @@ def scrap_asset(asset_name, **kwargs):
 def sisa_qty_scrap(asset, kecuali_sales_invoice=None):
 	"""Qty asset yang sudah discrap dan belum terjual.
 
-	Asset yang discrap seluruhnya berstatus Scrapped, jadi seluruh qty-nya boleh
-	dijual. Scrap sebagian tidak memecah asset, cuma menambah qty_scrapped, dan
-	yang boleh dijual sebanyak angka itu saja. Sales Invoice Disposal yang masih
-	draft ikut dihitung supaya dua invoice tidak sama-sama menghabiskan jatah."""
-	doc = frappe.db.get_value(
-		"Asset", asset, ["status", "asset_quantity", "qty_scrapped"], as_dict=True
-	)
+	Yang dibaca cuma qty_scrapped. Angka itu dicatat eksplisit waktu Asset Scrap
+	Request disetujui, baik scrap sebagian maupun seluruhnya.
+
+	Sebelumnya scrap penuh disimpulkan dari status == "Scrapped". Status itu
+	berubah jadi "Sold" begitu asetnya dijual dan tidak dikembalikan waktu
+	invoicenya dibatalkan, jadi asetnya tersangkut: qty_scrapped 0 dan status
+	bukan "Scrapped" lagi, sehingga tidak pernah bisa dijual ulang.
+
+	Sales Invoice Disposal yang masih draft ikut dihitung supaya dua invoice
+	tidak sama-sama menghabiskan jatah."""
+	doc = frappe.db.get_value("Asset", asset, ["qty_scrapped"], as_dict=True)
 
 	if not doc:
 		return 0
 
-	# asset yang discrap seluruhnya berstatus Scrapped, jadi sisa qty-nya ikut
-	# boleh dijual di samping bagian yang sudah discrap sebagian sebelumnya
 	discrap = cint(doc.qty_scrapped)
-	if doc.status == "Scrapped":
-		discrap += cint(doc.asset_quantity) or 1
 
 	if not discrap:
 		return 0

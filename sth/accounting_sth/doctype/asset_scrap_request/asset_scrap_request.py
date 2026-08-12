@@ -162,6 +162,18 @@ class AssetScrapRequest(Document):
 		if journal_entry:
 			self.db_set("journal_entry_for_scrap", journal_entry)
 
+		# qty yang boleh dijual dicatat eksplisit, tidak disimpulkan dari status.
+		# status berubah jadi "Sold" begitu asetnya dijual, dan kalau invoicenya
+		# dibatalkan asetnya tidak akan pernah kembali ke "Scrapped" — lihat
+		# sisa_qty_scrap() di sth/overrides/asset.py
+		frappe.db.set_value(
+			"Asset",
+			self.asset,
+			"qty_scrapped",
+			self.hitung_qty_scrap(),
+			update_modified=False
+		)
+
 	def hapus_buku_bagian_yang_discrap(self):
 		"""Hapus buku porsi yang discrap langsung dari asset asalnya.
 
