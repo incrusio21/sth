@@ -1,8 +1,8 @@
 import frappe
-from frappe.utils import flt
 
 DOCTYPE = "Buku Kerja Mandor Perawatan"
-CHILD = "Detail BKM Hasil Kerja Perawatan"
+CHILD_HASIL_KERJA = "Detail BKM Hasil Kerja Perawatan"
+CHILD_MATERIAL = "Detail BKM Material"
 
 # Header yang harus sama persis sebelum dua dokumen boleh disatukan. Kalau salah
 # satu berbeda, trans_no-nya memang sama tapi isinya bukan satu buku kerja, dan
@@ -32,6 +32,12 @@ def execute():
 	lewat voucher_detail_no, dan nama baris tidak berubah waktu induknya diganti.
 	Jadi log-nya cukup diarahkan ulang ke dokumen penampung, tanpa dihapus dan
 	dibuat lagi — riwayat pembayarannya utuh.
+
+	Baris material ikut pindah dengan alasan yang sama, dan stok tidak pernah
+	disentuh. Tiap dokumen kembar terlanjur membuat Stock Entry sendiri, jadi
+	barangnya memang sudah keluar sebanyak itu; yang dibutuhkan cuma angka di
+	dokumen menyusul kenyataannya. Membatalkan Stock Entry justru mengembalikan
+	stok yang secara fisik tidak pernah kembali.
 
 	Yang tidak aman digabung dilewati dan dicetak di akhir supaya bisa ditangani
 	manual. Tiap trans_no dikerjakan sendiri-sendiri dan langsung di-commit, jadi
@@ -126,21 +132,6 @@ def _alasan_tidak_aman(keeper, losers):
 		if doc.is_posted():
 			return f"{doc.name} sudah Posted, nilainya tidak boleh berubah lagi."
 
-	# Material dibawa Stock Entry sendiri, dan yang isinya sama persis dengan
-	# penampung memang keluar dua kali untuk pekerjaan yang satu — sistem luar
-	# mengulang seluruh header di tiap request. Barangnya kembali sendiri waktu
-	# dokumen sumber dibatalkan, lewat delete_ste di on_cancel.
-	#
-	# Yang isinya berbeda tidak boleh disentuh. Membatalkannya mengembalikan barang
-	# yang benar-benar dipakai, dan materialnya tidak pernah pindah ke penampung.
-	# Termasuk keadaan yang sumbernya punya material sedangkan penampung tidak.
-	material_beda = [doc.name for doc in losers if not _material_sama(keeper, doc)]
-	if material_beda:
-		return (
-			f"{', '.join(material_beda)} punya material yang berbeda dari {keeper.name}. "
-			"Materialnya harus diurus manual sebelum dokumennya digabung."
-		)
-
 	terlihat = {}
 	for doc in [keeper] + losers:
 		for hk in doc.hasil_kerja:
@@ -155,47 +146,21 @@ def _alasan_tidak_aman(keeper, losers):
 	return None
 
 
-def _material_sama(keeper, loser):
-	"""True kalau material dokumen sumber tidak menambah apa pun di luar penampung.
-
-	Sumber tanpa material selalu aman — tidak ada barang yang perlu diurus. Yang
-	isinya sama persis (item, gudang, qty) berarti header yang sama dikirim ulang,
-	jadi Stock Entry-nya memang kelebihan dan boleh ikut dibatalkan.
-
-	Sumber tanpa baris material tapi punya Stock Entry dianggap berbeda: keadaan
-	itu tidak masuk akal, dan menebaknya bukan tugas patch.
-	"""
-	if not loser.material:
-		return not loser.stock_entry
-
-	return _kunci_material(loser) == _kunci_material(keeper)
-
-
-def _kunci_material(doc):
-	"""Isi material sebagai daftar terurut, supaya dua dokumen bisa dibandingkan."""
-	return sorted(
-		(d.item or "", d.warehouse or "", flt(d.qty)) for d in doc.material
-	)
-
-
 def _merge_into(keeper, losers):
-	idx = len(keeper.hasil_kerja)
+	idx_hasil_kerja = len(keeper.hasil_kerja)
+	idx_material = len(keeper.material)
 
 	for loser in losers:
 		for hk in loser.hasil_kerja:
-			idx += 1
-			frappe.db.set_value(
-				CHILD,
-				hk.name,
-				{
-					"parent": keeper.name,
-					"parenttype": DOCTYPE,
-					"parentfield": "hasil_kerja",
-					"docstatus": keeper.docstatus,
-					"idx": idx,
-				},
-				update_modified=False,
-			)
+			idx_hasil_kerja += 1
+			_pindahkan_baris(CHILD_HASIL_KERJA, hk, keeper, "hasil_kerja", idx_hasil_kerja)
+
+		# Material ikut pindah, tidak dijumlah jadi satu baris: tiap baris memegang
+		# stock_entry_detail sendiri, dan itu satu-satunya jalan pulang ke Stock
+		# Entry asalnya. Digabung berarti tinggal satu link yang selamat.
+		for m in loser.material:
+			idx_material += 1
+			_pindahkan_baris(CHILD_MATERIAL, m, keeper, "material", idx_material)
 
 		# voucher_detail_no tiap log menunjuk nama baris yang barusan pindah, dan
 		# nama itu tidak berubah — jadi cukup induknya yang diarahkan ulang
@@ -212,6 +177,21 @@ def _merge_into(keeper, losers):
 	_hitung_ulang(keeper.name)
 
 
+def _pindahkan_baris(child_doctype, baris, keeper, parentfield, idx):
+	frappe.db.set_value(
+		child_doctype,
+		baris.name,
+		{
+			"parent": keeper.name,
+			"parenttype": DOCTYPE,
+			"parentfield": parentfield,
+			"docstatus": keeper.docstatus,
+			"idx": idx,
+		},
+		update_modified=False,
+	)
+
+
 def _kosongkan_loser(loser):
 	"""Batalkan dokumen yang isinya sudah pindah, tanpa menyentuh milik penampung.
 
@@ -219,11 +199,16 @@ def _kosongkan_loser(loser):
 	tanggungan penampung, yang jurnalnya dibuat ulang di _hitung_ulang. Tanpa itu
 	on_cancel akan menerbitkan entry pembalik untuk angka yang sudah pindah.
 
-	Stock Entry-nya justru sengaja dibiarkan diurus on_cancel: delete_ste yang
-	membatalkan lalu menghapusnya, dan itulah yang mengembalikan barang yang
-	terlanjur keluar dua kali. Sampai di sini materialnya sudah dipastikan sama
-	persis dengan penampung, jadi yang kembali memang kelebihannya — barang untuk
-	pekerjaan itu tetap keluar sekali lewat Stock Entry milik penampung.
+	Stock Entry-nya tidak disentuh sama sekali. Barangnya betul-betul sudah keluar
+	gudang, jadi membatalkannya mengembalikan stok yang secara fisik tidak pernah
+	kembali — dan tiap pembatalan cuma menambah record baru. Yang dilakukan patch
+	ini memindahkan baris materialnya ke penampung, supaya angka di dokumen sesuai
+	dengan yang benar-benar keluar.
+
+	Karena itu `stock_entry` dilepas dulu sebelum cancel: kalau tidak, delete_ste
+	di on_cancel akan membatalkan lalu menghapus Stock Entry-nya. Jejaknya tidak
+	hilang — tiap baris material yang pindah masih memegang stock_entry_detail ke
+	Stock Entry asalnya.
 
 	Dokumen dibatalkan, bukan dihapus, supaya nomornya tetap bisa ditelusuri dari
 	trans_no yang sama. Draft memang tidak pernah punya jurnal, log, maupun Stock
@@ -248,6 +233,7 @@ def _kosongkan_loser(loser):
 			"hasil_kerja_premi_amount": 0,
 			"material_amount": 0,
 			"grand_total": 0,
+			"stock_entry": "",
 		},
 		update_modified=False,
 	)
