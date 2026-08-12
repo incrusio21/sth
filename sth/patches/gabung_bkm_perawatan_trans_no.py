@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import flt
 
 DOCTYPE = "Buku Kerja Mandor Perawatan"
 CHILD = "Detail BKM Hasil Kerja Perawatan"
@@ -125,18 +126,19 @@ def _alasan_tidak_aman(keeper, losers):
 		if doc.is_posted():
 			return f"{doc.name} sudah Posted, nilainya tidak boleh berubah lagi."
 
-	# material dibawa Stock Entry sendiri. Memindahkannya berarti mengurus
-	# pengeluaran barang yang sudah terjadi, dan itu di luar jangkauan patch ini.
+	# Material dibawa Stock Entry sendiri, dan yang isinya sama persis dengan
+	# penampung memang keluar dua kali untuk pekerjaan yang satu — sistem luar
+	# mengulang seluruh header di tiap request. Barangnya kembali sendiri waktu
+	# dokumen sumber dibatalkan, lewat delete_ste di on_cancel.
 	#
-	# Yang diperiksa dokumen sumber, bukan urutan pembuatan: sumber dibatalkan atau
-	# dihapus, jadi materialnya ikut lenyap tanpa pernah pindah ke penampung.
-	# Material milik penampung sendiri tidak masalah — dokumennya tetap hidup
-	# beserta Stock Entry-nya.
-	pembawa_material = [doc.name for doc in losers if doc.material or doc.stock_entry]
-	if pembawa_material:
+	# Yang isinya berbeda tidak boleh disentuh. Membatalkannya mengembalikan barang
+	# yang benar-benar dipakai, dan materialnya tidak pernah pindah ke penampung.
+	# Termasuk keadaan yang sumbernya punya material sedangkan penampung tidak.
+	material_beda = [doc.name for doc in losers if not _material_sama(keeper, doc)]
+	if material_beda:
 		return (
-			f"{', '.join(pembawa_material)} punya material atau Stock Entry. "
-			"Materialnya harus dipindahkan manual sebelum dokumennya digabung."
+			f"{', '.join(material_beda)} punya material yang berbeda dari {keeper.name}. "
+			"Materialnya harus diurus manual sebelum dokumennya digabung."
 		)
 
 	terlihat = {}
@@ -151,6 +153,29 @@ def _alasan_tidak_aman(keeper, losers):
 			terlihat[hk.employee] = doc.name
 
 	return None
+
+
+def _material_sama(keeper, loser):
+	"""True kalau material dokumen sumber tidak menambah apa pun di luar penampung.
+
+	Sumber tanpa material selalu aman — tidak ada barang yang perlu diurus. Yang
+	isinya sama persis (item, gudang, qty) berarti header yang sama dikirim ulang,
+	jadi Stock Entry-nya memang kelebihan dan boleh ikut dibatalkan.
+
+	Sumber tanpa baris material tapi punya Stock Entry dianggap berbeda: keadaan
+	itu tidak masuk akal, dan menebaknya bukan tugas patch.
+	"""
+	if not loser.material:
+		return not loser.stock_entry
+
+	return _kunci_material(loser) == _kunci_material(keeper)
+
+
+def _kunci_material(doc):
+	"""Isi material sebagai daftar terurut, supaya dua dokumen bisa dibandingkan."""
+	return sorted(
+		(d.item or "", d.warehouse or "", flt(d.qty)) for d in doc.material
+	)
 
 
 def _merge_into(keeper, losers):
@@ -194,9 +219,15 @@ def _kosongkan_loser(loser):
 	tanggungan penampung, yang jurnalnya dibuat ulang di _hitung_ulang. Tanpa itu
 	on_cancel akan menerbitkan entry pembalik untuk angka yang sudah pindah.
 
+	Stock Entry-nya justru sengaja dibiarkan diurus on_cancel: delete_ste yang
+	membatalkan lalu menghapusnya, dan itulah yang mengembalikan barang yang
+	terlanjur keluar dua kali. Sampai di sini materialnya sudah dipastikan sama
+	persis dengan penampung, jadi yang kembali memang kelebihannya — barang untuk
+	pekerjaan itu tetap keluar sekali lewat Stock Entry milik penampung.
+
 	Dokumen dibatalkan, bukan dihapus, supaya nomornya tetap bisa ditelusuri dari
-	trans_no yang sama. Draft memang tidak pernah punya jurnal maupun log, jadi
-	langsung dibuang seperti dokumen hantu.
+	trans_no yang sama. Draft memang tidak pernah punya jurnal, log, maupun Stock
+	Entry, jadi langsung dibuang seperti dokumen hantu.
 	"""
 	if loser.docstatus == 0:
 		frappe.delete_doc(DOCTYPE, loser.name, ignore_permissions=True, force=True)
