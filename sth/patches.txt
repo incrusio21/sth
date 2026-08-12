@@ -17,3 +17,4 @@ sth.patches.gabung_masa_shu_ke_master_harga_shu
 sth.patches.isi_kode_mandor_bkm
 sth.patches.tampilkan_realisasi_tambahan
 sth.patches.perbaiki_unique_index_bkm_premi
+sth.patches.gabung_bkm_perawatan_trans_no

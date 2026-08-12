@@ -267,8 +267,15 @@ class BukuKerjaMandorController(PlantationController):
         bkm_obj.flags.transaction_employee = 1
         bkm_obj.save()
 
-    def make_attendance(self):
-        employee = self.hasil_kerja + self.get_mandor_details()
+    def make_attendance(self, hasil_kerja=None):
+        # hasil_kerja bisa dipersempit ke sebagian baris saja. Dipakai waktu baris
+        # baru disisipkan ke dokumen yang sudah disubmit: employee lama sudah punya
+        # Attendance, dan menyentuhnya lagi cuma menulis ulang nilai yang sama lalu
+        # menghitung ulang preminya tanpa perlu.
+        if hasil_kerja is None:
+            hasil_kerja = self.hasil_kerja
+
+        employee = list(hasil_kerja) + self.get_mandor_details()
         for emp in employee:
             attendance_detail = {
                 "employee": emp.employee, "company": self.company, "attendance_date": self.posting_date
