@@ -16,6 +16,38 @@ MANDOR_API_MAP = {
 	"USR251015035": "1206010909900006",
 }
 
+# Kegiatan pada kiriman BKM dari API datang sebagai kode induk (group), bukan kode
+# kegiatan yang benar-benar dipakai dokumen. Petakan ke anak kegiatannya supaya
+# Link-nya valid dan upah, premi, serta akunnya terambil dari master yang benar.
+#
+# Sengaja ditulis di sini, bukan ditelusuri lewat pohon Kegiatan: baru dua kode ini
+# yang dikirim sistem luar dan masing-masing memang selalu jatuh ke satu anak yang
+# sama. Kode induk baru harus ditambahkan ke daftar ini dan butuh deploy.
+KEGIATAN_API_MAP = {
+	"12660": "126600101",
+	"12666": "126660101",
+}
+
+
+def fix_kegiatan_from_api(doc):
+	"""Ganti kode kegiatan induk kiriman API dengan kode anak yang dituju.
+
+	Hanya kode yang terdaftar di KEGIATAN_API_MAP yang diganti. Nilai lain
+	dibiarkan apa adanya — input dari UI sudah memilih kegiatan non-group lewat
+	`kegiatan_query`, jadi tidak ada yang perlu diterjemahkan di sana.
+
+	Kalau kode anaknya ternyata belum ada di master Kegiatan, dokumen tetap
+	ditolak validasi Link seperti biasa, dan pesannya menyebut kode anak itu —
+	bukan kode induk yang memang tidak pernah ada sebagai kegiatan non-group.
+	"""
+	kegiatan = doc.get("kegiatan")
+	if not kegiatan:
+		return
+
+	anak = KEGIATAN_API_MAP.get(str(kegiatan).strip())
+	if anak:
+		doc.kegiatan = anak
+
 
 def fix_mandor_from_api(doc):
 	"""Isi `kode_mandor` (Link Employee) dari nilai `mandor` yang dikirim API.

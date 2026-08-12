@@ -6,7 +6,7 @@ from frappe.utils import flt, format_date, get_link_to_form
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
-from sth.custom.api import fix_mandor_from_api, submit_after_insert
+from sth.custom.api import fix_kegiatan_from_api, fix_mandor_from_api, submit_after_insert
 from frappe import _
 
 class BukuKerjaMandorPanen(BukuKerjaMandorController):
@@ -55,6 +55,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 	def before_insert(self):
 		fix_mandor_from_api(self)
+		fix_kegiatan_from_api(self)
 
 		# Data dari API kadang masuk dengan docstatus=1 langsung, sehingga
 		# proses insert tidak pernah melewati siklus submit (on_submit tidak jalan).
