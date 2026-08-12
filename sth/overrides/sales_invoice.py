@@ -1,7 +1,7 @@
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe import _
-from frappe.utils import get_last_day,flt
+from frappe.utils import get_last_day,flt,get_link_to_form
 
 class SalesInvoice(SalesInvoice):
 	def validate(self):
@@ -51,16 +51,36 @@ class SalesInvoice(SalesInvoice):
 	def pulihkan_asset(self):
 		"""Kembalikan asset ke keadaan sebelum dijual.
 
-		ERPNext menandai asset "Sold" dan mengisi disposal_date waktu invoicenya
-		disubmit, tapi pengembaliannya menumpang di get_gl_entries() — yang untuk
+		ERPNext menandai asset "Sold", mengisi disposal_date, dan membukukan
+		penyusutan prorata sampai tanggal pelepasan waktu invoicenya disubmit.
+		Seluruh pengembaliannya menumpang di get_gl_entries() — yang untuk
 		Disposal diganti get_gl_entries_disposal() dan tidak pernah memanggil
-		super(). Akibatnya asetnya tersangkut di status Sold dengan disposal_date
-		yang masih terisi, dan tidak bisa dijual lagi.
+		super(). Akibatnya pembatalan tidak membalik apa pun.
 
-		Qty yang boleh dijual sendiri tidak diutak-atik di sini: qty_scrapped
-		dicatat waktu Asset Scrap Request disetujui dan tetap utuh, sementara
+		Dua akibatnya berbeda berat. Yang ringan: asetnya tersangkut di status
+		Sold dan tidak bisa dijual lagi. Yang berat: jurnal penyusutan pelepasan
+		tetap hidup dan depreciation schedule-nya tidak direset, jadi penjualan
+		berikutnya membangun ulang schedule dari awal dan memposting ulang
+		penyusutan bulan-bulan yang sudah dibukukan. Siklus jual → batal → jual
+		yang berulang menumpuk beban penyusutan berlipat-lipat.
+
+		Pembalikan penyusutan sengaja memanggil fungsi ERPNext, bukan ditulis
+		ulang: perhitungan prorata dan penyusunan ulang schedule terlalu banyak
+		cabangnya untuk ditiru dengan aman.
+
+		Qty yang boleh dijual tidak diutak-atik di sini: qty_scrapped dicatat
+		waktu Asset Scrap Request disetujui dan tetap utuh, sementara
 		sisa_qty_scrap() sudah tidak menghitung invoice yang dibatalkan.
 		"""
+		from erpnext.assets.doctype.asset.depreciation import (
+			reset_depreciation_schedule,
+			reverse_depreciation_entry_made_after_disposal,
+		)
+
+		catatan = _("Sales Invoice {0} dibatalkan").format(
+			get_link_to_form(self.doctype, self.name)
+		)
+
 		for item in self.items:
 			if not item.asset:
 				continue
@@ -68,6 +88,11 @@ class SalesInvoice(SalesInvoice):
 			asset = frappe.get_doc("Asset", item.asset)
 			if asset.docstatus != 1:
 				continue
+
+			if asset.calculate_depreciation:
+				reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
+				asset.reload()
+				reset_depreciation_schedule(asset, self.posting_date, catatan)
 
 			asset.db_set("disposal_date", None, update_modified=False)
 			asset.set_status()
