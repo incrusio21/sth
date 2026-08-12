@@ -378,6 +378,9 @@ doc_events = {
 				],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},
+	"Journal Entry": {
+		"before_submit": ["sth.custom.journal_entry.cegah_penyusutan_ganda"],
+	},
 	"Period Closing Voucher": {
 		"validate": ["sth.custom.period_closing_voucher.check_invoice_asuransi_sewa"],
 	},
