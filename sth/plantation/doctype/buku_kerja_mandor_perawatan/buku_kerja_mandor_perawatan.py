@@ -5,7 +5,13 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
-from sth.custom.api import USER_API, fix_kegiatan_from_api, fix_mandor_from_api, submit_after_insert
+from sth.custom.api import (
+	USER_API,
+	fix_item_from_api,
+	fix_kegiatan_from_api,
+	fix_mandor_from_api,
+	submit_after_insert,
+)
 
 # Isi baris hasil kerja yang diambil dari kiriman API waktu digabung. Sisanya —
 # amount, premi_amount, sub_total, dan dua Link Employee Payment Log — dihitung
@@ -138,6 +144,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 	def before_insert(self):
 		fix_mandor_from_api(self)
 		fix_kegiatan_from_api(self)
+		fix_item_from_api(self)
 
 		# Data dari API kadang masuk dengan docstatus=1 langsung, sehingga
 		# proses insert tidak pernah melewati siklus submit (on_submit tidak jalan).

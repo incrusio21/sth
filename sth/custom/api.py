@@ -29,6 +29,21 @@ KEGIATAN_API_MAP = {
 }
 
 
+# Item pada tabel material kiriman BKM datang dengan kode milik sistem luar, bukan
+# kode Item di ERP. Petakan supaya Link Item-nya valid dan Stock Entry-nya
+# mengeluarkan barang yang benar.
+#
+# Sama seperti KEGIATAN_API_MAP, ditulis sebagai daftar karena pemetaannya tidak
+# bisa diturunkan dari kodenya sendiri. Kode baru harus ditambahkan di sini dan
+# butuh deploy.
+ITEM_API_MAP = {
+	"30202001": "30301013",
+	"31101019": "30101009",
+	"31201002": "30302011",
+	"31201012": "30301001",
+}
+
+
 def fix_kegiatan_from_api(doc):
 	"""Ganti kode kegiatan induk kiriman API dengan kode anak yang dituju.
 
@@ -47,6 +62,27 @@ def fix_kegiatan_from_api(doc):
 	anak = KEGIATAN_API_MAP.get(str(kegiatan).strip())
 	if anak:
 		doc.kegiatan = anak
+
+
+def fix_item_from_api(doc):
+	"""Ganti kode item baris material kiriman API dengan kode Item yang dituju.
+
+	Hanya kode yang terdaftar di ITEM_API_MAP yang diganti; sisanya lewat apa
+	adanya, sama seperti fix_kegiatan_from_api. Kode tak terdaftar yang ternyata
+	bukan Item tetap ditolak validasi Link seperti biasa, dan pesannya menyebut
+	kode mentah itu — jadi kode yang belum dipetakan langsung kelihatan.
+
+	Dipanggil sebelum Stock Entry dibuat, karena create_ste_issue mengeluarkan
+	barang memakai `item` baris ini apa adanya.
+	"""
+	for baris in doc.get("material") or []:
+		item = baris.get("item")
+		if not item:
+			continue
+
+		pengganti = ITEM_API_MAP.get(str(item).strip())
+		if pengganti:
+			baris.item = pengganti
 
 
 def fix_mandor_from_api(doc):
