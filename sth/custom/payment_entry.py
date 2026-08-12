@@ -1094,3 +1094,66 @@ def set_reference_no(doc, method):
 		if ((not doc.reference_no) or (doc.reference_no=="-")) :
 			doc.reference_no = doc.name
 			
+
+def update_uang_muka_employee_advance(doc, method=None):
+	"""Tandai uang muka yang dipakai di realisasi PDO supaya tidak terpakai dua kali.
+
+	Nilai yang dipotong di tiap baris realisasi dicatat waktu barisnya dibentuk
+	(lihat pakai_uang_muka di permintaan_dana_operasional.py). Di sini angka itu
+	ditambahkan ke claimed_amount Employee Advance-nya, dan dikurangi lagi kalau
+	Payment Entry-nya dibatalkan — dengan begitu uang muka yang sudah habis
+	terpakai berhenti muncul di daftar centangan realisasi berikutnya.
+
+	Uang muka yang lebih besar dari realisasi hanya terpakai sebesar realisasinya;
+	sisanya sengaja dibiarkan menggantung sebagai tagihan ke karyawan.
+	"""
+	arah = -1 if doc.docstatus == 2 else 1
+
+	for employee_advance, amount in _uang_muka_terpakai(doc).items():
+		advance = frappe.db.get_value(
+			"Employee Advance",
+			employee_advance,
+			["advance_amount", "claimed_amount", "return_amount"],
+			as_dict=True
+		)
+
+		if not advance:
+			continue
+
+		claimed = flt(advance.claimed_amount) + arah * flt(amount)
+		batas = flt(advance.advance_amount) - flt(advance.return_amount)
+
+		frappe.db.set_value(
+			"Employee Advance",
+			employee_advance,
+			"claimed_amount",
+			min(max(claimed, 0), max(batas, 0)),
+			update_modified=False
+		)
+
+
+def _uang_muka_terpakai(doc):
+	"""{Employee Advance: nilai terpakai} dari seluruh baris realisasi PDO."""
+	terpakai = {}
+
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if not row.get("uang_muka_detail"):
+			continue
+
+		try:
+			rincian = json.loads(row.uang_muka_detail)
+		except (TypeError, ValueError):
+			frappe.log_error(
+				"Rincian uang muka tidak terbaca di {0} baris {1}".format(doc.name, row.idx),
+				"update_uang_muka_employee_advance"
+			)
+			continue
+
+		for item in rincian or []:
+			nama = item.get("employee_advance")
+			if not nama:
+				continue
+
+			terpakai[nama] = flt(terpakai.get(nama)) + flt(item.get("amount"))
+
+	return terpakai

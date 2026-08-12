@@ -362,7 +362,8 @@ doc_events = {
 			"sth.custom.payment_entry.pasang_nota_piutang",
 			"sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
 			"sth.custom.payment_entry_leasing.on_payment_entry_submit",
-			"sth.custom.payment_entry.update_ganti_rugi_lahan_term"
+			"sth.custom.payment_entry.update_ganti_rugi_lahan_term",
+			"sth.custom.payment_entry.update_uang_muka_employee_advance"
 		],
 		"on_cancel": ["sth.custom.payment_entry.update_check_book", 
 				"sth.custom.payment_entry.update_status_deposito", 
@@ -372,7 +373,8 @@ doc_events = {
 				"sth.custom.payment_entry.update_pesangon_from_payment",
 				"sth.custom.payment_entry.pasang_nota_piutang",
 				"sth.custom.payment_entry_leasing.on_payment_entry_cancel",
-				"sth.custom.payment_entry.update_ganti_rugi_lahan_term"
+				"sth.custom.payment_entry.update_ganti_rugi_lahan_term",
+				"sth.custom.payment_entry.update_uang_muka_employee_advance"
 				],
 		"on_trash": "sth.custom.payment_entry.update_check_book"
 	},

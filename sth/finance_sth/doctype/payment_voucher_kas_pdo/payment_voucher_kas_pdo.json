@@ -10,6 +10,8 @@
   "tipe_pdo",
   "penerima",
   "total",
+  "uang_muka_detail",
+  "uang_muka",
   "item_barang",
   "pdo_child_name",
   "debit_to"
@@ -70,6 +72,23 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Item Barang"
+  },
+  {
+   "columns": 1,
+   "description": "Uang muka yang sudah lebih dulu diterima dan dipotongkan dari baris ini.",
+   "fieldname": "uang_muka",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Uang Muka",
+   "read_only": 1
+  },
+  {
+   "description": "Dokumen uang muka yang dipakai beserta nilainya, dipakai saat submit untuk menambah claimed_amount Employee Advance.",
+   "fieldname": "uang_muka_detail",
+   "fieldtype": "JSON",
+   "hidden": 1,
+   "label": "Rincian Uang Muka",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

@@ -1,6 +1,8 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe.model.document import Document
 from frappe import _
@@ -757,24 +759,57 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, peng
 		# pengguna — tipe lain tetap satu baris per baris PDO seperti sebelumnya.
 		rows = gabung_per_item_barang(rows)
 
-	if uang_muka_per_nama:
-		# Nilai dibayar mengikuti dokumen uang muka, menggantikan plafon PDO —
-		# perlakuan yang sama dengan jalur PPD lewat field ppd.
+	if uang_muka_per_nama["realisasi"]:
+		# PPD: nilai dibayar mengikuti realisasi yang sudah diverifikasi HRD,
+		# menggantikan plafon PDO — sama dengan jalur PPD lewat field ppd.
 		for baris in rows:
-			if baris["item_barang"] in uang_muka_per_nama:
-				baris["total"] = flt(uang_muka_per_nama[baris["item_barang"]])
+			nama = baris["item_barang"]
+			if nama in uang_muka_per_nama["realisasi"]:
+				baris["total"] = flt(uang_muka_per_nama["realisasi"][nama])
+
+	catatan_potongan = []
+
+	if uang_muka_per_nama["potongan"]:
+		# Employee Advance: uangnya sudah diterima duluan, jadi yang dibayar
+		# tinggal selisihnya. Potongan dibatasi sebesar realisasi — kalau uang
+		# mukanya lebih besar, PV-nya jadi nol dan kelebihannya tetap tercatat
+		# sebagai sisa Employee Advance yang harus dikembalikan karyawan.
+		for baris in rows:
+			nama = baris["item_barang"]
+			if nama not in uang_muka_per_nama["potongan"]:
+				continue
+
+			realisasi = flt(baris["total"])
+			potongan = min(flt(uang_muka_per_nama["potongan"][nama]), realisasi)
+
+			baris["total"] = flt(realisasi - potongan)
+			baris["uang_muka"] = potongan
+			baris["uang_muka_detail"] = json.dumps(
+				pakai_uang_muka(uang_muka_per_nama["rincian"].get(nama) or [], potongan)
+			)
+
+			catatan_potongan.append(
+				"Uang muka {0}: {1} dipotong dari realisasi {2}, dibayar {3}".format(
+					nama,
+					frappe.format_value(potongan, {"fieldtype": "Currency"}),
+					frappe.format_value(realisasi, {"fieldtype": "Currency"}),
+					frappe.format_value(flt(baris["total"]), {"fieldtype": "Currency"}),
+				)
+			)
 
 	if nama_terpilih and rincian_nama_barang:
 		note = "\n".join(
 			"{0}: {1}".format(nama, frappe.format_value(total, {"fieldtype": "Currency"}))
 			for nama, total in rincian_nama_barang.items()
 		)
-	elif uang_muka_per_nama:
+	elif catatan_potongan:
+		note = "\n".join(catatan_potongan)
+	elif uang_muka_per_nama["realisasi"]:
 		note = "\n".join(
 			"Uang muka {0}: {1}".format(
 				nama, frappe.format_value(flt(total), {"fieldtype": "Currency"})
 			)
-			for nama, total in uang_muka_per_nama.items()
+			for nama, total in uang_muka_per_nama["realisasi"].items()
 		)
 	# Bahan Bakar tidak menulis apa pun ke Keterangan: nominalnya diisi manual dan
 	# sisa plafon yang dulu ditulis di sini malah terbaca sebagai nilai tagihan.
@@ -783,13 +818,26 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, peng
 
 
 def hitung_uang_muka(source_name, pengguna_terpilih, uang_muka_terpilih):
-	"""{nama pengguna: nilai uang muka} dari dokumen yang dicentang.
+	"""Nilai dokumen yang dicentang di kolom Uang Muka, dipisah menurut sifatnya.
+
+	Dua sumber yang bisa dicentang berbeda arah, jadi tidak boleh diperlakukan sama:
+
+	- **PPD** nilainya adalah realisasi yang sudah diverifikasi HRD. Itu justru
+	  jumlah yang mau dibayar, jadi menggantikan plafon PDO.
+	- **Employee Advance** nilainya adalah uang yang sudah lebih dulu diterima
+	  karyawan. Kalau ikut menggantikan plafon, PV-nya membayarkan uang muka itu
+	  untuk kedua kalinya — karena itu dia mengurangi, bukan mengganti.
+
+	Balikan: {"realisasi": {nama: nilai}, "potongan": {nama: nilai},
+	          "rincian": {nama: [{"employee_advance": ..., "amount": ...}]}}
 
 	Uang muka dicocokkan balik ke nama di List Perjalanan Dinas lewat Employee-nya,
 	karena kolom Pengguna di PDO bertipe Data dan boleh diisi bebas.
 	"""
+	kosong = {"realisasi": {}, "potongan": {}, "rincian": {}}
+
 	if not uang_muka_terpilih:
-		return {}
+		return kosong
 
 	employee_ke_nama = {}
 	for nama in pengguna_terpilih or []:
@@ -797,7 +845,8 @@ def hitung_uang_muka(source_name, pengguna_terpilih, uang_muka_terpilih):
 		if employee:
 			employee_ke_nama[employee] = nama
 
-	hasil = {}
+	hasil = {"realisasi": {}, "potongan": {}, "rincian": {}}
+
 	for pilihan in uang_muka_terpilih:
 		doctype, _pemisah, docname = pilihan.partition(PEMISAH_UANG_MUKA)
 
@@ -807,8 +856,10 @@ def hitung_uang_muka(source_name, pengguna_terpilih, uang_muka_terpilih):
 			realisasi = get_realisasi_ppd(docname, source_name)
 			amount = sum(flt(nilai) for nilai in realisasi.values())
 			employee = frappe.db.get_value(doctype, docname, "employee")
+			ember = "realisasi"
 		elif doctype == "Employee Advance":
-			employee, amount = frappe.db.get_value(doctype, docname, ["employee", "advance_amount"])
+			employee, amount = sisa_employee_advance(docname)
+			ember = "potongan"
 		else:
 			frappe.throw(_("Tipe dokumen uang muka tidak dikenal: {0}").format(doctype))
 
@@ -820,9 +871,61 @@ def hitung_uang_muka(source_name, pengguna_terpilih, uang_muka_terpilih):
 				)
 			)
 
-		hasil[nama] = flt(hasil.get(nama)) + flt(amount)
+		hasil[ember][nama] = flt(hasil[ember].get(nama)) + flt(amount)
+
+		if ember == "potongan":
+			hasil["rincian"].setdefault(nama, []).append({
+				"employee_advance": docname,
+				"amount": flt(amount),
+			})
 
 	return hasil
+
+
+def pakai_uang_muka(rincian, terpakai):
+	"""Bagi nilai yang benar-benar terpotong ke dokumen uang muka, berurutan.
+
+	Potongan dibatasi sebesar realisasi, jadi kalau uang mukanya lebih besar tidak
+	semuanya terpakai. Yang dicatat di sini cuma yang terpakai, karena angka
+	inilah yang nanti menambah claimed_amount Employee Advance saat PV disubmit.
+	"""
+	sisa = flt(terpakai)
+	dipakai = []
+
+	for item in rincian:
+		if sisa <= 0:
+			break
+
+		amount = min(flt(item["amount"]), sisa)
+		if amount <= 0:
+			continue
+
+		dipakai.append({"employee_advance": item["employee_advance"], "amount": amount})
+		sisa -= amount
+
+	return dipakai
+
+
+def sisa_employee_advance(docname):
+	"""(employee, sisa uang muka) sebuah Employee Advance.
+
+	Yang dipakai sisanya, bukan advance_amount mentah — uang muka yang sudah
+	sebagian dipertanggungjawabkan atau dikembalikan tidak boleh dipotong penuh
+	lagi di realisasi berikutnya.
+	"""
+	advance = frappe.db.get_value(
+		"Employee Advance",
+		docname,
+		["employee", "advance_amount", "claimed_amount", "return_amount"],
+		as_dict=True
+	)
+
+	if not advance:
+		frappe.throw(_("Employee Advance {0} tidak ditemukan").format(docname))
+
+	sisa = flt(advance.advance_amount) - flt(advance.claimed_amount) - flt(advance.return_amount)
+
+	return advance.employee, max(sisa, 0)
 
 
 @frappe.whitelist()
