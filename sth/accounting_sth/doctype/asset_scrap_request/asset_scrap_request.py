@@ -187,14 +187,44 @@ class AssetScrapRequest(Document):
 
 		self.geser_nilai_asset(asset, -1)
 
-		if asset.calculate_depreciation:
-			frappe.msgprint(
-				_("Nilai Asset {0} sudah dikurangi, tapi jadwal penyusutannya belum ikut "
-				  "disesuaikan. Sesuaikan lewat Asset Value Adjustment kalau penyusutan "
-				  "berikutnya harus ikut turun.").format(self.asset),
-				title=_("Jadwal Penyusutan Belum Disesuaikan"),
-				indicator="orange"
+		self.sesuaikan_jadwal_penyusutan(
+			_("Asset Scrap Request {0} — scrap {1}%").format(
+				self.name, flt(self.persentase_scrap)
 			)
+		)
+
+	def sesuaikan_jadwal_penyusutan(self, catatan):
+		"""Susun ulang jadwal penyusutan mengikuti nilai buku yang baru.
+
+		Sisa periodenya dibiarkan apa adanya, jadi yang turun nominal bulanannya:
+		asset yang discrap 50% menyusut separuh dari sebelumnya dan tetap habis di
+		bulan yang sama seperti rencana semula.
+
+		Sebelum ini jadwalnya tidak ikut disesuaikan sama sekali — nilai asetnya
+		berkurang tapi nominal bulanannya tetap, jadi penyusutan sesudah scrap
+		sebagian pasti kelebihan. Yang ada cuma peringatan menyuruh user membuat
+		Asset Value Adjustment sendiri, dan peringatan yang menyerahkan pekerjaan
+		ke orang seperti itu justru sumber risikonya.
+
+		Asset Value Adjustment sengaja tidak dipakai walau semantiknya sama:
+		dokumen itu ikut menjurnal selisih nilainya sebagai beban penyusutan,
+		sedangkan porsi yang discrap sudah dihapusbukukan posting_gl_hapus_buku().
+		Yang dipanggil di sini hanya penyusun ulang jadwalnya, yang tidak menyentuh
+		buku besar.
+		"""
+		nominal = susun_ulang_jadwal_asset(self.asset, catatan)
+
+		if nominal is None:
+			return
+
+		frappe.msgprint(
+			_("Jadwal penyusutan Asset {0} sudah disesuaikan. Penyusutan berikutnya "
+			  "menjadi {1} per periode.").format(
+				self.asset, frappe.format_value(nominal, {"fieldtype": "Currency"})
+			),
+			title=_("Jadwal Penyusutan Disesuaikan"),
+			indicator="green"
+		)
 
 	def porsi_yang_discrap(self):
 		"""Harga perolehan, akumulasi penyusutan, dan nilai buku sebesar porsi yang
@@ -409,8 +439,65 @@ class AssetScrapRequest(Document):
 
 		self.geser_nilai_asset(asset, 1)
 
+		self.sesuaikan_jadwal_penyusutan(
+			_("Asset Scrap Request {0} dibatalkan").format(self.name)
+		)
+
 	def on_trash(self):
 		self.update_status_scrap(kosongkan=True)
+
+
+@frappe.whitelist()
+def susun_ulang_jadwal_asset(asset, catatan=None):
+	"""Susun ulang jadwal penyusutan sebuah asset dari nilai bukunya sekarang.
+
+	Sisa periode dibiarkan, jadi yang menyesuaikan nominal per periodenya.
+	Balikannya nominal penyusutan berikutnya, atau None kalau asetnya memang tidak
+	pakai penyusutan terjadwal.
+
+	Bisa dijalankan sendiri untuk asset yang terlanjur discrap sebagian sebelum
+	penyesuaian ini ada:
+
+	    bench --site <site> execute \\
+	      sth.accounting_sth.doctype.asset_scrap_request.asset_scrap_request.susun_ulang_jadwal_asset \\
+	      --kwargs "{'asset': 'ASS-TML-ASN00007'}"
+	"""
+	from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+		make_new_active_asset_depr_schedules_and_cancel_current_ones,
+	)
+
+	asset_doc = frappe.get_doc("Asset", asset)
+
+	if not asset_doc.calculate_depreciation:
+		return None
+
+	# nilainya digeser lewat db.set_value, jadi dokumen yang di tangan sudah basi
+	asset_doc.reload()
+	asset_doc.flags.ignore_validate_update_after_submit = True
+
+	make_new_active_asset_depr_schedules_and_cancel_current_ones(
+		asset_doc, catatan or _("Nilai asset disesuaikan")
+	)
+	asset_doc.save()
+
+	return nominal_penyusutan_berikutnya(asset)
+
+
+def nominal_penyusutan_berikutnya(asset):
+	"""Nominal baris jadwal aktif pertama yang belum dibukukan."""
+	baris = frappe.db.sql("""
+		SELECT ds.depreciation_amount
+		FROM `tabDepreciation Schedule` ds
+		JOIN `tabAsset Depreciation Schedule` ads ON ads.name = ds.parent
+		WHERE ads.asset = %(asset)s
+		  AND ads.docstatus = 1
+		  AND ads.status = 'Active'
+		  AND (ds.journal_entry IS NULL OR ds.journal_entry = '')
+		ORDER BY ds.idx
+		LIMIT 1
+	""", {"asset": asset}, as_dict=True)
+
+	return flt(baris[0].depreciation_amount) if baris else 0
 
 
 def get_pengajuan_berjalan(asset):
