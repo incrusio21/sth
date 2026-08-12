@@ -19,3 +19,4 @@ sth.patches.tampilkan_realisasi_tambahan
 sth.patches.perbaiki_unique_index_bkm_premi
 sth.patches.gabung_bkm_perawatan_trans_no
 sth.patches.gabung_bkm_perawatan_material_dobel
+sth.patches.arsipkan_bkm_perawatan_batal
