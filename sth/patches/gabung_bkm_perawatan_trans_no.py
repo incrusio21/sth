@@ -86,7 +86,18 @@ def _merge_group(trans_no):
 
 	docs = [frappe.get_doc(DOCTYPE, row.name) for row in rows]
 
-	alasan = _alasan_tidak_aman(docs)
+	# penampung dipilih lebih dulu karena pemeriksaan di bawah bergantung padanya:
+	# yang boleh menyimpan material cuma penampung, sisanya dokumen sumber.
+	#
+	# yang sudah disubmit jadi penampung: dokumennya sudah punya Employee Payment
+	# Log, jurnal, dan nomor yang dipakai di laporan. Kalau semuanya masih draft,
+	# yang tertua yang dipakai.
+	submitted = [doc for doc in docs if doc.docstatus == 1]
+	keeper = submitted[0] if submitted else docs[0]
+
+	losers = [doc for doc in docs if doc.name != keeper.name]
+
+	alasan = _alasan_tidak_aman(keeper, losers)
 	if alasan:
 		frappe.log_error(
 			title=f"BKM Perawatan kembar {trans_no}: dilewati",
@@ -94,22 +105,14 @@ def _merge_group(trans_no):
 		)
 		return False
 
-	# yang sudah disubmit jadi penampung: dokumennya sudah punya Employee Payment
-	# Log, jurnal, dan nomor yang dipakai di laporan. Kalau semuanya masih draft,
-	# yang tertua yang dipakai.
-	submitted = [doc for doc in docs if doc.docstatus == 1]
-	keeper = submitted[0] if submitted else docs[0]
-
-	_merge_into(keeper, [doc for doc in docs if doc.name != keeper.name])
+	_merge_into(keeper, losers)
 
 	return True
 
 
-def _alasan_tidak_aman(docs):
+def _alasan_tidak_aman(keeper, losers):
 	"""Keterangan kenapa grup ini tidak boleh digabung otomatis, atau None."""
-	keeper = docs[0]
-
-	for doc in docs[1:]:
+	for doc in losers:
 		beda = [f for f in FIELD_HEADER if (doc.get(f) or None) != (keeper.get(f) or None)]
 		if beda:
 			return (
@@ -117,14 +120,19 @@ def _alasan_tidak_aman(docs):
 				"trans_no-nya sama tapi isinya bukan satu buku kerja."
 			)
 
-	for doc in docs:
+	for doc in [keeper] + losers:
 		# jurnalnya sudah masuk buku besar dan periodenya ditutup
 		if doc.is_posted():
 			return f"{doc.name} sudah Posted, nilainya tidak boleh berubah lagi."
 
 	# material dibawa Stock Entry sendiri. Memindahkannya berarti mengurus
 	# pengeluaran barang yang sudah terjadi, dan itu di luar jangkauan patch ini.
-	pembawa_material = [doc.name for doc in docs[1:] if doc.material or doc.stock_entry]
+	#
+	# Yang diperiksa dokumen sumber, bukan urutan pembuatan: sumber dibatalkan atau
+	# dihapus, jadi materialnya ikut lenyap tanpa pernah pindah ke penampung.
+	# Material milik penampung sendiri tidak masalah — dokumennya tetap hidup
+	# beserta Stock Entry-nya.
+	pembawa_material = [doc.name for doc in losers if doc.material or doc.stock_entry]
 	if pembawa_material:
 		return (
 			f"{', '.join(pembawa_material)} punya material atau Stock Entry. "
@@ -132,7 +140,7 @@ def _alasan_tidak_aman(docs):
 		)
 
 	terlihat = {}
-	for doc in docs:
+	for doc in [keeper] + losers:
 		for hk in doc.hasil_kerja:
 			if hk.employee in terlihat:
 				return (
