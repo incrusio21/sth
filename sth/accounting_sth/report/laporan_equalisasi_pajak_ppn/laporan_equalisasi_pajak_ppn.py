@@ -69,10 +69,19 @@ def execute(filters=None):
 		SELECT
 			np.name AS doc_name,
 			pe.posting_date AS tanggal_bayar,
-			so.customer_name AS nama_vendor,
+				CASE
+						WHEN np.tipe = 'Others' AND np.sub_tipe_others  = 'Jual Asset' THEN si.customer_name
+						ELSE so.customer_name
+				END AS nama_vendor,
 			gle.account AS kode_akun,
-			np.sisa_dpp AS dpp,
-			np.sisa_ppn AS ppn,
+				CASE
+						WHEN np.tipe = 'Others' AND np.sub_tipe_others  = 'Jual Asset' THEN np.dpp_jual_asset
+						ELSE np.sisa_dpp
+				END as dpp,
+				CASE
+						WHEN np.tipe = 'Others' AND np.sub_tipe_others  = 'Jual Asset' THEN np.ppn_jual_asset
+						ELSE np.sisa_ppn
+				END as ppn,
 			np.name AS no_invoice,
 			np.nomor_invoice_buyer AS no_invoice_eksternal,
 			np.no_faktur_pajak AS no_faktur,
@@ -85,15 +94,33 @@ def execute(filters=None):
 			ON pe.nota_piutang_pemenuhan_kontrak = np.name
 		LEFT JOIN `tabSales Order` so
 			ON so.name = np.no_kontrak
+		LEFT JOIN `tabSales Invoice` si
+			ON si.name = np.sales_invoice
 		LEFT JOIN (
 			SELECT
 					nppkt.parent,
 					MIN(gle.account) AS account
 			FROM `tabNota Piutang Pemenuhan Kontrak Table` nppkt
+			INNER JOIN `tabNota Piutang` np_sub
+					ON np_sub.name = nppkt.parent
 			INNER JOIN `tabGL Entry` gle
 					ON gle.voucher_no = nppkt.pengakuan_penjualan
 			WHERE gle.debit <> 0
+				AND NOT (np_sub.tipe = 'Others' AND np_sub.sub_tipe_others = 'Jual Asset')
 			GROUP BY nppkt.parent
+
+			UNION ALL
+
+			SELECT
+					np_sub.name AS parent,
+					MIN(gle.account) AS account
+			FROM `tabNota Piutang` np_sub
+			INNER JOIN `tabGL Entry` gle
+					ON gle.voucher_no = np_sub.sales_invoice
+			WHERE gle.debit <> 0
+				AND np_sub.tipe = 'Others'
+				AND np_sub.sub_tipe_others = 'Jual Asset'
+			GROUP BY np_sub.name
 		) gle
 			ON gle.parent = np.name
 		WHERE np.docstatus = 1
