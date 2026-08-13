@@ -28,6 +28,12 @@ FIELD_HASIL_KERJA_API = (
 )
 
 
+# Kolom peran yang preminya dihitung dari isi BKM. Buku Kerja Mandor Premi
+# menjumlahkan qty seluruh baris BKM sebulan yang kolom perannya menunjuk orang
+# itu, jadi dokumen dengan pemegang peran berbeda tidak boleh disatukan.
+FIELD_PEMEGANG_PREMI = ("kode_mandor", "mandor1", "kerani_panen")
+
+
 def kunci_baris(hk):
 	"""Penanda satu baris hasil kerja panen.
 
@@ -48,21 +54,32 @@ def cari_bkm_setrans_no(kiriman):
 	jalur payroll sendiri-sendiri, jadi keduanya harus tetap dokumen terpisah
 	sekalipun trans_no-nya kebetulan sama.
 
+	Begitu juga ketiga pemegang premi. Di produksi ada trans_no yang dipakai dua
+	kerani sekaligus — pembagiannya 11 lawan 4 dokumen, bukan satu yang nyasar.
+	Premi mereka dihitung dari jumlah qty seluruh baris BKM sebulan yang kolom
+	perannya menunjuk mereka, jadi menggabung dua kerani ke satu dokumen
+	memindahkan premi dari satu orang ke orang lain tanpa ada yang memutuskan.
+
 	Dokumen batal (docstatus 2) sengaja dilewat. Kiriman sesudahnya harus
 	membentuk dokumen baru, bukan menghidupkan yang sudah dibatalkan.
 	"""
 	if not kiriman.trans_no:
 		return None
 
+	filters = {
+		"trans_no": kiriman.trans_no,
+		"company": kiriman.company,
+		"posting_date": getdate(kiriman.posting_date),
+		"is_kontanan": cint(kiriman.is_kontanan),
+		"docstatus": ("<", 2),
+	}
+
+	for field in FIELD_PEMEGANG_PREMI:
+		filters[field] = kiriman.get(field) or ""
+
 	return frappe.db.get_value(
 		"Buku Kerja Mandor Panen",
-		{
-			"trans_no": kiriman.trans_no,
-			"company": kiriman.company,
-			"posting_date": getdate(kiriman.posting_date),
-			"is_kontanan": cint(kiriman.is_kontanan),
-			"docstatus": ("<", 2),
-		},
+		filters,
 		"name",
 		order_by="creation",
 	)
