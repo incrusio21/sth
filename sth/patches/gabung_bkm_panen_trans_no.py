@@ -1,6 +1,7 @@
 import frappe
 
 from sth.plantation.doctype.buku_kerja_mandor_panen.buku_kerja_mandor_panen import (
+	FIELD_PEMEGANG_PREMI,
 	kunci_baris,
 )
 
@@ -9,7 +10,10 @@ CHILD_HASIL_KERJA = "Detail BKM Hasil Kerja Panen"
 
 # Header yang harus sama persis sebelum dua dokumen boleh disatukan. Kalau salah
 # satu berbeda, trans_no-nya memang sama tapi isinya bukan satu buku kerja, dan
-# menggabungkannya berarti memindahkan upah ke kegiatan atau mandor yang salah.
+# menggabungkannya berarti memindahkan upah ke kegiatan yang salah.
+#
+# Pemegang premi tidak ada di sini: dokumen dengan kerani atau mandor berbeda
+# bukan ditolak, tapi dipecah jadi kelompok sendiri-sendiri — lihat _muat_subgrup.
 #
 # Tarif ikut diperiksa — beda dari Perawatan — karena nilai tiap baris dihitung
 # ulang memakai header penampung: baris yang pindah ke dokumen bertarif lain akan
@@ -20,10 +24,7 @@ FIELD_HEADER = (
 	"unit",
 	"divisi",
 	"kegiatan",
-	"kode_mandor",
 	"kemandoran",
-	"mandor1",
-	"kerani_panen",
 	"is_kontanan",
 	"rupiah_basis",
 	"volume_basis",
@@ -100,38 +101,43 @@ def execute(dry_run=True):
 	digabung, manual = [], []
 
 	for trans_no in trans_nos:
-		if dry_run:
-			alasan = _periksa_grup(trans_no)
-			(manual if alasan else digabung).append((trans_no, alasan))
-			continue
-
 		try:
-			ok = _merge_group(trans_no)
+			hasil = _periksa_grup(trans_no) if dry_run else _merge_group(trans_no)
 		except Exception:
 			frappe.db.rollback()
 			frappe.log_error(
 				title=f"BKM Panen kembar {trans_no}: gagal digabung",
 				message=frappe.get_traceback(),
 			)
-			ok = False
+			manual.append((trans_no, "gagal, lihat Error Log"))
+			continue
 
-		frappe.db.commit()
-		(digabung if ok else manual).append((trans_no, None))
+		if not dry_run:
+			frappe.db.commit()
+
+		for label, alasan in hasil:
+			(manual if alasan else digabung).append((label, alasan))
 
 	awalan = "[dry run] " if dry_run else ""
-	print(f"{awalan}BKM Panen kembar: {len(digabung)} trans_no bisa digabung, {len(manual)} perlu dicek manual")
+	print(f"{awalan}BKM Panen kembar: {len(digabung)} kelompok bisa digabung, {len(manual)} perlu dicek manual")
 
-	for trans_no, alasan in manual:
-		print(f"  {trans_no}: {alasan or 'lihat Error Log'}")
+	for label, alasan in manual:
+		print(f"  {label}: {alasan}")
 
 	return {
-		"digabung": [t for t, _ in digabung],
-		"manual": [{"trans_no": t, "alasan": a} for t, a in manual],
+		"digabung": [label for label, _ in digabung],
+		"manual": [{"kelompok": label, "alasan": alasan} for label, alasan in manual],
 	}
 
 
-def _muat_grup(trans_no):
-	"""Dokumen se-trans_no beserta penampungnya, atau (None, None) kalau tunggal.
+def _muat_subgrup(trans_no):
+	"""Dokumen se-trans_no, dipecah per pemegang premi, sebagai (penampung, sumber).
+
+	Satu trans_no bisa dipakai dua kerani sekaligus — di produksi pembagiannya 11
+	lawan 4 dokumen, bukan satu yang nyasar. Premi kerani dan mandor dihitung dari
+	jumlah qty seluruh baris BKM sebulan yang kolom perannya menunjuk mereka, jadi
+	menyatukan dua kerani berarti memindahkan premi dari satu orang ke orang lain.
+	Yang seperti itu tetap digabung, tapi masing-masing ke penampungnya sendiri.
 
 	Yang sudah disubmit jadi penampung: dokumennya sudah punya Employee Payment
 	Log, jurnal, baris voucher di recap, dan nomor yang dipakai di laporan. Kalau
@@ -145,42 +151,58 @@ def _muat_grup(trans_no):
 	)
 
 	if len(rows) < 2:
-		return None, None
+		return []
 
-	docs = [frappe.get_doc(DOCTYPE, row.name) for row in rows]
+	subgrup = {}
+	for row in rows:
+		doc = frappe.get_doc(DOCTYPE, row.name)
+		kunci = tuple(doc.get(f) or "" for f in FIELD_PEMEGANG_PREMI)
+		subgrup.setdefault(kunci, []).append(doc)
 
-	submitted = [doc for doc in docs if doc.docstatus == 1]
-	keeper = submitted[0] if submitted else docs[0]
+	hasil = []
+	for kunci, docs in subgrup.items():
+		if len(docs) < 2:
+			continue
 
-	return keeper, [doc for doc in docs if doc.name != keeper.name]
+		submitted = [doc for doc in docs if doc.docstatus == 1]
+		keeper = submitted[0] if submitted else docs[0]
+
+		hasil.append((kunci, keeper, [doc for doc in docs if doc.name != keeper.name]))
+
+	return hasil
+
+
+def _label(trans_no, kunci):
+	return "{} ({})".format(trans_no, "/".join(k or "-" for k in kunci))
 
 
 def _periksa_grup(trans_no):
-	"""Alasan grup ini tidak boleh digabung otomatis, atau None kalau aman."""
-	keeper, losers = _muat_grup(trans_no)
-	if not keeper:
-		return None
-
-	return _alasan_tidak_aman(keeper, losers)
+	"""Daftar (label, alasan) tiap subgrup; alasan None berarti aman digabung."""
+	return [
+		(_label(trans_no, kunci), _alasan_tidak_aman(keeper, losers))
+		for kunci, keeper, losers in _muat_subgrup(trans_no)
+	]
 
 
 def _merge_group(trans_no):
-	"""Gabungkan satu trans_no. Balikan False kalau grupnya tidak aman disentuh."""
-	keeper, losers = _muat_grup(trans_no)
-	if not keeper:
-		return True
+	"""Gabungkan tiap subgrup satu trans_no. Balikan daftar (label, alasan gagal)."""
+	hasil = []
 
-	alasan = _alasan_tidak_aman(keeper, losers)
-	if alasan:
-		frappe.log_error(
-			title=f"BKM Panen kembar {trans_no}: dilewati",
-			message=alasan,
-		)
-		return False
+	for kunci, keeper, losers in _muat_subgrup(trans_no):
+		label = _label(trans_no, kunci)
+		alasan = _alasan_tidak_aman(keeper, losers)
 
-	_merge_into(keeper, losers)
+		if alasan:
+			frappe.log_error(
+				title=f"BKM Panen kembar {label}: dilewati",
+				message=alasan,
+			)
+		else:
+			_merge_into(keeper, losers)
 
-	return True
+		hasil.append((label, alasan))
+
+	return hasil
 
 
 def _alasan_tidak_aman(keeper, losers):
