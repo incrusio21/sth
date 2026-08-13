@@ -13,15 +13,27 @@ class RecapPanenbyBlok(Document):
 
 	def calculate_total_janjang(self):
 		self.jumlah_janjang = self.jumlah_brondolan = 0
-		same_voucher = []
+		same_voucher = {}
+		unique_recap = []
 		for vc in self.voucher_recap:
 			key = (vc.voucher_type, vc.voucher_no)
-			if key in same_voucher:
-				frappe.throw(f"{vc.voucher_type} {vc.voucher_no} already in Table")
+			existing = same_voucher.get(key)
+			if existing:
+				# voucher yang sama sudah ada di tabel: pakai nilai terakhir,
+				# jangan dihitung dobel
+				existing.jumlah_janjang = vc.jumlah_janjang
+				existing.jumlah_brondolan = vc.jumlah_brondolan
+				continue
 
+			same_voucher[key] = vc
+			unique_recap.append(vc)
+
+		for idx, vc in enumerate(unique_recap, start=1):
+			vc.idx = idx
 			self.jumlah_janjang += vc.jumlah_janjang
 			self.jumlah_brondolan += vc.jumlah_brondolan
-			same_voucher.append(key)
+
+		self.voucher_recap = unique_recap
 
 	def on_trash(self):
 		self.remove_document()
