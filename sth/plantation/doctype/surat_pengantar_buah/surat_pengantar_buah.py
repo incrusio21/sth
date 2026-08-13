@@ -41,13 +41,22 @@ class SuratPengantarBuah(Document):
 			return
 
 		rpb = frappe.qb.DocType("Recap Panen by Blok")
+		voucher = frappe.qb.DocType("Rekap Panen Voucher")
 
+		# BKM-nya diambil dari tabel voucher, bukan dari kolom voucher_no di header
+		# recap. Kolom header itu sisa rancangan lama waktu satu recap berarti satu
+		# BKM; sejak recap menampung banyak BKM, tidak ada lagi yang menulisnya.
+		# Membacanya berarti dua kebocoran sekaligus: recap yang headernya kosong
+		# tidak ikut terambil sehingga pemeriksaan ini diam sama sekali, dan recap
+		# yang headernya terisi cuma diperiksa satu BKM dari sekian yang ditampung.
 		query = (
-			frappe.qb.from_(rpb)
-			.select(rpb.kontanan, rpb.voucher_no)
+			frappe.qb.from_(voucher)
+			.inner_join(rpb)
+			.on(rpb.name == voucher.parent)
+			.select(rpb.kontanan, voucher.voucher_no)
 			.where(
-				(rpb.voucher_type == "Buku Kerja Mandor Panen") &
-				(rpb.name.isin(recap_panen))
+				(voucher.voucher_type == "Buku Kerja Mandor Panen") &
+				(voucher.parent.isin(recap_panen))
 			)
 		).run(as_dict=True)
 

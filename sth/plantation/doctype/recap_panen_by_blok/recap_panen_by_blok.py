@@ -147,9 +147,6 @@ class RecapPanenbyBlok(Document):
 
 		self.bjr = flt(self.total_weight / self.jumlah_janjang)
 		self.save()
-		
-	def update_employee_blok(self):
-		frappe.get_all("Detail BKM Hasil Kerja Panen", {"parent": self.voucher_no}, pluks="name")
 
 def on_doctype_update():
 	frappe.db.add_unique("Recap Panen by Blok", ["blok", "company", "posting_date"], constraint_name="unique_blok_company") 
