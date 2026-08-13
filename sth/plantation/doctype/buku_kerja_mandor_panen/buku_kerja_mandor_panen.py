@@ -2,12 +2,161 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt, format_date, get_link_to_form, getdate
+from frappe.utils import cint, flt, format_date, get_link_to_form, getdate
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
-from sth.custom.api import fix_kegiatan_from_api, fix_mandor_from_api, submit_after_insert
+from sth.custom.api import (
+	USER_API,
+	fix_kegiatan_from_api,
+	fix_mandor_from_api,
+	submit_after_insert,
+)
 from frappe import _
+
+# Isi baris hasil kerja yang diambil dari kiriman API waktu digabung. qty, bjr,
+# status, denda, dan seluruh turunan amount sengaja tidak ikut: semuanya dihitung
+# ulang oleh calculate(), dan bjr sendiri baru datang dari timbangan.
+FIELD_HASIL_KERJA_API = (
+	"employee", "blok", "tph", "attendance_status",
+	"jumlah_janjang", "qty_brondolan", "hari_kerja", "rate",
+	"buah_tidak_dipanen", "buah_mentah_disimpan", "buah_mentah_ditinggal",
+	"brondolan_tinggal", "pelepah_tidak_disusun", "tangkai_panjang",
+	"buah_tidak_disusun", "pelepah_sengkleh",
+	"jumlah_janjang_sesuai_kriteria", "jumlah_janjang_tidak_sesuai_kriteria",
+	"jumlah_output", "satuan", "jumlah_hektar",
+)
+
+
+def kunci_baris(hk):
+	"""Penanda satu baris hasil kerja panen.
+
+	Beda dari Perawatan yang cukup memakai employee: satu pemanen bisa mengisi
+	beberapa baris dalam sehari untuk blok — dan TPH — yang berbeda. Kalau TPH
+	tidak ikut jadi kunci, baris TPH kedua terbuang diam-diam dan janjangnya
+	hilang dari BKM padahal buahnya tetap berangkat lewat SPB. Di data yang TPH-nya
+	memang tidak pernah terisi, kunci ini dengan sendirinya jatuh ke employee + blok.
+	"""
+	return (hk.employee, hk.blok, hk.tph or "")
+
+
+def cari_bkm_setrans_no(kiriman):
+	"""BKM Panen yang sudah ada untuk trans_no kiriman ini, atau None.
+
+	Company dan posting_date ikut dicocokkan seperti di Perawatan. is_kontanan
+	ditambahkan karena bedanya bukan soal isi: kontanan dan non-kontanan punya
+	jalur payroll sendiri-sendiri, jadi keduanya harus tetap dokumen terpisah
+	sekalipun trans_no-nya kebetulan sama.
+
+	Dokumen batal (docstatus 2) sengaja dilewat. Kiriman sesudahnya harus
+	membentuk dokumen baru, bukan menghidupkan yang sudah dibatalkan.
+	"""
+	if not kiriman.trans_no:
+		return None
+
+	return frappe.db.get_value(
+		"Buku Kerja Mandor Panen",
+		{
+			"trans_no": kiriman.trans_no,
+			"company": kiriman.company,
+			"posting_date": getdate(kiriman.posting_date),
+			"is_kontanan": cint(kiriman.is_kontanan),
+			"docstatus": ("<", 2),
+		},
+		"name",
+		order_by="creation",
+	)
+
+
+def kunci_baris_terpakai(kiriman):
+	"""Kunci baris yang sudah ada di seluruh BKM ber-trans_no sama.
+
+	Bukan cuma dokumen yang akan digabung. Data yang masuk sebelum penggabungan
+	ini ada sudah telanjur terpecah jadi banyak BKM, dan kiriman susulan untuk
+	trans_no lama tetap datang. Tanpa menyisir dokumen saudaranya, baris yang
+	sudah tercatat di sana akan masuk lagi ke dokumen paling awal dan janjangnya
+	terhitung dua kali di Recap Panen by Blok.
+	"""
+	rows = frappe.db.sql(
+		"""
+		SELECT hk.employee, hk.blok, hk.tph
+		FROM `tabDetail BKM Hasil Kerja Panen` hk
+		INNER JOIN `tabBuku Kerja Mandor Panen` b ON b.name = hk.parent
+		WHERE b.trans_no = %(trans_no)s
+			AND b.company = %(company)s
+			AND b.posting_date = %(posting_date)s
+			AND b.is_kontanan = %(is_kontanan)s
+			AND b.docstatus < 2
+		""",
+		{
+			"trans_no": kiriman.trans_no,
+			"company": kiriman.company,
+			"posting_date": getdate(kiriman.posting_date),
+			"is_kontanan": cint(kiriman.is_kontanan),
+		},
+		as_dict=True,
+	)
+
+	return {(r.employee, r.blok, r.tph or "") for r in rows}
+
+
+def baris_hasil_kerja_baru(doc, kiriman):
+	"""Baris hasil kerja kiriman yang kuncinya belum ada di mana pun.
+
+	Baris yang sudah ada dilewati, bukan ditolak: satu buku kerja dikirim sebagai
+	beberapa request terpisah, dan request yang diulang karena jaringan harus
+	berakhir tanpa menambah apa-apa — bukan jadi error di sisi pengirim.
+	"""
+	sudah_ada = {kunci_baris(hk) for hk in doc.hasil_kerja} | kunci_baris_terpakai(kiriman)
+
+	baris = []
+	for hk in kiriman.hasil_kerja:
+		if not hk.employee:
+			continue
+
+		kunci = kunci_baris(hk)
+		if kunci in sudah_ada:
+			continue
+
+		sudah_ada.add(kunci)
+		baris.append({field: hk.get(field) for field in FIELD_HASIL_KERJA_API})
+
+	return baris
+
+
+def gabung_ke_bkm(nama, kiriman):
+	"""Satukan hasil kerja kiriman API ke BKM Panen yang sudah ada.
+
+	Balikan None berarti kirimannya harus jadi dokumen baru.
+	"""
+	doc = frappe.get_doc("Buku Kerja Mandor Panen", nama)
+
+	baris_baru = baris_hasil_kerja_baru(doc, kiriman)
+	if not baris_baru:
+		# kiriman ulang: dokumennya sudah memuat semua baris kiriman ini
+		return doc
+
+	if doc.is_posted():
+		# BKM susulan nyata adanya — di produksi ada yang baru datang berhari-hari
+		# sesudah dokumen pertama, kadang sesudah dokumen itu dijurnal. Menolaknya
+		# berarti janjangnya tidak pernah masuk sama sekali, dan Recap Panen by
+		# Blok tetap kurang. Biarkan berdiri sebagai dokumen sendiri seperti
+		# perilaku lama: barisnya sudah dipastikan bukan pengulangan.
+		return None
+
+	if doc.docstatus == 0:
+		# masih draft, jadi jalur biasa masih terbuka: validate ikut jalan dan
+		# on_submit belum pernah jalan sama sekali
+		for baris in baris_baru:
+			doc.append("hasil_kerja", baris)
+
+		doc.save()
+		return doc
+
+	doc.tambah_hasil_kerja_setelah_submit(baris_baru)
+
+	return doc
+
 
 class BukuKerjaMandorPanen(BukuKerjaMandorController):
 	def __init__(self, *args, **kwargs):
@@ -52,6 +201,35 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			{"fieldname": "kerani_panen"},
 		])
 		self._bkm_name = "Panen"
+
+	def insert(self, *args, **kwargs):
+		"""Kiriman API dengan trans_no yang sudah ada digabung, bukan jadi dokumen baru.
+
+		Sistem luar mengirim satu request per pemanen dengan trans_no yang sama
+		untuk semuanya — di produksi satu trans_no sampai memecah jadi 15 dokumen.
+		validate() tidak menangkapnya karena yang dicek trans_no *dan* employee
+		*dan* blok, sedangkan tiap request memang membawa pemanen yang berbeda.
+
+		Akibatnya bukan cuma dokumen berserakan. Kiriman susulan untuk trans_no
+		lama tetap datang berhari-hari sesudahnya, dan tiap kali jadi dokumen baru
+		lagi — kalau isinya mengulang baris yang sudah tercatat, janjangnya masuk
+		dua kali ke Recap Panen by Blok lewat voucher yang berbeda.
+
+		Sengaja dibatasi ke user API. Dari UI dan data import dokumen baru tetap
+		dokumen baru; di sana trans_no memang read-only dan tidak pernah terisi.
+		"""
+		if frappe.session.user != USER_API:
+			return super().insert(*args, **kwargs)
+
+		nama = cari_bkm_setrans_no(self)
+		if not nama:
+			return super().insert(*args, **kwargs)
+
+		digabung = gabung_ke_bkm(nama, self)
+		if digabung is None:
+			return super().insert(*args, **kwargs)
+
+		return digabung
 
 	def before_insert(self):
 		fix_mandor_from_api(self)
@@ -254,6 +432,85 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 		# if message:
 		# 	frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
+
+	def tambah_hasil_kerja_setelah_submit(self, baris_baru):
+		"""Sisipkan baris hasil kerja ke dokumen yang sudah disubmit.
+
+		save() tidak bisa dipakai — `hasil_kerja` bukan allow_on_submit — jadi
+		barisnya ditulis lewat db_update_all, cara yang sama dipakai
+		update_hasil_kerja_bjr waktu BJR menyusul setelah submit.
+
+		Karena jalur save() dan submit() dilewati, yang biasanya dikerjakan
+		validate dan on_submit dipanggil sendiri di sini, dan hanya sekali untuk
+		baris yang benar-benar baru. Dua hal yang tidak ada di Perawatan:
+
+		    Recap Panen by Blok   dihitung ulang, bukan ditambah. Sejak
+		                          create_or_update_recap_panen_by_blok idempoten,
+		                          baris voucher yang sudah ada di-update dan blok
+		                          yang tidak lagi terpakai ikut dilepas.
+		    BJR                   kalau timbangannya sudah masuk duluan, baris
+		                          baru lahir dengan bjr 0 sehingga upahnya 0.
+		                          Nilainya dipasang ulang dari recap.
+		"""
+		if self.is_posted():
+			frappe.throw(
+				_("{0} sudah Posted, hasil kerja baru tidak bisa ditambahkan lagi").format(
+					frappe.bold(self.name)
+				)
+			)
+
+		baris_ditambah = []
+		for baris in baris_baru:
+			hk = self.append("hasil_kerja", baris)
+			# append selalu memberi docstatus draft; barisnya harus seragam dengan
+			# induknya supaya cancel dan laporan yang menyaring docstatus melihatnya
+			hk.docstatus = self.docstatus
+			baris_ditambah.append(hk)
+
+		self.calculate()
+
+		# baris baru belum punya nama sampai di sini: db_update_all yang
+		# menyisipkannya, karena db_update jatuh ke db_insert untuk baris lokal
+		self.db_update_all()
+
+		for hk in baris_ditambah:
+			# barisnya sudah ada di database, jadi tandanya dilepas — db_update_all
+			# berikutnya harus meng-update, bukan menyisipkan baris kembar
+			hk.set("__islocal", 0)
+
+		self.create_or_update_payment_log([hk.name for hk in baris_ditambah])
+		self.create_or_update_mandor_premi()
+		self.make_attendance(baris_ditambah)
+		self.check_emp_hari_kerja()
+
+		self.create_or_update_recap_panen_by_blok()
+
+		bjr_blok = self.get_bjr_dari_recap({hk.blok for hk in baris_ditambah if hk.blok})
+		if bjr_blok:
+			# ikut membereskan payment log upah dan GL Entry untuk baris baru
+			self.update_hasil_kerja_bjr(bjr_blok)
+		else:
+			self.repair_gl_entry()
+
+	def get_bjr_dari_recap(self, blok_list):
+		"""BJR yang sudah dihitung Recap Panen by Blok untuk blok tertentu.
+
+		Blok yang recap-nya belum ditimbang dibiarkan di luar hasil: bjr 0 di sana
+		bukan nilai, cuma tanda belum ada timbangan, dan menuliskannya cuma akan
+		menyalakan hitung ulang upah tanpa mengubah apa-apa.
+		"""
+		bjr = {}
+		for blok in blok_list:
+			nilai = frappe.db.get_value("Recap Panen by Blok", {
+				"blok": blok,
+				"company": self.company,
+				"posting_date": self.posting_date,
+			}, "bjr")
+
+			if flt(nilai):
+				bjr[blok] = flt(nilai)
+
+		return bjr
 
 	def remove_bkm_from_recap_panen(self, keep_blok=None):
 		"""Lepas BKM ini dari Recap Panen by Blok.
