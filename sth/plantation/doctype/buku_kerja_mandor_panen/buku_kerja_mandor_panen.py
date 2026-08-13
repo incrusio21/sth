@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt, format_date, get_link_to_form
+from frappe.utils import flt, format_date, get_link_to_form, getdate
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
@@ -216,7 +216,11 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			
 			blok["jumlah_janjang"] += hk.jumlah_janjang
 			blok["jumlah_brondolan"] += hk.qty_brondolan
-		
+
+		# buang rekap blok yang sudah tidak dipakai lagi oleh BKM ini
+		# (blok/tanggal/company diubah tanpa cancel)
+		self.remove_bkm_from_recap_panen(keep_blok=blok_dict.keys())
+
 		message = ""
 		for b, value in blok_dict.items():
 			rekap_panen = "create_rekap_panen"
@@ -235,27 +239,51 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			except frappe.UniqueValidationError:
 				if frappe.message_log:
 					frappe.message_log.pop()
-				
+
 				frappe.db.rollback(save_point=rekap_panen)  # preserve transaction in postgres
 				rpb = frappe.get_last_doc("Recap Panen by Blok", {"company": self.company, "posting_date": self.posting_date, "blok": b})
-				rpb.append("voucher_recap", value)
+				for vc in rpb.voucher_recap:
+					if vc.voucher_type == self.doctype and vc.voucher_no == self.name:
+						vc.update(value)
+						break
+				else:
+					rpb.append("voucher_recap", value)
+
 				rpb.save()
 				# message += f"<br>{b}"
 
 		# if message:
 		# 	frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
 
-	def remove_bkm_from_recap_panen(self):
-		for epl in frappe.get_all(
-			"Rekap Panen Voucher", 
-			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
+	def remove_bkm_from_recap_panen(self, keep_blok=None):
+		"""Lepas BKM ini dari Recap Panen by Blok.
+
+		keep_blok: daftar blok yang masih dipakai BKM ini. Rekap dengan blok
+		tersebut (dan company/tanggal yang sama) dilewati, sisanya dibersihkan.
+		"""
+		keep = set()
+		if keep_blok:
+			keep = {(b, self.company, getdate(self.posting_date)) for b in keep_blok}
+
+		for epl in set(frappe.get_all(
+			"Rekap Panen Voucher",
+			filters={"voucher_type": self.doctype, "voucher_no": self.name},
 			pluck="parent"
-		):
+		)):
 			rpb = frappe.get_doc("Recap Panen by Blok", epl)
-			for vc in rpb.voucher_recap:
+			if (rpb.blok, rpb.company, getdate(rpb.posting_date)) in keep:
+				continue
+
+			# hapus semua baris BKM ini, termasuk sisa duplikat lama
+			for vc in list(rpb.voucher_recap):
 				if vc.voucher_type == self.doctype and vc.voucher_no == self.name:
 					rpb.remove(vc)
-					break
+
+			# rekap tanpa voucher tersisa tidak perlu disimpan sebagai baris kosong
+			if not rpb.voucher_recap and not flt(rpb.transfered_janjang):
+				rpb.flags.transaction_panen = True
+				rpb.delete()
+				continue
 
 			rpb.save()
 		
