@@ -295,7 +295,9 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		super().validate()
 	
 	def isi_cost_center(self):
-		self.cost_center = "{} - {}".format(frappe.get_doc("Blok",self.hasil_kerja[0].blok).deskripsi, frappe.get_doc("Company",self.company).abbr)
+		# Cost Center Blok dinamai persis seperti nama Blok, dan isi field blok
+		# di baris hasil kerja memang nama itu — tidak perlu dibaca ulang.
+		self.cost_center = "{} - {}".format(self.hasil_kerja[0].blok, frappe.get_doc("Company",self.company).abbr)
 
 	def reset_automated_data(self):
 		self.transfered_janjang = self.transfered_brondolan = \
