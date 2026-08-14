@@ -2,6 +2,10 @@ import csv
 
 import frappe
 
+# Diambil dari modulnya langsung, bukan lewat frappe.rename_doc: pintasan di
+# frappe/__init__.py tidak meneruskan ignore_permissions ke fungsi aslinya.
+from frappe.model.rename_doc import rename_doc
+
 DOCTYPE = "Blok"
 
 # Pemetaan nama lama -> nama baru, satu baris per Blok. Sengaja disimpan sebagai
@@ -50,7 +54,7 @@ def execute():
 	rencana = _susun_rencana(pemetaan)
 
 	for lama, baru in rencana["ganti"]:
-		frappe.rename_doc(
+		rename_doc(
 			DOCTYPE,
 			lama,
 			baru,

@@ -1,5 +1,9 @@
 import frappe
 
+# Diambil dari modulnya langsung, bukan lewat frappe.rename_doc: pintasan di
+# frappe/__init__.py tidak meneruskan ignore_permissions ke fungsi aslinya.
+from frappe.model.rename_doc import rename_doc
+
 DOCTYPE = "TPH"
 
 # TPH-nya ribuan, dan tiap rename menyentuh beberapa tabel sekaligus. Kabar
@@ -35,7 +39,7 @@ def execute():
 	rencana = _susun_rencana()
 
 	for nomor, (lama, baru) in enumerate(rencana["ganti"], start=1):
-		frappe.rename_doc(
+		rename_doc(
 			DOCTYPE,
 			lama,
 			baru,
