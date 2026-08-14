@@ -23,3 +23,4 @@ sth.patches.arsipkan_bkm_perawatan_batal
 sth.patches.isi_qty_scrapped_asset
 sth.patches.isi_total_jam_desimal_mill
 sth.patches.hapus_costing_mill_lama
+sth.patches.rename_blok_berprefiks_kode_divisi
