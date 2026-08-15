@@ -22,13 +22,37 @@ BULAN_MAP = {
 	"Desember": 12,
 }
 
+# State yang tidak lagi mentoleransi Tahun Tanam kosong. Di luar ini — selama
+# Blok masih draft — angkanya boleh menyusul.
+STATE_WAJIB_TAHUN_TANAM = ("TBM", "TM")
+
+
 class Blok(Document):
 	def validate(self):
 		self.set_periode_bjr()
 		self.pastikan_deskripsi_unik()
+		self.pastikan_tahun_tanam_terisi()
 
 	def before_save(self):
 		self.set_periode_bjr()
+
+	def pastikan_tahun_tanam_terisi(self):
+		"""Tahun Tanam boleh menyusul selama Blok masih draft.
+
+		Blok kadang dibuat duluan sebagai kerangka — luas dan divisinya sudah
+		jelas, tahun tanamnya belum. Begitu masuk TBM atau TM, angka itu sudah
+		dipakai: Cost Center Tahun Tanam dinamai darinya, dan alokasi biaya naik
+		TM dihitung per kelompok tahun tanam. Kosong di situ berarti Cost Center
+		tidak terbentuk dan Blok-nya diam-diam tidak ikut terhitung.
+		"""
+		if self.tahun_tanam:
+			return
+
+		if self.get("workflow_state") in STATE_WAJIB_TAHUN_TANAM or self.docstatus == 1:
+			frappe.throw(
+				"Tahun Tanam belum diisi. Boleh dikosongkan selagi Blok masih draft, "
+				"tapi harus terisi sebelum Blok masuk TBM atau TM."
+			)
 
 	def pastikan_deskripsi_unik(self):
 		"""Tolak Deskripsi yang sudah dipakai Blok lain.

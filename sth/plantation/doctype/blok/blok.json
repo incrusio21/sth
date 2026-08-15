@@ -69,8 +69,7 @@
    "fieldname": "tahun_tanam",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Tahun Tanam",
-   "reqd": 1
+   "label": "Tahun Tanam"
   },
   {
    "fieldname": "jumlah_pokok",
