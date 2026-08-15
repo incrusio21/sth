@@ -25,3 +25,5 @@ sth.patches.isi_total_jam_desimal_mill
 sth.patches.hapus_costing_mill_lama
 sth.patches.kembalikan_nama_blok_tpre
 sth.patches.kembalikan_nama_tph_tpre
+sth.patches.kembalikan_nama_blok_tmde
+sth.patches.kembalikan_nama_tph_tmde
