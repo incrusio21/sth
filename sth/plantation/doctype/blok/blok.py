@@ -25,9 +25,40 @@ BULAN_MAP = {
 class Blok(Document):
 	def validate(self):
 		self.set_periode_bjr()
+		self.pastikan_deskripsi_unik()
 
 	def before_save(self):
 		self.set_periode_bjr()
+
+	def pastikan_deskripsi_unik(self):
+		"""Tolak Deskripsi yang sudah dipakai Blok lain.
+
+		Cost Center Blok dinamai dari Deskripsi. Nama dokumennya sendiri sudah
+		dijaga unique lewat field `blok`, tapi Deskripsi cuma field biasa — dua
+		Blok yang Deskripsi-nya kebetulan sama akan berbagi satu Cost Center, dan
+		seluruh GL keduanya menumpuk di sana tanpa ada yang menegur.
+
+		Blok yang dibatalkan dilewati supaya amend tidak tertahan oleh dokumen
+		asalnya sendiri.
+		"""
+		if not self.deskripsi:
+			return
+
+		kembar = frappe.db.get_value(
+			"Blok",
+			{
+				"deskripsi": self.deskripsi,
+				"name": ["!=", self.name],
+				"docstatus": ["!=", 2],
+			},
+			"name",
+		)
+
+		if kembar:
+			frappe.throw(
+				f"Deskripsi <b>{self.deskripsi}</b> sudah dipakai Blok {kembar}. "
+				"Deskripsi dipakai sebagai nama Cost Center Blok, jadi tidak boleh kembar."
+			)
 
 	def after_insert(self):
 		self.make_cost_center()
@@ -52,8 +83,9 @@ class Blok(Document):
 		if self.get("workflow_state") != "TM" and self.cost_center != tahun_cc:
 			self.db_set("cost_center", tahun_cc, update_modified=False)
 
-		# --- Cost Center Blok (child dari Tahun Tanam CC), nama pakai nama Blok ---
-		_ensure_blok_cost_center(company, abbr, self.name)
+		# --- Cost Center Blok (child dari Tahun Tanam CC), nama pakai Deskripsi Blok ---
+		if self.deskripsi:
+			_ensure_blok_cost_center(company, abbr, self.deskripsi)
 
 	def set_periode_bjr(self):
 		if self.bulan and self.tahun:
@@ -88,11 +120,11 @@ def _ensure_tahun_tanam_cost_center(company, abbr, tahun_tanam):
 	return cc.name
 
 
-def _ensure_blok_cost_center(company, abbr, nama_blok):
-	"""Pastikan Cost Center Blok (nama = nama Blok) ada, lalu kembalikan namanya."""
+def _ensure_blok_cost_center(company, abbr, deskripsi):
+	"""Pastikan Cost Center Blok (nama = Deskripsi Blok) ada, lalu kembalikan namanya."""
 	blok_cc_existing = frappe.db.get_value(
 		"Cost Center",
-		{"cost_center_name": nama_blok, "company": company},
+		{"cost_center_name": deskripsi, "company": company},
 		"name"
 	)
 
@@ -100,7 +132,7 @@ def _ensure_blok_cost_center(company, abbr, nama_blok):
 		return blok_cc_existing
 
 	blok_cc = frappe.new_doc("Cost Center")
-	blok_cc.cost_center_name = nama_blok
+	blok_cc.cost_center_name = deskripsi
 	blok_cc.parent_cost_center = f"Blok - {abbr}"
 	blok_cc.company = company
 	blok_cc.is_group = 0
@@ -133,7 +165,7 @@ def _hitung_alokasi(blok, selected_bloks):
 		"tahun_tanam": blok.tahun_tanam,
 		"unit": blok.unit,
 		"workflow_state": "TBM",
-	}, fields=["name", "blok", "luas_areal"])
+	}, fields=["name", "blok", "deskripsi", "luas_areal"])
 
 	if not cohort:
 		frappe.throw("Tidak ada Blok TBM yang dapat dinaikkan.")
@@ -270,6 +302,13 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 	company = unit_doc.company
 	abbr = frappe.get_doc("Company", company).abbr
 
+	missing_deskripsi = [b.blok for b in selected if not b.deskripsi]
+	if missing_deskripsi:
+		frappe.throw(
+			f"Deskripsi belum diisi pada Blok berikut: {', '.join(missing_deskripsi)}. "
+			"Deskripsi dibutuhkan untuk penamaan Cost Center saat naik TM."
+		)
+
 	debit_account = frappe.db.get_value("Account", {
 		"account_number": "1271301",
 		"company": company,
@@ -302,12 +341,12 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 			f"Naik TM - Tahun Tanam {blok.tahun_tanam} Unit {blok.unit} - Blok: {nama_blok_dipilih}"
 		)
 
-		# Debit per Blok, cost center pakai Cost Center Blok (nama = nama Blok).
+		# Debit per Blok, cost center pakai Cost Center Blok (nama = Deskripsi Blok).
 		# Dibulatkan per baris; sisa pembulatan diserap baris terakhir supaya
 		# Total Debit == Total Credit persis (hindari ValidationError).
 		sisa_total = flt(total, precision=2)
 		for i, b in enumerate(selected):
-			blok_cc = _ensure_blok_cost_center(company, abbr, b.name)
+			blok_cc = _ensure_blok_cost_center(company, abbr, b.deskripsi)
 			if i == len(selected) - 1:
 				debit_amount = sisa_total
 			else:
@@ -336,7 +375,7 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 		je_name = je.name
 
 	for b in selected:
-		blok_cc = _ensure_blok_cost_center(company, abbr, b.name)
+		blok_cc = _ensure_blok_cost_center(company, abbr, b.deskripsi)
 		frappe.db.set_value("Blok", b.name, {
 			"workflow_state": "TM",
 			"naik_tm_journal_entry": je_name,

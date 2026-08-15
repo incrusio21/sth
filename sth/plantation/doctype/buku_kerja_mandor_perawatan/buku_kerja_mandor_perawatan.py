@@ -260,9 +260,8 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			return "{} - {}".format(self.batch, abbr) if self.batch else ""
 
 		if self.kategori_kegiatan == "TM":
-			# Cost Center Blok dinamai persis seperti nama Blok, dan field blok
-			# sudah memegang nama itu — tidak perlu dibaca ulang dari master.
-			return "{} - {}".format(self.blok, abbr) if self.blok else ""
+			deskripsi = frappe.get_cached_value("Blok", self.blok, "deskripsi") if self.blok else None
+			return "{} - {}".format(deskripsi, abbr) if deskripsi else ""
 
 		if self.kategori_kegiatan == "TBM":
 			return "{} - {}".format(self.tahun_tanam, abbr) if self.tahun_tanam else ""
