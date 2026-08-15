@@ -27,3 +27,4 @@ sth.patches.kembalikan_nama_blok_tpre
 sth.patches.kembalikan_nama_tph_tpre
 sth.patches.kembalikan_nama_blok_tmde
 sth.patches.kembalikan_nama_tph_tmde
+sth.patches.namai_tph_dari_nama_blok

@@ -5,6 +5,10 @@ divisi, dan rename_tph_berprefiks_kode_divisi mengikutkan TPH-nya. Untuk sebagia
 kebun penamaan itu ditarik kembali; kebun yang tidak disebut tetap seperti
 sesudah kedua patch tersebut.
 
+Ada kebun yang Bloknya tetap berprefiks tapi TPH-nya tidak; untuk itu ada
+namai_tph_dari_nama_blok, yang menurunkan nama TPH dari field `nama` Blok alih-alih
+dari nama dokumennya.
+
 Isi berkas ini dipakai bersama oleh patch per kebun — lihat
 kembalikan_nama_blok_tpre dan saudara-saudaranya. Yang membedakan cuma Unit yang
 dikerjakan, jadi tiap kebun baru cukup satu patch tipis yang menyebut Unit-nya.
@@ -117,6 +121,128 @@ def kembalikan_tph(unit):
 	frappe.db.commit()
 
 	_cetak_laporan_tph(unit, rencana, nama)
+
+
+def namai_tph_dari_nama_blok(units):
+	"""Namai TPH dari field `nama` Bloknya, bukan dari nama dokumen Blok.
+
+	Untuk kebun yang Bloknya tetap diawali kode divisi, tapi TPH-nya dikehendaki
+	memakai penyebutan lama: "ASRE01A06a-001" jadi "A06a-001" sementara Bloknya
+	tetap bernama "ASRE01A06a".
+
+	Nomor urut di belakang tidak diutak-atik — yang ditukar cuma bagian nama Blok
+	di depannya, dan cuma kalau nama TPH itu memang diawali nama dokumen Bloknya.
+	Yang tidak mengikuti pola itu dilewati dan dilaporkan.
+
+	Perlu diingat, sesudah ini nama TPH tidak lagi dijamin unik oleh kode divisi;
+	yang menjaganya tinggal pemeriksaan bentrok di sini. TPH yang nama barunya
+	sudah dipakai dokumen lain tidak diganti, bukan ditimpa.
+
+	Aman diulang: yang namanya sudah mengikuti field `nama` Blok dianggap selesai.
+	"""
+	rencana = _susun_rencana_tph_dari_nama(units)
+
+	for nomor, (lama, baru) in enumerate(rencana["ganti"], start=1):
+		rename_doc(
+			"TPH",
+			lama,
+			baru,
+			force=True,
+			ignore_permissions=True,
+			show_alert=False,
+			rebuild_search=False,
+		)
+
+		if nomor % SETIAP == 0:
+			print(f"  ... {nomor} dari {len(rencana['ganti'])} TPH")
+			frappe.db.commit()
+
+	frappe.db.commit()
+
+	nama = _samakan_nama_tph([baru for _, baru in rencana["ganti"] + rencana["sudah"]])
+
+	frappe.db.commit()
+
+	print(
+		f"TPH {'/'.join(units)} dinamai dari field Nama Blok: "
+		f"{len(rencana['ganti'])} TPH diganti namanya"
+	)
+
+	if rencana["sudah"]:
+		print(f"  {len(rencana['sudah'])} TPH sudah mengikuti field Nama Blok, dilewati")
+
+	if nama:
+		print(f"  {nama} TPH field Nama-nya disamakan dengan nama dokumen")
+
+	_cetak_periksa(
+		rencana,
+		(
+			("tanpa_nama_blok", "TPH Bloknya field Nama-nya kosong, jadi tidak ada nama yang bisa dipakai"),
+			("pola_lain", "TPH kodenya tidak diawali nama Blok, jadi tidak bisa diturunkan"),
+			("bentrok", "TPH TIDAK diganti karena nama barunya sudah dipakai dokumen lain"),
+		),
+	)
+
+
+def _susun_rencana_tph_dari_nama(units):
+	"""Pilah tiap TPH milik kebun-kebun ini, tanpa mengubah apa pun."""
+	rencana = {
+		"ganti": [],
+		"sudah": [],
+		"tanpa_nama_blok": [],
+		"pola_lain": [],
+		"bentrok": [],
+	}
+
+	blok_unit = {
+		b.name: (b.nama or "").strip()
+		for b in frappe.get_all(
+			"Blok",
+			filters={"unit": ["in", list(units)]},
+			fields=["name", "nama"],
+			limit_page_length=0,
+		)
+	}
+
+	tph = frappe.get_all("TPH", fields=["name", "blok"], limit_page_length=0)
+	nama_terpakai = {t.name for t in tph}
+
+	for t in tph:
+		# TPH di luar kebun ini bukan urusan patch, termasuk yang tidak punya Blok
+		if not t.blok or t.blok not in blok_unit:
+			continue
+
+		nama_blok = blok_unit[t.blok]
+
+		if not nama_blok:
+			rencana["tanpa_nama_blok"].append(t.name)
+			continue
+
+		if t.name.startswith(t.blok):
+			baru = nama_blok + t.name[len(t.blok):]
+		elif t.name.startswith(nama_blok):
+			# sudah memakai penyebutan lama; ikut didaftar supaya field `nama`
+			# tetap dirapikan kalau putaran sebelumnya putus
+			rencana["sudah"].append((t.name, t.name))
+			continue
+		else:
+			rencana["pola_lain"].append((t.name, t.blok))
+			continue
+
+		if baru == t.name:
+			rencana["sudah"].append((t.name, t.name))
+			continue
+
+		if baru in nama_terpakai:
+			rencana["bentrok"].append((t.name, baru))
+			continue
+
+		# didaftarkan sekarang juga supaya dua TPH tidak bisa dijadwalkan ke nama
+		# yang sama dalam satu putaran
+		nama_terpakai.add(baru)
+		rencana["ganti"].append((t.name, baru))
+
+	return rencana
 
 
 def _susun_rencana_blok(unit):
