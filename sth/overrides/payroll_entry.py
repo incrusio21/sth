@@ -268,6 +268,64 @@ class PayrollEntry(PayrollEntry):
 			"remarks":                   "Payment untuk Payroll Entry: {0}".format(self.name),
 		}
 	
+	def get_net_pay_per_cost_center_mill(self):
+		"""Net pay karyawan mill, dikelompokkan per cost center stasiunnya.
+
+		Beban gaji mill dipisah per stasiun sejak accrual supaya jurnal reclass
+		di Costing Mill tinggal memindahkan akunnya, bukan cost center-nya.
+		Karyawan non-mill tidak lewat sini dan tetap satu baris di cost center
+		Payroll Entry.
+		"""
+		from sth.accounting_sth.doctype.costing_mill.costing_mill import (
+			get_cost_center_stasiun,
+		)
+
+		slips = frappe.db.sql(
+			"""
+			SELECT
+				ss.employee,
+				ss.employee_name,
+				ss.net_pay,
+				e.stasiun,
+				e.unit
+			FROM `tabSalary Slip` ss
+			JOIN `tabEmployee` e ON e.name = ss.employee
+			JOIN `tabUnit` u ON u.name = e.unit AND u.mill = 1
+			WHERE ss.payroll_entry = %s
+			  AND ss.docstatus = 1
+			""",
+			self.name,
+			as_dict=True,
+		)
+
+		tanpa_stasiun = [d.employee_name or d.employee for d in slips if not d.stasiun]
+		if tanpa_stasiun:
+			frappe.throw(
+				_("Karyawan mill berikut belum diisi Stasiun-nya: {0}").format(
+					comma_and(tanpa_stasiun)
+				)
+			)
+
+		per_cost_center = {}
+		tanpa_cost_center = []
+
+		for d in slips:
+			cost_center = get_cost_center_stasiun(d.stasiun, self.company, d.unit)
+			if not cost_center:
+				tanpa_cost_center.append(d.stasiun)
+				continue
+
+			per_cost_center[cost_center] = per_cost_center.get(cost_center, 0) + flt(d.net_pay)
+
+		if tanpa_cost_center:
+			frappe.throw(
+				_("Stasiun berikut belum punya Cost Center (cek Detail Station Master): {0}").format(
+					comma_and(sorted(set(tanpa_cost_center)))
+				)
+			)
+
+		return per_cost_center
+
 	def make_payroll_gl_entries(self):
 
 		# ── 1. Hitung total dari semua Salary Slip yang terhubung ──────────────
@@ -306,45 +364,59 @@ class PayrollEntry(PayrollEntry):
 		if not self.payroll_payable_account:
 			frappe.throw(_("Field 'Payroll Payable Account' belum diisi pada Payroll Entry ini"))
 
-		# ── 4. Buat 2 baris GL Entry ───────────────────────────────────────────
+		# ── 4. Buat baris GL Entry ─────────────────────────────────────────────
+		# Debit dipecah: karyawan mill per cost center stasiunnya, sisanya
+		# (non-mill) satu baris di cost center Payroll Entry.
 		remarks = "Payroll Entry: {0}".format(self.name)
 
-		gl_entries = [
-			# Baris 1 — DEBIT (Beban Gaji)
-			frappe._dict({
+		mill_per_cost_center = self.get_net_pay_per_cost_center_mill()
+		total_mill = flt(sum(mill_per_cost_center.values()), 2)
+		sisa_non_mill = flt(flt(total_amount) - total_mill, 2)
+
+		def baris_debit(amount, cost_center):
+			return frappe._dict({
 				"doctype": "GL Entry",
 				"posting_date": self.posting_date,
 				"account": debit_account,
 				"against": self.payroll_payable_account,
-				"debit": total_amount,
-				"debit_in_account_currency": total_amount,
+				"debit": amount,
+				"debit_in_account_currency": amount,
 				"credit": 0,
 				"credit_in_account_currency": 0,
 				"voucher_type": self.doctype,
 				"voucher_no": self.name,
 				"company": self.company,
-				"cost_center": self.cost_center or None,
+				"cost_center": cost_center or None,
 				"remarks": remarks,
 				"is_opening": "No",
-			}),
-			# Baris 2 — CREDIT (Hutang Gaji)
-			frappe._dict({
-				"doctype": "GL Entry",
-				"posting_date": self.posting_date,
-				"account": self.payroll_payable_account,
-				"against": debit_account,
-				"debit": 0,
-				"debit_in_account_currency": 0,
-				"credit": total_amount,
-				"credit_in_account_currency": total_amount,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"company": self.company,
-				"cost_center": self.cost_center or None,
-				"remarks": remarks,
-				"is_opening": "No",
-			}),
+			})
+
+		gl_entries = [
+			baris_debit(flt(amount, 2), cost_center)
+			for cost_center, amount in sorted(mill_per_cost_center.items())
+			if flt(amount, 2)
 		]
+
+		if sisa_non_mill:
+			gl_entries.append(baris_debit(sisa_non_mill, self.cost_center))
+
+		# CREDIT (Hutang Gaji) tetap satu baris: akun neraca, tidak dipecah per stasiun.
+		gl_entries.append(frappe._dict({
+			"doctype": "GL Entry",
+			"posting_date": self.posting_date,
+			"account": self.payroll_payable_account,
+			"against": debit_account,
+			"debit": 0,
+			"debit_in_account_currency": 0,
+			"credit": total_amount,
+			"credit_in_account_currency": total_amount,
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"company": self.company,
+			"cost_center": self.cost_center or None,
+			"remarks": remarks,
+			"is_opening": "No",
+		}))
 
 		post_gl_entries(gl_entries)
 

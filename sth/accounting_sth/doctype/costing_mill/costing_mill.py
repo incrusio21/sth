@@ -206,8 +206,9 @@ def get_gaji_karyawan_mill(periode_dari, periode_sampai, company=None, unit=None
 	Karyawan bengkel dikecualikan di sini — biayanya masuk pool yang dibagi
 	berdasarkan HM lewat get_gaji_operator_bengkel_mill().
 
-	Nilainya memakai gross_pay, yaitu beban gaji sebelum potongan, bukan net_pay
-	yang tinggal dibayar.
+	Nilainya memakai net_pay supaya persis sama dengan yang sudah dibebankan
+	waktu accrual Payroll Entry; kalau dipakai gross_pay, kredit alokasi akan
+	lebih besar dari beban yang pernah dijurnal sebesar total potongan.
 	"""
 	unit_filter = "AND e.unit = %(unit)s" if unit else ""
 	company_filter = "AND ss.company = %(company)s" if company else ""
@@ -217,7 +218,7 @@ def get_gaji_karyawan_mill(periode_dari, periode_sampai, company=None, unit=None
 			ss.name AS salary_slip,
 			ss.employee,
 			ss.employee_name,
-			ss.gross_pay AS amount,
+			ss.net_pay AS amount,
 			e.stasiun,
 			e.coa_stasiun
 		FROM `tabSalary Slip` ss
@@ -259,6 +260,9 @@ def get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company=None, u
 	Bengkel tidak punya stasiun sendiri di COA, jadi biayanya tidak bisa
 	dibebankan langsung; yang dipakai sebagai pembagi adalah jam kerja mekanik
 	di tiap stasiun.
+
+	Stasiun karyawannya tetap ikut dibawa — bukan untuk membebani stasiun itu,
+	tapi untuk tahu cost center mana yang harus dikredit balik waktu closing.
 	"""
 	unit_filter = "AND e.unit = %(unit)s" if unit else ""
 	company_filter = "AND ss.company = %(company)s" if company else ""
@@ -268,8 +272,10 @@ def get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company=None, u
 			ss.name AS salary_slip,
 			ss.employee,
 			ss.employee_name,
-			ss.gross_pay AS amount,
-			e.designation
+			ss.net_pay AS amount,
+			e.designation,
+			e.stasiun,
+			e.unit
 		FROM `tabSalary Slip` ss
 		JOIN `tabEmployee` e ON e.name = ss.employee
 		JOIN `tabUnit` u ON u.name = e.unit AND u.mill = 1
@@ -290,6 +296,8 @@ def get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company=None, u
 		"employee": r.employee,
 		"employee_name": r.employee_name,
 		"designation": r.designation,
+		"stasiun": r.stasiun,
+		"unit": r.unit,
 		"amount": flt(r.amount),
 		"keterangan": KETERANGAN_BENGKEL,
 	} for r in rows]
@@ -469,12 +477,49 @@ def get_alokasi_hm_stasiun(periode_dari, periode_sampai, company=None, unit=None
 	return hitung_alokasi_hm(hm_rows, pool, company)
 
 
+def baris_kredit_alokasi(coa_kredit, kredit_per_cost_center, total_debit):
+	"""Baris kredit gaji dialokasi, satu baris per cost center asal.
+
+	Sisa pembulatan dibebankan ke baris terbesar supaya total kredit persis sama
+	dengan total debit; kalau tidak, submit-nya ditolak oleh cek keseimbangan di
+	get_gl_entries().
+	"""
+	baris = [
+		{
+			"no_coa": coa_kredit,
+			"stasiun": None,
+			"cost_center": cost_center,
+			"debit": 0,
+			"credit": flt(amount, 2),
+			"keterangan": "ALOKASI BIAYA GAJI MILL KE STASIUN",
+		}
+		for cost_center, amount in sorted(
+			kredit_per_cost_center.items(), key=lambda d: -flt(d[1])
+		)
+		if flt(amount, 2)
+	]
+
+	if not baris:
+		return baris
+
+	selisih = flt(flt(total_debit, 2) - sum(flt(b["credit"]) for b in baris), 2)
+	if selisih:
+		baris[0]["credit"] = flt(baris[0]["credit"] + selisih, 2)
+
+	return baris
+
+
 @frappe.whitelist()
 def get_closing_mill(periode_dari, periode_sampai, company=None, unit=None):
 	"""Baris jurnal akhir: debit per stasiun, kredit ke akun gaji dialokasi.
 
 	Dua sumber yang dijurnal di sini adalah gaji karyawan mill (langsung ke
 	stasiun karyawannya) dan gaji operator bengkel (dibagi menurut HM).
+
+	Kreditnya dipecah per cost center asal, yaitu cost center stasiun yang
+	dipakai waktu accrual Payroll Entry. Kalau kreditnya ditumpuk di satu cost
+	center, stasiun akan kelihatan dobel beban dan cost center default jadi
+	minus, padahal totalnya nol.
 	"""
 	coa_kredit = get_coa_gaji_dialokasi(company)
 	if not coa_kredit:
@@ -493,24 +538,31 @@ def get_closing_mill(periode_dari, periode_sampai, company=None, unit=None):
 
 	rows = []
 	total = 0
+	kredit_per_cost_center = {}
 
 	for (stasiun, no_coa), amount in per_stasiun.items():
 		if not amount:
 			continue
+		cost_center = get_cost_center_stasiun(stasiun, company, unit)
 		total += flt(amount)
+		kredit_per_cost_center[cost_center] = (
+			kredit_per_cost_center.get(cost_center, 0) + flt(amount)
+		)
 		rows.append({
 			"no_coa": no_coa,
 			"stasiun": stasiun,
-			"cost_center": get_cost_center_stasiun(stasiun, company, unit),
+			"cost_center": cost_center,
 			"debit": flt(amount, 2),
 			"credit": 0,
 			"keterangan": KETERANGAN_GAJI,
 		})
 
+	total_alokasi_bengkel = 0
 	for r in get_alokasi_hm_stasiun(periode_dari, periode_sampai, company, unit):
 		if not r.get("amount"):
 			continue
 		total += flt(r["amount"])
+		total_alokasi_bengkel += flt(r["amount"])
 		rows.append({
 			"no_coa": r["no_coa"],
 			"stasiun": r["stasiun"],
@@ -520,15 +572,42 @@ def get_closing_mill(periode_dari, periode_sampai, company=None, unit=None):
 			"keterangan": KETERANGAN_BENGKEL,
 		})
 
+	# Kredit balik gaji bengkel ke cost center karyawan bengkelnya sendiri,
+	# bukan ke stasiun yang menerima alokasi HM. Yang dikredit cuma sebesar yang
+	# benar-benar teralokasi: kalau HM-nya belum ada, alokasinya nol dan jurnal
+	# ini harus ikut nol supaya tetap seimbang.
+	bengkel_per_cost_center = {}
+	pool_bengkel = 0
+
+	for r in get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company, unit):
+		if not flt(r["amount"]):
+			continue
+		cost_center = get_cost_center_stasiun(r["stasiun"], company, r.get("unit") or unit) \
+			if r.get("stasiun") else None
+		bengkel_per_cost_center[cost_center] = (
+			bengkel_per_cost_center.get(cost_center, 0) + flt(r["amount"])
+		)
+		pool_bengkel += flt(r["amount"])
+
+	if pool_bengkel and total_alokasi_bengkel:
+		for cost_center, amount in bengkel_per_cost_center.items():
+			porsi = flt(amount) / pool_bengkel * total_alokasi_bengkel
+			kredit_per_cost_center[cost_center] = (
+				kredit_per_cost_center.get(cost_center, 0) + porsi
+			)
+	elif pool_bengkel:
+		frappe.msgprint(
+			"Gaji operator bengkel {0} tidak dialokasi karena belum ada HM stasiun "
+			"pada periode ini.".format(frappe.format(pool_bengkel, {"fieldtype": "Currency"})),
+			title="Alokasi Bengkel Kosong",
+			indicator="orange",
+		)
+
 	if total:
-		rows.append({
-			"no_coa": coa_kredit,
-			"stasiun": None,
-			"cost_center": None,
-			"debit": 0,
-			"credit": flt(total, 2),
-			"keterangan": "ALOKASI BIAYA GAJI MILL KE STASIUN",
-		})
+		# Patokannya debit yang sudah dibulatkan per baris, bukan total mentahnya,
+		# supaya tidak meleset satu sen dari cek keseimbangan waktu submit.
+		total_debit = sum(flt(r["debit"]) for r in rows)
+		rows.extend(baris_kredit_alokasi(coa_kredit, kredit_per_cost_center, total_debit))
 
 	return rows
 

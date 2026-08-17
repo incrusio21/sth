@@ -292,7 +292,10 @@ doc_events = {
 	},
 	"Employee": {
 		"autoname": "sth.custom.employee.autoname_employee",
-		"validate": "sth.custom.employee.set_coa_stasiun",
+		"validate": [
+			"sth.custom.employee.validasi_stasiun_mill",
+			"sth.custom.employee.set_coa_stasiun",
+		],
 		"after_insert": "sth.hr_customize.custom.leave_policy.create_allocations_for_new_employee"
 	},
 	"Employee Grievance": {

@@ -84,6 +84,31 @@ def get_coa_stasiun_options(station, company):
 		"company": company,
 	})
 
+def validasi_stasiun_mill(self, method=None):
+	"""Karyawan mill yang masih aktif wajib punya stasiun.
+
+	Costing Mill membebankan gaji ke stasiun karyawannya; kalau stasiun kosong
+	karyawannya lolos dari alokasi tanpa pesan apa pun dan biayanya nyangkut di
+	akun beban gaji. Karyawan non-aktif dilewati supaya data lama tetap bisa
+	disunting.
+	"""
+	if self.get("status") != "Active" or not self.get("unit"):
+		return
+
+	if self.get("stasiun"):
+		return
+
+	if not frappe.db.get_value("Unit", self.unit, "mill"):
+		return
+
+	frappe.throw(
+		"Stasiun wajib diisi untuk karyawan di unit mill {0}.".format(
+			frappe.bold(self.unit)
+		),
+		title="Stasiun Belum Diisi",
+	)
+
+
 def set_coa_stasiun(self, method=None):
 	"""Isi COA Stasiun sesuai stasiun dan company karyawan.
 
