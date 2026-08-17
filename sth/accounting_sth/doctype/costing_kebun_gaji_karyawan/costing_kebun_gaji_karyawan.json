@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-17 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "total_komponen",
+  "jumlah_kegiatan",
+  "jumlah_kegiatan_sumber",
+  "amount"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "columns": 2,
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nama Karyawan"
+  },
+  {
+   "columns": 2,
+   "description": "Total komponen gaji yang dibagi ke kegiatan (di luar upah dan premi dari BKM).",
+   "fieldname": "total_komponen",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Komponen"
+  },
+  {
+   "columns": 1,
+   "description": "Jumlah kegiatan panen + perawatan bulan ini, yaitu pembagi yang dipakai.",
+   "fieldname": "jumlah_kegiatan",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Jumlah Kegiatan"
+  },
+  {
+   "columns": 1,
+   "fieldname": "jumlah_kegiatan_sumber",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Kegiatan di Dokumen Ini"
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Nilai Dialokasi"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-17 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Kebun Gaji Karyawan",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -43,6 +43,8 @@ doctype_js = {
 	"Attendance": "public/js/attendance.js",
 	"Company": "public/js/company.js",
 	"Contract Template": "public/js/contract_template.js",
+	"Costing Panen": "public/js/costing_kebun.js",
+	"Costing Perawatan": "public/js/costing_kebun.js",
 	"Currency Exchange": "public/js/currency_exchange.js",
 	"Customer": "public/js/customer.js",
 	"Delivery Note": "public/js/delivery_note.js",

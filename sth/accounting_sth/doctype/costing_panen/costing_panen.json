@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-08-17 09:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "section_break_periode",
+  "periode_dari",
+  "column_break_periode",
+  "periode_sampai",
+  "column_break_company",
+  "company",
+  "unit",
+  "section_gaji_karyawan",
+  "costing_kebun_gaji_karyawan",
+  "total_gaji_karyawan",
+  "section_kegiatan",
+  "costing_kebun_kegiatan",
+  "total_kegiatan",
+  "section_closing",
+  "costing_kebun_closing",
+  "total_closing",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokumen",
+   "options": "CPN-.YYYY.-.####"
+  },
+  {
+   "fieldname": "section_break_periode",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "periode_dari",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_periode",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periode_sampai",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Periode Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "description": "Komponen gaji di luar upah dan premi dari BKM. Pembaginya jumlah kegiatan panen + perawatan bulan itu, jadi gaji satu orang tidak dihitung dua kali oleh dua costing.",
+   "fieldname": "section_gaji_karyawan",
+   "fieldtype": "Section Break",
+   "label": "Gaji Karyawan"
+  },
+  {
+   "fieldname": "costing_kebun_gaji_karyawan",
+   "fieldtype": "Table",
+   "label": "Gaji Karyawan",
+   "options": "Costing Kebun Gaji Karyawan"
+  },
+  {
+   "fieldname": "total_gaji_karyawan",
+   "fieldtype": "Currency",
+   "label": "Total Dialokasi ke Panen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_kegiatan",
+   "fieldtype": "Section Break",
+   "label": "Kegiatan Panen"
+  },
+  {
+   "fieldname": "costing_kebun_kegiatan",
+   "fieldtype": "Table",
+   "label": "Kegiatan",
+   "options": "Costing Kebun Kegiatan"
+  },
+  {
+   "fieldname": "total_kegiatan",
+   "fieldtype": "Currency",
+   "label": "Total Kegiatan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_closing",
+   "fieldtype": "Section Break",
+   "label": "Closing (Jurnal per Akun Kegiatan)"
+  },
+  {
+   "fieldname": "costing_kebun_closing",
+   "fieldtype": "Table",
+   "label": "Closing",
+   "options": "Costing Kebun Closing"
+  },
+  {
+   "fieldname": "total_closing",
+   "fieldtype": "Currency",
+   "label": "Total Closing",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Costing Panen",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-17 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Costing Panen",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
