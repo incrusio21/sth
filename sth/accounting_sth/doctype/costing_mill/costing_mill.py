@@ -638,22 +638,34 @@ def build_and_submit_costing_mill(company, unit, periode_dari, periode_sampai):
 	Isinya sama persis dengan tombol Ambil Data di form, dipakai kalau costing
 	mau dijalankan otomatis saat tutup buku.
 	"""
+	gaji_rows = get_gaji_karyawan_mill(periode_dari, periode_sampai, company, unit)
+	operator_rows = get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company, unit)
+	hm_rows = get_alokasi_hm_stasiun(periode_dari, periode_sampai, company, unit)
+	pengeluaran_rows = get_pengeluaran_barang_mill(periode_dari, periode_sampai, company, unit)
+
+	# Unit tanpa mill dilewati sebelum tabel Closing disusun: unit kebun tidak
+	# perlu ditinggali Costing Mill kosong tiap bulan, juga tidak perlu ikut
+	# ditegur soal akun 6211099 yang cuma dipakai jurnal alokasi. Yang datanya
+	# ada tapi belum lengkap tetap dibuat supaya kekurangannya kelihatan.
+	if not (gaji_rows or operator_rows or hm_rows or pengeluaran_rows):
+		return None
+
 	cm = frappe.new_doc("Costing Mill")
 	cm.company = company
 	cm.unit = unit
 	cm.periode_dari = periode_dari
 	cm.periode_sampai = periode_sampai
 
-	for row in get_gaji_karyawan_mill(periode_dari, periode_sampai, company, unit):
+	for row in gaji_rows:
 		cm.append("costing_mill_gaji_karyawan", row)
 
-	for row in get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company, unit):
+	for row in operator_rows:
 		cm.append("costing_mill_gaji_operator_bengkel", row)
 
-	for row in get_alokasi_hm_stasiun(periode_dari, periode_sampai, company, unit):
+	for row in hm_rows:
 		cm.append("costing_mill_hm_stasiun", row)
 
-	for row in get_pengeluaran_barang_mill(periode_dari, periode_sampai, company, unit):
+	for row in pengeluaran_rows:
 		cm.append("costing_mill_pengeluaran_barang", row)
 
 	for row in get_closing_mill(periode_dari, periode_sampai, company, unit):

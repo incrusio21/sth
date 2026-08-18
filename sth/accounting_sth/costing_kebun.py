@@ -93,10 +93,12 @@ class CostingKebun(Document):
 		if not self.company:
 			frappe.throw("Harap isi Company terlebih dahulu.")
 
-		data = get_data_costing_kebun(
+		self.isi_data(get_data_costing_kebun(
 			self.sumber, self.periode_dari, self.periode_sampai, self.company, self.unit
-		)
+		))
 
+	def isi_data(self, data):
+		"""Tulis hasil pembagian ke ketiga tabel, menimpa isi sebelumnya."""
 		for fieldname, rows in (
 			("costing_kebun_gaji_karyawan", data["gaji_karyawan"]),
 			("costing_kebun_kegiatan", data["kegiatan"]),
@@ -535,6 +537,12 @@ def get_data_costing_kebun(sumber, periode_dari, periode_sampai, company=None, u
 	yang sama, dan mengulang query per tabel cuma memperlambat tombol Ambil Data.
 	"""
 	semua = bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company, unit)
+
+	return susun_data_costing_kebun(semua, sumber, company)
+
+
+def susun_data_costing_kebun(semua, sumber, company):
+	"""Ketiga tabel dari pembagian yang sudah terlanjur dihitung."""
 	baris = baris_sumber(semua, sumber)
 
 	return {
@@ -542,3 +550,33 @@ def get_data_costing_kebun(sumber, periode_dari, periode_sampai, company=None, u
 		"kegiatan": susun_alokasi_kegiatan(baris, company),
 		"closing": susun_closing_kebun(baris, sumber, company),
 	}
+
+
+@frappe.whitelist()
+def build_and_submit_costing_kebun(doctype, company, unit, periode_dari, periode_sampai):
+	"""Buat dan submit Costing Panen / Costing Perawatan di sisi server.
+
+	Isinya sama persis dengan tombol Ambil Data di form, dipakai waktu
+	Accounting Period ditutup.
+
+	Unit yang tidak punya kegiatan sumber ini sama sekali dilewati, dan
+	dilewatinya sebelum tabel Closing disusun: unit mill tidak perlu ditinggali
+	Costing Panen kosong tiap bulan, juga tidak perlu ikut ditegur soal akun
+	6211099 yang cuma dipakai jurnal alokasi. Yang datanya ada tapi belum
+	lengkap tetap dibuat supaya kekurangannya kelihatan.
+	"""
+	doc = frappe.new_doc(doctype)
+	doc.company = company
+	doc.unit = unit
+	doc.periode_dari = periode_dari
+	doc.periode_sampai = periode_sampai
+
+	semua = bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company, unit)
+	if not baris_sumber(semua, doc.sumber):
+		return None
+
+	doc.isi_data(susun_data_costing_kebun(semua, doc.sumber, company))
+	doc.insert(ignore_permissions=True)
+	doc.submit()
+
+	return doc.name

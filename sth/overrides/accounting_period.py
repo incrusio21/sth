@@ -44,13 +44,13 @@ class SthAccountingPeriod(AccountingPeriod):
 			)
 	def on_submit(self):
 		post_bkm_on_submit(self)
-		create_costing_bengkel_on_submit(self)
+		create_costing_on_submit(self)
 
 	def on_cancel(self):
-		cancel_costing_bengkel_on_cancel(self)
+		cancel_costing_on_cancel(self)
 
 	def on_trash(self):
-		delete_costing_bengkel_on_trash(self)
+		delete_costing_on_trash(self)
 
 # BKM yang GL Entry-nya baru dibuat saat periodenya ditutup
 BKM_POSTED_ON_PERIOD_SUBMIT = ("Buku Kerja Mandor Panen", "Buku Kerja Mandor Perawatan")
@@ -127,79 +127,160 @@ def post_bkm_on_submit(doc, method=None):
 		)
 
 
-def create_costing_bengkel_on_submit(doc, method=None):
+# Costing yang dibuat sekalian waktu Accounting Period ditutup, berikut
+# builder-nya. Semuanya membaca dokumen sumber — slip gaji, BKM, pengeluaran
+# barang — bukan hasil costing lain, jadi urutan daftar ini tidak mengikat. Yang
+# harus lebih dulu cuma posting BKM, dan itu sudah dikerjakan di on_submit.
+#
+# Builder yang mendapati periodenya kosong mengembalikan None tanpa membuat
+# dokumen, jadi unit kebun tidak ditinggali Costing Mill kosong tiap bulan,
+# begitu juga sebaliknya. Costing Bengkel tetap dibuat apa adanya seperti
+# sebelumnya.
+COSTING_OTOMATIS = (
+	{
+		"doctype": "Costing Bengkel",
+		"builder": "sth.accounting_sth.doctype.costing_bengkel.costing_bengkel.build_and_submit_costing_bengkel",
+	},
+	{
+		"doctype": "Costing Mill",
+		"builder": "sth.accounting_sth.doctype.costing_mill.costing_mill.build_and_submit_costing_mill",
+	},
+	{
+		"doctype": "Costing Panen",
+		"builder": "sth.accounting_sth.costing_kebun.build_and_submit_costing_kebun",
+		"args": {"doctype": "Costing Panen"},
+	},
+	{
+		"doctype": "Costing Perawatan",
+		"builder": "sth.accounting_sth.costing_kebun.build_and_submit_costing_kebun",
+		"args": {"doctype": "Costing Perawatan"},
+	},
+)
+
+
+def filter_costing_periode(doc, docstatus=None):
+	filters = {
+		"company": doc.company,
+		"unit": doc.unit,
+		"periode_dari": doc.start_date,
+		"periode_sampai": doc.end_date,
+	}
+
+	if docstatus is not None:
+		filters["docstatus"] = docstatus
+
+	return filters
+
+
+def create_costing_on_submit(doc, method=None):
 	"""
 	Saat Accounting Period disubmit (workflow_state = "Submitted"), buat & submit
-	Costing Bengkel otomatis dengan periode/company/unit yang sama.
+	seluruh costing otomatis dengan periode/company/unit yang sama.
 	Dicek dulu supaya tidak dobel kalau doc disimpan ulang saat sudah Submitted.
+
+	Satu costing yang gagal tidak menghentikan sisanya: yang gagal dibatalkan
+	sampai savepoint-nya lalu dirangkum di akhir, supaya sekali submit ketahuan
+	semua yang perlu dibereskan, bukan satu per satu.
 	"""
 	if doc.get("workflow_state") != "Submitted":
 		return
 
-	existing = frappe.db.exists("Costing Bengkel", {
-		"company": doc.company,
-		"unit": doc.unit,
-		"periode_dari": doc.start_date,
-		"periode_sampai": doc.end_date,
-		"docstatus": ["!=", 2],
-	})
-	if existing:
-		return
+	gagal = []
 
-	from sth.accounting_sth.doctype.costing_bengkel.costing_bengkel import build_and_submit_costing_bengkel
+	for costing in COSTING_OTOMATIS:
+		doctype = costing["doctype"]
 
-	build_and_submit_costing_bengkel(
-		company=doc.company,
-		unit=doc.unit,
-		periode_dari=doc.start_date,
-		periode_sampai=doc.end_date,
-	)
+		if frappe.db.exists(doctype, filter_costing_periode(doc, ["!=", 2])):
+			continue
+
+		savepoint = "buat_costing"
+		try:
+			frappe.db.savepoint(savepoint)
+
+			args = dict(costing.get("args") or {})
+			args.update({
+				"company": doc.company,
+				"unit": doc.unit,
+				"periode_dari": doc.start_date,
+				"periode_sampai": doc.end_date,
+			})
+
+			frappe.get_attr(costing["builder"])(**args)
+		except Exception as e:
+			# pesan error per costing dirangkum di bawah, jangan ditampilkan dua kali
+			if frappe.message_log:
+				frappe.message_log.pop()
+
+			frappe.db.rollback(save_point=savepoint)
+			gagal.append((doctype, str(e)))
+
+	if gagal:
+		rows = "".join(
+			f"<tr><td>{dt}</td><td>{frappe.utils.escape_html(msg)}</td></tr>"
+			for dt, msg in gagal
+		)
+
+		frappe.throw(
+			title=_("Costing Gagal Dibuat"),
+			msg=_("""
+				<p>Accounting Period tidak dapat disubmit. Costing berikut gagal dibuat:</p>
+				<table class="table table-bordered table-sm" style="margin-top:8px;">
+					<thead><tr><th>Doctype</th><th>Error</th></tr></thead>
+					<tbody>{rows}</tbody>
+				</table>
+			""").format(rows=rows)
+		)
 
 
-def cancel_costing_bengkel_on_cancel(doc, method=None):
+@frappe.whitelist()
+def buat_costing_periode(accounting_period):
+	"""Bangun costing untuk Accounting Period yang sudah terlanjur ditutup.
+
+	Hook-nya cuma jalan sekali waktu submit, jadi periode yang ditutup sebelum
+	costing ini ikut otomatis tidak punya dokumennya. Yang sudah ada dilewati,
+	jadi aman dipanggil ulang:
+
+		bench --site <site> execute sth.overrides.accounting_period.buat_costing_periode --args "['JULI 2026 - TML']"
+	"""
+	doc = frappe.get_doc("Accounting Period", accounting_period)
+	create_costing_on_submit(doc)
+
+
+def cancel_costing_on_cancel(doc, method=None):
 	"""
 	Saat Accounting Period dibatalkan (workflow_state = "Cancelled"), cancel juga
-	Costing Bengkel yang otomatis dibuat untuk company/unit/periode yang sama.
+	seluruh costing yang otomatis dibuat untuk company/unit/periode yang sama.
 	"""
 	if doc.get("workflow_state") != "Cancelled":
 		return
 
-	costing_bengkel_list = frappe.get_all("Costing Bengkel", filters={
-		"company": doc.company,
-		"unit": doc.unit,
-		"periode_dari": doc.start_date,
-		"periode_sampai": doc.end_date,
-		"docstatus": 1,
-	}, pluck="name")
+	for costing in COSTING_OTOMATIS:
+		doctype = costing["doctype"]
 
-	for name in costing_bengkel_list:
-		cb = frappe.get_doc("Costing Bengkel", name)
-		cb.flags.ignore_links = True
-		cb.flags.ignore_permissions = True
-		cb.cancel()
+		for name in frappe.get_all(doctype, filters=filter_costing_periode(doc, 1), pluck="name"):
+			cd = frappe.get_doc(doctype, name)
+			cd.flags.ignore_links = True
+			cd.flags.ignore_permissions = True
+			cd.cancel()
 
 
-def delete_costing_bengkel_on_trash(doc, method=None):
+def delete_costing_on_trash(doc, method=None):
 	"""
-	Saat Accounting Period dihapus, ikut hapus Costing Bengkel yang otomatis
+	Saat Accounting Period dihapus, ikut hapus seluruh costing yang otomatis
 	dibuat untuk company/unit/periode yang sama. Yang masih submitted
 	dibatalkan dulu sebelum dihapus.
 	"""
-	costing_bengkel_list = frappe.get_all("Costing Bengkel", filters={
-		"company": doc.company,
-		"unit": doc.unit,
-		"periode_dari": doc.start_date,
-		"periode_sampai": doc.end_date,
-	}, pluck="name")
+	for costing in COSTING_OTOMATIS:
+		doctype = costing["doctype"]
 
-	for name in costing_bengkel_list:
-		cb = frappe.get_doc("Costing Bengkel", name)
-		if cb.docstatus == 1:
-			cb.flags.ignore_links = True
-			cb.flags.ignore_permissions = True
-			cb.cancel()
+		for name in frappe.get_all(doctype, filters=filter_costing_periode(doc), pluck="name"):
+			cd = frappe.get_doc(doctype, name)
+			if cd.docstatus == 1:
+				cd.flags.ignore_links = True
+				cd.flags.ignore_permissions = True
+				cd.cancel()
 
-		frappe.delete_doc("Costing Bengkel", name, force=True, ignore_permissions=True)
+			frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
 
 
 def validate_accounting_period_on_doc_save(doc, method=None):

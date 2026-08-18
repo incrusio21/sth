@@ -32,8 +32,8 @@ def debug_zero():
 def debug_ap():
 	no_doc="TEST JUNI - TML"
 	# frappe.db.sql(""" UPDATE `tabAccounting Period` SET docstatus=0, workflow_state="Draft" WHERE name = "{}" """.format(no_doc))
-	from sth.overrides.accounting_period import create_costing_bengkel_on_submit
-	create_costing_bengkel_on_submit(frappe.get_doc("Accounting Period",no_doc),"on_submit")
+	from sth.overrides.accounting_period import create_costing_on_submit
+	create_costing_on_submit(frappe.get_doc("Accounting Period",no_doc),"on_submit")
 
 def debug_list():
 	li = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Panen` WHERE docstatus = 0""")

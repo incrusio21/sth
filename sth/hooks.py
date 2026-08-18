@@ -256,10 +256,12 @@ doc_events = {
 		"on_submit":"sth.custom.payment_entry.check_payment_notification"
 	},
 
+	# Costing otomatis dan pembatalannya dipegang controller-nya sendiri
+	# (SthAccountingPeriod.on_submit / on_cancel / on_trash), jadi tidak
+	# didaftarkan lagi di sini.
 	"Accounting Period":{
 		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period",
 		"before_submit": "sth.overrides.accounting_period.check_unsubmitted_salary_slip",
-		"on_submit": ["sth.overrides.accounting_period.create_costing_bengkel_on_submit","sth.overrides.accounting_period.cancel_costing_bengkel_on_cancel"]
 	},
 
 	"Asset": {
