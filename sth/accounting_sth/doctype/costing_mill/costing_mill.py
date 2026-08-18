@@ -12,9 +12,11 @@ from frappe.utils import flt
 # stasiun dan lawannya harus akun kontra beban.
 NOMOR_COA_GAJI_DIALOKASI = "6211099"
 
-# Akhiran akun operasional. Akun grup stasiun di Station Procurement Settings
-# (mis. 63010) ditambah "01" jadi akun operasionalnya (6301001).
+# Akhiran anak akun stasiun. Akun grup stasiun di Station Procurement Settings
+# (mis. 63010) ditambah akhirannya jadi akun anaknya: 6301001 OPERASIONAL,
+# 6301004 SERVICE DAN MAINTENANCE.
 AKHIRAN_OPERASIONAL = "01"
+AKHIRAN_SERVICE = "04"
 
 KETERANGAN_GAJI = "ALOKASI GAJI KARYAWAN MILL"
 KETERANGAN_BENGKEL = "ALOKASI GAJI OPERATOR BENGKEL MILL"
@@ -130,14 +132,12 @@ class CostingMill(Document):
 # Pencarian COA dan Cost Center
 # ---------------------------------------------------------------------------
 
-@frappe.whitelist()
-def get_coa_operasional_stasiun(stasiun, company):
-	"""Akun OPERASIONAL milik sebuah stasiun.
+def get_coa_anak_stasiun(stasiun, company, akhiran):
+	"""Anak akun sebuah stasiun menurut akhiran nomornya.
 
 	Akun grup stasiun disimpan di Station Procurement Settings per company
-	(mis. 63010 - PENGOLAHAN PABRIK - STASIUN RECEPTION). Akun operasionalnya
-	adalah anak dengan nomor grup + "01" (6301001 - STASIUN RECEPTION -
-	OPERASIONAL).
+	(mis. 63010 - PENGOLAHAN PABRIK - STASIUN RECEPTION). Anaknya bernomor grup
+	+ akhiran, mis. 6301001 - STASIUN RECEPTION - OPERASIONAL.
 	"""
 	akun_grup = frappe.db.get_value("Station Procurement Settings", {
 		"parent": stasiun,
@@ -154,9 +154,25 @@ def get_coa_operasional_stasiun(stasiun, company):
 
 	return frappe.db.get_value("Account", {
 		"company": company,
-		"account_number": nomor_grup + AKHIRAN_OPERASIONAL,
+		"account_number": nomor_grup + akhiran,
 		"is_group": 0,
 	}, "name")
+
+
+@frappe.whitelist()
+def get_coa_operasional_stasiun(stasiun, company):
+	"""Akun OPERASIONAL milik sebuah stasiun, tempat gaji karyawan stasiun itu."""
+	return get_coa_anak_stasiun(stasiun, company, AKHIRAN_OPERASIONAL)
+
+
+@frappe.whitelist()
+def get_coa_service_stasiun(stasiun, company):
+	"""Akun SERVICE DAN MAINTENANCE milik sebuah stasiun.
+
+	Ke sinilah biaya bengkel mill dibebankan: pekerjaan bengkel di sebuah
+	stasiun adalah perawatan stasiun itu, bukan biaya operasionalnya.
+	"""
+	return get_coa_anak_stasiun(stasiun, company, AKHIRAN_SERVICE)
 
 
 @frappe.whitelist()
@@ -435,6 +451,9 @@ def get_hm_stasiun(periode_dari, periode_sampai, company=None, unit=None):
 def hitung_alokasi_hm(hm_rows, total_pool, company):
 	"""Bagi total_pool ke stasiun sebanding dengan HM-nya.
 
+	Akunnya SERVICE DAN MAINTENANCE stasiun yang dicatat di transaksi bengkel,
+	bukan OPERASIONAL: yang dibebankan di sini kerja bengkel di stasiun itu.
+
 	Sisa pembulatan dibebankan ke stasiun ber-HM terbesar supaya jumlah alokasi
 	persis sama dengan pool dan jurnalnya seimbang.
 	"""
@@ -445,7 +464,7 @@ def hitung_alokasi_hm(hm_rows, total_pool, company):
 		for r in baris:
 			r["porsi"] = 0
 			r["amount"] = 0
-			r["no_coa"] = get_coa_operasional_stasiun(r["stasiun"], company)
+			r["no_coa"] = get_coa_service_stasiun(r["stasiun"], company)
 		return baris
 
 	baris.sort(key=lambda r: -flt(r["total_hm"]))
@@ -456,7 +475,7 @@ def hitung_alokasi_hm(hm_rows, total_pool, company):
 		amount = flt(porsi * flt(total_pool), 2)
 		r["porsi"] = flt(porsi * 100, 4)
 		r["amount"] = amount
-		r["no_coa"] = get_coa_operasional_stasiun(r["stasiun"], company)
+		r["no_coa"] = get_coa_service_stasiun(r["stasiun"], company)
 		terbagi += amount
 
 	selisih = flt(flt(total_pool) - terbagi, 2)
