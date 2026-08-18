@@ -22,6 +22,7 @@
   "lampiran",
   "column_break_detail",
   "gross_purchase_amount",
+  "nilai_perolehan_scrap",
   "nilai_buku",
   "hasil_section",
   "asset_hasil_split",
@@ -145,6 +146,12 @@
    "read_only": 1
   },
   {
+   "fieldname": "nilai_perolehan_scrap",
+   "fieldtype": "Currency",
+   "label": "Harga Perolehan Discrap",
+   "read_only": 1
+  },
+  {
    "fieldname": "nilai_buku",
    "fieldtype": "Currency",
    "label": "Nilai Scrap",
@@ -187,7 +194,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-11 13:00:00.000000",
+ "modified": "2026-08-18 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Asset Scrap Request",

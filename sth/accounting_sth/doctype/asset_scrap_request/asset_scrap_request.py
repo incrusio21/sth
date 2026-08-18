@@ -121,6 +121,14 @@ class AssetScrapRequest(Document):
 
 		self.nilai_buku = flt(nilai_buku, self.precision("nilai_buku"))
 
+		# Harga perolehan porsi yang discrap, belum dipotong akumulasi penyusutan.
+		# Nilai Scrap di sebelahnya sudah bersih, jadi yang ini yang menjawab
+		# "asetnya senilai berapa waktu dibeli" tanpa perlu hitung manual.
+		self.nilai_perolehan_scrap = flt(
+			flt(self.gross_purchase_amount) * persentase / 100.0,
+			self.precision("nilai_perolehan_scrap")
+		)
+
 	def on_update(self):
 		# dipanggil di tiap transisi workflow, termasuk saat submit
 		self.update_status_scrap()
@@ -238,7 +246,11 @@ class AssetScrapRequest(Document):
 		dipakai waktu jurnalnya dibuat."""
 		persen = flt(self.persentase_scrap) / 100.0
 
-		gross = flt(flt(self.gross_purchase_amount) * persen, self.precision("gross_purchase_amount"))
+		# pengajuan lama belum punya nilai_perolehan_scrap, jadi tetap ada
+		# hitungannya sebagai cadangan
+		gross = flt(self.nilai_perolehan_scrap) or flt(
+			flt(self.gross_purchase_amount) * persen, self.precision("gross_purchase_amount")
+		)
 		nilai_buku = flt(self.nilai_buku)
 		akumulasi = max(flt(gross - nilai_buku, self.precision("nilai_buku")), 0)
 
