@@ -45,6 +45,44 @@ def cari_bkm_setrans_no(kiriman):
 	)
 
 
+def cari_bkm_baris_pertama(kiriman):
+	"""BKM Perawatan lain yang sudah memuat baris pertama kiriman ini, atau None.
+
+	Kuncinya trans_no + karyawan, sama seperti pemeriksaan duplikat yang sudah
+	ada: dua dokumen dengan kunci itu menghitung hari kerja orang yang sama dua
+	kali.
+
+	Dokumen batal dilewat, sama seperti cari_bkm_setrans_no: kiriman sesudah
+	pembatalan memang harus membentuk dokumen baru.
+
+	Nama dokumen sendiri dikeluarkan dari pencarian. Waktu dipanggil dari
+	insert() namanya belum ada, jadi dipakai string kosong — bukan None, yang
+	akan membuat seluruh perbandingannya jadi NULL dan tidak pernah cocok.
+	"""
+	if not kiriman.trans_no or not kiriman.hasil_kerja:
+		return None
+
+	baris = kiriman.hasil_kerja[0]
+
+	duplikat = frappe.db.sql("""
+		SELECT bkmp.name
+		FROM `tabBuku Kerja Mandor Perawatan` bkmp
+		INNER JOIN `tabDetail BKM Hasil Kerja Perawatan` hk ON hk.parent = bkmp.name
+		WHERE bkmp.trans_no = %(trans_no)s
+			AND hk.employee = %(employee)s
+			AND bkmp.name != %(name)s
+			AND bkmp.docstatus < 2
+		ORDER BY bkmp.creation
+		LIMIT 1
+	""", {
+		"trans_no": kiriman.trans_no,
+		"employee": baris.employee,
+		"name": kiriman.name or "",
+	})
+
+	return duplikat[0][0] if duplikat else None
+
+
 def baris_hasil_kerja_baru(doc, kiriman):
 	"""Baris hasil kerja kiriman yang employee-nya belum ada di dokumen.
 
@@ -129,6 +167,13 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		padahal yang dimaksud satu buku kerja berisi beberapa employee — dan
 		validate() tidak menangkapnya karena yang dicek trans_no *dan* employee.
 
+		Kiriman yang karyawannya sudah tercatat tapi dokumennya tidak bisa digabung
+		dibalas dengan dokumen yang sudah ada itu, bukan ditolak sebagai duplikat.
+		Pengirimnya tidak punya cara membedakan "sudah masuk" dari "gagal": yang
+		dilihat cuma request yang error, jadi kirimannya diulang terus tanpa ada
+		yang berubah di sini. Membalasnya dengan dokumennya membuat pengulangan itu
+		berhenti dengan sendirinya.
+
 		Sengaja dibatasi ke user API. Dari UI dan data import dokumen baru tetap
 		dokumen baru; di sana trans_no memang read-only dan tidak pernah terisi.
 		"""
@@ -136,10 +181,18 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			return super().insert(*args, **kwargs)
 
 		nama = cari_bkm_setrans_no(self)
-		if not nama:
-			return super().insert(*args, **kwargs)
+		if nama:
+			return gabung_ke_bkm(nama, self)
 
-		return gabung_ke_bkm(nama, self)
+		# Trans_no yang sama tapi company atau tanggalnya berbeda tidak digabung —
+		# dan memang tidak boleh. Kalau karyawannya ternyata sudah tercatat di
+		# dokumen itu, kirimannya pengulangan: dokumennya dikembalikan apa adanya,
+		# tidak ada yang ditambahkan dan tidak ada dokumen baru yang lahir.
+		duplikat = cari_bkm_baris_pertama(self)
+		if duplikat:
+			return frappe.get_doc(self.doctype, duplikat)
+
+		return super().insert(*args, **kwargs)
 
 	def before_insert(self):
 		fix_mandor_from_api(self)
@@ -159,26 +212,17 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 			submit_after_insert(self)
 
 	def validate(self):
-		if self.trans_no:
-			trans_no = self.trans_no
-			karyawan = self.hasil_kerja[0].employee
-
-			duplikat = frappe.db.sql("""
-				SELECT bkmp.name
-				FROM `tabBuku Kerja Mandor Perawatan` bkmp
-				INNER JOIN `tabDetail BKM Hasil Kerja Perawatan` hk ON hk.parent = bkmp.name
-				WHERE bkmp.trans_no = %s
-					AND hk.employee = %s
-					AND bkmp.name != %s
-				LIMIT 1
-			""", (trans_no, karyawan, self.name))
-
-			if duplikat:
-				frappe.throw(
-					f"Data sudah ada dengan Trans No <b>{trans_no}</b>, "
-					f"Karyawan <b>{karyawan}</b>. "
-					f"Referensi: {duplikat[0][0]}"
-				)
+		# Lewat API duplikatnya sudah ditangani insert() dengan mengembalikan
+		# dokumen yang sudah ada, jadi yang sampai ke sini tinggal jalur UI dan
+		# data import — di situ tidak ada yang bisa dikembalikan, dan dokumen
+		# kembar harus ditahan sebelum hari kerjanya terhitung dua kali.
+		duplikat = cari_bkm_baris_pertama(self)
+		if duplikat:
+			frappe.throw(
+				f"Data sudah ada dengan Trans No <b>{self.trans_no}</b>, "
+				f"Karyawan <b>{self.hasil_kerja[0].employee}</b>. "
+				f"Referensi: {duplikat}"
+			)
 
 		self.validate_hasil_kerja_harian()
 		super().validate()

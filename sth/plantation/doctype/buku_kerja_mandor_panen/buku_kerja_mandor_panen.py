@@ -85,6 +85,46 @@ def cari_bkm_setrans_no(kiriman):
 	)
 
 
+def cari_bkm_baris_pertama(kiriman):
+	"""BKM Panen lain yang sudah memuat baris pertama kiriman ini, atau None.
+
+	Kuncinya trans_no + karyawan + blok, tanpa TPH dan tanpa pemegang premi:
+	dua dokumen dengan kunci itu sama-sama menghitung janjang yang sama ke Recap
+	Panen by Blok, siapa pun yang tercatat sebagai kerani atau mandornya.
+
+	Dokumen batal dilewat, sama seperti cari_bkm_setrans_no: kiriman sesudah
+	pembatalan memang harus membentuk dokumen baru.
+
+	Nama dokumen sendiri dikeluarkan dari pencarian. Waktu dipanggil dari
+	insert() namanya belum ada, jadi dipakai string kosong — bukan None, yang
+	akan membuat seluruh perbandingannya jadi NULL dan tidak pernah cocok.
+	"""
+	if not kiriman.trans_no or not kiriman.hasil_kerja:
+		return None
+
+	baris = kiriman.hasil_kerja[0]
+
+	duplikat = frappe.db.sql("""
+		SELECT bkmp.name
+		FROM `tabBuku Kerja Mandor Panen` bkmp
+		INNER JOIN `tabDetail BKM Hasil Kerja Panen` hk ON hk.parent = bkmp.name
+		WHERE bkmp.trans_no = %(trans_no)s
+			AND hk.employee = %(employee)s
+			AND hk.blok = %(blok)s
+			AND bkmp.name != %(name)s
+			AND bkmp.docstatus < 2
+		ORDER BY bkmp.creation
+		LIMIT 1
+	""", {
+		"trans_no": kiriman.trans_no,
+		"employee": baris.employee,
+		"blok": baris.blok,
+		"name": kiriman.name or "",
+	})
+
+	return duplikat[0][0] if duplikat else None
+
+
 def kunci_baris_terpakai(kiriman):
 	"""Kunci baris yang sudah ada di seluruh BKM ber-trans_no sama.
 
@@ -232,21 +272,41 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		lagi — kalau isinya mengulang baris yang sudah tercatat, janjangnya masuk
 		dua kali ke Recap Panen by Blok lewat voucher yang berbeda.
 
+		Kiriman yang barisnya sudah tercatat tapi dokumennya tidak bisa digabung
+		dibalas dengan dokumen yang sudah ada itu, bukan ditolak sebagai duplikat.
+		Pengirimnya tidak punya cara membedakan "sudah masuk" dari "gagal": yang
+		dilihat cuma request yang error, jadi kirimannya diulang terus tanpa ada
+		yang berubah di sini. Membalasnya dengan dokumennya membuat pengulangan itu
+		berhenti dengan sendirinya.
+
 		Sengaja dibatasi ke user API. Dari UI dan data import dokumen baru tetap
 		dokumen baru; di sana trans_no memang read-only dan tidak pernah terisi.
 		"""
 		if frappe.session.user != USER_API:
 			return super().insert(*args, **kwargs)
 
+		# kode_mandor baru diisi dari `mandor` di before_insert, dan before_insert
+		# jalan di dalam super().insert() — sesudah pencarian di bawah. Tanpa ini
+		# kirimannya selalu dicari dengan kode_mandor kosong sementara dokumen yang
+		# dicari sudah terisi, jadi tidak pernah ada yang ketemu untuk digabung.
+		# Isinya idempoten, jadi before_insert boleh memanggilnya sekali lagi.
+		fix_mandor_from_api(self)
+
 		nama = cari_bkm_setrans_no(self)
-		if not nama:
-			return super().insert(*args, **kwargs)
+		if nama:
+			digabung = gabung_ke_bkm(nama, self)
+			if digabung is not None:
+				return digabung
 
-		digabung = gabung_ke_bkm(nama, self)
-		if digabung is None:
-			return super().insert(*args, **kwargs)
+		# Sampai sini kirimannya tidak bisa digabung: pemegang preminya berbeda,
+		# atau dokumennya sudah dijurnal. Kalau barisnya memang sudah tercatat di
+		# sana, ini pengulangan — dokumennya dikembalikan apa adanya, tidak ada yang
+		# ditambahkan dan tidak ada dokumen baru yang lahir.
+		duplikat = cari_bkm_baris_pertama(self)
+		if duplikat:
+			return frappe.get_doc(self.doctype, duplikat)
 
-		return digabung
+		return super().insert(*args, **kwargs)
 
 	def before_insert(self):
 		fix_mandor_from_api(self)
@@ -266,29 +326,18 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 	def validate(self):
 		self.isi_cost_center()
-		if self.trans_no:
-			trans_no = self.trans_no
-			karyawan = self.hasil_kerja[0].employee
-			blok = self.hasil_kerja[0].blok
 
-			duplikat = frappe.db.sql("""
-				SELECT bkmp.name
-				FROM `tabBuku Kerja Mandor Panen` bkmp
-				INNER JOIN `tabDetail BKM Hasil Kerja Panen` hk ON hk.parent = bkmp.name
-				WHERE bkmp.trans_no = %s
-					AND hk.employee = %s
-					AND hk.blok = %s
-					AND bkmp.name != %s
-				LIMIT 1
-			""", (trans_no, karyawan, blok, self.name))
-
-			if duplikat:
-				frappe.throw(
-					f"Data sudah ada dengan Trans No <b>{trans_no}</b>, "
-					f"Karyawan <b>{karyawan}</b>, dan Blok <b>{blok}</b>. "
-					f"Referensi: {duplikat[0][0]}"
-				)
-
+		# Lewat API duplikatnya sudah ditangani insert() dengan mengembalikan
+		# dokumen yang sudah ada, jadi yang sampai ke sini tinggal jalur UI dan
+		# data import — di situ tidak ada yang bisa dikembalikan, dan dokumen
+		# kembar harus ditahan sebelum janjangnya terhitung dua kali.
+		duplikat = cari_bkm_baris_pertama(self)
+		if duplikat:
+			frappe.throw(
+				f"Data sudah ada dengan Trans No <b>{self.trans_no}</b>, "
+				f"Karyawan <b>{self.hasil_kerja[0].employee}</b>, dan Blok "
+				f"<b>{self.hasil_kerja[0].blok}</b>. Referensi: {duplikat}"
+			)
 
 		self.reset_automated_data()
 		
