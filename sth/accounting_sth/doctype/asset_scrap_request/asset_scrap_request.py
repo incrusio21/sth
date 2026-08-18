@@ -6,6 +6,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, nowdate
 
+# Dua state workflow yang dikenali di sini. Nama persisnya dipasang
+# asset_scrap_settings.build_workflow waktu workflownya dibangun.
+STATE_DRAFT = "Draft"
 STATE_APPROVED = "Approved"
 
 # status asset yang tidak bisa lagi diajukan scrap
@@ -23,6 +26,33 @@ def nilai_buku_asset(asset):
 
 
 class AssetScrapRequest(Document):
+
+	def before_insert(self):
+		self.set_workflow_state_awal()
+
+	def set_workflow_state_awal(self):
+		"""Pengajuan yang dibuat langsung dari doctype-nya berangkat dari Draft.
+
+		Lewat tombol di form Asset, statenya dipasang apply_workflow sesudah
+		dokumennya masuk, jadi kosongnya tidak pernah sempat kelihatan. Yang
+		dibuat manual tidak lewat situ, dan dokumen berworkflow yang statenya
+		kosong ditolak dengan "Workflow State not set" begitu formnya meminta
+		daftar transisi — pengajuannya berhenti sebelum sempat diajukan.
+
+		Nama fieldnya dibaca dari workflownya, bukan ditulis di sini: field itu
+		Custom Field bikinan frappe, dan namanya ikut apa yang dipasang
+		build_workflow.
+		"""
+		workflow = frappe.get_meta(self.doctype).get_workflow()
+		if not workflow:
+			return
+
+		state_field = frappe.get_cached_value(
+			"Workflow", workflow, "workflow_state_field"
+		) or "workflow_state"
+
+		if not self.get(state_field):
+			self.set(state_field, STATE_DRAFT)
 
 	def validate(self):
 		self.validate_asset()
