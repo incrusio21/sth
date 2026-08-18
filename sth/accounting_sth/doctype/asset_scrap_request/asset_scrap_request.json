@@ -145,10 +145,9 @@
    "read_only": 1
   },
   {
-   "description": "Nilai buku saat pengajuan dibuat",
    "fieldname": "nilai_buku",
    "fieldtype": "Currency",
-   "label": "Nilai Buku",
+   "label": "Nilai Scrap",
    "read_only": 1
   },
   {
@@ -167,7 +166,7 @@
    "read_only": 1
   },
   {
-   "description": "Cuma terisi untuk scrap 100%, yang jurnalnya dibuat ERPNext. Scrap sebagian tidak membuat Journal Entry — hapus bukunya diposting sebagai GL Entry milik Asset-nya.",
+   "description": "Jurnal hapus buku pengajuan ini. Scrap 100% memakai jurnal buatan ERPNext, scrap sebagian menjurnal sendiri — satu asset yang discrap bertahap punya beberapa Journal Entry, satu per pengajuan.",
    "fieldname": "journal_entry_for_scrap",
    "fieldtype": "Link",
    "label": "Journal Entry Scrap",
