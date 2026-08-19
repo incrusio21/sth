@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-19 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purchase_order",
+  "payment_entry",
+  "tanggal",
+  "akun_uang_muka",
+  "column_break_uang_muka",
+  "jumlah_uang_muka",
+  "sudah_dipakai",
+  "sisa",
+  "dipakai",
+  "payment_entry_row"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal",
+   "fieldtype": "Date",
+   "label": "Tanggal Bayar",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "akun_uang_muka",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Akun Uang Muka",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_uang_muka",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jumlah_uang_muka",
+   "fieldtype": "Currency",
+   "label": "Jumlah Uang Muka",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sudah_dipakai",
+   "fieldtype": "Currency",
+   "label": "Sudah Dipakai Invoice Lain",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "sisa",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Sisa",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "dipakai",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Dipakai"
+  },
+  {
+   "fieldname": "payment_entry_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Payment Entry Row",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-19 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Buying STH",
+ "name": "Uang Muka Purchase Invoice",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

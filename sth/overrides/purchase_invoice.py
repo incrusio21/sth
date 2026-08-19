@@ -41,6 +41,12 @@ from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update
 form_grid_templates = {"items": "/home/frappe/frappe-bench/apps/sth/sth/templates/form_grid/custom_item_grid.html","non_voucher_match": "templates/form_grid/non_voucher_grid.html"}
 
 from sth.custom import method_ambil_account
+from sth.buying_sth.custom.uang_muka_po import (
+	advance_yang_menunjuk_po,
+	gl_entries_uang_muka,
+	isi_uang_muka_po,
+	validate_uang_muka_po,
+)
 
 class SthPurchaseInvoice(PurchaseInvoice):
 	def __init__(self, *args, **kwargs):
@@ -132,7 +138,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.validate_term()
 		self.set_retensi_amount()
 		self.set_charges_total()
+		self.validate_advance_bukan_uang_muka_po()
+		validate_uang_muka_po(self)
 		self.set_grand_total_setelah_dp()
+		self.set_outstanding_setelah_uang_muka()
 
 	def set_expense_account(self, for_validate=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
@@ -520,9 +529,76 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		# rounded_total dimatikan di validate (disable_rounded_total = 1),
 		# jadi fallback ke grand_total seperti set_retensi_amount.
 		self.grand_total_setelah_dp = flt(
-			flt(self.rounded_total or self.grand_total) - flt(self.total_advance),
+			flt(self.rounded_total or self.grand_total)
+			- flt(self.total_advance)
+			- flt(self.total_uang_muka),
 			self.precision("grand_total_setelah_dp"),
 		)
+
+	def set_outstanding_setelah_uang_muka(self):
+		"""Uang muka PO ikut mengurangi outstanding sejak di form.
+
+		calculate_taxes_and_totals() hanya mengenal tabel advances bawaan, jadi
+		angkanya dikoreksi di sini supaya sama dengan yang nanti dihitung ulang
+		payment ledger dari jurnal uang muka di get_gl_entries(). Aman dipanggil
+		berulang: outstanding_amount selalu dihitung ulang dari nol tiap validate.
+		"""
+		if self.is_return or not flt(self.total_uang_muka):
+			return
+
+		self.outstanding_amount = flt(
+			flt(self.outstanding_amount) - flt(self.total_uang_muka),
+			self.precision("outstanding_amount"),
+		)
+
+	@frappe.whitelist()
+	def set_uang_muka_po(self):
+		"""Tarik uang muka Purchase Order yang masih bersisa untuk invoice ini."""
+		isi_uang_muka_po(self)
+
+	def get_advance_entries(self, include_unallocated=True):
+		"""Payment Entry yang membayar Purchase Order tidak ikut ditawarkan di sini.
+
+		Uang muka PO punya tabelnya sendiri. Menyaringnya di sumber sekaligus
+		mematikan dua perilaku bawaan yang mengarahkan operator ke jalur yang
+		salah: allocate_advances_automatically yang mengisi tabel advances, dan
+		peringatan validate_advance_entries yang menyuruh menarik pembayaran PO
+		sebagai advance. Pembayaran lewat Journal Entry tidak disentuh — jalur
+		itu memang tidak memakai akun uang muka.
+		"""
+		return [
+			d
+			for d in super().get_advance_entries(include_unallocated=include_unallocated)
+			if not (d.get("reference_type") == "Payment Entry" and d.get("against_order"))
+		]
+
+	def validate_advance_bukan_uang_muka_po(self):
+		"""Uang muka PO tidak boleh lewat tabel advances bawaan.
+
+		Jalur advances merekonsiliasi dengan cara menimpa baris Payment Entry
+		Reference di tempat, sehingga referensinya berpindah dari Purchase Order
+		ke invoice ini. Uang muka PO punya tabelnya sendiri yang dijurnal di
+		invoice tanpa menyentuh Payment Entry. Advance lain (Proposal, uang muka
+		lewat Journal Entry) tetap lewat jalur bawaan.
+		"""
+		menunjuk_po = advance_yang_menunjuk_po(self)
+		if not menunjuk_po:
+			return
+
+		frappe.throw(
+			_("Payment Entry {0} membayar Purchase Order, jadi tidak boleh dipakai lewat tabel "
+			  "Advances — referensi pembayarannya akan berpindah dari Purchase Order ke invoice ini. "
+			  "Hapus barisnya, lalu pakai tabel Uang Muka Purchase Order.").format(
+				", ".join(sorted({d.reference_name for d in menunjuk_po}))
+			),
+			title=_("Uang Muka PO"),
+		)
+
+	def update_against_document_in_jv(self):
+		# Penjaga terakhir sebelum reconcile_against_document dipanggil di on_submit:
+		# validate sudah menolak lebih dulu, ini menutup jalur yang melewatkannya.
+		self.validate_advance_bukan_uang_muka_po()
+		super().update_against_document_in_jv()
 
 	def set_retensi_amount(self):
 		self.retensi_amount = flt(self.rounded_total or self.grand_total) \
@@ -649,6 +725,13 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.make_payment_gl_entries(gl_entries)
 			self.make_write_off_gl_entry(gl_entries)
 			self.make_gle_for_rounding_adjustment(gl_entries)
+			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
+
+		# Sengaja di luar percabangan invoice_type dan setelah merge_similar_entries:
+		# jurnal uang muka harus tetap berdiri sendiri sebagai pasangan debit hutang
+		# dan kredit akun uang muka, tidak dijaringkan ke baris hutang lainnya.
+		if self.get("uang_muka_po"):
+			gl_entries_uang_muka(self, gl_entries)
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
 		return gl_entries

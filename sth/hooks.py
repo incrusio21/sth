@@ -73,6 +73,7 @@ doctype_js = {
 	# ],
 	"Purchase Invoice": [
 		"accounting_sth/custom/override_purchase_invoice.js",
+		"buying_sth/custom/uang_muka_po.js",
 		"public/js/purchase_invoice.js",
 	],
 	# "Purchase Order": ["buying_sth/custom/purchase_order.js","public/js/purchase_order.js"],
