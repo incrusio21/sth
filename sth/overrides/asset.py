@@ -215,6 +215,91 @@ def scrap_asset(asset_name, **kwargs):
 	return _scrap_asset(asset_name, **kwargs)
 
 
+@frappe.whitelist()
+def restore_asset(asset_name):
+	"""Restore Asset sekaligus membatalkan pengajuan scrap yang menjalankannya.
+
+	Scrap penuh dijalankan Asset Scrap Request, dan pembatalannya sengaja
+	diarahkan ke tombol Restore Asset ini — lihat on_cancel di Asset Scrap
+	Request. Tanpa pembatalan itu pengajuannya tetap Approved sementara asetnya
+	sudah hidup lagi: status_scrap di Asset masih terisi dan qty_scrapped-nya
+	tidak kembali nol, sehingga asetnya masih terlihat boleh dijual lewat Sales
+	Invoice Disposal.
+
+	Jurnal scrapnya dicari dulu sebelum restore berjalan, karena dua hal:
+	restore bawaan melepas journal_entry_for_scrap dari Asset — padahal itu
+	penanda paling pasti pengajuan mana yang menjalankan scrap ini — dan
+	tautan jurnal di pengajuannya harus dilepas lebih dulu. Restore membatalkan
+	jurnal itu, sedangkan frappe menolak membatalkan dokumen yang masih ditunjuk
+	dokumen tersubmit lain (LinkExistsError).
+	"""
+	from erpnext.assets.doctype.asset.depreciation import restore_asset as _restore_asset
+
+	journal_entry = frappe.db.get_value("Asset", asset_name, "journal_entry_for_scrap")
+	pengajuan = cari_pengajuan_scrap_penuh(asset_name, journal_entry)
+
+	if pengajuan:
+		frappe.db.set_value(
+			"Asset Scrap Request", pengajuan, "journal_entry_for_scrap", None,
+			update_modified=False
+		)
+
+	hasil = _restore_asset(asset_name)
+
+	if pengajuan:
+		batalkan_pengajuan_scrap(pengajuan)
+
+	return hasil
+
+
+def cari_pengajuan_scrap_penuh(asset_name, journal_entry=None):
+	"""Asset Scrap Request yang menjalankan scrap penuh sebuah asset.
+
+	Pengajuan scrap sebagian sengaja tidak dicari: jurnalnya berdiri sendiri dan
+	tidak disentuh Restore Asset, jadi hapus bukunya tetap berlaku.
+	"""
+	from sth.accounting_sth.doctype.asset_scrap_request.asset_scrap_request import STATE_APPROVED
+
+	if journal_entry:
+		nama = frappe.db.get_value(
+			"Asset Scrap Request",
+			{"asset": asset_name, "docstatus": 1, "journal_entry_for_scrap": journal_entry},
+			"name",
+		)
+		if nama:
+			return nama
+
+	# pengajuan lama tidak selalu menyimpan jurnalnya. Rejected juga berdocstatus
+	# 1 tapi tidak pernah menjalankan scrap, jadi disaring lewat workflow_state.
+	kandidat = frappe.get_all(
+		"Asset Scrap Request",
+		filters={"asset": asset_name, "docstatus": 1, "persentase_scrap": (">=", 100)},
+		fields=["name", "workflow_state"],
+		order_by="creation desc",
+	)
+
+	for d in kandidat:
+		if not d.workflow_state or d.workflow_state == STATE_APPROVED:
+			return d.name
+
+	return None
+
+
+def batalkan_pengajuan_scrap(nama):
+	"""Batalkan pengajuan scrap sebagai bagian dari Restore Asset.
+
+	Flag-nya dibaca on_cancel di Asset Scrap Request: pembatalan scrap penuh
+	hanya boleh lewat jalur ini, tidak langsung dari pengajuannya.
+	"""
+	doc = frappe.get_doc("Asset Scrap Request", nama)
+
+	frappe.flags.restore_asset_berjalan = True
+	try:
+		doc.cancel()
+	finally:
+		frappe.flags.restore_asset_berjalan = False
+
+
 def sisa_qty_scrap(asset, kecuali_sales_invoice=None):
 	"""Qty asset yang sudah discrap dan belum terjual.
 

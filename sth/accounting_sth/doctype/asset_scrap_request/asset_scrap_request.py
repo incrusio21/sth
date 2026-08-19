@@ -517,7 +517,12 @@ class AssetScrapRequest(Document):
 		return bool(frappe.db.exists("GL Entry", self.filter_gl_hapus_buku()))
 
 	def on_cancel(self):
-		if self.sudah_hapus_buku():
+		if frappe.flags.get("restore_asset_berjalan"):
+			# Restore Asset sudah membalik jurnal scrap, mengembalikan penyusutan
+			# yang terlanjur dihapus, dan menghidupkan lagi status asetnya. Yang
+			# tersisa di sini tinggal melepas jejak scrapnya.
+			self.lepas_jejak_scrap_penuh()
+		elif self.sudah_hapus_buku():
 			if flt(self.persentase_scrap) >= 100:
 				frappe.throw(
 					_("Asset {0} sudah discrap seluruhnya. Batalkan lewat tombol Restore Asset "
@@ -527,6 +532,47 @@ class AssetScrapRequest(Document):
 			self.batalkan_hapus_buku()
 
 		self.update_status_scrap(kosongkan=True)
+
+	def lepas_jejak_scrap_penuh(self):
+		"""Kembalikan qty yang tercatat boleh dijual, lepaskan tautan jurnalnya.
+
+		Dipanggil hanya dari Restore Asset. Tanpa ini qty_scrapped tetap terisi
+		dan asetnya masih terlihat boleh dijual lewat Sales Invoice Disposal
+		padahal sudah dihidupkan kembali.
+		"""
+		self.db_set("journal_entry_for_scrap", None)
+
+		frappe.db.set_value(
+			"Asset",
+			self.asset,
+			"qty_scrapped",
+			self.qty_scrap_pengajuan_lain(),
+			update_modified=False,
+		)
+
+	def qty_scrap_pengajuan_lain(self):
+		"""Qty yang masih tercatat discrap oleh pengajuan lain yang belum dibatalkan.
+
+		scrap_seluruh_asset menimpa qty_scrapped, bukan menambahnya, jadi angka
+		sebelum scrap penuh tidak bisa dipulihkan dengan pengurangan: porsi milik
+		pengajuan scrap sebagian yang masih berlaku akan ikut hilang, dan bagian
+		yang sudah dihapusbukukan itu tidak bisa lagi dijual. Angkanya karena itu
+		disusun ulang dari pengajuan yang tersisa.
+
+		Rejected juga berdocstatus 1 tapi tidak pernah menjalankan scrap, jadi
+		disaring lewat workflow_state.
+		"""
+		lain = frappe.get_all(
+			"Asset Scrap Request",
+			filters={"asset": self.asset, "docstatus": 1, "name": ("!=", self.name)},
+			fields=["workflow_state", "qty_scrap"],
+		)
+
+		return sum(
+			cint(d.qty_scrap)
+			for d in lain
+			if not d.workflow_state or d.workflow_state == STATE_APPROVED
+		)
 
 	def batalkan_hapus_buku(self):
 		"""Kembalikan nilai dan qty yang dipotong waktu scrap sebagian disetujui."""
