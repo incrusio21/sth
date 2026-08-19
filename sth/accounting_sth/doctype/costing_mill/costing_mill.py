@@ -385,17 +385,17 @@ def get_pengeluaran_barang_mill(periode_dari, periode_sampai, company=None, unit
 
 @frappe.whitelist()
 def get_hm_stasiun(periode_dari, periode_sampai, company=None, unit=None):
-	"""Jam kerja per stasiun dari Buku Kerja Mekanik dan Preventive Maintenance.
+	"""Jam kerja per stasiun dari Buku Kerja Mekanik.
 
 	Jamnya dihitung per dokumen, tidak dikali jumlah mekanik yang ikut
 	mengerjakan — satu pekerjaan 3 jam oleh 4 orang tetap dihitung 3 HM.
 
-	Preventive Maintenance bukan doctype submittable, jadi yang disaring cuma
-	dokumen yang belum dibatalkan (docstatus < 2).
+	Preventive Maintenance dulu ikut menyumbang HM di sini dan sekarang tidak
+	lagi: alokasi bengkel bersandar sepenuhnya pada Buku Kerja Mekanik.
 	"""
 	params = {"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit}
 
-	bkm_rows = frappe.db.sql("""
+	rows = frappe.db.sql("""
 		SELECT kode_stasiun AS stasiun, SUM(total_jam_desimal) AS total_jam
 		FROM `tabBuku Kerja Mekanik`
 		WHERE docstatus = 1
@@ -409,40 +409,18 @@ def get_hm_stasiun(periode_dari, periode_sampai, company=None, unit=None):
 		unit_filter="AND unit = %(unit)s" if unit else "",
 	), params, as_dict=True)
 
-	pm_rows = frappe.db.sql("""
-		SELECT lokasi_stasiun_pilihan AS stasiun, SUM(total_jam_desimal) AS total_jam
-		FROM `tabPreventive Maintenance`
-		WHERE docstatus < 2
-		  AND tanggal BETWEEN %(dari)s AND %(sampai)s
-		  AND lokasi_stasiun_pilihan IS NOT NULL AND lokasi_stasiun_pilihan != ''
-		  {company_filter}
-		  {unit_filter}
-		GROUP BY lokasi_stasiun_pilihan
-	""".format(
-		company_filter="AND company = %(company)s" if company else "",
-		unit_filter="AND unit = %(unit)s" if unit else "",
-	), params, as_dict=True)
-
-	hm = {}
-	for r in bkm_rows:
-		hm.setdefault(r.stasiun, {"hm_bkm": 0.0, "hm_preventive": 0.0})["hm_bkm"] += flt(r.total_jam)
-	for r in pm_rows:
-		hm.setdefault(r.stasiun, {"hm_bkm": 0.0, "hm_preventive": 0.0})["hm_preventive"] += flt(r.total_jam)
-
 	nama_stasiun = {
-		s: frappe.db.get_value("Station Master", s, "machine_name") for s in hm
+		r.stasiun: frappe.db.get_value("Station Master", r.stasiun, "machine_name") for r in rows
 	}
 
-	result = []
-	for stasiun, jam in hm.items():
-		total_hm = flt(jam["hm_bkm"]) + flt(jam["hm_preventive"])
-		result.append({
-			"stasiun": stasiun,
-			"nama_stasiun": nama_stasiun.get(stasiun),
-			"hm_bkm": flt(jam["hm_bkm"], 2),
-			"hm_preventive": flt(jam["hm_preventive"], 2),
-			"total_hm": flt(total_hm, 2),
-		})
+	result = [
+		{
+			"stasiun": r.stasiun,
+			"nama_stasiun": nama_stasiun.get(r.stasiun),
+			"total_hm": flt(r.total_jam, 2),
+		}
+		for r in rows
+	]
 
 	result.sort(key=lambda r: -r["total_hm"])
 	return result

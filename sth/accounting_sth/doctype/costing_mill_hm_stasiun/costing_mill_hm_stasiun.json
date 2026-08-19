@@ -8,8 +8,6 @@
  "field_order": [
   "stasiun",
   "nama_stasiun",
-  "hm_bkm",
-  "hm_preventive",
   "total_hm",
   "porsi",
   "no_coa",
@@ -32,23 +30,7 @@
    "label": "Nama Stasiun"
   },
   {
-   "columns": 1,
-   "fieldname": "hm_bkm",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "HM Buku Kerja Mekanik",
-   "precision": "2"
-  },
-  {
-   "columns": 1,
-   "fieldname": "hm_preventive",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "HM Preventive Maintenance",
-   "precision": "2"
-  },
-  {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "total_hm",
    "fieldtype": "Float",
    "in_list_view": 1,
