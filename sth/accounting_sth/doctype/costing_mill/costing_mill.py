@@ -215,12 +215,41 @@ def get_cost_center_stasiun(stasiun, company, unit=None):
 # Sumber biaya
 # ---------------------------------------------------------------------------
 
+def kondisi_mekanik_bkm(company=None, unit=None, negasi=False):
+	"""Klausa EXISTS: karyawan yang punya Buku Kerja Mekanik di periode ini.
+
+	Inilah pemisah antara gaji karyawan mill dan gaji operator bengkel. Yang
+	tercatat mengerjakan sesuatu di Buku Kerja Mekanik masuk pool bengkel yang
+	dibagi menurut HM; sisanya dibebankan langsung ke stasiunnya masing-masing.
+
+	Dulu pemisahnya nama jabatan yang mengandung "BENGKEL". Jabatan tidak
+	menentukan siapa yang benar-benar bekerja di bengkel pada periode tertentu,
+	dan sumbernya juga beda dari yang dipakai get_hm_stasiun() sebagai pembagi —
+	sekarang keduanya bersandar pada Buku Kerja Mekanik yang sama.
+	"""
+	return """
+		{negasi} EXISTS (
+			SELECT 1
+			FROM `tabBuku Kerja Mekanik` bkm
+			WHERE bkm.docstatus = 1
+			  AND bkm.nama_karyawan = ss.employee
+			  AND bkm.tanggal BETWEEN %(dari)s AND %(sampai)s
+			  {company}
+			  {unit}
+		)
+	""".format(
+		negasi="NOT" if negasi else "",
+		company="AND bkm.company = %(company)s" if company else "",
+		unit="AND bkm.unit = %(unit)s" if unit else "",
+	)
+
+
 @frappe.whitelist()
 def get_gaji_karyawan_mill(periode_dari, periode_sampai, company=None, unit=None):
 	"""Gaji karyawan mill yang stasiunnya sudah jelas, langsung ke stasiun itu.
 
-	Karyawan bengkel dikecualikan di sini — biayanya masuk pool yang dibagi
-	berdasarkan HM lewat get_gaji_operator_bengkel_mill().
+	Karyawan yang punya Buku Kerja Mekanik di periode ini dikecualikan — biayanya
+	masuk pool yang dibagi berdasarkan HM lewat get_gaji_operator_bengkel_mill().
 
 	Nilainya memakai net_pay supaya persis sama dengan yang sudah dibebankan
 	waktu accrual Payroll Entry; kalau dipakai gross_pay, kredit alokasi akan
@@ -240,16 +269,19 @@ def get_gaji_karyawan_mill(periode_dari, periode_sampai, company=None, unit=None
 		FROM `tabSalary Slip` ss
 		JOIN `tabEmployee` e ON e.name = ss.employee
 		JOIN `tabUnit` u ON u.name = e.unit AND u.mill = 1
-		LEFT JOIN `tabDesignation` d ON d.name = e.designation
 		WHERE ss.docstatus = 1
 		  AND ss.start_date >= %(dari)s
 		  AND ss.end_date <= %(sampai)s
 		  AND e.stasiun IS NOT NULL AND e.stasiun != ''
-		  AND COALESCE(UPPER(d.designation_name), '') NOT LIKE '%%BENGKEL%%'
+		  AND {kondisi_bkm}
 		  {company_filter}
 		  {unit_filter}
 		ORDER BY e.stasiun, ss.employee_name
-	""".format(company_filter=company_filter, unit_filter=unit_filter), {
+	""".format(
+		company_filter=company_filter,
+		unit_filter=unit_filter,
+		kondisi_bkm=kondisi_mekanik_bkm(company, unit, negasi=True),
+	), {
 		"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit,
 	}, as_dict=True)
 
@@ -273,9 +305,10 @@ def get_gaji_karyawan_mill(periode_dari, periode_sampai, company=None, unit=None
 def get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company=None, unit=None):
 	"""Gaji operator bengkel mill — pool yang dibagi ke stasiun menurut HM.
 
-	Bengkel tidak punya stasiun sendiri di COA, jadi biayanya tidak bisa
-	dibebankan langsung; yang dipakai sebagai pembagi adalah jam kerja mekanik
-	di tiap stasiun.
+	Isinya karyawan yang tercatat mengerjakan sesuatu di Buku Kerja Mekanik
+	sepanjang periode ini, yaitu sumber yang sama dengan HM pembaginya di
+	get_hm_stasiun(). Bengkel tidak punya stasiun sendiri di COA, jadi biayanya
+	tidak bisa dibebankan langsung.
 
 	Stasiun karyawannya tetap ikut dibawa — bukan untuk membebani stasiun itu,
 	tapi untuk tahu cost center mana yang harus dikredit balik waktu closing.
@@ -295,15 +328,18 @@ def get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company=None, u
 		FROM `tabSalary Slip` ss
 		JOIN `tabEmployee` e ON e.name = ss.employee
 		JOIN `tabUnit` u ON u.name = e.unit AND u.mill = 1
-		JOIN `tabDesignation` d ON d.name = e.designation
 		WHERE ss.docstatus = 1
 		  AND ss.start_date >= %(dari)s
 		  AND ss.end_date <= %(sampai)s
-		  AND UPPER(d.designation_name) LIKE '%%BENGKEL%%'
+		  AND {kondisi_bkm}
 		  {company_filter}
 		  {unit_filter}
 		ORDER BY ss.employee_name
-	""".format(company_filter=company_filter, unit_filter=unit_filter), {
+	""".format(
+		company_filter=company_filter,
+		unit_filter=unit_filter,
+		kondisi_bkm=kondisi_mekanik_bkm(company, unit),
+	), {
 		"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit,
 	}, as_dict=True)
 
