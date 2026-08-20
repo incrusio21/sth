@@ -326,22 +326,44 @@ def party_akun_uang_muka(doc, akun_uang_muka, purchase_order):
 	}
 
 
+def kurangi_baris_hutang(doc, gl_entries, jumlah):
+	"""Potong baris hutang invoice sebesar uang muka yang dipakai.
+
+	Dipotong langsung di barisnya, bukan ditambahkan sebagai baris debit
+	terpisah. merge_similar_entries() menjumlahkan debit dan kredit sendiri-
+	sendiri, jadi baris debit terpisah akan tetap menyisakan angka di kedua sisi
+	walaupun barisnya sudah menyatu. Dengan dipotong di sini, credit_to keluar
+	sebagai satu baris bernilai bersih di sisi kredit saja.
+
+	Mengembalikan False kalau baris hutangnya tidak ada — invoice tipe SPK dan
+	Leasing tidak memanggil make_supplier_gl_entry() sama sekali.
+	"""
+	for entry in gl_entries:
+		if entry.get("account") != doc.credit_to or not flt(entry.get("credit")):
+			continue
+
+		for medan in ("credit", "credit_in_account_currency", "credit_in_transaction_currency"):
+			entry[medan] = flt(entry.get(medan)) - jumlah
+
+		return True
+
+	return False
+
+
 def gl_entries_uang_muka(doc, gl_entries):
-	"""D: hutang invoice / K: akun uang muka, sebesar yang dialokasikan.
+	"""K: akun uang muka, dan hutang invoice dipotong sebesar yang dialokasikan.
 
-	Debitnya memakai party dan `against_voucher` invoice ini sendiri supaya
-	outstanding hutangnya langsung berkurang lewat payment ledger, tanpa
-	menyentuh Payment Entry yang membayar PO.
-
-	Leg debitnya dibentuk supaya bisa menyatu dengan baris hutang invoice
-	menjadi satu baris credit_to — lihat komentar di dalam. Mengembalikan jumlah
-	baris jurnal yang ditambahkan.
+	Potongan hutangnya memakai `against_voucher` invoice ini sendiri supaya
+	outstanding-nya berkurang lewat payment ledger, tanpa menyentuh Payment
+	Entry yang membayar PO. Mengembalikan jumlah baris jurnal yang berubah.
 	"""
 	pasangan = pasangan_uang_muka_po(doc)
 	if not pasangan:
 		return 0
 
 	cost_center = doc.cost_center or frappe.db.get_value("Company", doc.company, "cost_center")
+	akun_dipakai = []
+	total = 0
 	ditambahkan = 0
 
 	for baris, info in pasangan:
@@ -351,32 +373,6 @@ def gl_entries_uang_muka(doc, gl_entries):
 
 		akun_uang_muka = akun_uang_muka_pe(info.payment_entry, info.purchase_order)
 		keterangan = _("Uang muka {0} lewat {1}").format(info.purchase_order, info.payment_entry)
-
-		# Field non-nominalnya sengaja dibuat persis sama dengan baris hutang di
-		# add_supplier_gl_entry() — against, due_date, against_voucher, project,
-		# cost_center, sampai tidak diberi remarks sendiri — supaya
-		# merge_similar_entries() menyatukan keduanya jadi satu baris credit_to.
-		# Beda satu field saja, barisnya berdiri sendiri lagi.
-		gl_entries.append(
-			doc.get_gl_dict(
-				{
-					"account": doc.credit_to,
-					"party_type": "Supplier",
-					"party": doc.supplier,
-					"due_date": doc.due_date,
-					"against": doc.against_expense_account,
-					"debit": dipakai,
-					"debit_in_account_currency": dipakai,
-					"debit_in_transaction_currency": dipakai,
-					"against_voucher": doc.name,
-					"against_voucher_type": doc.doctype,
-					"cost_center": cost_center,
-					"project": doc.project,
-					"_skip_merge": False,
-				},
-				doc.party_account_currency,
-			)
-		)
 
 		kredit = {
 			"account": akun_uang_muka,
@@ -392,6 +388,33 @@ def gl_entries_uang_muka(doc, gl_entries):
 
 		gl_entries.append(doc.get_gl_dict(kredit))
 
-		ditambahkan += 2
+		akun_dipakai.append(akun_uang_muka)
+		total += dipakai
+		ditambahkan += 1
+
+	if not total:
+		return ditambahkan
+
+	if not kurangi_baris_hutang(doc, gl_entries, total):
+		gl_entries.append(
+			doc.get_gl_dict(
+				{
+					"account": doc.credit_to,
+					"party_type": "Supplier",
+					"party": doc.supplier,
+					"due_date": doc.due_date,
+					"against": ", ".join(sorted(set(akun_dipakai))),
+					"debit": total,
+					"debit_in_account_currency": total,
+					"debit_in_transaction_currency": total,
+					"against_voucher": doc.name,
+					"against_voucher_type": doc.doctype,
+					"cost_center": cost_center,
+					"project": doc.project,
+				},
+				doc.party_account_currency,
+			)
+		)
+		ditambahkan += 1
 
 	return ditambahkan

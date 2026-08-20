@@ -713,11 +713,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
 		# Sengaja di luar percabangan invoice_type: jurnal uang muka berlaku untuk
-		# semua tipe invoice. Di-merge ulang setelahnya supaya debit uang muka
-		# menyatu dengan baris hutang jadi satu baris credit_to, bukan dua baris
-		# yang saling berlawanan.
+		# semua tipe invoice. Tidak di-merge ulang — potongan hutangnya dijahitkan
+		# langsung ke baris credit_to yang sudah ada, jadi barisnya memang sudah
+		# satu tanpa perlu menyentuh baris pembayaran dan write-off di sekitarnya.
 		if gl_entries_uang_muka(self, gl_entries):
-			gl_entries = merge_similar_entries(gl_entries)
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
 		return gl_entries
