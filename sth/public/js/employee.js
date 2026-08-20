@@ -70,7 +70,7 @@ function toggle_stasiun_fields(frm) {
   });
 }
 
-// COA Stasiun diambil dari akun operasional milik stasiun sesuai company.
+// COA Stasiun diambil dari akun milik stasiun sesuai company.
 // Kalau pilihannya cuma satu langsung diisi, kalau lebih user memilih sendiri
 // lewat daftar yang sudah difilter.
 function set_coa_stasiun(frm) {
@@ -96,7 +96,7 @@ function set_coa_stasiun(frm) {
       if (!options.length) {
         frm.set_value("coa_stasiun", null);
         frappe.show_alert({
-          message: __("Stasiun {0} belum punya akun operasional untuk company {1}.", [
+          message: __("Stasiun {0} belum punya akun untuk company {1}.", [
             frm.doc.stasiun,
             frm.doc.company
           ]),
