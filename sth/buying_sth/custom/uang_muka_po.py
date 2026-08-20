@@ -254,6 +254,34 @@ def validate_uang_muka_po(doc):
 		)
 
 
+def party_akun_uang_muka(doc, akun_uang_muka, purchase_order):
+	"""Party dan against_voucher untuk leg kredit akun uang muka.
+
+	Akun uang muka biasanya dipasang bertipe Payable supaya saldonya bisa
+	ditelusuri per supplier. Kalau begitu, `validate_party` di general_ledger
+	mewajibkan party di setiap GL entry yang menyentuhnya, dan Payment Ledger
+	Entry-nya ikut terbentuk. against_voucher-nya dibuat sama dengan yang
+	dipakai Payment Entry waktu membayar PO — Purchase Order, bukan invoice ini
+	— supaya kreditnya menutup debit uang muka yang sudah ada di sana, bukan
+	menggantung sebagai saldo baru.
+
+	Akun bertipe lain tidak masuk payment ledger, jadi dibiarkan tanpa party
+	seperti jurnal biasa.
+	"""
+	if frappe.get_cached_value("Account", akun_uang_muka, "account_type") not in (
+		"Payable",
+		"Receivable",
+	):
+		return {}
+
+	return {
+		"party_type": "Supplier",
+		"party": doc.supplier,
+		"against_voucher_type": "Purchase Order",
+		"against_voucher": purchase_order,
+	}
+
+
 def gl_entries_uang_muka(doc, gl_entries):
 	"""D: hutang invoice / K: akun uang muka, sebesar yang dialokasikan.
 
@@ -297,20 +325,19 @@ def gl_entries_uang_muka(doc, gl_entries):
 			)
 		)
 
-		gl_entries.append(
-			doc.get_gl_dict(
-				{
-					"account": akun_uang_muka,
-					"against": doc.credit_to,
-					"credit": dipakai,
-					"credit_in_account_currency": dipakai,
-					"credit_in_transaction_currency": dipakai,
-					"cost_center": cost_center,
-					"project": doc.project,
-					"remarks": keterangan,
-				}
-			)
-		)
+		kredit = {
+			"account": akun_uang_muka,
+			"against": doc.credit_to,
+			"credit": dipakai,
+			"credit_in_account_currency": dipakai,
+			"credit_in_transaction_currency": dipakai,
+			"cost_center": cost_center,
+			"project": doc.project,
+			"remarks": keterangan,
+		}
+		kredit.update(party_akun_uang_muka(doc, akun_uang_muka, info.purchase_order))
+
+		gl_entries.append(doc.get_gl_dict(kredit))
 
 		ditambahkan += 2
 
