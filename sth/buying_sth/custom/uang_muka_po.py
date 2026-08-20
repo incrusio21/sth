@@ -110,6 +110,50 @@ def advance_uang_muka_po(doc):
 	return [baris for baris, _ in pasangan_uang_muka_po(doc)]
 
 
+def saring_advance_beda_akun(doc, entries):
+	"""Buang Payment Entry yang uang mukanya tidak duduk di akun hutang invoice.
+
+	Rekonsiliasi bawaan mengasumsikan uang muka dan tagihannya berada di akun
+	party yang sama: yang dilakukannya hanya memindahkan referensi Payment Entry
+	ke invoice, akunnya tidak ikut pindah. Uang muka PO dibayar ke akun Uang
+	Muka, bukan ke credit_to, jadi asumsi itu tidak berlaku — sisa Payment Entry
+	yang belum dialokasikan ke PO mana pun akan tampak melunasi invoice padahal
+	uangnya masih menggantung di akun uang muka.
+
+	Baris yang menunjuk PO tetap lolos: baris itu dijurnal sendiri di
+	get_gl_entries() dan dilewati waktu rekonsiliasi, jadi beda akun justru
+	memang yang diharapkan.
+	"""
+	menganggur = {
+		d.get("reference_name")
+		for d in entries
+		if d.get("reference_type") == "Payment Entry" and not d.get("against_order")
+	}
+	if not menganggur:
+		return entries
+
+	# paid_to adalah akun party untuk payment_type Pay, yaitu satu-satunya tipe
+	# yang bisa jadi advance di Purchase Invoice.
+	akun = dict(
+		frappe.db.sql(
+			"""
+			select name, paid_to
+			from `tabPayment Entry`
+			where name in %(pe)s
+			""",
+			{"pe": list(menganggur)},
+		)
+	)
+
+	return [
+		d
+		for d in entries
+		if d.get("reference_type") != "Payment Entry"
+		or d.get("against_order")
+		or akun.get(d.get("reference_name")) == doc.credit_to
+	]
+
+
 def terpakai_di_invoice_lain(reference_rows, kecuali=None):
 	"""Berapa tiap baris uang muka sudah dipakai invoice submitted yang lain."""
 	if not reference_rows:
@@ -287,8 +331,11 @@ def gl_entries_uang_muka(doc, gl_entries):
 
 	Debitnya memakai party dan `against_voucher` invoice ini sendiri supaya
 	outstanding hutangnya langsung berkurang lewat payment ledger, tanpa
-	menyentuh Payment Entry yang membayar PO. Mengembalikan jumlah baris jurnal
-	yang ditambahkan.
+	menyentuh Payment Entry yang membayar PO.
+
+	Leg debitnya dibentuk supaya bisa menyatu dengan baris hutang invoice
+	menjadi satu baris credit_to — lihat komentar di dalam. Mengembalikan jumlah
+	baris jurnal yang ditambahkan.
 	"""
 	pasangan = pasangan_uang_muka_po(doc)
 	if not pasangan:
@@ -305,13 +352,19 @@ def gl_entries_uang_muka(doc, gl_entries):
 		akun_uang_muka = akun_uang_muka_pe(info.payment_entry, info.purchase_order)
 		keterangan = _("Uang muka {0} lewat {1}").format(info.purchase_order, info.payment_entry)
 
+		# Field non-nominalnya sengaja dibuat persis sama dengan baris hutang di
+		# add_supplier_gl_entry() — against, due_date, against_voucher, project,
+		# cost_center, sampai tidak diberi remarks sendiri — supaya
+		# merge_similar_entries() menyatukan keduanya jadi satu baris credit_to.
+		# Beda satu field saja, barisnya berdiri sendiri lagi.
 		gl_entries.append(
 			doc.get_gl_dict(
 				{
 					"account": doc.credit_to,
 					"party_type": "Supplier",
 					"party": doc.supplier,
-					"against": akun_uang_muka,
+					"due_date": doc.due_date,
+					"against": doc.against_expense_account,
 					"debit": dipakai,
 					"debit_in_account_currency": dipakai,
 					"debit_in_transaction_currency": dipakai,
@@ -319,7 +372,7 @@ def gl_entries_uang_muka(doc, gl_entries):
 					"against_voucher_type": doc.doctype,
 					"cost_center": cost_center,
 					"project": doc.project,
-					"remarks": keterangan,
+					"_skip_merge": False,
 				},
 				doc.party_account_currency,
 			)

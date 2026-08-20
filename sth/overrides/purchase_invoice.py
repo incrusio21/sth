@@ -45,6 +45,7 @@ from sth.buying_sth.custom.uang_muka_po import (
 	advance_uang_muka_po,
 	gl_entries_uang_muka,
 	koreksi_advance_uang_muka_po,
+	saring_advance_beda_akun,
 	validate_uang_muka_po,
 )
 
@@ -532,6 +533,17 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.precision("grand_total_setelah_dp"),
 		)
 
+	def get_advance_entries(self, include_unallocated=True):
+		"""Uang muka yang akunnya beda dari credit_to tidak ditawarkan jalur bawaan.
+
+		Penyaringnya ada di saring_advance_beda_akun(); di sini supaya berlaku
+		untuk semua pemakainya sekaligus — set_advances() yang mengisi tabel,
+		allocate_advances_automatically, dan peringatan validate_advance_entries.
+		"""
+		return saring_advance_beda_akun(
+			self, super().get_advance_entries(include_unallocated=include_unallocated)
+		)
+
 	@frappe.whitelist()
 	def set_advances(self):
 		"""Tarik advance seperti bawaan, lalu potong uang muka PO dengan sisanya.
@@ -700,10 +712,12 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.make_gle_for_rounding_adjustment(gl_entries)
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
-		# Sengaja di luar percabangan invoice_type dan setelah merge_similar_entries:
-		# jurnal uang muka harus tetap berdiri sendiri sebagai pasangan debit hutang
-		# dan kredit akun uang muka, tidak dijaringkan ke baris hutang lainnya.
+		# Sengaja di luar percabangan invoice_type: jurnal uang muka berlaku untuk
+		# semua tipe invoice. Di-merge ulang setelahnya supaya debit uang muka
+		# menyatu dengan baris hutang jadi satu baris credit_to, bukan dua baris
+		# yang saling berlawanan.
 		if gl_entries_uang_muka(self, gl_entries):
+			gl_entries = merge_similar_entries(gl_entries)
 			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 
 		return gl_entries
