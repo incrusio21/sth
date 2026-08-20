@@ -69,6 +69,13 @@ frappe.ui.form.on('Quotation', {
 	}
 });
 
+frappe.ui.form.on("Payment Schedule", {
+	payment_schedule_add(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "due_date", frm.doc.tanggal_pembayaran ?? null);
+	}
+});
+
 function set_rekening_filter(frm) {
 	frm.set_query('no_rekening_tujuan', function () {
 		return {
