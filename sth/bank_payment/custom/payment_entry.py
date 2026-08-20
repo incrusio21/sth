@@ -321,11 +321,11 @@ def create_kcm_from_pe(doc, method=None):
     )
 
     row.customer_reference = (
-        doc.reference_no
+        doc.name
     )
 
     row.remarks = (
-        doc.remarks
+        doc.name    
     )
 
     if ft_service_code in [

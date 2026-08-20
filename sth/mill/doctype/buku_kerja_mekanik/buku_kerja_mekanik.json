@@ -10,6 +10,7 @@
   "naming_series",
   "tanggal",
   "jam",
+  "set_posting_time",
   "column_break_bpcy",
   "company",
   "unit",
@@ -47,14 +48,16 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal"
+   "label": "Tanggal",
+   "read_only_depends_on": "eval:!doc.set_posting_time"
   },
   {
    "default": "Now",
    "fieldname": "jam",
    "fieldtype": "Time",
    "in_preview": 1,
-   "label": "Jam"
+   "label": "Jam",
+   "read_only_depends_on": "eval:!doc.set_posting_time"
   },
   {
    "fieldname": "company",
@@ -172,13 +175,19 @@
    "label": "Total Jam (Desimal)",
    "precision": "2",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Tanggal and Jam"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-15 15:50:55.303276",
+ "modified": "2026-08-19 10:50:01.850423",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Buku Kerja Mekanik",

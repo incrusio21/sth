@@ -33,7 +33,7 @@ def mtfu_separated(self):
 
         payload = {
 
-            "instruction_mode": "1",
+            "instruction_mode": "2",
 
             "instruction_date": safe(
                 row.instruction_date
@@ -41,7 +41,7 @@ def mtfu_separated(self):
 
             "session": safe(
                 row.session,
-                "1"
+                "2"
             ),
 
             "debit_account": safe(
@@ -82,11 +82,11 @@ def mtfu_separated(self):
             ),
 
             "remark": safe(
-                row.remark
+                row.payment_entry
             ),
 
             "customer_ref": safe(
-                row.customer_reference
+                row.payment_entry
             ),
 
             "email_flag": (
@@ -164,8 +164,8 @@ def mtfu_consolidated(self):
             "ft_service": row.ft_service or "IBU",
             "bank_code": row.bank_code,
             "bank_name": row.beneficiary_bank_name,
-            "remark": row.remark,
-            "customer_ref": row.customer_reference,
+            "remark": row.payment_entry,
+            "customer_ref": row.payment_entry,
 
             "email_flag": row.email_flag,
 
@@ -415,8 +415,8 @@ def build_mtfu_separated(data: dict):
     instruction_mode = val(
         data,
         "instruction_mode",
-        1,
-        default="1"
+        2,
+        default="2"
     )
 
     fields[0] = "M"

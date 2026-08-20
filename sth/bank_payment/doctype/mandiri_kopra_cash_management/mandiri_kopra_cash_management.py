@@ -435,9 +435,9 @@ def get_payment_entry_details(payment_entry):
     }
 
 def test():
-	doc = frappe.get_doc("Mandiri Kopra Cash Management", "TMTL0011404052026000006")
+	doc = frappe.get_doc("Mandiri Kopra Cash Management", "TMTL0011507082026000011")
 	content = doc.create_content()
-	print(content)
+	print(str(content))
 
 
 @frappe.whitelist()
