@@ -35,7 +35,7 @@ KOMPONEN_COSTING_KEBUN = (
 	"Natura",
 	"Premi Kehadiran",
 	"Premi Tutup Buku",
-	"Upah Perawatan"
+	"Gaji Pokok"
 )
 
 # BPJS beban perusahaan namanya bervariasi (JKK punya beberapa varian RS/RT/RSD),
