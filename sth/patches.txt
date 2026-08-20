@@ -30,3 +30,4 @@ sth.patches.kembalikan_nama_tph_tmde
 sth.patches.namai_tph_dari_nama_blok
 sth.patches.isi_nilai_perolehan_asset_scrap_request
 sth.patches.isi_workflow_state_asset_scrap_request
+sth.patches.pindahkan_uang_muka_po_ke_advances
