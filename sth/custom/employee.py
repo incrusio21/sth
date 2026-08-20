@@ -77,7 +77,6 @@ def get_coa_stasiun_options(station, company):
 			sps.parent = %(station)s
 			AND sps.parenttype = 'Station Master'
 			AND sps.company = %(company)s
-			AND ca.name LIKE '%%OPERASIONAL%%'
 		ORDER BY ca.name
 	""", {
 		"station": station,
