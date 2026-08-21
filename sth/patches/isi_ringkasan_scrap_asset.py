@@ -1,3 +1,6 @@
+import json
+import os
+
 import frappe
 from frappe.utils import cint, flt
 
@@ -22,6 +25,8 @@ def execute():
 	3. Nominal Awal, Nominal Total Scrap, Qty Sudah Discrap, dan Sisa Qty di
 	   Asset diisi dari pengajuan yang berlaku.
 	"""
+	pastikan_field_ringkasan_ada()
+
 	for asset in asset_pernah_discrap():
 		berlaku = pengajuan_berlaku(asset)
 		if not berlaku:
@@ -35,6 +40,32 @@ def execute():
 		perbarui_ringkasan_scrap(asset)
 
 	frappe.db.commit()
+
+
+def pastikan_field_ringkasan_ada():
+	"""Pasang Custom Field Asset lebih dulu.
+
+	bench migrate menyinkronkan folder custom/ di post_schema_updates, yaitu
+	sesudah semua patch dijalankan. Patch ini menulis ke field yang lahir bareng
+	dirinya, jadi tanpa ini migrate berhenti dengan "Unknown column
+	nilai_perolehan_awal".
+
+	Dijalankan tanpa syarat, bukan dijaga has_column(): daftar kolom tabel itu
+	dibaca dari cache, dan menebak-nebak isinya di tengah migrate lebih rawan
+	daripada menyinkronkan ulang. Sinkronisasi bawaan tetap jalan sesudahnya dan
+	tidak terganggu — isinya sama.
+	"""
+	from frappe.modules.utils import sync_customizations_for_doctype
+
+	folder = frappe.get_app_path("sth", "accounting_sth", "custom")
+	with open(os.path.join(folder, "asset.json")) as f:
+		sync_customizations_for_doctype(json.load(f), folder)
+
+	frappe.db.commit()
+
+	# daftar kolom tabAsset yang tersimpan di cache masih yang lama
+	cache = frappe.cache() if callable(frappe.cache) else frappe.cache
+	cache.hdel("table_columns", "tabAsset")
 
 
 def asset_pernah_discrap():
