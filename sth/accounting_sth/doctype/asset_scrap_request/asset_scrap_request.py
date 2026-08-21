@@ -227,14 +227,12 @@ class AssetScrapRequest(Document):
 		)
 
 	def scrap_seluruh_asset(self):
-		# import langsung supaya tidak kena penjaga di sth.overrides.asset.scrap_asset
-		from erpnext.assets.doctype.asset.depreciation import scrap_asset
+		# bukan scrap_asset bawaan ERPNext: yang itu memaku tanggal jurnalnya ke
+		# hari approval, sedangkan jurnal scrap harus jatuh di tanggal pengajuan
+		# ini — sama seperti jurnal scrap sebagian di buat_je_hapus_buku()
+		from sth.overrides.asset import scrap_asset_pada_tanggal
 
-		frappe.flags.ignore_asset_scrap_request = True
-		try:
-			scrap_asset(self.asset)
-		finally:
-			frappe.flags.ignore_asset_scrap_request = False
+		scrap_asset_pada_tanggal(self.asset, self.posting_date)
 
 		journal_entry = frappe.db.get_value("Asset", self.asset, "journal_entry_for_scrap")
 		if journal_entry:

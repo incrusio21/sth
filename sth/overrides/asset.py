@@ -214,6 +214,71 @@ def scrap_asset(asset_name, **kwargs):
 	return _scrap_asset(asset_name, **kwargs)
 
 
+def scrap_asset_pada_tanggal(asset_name, tanggal=None):
+	"""Scrap seluruh Asset, dengan tanggal jurnal yang ditentukan pemanggilnya.
+
+	Salinan erpnext...scrap_asset yang tanggalnya bisa diatur. Bawaannya memaku
+	tanggal ke today(), jadi pengajuan yang baru disetujui beberapa hari
+	kemudian menjurnal di tanggal approval — bukan di tanggal pengajuannya.
+	Yang ikut kena bukan cuma Journal Entry-nya: penyusutan terakhir sebelum
+	dilepas dan disposal_date asetnya juga memakai tanggal yang sama.
+
+	Beda lain dari bawaannya: di sana `date` terkirim sebagai `selling_amount`
+	ke get_gl_entries_on_asset_disposal karena posisinya, sehingga posting_date
+	tiap baris GL-nya tetap hari ini. Di sini tanggalnya dikirim sebagai
+	keyword. Nominalnya tidak bergeser — flt("2026-08-21") tetap 0, sama dengan
+	selling_amount 0 yang memang berlaku untuk scrap.
+	"""
+	from erpnext.assets.doctype.asset.depreciation import (
+		depreciate_asset,
+		get_gl_entries_on_asset_disposal,
+	)
+	from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+
+	asset = frappe.get_doc("Asset", asset_name)
+
+	if asset.docstatus != 1:
+		frappe.throw(_("Asset {0} must be submitted").format(asset.name))
+	elif asset.status in ("Cancelled", "Sold", "Scrapped", "Capitalized"):
+		frappe.throw(
+			_("Asset {0} cannot be scrapped, as it is already {1}").format(asset.name, asset.status)
+		)
+
+	date = getdate(tanggal) if tanggal else getdate(today())
+
+	notes = _("This schedule was created when Asset {0} was scrapped.").format(
+		get_link_to_form(asset.doctype, asset.name)
+	)
+	if asset.status != "Fully Depreciated":
+		depreciate_asset(asset, date, notes)
+		asset.reload()
+
+	je = frappe.new_doc("Journal Entry")
+	je.voucher_type = "Journal Entry"
+	je.posting_date = date
+	je.company = asset.company
+	je.remark = _("Scrap Entry for asset {0}").format(asset_name)
+
+	seri = frappe.get_cached_value("Company", asset.company, "series_for_depreciation_entry")
+	if seri:
+		je.naming_series = seri
+
+	for entry in get_gl_entries_on_asset_disposal(asset, date=date):
+		entry.update({"reference_type": "Asset", "reference_name": asset_name})
+		je.append("accounts", entry)
+
+	je.flags.ignore_permissions = True
+	je.submit()
+
+	frappe.db.set_value("Asset", asset_name, "disposal_date", date)
+	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
+	asset.set_status("Scrapped")
+
+	add_asset_activity(asset_name, _("Asset scrapped"))
+
+	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
+
+
 @frappe.whitelist()
 def restore_asset(asset_name):
 	"""Restore Asset sekaligus membatalkan pengajuan scrap yang menjalankannya.
