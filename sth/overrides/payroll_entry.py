@@ -895,11 +895,33 @@ def balikkan_gl_payroll_batal():
 		ORDER BY pe.name
 	""")
 
-	for nama in tertinggal:
-		make_reverse_gl_entries(voucher_type="Payroll Entry", voucher_no=nama)
-		print("GL Payroll Entry {0} dibalik".format(nama))
-
 	if not tertinggal:
 		print("Tidak ada Payroll Entry batal yang GL-nya masih hidup")
+		return {"berhasil": [], "gagal": []}
 
-	return tertinggal
+	berhasil = []
+	gagal = []
+
+	# satu dokumen yang tertolak tidak menghentikan sisanya. yang paling sering
+	# menolak adalah periode yang sudah ditutup, dan itu perlu diputuskan
+	# sendiri-sendiri — bukan alasan membiarkan yang lain ikut tertinggal
+	for nama in tertinggal:
+		titik = "balik_gl_payroll"
+		try:
+			frappe.db.savepoint(titik)
+			make_reverse_gl_entries(voucher_type="Payroll Entry", voucher_no=nama)
+			berhasil.append(nama)
+			print("OK   {0}".format(nama))
+		except Exception as e:
+			if frappe.message_log:
+				frappe.message_log.pop()
+
+			frappe.db.rollback(save_point=titik)
+			pesan = frappe.utils.strip_html(str(e)).strip()
+			gagal.append({"payroll_entry": nama, "sebab": pesan})
+			print("GAGAL {0} — {1}".format(nama, pesan))
+
+	print("")
+	print("Selesai: {0} dibalik, {1} gagal".format(len(berhasil), len(gagal)))
+
+	return {"berhasil": berhasil, "gagal": gagal}
