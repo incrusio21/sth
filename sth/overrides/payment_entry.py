@@ -189,8 +189,16 @@ class PaymentEntry(EmployeePaymentEntry):
 		Hanya flag-nya yang direset. paid_to dibiarkan apa adanya supaya akun uang muka PO
 		dari Procurement Settings yang dipasang set_paid_to_uang_muka_po tidak tertimpa akun
 		uang muka default milik Company.
+
+		Tidak dijaga dengan docstatus seperti set_liability_account milik ERPNext. Frappe
+		menyetel docstatus = 1 sebelum save(), jadi validate() pada saat submit sudah
+		melihat docstatus 1 dan penjaga semacam itu membuat draft yang tersimpan sebelum
+		perbaikan ini terpasang tetap tersubmit dengan flag menyala. Aman tanpa penjaga
+		karena validate hanya dijalankan untuk _action save dan submit; cancel dan
+		update after submit tidak melewatinya sehingga flag dokumen lama yang jurnalnya
+		terlanjur empat baris tetap utuh dan pembalikannya tetap cocok.
 		"""
-		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
+		if self.payment_type == "Internal Transfer":
 			return
 
 		if not self.book_advance_payments_in_separate_party_account:
