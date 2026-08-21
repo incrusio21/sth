@@ -601,12 +601,56 @@ class PaymentEntry(EmployeePaymentEntry):
 
 		if self.docstatus == 2:
 			self.delete_gl_entry()
+			self.delete_payment_ledger_entry()
+			self.delete_advance_payment_ledger_entry()
 
 
 	def delete_gl_entry(self):
 
 		frappe.db.delete(
 			"GL Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name
+			}
+		)
+
+	def delete_payment_ledger_entry(self):
+		"""Buang Payment Ledger Entry milik dokumen ini.
+
+		Saudara kembar GL Entry, dan ikut menghalangi penghapusan dengan alasan yang
+		sama: pemeriksaan link waktu hapus cuma melihat hook ignore_links_on_delete,
+		bukan ignore_linked_doctypes yang dipasang on_cancel.
+
+		Dokumennya sudah dibatalkan waktu sampai di sini, jadi barisnya tinggal jejak
+		yang saling menghapus. Dibuang bersama GL Entry supaya tidak ada sisa buku
+		besar yang menunjuk ke dokumen yang sudah tidak ada.
+		"""
+		frappe.db.delete(
+			"Payment Ledger Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name
+			}
+		)
+
+	def delete_advance_payment_ledger_entry(self):
+		"""Buang jejak buku besar uang muka supaya dokumennya bisa dihapus.
+
+		Baris Advance Payment Ledger Entry dibuat untuk setiap referensi yang masuk
+		advance_payment_doctypes, lalu ditambah lagi barisan bertanda Cancel waktu
+		dokumennya dibatalkan. Keduanya menunjuk balik ke Payment Entry ini.
+
+		Saat cancel hal itu tidak jadi soal karena ERPNext sudah memasukkan doctype-nya
+		ke ignore_linked_doctypes. Saat hapus, daftar itu tidak dipakai sama sekali,
+		cuma hook ignore_links_on_delete, sehingga barisnya menghalangi penghapusan.
+
+		Dibersihkan di sini, bukan dengan melonggarkan hook, supaya tidak ada baris
+		yatim yang tertinggal di buku besar uang muka. on_trash dijalankan sebelum
+		pemeriksaan link, jadi barisnya sudah hilang waktu giliran pemeriksaan tiba.
+		"""
+		frappe.db.delete(
+			"Advance Payment Ledger Entry",
 			{
 				"voucher_type": self.doctype,
 				"voucher_no": self.name
