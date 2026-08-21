@@ -142,6 +142,7 @@ class PaymentEntry(EmployeePaymentEntry):
 				self.paid_to = debit_account
 
 		self.set_paid_to_uang_muka_po()
+		self.reset_flag_uang_muka_terpisah()
 		self.validate_paid_amount_with_outstanding()
 
 	def set_paid_to_uang_muka_po(self):
@@ -170,6 +171,34 @@ class PaymentEntry(EmployeePaymentEntry):
 		self.paid_to_account_currency = frappe.db.get_value(
 			"Account", self.paid_to, "account_currency"
 		)
+
+	def reset_flag_uang_muka_terpisah(self):
+		"""Matikan pembukuan uang muka di akun terpisah untuk pembayaran tagihan.
+
+		Field-nya fetch_from Company, jadi ikut ternyala di setiap PE company yang
+		mengaktifkan Book Advance Payments in Separate Party Account. ERPNext biasanya
+		mematikannya lagi lewat set_liability_account() untuk PE yang mereferensi selain
+		SO/PO, tapi validate() di sini tidak memanggil validate() milik ERPNext sehingga
+		method itu tidak pernah jalan.
+
+		Kalau flag-nya dibiarkan menyala, add_advance_gl_entries menambah sepasang jurnal
+		rekonsiliasi uang muka. Untuk pembayaran tagihan biasa paid_to-nya sama dengan akun
+		hutang di baris reference, jadi pasangan itu jatuh di akun yang sama dan cuma saling
+		menghapus: nettonya benar tapi buku besarnya jadi empat baris.
+
+		Hanya flag-nya yang direset. paid_to dibiarkan apa adanya supaya akun uang muka PO
+		dari Procurement Settings yang dipasang set_paid_to_uang_muka_po tidak tertimpa akun
+		uang muka default milik Company.
+		"""
+		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
+			return
+
+		if not self.book_advance_payments_in_separate_party_account:
+			return
+
+		jenis_referensi = {d.reference_doctype for d in self.get("references") if d.reference_name}
+		if jenis_referensi - set(frappe.get_hooks("advance_payment_doctypes")):
+			self.book_advance_payments_in_separate_party_account = False
 
 	def validate_paid_amount_with_outstanding(self):
 		"""
