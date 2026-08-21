@@ -20,11 +20,6 @@ from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_ent
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# Sama dengan yang dipakai Costing Mill: akun kontra beban, bukan hutang gaji.
-# Payroll sudah menjurnal beban gaji lawan hutang gaji, jadi alokasi ini murni
-# reclass beban ke kegiatan.
-NOMOR_COA_GAJI_DIALOKASI = "6211099"
-
 # Komponen yang dibagi ke kegiatan. Upah Panen/Perawatan/Traksi dan premi yang
 # lahir dari BKM (brondolan, angkut, supervisi) sengaja tidak ada di sini: kalau
 # ikut, akun kegiatan terdebit dua kali. Gaji Pokok juga tidak ikut sesuai
@@ -192,12 +187,17 @@ class CostingKebun(Document):
 
 @frappe.whitelist()
 def get_coa_gaji_dialokasi(company):
-	"""Akun kontra 6211099 - BIAYA GAJI DAN UPAH DIALOKASI."""
-	return frappe.db.get_value("Account", {
-		"company": company,
-		"account_number": NOMOR_COA_GAJI_DIALOKASI,
-		"is_group": 0,
-	}, "name")
+	"""Akun kredit alokasi gaji, diambil dari STH Accounting Settings.
+
+	Barisnya dicocokkan per company di tabel STH Accounting Settings Payroll,
+	akun yang sama yang dipakai Payroll Entry waktu mendebit beban gaji, jadi
+	alokasi ini murni reclass beban ke kegiatan.
+	"""
+	settings = frappe.get_single("STH Accounting Settings")
+	for row in settings.sth_accounting_settings_payroll:
+		if row.company == company:
+			return row.account
+	return None
 
 
 def get_komponen_gaji(periode_dari, periode_sampai, company=None, unit=None):
@@ -455,9 +455,8 @@ def susun_closing_kebun(baris, sumber, company):
 	coa_kredit = get_coa_gaji_dialokasi(company)
 	if not coa_kredit:
 		frappe.throw(
-			"Akun {0} - BIAYA GAJI DAN UPAH DIALOKASI belum ada di company {1}.".format(
-				NOMOR_COA_GAJI_DIALOKASI, company
-			)
+			"Akun alokasi gaji untuk company {0} belum diisi di STH Accounting Settings "
+			"tabel Payroll.".format(company)
 		)
 
 	debit_per_akun = {}
@@ -563,7 +562,7 @@ def build_and_submit_costing_kebun(doctype, company, unit, periode_dari, periode
 	Unit yang tidak punya kegiatan sumber ini sama sekali dilewati, dan
 	dilewatinya sebelum tabel Closing disusun: unit mill tidak perlu ditinggali
 	Costing Panen kosong tiap bulan, juga tidak perlu ikut ditegur soal akun
-	6211099 yang cuma dipakai jurnal alokasi. Yang datanya ada tapi belum
+	alokasi gaji yang cuma dipakai jurnal alokasi. Yang datanya ada tapi belum
 	lengkap tetap dibuat supaya kekurangannya kelihatan.
 	"""
 	doc = frappe.new_doc(doctype)

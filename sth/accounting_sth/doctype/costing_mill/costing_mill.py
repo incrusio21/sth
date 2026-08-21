@@ -7,11 +7,6 @@ from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_ent
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# Kredit alokasi gaji. Bukan Hutang Gaji (2161001): payroll sudah menjurnal
-# beban gaji lawan hutang gaji, jadi jurnal alokasi ini murni reclass beban ke
-# stasiun dan lawannya harus akun kontra beban.
-NOMOR_COA_GAJI_DIALOKASI = "6211099"
-
 # Akhiran anak akun stasiun. Akun grup stasiun di Station Procurement Settings
 # (mis. 63010) ditambah akhirannya jadi akun anaknya: 6301001 OPERASIONAL,
 # 6301004 SERVICE DAN MAINTENANCE.
@@ -177,12 +172,17 @@ def get_coa_service_stasiun(stasiun, company):
 
 @frappe.whitelist()
 def get_coa_gaji_dialokasi(company):
-	"""Akun kontra 6211099 - BIAYA GAJI DAN UPAH DIALOKASI."""
-	return frappe.db.get_value("Account", {
-		"company": company,
-		"account_number": NOMOR_COA_GAJI_DIALOKASI,
-		"is_group": 0,
-	}, "name")
+	"""Akun kredit alokasi gaji, diambil dari STH Accounting Settings.
+
+	Barisnya dicocokkan per company di tabel STH Accounting Settings Payroll,
+	akun yang sama yang dipakai Payroll Entry waktu mendebit beban gaji, jadi
+	jurnal alokasi ini murni reclass beban ke stasiun.
+	"""
+	settings = frappe.get_single("STH Accounting Settings")
+	for row in settings.sth_accounting_settings_payroll:
+		if row.company == company:
+			return row.account
+	return None
 
 
 def get_cost_center_stasiun(stasiun, company, unit=None):
@@ -557,9 +557,8 @@ def get_closing_mill(periode_dari, periode_sampai, company=None, unit=None):
 	coa_kredit = get_coa_gaji_dialokasi(company)
 	if not coa_kredit:
 		frappe.throw(
-			"Akun {0} - BIAYA GAJI DAN UPAH DIALOKASI belum ada di company {1}.".format(
-				NOMOR_COA_GAJI_DIALOKASI, company
-			)
+			"Akun alokasi gaji untuk company {0} belum diisi di STH Accounting Settings "
+			"tabel Payroll.".format(company)
 		)
 
 	# Gaji karyawan mill dijumlahkan per stasiun supaya jurnalnya ringkas,
@@ -659,8 +658,8 @@ def build_and_submit_costing_mill(company, unit, periode_dari, periode_sampai):
 
 	# Unit tanpa mill dilewati sebelum tabel Closing disusun: unit kebun tidak
 	# perlu ditinggali Costing Mill kosong tiap bulan, juga tidak perlu ikut
-	# ditegur soal akun 6211099 yang cuma dipakai jurnal alokasi. Yang datanya
-	# ada tapi belum lengkap tetap dibuat supaya kekurangannya kelihatan.
+	# ditegur soal akun alokasi gaji yang cuma dipakai jurnal alokasi. Yang
+	# datanya ada tapi belum lengkap tetap dibuat supaya kekurangannya kelihatan.
 	if not (gaji_rows or operator_rows or hm_rows or pengeluaran_rows):
 		return None
 
