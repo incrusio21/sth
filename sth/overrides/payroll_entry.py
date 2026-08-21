@@ -17,11 +17,59 @@ from frappe.utils import (
 )
 from frappe.query_builder.functions import Coalesce, Count
 
-from erpnext.accounts.general_ledger import make_gl_entries as post_gl_entries
+from erpnext.accounts.general_ledger import (
+	make_gl_entries as post_gl_entries,
+	make_reverse_gl_entries,
+)
 from frappe import _
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry, create_salary_slips_for_employees, get_salary_structure,set_fields_to_select,set_searchfield,set_filter_conditions,set_match_conditions,remove_payrolled_employees
 class PayrollEntry(PayrollEntry):
-	
+
+	def on_cancel(self):
+		self.batalkan_gl_payroll()
+		super().on_cancel()
+
+	def batalkan_gl_payroll(self):
+		"""Balik GL accrual yang diposting make_payroll_gl_entries().
+
+		Accrual gaji diposting langsung sebagai GL Entry milik Payroll Entry, bukan
+		lewat Journal Entry, jadi on_cancel bawaan hrms tidak menyentuhnya sama
+		sekali: yang dibatalkannya cuma Journal Entry yang tertaut, dan GL Entry
+		malah dimasukkan ke ignore_linked_doctypes supaya tidak menghalangi cancel.
+
+		Akibatnya beban gaji dan hutang gajinya tetap hidup di buku besar sesudah
+		Payroll Entry-nya dibatalkan, dan dokumennya juga tidak bisa dihapus karena
+		GL-nya masih menautinya.
+		"""
+		ada_gl = frappe.db.exists("GL Entry", {
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"is_cancelled": 0,
+		})
+
+		if ada_gl:
+			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+
+	def on_trash(self):
+		self.hapus_gl_payroll()
+
+	def hapus_gl_payroll(self):
+		"""Buang GL Entry milik Payroll Entry ini waktu dokumennya dihapus.
+
+		Mengikuti cara ERPNext memperlakukan vouchernya sendiri, termasuk
+		penjaganya di Accounts Settings: kalau "Delete Linked Ledger Entries"
+		dimatikan, GL-nya ditinggal dan penghapusan tetap dihalangi seperti
+		voucher lain. Barisnya sudah bertanda batal lebih dulu lewat on_cancel,
+		jadi yang dibuang di sini tidak lagi memikul saldo.
+		"""
+		if not frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
+			return
+
+		gle = frappe.qb.DocType("GL Entry")
+		frappe.qb.from_(gle).delete().where(
+			(gle.voucher_type == self.doctype) & (gle.voucher_no == self.name)
+		).run()
+
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status=1, as_dict=True)
 
@@ -821,3 +869,37 @@ def get_payroll_entry_for_payment(payroll_entry):
 		"unit"					  : doc.unit,
 		"remarks"                 : "Payment untuk Payroll Entry: {0}".format(payroll_entry),
 	}
+
+
+@frappe.whitelist()
+def balikkan_gl_payroll_batal():
+	"""Balik GL accrual milik Payroll Entry yang terlanjur dibatalkan.
+
+	Sebelum on_cancel ikut membalik GL-nya, membatalkan Payroll Entry tidak
+	menyentuh accrual gaji sama sekali: dokumennya berdocstatus 2 tapi beban gaji
+	dan hutang gajinya tetap hidup di buku besar.
+
+	Tidak dijalankan sebagai patch karena jurnal baliknya memakai tanggal posting
+	yang lama, dan periode itu bisa saja sudah ditutup — kapan membalikkannya
+	keputusan yang menutup buku, bukan keputusan migrate:
+
+	    bench --site <site> execute sth.overrides.payroll_entry.balikkan_gl_payroll_batal
+	"""
+	tertinggal = frappe.db.sql_list("""
+		SELECT DISTINCT pe.name
+		FROM `tabPayroll Entry` pe
+		JOIN `tabGL Entry` gle
+		  ON gle.voucher_type = 'Payroll Entry' AND gle.voucher_no = pe.name
+		WHERE pe.docstatus = 2
+		  AND gle.is_cancelled = 0
+		ORDER BY pe.name
+	""")
+
+	for nama in tertinggal:
+		make_reverse_gl_entries(voucher_type="Payroll Entry", voucher_no=nama)
+		print("GL Payroll Entry {0} dibalik".format(nama))
+
+	if not tertinggal:
+		print("Tidak ada Payroll Entry batal yang GL-nya masih hidup")
+
+	return tertinggal
