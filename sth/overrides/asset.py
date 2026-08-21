@@ -2,7 +2,6 @@ import frappe
 from erpnext.assets.doctype.asset.asset import Asset
 from frappe import _
 from frappe.utils import (
-	cint,
 	flt,
 	get_datetime,
 	get_last_day,
@@ -318,7 +317,7 @@ def sisa_qty_scrap(asset, kecuali_sales_invoice=None):
 	if not doc:
 		return 0
 
-	discrap = cint(doc.qty_scrapped)
+	discrap = flt(doc.qty_scrapped)
 
 	if not discrap:
 		return 0

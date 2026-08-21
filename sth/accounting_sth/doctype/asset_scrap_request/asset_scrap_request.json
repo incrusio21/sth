@@ -82,12 +82,13 @@
   },
   {
    "depends_on": "eval:doc.asset_quantity > 1",
-   "description": "Perkiraan jumlah unit yang discrap, dihitung dari persentase. Pembagian nilainya tetap memakai persentase, bukan qty ini.",
+   "description": "Porsi qty yang discrap, boleh pecahan: qty 1 yang discrap 50% tercatat 0.5",
    "fieldname": "qty_scrap",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "Qty Discrap",
    "non_negative": 1,
-   "read_only": 1
+   "read_only": 1,
+   "precision": "4"
   },
   {
    "fieldname": "column_break_head",

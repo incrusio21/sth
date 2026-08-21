@@ -101,11 +101,11 @@ class AssetScrapRequest(Document):
 		self.asset_quantity = total
 
 		if not flt(self.persentase_scrap):
-			if cint(self.qty_scrap):
+			if flt(self.qty_scrap):
 				# pengajuan yang dibuat sebelum ada input persentase: rasionya
 				# diambil dari qty supaya nilainya tidak berubah di tengah approval
 				self.persentase_scrap = flt(
-					cint(self.qty_scrap) * 100 / total, self.precision("persentase_scrap")
+					flt(self.qty_scrap) * 100 / total, self.precision("persentase_scrap")
 				)
 			else:
 				# tanpa pengisian, perlakuannya seperti sebelum ada scrap sebagian
@@ -120,21 +120,37 @@ class AssetScrapRequest(Document):
 		self.qty_scrap = self.hitung_qty_scrap()
 
 	def hitung_qty_scrap(self):
-		"""Qty yang mewakili persentase, cuma untuk ditampilkan dan dipasang ke
-		asset pecahan. Yang menentukan pembagian nilai tetap persentasenya."""
-		total = cint(self.asset_quantity) or 1
+		"""Qty yang mewakili porsi yang discrap, boleh pecahan.
+
+		Dulu angkanya dibulatkan ke unit utuh dan dipaksa minimal 1, jadi asset
+		ber-qty 1 yang discrap 50% tetap tercatat discrap 1 unit — sisanya nol,
+		padahal separuh nilainya masih di buku. Sekarang qty mengikuti
+		persentasenya apa adanya: 1 discrap 50% jadi 0.5, sisa 0.5.
+
+		Dasarnya sisa qty, bukan qty awal, karena persentasenya juga dihitung dari
+		nilai asset yang tersisa sekarang. Asset ber-qty 1 yang discrap 50% dua
+		kali menyisakan seperempat nilai, dan qty sisanya ikut 0.25 — kalau
+		dasarnya qty awal, qty habis di scrap kedua padahal nilainya belum.
+		"""
+		sisa = self.sisa_qty_sebelum_scrap()
 		persentase = flt(self.persentase_scrap)
 
 		if persentase >= 100:
-			return total
+			return sisa
 
-		qty = cint(round(total * persentase / 100.0)) or 1
+		return flt(sisa * persentase / 100.0, self.precision("qty_scrap"))
 
-		if total > 1:
-			# asset sisa harus tetap punya qty
-			qty = min(qty, total - 1)
+	def sisa_qty_sebelum_scrap(self):
+		"""Qty asset yang belum discrap saat pengajuan ini dihitung.
 
-		return qty
+		Diturunkan dari qty_scrapped, bukan dibaca dari qty_sisa, supaya asset
+		yang porsinya sudah habis terbagi tidak salah dibaca sebagai belum pernah
+		discrap sama sekali.
+		"""
+		total = cint(self.asset_quantity) or 1
+		sudah = flt(frappe.db.get_value("Asset", self.asset, "qty_scrapped"))
+
+		return max(flt(total) - sudah, 0)
 
 	def set_nilai_buku(self):
 		asset = frappe.get_doc("Asset", self.asset)
@@ -179,12 +195,36 @@ class AssetScrapRequest(Document):
 
 	def scrap_asset(self):
 		self.validate_asset()
+		self.catat_nilai_perolehan_awal()
 
 		if flt(self.persentase_scrap) >= 100:
 			self.scrap_seluruh_asset()
 			return
 
 		self.hapus_buku_bagian_yang_discrap()
+
+	def catat_nilai_perolehan_awal(self):
+		"""Potret harga perolehan Asset sebelum ada porsi yang dihapusbukukan.
+
+		Harus diambil sebelum geser_nilai_asset() bekerja: sesudah itu
+		gross_purchase_amount di Asset sudah tinggal sisanya, dan angka semula
+		tidak bisa lagi dibaca dari mana pun. Dipotret sekali saja — scrap
+		bertahap yang kedua dan seterusnya tidak boleh menimpanya.
+		"""
+		asset = frappe.db.get_value(
+			"Asset", self.asset, ["gross_purchase_amount", "nilai_perolehan_awal"], as_dict=True
+		)
+
+		if flt(asset.nilai_perolehan_awal):
+			return
+
+		frappe.db.set_value(
+			"Asset",
+			self.asset,
+			"nilai_perolehan_awal",
+			flt(asset.gross_purchase_amount),
+			update_modified=False,
+		)
 
 	def scrap_seluruh_asset(self):
 		# import langsung supaya tidak kena penjaga di sth.overrides.asset.scrap_asset
@@ -204,13 +244,7 @@ class AssetScrapRequest(Document):
 		# status berubah jadi "Sold" begitu asetnya dijual, dan kalau invoicenya
 		# dibatalkan asetnya tidak akan pernah kembali ke "Scrapped" — lihat
 		# sisa_qty_scrap() di sth/overrides/asset.py
-		frappe.db.set_value(
-			"Asset",
-			self.asset,
-			"qty_scrapped",
-			self.hitung_qty_scrap(),
-			update_modified=False
-		)
+		perbarui_ringkasan_scrap(self.asset)
 
 	def hapus_buku_bagian_yang_discrap(self):
 		"""Hapus buku porsi yang discrap langsung dari asset asalnya.
@@ -468,10 +502,14 @@ class AssetScrapRequest(Document):
 
 	def geser_nilai_asset(self, asset, arah):
 		"""Kurangi (arah -1) atau kembalikan (arah 1) nilai asset sebesar porsi yang
-		discrap, sekalian qty yang boleh dijual."""
+		discrap, sekalian ringkasan scrapnya.
+
+		asset_quantity sengaja tidak ikut digeser: angka itu dibekukan sebagai qty
+		awal supaya "discrap berapa" dan "sisa berapa" punya patokan yang tidak
+		bergerak. Sisanya dibaca dari field qty_sisa yang disusun
+		perbarui_ringkasan_scrap().
+		"""
 		gross, akumulasi, nilai_buku = self.porsi_yang_discrap()
-		qty_scrap = self.hitung_qty_scrap()
-		qty_total = cint(asset.asset_quantity) or 1
 
 		gross_baru = max(flt(asset.gross_purchase_amount) + arah * gross, 0)
 
@@ -484,13 +522,7 @@ class AssetScrapRequest(Document):
 			"value_after_depreciation": max(
 				flt(asset.value_after_depreciation) + arah * nilai_buku, 0
 			),
-			"qty_scrapped": max(cint(asset.get("qty_scrapped")) - arah * qty_scrap, 0),
 		}
-
-		# qty asset cuma digeser kalau waktu pengajuan ini dulu masih ada sisanya.
-		# asset ber-qty 1 yang discrap sebagian nilainya tetap dihitung 1 unit
-		if cint(self.asset_quantity) > qty_scrap:
-			nilai["asset_quantity"] = max(qty_total + arah * qty_scrap, 1)
 
 		frappe.db.set_value("Asset", asset.name, nilai, update_modified=False)
 
@@ -502,6 +534,10 @@ class AssetScrapRequest(Document):
 				max(flt(row.value_after_depreciation) + arah * nilai_buku, 0),
 				update_modified=False
 			)
+
+		# arah +1 berarti pembatalan; pengajuan ini dikeluarkan sendiri dari
+		# hitungan supaya tidak bergantung pada docstatusnya sudah tersimpan 2
+		perbarui_ringkasan_scrap(asset.name, kecuali=self.name if arah > 0 else None)
 
 	def sudah_hapus_buku(self):
 		"""Pengajuan yang hapus bukunya sudah diposting.
@@ -542,43 +578,18 @@ class AssetScrapRequest(Document):
 		"""
 		self.db_set("journal_entry_for_scrap", None)
 
-		frappe.db.set_value(
-			"Asset",
-			self.asset,
-			"qty_scrapped",
-			self.qty_scrap_pengajuan_lain(),
-			update_modified=False,
-		)
-
-	def qty_scrap_pengajuan_lain(self):
-		"""Qty yang masih tercatat discrap oleh pengajuan lain yang belum dibatalkan.
-
-		scrap_seluruh_asset menimpa qty_scrapped, bukan menambahnya, jadi angka
-		sebelum scrap penuh tidak bisa dipulihkan dengan pengurangan: porsi milik
-		pengajuan scrap sebagian yang masih berlaku akan ikut hilang, dan bagian
-		yang sudah dihapusbukukan itu tidak bisa lagi dijual. Angkanya karena itu
-		disusun ulang dari pengajuan yang tersisa.
-
-		Rejected juga berdocstatus 1 tapi tidak pernah menjalankan scrap, jadi
-		disaring lewat workflow_state.
-		"""
-		lain = frappe.get_all(
-			"Asset Scrap Request",
-			filters={"asset": self.asset, "docstatus": 1, "name": ("!=", self.name)},
-			fields=["workflow_state", "qty_scrap"],
-		)
-
-		return sum(
-			cint(d.qty_scrap)
-			for d in lain
-			if not d.workflow_state or d.workflow_state == STATE_APPROVED
-		)
+		perbarui_ringkasan_scrap(self.asset, kecuali=self.name)
 
 	def batalkan_hapus_buku(self):
 		"""Kembalikan nilai dan qty yang dipotong waktu scrap sebagian disetujui."""
 		from sth.overrides.asset import sisa_qty_scrap
 
-		if sisa_qty_scrap(self.asset) < self.hitung_qty_scrap():
+		# yang dipakai qty yang tersimpan di pengajuan, bukan hitung ulang: dasar
+		# hitungannya sudah bergeser begitu scrap ini dibukukan. presisinya
+		# disamakan supaya selisih pembulatan sepersekian angka di belakang koma
+		# tidak dibaca sebagai "sudah terjual"
+		presisi = self.precision("qty_scrap")
+		if flt(sisa_qty_scrap(self.asset), presisi) < flt(self.qty_scrap, presisi):
 			frappe.throw(
 				_("Bagian yang discrap dari Asset {0} sudah terjual, pengajuan ini tidak bisa "
 				  "dibatalkan.").format(self.asset)
@@ -606,6 +617,74 @@ class AssetScrapRequest(Document):
 
 	def on_trash(self):
 		self.update_status_scrap(kosongkan=True)
+
+
+def pengajuan_berlaku(asset, kecuali=None):
+	"""Pengajuan scrap yang benar-benar sudah dijalankan atas sebuah Asset.
+
+	Rejected juga berdocstatus 1 tapi tidak pernah menjalankan scrap, jadi
+	disaring lewat workflow_state. Pengajuan lama yang statenya kosong ikut
+	dihitung — waktu itu docstatus 1 memang berarti disetujui.
+	"""
+	baris = frappe.get_all(
+		"Asset Scrap Request",
+		filters={"asset": asset, "docstatus": 1},
+		fields=[
+			"name", "creation", "workflow_state", "qty_scrap", "persentase_scrap",
+			"asset_quantity", "gross_purchase_amount", "nilai_perolehan_scrap",
+		],
+		order_by="creation asc",
+	)
+
+	return [
+		d for d in baris
+		if d.name != kecuali and (not d.workflow_state or d.workflow_state == STATE_APPROVED)
+	]
+
+
+def nilai_perolehan_porsi(pengajuan):
+	"""Harga perolehan porsi yang discrap sebuah pengajuan.
+
+	Pengajuan lama belum punya nilai_perolehan_scrap, jadi tetap ada hitungannya
+	sebagai cadangan — sama dengan cadangan di porsi_yang_discrap().
+	"""
+	if flt(pengajuan.nilai_perolehan_scrap):
+		return flt(pengajuan.nilai_perolehan_scrap)
+
+	return flt(pengajuan.gross_purchase_amount) * flt(pengajuan.persentase_scrap) / 100.0
+
+
+def perbarui_ringkasan_scrap(asset, kecuali=None):
+	"""Susun ulang ringkasan scrap di Asset dari pengajuan yang berlaku.
+
+	Angkanya disusun ulang, bukan ditambah-kurang, supaya pembatalan dan scrap
+	bertahap tidak bisa membuatnya melenceng. scrap_seluruh_asset() dulu menimpa
+	qty_scrapped begitu saja, jadi porsi milik pengajuan sebagian yang masih
+	berlaku ikut hilang dan bagian yang sudah dihapusbukukan tidak bisa lagi
+	dijual.
+
+	`kecuali` untuk pengajuan yang sedang dibatalkan, supaya tidak bergantung
+	pada docstatus 2-nya sudah tersimpan lebih dulu.
+	"""
+	berlaku = pengajuan_berlaku(asset, kecuali)
+
+	qty_scrapped = flt(sum(flt(d.qty_scrap) for d in berlaku))
+	qty_awal = cint(frappe.db.get_value("Asset", asset, "asset_quantity")) or 1
+
+	nilai = {
+		"qty_scrapped": qty_scrapped,
+		"qty_sisa": max(flt(qty_awal) - qty_scrapped, 0),
+		"nilai_total_scrap": flt(sum(nilai_perolehan_porsi(d) for d in berlaku)),
+	}
+
+	if not berlaku:
+		# tidak ada lagi jejak scrap: potret harga perolehan awal ikut dilepas
+		# supaya scrap berikutnya memotret ulang dari nilai yang berlaku saat itu
+		nilai["nilai_perolehan_awal"] = 0
+
+	frappe.db.set_value("Asset", asset, nilai, update_modified=False)
+
+	return nilai
 
 
 @frappe.whitelist()
@@ -699,7 +778,7 @@ def get_status_scrap(asset):
 	hasil["workflow_state"] = doc.get("workflow_state")
 	hasil["actions"] = [transisi.action for transisi in get_transitions(doc, raise_exception=False)]
 	hasil["persentase_scrap"] = flt(doc.persentase_scrap)
-	hasil["qty_scrap"] = cint(doc.qty_scrap)
+	hasil["qty_scrap"] = flt(doc.qty_scrap)
 	hasil["bisa_ajukan"] = False
 
 	return hasil

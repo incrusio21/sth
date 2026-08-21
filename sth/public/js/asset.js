@@ -118,12 +118,13 @@ function setup_approval_scrap(frm) {
 }
 
 function dialog_ajukan_scrap(frm, asset_quantity) {
-	// scrap sebagian dihitung dari persentase nilai asset, jadi asset ber-qty 1
-	// pun bisa (misalnya bangunan yang rusak sebagian). asetnya baru dipecah
-	// saat approval terakhir
+	// scrap sebagian dihitung dari persentase nilai asset yang tersisa, jadi asset
+	// ber-qty 1 pun bisa (misalnya bangunan yang rusak sebagian). asetnya tidak
+	// dipecah jadi dokumen baru: nilai dan qty-nya dikurangi di tempat, dan qty
+	// yang discrap boleh pecahan — qty 1 discrap 50% menyisakan 0.5
 	const keterangan_qty = asset_quantity > 1
-		? __("Qty asset ini {0}, nilainya dibagi sesuai persentase di atas.", [asset_quantity])
-		: __("Nilai asset dibagi sesuai persentase ini, sisanya tetap jadi asset aktif.");
+		? __("Qty asset ini {0}, nilai dan qty-nya dibagi sesuai persentase di atas.", [asset_quantity])
+		: __("Nilai dan qty asset dibagi sesuai persentase ini, sisanya tetap jadi asset aktif.");
 
 	const fields = [
 		{
