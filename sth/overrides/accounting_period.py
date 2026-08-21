@@ -248,10 +248,13 @@ def buat_costing_periode(accounting_period):
 
 def cancel_costing_on_cancel(doc, method=None):
 	"""
-	Saat Accounting Period dibatalkan (workflow_state = "Cancelled"), cancel juga
-	seluruh costing yang otomatis dibuat untuk company/unit/periode yang sama.
+	Saat Accounting Period dibatalkan, cancel juga seluruh costing yang otomatis
+	dibuat untuk company/unit/periode yang sama.
+
+	State pembatalan di workflow-nya bernama "Canceled" (satu L). Ejaan
+	"Cancelled" ikut diterima supaya tidak pecah kalau workflow-nya diganti.
 	"""
-	if doc.get("workflow_state") != "Cancelled":
+	if doc.get("workflow_state") not in ("Canceled", "Cancelled"):
 		return
 
 	for costing in COSTING_OTOMATIS:
