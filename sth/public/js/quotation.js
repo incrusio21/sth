@@ -71,8 +71,20 @@ frappe.ui.form.on('Quotation', {
 
 frappe.ui.form.on("Payment Schedule", {
 	payment_schedule_add(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "due_date", frm.doc.tanggal_pembayaran ?? null);
+	},
+	payment_term(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		row.__force_due_date = frm.doc.tanggal_pembayaran ?? null;
+	},
+	due_date(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.__force_due_date !== undefined && row.due_date !== row.__force_due_date) {
+			let forced_value = row.__force_due_date;
+			row.__force_due_date = undefined;
+			frappe.model.set_value(cdt, cdn, "due_date", forced_value);
+		}
 	}
 });
 
