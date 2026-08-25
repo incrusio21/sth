@@ -9,7 +9,9 @@
   "sth_accounting_settings_alokasi_gaji_bengkel",
   "sth_accounting_settings_reparasi_bengkel_account",
   "sth_accounting_settings_biaya_bengkel_dialokasi",
-  "sth_accounting_settings_penjualan_asset"
+  "sth_accounting_settings_penjualan_asset",
+  "sth_accounting_settings_cogs",
+  "sth_accounting_settings_cogs_sumber_biaya"
  ],
  "fields": [
   {
@@ -41,13 +43,25 @@
    "fieldtype": "Table",
    "label": "Penjualan Asset",
    "options": "STH Accounting Settings Penjualan Asset"
+  },
+  {
+   "fieldname": "sth_accounting_settings_cogs",
+   "fieldtype": "Table",
+   "label": "COGS Mill dan Kebun",
+   "options": "STH Accounting Settings COGS"
+  },
+  {
+   "fieldname": "sth_accounting_settings_cogs_sumber_biaya",
+   "fieldtype": "Table",
+   "label": "COGS Mill dan Kebun - Sumber Biaya",
+   "options": "STH Accounting Settings COGS Sumber Biaya"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-05 09:00:00.000000",
+ "modified": "2026-08-25 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "STH Accounting Settings",
