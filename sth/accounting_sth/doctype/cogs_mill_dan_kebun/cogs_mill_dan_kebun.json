@@ -1,0 +1,327 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-08-25 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "section_break_periode",
+  "periode_dari",
+  "column_break_periode",
+  "periode_sampai",
+  "column_break_company",
+  "company",
+  "unit",
+  "section_konversi",
+  "qty_tbs_diolah",
+  "oer",
+  "ker",
+  "column_break_harga",
+  "harga_rata_cpo",
+  "harga_rata_pk",
+  "column_break_conversion",
+  "conversion_cost_cpo",
+  "conversion_cost_pk",
+  "section_biaya",
+  "biaya_kebun",
+  "column_break_biaya",
+  "biaya_mill",
+  "section_rincian",
+  "rincian",
+  "section_closing",
+  "posting_jurnal",
+  "closing",
+  "total_closing",
+  "section_pemeriksaan",
+  "saldo_gl_tbs",
+  "saldo_gl_cpo",
+  "saldo_gl_pk",
+  "column_break_pemeriksaan",
+  "selisih_gl_tbs",
+  "selisih_gl_cpo",
+  "selisih_gl_pk",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "No Dokumen",
+   "options": "COGS-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_periode",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "periode_dari",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Periode Dari",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_periode",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periode_sampai",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Periode Sampai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "section_konversi",
+   "fieldtype": "Section Break",
+   "label": "Conversion Cost CPO / PK"
+  },
+  {
+   "description": "Internal Consumption TBS, yaitu TBS yang benar-benar diolah pabrik.",
+   "fieldname": "qty_tbs_diolah",
+   "fieldtype": "Float",
+   "label": "TBS Diolah (Kg)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "description": "Qty produksi CPO dibagi TBS diolah.",
+   "fieldname": "oer",
+   "fieldtype": "Percent",
+   "label": "OER",
+   "precision": "4",
+   "read_only": 1
+  },
+  {
+   "description": "Qty produksi Palm Kernel dibagi TBS diolah.",
+   "fieldname": "ker",
+   "fieldtype": "Percent",
+   "label": "KER",
+   "precision": "4",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_harga",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Rata-rata harga jual periode berjalan. Terisi dari Sales Invoice, boleh diubah.",
+   "fieldname": "harga_rata_cpo",
+   "fieldtype": "Currency",
+   "label": "Average Price CPO",
+   "precision": "2"
+  },
+  {
+   "description": "Rata-rata harga jual periode berjalan. Terisi dari Sales Invoice, boleh diubah.",
+   "fieldname": "harga_rata_pk",
+   "fieldtype": "Currency",
+   "label": "Average Price PK",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_conversion",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "(OER x Harga CPO) / ((OER x Harga CPO) + (KER x Harga PK))",
+   "fieldname": "conversion_cost_cpo",
+   "fieldtype": "Percent",
+   "label": "Conversion Cost CPO",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "description": "100% dikurangi Conversion Cost CPO.",
+   "fieldname": "conversion_cost_pk",
+   "fieldtype": "Percent",
+   "label": "Conversion Cost PK",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_biaya",
+   "fieldtype": "Section Break",
+   "label": "Biaya Pokok Periode"
+  },
+  {
+   "description": "Mutasi akun biaya kelompok Kebun di STH Accounting Settings. Jadi nilai produksi TBS.",
+   "fieldname": "biaya_kebun",
+   "fieldtype": "Currency",
+   "label": "Biaya Kebun",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_biaya",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Mutasi akun biaya kelompok Mill di STH Accounting Settings. Dibagi ke CPO dan PK.",
+   "fieldname": "biaya_mill",
+   "fieldtype": "Currency",
+   "label": "Biaya Mill",
+   "precision": "2"
+  },
+  {
+   "fieldname": "section_rincian",
+   "fieldtype": "Section Break",
+   "label": "Rincian Pergerakan dan Nilai"
+  },
+  {
+   "fieldname": "rincian",
+   "fieldtype": "Table",
+   "label": "Rincian",
+   "options": "COGS Mill dan Kebun Rincian"
+  },
+  {
+   "fieldname": "section_closing",
+   "fieldtype": "Section Break",
+   "label": "Closing (Jurnal)"
+  },
+  {
+   "default": "0",
+   "description": "Kalau dimatikan, dokumen tetap bisa disubmit dan tabel Closing tetap tersusun, tapi tidak ada GL Entry yang dibuat. Dipakai untuk memeriksa dampak jurnal sebelum benar-benar diposting.",
+   "fieldname": "posting_jurnal",
+   "fieldtype": "Check",
+   "label": "Posting Jurnal ke Buku Besar"
+  },
+  {
+   "fieldname": "closing",
+   "fieldtype": "Table",
+   "label": "Closing",
+   "options": "COGS Mill dan Kebun Closing"
+  },
+  {
+   "fieldname": "total_closing",
+   "fieldtype": "Currency",
+   "label": "Total Debit",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_pemeriksaan",
+   "fieldtype": "Section Break",
+   "label": "Pemeriksaan Saldo GL"
+  },
+  {
+   "description": "Saldo akun persediaan di GL per Periode Sampai, diambil sebelum jurnal dokumen ini.",
+   "fieldname": "saldo_gl_tbs",
+   "fieldtype": "Currency",
+   "label": "Saldo GL Persediaan TBS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "saldo_gl_cpo",
+   "fieldtype": "Currency",
+   "label": "Saldo GL Persediaan CPO",
+   "read_only": 1
+  },
+  {
+   "fieldname": "saldo_gl_pk",
+   "fieldtype": "Currency",
+   "label": "Saldo GL Persediaan PK",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pemeriksaan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Saldo GL setelah jurnal dokumen ini dikurangi nilai Closing Stock menurut form. Idealnya nol.",
+   "fieldname": "selisih_gl_tbs",
+   "fieldtype": "Currency",
+   "label": "Selisih TBS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "selisih_gl_cpo",
+   "fieldtype": "Currency",
+   "label": "Selisih CPO",
+   "read_only": 1
+  },
+  {
+   "fieldname": "selisih_gl_pk",
+   "fieldtype": "Currency",
+   "label": "Selisih PK",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "COGS Mill dan Kebun",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-25 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "COGS Mill dan Kebun",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

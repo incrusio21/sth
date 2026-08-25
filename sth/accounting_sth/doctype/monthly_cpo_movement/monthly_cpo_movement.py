@@ -66,7 +66,20 @@ class MonthlyCPOMovement(Document):
 			)
 
 	def validate(self):
+		self.validasi_sudah_diganti()
 		self.validate_duplicate()
+
+	def validasi_sudah_diganti(self):
+		"""Form ini digantikan COGS Mill dan Kebun. Dokumen lama sengaja tidak
+		dihapus supaya Stock Reconciliation yang sudah terlanjur dibuat masih
+		bisa ditelusuri dan dibatalkan."""
+		if self.is_new():
+			frappe.throw(
+				"Monthly CPO Movement sudah digantikan oleh <b>COGS Mill dan Kebun</b>. "
+				"Dokumen lama tetap bisa dibuka dan dibatalkan, tapi perhitungan baru "
+				"dibuat di form tersebut.",
+				title="Form Sudah Diganti",
+			)
 
 	def validate_duplicate(self):
 		existing = frappe.db.exists("Monthly CPO Movement", {
