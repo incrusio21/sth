@@ -261,7 +261,12 @@ doc_events = {
 	# didaftarkan lagi di sini.
 	"Accounting Period":{
 		"validate": "sth.custom.period_closing_voucher.check_invoice_asuransi_sewa_accounting_period",
-		"before_submit": "sth.overrides.accounting_period.check_unsubmitted_salary_slip",
+		# urutannya sengaja: BKM dulu, baru upah, baru slip gaji, mengikuti
+		# urutan kerjanya. Yang paling hulu yang harus ketahuan lebih dulu.
+		"before_submit": [
+			"sth.accounting_sth.validasi_closing.validasi_sebelum_closing",
+			"sth.overrides.accounting_period.check_unsubmitted_salary_slip",
+		],
 	},
 
 	"Asset": {
