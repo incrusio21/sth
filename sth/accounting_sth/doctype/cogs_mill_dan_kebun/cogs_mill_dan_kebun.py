@@ -53,7 +53,7 @@ KETERANGAN_OLAH = "PENGOLAHAN TBS MENJADI CPO DAN PALM KERNEL"
 KETERANGAN_HPP = "HARGA POKOK PENJUALAN {0}"
 
 
-class COGSMillDanKebun(Document):
+class COGSMilldanKebun(Document):
 
 	def validate(self):
 		self.validasi_periode()
@@ -412,14 +412,17 @@ def get_item_produk(produk):
 
 
 def get_gudang_produk(produk, company, unit=None):
-	filters = {"warehouse_category": KATEGORI_GUDANG[produk], "is_group": 0}
+	"""Gudang selalu disaring per company. Kalau Unit diisi tapi tidak punya
+	gudang produk, jangan jatuh ke gudang company — unit kebun tidak punya
+	gudang TBS/CPO/PK, dan diam-diam memakai gudang mill bikin angkanya
+	kelihatan wajar padahal salah unit."""
+	filters = {
+		"warehouse_category": KATEGORI_GUDANG[produk],
+		"is_group": 0,
+		"company": company,
+	}
 	if unit:
 		filters["unit"] = unit
-		gudang = frappe.db.get_value("Warehouse", filters, "name")
-		if gudang:
-			return gudang
-		filters.pop("unit")
-	filters["company"] = company
 	return frappe.db.get_value("Warehouse", filters, "name")
 
 

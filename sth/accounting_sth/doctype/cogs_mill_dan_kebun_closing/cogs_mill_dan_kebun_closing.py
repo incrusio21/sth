@@ -4,5 +4,5 @@
 from frappe.model.document import Document
 
 
-class COGSMillDanKebunClosing(Document):
+class COGSMilldanKebunClosing(Document):
 	pass
