@@ -534,27 +534,42 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.precision("grand_total_setelah_dp"),
 		)
 
-	def validate_uang_muka_wajib_diambil(self):
-		"""Uang muka yang masih bisa dipakai tidak boleh dilewat begitu saja.
+	def uang_muka_tersedia(self):
+		"""Uang muka yang masih bisa ditarik invoice ini; 0 kalau tidak relevan.
 
-		Diperiksa tiap validate, jadi draft pun sudah ditahan sampai uang mukanya
-		ditarik. Yang dihitung cuma uang muka yang memang bisa dipakai invoice ini:
+		Yang dihitung cuma uang muka yang memang bisa dipakai invoice ini:
 		get_advance_entries() sudah menyaring supplier, akun hutang, dan uang muka
 		yang akunnya beda dari credit_to.
 
 		Invoice uang muka (termin DP) dan Debit Note dilewati — keduanya bukan
-		penagihan yang memotong uang muka.
+		penagihan yang memotong uang muka. Begitu ada satu baris advance yang
+		teralokasi, uang mukanya sudah diambil dan sisanya bukan urusan penjaga ini.
+
+		Dipakai dua tempat: penjaga waktu validate dan peringatan di form waktu
+		invoice ditarik dari Purchase Receipt. Satu sumber supaya peringatan di
+		layar tidak pernah beda dari error waktu simpan.
 		"""
 		if self.get("is_return") or self.termin == "DP":
-			return
+			return 0.0
+
+		if not self.get("supplier") or not self.get("credit_to"):
+			return 0.0
 
 		if any(flt(baris.allocated_amount) for baris in self.get("advances")):
-			return
+			return 0.0
 
-		tersedia = flt(
+		return flt(
 			sum(flt(entry.amount) for entry in self.get_advance_entries()),
 			self.precision("total_advance"),
 		)
+
+	def validate_uang_muka_wajib_diambil(self):
+		"""Uang muka yang masih bisa dipakai tidak boleh dilewat begitu saja.
+
+		Diperiksa tiap validate, jadi draft pun sudah ditahan sampai uang mukanya
+		ditarik.
+		"""
+		tersedia = self.uang_muka_tersedia()
 		if tersedia <= 0:
 			return
 
@@ -1721,3 +1736,31 @@ def get_or_create_cost_center(kode_vra, company):
     cc.insert()
 
     return cc.name
+
+
+@frappe.whitelist()
+def get_uang_muka_tersedia(company, supplier, credit_to, purchase_orders=None, is_return=0, termin=None):
+	"""Uang muka yang masih bisa ditarik, untuk peringatan di form.
+
+	Dipanggil form waktu item ditarik dari Purchase Receipt dan waktu invoice
+	dibuat dari Purchase Receipt, supaya uang mukanya ketahuan sebelum dokumen
+	disimpan — bukan baru waktu penjaga di validate menolak.
+
+	Yang dikirim form cuma field penentunya, bukan seluruh dokumen: invoice-nya
+	belum tersimpan, dan doc bikinan sendiri lewat new_doc() dijamin punya
+	default semua field yang dibaca get_advance_entries().
+	"""
+	if not frappe.has_permission("Purchase Invoice", "read"):
+		frappe.throw(_("Tidak punya akses ke Purchase Invoice."), frappe.PermissionError)
+
+	doc = frappe.new_doc("Purchase Invoice")
+	doc.company = company
+	doc.supplier = supplier
+	doc.credit_to = credit_to
+	doc.is_return = cint(is_return)
+	doc.termin = termin
+
+	for purchase_order in frappe.parse_json(purchase_orders) or []:
+		doc.append("items", {"purchase_order": purchase_order})
+
+	return doc.uang_muka_tersedia()
