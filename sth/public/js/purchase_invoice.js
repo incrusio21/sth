@@ -76,6 +76,8 @@ frappe.ui.form.on("Purchase Invoice", {
 
         frm.trigger('set_grand_total_setelah_dp')
 
+        peringatan_uang_muka(frm)
+
         frm.fields_dict["charges_purchase_invoice"].grid.update_docfield_property(
             "account", "get_query", function () {
                 return {
@@ -583,6 +585,66 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 });
 
+
+// ─── Peringatan Uang Muka ──────────────────────────────────────────────────
+
+// Invoice yang datang dari Purchase Receipt — lewat "Get Items From" maupun
+// tombol Create di PREC — sering langsung disubmit tanpa menengok bagian Advance
+// Payments. Peringatan ini muncul begitu itemnya masuk, jadi uang mukanya
+// ketahuan di layar, bukan baru waktu penjaga di server menolak simpanannya.
+//
+// Angkanya dari method yang sama dengan penjaga itu, supaya peringatan di layar
+// tidak pernah beda dari errornya.
+function peringatan_uang_muka(frm) {
+    if (frm.doc.docstatus !== 0 || frm.doc.is_return || frm.doc.termin === "DP") return
+    if (!frm.doc.company || !frm.doc.supplier || !frm.doc.credit_to) return
+    if (!(frm.doc.items || []).length) return
+    if ((frm.doc.advances || []).some(row => flt(row.allocated_amount))) return
+
+    const purchase_orders = [...new Set(
+        (frm.doc.items || []).map(row => row.purchase_order).filter(Boolean)
+    )]
+
+    // refresh dipanggil berkali-kali untuk dokumen yang sama. Tanda ini menahan
+    // dialognya supaya tidak muncul ulang selama isi invoice belum berubah.
+    const tanda = [
+        frm.doc.supplier,
+        frm.doc.credit_to,
+        (frm.doc.items || []).length,
+        purchase_orders.join(","),
+    ].join("|")
+
+    if (frm.__uang_muka_tanda === tanda) return
+    frm.__uang_muka_tanda = tanda
+
+    frappe.call({
+        method: "sth.overrides.purchase_invoice.get_uang_muka_tersedia",
+        args: {
+            company: frm.doc.company,
+            supplier: frm.doc.supplier,
+            credit_to: frm.doc.credit_to,
+            purchase_orders: purchase_orders,
+            is_return: frm.doc.is_return ? 1 : 0,
+            termin: frm.doc.termin,
+        },
+        callback(r) {
+            const tersedia = flt(r.message)
+            if (!tersedia) return
+
+            frappe.msgprint({
+                title: __("Uang Muka Belum Diambil"),
+                indicator: "orange",
+                message: __(
+                    "Supplier {0} masih punya uang muka {1} yang bisa dipakai di invoice ini. Tarik dulu lewat tombol <b>Get Advances Paid</b> di bagian Advance Payments.",
+                    [
+                        frm.doc.supplier,
+                        format_currency(tersedia, frm.doc.party_account_currency || frm.doc.currency),
+                    ]
+                ),
+            })
+        },
+    })
+}
 
 // ─── VAT Detail ───────────────────────────────────────────────────────────────
 
