@@ -106,10 +106,14 @@ frappe.query_reports["Trial Balance"] = {
 			default: 1,
 		},
 		{
+			// Opening dan Closing sudah tampil satu kolom bersih, jadi filter ini
+			// tidak lagi mengubah apa pun. Disembunyikan, bukan dihapus, supaya
+			// filter tersimpan milik pengguna tidak error.
 			fieldname: "show_net_values",
 			label: __("Show net values in opening and closing columns"),
 			fieldtype: "Check",
 			default: 1,
+			hidden: 1,
 		},
 	],
 	formatter: erpnext.financial_statements.formatter,

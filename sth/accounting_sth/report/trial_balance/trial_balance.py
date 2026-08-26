@@ -379,6 +379,9 @@ def calculate_total_row(accounts, company_currency):
 			for field in value_fields:
 				total_row[field] += d[field]
 
+	total_row["opening"] = total_row["opening_debit"] - total_row["opening_credit"]
+	total_row["closing"] = total_row["closing_debit"] - total_row["closing_credit"]
+
 	return total_row
 
 
@@ -417,6 +420,11 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 				# ignore zero values
 				has_value = True
 
+		# Opening dan closing tampil satu kolom: selisih debit dikurangi kredit,
+		# saldo kredit tampil negatif.
+		row["opening"] = flt(row["opening_debit"] - row["opening_credit"], 3)
+		row["closing"] = flt(row["closing_debit"] - row["closing_credit"], 3)
+
 		row["has_value"] = has_value
 		data.append(row)
 
@@ -443,18 +451,11 @@ def get_columns():
 			"hidden": 1,
 		},
 		{
-			"fieldname": "opening_debit",
-			"label": _("Opening (Dr)"),
+			"fieldname": "opening",
+			"label": _("Opening"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120,
-		},
-		{
-			"fieldname": "opening_credit",
-			"label": _("Opening (Cr)"),
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
+			"width": 140,
 		},
 		{
 			"fieldname": "debit",
@@ -471,18 +472,11 @@ def get_columns():
 			"width": 120,
 		},
 		{
-			"fieldname": "closing_debit",
-			"label": _("Closing (Dr)"),
+			"fieldname": "closing",
+			"label": _("Closing"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120,
-		},
-		{
-			"fieldname": "closing_credit",
-			"label": _("Closing (Cr)"),
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
+			"width": 140,
 		},
 	]
 
