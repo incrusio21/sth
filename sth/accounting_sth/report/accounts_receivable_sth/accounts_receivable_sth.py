@@ -886,10 +886,10 @@ class ReceivablePayableReport:
 		)
 
 		# ↓ Filter voucher_type berdasarkan account_type
-		if self.account_type == "Receivable":
-			query = query.where(ple.voucher_type == "Sales Invoice")
-		elif self.account_type == "Payable":
-			query = query.where(ple.voucher_type == "Purchase Invoice")
+		# if self.account_type == "Receivable":
+		# 	query = query.where(ple.voucher_type == "Sales Invoice")
+		# elif self.account_type == "Payable":
+		# 	query = query.where(ple.voucher_type == "Purchase Invoice")
 
 		if self.filters.get("show_remarks"):
 			if remarks_length := frappe.db.get_single_value(
