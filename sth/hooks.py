@@ -421,6 +421,7 @@ doc_events = {
 	},
 	"Quotation": {
 		# "validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.procurement_sth.custom.item.check_persetujuan"],
+		"before_validate": ["sth.custom.quotation.set_custom_payment_schedule_due_date"],
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list"],
 	},
 	"Sales Order": {
