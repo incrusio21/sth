@@ -141,6 +141,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.set_charges_total()
 		validate_uang_muka_po(self)
 		self.set_grand_total_setelah_dp()
+		self.validate_uang_muka_wajib_diambil()
 
 	def set_expense_account(self, for_validate=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
@@ -531,6 +532,40 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.grand_total_setelah_dp = flt(
 			flt(self.rounded_total or self.grand_total) - flt(self.total_advance),
 			self.precision("grand_total_setelah_dp"),
+		)
+
+	def validate_uang_muka_wajib_diambil(self):
+		"""Uang muka yang masih bisa dipakai tidak boleh dilewat begitu saja.
+
+		Diperiksa tiap validate, jadi draft pun sudah ditahan sampai uang mukanya
+		ditarik. Yang dihitung cuma uang muka yang memang bisa dipakai invoice ini:
+		get_advance_entries() sudah menyaring supplier, akun hutang, dan uang muka
+		yang akunnya beda dari credit_to.
+
+		Invoice uang muka (termin DP) dan Debit Note dilewati — keduanya bukan
+		penagihan yang memotong uang muka.
+		"""
+		if self.get("is_return") or self.termin == "DP":
+			return
+
+		if any(flt(baris.allocated_amount) for baris in self.get("advances")):
+			return
+
+		tersedia = flt(
+			sum(flt(entry.amount) for entry in self.get_advance_entries()),
+			self.precision("total_advance"),
+		)
+		if tersedia <= 0:
+			return
+
+		frappe.throw(
+			_("Supplier {0} masih punya uang muka {1} yang bisa dipakai di invoice ini, "
+			  "tapi belum ada yang diambil. Tarik dulu lewat tombol "
+			  "<b>Get Advances Paid</b> di bagian Advance Payments.").format(
+				frappe.bold(self.supplier),
+				frappe.format_value(tersedia, {"fieldtype": "Currency"}),
+			),
+			title=_("Uang Muka Belum Diambil"),
 		)
 
 	def get_advance_entries(self, include_unallocated=True):
