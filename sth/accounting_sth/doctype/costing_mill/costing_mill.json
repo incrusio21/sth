@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-08-12 09:00:00.000000",
+ "creation": "2026-08-12 09:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -23,7 +23,6 @@
   "section_hm_stasiun",
   "costing_mill_hm_stasiun",
   "total_hm",
-  "column_break_hm",
   "total_alokasi_bengkel",
   "section_pengeluaran_barang",
   "costing_mill_pengeluaran_barang",
@@ -123,6 +122,7 @@
   {
    "fieldname": "section_hm_stasiun",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Aktivitas (HM) per Stasiun"
   },
   {
@@ -137,10 +137,6 @@
    "label": "Total HM",
    "precision": "2",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_hm",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_alokasi_bengkel",
@@ -208,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 09:00:00.000000",
+ "modified": "2026-08-26 13:31:04.891140",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Costing Mill",
