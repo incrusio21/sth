@@ -42,8 +42,8 @@ function ambil_data_cogs(frm) {
         return;
     }
 
-    frappe.dom.freeze(__("Mengambil data..."));
-
+    // frappe.call mengembalikan promise jQuery yang tidak punya .finally(),
+    // jadi pembekuan layar diserahkan ke opsi freeze bawaan.
     frappe.call({
         method: `${METODE}.ambil_data`,
         args: {
@@ -51,42 +51,37 @@ function ambil_data_cogs(frm) {
             periode_sampai: frm.doc.periode_sampai,
             company: frm.doc.company,
             unit: frm.doc.unit
+        },
+        freeze: true,
+        freeze_message: __("Mengambil data..."),
+        callback(r) {
+            const d = r.message;
+            if (!d) return;
+
+            frm.clear_table("rincian");
+            (d.rincian || []).forEach((row) => frm.add_child("rincian", row));
+
+            // Nilai berikut boleh dikoreksi manual setelahnya; perhitungan di
+            // server selalu jalan ulang waktu dokumen disimpan.
+            frm.set_value("biaya_kebun", d.biaya_kebun);
+            frm.set_value("biaya_mill", d.biaya_mill);
+            frm.set_value("harga_rata_cpo", d.harga_rata_cpo);
+            frm.set_value("harga_rata_pk", d.harga_rata_pk);
+            frm.set_value("saldo_gl_tbs", d.saldo_gl_tbs);
+            frm.set_value("saldo_gl_cpo", d.saldo_gl_cpo);
+            frm.set_value("saldo_gl_pk", d.saldo_gl_pk);
+
+            frm.refresh_fields();
+
+            if ((d.peringatan || []).length) {
+                frappe.msgprint({
+                    title: __("Perlu Dilengkapi"),
+                    message: d.peringatan.join("<br>"),
+                    indicator: "orange"
+                });
+            } else {
+                frappe.show_alert({ message: __("Data berhasil diambil."), indicator: "green" });
+            }
         }
-    }).then((r) => {
-        const d = r.message;
-        if (!d) return;
-
-        frm.clear_table("rincian");
-        (d.rincian || []).forEach((row) => frm.add_child("rincian", row));
-
-        // Nilai berikut boleh dikoreksi manual setelahnya; perhitungan di
-        // server selalu jalan ulang waktu dokumen disimpan.
-        frm.set_value("biaya_kebun", d.biaya_kebun);
-        frm.set_value("biaya_mill", d.biaya_mill);
-        frm.set_value("harga_rata_cpo", d.harga_rata_cpo);
-        frm.set_value("harga_rata_pk", d.harga_rata_pk);
-        frm.set_value("saldo_gl_tbs", d.saldo_gl_tbs);
-        frm.set_value("saldo_gl_cpo", d.saldo_gl_cpo);
-        frm.set_value("saldo_gl_pk", d.saldo_gl_pk);
-
-        frm.refresh_fields();
-
-        if ((d.peringatan || []).length) {
-            frappe.msgprint({
-                title: __("Perlu Dilengkapi"),
-                message: d.peringatan.join("<br>"),
-                indicator: "orange"
-            });
-        } else {
-            frappe.show_alert({ message: __("Data berhasil diambil."), indicator: "green" });
-        }
-    }).catch((err) => {
-        frappe.msgprint({
-            title: __("Gagal Mengambil Data"),
-            message: (err && err.message) || __("Terjadi kesalahan saat mengambil data."),
-            indicator: "red"
-        });
-    }).finally(() => {
-        frappe.dom.unfreeze();
     });
 }
