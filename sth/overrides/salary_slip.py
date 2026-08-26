@@ -556,7 +556,12 @@ class SalarySlip(SalarySlip):
 			self.salary_withholding = None
 
 	def update_payment_related(self, doctype, list_field, cancel=0):
-		if not self.get(list_field):
+		# list_field cuma hidup di memori, diisi calculate_net_pay() waktu validate.
+		# Cancel tidak menjalankan validate, jadi list itu selalu kosong di sana dan
+		# pelepasannya harus bersandar pada kolom salary_slip di dokumen tujuan.
+		# Selama masih ikut berhenti di sini, Employee Payment Log tetap menaut slip
+		# yang dibatalkan dan cancel-nya ditolak "is linked with".
+		if not cancel and not self.get(list_field):
 			return
 		
 		dt = frappe.qb.DocType(doctype)
