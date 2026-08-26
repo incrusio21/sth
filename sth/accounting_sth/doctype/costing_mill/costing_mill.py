@@ -462,39 +462,107 @@ def get_hm_stasiun(periode_dari, periode_sampai, company=None, unit=None):
 	return result
 
 
-def hitung_alokasi_hm(hm_rows, total_pool, company):
-	"""Bagi total_pool ke stasiun sebanding dengan HM-nya.
+def get_hm_karyawan_stasiun(periode_dari, periode_sampai, company=None, unit=None):
+	"""HM tiap karyawan di tiap stasiun, dari Buku Kerja Mekanik.
+
+	Satu Buku Kerja Mekanik berisi satu karyawan, jadi jamnya bisa dipilah per
+	orang tanpa perlu tabel bantu. Hasilnya {karyawan: {stasiun: jam}}.
+	"""
+	params = {"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit}
+
+	rows = frappe.db.sql("""
+		SELECT
+			nama_karyawan AS employee,
+			kode_stasiun AS stasiun,
+			SUM(total_jam_desimal) AS total_jam
+		FROM `tabBuku Kerja Mekanik`
+		WHERE docstatus = 1
+		  AND tanggal BETWEEN %(dari)s AND %(sampai)s
+		  AND kode_stasiun IS NOT NULL AND kode_stasiun != ''
+		  AND nama_karyawan IS NOT NULL AND nama_karyawan != ''
+		  {company_filter}
+		  {unit_filter}
+		GROUP BY nama_karyawan, kode_stasiun
+	""".format(
+		company_filter="AND company = %(company)s" if company else "",
+		unit_filter="AND unit = %(unit)s" if unit else "",
+	), params, as_dict=True)
+
+	hasil = {}
+	for r in rows:
+		if flt(r.total_jam) <= 0:
+			continue
+		hasil.setdefault(r.employee, {})[r.stasiun] = flt(r.total_jam)
+
+	return hasil
+
+
+def hitung_alokasi_hm(hm_rows, pool_rows, hm_karyawan, company):
+	"""Bagi gaji tiap operator ke stasiun yang dia kerjakan sendiri.
+
+	Pembaginya HM karyawan itu sendiri di tiap stasiun, bukan HM seluruh stasiun.
+	Gaji operator yang sebulan penuh memegang satu stasiun tidak boleh ikut
+	membebani stasiun lain yang kebetulan punya HM; itu yang terjadi kalau
+	seluruh pool dibagi rata menurut HM gabungan.
+
+	Karyawan yang gajinya masuk pool tapi tidak punya HM berstasiun sama sekali
+	dibagi menurut HM seluruh stasiun. Nilainya tetap harus keluar, kalau tidak
+	kredit alokasi di closing tidak seimbang dengan debitnya.
 
 	Akunnya SERVICE DAN MAINTENANCE stasiun yang dicatat di transaksi bengkel,
 	bukan OPERASIONAL: yang dibebankan di sini kerja bengkel di stasiun itu.
 
-	Sisa pembulatan dibebankan ke stasiun ber-HM terbesar supaya jumlah alokasi
+	Sisa pembulatan dibebankan ke stasiun beralokasi terbesar supaya jumlahnya
 	persis sama dengan pool dan jurnalnya seimbang.
 	"""
 	baris = [dict(r) for r in hm_rows]
 	total_hm = sum(flt(r["total_hm"]) for r in baris)
+	total_pool = sum(flt(r.get("amount")) for r in pool_rows)
+
+	for r in baris:
+		r["porsi"] = 0
+		r["amount"] = 0
+		r["no_coa"] = get_coa_service_stasiun(r["stasiun"], company)
 
 	if not baris or not total_hm or not total_pool:
-		for r in baris:
-			r["porsi"] = 0
-			r["amount"] = 0
-			r["no_coa"] = get_coa_service_stasiun(r["stasiun"], company)
 		return baris
 
 	baris.sort(key=lambda r: -flt(r["total_hm"]))
-	terbagi = 0
+	per_stasiun = {r["stasiun"]: 0.0 for r in baris}
 
+	for orang in pool_rows:
+		gaji = flt(orang.get("amount"))
+		if not gaji:
+			continue
+
+		jam = {
+			stasiun: flt(nilai)
+			for stasiun, nilai in (hm_karyawan.get(orang.get("employee")) or {}).items()
+			if stasiun in per_stasiun
+		}
+		pembagi = sum(jam.values())
+
+		if not pembagi:
+			jam = {r["stasiun"]: flt(r["total_hm"]) for r in baris}
+			pembagi = total_hm
+
+		for stasiun, nilai in jam.items():
+			per_stasiun[stasiun] += gaji * nilai / pembagi
+
+	terbagi = 0
 	for r in baris:
-		porsi = flt(r["total_hm"]) / total_hm
-		amount = flt(porsi * flt(total_pool), 2)
-		r["porsi"] = flt(porsi * 100, 4)
+		amount = flt(per_stasiun[r["stasiun"]], 2)
 		r["amount"] = amount
-		r["no_coa"] = get_coa_service_stasiun(r["stasiun"], company)
+		# Porsi sekarang porsi rupiah, bukan porsi HM: keduanya tidak lagi sama
+		# begitu gaji dibagi per karyawan.
+		r["porsi"] = flt(amount / total_pool * 100, 4)
 		terbagi += amount
 
 	selisih = flt(flt(total_pool) - terbagi, 2)
 	if selisih:
-		baris[0]["amount"] = flt(baris[0]["amount"] + selisih, 2)
+		penerima = max(baris, key=lambda r: flt(r["amount"]))
+		penerima["amount"] = flt(penerima["amount"] + selisih, 2)
+		penerima["porsi"] = flt(penerima["amount"] / total_pool * 100, 4)
 
 	return baris
 
@@ -503,11 +571,10 @@ def hitung_alokasi_hm(hm_rows, total_pool, company):
 def get_alokasi_hm_stasiun(periode_dari, periode_sampai, company=None, unit=None):
 	"""Baris HM per stasiun lengkap dengan porsi dan nilai alokasinya."""
 	hm_rows = get_hm_stasiun(periode_dari, periode_sampai, company, unit)
-	pool = sum(flt(r["amount"]) for r in get_gaji_operator_bengkel_mill(
-		periode_dari, periode_sampai, company, unit
-	))
+	pool_rows = get_gaji_operator_bengkel_mill(periode_dari, periode_sampai, company, unit)
+	hm_karyawan = get_hm_karyawan_stasiun(periode_dari, periode_sampai, company, unit)
 
-	return hitung_alokasi_hm(hm_rows, pool, company)
+	return hitung_alokasi_hm(hm_rows, pool_rows, hm_karyawan, company)
 
 
 def baris_kredit_alokasi(coa_kredit, kredit_per_cost_center, total_debit):
