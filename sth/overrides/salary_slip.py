@@ -95,6 +95,24 @@ class SalarySlip(SalarySlip):
 		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
 		self.update_pesangon_payment_status()
 
+	def on_trash(self):
+		"""Lepas lagi dokumen pembayarannya sebelum slip benar-benar dihapus.
+
+		Payroll Entry tidak berhenti di cancel: on_cancel bawaan hrms lanjut
+		memanggil delete_linked_salary_slips() yang menghapus tiap slipnya. Slip
+		yang dibatalkan sebelum pelepasan di on_cancel terpasang masih ditaut
+		Employee Payment Log, dan penghapusannya ditolak "is linked with" —
+		cancel Payroll Entry-nya ikut gagal di tengah jalan.
+
+		Pelepasan di sini menyaring lewat kolom salary_slip juga, jadi aman
+		dijalankan ulang walau on_cancel sudah sempat melepasnya.
+		"""
+		if hasattr(super(), "on_trash"):
+			super().on_trash()
+
+		self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
+		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
+
 	def set_pesangon_amount_from_periode(self):
 		from calendar import monthrange
 		from frappe.utils import getdate, flt
