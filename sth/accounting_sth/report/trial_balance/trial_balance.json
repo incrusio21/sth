@@ -9,7 +9,7 @@
  "is_standard": "Yes", 
  "modified": "2017-02-24 20:12:33.520866", 
  "modified_by": "Administrator", 
- "module": "Accounts", 
+ "module": "Accounting STH", 
  "name": "Trial Balance", 
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
