@@ -7,14 +7,9 @@ from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_ent
 from frappe.model.document import Document
 from frappe.utils import add_days, flt
 
-# Produk dikenali lewat Item.tipe_barang dan Warehouse.warehouse_category,
-# sama seperti Data TBS dan Sounding Stock CPO/Palm Kernel.
+# Produk dikenali lewat Item.tipe_barang. Gudangnya ikut Default Warehouse di
+# Item Defaults item itu sendiri, bukan Warehouse Category.
 TIPE_BARANG = {"TBS": "TBS", "CPO": "CPO", "Palm Kernel": "Palm Kernel"}
-KATEGORI_GUDANG = {
-	"TBS": "TBS",
-	"CPO": "Product CPO",
-	"Palm Kernel": "Product Palm Kernel",
-}
 
 PREFIKS = {"TBS": "tbs", "CPO": "cpo", "Palm Kernel": "pk"}
 
@@ -408,22 +403,34 @@ def get_sumber_biaya(company, kelompok):
 
 
 def get_item_produk(produk):
-	return frappe.db.get_value("Item", {"tipe_barang": TIPE_BARANG[produk]}, "name")
+	"""Semua item dengan tipe barang ini. Satu produk boleh punya lebih dari
+	satu item, jadi hasilnya daftar dan angkanya dijumlahkan."""
+	return frappe.get_all(
+		"Item",
+		filters={"tipe_barang": TIPE_BARANG[produk], "disabled": 0},
+		pluck="name",
+		order_by="name",
+	)
 
 
-def get_gudang_produk(produk, company, unit=None):
-	"""Gudang selalu disaring per company. Kalau Unit diisi tapi tidak punya
-	gudang produk, jangan jatuh ke gudang company — unit kebun tidak punya
-	gudang TBS/CPO/PK, dan diam-diam memakai gudang mill bikin angkanya
-	kelihatan wajar padahal salah unit."""
-	filters = {
-		"warehouse_category": KATEGORI_GUDANG[produk],
-		"is_group": 0,
-		"company": company,
-	}
-	if unit:
-		filters["unit"] = unit
-	return frappe.db.get_value("Warehouse", filters, "name")
+def get_sumber_stok(item_codes, company, unit=None):
+	"""Pasangan item dan gudangnya. Gudang diambil dari Default Warehouse pada
+	Item Defaults baris company ini. Kalau Unit diisi, gudang milik unit lain
+	dibuang — diam-diam memakai gudang unit lain bikin angkanya kelihatan
+	wajar padahal salah unit."""
+	pasangan = []
+	for item_code in item_codes:
+		gudang = frappe.db.get_value(
+			"Item Default",
+			{"parent": item_code, "parenttype": "Item", "company": company},
+			"default_warehouse",
+		)
+		if not gudang:
+			continue
+		if unit and frappe.db.get_value("Warehouse", gudang, "unit") != unit:
+			continue
+		pasangan.append((item_code, gudang))
+	return pasangan
 
 
 # ---------------------------------------------------------------------------
@@ -555,16 +562,16 @@ def saldo_akun(company, akun, sampai):
 	return flt(total[0][0]) if total else 0.0
 
 
-def harga_rata_jual(company, item_code, dari, sampai):
-	if not item_code:
+def harga_rata_jual(company, item_codes, dari, sampai):
+	if not item_codes:
 		return 0.0
 	row = frappe.db.sql("""
 		select sum(sii.base_net_amount) as nilai, sum(sii.qty) as qty
 		from `tabSales Invoice Item` sii
 		join `tabSales Invoice` si on si.name = sii.parent
 		where si.docstatus = 1 and si.is_return = 0 and si.company = %s
-			and si.posting_date between %s and %s and sii.item_code = %s
-	""", (company, dari, sampai, item_code), as_dict=True)
+			and si.posting_date between %s and %s and sii.item_code in %s
+	""", (company, dari, sampai, tuple(item_codes)), as_dict=True)
 	if not row or not flt(row[0].qty):
 		return 0.0
 	return flt(row[0].nilai) / flt(row[0].qty)
@@ -579,29 +586,48 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 	peringatan = []
 
 	for produk, prefiks in PREFIKS.items():
-		item_code = get_item_produk(produk)
-		gudang = get_gudang_produk(produk, company, unit)
-
-		if not item_code:
+		item_codes = get_item_produk(produk)
+		if not item_codes:
 			peringatan.append(
 				"{0}: belum ada Item dengan Tipe Barang '{1}'.".format(produk, TIPE_BARANG[produk])
 			)
 			continue
-		if not gudang:
+
+		pasangan = get_sumber_stok(item_codes, company, unit)
+		if not pasangan:
 			peringatan.append(
-				"{0}: belum ada Warehouse dengan Warehouse Category '{1}'.".format(
-					produk, KATEGORI_GUDANG[produk]
+				"{0}: Item dengan Tipe Barang '{1}' belum punya Default Warehouse "
+				"di Item Defaults untuk company {2}{3}.".format(
+					produk,
+					TIPE_BARANG[produk],
+					company,
+					" unit {0}".format(unit) if unit else "",
 				)
 			)
 			continue
 
+		# Satu produk bisa tersebar di beberapa item/gudang, jadi saldo dan
+		# mutasinya dijumlahkan dulu sebelum masuk ke baris rincian.
+		opening_qty = opening_nilai = closing_qty = 0.0
+		mutasi = {
+			"pembelian_qty": 0.0, "pembelian_nilai": 0.0,
+			"produksi_qty": 0.0,
+			"penjualan_qty": 0.0,
+			"adjustment_qty": 0.0,
+		}
+		for item_code, gudang in pasangan:
+			qty_awal, nilai_awal = saldo_sle(item_code, gudang, add_days(periode_dari, -1))
+			opening_qty += qty_awal
+			opening_nilai += nilai_awal
+
+			for kunci, angka in mutasi_sle(item_code, gudang, periode_dari, periode_sampai).items():
+				mutasi[kunci] += angka
+
+			qty_akhir, _nilai_akhir = saldo_sle(item_code, gudang, periode_sampai)
+			closing_qty += qty_akhir
+
 		if prefiks in sebelumnya:
 			opening_qty, opening_nilai = sebelumnya[prefiks]
-		else:
-			opening_qty, opening_nilai = saldo_sle(item_code, gudang, add_days(periode_dari, -1))
-
-		mutasi = mutasi_sle(item_code, gudang, periode_dari, periode_sampai)
-		closing_qty, _closing_nilai = saldo_sle(item_code, gudang, periode_sampai)
 
 		nilai[prefiks + "_opening"] = (opening_qty, opening_nilai)
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
