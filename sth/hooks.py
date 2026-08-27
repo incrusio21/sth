@@ -294,7 +294,11 @@ doc_events = {
 		],
 		"before_submit": "sth.custom.delivery_note.update_delivered_do",
 		"before_cancel": "sth.custom.delivery_note.update_delivered_do",
-		"after_insert": "sth.custom.delivery_note.create_kriteria_upload_document"
+		"after_insert": "sth.custom.delivery_note.create_kriteria_upload_document",
+		# barang masuk gudang transit sesudah stoknya benar-benar keluar, jadi
+		# nilai keluarnya bisa dipakai apa adanya sebagai nilai masuk
+		"on_submit": "sth.mill.gudang_transit.buat_penerimaan_transit",
+		"on_cancel": "sth.mill.gudang_transit.batalkan_penerimaan_transit"
 	},
 	"Driver": {
 		"validate": "sth.utils.qr_generator.validate_create_qr",
@@ -433,6 +437,8 @@ doc_events = {
 		# ERPNext ikut memeriksa akun yang kita pasang, bukan akun sebelumnya
 		"before_validate": ["sth.sales_sth.custom.sales_invoice.set_debit_to"],
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.sales_sth.custom.sales_invoice.validate_expense_account","sth.sales_sth.custom.sales_invoice.validate_penjualan_asset"],
+		"on_submit": "sth.mill.gudang_transit.buat_pengeluaran_transit",
+		"on_cancel": "sth.mill.gudang_transit.batalkan_pengeluaran_transit",
 	},
 	"Supplier": {
 		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening"],

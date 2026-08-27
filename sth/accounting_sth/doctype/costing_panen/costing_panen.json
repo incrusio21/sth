@@ -94,9 +94,10 @@
    "read_only": 1
   },
   {
+   "description": "Semua kegiatan yang jadi pembagi gaji, termasuk kegiatan perawatan yang tidak dijurnal di sini. Yang masuk jurnal cuma baris bersumber Panen, dan cuma itu yang dihitung di Total Kegiatan Panen.",
    "fieldname": "section_kegiatan",
    "fieldtype": "Section Break",
-   "label": "Kegiatan Panen"
+   "label": "Kegiatan Panen dan Perawatan"
   },
   {
    "fieldname": "costing_kebun_kegiatan",
@@ -107,7 +108,7 @@
   {
    "fieldname": "total_kegiatan",
    "fieldtype": "Currency",
-   "label": "Total Kegiatan",
+   "label": "Total Kegiatan Panen",
    "read_only": 1
   },
   {

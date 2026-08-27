@@ -8,6 +8,8 @@
   "transit_tab",
   "transit_settings_section",
   "sth_stock_settings_table",
+  "item_transit_section",
+  "sth_stock_settings_item_transit",
   "persediaan_account_pengecualian_tab",
   "sth_stock_settings_persediaan_account"
  ],
@@ -40,6 +42,19 @@
    "fieldtype": "Table",
    "label": "STH Stock Settings Persediaan Account",
    "options": "STH Stock Settings Persediaan Account"
+  },
+  {
+   "description": "Hanya item di daftar ini yang mampir di gudang transit. Item lain tetap keluar langsung lewat Delivery Note seperti biasa.",
+   "fieldname": "item_transit_section",
+   "fieldtype": "Section Break",
+   "label": "Item yang Lewat Gudang Transit"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "sth_stock_settings_item_transit",
+   "fieldtype": "Table",
+   "label": "Item Transit",
+   "options": "STH Stock Settings Item Transit"
   }
  ],
  "grid_page_length": 50,

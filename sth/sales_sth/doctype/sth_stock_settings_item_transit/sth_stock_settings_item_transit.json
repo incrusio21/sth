@@ -1,47 +1,52 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-04-01 01:13:16.618757",
+ "creation": "2026-08-28 09:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "stock_in_transit_account",
-  "transit_warehouse"
+  "item_code",
+  "item_name"
  ],
  "fields": [
   {
+   "columns": 3,
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
-   "fieldname": "stock_in_transit_account",
+   "columns": 3,
+   "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Stock In Transit Account",
-   "options": "Account"
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
   },
   {
-   "description": "Gudang penampung CPO dan Palm Kernel yang sudah keluar lewat Delivery Note tapi belum ditagih.",
-   "fieldname": "transit_warehouse",
-   "fieldtype": "Link",
+   "columns": 4,
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Gudang Transit",
-   "options": "Warehouse"
+   "label": "Nama Item",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-01 01:14:28.331301",
+ "modified": "2026-08-28 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Sales STH",
- "name": "STH Stock Settings Table",
+ "name": "STH Stock Settings Item Transit",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

@@ -108,7 +108,15 @@ class CostingKebun(Document):
 
 	def hitung_total(self):
 		self.total_gaji_karyawan = sum(flt(d.amount) for d in self.costing_kebun_gaji_karyawan)
-		self.total_kegiatan = sum(flt(d.amount) for d in self.costing_kebun_kegiatan)
+		# Tabel Kegiatan memuat kedua sumber karena keduanya jadi pembagi, tapi yang
+		# dijurnal cuma sumber dokumen ini, jadi totalnya pun cuma sumber ini supaya
+		# ketemu dengan tabel Closing. Baris lama yang sumbernya belum terisi
+		# dianggap milik dokumen ini, sama seperti sebelum kolom itu ada.
+		self.total_kegiatan = sum(
+			flt(d.amount)
+			for d in self.costing_kebun_kegiatan
+			if not d.sumber or d.sumber == self.sumber
+		)
 		self.total_closing = sum(flt(d.debit) for d in self.costing_kebun_closing)
 
 	def make_gl_entry(self):
@@ -387,17 +395,34 @@ def baris_sumber(semua, sumber):
 	return [r for r in semua if r["sumber"] == sumber]
 
 
+def baris_pembagi(semua, sumber):
+	"""Semua kegiatan milik karyawan yang punya kegiatan di sumber ini.
+
+	Dipakai tabel Kegiatan, yang memuat kedua sumber supaya pembaginya bisa
+	ditelusuri. Karyawan yang bulan itu tidak pernah mengerjakan sumber ini
+	dibuang: kegiatannya tidak menjelaskan alokasi apa pun di dokumen ini.
+	"""
+	karyawan = {r["employee"] for r in semua if r["sumber"] == sumber}
+	return [r for r in semua if r["employee"] in karyawan]
+
+
 @frappe.whitelist()
 def get_alokasi_kegiatan(sumber, periode_dari, periode_sampai, company=None, unit=None):
-	"""Baris kegiatan milik satu sumber saja, lengkap dengan nilai alokasinya."""
+	"""Kegiatan yang jadi pembagi gaji di satu sumber, kedua sumber sekaligus."""
 	semua = bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company, unit)
-	return susun_alokasi_kegiatan(baris_sumber(semua, sumber), company)
+	return susun_alokasi_kegiatan(baris_pembagi(semua, sumber), company)
 
 
 def susun_alokasi_kegiatan(baris, company):
+	"""Rincian per kegiatan, kedua sumber sekaligus.
+
+	Sumbernya dibawa ke tiap baris supaya kelihatan mana yang dijurnal dokumen
+	ini dan mana yang cuma menambah pembagi.
+	"""
 	hasil = []
 	for r in baris:
 		hasil.append({
+			"sumber": r["sumber"],
 			"bkm_doctype": r["bkm_doctype"],
 			"bkm": r["bkm"],
 			"tanggal": r["tanggal"],
@@ -542,12 +567,18 @@ def get_data_costing_kebun(sumber, periode_dari, periode_sampai, company=None, u
 
 
 def susun_data_costing_kebun(semua, sumber, company):
-	"""Ketiga tabel dari pembagian yang sudah terlanjur dihitung."""
+	"""Ketiga tabel dari pembagian yang sudah terlanjur dihitung.
+
+	Tabel Kegiatan memuat kedua sumber, tabel Closing cuma sumber dokumen ini:
+	pembagi gajinya gabungan, jadi kegiatan sumber lain harus ikut terlihat
+	supaya angka pembaginya bisa ditelusuri, tapi jurnalnya tetap milik dokumen
+	yang bersangkutan supaya akun kegiatan tidak terdebit dua kali.
+	"""
 	baris = baris_sumber(semua, sumber)
 
 	return {
 		"gaji_karyawan": susun_gaji_karyawan(semua, sumber),
-		"kegiatan": susun_alokasi_kegiatan(baris, company),
+		"kegiatan": susun_alokasi_kegiatan(baris_pembagi(semua, sumber), company),
 		"closing": susun_closing_kebun(baris, sumber, company),
 	}
 

@@ -17,6 +17,12 @@ VOUCHER_PEMBELIAN = ("Purchase Receipt", "Purchase Invoice")
 VOUCHER_PENJUALAN = ("Delivery Note", "Sales Invoice")
 VOUCHER_ADJUSTMENT = "Stock Reconciliation"
 
+# Biaya Mill = total kepala akun 63 (Proses Pabrik) dan 72 (Biaya Tidak
+# Langsung). Dipakai patch isi_sumber_biaya_mill_cogs untuk mengisi tabel COGS
+# Sumber Biaya; sesudah terisi, yang dibaca tetap tabel setelannya, jadi
+# kepala akun lain bisa ditambah atau dibuang dari sana tanpa mengubah kode.
+KEPALA_AKUN_MILL = ("63", "72")
+
 # Susunan baris rincian, mengikuti urutan di Formula COGS Mill dan Kebun.xlsx.
 BARIS = (
 	("tbs_opening", "TBS", "Opening Stock"),
