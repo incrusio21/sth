@@ -1,7 +1,7 @@
-import contextlib
-
 import frappe
-from frappe.utils import cint, flt, getdate
+from frappe.utils import flt, getdate
+
+from sth.mill.utils import buat_ulang_ste_sounding, izinkan_stock_minus
 
 DOCTYPE = "Sounding Stock Palm Kernel di Bunker Kernel"
 
@@ -78,7 +78,7 @@ def execute():
 				berubah += 1
 
 			if doc.docstatus == 1 and perlu_ste_baru(doc, produksi_lama):
-				ste_dibuat += buat_ulang_ste(doc)
+				ste_dibuat += buat_ulang_ste_sounding(doc, doc.produksi)
 
 			frappe.db.commit()
 			print("[{0}/{1}] {2} selesai.".format(urutan, len(dokumen), doc.name))
@@ -90,52 +90,6 @@ def execute():
 	laporkan_volume_dinolkan(volume_dinolkan)
 	laporkan_stock_minus()
 	laporkan_antrian_repost()
-
-
-@contextlib.contextmanager
-def izinkan_stock_minus():
-	"""Matikan sementara larangan stok minus selama patch berjalan.
-
-	Membatalkan penerimaan lama membuat stok di tanggal itu berkurang, padahal
-	Delivery Note sesudahnya sudah terlanjur mengambil barangnya. Selama STE
-	penggantinya belum dibuat, ERPNext melihat stok minus di masa depan dan
-	menolak pembatalannya - persis NegativeStockError yang muncul saat patch ini
-	dijalankan pertama kali. Jendela minus itu tidak bisa dihindari dengan
-	mengerjakan dokumennya satu per satu, karena yang divalidasi adalah keadaan
-	sesudah tanggal itu, bukan urutan pengerjaannya.
-
-	Setelannya dikembalikan apa adanya di akhir, termasuk kalau patch gagal.
-	"""
-	asal = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
-
-	if not asal:
-		set_allow_negative_stock(1)
-
-	try:
-		yield
-	finally:
-		# Pekerjaan dokumen yang gagal dibuang dulu, supaya yang ikut ter-commit
-		# bersama pengembalian setelan cuma dokumen yang sudah tuntas. Di jalur
-		# sukses ini tidak ada efeknya, semuanya sudah di-commit per dokumen.
-		frappe.db.rollback()
-
-		if not asal:
-			set_allow_negative_stock(0)
-			# Harus di-commit di sini juga: kalau patch gagal, migrate akan
-			# rollback, dan tanpa commit ini site tertinggal dengan stok minus
-			# masih diizinkan.
-			frappe.db.commit()
-
-
-def set_allow_negative_stock(nilai):
-	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", nilai)
-	frappe.clear_document_cache("Stock Settings", "Stock Settings")
-
-	# get_single_value menyimpan hasilnya sepanjang request, dan itulah yang
-	# dibaca is_negative_stock_allowed tiap kali SLE dibuat.
-	value_cache = getattr(frappe.db, "value_cache", None)
-	if value_cache:
-		value_cache.pop("Stock Settings", None)
 
 
 def laporkan_volume_dinolkan(nama_dokumen):
@@ -279,17 +233,3 @@ def perlu_ste_baru(doc, produksi_lama):
 		return True
 
 	return getdate(posting_date) != getdate(doc.tanggal)
-
-
-def buat_ulang_ste(doc):
-	for row in frappe.get_all("Stock Entry", filters={"references": doc.name}, fields=["name", "docstatus"]):
-		ste = frappe.get_doc("Stock Entry", row.name)
-		if ste.docstatus == 1:
-			ste.cancel()
-		ste.delete()
-
-	if not flt(doc.produksi):
-		return 0
-
-	doc.create_ste()
-	return 1
