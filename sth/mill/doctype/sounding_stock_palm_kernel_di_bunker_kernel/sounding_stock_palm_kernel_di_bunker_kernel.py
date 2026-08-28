@@ -140,6 +140,11 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 		def postprocess(source,target):
 			target.stock_entry_type = ste_type
+
+			# Tanpa ini validate_posting_time menimpa posting_date dengan hari
+			# ini, jadi penerimaan bertanggal mundur tercatat di tanggal STE-nya
+			# dibuat, bukan di tanggal soundingnya.
+			target.set_posting_time = 1
 			
 			update_fields = (
 				"item_name",
@@ -195,7 +200,8 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 				"field_map": {
 					"name":"references",
 					"doctype": "reference_doctype",
-					"tanggal":"posting_date"
+					"tanggal":"posting_date",
+					"jam":"posting_time"
 				}
 			},
 		}

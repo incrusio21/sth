@@ -1,7 +1,7 @@
 import contextlib
 
 import frappe
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 
 DOCTYPE = "Sounding Stock Palm Kernel di Bunker Kernel"
 
@@ -36,7 +36,9 @@ def execute():
 
 	Untuk dokumen yang sudah submit, Stock Entry lama di-cancel lalu dihapus dan
 	dibuat ulang dari produksi yang baru. Produksi negatif keluar sebagai
-	Material Issue, mengikuti penanganan di Sounding Stock CPO di BST.
+	Material Issue, mengikuti penanganan di Sounding Stock CPO di BST. STE yang
+	posting_date-nya tidak sama dengan tanggal soundingnya ikut dibuat ulang,
+	untuk membetulkan STE yang terlanjur bertanggal hari pembuatannya.
 
 	Tiap dokumen di-commit begitu selesai. Kalau ada yang gagal, patch berhenti
 	dengan error tapi dokumen yang sudah beres tidak ikut hangus, dan patch ini
@@ -252,10 +254,14 @@ def simpan(doc):
 
 
 def perlu_ste_baru(doc, produksi_lama):
-	"""STE dibuat ulang kalau produksinya berubah, atau belum punya STE sama sekali.
+	"""STE dibuat ulang kalau produksinya berubah, belum ada, atau salah tanggal.
 
-	Yang kedua untuk dokumen berproduksi negatif: dulu on_submit melewatinya
-	karena syaratnya produksi > 0, jadi stoknya tidak pernah dikeluarkan.
+	Belum ada: dokumen berproduksi negatif dulu dilewati on_submit karena
+	syaratnya produksi > 0, jadi stoknya tidak pernah dikeluarkan.
+
+	Salah tanggal: STE yang dibuat sebelum set_posting_time dinyalakan kena
+	timpa validate_posting_time, posting_date-nya jadi hari STE itu dibuat dan
+	bukan tanggal soundingnya.
 	"""
 	if flt(doc.produksi) != produksi_lama:
 		return True
@@ -263,7 +269,16 @@ def perlu_ste_baru(doc, produksi_lama):
 	if not flt(doc.produksi):
 		return False
 
-	return not frappe.db.exists("Stock Entry", {"references": doc.name, "docstatus": 1})
+	posting_date = frappe.db.get_value(
+		"Stock Entry",
+		{"references": doc.name, "docstatus": 1},
+		"posting_date",
+	)
+
+	if not posting_date:
+		return True
+
+	return getdate(posting_date) != getdate(doc.tanggal)
 
 
 def buat_ulang_ste(doc):
