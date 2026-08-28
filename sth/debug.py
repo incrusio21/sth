@@ -36,17 +36,24 @@ def debug_ap():
 	create_costing_on_submit(frappe.get_doc("Accounting Period",no_doc),"on_submit")
 
 def debug_list():
-	li = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Panen` WHERE docstatus = 0""")
+	li = frappe.db.sql(""" SELECT name FROM `tabSounding Stock Palm Kernel di Bunker Kernel` 
+		WHERE name = "SSPKDBK-0008"
+
+		ORDER BY creation ASC""")
 	for row in li:
 		no_doc = row[0]
+		print(no_doc)
 		# frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 		
 		# try:
 			# frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 			# frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-		doc = frappe.get_doc("Buku Kerja Mandor Panen",no_doc)
-		doc.isi_cost_center()
+		doc = frappe.get_doc("Sounding Stock Palm Kernel di Bunker Kernel",no_doc)
+		doc.get_stock()
+		doc.before_save()
+		doc.hitung_produksi()
 		doc.db_update()
+		# doc.on_cancel()
 		frappe.db.commit()
 		# except:
 		# 	pass

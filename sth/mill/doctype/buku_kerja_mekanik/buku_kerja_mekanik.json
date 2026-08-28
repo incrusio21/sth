@@ -71,7 +71,8 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Unit",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_lrjm",
@@ -88,14 +89,18 @@
   {
    "fieldname": "nama_karyawan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Nama Karyawan",
-   "options": "Employee"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "fieldname": "nama_unit_mesin_yang_diperbaiki",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Nama Unit Mesin yang Diperbaiki",
-   "options": "Mill Machine"
+   "options": "Mill Machine",
+   "reqd": 1
   },
   {
    "fetch_from": "kode_stasiun.machine_name",
@@ -187,7 +192,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-19 10:50:01.850423",
+ "modified": "2026-08-21 16:27:36.051488",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Buku Kerja Mekanik",

@@ -16,7 +16,7 @@ class SoundingStockCPOdiBST(Document):
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
 
 	def on_submit(self):
-		if self.produksi_cpo > 0:
+		if self.produksi_cpo:
 			self.create_ste()
 	
 	def on_cancel(self):
@@ -62,8 +62,9 @@ class SoundingStockCPOdiBST(Document):
 		self.potongan_sortasi = data_sortasi[0].qty if data_sortasi else 0
 
 	def create_ste(self):
+		ste_type = "Material Receipt" if self.produksi_cpo > 0 else "Material Issue"
 		def postprocess(source,target):
-			target.stock_entry_type = "Material Receipt"
+			target.stock_entry_type = ste_type
 			
 			update_fields = (
 				"item_name",
@@ -85,8 +86,12 @@ class SoundingStockCPOdiBST(Document):
 
 			item = target.append("items")
 			item.item_code = frappe.db.get_value("Item",{"tipe_barang": "CPO"})
-			item.qty = self.produksi_cpo
-			item.t_warehouse = self.gudang
+			item.qty = abs(self.produksi_cpo)
+
+			if ste_type == "Material Receipt":
+				item.t_warehouse = self.gudang
+			else:
+				item.s_warehouse = self.gudang
 
 			item_details = target.get_item_details(
 				frappe._dict(
