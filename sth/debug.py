@@ -37,7 +37,7 @@ def debug_ap():
 
 def debug_list():
 	li = frappe.db.sql(""" SELECT name FROM `tabSounding Stock Palm Kernel di Bunker Kernel` 
-		WHERE name = "SSPKDBK-0008"
+		WHERE name = "SSPKDBK-0012"
 
 		ORDER BY creation ASC""")
 	for row in li:
@@ -52,9 +52,11 @@ def debug_list():
 		doc.get_stock()
 		doc.before_save()
 		doc.hitung_produksi()
-		doc.db_update()
+		# doc.on_submit()
+		# print(doc.stock_awal)
+		# doc.db_update()
 		# doc.on_cancel()
-		frappe.db.commit()
+		# frappe.db.commit()
 		# except:
 		# 	pass
 
