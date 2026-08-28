@@ -1,5 +1,7 @@
+import contextlib
+
 import frappe
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 DOCTYPE = "Sounding Stock Palm Kernel di Bunker Kernel"
 
@@ -27,9 +29,10 @@ def execute():
 	dibuat ulang dari produksi yang baru. Produksi negatif keluar sebagai
 	Material Issue, mengikuti penanganan di Sounding Stock CPO di BST.
 
-	Kalau ada dokumen yang gagal, patch ini sengaja berhenti dengan error supaya
-	tidak ada rantai stock awal yang setengah jadi. Aman dijalankan ulang:
-	semuanya dihitung ulang dari sumbernya.
+	Tiap dokumen di-commit begitu selesai. Kalau ada yang gagal, patch berhenti
+	dengan error tapi dokumen yang sudah beres tidak ikut hangus, dan patch ini
+	aman dijalankan ulang: semuanya dihitung ulang dari sumbernya, dan dokumen
+	yang produksinya sudah benar tidak menyentuh Stock Entry-nya lagi.
 	"""
 	dokumen = frappe.get_all(
 		DOCTYPE,
@@ -46,25 +49,116 @@ def execute():
 	stock_akhir_sebelumnya = {}
 	berubah = ste_dibuat = 0
 
-	for row in dokumen:
-		doc = frappe.get_doc(DOCTYPE, row.name)
-		produksi_lama = flt(doc.produksi)
-		stock_akhir_lama = flt(doc.stock_akhir)
+	with izinkan_stock_minus():
+		for urutan, row in enumerate(dokumen, 1):
+			doc = frappe.get_doc(DOCTYPE, row.name)
+			produksi_lama = flt(doc.produksi)
+			stock_akhir_lama = flt(doc.stock_akhir)
 
-		hitung_ulang(doc, stock_akhir_sebelumnya)
-		simpan(doc)
+			hitung_ulang(doc, stock_akhir_sebelumnya)
+			simpan(doc)
 
-		stock_akhir_sebelumnya[doc.unit] = flt(doc.stock_akhir)
+			stock_akhir_sebelumnya[doc.unit] = flt(doc.stock_akhir)
 
-		if flt(doc.produksi) != produksi_lama or flt(doc.stock_akhir) != stock_akhir_lama:
-			berubah += 1
+			if flt(doc.produksi) != produksi_lama or flt(doc.stock_akhir) != stock_akhir_lama:
+				berubah += 1
 
-		if doc.docstatus == 1 and perlu_ste_baru(doc, produksi_lama):
-			ste_dibuat += buat_ulang_ste(doc)
+			if doc.docstatus == 1 and perlu_ste_baru(doc, produksi_lama):
+				ste_dibuat += buat_ulang_ste(doc)
+
+			frappe.db.commit()
+			print("[{0}/{1}] {2} selesai.".format(urutan, len(dokumen), doc.name))
 
 	print("{0} dari {1} dokumen sounding Palm Kernel dihitung ulang, {2} Stock Entry dibuat ulang.".format(
 		berubah, len(dokumen), ste_dibuat
 	))
+
+	laporkan_stock_minus()
+	laporkan_antrian_repost()
+
+
+@contextlib.contextmanager
+def izinkan_stock_minus():
+	"""Matikan sementara larangan stok minus selama patch berjalan.
+
+	Membatalkan penerimaan lama membuat stok di tanggal itu berkurang, padahal
+	Delivery Note sesudahnya sudah terlanjur mengambil barangnya. Selama STE
+	penggantinya belum dibuat, ERPNext melihat stok minus di masa depan dan
+	menolak pembatalannya - persis NegativeStockError yang muncul saat patch ini
+	dijalankan pertama kali. Jendela minus itu tidak bisa dihindari dengan
+	mengerjakan dokumennya satu per satu, karena yang divalidasi adalah keadaan
+	sesudah tanggal itu, bukan urutan pengerjaannya.
+
+	Setelannya dikembalikan apa adanya di akhir, termasuk kalau patch gagal.
+	"""
+	asal = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
+	if not asal:
+		set_allow_negative_stock(1)
+
+	try:
+		yield
+	finally:
+		# Pekerjaan dokumen yang gagal dibuang dulu, supaya yang ikut ter-commit
+		# bersama pengembalian setelan cuma dokumen yang sudah tuntas. Di jalur
+		# sukses ini tidak ada efeknya, semuanya sudah di-commit per dokumen.
+		frappe.db.rollback()
+
+		if not asal:
+			set_allow_negative_stock(0)
+			# Harus di-commit di sini juga: kalau patch gagal, migrate akan
+			# rollback, dan tanpa commit ini site tertinggal dengan stok minus
+			# masih diizinkan.
+			frappe.db.commit()
+
+
+def set_allow_negative_stock(nilai):
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", nilai)
+	frappe.clear_document_cache("Stock Settings", "Stock Settings")
+
+	# get_single_value menyimpan hasilnya sepanjang request, dan itulah yang
+	# dibaca is_negative_stock_allowed tiap kali SLE dibuat.
+	value_cache = getattr(frappe.db, "value_cache", None)
+	if value_cache:
+		value_cache.pop("Stock Settings", None)
+
+
+def laporkan_stock_minus():
+	"""Ingatkan kalau saldo Palm Kernel masih ada yang minus.
+
+	Larangan stok minus sudah dinyalakan lagi di akhir patch, jadi gudang yang
+	saldonya masih minus akan menolak transaksi berikutnya sampai selisihnya
+	dibereskan.
+	"""
+	item_code = frappe.db.get_value("Item", {"tipe_barang": "Palm Kernel"})
+	if not item_code:
+		return
+
+	minus = frappe.db.sql("""
+		select warehouse, min(qty_after_transaction) as terendah
+		from `tabStock Ledger Entry`
+		where item_code = %s and is_cancelled = 0 and qty_after_transaction < 0
+		group by warehouse
+	""", item_code, as_dict=True)
+
+	if not minus:
+		return
+
+	print("Perhatian, saldo Palm Kernel masih minus di:")
+	for row in minus:
+		print("  {0}: terendah {1}".format(row.warehouse, row.terendah))
+
+
+def laporkan_antrian_repost():
+	"""Penilaian stok dihitung ulang oleh scheduler, bukan oleh patch ini.
+
+	STE bertanggal mundur bikin ERPNext mengantrikan Repost Item Valuation.
+	Menjalankannya di dalam patch bisa memakan waktu berjam-jam dan menahan
+	migrate, jadi biar scheduler yang mengerjakan.
+	"""
+	antri = frappe.db.count("Repost Item Valuation", {"status": ("in", ("Queued", "In Progress"))})
+	if antri:
+		print("{0} Repost Item Valuation mengantre, nilai stok menyesuaikan setelah scheduler selesai.".format(antri))
 
 
 def hitung_ulang(doc, stock_akhir_sebelumnya):
