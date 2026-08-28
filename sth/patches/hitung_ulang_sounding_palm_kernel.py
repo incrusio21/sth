@@ -25,6 +25,14 @@ def execute():
 	lamanya dipakai kembali, bukan ditimpa nol. Dokumen tanpa Ukuran Detail
 	tidak dibangun ulang sama sekali karena rekapnya cuma ada di dokumen.
 
+	Total volume sounding yang sudah terisi tidak pernah ditimpa jadi nol. Ada
+	dokumen yang rekapnya sudah telanjur nol semua karena ukurannya tidak ada di
+	master, sementara total di induknya masih menyimpan angka soundingnya - itu
+	satu-satunya catatan yang tersisa. Menimpanya jadi nol berarti menghapus
+	produksi hari itu berikut penerimaan stoknya, dan Delivery Note sesudahnya
+	ikut kekurangan barang. Dokumen seperti ini didaftar di akhir supaya
+	masternya bisa dilengkapi lalu patch dijalankan ulang.
+
 	Untuk dokumen yang sudah submit, Stock Entry lama di-cancel lalu dihapus dan
 	dibuat ulang dari produksi yang baru. Produksi negatif keluar sebagai
 	Material Issue, mengikuti penanganan di Sounding Stock CPO di BST.
@@ -47,6 +55,7 @@ def execute():
 		return
 
 	stock_akhir_sebelumnya = {}
+	masternya_kurang = []
 	berubah = ste_dibuat = 0
 
 	with izinkan_stock_minus():
@@ -55,7 +64,9 @@ def execute():
 			produksi_lama = flt(doc.produksi)
 			stock_akhir_lama = flt(doc.stock_akhir)
 
-			hitung_ulang(doc, stock_akhir_sebelumnya)
+			if hitung_ulang(doc, stock_akhir_sebelumnya):
+				masternya_kurang.append(doc.name)
+
 			simpan(doc)
 
 			stock_akhir_sebelumnya[doc.unit] = flt(doc.stock_akhir)
@@ -73,6 +84,7 @@ def execute():
 		berubah, len(dokumen), ste_dibuat
 	))
 
+	laporkan_master_kurang(masternya_kurang)
 	laporkan_stock_minus()
 	laporkan_antrian_repost()
 
@@ -123,6 +135,24 @@ def set_allow_negative_stock(nilai):
 		value_cache.pop("Stock Settings", None)
 
 
+def laporkan_master_kurang(nama_dokumen):
+	"""Daftar dokumen yang ukurannya tidak ada di Ukuran Bunker Kernel Silo Detail.
+
+	Rekapnya nol semua, jadi yang dipakai total volume sounding lama. Angkanya
+	tetap benar, tapi rincian per kompartemennya tidak bisa dipulihkan sampai
+	masternya dilengkapi dan patch ini dijalankan ulang.
+	"""
+	if not nama_dokumen:
+		return
+
+	print("{0} dokumen rekapnya tidak bisa dibangun ulang, total volume lamanya dipakai:".format(
+		len(nama_dokumen)
+	))
+	for nama in nama_dokumen:
+		print("  {0}".format(nama))
+	print("Lengkapi Ukuran Bunker Kernel Silo Detail untuk ukuran tersebut, lalu jalankan patch ini lagi.")
+
+
 def laporkan_stock_minus():
 	"""Ingatkan kalau saldo Palm Kernel masih ada yang minus.
 
@@ -162,7 +192,13 @@ def laporkan_antrian_repost():
 
 
 def hitung_ulang(doc, stock_akhir_sebelumnya):
-	"""Bangun ulang hasil sounding, lalu hitung stock akhir dan produksinya."""
+	"""Bangun ulang hasil sounding, lalu hitung stock akhir dan produksinya.
+
+	Mengembalikan True kalau rekapnya gagal dibangun dan total volume lama yang
+	dipakai, tanda masternya belum lengkap.
+	"""
+	volume_lama = flt(doc.volume_sounding)
+
 	if doc.ukuran_detail:
 		netto_manual = {
 			(baris.idx, baris.kompartemen): flt(baris.netto)
@@ -178,10 +214,16 @@ def hitung_ulang(doc, stock_akhir_sebelumnya):
 
 	doc.calculate_volume_sounding()
 
+	volume_hilang = bool(volume_lama and not flt(doc.volume_sounding))
+	if volume_hilang:
+		doc.volume_sounding = volume_lama
+
 	if doc.unit in stock_akhir_sebelumnya:
 		doc.stock_awal = stock_akhir_sebelumnya[doc.unit]
 
 	doc.hitung_produksi()
+
+	return volume_hilang
 
 
 def kembalikan_netto_manual(doc, netto_manual):
