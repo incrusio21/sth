@@ -3,9 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate,flt
+from frappe.utils import getdate,flt,now
 from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.utils import get_stock_balance
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def before_save(self):
@@ -27,11 +26,13 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def hitung_produksi(self):
 		self.stock_akhir = self.volume_sounding
 		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman)
+
+		tbs_olah_bersih = flt(self.tbs_olah) - flt(self.sortasi)
 		self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
-		self.ker_netto_2 = self.produksi/(self.tbs_olah - self.sortasi)*100 if self.tbs_olah else 0
+		self.ker_netto_2 = self.produksi / tbs_olah_bersih*100 if tbs_olah_bersih else 0
 
 	def on_submit(self):
-		if self.produksi > 0:
+		if self.produksi:
 			self.create_ste()
 	
 	def on_cancel(self):
@@ -119,13 +120,9 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			where i.tipe_barang = 'TBS' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
-		warehouse = get_warehouse_palm(self.unit)
-		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
+		self.stock_awal = get_stock_awal(self.unit, self.tanggal_proses, self.creation)
 
-		self.stock_awal = get_stock_balance(item_code, warehouse, self.tanggal_proses, "23:59:59") if warehouse and item_code else 0
-		
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
-		self.stock_akhir = flt(self.stock_awal) - flt(self.pengiriman)
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
 
@@ -139,8 +136,10 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		return sum(left)/len(left), sum(right)/len(right)
 	
 	def create_ste(self):
+		ste_type = "Material Receipt" if self.produksi > 0 else "Material Issue"
+
 		def postprocess(source,target):
-			target.stock_entry_type = "Material Receipt"
+			target.stock_entry_type = ste_type
 			
 			update_fields = (
 				"item_name",
@@ -162,8 +161,12 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 			item = target.append("items")
 			item.item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
-			item.qty = self.produksi
-			item.t_warehouse = frappe.db.get_value("Warehouse",{"unit": self.unit,"warehouse_category": "Product Palm Kernel"})
+			item.qty = abs(self.produksi)
+
+			if ste_type == "Material Receipt":
+				item.t_warehouse = get_warehouse_palm(self.unit)
+			else:
+				item.s_warehouse = get_warehouse_palm(self.unit)
 
 			item_details = target.get_item_details(
 				frappe._dict(
@@ -204,6 +207,36 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 def get_warehouse_palm(unit):
 	return frappe.db.get_value("Warehouse",{"unit":unit,"warehouse_category": "Product Palm Kernel"})
+
+
+def get_stock_awal(unit, tanggal_proses, creation=None):
+	"""Stock awal = stock akhir sounding sebelumnya di unit yang sama.
+
+	Bukan saldo Stock Ledger: saldo gudang di akhir tanggal proses sudah
+	dipotong pengiriman hari itu, sedangkan stock awal yang dimaksud adalah
+	isi bunker sebelum produksi hari itu masuk. Sounding yang dibatalkan
+	dilewati supaya rantainya tidak putus.
+	"""
+	if not (unit and tanggal_proses):
+		return 0
+
+	sebelumnya = frappe.db.sql("""
+		select stock_akhir
+		from `tabSounding Stock Palm Kernel di Bunker Kernel`
+		where unit = %(unit)s and docstatus < 2
+			and (
+				tanggal_proses < %(tanggal_proses)s
+				or (tanggal_proses = %(tanggal_proses)s and creation < %(creation)s)
+			)
+		order by tanggal_proses desc, creation desc
+		limit 1
+	""", {
+		"unit": unit,
+		"tanggal_proses": tanggal_proses,
+		"creation": creation or now(),
+	})
+
+	return flt(sebelumnya[0][0]) if sebelumnya else 0
 
 @frappe.whitelist()
 def get_berat_limas(density,kompartemen,pabrik):
