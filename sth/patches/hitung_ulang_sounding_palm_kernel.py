@@ -25,13 +25,14 @@ def execute():
 	lamanya dipakai kembali, bukan ditimpa nol. Dokumen tanpa Ukuran Detail
 	tidak dibangun ulang sama sekali karena rekapnya cuma ada di dokumen.
 
-	Total volume sounding yang sudah terisi tidak pernah ditimpa jadi nol. Ada
-	dokumen yang rekapnya sudah telanjur nol semua karena ukurannya tidak ada di
-	master, sementara total di induknya masih menyimpan angka soundingnya - itu
-	satu-satunya catatan yang tersisa. Menimpanya jadi nol berarti menghapus
-	produksi hari itu berikut penerimaan stoknya, dan Delivery Note sesudahnya
-	ikut kekurangan barang. Dokumen seperti ini didaftar di akhir supaya
-	masternya bisa dilengkapi lalu patch dijalankan ulang.
+	Dokumen yang rekapnya nol semua - ukurannya tidak ada di master - volume
+	soundingnya ikut jadi nol, tidak memakai total lama yang masih tersimpan di
+	induknya. Total lama itu tidak bisa dipercaya: SSPKDBK-0008 misalnya
+	menghasilkan KER 64%, padahal wajarnya 4-6%. Konsekuensinya penerimaan
+	stoknya ikut terhapus, dan produksi yang hilang itu muncul lagi di sounding
+	berikutnya karena stock awalnya jadi nol - totalnya tetap, cuma pembagian
+	per harinya yang meleset sampai masternya dilengkapi dan patch ini
+	dijalankan ulang. Dokumen yang kena didaftar di akhir.
 
 	Untuk dokumen yang sudah submit, Stock Entry lama di-cancel lalu dihapus dan
 	dibuat ulang dari produksi yang baru. Produksi negatif keluar sebagai
@@ -55,7 +56,7 @@ def execute():
 		return
 
 	stock_akhir_sebelumnya = {}
-	masternya_kurang = []
+	volume_dinolkan = []
 	berubah = ste_dibuat = 0
 
 	with izinkan_stock_minus():
@@ -65,7 +66,7 @@ def execute():
 			stock_akhir_lama = flt(doc.stock_akhir)
 
 			if hitung_ulang(doc, stock_akhir_sebelumnya):
-				masternya_kurang.append(doc.name)
+				volume_dinolkan.append(doc.name)
 
 			simpan(doc)
 
@@ -84,7 +85,7 @@ def execute():
 		berubah, len(dokumen), ste_dibuat
 	))
 
-	laporkan_master_kurang(masternya_kurang)
+	laporkan_volume_dinolkan(volume_dinolkan)
 	laporkan_stock_minus()
 	laporkan_antrian_repost()
 
@@ -135,17 +136,17 @@ def set_allow_negative_stock(nilai):
 		value_cache.pop("Stock Settings", None)
 
 
-def laporkan_master_kurang(nama_dokumen):
-	"""Daftar dokumen yang ukurannya tidak ada di Ukuran Bunker Kernel Silo Detail.
+def laporkan_volume_dinolkan(nama_dokumen):
+	"""Daftar dokumen yang volume soundingnya jadi nol.
 
-	Rekapnya nol semua, jadi yang dipakai total volume sounding lama. Angkanya
-	tetap benar, tapi rincian per kompartemennya tidak bisa dipulihkan sampai
-	masternya dilengkapi dan patch ini dijalankan ulang.
+	Ukurannya tidak ada di Ukuran Bunker Kernel Silo Detail, jadi rekapnya nol
+	semua dan produksinya ikut nol. Penerimaan stok dokumen ini terhapus, dan
+	produksinya pindah ke sounding berikutnya.
 	"""
 	if not nama_dokumen:
 		return
 
-	print("{0} dokumen rekapnya tidak bisa dibangun ulang, total volume lamanya dipakai:".format(
+	print("{0} dokumen volume soundingnya jadi nol karena ukurannya tidak ada di master:".format(
 		len(nama_dokumen)
 	))
 	for nama in nama_dokumen:
@@ -194,8 +195,8 @@ def laporkan_antrian_repost():
 def hitung_ulang(doc, stock_akhir_sebelumnya):
 	"""Bangun ulang hasil sounding, lalu hitung stock akhir dan produksinya.
 
-	Mengembalikan True kalau rekapnya gagal dibangun dan total volume lama yang
-	dipakai, tanda masternya belum lengkap.
+	Mengembalikan True kalau volume soundingnya yang tadinya terisi jadi nol,
+	tanda ukurannya tidak ada di master.
 	"""
 	volume_lama = flt(doc.volume_sounding)
 
@@ -215,8 +216,6 @@ def hitung_ulang(doc, stock_akhir_sebelumnya):
 	doc.calculate_volume_sounding()
 
 	volume_hilang = bool(volume_lama and not flt(doc.volume_sounding))
-	if volume_hilang:
-		doc.volume_sounding = volume_lama
 
 	if doc.unit in stock_akhir_sebelumnya:
 		doc.stock_awal = stock_akhir_sebelumnya[doc.unit]
