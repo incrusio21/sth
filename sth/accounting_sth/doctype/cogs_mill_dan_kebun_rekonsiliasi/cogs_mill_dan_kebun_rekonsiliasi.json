@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-30 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "produk",
+  "item_code",
+  "gudang",
+  "unit",
+  "qty",
+  "rate",
+  "amount",
+  "stock_reconciliation"
+ ],
+ "fields": [
+  {"fieldname": "produk", "fieldtype": "Data", "in_list_view": 1, "label": "Produk", "read_only": 1, "columns": 1},
+  {"fieldname": "item_code", "fieldtype": "Link", "in_list_view": 1, "label": "Item", "options": "Item", "read_only": 1, "columns": 2},
+  {"fieldname": "gudang", "fieldtype": "Link", "in_list_view": 1, "label": "Gudang", "options": "Warehouse", "read_only": 1, "columns": 2},
+  {"fieldname": "unit", "fieldtype": "Link", "label": "Unit", "options": "Unit", "read_only": 1},
+  {"fieldname": "qty", "fieldtype": "Float", "in_list_view": 1, "label": "Qty", "read_only": 1, "columns": 1},
+  {"fieldname": "rate", "fieldtype": "Currency", "in_list_view": 1, "label": "Valuation Rate", "read_only": 1, "columns": 2},
+  {"fieldname": "amount", "fieldtype": "Currency", "label": "Amount", "read_only": 1},
+  {"fieldname": "stock_reconciliation", "fieldtype": "Link", "in_list_view": 1, "label": "Stock Reconciliation", "no_copy": 1, "options": "Stock Reconciliation", "read_only": 1, "columns": 2}
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-30 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "COGS Mill dan Kebun Rekonsiliasi",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

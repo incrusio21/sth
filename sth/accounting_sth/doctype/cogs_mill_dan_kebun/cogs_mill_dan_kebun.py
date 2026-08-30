@@ -4,6 +4,9 @@
 import erpnext
 import frappe
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	EmptyStockReconciliationItemsError,
+)
 from frappe.model.document import Document
 from frappe.utils import add_days, flt
 
@@ -49,6 +52,8 @@ BARIS = (
 	("pk_cogs", "Palm Kernel", "Cost Of Goods Sold"),
 )
 
+WAKTU_REKONSILIASI = "23:59:59"
+
 KETERANGAN_KEBUN = "KAPITALISASI BIAYA KEBUN KE PERSEDIAAN TBS"
 KETERANGAN_OLAH = "PENGOLAHAN TBS MENJADI CPO DAN PALM KERNEL"
 KETERANGAN_HPP = "HARGA POKOK PENJUALAN {0}"
@@ -58,9 +63,13 @@ class COGSMilldanKebun(Document):
 
 	def validate(self):
 		self.validasi_periode()
+		self.validasi_mode_posting()
 		self.hitung()
 
 	def on_submit(self):
+		if self.buat_stock_reconciliation:
+			self.buat_rekonsiliasi()
+			return
 		if not self.posting_jurnal:
 			frappe.msgprint(
 				"Tabel Closing sudah tersusun tapi tidak diposting ke buku besar karena "
@@ -73,6 +82,7 @@ class COGSMilldanKebun(Document):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry",)
+		self.batalkan_rekonsiliasi()
 		if not self.posting_jurnal:
 			return
 		self.make_gl_entry()
@@ -105,6 +115,17 @@ class COGSMilldanKebun(Document):
 			frappe.throw(
 				"Periode ini sudah punya dokumen <b>{0}</b>.".format(kembar),
 				title="Duplikat Tidak Diizinkan",
+			)
+
+	def validasi_mode_posting(self):
+		"""Stock Reconciliation dan jurnal Closing sama-sama menyentuh akun
+		persediaan, jadi kalau keduanya jalan nilainya dobel."""
+		if self.buat_stock_reconciliation and self.posting_jurnal:
+			frappe.throw(
+				"<b>Buat Stock Reconciliation saat Submit</b> dan <b>Posting Jurnal ke Buku "
+				"Besar</b> tidak bisa menyala bersamaan karena keduanya sama-sama menjurnal "
+				"akun persediaan. Pilih salah satu.",
+				title="Dua Sumber Jurnal Persediaan",
 			)
 
 	# ------------------------------------------------------------------
@@ -209,6 +230,7 @@ class COGSMilldanKebun(Document):
 
 		self.tulis_rincian(nilai)
 		self.susun_closing(nilai)
+		self.susun_rekonsiliasi(nilai)
 		self.hitung_selisih_gl(nilai)
 
 	def tulis_rincian(self, nilai):
@@ -251,6 +273,191 @@ class COGSMilldanKebun(Document):
 					- a(prefiks + "_closing"),
 					2,
 				),
+			)
+
+	# ------------------------------------------------------------------
+	# Stock Reconciliation
+	# ------------------------------------------------------------------
+
+	def susun_rekonsiliasi(self, nilai):
+		"""Daftar gudang yang akan disamakan nilainya, disusun sejak draft
+		supaya bisa diperiksa sebelum submit. Nama Stock Reconciliation-nya
+		baru terisi waktu submit, jadi yang sudah ada dipertahankan."""
+		sebelumnya = {
+			(row.item_code, row.gudang): row.stock_reconciliation
+			for row in self.get("rekonsiliasi") or []
+			if row.stock_reconciliation
+		}
+
+		self.set("rekonsiliasi", [])
+		if not self.buat_stock_reconciliation or not self.company or not self.periode_sampai:
+			return
+
+		def rate_produk(prefiks):
+			# Rate Closing Stock; kalau tidak ada stok akhir, rate Available
+			# dipakai supaya gudang yang masih menyimpan barang tetap punya
+			# nilai satuan yang sama dengan periode ini.
+			for akhiran in ("_closing", "_available"):
+				baris = nilai.get(prefiks + akhiran) or {}
+				if flt(baris.get("qty")) and flt(baris.get("amount")):
+					return flt(baris["amount"]) / flt(baris["qty"])
+			return 0.0
+
+		tanpa_rate = []
+		for produk, prefiks in PREFIKS.items():
+			rate = rate_produk(prefiks)
+			for item_code in get_item_produk(produk):
+				for gudang, unit in gudang_berstok(
+					item_code, self.company, self.unit, self.periode_sampai
+				):
+					qty, nilai_stok = saldo_sle(item_code, gudang, self.periode_sampai)
+					if not qty and not nilai_stok:
+						continue
+					if qty and not rate:
+						# Menilai barang yang masih ada dengan rate nol akan
+						# menghapus nilainya, jadi produknya dilewat saja.
+						if produk not in tanpa_rate:
+							tanpa_rate.append(produk)
+						continue
+					# Gudang kosong bernilai nol; rate hanya dipasang kalau
+					# masih ada barangnya.
+					rate_baris = flt(rate) if qty else 0.0
+					if flt(nilai_stok, 2) == flt(rate_baris * qty, 2):
+						continue
+					self.append("rekonsiliasi", {
+						"produk": produk,
+						"item_code": item_code,
+						"gudang": gudang,
+						"unit": unit or self.unit,
+						"qty": qty,
+						"rate": rate_baris,
+						"amount": flt(rate_baris * qty, 2),
+						"stock_reconciliation": sebelumnya.get((item_code, gudang)),
+					})
+
+		if tanpa_rate:
+			frappe.msgprint(
+				"Rate Closing Stock <b>{0}</b> nol padahal gudangnya masih menyimpan barang, "
+				"jadi produk itu tidak ikut direkonsiliasi.".format(", ".join(tanpa_rate)),
+				indicator="orange",
+				alert=True,
+			)
+
+	def buat_rekonsiliasi(self):
+		if not self.get("rekonsiliasi"):
+			frappe.msgprint(
+				"Tidak ada gudang yang perlu direkonsiliasi: nilai persediaannya sudah sama "
+				"dengan rate Closing Stock periode ini.",
+				indicator="orange",
+				alert=True,
+			)
+			return
+
+		setelan = get_setelan(self.company) or frappe._dict()
+
+		tanpa_unit = sorted({row.gudang for row in self.rekonsiliasi if not row.unit})
+		if tanpa_unit:
+			frappe.throw(
+				"Gudang berikut belum punya Unit, padahal Stock Reconciliation mewajibkannya: "
+				"<b>{0}</b>.".format(", ".join(tanpa_unit))
+			)
+
+		# Satu Stock Reconciliation per produk per unit: cost center-nya beda
+		# antara kebun dan mill, dan Unit wajib diisi satu nilai per dokumen.
+		kelompok = {}
+		for row in self.rekonsiliasi:
+			kelompok.setdefault((row.produk, row.unit), []).append(row)
+
+		tanpa_akun = sorted({
+			produk for produk, _unit in kelompok if not self.akun_selisih(setelan, produk)
+		})
+		if tanpa_akun:
+			frappe.throw(
+				"Lawan jurnal rekonsiliasi untuk <b>{0}</b> belum ada. Isi <b>Akun Selisih "
+				"Rekonsiliasi</b> di STH Accounting Settings tab COGS untuk company <b>{1}</b>, "
+				"atau lengkapi akun alokasinya.".format(", ".join(tanpa_akun), self.company)
+			)
+
+		dibuat = []
+		for (produk, unit), baris in kelompok.items():
+			nama = self.submit_stock_reconciliation(setelan, produk, unit, baris)
+			if not nama:
+				continue
+			dibuat.append(nama)
+			for row in baris:
+				row.stock_reconciliation = nama
+				frappe.db.set_value(
+					row.doctype, row.name, "stock_reconciliation", nama, update_modified=False
+				)
+
+		if dibuat:
+			frappe.msgprint(
+				"Stock Reconciliation <b>{0}</b> berhasil dibuat.".format(", ".join(sorted(dibuat))),
+				indicator="green",
+				alert=True,
+			)
+
+	def akun_selisih(self, setelan, produk):
+		"""Lawan jurnal Stock Reconciliation.
+
+		Kalau field khususnya kosong, dipakai akun alokasi produk itu — akun yang
+		dulu dikredit tabel Closing. Selisih penilaiannya jadi menutup biaya kebun
+		atau biaya mill periode ini, bukan lahir sebagai untung-rugi baru.
+		"""
+		if setelan.akun_selisih_rekonsiliasi:
+			return setelan.akun_selisih_rekonsiliasi
+		return setelan.akun_alokasi_kebun if produk == "TBS" else setelan.akun_alokasi_pabrik
+
+	def submit_stock_reconciliation(self, setelan, produk, unit, baris):
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.purpose = "Stock Reconciliation"
+		sr.company = self.company
+		sr.unit = unit
+		sr.set_posting_time = 1
+		sr.posting_date = self.periode_sampai
+		sr.posting_time = WAKTU_REKONSILIASI
+		sr.expense_account = self.akun_selisih(setelan, produk)
+		sr.cost_center = (
+			setelan.cost_center_kebun if produk == "TBS" else setelan.cost_center_mill
+		)
+
+		for row in baris:
+			sr.append("items", {
+				"item_code": row.item_code,
+				"warehouse": row.gudang,
+				"qty": flt(row.qty),
+				"valuation_rate": flt(row.rate),
+			})
+
+		# Kalau ternyata ERPNext menilai tidak ada baris yang berubah, dokumennya
+		# batal dibuat tanpa menghentikan submit COGS-nya.
+		batas_pesan = len(frappe.local.message_log)
+		try:
+			sr.insert(ignore_permissions=True)
+			sr.submit()
+		except EmptyStockReconciliationItemsError:
+			del frappe.local.message_log[batas_pesan:]
+			return None
+
+		return sr.name
+
+	def batalkan_rekonsiliasi(self):
+		nama = []
+		for row in self.get("rekonsiliasi") or []:
+			if row.stock_reconciliation and row.stock_reconciliation not in nama:
+				nama.append(row.stock_reconciliation)
+
+		dibatalkan = []
+		for sr in nama:
+			if frappe.db.get_value("Stock Reconciliation", sr, "docstatus") == 1:
+				frappe.get_doc("Stock Reconciliation", sr).cancel()
+				dibatalkan.append(sr)
+
+		if dibatalkan:
+			frappe.msgprint(
+				"Stock Reconciliation <b>{0}</b> ikut dibatalkan.".format(", ".join(dibatalkan)),
+				indicator="orange",
+				alert=True,
 			)
 
 	# ------------------------------------------------------------------
@@ -417,6 +624,46 @@ def get_item_produk(produk):
 		pluck="name",
 		order_by="name",
 	)
+
+
+def gudang_berstok(item_code, company, unit, sampai):
+	"""Semua gudang company ini yang pernah dilewati item, termasuk gudang
+	transit. Yang dipakai rekonsiliasi bukan cuma gudang default karena nilai
+	satuan barang harus sama di mana pun barangnya berada."""
+	rows = frappe.db.sql("""
+		select distinct sle.warehouse as gudang, w.unit as unit
+		from `tabStock Ledger Entry` sle
+		inner join `tabWarehouse` w on w.name = sle.warehouse
+		where sle.item_code = %s and sle.posting_date <= %s and sle.is_cancelled = 0
+			and w.company = %s
+		order by sle.warehouse
+	""", (item_code, sampai, company), as_dict=True)
+	# Gudang tanpa Unit ikut, bukan dibuang: gudang transit disetel per company
+	# dan lazimnya tidak berunit. Kalau dibuang, barang yang menginap di transit
+	# tidak ikut dinilai ulang dan harga pokoknya waktu invoice memakai rate lama.
+	return [
+		(row.gudang, row.unit)
+		for row in rows
+		if not unit or not row.unit or row.unit == unit
+	]
+
+
+def get_gudang_transit(company, item_codes):
+	"""Pasangan item dan gudang transit, untuk item yang memang ikut alur transit.
+
+	Barang yang sudah keluar lewat Delivery Note tapi belum ditagih menumpuk di
+	gudang transit; secara harga pokok dia masih persediaan sampai Sales Invoice
+	terbit, jadi saldonya ikut Opening dan Closing. Mutasinya sengaja tidak
+	ikut dihitung supaya penerimaan transit tidak terbaca sebagai produksi.
+	"""
+	from sth.mill.gudang_transit import get_item_transit, get_setelan_transit
+
+	setelan = get_setelan_transit(company)
+	if not setelan.warehouse:
+		return []
+
+	transit = get_item_transit(company)
+	return [(item_code, setelan.warehouse) for item_code in item_codes if item_code in transit]
 
 
 def get_sumber_stok(item_codes, company, unit=None):
@@ -613,7 +860,8 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			continue
 
 		# Satu produk bisa tersebar di beberapa item/gudang, jadi saldo dan
-		# mutasinya dijumlahkan dulu sebelum masuk ke baris rincian.
+		# mutasinya dijumlahkan dulu sebelum masuk ke baris rincian. Saldonya
+		# ditambah gudang transit, mutasinya tidak.
 		opening_qty = opening_nilai = closing_qty = 0.0
 		mutasi = {
 			"pembelian_qty": 0.0, "pembelian_nilai": 0.0,
@@ -622,12 +870,16 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			"adjustment_qty": 0.0,
 		}
 		for item_code, gudang in pasangan:
+			for kunci, angka in mutasi_sle(item_code, gudang, periode_dari, periode_sampai).items():
+				mutasi[kunci] += angka
+
+		pasangan_saldo = pasangan + get_gudang_transit(
+			company, [item_code for item_code, _gudang in pasangan]
+		)
+		for item_code, gudang in pasangan_saldo:
 			qty_awal, nilai_awal = saldo_sle(item_code, gudang, add_days(periode_dari, -1))
 			opening_qty += qty_awal
 			opening_nilai += nilai_awal
-
-			for kunci, angka in mutasi_sle(item_code, gudang, periode_dari, periode_sampai).items():
-				mutasi[kunci] += angka
 
 			qty_akhir, _nilai_akhir = saldo_sle(item_code, gudang, periode_sampai)
 			closing_qty += qty_akhir

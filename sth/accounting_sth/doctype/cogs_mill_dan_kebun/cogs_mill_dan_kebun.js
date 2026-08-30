@@ -7,7 +7,12 @@ frappe.ui.form.on("COGS Mill dan Kebun", {
         }
 
         frm.set_intro(null);
-        if (!frm.doc.posting_jurnal) {
+        if (frm.doc.buat_stock_reconciliation) {
+            frm.set_intro(
+                __("Submit akan membuat Stock Reconciliation per produk per unit, menyamakan nilai persediaan di tiap gudang dengan rate Closing Stock. Tabel Closing di bawah tidak diposting karena akun persediaannya sudah disentuh Stock Reconciliation."),
+                "blue"
+            );
+        } else if (!frm.doc.posting_jurnal) {
             frm.set_intro(
                 __("Posting Jurnal ke Buku Besar masih mati. Tabel Closing di bawah adalah jurnal yang akan terbentuk, tapi belum ada GL Entry yang dibuat."),
                 "orange"
@@ -16,6 +21,16 @@ frappe.ui.form.on("COGS Mill dan Kebun", {
     },
 
     posting_jurnal(frm) {
+        if (frm.doc.posting_jurnal && frm.doc.buat_stock_reconciliation) {
+            frm.set_value("buat_stock_reconciliation", 0);
+        }
+        frm.trigger("refresh");
+    },
+
+    buat_stock_reconciliation(frm) {
+        if (frm.doc.buat_stock_reconciliation && frm.doc.posting_jurnal) {
+            frm.set_value("posting_jurnal", 0);
+        }
         frm.trigger("refresh");
     },
 

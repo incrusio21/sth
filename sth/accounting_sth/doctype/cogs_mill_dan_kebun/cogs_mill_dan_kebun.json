@@ -35,6 +35,9 @@
   "posting_jurnal",
   "closing",
   "total_closing",
+  "section_rekonsiliasi",
+  "buat_stock_reconciliation",
+  "rekonsiliasi",
   "section_pemeriksaan",
   "saldo_gl_tbs",
   "saldo_gl_cpo",
@@ -220,6 +223,26 @@
    "read_only": 1
   },
   {
+   "fieldname": "section_rekonsiliasi",
+   "fieldtype": "Section Break",
+   "label": "Stock Reconciliation"
+  },
+  {
+   "default": "1",
+   "description": "Menyamakan nilai persediaan di Stock Ledger dengan rate Closing Stock hasil perhitungan ini, untuk tiap gudang yang punya stok atau mutasi. Tidak bisa dinyalakan bersama Posting Jurnal ke Buku Besar karena keduanya menyentuh akun persediaan.",
+   "fieldname": "buat_stock_reconciliation",
+   "fieldtype": "Check",
+   "label": "Buat Stock Reconciliation saat Submit"
+  },
+  {
+   "depends_on": "buat_stock_reconciliation",
+   "fieldname": "rekonsiliasi",
+   "fieldtype": "Table",
+   "label": "Rekonsiliasi",
+   "options": "COGS Mill dan Kebun Rekonsiliasi",
+   "read_only": 1
+  },
+  {
    "collapsible": 1,
    "fieldname": "section_pemeriksaan",
    "fieldtype": "Section Break",
@@ -281,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-25 09:00:00.000000",
+ "modified": "2026-08-30 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "COGS Mill dan Kebun",
