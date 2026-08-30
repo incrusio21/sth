@@ -777,7 +777,7 @@ class PaymentEntry(EmployeePaymentEntry):
 		# else:
 		# 	self.make_exchange_gain_loss_journal()
 
-		self.make_advance_gl_entries(cancel=cancel)
+		# self.make_advance_gl_entries(cancel=cancel)
 
 	def add_party_gl_entries(self, gl_entries):
 		if not self.party_account:

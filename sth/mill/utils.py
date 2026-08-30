@@ -1,4 +1,7 @@
+import contextlib
+
 import frappe
+from frappe.utils import cint, flt
 
 SEHARI = 24 * 3600
 
@@ -64,3 +67,67 @@ def set_total_jam_desimal(self, method=None):
 	self.total_jam_desimal = hitung_jam_desimal(
 		self.get("jam_mulai"), self.get("jam_selesai")
 	)
+
+
+@contextlib.contextmanager
+def izinkan_stock_minus():
+	"""Matikan sementara larangan stok minus, lalu kembalikan setelah selesai.
+
+	Membatalkan penerimaan lama membuat stok di tanggal itu berkurang, padahal
+	Delivery Note sesudahnya sudah terlanjur mengambil barangnya. Selama
+	penggantinya belum dibuat, ERPNext melihat stok minus di masa depan dan
+	menolak pembatalannya. Jendela minus itu tidak bisa dihindari dengan
+	mengerjakan dokumennya satu per satu, karena yang divalidasi adalah keadaan
+	sesudah tanggal itu, bukan urutan pengerjaannya.
+	"""
+	asal = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
+	if not asal:
+		set_allow_negative_stock(1)
+
+	try:
+		yield
+	finally:
+		# Pekerjaan dokumen yang gagal dibuang dulu, supaya yang ikut ter-commit
+		# bersama pengembalian setelan cuma dokumen yang sudah tuntas. Di jalur
+		# sukses ini tidak ada efeknya, semuanya sudah di-commit per dokumen.
+		frappe.db.rollback()
+
+		if not asal:
+			set_allow_negative_stock(0)
+			# Harus di-commit di sini juga: kalau pemanggilnya gagal, migrate
+			# akan rollback, dan tanpa commit ini site tertinggal dengan stok
+			# minus masih diizinkan.
+			frappe.db.commit()
+
+
+def set_allow_negative_stock(nilai):
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", nilai)
+	frappe.clear_document_cache("Stock Settings", "Stock Settings")
+
+	# get_single_value menyimpan hasilnya sepanjang request, dan itulah yang
+	# dibaca is_negative_stock_allowed tiap kali SLE dibuat.
+	value_cache = getattr(frappe.db, "value_cache", None)
+	if value_cache:
+		value_cache.pop("Stock Settings", None)
+
+
+def buat_ulang_ste_sounding(doc, produksi):
+	"""Buang Stock Entry dokumen sounding ini, lalu buat ulang lewat create_ste.
+
+	Qty maupun tanggal Stock Entry tidak bisa diubah setelah submit, jadi satu-
+	satunya cara membetulkannya adalah membatalkan yang lama, menghapusnya, dan
+	membiarkan controller-nya membuat yang baru. Mengembalikan jumlah STE yang
+	dibuat, supaya pemanggilnya bisa melaporkannya.
+	"""
+	for row in frappe.get_all("Stock Entry", filters={"references": doc.name}, fields=["name", "docstatus"]):
+		ste = frappe.get_doc("Stock Entry", row.name)
+		if ste.docstatus == 1:
+			ste.cancel()
+		ste.delete()
+
+	if not flt(produksi):
+		return 0
+
+	doc.create_ste()
+	return 1

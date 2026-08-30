@@ -17,7 +17,16 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			self.add_rekap_hasil()
 		
 		self.calculate_volume_sounding()
-		self.produksi = self.volume_sounding - self.stock_akhir 
+		# self.produksi = self.volume_sounding - self.stock_akhir 
+		# self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
+		# self.ker_netto_2 = self.produksi/(self.tbs_olah - self.sortasi)*100 if self.tbs_olah else 0
+
+	def validate(self):
+		self.hitung_produksi()
+
+	def hitung_produksi(self):
+		self.stock_akhir = self.volume_sounding
+		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman)
 		self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
 		self.ker_netto_2 = self.produksi/(self.tbs_olah - self.sortasi)*100 if self.tbs_olah else 0
 
@@ -29,7 +38,8 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
 		for row in ste:
 			doc = frappe.get_doc("Stock Entry",row)
-			doc.cancel()
+			if doc.docstatus == 1:
+				doc.cancel()
 	
 	def on_trash(self):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
@@ -113,8 +123,11 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
 
 		self.stock_awal = get_stock_balance(item_code, warehouse, self.tanggal_proses, "23:59:59") if warehouse and item_code else 0
+		self.stock_awal -= 500000
 		
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
+		print(self.pengiriman)
+
 		self.stock_akhir = flt(self.stock_awal) - flt(self.pengiriman)
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
@@ -188,6 +201,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		}
 
 		doc = get_mapped_doc(self.doctype,self.name,mapper,None,postprocess,True)
+		doc.set_posting_time = 1
 		doc.insert()
 		doc.submit()
 
