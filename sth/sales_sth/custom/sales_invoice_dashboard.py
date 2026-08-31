@@ -13,6 +13,11 @@ def get_data(data):
 			"Auto Repeat": "reference_document",
 			"Purchase Invoice": "inter_company_invoice_reference",
 			"Nota Piutang": "pengakuan_penjualan_ppn",
+			# Stock Entry keluar gudang transit, dibuat sth/mill/gudang_transit.py
+			# waktu invoice ini disubmit. Nomor Delivery Note-nya cuma ada per
+			# baris item Stock Entry karena satu invoice bisa menagih beberapa
+			# Delivery Note, jadi yang menyambung ke sini field header-nya.
+			"Stock Entry": "sales_invoice_transit",
 		},
 		"internal_links": {
 			"Sales Order": ["items", "sales_order"],
@@ -33,6 +38,7 @@ def get_data(data):
 				],
 			},
 			{"label": _("Reference"), "items": ["Timesheet", "Delivery Note", "Sales Order", "Nota Piutang"]},
+			{"label": _("Transit"), "items": ["Stock Entry"]},
 			{"label": _("Returns"), "items": ["Sales Invoice"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
 			{"label": _("Internal Transfers"), "items": ["Purchase Invoice"]},
