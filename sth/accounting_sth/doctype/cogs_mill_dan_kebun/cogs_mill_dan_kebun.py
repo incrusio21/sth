@@ -709,7 +709,7 @@ def mutasi_sle(item_code, warehouse, dari, sampai):
 
 	'produksi_qty' di sini bucket sisa (masuk, bukan pembelian, bukan Stock
 	Reconciliation) dan cuma dipakai CPO dan PK. Production TBS diambil dari Data
-	TBS lewat produksi_tbs_dari_data_tbs, karena Stock Entry bikinan Data TBS hanya
+	TBS lewat grand_total_tbs_terakhir, karena Stock Entry bikinan Data TBS hanya
 	mencatat selisih restan. 'pembelian_qty' tetap dipakai TBS untuk baris FFB
 	Purchase."""
 	rows = frappe.db.sql("""
@@ -746,26 +746,20 @@ def mutasi_sle(item_code, warehouse, dari, sampai):
 	return hasil
 
 
-def filter_data_tbs(company, unit):
-	"""Potongan where dan parameternya untuk menyaring Data TBS.
+def ada_data_tbs(company, unit, dari, sampai):
+	"""Membedakan 'memang tidak ada produksi' dari 'Data TBS-nya belum disubmit';
+	tanpa ini Production nol lewat tanpa peringatan.
 
 	Company dibaca dari Unit, bukan dari field company Data TBS: field itu tidak
 	punya default maupun fetch_from dan JS-nya tidak mengisinya, jadi di dokumen
 	lama lazimnya kosong dan menyaringnya membuang semua barisnya."""
 	syarat = ""
-	nilai = {"company": company}
+	nilai = {"company": company, "dari": dari, "sampai": sampai}
 	if unit:
 		syarat = "and dt.unit = %(unit)s"
 		nilai["unit"] = unit
-	return syarat, nilai
 
-
-def ada_data_tbs(company, unit, dari, sampai):
-	"""Membedakan 'memang tidak ada produksi' dari 'Data TBS-nya belum disubmit';
-	tanpa ini Production nol lewat tanpa peringatan."""
-	syarat, nilai = filter_data_tbs(company, unit)
-	nilai.update({"dari": dari, "sampai": sampai})
-	row = frappe.db.sql("""
+	return bool(frappe.db.sql("""
 		select dt.name
 		from `tabData TBS` dt
 		inner join `tabUnit` u on u.name = dt.unit
@@ -773,54 +767,39 @@ def ada_data_tbs(company, unit, dari, sampai):
 			and dt.tanggal_produksi between %(dari)s and %(sampai)s
 			{syarat}
 		limit 1
-	""".format(syarat=syarat), nilai)
-	return bool(row)
+	""".format(syarat=syarat), nilai))
 
 
-def produksi_tbs_dari_data_tbs(company, unit, dari, sampai):
-	"""Production TBS = total Jumlah TBS Diterima di Data TBS, bukan mutasi SLE.
+def grand_total_tbs_terakhir(company, unit, sampai, dari=None):
+	"""Grand Total TBS pada Data TBS terakhir dalam rentang tanggal proses.
 
-	Stock Entry bikinan Data TBS hanya memposting selisih restan, jadi qty di
-	Stock Ledger bukan TBS yang masuk hari itu.
+	Dipakai dua kali: Production (rentangnya periode itu sendiri) dan Opening
+	(rentangnya sebelum periode). Keduanya angka posisi terakhir, bukan jumlah
+	sepanjang periode.
 
-	PERHATIAN: jumlah_tbs_diterima menjumlahkan Timbangan 'TBS Internal' dan
-	'TBS Eksternal' sekaligus, sedangkan yang eksternal juga masuk lewat Purchase
-	Receipt yang mengisi baris FFB Purchase. Jadi TBS eksternal terhitung dua kali
-	di Available. Ini disengaja untuk sementara supaya angkanya bisa dibandingkan
-	dulu, bukan kelalaian."""
-	syarat, nilai = filter_data_tbs(company, unit)
-	nilai.update({"dari": dari, "sampai": sampai})
-	row = frappe.db.sql("""
-		select sum(dt.jumlah_tbs_diterima)
-		from `tabData TBS` dt
-		inner join `tabUnit` u on u.name = dt.unit
-		where dt.docstatus = 1 and u.company = %(company)s
-			and dt.tanggal_produksi between %(dari)s and %(sampai)s
-			{syarat}
-	""".format(syarat=syarat), nilai)
-	return flt(row[0][0]) if row and row[0] else 0.0
-
-
-def opening_tbs_dari_data_tbs(company, unit, periode_dari):
-	"""Opening TBS dari Grand Total TBS pada Data TBS terakhir sebelum periode.
-
-	Cuma dipakai kalau belum ada dokumen COGS periode sebelumnya; kalau ada,
-	Closing dokumen itu yang menang supaya rantai nilainya nyambung.
+	Stock Ledger tidak dipakai karena Stock Entry bikinan Data TBS hanya
+	memposting selisih restan, jadi qty di SLE bukan TBS yang ada di pabrik.
 
 	Tanpa Unit, tiap unit diambil entry terakhirnya sendiri lalu dijumlahkan.
-	Kalau dicari satu entry terakhir untuk semua unit, unit yang berhenti produksi
-	lebih dulu hilang gara-gara unit lain punya entry yang lebih baru."""
+	Kalau dicari satu entry terakhir untuk seluruh company, unit yang berhenti
+	produksi lebih dulu hilang gara-gara unit lain punya entry yang lebih baru.
+	Daftar unit diambil dari Unit.company, bukan dari Data TBS.company: field itu
+	tidak punya default maupun fetch_from dan lazimnya kosong."""
 	daftar_unit = [unit] if unit else frappe.get_all("Unit", filters={"company": company}, pluck="name")
+
+	syarat = "and tanggal_produksi >= %(dari)s" if dari else ""
 
 	total = 0.0
 	for nama_unit in daftar_unit:
 		row = frappe.db.sql("""
 			select grand_total_tbs
 			from `tabData TBS`
-			where docstatus = 1 and unit = %s and tanggal_produksi < %s
+			where docstatus = 1 and unit = %(unit)s
+				and tanggal_produksi <= %(sampai)s
+				{syarat}
 			order by tanggal_produksi desc, creation desc
 			limit 1
-		""", (nama_unit, periode_dari))
+		""".format(syarat=syarat), {"unit": nama_unit, "sampai": sampai, "dari": dari})
 		if row:
 			total += flt(row[0][0])
 
@@ -976,7 +955,7 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		elif prefiks == "tbs":
 			# Belum ada dokumen periode sebelumnya: qty Opening dari Data TBS
 			# terakhir. Nilainya tetap dari Stock Ledger, Data TBS cuma simpan qty.
-			opening_qty = opening_tbs_dari_data_tbs(company, unit, periode_dari)
+			opening_qty = grand_total_tbs_terakhir(company, unit, add_days(periode_dari, -1))
 
 		nilai[prefiks + "_opening"] = (opening_qty, opening_nilai)
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
@@ -984,9 +963,10 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		nilai[prefiks + "_closing"] = (closing_qty, 0)
 		if prefiks == "tbs":
 			nilai["tbs_sold"] = (mutasi["penjualan_qty"], 0)
-			# Production TBS tidak dari SLE: lihat produksi_tbs_dari_data_tbs.
+			# Production TBS bukan jumlah sepanjang periode, tapi Grand Total TBS
+			# pada Data TBS terakhir periode itu. Lihat grand_total_tbs_terakhir.
 			nilai["tbs_production"] = (
-				produksi_tbs_dari_data_tbs(company, unit, periode_dari, periode_sampai),
+				grand_total_tbs_terakhir(company, unit, periode_sampai, periode_dari),
 				0,
 			)
 			if not ada_data_tbs(company, unit, periode_dari, periode_sampai):
