@@ -59,8 +59,9 @@ BARIS = (
 # Stock Entry-nya cuma memposting selisih, bukan posisi.
 #
 # 'produksi_total' membedakan cara menjumlahkannya: TBS memakai posisi terakhir
-# (grand_total_tbs sudah kumulatif restan plus terima), CPO dan PK memakai
-# jumlah pengiriman sepanjang periode.
+# (grand_total_tbs sudah kumulatif restan plus terima), CPO dan PK menjumlahkan
+# produksi harian. Field produksi CPO dan PK sengaja yang sama dengan qty Stock
+# Entry bikinan Sounding, jadi qty dan rate-nya berasal dari dokumen yang sama.
 SUMBER_PRODUK = {
 	"tbs": {
 		"doctype": "Data TBS",
@@ -72,14 +73,14 @@ SUMBER_PRODUK = {
 	"cpo": {
 		"doctype": "Sounding Stock CPO di BST",
 		"tanggal": "tanggal_proses",
-		"produksi": "pengiriman_cpo",
+		"produksi": "produksi_cpo",
 		"produksi_total": True,
 		"closing": "stock_bst",
 	},
 	"pk": {
 		"doctype": "Sounding Stock Palm Kernel di Bunker Kernel",
 		"tanggal": "tanggal_proses",
-		"produksi": "pengiriman",
+		"produksi": "produksi",
 		"produksi_total": True,
 		"closing": "stock_akhir",
 	},
