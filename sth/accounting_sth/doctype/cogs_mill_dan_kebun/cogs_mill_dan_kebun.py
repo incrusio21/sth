@@ -58,14 +58,15 @@ BARIS = (
 # field references. Stock Ledger tidak dipakai untuk angka-angka ini karena
 # Stock Entry-nya cuma memposting selisih, bukan posisi.
 #
-# 'produksi_total' membedakan cara menjumlahkannya. Ketiganya sekarang memakai
-# jumlah sepanjang periode; yang memakai posisi terakhir tinggal baris Closing.
+# 'produksi_total' membedakan cara menjumlahkannya: TBS memakai posisi terakhir
+# (grand_total_tbs sudah kumulatif restan plus terima), CPO dan PK memakai
+# jumlah pengiriman sepanjang periode.
 SUMBER_PRODUK = {
 	"tbs": {
 		"doctype": "Data TBS",
 		"tanggal": "tanggal_produksi",
-		"produksi": "jumlah_tbs_diterima",
-		"produksi_total": True,
+		"produksi": "grand_total_tbs",
+		"produksi_total": False,
 		"closing": "jumlah_tbs_restan",
 	},
 	"cpo": {
@@ -854,7 +855,7 @@ def _syarat_unit(unit, nilai):
 def sumber_terakhir(prefiks, field, company, unit, dari, sampai):
 	"""Isi satu field pada dokumen sumber terakhir dalam rentang tanggal.
 
-	Dipakai baris Closing ketiga produk. Angka posisi, bukan jumlah.
+	Dipakai Closing ketiga produk dan Production TBS. Angka posisi, bukan jumlah.
 
 	Tanpa Unit, tiap unit diambil dokumen terakhirnya sendiri lalu dijumlahkan.
 	Kalau dicari satu dokumen terakhir untuk seluruh company, unit yang berhenti
@@ -881,7 +882,7 @@ def sumber_terakhir(prefiks, field, company, unit, dari, sampai):
 
 def sumber_total(prefiks, field, company, unit, dari, sampai):
 	"""Jumlah satu field pada seluruh dokumen sumber dalam rentang tanggal.
-	Dipakai baris Production ketiga produk, yang dicatat per hari."""
+	Dipakai Production CPO dan PK, yang mencatat pengiriman per hari."""
 	cfg = _sumber(prefiks, field)
 	nilai = {"company": company, "dari": dari, "sampai": sampai}
 	syarat = _syarat_unit(unit, nilai)
