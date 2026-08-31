@@ -44,8 +44,6 @@ frappe.ui.form.on("COGS Mill dan Kebun", {
     }
 });
 
-const METODE = "sth.accounting_sth.doctype.cogs_mill_dan_kebun.cogs_mill_dan_kebun";
-
 function ambil_data_cogs(frm) {
     if (!frm.doc.periode_dari || !frm.doc.periode_sampai) {
         frappe.msgprint(__("Harap isi Periode Dari dan Periode Sampai terlebih dahulu."));
@@ -57,46 +55,25 @@ function ambil_data_cogs(frm) {
         return;
     }
 
-    // frappe.call mengembalikan promise jQuery yang tidak punya .finally(),
-    // jadi pembekuan layar diserahkan ke opsi freeze bawaan.
-    frappe.call({
-        method: `${METODE}.ambil_data`,
-        args: {
-            periode_dari: frm.doc.periode_dari,
-            periode_sampai: frm.doc.periode_sampai,
-            company: frm.doc.company,
-            unit: frm.doc.unit
-        },
+    // Dokumennya ikut dikirim supaya server bisa menjalankan hitung() dan
+    // mengembalikan baris turunan yang sudah terisi, bukan cuma baris masukan.
+    frm.call({
+        doc: frm.doc,
+        method: "ambil_data",
         freeze: true,
-        freeze_message: __("Mengambil data..."),
-        callback(r) {
-            const d = r.message;
-            if (!d) return;
+        freeze_message: __("Mengambil data...")
+    }).then((r) => {
+        frm.refresh_fields();
 
-            frm.clear_table("rincian");
-            (d.rincian || []).forEach((row) => frm.add_child("rincian", row));
-
-            // Nilai berikut boleh dikoreksi manual setelahnya; perhitungan di
-            // server selalu jalan ulang waktu dokumen disimpan.
-            frm.set_value("biaya_kebun", d.biaya_kebun);
-            frm.set_value("biaya_mill", d.biaya_mill);
-            frm.set_value("harga_rata_cpo", d.harga_rata_cpo);
-            frm.set_value("harga_rata_pk", d.harga_rata_pk);
-            frm.set_value("saldo_gl_tbs", d.saldo_gl_tbs);
-            frm.set_value("saldo_gl_cpo", d.saldo_gl_cpo);
-            frm.set_value("saldo_gl_pk", d.saldo_gl_pk);
-
-            frm.refresh_fields();
-
-            if ((d.peringatan || []).length) {
-                frappe.msgprint({
-                    title: __("Perlu Dilengkapi"),
-                    message: d.peringatan.join("<br>"),
-                    indicator: "orange"
-                });
-            } else {
-                frappe.show_alert({ message: __("Data berhasil diambil."), indicator: "green" });
-            }
+        const peringatan = r.message || [];
+        if (peringatan.length) {
+            frappe.msgprint({
+                title: __("Perlu Dilengkapi"),
+                message: peringatan.join("<br>"),
+                indicator: "orange"
+            });
+        } else {
+            frappe.show_alert({ message: __("Data berhasil diambil."), indicator: "green" });
         }
     });
 }

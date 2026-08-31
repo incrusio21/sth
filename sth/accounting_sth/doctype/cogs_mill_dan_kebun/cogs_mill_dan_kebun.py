@@ -132,6 +132,45 @@ class COGSMilldanKebun(Document):
 	# Perhitungan
 	# ------------------------------------------------------------------
 
+	@frappe.whitelist()
+	def ambil_data(self):
+		"""Isi ulang rincian dari dokumen sumber lalu langsung hitung turunannya.
+
+		Dipanggil lewat frm.call dengan dokumennya ikut dikirim, mengikuti pola
+		Costing Kebun. Sebelumnya tombol ini cuma mengisi baris masukan lewat
+		fungsi modul, jadi Available, Cost Of Production, dan Internal Consumption
+		tetap nol sampai dokumennya disimpan dan hasilnya kelihatan seperti salah.
+
+		Mengembalikan daftar peringatan; baris turunannya ikut terkirim balik
+		bersama dokumen.
+		"""
+		if not (self.periode_dari and self.periode_sampai):
+			frappe.throw("Harap isi Periode Dari dan Periode Sampai terlebih dahulu.")
+
+		if not self.company:
+			frappe.throw("Harap isi Company terlebih dahulu.")
+
+		data = ambil_data(self.periode_dari, self.periode_sampai, self.company, self.unit)
+
+		for fieldname in (
+			"biaya_kebun",
+			"biaya_mill",
+			"harga_rata_cpo",
+			"harga_rata_pk",
+			"saldo_gl_tbs",
+			"saldo_gl_cpo",
+			"saldo_gl_pk",
+		):
+			self.set(fieldname, data[fieldname])
+
+		self.set("rincian", [])
+		for row in data["rincian"]:
+			self.append("rincian", row)
+
+		self.hitung()
+
+		return data["peringatan"]
+
 	def hitung(self):
 		"""Hitung ulang seluruh baris turunan, conversion cost, dan jurnal.
 
@@ -970,8 +1009,10 @@ def harga_rata_jual(company, item_codes, dari, sampai):
 	return flt(row[0].nilai) / flt(row[0].qty)
 
 
-@frappe.whitelist()
 def ambil_data(periode_dari, periode_sampai, company, unit=None):
+	"""Kumpulkan angka dari dokumen sumber. Tidak lagi diekspos ke klien: yang
+	dipanggil tombol Ambil Data adalah method dokumen dengan nama sama, supaya
+	baris turunannya ikut terhitung."""
 	setelan = get_setelan(company)
 	sebelumnya = opening_dari_dokumen_sebelumnya(company, unit, periode_dari)
 
