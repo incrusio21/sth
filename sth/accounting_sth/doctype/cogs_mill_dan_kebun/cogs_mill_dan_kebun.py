@@ -52,6 +52,44 @@ BARIS = (
 	("pk_cogs", "Palm Kernel", "Cost Of Goods Sold"),
 )
 
+# Dokumen sumber angka posisi tiap produk. Doctype-nya beda-beda tapi polanya
+# sama: satu dokumen per unit per hari, qty produksi dan stok akhir ada di
+# field-nya sendiri, dan Stock Entry yang dibuatnya menempelkan nama dokumen di
+# field references. Stock Ledger tidak dipakai untuk angka-angka ini karena
+# Stock Entry-nya cuma memposting selisih, bukan posisi.
+#
+# 'produksi_total' membedakan cara menjumlahkannya: TBS memakai posisi terakhir
+# (grand_total_tbs sudah kumulatif restan plus terima), CPO dan PK memakai
+# jumlah pengiriman sepanjang periode.
+SUMBER_PRODUK = {
+	"tbs": {
+		"doctype": "Data TBS",
+		"tanggal": "tanggal_produksi",
+		"produksi": "grand_total_tbs",
+		"produksi_total": False,
+		"closing": "jumlah_tbs_restan",
+	},
+	"cpo": {
+		"doctype": "Sounding Stock CPO di BST",
+		"tanggal": "tanggal_proses",
+		"produksi": "pengiriman_cpo",
+		"produksi_total": True,
+		"closing": "stock_bst",
+	},
+	"pk": {
+		"doctype": "Sounding Stock Palm Kernel di Bunker Kernel",
+		"tanggal": "tanggal_proses",
+		"produksi": "pengiriman",
+		"produksi_total": True,
+		"closing": "stock_akhir",
+	},
+}
+
+# Opening tiap produk diambil dari baris pemakaian dokumen periode sebelumnya,
+# bukan dari Closing-nya. Closing sekarang berisi stok akhir bertanda negatif,
+# sedangkan yang dibawa ke bulan ini adalah barang yang sudah dibebani biaya.
+BARIS_OPENING = {"tbs": "tbs_cop", "cpo": "cpo_cogs", "pk": "pk_cogs"}
+
 WAKTU_REKONSILIASI = "23:59:59"
 
 KETERANGAN_KEBUN = "KAPITALISASI BIAYA KEBUN KE PERSEDIAAN TBS"
@@ -195,30 +233,28 @@ class COGSMilldanKebun(Document):
 			if amount is not None:
 				baris["amount"] = flt(amount)
 
-		# --- TBS: satu rate untuk semua baris, diambil dari Stock Entry bikinan
-		# Data TBS terakhir. Nilai tiap baris = qty x rate, jadi Available di sisi
-		# rupiah otomatis sejalan dengan qty-nya.
-		#
-		# Rate-nya dibaca ulang tiap kali dihitung, bukan disimpan di field:
-		# nilai persediaan TBS harus selalu sama dengan yang dipakai Stock Ledger,
-		# jadi tidak boleh ada yang mengetiknya sendiri di form.
-		rate_tbs = (
-			rate_tbs_dari_data_tbs(self.company, self.unit, self.periode_dari, self.periode_sampai)
-			if self.company and self.periode_dari and self.periode_sampai
-			else 0.0
-		)
+		# Rate tiap produk dibaca ulang dari Stock Entry dokumen sumbernya, tidak
+		# disimpan di field: nilainya harus selalu sama dengan yang dipakai Stock
+		# Ledger, jadi tidak boleh ada yang mengetiknya sendiri di form.
+		rate = {}
+		if self.company and self.periode_dari and self.periode_sampai:
+			for produk, prefiks in PREFIKS.items():
+				rate[prefiks] = rate_dari_stock_entry(
+					prefiks, produk, self.company, self.unit,
+					self.periode_dari, self.periode_sampai,
+				)
+
+		# --- TBS: satu rate untuk semua baris, jadi Available di sisi rupiah
+		# otomatis sejalan dengan qty-nya.
+		rate_tbs = flt(rate.get("tbs"))
 		for kode in ("tbs_opening", "tbs_production", "tbs_purchase"):
 			isi(kode, amount=rate_tbs * q(kode))
-		# Opening tidak ikut dijumlahkan: Production diambil dari grand_total_tbs
-		# yang sudah memuat restan awal, jadi menambah Opening lagi menghitung
-		# restan dua kali. Barisnya tetap diisi sebagai penunjuk saldo awal.
 		isi(
 			"tbs_available",
-			qty=q("tbs_production") + q("tbs_purchase"),
-			amount=a("tbs_production") + a("tbs_purchase"),
+			qty=q("tbs_opening") + q("tbs_production") + q("tbs_purchase"),
+			amount=a("tbs_opening") + a("tbs_production") + a("tbs_purchase"),
 		)
 		# Closing dan Sold TBS disimpan negatif lalu dijumlahkan, mengikuti excel.
-		# Beda dengan CPO dan PK yang qty Closing-nya tetap positif.
 		isi("tbs_closing", amount=rate_tbs * q("tbs_closing"))
 		isi(
 			"tbs_cop",
@@ -241,32 +277,22 @@ class COGSMilldanKebun(Document):
 		nilai_pk = flt(self.ker) * flt(self.harga_rata_pk)
 		pembagi = nilai_cpo + nilai_pk
 
+		# Conversion cost sekarang angka pemantau saja. Nilai produksi CPO dan PK
+		# tidak lagi dibagi dari TBS diolah plus biaya mill, tapi diambil dari
+		# rate Stock Entry Sounding masing-masing.
 		self.conversion_cost_cpo = (nilai_cpo / pembagi * 100) if pembagi else 0
 		self.conversion_cost_pk = (100 - flt(self.conversion_cost_cpo)) if pembagi else 0
 
-		# --- Biaya yang dibagi ke CPO dan PK: TBS diolah ditambah biaya mill
-		nilai_tbs_diolah = flt(a("tbs_internal"), 2)
-		nilai_mill = flt(self.biaya_mill, 2)
-		dibagi = nilai_tbs_diolah + nilai_mill
-
-		if dibagi and not pembagi:
-			frappe.throw(
-				"Average Price CPO dan PK belum terisi, conversion cost tidak bisa dihitung "
-				"sehingga biaya TBS dan biaya mill tidak punya tujuan alokasi."
-			)
-
-		amount_cpo = flt(dibagi * flt(self.conversion_cost_cpo) / 100, 2)
-		isi("cpo_production", amount=amount_cpo)
-		isi("pk_production", amount=dibagi - amount_cpo)
-
-		# --- CPO dan PK: rata-rata tertimbang, stock adjustment hanya qty
+		# --- CPO dan PK: Production dari rate Sounding, sisanya rata-rata
+		# tertimbang. Closing negatif seperti TBS, jadi COGS menjumlahkan.
 		for prefiks in ("cpo", "pk"):
+			isi(prefiks + "_production", amount=flt(rate.get(prefiks)) * q(prefiks + "_production"))
 			isi(
 				prefiks + "_available",
-				qty=q(prefiks + "_opening") + q(prefiks + "_purchase") + q(prefiks + "_production"),
-				amount=a(prefiks + "_opening") + a(prefiks + "_purchase") + a(prefiks + "_production"),
+				qty=q(prefiks + "_opening") + q(prefiks + "_production") + q(prefiks + "_purchase"),
+				amount=a(prefiks + "_opening") + a(prefiks + "_production") + a(prefiks + "_purchase"),
 			)
-			rate = (
+			rate_rata = (
 				a(prefiks + "_available") / q(prefiks + "_available")
 				if q(prefiks + "_available")
 				else 0
@@ -274,11 +300,11 @@ class COGSMilldanKebun(Document):
 			# Selisih nilai stock adjustment sengaja tidak dijurnal, mengikuti
 			# excel: qty-nya menambah COGS, nilainya terserap lewat rate.
 			isi(prefiks + "_adjustment", amount=0)
-			isi(prefiks + "_closing", amount=rate * q(prefiks + "_closing"))
+			isi(prefiks + "_closing", amount=rate_rata * q(prefiks + "_closing"))
 			isi(
 				prefiks + "_cogs",
-				qty=q(prefiks + "_available") + q(prefiks + "_adjustment") - q(prefiks + "_closing"),
-				amount=a(prefiks + "_available") - a(prefiks + "_closing"),
+				qty=q(prefiks + "_available") + q(prefiks + "_adjustment") + q(prefiks + "_closing"),
+				amount=a(prefiks + "_available") + a(prefiks + "_adjustment") + a(prefiks + "_closing"),
 			)
 
 		self.tulis_rincian(nilai)
@@ -308,8 +334,8 @@ class COGSMilldanKebun(Document):
 		def a(kode):
 			return flt(nilai.get(kode, {}).get("amount"))
 
-		# Closing dan Sold TBS disimpan negatif, jadi ikut dijumlahkan; punya
-		# CPO dan PK di bawah masih positif dan tetap dikurangkan.
+		# Closing dan Sold disimpan negatif di ketiga produk, jadi ikut
+		# dijumlahkan, bukan dikurangkan.
 		self.selisih_gl_tbs = flt(
 			flt(self.saldo_gl_tbs)
 			+ a("tbs_production")
@@ -325,7 +351,7 @@ class COGSMilldanKebun(Document):
 					flt(self.get("saldo_gl_" + prefiks))
 					+ a(prefiks + "_production")
 					- a(prefiks + "_cogs")
-					- a(prefiks + "_closing"),
+					+ a(prefiks + "_closing"),
 					2,
 				),
 			)
@@ -762,11 +788,12 @@ def mutasi_sle(item_code, warehouse, dari, sampai):
 	"""Mutasi periode dipecah per jenis voucher dan arah, supaya pembelian,
 	produksi, penjualan, dan stock adjustment bisa dibedakan.
 
-	'produksi_qty' di sini bucket sisa (masuk, bukan pembelian, bukan Stock
-	Reconciliation) dan cuma dipakai CPO dan PK. Production TBS diambil dari Data
-	TBS lewat data_tbs_terakhir, karena Stock Entry bikinan Data TBS hanya
-	mencatat selisih restan. 'pembelian_qty' tetap dipakai TBS untuk baris FFB
-	Purchase."""
+	Yang masih dipakai cuma 'pembelian_qty' dan 'pembelian_nilai' untuk baris
+	Purchase ketiga produk. Production, Closing, dan Stock Adjustment sekarang
+	diambil dari dokumen sumber di SUMBER_PRODUK, karena Stock Entry bikinan
+	dokumen-dokumen itu cuma memposting selisih, bukan posisi. Bucket sisanya
+	dibiarkan supaya pemisahan voucher-nya tetap terbaca kalau nanti diperlukan
+	lagi."""
 	rows = frappe.db.sql("""
 		select
 			voucher_type,
@@ -801,107 +828,134 @@ def mutasi_sle(item_code, warehouse, dari, sampai):
 	return hasil
 
 
-def ada_data_tbs(company, unit, dari, sampai):
-	"""Membedakan 'memang tidak ada produksi' dari 'Data TBS-nya belum disubmit';
-	tanpa ini Production nol lewat tanpa peringatan.
-
-	Company dibaca dari Unit, bukan dari field company Data TBS: field itu tidak
-	punya default maupun fetch_from dan JS-nya tidak mengisinya, jadi di dokumen
-	lama lazimnya kosong dan menyaringnya membuang semua barisnya."""
-	syarat = ""
-	nilai = {"company": company, "dari": dari, "sampai": sampai}
-	if unit:
-		syarat = "and dt.unit = %(unit)s"
-		nilai["unit"] = unit
-
-	return bool(frappe.db.sql("""
-		select dt.name
-		from `tabData TBS` dt
-		inner join `tabUnit` u on u.name = dt.unit
-		where dt.docstatus = 1 and u.company = %(company)s
-			and dt.tanggal_produksi between %(dari)s and %(sampai)s
-			{syarat}
-		limit 1
-	""".format(syarat=syarat), nilai))
+def _sumber(prefiks, field=None):
+	"""Konfigurasi dokumen sumber satu produk, sekalian memastikan nama field yang
+	diminta memang terdaftar. Nama doctype dan field masuk langsung ke SQL, jadi
+	satu-satunya yang boleh lewat adalah yang tertulis di SUMBER_PRODUK."""
+	cfg = SUMBER_PRODUK.get(prefiks)
+	if not cfg:
+		frappe.throw("Produk '{0}' tidak punya dokumen sumber.".format(prefiks))
+	if field is not None and field not in (cfg["produksi"], cfg["closing"]):
+		frappe.throw(
+			"Field '{0}' tidak terdaftar sebagai sumber {1}.".format(field, cfg["doctype"])
+		)
+	return cfg
 
 
-# Field Data TBS yang boleh dibaca data_tbs_terakhir. Nama field masuk langsung
-# ke SQL, jadi dibatasi di sini supaya tidak ada jalan menyisipkan apa pun.
-FIELD_DATA_TBS = ("grand_total_tbs", "jumlah_tbs_restan", "total_tbs_restan", "tbs_olah")
+def _syarat_unit(unit, nilai):
+	"""Company disaring lewat Unit, bukan lewat field company dokumen sumber:
+	di Data TBS field itu tidak punya default maupun fetch_from dan lazimnya
+	kosong, jadi menyaringnya membuang semua barisnya."""
+	if not unit:
+		return ""
+	nilai["unit"] = unit
+	return "and d.unit = %(unit)s"
 
 
-def data_tbs_terakhir(company, unit, field, dari, sampai):
-	"""Isi satu field pada Data TBS terakhir dalam rentang tanggal proses.
+def sumber_terakhir(prefiks, field, company, unit, dari, sampai):
+	"""Isi satu field pada dokumen sumber terakhir dalam rentang tanggal.
 
-	Dipakai Production (grand_total_tbs) dan Closing (jumlah_tbs_restan).
-	Keduanya angka posisi terakhir, bukan jumlah sepanjang periode.
+	Dipakai Closing ketiga produk dan Production TBS. Angka posisi, bukan jumlah.
 
-	Stock Ledger tidak dipakai karena Stock Entry bikinan Data TBS hanya
-	memposting selisih restan, jadi qty di SLE bukan TBS yang ada di pabrik.
-
-	Tanpa Unit, tiap unit diambil entry terakhirnya sendiri lalu dijumlahkan.
-	Kalau dicari satu entry terakhir untuk seluruh company, unit yang berhenti
-	produksi lebih dulu hilang gara-gara unit lain punya entry yang lebih baru.
-	Daftar unit diambil dari Unit.company, bukan dari Data TBS.company: field itu
-	tidak punya default maupun fetch_from dan lazimnya kosong."""
-	if field not in FIELD_DATA_TBS:
-		frappe.throw("Field Data TBS '{0}' tidak dikenali.".format(field))
-
+	Tanpa Unit, tiap unit diambil dokumen terakhirnya sendiri lalu dijumlahkan.
+	Kalau dicari satu dokumen terakhir untuk seluruh company, unit yang berhenti
+	produksi lebih dulu hilang gara-gara unit lain punya dokumen yang lebih baru."""
+	cfg = _sumber(prefiks, field)
 	daftar_unit = [unit] if unit else frappe.get_all("Unit", filters={"company": company}, pluck="name")
 
 	total = 0.0
 	for nama_unit in daftar_unit:
 		row = frappe.db.sql("""
 			select `{field}`
-			from `tabData TBS`
+			from `tab{doctype}`
 			where docstatus = 1 and unit = %(unit)s
-				and tanggal_produksi between %(dari)s and %(sampai)s
-			order by tanggal_produksi desc, creation desc
+				and `{tanggal}` between %(dari)s and %(sampai)s
+			order by `{tanggal}` desc, creation desc
 			limit 1
-		""".format(field=field), {"unit": nama_unit, "dari": dari, "sampai": sampai})
+		""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"]),
+			{"unit": nama_unit, "dari": dari, "sampai": sampai})
 		if row:
 			total += flt(row[0][0])
 
 	return total
 
 
-def rate_tbs_dari_data_tbs(company, unit, dari, sampai):
-	"""Basic Rate item TBS pada Stock Entry bikinan Data TBS terakhir periode ini.
-
-	Data TBS menempelkan namanya di field references Stock Entry, jadi rate yang
-	dipakai ERPNext untuk memvaluasi TBS hari itu bisa dibaca balik dari sana.
-	Stock Entry-nya Material Receipt tanpa basic_rate, jadi isinya valuation rate
-	terakhir item TBS — itu yang jadi dasar seluruh nilai baris TBS. Sengaja tidak
-	disimpan di field dokumen supaya tidak bisa diketik ulang di form.
-
-	Satu rate untuk semua unit: yang diambil Data TBS terakhir, bukan rata-rata
-	tertimbang antar unit. Kalau unit-unitnya punya rate yang berbeda jauh, isi
-	Unit di dokumen ini supaya tiap unit dihitung sendiri.
-
-	Tidak semua Data TBS punya Stock Entry: on_submit-nya cuma membuat kalau ada
-	restan atau TBS diterima. Karena itu yang dicari Data TBS terakhir yang punya
-	Stock Entry, bukan Data TBS terakhir lalu menyerah kalau kosong."""
-	syarat = ""
+def sumber_total(prefiks, field, company, unit, dari, sampai):
+	"""Jumlah satu field pada seluruh dokumen sumber dalam rentang tanggal.
+	Dipakai Production CPO dan PK, yang mencatat pengiriman per hari."""
+	cfg = _sumber(prefiks, field)
 	nilai = {"company": company, "dari": dari, "sampai": sampai}
-	if unit:
-		syarat = "and dt.unit = %(unit)s"
-		nilai["unit"] = unit
+	syarat = _syarat_unit(unit, nilai)
+
+	row = frappe.db.sql("""
+		select sum(d.`{field}`)
+		from `tab{doctype}` d
+		inner join `tabUnit` u on u.name = d.unit
+		where d.docstatus = 1 and u.company = %(company)s
+			and d.`{tanggal}` between %(dari)s and %(sampai)s
+			{syarat}
+	""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai)
+
+	return flt(row[0][0]) if row and row[0] else 0.0
+
+
+def ada_dokumen_sumber(prefiks, company, unit, dari, sampai):
+	"""Membedakan 'memang tidak ada produksi' dari 'dokumennya belum disubmit';
+	tanpa ini Production nol lewat tanpa peringatan."""
+	cfg = _sumber(prefiks)
+	nilai = {"company": company, "dari": dari, "sampai": sampai}
+	syarat = _syarat_unit(unit, nilai)
+
+	return bool(frappe.db.sql("""
+		select d.name
+		from `tab{doctype}` d
+		inner join `tabUnit` u on u.name = d.unit
+		where d.docstatus = 1 and u.company = %(company)s
+			and d.`{tanggal}` between %(dari)s and %(sampai)s
+			{syarat}
+		limit 1
+	""".format(doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai))
+
+
+def rate_dari_stock_entry(prefiks, produk, company, unit, dari, sampai):
+	"""Basic Rate produk pada Stock Entry bikinan dokumen sumber terakhir.
+
+	Ketiga dokumen sumber menempelkan namanya di field references Stock Entry,
+	jadi rate yang dipakai ERPNext memvaluasi produk itu bisa dibaca balik.
+	Sengaja tidak disimpan di field dokumen supaya tidak bisa diketik ulang di
+	form: nilainya harus selalu sama dengan yang dipakai Stock Ledger.
+
+	Yang dicari dokumen terakhir yang punya Stock Entry, bukan dokumen terakhir
+	lalu menyerah kalau kosong: ketiganya cuma membuat Stock Entry kalau ada
+	produksi, jadi hari terakhir bisa saja tidak punya.
+
+	Satu rate untuk semua unit. Kalau unit-unitnya punya rate yang berbeda jauh,
+	isi Unit di dokumen ini supaya tiap unit dihitung sendiri."""
+	cfg = _sumber(prefiks)
+	nilai = {
+		"company": company,
+		"dari": dari,
+		"sampai": sampai,
+		"doctype": cfg["doctype"],
+		"tipe": TIPE_BARANG[produk],
+	}
+	syarat = _syarat_unit(unit, nilai)
 
 	row = frappe.db.sql("""
 		select sed.basic_rate, sed.valuation_rate
 		from `tabStock Entry Detail` sed
 		inner join `tabStock Entry` se on se.name = sed.parent
-		inner join `tabData TBS` dt on dt.name = se.references
-		inner join `tabUnit` u on u.name = dt.unit
+		inner join `tab{doctype}` d on d.name = se.references
+		inner join `tabUnit` u on u.name = d.unit
 		inner join `tabItem` i on i.name = sed.item_code
-		where se.docstatus = 1 and se.reference_doctype = 'Data TBS'
-			and dt.docstatus = 1 and u.company = %(company)s
-			and i.tipe_barang = 'TBS'
-			and dt.tanggal_produksi between %(dari)s and %(sampai)s
+		where se.docstatus = 1 and se.reference_doctype = %(doctype)s
+			and d.docstatus = 1 and u.company = %(company)s
+			and i.tipe_barang = %(tipe)s
+			and d.`{tanggal}` between %(dari)s and %(sampai)s
 			{syarat}
-		order by dt.tanggal_produksi desc, dt.creation desc, sed.idx desc
+		order by d.`{tanggal}` desc, d.creation desc, sed.idx desc
 		limit 1
-	""".format(syarat=syarat), nilai, as_dict=True)
+	""".format(doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai, as_dict=True)
 
 	if not row:
 		return 0.0
@@ -909,8 +963,9 @@ def rate_tbs_dari_data_tbs(company, unit, dari, sampai):
 
 
 def opening_dari_dokumen_sebelumnya(company, unit, periode_dari):
-	"""Opening diambil dari Closing Stock dokumen periode sebelumnya supaya
-	rantai nilainya nyambung; kalau belum ada, jatuh ke Stock Ledger."""
+	"""Opening diambil dari baris pemakaian dokumen periode sebelumnya supaya
+	rantai nilainya nyambung; kalau belum ada, jatuh ke Stock Ledger. Baris mana
+	untuk produk mana ada di BARIS_OPENING."""
 	filters = {
 		"company": company,
 		"docstatus": 1,
@@ -925,27 +980,21 @@ def opening_dari_dokumen_sebelumnya(company, unit, periode_dari):
 	if not nama:
 		return {}
 
-	akhiran = "_closing"
-	hasil = {}
-	per_kode = {}
-	for row in frappe.get_all(
-		"COGS Mill dan Kebun Rincian",
-		filters={"parent": nama, "parenttype": "COGS Mill dan Kebun"},
-		fields=["kode", "qty", "amount"],
-	):
-		if not row.kode:
-			continue
-		per_kode[row.kode] = (flt(row.qty), flt(row.amount))
-		if row.kode.endswith(akhiran):
-			hasil[row.kode[: -len(akhiran)]] = (flt(row.qty), flt(row.amount))
+	per_kode = {
+		row.kode: (flt(row.qty), flt(row.amount))
+		for row in frappe.get_all(
+			"COGS Mill dan Kebun Rincian",
+			filters={"parent": nama, "parenttype": "COGS Mill dan Kebun"},
+			fields=["kode", "qty", "amount"],
+		)
+		if row.kode
+	}
 
-	# TBS: Opening bukan Closing bulan lalu tapi Cost Of Production-nya. Closing
-	# TBS isinya restan bertanda negatif, sedangkan yang dibawa ke bulan ini
-	# adalah TBS yang sudah dibebani biaya kebun dan siap diolah.
-	if "tbs_cop" in per_kode:
-		hasil["tbs"] = per_kode["tbs_cop"]
-
-	return hasil
+	return {
+		prefiks: per_kode[kode]
+		for prefiks, kode in BARIS_OPENING.items()
+		if kode in per_kode
+	}
 
 
 def total_biaya(company, kelompok, dari, sampai):
@@ -1074,33 +1123,40 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
 		nilai[prefiks + "_production"] = (mutasi["produksi_qty"], 0)
 		nilai[prefiks + "_closing"] = (closing_qty, 0)
+		# Production dan Closing ketiganya dari dokumen sumber, bukan mutasi
+		# Stock Ledger. Closing dinegatifkan karena rantai di hitung()
+		# menjumlahkan, tidak mengurangkan.
+		cfg = SUMBER_PRODUK[prefiks]
+		hitung_produksi = sumber_total if cfg["produksi_total"] else sumber_terakhir
+		nilai[prefiks + "_production"] = (
+			hitung_produksi(prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai),
+			0,
+		)
+		nilai[prefiks + "_closing"] = (
+			-sumber_terakhir(prefiks, cfg["closing"], company, unit, periode_dari, periode_sampai),
+			0,
+		)
+		if not ada_dokumen_sumber(prefiks, company, unit, periode_dari, periode_sampai):
+			peringatan.append(
+				"{0}: belum ada {1} yang disubmit untuk {2} sampai {3} di company "
+				"{4}{5}, jadi Production-nya nol.".format(
+					produk,
+					cfg["doctype"],
+					periode_dari,
+					periode_sampai,
+					company,
+					" unit {0}".format(unit) if unit else "",
+				)
+			)
+
 		if prefiks == "tbs":
 			# Penjualan TBS ke pihak ketiga dinolkan dulu atas permintaan user;
 			# qty-nya masih bisa diisi manual di grid dan tetap ikut dihitung.
 			nilai["tbs_sold"] = (0, 0)
-			# Production dan Closing TBS bukan mutasi sepanjang periode tapi
-			# posisi pada Data TBS terakhir. Closing dinegatifkan karena rantai
-			# TBS di hitung() menjumlahkan, tidak mengurangkan.
-			nilai["tbs_production"] = (
-				data_tbs_terakhir(company, unit, "grand_total_tbs", periode_dari, periode_sampai),
-				0,
-			)
-			nilai["tbs_closing"] = (
-				-data_tbs_terakhir(company, unit, "jumlah_tbs_restan", periode_dari, periode_sampai),
-				0,
-			)
-			if not ada_data_tbs(company, unit, periode_dari, periode_sampai):
-				peringatan.append(
-					"TBS: belum ada Data TBS yang disubmit dengan Tanggal Proses "
-					"{0} sampai {1} untuk company {2}{3}, jadi Production TBS nol.".format(
-						periode_dari,
-						periode_sampai,
-						company,
-						" unit {0}".format(unit) if unit else "",
-					)
-				)
 		else:
-			nilai[prefiks + "_adjustment"] = (mutasi["adjustment_qty"], 0)
+			# Stock Adjustment juga dinolkan dulu; mutasi Stock Reconciliation
+			# tetap dihitung di mutasi_sle kalau nanti mau dipakai lagi.
+			nilai[prefiks + "_adjustment"] = (0, 0)
 
 	rincian = []
 	for kode, produk, label in BARIS:
