@@ -158,14 +158,19 @@ class COGSMilldanKebun(Document):
 
 		# --- TBS: biaya kebun jadi nilai produksi, sisanya rata-rata tertimbang
 		isi("tbs_production", amount=flt(self.biaya_kebun))
+		# Opening tidak ikut dijumlahkan: Production diambil dari grand_total_tbs
+		# yang sudah memuat restan awal, jadi menambah Opening lagi menghitung
+		# restan dua kali. Barisnya tetap diisi sebagai penunjuk saldo awal.
 		isi(
 			"tbs_available",
-			qty=q("tbs_opening") + q("tbs_production") + q("tbs_purchase"),
-			amount=a("tbs_opening") + a("tbs_production") + a("tbs_purchase"),
+			qty=q("tbs_production") + q("tbs_purchase"),
+			amount=a("tbs_production") + a("tbs_purchase"),
 		)
 		rate_tbs = a("tbs_available") / q("tbs_available") if q("tbs_available") else 0
-		# Qty Closing dan Sold disimpan positif lalu dikurangkan di sini; di
-		# excel keduanya ditulis negatif lalu dijumlahkan.
+		# Qty Closing disimpan positif lalu dikurangkan di sini; di excel ditulis
+		# negatif lalu dijumlahkan. Closing berisi qty terjual bulan itu, jadi
+		# Sold tidak dikurangkan lagi di Internal Consumption — barisnya tetap
+		# ditampilkan sebagai rincian dari angka yang sama.
 		isi("tbs_closing", amount=rate_tbs * q("tbs_closing"))
 		isi(
 			"tbs_cop",
@@ -175,8 +180,8 @@ class COGSMilldanKebun(Document):
 		isi("tbs_sold", amount=rate_tbs * q("tbs_sold"))
 		isi(
 			"tbs_internal",
-			qty=q("tbs_cop") - q("tbs_sold"),
-			amount=a("tbs_cop") - a("tbs_sold"),
+			qty=q("tbs_cop"),
+			amount=a("tbs_cop"),
 		)
 
 		# --- Conversion cost: OER dan KER dari qty produksi terhadap TBS diolah
@@ -963,6 +968,9 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		nilai[prefiks + "_closing"] = (closing_qty, 0)
 		if prefiks == "tbs":
 			nilai["tbs_sold"] = (mutasi["penjualan_qty"], 0)
+			# Closing TBS bukan saldo akhir Stock Ledger tapi qty terjual bulan
+			# itu, sumbernya sama dengan baris Sold to Third Parties.
+			nilai["tbs_closing"] = (mutasi["penjualan_qty"], 0)
 			# Production TBS bukan jumlah sepanjang periode, tapi Grand Total TBS
 			# pada Data TBS terakhir periode itu. Lihat grand_total_tbs_terakhir.
 			nilai["tbs_production"] = (
