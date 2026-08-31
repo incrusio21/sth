@@ -167,21 +167,19 @@ class COGSMilldanKebun(Document):
 			amount=a("tbs_production") + a("tbs_purchase"),
 		)
 		rate_tbs = a("tbs_available") / q("tbs_available") if q("tbs_available") else 0
-		# Qty Closing disimpan positif lalu dikurangkan di sini; di excel ditulis
-		# negatif lalu dijumlahkan. Closing berisi qty terjual bulan itu, jadi
-		# Sold tidak dikurangkan lagi di Internal Consumption — barisnya tetap
-		# ditampilkan sebagai rincian dari angka yang sama.
+		# Closing dan Sold TBS disimpan negatif lalu dijumlahkan, mengikuti excel.
+		# Beda dengan CPO dan PK yang qty Closing-nya tetap positif.
 		isi("tbs_closing", amount=rate_tbs * q("tbs_closing"))
 		isi(
 			"tbs_cop",
-			qty=q("tbs_available") - q("tbs_closing"),
-			amount=a("tbs_available") - a("tbs_closing"),
+			qty=q("tbs_available") + q("tbs_closing"),
+			amount=a("tbs_available") + a("tbs_closing"),
 		)
 		isi("tbs_sold", amount=rate_tbs * q("tbs_sold"))
 		isi(
 			"tbs_internal",
-			qty=q("tbs_cop"),
-			amount=a("tbs_cop"),
+			qty=q("tbs_cop") + q("tbs_sold"),
+			amount=a("tbs_cop") + a("tbs_sold"),
 		)
 
 		# --- Conversion cost: OER dan KER dari qty produksi terhadap TBS diolah
@@ -260,12 +258,14 @@ class COGSMilldanKebun(Document):
 		def a(kode):
 			return flt(nilai.get(kode, {}).get("amount"))
 
+		# Closing dan Sold TBS disimpan negatif, jadi ikut dijumlahkan; punya
+		# CPO dan PK di bawah masih positif dan tetap dikurangkan.
 		self.selisih_gl_tbs = flt(
 			flt(self.saldo_gl_tbs)
 			+ a("tbs_production")
 			- a("tbs_internal")
-			- a("tbs_sold")
-			- a("tbs_closing"),
+			+ a("tbs_sold")
+			+ a("tbs_closing"),
 			2,
 		)
 		for prefiks in ("cpo", "pk"):
@@ -714,7 +714,7 @@ def mutasi_sle(item_code, warehouse, dari, sampai):
 
 	'produksi_qty' di sini bucket sisa (masuk, bukan pembelian, bukan Stock
 	Reconciliation) dan cuma dipakai CPO dan PK. Production TBS diambil dari Data
-	TBS lewat grand_total_tbs_terakhir, karena Stock Entry bikinan Data TBS hanya
+	TBS lewat data_tbs_terakhir, karena Stock Entry bikinan Data TBS hanya
 	mencatat selisih restan. 'pembelian_qty' tetap dipakai TBS untuk baris FFB
 	Purchase."""
 	rows = frappe.db.sql("""
@@ -775,12 +775,16 @@ def ada_data_tbs(company, unit, dari, sampai):
 	""".format(syarat=syarat), nilai))
 
 
-def grand_total_tbs_terakhir(company, unit, sampai, dari=None):
-	"""Grand Total TBS pada Data TBS terakhir dalam rentang tanggal proses.
+# Field Data TBS yang boleh dibaca data_tbs_terakhir. Nama field masuk langsung
+# ke SQL, jadi dibatasi di sini supaya tidak ada jalan menyisipkan apa pun.
+FIELD_DATA_TBS = ("grand_total_tbs", "jumlah_tbs_restan", "total_tbs_restan", "tbs_olah")
 
-	Dipakai dua kali: Production (rentangnya periode itu sendiri) dan Opening
-	(rentangnya sebelum periode). Keduanya angka posisi terakhir, bukan jumlah
-	sepanjang periode.
+
+def data_tbs_terakhir(company, unit, field, dari, sampai):
+	"""Isi satu field pada Data TBS terakhir dalam rentang tanggal proses.
+
+	Dipakai Production (grand_total_tbs) dan Closing (jumlah_tbs_restan).
+	Keduanya angka posisi terakhir, bukan jumlah sepanjang periode.
 
 	Stock Ledger tidak dipakai karena Stock Entry bikinan Data TBS hanya
 	memposting selisih restan, jadi qty di SLE bukan TBS yang ada di pabrik.
@@ -790,21 +794,21 @@ def grand_total_tbs_terakhir(company, unit, sampai, dari=None):
 	produksi lebih dulu hilang gara-gara unit lain punya entry yang lebih baru.
 	Daftar unit diambil dari Unit.company, bukan dari Data TBS.company: field itu
 	tidak punya default maupun fetch_from dan lazimnya kosong."""
-	daftar_unit = [unit] if unit else frappe.get_all("Unit", filters={"company": company}, pluck="name")
+	if field not in FIELD_DATA_TBS:
+		frappe.throw("Field Data TBS '{0}' tidak dikenali.".format(field))
 
-	syarat = "and tanggal_produksi >= %(dari)s" if dari else ""
+	daftar_unit = [unit] if unit else frappe.get_all("Unit", filters={"company": company}, pluck="name")
 
 	total = 0.0
 	for nama_unit in daftar_unit:
 		row = frappe.db.sql("""
-			select grand_total_tbs
+			select `{field}`
 			from `tabData TBS`
 			where docstatus = 1 and unit = %(unit)s
-				and tanggal_produksi <= %(sampai)s
-				{syarat}
+				and tanggal_produksi between %(dari)s and %(sampai)s
 			order by tanggal_produksi desc, creation desc
 			limit 1
-		""".format(syarat=syarat), {"unit": nama_unit, "sampai": sampai, "dari": dari})
+		""".format(field=field), {"unit": nama_unit, "dari": dari, "sampai": sampai})
 		if row:
 			total += flt(row[0][0])
 
@@ -830,13 +834,24 @@ def opening_dari_dokumen_sebelumnya(company, unit, periode_dari):
 
 	akhiran = "_closing"
 	hasil = {}
+	per_kode = {}
 	for row in frappe.get_all(
 		"COGS Mill dan Kebun Rincian",
 		filters={"parent": nama, "parenttype": "COGS Mill dan Kebun"},
 		fields=["kode", "qty", "amount"],
 	):
-		if row.kode and row.kode.endswith(akhiran):
+		if not row.kode:
+			continue
+		per_kode[row.kode] = (flt(row.qty), flt(row.amount))
+		if row.kode.endswith(akhiran):
 			hasil[row.kode[: -len(akhiran)]] = (flt(row.qty), flt(row.amount))
+
+	# TBS: Opening bukan Closing bulan lalu tapi Cost Of Production-nya. Closing
+	# TBS isinya restan bertanda negatif, sedangkan yang dibawa ke bulan ini
+	# adalah TBS yang sudah dibebani biaya kebun dan siap diolah.
+	if "tbs_cop" in per_kode:
+		hasil["tbs"] = per_kode["tbs_cop"]
+
 	return hasil
 
 
@@ -955,26 +970,28 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			qty_akhir, _nilai_akhir = saldo_sle(item_code, gudang, periode_sampai)
 			closing_qty += qty_akhir
 
+		# Untuk TBS 'sebelumnya' berisi Cost Of Production dokumen periode lalu,
+		# bukan Closing-nya; lihat opening_dari_dokumen_sebelumnya.
 		if prefiks in sebelumnya:
 			opening_qty, opening_nilai = sebelumnya[prefiks]
-		elif prefiks == "tbs":
-			# Belum ada dokumen periode sebelumnya: qty Opening dari Data TBS
-			# terakhir. Nilainya tetap dari Stock Ledger, Data TBS cuma simpan qty.
-			opening_qty = grand_total_tbs_terakhir(company, unit, add_days(periode_dari, -1))
 
 		nilai[prefiks + "_opening"] = (opening_qty, opening_nilai)
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
 		nilai[prefiks + "_production"] = (mutasi["produksi_qty"], 0)
 		nilai[prefiks + "_closing"] = (closing_qty, 0)
 		if prefiks == "tbs":
-			nilai["tbs_sold"] = (mutasi["penjualan_qty"], 0)
-			# Closing TBS bukan saldo akhir Stock Ledger tapi qty terjual bulan
-			# itu, sumbernya sama dengan baris Sold to Third Parties.
-			nilai["tbs_closing"] = (mutasi["penjualan_qty"], 0)
-			# Production TBS bukan jumlah sepanjang periode, tapi Grand Total TBS
-			# pada Data TBS terakhir periode itu. Lihat grand_total_tbs_terakhir.
+			# Penjualan TBS ke pihak ketiga dinolkan dulu atas permintaan user;
+			# qty-nya masih bisa diisi manual di grid dan tetap ikut dihitung.
+			nilai["tbs_sold"] = (0, 0)
+			# Production dan Closing TBS bukan mutasi sepanjang periode tapi
+			# posisi pada Data TBS terakhir. Closing dinegatifkan karena rantai
+			# TBS di hitung() menjumlahkan, tidak mengurangkan.
 			nilai["tbs_production"] = (
-				grand_total_tbs_terakhir(company, unit, periode_sampai, periode_dari),
+				data_tbs_terakhir(company, unit, "grand_total_tbs", periode_dari, periode_sampai),
+				0,
+			)
+			nilai["tbs_closing"] = (
+				-data_tbs_terakhir(company, unit, "jumlah_tbs_restan", periode_dari, periode_sampai),
 				0,
 			)
 			if not ada_data_tbs(company, unit, periode_dari, periode_sampai):
