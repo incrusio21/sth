@@ -86,11 +86,6 @@ SUMBER_PRODUK = {
 	},
 }
 
-# Opening tiap produk diambil dari baris pemakaian dokumen periode sebelumnya,
-# bukan dari Closing-nya. Closing sekarang berisi stok akhir bertanda negatif,
-# sedangkan yang dibawa ke bulan ini adalah barang yang sudah dibebani biaya.
-BARIS_OPENING = {"tbs": "tbs_cop", "cpo": "cpo_cogs", "pk": "pk_cogs"}
-
 WAKTU_REKONSILIASI = "23:59:59"
 
 KETERANGAN_KEBUN = "KAPITALISASI BIAYA KEBUN KE PERSEDIAAN TBS"
@@ -967,41 +962,6 @@ def rate_dari_stock_entry(prefiks, produk, company, unit, dari, sampai):
 	return flt(row[0].basic_rate) or flt(row[0].valuation_rate)
 
 
-def opening_dari_dokumen_sebelumnya(company, unit, periode_dari):
-	"""Opening diambil dari baris pemakaian dokumen periode sebelumnya supaya
-	rantai nilainya nyambung; kalau belum ada, jatuh ke Stock Ledger. Baris mana
-	untuk produk mana ada di BARIS_OPENING."""
-	filters = {
-		"company": company,
-		"docstatus": 1,
-		"periode_sampai": ("<", periode_dari),
-	}
-	if unit:
-		filters["unit"] = unit
-
-	nama = frappe.db.get_value(
-		"COGS Mill dan Kebun", filters, "name", order_by="periode_sampai desc"
-	)
-	if not nama:
-		return {}
-
-	per_kode = {
-		row.kode: (flt(row.qty), flt(row.amount))
-		for row in frappe.get_all(
-			"COGS Mill dan Kebun Rincian",
-			filters={"parent": nama, "parenttype": "COGS Mill dan Kebun"},
-			fields=["kode", "qty", "amount"],
-		)
-		if row.kode
-	}
-
-	return {
-		prefiks: per_kode[kode]
-		for prefiks, kode in BARIS_OPENING.items()
-		if kode in per_kode
-	}
-
-
 def total_biaya(company, kelompok, dari, sampai):
 	akun_induk = get_sumber_biaya(company, kelompok)
 	if not akun_induk:
@@ -1068,7 +1028,6 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 	dipanggil tombol Ambil Data adalah method dokumen dengan nama sama, supaya
 	baris turunannya ikut terhitung."""
 	setelan = get_setelan(company)
-	sebelumnya = opening_dari_dokumen_sebelumnya(company, unit, periode_dari)
 
 	nilai = {}
 	peringatan = []
@@ -1095,9 +1054,8 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			continue
 
 		# Satu produk bisa tersebar di beberapa item/gudang, jadi saldo dan
-		# mutasinya dijumlahkan dulu sebelum masuk ke baris rincian. Saldonya
-		# ditambah gudang transit, mutasinya tidak.
-		opening_qty = opening_nilai = closing_qty = 0.0
+		# mutasinya dijumlahkan dulu sebelum masuk ke baris rincian.
+		opening_qty = opening_nilai = 0.0
 		mutasi = {
 			"pembelian_qty": 0.0, "pembelian_nilai": 0.0,
 			"produksi_qty": 0.0,
@@ -1108,6 +1066,12 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			for kunci, angka in mutasi_sle(item_code, gudang, periode_dari, periode_sampai).items():
 				mutasi[kunci] += angka
 
+		# Opening = sisa stok tiap item di gudang default-nya sehari sebelum
+		# periode, bukan baris pemakaian dokumen COGS periode lalu. Gudang
+		# transit ikut dijumlahkan karena barang yang sudah keluar lewat
+		# Delivery Note tapi belum ditagih secara harga pokok masih persediaan;
+		# mutasinya sengaja tidak ikut supaya penerimaan transit tidak terbaca
+		# sebagai produksi.
 		pasangan_saldo = pasangan + get_gudang_transit(
 			company, [item_code for item_code, _gudang in pasangan]
 		)
@@ -1116,18 +1080,8 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			opening_qty += qty_awal
 			opening_nilai += nilai_awal
 
-			qty_akhir, _nilai_akhir = saldo_sle(item_code, gudang, periode_sampai)
-			closing_qty += qty_akhir
-
-		# Untuk TBS 'sebelumnya' berisi Cost Of Production dokumen periode lalu,
-		# bukan Closing-nya; lihat opening_dari_dokumen_sebelumnya.
-		if prefiks in sebelumnya:
-			opening_qty, opening_nilai = sebelumnya[prefiks]
-
 		nilai[prefiks + "_opening"] = (opening_qty, opening_nilai)
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
-		nilai[prefiks + "_production"] = (mutasi["produksi_qty"], 0)
-		nilai[prefiks + "_closing"] = (closing_qty, 0)
 		# Production dan Closing ketiganya dari dokumen sumber, bukan mutasi
 		# Stock Ledger. Closing dinegatifkan karena rantai di hitung()
 		# menjumlahkan, tidak mengurangkan.
