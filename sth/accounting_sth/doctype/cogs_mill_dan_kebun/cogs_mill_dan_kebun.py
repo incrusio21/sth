@@ -156,8 +156,12 @@ class COGSMilldanKebun(Document):
 			if amount is not None:
 				baris["amount"] = flt(amount)
 
-		# --- TBS: biaya kebun jadi nilai produksi, sisanya rata-rata tertimbang
-		isi("tbs_production", amount=flt(self.biaya_kebun))
+		# --- TBS: satu rate untuk semua baris, diambil dari Stock Entry bikinan
+		# Data TBS terakhir. Nilai tiap baris = qty x rate, jadi Available di sisi
+		# rupiah otomatis sejalan dengan qty-nya.
+		rate_tbs = flt(self.rate_tbs)
+		for kode in ("tbs_opening", "tbs_production", "tbs_purchase"):
+			isi(kode, amount=rate_tbs * q(kode))
 		# Opening tidak ikut dijumlahkan: Production diambil dari grand_total_tbs
 		# yang sudah memuat restan awal, jadi menambah Opening lagi menghitung
 		# restan dua kali. Barisnya tetap diisi sebagai penunjuk saldo awal.
@@ -166,7 +170,6 @@ class COGSMilldanKebun(Document):
 			qty=q("tbs_production") + q("tbs_purchase"),
 			amount=a("tbs_production") + a("tbs_purchase"),
 		)
-		rate_tbs = a("tbs_available") / q("tbs_available") if q("tbs_available") else 0
 		# Closing dan Sold TBS disimpan negatif lalu dijumlahkan, mengikuti excel.
 		# Beda dengan CPO dan PK yang qty Closing-nya tetap positif.
 		isi("tbs_closing", amount=rate_tbs * q("tbs_closing"))
@@ -815,6 +818,48 @@ def data_tbs_terakhir(company, unit, field, dari, sampai):
 	return total
 
 
+def rate_tbs_dari_data_tbs(company, unit, dari, sampai):
+	"""Basic Rate item TBS pada Stock Entry bikinan Data TBS terakhir periode ini.
+
+	Data TBS menempelkan namanya di field references Stock Entry, jadi rate yang
+	dipakai ERPNext untuk memvaluasi TBS hari itu bisa dibaca balik dari sana.
+	Stock Entry-nya Material Receipt tanpa basic_rate, jadi isinya valuation rate
+	terakhir item TBS — itu yang jadi dasar seluruh nilai baris TBS.
+
+	Satu rate untuk semua unit: yang diambil Data TBS terakhir, bukan rata-rata
+	tertimbang antar unit. Kalau unit-unitnya punya rate yang berbeda jauh, isi
+	Unit di dokumen ini supaya tiap unit dihitung sendiri.
+
+	Tidak semua Data TBS punya Stock Entry: on_submit-nya cuma membuat kalau ada
+	restan atau TBS diterima. Karena itu yang dicari Data TBS terakhir yang punya
+	Stock Entry, bukan Data TBS terakhir lalu menyerah kalau kosong."""
+	syarat = ""
+	nilai = {"company": company, "dari": dari, "sampai": sampai}
+	if unit:
+		syarat = "and dt.unit = %(unit)s"
+		nilai["unit"] = unit
+
+	row = frappe.db.sql("""
+		select sed.basic_rate, sed.valuation_rate
+		from `tabStock Entry Detail` sed
+		inner join `tabStock Entry` se on se.name = sed.parent
+		inner join `tabData TBS` dt on dt.name = se.references
+		inner join `tabUnit` u on u.name = dt.unit
+		inner join `tabItem` i on i.name = sed.item_code
+		where se.docstatus = 1 and se.reference_doctype = 'Data TBS'
+			and dt.docstatus = 1 and u.company = %(company)s
+			and i.tipe_barang = 'TBS'
+			and dt.tanggal_produksi between %(dari)s and %(sampai)s
+			{syarat}
+		order by dt.tanggal_produksi desc, dt.creation desc, sed.idx desc
+		limit 1
+	""".format(syarat=syarat), nilai, as_dict=True)
+
+	if not row:
+		return 0.0
+	return flt(row[0].basic_rate) or flt(row[0].valuation_rate)
+
+
 def opening_dari_dokumen_sebelumnya(company, unit, periode_dari):
 	"""Opening diambil dari Closing Stock dokumen periode sebelumnya supaya
 	rantai nilainya nyambung; kalau belum ada, jatuh ke Stock Ledger."""
@@ -1023,6 +1068,7 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		"rincian": rincian,
 		"biaya_kebun": total_biaya(company, "Kebun", periode_dari, periode_sampai),
 		"biaya_mill": total_biaya(company, "Mill", periode_dari, periode_sampai),
+		"rate_tbs": rate_tbs_dari_data_tbs(company, unit, periode_dari, periode_sampai),
 		"harga_rata_cpo": harga_rata_jual(company, get_item_produk("CPO"), periode_dari, periode_sampai),
 		"harga_rata_pk": harga_rata_jual(company, get_item_produk("Palm Kernel"), periode_dari, periode_sampai),
 		"saldo_gl_tbs": saldo_akun(company, setelan and setelan.akun_persediaan_tbs, periode_sampai),
