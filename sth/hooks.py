@@ -556,7 +556,8 @@ override_doctype_dashboards = {
 	"Asset": "sth.accounting_sth.custom.asset_dashboard.get_data",
 	"Project": "sth.legal.custom.project_dashboard.get_dashboard_data",
 	"Sales Order": "sth.sales_sth.custom.sales_order_dashboard.get_data",
-	"Sales Invoice": "sth.sales_sth.custom.sales_invoice_dashboard.get_data"
+	"Sales Invoice": "sth.sales_sth.custom.sales_invoice_dashboard.get_data",
+	"Delivery Note": "sth.sales_sth.custom.delivery_note_dashboard.get_data"
 }
 
 # exempt linked doctypes from being automatically cancelled
