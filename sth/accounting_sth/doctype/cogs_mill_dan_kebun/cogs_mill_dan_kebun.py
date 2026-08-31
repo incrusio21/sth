@@ -159,7 +159,15 @@ class COGSMilldanKebun(Document):
 		# --- TBS: satu rate untuk semua baris, diambil dari Stock Entry bikinan
 		# Data TBS terakhir. Nilai tiap baris = qty x rate, jadi Available di sisi
 		# rupiah otomatis sejalan dengan qty-nya.
-		rate_tbs = flt(self.rate_tbs)
+		#
+		# Rate-nya dibaca ulang tiap kali dihitung, bukan disimpan di field:
+		# nilai persediaan TBS harus selalu sama dengan yang dipakai Stock Ledger,
+		# jadi tidak boleh ada yang mengetiknya sendiri di form.
+		rate_tbs = (
+			rate_tbs_dari_data_tbs(self.company, self.unit, self.periode_dari, self.periode_sampai)
+			if self.company and self.periode_dari and self.periode_sampai
+			else 0.0
+		)
 		for kode in ("tbs_opening", "tbs_production", "tbs_purchase"):
 			isi(kode, amount=rate_tbs * q(kode))
 		# Opening tidak ikut dijumlahkan: Production diambil dari grand_total_tbs
@@ -824,7 +832,8 @@ def rate_tbs_dari_data_tbs(company, unit, dari, sampai):
 	Data TBS menempelkan namanya di field references Stock Entry, jadi rate yang
 	dipakai ERPNext untuk memvaluasi TBS hari itu bisa dibaca balik dari sana.
 	Stock Entry-nya Material Receipt tanpa basic_rate, jadi isinya valuation rate
-	terakhir item TBS — itu yang jadi dasar seluruh nilai baris TBS.
+	terakhir item TBS — itu yang jadi dasar seluruh nilai baris TBS. Sengaja tidak
+	disimpan di field dokumen supaya tidak bisa diketik ulang di form.
 
 	Satu rate untuk semua unit: yang diambil Data TBS terakhir, bukan rata-rata
 	tertimbang antar unit. Kalau unit-unitnya punya rate yang berbeda jauh, isi
@@ -1068,7 +1077,6 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		"rincian": rincian,
 		"biaya_kebun": total_biaya(company, "Kebun", periode_dari, periode_sampai),
 		"biaya_mill": total_biaya(company, "Mill", periode_dari, periode_sampai),
-		"rate_tbs": rate_tbs_dari_data_tbs(company, unit, periode_dari, periode_sampai),
 		"harga_rata_cpo": harga_rata_jual(company, get_item_produk("CPO"), periode_dari, periode_sampai),
 		"harga_rata_pk": harga_rata_jual(company, get_item_produk("Palm Kernel"), periode_dari, periode_sampai),
 		"saldo_gl_tbs": saldo_akun(company, setelan and setelan.akun_persediaan_tbs, periode_sampai),

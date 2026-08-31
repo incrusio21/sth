@@ -17,7 +17,6 @@
   "unit",
   "section_konversi",
   "qty_tbs_diolah",
-  "rate_tbs",
   "oer",
   "ker",
   "column_break_harga",
@@ -110,13 +109,6 @@
    "label": "TBS Diolah (Kg)",
    "precision": "3",
    "read_only": 1
-  },
-  {
-   "description": "Basic Rate item TBS pada Stock Entry bikinan Data TBS terakhir periode ini. Jadi dasar seluruh nilai baris TBS, boleh diubah.",
-   "fieldname": "rate_tbs",
-   "fieldtype": "Currency",
-   "label": "Rate TBS (Kg)",
-   "precision": "2"
   },
   {
    "description": "Qty produksi CPO dibagi TBS diolah.",

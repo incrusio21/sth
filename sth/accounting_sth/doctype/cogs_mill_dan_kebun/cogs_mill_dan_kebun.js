@@ -78,7 +78,6 @@ function ambil_data_cogs(frm) {
 
             // Nilai berikut boleh dikoreksi manual setelahnya; perhitungan di
             // server selalu jalan ulang waktu dokumen disimpan.
-            frm.set_value("rate_tbs", d.rate_tbs);
             frm.set_value("biaya_kebun", d.biaya_kebun);
             frm.set_value("biaya_mill", d.biaya_mill);
             frm.set_value("harga_rata_cpo", d.harga_rata_cpo);
