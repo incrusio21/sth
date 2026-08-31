@@ -58,16 +58,18 @@ BARIS = (
 # field references. Stock Ledger tidak dipakai untuk angka-angka ini karena
 # Stock Entry-nya cuma memposting selisih, bukan posisi.
 #
-# 'produksi_total' membedakan cara menjumlahkannya: TBS memakai posisi terakhir
-# (grand_total_tbs sudah kumulatif restan plus terima), CPO dan PK menjumlahkan
-# produksi harian. Field produksi CPO dan PK sengaja yang sama dengan qty Stock
-# Entry bikinan Sounding, jadi qty dan rate-nya berasal dari dokumen yang sama.
+# 'produksi' kosong berarti angkanya tidak ada di dokumen sumber. TBS begitu:
+# Production-nya dijumlahkan langsung dari Timbangan lewat produksi_tbs_timbangan,
+# sedangkan Data TBS tetap dipakai untuk Closing dan rate. 'produksi_total'
+# membedakan jumlah sepanjang periode dari posisi terakhir. Field produksi CPO
+# dan PK sengaja yang sama dengan qty Stock Entry bikinan Sounding, jadi qty dan
+# rate-nya berasal dari angka yang sama.
 SUMBER_PRODUK = {
 	"tbs": {
 		"doctype": "Data TBS",
 		"tanggal": "tanggal_produksi",
-		"produksi": "grand_total_tbs",
-		"produksi_total": False,
+		"produksi": None,
+		"produksi_total": True,
 		"closing": "jumlah_tbs_restan",
 	},
 	"cpo": {
@@ -963,6 +965,37 @@ def rate_dari_stock_entry(prefiks, produk, company, unit, dari, sampai):
 	return flt(row[0].basic_rate) or flt(row[0].valuation_rate)
 
 
+def produksi_tbs_timbangan(company, unit, dari, sampai):
+	"""Production TBS = netto timbangan TBS Internal yang masuk sepanjang periode.
+
+	Langsung dari Timbangan, tidak lewat Data TBS: jumlah_tbs_diterima di sana
+	menggabungkan TBS Internal dan TBS Eksternal, sedangkan yang eksternal masuk
+	lewat Purchase Receipt dan sudah terhitung di baris FFB Purchase. Selain itu
+	jumlah_tbs_diterima cuma terisi kalau tombol Get Data ditekan, jadi dia potret
+	saat itu, bukan angka yang ikut menyesuaikan.
+
+	Disaring type 'Receive' supaya timbangan keluar tidak ikut terjumlah. Field
+	unit di Timbangan memang cuma terisi untuk TBS Internal, dan itu yang dipakai
+	menyambung ke company lewat Unit."""
+	nilai = {"company": company, "dari": dari, "sampai": sampai}
+	syarat = ""
+	if unit:
+		syarat = "and t.unit = %(unit)s"
+		nilai["unit"] = unit
+
+	row = frappe.db.sql("""
+		select sum(t.netto_2)
+		from `tabTimbangan` t
+		inner join `tabUnit` u on u.name = t.unit
+		where t.docstatus = 1 and t.receive_type = 'TBS Internal' and t.type = 'Receive'
+			and u.company = %(company)s
+			and t.posting_date between %(dari)s and %(sampai)s
+			{syarat}
+	""".format(syarat=syarat), nilai)
+
+	return flt(row[0][0]) if row and row[0] else 0.0
+
+
 def opening_dari_dokumen_sebelumnya(company, unit, periode_dari):
 	"""Opening diambil dari baris pemakaian dokumen periode sebelumnya supaya
 	rantai nilainya nyambung; kalau belum ada, jatuh ke Stock Ledger. Baris mana
@@ -1128,11 +1161,14 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		# Stock Ledger. Closing dinegatifkan karena rantai di hitung()
 		# menjumlahkan, tidak mengurangkan.
 		cfg = SUMBER_PRODUK[prefiks]
-		hitung_produksi = sumber_total if cfg["produksi_total"] else sumber_terakhir
-		nilai[prefiks + "_production"] = (
-			hitung_produksi(prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai),
-			0,
-		)
+		if cfg["produksi"]:
+			hitung_produksi = sumber_total if cfg["produksi_total"] else sumber_terakhir
+			produksi = hitung_produksi(
+				prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai
+			)
+		else:
+			produksi = produksi_tbs_timbangan(company, unit, periode_dari, periode_sampai)
+		nilai[prefiks + "_production"] = (produksi, 0)
 		nilai[prefiks + "_closing"] = (
 			-sumber_terakhir(prefiks, cfg["closing"], company, unit, periode_dari, periode_sampai),
 			0,
@@ -1140,7 +1176,7 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		if not ada_dokumen_sumber(prefiks, company, unit, periode_dari, periode_sampai):
 			peringatan.append(
 				"{0}: belum ada {1} yang disubmit untuk {2} sampai {3} di company "
-				"{4}{5}, jadi Production-nya nol.".format(
+				"{4}{5}, jadi Closing Stock dan rate-nya nol.".format(
 					produk,
 					cfg["doctype"],
 					periode_dari,
