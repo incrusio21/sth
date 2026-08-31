@@ -609,7 +609,11 @@ class COGSMilldanKebun(Document):
 		for row in baris:
 			self.append("closing", row)
 
+		# Kedua sisi dijumlahkan sendiri-sendiri, bukan satu total: sejak nilai
+		# produksi CPO dan PK diambil dari rate Sounding, debit dan kredit tidak
+		# lagi otomatis ketemu dan bedanya perlu kelihatan.
 		self.total_closing = sum(flt(row["debit"]) for row in baris)
+		self.total_credit = sum(flt(row["credit"]) for row in baris)
 
 	def make_gl_entry(self):
 		if self.docstatus == 1:

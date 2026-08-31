@@ -35,6 +35,7 @@
   "posting_jurnal",
   "closing",
   "total_closing",
+  "total_credit",
   "section_rekonsiliasi",
   "buat_stock_reconciliation",
   "rekonsiliasi",
@@ -220,6 +221,13 @@
    "fieldname": "total_closing",
    "fieldtype": "Currency",
    "label": "Total Debit",
+   "read_only": 1
+  },
+  {
+   "description": "Harus sama dengan Total Debit. Bedanya berarti ada sisi jurnal yang belum punya lawan.",
+   "fieldname": "total_credit",
+   "fieldtype": "Currency",
+   "label": "Total Credit",
    "read_only": 1
   },
   {
