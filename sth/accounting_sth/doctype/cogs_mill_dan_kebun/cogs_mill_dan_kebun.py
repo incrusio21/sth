@@ -917,9 +917,8 @@ def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
 	dipakai pabrik adalah rendemen harian di Sounding, yang pembaginya sudah
 	dikurangi potongan sortasi.
 
-	Hari yang rendemennya nol tidak ikut dirata-rata. Itu hari tanpa olah — kedua
-	field memang diisi nol kalau TBS Olah kosong — dan kalau ikut, rata-ratanya
-	turun jauh di bawah rendemen pabrik yang sebenarnya.
+	Semua dokumen yang sudah submit ikut dirata-rata, termasuk yang rendemennya nol
+	atau minus: pembaginya jumlah hari sounding, bukan cuma hari yang berproduksi.
 	"""
 	cfg = _sumber(prefiks)
 	field = cfg.get("rendemen")
@@ -936,7 +935,6 @@ def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
 		inner join `tabUnit` u on u.name = d.unit
 		where d.docstatus = 1 and u.company = %(company)s
 			and d.`{tanggal}` between %(dari)s and %(sampai)s
-			and d.`{field}` > 0
 			{syarat}
 	""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai)
 
