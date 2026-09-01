@@ -37,3 +37,4 @@ sth.patches.isi_sumber_biaya_mill_cogs
 sth.patches.hitung_ulang_sounding_palm_kernel
 sth.patches.perbaiki_tanggal_ste_sounding_cpo
 sth.patches.lepas_bkm_posted_tanpa_periode_tertutup
+sth.patches.isi_data_kendaraan_security_check_point
