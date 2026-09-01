@@ -104,7 +104,7 @@
    "label": "Conversion Cost CPO / PK"
   },
   {
-   "description": "Internal Consumption TBS, yaitu TBS yang benar-benar diolah pabrik.",
+   "description": "Jumlah TBS Olah di Data TBS sepanjang periode.",
    "fieldname": "qty_tbs_diolah",
    "fieldtype": "Float",
    "label": "TBS Diolah (Kg)",

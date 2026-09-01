@@ -269,10 +269,19 @@ class COGSMilldanKebun(Document):
 			amount=a("tbs_cop") + a("tbs_sold"),
 		)
 
-		# --- Conversion cost: OER dan KER dari rendemen harian di dokumen Sounding
-		self.qty_tbs_diolah = q("tbs_internal")
-		self.oer = self.ker = 0
+		# --- Conversion cost: TBS diolah dijumlahkan dari tbs_olah di Data TBS,
+		# OER dan KER dari rendemen harian di dokumen Sounding.
+		#
+		# TBS diolah tidak lagi diambil dari baris Internal Consumption. Baris itu
+		# sisa rantai Available dikurangi Closing dan Sold, jadi ikut bergeser tiap
+		# kali qty di grid dikoreksi manual, sedangkan angka yang dipakai memantau
+		# OER dan KER harus TBS yang benar-benar dicatat masuk olah pabrik.
+		self.qty_tbs_diolah = self.oer = self.ker = 0
 		if self.company and self.periode_dari and self.periode_sampai:
+			self.qty_tbs_diolah = sumber_total(
+				"tbs", "tbs_olah", self.company, self.unit,
+				self.periode_dari, self.periode_sampai,
+			)
 			for prefiks, fieldname in (("cpo", "oer"), ("pk", "ker")):
 				self.set(fieldname, rendemen_dari_sounding(
 					prefiks, self.company, self.unit, self.periode_dari, self.periode_sampai
