@@ -31,6 +31,7 @@
   "column_break_mfaj",
   "oer_netto_1",
   "oer_netto_2",
+  "rata_rata_oer_bulanan",
   "perhitungan_stock_bst_1_tab",
   "section_break_oecm",
   "uhst1",
@@ -348,6 +349,15 @@
    "read_only": 1
   },
   {
+   "description": "Rata-rata OER Netto 2 dokumen submitted di unit ini sepanjang bulan Tanggal Proses.",
+   "fieldname": "rata_rata_oer_bulanan",
+   "fieldtype": "Percent",
+   "label": "Rata-rata OER Bulan Ini",
+   "no_copy": 1,
+   "precision": "2",
+   "read_only": 1
+  },
+  {
    "fieldname": "gudang",
    "fieldtype": "Link",
    "hidden": 1,
@@ -505,7 +515,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-07-16 09:45:52.141082",
+ "modified": "2026-09-01 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

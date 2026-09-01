@@ -6,14 +6,21 @@ from frappe.model.document import Document
 from frappe.utils import today,flt,getdate
 from frappe.model.mapper import get_mapped_doc
 
+from sth.mill.utils import set_rata_rata_rendemen_bulanan
+
 
 class SoundingStockCPOdiBST(Document):
+	def onload(self):
+		set_rata_rata_rendemen_bulanan(self)
+
 	def before_validate(self):
 		self.gudang = get_warehouse_bst(self.unit)
 
 	def validate(self):
 		if not self.gudang:
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
+
+		set_rata_rata_rendemen_bulanan(self)
 
 	def on_submit(self):
 		if self.produksi_cpo:

@@ -7,7 +7,12 @@ from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.utils import get_stock_balance
 
+from sth.mill.utils import set_rata_rata_rendemen_bulanan
+
 class SoundingStockPalmKerneldiBunkerKernel(Document):
+	def onload(self):
+		set_rata_rata_rendemen_bulanan(self)
+
 	def before_save(self):
 		self.hasil_titik_sounding = []
 		self.rekap_hasil = []
@@ -23,12 +28,17 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 	def validate(self):
 		self.hitung_produksi()
+		set_rata_rata_rendemen_bulanan(self)
 
 	def hitung_produksi(self):
 		self.stock_akhir = self.volume_sounding
 		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman)
 		self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
-		self.ker_netto_2 = self.produksi/(self.tbs_olah - self.sortasi)*100 if self.tbs_olah else 0
+		# Penjaganya penyebut netto 2 itu sendiri, bukan tbs_olah: kalau seluruh
+		# TBS yang masuk kena potongan sortasi, tbs_olah terisi tapi selisihnya nol
+		# dan pembagiannya error.
+		penyebut_netto_2 = flt(self.tbs_olah) - flt(self.sortasi)
+		self.ker_netto_2 = self.produksi/penyebut_netto_2*100 if penyebut_netto_2 else 0
 
 	def on_submit(self):
 		if self.produksi > 0:
@@ -123,7 +133,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
 
 		self.stock_awal = get_stock_balance(item_code, warehouse, self.tanggal_proses, "23:59:59") if warehouse and item_code else 0
-		self.stock_awal -= 500000
+		
 		
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
 		print(self.pengiriman)

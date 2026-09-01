@@ -1,7 +1,7 @@
 import contextlib
 
 import frappe
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_first_day, get_last_day
 
 SEHARI = 24 * 3600
 
@@ -131,3 +131,47 @@ def buat_ulang_ste_sounding(doc, produksi):
 
 	doc.create_ste()
 	return 1
+
+
+# Field rendemen harian tiap dokumen sounding dan field informasi rata-ratanya.
+# Nama doctype dan field masuk langsung ke SQL, jadi cuma yang terdaftar di sini
+# yang boleh lewat.
+RENDEMEN_BULANAN = {
+	"Sounding Stock CPO di BST": ("oer_netto_2", "rata_rata_oer_bulanan"),
+	"Sounding Stock Palm Kernel di Bunker Kernel": ("ker_netto_2", "rata_rata_ker_bulanan"),
+}
+
+
+def set_rata_rata_rendemen_bulanan(doc):
+	"""Isi field informasi rata-rata rendemen sebulan di dokumen sounding.
+
+	Rata-rata harian sederhana atas dokumen submitted di unit yang sama sepanjang
+	bulan tanggal_proses. Sengaja sama persis dengan cara COGS Mill dan Kebun
+	menghitung OER dan KER: netto 2, tidak ditimbang jumlah TBS olah, dan hari
+	yang rendemennya nol tetap ikut membagi. Jadi angka di sini bisa dipakai
+	mencocokkan dokumen itu, bukan tandingannya.
+
+	Dipanggil dari validate maupun onload. Dari onload karena rata-rata sebulan
+	terus bergerak tiap sounding hari berikutnya disubmit: kalau cuma disimpan
+	waktu validate, yang tampil di dokumen lama adalah rata-rata sampai hari itu
+	saja — malah belum termasuk dokumen itu sendiri, yang docstatus-nya baru jadi
+	1 sesudah validate lewat.
+	"""
+	rendemen, target = RENDEMEN_BULANAN[doc.doctype]
+	doc.set(target, 0)
+
+	if not (doc.unit and doc.tanggal_proses):
+		return
+
+	row = frappe.db.sql("""
+		select avg(d.`{rendemen}`)
+		from `tab{doctype}` d
+		where d.docstatus = 1 and d.unit = %(unit)s
+			and d.tanggal_proses between %(dari)s and %(sampai)s
+	""".format(rendemen=rendemen, doctype=doc.doctype), {
+		"unit": doc.unit,
+		"dari": get_first_day(doc.tanggal_proses),
+		"sampai": get_last_day(doc.tanggal_proses),
+	})
+
+	doc.set(target, flt(row[0][0]) if row and row[0] else 0.0)

@@ -33,6 +33,7 @@
   "tbs_olah",
   "ker_netto_1",
   "ker_netto_2",
+  "rata_rata_ker_bulanan",
   "column_break_wdwq",
   "berat_jenis",
   "rekap_hasil",
@@ -267,6 +268,15 @@
    "read_only": 1
   },
   {
+   "description": "Rata-rata KER Netto 2 dokumen submitted di unit ini sepanjang bulan Tanggal Proses.",
+   "fieldname": "rata_rata_ker_bulanan",
+   "fieldtype": "Percent",
+   "label": "Rata-rata KER Bulan Ini (%)",
+   "no_copy": 1,
+   "precision": "2",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_wdwq",
    "fieldtype": "Column Break"
   },
@@ -342,7 +352,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-18 10:51:20.869651",
+ "modified": "2026-09-01 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
