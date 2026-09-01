@@ -112,7 +112,6 @@
    "read_only": 1
   },
   {
-   "description": "Qty produksi CPO dibagi TBS diolah.",
    "fieldname": "oer",
    "fieldtype": "Percent",
    "label": "OER",
@@ -120,7 +119,6 @@
    "read_only": 1
   },
   {
-   "description": "Qty produksi Palm Kernel dibagi TBS diolah.",
    "fieldname": "ker",
    "fieldtype": "Percent",
    "label": "KER",
@@ -312,7 +310,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-30 09:00:00.000000",
+ "modified": "2026-09-01 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "COGS Mill dan Kebun",
