@@ -62,6 +62,9 @@ BARIS = (
 # ketiganya sekarang dijumlahkan, yang memakai posisi terakhir tinggal Closing.
 # Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry bikinan
 # Sounding, jadi qty dan rate-nya berasal dari angka yang sama.
+#
+# 'rendemen' adalah field rendemen harian di dokumen Sounding, yang dirata-rata
+# jadi OER dan KER dokumen ini. TBS tidak punya.
 SUMBER_PRODUK = {
 	"tbs": {
 		"doctype": "Data TBS",
@@ -76,6 +79,7 @@ SUMBER_PRODUK = {
 		"produksi": "produksi_cpo",
 		"produksi_total": True,
 		"closing": "stock_bst",
+		"rendemen": "oer_netto_2",
 	},
 	"pk": {
 		"doctype": "Sounding Stock Palm Kernel di Bunker Kernel",
@@ -83,6 +87,7 @@ SUMBER_PRODUK = {
 		"produksi": "produksi",
 		"produksi_total": True,
 		"closing": "stock_akhir",
+		"rendemen": "ker_netto_2",
 	},
 }
 
@@ -264,10 +269,14 @@ class COGSMilldanKebun(Document):
 			amount=a("tbs_cop") + a("tbs_sold"),
 		)
 
-		# --- Conversion cost: OER dan KER dari qty produksi terhadap TBS diolah
+		# --- Conversion cost: OER dan KER dari rendemen harian di dokumen Sounding
 		self.qty_tbs_diolah = q("tbs_internal")
-		self.oer = (q("cpo_production") / self.qty_tbs_diolah * 100) if self.qty_tbs_diolah else 0
-		self.ker = (q("pk_production") / self.qty_tbs_diolah * 100) if self.qty_tbs_diolah else 0
+		self.oer = self.ker = 0
+		if self.company and self.periode_dari and self.periode_sampai:
+			for prefiks, fieldname in (("cpo", "oer"), ("pk", "ker")):
+				self.set(fieldname, rendemen_dari_sounding(
+					prefiks, self.company, self.unit, self.periode_dari, self.periode_sampai
+				))
 
 		nilai_cpo = flt(self.oer) * flt(self.harga_rata_cpo)
 		nilai_pk = flt(self.ker) * flt(self.harga_rata_pk)
@@ -893,6 +902,41 @@ def sumber_total(prefiks, field, company, unit, dari, sampai):
 		inner join `tabUnit` u on u.name = d.unit
 		where d.docstatus = 1 and u.company = %(company)s
 			and d.`{tanggal}` between %(dari)s and %(sampai)s
+			{syarat}
+	""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai)
+
+	return flt(row[0][0]) if row and row[0] else 0.0
+
+
+def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
+	"""Rata-rata rendemen harian pada dokumen Sounding sepanjang periode.
+
+	OER diambil dari oer_netto_2 di Sounding Stock CPO di BST, KER dari
+	ker_netto_2 di Sounding Stock Palm Kernel di Bunker Kernel. Keduanya dipakai
+	apa adanya, bukan dihitung ulang dari Production terhadap TBS diolah: yang
+	dipakai pabrik adalah rendemen harian di Sounding, yang pembaginya sudah
+	dikurangi potongan sortasi.
+
+	Hari yang rendemennya nol tidak ikut dirata-rata. Itu hari tanpa olah — kedua
+	field memang diisi nol kalau TBS Olah kosong — dan kalau ikut, rata-ratanya
+	turun jauh di bawah rendemen pabrik yang sebenarnya.
+	"""
+	cfg = _sumber(prefiks)
+	field = cfg.get("rendemen")
+
+	if not field:
+		return 0.0
+
+	nilai = {"company": company, "dari": dari, "sampai": sampai}
+	syarat = _syarat_unit(unit, nilai)
+
+	row = frappe.db.sql("""
+		select avg(d.`{field}`)
+		from `tab{doctype}` d
+		inner join `tabUnit` u on u.name = d.unit
+		where d.docstatus = 1 and u.company = %(company)s
+			and d.`{tanggal}` between %(dari)s and %(sampai)s
+			and d.`{field}` > 0
 			{syarat}
 	""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai)
 
