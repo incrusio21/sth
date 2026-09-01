@@ -58,10 +58,12 @@ BARIS = (
 # field references. Stock Ledger tidak dipakai untuk angka-angka ini karena
 # Stock Entry-nya cuma memposting selisih, bukan posisi.
 #
-# 'produksi_total' membedakan jumlah sepanjang periode dari posisi terakhir;
-# ketiganya sekarang dijumlahkan, yang memakai posisi terakhir tinggal Closing.
-# Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry bikinan
-# Sounding, jadi qty dan rate-nya berasal dari angka yang sama.
+# 'produksi_total' dan 'closing_total' membedakan jumlah sepanjang periode dari
+# posisi terakhir. Production ketiganya dijumlahkan; Closing cuma TBS, atas
+# permintaan user: total_tbs_restan di Data TBS — restan halaman plus loading ramp —
+# dijumlahkan sebulan, sedangkan CPO dan PK tetap memakai posisi dokumen sounding
+# terakhir. Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry
+# bikinan Sounding, jadi qty dan rate-nya berasal dari angka yang sama.
 #
 # 'rendemen' adalah field rendemen harian di dokumen Sounding, yang dirata-rata
 # jadi OER dan KER dokumen ini. TBS tidak punya.
@@ -71,7 +73,8 @@ SUMBER_PRODUK = {
 		"tanggal": "tanggal_produksi",
 		"produksi": "tbs_olah",
 		"produksi_total": True,
-		"closing": "jumlah_tbs_restan",
+		"closing": "total_tbs_restan",
+		"closing_total": True,
 	},
 	"cpo": {
 		"doctype": "Sounding Stock CPO di BST",
@@ -79,6 +82,7 @@ SUMBER_PRODUK = {
 		"produksi": "produksi_cpo",
 		"produksi_total": True,
 		"closing": "stock_bst",
+		"closing_total": False,
 		"rendemen": "oer_netto_2",
 	},
 	"pk": {
@@ -87,6 +91,7 @@ SUMBER_PRODUK = {
 		"produksi": "produksi",
 		"produksi_total": True,
 		"closing": "stock_akhir",
+		"closing_total": False,
 		"rendemen": "ker_netto_2",
 	},
 }
@@ -256,7 +261,12 @@ class COGSMilldanKebun(Document):
 			amount=a("tbs_opening") + a("tbs_production") + a("tbs_purchase"),
 		)
 		# Closing dan Sold TBS disimpan negatif lalu dijumlahkan, mengikuti excel.
-		isi("tbs_closing", amount=rate_tbs * q("tbs_closing"))
+		# Closing dinilai dengan rate baris Available, bukan rate Stock Entry:
+		# permintaan user, supaya yang disisakan dinilai dengan rata-rata barang
+		# yang tersedia periode ini. Selama ketiga baris pembentuk Available memakai
+		# rate_tbs, dua-duanya menghasilkan angka yang sama.
+		rate_available_tbs = a("tbs_available") / q("tbs_available") if q("tbs_available") else 0
+		isi("tbs_closing", amount=rate_available_tbs * q("tbs_closing"))
 		isi(
 			"tbs_cop",
 			qty=q("tbs_available") + q("tbs_closing"),
@@ -873,7 +883,7 @@ def _syarat_unit(unit, nilai):
 def sumber_terakhir(prefiks, field, company, unit, dari, sampai):
 	"""Isi satu field pada dokumen sumber terakhir dalam rentang tanggal.
 
-	Dipakai Closing ketiga produk dan Production TBS. Angka posisi, bukan jumlah.
+	Dipakai Closing CPO dan PK. Angka posisi, bukan jumlah.
 
 	Tanpa Unit, tiap unit diambil dokumen terakhirnya sendiri lalu dijumlahkan.
 	Kalau dicari satu dokumen terakhir untuk seluruh company, unit yang berhenti
@@ -900,7 +910,7 @@ def sumber_terakhir(prefiks, field, company, unit, dari, sampai):
 
 def sumber_total(prefiks, field, company, unit, dari, sampai):
 	"""Jumlah satu field pada seluruh dokumen sumber dalam rentang tanggal.
-	Dipakai Production CPO dan PK, yang mencatat pengiriman per hari."""
+	Dipakai Production ketiga produk dan Closing TBS."""
 	cfg = _sumber(prefiks, field)
 	nilai = {"company": company, "dari": dari, "sampai": sampai}
 	syarat = _syarat_unit(unit, nilai)
@@ -1142,8 +1152,9 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			hitung_produksi(prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai),
 			0,
 		)
+		hitung_closing = sumber_total if cfg["closing_total"] else sumber_terakhir
 		nilai[prefiks + "_closing"] = (
-			-sumber_terakhir(prefiks, cfg["closing"], company, unit, periode_dari, periode_sampai),
+			-hitung_closing(prefiks, cfg["closing"], company, unit, periode_dari, periode_sampai),
 			0,
 		)
 		if not ada_dokumen_sumber(prefiks, company, unit, periode_dari, periode_sampai):
