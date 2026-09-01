@@ -47,13 +47,92 @@ class SthAccountingPeriod(AccountingPeriod):
 		create_costing_on_submit(self)
 
 	def on_cancel(self):
+		# urutannya kebalikan on_submit: costing dulu baru BKM, supaya costing
+		# masih melihat BKM-nya utuh saat dibatalkan.
 		cancel_costing_on_cancel(self)
+		unpost_bkm_on_cancel(self)
 
 	def on_trash(self):
 		delete_costing_on_trash(self)
 
 # BKM yang GL Entry-nya baru dibuat saat periodenya ditutup
 BKM_POSTED_ON_PERIOD_SUBMIT = ("Buku Kerja Mandor Panen", "Buku Kerja Mandor Perawatan")
+
+# samakan dengan POSTED di sth.controllers.buku_kerja_mandor. sengaja tidak diimpor:
+# modul ini sudah ditarik sth/__init__.py saat app boot, dan ikut menarik seluruh
+# controller stack ke sana cuma demi satu konstanta tidak sepadan.
+POSTED = "Posted"
+
+
+def filter_bkm_periode(doc):
+	"""BKM submitted milik company/unit/periode Accounting Period ini."""
+	return {
+		"company": doc.company,
+		"unit": doc.unit,
+		"posting_date": ["between", [doc.start_date, doc.end_date]],
+		"docstatus": 1,
+	}
+
+
+def bkm_state_field(doctype):
+	"""
+	Fieldname state workflow BKM, atau None kalau doctype-nya belum punya workflow
+	aktif. Tanpa workflow GL Entry sudah dibuat sejak submit, jadi tidak ada yang
+	perlu diposting maupun dilepas postingnya.
+	"""
+	workflow = frappe.get_meta(doctype).get_workflow()
+	if not workflow:
+		return None
+
+	return frappe.get_cached_value("Workflow", workflow, "workflow_state_field") or "workflow_state"
+
+
+def proses_bkm(daftar, aksi):
+	"""
+	Jalankan `aksi` (nama method di BukuKerjaMandorController) untuk tiap (doctype,
+	name) di daftar. Satu savepoint per dokumen supaya yang gagal tidak menyeret
+	yang lain, dan errornya dikumpulkan untuk dirangkum sekali di akhir.
+	"""
+	gagal = []
+
+	for doctype, name in daftar:
+		savepoint = "proses_bkm"
+		try:
+			frappe.db.savepoint(savepoint)
+
+			bkm = frappe.get_doc(doctype, name)
+			bkm.flags.ignore_permissions = True
+			getattr(bkm, aksi)()
+		except Exception as e:
+			# pesan error per dokumen dirangkum di bawah, jangan ditampilkan dua kali
+			if frappe.message_log:
+				frappe.message_log.pop()
+
+			frappe.db.rollback(save_point=savepoint)
+			gagal.append((doctype, name, str(e)))
+
+	return gagal
+
+
+def throw_bkm_gagal(gagal, title, intro):
+	if not gagal:
+		return
+
+	rows = "".join(
+		f"<tr><td>{dt}</td><td>{name}</td><td>{frappe.utils.escape_html(msg)}</td></tr>"
+		for dt, name, msg in gagal
+	)
+
+	frappe.throw(
+		title=title,
+		msg="""
+			<p>{intro}</p>
+			<table class="table table-bordered table-sm" style="margin-top:8px;">
+				<thead><tr><th>Doctype</th><th>Document</th><th>Error</th></tr></thead>
+				<tbody>{rows}</tbody>
+			</table>
+		""".format(intro=intro, rows=rows)
+	)
 
 
 def post_bkm_on_submit(doc, method=None):
@@ -65,66 +144,68 @@ def post_bkm_on_submit(doc, method=None):
 	if doc.get("workflow_state") != "Submitted":
 		return
 
-	failed = []
+	daftar = []
 
 	for doctype in BKM_POSTED_ON_PERIOD_SUBMIT:
-		workflow = frappe.get_meta(doctype).get_workflow()
-		if not workflow:
-			# tanpa workflow, GL Entry sudah dibuat sejak submit
+		state_field = bkm_state_field(doctype)
+		if not state_field:
 			continue
 
-		state_field = frappe.get_cached_value("Workflow", workflow, "workflow_state_field") or "workflow_state"
-
-		bkm_list = frappe.get_all(
+		names = frappe.get_all(
 			doctype,
-			filters={
-				"company": doc.company,
-				"unit": doc.unit,
-				"posting_date": ["between", [doc.start_date, doc.end_date]],
-				"docstatus": 1,
-			},
+			filters=filter_bkm_periode(doc),
 			# dokumen lama (sebelum workflow dipasang) state-nya kosong, bukan "Submitted",
 			# dan tetap harus ikut ditandai Posted
 			or_filters=[
-				[doctype, state_field, "!=", "Posted"],
+				[doctype, state_field, "!=", POSTED],
 				[doctype, state_field, "is", "not set"],
 			],
 			pluck="name"
 		)
 
-		for name in bkm_list:
-			posting_savepoint = "post_bkm"
-			try:
-				frappe.db.savepoint(posting_savepoint)
+		daftar.extend((doctype, name) for name in names)
 
-				bkm = frappe.get_doc(doctype, name)
-				bkm.flags.ignore_permissions = True
-				bkm.set_as_posted()
-			except Exception as e:
-				# pesan error per dokumen dirangkum di bawah, jangan ditampilkan dua kali
-				if frappe.message_log:
-					frappe.message_log.pop()
+	throw_bkm_gagal(
+		proses_bkm(daftar, "set_as_posted"),
+		_("BKM Gagal Diposting"),
+		_("Accounting Period tidak dapat disubmit. Dokumen berikut gagal dipindahkan ke state <b>Posted</b>:"),
+	)
 
-				frappe.db.rollback(save_point=posting_savepoint)
-				failed.append((doctype, name, str(e)))
 
-	if failed:
-		rows = "".join(
-			f"<tr><td>{dt}</td><td>{name}</td><td>{frappe.utils.escape_html(msg)}</td></tr>"
-			for dt, name, msg in failed
+def unpost_bkm_on_cancel(doc, method=None):
+	"""
+	Kebalikan post_bkm_on_submit. Saat Accounting Period dibatalkan, BKM Panen &
+	Perawatan yang sudah Posted dikembalikan ke Submitted dan GL Entry-nya dihapus,
+	supaya periodenya benar-benar terbuka lagi: selama masih Posted, upah dan premi
+	BKM tidak bisa dihitung ulang, jadi periode yang batal pun tetap terkunci.
+
+	Tidak dijaga workflow_state: on_cancel hanya jalan saat docstatus benar-benar
+	pindah ke 2, dan periode yang batal harus melepas BKM-nya lewat jalur pembatalan
+	mana pun. Lihat cancel_costing_on_cancel untuk duduk perkaranya.
+
+	BKM yang dipindah ke Posted manual lewat workflow, bukan lewat closing, ikut
+	dilepas. Itu memang yang diinginkan: periodenya dibuka, isinya boleh dikoreksi.
+	"""
+	daftar = []
+
+	for doctype in BKM_POSTED_ON_PERIOD_SUBMIT:
+		state_field = bkm_state_field(doctype)
+		if not state_field:
+			continue
+
+		filters = filter_bkm_periode(doc)
+		filters[state_field] = POSTED
+
+		daftar.extend(
+			(doctype, name)
+			for name in frappe.get_all(doctype, filters=filters, pluck="name")
 		)
 
-		frappe.throw(
-			title=_("BKM Gagal Diposting"),
-			msg=_("""
-				<p>Accounting Period tidak dapat disubmit. Dokumen berikut gagal dipindahkan
-				ke state <b>Posted</b>:</p>
-				<table class="table table-bordered table-sm" style="margin-top:8px;">
-					<thead><tr><th>Doctype</th><th>Document</th><th>Error</th></tr></thead>
-					<tbody>{rows}</tbody>
-				</table>
-			""").format(rows=rows)
-		)
+	throw_bkm_gagal(
+		proses_bkm(daftar, "set_as_unposted"),
+		_("BKM Gagal Dilepas Postingnya"),
+		_("Accounting Period tidak dapat dibatalkan. Dokumen berikut gagal dikembalikan ke state <b>Submitted</b>:"),
+	)
 
 
 # Costing yang dibuat sekalian waktu Accounting Period ditutup, berikut
@@ -251,12 +332,16 @@ def cancel_costing_on_cancel(doc, method=None):
 	Saat Accounting Period dibatalkan, cancel juga seluruh costing yang otomatis
 	dibuat untuk company/unit/periode yang sama.
 
-	State pembatalan di workflow-nya bernama "Canceled" (satu L). Ejaan
-	"Cancelled" ikut diterima supaya tidak pecah kalau workflow-nya diganti.
-	"""
-	if doc.get("workflow_state") not in ("Canceled", "Cancelled"):
-		return
+	Dulu fungsi ini dijaga `workflow_state in ("Canceled", "Cancelled")`. Guard itu
+	dicabut karena menyaring jalur pembatalan, bukan memastikan dokumennya batal:
+	on_cancel sendiri hanya dipanggil saat docstatus benar-benar pindah ke 2. Yang
+	menulis workflow_state cuma transisi workflow — doc.cancel() langsung (bench
+	console, API, patch) meninggalkannya di "Submitted", jadi costing-nya diam-diam
+	tidak ikut dibatalkan padahal periodenya sudah batal.
 
+	Sekarang sejajar dengan unpost_bkm_on_cancel: keduanya jalan lewat jalur
+	pembatalan mana pun.
+	"""
 	for costing in COSTING_OTOMATIS:
 		doctype = costing["doctype"]
 

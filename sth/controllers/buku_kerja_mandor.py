@@ -21,6 +21,9 @@ force_item_fields = (
 # bukan saat submit, karena nilai dokumen masih bisa berubah selama periode berjalan.
 POSTED = "Posted"
 
+# state yang dikembalikan saat periodenya dibuka lagi, lihat set_as_unposted
+SUBMITTED = "Submitted"
+
 class BukuKerjaMandorController(PlantationController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -418,6 +421,31 @@ class BukuKerjaMandorController(PlantationController):
         # alert per dokumen hanya jadi noise saat posting massal
         self.flags.no_gl_alert = True
         self.make_gl_entry_on_post()
+
+        return True
+
+    def set_as_unposted(self):
+        """
+        Kebalikan set_as_posted, dipakai saat Accounting Period dibatalkan:
+        dokumen dikembalikan ke Submitted dan GL Entry-nya dihapus, supaya
+        periodenya benar-benar terbuka lagi. Selama masih Posted upah dan premi
+        tidak bisa dihitung ulang, jadi tanpa ini periode yang sudah dibatalkan
+        pun BKM-nya tetap terkunci.
+        """
+        if self.docstatus != 1 or not self.is_posted():
+            return False
+
+        workflow = self.meta.get_workflow()
+        if not workflow:
+            return False
+
+        fieldname = frappe.get_cached_value("Workflow", workflow, "workflow_state_field") or "workflow_state"
+        self.db_set(fieldname, SUBMITTED, update_modified=False)
+
+        # GL Entry dihapus, bukan di-reverse, mengikuti repair_gl_entry: dokumennya
+        # tidak sedang dibatalkan, cuma belum jadi diposting, jadi tidak perlu
+        # meninggalkan jejak reverse di tanggal yang sama.
+        self.delete_gl_entry()
 
         return True
 
