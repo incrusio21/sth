@@ -10,7 +10,66 @@ from erpnext.controllers.queries import get_fields
 class SecurityCheckPoint(Document):
 
 	def before_insert(self):
+		self.keep_api_no_polisi()
 		self.map_api_spb_trans_no()
+
+	def validate(self):
+		self.set_data_kendaraan()
+
+	def is_from_api(self):
+		"""Dokumen ini kiriman REST API, bukan input orang lewat UI."""
+		return bool(self.owner and "api@sth" in self.owner)
+
+	def keep_api_no_polisi(self):
+		"""Simpan no polisi kiriman API sebelum fetch_from sempat menimpanya.
+
+		Field no_polisi menarik nilai dari spb.no_polisi, jadi _validate_links()
+		— yang jalan tepat setelah before_insert — selalu menggantinya dengan
+		punya SPB. SPB kiriman API biasanya masih stub tanpa no polisi, jadi tanpa
+		disimpan dulu nomornya hilang sebelum sempat dipakai mencari kendaraan.
+		"""
+		if not self.is_from_api():
+			return
+
+		self.flags.api_no_polisi = self.no_polisi
+
+	def set_data_kendaraan(self):
+		"""Isi data supir dan no polisi dari master Alat Berat Dan Kendaraan.
+
+		Kiriman API cuma membawa no polisi; nama supirnya tidak ikut. Kendaraannya
+		dicari lewat no_pol, operatornya dipakai sebagai driver_name, dan no_pol
+		master ditulis balik ke no_polisi serta license_plate supaya formatnya ikut
+		master, bukan format yang dikirim sistem luar.
+
+		Dijalankan di validate, bukan before_insert, supaya nilainya tidak keburu
+		ditimpa fetch_from spb.no_polisi di _validate_links().
+		"""
+		if not self.is_from_api():
+			return
+
+		no_polisi = self.flags.api_no_polisi or self.no_polisi
+
+		if not no_polisi and not self.is_new():
+			# Simpan ulang dokumen lama (mis. waktu kendaraan keluar) juga kena
+			# fetch_from spb.no_polisi; pakai nilai yang sudah tersimpan supaya
+			# nomornya tidak ikut terhapus.
+			no_polisi = frappe.db.get_value(self.doctype, self.name, "no_polisi")
+
+		if not no_polisi:
+			return
+
+		# No polisi yang tidak terdaftar tetap dicatat apa adanya supaya petugas pos
+		# masih bisa mencocokkan kendaraannya di lapangan.
+		self.no_polisi = no_polisi
+
+		kendaraan = get_kendaraan_by_no_pol(no_polisi)
+		if not kendaraan:
+			return
+
+		self.no_polisi = self.license_plate = kendaraan.no_pol
+
+		if kendaraan.operator:
+			self.driver_name = get_nama_operator(kendaraan.operator)
 
 	def map_api_spb_trans_no(self):
 		"""Field spb dari API berisi trans_no SPB, bukan nama dokumennya.
@@ -53,6 +112,44 @@ class SecurityCheckPoint(Document):
 		)
 
 		return doc.name
+
+
+def get_kendaraan_by_no_pol(no_polisi):
+	"""Kendaraan di master yang no polisinya sama dengan no_polisi.
+
+	Dicocokkan persis dulu, baru tanpa spasi dan tanda hubung: sistem luar mengirim
+	"B 9165 UDB" sementara di master banyak yang ditulis "B9165UDB", padahal
+	kendaraannya sama. Kendaraan yang sudah dibatalkan tidak ikut dicari.
+	"""
+	kendaraan = frappe.db.get_value(
+		"Alat Berat Dan Kendaraan",
+		{"no_pol": no_polisi, "docstatus": ["<", 2]},
+		["name", "no_pol", "operator"],
+		as_dict=True,
+	)
+
+	if kendaraan:
+		return kendaraan
+
+	rows = frappe.db.sql("""
+		select name, no_pol, operator
+		from `tabAlat Berat Dan Kendaraan`
+		where docstatus < 2
+			and upper(replace(replace(no_pol, ' ', ''), '-', '')) = %s
+		limit 1
+	""", strip_no_pol(no_polisi), as_dict=True)
+
+	return rows[0] if rows else None
+
+
+def strip_no_pol(no_polisi):
+	"""Bentuk ringkas no polisi: tanpa spasi, tanpa tanda hubung, huruf besar."""
+	return (no_polisi or "").replace(" ", "").replace("-", "").upper()
+
+
+def get_nama_operator(operator):
+	"""Nama karyawan yang jadi operator/supir kendaraan."""
+	return frappe.db.get_value("Employee", operator, "employee_name")
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
