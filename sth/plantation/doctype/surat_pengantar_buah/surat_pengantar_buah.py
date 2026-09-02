@@ -132,19 +132,25 @@ class SuratPengantarBuah(Document):
 		self.details[-1].persentase = flt(100 - terbagi, presisi)
 
 	def bagi_berat_ke_baris(self, total_weight):
-		"""Bagi berat ke baris-baris blok menurut persentasenya.
+		"""Bagi berat ke baris-baris menurut porsi janjangnya.
 
 		Satu-satunya tempat berat dipecah ke baris, dipakai jalur timbang pabrik
-		maupun jalur Timbangan. Baris berpersentase yang terakhir menyerap sisa
-		pembulatan supaya jumlah seluruh baris persis sama dengan beratnya.
+		maupun jalur Timbangan.
+
+		Porsinya dihitung di tempat dari total_janjang seluruh baris details,
+		bukan dari field persentase yang tersimpan. persentase baru ditulis ulang
+		waktu dokumennya divalidasi, sedangkan pembagian ini juga dipanggil dari
+		Timbangan lewat db_update yang tidak lewat validate — janjang yang datang
+		belakangan lewat API karena itu bisa meninggalkan persentase yang basi.
+
+		Janjang dihitung apa adanya dari isi tabel, tanpa memandang baris itu
+		membawa blok panen, blok restan, atau dua-duanya: total_janjang tiap baris
+		sudah menjumlahkan qty dan qty_restan. Baris berjanjang yang terakhir
+		menyerap sisa pembulatan supaya jumlah seluruh baris persis sama dengan
+		beratnya.
 		"""
 		if not self.details:
 			return
-
-		# SPB lama belum punya persentase tersimpan; dihitung di tempat supaya
-		# beratnya tidak jatuh nol semua
-		if not any(flt(d.persentase) for d in self.details):
-			self.hitung_persentase_dari_janjang()
 
 		presisi = get_field_precision(
 			frappe.get_meta("SPB Timbangan Pabrik").get_field("total_weight")
@@ -153,15 +159,16 @@ class SuratPengantarBuah(Document):
 		for d in self.details:
 			d.total_weight = 0.0
 
-		berbagi = [d for d in self.details if flt(d.persentase)]
-		if not berbagi:
+		berbagi = [d for d in self.details if flt(d.total_janjang)]
+		total_janjang = sum(flt(d.total_janjang) for d in berbagi)
+		if not total_janjang:
 			return
 
 		total_weight = flt(total_weight)
 		terbagi = 0.0
 
 		for d in berbagi[:-1]:
-			d.total_weight = flt(total_weight * flt(d.persentase) / 100, presisi)
+			d.total_weight = flt(total_weight * flt(d.total_janjang) / total_janjang, presisi)
 			terbagi += d.total_weight
 
 		berbagi[-1].total_weight = flt(total_weight - terbagi, presisi)
