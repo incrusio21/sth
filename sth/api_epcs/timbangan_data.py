@@ -176,19 +176,11 @@ def _build_data(timbangan_rows):
 	if not timbangan_rows:
 		return []
 
+	spb_map = _map_by_name("Surat Pengantar Buah", [r.get("spb") for r in timbangan_rows], SPB_FIELDS)
 	scp_map = _map_by_name(
 		"Security Check Point",
 		[r.get("ticket_number") for r in timbangan_rows],
-		["name", "supplier", "spb"],
-	)
-	# SPB dijemput dari dua arah: link spb di Timbangan untuk data kendaraan dan
-	# supir, dan link spb di Security Check Point untuk spb_trans_no. Keduanya
-	# masuk ke satu map supaya tetap sekali query, dan seringnya menunjuk dokumen
-	# yang sama.
-	spb_map = _map_by_name(
-		"Surat Pengantar Buah",
-		[r.get("spb") for r in timbangan_rows] + [s.get("spb") for s in scp_map.values()],
-		SPB_FIELDS,
+		["name", "supplier", "trans_no"],
 	)
 	supplier_map = _map_by_name(
 		"Supplier",
@@ -209,9 +201,8 @@ def _build_data(timbangan_rows):
 	data = []
 
 	for row in timbangan_rows:
-		scp = scp_map.get(row.get("ticket_number")) or {}
 		spb = spb_map.get(row.get("spb")) or {}
-		spb_scp = spb_map.get(scp.get("spb")) or {}
+		scp = scp_map.get(row.get("ticket_number")) or {}
 		supplier_code = scp.get("supplier")
 		supplier = supplier_map.get(supplier_code) or {}
 		driver = driver_map.get(spb.get("driver_code")) or {}
@@ -233,10 +224,14 @@ def _build_data(timbangan_rows):
 			"is_external": is_external,
 			"supplier_code": supplier_code,
 			"supplier_name": supplier.get("supplier_name"),
-			# 'spb' di sini nomor tiket Security Check Point, bukan dokumen Surat
-			# Pengantar Buah -- itu tetap di 'spb_no'. Penamaannya mengikuti EPCS.
-			"spb": row.get("ticket_number"),
-			"spb_trans_no": spb_scp.get("trans_no"),
+			# Dua pasang nomor dokumen: yang dari Security Check Point lewat
+			# ticket_number, dan yang dari Surat Pengantar Buah lewat link spb di
+			# Timbangan. 'spb' dan 'spb_no' isinya sama; 'spb_no' dipertahankan
+			# supaya pemakai API yang lama tidak putus.
+			"verifikasi_security": row.get("ticket_number"),
+			"verifikasi_security_trans_no": scp.get("trans_no"),
+			"spb": row.get("spb"),
+			"spb_trans_no": spb.get("trans_no"),
 			"spb_no": row.get("spb"),
 			"spb_date": spb.get("posting_date"),
 			# TODO: sumber data is_contract belum ditentukan
