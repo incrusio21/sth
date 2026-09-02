@@ -14,6 +14,7 @@
   "column_break_exgg",
   "company",
   "posting_date",
+  "trans_no",
   "amended_from",
   "supervisi_section",
   "mandor",
@@ -381,13 +382,19 @@
    "fieldtype": "Link",
    "label": "Kemandoran",
    "options": "Kemandoran"
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-02 11:13:17.842523",
+ "modified": "2026-09-02 11:14:51.043534",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
