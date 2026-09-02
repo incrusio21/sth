@@ -62,8 +62,9 @@ BARIS = (
 # posisi terakhir. Production ketiganya dijumlahkan; Closing cuma TBS, atas
 # permintaan user: tbs_restan di Data TBS — restan halaman saja, tanpa loading
 # ramp — dijumlahkan sebulan, sedangkan CPO dan PK tetap memakai posisi dokumen
-# sounding terakhir. Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry
-# bikinan Sounding, jadi qty dan rate-nya berasal dari angka yang sama.
+# sounding terakhir. Field produksi CPO dan PK sengaja yang sama dengan qty Stock
+# Entry bikinan Sounding, jadi qty yang dibebani biaya sama dengan qty yang masuk
+# Stock Ledger.
 #
 # 'rendemen' adalah field rendemen harian di dokumen Sounding, yang dirata-rata
 # jadi OER dan KER dokumen ini. TBS tidak punya.
@@ -239,23 +240,22 @@ class COGSMilldanKebun(Document):
 			if amount is not None:
 				baris["amount"] = flt(amount)
 
-		# Rate tiap produk dibaca ulang dari Stock Entry dokumen sumbernya, tidak
-		# disimpan di field: nilainya harus selalu sama dengan yang dipakai Stock
-		# Ledger, jadi tidak boleh ada yang mengetiknya sendiri di form.
-		rate = {}
+		# Rate TBS dibaca ulang dari Stock Entry Data TBS, tidak disimpan di
+		# field: nilainya harus selalu sama dengan yang dipakai Stock Ledger, jadi
+		# tidak boleh ada yang mengetiknya sendiri di form. CPO dan PK tidak lagi
+		# memakai rate Stock Entry sama sekali — nilai produksinya dibagi dari biaya.
+		rate_tbs = 0.0
 		if self.company and self.periode_dari and self.periode_sampai:
-			for produk, prefiks in PREFIKS.items():
-				rate[prefiks] = rate_dari_stock_entry(
-					prefiks, produk, self.company, self.unit,
-					self.periode_dari, self.periode_sampai,
-				)
+			rate_tbs = rate_dari_stock_entry(
+				"tbs", "TBS", self.company, self.unit,
+				self.periode_dari, self.periode_sampai,
+			)
 
 		# --- TBS: nilai Production diambil dari Biaya Kebun periode ini, bukan
 		# dari rate Stock Entry. Seluruh biaya kebun dikapitalisasi ke TBS yang
 		# dipanen, jadi rate baris ini hasil bagi biaya kebun dengan qty panen —
 		# lihat tulis_rincian, yang selalu mengisi rate dari amount / qty.
 		# Opening dan Purchase tetap memakai rate Stock Entry dokumen sumber.
-		rate_tbs = flt(rate.get("tbs"))
 		for kode in ("tbs_opening", "tbs_purchase"):
 			isi(kode, amount=rate_tbs * q(kode))
 		isi("tbs_production", amount=flt(self.biaya_kebun))
@@ -305,16 +305,37 @@ class COGSMilldanKebun(Document):
 		nilai_pk = flt(self.ker) * flt(self.harga_rata_pk)
 		pembagi = nilai_cpo + nilai_pk
 
-		# Conversion cost sekarang angka pemantau saja. Nilai produksi CPO dan PK
-		# tidak lagi dibagi dari TBS diolah plus biaya mill, tapi diambil dari
-		# rate Stock Entry Sounding masing-masing.
 		self.conversion_cost_cpo = (nilai_cpo / pembagi * 100) if pembagi else 0
 		self.conversion_cost_pk = (100 - flt(self.conversion_cost_cpo)) if pembagi else 0
 
-		# --- CPO dan PK: Production dari rate Sounding, sisanya rata-rata
+		# --- Biaya yang dibagi ke CPO dan PK: nilai TBS yang diolah sendiri — baris
+		# Internal Consumption, yang sudah membawa Biaya Kebun lewat Production —
+		# ditambah Biaya Mill periode ini. Polanya sama dengan TBS: amount baris
+		# Production ditetapkan lebih dulu, rupiah per kg-nya menyusul dari
+		# amount / qty di tulis_rincian.
+		dibagi = flt(a("tbs_internal"), 2) + flt(self.biaya_mill, 2)
+
+		if dibagi and not pembagi:
+			pesan = (
+				"Average Price CPO dan PK belum terisi, conversion cost tidak bisa dihitung "
+				"sehingga nilai TBS diolah dan Biaya Mill tidak punya tujuan alokasi."
+			)
+			if self.docstatus == 1:
+				frappe.throw(pesan)
+			frappe.msgprint(pesan, indicator="orange", alert=True)
+
+		if pembagi:
+			amount_cpo = flt(dibagi * flt(self.conversion_cost_cpo) / 100, 2)
+			amount_produksi = {"cpo": amount_cpo, "pk": dibagi - amount_cpo}
+		else:
+			# Tanpa conversion cost tidak ada dasar pembagian. Dinolkan dua-duanya,
+			# bukan dibiarkan PK menampung sisa pengurangan dari nol.
+			amount_produksi = {"cpo": 0.0, "pk": 0.0}
+
+		# --- CPO dan PK: Production dari pembagian biaya, sisanya rata-rata
 		# tertimbang. Closing negatif seperti TBS, jadi COGS menjumlahkan.
 		for prefiks in ("cpo", "pk"):
-			isi(prefiks + "_production", amount=flt(rate.get(prefiks)) * q(prefiks + "_production"))
+			isi(prefiks + "_production", amount=amount_produksi[prefiks])
 			isi(
 				prefiks + "_available",
 				qty=q(prefiks + "_opening") + q(prefiks + "_production") + q(prefiks + "_purchase"),
@@ -634,9 +655,9 @@ class COGSMilldanKebun(Document):
 		for row in baris:
 			self.append("closing", row)
 
-		# Kedua sisi dijumlahkan sendiri-sendiri, bukan satu total: sejak nilai
-		# produksi CPO dan PK diambil dari rate Sounding, debit dan kredit tidak
-		# lagi otomatis ketemu dan bedanya perlu kelihatan.
+		# Kedua sisi dijumlahkan sendiri-sendiri, bukan satu total, supaya beda
+		# antara debit dan kredit langsung kelihatan kalau ada baris yang belum
+		# punya lawan jurnal.
 		self.total_closing = sum(flt(row["debit"]) for row in baris)
 		self.total_credit = sum(flt(row["credit"]) for row in baris)
 
@@ -989,6 +1010,9 @@ def rate_dari_stock_entry(prefiks, produk, company, unit, dari, sampai):
 	jadi rate yang dipakai ERPNext memvaluasi produk itu bisa dibaca balik.
 	Sengaja tidak disimpan di field dokumen supaya tidak bisa diketik ulang di
 	form: nilainya harus selalu sama dengan yang dipakai Stock Ledger.
+
+	Yang memakainya tinggal TBS, untuk baris Opening, Purchase, dan Sold; nilai
+	Production ketiga produk sekarang dibagi dari biaya, bukan dari rate ini.
 
 	Yang dicari dokumen terakhir yang punya Stock Entry, bukan dokumen terakhir
 	lalu menyerah kalau kosong: ketiganya cuma membuat Stock Entry kalau ada
