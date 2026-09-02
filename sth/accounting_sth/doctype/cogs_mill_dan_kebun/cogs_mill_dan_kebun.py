@@ -60,9 +60,9 @@ BARIS = (
 #
 # 'produksi_total' dan 'closing_total' membedakan jumlah sepanjang periode dari
 # posisi terakhir. Production ketiganya dijumlahkan; Closing cuma TBS, atas
-# permintaan user: total_tbs_restan di Data TBS — restan halaman plus loading ramp —
-# dijumlahkan sebulan, sedangkan CPO dan PK tetap memakai posisi dokumen sounding
-# terakhir. Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry
+# permintaan user: tbs_restan di Data TBS — restan halaman saja, tanpa loading
+# ramp — dijumlahkan sebulan, sedangkan CPO dan PK tetap memakai posisi dokumen
+# sounding terakhir. Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry
 # bikinan Sounding, jadi qty dan rate-nya berasal dari angka yang sama.
 #
 # 'rendemen' adalah field rendemen harian di dokumen Sounding, yang dirata-rata
@@ -73,7 +73,7 @@ SUMBER_PRODUK = {
 		"tanggal": "tanggal_produksi",
 		"produksi": "tbs_olah",
 		"produksi_total": True,
-		"closing": "total_tbs_restan",
+		"closing": "tbs_restan",
 		"closing_total": True,
 	},
 	"cpo": {
