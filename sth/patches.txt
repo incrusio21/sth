@@ -6,35 +6,4 @@ sth.patches.merge_duplicate_spb_trans_no
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
-sth.patches.set_nama_pengguna_pdo_kas
-sth.patches.create_asset_scrap_request_workflow
-sth.patches.tambah_jalur_approval_realisasi_tambahan
-sth.patches.gl_bkm_perawatan_tanpa_material
-sth.patches.asset_scrap_approval_per_unit
-sth.patches.custom_alat_berat_dan_kendaraan_dynamic_link
-sth.patches.isi_persentase_asset_scrap_request
-sth.patches.gabung_masa_shu_ke_master_harga_shu
-sth.patches.isi_kode_mandor_bkm
-sth.patches.tampilkan_realisasi_tambahan
-sth.patches.perbaiki_unique_index_bkm_premi
-sth.patches.gabung_bkm_perawatan_trans_no
-sth.patches.gabung_bkm_perawatan_material_dobel
-sth.patches.arsipkan_bkm_perawatan_batal
-sth.patches.isi_qty_scrapped_asset
-sth.patches.isi_total_jam_desimal_mill
-sth.patches.hapus_costing_mill_lama
-sth.patches.kembalikan_nama_blok_tpre
-sth.patches.kembalikan_nama_tph_tpre
-sth.patches.kembalikan_nama_blok_tmde
-sth.patches.kembalikan_nama_tph_tmde
-sth.patches.namai_tph_dari_nama_blok
-sth.patches.isi_nilai_perolehan_asset_scrap_request
-sth.patches.isi_workflow_state_asset_scrap_request
-sth.patches.pindahkan_uang_muka_po_ke_advances
-sth.patches.isi_ringkasan_scrap_asset
-sth.patches.matikan_uang_muka_di_akun_terpisah
-sth.patches.isi_sumber_biaya_mill_cogs
-sth.patches.hitung_ulang_sounding_palm_kernel
-sth.patches.perbaiki_tanggal_ste_sounding_cpo
-sth.patches.lepas_bkm_posted_tanpa_periode_tertutup
-sth.patches.isi_data_kendaraan_security_check_point
+
