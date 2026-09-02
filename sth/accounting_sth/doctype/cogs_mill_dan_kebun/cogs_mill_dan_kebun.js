@@ -20,6 +20,22 @@ frappe.ui.form.on("COGS Mill dan Kebun", {
         }
     },
 
+    biaya_kebun(frm) {
+        hitung_ulang_cogs(frm);
+    },
+
+    biaya_mill(frm) {
+        hitung_ulang_cogs(frm);
+    },
+
+    harga_rata_cpo(frm) {
+        hitung_ulang_cogs(frm);
+    },
+
+    harga_rata_pk(frm) {
+        hitung_ulang_cogs(frm);
+    },
+
     posting_jurnal(frm) {
         if (frm.doc.posting_jurnal && frm.doc.buat_stock_reconciliation) {
             frm.set_value("buat_stock_reconciliation", 0);
@@ -43,6 +59,25 @@ frappe.ui.form.on("COGS Mill dan Kebun", {
         });
     }
 });
+
+// Empat field di atas boleh diketik manual dan ikut menentukan nilai baris
+// Production. Perhitungannya tidak diulang di sini, tapi dilempar balik ke
+// hitung() di server -- rumus yang sama dengan yang jalan waktu disave, jadi
+// angka yang kelihatan di form tidak pernah beda dengan yang tersimpan.
+function hitung_ulang_cogs(frm) {
+    if (frm.doc.docstatus !== 0) {
+        return;
+    }
+
+    frm.call({
+        doc: frm.doc,
+        method: "hitung_ulang",
+        freeze: true,
+        freeze_message: __("Menghitung ulang...")
+    }).then(() => {
+        frm.refresh_fields();
+    });
+}
 
 function ambil_data_cogs(frm) {
     if (!frm.doc.periode_dari || !frm.doc.periode_sampai) {

@@ -216,6 +216,17 @@ class COGSMilldanKebun(Document):
 
 		return data["peringatan"]
 
+	@frappe.whitelist()
+	def hitung_ulang(self):
+		"""Hitung ulang tanpa mengambil data baru dari dokumen sumber.
+
+		Dipanggil dari form waktu field yang boleh diketik manual berubah — Biaya
+		Kebun, Biaya Mill, dan Average Price CPO/PK. Perhitungannya semua di sini,
+		bukan diduplikasi di JS, supaya angka yang kelihatan di form tidak pernah
+		beda dengan yang tersimpan waktu disave.
+		"""
+		self.hitung()
+
 	def hitung(self):
 		"""Hitung ulang seluruh baris turunan, conversion cost, dan jurnal.
 
