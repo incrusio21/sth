@@ -4,18 +4,22 @@
 """Validasi kesiapan data sebelum Accounting Period ditutup.
 
 Closing baru boleh jalan kalau tidak ada lagi pekerjaan yang menggantung di
-periode itu. Ada tiga hal yang diperiksa:
+periode itu. Ada dua hal yang diperiksa:
 
 1. BKM yang isinya sudah ada tapi dokumennya masih draft. BKM kosong sengaja
    dibiarkan lewat -- yang menahan closing cuma yang sudah ada baris kerjanya.
 2. Upah dan premi yang sudah lahir dari BKM (dan sumber payroll lain) tapi
    belum ikut slip gaji, terbaca dari Employee Payment Log yang belum is_paid.
-3. Transaksi berjurnal yang masih draft, yaitu dokumen dari doctype yang pernah
-   menghasilkan GL Entry.
 
-Ketiganya menahan closing karena seluruh costing -- Bengkel, Mill, Panen,
+Keduanya menahan closing karena seluruh costing -- Bengkel, Mill, Panen,
 Perawatan -- dibangun dari dokumen-dokumen ini saat Accounting Period disubmit.
 Kalau ada yang tertinggal, costing dan buku besarnya ikut kurang.
+
+Pemeriksaan ketiga -- transaksi berjurnal yang masih draft, dijaring dari
+doctype yang pernah menghasilkan GL Entry -- dilepas atas permintaan user
+(2 Sep 2026). Jaringnya terlalu lebar: dokumen draft apa pun yang doctype-nya
+pernah menjurnal ikut menahan closing, padahal banyak di antaranya tidak
+memengaruhi costing periode itu.
 """
 
 import frappe
@@ -31,22 +35,6 @@ BKM_DOCTYPES = (
 	"Buku Kerja Mandor Bengkel",
 )
 
-# Doctype yang punya GL Entry tapi tidak ikut pemeriksaan draft umum.
-#
-# BKM diperiksa sendiri di cek_bkm_draft dengan syarat "ada isi kerjanya", jadi
-# kalau ikut di sini BKM kosong pun ikut menahan closing. Salary Slip sudah
-# dipegang check_unsubmitted_salary_slip yang pesannya lebih terarah.
-DIKECUALIKAN_DARI_CEK_DRAFT = BKM_DOCTYPES + ("Salary Slip",)
-
-# Doctype yang tanggal periodenya bukan posting_date. Nilainya None berarti
-# dokumen itu tidak bisa dilingkupi periode, jadi dilewati.
-FIELD_TANGGAL = {
-	"Asset": "available_for_use_date",
-	"Asset Repair": "completion_date",
-	"Period Closing Voucher": "period_end_date",
-	"Bank Clearance": None,
-}
-
 # Banyaknya baris yang ditampilkan per bagian. Sisanya cukup dihitung supaya
 # pesan errornya tidak jadi halaman sendiri.
 BATAS_BARIS = 50
@@ -58,7 +46,6 @@ def validasi_sebelum_closing(doc, method=None):
 
 	bagian.extend(cek_bkm_draft(doc))
 	bagian.extend(cek_upah_belum_masuk_gaji(doc))
-	bagian.extend(cek_transaksi_berjurnal_draft(doc))
 
 	if not bagian:
 		return
@@ -82,13 +69,12 @@ def filter_periode(doc, doctype, meta=None):
 	"""
 	meta = meta or frappe.get_meta(doctype)
 
-	fieldname = FIELD_TANGGAL.get(doctype, "posting_date")
-	if not fieldname or not meta.has_field(fieldname):
+	if not meta.has_field("posting_date"):
 		return None, None
 
 	filters = {
 		"docstatus": 0,
-		fieldname: ["between", [doc.start_date, doc.end_date]],
+		"posting_date": ["between", [doc.start_date, doc.end_date]],
 	}
 
 	if meta.has_field("company"):
@@ -212,59 +198,6 @@ def cek_upah_belum_masuk_gaji(doc):
 			for r in rows
 		],
 	)]
-
-
-def cek_transaksi_berjurnal_draft(doc):
-	"""Dokumen draft dari doctype yang punya jurnal."""
-	temuan = []
-
-	for doctype in doctype_berjurnal(doc):
-		meta = frappe.get_meta(doctype)
-		if not meta.is_submittable:
-			continue
-
-		filters, or_filters = filter_periode(doc, doctype, meta)
-		if filters is None:
-			continue
-
-		fieldname = FIELD_TANGGAL.get(doctype, "posting_date")
-
-		for d in frappe.get_all(
-			doctype,
-			filters=filters,
-			or_filters=or_filters,
-			fields=["name", "{0} as tanggal".format(fieldname)],
-			order_by="{0} asc, name asc".format(fieldname),
-		):
-			temuan.append((doctype, d.name, d.tanggal))
-
-	if not temuan:
-		return []
-
-	return [bagian_tabel(
-		_("Masih ada transaksi berjurnal yang belum disubmit:"),
-		[_("Doctype"), _("Dokumen"), _("Tanggal")],
-		temuan,
-	)]
-
-
-def doctype_berjurnal(doc):
-	"""Doctype yang pernah menghasilkan GL Entry, plus yang dikunci periode ini.
-
-	Diambil dari isi buku besar, bukan daftar tetap, supaya doctype baru yang
-	menjurnal ikut terjaring tanpa perlu didaftarkan lagi di sini. Closed
-	Document ikut dibaca supaya dokumen inti akuntansi tetap terperiksa di site
-	yang buku besarnya masih kosong.
-	"""
-	daftar = {
-		row[0] for row in frappe.db.sql("SELECT DISTINCT voucher_type FROM `tabGL Entry`")
-		if row[0]
-	}
-
-	daftar.update(d.document_type for d in (doc.get("closed_documents") or []) if d.document_type)
-	daftar.difference_update(DIKECUALIKAN_DARI_CEK_DRAFT)
-
-	return sorted(dt for dt in daftar if frappe.db.exists("DocType", dt))
 
 
 def bagian_tabel(judul, header, rows):
