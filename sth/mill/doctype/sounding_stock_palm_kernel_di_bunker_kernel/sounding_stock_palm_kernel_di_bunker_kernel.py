@@ -102,7 +102,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 				"kompartemen": row.nama_kompartemen_bunker,
 				"ukuran": row.total_hitungan,
 				"volume": volume,
-				"netto" : volume * self.berat_jenis if self.berat_jenis > 0 else volume
+				"netto" : flt(volume * self.berat_jenis if self.berat_jenis > 0 else volume)
 			})
 
 	def calculate_volume_sounding(self):

@@ -25,6 +25,9 @@ class AnggaranDasar(Document):
 		grand_total = total_lembar_saham = 0
 		precision = frappe.get_precision("Detail Form Saham", "amount")
 		for sh in self.saham:
+			sh.rate = flt(sh.rate)
+			sh.agio_rate = flt(sh.agio_rate)
+			
 			saham_amount = flt(sh.rate * sh.qty, precision)
 			agio_amount = flt(sh.agio_rate * sh.qty, precision)
 			sh.amount = flt(saham_amount + agio_amount, precision)

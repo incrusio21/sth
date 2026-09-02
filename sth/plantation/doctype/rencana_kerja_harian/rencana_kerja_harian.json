@@ -149,8 +149,7 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Mandor 1",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "fieldname": "kerani",
@@ -388,7 +387,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-22 15:48:02.140899",
+ "modified": "2026-09-02 11:13:17.842523",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
