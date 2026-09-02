@@ -45,6 +45,24 @@ SPB_FIELDS = [
 ]
 
 
+# Nilai Select receive_type di doctype Timbangan. Alias pendeknya disediakan
+# supaya pemanggil cukup mengirim "internal" atau "eksternal"; nilai penuhnya
+# tetap boleh dipakai apa adanya.
+RECEIVE_TYPE_ALIAS = {
+	"internal": "TBS Internal",
+	"eksternal": "TBS Eksternal",
+	"external": "TBS Eksternal",
+}
+
+
+def _normalize_receive_type(receive_type):
+	"""Terjemahkan alias jadi nilai Select-nya; yang tidak dikenal diteruskan."""
+	if receive_type is None or receive_type == "":
+		return None
+
+	return RECEIVE_TYPE_ALIAS.get(str(receive_type).strip().lower(), receive_type)
+
+
 def _combine_datetime(date_value, time_value):
 	"""Gabungkan Date + Time jadi Datetime. Time dari DB berupa timedelta."""
 	if not date_value or time_value is None:
@@ -75,11 +93,14 @@ def _map_by_name(doctype, names, fields):
 	return {row["name"]: row for row in rows}
 
 
-def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after,date):
+def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after, date, receive_type=None):
 	filters = []
 
 	if estate_code:
 		filters.append(["unit", "=", estate_code])
+	receive_type = _normalize_receive_type(receive_type)
+	if receive_type:
+		filters.append(["receive_type", "=", receive_type])
 	if from_date:
 		filters.append(["posting_date", ">=", getdate(from_date)])
 	if to_date:
@@ -97,7 +118,7 @@ def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_af
 
 
 @frappe.whitelist()
-def get_timbangan(trans_no=None, date=None, from_date=None, to_date=None):
+def get_timbangan(trans_no=None, date=None, from_date=None, to_date=None, estate_code=None, receive_type=None):
 	"""Kembalikan data Timbangan berdasarkan trans_no, atau berdasarkan tanggal.
 
 	- trans_no diisi   : kembalikan satu data (dict) atau None kalau tidak ada.
@@ -105,6 +126,12 @@ def get_timbangan(trans_no=None, date=None, from_date=None, to_date=None):
 	- from_date/to_date: kembalikan list data dalam rentang tanggal (boleh salah satu saja).
 
 	Salah satu dari trans_no, date, atau from_date/to_date wajib diisi.
+
+	Penyaring tambahan, boleh dipakai bersama yang mana pun di atas:
+		estate_code  : Unit
+		receive_type : "internal" / "eksternal" (atau nilai penuhnya, mis.
+		               "TBS Internal"), menyaring TBS kebun sendiri dari
+		               TBS pihak ketiga.
 	"""
 	if not trans_no and not date and not from_date and not to_date:
 		frappe.throw(_("Parameter trans_no, date, atau from_date/to_date wajib diisi."))
@@ -119,6 +146,12 @@ def get_timbangan(trans_no=None, date=None, from_date=None, to_date=None):
 			filters.append(["posting_date", ">=", getdate(from_date)])
 		if to_date:
 			filters.append(["posting_date", "<=", getdate(to_date)])
+
+	if estate_code:
+		filters.append(["unit", "=", estate_code])
+	receive_type = _normalize_receive_type(receive_type)
+	if receive_type:
+		filters.append(["receive_type", "=", receive_type])
 
 	timbangan_rows = frappe.get_all(
 		"Timbangan",
@@ -147,6 +180,7 @@ def get_all_timbangan(
 	limit=None,
 	date=None,
 	offset=0,
+	receive_type=None,
 ):
 	"""Kembalikan daftar data Timbangan beserta data turunannya.
 
@@ -158,10 +192,14 @@ def get_all_timbangan(
 		wb_type        : 0 = baru WB in, 1 = sudah WB out
 		modified_after : untuk sinkronisasi inkremental
 		limit/offset   : paging, limit kosong berarti semua baris
+		receive_type   : "internal" / "eksternal" (atau nilai penuhnya, mis.
+		                 "TBS Internal")
 	"""
 	timbangan_rows = frappe.get_all(
 		"Timbangan",
-		filters=_build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after, date),
+		filters=_build_filters(
+			estate_code, from_date, to_date, spb_no, wb_type, modified_after, date, receive_type
+		),
 		fields=TIMBANGAN_FIELDS,
 		order_by="posting_date asc, creation asc",
 		limit_page_length=int(limit) if limit else 0,
