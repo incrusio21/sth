@@ -250,11 +250,15 @@ class COGSMilldanKebun(Document):
 					self.periode_dari, self.periode_sampai,
 				)
 
-		# --- TBS: satu rate untuk semua baris, jadi Available di sisi rupiah
-		# otomatis sejalan dengan qty-nya.
+		# --- TBS: nilai Production diambil dari Biaya Kebun periode ini, bukan
+		# dari rate Stock Entry. Seluruh biaya kebun dikapitalisasi ke TBS yang
+		# dipanen, jadi rate baris ini hasil bagi biaya kebun dengan qty panen —
+		# lihat tulis_rincian, yang selalu mengisi rate dari amount / qty.
+		# Opening dan Purchase tetap memakai rate Stock Entry dokumen sumber.
 		rate_tbs = flt(rate.get("tbs"))
-		for kode in ("tbs_opening", "tbs_production", "tbs_purchase"):
+		for kode in ("tbs_opening", "tbs_purchase"):
 			isi(kode, amount=rate_tbs * q(kode))
+		isi("tbs_production", amount=flt(self.biaya_kebun))
 		isi(
 			"tbs_available",
 			qty=q("tbs_opening") + q("tbs_production") + q("tbs_purchase"),
@@ -263,8 +267,8 @@ class COGSMilldanKebun(Document):
 		# Closing dan Sold TBS disimpan negatif lalu dijumlahkan, mengikuti excel.
 		# Closing dinilai dengan rate baris Available, bukan rate Stock Entry:
 		# permintaan user, supaya yang disisakan dinilai dengan rata-rata barang
-		# yang tersedia periode ini. Selama ketiga baris pembentuk Available memakai
-		# rate_tbs, dua-duanya menghasilkan angka yang sama.
+		# yang tersedia periode ini — campuran biaya kebun untuk yang dipanen dan
+		# rate Stock Entry untuk stok awal dan pembelian.
 		rate_available_tbs = a("tbs_available") / q("tbs_available") if q("tbs_available") else 0
 		isi("tbs_closing", amount=rate_available_tbs * q("tbs_closing"))
 		isi(
