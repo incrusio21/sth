@@ -7,7 +7,7 @@ from datetime import datetime, time as dtime, timedelta
 
 import frappe
 from frappe import _
-from frappe.utils import get_datetime, getdate
+from frappe.utils import cint, get_datetime, getdate
 
 TIMBANGAN_FIELDS = [
 	"name",
@@ -41,6 +41,7 @@ SPB_FIELDS = [
 	"kendaraan",
 	"no_polisi",
 	"driver_code",
+	"trans_no",
 ]
 
 
@@ -175,11 +176,19 @@ def _build_data(timbangan_rows):
 	if not timbangan_rows:
 		return []
 
-	spb_map = _map_by_name("Surat Pengantar Buah", [r.get("spb") for r in timbangan_rows], SPB_FIELDS)
 	scp_map = _map_by_name(
 		"Security Check Point",
 		[r.get("ticket_number") for r in timbangan_rows],
-		["name", "supplier"],
+		["name", "supplier", "spb"],
+	)
+	# SPB dijemput dari dua arah: link spb di Timbangan untuk data kendaraan dan
+	# supir, dan link spb di Security Check Point untuk spb_trans_no. Keduanya
+	# masuk ke satu map supaya tetap sekali query, dan seringnya menunjuk dokumen
+	# yang sama.
+	spb_map = _map_by_name(
+		"Surat Pengantar Buah",
+		[r.get("spb") for r in timbangan_rows] + [s.get("spb") for s in scp_map.values()],
+		SPB_FIELDS,
 	)
 	supplier_map = _map_by_name(
 		"Supplier",
@@ -200,8 +209,9 @@ def _build_data(timbangan_rows):
 	data = []
 
 	for row in timbangan_rows:
-		spb = spb_map.get(row.get("spb")) or {}
 		scp = scp_map.get(row.get("ticket_number")) or {}
+		spb = spb_map.get(row.get("spb")) or {}
+		spb_scp = spb_map.get(scp.get("spb")) or {}
 		supplier_code = scp.get("supplier")
 		supplier = supplier_map.get(supplier_code) or {}
 		driver = driver_map.get(spb.get("driver_code")) or {}
@@ -223,6 +233,10 @@ def _build_data(timbangan_rows):
 			"is_external": is_external,
 			"supplier_code": supplier_code,
 			"supplier_name": supplier.get("supplier_name"),
+			# 'spb' di sini nomor tiket Security Check Point, bukan dokumen Surat
+			# Pengantar Buah -- itu tetap di 'spb_no'. Penamaannya mengikuti EPCS.
+			"spb": row.get("ticket_number"),
+			"spb_trans_no": spb_scp.get("trans_no"),
 			"spb_no": row.get("spb"),
 			"spb_date": spb.get("posting_date"),
 			# TODO: sumber data is_contract belum ditentukan
@@ -231,8 +245,12 @@ def _build_data(timbangan_rows):
 			"veh_regno": spb.get("no_polisi"),
 			"driver_code": spb.get("driver_code"),
 			"driver_name": driver.get("first_name"),
-			"total_jjg": row.get("jumlah_janjang"),
-			"total_brd": row.get("total_brondolan"),
+			# Keduanya Float di doctype Timbangan, tapi EPCS menunggunya bulat.
+			# cint memotong pecahannya, bukan membulatkan; jumlah_janjang memang
+			# sudah berpresisi 0, jadi yang bisa kehilangan pecahan cuma
+			# total_brondolan.
+			"total_jjg": cint(row.get("jumlah_janjang")),
+			"total_brd": cint(row.get("total_brondolan")),
 			"bruto": row.get("bruto"),
 			"tarra": row.get("tara"),
 			"netto": row.get("netto"),
