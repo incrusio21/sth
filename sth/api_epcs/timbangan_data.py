@@ -226,13 +226,11 @@ def _build_data(timbangan_rows):
 			"supplier_name": supplier.get("supplier_name"),
 			# Dua pasang nomor dokumen: yang dari Security Check Point lewat
 			# ticket_number, dan yang dari Surat Pengantar Buah lewat link spb di
-			# Timbangan. 'spb' dan 'spb_no' isinya sama; 'spb_no' dipertahankan
-			# supaya pemakai API yang lama tidak putus.
+			# Timbangan.
 			"verifikasi_security": row.get("ticket_number"),
 			"verifikasi_security_trans_no": scp.get("trans_no"),
-			"spb": row.get("spb"),
-			"spb_trans_no": spb.get("trans_no"),
 			"spb_no": row.get("spb"),
+			"spb_trans_no": spb.get("trans_no"),
 			"spb_date": spb.get("posting_date"),
 			# TODO: sumber data is_contract belum ditentukan
 			"is_contract": 0,
