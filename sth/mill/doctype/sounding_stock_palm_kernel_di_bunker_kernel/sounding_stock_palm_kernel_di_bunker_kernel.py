@@ -100,8 +100,8 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 			self.append("rekap_hasil",{
 				"kompartemen": row.nama_kompartemen_bunker,
-				"ukuran": row.total_hitungan,
-				"volume": volume,
+				"ukuran": flt(row.total_hitungan),
+				"volume": flt(volume),
 				"netto" : flt(volume * self.berat_jenis if self.berat_jenis > 0 else volume)
 			})
 
