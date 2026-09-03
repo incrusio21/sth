@@ -20,26 +20,19 @@ from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_ent
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# Komponen yang dibagi ke kegiatan. Upah Panen/Perawatan/Traksi dan premi yang
-# lahir dari BKM (brondolan, angkut, supervisi) sengaja tidak ada di sini: kalau
-# ikut, akun kegiatan terdebit dua kali. Gaji Pokok juga tidak ikut sesuai
-# rentang HKnE s.d. BPJS Kesehatan di form gaji kebun.
-KOMPONEN_COSTING_KEBUN = (
-	"HKnE",
-	"Lembur",
-	"Natura",
-	"Premi Kehadiran",
-	"Premi Tutup Buku",
-	"Gaji Pokok"
-)
-
-# BPJS beban perusahaan namanya bervariasi (JKK punya beberapa varian RS/RT/RSD),
-# jadi disaring dengan pola, bukan daftar tetap. Yang beban karyawan tidak kena
-# karena baris yang dibaca cuma parentfield "earnings".
-POLA_KOMPONEN_BPJS = (
-	"BPJS% (Perusahaan)",
-	"BPJS TK - JK%",
-)
+# Penanda di Salary Component untuk komponen yang dibagi ke kegiatan. Dulu
+# daftarnya ditulis di sini, termasuk pola nama BPJS beban perusahaan yang
+# variannya banyak; sekarang tinggal dicentang di masternya, jadi komponen baru
+# tidak perlu deploy.
+#
+# Yang tidak boleh dicentang: upah Panen/Perawatan/Traksi dan premi yang lahir
+# dari BKM (brondolan, angkut, supervisi). Kalau ikut, akun kegiatannya terdebit
+# dua kali - sekali dari BKM-nya sendiri, sekali dari alokasi ini. Komponen beban
+# karyawan tidak perlu dipikirkan: baris yang dibaca cuma parentfield "earnings".
+#
+# sth.patches.tandai_komponen_costing_kebun mencentang komponen yang dulu
+# terdaftar di sini.
+FIELD_KOMPONEN_KEBUN = "dibagi_ke_kegiatan_kebun"
 
 SUMBER_PANEN = "Panen"
 SUMBER_PERAWATAN = "Perawatan"
@@ -211,22 +204,18 @@ def get_coa_gaji_dialokasi(company):
 def get_komponen_gaji(periode_dari, periode_sampai, company=None, unit=None):
 	"""Total komponen gaji yang dibagi ke kegiatan, per karyawan.
 
+	Komponennya yang dicentang "Dibagi ke Kegiatan Kebun" di master Salary
+	Component - lihat FIELD_KOMPONEN_KEBUN.
+
 	Cost center accrual ikut dibawa: itu cost center Payroll Entry yang mendebit
 	beban gaji, dan ke situ pula kreditnya harus dikembalikan waktu closing.
 	"""
-	pola = " OR ".join(
-		["sd.salary_component LIKE %(pola_{0})s".format(i) for i in range(len(POLA_KOMPONEN_BPJS))]
-	)
-
 	params = {
 		"dari": periode_dari,
 		"sampai": periode_sampai,
 		"company": company,
 		"unit": unit,
-		"komponen": KOMPONEN_COSTING_KEBUN,
 	}
-	for i, p in enumerate(POLA_KOMPONEN_BPJS):
-		params["pola_{0}".format(i)] = p
 
 	rows = frappe.db.sql("""
 		SELECT
@@ -238,16 +227,17 @@ def get_komponen_gaji(periode_dari, periode_sampai, company=None, unit=None):
 		JOIN `tabSalary Detail` sd
 			ON sd.parent = ss.name AND sd.parentfield = 'earnings'
 		JOIN `tabEmployee` e ON e.name = ss.employee
+		JOIN `tabSalary Component` sc ON sc.name = sd.salary_component
 		LEFT JOIN `tabPayroll Entry` pe ON pe.name = ss.payroll_entry
 		WHERE ss.docstatus = 1
 		  AND ss.start_date >= %(dari)s
 		  AND ss.end_date <= %(sampai)s
-		  AND (sd.salary_component IN %(komponen)s OR {pola})
+		  AND sc.`{field}` = 1
 		  {company_filter}
 		  {unit_filter}
 		GROUP BY ss.employee, ss.employee_name, pe.cost_center
 	""".format(
-		pola=pola,
+		field=FIELD_KOMPONEN_KEBUN,
 		company_filter="AND ss.company = %(company)s" if company else "",
 		unit_filter="AND e.unit = %(unit)s" if unit else "",
 	), params, as_dict=True)
