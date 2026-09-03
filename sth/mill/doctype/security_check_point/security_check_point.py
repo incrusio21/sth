@@ -2,14 +2,19 @@
 # For license information, please see license.txt
 
 
+import re
+
 import frappe
 from frappe.model.document import Document
 from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.utils import cstr
+from frappe.utils.synchronization import filelock
 from erpnext.controllers.queries import get_fields
 
 class SecurityCheckPoint(Document):
 
 	def before_insert(self):
+		self.validate_trans_no_kembar()
 		self.keep_api_no_polisi()
 		self.map_api_spb_trans_no()
 		self.map_lokasi_pos()
@@ -20,6 +25,28 @@ class SecurityCheckPoint(Document):
 	def is_from_api(self):
 		"""Dokumen ini kiriman REST API, bukan input orang lewat UI."""
 		return bool(self.owner and "api@sth" in self.owner)
+
+	def validate_trans_no_kembar(self):
+		"""Tolak kiriman dengan trans_no yang sudah pernah masuk.
+
+		Sistem luar bisa mengirim transaksi yang sama dua kali — koneksinya putus
+		lalu dicoba lagi padahal dokumennya sudah tercatat. Tanpa penjagaan ini satu
+		kendaraan tercatat dua kali dan timbangan melihat dua Security Check Point
+		untuk satu SPB.
+
+		Nomor dokumen yang sudah ada ikut disebut di pesannya supaya pemanggil tahu
+		kiriman sebelumnya mendarat di mana. Dokumen amend dilewati karena memang
+		mewarisi trans_no dokumen yang dibatalkan.
+		"""
+		if not self.trans_no or self.amended_from:
+			return
+
+		kembar = get_security_check_point_by_trans_no(self.trans_no)
+		if kembar:
+			frappe.throw(
+				f"Security Check Point untuk Trans No {self.trans_no} sudah ada: {kembar}",
+				frappe.DuplicateEntryError,
+			)
 
 	def keep_api_no_polisi(self):
 		"""Simpan no polisi kiriman API sebelum fetch_from sempat menimpanya.
@@ -141,6 +168,80 @@ class SecurityCheckPoint(Document):
 		)
 
 		return doc.name
+
+
+@frappe.whitelist()
+def create_or_update(**kwargs):
+	"""Buat Security Check Point, atau kembalikan yang trans_no-nya sudah tercatat.
+
+	Endpoint /api/resource menolak kiriman kembar sebagai error karena insert tidak
+	bisa dibelokkan jadi "pakai yang lama". Lewat sini pemanggil cukup menerima
+	dokumen yang sudah ada, jadi kiriman ulang setelah koneksi putus tidak perlu
+	diperlakukan sebagai kegagalan.
+	"""
+	args = dict(kwargs)
+	args.pop("doctype", None)
+
+	trans_no = cstr(args.get("trans_no")).strip()
+
+	if not trans_no:
+		return insert_security_check_point(args)
+
+	# Dua panggilan dengan trans_no yang sama bisa masuk barengan. Tanpa lock
+	# keduanya sama-sama melihat "belum ada" lalu masing-masing insert.
+	with filelock(trans_no_lock_name(trans_no), timeout=60):
+		# Mulai transaksi baru supaya baris yang baru saja di-commit oleh request
+		# yang antre sebelum kita ikut terbaca (bukan snapshot lama).
+		frappe.db.commit()
+
+		kembar = get_security_check_point_by_trans_no(trans_no)
+		if kembar:
+			return frappe.get_doc("Security Check Point", kembar)
+
+		doc = insert_security_check_point(args)
+
+		# commit selagi lock masih dipegang, supaya request berikutnya pasti
+		# melihat dokumen ini dan masuk ke jalur "sudah ada".
+		frappe.db.commit()
+
+		return doc
+
+
+def trans_no_lock_name(trans_no):
+	return "scp-trans-no-" + re.sub(r"[^A-Za-z0-9]+", "-", trans_no)[:64]
+
+
+def get_security_check_point_by_trans_no(trans_no):
+	"""Nama Security Check Point yang trans_no-nya sama.
+
+	Dokumen yang sudah dibatalkan tidak ikut dihitung supaya trans_no-nya bisa
+	dikirim ulang setelah pembatalan.
+	"""
+	return frappe.db.get_value(
+		"Security Check Point",
+		{"trans_no": trans_no, "docstatus": ["<", 2]},
+		"name",
+	)
+
+
+def insert_security_check_point(args):
+	"""Insert dokumennya, lalu submit kalau kiriman memang meminta docstatus 1.
+
+	Dokumen tidak bisa langsung lahir sebagai submitted; docstatus-nya diturunkan
+	dulu supaya before_insert dan validate tetap kena, baru di-submit.
+	"""
+	doc = frappe.get_doc(dict(args, doctype="Security Check Point"))
+
+	submit_after_insert = doc.docstatus == 1
+	if submit_after_insert:
+		doc.docstatus = 0
+
+	doc.insert()
+
+	if submit_after_insert:
+		doc.submit()
+
+	return doc
 
 
 def get_security_location(pos, unit=None):
