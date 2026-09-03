@@ -112,25 +112,37 @@ def set_allow_negative_stock(nilai):
 		value_cache.pop("Stock Settings", None)
 
 
-def buat_ulang_ste_sounding(doc, produksi):
-	"""Buang Stock Entry dokumen sounding ini, lalu buat ulang lewat create_ste.
-
-	Qty maupun tanggal Stock Entry tidak bisa diubah setelah submit, jadi satu-
-	satunya cara membetulkannya adalah membatalkan yang lama, menghapusnya, dan
-	membiarkan controller-nya membuat yang baru. Mengembalikan jumlah STE yang
-	dibuat, supaya pemanggilnya bisa melaporkannya.
-	"""
+def buang_ste(doc):
+	"""Batalkan dan hapus semua Stock Entry yang menunjuk dokumen ini."""
 	for row in frappe.get_all("Stock Entry", filters={"references": doc.name}, fields=["name", "docstatus"]):
 		ste = frappe.get_doc("Stock Entry", row.name)
 		if ste.docstatus == 1:
 			ste.cancel()
 		ste.delete()
 
+
+def buat_ulang_ste(doc):
+	"""Buang Stock Entry dokumen ini, lalu buat ulang lewat create_ste-nya.
+
+	Qty maupun tanggal Stock Entry tidak bisa diubah setelah submit, jadi satu-
+	satunya cara membetulkannya adalah membatalkan yang lama, menghapusnya, dan
+	membiarkan controller-nya membuat yang baru. Mengembalikan jumlah STE yang
+	dibuat, supaya pemanggilnya bisa melaporkannya — create_ste boleh saja
+	memutuskan tidak membuat apa-apa.
+	"""
+	buang_ste(doc)
+	doc.create_ste()
+
+	return frappe.db.count("Stock Entry", {"references": doc.name})
+
+
+def buat_ulang_ste_sounding(doc, produksi):
+	"""buat_ulang_ste untuk dokumen sounding, yang STE-nya cuma dibuat kalau ada produksi."""
 	if not flt(produksi):
+		buang_ste(doc)
 		return 0
 
-	doc.create_ste()
-	return 1
+	return buat_ulang_ste(doc)
 
 
 # Field rendemen harian tiap dokumen sounding dan field informasi rata-ratanya.
