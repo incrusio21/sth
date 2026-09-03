@@ -207,7 +207,8 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 				"field_map": {
 					"name":"references",
 					"doctype": "reference_doctype",
-					"tanggal_proses":"posting_date"
+					"tanggal_proses":"posting_date",
+					"jam":"posting_time"
 				}
 			},
 		}
@@ -215,7 +216,8 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		# posting_date diambil dari tanggal_proses, bukan field tanggal: tanggal
 		# adalah kapan soundingnya dicatat, sementara produksinya milik hari
 		# prosesnya — sama seperti stock awal, pengiriman, dan tbs olah yang
-		# semuanya diambil per tanggal_proses di get_stock().
+		# semuanya diambil per tanggal_proses di get_stock(). Jamnya ikut field
+		# jam, jadi urutan Stock Ledger di hari itu ikut jam soundingnya.
 		doc = get_mapped_doc(self.doctype,self.name,mapper,None,postprocess,True)
 		# Tanpa ini validate_posting_time menimpa posting_date dengan hari ini.
 		doc.set_posting_time = 1
