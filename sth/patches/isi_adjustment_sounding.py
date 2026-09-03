@@ -3,6 +3,13 @@ from frappe.utils import flt
 
 from sth.mill.utils import get_adjustment_stock
 
+# Dokumen sebelum tanggal ini tidak diisi. Stock awal yang tersimpan di dokumen
+# lama adalah potretnya saat itu, dan sebagian koreksi baru diposting belakangan
+# dengan tanggal mundur — SSPKDBK-0015 misalnya, yang koreksinya 500.000 masuk
+# jauh setelah soundingnya dibuat. Memecahnya jadi sebelum dan adjustment di
+# dokumen semacam itu menghasilkan angka yang menyesatkan, bukan keterangan.
+MULAI = "2026-08-01"
+
 # Doctype sounding, item yang disounding, gudangnya, dan apakah stock awalnya
 # sudah mencakup mutasi di tanggal prosesnya sendiri.
 SOUNDING = (
@@ -19,6 +26,8 @@ def execute():
 	bisa dipakai lagi. Keduanya cuma keterangan: stock_awal tidak disentuh, jadi
 	produksi, OER, KER, dan Stock Entry-nya tetap seperti semula.
 
+	Hanya dokumen sejak MULAI yang diisi; yang lebih lama dibiarkan nol.
+
 	Aman dijalankan ulang — dokumen yang angkanya sudah cocok dilewati.
 	"""
 	for doctype, tipe_barang, kategori, termasuk_tanggal_proses in SOUNDING:
@@ -28,8 +37,8 @@ def execute():
 			print("Item {0} tidak ada, {1} dilewati.".format(tipe_barang, doctype))
 			continue
 
-		print("{0}: {1} dokumen diperbarui.".format(
-			doctype, isi_dokumen(doctype, item_code, kategori, termasuk_tanggal_proses)
+		print("{0}: {1} dokumen sejak {2} diperbarui.".format(
+			doctype, isi_dokumen(doctype, item_code, kategori, termasuk_tanggal_proses), MULAI
 		))
 
 
@@ -39,7 +48,7 @@ def isi_dokumen(doctype, item_code, kategori, termasuk_tanggal_proses):
 
 	for row in frappe.get_all(
 		doctype,
-		filters={"docstatus": ("<", 2)},
+		filters={"docstatus": ("<", 2), "tanggal_proses": (">=", MULAI)},
 		fields=["name", "unit", "tanggal_proses", "stock_awal",
 			"stock_awal_sebelum_adjustment", "adjustment"],
 		order_by="tanggal_proses asc, creation asc",
