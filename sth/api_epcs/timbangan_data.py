@@ -264,11 +264,12 @@ def _build_data(timbangan_rows):
 			"supplier_name": supplier.get("supplier_name"),
 			# Dua pasang nomor dokumen: yang dari Security Check Point lewat
 			# ticket_number, dan yang dari Surat Pengantar Buah lewat link spb di
-			# Timbangan.
+			# Timbangan. spb_no adalah nomor SPB milik sistem luar (trans_no);
+			# nama dokumen SPB di ERP dikirim terpisah sebagai erp_spb_no.
 			"verifikasi_security": row.get("ticket_number"),
 			"verifikasi_security_trans_no": scp.get("trans_no"),
-			"spb_no": row.get("spb"),
-			"spb_trans_no": spb.get("trans_no"),
+			"erp_spb_no": row.get("spb"),
+			"spb_no": spb.get("trans_no"),
 			"spb_date": spb.get("posting_date"),
 			# TODO: sumber data is_contract belum ditentukan
 			"is_contract": 0,
