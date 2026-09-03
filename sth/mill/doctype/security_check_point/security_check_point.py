@@ -114,13 +114,10 @@ class SecurityCheckPoint(Document):
 		"""
 		if not self.lokasi_pos:
 			return
-
-		if frappe.db.exists("Security Location", self.lokasi_pos):
-			return
-
+			
 		kode = get_security_location(self.lokasi_pos, self.unit)
 		if kode:
-			self.lokasi_pos = kode
+			self.kode_lokasi_pos = kode
 
 	def get_or_create_spb(self, trans_no):
 		"""Nama dokumen SPB untuk trans_no ini, dibuatkan dulu kalau belum ada.

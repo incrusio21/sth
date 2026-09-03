@@ -32,6 +32,7 @@
   "purchase_order",
   "column_break_nccm",
   "company",
+  "kode_lokasi_pos",
   "lokasi_pos",
   "unit",
   "divisi",
@@ -406,9 +407,8 @@
   },
   {
    "fieldname": "lokasi_pos",
-   "fieldtype": "Link",
-   "label": "Lokasi POS",
-   "options": "Security Location"
+   "fieldtype": "Data",
+   "label": "Lokasi POS"
   },
   {
    "fieldname": "catatan",
@@ -469,13 +469,19 @@
    "label": "SPB Trans No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "kode_lokasi_pos",
+   "fieldtype": "Link",
+   "label": "Kode Lokasi POS",
+   "options": "Security Location"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-03 09:41:05.132936",
+ "modified": "2026-09-03 14:58:35.575152",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

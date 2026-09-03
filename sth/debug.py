@@ -12,12 +12,12 @@ def debug():
 
 
 def debug_gl():
-	no_doc = "CB-2026-0003"
-	# frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
-	frappe.db.sql(""" UPDATE `tabCosting Bengkel` SET docstatus=0 WHERE name = "{}" """.format(no_doc))
+	no_doc = "MAT-DN-2026-00130"
+	frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
+	# frappe.db.sql(""" UPDATE `tabCosting Bengkel` SET docstatus=0 WHERE name = "{}" """.format(no_doc))
 	frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 	frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-	frappe.get_doc("Costing Bengkel",no_doc).save()
+	frappe.get_doc("Delivery Note",no_doc).on_submit()
 
 def debug_bkm():
 	lis = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Panen` WHERE docstatus = 1 and name = "BKM-PNN-00472" """)
@@ -33,7 +33,7 @@ def debug_zero():
 	# frappe.db.sql(""" UPDATE `tabPengeluaran Barang` SET docstatus=1 WHERE name = "PB-100626-0001" """)
 
 def debug_ap():
-	no_doc="TEST JUNI - TML"
+	no_doc="CLOSING TPRM JUNI 2026 - TML"
 	# frappe.db.sql(""" UPDATE `tabAccounting Period` SET docstatus=0, workflow_state="Draft" WHERE name = "{}" """.format(no_doc))
 	from sth.overrides.accounting_period import create_costing_on_submit
 	create_costing_on_submit(frappe.get_doc("Accounting Period",no_doc),"on_submit")

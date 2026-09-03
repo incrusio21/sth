@@ -271,6 +271,7 @@ def create_costing_on_submit(doc, method=None):
 	gagal = []
 
 	for costing in COSTING_OTOMATIS:
+		print(costing)
 		doctype = costing["doctype"]
 
 		if frappe.db.exists(doctype, filter_costing_periode(doc, ["!=", 2])):
@@ -290,6 +291,7 @@ def create_costing_on_submit(doc, method=None):
 
 			frappe.get_attr(costing["builder"])(**args)
 		except Exception as e:
+			print("gagal")
 			# pesan error per costing dirangkum di bawah, jangan ditampilkan dua kali
 			if frappe.message_log:
 				frappe.message_log.pop()
