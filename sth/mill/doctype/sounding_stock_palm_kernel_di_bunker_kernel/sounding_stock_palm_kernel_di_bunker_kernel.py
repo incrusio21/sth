@@ -116,11 +116,18 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 	@frappe.whitelist()
 	def get_stock(self):
+		# Tanggalnya diambil dari Delivery Note-nya, bukan dari Timbangan: DN dibuat
+		# menyusul dan posting_date-nya bisa beda hari dengan timbangannya, sementara
+		# yang dihitung keluar dari bunker adalah pengiriman menurut tanggal DN.
+		# DN yang dibatalkan tidak ikut, pengirimannya memang tidak jadi.
+		# Unit ikut disebut per tabel karena Delivery Note punya field unit juga.
 		get_delivery = frappe.db.sql("""
-			select sum(coalesce(netto_2,0)) as qty
+			select sum(coalesce(t.netto_2,0)) as qty
 			from `tabTimbangan` t
 			join `tabItem` i on t.kode_barang = i.name
-			where i.tipe_barang = 'Palm Kernel' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
+			join `tabDelivery Note` dn on dn.name = t.delivery_note
+			where i.tipe_barang = 'Palm Kernel' and t.docstatus = 1 and dn.docstatus = 1
+				and t.unit = %s and dn.posting_date = %s
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 		data_sortasi = frappe.db.sql("""
@@ -131,7 +138,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 		self.stock_awal = self.get_stock_awal()
-		self.pengiriman = get_delivery[0].qty if get_delivery else 0
+		self.pengiriman = flt(get_delivery[0].qty) if get_delivery else 0
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
 
