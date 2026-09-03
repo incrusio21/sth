@@ -25,6 +25,8 @@
   "hasil_titik_sounding",
   "detail_stock_section",
   "get_stock",
+  "stock_awal_sebelum_adjustment",
+  "adjustment",
   "stock_awal",
   "pengiriman",
   "stock_akhir",
@@ -354,6 +356,20 @@
    "fieldtype": "Check",
    "in_preview": 1,
    "label": "Ignore Recalculate Rekap"
+  },
+  {
+   "fieldname": "stock_awal_sebelum_adjustment",
+   "fieldtype": "Float",
+   "label": "Stock Awal (Sebelum Adjustment)",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adjustment",
+   "fieldtype": "Float",
+   "label": "Adjustment",
+   "precision": "0",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

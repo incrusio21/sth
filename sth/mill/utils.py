@@ -145,6 +145,63 @@ def buat_ulang_ste_sounding(doc, produksi):
 	return buat_ulang_ste(doc)
 
 
+def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses, termasuk_tanggal_proses=False):
+	"""Mutasi gudang yang bukan berasal dari sounding maupun pengiriman.
+
+	Yang ikut dihitung Stock Ledger Entry item ini di gudang ini yang vouchernya
+	bukan Stock Entry buatan dokumen sounding dan bukan Delivery Note / Purchase
+	Receipt. Sisanya berarti koreksi manual — Stock Entry yang diketik sendiri
+	atau Stock Reconciliation — dan itulah yang disebut adjustment di sini.
+
+	Rentangnya dibatasi sejak tanggal proses sounding sebelumnya di unit yang
+	sama. Tanpa batas bawah yang terhitung adalah tumpukan koreksi berbulan-bulan,
+	padahal yang mau dijawab cuma "stock awal hari ini bergeser berapa gara-gara
+	koreksi sejak sounding kemarin".
+
+	Rentangnya setengah terbuka, dan ujung mana yang terbuka mengikuti apa yang
+	sudah tercakup stock awal masing-masing dokumen. Sounding PK memakai saldo
+	sebelum tanggal proses, jadi rentangnya [sounding sebelumnya, tanggal proses).
+	Sounding CPO memakai saldo berjalan sehingga mutasi di tanggal prosesnya
+	sendiri ikut, jadi rentangnya (sounding sebelumnya, tanggal proses].
+
+	Dua-duanya harus setengah terbuka, bukan terbuka di kedua ujung: sounding
+	dibuat harian, jadi rentang yang terbuka di kedua ujung selalu kosong dan
+	koreksi yang diposting tepat di tanggal sounding sebelumnya tidak pernah
+	terhitung sama sekali.
+	"""
+	if not (item_code and warehouse and tanggal_proses):
+		return 0.0
+
+	sebelumnya = frappe.db.sql("""
+		select max(tanggal_proses) from `tab{doctype}`
+		where unit = %(unit)s and docstatus < 2 and tanggal_proses < %(tanggal_proses)s
+	""".format(doctype=doctype), {"unit": unit, "tanggal_proses": tanggal_proses})
+
+	dari = (sebelumnya[0][0] if sebelumnya else None) or "1900-01-01"
+	batas_bawah = ">" if termasuk_tanggal_proses else ">="
+	batas_atas = "<=" if termasuk_tanggal_proses else "<"
+
+	total = frappe.db.sql("""
+		select coalesce(sum(sle.actual_qty), 0)
+		from `tabStock Ledger Entry` sle
+		left join `tabStock Entry` se
+			on se.name = sle.voucher_no and sle.voucher_type = 'Stock Entry'
+		where sle.is_cancelled = 0
+			and sle.item_code = %(item_code)s and sle.warehouse = %(warehouse)s
+			and sle.voucher_type not in ('Delivery Note', 'Purchase Receipt')
+			and (se.reference_doctype is null or se.reference_doctype not like 'Sounding%%')
+			and sle.posting_date {batas_bawah} %(dari)s
+			and sle.posting_date {batas_atas} %(sampai)s
+	""".format(batas_bawah=batas_bawah, batas_atas=batas_atas), {
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"dari": dari,
+		"sampai": tanggal_proses,
+	})
+
+	return flt(total[0][0]) if total else 0.0
+
+
 # Field rendemen harian tiap dokumen sounding dan field informasi rata-ratanya.
 # Nama doctype dan field masuk langsung ke SQL, jadi cuma yang terdaftar di sini
 # yang boleh lewat.

@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import today,flt,getdate
 from frappe.model.mapper import get_mapped_doc
 
-from sth.mill.utils import set_rata_rata_rendemen_bulanan
+from sth.mill.utils import get_adjustment_stock, set_rata_rata_rendemen_bulanan
 
 
 class SoundingStockCPOdiBST(Document):
@@ -65,8 +65,27 @@ class SoundingStockCPOdiBST(Document):
 		stock_saat_ini = get_total_stock[0].qty if get_total_stock else 0
 		self.pengiriman_cpo = get_delivery[0].qty if get_delivery else 0
 		self.stock_awal = flt(stock_saat_ini) + flt(self.pengiriman_cpo)
+		self.set_adjustment()
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.potongan_sortasi = data_sortasi[0].qty if data_sortasi else 0
+
+	def set_adjustment(self):
+		"""Pecah stock awal jadi bagian sebelum koreksi dan koreksinya sendiri.
+
+		Sekadar keterangan: produksi dan OER tetap dihitung dari stock_awal yang
+		utuh, yaitu yang sudah termasuk adjustment. Stock awal di sini saldo
+		berjalan ditambah pengiriman hari itu, jadi koreksi yang diposting di
+		tanggal prosesnya sendiri sudah ikut di dalamnya.
+		"""
+		self.adjustment = get_adjustment_stock(
+			frappe.db.get_value("Item", {"tipe_barang": "CPO"}),
+			get_warehouse_bst(self.unit),
+			self.unit,
+			self.doctype,
+			self.tanggal_proses,
+			termasuk_tanggal_proses=True,
+		)
+		self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
 
 	def create_ste(self):
 		ste_type = "Material Receipt" if self.produksi_cpo > 0 else "Material Issue"

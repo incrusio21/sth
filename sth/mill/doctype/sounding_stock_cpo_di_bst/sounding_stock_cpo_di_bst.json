@@ -18,6 +18,8 @@
   "unit",
   "gudang",
   "section_break_nlsf",
+  "stock_awal_sebelum_adjustment",
+  "adjustment",
   "stock_awal",
   "column_break_akrd",
   "pengiriman_cpo",
@@ -504,6 +506,20 @@
    "label": "Hasil Suhu Titik 2 (Derajat)",
    "options": "Ukuran Berat Jenis",
    "precision": "2"
+  },
+  {
+   "fieldname": "stock_awal_sebelum_adjustment",
+   "fieldtype": "Float",
+   "label": "Stock Awal (Sebelum Adjustment)",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adjustment",
+   "fieldtype": "Float",
+   "label": "Adjustment",
+   "precision": "0",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

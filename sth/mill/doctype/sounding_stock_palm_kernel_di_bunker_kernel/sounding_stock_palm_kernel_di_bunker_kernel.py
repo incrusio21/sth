@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
 
-from sth.mill.utils import set_rata_rata_rendemen_bulanan
+from sth.mill.utils import get_adjustment_stock, set_rata_rata_rendemen_bulanan
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def onload(self):
@@ -131,6 +131,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 		self.stock_awal = self.get_stock_awal()
+		self.set_adjustment()
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
@@ -140,6 +141,22 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		# berubah lagi setelah disimpan. Dipanggil paling akhir karena KER-nya
 		# memakai tbs olah dan sortasi yang baru diisi di atas.
 		self.hitung_produksi()
+
+	def set_adjustment(self):
+		"""Pecah stock awal jadi bagian sebelum koreksi dan koreksinya sendiri.
+
+		Sekadar keterangan: produksi dan KER tetap dihitung dari stock_awal yang
+		utuh, yaitu yang sudah termasuk adjustment. Stock awal di sini saldo
+		pembuka hari itu, jadi yang dihitung koreksi sebelum tanggal proses saja.
+		"""
+		self.adjustment = get_adjustment_stock(
+			frappe.db.get_value("Item", {"tipe_barang": "Palm Kernel"}),
+			get_warehouse_palm(self.unit),
+			self.unit,
+			self.doctype,
+			self.tanggal_proses,
+		)
+		self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
 
 	def get_stock_awal(self):
 		"""Saldo Palm Kernel dari Stock Ledger Entry terakhir sebelum tanggal proses.
