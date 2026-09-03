@@ -12,6 +12,7 @@ class SecurityCheckPoint(Document):
 	def before_insert(self):
 		self.keep_api_no_polisi()
 		self.map_api_spb_trans_no()
+		self.map_api_lokasi_pos()
 
 	def validate(self):
 		self.set_data_kendaraan()
@@ -90,6 +91,30 @@ class SecurityCheckPoint(Document):
 		self.spb_trans_no = trans_no
 		self.spb = self.get_or_create_spb(trans_no)
 
+	def map_api_lokasi_pos(self):
+		"""Field lokasi_pos dari API berisi nama pos, bukan kode dokumennya.
+
+		Security Location dinamai memakai kode (autoname field:kode), sementara
+		sistem luar mengirim namanya — "POS PMKS". Tanpa diterjemahkan,
+		_validate_links() menolak dokumennya "Could not find Lokasi POS".
+
+		Nilai yang memang sudah berupa kode dibiarkan; begitu juga nama yang tidak
+		terdaftar, supaya validasi Link yang menolaknya dan pesannya menyebut nama
+		kiriman itu sendiri.
+
+		Dijalankan di before_insert, bukan validate, karena _validate_links() jalan
+		lebih dulu daripada validate.
+		"""
+		if not (self.is_from_api() and self.lokasi_pos):
+			return
+
+		if frappe.db.exists("Security Location", self.lokasi_pos):
+			return
+
+		kode = get_security_location_by_nama(self.lokasi_pos)
+		if kode:
+			self.lokasi_pos = kode
+
 	def get_or_create_spb(self, trans_no):
 		"""Nama dokumen SPB untuk trans_no ini, dibuatkan dulu kalau belum ada.
 
@@ -112,6 +137,32 @@ class SecurityCheckPoint(Document):
 		)
 
 		return doc.name
+
+
+def get_security_location_by_nama(nama):
+	"""Kode Security Location yang namanya sama dengan `nama`.
+
+	Dicocokkan persis dulu, baru tanpa beda huruf besar kecil dan tanpa spasi
+	berlebih: sistem luar mengirim "POS PMKS" sementara di master bisa tertulis
+	"Pos PMKS", padahal posnya sama.
+	"""
+	kode = frappe.db.get_value("Security Location", {"nama": nama}, "name")
+	if kode:
+		return kode
+
+	rows = frappe.db.sql("""
+		select name
+		from `tabSecurity Location`
+		where upper(trim(nama)) = %s
+		limit 1
+	""", strip_nama_pos(nama))
+
+	return rows[0][0] if rows else None
+
+
+def strip_nama_pos(nama):
+	"""Bentuk ringkas nama pos: tanpa spasi berlebih, huruf besar."""
+	return " ".join((nama or "").split()).upper()
 
 
 def get_kendaraan_by_no_pol(no_polisi):
