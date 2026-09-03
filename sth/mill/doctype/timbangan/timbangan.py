@@ -284,6 +284,11 @@ def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 				"doctype": "Delivery Note",
 				"field_map": {
 					"name": "timbangan_ref",
+					# posting_date tidak ikut tersalin sendiri karena no_copy, jadi
+					# disebut di sini: DN mengikuti tanggal timbangannya, bukan tanggal
+					# DN itu dibuat. set_posting_time di set_missing_values yang menjaga
+					# validate_posting_time tidak menimpanya lagi dengan hari ini.
+					"posting_date": "posting_date",
 					"company": "company",
 					"driver_name": "driver_name",
 					"transportir": "transporter_name",
