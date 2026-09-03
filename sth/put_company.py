@@ -100,7 +100,23 @@ def fix_company(target_company, source_abbr, source_accounts):
 	if changed:
 		company_doc.flags.ignore_links = True      # skip re-validation during save
 		company_doc.flags.ignore_validate = True
-		company_doc.save(ignore_permissions=True)
+
+		# Company.on_update() re-derives its own default accounts and rewrites every
+		# Mode of Payment. Neither is wanted here: the defaults were just set from the
+		# source company, and set_default_accounts() reads self.update_default_account,
+		# a transient attribute that only exists while the chart of accounts is being
+		# created - saving an existing company without it fails with AttributeError.
+		# The attribute is set as well, in case this ERPNext guards only part of that
+		# block with the flag.
+		company_doc.update_default_account = False
+
+		ignore_coa = frappe.local.flags.ignore_chart_of_accounts
+		frappe.local.flags.ignore_chart_of_accounts = True
+		try:
+			company_doc.save(ignore_permissions=True)
+		finally:
+			frappe.local.flags.ignore_chart_of_accounts = ignore_coa
+
 		frappe.db.commit()
 		print(f"  ✓ Saved '{target_company}'")
 	else:
