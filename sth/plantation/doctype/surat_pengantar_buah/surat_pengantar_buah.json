@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-07-08 14:49:30.296827",
+ "creation": "2026-08-04 10:58:57.443963",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -29,6 +29,7 @@
   "column_break_lcgj",
   "no_polisi",
   "driver_code",
+  "driver_name",
   "section_break_xfoy",
   "column_break_dwtw",
   "in_time",
@@ -357,13 +358,18 @@
    "label": "Sopir/Operator",
    "options": "Employee",
    "read_only": 1
+  },
+  {
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-12 14:46:14.394365",
+ "modified": "2026-09-03 17:43:22.688990",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

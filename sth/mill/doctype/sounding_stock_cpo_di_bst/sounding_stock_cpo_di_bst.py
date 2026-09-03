@@ -23,7 +23,7 @@ class SoundingStockCPOdiBST(Document):
 		set_rata_rata_rendemen_bulanan(self)
 
 	def on_submit(self):
-		if self.produksi_cpo:
+		if self.produksi_cpo > 0:
 			self.create_ste()
 	
 	def on_cancel(self):

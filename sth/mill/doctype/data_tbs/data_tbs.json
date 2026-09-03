@@ -60,6 +60,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah TBS Restan",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -69,6 +70,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah TBS Diterima",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -78,6 +80,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Grand Total TBS",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -91,6 +94,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Berat Rata-rata Lori ( Kg )",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -100,6 +104,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "TBS Olah ( Kg )",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -109,6 +114,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "TBS Restan ( Kg )",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -160,6 +166,7 @@
    "fieldtype": "Int",
    "in_preview": 1,
    "label": "Jumlah Lori Mentah",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -168,6 +175,7 @@
    "fieldtype": "Int",
    "in_preview": 1,
    "label": "Lori Estimasi Loading Ramp",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -176,6 +184,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "TBS Loading Ramp ( Kg )",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   },
@@ -185,6 +194,7 @@
    "fieldtype": "Int",
    "in_preview": 1,
    "label": "Grand Total Lori",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -193,6 +203,7 @@
    "fieldtype": "Int",
    "in_preview": 1,
    "label": "Jumlah Lori Olah",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -201,6 +212,7 @@
    "fieldtype": "Int",
    "in_preview": 1,
    "label": "Jumlah Lori Masak",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -267,6 +279,7 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Total TBS Restan ( Kg )",
+   "no_copy": 1,
    "precision": "0",
    "read_only": 1
   }
@@ -280,7 +293,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-04-20 13:16:18.038116",
+ "modified": "2026-09-03 16:49:42.685111",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
