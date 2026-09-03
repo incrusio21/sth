@@ -378,7 +378,35 @@ def bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company=None, unit=None)
 		if selisih:
 			hasil[-jumlah]["amount"] = flt(hasil[-jumlah]["amount"] + selisih, 2)
 
+	hasil.extend(gaji_tanpa_kegiatan(komponen, per_karyawan))
+
 	return hasil
+
+
+def gaji_tanpa_kegiatan(komponen, per_karyawan):
+	"""Karyawan yang punya gaji tapi tidak punya kegiatan sama sekali.
+
+	Satu baris per karyawan, tanpa sumber dan tanpa amount: gajinya belum
+	teralokasi ke kegiatan mana pun, jadi tidak ada yang bisa dijurnal. Barisnya
+	tetap dibawa supaya tabel Gaji Karyawan memperlihatkan gaji yang belum
+	terserap - dulu karyawan seperti ini hilang sama sekali dari dokumennya.
+
+	Karena sumbernya None, baris ini tidak lolos baris_sumber maupun
+	baris_pembagi, jadi tabel Kegiatan dan tabel Closing tidak ikut berubah.
+	"""
+	return [
+		{
+			"employee": employee,
+			"employee_name": data["employee_name"],
+			"cost_center_accrual": data["cost_center_accrual"],
+			"sumber": None,
+			"total_komponen": flt(data["amount"]),
+			"jumlah_kegiatan": 0,
+			"amount": 0,
+		}
+		for employee, data in komponen.items()
+		if employee not in per_karyawan and flt(data["amount"])
+	]
 
 
 def baris_sumber(semua, sumber):
@@ -437,6 +465,13 @@ def get_gaji_karyawan(sumber, periode_dari, periode_sampai, company=None, unit=N
 
 
 def susun_gaji_karyawan(baris, sumber):
+	"""Gaji tiap karyawan beserta porsi yang jatuh ke sumber dokumen ini.
+
+	Semua karyawan bergaji ikut terdaftar, termasuk yang porsinya nol karena
+	bulan itu cuma mengerjakan sumber lain atau tidak punya kegiatan sama
+	sekali. Yang begitu justru perlu kelihatan: gajinya ada tapi belum terserap
+	ke kegiatan.
+	"""
 	rekap = {}
 	for r in baris:
 		data = rekap.setdefault(r["employee"], {
@@ -452,7 +487,7 @@ def susun_gaji_karyawan(baris, sumber):
 			data["jumlah_kegiatan_sumber"] += 1
 			data["amount"] = flt(data["amount"] + flt(r["amount"]), 2)
 
-	return [d for d in rekap.values() if d["jumlah_kegiatan_sumber"]]
+	return list(rekap.values())
 
 
 @frappe.whitelist()
@@ -569,7 +604,10 @@ def susun_data_costing_kebun(semua, sumber, company):
 	return {
 		"gaji_karyawan": susun_gaji_karyawan(semua, sumber),
 		"kegiatan": susun_alokasi_kegiatan(baris_pembagi(semua, sumber), company),
-		"closing": susun_closing_kebun(baris, sumber, company),
+		# Tanpa kegiatan di sumber ini tidak ada yang dijurnal, dan
+		# susun_closing_kebun dilewati sekalian: ia menegur akun alokasi gaji yang
+		# belum diisi, padahal dokumen tanpa jurnal tidak memerlukannya.
+		"closing": susun_closing_kebun(baris, sumber, company) if baris else [],
 	}
 
 
@@ -580,15 +618,11 @@ def build_and_submit_costing_kebun(doctype, company, unit, periode_dari, periode
 	Isinya sama persis dengan tombol Ambil Data di form, dipakai waktu
 	Accounting Period ditutup.
 
-	Unit yang tidak punya kegiatan sumber ini sama sekali tetap dibuatkan
-	dokumennya, tapi dibiarkan draft dan kosong: tidak ada yang bisa dijurnal,
-	sementara dokumennya sendiri berguna sebagai tanda periode itu sudah
-	diproses. Yang datanya ada tapi belum lengkap tetap dibuat dan disubmit
-	supaya kekurangannya kelihatan.
-
-	Tabelnya sengaja tidak disusun untuk yang kosong: susun_closing_kebun
-	menegur akun alokasi gaji yang belum diisi, padahal dokumen kosong ini tidak
-	menjurnal apa pun, dan teguran itu akan menggagalkan closing periodenya.
+	Unit yang tidak punya kegiatan sumber ini tetap dibuatkan dokumennya, dengan
+	tabel Gaji Karyawan terisi seperti biasa, tapi dibiarkan draft: gajinya ada,
+	cuma belum terserap ke kegiatan mana pun, jadi tidak ada yang bisa dijurnal.
+	Yang datanya ada tapi belum lengkap tetap dibuat dan disubmit supaya
+	kekurangannya kelihatan.
 	"""
 	doc = frappe.new_doc(doctype)
 	doc.company = company
@@ -598,12 +632,12 @@ def build_and_submit_costing_kebun(doctype, company, unit, periode_dari, periode
 
 	semua = bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company, unit)
 
-	if not baris_sumber(semua, doc.sumber):
-		doc.insert(ignore_permissions=True)
-		return doc.name
-
 	doc.isi_data(susun_data_costing_kebun(semua, doc.sumber, company))
 	doc.insert(ignore_permissions=True)
+
+	if not baris_sumber(semua, doc.sumber):
+		return doc.name
+
 	doc.submit()
 
 	return doc.name
