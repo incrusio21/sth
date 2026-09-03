@@ -40,8 +40,22 @@ BKM_DOCTYPES = (
 BATAS_BARIS = 50
 
 
+def tutup_sementara(doc):
+	"""Periode ini ditutup sementara, cuma untuk mengunci transaksi saat memeriksa.
+
+	Pemeriksaan kesiapan closing dilewati: yang dicari justru dokumen yang masih
+	menggantung, jadi menahan penguncian karena ada yang menggantung membuat
+	fiturnya tidak ada gunanya. Sisa jalannya submit tetap seperti biasa - BKM
+	tetap di-posting dan costing tetap dibuat.
+	"""
+	return bool(doc.get("tutup_sementara"))
+
+
 def validasi_sebelum_closing(doc, method=None):
 	"""Hook before_submit Accounting Period."""
+	if tutup_sementara(doc):
+		return
+
 	bagian = []
 
 	bagian.extend(cek_bkm_draft(doc))

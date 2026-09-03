@@ -7,6 +7,8 @@ from erpnext.accounts.doctype.accounting_period.accounting_period import (
 	ClosedAccountingPeriod
 )
 
+from sth.accounting_sth.validasi_closing import tutup_sementara
+
 class SthAccountingPeriod(AccountingPeriod):
 
 	def autoname(self):
@@ -428,7 +430,13 @@ def check_unsubmitted_salary_slip(self, method):
 	"""
 	Cek Salary Slip yang masih Draft (belum disubmit) dalam periode Accounting Period.
 	Accounting Period tidak boleh disubmit selama masih ada Salary Slip Draft di periode tsb.
+
+	Dilewati untuk periode yang ditutup sementara, sama seperti pemeriksaan
+	kesiapan closing yang lain.
 	"""
+	if tutup_sementara(self):
+		return
+
 	result = frappe.db.sql("""
 		SELECT ss.name, ss.employee, ss.employee_name, ss.start_date, ss.end_date
 		FROM `tabSalary Slip` ss
