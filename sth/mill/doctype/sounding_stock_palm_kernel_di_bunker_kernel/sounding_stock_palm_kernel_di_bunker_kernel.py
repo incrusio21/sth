@@ -142,11 +142,11 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		self.hitung_produksi()
 
 	def get_stock_awal(self):
-		"""Saldo Palm Kernel dari Stock Ledger Entry terakhir di gudang unit ini.
+		"""Saldo Palm Kernel dari Stock Ledger Entry terakhir sebelum tanggal proses.
 
-		Yang dibaca qty_after_transaction baris paling akhir, bukan saldo sampai
-		tanggal tertentu: yang dipakai stock terakhir apa adanya di gudang itu.
-		Entry batal tidak ikut dihitung.
+		Yang dibaca qty_after_transaction baris paling akhir sebelum tanggal proses
+		di gudang unit ini — saldo pembuka hari itu, jadi mutasi pada tanggal
+		prosesnya sendiri tidak ikut. Entry batal tidak dihitung.
 		"""
 		warehouse = get_warehouse_palm(self.unit)
 		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
@@ -158,9 +158,10 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			select qty_after_transaction
 			from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s and is_cancelled = 0
+				and posting_date < %s
 			order by posting_date desc, posting_time desc, creation desc
 			limit 1
-		""",(item_code, warehouse))
+		""",(item_code, warehouse, self.tanggal_proses))
 
 		return flt(terakhir[0][0]) if terakhir else 0
 
