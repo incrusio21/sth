@@ -19,6 +19,7 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
     get_stock(frm) {
         frm.call('get_stock').then(() => {
             frm.refresh()
+            frm.dirty()
         })
     },
 

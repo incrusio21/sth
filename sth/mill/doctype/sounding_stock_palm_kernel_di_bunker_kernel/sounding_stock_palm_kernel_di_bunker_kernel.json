@@ -36,6 +36,7 @@
   "rata_rata_ker_bulanan",
   "column_break_wdwq",
   "berat_jenis",
+  "ignore_recalculate",
   "rekap_hasil",
   "volume_sounding",
   "section_break_jhlo",
@@ -346,13 +347,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_recalculate",
+   "fieldtype": "Check",
+   "in_preview": 1,
+   "label": "Ignore Recalculate Rekap"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-01 12:00:00.000000",
+ "modified": "2026-09-02 16:14:20.090626",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",

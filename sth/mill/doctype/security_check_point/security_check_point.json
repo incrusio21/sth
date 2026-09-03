@@ -309,6 +309,7 @@
   },
   {
    "fetch_from": "lokasi_pos.unit",
+   "fetch_if_empty": 1,
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -358,6 +359,7 @@
   {
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fetch_from": "spb.divisi",
+   "fetch_if_empty": 1,
    "fieldname": "divisi",
    "fieldtype": "Link",
    "label": "Divisi",
@@ -473,7 +475,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-28 22:49:00.466482",
+ "modified": "2026-09-03 09:41:05.132936",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

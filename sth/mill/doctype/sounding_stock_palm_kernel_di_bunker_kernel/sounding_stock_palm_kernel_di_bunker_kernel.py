@@ -15,7 +15,6 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 	def before_save(self):
 		self.hasil_titik_sounding = []
-		self.rekap_hasil = []
 
 		if self.ukuran_detail:
 			self.calculate_hasil_titik_sounding()
@@ -91,6 +90,9 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 				})
 
 	def add_rekap_hasil(self):
+		if self.ignore_recalculate: return
+
+		self.rekap_hasil = []
 		for row in self.hasil_titik_sounding:
 			parent_doc = frappe.db.get_value("Ukuran Bunker Kernel Silo",{"pabrik":self.pabrik,"kompartemen_bunker":row.nama_kompartemen_bunker}) or frappe.db.get_value("Ukuran Bunker Kernel Silo",{"pabrik":self.pabrik,"default":1})
 

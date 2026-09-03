@@ -73,19 +73,19 @@ def get_columns():
 		{
 			"fieldname": "netto",
 			"label": _("Berat Bersih"),
-			"fieldtype": "Int",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "potongan",
 			"label": _("Potongan (kg)"),
-			"fieldtype": "Int",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "berat_normal",
 			"label": _("Berat Normal"),
-			"fieldtype": "Int",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
