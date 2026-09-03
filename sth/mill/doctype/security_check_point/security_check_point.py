@@ -12,7 +12,7 @@ class SecurityCheckPoint(Document):
 	def before_insert(self):
 		self.keep_api_no_polisi()
 		self.map_api_spb_trans_no()
-		self.map_api_lokasi_pos()
+		self.map_lokasi_pos()
 
 	def validate(self):
 		self.set_data_kendaraan()
@@ -91,12 +91,19 @@ class SecurityCheckPoint(Document):
 		self.spb_trans_no = trans_no
 		self.spb = self.get_or_create_spb(trans_no)
 
-	def map_api_lokasi_pos(self):
-		"""Field lokasi_pos dari API berisi nama pos, bukan kode dokumennya.
+	def map_lokasi_pos(self):
+		"""Field lokasi_pos bisa berisi nama pos, bukan kode dokumennya.
 
 		Security Location dinamai memakai kode (autoname field:kode), sementara
-		sistem luar mengirim namanya — "POS PMKS". Tanpa diterjemahkan,
-		_validate_links() menolak dokumennya "Could not find Lokasi POS".
+		sistem luar mengirim namanya — "POS PMKS" untuk pos TPRM-POS-PMKS. Tanpa
+		diterjemahkan, _validate_links() menolak dokumennya "Could not find
+		Lokasi POS".
+
+		Tidak dibatasi kiriman API: pengiriman lewat REST tidak selalu memakai user
+		api@sth — timbangan memakai akun operatornya sendiri — jadi penerjemahan
+		yang digantungkan ke pemilik dokumen tidak pernah kena. Input lewat UI tidak
+		terpengaruh karena field Link-nya sudah mengirim kode, jadi berhenti di
+		pengecekan exists() di bawah.
 
 		Nilai yang memang sudah berupa kode dibiarkan; begitu juga nama yang tidak
 		terdaftar, supaya validasi Link yang menolaknya dan pesannya menyebut nama
@@ -105,13 +112,13 @@ class SecurityCheckPoint(Document):
 		Dijalankan di before_insert, bukan validate, karena _validate_links() jalan
 		lebih dulu daripada validate.
 		"""
-		if not (self.is_from_api() and self.lokasi_pos):
+		if not self.lokasi_pos:
 			return
 
 		if frappe.db.exists("Security Location", self.lokasi_pos):
 			return
 
-		kode = get_security_location_by_nama(self.lokasi_pos)
+		kode = get_security_location(self.lokasi_pos)
 		if kode:
 			self.lokasi_pos = kode
 
@@ -139,30 +146,34 @@ class SecurityCheckPoint(Document):
 		return doc.name
 
 
-def get_security_location_by_nama(nama):
-	"""Kode Security Location yang namanya sama dengan `nama`.
+def get_security_location(pos):
+	"""Kode Security Location yang nama atau kodenya sama dengan `pos`.
 
 	Dicocokkan persis dulu, baru tanpa beda huruf besar kecil dan tanpa spasi
-	berlebih: sistem luar mengirim "POS PMKS" sementara di master bisa tertulis
-	"Pos PMKS", padahal posnya sama.
+	maupun tanda hubung: sistem luar mengirim "POS PMKS" sementara di master bisa
+	tertulis "Pos PMKS" sebagai nama atau "POS-PMKS" sebagai kode, padahal posnya
+	sama. Nama didahulukan supaya pos yang namanya cocok tidak kalah oleh pos lain
+	yang kebetulan kodenya mirip.
 	"""
-	kode = frappe.db.get_value("Security Location", {"nama": nama}, "name")
+	kode = frappe.db.get_value("Security Location", {"nama": pos}, "name")
 	if kode:
 		return kode
 
 	rows = frappe.db.sql("""
 		select name
 		from `tabSecurity Location`
-		where upper(trim(nama)) = %s
+		where upper(replace(replace(nama, ' ', ''), '-', '')) = %(pos)s
+			or upper(replace(replace(kode, ' ', ''), '-', '')) = %(pos)s
+		order by upper(replace(replace(nama, ' ', ''), '-', '')) = %(pos)s desc
 		limit 1
-	""", strip_nama_pos(nama))
+	""", {"pos": strip_nama_pos(pos)})
 
 	return rows[0][0] if rows else None
 
 
-def strip_nama_pos(nama):
-	"""Bentuk ringkas nama pos: tanpa spasi berlebih, huruf besar."""
-	return " ".join((nama or "").split()).upper()
+def strip_nama_pos(pos):
+	"""Bentuk ringkas nama pos: tanpa spasi, tanpa tanda hubung, huruf besar."""
+	return (pos or "").replace(" ", "").replace("-", "").upper()
 
 
 def get_kendaraan_by_no_pol(no_polisi):
