@@ -590,11 +590,15 @@ def build_and_submit_costing_kebun(doctype, company, unit, periode_dari, periode
 	Isinya sama persis dengan tombol Ambil Data di form, dipakai waktu
 	Accounting Period ditutup.
 
-	Unit yang tidak punya kegiatan sumber ini sama sekali dilewati, dan
-	dilewatinya sebelum tabel Closing disusun: unit mill tidak perlu ditinggali
-	Costing Panen kosong tiap bulan, juga tidak perlu ikut ditegur soal akun
-	alokasi gaji yang cuma dipakai jurnal alokasi. Yang datanya ada tapi belum
-	lengkap tetap dibuat supaya kekurangannya kelihatan.
+	Unit yang tidak punya kegiatan sumber ini sama sekali tetap dibuatkan
+	dokumennya, tapi dibiarkan draft dan kosong: tidak ada yang bisa dijurnal,
+	sementara dokumennya sendiri berguna sebagai tanda periode itu sudah
+	diproses. Yang datanya ada tapi belum lengkap tetap dibuat dan disubmit
+	supaya kekurangannya kelihatan.
+
+	Tabelnya sengaja tidak disusun untuk yang kosong: susun_closing_kebun
+	menegur akun alokasi gaji yang belum diisi, padahal dokumen kosong ini tidak
+	menjurnal apa pun, dan teguran itu akan menggagalkan closing periodenya.
 	"""
 	doc = frappe.new_doc(doctype)
 	doc.company = company
@@ -603,8 +607,10 @@ def build_and_submit_costing_kebun(doctype, company, unit, periode_dari, periode
 	doc.periode_sampai = periode_sampai
 
 	semua = bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company, unit)
+
 	if not baris_sumber(semua, doc.sumber):
-		return None
+		doc.insert(ignore_permissions=True)
+		return doc.name
 
 	doc.isi_data(susun_data_costing_kebun(semua, doc.sumber, company))
 	doc.insert(ignore_permissions=True)
