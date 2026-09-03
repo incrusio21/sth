@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate,flt
+from frappe.utils import add_days,getdate,flt,now
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.utils import get_stock_balance
 
@@ -131,18 +131,60 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			where i.tipe_barang = 'TBS' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
+		self.stock_awal = self.get_stock_awal()
+		self.pengiriman = get_delivery[0].qty if get_delivery else 0
+		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
+		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
+
+		# Stock akhir dan produksinya dihitung dengan rumus yang sama seperti waktu
+		# dokumen disimpan, supaya angka yang muncul begitu tombol ditekan tidak
+		# berubah lagi setelah disimpan. Dipanggil paling akhir karena KER-nya
+		# memakai tbs olah dan sortasi yang baru diisi di atas.
+		self.hitung_produksi()
+
+	def get_stock_awal(self):
+		"""Stock awal hari ini: stock akhir sounding sebelumnya di unit yang sama.
+
+		Bukan saldo Stock Ledger, karena stock akhir sounding adalah hasil ukur
+		bunker — itu yang jadi pembuka hari berikutnya, dan rantai itu juga yang
+		diperiksa patch batalkan_ste_sounding_palm_kernel lewat tanda RANTAI.
+
+		Pendahulunya dicari menurut urutan yang sama seperti patch: tanggal proses,
+		lalu urutan pembuatan untuk dokumen yang tanggal prosesnya sama.
+
+		Sounding pertama sebuah unit tidak punya pendahulu; rantainya dimulai dari
+		saldo Stock Ledger sampai akhir hari sebelum tanggal proses, jadi produksi
+		hari ini sendiri tidak ikut terhitung sebagai stock awalnya.
+		"""
+		sebelumnya = frappe.db.sql("""
+			select stock_akhir
+			from `tabSounding Stock Palm Kernel di Bunker Kernel`
+			where unit = %(unit)s
+				and docstatus < 2
+				and name != %(name)s
+				and (tanggal_proses < %(tanggal_proses)s
+					or (tanggal_proses = %(tanggal_proses)s and creation < %(creation)s))
+			order by tanggal_proses desc, creation desc
+			limit 1
+		""",{
+			"unit": self.unit,
+			"name": self.name,
+			"tanggal_proses": self.tanggal_proses,
+			"creation": self.creation or now(),
+		})
+
+		if sebelumnya:
+			return flt(sebelumnya[0][0])
+
 		warehouse = get_warehouse_palm(self.unit)
 		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
 
-		self.stock_awal = get_stock_balance(item_code, warehouse, self.tanggal_proses, "23:59:59") if warehouse and item_code else 0
-		
-		
-		self.pengiriman = get_delivery[0].qty if get_delivery else 0
-		print(self.pengiriman)
+		if not (warehouse and item_code):
+			return 0
 
-		self.stock_akhir = flt(self.stock_awal) - flt(self.pengiriman)
-		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
-		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
+		sehari_sebelumnya = add_days(getdate(self.tanggal_proses), -1)
+
+		return get_stock_balance(item_code, warehouse, sehari_sebelumnya, "23:59:59")
 
 	def split_and_avg(self,arr):
 		arr = list(map(int, arr))
