@@ -118,7 +118,7 @@ class SecurityCheckPoint(Document):
 		if frappe.db.exists("Security Location", self.lokasi_pos):
 			return
 
-		kode = get_security_location(self.lokasi_pos)
+		kode = get_security_location(self.lokasi_pos, self.unit)
 		if kode:
 			self.lokasi_pos = kode
 
@@ -146,8 +146,25 @@ class SecurityCheckPoint(Document):
 		return doc.name
 
 
-def get_security_location(pos):
+def get_security_location(pos, unit=None):
 	"""Kode Security Location yang nama atau kodenya sama dengan `pos`.
+
+	Nama pos dipakai ulang antar unit — "POS PMKS" bisa ada di TPRM maupun di
+	unit lain — jadi unit kiriman ikut menyaring supaya tidak jatuh ke pos milik
+	unit yang salah.
+
+	Unit di master boleh saja belum diisi, jadi kalau penyaringan lewat unit tidak
+	menemukan apa-apa, pencarian diulang tanpa unit ketimbang dokumennya ditolak.
+	"""
+	kode = cari_security_location(pos, unit)
+	if not kode and unit:
+		kode = cari_security_location(pos, None)
+
+	return kode
+
+
+def cari_security_location(pos, unit):
+	"""Satu putaran pencarian pos, disaring `unit` kalau diisi.
 
 	Dicocokkan persis dulu, baru tanpa beda huruf besar kecil dan tanpa spasi
 	maupun tanda hubung: sistem luar mengirim "POS PMKS" sementara di master bisa
@@ -155,18 +172,25 @@ def get_security_location(pos):
 	sama. Nama didahulukan supaya pos yang namanya cocok tidak kalah oleh pos lain
 	yang kebetulan kodenya mirip.
 	"""
-	kode = frappe.db.get_value("Security Location", {"nama": pos}, "name")
+	filters = {"nama": pos}
+	if unit:
+		filters["unit"] = unit
+
+	kode = frappe.db.get_value("Security Location", filters, "name")
 	if kode:
 		return kode
 
-	rows = frappe.db.sql("""
+	kondisi_unit = "and unit = %(unit)s" if unit else ""
+
+	rows = frappe.db.sql(f"""
 		select name
 		from `tabSecurity Location`
-		where upper(replace(replace(nama, ' ', ''), '-', '')) = %(pos)s
-			or upper(replace(replace(kode, ' ', ''), '-', '')) = %(pos)s
+		where (upper(replace(replace(nama, ' ', ''), '-', '')) = %(pos)s
+				or upper(replace(replace(kode, ' ', ''), '-', '')) = %(pos)s)
+			{kondisi_unit}
 		order by upper(replace(replace(nama, ' ', ''), '-', '')) = %(pos)s desc
 		limit 1
-	""", {"pos": strip_nama_pos(pos)})
+	""", {"pos": strip_nama_pos(pos), "unit": unit})
 
 	return rows[0][0] if rows else None
 
