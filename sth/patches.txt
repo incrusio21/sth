@@ -6,5 +6,7 @@ sth.patches.merge_duplicate_spb_trans_no
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
-sth.patches.perbaiki_restan_data_tbs
-sth.patches.isi_adjustment_sounding
+# perbaiki_restan_data_tbs dan isi_adjustment_sounding sengaja tidak didaftarkan:
+# keduanya perbaikan data sekali jalan yang mau diawasi sendiri waktu dijalankan,
+# yang restan Data TBS bahkan memposting ulang puluhan Stock Entry. Jalankan
+# dengan `bench --site <site> execute sth.patches.<nama>.execute`.
