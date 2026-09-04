@@ -59,12 +59,12 @@ BARIS = (
 # Stock Entry-nya cuma memposting selisih, bukan posisi.
 #
 # 'produksi_total' dan 'closing_total' membedakan jumlah sepanjang periode dari
-# posisi terakhir. Production ketiganya dijumlahkan; Closing cuma TBS, atas
-# permintaan user: tbs_restan di Data TBS — restan halaman saja, tanpa loading
-# ramp — dijumlahkan sebulan, sedangkan CPO dan PK tetap memakai posisi dokumen
-# sounding terakhir. Field produksi CPO dan PK sengaja yang sama dengan qty Stock
-# Entry bikinan Sounding, jadi qty yang dibebani biaya sama dengan qty yang masuk
-# Stock Ledger.
+# posisi terakhir. Production ketiganya dijumlahkan; Closing ketiganya memakai
+# posisi dokumen terakhir di bulan itu, karena Closing memang saldo akhir, bukan
+# jumlah sebulan. TBS memakai total_tbs_restan — restan halaman ditambah loading
+# ramp, yaitu angka yang diwarisi Data TBS hari berikutnya sebagai restan awal.
+# Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry bikinan
+# Sounding, jadi qty yang dibebani biaya sama dengan qty yang masuk Stock Ledger.
 #
 # 'rendemen' adalah field rendemen harian di dokumen Sounding, yang dirata-rata
 # jadi OER dan KER dokumen ini. TBS tidak punya.
@@ -74,8 +74,8 @@ SUMBER_PRODUK = {
 		"tanggal": "tanggal_produksi",
 		"produksi": "tbs_olah",
 		"produksi_total": True,
-		"closing": "tbs_restan",
-		"closing_total": True,
+		"closing": "total_tbs_restan",
+		"closing_total": False,
 	},
 	"cpo": {
 		"doctype": "Sounding Stock CPO di BST",
