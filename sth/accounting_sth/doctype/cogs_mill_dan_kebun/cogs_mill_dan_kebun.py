@@ -58,6 +58,9 @@ BARIS = (
 # field references. Stock Ledger tidak dipakai untuk angka-angka ini karena
 # Stock Entry-nya cuma memposting selisih, bukan posisi.
 #
+# 'opening_dari_sumber' memindahkan Opening dari saldo Stock Ledger ke dokumen
+# sumber, dipakai TBS saja: Closing bulan lalu harus jadi Opening bulan ini.
+#
 # 'produksi_total' dan 'closing_total' membedakan jumlah sepanjang periode dari
 # posisi terakhir. Production ketiganya dijumlahkan; Closing ketiganya memakai
 # posisi dokumen terakhir di bulan itu, karena Closing memang saldo akhir, bukan
@@ -76,6 +79,7 @@ SUMBER_PRODUK = {
 		"produksi_total": True,
 		"closing": "total_tbs_restan",
 		"closing_total": False,
+		"opening_dari_sumber": True,
 	},
 	"cpo": {
 		"doctype": "Sounding Stock CPO di BST",
@@ -98,6 +102,9 @@ SUMBER_PRODUK = {
 }
 
 WAKTU_REKONSILIASI = "23:59:59"
+
+# Batas bawah pencarian dokumen sumber kalau memang tidak dibatasi ke belakang.
+AWAL_MULA = "1900-01-01"
 
 KETERANGAN_KEBUN = "KAPITALISASI BIAYA KEBUN KE PERSEDIAAN TBS"
 KETERANGAN_OLAH = "PENGOLAHAN TBS MENJADI CPO DAN PALM KERNEL"
@@ -1186,6 +1193,23 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		# Stock Ledger. Closing dinegatifkan karena rantai di hitung()
 		# menjumlahkan, tidak mengurangkan.
 		cfg = SUMBER_PRODUK[prefiks]
+
+		# Opening TBS dibaca dari dokumen sumber, bukan dari Stock Ledger: atas
+		# permintaan user, Closing bulan lalu harus jadi Opening bulan ini, sama
+		# seperti Total TBS Restan di Data TBS diwarisi hari berikutnya jadi
+		# restan awal. Yang dicari dokumen terakhir sebelum periode ini tanpa
+		# dibatasi satu bulan ke belakang — kalau bulan sebelumnya kebetulan tidak
+		# punya dokumen submitted, Opening tidak boleh jatuh ke nol. Nilainya nol
+		# karena hitung() mengisi amount Opening TBS dari rate Stock Entry.
+		if cfg.get("opening_dari_sumber"):
+			nilai[prefiks + "_opening"] = (
+				sumber_terakhir(
+					prefiks, cfg["closing"], company, unit,
+					AWAL_MULA, add_days(periode_dari, -1),
+				),
+				0,
+			)
+
 		hitung_produksi = sumber_total if cfg["produksi_total"] else sumber_terakhir
 		nilai[prefiks + "_production"] = (
 			hitung_produksi(prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai),
