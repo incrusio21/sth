@@ -44,6 +44,26 @@ class SthAccountingPeriod(AccountingPeriod):
 				_("Accounting Period overlaps with {0} - {1}").format(existing_accounting_period[0].get("name"), existing_accounting_period[0].get("unit")),
 				OverlapError,
 			)
+	def bootstrap_doctypes_for_closing(self):
+		"""Isi Closed Documents dari hook period_closing_doctypes.
+
+		Ditimpa karena erpnext versi ini membaca hasil get_doctypes_for_closing
+		sebagai objek (`baris.document_type`) padahal yang dikembalikan dict
+		biasa, jadi bikin Accounting Period lewat kode selalu gagal
+		AttributeError. Lewat form tidak pernah kelihatan karena grid-nya sudah
+		diisi JS di onload sebelum dokumennya disimpan, sehingga tabelnya tidak
+		lagi kosong waktu before_insert jalan.
+		"""
+		if self.closed_documents:
+			return
+
+		for baris in self.get_doctypes_for_closing():
+			baris = frappe._dict(baris)
+			self.append("closed_documents", {
+				"document_type": baris.document_type,
+				"closed": baris.closed,
+			})
+
 	def on_submit(self):
 		post_bkm_on_submit(self)
 		create_costing_on_submit(self)
@@ -495,4 +515,60 @@ def check_unsubmitted_salary_slip(self, method):
 				<p>Accounting Period tidak dapat disubmit. Belum ada <b>Salary Slip</b> berstatus Submitted
 				dalam periode ini.</p>
 			""")
+		)
+# Field tanggal yang menentukan periode tiap doctype mill. Yang dipakai adalah
+# tanggal yang jadi posting_date Stock Entry-nya, karena di situlah mutasi
+# stoknya mendarat — bukan tanggal dokumennya dicatat. Sounding CPO memakai
+# field `tanggal` karena create_ste-nya memang memetakan itu, sementara Data TBS
+# dan Sounding PK memetakan tanggal prosesnya.
+FIELD_TANGGAL_PERIODE = {
+	"Data TBS": "tanggal_produksi",
+	"Sounding Stock CPO di BST": "tanggal",
+	"Sounding Stock Palm Kernel di Bunker Kernel": "tanggal_proses",
+}
+
+
+def validasi_periode_tertutup(doc, method=None):
+	"""Tolak dokumen mill yang tanggalnya jatuh di Accounting Period tertutup.
+
+	Tidak memakai validate_accounting_period_on_doc_save bawaan erpnext karena
+	dua hal. Pertama, ketiga doctype ini tidak punya posting_date, dan fungsi
+	bawaannya membaca field itu untuk doctype yang tidak dikenalnya. Kedua,
+	Accounting Period di sini dipecah per unit — lihat validate_overlap di
+	SthAccountingPeriod — sehingga menutup TPRM tidak boleh ikut mengunci TPRE,
+	padahal fungsi bawaannya cuma mencocokkan company.
+
+	Sengaja tidak menyaring docstatus Accounting Period, mengikuti erpnext:
+	periode yang masih draft pun sudah mengunci, sama seperti yang berlaku untuk
+	Journal Entry dan Stock Entry di site ini.
+	"""
+	tanggal = doc.get(FIELD_TANGGAL_PERIODE[doc.doctype])
+
+	if not (tanggal and doc.get("company")):
+		return
+
+	syarat_unit = "and ap.unit = %(unit)s" if doc.get("unit") else ""
+
+	periode = frappe.db.sql("""
+		select ap.name
+		from `tabAccounting Period` ap
+		join `tabClosed Document` cd on cd.parent = ap.name
+		where cd.closed = 1 and cd.document_type = %(doctype)s
+			and ap.company = %(company)s {syarat_unit}
+			and %(tanggal)s between ap.start_date and ap.end_date
+		limit 1
+	""".format(syarat_unit=syarat_unit), {
+		"doctype": doc.doctype,
+		"company": doc.company,
+		"unit": doc.get("unit"),
+		"tanggal": tanggal,
+	})
+
+	if periode:
+		frappe.throw(
+			_("{0} tanggal {1} tidak bisa dibuat karena Accounting Period {2} sudah ditutup.").format(
+				_(doc.doctype), frappe.bold(frappe.format(tanggal, {"fieldtype": "Date"})),
+				frappe.bold(periode[0][0])
+			),
+			ClosedAccountingPeriod,
 		)

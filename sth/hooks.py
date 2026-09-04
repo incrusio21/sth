@@ -246,6 +246,17 @@ override_doctype_class = {
 # ---------------
 # Hook on document methods and events
 
+# Ikut didaftarkan ke Closed Documents-nya Accounting Period. frappe.get_hooks
+# menggabungkan daftar ini dengan milik erpnext, jadi ketiganya ikut terisi
+# sendiri waktu Accounting Period baru dibuat maupun waktu tombol Get Doctypes
+# For Closing ditekan. Penguncian dokumennya sendiri dipasang lewat doc_events di
+# bawah, bukan lewat hook ini.
+period_closing_doctypes = [
+	"Data TBS",
+	"Sounding Stock CPO di BST",
+	"Sounding Stock Palm Kernel di Bunker Kernel",
+]
+
 doc_events = {
 	# untuk kriteria upload
 	"*": {
@@ -267,6 +278,16 @@ doc_events = {
 			"sth.accounting_sth.validasi_closing.validasi_sebelum_closing",
 			"sth.overrides.accounting_period.check_unsubmitted_salary_slip",
 		],
+	},
+
+	"Data TBS": {
+		"validate": "sth.overrides.accounting_period.validasi_periode_tertutup",
+	},
+	"Sounding Stock CPO di BST": {
+		"validate": "sth.overrides.accounting_period.validasi_periode_tertutup",
+	},
+	"Sounding Stock Palm Kernel di Bunker Kernel": {
+		"validate": "sth.overrides.accounting_period.validasi_periode_tertutup",
 	},
 
 	"Asset": {
