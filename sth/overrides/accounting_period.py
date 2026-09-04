@@ -518,12 +518,11 @@ def check_unsubmitted_salary_slip(self, method):
 		)
 # Field tanggal yang menentukan periode tiap doctype mill. Yang dipakai adalah
 # tanggal yang jadi posting_date Stock Entry-nya, karena di situlah mutasi
-# stoknya mendarat — bukan tanggal dokumennya dicatat. Sounding CPO memakai
-# field `tanggal` karena create_ste-nya memang memetakan itu, sementara Data TBS
-# dan Sounding PK memetakan tanggal prosesnya.
+# stoknya mendarat — bukan tanggal dokumennya dicatat, yang biasanya sehari
+# sesudahnya dan bisa jatuh di bulan berikutnya.
 FIELD_TANGGAL_PERIODE = {
 	"Data TBS": "tanggal_produksi",
-	"Sounding Stock CPO di BST": "tanggal",
+	"Sounding Stock CPO di BST": "tanggal_proses",
 	"Sounding Stock Palm Kernel di Bunker Kernel": "tanggal_proses",
 }
 

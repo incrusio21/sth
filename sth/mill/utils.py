@@ -137,8 +137,16 @@ def buat_ulang_ste(doc):
 
 
 def buat_ulang_ste_sounding(doc, produksi):
-	"""buat_ulang_ste untuk dokumen sounding, yang STE-nya cuma dibuat kalau ada produksi."""
-	if not flt(produksi):
+	"""buat_ulang_ste untuk dokumen sounding, yang STE-nya cuma dibuat kalau ada produksi.
+
+	Syaratnya harus sama persis dengan on_submit kedua doctype sounding, yaitu
+	produksi lebih besar dari nol. Sebelumnya cuma menolak nol, sehingga sounding
+	berproduksi minus — yang jumlahnya banyak di CPO, akibat stock awal atau
+	pengiriman yang belum benar — malah dibuatkan Material Issue sebesar angka
+	minusnya waktu patch tanggal dijalankan, padahal submit biasa tidak pernah
+	membuatkan apa-apa untuk dokumen itu.
+	"""
+	if flt(produksi) <= 0:
 		buang_ste(doc)
 		return 0
 

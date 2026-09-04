@@ -151,12 +151,16 @@ class SoundingStockCPOdiBST(Document):
 				"field_map": {
 					"name":"references",
 					"doctype": "reference_doctype",
-					"tanggal":"posting_date",
+					"tanggal_proses":"posting_date",
 					"jam":"posting_time"
 				}
 			},
 		}
 
+		# posting_date diambil dari tanggal_proses, bukan field tanggal: tanggal
+		# adalah kapan soundingnya dicatat, sementara produksinya milik hari
+		# prosesnya — sama seperti tbs olah dan potongan sortasi yang diambil per
+		# tanggal_proses di get_data(). Sama dengan Sounding Palm Kernel.
 		doc = get_mapped_doc(self.doctype,self.name,mapper,None,postprocess,True)
 		doc.insert()
 		doc.submit()
