@@ -68,8 +68,9 @@ def isi_baris_non_voucher_match():
 
 
 def isi_total_pajak_dokumen():
+	meta = meta_dengan_custom_field()
 	assignments, belum_cocok = klausa(
-		VAT_TOTAL_BASE_FIELDS, "pi", presisi(PARENT_DOCTYPE, "base_total_ppn")
+		VAT_TOTAL_BASE_FIELDS, "pi", get_field_precision(meta.get_field("base_total_ppn"))
 	)
 
 	perlu_diisi = frappe.db.sql(
@@ -94,6 +95,36 @@ def isi_total_pajak_dokumen():
 	)
 
 	print("{0} Purchase Invoice diisi total pajak mata uang perusahaannya.".format(perlu_diisi))
+
+
+def meta_dengan_custom_field():
+	"""Meta Purchase Invoice yang dijamin sudah memuat custom field base_*.
+
+	Patch post_model_sync dijalankan sebelum sync_customizations() milik migrate,
+	jadi custom field yang baru ditambahkan di buying_sth/custom belum ada waktu
+	patch ini kena giliran. Field DocType biasa tidak kena masalah ini karena
+	sudah ikut tahap model sync, makanya baris Non Voucher Match aman.
+
+	Disinkronkan duluan di sini; migrate tetap menyinkronkan lagi setelahnya dan
+	itu tidak masalah karena sync_customizations idempoten.
+	"""
+	from frappe.modules.utils import sync_customizations
+
+	meta = frappe.get_meta(PARENT_DOCTYPE)
+	if meta.get_field("base_total_ppn"):
+		return meta
+
+	sync_customizations(app="sth")
+	frappe.clear_cache(doctype=PARENT_DOCTYPE)
+
+	# cached=False supaya tidak kena meta yang masih tersimpan di proses ini.
+	meta = frappe.get_meta(PARENT_DOCTYPE, cached=False)
+	if not meta.get_field("base_total_ppn"):
+		frappe.throw(
+			"Custom field base_total_ppn gagal disinkronkan ke {0}.".format(PARENT_DOCTYPE)
+		)
+
+	return meta
 
 
 def presisi(doctype, fieldname):
