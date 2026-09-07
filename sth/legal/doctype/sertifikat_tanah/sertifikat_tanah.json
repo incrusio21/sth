@@ -195,7 +195,7 @@
   },
   {
    "fieldname": "nomor_nib",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "in_preview": 1,
    "label": "Nomor NIB"
   }
