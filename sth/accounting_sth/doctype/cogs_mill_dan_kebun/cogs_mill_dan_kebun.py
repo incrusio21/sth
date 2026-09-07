@@ -8,7 +8,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 from frappe.model.document import Document
-from frappe.utils import add_days, flt
+from frappe.utils import add_days, flt, get_first_day, get_last_day, getdate
 
 # Produk dikenali lewat Item.tipe_barang. Gudangnya ikut Default Warehouse di
 # Item Defaults item itu sendiri, bukan Warehouse Category.
@@ -19,6 +19,11 @@ PREFIKS = {"TBS": "tbs", "CPO": "cpo", "Palm Kernel": "pk"}
 VOUCHER_PEMBELIAN = ("Purchase Receipt", "Purchase Invoice")
 VOUCHER_PENJUALAN = ("Delivery Note", "Sales Invoice")
 VOUCHER_ADJUSTMENT = "Stock Reconciliation"
+
+# Akun pembelian TBS, dikenali lewat nomor akun supaya berlaku di semua company:
+# tiap company punya salinannya sendiri dengan abbr di belakang nama, misalnya
+# '6511001 - PEMBELIAN TBS LUAR - TML' dan '6511002 - PEMBELIAN TBS PLASMA - TML'.
+AKUN_PEMBELIAN_TBS = ("6511001", "6511002")
 
 # Biaya Mill = total kepala akun 63 (Proses Pabrik) dan 72 (Biaya Tidak
 # Langsung). Dipakai patch isi_sumber_biaya_mill_cogs untuk mengisi tabel COGS
@@ -69,8 +74,10 @@ BARIS = (
 # Field produksi CPO dan PK sengaja yang sama dengan qty Stock Entry bikinan
 # Sounding, jadi qty yang dibebani biaya sama dengan qty yang masuk Stock Ledger.
 #
-# 'rendemen' adalah field rendemen harian di dokumen Sounding, yang dirata-rata
-# jadi OER dan KER dokumen ini. TBS tidak punya.
+# 'rendemen_bulanan' adalah field rata-rata rendemen sebulan di dokumen Sounding,
+# yang jadi OER dan KER dokumen ini. Isinya rata-rata berjalan rendemen harian
+# sejak awal bulan sampai tanggal proses dokumen itu, jadi dokumen terakhir bulan
+# itu sudah membawa rata-rata sebulan penuh. TBS tidak punya.
 SUMBER_PRODUK = {
 	"tbs": {
 		"doctype": "Data TBS",
@@ -88,7 +95,7 @@ SUMBER_PRODUK = {
 		"produksi_total": True,
 		"closing": "stock_bst",
 		"closing_total": False,
-		"rendemen": "oer_netto_2",
+		"rendemen_bulanan": "rata_rata_oer_bulanan",
 	},
 	"pk": {
 		"doctype": "Sounding Stock Palm Kernel di Bunker Kernel",
@@ -97,7 +104,7 @@ SUMBER_PRODUK = {
 		"produksi_total": True,
 		"closing": "stock_akhir",
 		"closing_total": False,
-		"rendemen": "ker_netto_2",
+		"rendemen_bulanan": "rata_rata_ker_bulanan",
 	},
 }
 
@@ -273,9 +280,11 @@ class COGSMilldanKebun(Document):
 		# dari rate Stock Entry. Seluruh biaya kebun dikapitalisasi ke TBS yang
 		# dipanen, jadi rate baris ini hasil bagi biaya kebun dengan qty panen —
 		# lihat tulis_rincian, yang selalu mengisi rate dari amount / qty.
-		# Opening dan Purchase tetap memakai rate Stock Entry dokumen sumber.
-		for kode in ("tbs_opening", "tbs_purchase"):
-			isi(kode, amount=rate_tbs * q(kode))
+		# Opening tetap memakai rate Stock Entry dokumen sumber.
+		# Cuma Opening yang dinilai dengan rate Stock Entry. Amount FFB Purchase
+		# datang dari akun pembelian TBS lewat ambil_data dan dibiarkan apa adanya,
+		# supaya nilai pembelian tidak berubah jadi qty dikali rate produksi sendiri.
+		isi("tbs_opening", amount=rate_tbs * q("tbs_opening"))
 		isi("tbs_production", amount=flt(self.biaya_kebun))
 		isi(
 			"tbs_available",
@@ -971,36 +980,72 @@ def sumber_total(prefiks, field, company, unit, dari, sampai):
 
 
 def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
-	"""Rata-rata rendemen harian pada dokumen Sounding sepanjang periode.
+	"""OER dan KER dari dokumen Sounding terakhir dalam periode.
 
-	OER diambil dari oer_netto_2 di Sounding Stock CPO di BST, KER dari
-	ker_netto_2 di Sounding Stock Palm Kernel di Bunker Kernel. Keduanya dipakai
-	apa adanya, bukan dihitung ulang dari Production terhadap TBS diolah: yang
-	dipakai pabrik adalah rendemen harian di Sounding, yang pembaginya sudah
-	dikurangi potongan sortasi.
+	OER diambil dari rata_rata_oer_bulanan di Sounding Stock CPO di BST, KER dari
+	rata_rata_ker_bulanan di Sounding Stock Palm Kernel di Bunker Kernel — bukan
+	dihitung ulang dari Production terhadap TBS diolah: yang dipakai pabrik adalah
+	rendemen harian di Sounding, yang pembaginya sudah dikurangi potongan sortasi.
 
-	Semua dokumen yang sudah submit ikut dirata-rata, termasuk yang rendemennya nol
-	atau minus: pembaginya jumlah hari sounding, bukan cuma hari yang berproduksi.
+	Field itu sendiri berisi rata-rata berjalan rendemen harian sejak awal bulan
+	sampai tanggal proses dokumennya, jadi dokumen terakhir bulan itu sudah
+	membawa rata-rata sebulan penuh. Mengambilnya dari sana, bukan merata-rata
+	sendiri di sini, membuat angka di COGS sama persis dengan yang terbaca di
+	dokumen Sounding terakhir — termasuk hari yang rendemennya nol atau minus,
+	yang tetap ikut membagi.
+
+	Karena rentang field itu selalu mulai dari awal bulan tanggal prosesnya,
+	periode COGS yang bukan satu bulan penuh akan membawa hari-hari sebelum
+	Periode Dari. Peringatannya keluar dari peringatan_periode_bukan_sebulan.
+
+	Tanpa Unit, tiap unit diambil dokumen terakhirnya sendiri lalu dirata-rata —
+	dijumlahkan seperti Closing tidak masuk akal untuk angka persen. Unit yang
+	tidak punya dokumen sama sekali tidak ikut membagi.
 	"""
 	cfg = _sumber(prefiks)
-	field = cfg.get("rendemen")
+	field = cfg.get("rendemen_bulanan")
 
 	if not field:
 		return 0.0
 
-	nilai = {"company": company, "dari": dari, "sampai": sampai}
-	syarat = _syarat_unit(unit, nilai)
+	daftar_unit = [unit] if unit else frappe.get_all("Unit", filters={"company": company}, pluck="name")
 
-	row = frappe.db.sql("""
-		select avg(d.`{field}`)
-		from `tab{doctype}` d
-		inner join `tabUnit` u on u.name = d.unit
-		where d.docstatus = 1 and u.company = %(company)s
-			and d.`{tanggal}` between %(dari)s and %(sampai)s
-			{syarat}
-	""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"], syarat=syarat), nilai)
+	terkumpul = []
+	for nama_unit in daftar_unit:
+		row = frappe.db.sql("""
+			select `{field}`
+			from `tab{doctype}`
+			where docstatus = 1 and unit = %(unit)s
+				and `{tanggal}` between %(dari)s and %(sampai)s
+			order by `{tanggal}` desc, creation desc
+			limit 1
+		""".format(field=field, doctype=cfg["doctype"], tanggal=cfg["tanggal"]),
+			{"unit": nama_unit, "dari": dari, "sampai": sampai})
+		if row:
+			terkumpul.append(flt(row[0][0]))
 
-	return flt(row[0][0]) if row and row[0] else 0.0
+	return sum(terkumpul) / len(terkumpul) if terkumpul else 0.0
+
+
+def peringatan_periode_bukan_sebulan(dari, sampai):
+	"""OER dan KER dibaca dari field rata-rata di dokumen Sounding terakhir, dan
+	rentang field itu selalu mulai dari awal bulan tanggal prosesnya sendiri.
+
+	Periode yang bukan satu bulan takwim penuh karena itu menghasilkan rendemen
+	yang rentangnya beda dengan rentang periode ini: periode 10-20 Agustus tetap
+	membawa rendemen sejak 1 Agustus, dan periode dua bulan cuma membawa rendemen
+	bulan terakhirnya. Angkanya tidak salah, tapi bukan yang diminta, jadi
+	dikatakan terus terang alih-alih diam-diam dipakai.
+	"""
+	if get_first_day(dari) == get_first_day(sampai) and 			getdate(dari) == getdate(get_first_day(dari)) and 			getdate(sampai) == getdate(get_last_day(sampai)):
+		return None
+
+	return (
+		"Periode {0} sampai {1} bukan satu bulan takwim penuh. OER dan KER diambil "
+		"dari dokumen Sounding terakhir, yang rata-ratanya selalu dihitung sejak "
+		"awal bulan tanggal prosesnya, jadi rentang rendemennya tidak sama dengan "
+		"rentang periode ini.".format(dari, sampai)
+	)
 
 
 def ada_dokumen_sumber(prefiks, company, unit, dari, sampai):
@@ -1067,6 +1112,81 @@ def rate_dari_stock_entry(prefiks, produk, company, unit, dari, sampai):
 	if not row:
 		return 0.0
 	return flt(row[0].basic_rate) or flt(row[0].valuation_rate)
+
+
+def qty_pembelian_tbs(company, unit, dari, sampai):
+	"""Qty baris FFB Purchase: TBS unit plasma yang ditimbang di PKS ditambah
+	pembelian TBS lewat Purchase Invoice.
+
+	Yang plasma dibaca dari dokumen Timbangan bertipe Receive: unit asalnya
+	ditelusuri lewat Surat Pengantar Buah, dan yang ikut cuma SPB dari Unit yang
+	ditandai Plasma. Field `unit` di Timbangan sendiri adalah pabrik yang
+	menimbang, bukan kebun pengirim, jadi tidak bisa dipakai membedakan plasma.
+
+	Yang dijumlahkan netto 2 — netto sesudah potongan sortasi — karena itu yang
+	benar-benar diterima pabrik; kalau kosong dipakai netto apa adanya.
+
+	Purchase Invoice tidak punya dimensi unit, jadi saringan Unit cuma berlaku
+	untuk Timbangan, mengikuti Biaya Kebun dan Biaya Mill yang juga per company.
+	Retur ikut terjumlah dengan sendirinya karena qty-nya negatif.
+	"""
+	item_codes = get_item_produk("TBS")
+	if not item_codes:
+		return 0.0
+
+	nilai = {"company": company, "dari": dari, "sampai": sampai, "items": tuple(item_codes)}
+	syarat_unit = ""
+	if unit:
+		nilai["unit"] = unit
+		syarat_unit = "and t.unit = %(unit)s"
+
+	plasma = frappe.db.sql("""
+		select sum(case when t.netto_2 then t.netto_2 else t.netto end)
+		from `tabTimbangan` t
+		inner join `tabSurat Pengantar Buah` spb on spb.name = t.spb
+		inner join `tabUnit` u on u.name = spb.unit
+		where t.docstatus = 1 and t.type = 'Receive' and u.plasma = 1
+			and t.company = %(company)s and t.kode_barang in %(items)s
+			and t.posting_date between %(dari)s and %(sampai)s
+			{syarat_unit}
+	""".format(syarat_unit=syarat_unit), nilai)
+
+	invoice = frappe.db.sql("""
+		select sum(pii.qty)
+		from `tabPurchase Invoice Item` pii
+		inner join `tabPurchase Invoice` pi on pi.name = pii.parent
+		where pi.docstatus = 1 and pi.company = %(company)s
+			and pii.item_code in %(items)s
+			and pi.posting_date between %(dari)s and %(sampai)s
+	""", nilai)
+
+	return (flt(plasma[0][0]) if plasma else 0.0) + (flt(invoice[0][0]) if invoice else 0.0)
+
+
+def nilai_pembelian_tbs(company, dari, sampai):
+	"""Nilai pembelian TBS dari akun 6511001 dan 6511002 sepanjang periode.
+
+	Kredit dikurangi debit, bukan sebaliknya seperti Biaya Kebun dan Biaya Mill:
+	kedua akun ini dipakai sebagai lawan jurnal Stock Entry TBS, jadi penerimaan
+	TBS masuk di sisi kredit. Keputusan user 7 September 2026.
+	"""
+	akun = frappe.get_all(
+		"Account",
+		filters={"company": company, "is_group": 0, "account_number": ("in", AKUN_PEMBELIAN_TBS)},
+		pluck="name",
+	)
+
+	if not akun:
+		return 0.0
+
+	total = frappe.db.sql("""
+		select sum(credit) - sum(debit)
+		from `tabGL Entry`
+		where company = %s and posting_date between %s and %s
+			and is_cancelled = 0 and account in %s
+	""", (company, dari, sampai, tuple(akun)))
+
+	return flt(total[0][0]) if total else 0.0
 
 
 def total_biaya(company, kelompok, dari, sampai):
@@ -1139,6 +1259,10 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 	nilai = {}
 	peringatan = []
 
+	pesan_periode = peringatan_periode_bukan_sebulan(periode_dari, periode_sampai)
+	if pesan_periode:
+		peringatan.append(pesan_periode)
+
 	for produk, prefiks in PREFIKS.items():
 		item_codes = get_item_produk(produk)
 		if not item_codes:
@@ -1189,6 +1313,15 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 
 		nilai[prefiks + "_opening"] = (opening_qty, opening_nilai)
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
+
+		# FFB Purchase tidak diambil dari Stock Ledger seperti Purchase CPO dan PK:
+		# qty-nya TBS plasma yang ditimbang di PKS ditambah Purchase Invoice item
+		# TBS, nilainya dari akun pembelian TBS. Permintaan user 7 September 2026.
+		if prefiks == "tbs":
+			nilai["tbs_purchase"] = (
+				qty_pembelian_tbs(company, unit, periode_dari, periode_sampai),
+				nilai_pembelian_tbs(company, periode_dari, periode_sampai),
+			)
 		# Production dan Closing ketiganya dari dokumen sumber, bukan mutasi
 		# Stock Ledger. Closing dinegatifkan karena rantai di hitung()
 		# menjumlahkan, tidak mengurangkan.
@@ -1257,7 +1390,14 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 	return {
 		"rincian": rincian,
 		"biaya_kebun": total_biaya(company, "Kebun", periode_dari, periode_sampai),
-		"biaya_mill": total_biaya(company, "Mill", periode_dari, periode_sampai),
+		# Nilai pembelian TBS masuk dua kali dengan sengaja: sekali lewat baris FFB
+		# Purchase, yang mengalir ke Available lalu Internal Consumption, sekali lagi
+		# di sini. Keduanya jadi dasar alokasi ke CPO dan PK. Ditanyakan dan
+		# ditegaskan user 7 September 2026.
+		"biaya_mill": (
+			total_biaya(company, "Mill", periode_dari, periode_sampai)
+			+ nilai_pembelian_tbs(company, periode_dari, periode_sampai)
+		),
 		"harga_rata_cpo": harga_rata_jual(company, get_item_produk("CPO"), periode_dari, periode_sampai),
 		"harga_rata_pk": harga_rata_jual(company, get_item_produk("Palm Kernel"), periode_dari, periode_sampai),
 		"saldo_gl_tbs": saldo_akun(company, setelan and setelan.akun_persediaan_tbs, periode_sampai),
