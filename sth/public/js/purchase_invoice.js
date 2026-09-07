@@ -222,6 +222,11 @@ frappe.ui.form.on("Purchase Invoice", {
         }
     },
 
+    conversion_rate(frm) {
+        refresh_non_voucher_base_amounts(frm);
+        refresh_base_vat_totals(frm);
+    },
+
     invoice_type(frm) {
         sth.form.setup_column_table_items(frm, frm.doc.invoice_type)
         toggle_kegiatan_unit_columns(frm)
@@ -464,6 +469,7 @@ frappe.ui.form.on("Purchase Invoice", {
             total += row.amount
         }
         frm.set_value("total_pph_lainnya", total)
+        refresh_base_vat_totals(frm)
     },
 
     calculate_total_ppn(frm) {
@@ -472,6 +478,7 @@ frappe.ui.form.on("Purchase Invoice", {
             total += row.amount
         }
         frm.set_value("total_ppn", total)
+        refresh_base_vat_totals(frm)
     },
 
     set_grand_total_setelah_dp(frm) {
@@ -1123,7 +1130,48 @@ function calculate_non_voucher_row(frm, cdt, cdn) {
     }
 
     row.total = (row.dpp || 0) + (row.ppn || 0) - (row.pph || 0);
+    set_non_voucher_base_amounts(row, frm.doc.conversion_rate);
     frm.refresh_field('non_voucher_match');
+}
+
+// Kembaran NON_VOUCHER_BASE_FIELDS di sth/overrides/purchase_invoice.py.
+// Server yang jadi patokan waktu validate; hitungan di sini cuma supaya
+// angkanya sudah kelihatan benar sebelum dokumen disimpan.
+const NON_VOUCHER_BASE_FIELDS = {
+    dpp: "base_dpp",
+    dpp_nilai_lainnya: "base_dpp_nilai_lainnya",
+    ppn: "base_ppn",
+    pph: "base_pph",
+    total: "base_total",
+};
+
+function set_non_voucher_base_amounts(row, conversion_rate) {
+    const rate = flt(conversion_rate) || 1;
+    for (const [field, base_field] of Object.entries(NON_VOUCHER_BASE_FIELDS)) {
+        row[base_field] = flt(row[field] || 0) * rate;
+    }
+}
+
+function refresh_non_voucher_base_amounts(frm) {
+    const rows = frm.doc.non_voucher_match || [];
+    if (!rows.length) return;
+
+    rows.forEach((row) => set_non_voucher_base_amounts(row, frm.doc.conversion_rate));
+    frm.refresh_field('non_voucher_match');
+}
+
+// Kembaran VAT_TOTAL_BASE_FIELDS di sth/overrides/purchase_invoice.py, untuk
+// alur Voucher Match.
+const VAT_TOTAL_BASE_FIELDS = {
+    total_ppn: "base_total_ppn",
+    total_pph_lainnya: "base_total_pph_lainnya",
+};
+
+function refresh_base_vat_totals(frm) {
+    const rate = flt(frm.doc.conversion_rate) || 1;
+    for (const [field, base_field] of Object.entries(VAT_TOTAL_BASE_FIELDS)) {
+        frm.set_value(base_field, flt(frm.doc[field] || 0) * rate);
+    }
 }
 
 function calculate_ppn_from_percentage(frm, cdt, cdn) {
