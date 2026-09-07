@@ -1,7 +1,7 @@
 import contextlib
 
 import frappe
-from frappe.utils import cint, flt, get_first_day, get_last_day
+from frappe.utils import cint, flt, get_first_day
 
 SEHARI = 24 * 3600
 
@@ -222,17 +222,24 @@ RENDEMEN_BULANAN = {
 def set_rata_rata_rendemen_bulanan(doc):
 	"""Isi field informasi rata-rata rendemen sebulan di dokumen sounding.
 
-	Rata-rata harian sederhana atas dokumen submitted di unit yang sama sepanjang
-	bulan tanggal_proses. Sengaja sama persis dengan cara COGS Mill dan Kebun
-	menghitung OER dan KER: netto 2, tidak ditimbang jumlah TBS olah, dan hari
-	yang rendemennya nol tetap ikut membagi. Jadi angka di sini bisa dipakai
-	mencocokkan dokumen itu, bukan tandingannya.
+	Rata-rata harian sederhana atas dokumen submitted di unit yang sama sejak
+	awal bulan tanggal_proses sampai tanggal_proses dokumen ini. Sengaja sama
+	persis dengan cara COGS Mill dan Kebun menghitung OER dan KER: netto 2, tidak
+	ditimbang jumlah TBS olah, dan hari yang rendemennya nol tetap ikut membagi.
+	Jadi angka di sini bisa dipakai mencocokkan dokumen itu, bukan tandingannya.
 
-	Dipanggil dari validate maupun onload. Dari onload karena rata-rata sebulan
-	terus bergerak tiap sounding hari berikutnya disubmit: kalau cuma disimpan
-	waktu validate, yang tampil di dokumen lama adalah rata-rata sampai hari itu
-	saja — malah belum termasuk dokumen itu sendiri, yang docstatus-nya baru jadi
-	1 sesudah validate lewat.
+	Sebulan, tapi berhenti di tanggal dokumennya sendiri — hari sesudahnya tidak
+	ikut. Angkanya jadi rata-rata berjalan yang isinya cuma hal-hal yang sudah
+	terjadi waktu dokumen itu dibuat, dan hasilnya tidak berubah lagi kalau
+	dokumen ini dibuka sesudah sounding hari-hari berikutnya masuk. Itu juga yang
+	bikin patch data lama masuk akal: dokumen diproses urut tanggal, dan
+	rata-rata tiap dokumen cuma bergantung pada dokumen yang sudah dilewati
+	patch, bukan pada dokumen di depannya yang rendemennya belum dihitung ulang.
+
+	Dipanggil dari validate maupun onload. Dari onload karena batas atasnya ikut
+	tanggal_proses sendiri: waktu validate dokumen ini masih docstatus 0 sehingga
+	tidak ikut rata-ratanya sendiri, dan sounding bertanggal mundur yang disubmit
+	belakangan juga masih bisa menggeser angkanya.
 	"""
 	rendemen, target = RENDEMEN_BULANAN[doc.doctype]
 	doc.set(target, 0)
@@ -248,7 +255,7 @@ def set_rata_rata_rendemen_bulanan(doc):
 	""".format(rendemen=rendemen, doctype=doc.doctype), {
 		"unit": doc.unit,
 		"dari": get_first_day(doc.tanggal_proses),
-		"sampai": get_last_day(doc.tanggal_proses),
+		"sampai": doc.tanggal_proses,
 	})
 
 	doc.set(target, flt(row[0][0]) if row and row[0] else 0.0)
