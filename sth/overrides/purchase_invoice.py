@@ -49,6 +49,27 @@ from sth.buying_sth.custom.uang_muka_po import (
 	validate_uang_muka_po,
 )
 
+# Kolom nilai mata uang perusahaan di tabel Non Voucher Match, dipetakan dari
+# kolom mata uang invoice-nya. Dipakai bareng oleh SthPurchaseInvoice.validate
+# dan patch sth.patches.isi_base_amount_pajak_purchase_invoice supaya rumusnya
+# tidak kembar di dua tempat.
+NON_VOUCHER_BASE_FIELDS = {
+	"dpp": "base_dpp",
+	"dpp_nilai_lainnya": "base_dpp_nilai_lainnya",
+	"ppn": "base_ppn",
+	"pph": "base_pph",
+	"total": "base_total",
+}
+
+# Kembarannya di level dokumen, buat alur Voucher Match. Total PPN dan Total PPh
+# Lainnya juga dibaca laporan pajak sebagai rupiah padahal isinya mata uang
+# invoice.
+VAT_TOTAL_BASE_FIELDS = {
+	"total_ppn": "base_total_ppn",
+	"total_pph_lainnya": "base_total_pph_lainnya",
+}
+
+
 class SthPurchaseInvoice(PurchaseInvoice):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -139,6 +160,8 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.validate_term()
 		self.set_retensi_amount()
 		self.set_charges_total()
+		self.set_non_voucher_base_amounts()
+		self.set_base_vat_totals()
 		validate_uang_muka_po(self)
 		self.set_grand_total_setelah_dp()
 		self.validate_uang_muka_wajib_diambil()
@@ -522,6 +545,47 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.total_charges = sum(
 			flt(row.total) for row in self.get("charges_purchase_invoice")
 		)
+
+	def set_non_voucher_base_amounts(self):
+		"""Isi nilai mata uang perusahaan tiap baris Non Voucher Match.
+
+		Angka di tabel ini diketik dalam mata uang invoice, sementara laporan
+		pajak (Equalisasi dan PPN Masukan) menjumlahkannya sebagai rupiah. Tanpa
+		kolom base_*, invoice mata uang asing ikut terjumlah apa adanya ke total
+		yang dianggap rupiah.
+
+		Dipanggil setelah super().validate() karena conversion_rate baru final di
+		sana. Baris dihitung apa adanya tanpa melihat voucher_type supaya kolom
+		base_* selalu konsisten dengan kolom mata uang invoice di baris yang sama.
+		"""
+		rows = self.get("non_voucher_match") or []
+		if not rows:
+			return
+
+		conversion_rate = flt(self.conversion_rate) or 1.0
+		for row in rows:
+			for field, base_field in NON_VOUCHER_BASE_FIELDS.items():
+				row.set(
+					base_field,
+					flt(flt(row.get(field)) * conversion_rate, row.precision(base_field)),
+				)
+
+	def set_base_vat_totals(self):
+		"""Isi Total PPN dan Total PPh Lainnya dalam mata uang perusahaan.
+
+		Sepasang dengan set_non_voucher_base_amounts, cuma untuk alur Voucher
+		Match: kedua total ini diisi dari tabel PPN dan PPh Lainnya yang angkanya
+		mata uang invoice, sementara laporan pajak menjumlahkannya sebagai rupiah.
+
+		Sama seperti tetangganya, dipanggil setelah super().validate() supaya
+		conversion_rate-nya sudah final.
+		"""
+		conversion_rate = flt(self.conversion_rate) or 1.0
+		for field, base_field in VAT_TOTAL_BASE_FIELDS.items():
+			self.set(
+				base_field,
+				flt(flt(self.get(field)) * conversion_rate, self.precision(base_field)),
+			)
 
 	def set_grand_total_setelah_dp(self):
 		# total_advance sudah diisi calculate_taxes_and_totals() di dalam

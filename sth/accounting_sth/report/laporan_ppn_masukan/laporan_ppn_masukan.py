@@ -12,15 +12,15 @@ def execute(filters=None):
 		SELECT
 			pi.supplier_name as nama_vendor,
 			nvm.coa as kode_akun,
-			pi.total - pi.discount_amount as dpp,
-			pi.total_pph_lainnya as pph,
-			pi.total_ppn as ppn,
+			pi.base_total - pi.base_discount_amount as dpp,
+			pi.base_total_pph_lainnya as pph,
+			pi.base_total_ppn as ppn,
 			pi.name as no_invoice,
 			pi.no_fp as no_faktur,
 			pi.no_faktur_pajak_pengganti as no_faktur_pengganti,
 			pi.posting_date as tanggal_invoice,
 			GROUP_CONCAT(DISTINCT vd.type SEPARATOR ', ') as jenis_pajak,
-			pi.total_pph_lainnya as summary_all_pph
+			pi.base_total_pph_lainnya as summary_all_pph
 		FROM `tabPurchase Invoice` pi
 		LEFT JOIN `tabNon Voucher Match` nvm 
 			ON nvm.parent = pi.name

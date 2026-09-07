@@ -25,33 +25,33 @@ def execute(filters=None):
 			END as kode_akun,
 			CASE 
 					WHEN pi.voucher_type = "Voucher Match" 
-					THEN pi.total - pi.discount_amount
+					THEN pi.base_total - pi.base_discount_amount
 					
 					WHEN pi.voucher_type = "Non Voucher Match"
-				THEN nvm.dpp
+				THEN nvm.base_dpp
 					ELSE 0 
 			END as dpp,
 			CASE 
 					WHEN pi.voucher_type = "Voucher Match" 
-					THEN pi.total_pph_lainnya
+					THEN pi.base_total_pph_lainnya
 					
 					WHEN pi.voucher_type = "Non Voucher Match"
-				THEN nvm.pph
+				THEN nvm.base_pph
 					ELSE 0 
 			END as pph,
 			CASE 
 					WHEN pi.voucher_type = "Voucher Match" 
-					THEN pi.total_ppn
+					THEN pi.base_total_ppn
 					
 					WHEN pi.voucher_type = "Non Voucher Match"
-				THEN nvm.ppn
+				THEN nvm.base_ppn
 					ELSE 0 
 			END as ppn,
 			pi.name as no_invoice,
 			pi.no_fp as no_faktur,
 			pi.no_faktur_pajak_pengganti as no_faktur_pengganti,
 			pi.posting_date as tanggal_invoice,
-			pi.total_pph_lainnya as summary_all_pph,
+			pi.base_total_pph_lainnya as summary_all_pph,
 			pi.status as status
 		FROM `tabPurchase Invoice` pi
 		LEFT JOIN `tabPurchase Invoice Item` pii 
@@ -242,7 +242,7 @@ def get_jenis_pajak(parent, tipe_voucher, nvm_name):
 def get_nvm_summary_all_pph(parent):
   query = frappe.db.sql("""
 		SELECT 
-				SUM(nvm.pph) as summary_all_pph
+				SUM(nvm.base_pph) as summary_all_pph
 		FROM `tabNon Voucher Match` nvm
 		JOIN `tabTax Rate` tr_ppn 
 				ON tr_ppn.name = nvm.pilih_ppn
@@ -273,8 +273,8 @@ def get_dpp_voucher_match(parent):
         SELECT
             CASE
                 WHEN SUM(CASE WHEN pph = 1 THEN 1 ELSE 0 END) > 0
-                THEN SUM(CASE WHEN pph = 1 THEN amount ELSE 0 END)
-                ELSE SUM(amount)
+                THEN SUM(CASE WHEN pph = 1 THEN base_amount ELSE 0 END)
+                ELSE SUM(base_amount)
             END AS total_amount
         FROM `tabPurchase Invoice Item`
         WHERE parent = %(parent)s
