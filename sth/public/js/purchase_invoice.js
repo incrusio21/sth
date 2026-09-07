@@ -942,6 +942,14 @@ frappe.ui.form.on('Non Voucher Match', {
 
     persen_pph(frm, cdt, cdn) {
         calculate_non_voucher_row(frm, cdt, cdn);
+    },
+
+    pilih_ppn(frm, cdt, cdn) {
+        set_non_voucher_tax_rate(frm, cdt, cdn, "pilih_ppn", "persen_ppn");
+    },
+
+    pilih_pph(frm, cdt, cdn) {
+        set_non_voucher_tax_rate(frm, cdt, cdn, "pilih_pph", "persen_pph");
     }
 });
 
@@ -1125,9 +1133,7 @@ function calculate_non_voucher_row(frm, cdt, cdn) {
     calculate_pph_from_percentage(frm, cdt, cdn);
     let row = locals[cdt][cdn];
 
-    if (row.dpp) {
-        row.dpp_nilai_lainnya = (row.dpp * 11) / 12;
-    }
+    row.dpp_nilai_lainnya = (flt(row.dpp) * 11) / 12;
 
     row.total = (row.dpp || 0) + (row.ppn || 0) - (row.pph || 0);
     set_non_voucher_base_amounts(row, frm.doc.conversion_rate);
@@ -1174,18 +1180,43 @@ function refresh_base_vat_totals(frm) {
     }
 }
 
+// Kolom ppn/pph read-only dan persen_ppn/persen_pph diisi dari Tax Rate, jadi
+// nilainya selalu turunan dari persen. Dihitung tanpa syarat supaya rate 0 atau
+// Tax Rate yang dikosongkan ikut menihilkan ppn/pph, bukan meninggalkan angka
+// dari pilihan sebelumnya.
 function calculate_ppn_from_percentage(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
-    if (row.persen_ppn && row.dpp) {
-        row.ppn = (row.dpp * row.persen_ppn) / 100;
-    }
+    row.ppn = (flt(row.dpp) * flt(row.persen_ppn)) / 100;
 }
 
 function calculate_pph_from_percentage(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
-    if (row.persen_pph && row.dpp) {
-        row.pph = (row.dpp * row.persen_pph) / 100;
+    row.pph = (flt(row.dpp) * flt(row.persen_pph)) / 100;
+}
+
+// fetch_from "pilih_ppn.rate" baru terisi waktu dokumen disimpan, dan waktu
+// nilainya masuk tidak ada yang menghitung ulang barisnya -- persen tetap 0 dan
+// ppn/pph tidak berubah. Ambil rate-nya sendiri begitu Tax Rate dipilih, lalu
+// hitung ulang baris itu.
+function set_non_voucher_tax_rate(frm, cdt, cdn, link_field, rate_field) {
+    const row = locals[cdt][cdn];
+    const tax_rate = row[link_field];
+
+    if (!tax_rate) {
+        row[rate_field] = 0;
+        calculate_non_voucher_row(frm, cdt, cdn);
+        return;
     }
+
+    frappe.db.get_value("Tax Rate", tax_rate, "rate").then((r) => {
+        // Barisnya bisa sudah dihapus atau Tax Rate-nya diganti lagi sebelum
+        // request ini selesai.
+        const current = locals[cdt][cdn];
+        if (!current || current[link_field] !== tax_rate) return;
+
+        current[rate_field] = flt(r.message && r.message.rate);
+        calculate_non_voucher_row(frm, cdt, cdn);
+    });
 }
 
 
