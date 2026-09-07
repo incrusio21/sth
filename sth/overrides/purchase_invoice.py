@@ -910,17 +910,20 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 			# gl_entries.append(self.get_gl_dict(gl, self.party_account_currency, item=item))
 
+		# Kolom credit GL memakai mata uang perusahaan, sementara
+		# credit_in_transaction_currency memakai mata uang invoice. Untuk
+		# invoice rupiah kursnya 1 sehingga keduanya sama.
 		gl = {
 			"account": self.credit_to,
 			"party_type": "Supplier",
 			"party": self.supplier,
 			"due_date": self.due_date,
 			"against": against_account or self.against_expense_account,
-			"credit": self.grand_total,
-			"credit_in_account_currency": self.grand_total
+			"credit": base_grand_total,
+			"credit_in_account_currency": base_grand_total
 			if self.party_account_currency == self.company_currency
-			else self.grand_total,
-			"credit_in_transaction_currency": self.grand_total,
+			else grand_total,
+			"credit_in_transaction_currency": grand_total,
 			"against_voucher": against_voucher,
 			"against_voucher_type": self.doctype,
 			"project": self.project,
@@ -1509,10 +1512,22 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 						acc_doc = frappe.get_doc("Account", item.expense_account)
 
+						# Kolom debit GL memakai mata uang perusahaan. item.valuation_rate
+						# sudah mata uang perusahaan, sedangkan item.rate dan tax_amount
+						# masih mata uang invoice, jadi keduanya dikali kurs dulu. Untuk
+						# invoice rupiah kursnya 1 sehingga hasilnya tidak berubah.
+						conversion_rate = flt(self.conversion_rate) or 1.0
+
 						total_taxes = 0
 						for ri in self.taxes:
 							if ri.category == "Valuation and Total" and "PPH 21" in ri.account_head:
-								total_taxes += ri.tax_amount
+								total_taxes += flt(ri.tax_amount) * conversion_rate
+
+						item_debit = (
+							flt(item.valuation_rate) * item.qty
+							if flt(item.valuation_rate)
+							else flt(item.rate) * item.qty * conversion_rate
+						) - total_taxes
 
 						if acc_doc.account_type == "Payable":
 							gl_entries.append(
@@ -1520,7 +1535,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 									{
 										"account": expense_account,
 										"against": self.supplier,
-										"debit": ((item.valuation_rate or item.rate) * item.qty)-total_taxes,
+										"debit": item_debit,
 										"debit_in_transaction_currency": amount,
 										"cost_center": item.cost_center,
 										"project": item.project or self.project,
@@ -1538,7 +1553,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 									{
 										"account": expense_account,
 										"against": self.supplier,
-										"debit": ((item.valuation_rate or item.rate) * item.qty)-total_taxes,
+										"debit": item_debit,
 										"debit_in_transaction_currency": amount,
 										"cost_center": item.cost_center,
 										"project": item.project or self.project,

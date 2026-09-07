@@ -326,7 +326,7 @@ def party_akun_uang_muka(doc, akun_uang_muka, purchase_order):
 	}
 
 
-def kurangi_baris_hutang(doc, gl_entries, jumlah):
+def kurangi_baris_hutang(doc, gl_entries, jumlah, jumlah_base=None):
 	"""Potong baris hutang invoice sebesar uang muka yang dipakai.
 
 	Dipotong langsung di barisnya, bukan ditambahkan sebagai baris debit
@@ -338,12 +338,21 @@ def kurangi_baris_hutang(doc, gl_entries, jumlah):
 	Mengembalikan False kalau baris hutangnya tidak ada — invoice tipe SPK dan
 	Leasing tidak memanggil make_supplier_gl_entry() sama sekali.
 	"""
+	if jumlah_base is None:
+		jumlah_base = jumlah
+
 	for entry in gl_entries:
 		if entry.get("account") != doc.credit_to or not flt(entry.get("credit")):
 			continue
 
-		for medan in ("credit", "credit_in_account_currency", "credit_in_transaction_currency"):
-			entry[medan] = flt(entry.get(medan)) - jumlah
+		# credit memakai mata uang perusahaan, credit_in_transaction_currency
+		# memakai mata uang invoice, dan credit_in_account_currency ikut mata
+		# uang akun hutangnya.
+		entry["credit"] = flt(entry.get("credit")) - jumlah_base
+		entry["credit_in_account_currency"] = flt(entry.get("credit_in_account_currency")) - (
+			jumlah_base if doc.party_account_currency == doc.company_currency else jumlah
+		)
+		entry["credit_in_transaction_currency"] = flt(entry.get("credit_in_transaction_currency")) - jumlah
 
 		return True
 
@@ -362,8 +371,13 @@ def gl_entries_uang_muka(doc, gl_entries):
 		return 0
 
 	cost_center = doc.cost_center or frappe.db.get_value("Company", doc.company, "cost_center")
+	# Kolom debit/credit GL memakai mata uang perusahaan, sedangkan
+	# allocated_amount memakai mata uang invoice. Untuk invoice rupiah
+	# kursnya 1 sehingga nilainya sama.
+	kurs = flt(doc.conversion_rate) or 1.0
 	akun_dipakai = []
 	total = 0
+	total_base = 0
 	ditambahkan = 0
 
 	for baris, info in pasangan:
@@ -371,14 +385,15 @@ def gl_entries_uang_muka(doc, gl_entries):
 		if not dipakai:
 			continue
 
+		dipakai_base = flt(dipakai * kurs, baris.precision("allocated_amount"))
+
 		akun_uang_muka = akun_uang_muka_pe(info.payment_entry, info.purchase_order)
 		keterangan = _("Uang muka {0} lewat {1}").format(info.purchase_order, info.payment_entry)
 
 		kredit = {
 			"account": akun_uang_muka,
 			"against": doc.credit_to,
-			"credit": dipakai,
-			"credit_in_account_currency": dipakai,
+			"credit": dipakai_base,
 			"credit_in_transaction_currency": dipakai,
 			"cost_center": cost_center,
 			"project": doc.project,
@@ -390,12 +405,13 @@ def gl_entries_uang_muka(doc, gl_entries):
 
 		akun_dipakai.append(akun_uang_muka)
 		total += dipakai
+		total_base += dipakai_base
 		ditambahkan += 1
 
 	if not total:
 		return ditambahkan
 
-	if not kurangi_baris_hutang(doc, gl_entries, total):
+	if not kurangi_baris_hutang(doc, gl_entries, total, total_base):
 		gl_entries.append(
 			doc.get_gl_dict(
 				{
@@ -404,8 +420,7 @@ def gl_entries_uang_muka(doc, gl_entries):
 					"party": doc.supplier,
 					"due_date": doc.due_date,
 					"against": ", ".join(sorted(set(akun_dipakai))),
-					"debit": total,
-					"debit_in_account_currency": total,
+					"debit": total_base,
 					"debit_in_transaction_currency": total,
 					"against_voucher": doc.name,
 					"against_voucher_type": doc.doctype,
