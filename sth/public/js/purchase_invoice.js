@@ -46,6 +46,8 @@ frappe.ui.form.on("Purchase Invoice", {
         frm.trigger('get_tax_template')
         frm.page.sidebar.hide()
 
+        toggle_pakai_ppn(frm)
+
         // Hanya untuk draft. Di dokumen submitted/cancelled, perhitungan ini menulis
         // ulang sub_total dan baris ppn/pph/taxes; hasil aritmetika JS di sini tidak
         // dibulatkan seperti perhitungan server, jadi nilainya selalu meleset sedikit
@@ -217,6 +219,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
     voucher_type(frm) {
         toggle_non_voucher_section(frm);
+        toggle_pakai_ppn(frm);
         if (frm.doc.voucher_type === 'Non Voucher Match') {
             set_coa_filter(frm);
         }
@@ -962,6 +965,22 @@ function toggle_non_voucher_section(frm) {
         frm.set_df_property('items', 'hidden', 0);
     }
     frm.refresh_fields();
+}
+
+// Di alur Non Voucher Match, PPN diambil dari kolom PPN tabel Non Voucher Match
+// dan ditulis sendiri ke taxes waktu validate. Kalau Pakai PPN ikut menyala,
+// baris "PPN 12%" dari tabel PPN ikut masuk ke perhitungan, jadi dimatikan dan
+// dikunci selama voucher_type-nya Non Voucher Match.
+function toggle_pakai_ppn(frm) {
+    const non_voucher = frm.doc.voucher_type === 'Non Voucher Match';
+
+    frm.set_df_property('pakai_ppn', 'read_only', non_voucher ? 1 : 0);
+
+    // Dokumen submitted/cancelled tidak boleh disimpan lagi; mengubah nilainya
+    // di sini cuma bikin indicator "Not Saved" yang tidak bisa hilang.
+    if (non_voucher && frm.doc.pakai_ppn && frm.doc.docstatus === 0) {
+        frm.set_value('pakai_ppn', 0);
+    }
 }
 
 function toggle_kegiatan_unit_columns(frm) {
