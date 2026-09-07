@@ -1087,12 +1087,19 @@ function process_non_voucher_entries(frm) {
                 row => (row.description || "").startsWith(CHARGES_MARKER)
             );
 
+            // Description-nya wajib ber-marker: make_tax_gl_entries() di
+            // sth/overrides/purchase_invoice.py hanya membuat GL Entry untuk
+            // baris taxes yang description-nya ber-marker. Tanpa itu PPN dan
+            // PPh tidak pernah masuk jurnal, padahal keduanya ikut menambah
+            // grand_total di sisi hutang, sehingga debit != kredit.
             let new_tax_rows = [];
             if (total_ppn != 0) {
                 new_tax_rows.push({
                     charge_type: 'Actual',
+                    add_deduct_tax: 'Add',
+                    category: 'Total',
                     account_head: company.ppn_account,
-                    description: 'PPN',
+                    description: `${PPN_MARKER}Non Voucher Match`,
                     tax_amount: total_ppn,
                     tipe_pajak: "PPN",
                 });
@@ -1100,8 +1107,10 @@ function process_non_voucher_entries(frm) {
             if (total_pph != 0) {
                 new_tax_rows.push({
                     charge_type: 'Actual',
+                    add_deduct_tax: 'Add',
+                    category: 'Total',
                     account_head: company.pph_account,
-                    description: 'PPh',
+                    description: `${PPH_LAINNYA_MARKER}Non Voucher Match`,
                     tax_amount: -total_pph,
                     tipe_pajak: "PPH",
                 });
