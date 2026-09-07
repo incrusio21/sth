@@ -8,6 +8,7 @@ sth.patches.merge_duplicate_spb_trans_no
 # Patches added in this section will be executed after doctypes are migrated
 sth.patches.isi_base_amount_pajak_purchase_invoice
 sth.patches.isi_rata_rata_rendemen_sounding
+sth.patches.bersihkan_coa_stasiun_grup
 # perbaiki_restan_data_tbs dan isi_adjustment_sounding sengaja tidak didaftarkan:
 # keduanya perbaikan data sekali jalan yang mau diawasi sendiri waktu dijalankan,
 # yang restan Data TBS bahkan memposting ulang puluhan Stock Entry. Jalankan

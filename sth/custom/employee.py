@@ -27,20 +27,23 @@ def get_stasiun_by_unit(doctype, txt, searchfield, start, page_len, filters):
 		"page_len": page_len,
 	})
 
-def stasiun_umum(station):
-	"""Stasiun yang Station Name-nya mengandung UMUM."""
-	nama = frappe.db.get_value("Station Master", station, "machine_name") or ""
-
-	return "UMUM" in nama.upper()
-
-
 def akun_stasiun(station, company):
 	"""Akun yang boleh dipakai sebagai COA Stasiun untuk satu stasiun dan company.
 
-	Normalnya akun anak dari account yang dipasang di Station Procurement
-	Settings. Stasiun UMUM tidak dipecah per kegiatan sehingga tidak punya anak
-	sama sekali, jadi yang dipakai account yang terdaftar di Station Procurement
-	Settings itu sendiri.
+	Akun yang dipasang di Station Procurement Settings lazimnya akun grup, dan
+	yang dipakai karyawan adalah akun anaknya. Kalau akun itu sendiri sudah akun
+	anak — BENGKEL misalnya, yang memakai 4111003 PEMELIHARAAN BENGKEL — dialah
+	satu-satunya pilihan, tidak perlu dicarikan turunan yang memang tidak ada.
+
+	Yang menentukan punya-tidaknya anak, bukan nama stasiunnya. Aturan lama
+	memakai kata UMUM di nama stasiun dan menganggap stasiun itu tidak dipecah
+	per kegiatan; nyatanya akunnya, 72110 BIAYA PEGAWAI STAF DAN NON-STAFF,
+	punya lima belas anak. Akibatnya yang terpasang di karyawan justru akun grup
+	itu sendiri, dan itu tidak akan pernah bisa dijurnal.
+
+	Akun grup karena itu tidak pernah ikut hasil. GL Entry menolaknya mentah-
+	mentah, jadi memasangnya di karyawan cuma menunda kegagalan sampai Costing
+	Mill disubmit — sesudah Ambil Data terlihat normal dan tabel Closing tersusun.
 
 	Ini satu-satunya sumber untuk dropdown maupun pengisian otomatis.
 	set_coa_stasiun() mengosongkan coa_stasiun kalau nilainya tidak ada di
@@ -50,39 +53,36 @@ def akun_stasiun(station, company):
 	if not station or not company:
 		return []
 
-	if stasiun_umum(station):
-		return frappe.db.sql_list("""
-			SELECT
-				sps.account
-			FROM `tabStation Procurement Settings` sps
-			WHERE
-				sps.parent = %(station)s
-				AND sps.parenttype = 'Station Master'
-				AND sps.company = %(company)s
-				AND sps.account IS NOT NULL AND sps.account != ''
-			ORDER BY sps.account
-		""", {
-			"station": station,
-			"company": company,
-		})
-
-	return frappe.db.sql_list("""
+	terpasang = frappe.db.sql_list("""
 		SELECT
-			ca.name
+			sps.account
 		FROM `tabStation Procurement Settings` sps
-		INNER JOIN `tabAccount` a
-			ON a.name = sps.account
-		INNER JOIN `tabAccount` ca
-			ON ca.parent_account = a.name
 		WHERE
 			sps.parent = %(station)s
 			AND sps.parenttype = 'Station Master'
 			AND sps.company = %(company)s
-		ORDER BY ca.name
+			AND sps.account IS NOT NULL AND sps.account != ''
 	""", {
 		"station": station,
 		"company": company,
 	})
+
+	if not terpasang:
+		return []
+
+	# Yang sudah berupa akun anak dipakai apa adanya; yang grup diganti anaknya.
+	sendiri = frappe.get_all(
+		"Account",
+		filters={"name": ("in", terpasang), "is_group": 0},
+		pluck="name",
+	)
+	anak = frappe.get_all(
+		"Account",
+		filters={"parent_account": ("in", terpasang), "is_group": 0},
+		pluck="name",
+	)
+
+	return sorted(set(sendiri) | set(anak))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
