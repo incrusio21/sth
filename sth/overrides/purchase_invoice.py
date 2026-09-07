@@ -1134,6 +1134,11 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		if not total_debit:
 			return
 
+		# total_debit memakai mata uang perusahaan, sedangkan tax_amount masih
+		# mata uang invoice, jadi dikali kurs dulu sebelum dijumlahkan. Untuk
+		# invoice rupiah kursnya 1 sehingga hasilnya tidak berubah.
+		conversion_rate = flt(self.conversion_rate) or 1.0
+
 		total_charges_pp = 0
 		for tax in self.taxes:
 			if ("__from_pph_lainnya__" in (tax.description or "")
@@ -1142,9 +1147,9 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				or "__from_pb__" in (tax.description or "")):
 
 				if "__from_charges__" in (tax.description or ""):
-					total_charges_pp += tax.tax_amount * -1
+					total_charges_pp += flt(tax.tax_amount) * conversion_rate * -1
 				else:
-					total_charges_pp += tax.tax_amount
+					total_charges_pp += flt(tax.tax_amount) * conversion_rate
 
 		# Kurangi credit_to dengan total charges (charges punya GL entry sendiri via make_charges_gl_entries)
 		credit_amount = flt(total_debit + total_charges_pp, self.precision("base_grand_total"))
@@ -1192,8 +1197,11 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			"Keterangan {2}. Accounting Entry for {0} {1}. "
 		).format(self.doctype, self.name, self.keterangan)
 
-		grand_total = flt(self.grand_total)
-		base_amount = flt(self.grand_total)
+		# Semua baris di bawah dibuat dengan account_currency = company_currency,
+		# jadi nilainya harus mata uang perusahaan. base_grand_total adalah
+		# grand_total yang sudah dikali kurs; untuk invoice rupiah nilainya sama.
+		grand_total = flt(self.base_grand_total)
+		base_amount = flt(self.base_grand_total)
 
 		service = 1
 
