@@ -595,9 +595,13 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 			},
 			callback: function (r) {
 				if (r.message && r.message.has_payment_entry) {
-					frappe.throw(
-						'This Purchase Order has a GL Entry for Uang Muka with Payment Entry. Purchase Order cannot be closed.',
-					)
+					frappe.throw({
+						title: __("Uang Muka PO"),
+						message: __(
+							"Purchase Order ini masih menyisakan uang muka {0} di supplier. Kembalikan dulu lewat tombol <b>Uang Muka</b> sebelum PO ditutup.",
+							[format_currency(r.message.sisa, cur_frm.doc.currency)]
+						),
+					})
 				} else {
 					cur_frm.cscript.update_status("Close", "Closed");
 				}
@@ -661,8 +665,23 @@ frappe.ui.form.on("Purchase Order", {
 		})
 
 		frm.trigger("set_query_field")
+		frm.trigger("tombol_uang_muka")
 		sth.form.setup_column_table_items(frm, frm.doc.purchase_type, "Purchase Order Item")
 		sth.form.toggle_pph_22(frm)
+	},
+
+	// Tombolnya baru dipasang sesudah rekapnya diambil, supaya PO yang tidak
+	// pernah dibayar uang muka tidak kebagian menu yang isinya kosong.
+	tombol_uang_muka(frm) {
+		if (frm.doc.docstatus !== 1) return
+
+		frappe.xcall("sth.buying_sth.custom.purchase_order.info_uang_muka_po", {
+			purchase_order: frm.doc.name,
+		}).then((rekap) => {
+			if (!rekap || !(rekap.baris || []).length) return
+
+			frm.add_custom_button(__("Uang Muka"), () => tampilkan_uang_muka(frm))
+		})
 	},
 
 	onload_post_render(frm) {
@@ -978,4 +997,157 @@ function calculate_sub_total(frm) {
 
 frappe.form.link_formatters['Item'] = function (value, doc) {
 	return value
+}
+
+
+// ─── Uang Muka PO ────────────────────────────────────────────────────────────
+//
+// Uang muka PO dibayar lewat Payment Entry yang menempel di PO-nya. Yang
+// mengurangi ada dua dan keduanya dokumen lain: pemakaian di Purchase Invoice
+// dan pengembalian uang lewat Payment Entry penerimaan. Dialog ini menampilkan
+// ketiganya berikut sisanya, dan membuatkan Payment Entry pengembaliannya —
+// tanpa satu pun pembayaran lama dibatalkan.
+
+function tampilkan_uang_muka(frm) {
+	frappe.xcall("sth.buying_sth.custom.purchase_order.info_uang_muka_po", {
+		purchase_order: frm.doc.name,
+	}).then((rekap) => {
+		const sisa = flt(rekap.sisa)
+		const boleh_kembalikan = sisa > 0 && frappe.model.can_create("Payment Entry")
+
+		const opsi = {
+			title: __("Uang Muka {0}", [frm.doc.name]),
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "rincian",
+					fieldtype: "HTML",
+					options: html_uang_muka(rekap),
+				},
+			],
+		}
+
+		if (boleh_kembalikan) {
+			opsi.fields.push({
+				fieldname: "jumlah",
+				fieldtype: "Currency",
+				label: __("Jumlah Dikembalikan"),
+				default: sisa,
+				description: __("Paling banyak sebesar sisa uang muka, {0}.", [
+					format_currency(sisa, rekap.currency),
+				]),
+			})
+
+			opsi.primary_action_label = __("Kembalikan Uang Muka")
+			opsi.primary_action = () => {
+				const jumlah = flt(dialog.get_value("jumlah"))
+				if (jumlah <= 0 || jumlah > sisa) {
+					frappe.msgprint({
+						title: __("Uang Muka PO"),
+						message: __("Jumlah pengembalian harus antara 0 dan {0}.", [
+							format_currency(sisa, rekap.currency),
+						]),
+						indicator: "red",
+					})
+					return
+				}
+
+				dialog.hide()
+				buat_pengembalian_uang_muka(frm, jumlah)
+			}
+		}
+
+		const dialog = new frappe.ui.Dialog(opsi)
+
+		dialog.show()
+	})
+}
+
+function buat_pengembalian_uang_muka(frm, jumlah) {
+	frappe.call({
+		method: "sth.buying_sth.custom.purchase_order.get_payment_entry_pengembalian_uang_muka",
+		args: { purchase_order: frm.doc.name, jumlah: jumlah },
+		freeze: true,
+		freeze_message: __("Menyiapkan pengembalian uang muka ..."),
+		callback(r) {
+			if (!r.message) return
+
+			const doclist = frappe.model.sync(r.message)
+			frappe.set_route("Form", doclist[0].doctype, doclist[0].name)
+			frappe.show_alert({
+				message: __("Lengkapi Unit dan Mode of Payment supaya rekening penerimanya terisi."),
+				indicator: "blue",
+			})
+		},
+	})
+}
+
+function html_uang_muka(rekap) {
+	const uang = (nilai) => format_currency(flt(nilai), rekap.currency)
+	const tautan = (doctype, nama) => frappe.utils.get_form_link(doctype, nama, true)
+
+	if (!(rekap.baris || []).length) {
+		return `<p class="text-muted">${__("Belum ada pembayaran uang muka untuk Purchase Order ini.")}</p>`
+	}
+
+	const baris = rekap.baris.map((row) => {
+		const invoice = (row.invoice || [])
+			.map((d) => `${tautan("Purchase Invoice", d.purchase_invoice)} (${uang(d.allocated_amount)})`)
+			.join("<br>") || `<span class="text-muted">-</span>`
+
+		return `<tr>
+			<td>${tautan("Payment Entry", row.payment_entry)}
+				<br><span class="text-muted">${frappe.datetime.str_to_user(row.posting_date)}</span></td>
+			<td>${frappe.utils.escape_html(row.akun_uang_muka || "")}</td>
+			<td class="text-right">${uang(row.dibayar)}</td>
+			<td>${invoice}</td>
+			<td class="text-right">${uang(row.terpakai)}</td>
+			<td class="text-right">${uang(row.dikembalikan)}</td>
+			<td class="text-right"><b>${uang(row.sisa)}</b></td>
+		</tr>`
+	}).join("")
+
+	const pengembalian = (rekap.pengembalian || []).map((row) => {
+		return `<tr>
+			<td>${tautan("Payment Entry", row.payment_entry)}</td>
+			<td>${frappe.datetime.str_to_user(row.posting_date)}</td>
+			<td class="text-right">${uang(row.allocated_amount)}</td>
+		</tr>`
+	}).join("")
+
+	const tabel_pengembalian = pengembalian
+		? `<h5 class="mt-4">${__("Pengembalian")}</h5>
+			<table class="table table-bordered table-sm">
+				<thead><tr>
+					<th>${__("Payment Entry")}</th>
+					<th>${__("Tanggal")}</th>
+					<th class="text-right">${__("Jumlah")}</th>
+				</tr></thead>
+				<tbody>${pengembalian}</tbody>
+			</table>`
+		: ""
+
+	return `<div class="uang-muka-po">
+		<table class="table table-bordered table-sm">
+			<thead><tr>
+				<th>${__("Pembayaran")}</th>
+				<th>${__("Akun Uang Muka")}</th>
+				<th class="text-right">${__("Dibayar")}</th>
+				<th>${__("Dipakai di Invoice")}</th>
+				<th class="text-right">${__("Terpakai")}</th>
+				<th class="text-right">${__("Dikembalikan")}</th>
+				<th class="text-right">${__("Sisa")}</th>
+			</tr></thead>
+			<tbody>${baris}</tbody>
+			<tfoot><tr>
+				<th colspan="2">${__("Total")}</th>
+				<th class="text-right">${uang(rekap.total_dibayar)}</th>
+				<th></th>
+				<th class="text-right">${uang(rekap.total_terpakai)}</th>
+				<th class="text-right">${uang(rekap.total_dikembalikan)}</th>
+				<th class="text-right">${uang(rekap.sisa)}</th>
+			</tr></tfoot>
+		</table>
+		${tabel_pengembalian}
+	</div>`
 }

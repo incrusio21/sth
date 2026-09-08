@@ -32,7 +32,8 @@
   "tsu",
   "tts",
   "tps",
-  "nomor_nib"
+  "nomor_nib",
+  "nomor_objek_pajak_nop"
  ],
  "fields": [
   {
@@ -198,12 +199,18 @@
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Nomor NIB"
+  },
+  {
+   "fieldname": "nomor_objek_pajak_nop",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor Objek Pajak (NOP)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-07 16:01:46.983748",
+ "modified": "2026-09-08 10:50:11.242450",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",

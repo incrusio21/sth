@@ -21,7 +21,6 @@ class SoundingStockCPOdiBST(Document):
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
 
 		set_rata_rata_rendemen_bulanan(self)
-		self.calculate_totals()
 
 	def on_submit(self):
 		self.create_ste()
@@ -31,26 +30,44 @@ class SoundingStockCPOdiBST(Document):
 	
 	def on_trash(self):
 		self.delete_ste()
-		
+	
+	def cancel_ste(self):
+		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
+		for row in ste:
+			doc = frappe.get_doc("Stock Entry",row)
+			doc.cancel()
+	
+	def delete_ste(self):
+		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
+		for row in ste:
+			doc = frappe.get_doc("Stock Entry",row)
+			doc.delete()
 
 	@frappe.whitelist()
 	def get_data(self):
-	
-		# get_total_stock = frappe.db.sql("""
-		# 	select b.actual_qty as qty from `tabBin` b
-		# 	join `tabItem` i on b.item_code = i.name
-		# 	join `tabWarehouse` w on w.name = b.warehouse
-		# 	where i.tipe_barang = "CPO" and w.unit = %s and w.name = %s
-		# """,(self.unit,get_warehouse_bst(self.unit)),as_dict=True)
-	
-		# stock_saat_ini = get_total_stock[0].qty if get_total_stock else 0
-		stock_saat_ini = self.get_total_stock()
 		self.pengiriman_cpo = self.get_delivery()
-		self.stock_awal = flt(stock_saat_ini) + flt(self.pengiriman_cpo)
+		self.stock_awal = flt(self.get_stock()) + flt(self.pengiriman_cpo)
 		self.set_adjustment()
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.potongan_sortasi = self.get_sortasi()
-		self.calculate_totals()
+
+	def get_stock(self):
+		warehouse = get_warehouse_bst(self.unit)
+		item_code = frappe.db.get_value("Item",{"tipe_barang": "CPO"})
+
+		if not (warehouse and item_code):
+			return 0
+
+		terakhir = frappe.db.sql("""
+			select qty_after_transaction
+			from `tabStock Ledger Entry`
+			where item_code = %s and warehouse = %s and is_cancelled = 0
+				and posting_date < %s
+			order by posting_date desc, posting_time desc, creation desc
+			limit 1
+		""",(item_code, warehouse, self.tanggal_proses))
+
+		return flt(terakhir[0][0]) if terakhir else 0
 
 	def get_delivery(self):
 		data = frappe.db.sql("""
@@ -72,24 +89,6 @@ class SoundingStockCPOdiBST(Document):
 
 		return data_sortasi[0].qty if data_sortasi else 0
 
-	def get_total_stock(self):
-		warehouse = get_warehouse_bst(self.unit)
-		item_code = frappe.db.get_value("Item",{"tipe_barang": "CPO"})
-
-		if not (warehouse and item_code):
-			return 0
-
-		terakhir = frappe.db.sql("""
-			select qty_after_transaction
-			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s and is_cancelled = 0
-				and posting_date < %s
-			order by posting_date desc, posting_time desc, creation desc
-			limit 1
-		""",(item_code, warehouse, self.tanggal_proses))
-
-		return flt(terakhir[0][0]) if terakhir else 0
-
 	def set_adjustment(self):
 		"""Pecah stock awal jadi bagian sebelum koreksi dan koreksinya sendiri.
 
@@ -108,19 +107,11 @@ class SoundingStockCPOdiBST(Document):
 		)
 		self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
 
-	def calculate_totals(self) :
-		total_stock = self.tonase_sebenarnya + self.tonase_sebenarnya_2
-		total_produksi = (flt(total_stock) + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
-		self.stock_bst = total_stock
-		self.produksi_cpo = total_produksi
-    
-
 	def create_ste(self):
-		if round(self.produksi_cpo,2) == 0: return
+		if round(self.produksi_cpo,2) > 0: return
 
 		ste_type = "Material Receipt" if self.produksi_cpo > 0 else "Material Issue"
 		def postprocess(source,target):
-			 
 			target.stock_entry_type = ste_type
 
 			# Tanpa ini validate_posting_time menimpa posting_date dengan hari
@@ -128,7 +119,7 @@ class SoundingStockCPOdiBST(Document):
 			# dibuat, bukan di tanggal soundingnya.
 			target.set_posting_time = 1
 			target.posting_time = "23:59:59"
-
+			
 			update_fields = (
 				"item_name",
 				"stock_uom",
@@ -184,7 +175,7 @@ class SoundingStockCPOdiBST(Document):
 					"name":"references",
 					"doctype": "reference_doctype",
 					"tanggal_proses":"posting_date",
-					
+					"jam":"posting_time"
 				}
 			},
 		}
@@ -197,42 +188,22 @@ class SoundingStockCPOdiBST(Document):
 		doc.insert()
 		doc.submit()
 	
-	def cancel_ste(self):
-		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
-		for row in ste:
-			doc = frappe.get_doc("Stock Entry",row)
-			doc.cancel()
-	
-	def delete_ste(self):
-		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
-		for row in ste:
-			doc = frappe.get_doc("Stock Entry",row)
-			doc.delete()
-
-	def recreate_ste(self):
-		self.cancel_ste()
-		self.delete_ste()
-		self.create_ste()
-
-
 	def update_document_afterwards(self):
 		docs = frappe.get_all(
-			"Sounding Stock CPO di BST",
+			self.doctype,
 			filters=[
-				["creation",">",self.creation],
+				["tanggal_proses",">",self.tanggal_proses],
+				["name","!=",self.name]
 			],
+
 			pluck="name"
 		)
+
+		if not docs: return
 
 		for name in docs:
 			doc = frappe.get_doc(self.doctype,name)
 			doc.get_data()
-			doc.recreate_ste()
-
-			doc.db_update_all()
-
-
-
 
 @frappe.whitelist()
 def get_ukuran_sounding(tinggi,bst,pabrik):

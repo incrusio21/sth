@@ -46,6 +46,7 @@ from sth.buying_sth.custom.uang_muka_po import (
 	gl_entries_uang_muka,
 	koreksi_advance_uang_muka_po,
 	saring_advance_beda_akun,
+	sisa_advance_uang_muka_po,
 	validate_uang_muka_po,
 )
 
@@ -653,9 +654,16 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		Penyaringnya ada di saring_advance_beda_akun(); di sini supaya berlaku
 		untuk semua pemakainya sekaligus — set_advances() yang mengisi tabel,
 		allocate_advances_automatically, dan peringatan validate_advance_entries.
+
+		Uang muka PO yang lolos saringan itu ditawarkan sebesar sisanya:
+		sisa_advance_uang_muka_po() memotong yang sudah dipakai invoice lain dan
+		yang sudah dikembalikan ke supplier, lalu membuang baris yang habis.
 		"""
-		return saring_advance_beda_akun(
-			self, super().get_advance_entries(include_unallocated=include_unallocated)
+		return sisa_advance_uang_muka_po(
+			self,
+			saring_advance_beda_akun(
+				self, super().get_advance_entries(include_unallocated=include_unallocated)
+			),
 		)
 
 	@frappe.whitelist()

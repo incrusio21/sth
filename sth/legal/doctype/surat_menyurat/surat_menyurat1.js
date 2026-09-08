@@ -6,7 +6,7 @@ frappe.ui.form.on("Surat Menyurat", {
     frm.set_query("unit", function (doc) {
       return {
         filters: {
-          company: ["=", doc.company]
+          company: doc.company
         }
       };
     });

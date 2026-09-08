@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt,cint
+from frappe.utils import flt, cint, nowdate
     
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
@@ -76,33 +76,129 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 @frappe.whitelist()
 def check_uang_muka_payment_entry(purchase_order):
-    """Check if Purchase Order has GL Entry for Uang Muka with Payment Entry"""
-    
-    gl_entries = frappe.db.sql("""
-        SELECT 
-            ge.name, 
-            ge.voucher_no, 
-            ge.voucher_type,
-            ge.account
-        FROM `tabGL Entry` ge
-        WHERE ge.against_voucher = %(po_name)s
-            AND ge.against_voucher_type = 'Purchase Order'
-            AND ge.account LIKE %(account_pattern)s
-            AND is_cancelled = 0
-    """, {
-        'po_name': purchase_order,
-        'account_pattern': '%UANG MUKA%'
-    }, as_dict=1,debug=1)
-    
-    has_payment_entry = any(
-        entry.get('voucher_type') == 'Payment Entry' 
-        for entry in gl_entries
-    )
-    
+    """Sisa uang muka PO, dipakai menahan PO ditutup selagi uangnya masih di supplier.
+
+    Dulu yang dilihat cuma ada-tidaknya GL Entry uang muka dari Payment Entry,
+    dicari dari nama akun yang mengandung "UANG MUKA". Akibatnya PO tetap
+    tertahan walaupun uang mukanya sudah habis dipakai invoice atau sudah
+    dikembalikan ke supplier. Yang dipakai sekarang sisanya, dihitung dari baris
+    pembayarannya sendiri, bukan ditebak dari nama akun.
+    """
+    from sth.buying_sth.custom.uang_muka_po import rekap_uang_muka_po
+
+    rekap = rekap_uang_muka_po(purchase_order)
+
     return {
-        'has_uang_muka': len(gl_entries) > 0,
-        'has_payment_entry': has_payment_entry
+        'has_uang_muka': flt(rekap['total_dibayar']) > 0,
+        'has_payment_entry': flt(rekap['sisa']) > 0,
+        'sisa': flt(rekap['sisa']),
     }
+
+
+@frappe.whitelist()
+def info_uang_muka_po(purchase_order):
+    """Rincian uang muka satu PO untuk ditampilkan di form Purchase Order."""
+    frappe.has_permission("Purchase Order", doc=purchase_order, throw=True)
+
+    from sth.buying_sth.custom.uang_muka_po import rekap_uang_muka_po
+
+    return rekap_uang_muka_po(purchase_order)
+
+
+@frappe.whitelist()
+def get_payment_entry_pengembalian_uang_muka(purchase_order, jumlah=None):
+    """Payment Entry penerimaan yang menarik balik sisa uang muka Purchase Order.
+
+    Uang mukanya tidak dibatalkan: Payment Entry pembayarannya tetap utuh
+    menempel di PO, begitu juga jurnalnya. Pengembaliannya jadi dokumen sendiri
+    yang mengkredit akun uang muka yang sama dengan `against_voucher` PO yang
+    sama, jadi saldo uang muka supplier tertutup lewat payment ledger dan
+    advance_paid PO ikut turun tanpa satu pun jurnal lama diposting ulang.
+
+    Rekening penerimaannya sengaja dibiarkan kosong — diisi user lewat Unit dan
+    Mode of Payment seperti Payment Entry lain, supaya uangnya masuk ke rekening
+    yang benar-benar menerima.
+    """
+    from erpnext.setup.utils import get_exchange_rate
+
+    from sth.buying_sth.custom.uang_muka_po import akun_uang_muka_tersisa, rekap_uang_muka_po
+
+    frappe.has_permission("Purchase Order", doc=purchase_order, throw=True)
+
+    rekap = rekap_uang_muka_po(purchase_order)
+    sisa = flt(rekap['sisa'])
+
+    if sisa <= 0:
+        frappe.throw(
+            _("Purchase Order {0} tidak punya sisa uang muka yang bisa dikembalikan.").format(
+                purchase_order
+            ),
+            title=_("Uang Muka PO"),
+        )
+
+    jumlah = flt(jumlah) if jumlah else sisa
+
+    if jumlah <= 0:
+        frappe.throw(_("Jumlah pengembalian harus lebih dari nol."), title=_("Uang Muka PO"))
+
+    if jumlah > sisa:
+        frappe.throw(
+            _("Jumlah pengembalian ({0}) melebihi sisa uang muka {1} ({2}).").format(
+                frappe.format_value(jumlah, {"fieldtype": "Currency"}),
+                purchase_order,
+                frappe.format_value(sisa, {"fieldtype": "Currency"}),
+            ),
+            title=_("Uang Muka PO"),
+        )
+
+    po = frappe.get_doc("Purchase Order", purchase_order)
+    akun = akun_uang_muka_tersisa(purchase_order)
+    mata_uang_akun = frappe.db.get_value("Account", akun, "account_currency")
+    mata_uang_company = frappe.get_cached_value("Company", po.company, "default_currency")
+
+    kurs = 1.0
+    if mata_uang_akun != mata_uang_company:
+        kurs = get_exchange_rate(mata_uang_akun, mata_uang_company, nowdate())
+
+    pe = frappe.new_doc("Payment Entry")
+    pe.payment_type = "Receive"
+    pe.company = po.company
+    pe.posting_date = nowdate()
+    pe.party_type = "Supplier"
+    pe.party = po.supplier
+    pe.party_name = po.supplier_name
+    pe.unit = po.get("unit")
+    pe.cost_center = po.get("cost_center")
+    pe.paid_from = akun
+    pe.paid_from_account_currency = mata_uang_akun
+    pe.source_exchange_rate = kurs
+    pe.target_exchange_rate = kurs
+    pe.paid_amount = jumlah
+    pe.received_amount = jumlah
+    pe.base_paid_amount = jumlah * kurs
+    pe.base_received_amount = jumlah * kurs
+    pe.total_allocated_amount = jumlah
+    pe.base_total_allocated_amount = jumlah * kurs
+    pe.unallocated_amount = 0
+    pe.difference_amount = 0
+    pe.remarks = _("Pengembalian uang muka Purchase Order {0}").format(po.name)
+
+    pe.append(
+        "references",
+        {
+            "reference_doctype": "Purchase Order",
+            "reference_name": po.name,
+            "total_amount": po.rounded_total or po.grand_total,
+            "outstanding_amount": sisa,
+            "allocated_amount": jumlah,
+            "exchange_rate": kurs,
+        },
+    )
+
+    pe.setup_party_account_field()
+
+    return pe
+
 
 def tipe_procurement_po(sub_purchase_type):
     """Jenis PO dalam istilah tabel Procurement Settings.

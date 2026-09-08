@@ -12,13 +12,13 @@ def debug():
 
 
 def debug_gl():
-	no_doc = "MAT-DN-2026-00130"
-	frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
+	no_doc = "ACC-PINV-2026-00136"
+	# frappe.db.sql(""" DELETE FROM `tabStock Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 	# frappe.db.sql(""" UPDATE `tabCosting Bengkel` SET docstatus=0 WHERE name = "{}" """.format(no_doc))
 	frappe.db.sql(""" DELETE FROM `tabPayment Ledger Entry` WHERE voucher_no = "{}" """.format(no_doc))
 	frappe.db.sql(""" DELETE FROM `tabGL Entry` WHERE voucher_no = "{}" """.format(no_doc))
-	frappe.get_doc("Delivery Note",no_doc).on_submit()
-
+	frappe.get_doc("Purchase Invoice",no_doc).on_submit()
+	
 def debug_bkm():
 	lis = frappe.db.sql(""" SELECT name FROM `tabBuku Kerja Mandor Panen` WHERE docstatus = 1 and name = "BKM-PNN-00472" """)
 	for row in lis:

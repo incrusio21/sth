@@ -142,8 +142,10 @@ class PaymentEntry(EmployeePaymentEntry):
 				self.paid_to = debit_account
 
 		self.set_paid_to_uang_muka_po()
+		self.set_paid_from_uang_muka_po()
 		self.reset_flag_uang_muka_terpisah()
 		self.validate_paid_amount_with_outstanding()
+		self.validate_pengembalian_uang_muka_po()
 
 	def set_paid_to_uang_muka_po(self):
 		"""Pembayaran terhadap Purchase Order masuk ke akun Uang Muka.
@@ -171,6 +173,136 @@ class PaymentEntry(EmployeePaymentEntry):
 		self.paid_to_account_currency = frappe.db.get_value(
 			"Account", self.paid_to, "account_currency"
 		)
+
+	def pengembalian_uang_muka_po(self):
+		"""Payment Entry ini menarik balik uang muka PO, bukan membayarnya.
+
+		Penerimaan dari supplier yang menunjuk Purchase Order cuma bisa satu hal:
+		uang muka yang dikembalikan. Pembayaran tagihan menunjuk Purchase Invoice,
+		dan pembayaran uang mukanya sendiri bertipe Pay.
+		"""
+		if self.payment_type != "Receive" or self.party_type != "Supplier":
+			return False
+
+		return any(
+			d.reference_doctype == "Purchase Order" for d in self.get("references") if d.reference_name
+		)
+
+	def set_paid_from_uang_muka_po(self):
+		"""Pengembalian uang muka PO mengkredit akun uang mukanya sendiri.
+
+		Akunnya diambil dari pembayaran yang dulu mendebitnya, bukan dari
+		Procurement Settings, supaya yang dikredit persis akun yang terdebit walau
+		setting-nya sudah berganti sesudah pembayaran.
+
+		Dipasang di sini, bukan cuma di tombol Kembalikan Uang Muka pada PO, supaya
+		PE yang barisnya dipilih manual ikut memakai akun yang sama. Akun uang muka
+		biasanya bertipe Payable, jadi party-nya ikut ke jurnal dan kreditnya
+		menutup debit uang muka lewat payment ledger.
+		"""
+		if not self.pengembalian_uang_muka_po():
+			return
+
+		references = [d for d in self.get("references") if d.reference_name]
+		if any(d.reference_doctype != "Purchase Order" for d in references):
+			return
+
+		from sth.buying_sth.custom.uang_muka_po import akun_uang_muka_tersisa
+
+		# docstatus baris sudah 1 waktu validate dijalankan saat submit, jadi
+		# pengembalian ini sendiri harus dilewati supaya akunnya tidak ikut hilang
+		# begitu sisanya habis olehnya sendiri.
+		akun = {
+			akun_uang_muka_tersisa(d.reference_name, kecuali_pe=self.name) for d in references
+		}
+		akun.discard(None)
+
+		if len(akun) > 1:
+			frappe.throw(
+				_("Sisa uang muka Purchase Order yang dikembalikan duduk di akun yang "
+				  "berbeda-beda ({0}). Pisahkan pengembaliannya per akun.").format(
+					", ".join(sorted(akun))
+				),
+				title=_("Uang Muka PO"),
+			)
+
+		if not akun:
+			return
+
+		self.paid_from = akun.pop()
+		self.paid_from_account_currency = frappe.db.get_value(
+			"Account", self.paid_from, "account_currency"
+		)
+
+	def validate_pengembalian_uang_muka_po(self):
+		"""Pengembalian tidak boleh melebihi uang muka yang masih ada di supplier.
+
+		Uang muka yang sudah dipakai Purchase Invoice sudah jadi pelunasan hutang,
+		yang bisa ditarik balik cuma sisanya. Payment Entry pembayarannya tidak
+		disentuh sama sekali oleh pengembalian ini, jadi tidak ada penjaga bawaan
+		yang menghitungnya.
+		"""
+		if not self.pengembalian_uang_muka_po():
+			return
+
+		per_po = {}
+		for d in self.get("references"):
+			if d.reference_doctype != "Purchase Order" or not d.reference_name:
+				continue
+
+			per_po[d.reference_name] = flt(per_po.get(d.reference_name)) + flt(d.allocated_amount)
+
+		from sth.buying_sth.custom.uang_muka_po import sisa_uang_muka_po
+
+		sisa = sisa_uang_muka_po(list(per_po), kecuali_pe=self.name)
+		presisi = self.precision("paid_amount")
+
+		for po, jumlah in per_po.items():
+			if flt(jumlah, presisi) <= flt(sisa.get(po), presisi):
+				continue
+
+			frappe.throw(
+				_("Pengembalian uang muka {0} ({1}) melebihi sisa uang mukanya ({2}). "
+				  "Uang muka yang sudah dipakai di Purchase Invoice tidak bisa ditarik balik.").format(
+					po,
+					fmt_money(jumlah, presisi, self.paid_from_account_currency),
+					fmt_money(flt(sisa.get(po)), presisi, self.paid_from_account_currency),
+				),
+				title=_("Uang Muka PO"),
+			)
+
+	def make_advance_payment_ledger_for_payment(self):
+		"""Pengembalian uang muka mengurangi advance_paid, bukan menambahnya.
+
+		Bawaan selalu mencatat allocated_amount positif — yang dibayangkannya cuma
+		pembayaran uang muka, arah sebaliknya tidak ada. Penerimaan dari supplier
+		yang menunjuk Purchase Order justru menarik uang mukanya balik, jadi
+		barisnya dicatat negatif supaya advance_paid PO turun sebesar yang
+		dikembalikan dan PO-nya bisa dibayar atau ditutup lagi.
+		"""
+		if not self.pengembalian_uang_muka_po():
+			super().make_advance_payment_ledger_for_payment()
+			return
+
+		advance_payment_doctypes = self.get_advance_payment_doctypes()
+
+		for d in self.get("references"):
+			if d.reference_doctype not in advance_payment_doctypes:
+				continue
+
+			baris = frappe.new_doc("Advance Payment Ledger Entry")
+			baris.company = self.company
+			baris.voucher_type = self.doctype
+			baris.voucher_no = self.name
+			baris.against_voucher_type = d.reference_doctype
+			baris.against_voucher_no = d.reference_name
+			baris.amount = (
+				-1 * flt(d.allocated_amount) if self.docstatus == 1 else flt(d.allocated_amount)
+			)
+			baris.currency = self.paid_from_account_currency
+			baris.event = "Submit" if self.docstatus == 1 else "Cancel"
+			baris.flags.ignore_permissions = 1
+			baris.save()
 
 	def reset_flag_uang_muka_terpisah(self):
 		"""Matikan pembukuan uang muka di akun terpisah untuk pembayaran tagihan.

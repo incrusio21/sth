@@ -26,6 +26,13 @@ docstatus barisnya ikut jadi 2.
 
 Advance selain uang muka PO — Journal Entry, atau Payment Entry yang tidak
 menunjuk PO — tidak disentuh sama sekali dan tetap lewat jalur bawaan.
+
+Uang muka yang tidak jadi dipakai ditarik balik lewat Payment Entry penerimaan
+yang menunjuk PO yang sama, dibuatkan `get_payment_entry_pengembalian_uang_muka`
+di purchase_order.py: jurnalnya D: Bank / K: Uang Muka, kebalikan persis dari
+pembayarannya. Payment Entry pembayarannya tidak ikut dibatalkan, jadi sisanya
+juga tidak bisa dibaca dari dokumen mana pun — dihitung di bagian bawah berkas
+ini sebagai dibayar - dipakai invoice - dikembalikan.
 """
 
 import frappe
@@ -183,17 +190,16 @@ def koreksi_advance_uang_muka_po(doc):
 	Bawaan mengisi advance_amount dari allocated_amount baris Payment Entry
 	Reference — angka penuh, karena bawaan mengandalkan unallocated_amount
 	Payment Entry yang di sini memang tidak pernah berkurang. Sisanya dipotong
-	dengan yang sudah dipakai invoice lain, alokasinya dibatasi tagihan yang
-	belum tertutup advance lain, dan baris yang sudah habis dibuang.
+	dengan yang sudah dipakai invoice lain dan yang sudah dikembalikan ke
+	supplier, alokasinya dibatasi tagihan yang belum tertutup advance lain, dan
+	baris yang sudah habis dibuang.
 	"""
 	pasangan = pasangan_uang_muka_po(doc)
 	if not pasangan:
 		return
 
-	terpakai = terpakai_di_invoice_lain(
-		[baris.reference_row for baris, _ in pasangan], kecuali=doc.name
-	)
 	uang_muka = {baris.reference_row: info for baris, info in pasangan}
+	rincian = sisa_per_baris(uang_muka, kecuali=doc.name)
 
 	sisa_tagihan = flt(doc.get("rounded_total") or doc.grand_total)
 	for baris in doc.get("advances"):
@@ -207,7 +213,7 @@ def koreksi_advance_uang_muka_po(doc):
 			tersisa.append(baris)
 			continue
 
-		sisa = flt(info.allocated_amount) - terpakai.get(baris.reference_row, 0.0)
+		sisa = flt(rincian[baris.reference_row]["sisa"])
 		if sisa <= 0:
 			continue
 
@@ -240,7 +246,9 @@ def validate_uang_muka_po(doc):
 			title=_("Uang Muka PO"),
 		)
 
-	terpakai = terpakai_di_invoice_lain(baris_pe, kecuali=doc.name)
+	rincian = sisa_per_baris(
+		{baris.reference_row: info for baris, info in pasangan}, kecuali=doc.name
+	)
 
 	for baris, info in pasangan:
 		if info.docstatus != 1:
@@ -249,7 +257,8 @@ def validate_uang_muka_po(doc):
 				title=_("Uang Muka PO"),
 			)
 
-		sisa = flt(info.allocated_amount) - terpakai.get(baris.reference_row, 0.0)
+		rinci = rincian[baris.reference_row]
+		sisa = flt(rinci["sisa"])
 		dipakai = flt(baris.allocated_amount, baris.precision("allocated_amount"))
 
 		if dipakai < 0:
@@ -261,14 +270,14 @@ def validate_uang_muka_po(doc):
 		if dipakai > flt(sisa, baris.precision("advance_amount")):
 			frappe.throw(
 				_("Uang muka yang dipakai di baris {0} ({1}) melebihi sisanya ({2}). "
-				  "Payment Entry {3} sudah terpakai {4} di invoice lain.").format(
+				  "Payment Entry {3} sudah terpakai {4} di invoice lain dan {5} sudah "
+				  "dikembalikan ke supplier.").format(
 					baris.idx,
 					frappe.format_value(dipakai, {"fieldtype": "Currency"}),
 					frappe.format_value(sisa, {"fieldtype": "Currency"}),
 					info.payment_entry,
-					frappe.format_value(
-						terpakai.get(baris.reference_row, 0.0), {"fieldtype": "Currency"}
-					),
+					frappe.format_value(rinci["terpakai"], {"fieldtype": "Currency"}),
+					frappe.format_value(rinci["dikembalikan"], {"fieldtype": "Currency"}),
 				),
 				title=_("Uang Muka PO"),
 			)
@@ -433,3 +442,306 @@ def gl_entries_uang_muka(doc, gl_entries):
 		ditambahkan += 1
 
 	return ditambahkan
+
+
+# ─── Sisa uang muka per Purchase Order ────────────────────────────────────────
+#
+# Uang muka yang sudah dibayar tidak pernah tercatat berkurang di dokumennya
+# sendiri: baris Payment Entry Reference-nya tetap utuh menempel di PO. Yang
+# mengurangi ada dua, dan keduanya dokumen lain — pemakaian di Purchase Invoice
+# (tabel `advances`) dan pengembalian uang lewat Payment Entry penerimaan yang
+# menunjuk PO yang sama. Sisanya karena itu selalu dihitung, bukan disimpan.
+
+
+def baris_uang_muka_po(purchase_orders):
+	"""Baris Payment Entry Reference yang membayar uang muka PO, urut waktu bayar.
+
+	Hanya Payment Entry tipe Pay; yang tipe Receive justru pengembaliannya.
+	"""
+	if not purchase_orders:
+		return []
+
+	return frappe.db.sql(
+		"""
+		select
+			per.name,
+			per.parent as payment_entry,
+			per.reference_name as purchase_order,
+			per.allocated_amount,
+			pe.posting_date,
+			pe.paid_to as akun_uang_muka
+		from `tabPayment Entry Reference` per
+		inner join `tabPayment Entry` pe on pe.name = per.parent
+		where per.reference_doctype = 'Purchase Order'
+			and per.reference_name in %(po)s
+			and per.docstatus = 1
+			and pe.payment_type = 'Pay'
+		order by pe.posting_date, pe.name, per.idx
+		""",
+		{"po": list(purchase_orders)},
+		as_dict=True,
+	)
+
+
+def baris_pengembalian_uang_muka(purchase_orders, kecuali_pe=None):
+	"""Payment Entry penerimaan yang menarik balik uang muka PO.
+
+	`kecuali_pe` melewati satu Payment Entry — dipakai waktu memvalidasi
+	pengembalian yang sedang disubmit, karena frappe sudah menyetel docstatus 1
+	sebelum validate dijalankan.
+	"""
+	if not purchase_orders:
+		return []
+
+	return frappe.db.sql(
+		"""
+		select
+			per.parent as payment_entry,
+			per.reference_name as purchase_order,
+			per.allocated_amount,
+			pe.posting_date,
+			pe.paid_from as akun_uang_muka
+		from `tabPayment Entry Reference` per
+		inner join `tabPayment Entry` pe on pe.name = per.parent
+		where per.reference_doctype = 'Purchase Order'
+			and per.reference_name in %(po)s
+			and per.docstatus = 1
+			and pe.payment_type = 'Receive'
+			and per.parent != %(kecuali_pe)s
+		order by pe.posting_date, pe.name, per.idx
+		""",
+		{"po": list(purchase_orders), "kecuali_pe": kecuali_pe or ""},
+		as_dict=True,
+	)
+
+
+def dikembalikan_per_baris(purchase_orders, kecuali_pe=None):
+	"""Bagi uang muka yang sudah dikembalikan ke baris pembayarannya.
+
+	Pengembalian menunjuk PO-nya, bukan baris pembayaran mana yang ditarik balik
+	— satu PO bisa dibayar berkali-kali. Dibagi ke baris yang paling tua dulu,
+	dibatasi sisa tiap baris setelah dipakai invoice, supaya pembagiannya sama
+	siapa pun yang menghitung dan tidak berubah-ubah tiap kali dipanggil.
+
+	Pemakaian invoice di sini sengaja dihitung tanpa pengecualian invoice mana
+	pun: patokan pembagiannya harus satu, tidak boleh ikut invoice yang kebetulan
+	sedang dibuka. Kelebihan yang tidak kebagian dibebankan ke baris terakhir
+	supaya totalnya tidak bocor.
+	"""
+	total_per_po = {}
+	for row in baris_pengembalian_uang_muka(purchase_orders, kecuali_pe=kecuali_pe):
+		total_per_po[row.purchase_order] = flt(total_per_po.get(row.purchase_order)) + flt(
+			row.allocated_amount
+		)
+
+	if not total_per_po:
+		return {}
+
+	baris = baris_uang_muka_po(total_per_po)
+	terpakai = terpakai_di_invoice_lain([row.name for row in baris])
+
+	hasil = {}
+	baris_terakhir = {}
+	for row in baris:
+		baris_terakhir[row.purchase_order] = row.name
+
+		belum_dibagi = flt(total_per_po.get(row.purchase_order))
+		if belum_dibagi <= 0:
+			continue
+
+		muat = max(flt(row.allocated_amount) - terpakai.get(row.name, 0.0), 0.0)
+		diambil = min(muat, belum_dibagi)
+		if diambil:
+			hasil[row.name] = flt(hasil.get(row.name)) + diambil
+			total_per_po[row.purchase_order] = belum_dibagi - diambil
+
+	for po, sisa in total_per_po.items():
+		if flt(sisa, 2) > 0 and po in baris_terakhir:
+			hasil[baris_terakhir[po]] = flt(hasil.get(baris_terakhir[po])) + sisa
+
+	return hasil
+
+
+def sisa_per_baris(info_per_baris, kecuali=None, kecuali_pe=None):
+	"""Sisa tiap baris uang muka: dibayar - dipakai invoice - dikembalikan.
+
+	`info_per_baris` memetakan nama baris Payment Entry Reference ke datanya,
+	seperti yang dikembalikan referensi_pe_ke_po(). `kecuali` melewati satu
+	Purchase Invoice, `kecuali_pe` satu Payment Entry pengembalian.
+	"""
+	if not info_per_baris:
+		return {}
+
+	terpakai = terpakai_di_invoice_lain(list(info_per_baris), kecuali=kecuali)
+	dikembalikan = dikembalikan_per_baris(
+		{info.purchase_order for info in info_per_baris.values()}, kecuali_pe=kecuali_pe
+	)
+
+	hasil = {}
+	for nama, info in info_per_baris.items():
+		dipakai = flt(terpakai.get(nama))
+		kembali = flt(dikembalikan.get(nama))
+		hasil[nama] = {
+			"terpakai": dipakai,
+			"dikembalikan": kembali,
+			"sisa": flt(info.allocated_amount) - dipakai - kembali,
+		}
+
+	return hasil
+
+
+def sisa_uang_muka_po(purchase_orders, kecuali_pe=None):
+	"""Sisa uang muka tiap PO, dijumlahkan dari baris-baris pembayarannya."""
+	baris = baris_uang_muka_po(purchase_orders)
+	rincian = sisa_per_baris({row.name: row for row in baris}, kecuali_pe=kecuali_pe)
+
+	hasil = {po: 0.0 for po in purchase_orders}
+	for row in baris:
+		hasil[row.purchase_order] = flt(hasil.get(row.purchase_order)) + flt(
+			rincian[row.name]["sisa"]
+		)
+
+	return hasil
+
+
+def invoice_pemakai_uang_muka(reference_rows):
+	"""Purchase Invoice yang memakai tiap baris uang muka, untuk ditampilkan."""
+	if not reference_rows:
+		return {}
+
+	hasil = frappe.db.sql(
+		"""
+		select pia.reference_row, pia.parent as purchase_invoice, pia.allocated_amount
+		from `tabPurchase Invoice Advance` pia
+		where pia.parenttype = 'Purchase Invoice'
+			and pia.docstatus = 1
+			and pia.reference_type = 'Payment Entry'
+			and pia.reference_row in %(rows)s
+		order by pia.parent
+		""",
+		{"rows": list(reference_rows)},
+		as_dict=True,
+	)
+
+	peta = {}
+	for row in hasil:
+		peta.setdefault(row.reference_row, []).append(row)
+
+	return peta
+
+
+def rekap_uang_muka_po(purchase_order, kecuali_pe=None):
+	"""Rincian uang muka satu PO: dibayar, dipakai, dikembalikan, dan sisanya.
+
+	`kecuali_pe` melewati satu Payment Entry pengembalian — dipakai dokumen yang
+	sedang disubmit, yang barisnya sudah berdocstatus 1 waktu validate jalan.
+	"""
+	po = frappe.db.get_value(
+		"Purchase Order",
+		purchase_order,
+		["name", "supplier", "supplier_name", "company", "currency", "status", "docstatus"],
+		as_dict=True,
+	)
+	if not po:
+		frappe.throw(_("Purchase Order {0} tidak ditemukan.").format(purchase_order))
+
+	baris = baris_uang_muka_po([purchase_order])
+	rincian = sisa_per_baris({row.name: row for row in baris}, kecuali_pe=kecuali_pe)
+	pemakai = invoice_pemakai_uang_muka([row.name for row in baris])
+
+	rekap = {
+		"purchase_order": po.name,
+		"supplier": po.supplier,
+		"supplier_name": po.supplier_name,
+		"company": po.company,
+		"currency": po.currency,
+		"status": po.status,
+		"baris": [],
+		"pengembalian": baris_pengembalian_uang_muka([purchase_order], kecuali_pe=kecuali_pe),
+		"total_dibayar": 0.0,
+		"total_terpakai": 0.0,
+		"total_dikembalikan": 0.0,
+		"sisa": 0.0,
+	}
+
+	for row in baris:
+		rinci = rincian[row.name]
+		rekap["baris"].append(
+			{
+				"baris": row.name,
+				"payment_entry": row.payment_entry,
+				"posting_date": row.posting_date,
+				"akun_uang_muka": row.akun_uang_muka,
+				"dibayar": flt(row.allocated_amount),
+				"terpakai": rinci["terpakai"],
+				"dikembalikan": rinci["dikembalikan"],
+				"sisa": rinci["sisa"],
+				"invoice": pemakai.get(row.name, []),
+			}
+		)
+		rekap["total_dibayar"] += flt(row.allocated_amount)
+		rekap["total_terpakai"] += rinci["terpakai"]
+		rekap["total_dikembalikan"] += rinci["dikembalikan"]
+		rekap["sisa"] += rinci["sisa"]
+
+	return rekap
+
+
+def akun_uang_muka_tersisa(purchase_order, kecuali_pe=None):
+	"""Akun tempat sisa uang muka PO ini duduk.
+
+	Dibaca dari pembayarannya, bukan dari Procurement Settings, supaya
+	pengembaliannya mengkredit akun yang benar-benar terdebit walaupun
+	setting-nya sudah berganti sesudah pembayaran.
+	"""
+	akun = {
+		row["akun_uang_muka"]
+		for row in rekap_uang_muka_po(purchase_order, kecuali_pe=kecuali_pe)["baris"]
+		if flt(row["sisa"]) > 0
+	}
+
+	if len(akun) > 1:
+		frappe.throw(
+			_("Sisa uang muka {0} duduk di lebih dari satu akun ({1}). "
+			  "Kembalikan lewat Payment Entry sendiri-sendiri per akun.").format(
+				purchase_order, ", ".join(sorted(akun))
+			),
+			title=_("Uang Muka PO"),
+		)
+
+	return akun.pop() if akun else None
+
+
+def sisa_advance_uang_muka_po(doc, entries):
+	"""Uang muka PO ditawarkan sebesar sisanya, bukan sebesar yang dibayar.
+
+	Baris Payment Entry Reference-nya tidak pernah berkurang, jadi angka bawaan
+	selalu utuh. Tanpa dipotong di sini, uang muka yang sudah habis dipakai
+	invoice lain atau sudah dikembalikan tetap tampak tersedia dan penjaga
+	Uang Muka Belum Diambil menahan invoice yang tidak punya apa-apa lagi untuk
+	ditarik.
+	"""
+	kandidat = [
+		d.get("reference_row")
+		for d in entries
+		if d.get("against_order") and d.get("reference_row")
+	]
+	if not kandidat:
+		return entries
+
+	rincian = sisa_per_baris(referensi_pe_ke_po(kandidat), kecuali=doc.name)
+
+	hasil = []
+	for d in entries:
+		rinci = rincian.get(d.get("reference_row")) if d.get("against_order") else None
+		if rinci is None:
+			hasil.append(d)
+			continue
+
+		if flt(rinci["sisa"]) <= 0:
+			continue
+
+		d["amount"] = flt(rinci["sisa"])
+		hasil.append(d)
+
+	return hasil

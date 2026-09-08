@@ -103,16 +103,6 @@
    "label": "Last Update"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "in_preview": 1,
-   "label": "Nomor Surat",
-   "options": "INT/.{unit}./.{abbr}./.MM./.YYYY./.#####\nEXT/.{unit}./.{abbr}./.MM./.YYYY./.#####",
-   "read_only": 1,
-   "set_only_once": 1
-  },
-  {
    "fieldname": "tipe_surat",
    "fieldtype": "Select",
    "label": "Tipe Surat",
@@ -152,16 +142,23 @@
    "in_preview": 1,
    "label": "Nomor Surat Masuk",
    "mandatory_depends_on": "eval: doc.tipe_surat == \"Masuk\" && doc.jenis_surat == \"External\""
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Nomor Surat",
+   "options": "INT/.{unit}./.{abbr}./.MM./.YYYY./.#####\nEXT/.{unit}./.{abbr}./.MM./.YYYY./.#####"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-07 16:52:49.852799",
+ "modified": "2026-09-08 10:07:57.916916",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Surat Menyurat",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "By script",
  "owner": "Administrator",
  "permissions": [
   {

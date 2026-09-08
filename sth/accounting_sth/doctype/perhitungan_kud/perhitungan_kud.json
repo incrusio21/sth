@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-08-04 09:00:00",
+ "creation": "2026-08-11 11:53:01.822291",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -31,10 +31,11 @@
   "biaya_perawatan",
   "lain_lain",
   "total_biaya_perawatan_panen_dan_transport",
+  "column_break_biaya",
   "persen_management_fee",
   "management_fee",
-  "column_break_biaya",
   "jumlah_biaya_operasional",
+  "column_break_eong",
   "setelah_biaya_operasional",
   "detail_biaya_section",
   "detail_biaya",
@@ -236,6 +237,7 @@
    "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "setelah_biaya_operasional",
    "fieldtype": "Currency",
    "label": "Setelah Dipotong Biaya Operasional",
@@ -248,7 +250,7 @@
    "label": "Rincian Biaya BKM"
   },
   {
-   "description": "Semua BKM tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi — ketiga angka Biaya BKM di atas dijumlah dari daftar ini.",
+   "description": "Semua BKM tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi \u2014 ketiga angka Biaya BKM di atas dijumlah dari daftar ini.",
    "fieldname": "detail_biaya",
    "fieldtype": "Table",
    "label": "Rincian Biaya BKM",
@@ -330,13 +332,17 @@
    "in_preview": 1,
    "label": "Total Biaya Perawatan Panen Dan Transport",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eong",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-11 09:00:00.000000",
+ "modified": "2026-09-08 11:57:23.806991",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",
