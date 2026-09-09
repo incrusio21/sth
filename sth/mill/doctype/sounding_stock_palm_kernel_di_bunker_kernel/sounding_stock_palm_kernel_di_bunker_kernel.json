@@ -271,7 +271,7 @@
    "read_only": 1
   },
   {
-   "description": "Rata-rata KER Netto 2 dokumen submitted di unit ini sejak awal bulan sampai Tanggal Proses dokumen ini. Tanggal sesudahnya tidak ikut.",
+   "description": "Total Produksi dibagi total TBS Olah dikurangi Sortasi, atas dokumen submitted di unit ini sejak awal bulan sampai Tanggal Proses dokumen ini, dikali 100. Tanggal sesudahnya tidak ikut.",
    "fieldname": "rata_rata_ker_bulanan",
    "fieldtype": "Percent",
    "label": "Rata-rata KER Bulan Ini (%)",

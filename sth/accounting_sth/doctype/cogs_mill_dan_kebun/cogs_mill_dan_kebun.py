@@ -75,9 +75,9 @@ BARIS = (
 # Sounding, jadi qty yang dibebani biaya sama dengan qty yang masuk Stock Ledger.
 #
 # 'rendemen_bulanan' adalah field rata-rata rendemen sebulan di dokumen Sounding,
-# yang jadi OER dan KER dokumen ini. Isinya rata-rata berjalan rendemen harian
-# sejak awal bulan sampai tanggal proses dokumen itu, jadi dokumen terakhir bulan
-# itu sudah membawa rata-rata sebulan penuh. TBS tidak punya.
+# yang jadi OER dan KER dokumen ini. Isinya total produksi dibagi total TBS olah
+# netto 2 sejak awal bulan sampai tanggal proses dokumen itu, jadi dokumen
+# terakhir bulan itu sudah membawa rendemen sebulan penuh. TBS tidak punya.
 SUMBER_PRODUK = {
 	"tbs": {
 		"doctype": "Data TBS",
@@ -987,12 +987,13 @@ def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
 	dihitung ulang dari Production terhadap TBS diolah: yang dipakai pabrik adalah
 	rendemen harian di Sounding, yang pembaginya sudah dikurangi potongan sortasi.
 
-	Field itu sendiri berisi rata-rata berjalan rendemen harian sejak awal bulan
-	sampai tanggal proses dokumennya, jadi dokumen terakhir bulan itu sudah
-	membawa rata-rata sebulan penuh. Mengambilnya dari sana, bukan merata-rata
+	Field itu sendiri berisi total produksi dibagi total TBS olah netto 2 sejak
+	awal bulan sampai tanggal proses dokumennya — ditimbang tonase, cara yang sama
+	dengan rata-rata harga jual di sini — jadi dokumen terakhir bulan itu sudah
+	membawa rendemen sebulan penuh. Mengambilnya dari sana, bukan menghitung
 	sendiri di sini, membuat angka di COGS sama persis dengan yang terbaca di
-	dokumen Sounding terakhir — termasuk hari yang rendemennya nol atau minus,
-	yang tetap ikut membagi.
+	dokumen Sounding terakhir — termasuk hari yang produksinya nol atau minus,
+	yang tetap ikut lewat pembilang.
 
 	Karena rentang field itu selalu mulai dari awal bulan tanggal prosesnya,
 	periode COGS yang bukan satu bulan penuh akan membawa hari-hari sebelum

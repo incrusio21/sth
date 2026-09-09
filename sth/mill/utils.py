@@ -210,23 +210,38 @@ def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses, te
 	return flt(total[0][0]) if total else 0.0
 
 
-# Field rendemen harian tiap dokumen sounding dan field informasi rata-ratanya.
-# Nama doctype dan field masuk langsung ke SQL, jadi cuma yang terdaftar di sini
-# yang boleh lewat.
+# Field tiap dokumen sounding yang dipakai menghitung rendemen rata-rata sebulan,
+# plus field informasi tempat hasilnya disimpan. Nama doctype dan field masuk
+# langsung ke SQL, jadi cuma yang terdaftar di sini yang boleh lewat.
 RENDEMEN_BULANAN = {
-	"Sounding Stock CPO di BST": ("oer_netto_2", "rata_rata_oer_bulanan"),
-	"Sounding Stock Palm Kernel di Bunker Kernel": ("ker_netto_2", "rata_rata_ker_bulanan"),
+	"Sounding Stock CPO di BST": {
+		"produksi": "produksi_cpo",
+		"tbs_olah": "tbs_olah",
+		"sortasi": "potongan_sortasi",
+		"target": "rata_rata_oer_bulanan",
+	},
+	"Sounding Stock Palm Kernel di Bunker Kernel": {
+		"produksi": "produksi",
+		"tbs_olah": "tbs_olah",
+		"sortasi": "sortasi",
+		"target": "rata_rata_ker_bulanan",
+	},
 }
 
 
 def set_rata_rata_rendemen_bulanan(doc):
 	"""Isi field informasi rata-rata rendemen sebulan di dokumen sounding.
 
-	Rata-rata harian sederhana atas dokumen submitted di unit yang sama sejak
-	awal bulan tanggal_proses sampai tanggal_proses dokumen ini. Sengaja sama
-	persis dengan cara COGS Mill dan Kebun menghitung OER dan KER: netto 2, tidak
-	ditimbang jumlah TBS olah, dan hari yang rendemennya nol tetap ikut membagi.
-	Jadi angka di sini bisa dipakai mencocokkan dokumen itu, bukan tandingannya.
+	Caranya sama dengan rata-rata harga jual CPO di COGS Mill dan Kebun: yang
+	dirata-rata bukan angka persen hariannya, tapi bahannya. Total produksi sejak
+	awal bulan tanggal_proses sampai tanggal_proses dokumen ini dibagi total TBS
+	olah pada rentang yang sama, dikali 100. Sama seperti rendemen harian, TBS olah
+	di penyebut dikurangi potongan sortasi dulu — jadi ini tetap rendemen netto 2,
+	cuma ditimbang tonasenya.
+
+	Bedanya dengan rata-rata harian sederhana: hari yang tbs olahnya besar menarik
+	angkanya lebih kuat, dan hari yang tidak mengolah TBS sama sekali tidak lagi
+	ikut membagi. Hari yang produksinya nol atau minus tetap ikut, lewat pembilang.
 
 	Sebulan, tapi berhenti di tanggal dokumennya sendiri — hari sesudahnya tidak
 	ikut. Angkanya jadi rata-rata berjalan yang isinya cuma hal-hal yang sudah
@@ -234,28 +249,49 @@ def set_rata_rata_rendemen_bulanan(doc):
 	dokumen ini dibuka sesudah sounding hari-hari berikutnya masuk. Itu juga yang
 	bikin patch data lama masuk akal: dokumen diproses urut tanggal, dan
 	rata-rata tiap dokumen cuma bergantung pada dokumen yang sudah dilewati
-	patch, bukan pada dokumen di depannya yang rendemennya belum dihitung ulang.
+	patch, bukan pada dokumen di depannya yang belum dihitung ulang.
 
 	Dipanggil dari validate maupun onload. Dari onload karena batas atasnya ikut
 	tanggal_proses sendiri: waktu validate dokumen ini masih docstatus 0 sehingga
 	tidak ikut rata-ratanya sendiri, dan sounding bertanggal mundur yang disubmit
 	belakangan juga masih bisa menggeser angkanya.
 	"""
-	rendemen, target = RENDEMEN_BULANAN[doc.doctype]
-	doc.set(target, 0)
+	cfg = RENDEMEN_BULANAN[doc.doctype]
+	doc.set(cfg["target"], 0)
 
 	if not (doc.unit and doc.tanggal_proses):
 		return
 
 	row = frappe.db.sql("""
-		select avg(d.`{rendemen}`)
+		select sum(coalesce(d.`{produksi}`, 0)),
+			sum(coalesce(d.`{tbs_olah}`, 0) - coalesce(d.`{sortasi}`, 0))
 		from `tab{doctype}` d
 		where d.docstatus = 1 and d.unit = %(unit)s
 			and d.tanggal_proses between %(dari)s and %(sampai)s
-	""".format(rendemen=rendemen, doctype=doc.doctype), {
+	""".format(
+		produksi=cfg["produksi"],
+		tbs_olah=cfg["tbs_olah"],
+		sortasi=cfg["sortasi"],
+		doctype=doc.doctype,
+	), {
 		"unit": doc.unit,
 		"dari": get_first_day(doc.tanggal_proses),
 		"sampai": doc.tanggal_proses,
 	})
 
-	doc.set(target, flt(row[0][0]) if row and row[0] else 0.0)
+	if not (row and row[0]):
+		return
+
+	doc.set(cfg["target"], hitung_rendemen(row[0][0], row[0][1]))
+
+
+def hitung_rendemen(produksi, penyebut):
+	"""Rendemen persen dari total produksi dan total TBS olah netto 2.
+
+	Penjaganya penyebut itu sendiri, bukan tbs olah kotornya: kalau seluruh TBS
+	yang masuk kena potongan sortasi, penyebutnya nol dan pembagiannya error.
+	Sama seperti hitung_produksi di dokumen soundingnya.
+	"""
+	penyebut = flt(penyebut)
+
+	return flt(produksi) / penyebut * 100 if penyebut else 0.0

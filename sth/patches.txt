@@ -9,6 +9,7 @@ sth.patches.merge_duplicate_spb_trans_no
 sth.patches.isi_base_amount_pajak_purchase_invoice
 sth.patches.isi_rata_rata_rendemen_sounding
 sth.patches.isi_sub_total_purchase_order
+sth.patches.hitung_ulang_rata_rata_rendemen_sounding
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
