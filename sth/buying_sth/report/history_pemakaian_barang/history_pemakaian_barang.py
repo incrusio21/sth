@@ -84,7 +84,7 @@ def get_data(filters,months):
 		WHERE pbi.`docstatus` = 1 AND YEAR(pb.`tanggal`) = %(year)s AND MONTH(pb.`tanggal`) BETWEEN %(from_month)s AND %(to_month)s
 		GROUP BY pbi.`kode_barang`, MONTH(pb.`tanggal`)
 		ORDER BY pb.`tanggal` ASC 
-	""",args,as_dict=True,debug=True)
+	""",args,as_dict=True)
 
 	result = []
 

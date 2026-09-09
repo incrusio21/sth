@@ -34,8 +34,8 @@ class SoundingStockCPOdiBST(Document):
 		self.delete_ste()
 		
 	def validate_duplicate(self):
-		if name := frappe.db.get_value(self.doctype,{"tanggal_proses":self.tanggal_proses,"name":["!=",self.name]},"name"):
-			frappe.throw(f"Terdapat document dengan tanggal proses yang sama: {name}")
+		if name := frappe.db.get_value(self.doctype,{"tanggal_proses":self.tanggal_proses,"unit":self.unit,"docstatus":["<",2],"name":["!=",self.name]},"name"):
+			frappe.throw(f"Terdapat document dengan tanggal proses yang sama untuk unit {self.unit}: {name}")
 
 	def validate_backdate(self):
 		allowed_diff = frappe.get_single_value("Mill Settings","max_backdate_proses") or 1
@@ -109,7 +109,7 @@ class SoundingStockCPOdiBST(Document):
 				and posting_date < %s
 			order by posting_date desc, posting_time desc, creation desc
 			limit 1
-		""",(item_code, warehouse, self.tanggal_proses),debug=True)
+		""",(item_code, warehouse, self.tanggal_proses))
 
 		return flt(terakhir[0][0]) if terakhir else 0
 

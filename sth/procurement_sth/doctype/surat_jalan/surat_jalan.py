@@ -235,7 +235,7 @@ def get_stock_item(item_code,warehouse):
 			ON b.item_code = i.item_code
 		AND b.warehouse = %s
 		WHERE i.item_code = %s;
-	""",[warehouse,item_code],as_dict=True, debug=True)
+	""",[warehouse,item_code],as_dict=True)
 
 @frappe.whitelist()
 def map_from_po(source_name, target_doc=None, args=None):

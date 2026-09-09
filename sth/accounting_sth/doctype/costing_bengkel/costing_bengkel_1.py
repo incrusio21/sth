@@ -225,7 +225,7 @@ def get_pengeluaran_barang_solar_bengkel(periode_dari, periode_sampai, company=N
           {company_filter}
           {unit_filter}
         ORDER BY pb.tanggal, pb.name, pbi.kendaraan;
-    """.format(company_filter=company_filter, unit_filter=unit_filter), {"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit}, as_dict=True, debug=True)
+    """.format(company_filter=company_filter, unit_filter=unit_filter), {"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit}, as_dict=True)
 
     result = []
     for item in pb_items:

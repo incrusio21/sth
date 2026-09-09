@@ -62,7 +62,7 @@ def get_data(filters):
 			) t
 			WHERE rn = 1
 			ORDER BY company, bank, bank_account, posting_date
-		""", filters, as_dict=True, debug=True)
+		""", filters, as_dict=True)
 	else:
 		data_raw = frappe.db.sql("""
 			SELECT
@@ -94,7 +94,7 @@ def get_data(filters):
 			) t
 			WHERE rn = 1
 			ORDER BY company, bank, bank_account, posting_date
-		""", filters, as_dict=True, debug=True)
+		""", filters, as_dict=True)
 
 	rows = defaultdict(dict)
 

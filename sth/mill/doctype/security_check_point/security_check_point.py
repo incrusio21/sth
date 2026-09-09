@@ -365,5 +365,5 @@ def delivery_order_query(doctype, txt, searchfield, start, page_len, filters):
 			(case when locate(%(_txt)s, `tabDelivery Order`.name) > 0 then locate(%(_txt)s, `tabDelivery Order`.name) else 99999 end),
 			`tabDelivery Order`.name
 		limit %(page_len)s offset %(start)s
-		""",params,debug=True
+		""",params
 	)
