@@ -6,10 +6,6 @@ import frappe
 # kebanjiran kalau yang bermasalah ternyata banyak.
 BATAS_RINCIAN = 20
 
-# Penanda satu SPB yang bloknya jatuh di lebih dari satu divisi; dibedakan dari
-# None, yang artinya divisinya tidak ketemu sama sekali.
-BEDA_DIVISI = object()
-
 # Rekap spb-muatan-block-20260909153948.xlsx, satu baris per Trans No SPB:
 #
 #     trans_no|kode unit|nama sopir|blok1,blok2,...
@@ -253,10 +249,11 @@ def execute(trans_nos=None):
 	Ketiganya ditimpa walau sudah terisi: ekspor ini yang dianggap benar, dan yang
 	mau diperbaiki justru nilai yang salah, bukan yang kosong.
 
-	Satu Trans No bisa memuat sampai tujuh blok. Selama semua blok itu jatuh di
-	divisi yang sama, divisinya dipakai; kalau blok satu SPB terpisah di dua
-	divisi, divisinya dilewati — driver_name dan unit tetap diperbarui — lalu
-	dokumennya disebut di ringkasan supaya bisa diputuskan sendiri.
+	Satu Trans No bisa memuat sampai tujuh blok, dan bloknya tidak selalu satu
+	divisi. Yang dipakai divisi blok pertamanya — satu SPB cuma punya satu field
+	divisi, jadi mau tidak mau salah satu yang mewakili. Yang bercampur begitu
+	tetap disebut di ringkasan, lengkap dengan divisi yang dipakai dan divisi
+	lain yang ikut tersinggung, supaya bisa diperiksa sendiri.
 
 	Cakupannya beda antara dua doctype ini. Security Check Point dibatasi kiriman
 	API: dokumen yang diinput orang lewat UI datanya diisi petugas yang melihat
@@ -372,12 +369,17 @@ def _nilai_baru(trans_no, baris, sopir, divisi_per_unit, laporan):
 	if unit not in divisi_per_unit:
 		divisi_per_unit[unit] = _get_divisi_per_blok(unit)
 
-	divisi = _cari_divisi(divisi_per_unit[unit], unit, baris["blok"], laporan["blok_asing"])
+	divisi, lain = _cari_divisi(
+		divisi_per_unit[unit], unit, baris["blok"], laporan["blok_asing"]
+	)
 
-	if divisi is BEDA_DIVISI:
-		laporan["divisi_campur"].append(trans_no)
-	elif divisi:
+	if divisi:
 		values["divisi"] = divisi
+
+	if lain:
+		laporan["divisi_campur"].append(
+			"{0} -> {1} (blok lainnya di {2})".format(trans_no, divisi, ", ".join(lain))
+		)
 
 	return values
 
@@ -487,25 +489,33 @@ def _get_divisi_per_blok(unit):
 
 
 def _cari_divisi(peta, unit, blok_list, blok_asing):
-	"""Divisi yang menaungi semua blok satu SPB, atau penandanya kalau bercampur."""
-	ditemukan = set()
+	"""Divisi satu SPB, diambil dari blok pertamanya.
+
+	Kembaliannya sepasang: divisi yang dipakai, dan daftar divisi lain yang juga
+	disinggung SPB itu. Daftar kedua kosong untuk SPB yang bloknya memang satu
+	divisi saja — yang isinya cuma dipakai melaporkan mana yang bercampur.
+
+	Bloknya diperiksa sesuai urutan di ekspor, dan yang tidak ketemu di master
+	dilewati: "blok pertama" berarti blok pertama yang divisinya bisa dipastikan,
+	bukan baris pertama begitu saja.
+	"""
+	ditemukan = []
 
 	for kode in blok_list:
 		divisi = peta.get(kode.strip().upper())
 
 		if divisi:
-			ditemukan.add(divisi)
+			ditemukan.append(divisi)
 		else:
 			blok_asing.setdefault((unit, kode), 0)
 			blok_asing[(unit, kode)] += 1
 
 	if not ditemukan:
-		return None
+		return None, []
 
-	if len(ditemukan) > 1:
-		return BEDA_DIVISI
+	dipakai = ditemukan[0]
 
-	return ditemukan.pop()
+	return dipakai, sorted({d for d in ditemukan if d != dipakai})
 
 
 def _tulis(doctype, row, values):
@@ -558,7 +568,7 @@ def _cetak_ringkasan(jumlah, total, laporan):
 
 	_cetak_daftar(
 		laporan["divisi_campur"],
-		"SPB bloknya terpisah di dua divisi, divisinya dilewati",
+		"SPB bloknya terpisah di lebih dari satu divisi, dipakai blok pertamanya",
 	)
 
 
