@@ -3,7 +3,7 @@
 
 import frappe,math
 from frappe.model.document import Document
-from frappe.utils import today,flt,getdate
+from frappe.utils import today,flt,getdate,date_diff
 from frappe.model.mapper import get_mapped_doc
 
 from sth.mill.utils import get_adjustment_stock, set_rata_rata_rendemen_bulanan
@@ -17,6 +17,7 @@ class SoundingStockCPOdiBST(Document):
 		self.gudang = get_warehouse_bst(self.unit)
 
 	def validate(self):
+		self.validate_duplicate()
 		if not self.gudang:
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
 
@@ -32,6 +33,28 @@ class SoundingStockCPOdiBST(Document):
 	def on_trash(self):
 		self.delete_ste()
 		
+	def validate_duplicate(self):
+		if name := frappe.db.get_value(self.doctype,{"tanggal_proses":self.tanggal_proses,"name":["!=",self.name]},"name"):
+			frappe.throw(f"Terdapat document dengan tanggal proses yang sama: {name}")
+
+	def validate_backdate(self):
+		allowed_diff = frappe.get_single_value("Mill Settings","max_backdate_proses") or 1
+		if date_diff(today(),self.tanggal_proses) > allowed_diff:
+			frappe.throw(f"Tanggal proses maksimal mundur : {allowed_diff} hari.")
+
+	def validate_previous_documents(self):
+		draft_doc = frappe.get_all(
+			self.doctype,
+			filters=[
+				["docstatus","=",0],
+				["tanggal_proses","<",self.tanggal_proses]
+			],
+
+			pluck="name"
+		)
+
+		if draft_doc:
+			frappe.throw(f"Terdapat dokument sebelumnya yang belum di submit")
 
 	@frappe.whitelist()
 	def get_data(self):
