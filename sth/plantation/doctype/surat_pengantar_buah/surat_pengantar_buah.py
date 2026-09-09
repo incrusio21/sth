@@ -329,6 +329,12 @@ _SKIP_HEADER_FIELDS = {
 	"naming_series", "amended_from", "trans_no", "docstatus", "details",
 }
 
+# Header yang masih boleh diperbaiki walau SPB-nya sudah submit. Stub yang dibuat
+# Security Check Point memakai unit dan divisi milik pos penjagaan, dan itu tidak
+# selalu kebun yang benar-benar memanen — kiriman SPB inilah yang tahu, tapi
+# seringnya datang sesudah stub itu ikut tersubmit oleh timbangan.
+_HEADER_AFTER_SUBMIT = ("unit", "divisi")
+
 def _update_spb(existing_name, args):
 	doc = frappe.get_doc("Surat Pengantar Buah", existing_name)
 	details = args.get("details") or []
@@ -344,23 +350,59 @@ def _update_spb(existing_name, args):
 		if cint(args.get("docstatus")) == 1:
 			doc.submit()
 	else:
-		# Dokumen sudah submit: hanya detail dan totalnya yang boleh disentuh,
-		# lewat db_set supaya tidak kena validate_update_after_submit. validate
-		# tidak jalan di jalur ini, jadi recap_panen diisi manual di sini.
+		# Dokumen sudah submit: hanya detail, totalnya, dan _HEADER_AFTER_SUBMIT
+		# yang boleh disentuh, lewat db_set supaya tidak kena
+		# validate_update_after_submit. validate tidak jalan di jalur ini, jadi
+		# recap_panen diisi manual di sini.
 		_apply_details(doc, details)
 		set_recap_panen_in_details(doc.details)
 
-		doc.update_child_table("details")
-		doc.db_set({
+		nilai = _header_after_submit(doc, args)
+		nilai.update({
 			"total_janjang": sum(flt(d.total_janjang) for d in doc.details),
 			"total_brondolan": sum(flt(d.brondolan_terkirim) for d in doc.details)
-		}, notify=False)
+		})
+
+		doc.update_child_table("details")
+		doc.db_set(nilai, notify=False)
 
 	_resync_timbangan(doc.name)
 
 	frappe.db.commit()
 
 	return doc
+
+def _header_after_submit(doc, args):
+	"""Header yang ikut diperbarui walau SPB-nya sudah submit.
+
+	Yang tidak disebut pemanggil, dan yang dikirim kosong, dilewati: tidak
+	menyebut sebuah field bukan berarti minta dikosongkan. Security Check Point
+	sendiri memanggil create_or_update tanpa divisi kalau posnya belum tahu.
+
+	Nilainya ditulis lewat db_set di pemanggil, bukan doc.save(), supaya
+	dokumen yang sudah submit tidak perlu dibatalkan dulu — sama seperti detail
+	dan totalnya. Field lain sengaja tidak ikut: sesudah submit, angka timbangan
+	dan kendaraannya sudah jadi pegangan orang lain.
+	"""
+	nilai = {}
+
+	for field in _HEADER_AFTER_SUBMIT:
+		value = args.get(field)
+
+		if not value or value == doc.get(field):
+			continue
+
+		options = doc.meta.get_field(field).options
+
+		# db_set melewati pemeriksaan Link, jadi kode yang tidak terdaftar akan
+		# mendarat diam-diam di dokumen yang sudah submit. Di jalur draft
+		# doc.save() yang menolaknya; di sini penolakannya dipasang sendiri.
+		if not frappe.db.exists(options, value):
+			frappe.throw(f"Could not find {options}: {value}")
+
+		nilai[field] = value
+
+	return nilai
 
 def _apply_header(doc, args):
 	doc.update({
