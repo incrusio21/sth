@@ -1,3 +1,5 @@
+import re
+
 import frappe
 
 # Batas rincian yang dicetak per kategori masalah, supaya output bench tidak
@@ -15,7 +17,8 @@ BEDA_DIVISI = object()
 # ESTATE, KENDARAAN, dan SOPIR di ekspor itu seragam untuk satu Trans No, jadi
 # 429 baris per blok cukup diringkas jadi 216 baris. Bloknya disimpan lengkap
 # karena divisi tidak ada di ekspor dan harus dicari lewat master Blok.
-DATA = """SPBTML62260908155712705|TPRE|HENDRA L|G10c,G10b,G11a
+DATA = """\
+SPBTML62260908155712705|TPRE|HENDRA L|G10c,G10b,G11a
 SPBTMM95260908164001614|ASRE|JULPRIANDI MANURUNG|A06f
 SPBTML12260908190047192|TPRE|-|F03e,F03f
 SPBTML12260908155158106|TPRE|J. RIANTO SIMAMORA|F03e,F03f
@@ -235,11 +238,12 @@ SPBTML58260828151154347|TPRE|JEFRI HEMANTO PANGIHUTAN HUTABARAT|E26u,E26d
 
 
 def execute(trans_nos=None):
-	"""Perbaiki nama supir, unit, dan divisi Security Check Point kiriman API.
+	"""Perbaiki nama supir, unit, dan divisi SPB dan Security Check Point.
 
-	Sumbernya ekspor "Surat Pengiriman Buah per Blok" tanggal 9 September 2026;
-	sambungannya lewat spb_trans_no, yang isinya trans_no SPB kiriman API — kolom
-	TRANS NO di ekspor itu.
+	Sumbernya ekspor "Surat Pengiriman Buah per Blok" tanggal 9 September 2026.
+	Kolom TRANS NO di ekspor itu adalah trans_no SPB kiriman API, yang di Surat
+	Pengantar Buah tersimpan di field trans_no dan di Security Check Point di
+	field spb_trans_no.
 
 	    driver_name : kolom SOPIR
 	    unit        : kode di depan kolom ESTATE (TPRE, ASRE, APLE, TMDE)
@@ -247,79 +251,70 @@ def execute(trans_nos=None):
 	                  divisi
 
 	Ketiganya ditimpa walau sudah terisi: ekspor ini yang dianggap benar, dan yang
-	mau diperbaiki justru nilai yang salah, bukan yang kosong. Hanya dokumen
-	kiriman API yang disentuh; dokumen yang diinput orang lewat UI dibiarkan.
+	mau diperbaiki justru nilai yang salah, bukan yang kosong.
 
 	Satu Trans No bisa memuat sampai tujuh blok. Selama semua blok itu jatuh di
 	divisi yang sama, divisinya dipakai; kalau blok satu SPB terpisah di dua
 	divisi, divisinya dilewati — driver_name dan unit tetap diperbarui — lalu
 	dokumennya disebut di ringkasan supaya bisa diputuskan sendiri.
 
+	Cakupannya beda antara dua doctype ini. Security Check Point dibatasi kiriman
+	API: dokumen yang diinput orang lewat UI datanya diisi petugas yang melihat
+	kendaraannya langsung, dan itu lebih dipercaya daripada ekspor. SPB tidak
+	disaring pemiliknya, cukup mengandalkan trans_no — field itu memang hanya
+	diisi jalur API, sementara pengiriman lewat REST tidak selalu memakai user
+	api@sth sehingga saringan owner justru membuat sebagian SPB terlewat.
+
 	Ditulis lewat db.set_value karena sebagian dokumennya sudah submit, dan patch
-	ini cuma membetulkan data master tanpa menyentuh angka apa pun.
+	ini cuma membetulkan data master tanpa menyentuh angka timbangan apa pun.
 
 	Sengaja tidak didaftarkan di patches.txt: perbaikan sekali jalan dari satu
 	berkas ekspor, yang mau diawasi sendiri waktu dijalankan.
 
-	    bench --site <site> execute sth.patches.perbaiki_supir_unit_divisi_security_check_point.execute
+	    bench --site <site> execute sth.patches.perbaiki_supir_unit_divisi_spb_dan_security_check_point.execute
 
 	Untuk sebagian Trans No saja:
 
-	    from sth.patches.perbaiki_supir_unit_divisi_security_check_point import execute
+	    from sth.patches.perbaiki_supir_unit_divisi_spb_dan_security_check_point import execute
 	    execute(["SPBTML62260908155712705"])
 	"""
 	rekap = _baca_data(trans_nos)
 	if not rekap:
-		print("Perbaikan SCP: tidak ada Trans No yang cocok di data ekspor")
+		print("Perbaikan dari ekspor SPB: tidak ada Trans No yang cocok di data ekspor")
 		return
 
 	divisi_per_unit = {}
-	jumlah = 0
-	tanpa_dokumen = []
-	unit_asing = set()
-	blok_asing = {}
-	divisi_campur = []
+	nama_employee = {}
+	jumlah = {"scp": 0, "spb": 0, "driver_code": 0}
+	laporan = {
+		"tanpa_scp": [],
+		"tanpa_spb": [],
+		"unit_asing": set(),
+		"blok_asing": {},
+		"divisi_campur": [],
+	}
 
 	for trans_no, baris in rekap.items():
+		sopir = _sopir(baris)
+		values = _nilai_baru(trans_no, baris, sopir, divisi_per_unit, laporan)
+
 		scp_list = _get_scp(trans_no)
-
 		if not scp_list:
-			tanpa_dokumen.append(trans_no)
-			continue
-
-		values = {}
-
-		# Sopir yang di ekspornya cuma "-" berarti memang tidak dicatat; jangan
-		# dipakai menghapus nama yang sudah ada di dokumennya.
-		if baris["sopir"] and baris["sopir"] != "-":
-			values["driver_name"] = baris["sopir"]
-
-		unit = baris["unit"]
-
-		if unit:
-			if not frappe.db.exists("Unit", unit):
-				unit_asing.add(unit)
-				unit = None
-			else:
-				values["unit"] = unit
-
-		if unit:
-			if unit not in divisi_per_unit:
-				divisi_per_unit[unit] = _get_divisi_per_blok(unit)
-
-			divisi = _cari_divisi(
-				divisi_per_unit[unit], unit, baris["blok"], blok_asing
-			)
-
-			if divisi == BEDA_DIVISI:
-				divisi_campur.append(trans_no)
-			elif divisi:
-				values["divisi"] = divisi
+			laporan["tanpa_scp"].append(trans_no)
 
 		for scp in scp_list:
-			jumlah += _tulis(scp, values)
+			jumlah["scp"] += _tulis("Security Check Point", scp, values)
 
-	_cetak_ringkasan(jumlah, len(rekap), tanpa_dokumen, unit_asing, blok_asing, divisi_campur)
+		spb_list = _get_spb(trans_no)
+		if not spb_list:
+			laporan["tanpa_spb"].append(trans_no)
+
+		for spb in spb_list:
+			lepas = _lepas_driver_code(spb, sopir, nama_employee)
+			jumlah["driver_code"] += len(lepas)
+			jumlah["spb"] += _tulis("Surat Pengantar Buah", spb, dict(values, **lepas))
+
+	_cetak_ringkasan(jumlah, len(rekap), laporan)
 
 
 def _baca_data(trans_nos):
@@ -345,6 +340,48 @@ def _baca_data(trans_nos):
 	return rekap
 
 
+def _sopir(baris):
+	"""Nama supir dari ekspor, atau None kalau memang tidak dicatat.
+
+	Sopir yang di ekspornya cuma "-" jangan dipakai menghapus nama yang sudah ada
+	di dokumennya, dan jangan dipakai menilai driver_code juga.
+	"""
+	sopir = baris["sopir"].strip()
+
+	return sopir if sopir and sopir != "-" else None
+
+
+def _nilai_baru(trans_no, baris, sopir, divisi_per_unit, laporan):
+	"""Nilai yang berlaku sama untuk SPB maupun Security Check Point-nya."""
+	values = {}
+
+	if sopir:
+		values["driver_name"] = sopir
+
+	unit = baris["unit"]
+
+	if not unit:
+		return values
+
+	if not frappe.db.exists("Unit", unit):
+		laporan["unit_asing"].add(unit)
+		return values
+
+	values["unit"] = unit
+
+	if unit not in divisi_per_unit:
+		divisi_per_unit[unit] = _get_divisi_per_blok(unit)
+
+	divisi = _cari_divisi(divisi_per_unit[unit], unit, baris["blok"], laporan["blok_asing"])
+
+	if divisi is BEDA_DIVISI:
+		laporan["divisi_campur"].append(trans_no)
+	elif divisi:
+		values["divisi"] = divisi
+
+	return values
+
+
 def _get_scp(trans_no):
 	"""Security Check Point kiriman API untuk trans_no SPB ini.
 
@@ -365,6 +402,55 @@ def _get_scp(trans_no):
 		fields=["name", "driver_name", "unit", "divisi"],
 		limit_page_length=0,
 	)
+
+
+def _get_spb(trans_no):
+	"""Surat Pengantar Buah untuk trans_no ini, kecuali yang sudah dibatalkan.
+
+	Tanpa saringan owner — lihat penjelasan cakupan di execute(). Kembalinya
+	daftar walau trans_no sudah punya penjaga kembar: merge_duplicate_spb_trans_no
+	baru dijalankan belakangan, jadi sisa dokumen kembar masih mungkin ada.
+	"""
+	return frappe.get_all(
+		"Surat Pengantar Buah",
+		filters={"trans_no": trans_no, "docstatus": ["<", 2]},
+		fields=["name", "driver_name", "driver_code", "unit", "divisi"],
+		limit_page_length=0,
+	)
+
+
+def _lepas_driver_code(spb, sopir, cache):
+	"""Kosongkan driver_code yang Employee-nya bukan supir di ekspor.
+
+	driver_name diisi dari ekspor sementara driver_code menunjuk Employee; kalau
+	keduanya dibiarkan beda, dokumennya menyimpan dua nama supir yang saling
+	bertentangan. Employee penggantinya tidak ditebak — nama saja tidak cukup
+	untuk memastikan orangnya — jadi tautannya dilepas dan diisi ulang sendiri.
+
+	Dilepas cuma kalau ekspornya memang mencatat supir; kalau tidak, tidak ada
+	dasar untuk menyatakan driver_code-nya salah.
+	"""
+	if not spb.driver_code or not sopir:
+		return {}
+
+	if spb.driver_code not in cache:
+		cache[spb.driver_code] = frappe.db.get_value("Employee", spb.driver_code, "employee_name")
+
+	if _samakan(cache[spb.driver_code]) == _samakan(sopir):
+		return {}
+
+	return {"driver_code": None}
+
+
+def _samakan(nama):
+	"""Bentuk nama untuk membandingkan ekspor dengan master Employee.
+
+	Tanda baca dijadikan spasi lalu spasinya dirapatkan, supaya "J. RIANTO
+	SIMAMORA" di ekspor tetap dianggap orang yang sama dengan "J RIANTO SIMAMORA"
+	di master. Selebihnya dibandingkan apa adanya: yang beda ejaannya lebih baik
+	dilepas dan dipasang ulang sendiri daripada dibiarkan menunjuk orang lain.
+	"""
+	return re.sub(r"[^A-Z0-9]+", " ", (nama or "").upper()).strip()
 
 
 def _get_divisi_per_blok(unit):
@@ -422,38 +508,56 @@ def _cari_divisi(peta, unit, blok_list, blok_asing):
 	return ditemukan.pop()
 
 
-def _tulis(scp, values):
+def _tulis(doctype, row, values):
 	"""Tulis field yang isinya belum sesuai, kembalikan 1 kalau ada yang berubah."""
-	berubah = {f: v for f, v in values.items() if scp.get(f) != v}
+	berubah = {f: v for f, v in values.items() if row.get(f) != v}
 
 	if not berubah:
 		return 0
 
-	frappe.db.set_value("Security Check Point", scp.name, berubah, update_modified=False)
+	frappe.db.set_value(doctype, row.name, berubah, update_modified=False)
 
 	return 1
 
 
-def _cetak_ringkasan(jumlah, total, tanpa_dokumen, unit_asing, blok_asing, divisi_campur):
-	print("Perbaikan SCP: {0} dokumen diperbarui dari {1} Trans No di ekspor".format(jumlah, total))
+def _cetak_ringkasan(jumlah, total, laporan):
+	print(
+		"Perbaikan dari ekspor SPB: {spb} Surat Pengantar Buah, "
+		"{scp} Security Check Point diperbarui dari ".format(**jumlah)
+		+ "{0} Trans No di ekspor".format(total)
+	)
+
+	if jumlah["driver_code"]:
+		print(
+			"  {0} driver_code SPB dikosongkan karena Employee-nya bukan supir di "
+			"ekspor, isi ulang sendiri".format(jumlah["driver_code"])
+		)
 
 	_cetak_daftar(
-		tanpa_dokumen,
+		laporan["tanpa_spb"],
+		"Trans No tidak punya Surat Pengantar Buah, dilewati",
+	)
+
+	_cetak_daftar(
+		laporan["tanpa_scp"],
 		"Trans No tidak punya Security Check Point kiriman API, dilewati",
 	)
 
 	_cetak_daftar(
-		sorted(unit_asing),
+		sorted(laporan["unit_asing"]),
 		"kode Unit di ekspor tidak ada di master, unit dan divisinya dilewati",
 	)
 
 	_cetak_daftar(
-		["{0} {1} ({2} SPB)".format(u, k, n) for (u, k), n in sorted(blok_asing.items())],
+		[
+			"{0} {1} ({2} SPB)".format(u, k, n)
+			for (u, k), n in sorted(laporan["blok_asing"].items())
+		],
 		"blok tidak ketemu di master Blok unit itu",
 	)
 
 	_cetak_daftar(
-		divisi_campur,
+		laporan["divisi_campur"],
 		"SPB bloknya terpisah di dua divisi, divisinya dilewati",
 	)
 
