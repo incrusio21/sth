@@ -285,6 +285,31 @@ def get_payment_entry_uang_muka(
 def set_accept_day(doc,method):
     doc.accept_day = cint(doc.syarat_pembayaran.split(' ')[0]) if doc.syarat_pembayaran else 0
 
+
+def set_sub_total(doc, method=None):
+    """Isi Sub Total dari jumlah amount seluruh baris item.
+
+    Sebelumnya angka ini cuma dihitung di purchase_order.js, jadi Purchase Order
+    yang lahir tanpa lewat form — API, import, atau get_mapped_doc dari Material
+    Request maupun Supplier Quotation — sub_total-nya tertinggal nol padahal
+    print format PO mencetaknya sebagai baris "Sub Total".
+
+    Rumusnya sama dengan yang di klien. Tiga tabel lain yang ikut dijumlah
+    calculate_sub_total() di sana (charges, pengeluaran barang, dan Non Voucher
+    Match) tidak ada di Purchase Order — itu bawaan Purchase Invoice yang ikut
+    tersalin waktu fungsinya dipindahkan — jadi yang tersisa cuma total item.
+
+    Diskon dokumen tidak dikurangkan: di print format diskon berdiri sebagai
+    barisnya sendiri di bawah Sub Total.
+
+    Nilainya mata uang transaksi, mengikuti item.amount yang dijumlah, bukan
+    mata uang perusahaan.
+    """
+    doc.sub_total = flt(
+        sum(flt(row.amount) for row in (doc.items or [])),
+        doc.precision("sub_total"),
+    )
+
 @frappe.whitelist()
 def get_history_purchase_item(nama_barang):
     from erpnext.accounts.utils import get_fiscal_year

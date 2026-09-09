@@ -989,16 +989,14 @@ function sync_all_to_taxes(frm) {
     }
 }
 
+// Kembarannya di server: sth.buying_sth.custom.purchase_order.set_sub_total,
+// yang dipanggil dari validate dan jadi penentu akhir angkanya. Yang di sini
+// cuma supaya Sub Total ikut bergerak waktu qty dan rate diketik.
+//
+// Voucher Match, charges, dan pengeluaran barang yang ikut dijumlah versi
+// Purchase Invoice tidak ada tabelnya di Purchase Order, jadi tidak dibawa.
 function calculate_sub_total(frm) {
-    let sub_total = 0;
-    if (frm.doc.voucher_type === "Non Voucher Match") {
-        sub_total = (frm.doc.non_voucher_match || []).reduce((sum, r) => sum + (r.total || 0), 0);
-    } else {
-        const total_items = (frm.doc.items || []).reduce((sum, r) => sum + (r.amount || 0), 0);
-        const total_charges = (frm.doc.charges_purchase_invoice || []).reduce((sum, r) => sum + (r.total || 0), 0);
-        const total_pb = (frm.doc.purchase_invoice_pengeluaran_barang || []).reduce((sum, r) => sum + (r.amount || 0), 0);
-        sub_total = total_items + total_charges - total_pb;
-    }
+    const sub_total = (frm.doc.items || []).reduce((sum, r) => sum + (r.amount || 0), 0);
     frm.set_value("sub_total", sub_total);
 }
 

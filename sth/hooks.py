@@ -432,7 +432,8 @@ doc_events = {
 		"on_trash": "sth.legal.custom.project.Project",
 	},
 	"Purchase Order": {
-		"before_save": "sth.buying_sth.custom.purchase_order.set_accept_day"
+		"before_save": "sth.buying_sth.custom.purchase_order.set_accept_day",
+		"validate": "sth.buying_sth.custom.purchase_order.set_sub_total"
 	},
 	"Purchase Receipt": {
 		"validate": ["sth.custom.purchase_receipt.set_purchase_order_if_exist", "sth.custom.purchase_receipt.validate_overreceipt"],
