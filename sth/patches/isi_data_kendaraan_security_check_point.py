@@ -22,9 +22,10 @@ def execute(scp_names=None):
 	    Surat Pengantar Buah : kendaraan, no_polisi, driver_code
 	    Timbangan            : no_polisi, driver_name
 
-	Di Security Check Point nilainya ditimpa supaya formatnya ikut master. Di SPB
-	dan Timbangan cuma field yang masih kosong yang diisi — keduanya punya jalur
-	API sendiri yang datanya lebih lengkap, dan itu tidak boleh tertindih.
+	Di Security Check Point platnya ditimpa supaya formatnya ikut master, tapi
+	nama supir cuma mengisi yang kosong. Di SPB dan Timbangan juga cuma field yang
+	masih kosong yang diisi — keduanya punya jalur API sendiri yang datanya lebih
+	lengkap, dan itu tidak boleh tertindih.
 
 	No polisinya dicari berurutan dari Security Check Point sendiri, lalu SPB, lalu
 	Timbangan-nya: field no_polisi di SCP menarik nilai dari spb.no_polisi, jadi
@@ -67,11 +68,18 @@ def execute(scp_names=None):
 
 		driver_name = nama_operator[kendaraan.operator]
 
-		jumlah["scp"] += _tulis("Security Check Point", row.name, {
+		# Plat ditimpa supaya formatnya ikut master, nama supir cuma mengisi yang
+		# kosong — sama seperti set_data_kendaraan di controllernya, supaya patch
+		# ini tidak menghapus nama supir kiriman API yang lebih baru.
+		diubah = _tulis("Security Check Point", row.name, {
 			"no_polisi": kendaraan.no_pol,
 			"license_plate": kendaraan.no_pol,
-			"driver_name": driver_name,
 		})
+		diubah = max(diubah, _tulis(
+			"Security Check Point", row.name, {"driver_name": driver_name}, hanya_kosong=True
+		))
+
+		jumlah["scp"] += diubah
 
 		jumlah["spb"] += _isi_spb(row.spb, kendaraan)
 		jumlah["timbangan"] += _isi_timbangan(row, kendaraan, driver_name)

@@ -64,10 +64,16 @@ class SecurityCheckPoint(Document):
 	def set_data_kendaraan(self):
 		"""Isi data supir dan no polisi dari master Alat Berat Dan Kendaraan.
 
-		Kiriman API cuma membawa no polisi; nama supirnya tidak ikut. Kendaraannya
-		dicari lewat no_pol, operatornya dipakai sebagai driver_name, dan no_pol
-		master ditulis balik ke no_polisi serta license_plate supaya formatnya ikut
-		master, bukan format yang dikirim sistem luar.
+		Kendaraannya dicari lewat no_pol, lalu no_pol master ditulis balik ke
+		no_polisi serta license_plate supaya formatnya ikut master, bukan format
+		yang dikirim sistem luar.
+
+		Nama supir beda perlakuan: operator master cuma mengisi driver_name yang
+		masih kosong, tidak menimpa yang dikirim. Dulu kiriman API memang tidak
+		membawa nama supir sehingga master selalu menang, tapi sekarang membawa —
+		dan yang dikirim itu supir yang benar-benar jalan hari itu, sedangkan
+		master menyimpan operator tetap kendaraannya. Supir pengganti hal biasa,
+		jadi yang dari lapangan menang.
 
 		Dijalankan di validate, bukan before_insert, supaya nilainya tidak keburu
 		ditimpa fetch_from spb.no_polisi di _validate_links().
@@ -96,7 +102,7 @@ class SecurityCheckPoint(Document):
 
 		self.no_polisi = self.license_plate = kendaraan.no_pol
 
-		if kendaraan.operator:
+		if kendaraan.operator and not self.driver_name:
 			self.driver_name = get_nama_operator(kendaraan.operator)
 
 	def map_api_spb_trans_no(self):
