@@ -49,6 +49,12 @@ frappe.ui.form.on("Supplier Quotation", {
         }
     },
 
+    validate(frm) {
+        if (frm.doc.docstatus == 0) {
+            sync_to_taxes(frm)
+        }
+    },
+
     company(frm) {
         frm.trigger('get_tax_template')
     },
@@ -69,16 +75,9 @@ frappe.ui.form.on("Supplier Quotation", {
         frm.trigger('calculate_total_biaya_angkut')
     },
 
-    total_biaya_ongkos_angkut(frm) {
-        if (frappe.refererence.__ref_tax["Ongkos Angkut"]) {
-            let coa = frappe.refererence.__ref_tax["Ongkos Angkut"].account
-            let tax = frm.doc.taxes.find((r) => r.account_head == coa)
-            if (tax) {
-                frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.total_biaya_ongkos_angkut)
-                frm.trigger('calculate_taxes_and_totals')
-            }
-        }
-    },
+    total_biaya_ongkos_angkut(frm) { sync_to_taxes(frm) },
+    pph_22(frm) { sync_to_taxes(frm) },
+    pbbkb(frm) { sync_to_taxes(frm) },
 
     is_pph_22(frm) {
         sth.form.enforce_pph_22(frm)
@@ -92,37 +91,12 @@ frappe.ui.form.on("Supplier Quotation", {
         sth.form.toggle_pph_22(frm)
     },
 
-    pph_22(frm) {
-        if (frappe.refererence.__ref_tax["PPH 22"]) {
-            let coa = frappe.refererence.__ref_tax["PPH 22"].account
-            let tax = frm.doc.taxes.find((r) => r.account_head == coa)
-            if (tax) {
-                frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.pph_22)
-                frm.trigger('calculate_taxes_and_totals')
-            }
-        }
-    },
-
-    pbbkb(frm) {
-        if (frappe.refererence.__ref_tax["PBBKB"]) {
-            let coa = frappe.refererence.__ref_tax["PBBKB"].account
-            let tax = frm.doc.taxes.find((r) => r.account_head == coa)
-            if (tax) {
-                frappe.model.set_value(tax.doctype, tax.name, "tax_amount", frm.doc.pbbkb)
-                frm.trigger('calculate_taxes_and_totals')
-            }
-        }
-    },
-
     get_tax_template(frm) {
         frappe.provide('frappe.refererence.__ref_tax')
         if (Object.keys(frappe.refererence.__ref_tax).length === 0) {
             if (!frm.doc.company) {
                 return
             }
-
-            console.log("masuk");
-
 
             frappe.xcall("sth.custom.supplier_quotation.get_taxes_template", { "company": frm.doc.company }).then((res) => {
                 for (const row of res) {
@@ -136,6 +110,10 @@ frappe.ui.form.on("Supplier Quotation", {
 
                     frappe.refererence.__ref_tax[row.type] = row
                 }
+
+                // Referensinya baru ada sekarang, jadi angka yang sudah telanjur
+                // diketik sebelum ini belum sempat mendarat di tabel taxes.
+                sync_to_taxes(frm)
             })
         }
     },
@@ -232,6 +210,73 @@ frappe.ui.form.on("VAT Detail", {
     }
 })
 
+
+// ─── Sync Taxes ──────────────────────────────────────────────────────────────
+//
+// Kembaran sync_all_to_taxes di purchase_order.js. Grand total cuma menjumlah
+// tabel taxes, sementara biaya ongkos, PPh 22, dan PBBKB tinggal di field
+// header — jadi ketiganya harus dituliskan ke tabel itu dulu supaya ikut
+// terhitung.
+//
+// Sebelumnya barisnya cuma dipasang get_tax_template waktu dokumennya masih
+// baru, dan itu pun sekali saja per sesi browser: __ref_tax di-cache di
+// frappe.refererence, jadi Supplier Quotation kedua dan seterusnya melewati
+// xcall-nya sama sekali dan tidak kebagian baris apa pun. Angkanya lalu tidak
+// punya tempat mendarat dan grand total-nya tertinggal.
+//
+// Bedanya dengan Purchase Order: di sana tabel taxes dibuang lalu disusun ulang
+// dari nol, di sini barisnya dicari dan diperbarui di tempat. PPh Lainnya di
+// Supplier Quotation memegang baris taxes-nya lewat ref_child_name, dan pointer
+// itu putus kalau tabelnya dikosongkan.
+const SQ_TAX_FIELD_MAP = [
+    { key: "Ongkos Angkut", field: "total_biaya_ongkos_angkut" },
+    { key: "PPH 22", field: "pph_22" },
+    { key: "PBBKB", field: "pbbkb" },
+]
+
+function sync_to_taxes(frm) {
+    const ref_tax = frappe.refererence.__ref_tax || {}
+    let berubah = false
+
+    for (const { key, field } of SQ_TAX_FIELD_MAP) {
+        const ref = ref_tax[key]
+        if (!ref) continue
+
+        let tax = (frm.doc.taxes || []).find((r) => r.account_head == ref.account)
+
+        if (!tax) {
+            tax = frm.add_child("taxes")
+            tax.account_head = ref.account
+            tax.charge_type = "Actual"
+            tax.add_deduct_tax = "Add"
+            tax.category = "Total"
+            // Purchase Order membiarkan description kosong untuk baris ini,
+            // tapi di sini get_tax_template selama ini mengisinya lewat trigger
+            // account_head; diisi kodenya sendiri supaya barisnya tetap punya
+            // keterangan tanpa menunggu panggilan yang asinkron.
+            tax.description = key
+            // Diisi nol dulu: kalau field-nya memang masih kosong, perbandingan
+            // di bawah tidak akan menulis apa pun dan barisnya bisa tersimpan
+            // dengan tax_amount undefined.
+            tax.tax_amount = 0
+            berubah = true
+        }
+
+        const amount = flt(frm.doc[field])
+
+        if (flt(tax.tax_amount) !== amount) {
+            frappe.model.set_value(tax.doctype, tax.name, "tax_amount", amount)
+            berubah = true
+        }
+    }
+
+    if (!berubah) {
+        return
+    }
+
+    frm.refresh_field("taxes")
+    frm.trigger("calculate_taxes_and_totals")
+}
 
 function btn_get_material_request(frm) {
     frm.add_custom_button(
