@@ -26,6 +26,9 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 		return child_filter
+	
+	def update_item(source,target,source_parent):
+		target.description = ""
 
 
 	doclist = get_mapped_doc(
@@ -47,6 +50,7 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 					"sales_order": "sales_order",
 				},
 				"condition": select_item,
+				"postprocess": update_item
 			},
 		},
 		target_doc,

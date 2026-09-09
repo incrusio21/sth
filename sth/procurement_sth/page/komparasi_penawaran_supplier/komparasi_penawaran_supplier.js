@@ -546,6 +546,11 @@ class SupplierComparasion {
 							label: "Supplier",
 							fieldtype: "Link",
 							options: "Supplier",
+						},
+						{
+							fieldname: "supplier_name",
+							label: "Supplier",
+							fieldtype: "Data",
 							in_list_view: 1,
 							read_only: 1,
 							columns: 1

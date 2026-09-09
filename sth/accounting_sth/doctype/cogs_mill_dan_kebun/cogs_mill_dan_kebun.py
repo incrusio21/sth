@@ -1180,7 +1180,7 @@ def nilai_pembelian_tbs(company, dari, sampai):
 		return 0.0
 
 	total = frappe.db.sql("""
-		select sum(credit) - sum(debit)
+		select sum(debit) - sum(credit)
 		from `tabGL Entry`
 		where company = %s and posting_date between %s and %s
 			and is_cancelled = 0 and account in %s

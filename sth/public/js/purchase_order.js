@@ -340,6 +340,7 @@ erpnext.buying.PurchaseOrderControllerCustom = class PurchaseOrderController ext
 
 	validate() {
 		set_schedule_date(this.frm);
+		calculate_sub_total(this.frm)
 	}
 
 	has_unsupplied_items() {
@@ -824,6 +825,12 @@ frappe.ui.form.on("Purchase Order Item", {
 
 	item_name(frm) {
 		sth.form.toggle_pph_22(frm)
+	},
+	qty(frm){
+		calculate_sub_total(frm)
+	},
+	rate(frm){
+		calculate_sub_total(frm)
 	}
 });
 

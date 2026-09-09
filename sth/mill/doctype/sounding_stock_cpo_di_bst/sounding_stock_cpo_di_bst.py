@@ -69,7 +69,7 @@ class SoundingStockCPOdiBST(Document):
 		# stock_saat_ini = get_total_stock[0].qty if get_total_stock else 0
 		stock_saat_ini = self.get_total_stock()
 		self.pengiriman_cpo = self.get_delivery()
-		self.stock_awal = flt(stock_saat_ini) + flt(self.pengiriman_cpo)
+		self.stock_awal = flt(stock_saat_ini)
 		self.set_adjustment()
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.potongan_sortasi = self.get_sortasi()
@@ -109,7 +109,7 @@ class SoundingStockCPOdiBST(Document):
 				and posting_date < %s
 			order by posting_date desc, posting_time desc, creation desc
 			limit 1
-		""",(item_code, warehouse, self.tanggal_proses))
+		""",(item_code, warehouse, self.tanggal_proses),debug=True)
 
 		return flt(terakhir[0][0]) if terakhir else 0
 

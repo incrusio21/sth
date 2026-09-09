@@ -116,7 +116,7 @@ def get_condition(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND so.pt = %(company)s"
+		conditions += " AND so.company = %(company)s"
 
 	if filters.get("unit"):
 		conditions += " AND so.unit = %(unit)s"

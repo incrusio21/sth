@@ -1,7 +1,6 @@
 frappe.provide("sth.queries")
 frappe.provide("sth.form")
 frappe.ui.form.off("Material Request", "make_request_for_quotation")
-frappe.ui.form.off("Material Request", "make_supplier_quotation")
 frappe.ui.form.on("Material Request", {
     setup(frm) {
         sth.form.override_class_function(frm.cscript, "refresh", () => {
@@ -46,13 +45,6 @@ frappe.ui.form.on("Material Request", {
             method: "sth.overrides.material_request.make_request_for_quotation",
             frm: frm,
             run_link_triggers: true,
-        });
-    },
-
-    make_supplier_quotation: function (frm) {
-        frappe.model.open_mapped_doc({
-            method: "sth.overrides.supplier_quotation.make_supplier_quotation",
-            frm: frm,
         });
     },
 
