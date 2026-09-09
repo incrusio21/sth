@@ -9,17 +9,17 @@ def execute():
 
 	Rumusnya berubah: dulu rata-rata harian sederhana atas angka persen tiap
 	dokumen, sekarang ditimbang tonase — total produksi dibagi total TBS olah
-	netto 2 sejak awal bulan sampai tanggal proses dokumen itu, dikali 100. Nilai
-	yang tersimpan di dokumen lama masih hasil rumus yang lama.
+	sejak awal bulan sampai tanggal proses dokumen itu, dikali 100. Nilai yang
+	tersimpan di dokumen lama masih hasil rumus yang lama.
 
 	Yang tampil di form sebenarnya sudah benar tanpa patch ini — dihitung ulang
 	tiap dokumen dibuka. Yang salah adalah kolom di database, dan itulah yang
 	dibaca list view, report view, ekspor, dan OER/KER di COGS Mill dan Kebun.
 
 	Rumusnya persis sama dengan set_rata_rata_rendemen_bulanan, sampai ke
-	pembaginya yang dikurangi potongan sortasi. Cuma dokumen submitted yang
-	menjumlah, dan dokumen di tanggal yang sama saling ikut menghitung, sesuai
-	`between` di query aslinya.
+	pembaginya yang TBS olah apa adanya, tidak dikurangi potongan sortasi. Cuma
+	dokumen submitted yang menjumlah, dan dokumen di tanggal yang sama saling ikut
+	menghitung, sesuai `between` di query aslinya.
 
 	Semua dokumen dihitung sekaligus di Python, bukan satu query per dokumen:
 	rata-rata berjalan cuma butuh satu kali baca seluruh dokumen per doctype.
@@ -43,7 +43,6 @@ def isi_dokumen(doctype, cfg):
 			"docstatus",
 			cfg["produksi"],
 			cfg["tbs_olah"],
-			cfg["sortasi"],
 			cfg["target"],
 		],
 		order_by="unit asc, tanggal_proses asc",
@@ -78,8 +77,8 @@ def isi_dokumen(doctype, cfg):
 
 
 def kumpulkan(dokumen, cfg):
-	"""Total produksi dan total TBS olah netto 2 submitted sampai tiap tanggal,
-	per unit per bulan.
+	"""Total produksi dan total TBS olah submitted sampai tiap tanggal, per unit
+	per bulan.
 
 	Dokumen draft ikut dapat tanggalnya sendiri di hasil — supaya fieldnya tetap
 	terisi — tapi angkanya tidak ikut menjumlah, sama seperti query aslinya yang
@@ -100,7 +99,7 @@ def kumpulkan(dokumen, cfg):
 
 		isi = harian.setdefault(kunci(row), {}).setdefault(tanggal, [0.0, 0.0])
 		isi[0] += flt(row.get(cfg["produksi"]))
-		isi[1] += flt(row.get(cfg["tbs_olah"])) - flt(row.get(cfg["sortasi"]))
+		isi[1] += flt(row.get(cfg["tbs_olah"]))
 
 	kumulatif = {}
 

@@ -217,13 +217,11 @@ RENDEMEN_BULANAN = {
 	"Sounding Stock CPO di BST": {
 		"produksi": "produksi_cpo",
 		"tbs_olah": "tbs_olah",
-		"sortasi": "potongan_sortasi",
 		"target": "rata_rata_oer_bulanan",
 	},
 	"Sounding Stock Palm Kernel di Bunker Kernel": {
 		"produksi": "produksi",
 		"tbs_olah": "tbs_olah",
-		"sortasi": "sortasi",
 		"target": "rata_rata_ker_bulanan",
 	},
 }
@@ -235,9 +233,11 @@ def set_rata_rata_rendemen_bulanan(doc):
 	Caranya sama dengan rata-rata harga jual CPO di COGS Mill dan Kebun: yang
 	dirata-rata bukan angka persen hariannya, tapi bahannya. Total produksi sejak
 	awal bulan tanggal_proses sampai tanggal_proses dokumen ini dibagi total TBS
-	olah pada rentang yang sama, dikali 100. Sama seperti rendemen harian, TBS olah
-	di penyebut dikurangi potongan sortasi dulu — jadi ini tetap rendemen netto 2,
-	cuma ditimbang tonasenya.
+	olah pada rentang yang sama, dikali 100.
+
+	Penyebutnya TBS olah apa adanya, tidak dikurangi potongan sortasi — permintaan
+	user. Jadi angkanya sebanding dengan rendemen netto 1 harian, bukan netto 2
+	yang jadi kolom di sebelahnya.
 
 	Bedanya dengan rata-rata harian sederhana: hari yang tbs olahnya besar menarik
 	angkanya lebih kuat, dan hari yang tidak mengolah TBS sama sekali tidak lagi
@@ -263,15 +263,13 @@ def set_rata_rata_rendemen_bulanan(doc):
 		return
 
 	row = frappe.db.sql("""
-		select sum(coalesce(d.`{produksi}`, 0)),
-			sum(coalesce(d.`{tbs_olah}`, 0) - coalesce(d.`{sortasi}`, 0))
+		select sum(coalesce(d.`{produksi}`, 0)), sum(coalesce(d.`{tbs_olah}`, 0))
 		from `tab{doctype}` d
 		where d.docstatus = 1 and d.unit = %(unit)s
 			and d.tanggal_proses between %(dari)s and %(sampai)s
 	""".format(
 		produksi=cfg["produksi"],
 		tbs_olah=cfg["tbs_olah"],
-		sortasi=cfg["sortasi"],
 		doctype=doc.doctype,
 	), {
 		"unit": doc.unit,
@@ -286,11 +284,10 @@ def set_rata_rata_rendemen_bulanan(doc):
 
 
 def hitung_rendemen(produksi, penyebut):
-	"""Rendemen persen dari total produksi dan total TBS olah netto 2.
+	"""Rendemen persen dari total produksi dan total TBS olah.
 
-	Penjaganya penyebut itu sendiri, bukan tbs olah kotornya: kalau seluruh TBS
-	yang masuk kena potongan sortasi, penyebutnya nol dan pembagiannya error.
-	Sama seperti hitung_produksi di dokumen soundingnya.
+	Penyebut nol — sebulan yang belum mengolah TBS sama sekali — dijawab 0, bukan
+	dibiarkan jadi error pembagian.
 	"""
 	penyebut = flt(penyebut)
 

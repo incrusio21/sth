@@ -76,7 +76,7 @@ BARIS = (
 #
 # 'rendemen_bulanan' adalah field rata-rata rendemen sebulan di dokumen Sounding,
 # yang jadi OER dan KER dokumen ini. Isinya total produksi dibagi total TBS olah
-# netto 2 sejak awal bulan sampai tanggal proses dokumen itu, jadi dokumen
+# sejak awal bulan sampai tanggal proses dokumen itu, jadi dokumen
 # terakhir bulan itu sudah membawa rendemen sebulan penuh. TBS tidak punya.
 SUMBER_PRODUK = {
 	"tbs": {
@@ -985,11 +985,11 @@ def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
 	OER diambil dari rata_rata_oer_bulanan di Sounding Stock CPO di BST, KER dari
 	rata_rata_ker_bulanan di Sounding Stock Palm Kernel di Bunker Kernel — bukan
 	dihitung ulang dari Production terhadap TBS diolah: yang dipakai pabrik adalah
-	rendemen harian di Sounding, yang pembaginya sudah dikurangi potongan sortasi.
+	angka yang terbaca di dokumen Sounding itu sendiri.
 
-	Field itu sendiri berisi total produksi dibagi total TBS olah netto 2 sejak
-	awal bulan sampai tanggal proses dokumennya — ditimbang tonase, cara yang sama
-	dengan rata-rata harga jual di sini — jadi dokumen terakhir bulan itu sudah
+	Field itu sendiri berisi total produksi dibagi total TBS olah sejak awal bulan
+	sampai tanggal proses dokumennya — ditimbang tonase, cara yang sama dengan
+	rata-rata harga jual di sini — jadi dokumen terakhir bulan itu sudah
 	membawa rendemen sebulan penuh. Mengambilnya dari sana, bukan menghitung
 	sendiri di sini, membuat angka di COGS sama persis dengan yang terbaca di
 	dokumen Sounding terakhir — termasuk hari yang produksinya nol atau minus,
