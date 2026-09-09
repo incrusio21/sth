@@ -330,10 +330,12 @@ _SKIP_HEADER_FIELDS = {
 }
 
 # Header yang masih boleh diperbaiki walau SPB-nya sudah submit. Stub yang dibuat
-# Security Check Point memakai unit dan divisi milik pos penjagaan, dan itu tidak
-# selalu kebun yang benar-benar memanen — kiriman SPB inilah yang tahu, tapi
-# seringnya datang sesudah stub itu ikut tersubmit oleh timbangan.
-_HEADER_AFTER_SUBMIT = ("unit", "divisi")
+# Security Check Point memakai unit, divisi, dan nama supir seadanya milik pos
+# penjagaan, dan itu tidak selalu kebun yang benar-benar memanen atau supir yang
+# benar-benar jalan — kiriman SPB inilah yang tahu, tapi seringnya datang sesudah
+# stub itu ikut tersubmit oleh timbangan. Nama supirnya diteruskan lagi ke
+# verifikasi security oleh _resync_security_check_point.
+_HEADER_AFTER_SUBMIT = ("unit", "divisi", "driver_name")
 
 def _update_spb(existing_name, args):
 	doc = frappe.get_doc("Surat Pengantar Buah", existing_name)
@@ -367,6 +369,7 @@ def _update_spb(existing_name, args):
 		doc.db_set(nilai, notify=False)
 
 	_resync_timbangan(doc.name)
+	_resync_security_check_point(doc)
 
 	frappe.db.commit()
 
@@ -392,13 +395,14 @@ def _header_after_submit(doc, args):
 		if not value or value == doc.get(field):
 			continue
 
-		options = doc.meta.get_field(field).options
+		meta = doc.meta.get_field(field)
 
 		# db_set melewati pemeriksaan Link, jadi kode yang tidak terdaftar akan
 		# mendarat diam-diam di dokumen yang sudah submit. Di jalur draft
 		# doc.save() yang menolaknya; di sini penolakannya dipasang sendiri.
-		if not frappe.db.exists(options, value):
-			frappe.throw(f"Could not find {options}: {value}")
+		# Field Data seperti driver_name tidak punya master untuk diperiksa.
+		if meta.fieldtype == "Link" and not frappe.db.exists(meta.options, value):
+			frappe.throw(f"Could not find {meta.options}: {value}")
 
 		nilai[field] = value
 
@@ -439,6 +443,42 @@ def _resync_timbangan(spb_name):
 		return
 
 	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
+
+def _resync_security_check_point(doc):
+	"""Turunkan nama supir SPB ke Security Check Point yang menempel padanya.
+
+	Kiriman SPB inilah data terakhir soal supir — pos penjagaan mencatat siapa
+	yang lewat, tapi supir pengganti hal biasa dan yang benar-benar jalan baru
+	tegas di SPB. Yang dilihat orang justru verifikasi security-nya, jadi nama
+	di sana ikut dibetulkan, bukan dibiarkan berbeda dengan SPB.
+
+	Cuma TBS Internal: penerimaan lain tidak menempel ke SPB sama sekali — field
+	spb di Security Check Point memang hanya muncul untuk penerimaan itu.
+
+	Lewat db.set_value, bukan doc.save(): dokumennya banyak yang sudah submit,
+	dan driver_name di sana read-only dengan fetch_from qr_code_scan.full_name,
+	jadi menyimpan ulang lewat dokumen malah mengembalikannya ke hasil pindaian
+	QR.
+	"""
+	if not doc.driver_name:
+		return
+
+	rows = frappe.get_all(
+		"Security Check Point",
+		filters={
+			"spb": doc.name,
+			"receive_type": "TBS Internal",
+			"docstatus": ["<", 2],
+		},
+		fields=["name", "driver_name"],
+		limit_page_length=0,
+	)
+
+	for row in rows:
+		if row.driver_name == doc.driver_name:
+			continue
+
+		frappe.db.set_value("Security Check Point", row.name, "driver_name", doc.driver_name)
 
 def set_recap_panen_in_details(details):
 	"""Isi recap_panen tiap baris detail dari blok + tanggal panennya.
