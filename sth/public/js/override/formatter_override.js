@@ -194,14 +194,27 @@ frappe.form.formatters = {
 		if (frappe.form.link_formatters[doctype]) {
 			// don't apply formatters in case of composite (parent field of same type)
 			if (doc && doctype !== doc.doctype) {
-				// Kembali ke nilai aslinya kalau formatternya tidak menghasilkan
-				// apa-apa. link_formatters itu global dan menetap sepanjang sesi,
-				// jadi satu formatter yang menyebut field milik doctype-nya
-				// sendiri — mis. doc.item_name — akan memulangkan undefined waktu
-				// dipakai menggambar grid doctype lain. Tanpa jaring ini nilainya
-				// jatuh ke `if (!value) return ""` di bawah dan selnya tampak
-				// kosong padahal isinya ada.
-				value = frappe.form.link_formatters[doctype](value, doc, docfield) || value;
+				const diformat = frappe.form.link_formatters[doctype](value, doc, docfield);
+
+				if (diformat) {
+					value = diformat;
+
+					// Judul yang di-cache dilepas supaya hasil formatter yang
+					// menang. frappe._link_titles terisi diam-diam tiap kali
+					// dropdown link dipakai (link.js: setiap hasil pencarian
+					// disimpan), lalu berlaku di seluruh desk sampai halaman
+					// dimuat ulang — dan a.innerText di bawah mendahulukannya
+					// atas value. Tanpa pelepasan ini, formatter yang sengaja
+					// menampilkan kode dokumen tidak pernah kelihatan.
+					link_title = null;
+				}
+
+				// Formatter yang tidak menghasilkan apa-apa dianggap tidak
+				// mengurus doctype ini: value dan judulnya dibiarkan seperti
+				// bawaan frappe. Itu juga menjaga formatter yang menyebut field
+				// milik doctype lain — mis. doc.item_name di grid yang tidak
+				// punya field itu — supaya nilainya tidak jatuh ke
+				// `if (!value) return ""` dan selnya tampak kosong.
 			}
 		}
 

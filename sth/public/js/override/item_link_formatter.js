@@ -25,27 +25,41 @@
 // sesudah semua bundel dievaluasi — ERPNext sendiri memakai kait yang sama —
 // jadi pemasangan kedua ini pasti menang tanpa bergantung urutan.
 
-// Doctype yang menampilkan nama barang, berikut field tempat namanya disimpan.
+// Doctype yang tampilan link Item-nya kita tentukan sendiri: nilainya nama field
+// tempat nama barang disimpan, atau null kalau yang mau ditampilkan kode Item apa
+// adanya.
 //
-// Sisanya menampilkan kode Item apa adanya. Purchase Order, Purchase Receipt,
-// dan Retur Ke Supplier dulu punya formatter sendiri untuk itu; sekarang cukup
-// tidak disebut di sini. Retur Ke Supplier memang menampilkan kode walau
-// barisnya menyimpan nama_barang — field link-nya sendiri bernama kode_barang.
-const FIELD_NAMA_BARANG = {
+// Retur Ke Supplier menampilkan kode walau barisnya menyimpan nama_barang —
+// field link-nya sendiri memang bernama kode_barang.
+const ATURAN = {
 	"Material Request": "item_name",
 	"Pengeluaran Barang": "item_name",
+	"Purchase Order": null,
+	"Purchase Receipt": null,
 	"Request for Quotation": "item_name",
+	"Retur Ke Supplier": null,
 	"Supplier Quotation": "item_name",
 };
 
 function formatter_item(value, doc) {
 	if (!doc) {
-		return value;
+		return undefined;
 	}
 
 	// Baris tabel anak membawa doctype anaknya sendiri, jadi induknya dikenali
 	// lewat parenttype.
-	const field = FIELD_NAMA_BARANG[doc.parenttype || doc.doctype];
+	const doctype = doc.parenttype || doc.doctype;
+
+	// Doctype yang tidak disebut dibiarkan apa adanya: mengembalikan undefined
+	// berarti frappe yang memutuskan, termasuk memakai judul dokumen yang
+	// di-cache. Kalau di sini dipulangkan value, seluruh doctype lain — Stock
+	// Entry, Sales Order, Delivery Note — ikut berubah dari nama jadi kode,
+	// padahal tidak ada yang meminta itu.
+	if (!(doctype in ATURAN)) {
+		return undefined;
+	}
+
+	const field = ATURAN[doctype];
 
 	// Jatuh ke kode Item kalau namanya belum terisi — mis. baris yang barusan
 	// ditambah dan item_name-nya belum sempat ditarik.
