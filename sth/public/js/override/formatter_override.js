@@ -194,7 +194,14 @@ frappe.form.formatters = {
 		if (frappe.form.link_formatters[doctype]) {
 			// don't apply formatters in case of composite (parent field of same type)
 			if (doc && doctype !== doc.doctype) {
-				value = frappe.form.link_formatters[doctype](value, doc, docfield);
+				// Kembali ke nilai aslinya kalau formatternya tidak menghasilkan
+				// apa-apa. link_formatters itu global dan menetap sepanjang sesi,
+				// jadi satu formatter yang menyebut field milik doctype-nya
+				// sendiri — mis. doc.item_name — akan memulangkan undefined waktu
+				// dipakai menggambar grid doctype lain. Tanpa jaring ini nilainya
+				// jatuh ke `if (!value) return ""` di bawah dan selnya tampak
+				// kosong padahal isinya ada.
+				value = frappe.form.link_formatters[doctype](value, doc, docfield) || value;
 			}
 		}
 

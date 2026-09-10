@@ -447,5 +447,5 @@ function resolve_account_filter(frm, cdt, cdn) {
 
 
 frappe.form.link_formatters['Item'] = function (value, doc) {
-	return doc.item_name || doc.kode_barang
+	return doc.item_name || doc.kode_barang || value
 }

@@ -77,5 +77,5 @@ frappe.ui.form.on("Retur Supplier Item", {
 
 
 frappe.form.link_formatters['Item'] = function (value, doc) {
-    return doc.kode_barang || doc.nama_barang
+    return doc.kode_barang || doc.nama_barang || value
 }

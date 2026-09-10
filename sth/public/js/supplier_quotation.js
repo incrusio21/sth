@@ -363,7 +363,7 @@ function btn_get_rfq(frm) {
 
 
 frappe.form.link_formatters['Item'] = function (value, doc) {
-    return doc.item_name || doc.item_code
+    return doc.item_name || doc.item_code || value
 }
 
 
