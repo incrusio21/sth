@@ -13,10 +13,17 @@
 // lebih dulu.
 //
 // Dimuat lewat sth.bundle.js sesudah formatter_override.js, yang mengosongkan
-// frappe.form.link_formatters — termasuk formatter Item bawaan ERPNext yang
-// menampilkan "KODE: Nama". Jadi doctype yang tidak disebut di bawah memakai
-// kode Item apa adanya, persis keadaan sekarang sebelum satu pun JS doctype
-// sempat dimuat.
+// frappe.form.link_formatters. Jadi doctype yang tidak disebut di bawah memakai
+// kode Item apa adanya.
+//
+// Pemasangannya diulang di app_ready. ERPNext memasang formatter Item-nya
+// sendiri — yang menampilkan "KODE: Nama" — di level modul erpnext.bundle.js,
+// dan urutan antar-app di app_include_js tidak dijamin: kalau bundel ERPNext
+// dimuat sesudah sth.bundle.js, punya kita tertimpa diam-diam dan seluruh desk
+// kembali menampilkan judul. Dulu keadaan itu tidak terlihat karena JS tiap
+// doctype menimpanya lagi waktu formnya dibuka. desk.js memicu app_ready
+// sesudah semua bundel dievaluasi — ERPNext sendiri memakai kait yang sama —
+// jadi pemasangan kedua ini pasti menang tanpa bergantung urutan.
 
 // Doctype yang menampilkan nama barang, berikut field tempat namanya disimpan.
 //
@@ -31,7 +38,7 @@ const FIELD_NAMA_BARANG = {
 	"Supplier Quotation": "item_name",
 };
 
-frappe.form.link_formatters["Item"] = function (value, doc) {
+function formatter_item(value, doc) {
 	if (!doc) {
 		return value;
 	}
@@ -43,4 +50,12 @@ frappe.form.link_formatters["Item"] = function (value, doc) {
 	// Jatuh ke kode Item kalau namanya belum terisi — mis. baris yang barusan
 	// ditambah dan item_name-nya belum sempat ditarik.
 	return (field && doc[field]) || value;
-};
+}
+
+function pasang_formatter_item() {
+	frappe.form.link_formatters["Item"] = formatter_item;
+}
+
+pasang_formatter_item();
+
+$(document).on("app_ready", pasang_formatter_item);
