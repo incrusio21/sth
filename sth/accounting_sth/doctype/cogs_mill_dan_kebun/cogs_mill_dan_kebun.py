@@ -1164,6 +1164,57 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 	return (flt(plasma[0][0]) if plasma else 0.0) + (flt(invoice[0][0]) if invoice else 0.0)
 
 
+def qty_produksi_tbs_internal(company, unit, dari, sampai):
+	"""Qty baris TBS Production: TBS kebun sendiri yang ditimbang di PKS.
+
+	Sebelumnya angkanya diambil dari `tbs_olah` di Data TBS, yaitu TBS yang
+	diolah pabrik. Yang dimaksud baris Production sebenarnya tonase yang
+	dihasilkan kebun, dan itu tercatat di jembatan timbang — permintaan user.
+
+	Yang dijumlahkan `netto`, Netto 1, sebelum potongan sortasi. Beda dengan
+	baris FFB Purchase yang memakai netto 2: yang dibeli dari plasma dinilai
+	sebesar yang lolos sortasi, sedangkan yang dipanen kebun sendiri dihitung
+	sebesar yang dikirim.
+
+	Kebun sendiri dibedakan dari plasma lewat Surat Pengantar Buah: unit
+	pengirimnya ditelusuri ke Unit, dan yang ikut hanya yang tidak ditandai
+	Plasma. Field `unit` di Timbangan adalah pabrik yang menimbang, bukan kebun
+	pengirim, jadi tidak bisa dipakai membedakannya. Yang plasma sengaja
+	ditinggalkan karena sudah terhitung di baris FFB Purchase lewat
+	qty_pembelian_tbs; kalau ikut di sini, tonasenya dobel.
+
+	Inner join ke SPB sekaligus membuang TBS pihak ketiga — kiriman luar datang
+	dari Supplier tanpa SPB.
+
+	Field receive_type sengaja tidak dipakai walau nilainya persis "TBS
+	Internal". Isinya fetch_from ticket_number.receive_type, sedangkan Timbangan
+	kiriman API tidak mengisi ticket_number sama sekali, jadi menyaring lewat
+	field itu justru membuang dokumen yang paling banyak.
+	"""
+	item_codes = get_item_produk("TBS")
+	if not item_codes:
+		return 0.0
+
+	nilai = {"company": company, "dari": dari, "sampai": sampai, "items": tuple(item_codes)}
+	syarat_unit = ""
+	if unit:
+		nilai["unit"] = unit
+		syarat_unit = "and t.unit = %(unit)s"
+
+	row = frappe.db.sql("""
+		select sum(t.netto)
+		from `tabTimbangan` t
+		inner join `tabSurat Pengantar Buah` spb on spb.name = t.spb
+		inner join `tabUnit` u on u.name = spb.unit
+		where t.docstatus = 1 and t.type = 'Receive' and ifnull(u.plasma, 0) = 0
+			and t.company = %(company)s and t.kode_barang in %(items)s
+			and t.posting_date between %(dari)s and %(sampai)s
+			{syarat_unit}
+	""".format(syarat_unit=syarat_unit), nilai)
+
+	return flt(row[0][0]) if row else 0.0
+
+
 def nilai_pembelian_tbs(company, dari, sampai):
 	"""Nilai pembelian TBS dari akun 6511001 dan 6511002 sepanjang periode.
 
@@ -1344,11 +1395,22 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 				0,
 			)
 
-		hitung_produksi = sumber_total if cfg["produksi_total"] else sumber_terakhir
-		nilai[prefiks + "_production"] = (
-			hitung_produksi(prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai),
-			0,
-		)
+		if prefiks == "tbs":
+			# TBS Production tidak diambil dari dokumen sumber seperti CPO dan PK:
+			# qty-nya tonase kebun sendiri yang ditimbang di PKS, netto 1. Field
+			# tbs_olah di Data TBS adalah TBS yang diolah pabrik, bukan yang
+			# dihasilkan kebun. Permintaan user 10 September 2026. Data TBS tetap
+			# jadi sumber Closing dan Opening TBS.
+			qty_produksi = qty_produksi_tbs_internal(
+				company, unit, periode_dari, periode_sampai
+			)
+		else:
+			hitung_produksi = sumber_total if cfg["produksi_total"] else sumber_terakhir
+			qty_produksi = hitung_produksi(
+				prefiks, cfg["produksi"], company, unit, periode_dari, periode_sampai
+			)
+
+		nilai[prefiks + "_production"] = (qty_produksi, 0)
 		hitung_closing = sumber_total if cfg["closing_total"] else sumber_terakhir
 		nilai[prefiks + "_closing"] = (
 			-hitung_closing(prefiks, cfg["closing"], company, unit, periode_dari, periode_sampai),
