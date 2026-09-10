@@ -34,6 +34,7 @@
   "oer_netto_1",
   "oer_netto_2",
   "rata_rata_oer_bulanan",
+  "total_produksi_bulanan",
   "perhitungan_stock_bst_1_tab",
   "section_break_oecm",
   "uhst1",
@@ -71,6 +72,15 @@
   "amended_from"
  ],
  "fields": [
+  {
+   "description": "Sejak awal bulan sampai tanggal proses dokumen ini",
+   "fieldname": "total_produksi_bulanan",
+   "fieldtype": "Float",
+   "label": "Total Produksi CPO Bulan Ini",
+   "no_copy": 1,
+   "precision": "0",
+   "read_only": 1
+  },
   {
    "fetch_from": "pabrik.unit",
    "fieldname": "unit",
@@ -530,7 +540,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-01 12:00:00.000000",
+ "modified": "2026-09-10 22:42:15.115235",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

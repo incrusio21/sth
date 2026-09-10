@@ -218,17 +218,22 @@ RENDEMEN_BULANAN = {
 		"produksi": "produksi_cpo",
 		"tbs_olah": "tbs_olah",
 		"target": "rata_rata_oer_bulanan",
+		"target_produksi": "total_produksi_bulanan",
 	},
 	"Sounding Stock Palm Kernel di Bunker Kernel": {
 		"produksi": "produksi",
 		"tbs_olah": "tbs_olah",
 		"target": "rata_rata_ker_bulanan",
+		"target_produksi": "total_produksi_bulanan",
 	},
 }
 
 
 def set_rata_rata_rendemen_bulanan(doc):
-	"""Isi field informasi rata-rata rendemen sebulan di dokumen sounding.
+	"""Isi field informasi rata-rata rendemen dan total produksi sebulan.
+
+	Keduanya dari satu query yang sama: total produksi jadi field informasinya
+	sendiri, dan bersama total TBS olah jadi rata-rata rendemennya.
 
 	Caranya sama dengan rata-rata harga jual CPO di COGS Mill dan Kebun: yang
 	dirata-rata bukan angka persen hariannya, tapi bahannya. Total produksi sejak
@@ -258,6 +263,7 @@ def set_rata_rata_rendemen_bulanan(doc):
 	"""
 	cfg = RENDEMEN_BULANAN[doc.doctype]
 	doc.set(cfg["target"], 0)
+	doc.set(cfg["target_produksi"], 0)
 
 	if not (doc.unit and doc.tanggal_proses):
 		return
@@ -280,6 +286,10 @@ def set_rata_rata_rendemen_bulanan(doc):
 	if not (row and row[0]):
 		return
 
+	# Pembilangnya sekaligus jadi field informasi tersendiri: total produksi sejak
+	# awal bulan sampai tanggal dokumen ini. Batas atasnya sama dengan rata-rata
+	# di atas, jadi keduanya bercerita tentang rentang yang sama.
+	doc.set(cfg["target_produksi"], flt(row[0][0]))
 	doc.set(cfg["target"], hitung_rendemen(row[0][0], row[0][1]))
 
 

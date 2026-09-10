@@ -36,6 +36,7 @@
   "ker_netto_1",
   "ker_netto_2",
   "rata_rata_ker_bulanan",
+  "total_produksi_bulanan",
   "column_break_wdwq",
   "berat_jenis",
   "ignore_recalculate",
@@ -55,6 +56,15 @@
   "amended_from"
  ],
  "fields": [
+  {
+   "description": "Sejak awal bulan sampai tanggal proses dokumen ini",
+   "fieldname": "total_produksi_bulanan",
+   "fieldtype": "Float",
+   "label": "Total Produksi PK Bulan Ini",
+   "no_copy": 1,
+   "precision": "0",
+   "read_only": 1
+  },
   {
    "fieldname": "foto",
    "fieldtype": "Attach Image",
@@ -377,7 +387,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-10 22:33:41.836600",
+ "modified": "2026-09-10 22:42:15.116691",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
