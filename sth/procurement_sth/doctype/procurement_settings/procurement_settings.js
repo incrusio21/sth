@@ -14,16 +14,7 @@ frappe.ui.form.on("Procurement Settings", {
 			};
 		});
 
-		const original_link_formatter = frappe.form.formatters.Link;
-
-		frappe.form.formatters.Link = function (value, docfield, options, doc) {
-			// Tampilkan plain text untuk Procurement Settings
-			if (doc) {
-				return value || "";
-			}
-			// Doctype lain tetap pakai formatter asli
-			return original_link_formatter(value, docfield, options, doc);
-		};
+		pasang_formatter_link_polos();
 
 		set_akun_query(frm);
 	},
@@ -45,6 +36,47 @@ frappe.ui.form.on('Akun Pengeluaran Table', {
 		set_akun_query(frm, cdt, cdn);
 	}
 });
+
+// Link di Procurement Settings ditampilkan apa adanya, bukan judul dokumennya:
+// yang dipilih di sini kode barang dan nomor akun, dan itu yang mau dilihat.
+//
+// frappe.form.formatters.Link itu global — satu untuk seluruh desk. Pembungkus
+// ini dulu cuma memeriksa `if (doc)`, padahal doc terisi untuk hampir semua link
+// yang digambar di dalam form atau grid mana pun. Akibatnya begitu Procurement
+// Settings sekali dibuka, link di doctype lain ikut jadi teks biasa yang tidak
+// bisa diklik sampai halamannya dimuat ulang. Sekarang cakupannya dilihat dari
+// dokumen yang sedang digambar, bukan dari ada-tidaknya dokumen.
+let formatter_link_terpasang = false;
+
+function pasang_formatter_link_polos() {
+	// onload jalan tiap kali halamannya dibuka; tanpa penjaga ini pembungkusnya
+	// menumpuk di atas pembungkus sebelumnya sepanjang sesi.
+	if (formatter_link_terpasang) {
+		return;
+	}
+
+	formatter_link_terpasang = true;
+
+	const formatter_asli = frappe.form.formatters.Link;
+
+	frappe.form.formatters.Link = function (value, docfield, options, doc) {
+		if (milik_procurement_settings(doc)) {
+			return value || "";
+		}
+
+		return formatter_asli(value, docfield, options, doc);
+	};
+}
+
+function milik_procurement_settings(doc) {
+	if (!doc) {
+		return false;
+	}
+
+	// Baris tabel anak membawa doctype anaknya sendiri, jadi induknya dikenali
+	// lewat parenttype.
+	return doc.doctype === "Procurement Settings" || doc.parenttype === "Procurement Settings";
+}
 
 function fix_kode_barang(frm) {
 	let grid = frm.fields_dict['item_overreceipt_procurement_settings'].grid;
