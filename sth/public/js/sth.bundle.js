@@ -9,6 +9,7 @@ import "./controllers/queries";
 import "./lib/scale_connection";
 import "./override/utils";
 // import "./override/multi_select_dialog_override";
+import "./override/multi_select_dialog_checkmap";
 import "./override/report_view_override";
 import "./override/formatter_override";
 import "./override/file_uploader";
