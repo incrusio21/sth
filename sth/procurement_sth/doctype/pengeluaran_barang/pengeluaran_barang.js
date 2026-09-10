@@ -444,8 +444,3 @@ function resolve_account_filter(frm, cdt, cdn) {
 		apply_account_filter_from_kegiatan(frm, cdt, cdn);
 	}
 }
-
-
-frappe.form.link_formatters['Item'] = function (value, doc) {
-	return doc.item_name || doc.kode_barang || value
-}

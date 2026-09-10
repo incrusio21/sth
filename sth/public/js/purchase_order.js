@@ -1000,10 +1000,6 @@ function calculate_sub_total(frm) {
     frm.set_value("sub_total", sub_total);
 }
 
-frappe.form.link_formatters['Item'] = function (value, doc) {
-	return value
-}
-
 
 // ─── Uang Muka PO ────────────────────────────────────────────────────────────
 //

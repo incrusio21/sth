@@ -160,7 +160,3 @@ frappe.ui.form.on("Purchase Receipt", {
         });
     },
 });
-
-frappe.form.link_formatters['Item'] = function (value, doc) {
-    return value
-}

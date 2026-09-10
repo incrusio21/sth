@@ -439,8 +439,3 @@ frappe.ui.form.on("VAT Detail", {
 		frm.trigger('calculate_taxes_and_totals')
 	}
 })
-
-
-frappe.form.link_formatters['Item'] = function (value, doc) {
-	return value
-}

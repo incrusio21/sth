@@ -74,8 +74,3 @@ frappe.ui.form.on("Retur Supplier Item", {
         frm.trigger('calculate_jumlah_retur')
     }
 })
-
-
-frappe.form.link_formatters['Item'] = function (value, doc) {
-    return doc.kode_barang || doc.nama_barang || value
-}

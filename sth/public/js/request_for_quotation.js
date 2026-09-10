@@ -184,7 +184,3 @@ frappe.ui.form.on("Request for Quotation Supplier", {
         frappe.model.set_value(dt, dn, "email_id", row.email)
     }
 })
-
-frappe.form.link_formatters['Item'] = function (value, doc) {
-    return doc.item_name || doc.item_code || value
-}

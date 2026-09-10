@@ -213,7 +213,3 @@ function get_stock_for_item(frm, cdt, cdn) {
         }
     });
 }
-
-frappe.form.link_formatters['Item'] = function (value, doc) {
-    return doc.item_name || doc.item_code || value
-}
