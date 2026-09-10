@@ -337,7 +337,7 @@
    "fieldname": "sortasi",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Sortasi",
+   "label": "Potongan Sortasi",
    "precision": "0",
    "read_only": 1
   },
@@ -377,7 +377,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-10 22:32:32.981378",
+ "modified": "2026-09-10 22:33:41.836600",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
