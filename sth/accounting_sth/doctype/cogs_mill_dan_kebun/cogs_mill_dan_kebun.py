@@ -1220,7 +1220,15 @@ def nilai_pembelian_tbs(company, dari, sampai):
 
 	Kredit dikurangi debit, bukan sebaliknya seperti Biaya Kebun dan Biaya Mill:
 	kedua akun ini dipakai sebagai lawan jurnal Stock Entry TBS, jadi penerimaan
-	TBS masuk di sisi kredit. Keputusan user 7 September 2026.
+	TBS masuk di sisi kredit dan pengeluaran di debit. Keputusan user 7 September
+	2026.
+
+	Sempat terbalik jadi debit dikurangi kredit sejak commit 8812309c, sementara
+	docstring ini tetap menyebut kredit dikurangi debit. Akibatnya nilai
+	pembelian TBS keluar negatif — Agustus 2026 di PT. TRIMITRA LESTARI:
+	debit 1.610.000.600 lawan kredit 1.712.529.728, jadi -102.529.128 — lalu
+	mengurangi dua kali karena angka yang sama juga ditambahkan ke Biaya Mill.
+	Dikembalikan atas permintaan user 10 September 2026.
 	"""
 	akun = frappe.get_all(
 		"Account",
@@ -1232,7 +1240,7 @@ def nilai_pembelian_tbs(company, dari, sampai):
 		return 0.0
 
 	total = frappe.db.sql("""
-		select sum(debit) - sum(credit)
+		select sum(credit) - sum(debit)
 		from `tabGL Entry`
 		where company = %s and posting_date between %s and %s
 			and is_cancelled = 0 and account in %s
