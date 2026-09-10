@@ -30,9 +30,9 @@
   "stock_awal",
   "pengiriman",
   "stock_akhir",
-  "sortasi",
   "produksi",
   "tbs_olah",
+  "sortasi",
   "ker_netto_1",
   "ker_netto_2",
   "rata_rata_ker_bulanan",
@@ -336,8 +336,10 @@
    "default": "0",
    "fieldname": "sortasi",
    "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Sortasi"
+   "in_preview": 1,
+   "label": "Sortasi",
+   "precision": "0",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -375,7 +377,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-02 16:14:20.090626",
+ "modified": "2026-09-10 22:32:32.981378",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
