@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-10 13:19:34.680771",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "header_section",
+  "deskripsi"
+ ],
+ "fields": [
+  {
+   "fieldname": "deskripsi",
+   "fieldtype": "Data",
+   "label": "Deskripsi"
+  },
+  {
+   "fieldname": "header_section",
+   "fieldtype": "Section Break",
+   "label": "Header"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-10 13:20:03.981726",
+ "modified_by": "Administrator",
+ "module": "Legal",
+ "name": "Yang Mengeluarkan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

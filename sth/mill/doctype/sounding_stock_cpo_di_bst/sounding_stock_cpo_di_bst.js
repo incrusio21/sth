@@ -19,7 +19,7 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     get_data(frm) {
-        if (frm.doc.docstatus != 0) return
+        // if (frm.doc.docstatus != 0) return
 
         frm.call("get_data", { freeze: true, freeze_message: "Getting Data..." })
             .then(() => {

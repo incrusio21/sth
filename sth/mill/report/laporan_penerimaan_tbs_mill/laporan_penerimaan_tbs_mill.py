@@ -197,7 +197,7 @@ def get_data_external(filters):
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
 		LEFT JOIN `tabSupplier` s ON s.name = t.supplier
-		WHERE t.receive_type = "TBS Eksternal" AND t.supplier IS NOT NULL {};
+		WHERE t.receive_type = "TBS Eksternal" AND t.supplier IS NOT NULL AND t.docstatus = 1 {};
 	""".format(conditions), filters, as_dict=True)
 
 	grouped = defaultdict(list)
@@ -239,7 +239,7 @@ def get_data_internal(filters):
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
 		LEFT JOIN `tabSurat Pengantar Buah` as spb ON spb.name = t.spb
-		WHERE t.receive_type = "TBS Internal" AND t.spb IS NOT NULL {};
+		WHERE t.receive_type = "TBS Internal" AND t.spb IS NOT NULL AND t.docstatus = 1 {};
 	""".format(conditions), filters, as_dict=True)
 
 	grouped = defaultdict(list)

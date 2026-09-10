@@ -28,6 +28,7 @@
   "modal_dasar",
   "modal_di_setor",
   "kegiatan_usaha",
+  "tanggal_bnri",
   "bnri",
   "tbnri",
   "keterangan"
@@ -143,38 +144,39 @@
    "fieldname": "nomor_sp_ahu_perubahan_anggaran_dasar",
    "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Nomor SP AHU Perubahan Anggaran Dasar ",
-   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\""
+   "label": "Nomor SP AHU Perubahan Anggaran Dasar "
   },
   {
    "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\"",
    "fieldname": "tanggal_sp_ahu",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal SP AHU",
-   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Anggaran Dasar\""
+   "label": "Tanggal SP AHU"
   },
   {
    "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\"",
    "fieldname": "nomor_sp_ahu_perubahan_data_perseroan",
    "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Nomor SP AHU Perubahan Data Perseroan",
-   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\""
+   "label": "Nomor SP AHU Perubahan Data Perseroan"
   },
   {
    "depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\"",
    "fieldname": "tanggal_sp_ahu_perseroan",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal SP AHU Perseroan",
-   "mandatory_depends_on": "eval:doc.jenis_transaksi == \"Perubahan Data Perseroan\""
+   "label": "Tanggal SP AHU Perseroan"
+  },
+  {
+   "fieldname": "tanggal_bnri",
+   "fieldtype": "Date",
+   "label": "Tanggal BNRI"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 10:46:47.485636",
+ "modified": "2026-09-10 16:38:04.782454",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Akta List",
