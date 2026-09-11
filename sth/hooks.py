@@ -471,6 +471,7 @@ doc_events = {
 	},
 	"Supplier Quotation": {
 		# "before_submit": "sth.custom.supplier_quotation.update_status_rfq",
+		"validate": "sth.custom.supplier_quotation.validate_duplicate_supplier",
 		"on_submit": ["sth.custom.supplier_quotation.create_po_draft","sth.custom.material_request.calculate_percent_quoted"]
 	},
 	
