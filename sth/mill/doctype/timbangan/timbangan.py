@@ -131,7 +131,20 @@ class Timbangan(Document):
 		if not self.do_no:
 			self.qty_do = 0
 			self.qty_do_2 = 0
+			self.sisa_do = 0
+			self.sisa_do_2 = 0
 			return
+
+		# Sisa DO dihitung ulang tiap simpan. Dulu kedua field ini cuma diisi JS
+		# waktu reference_do_item atau no_do_2 diubah, jadi angkanya berhenti di
+		# keadaan saat timbangannya dibuat — dan tidak pernah ikut turun waktu
+		# Delivery Note lain memakan DO yang sama. Yang menulis ulang sesudah DN
+		# ada: perbarui_sisa_do_timbangan, dipanggil dari hook Delivery Note.
+		self.sisa_do = format_sisa(hitung_sisa_do(self.do_no, self.kode_barang))
+		if self.no_do_2:
+			self.sisa_do_2 = format_sisa(hitung_sisa_do(self.no_do_2, self.kode_barang))
+		else:
+			self.sisa_do_2 = 0
 
 		sisa_do_1 = self.get_sisa_do_available(self.do_no)
 		self.qty_do = min(flt(self.netto_2), sisa_do_1)
@@ -354,6 +367,56 @@ def get_sisa_do(reference):
 	delivered,qty = frappe.db.get_value("Delivery Order Item",reference,["delivered_qty","qty"])
 	return flt(qty) - flt(delivered)
 
+
+def hitung_sisa_do(do_no, item_code):
+	"""Sisa DO menurut Delivery Note: qty barisnya dikurangi yang sudah terkirim."""
+	if not do_no or not item_code:
+		return 0
+
+	item = frappe.db.get_value(
+		"Delivery Order Item",
+		{"parent": do_no, "item_code": item_code},
+		["qty", "delivered_qty"],
+		as_dict=True,
+	)
+	if not item:
+		return 0
+
+	return flt(item.qty) - flt(item.delivered_qty)
+
+
+def format_sisa(nilai):
+	"""sisa_do dan sisa_do_2 fieldtype-nya Data, jadi angkanya disimpan sebagai
+	teks. Yang bulat ditulis tanpa ".0" supaya bentuknya sama dengan yang selama
+	ini ditulis JS."""
+	nilai = flt(nilai)
+	return int(nilai) if nilai == int(nilai) else nilai
+
+
+def perbarui_sisa_do_timbangan(do_no, item_code):
+	"""Tulis ulang Sisa DO di semua Timbangan yang memakai DO dan barang ini.
+
+	Dipanggil sesudah Delivery Note mengubah delivered_qty. Tanpa ini angkanya
+	cuma potret saat timbangannya dibuat: DN berikutnya yang memakan DO yang
+	sama tidak pernah ikut menurunkannya, padahal field-nya ikut tampil di
+	preview list.
+	"""
+	if not do_no or not item_code:
+		return
+
+	sisa = format_sisa(hitung_sisa_do(do_no, item_code))
+
+	# do_no dan no_do_2 dipisah: satu DO bisa jadi DO 1 di satu timbangan dan
+	# DO 2 di timbangan lain.
+	for fieldname, filter_do in (("sisa_do", "do_no"), ("sisa_do_2", "no_do_2")):
+		for name in frappe.get_all(
+			"Timbangan",
+			filters={filter_do: do_no, "kode_barang": item_code, "docstatus": ("!=", 2)},
+			pluck="name",
+		):
+			frappe.db.set_value("Timbangan", name, fieldname, sisa, update_modified=False)
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_do_2_available(doctype, txt, searchfield, start, page_len, filters):
@@ -385,7 +448,4 @@ def get_do_2_available(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_sisa_do_2(do_no, item_code):
-	item = frappe.db.get_value("Delivery Order Item", {"parent": do_no, "item_code": item_code}, ["delivered_qty", "qty"], as_dict=True)
-	if not item:
-		return 0
-	return flt(item.qty) - flt(item.delivered_qty)
+	return hitung_sisa_do(do_no, item_code)

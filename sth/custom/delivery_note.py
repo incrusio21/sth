@@ -1,5 +1,7 @@
 import frappe
 
+from sth.mill.doctype.timbangan.timbangan import perbarui_sisa_do_timbangan
+
 def update_ke_stock_in_transit_account(self,method):
 	doc = frappe.get_single('STH Stock Settings')
 	expense_accoun = ''
@@ -36,6 +38,11 @@ def debug():
 
 def update_delivered_do(self,method):
 	for item in self.items:
+		# Baris yang tidak berasal dari Delivery Order tidak punya acuan yang mau
+		# ditambah, mis. DN yang dibuat manual tanpa DO.
+		if not item.delivery_order_item:
+			continue
+
 		delivered_qty = frappe.db.get_value("Delivery Order Item",item.delivery_order_item,'delivered_qty') or 0
 		if method == "before_submit":
 			qty_final = delivered_qty + item.qty
@@ -43,6 +50,15 @@ def update_delivered_do(self,method):
 			qty_final = delivered_qty - item.qty
 		
 		frappe.db.set_value("Delivery Order Item",item.delivery_order_item,"delivered_qty",qty_final)
+
+		# Sisa DO yang tampil di Timbangan ikut ditulis ulang. Field itu Data read
+		# only yang dulu cuma diisi JS waktu timbangannya dibuat, jadi tiap DN
+		# berikutnya membuat angkanya makin jauh dari delivered_qty yang barusan
+		# berubah di atas.
+		do_no, item_code = frappe.db.get_value(
+			"Delivery Order Item", item.delivery_order_item, ["parent", "item_code"]
+		)
+		perbarui_sisa_do_timbangan(do_no, item_code)
 
 
 def create_kriteria_upload_document(doc, method):
