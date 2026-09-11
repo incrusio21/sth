@@ -1165,26 +1165,26 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 
 
 def qty_produksi_tbs_internal(company, unit, dari, sampai):
-	"""Qty baris TBS Production: TBS kebun sendiri yang ditimbang di PKS.
+	"""Qty baris TBS Production: TBS ber-SPB yang ditimbang di PKS.
 
 	Sebelumnya angkanya diambil dari `tbs_olah` di Data TBS, yaitu TBS yang
 	diolah pabrik. Yang dimaksud baris Production sebenarnya tonase yang
 	dihasilkan kebun, dan itu tercatat di jembatan timbang — permintaan user.
 
 	Yang dijumlahkan `netto`, Netto 1, sebelum potongan sortasi. Beda dengan
-	baris FFB Purchase yang memakai netto 2: yang dibeli dari plasma dinilai
-	sebesar yang lolos sortasi, sedangkan yang dipanen kebun sendiri dihitung
-	sebesar yang dikirim.
+	baris FFB Purchase yang memakai netto 2: yang dibeli dinilai sebesar yang
+	lolos sortasi, sedangkan yang dihasilkan kebun dihitung sebesar yang dikirim.
 
-	Kebun sendiri dibedakan dari plasma lewat Surat Pengantar Buah: unit
-	pengirimnya ditelusuri ke Unit, dan yang ikut hanya yang tidak ditandai
-	Plasma. Field `unit` di Timbangan adalah pabrik yang menimbang, bukan kebun
-	pengirim, jadi tidak bisa dipakai membedakannya. Yang plasma sengaja
-	ditinggalkan karena sudah terhitung di baris FFB Purchase lewat
-	qty_pembelian_tbs; kalau ikut di sini, tonasenya dobel.
+	Kebun plasma ikut terjumlah. Sebelumnya dibuang lewat flag Plasma di Unit
+	pengirim supaya tidak dobel dengan baris FFB Purchase; permintaan user 11
+	September 2026 plasma tetap masuk Production, jadi saringan itu dilepas.
+	qty_pembelian_tbs tidak ikut diubah, jadi tonase plasma sekarang terhitung di
+	dua baris sekaligus — Production memakai netto 1, FFB Purchase netto 2.
 
-	Inner join ke SPB sekaligus membuang TBS pihak ketiga — kiriman luar datang
-	dari Supplier tanpa SPB.
+	Inner join ke SPB tetap dipasang karena itu yang membuang TBS pihak ketiga —
+	kiriman luar datang dari Supplier tanpa SPB. Join ke Unit dilepas bersama
+	flagnya: tanpa saringan plasma join itu cuma menambah risiko baris terbuang
+	kalau unit di SPB kosong atau tertaut ke Unit yang sudah dihapus.
 
 	Field receive_type sengaja tidak dipakai walau nilainya persis "TBS
 	Internal". Isinya fetch_from ticket_number.receive_type, sedangkan Timbangan
@@ -1205,8 +1205,7 @@ def qty_produksi_tbs_internal(company, unit, dari, sampai):
 		select sum(t.netto)
 		from `tabTimbangan` t
 		inner join `tabSurat Pengantar Buah` spb on spb.name = t.spb
-		inner join `tabUnit` u on u.name = spb.unit
-		where t.docstatus = 1 and t.type = 'Receive' and ifnull(u.plasma, 0) = 0
+		where t.docstatus = 1 and t.type = 'Receive'
 			and t.company = %(company)s and t.kode_barang in %(items)s
 			and t.posting_date between %(dari)s and %(sampai)s
 			{syarat_unit}
@@ -1405,10 +1404,11 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 
 		if prefiks == "tbs":
 			# TBS Production tidak diambil dari dokumen sumber seperti CPO dan PK:
-			# qty-nya tonase kebun sendiri yang ditimbang di PKS, netto 1. Field
-			# tbs_olah di Data TBS adalah TBS yang diolah pabrik, bukan yang
-			# dihasilkan kebun. Permintaan user 10 September 2026. Data TBS tetap
-			# jadi sumber Closing dan Opening TBS.
+			# qty-nya tonase ber-SPB yang ditimbang di PKS, netto 1, kebun sendiri
+			# maupun plasma. Field tbs_olah di Data TBS adalah TBS yang diolah
+			# pabrik, bukan yang dihasilkan kebun. Permintaan user 10 September 2026,
+			# plasma diikutkan 11 September 2026. Data TBS tetap jadi sumber Closing
+			# dan Opening TBS.
 			qty_produksi = qty_produksi_tbs_internal(
 				company, unit, periode_dari, periode_sampai
 			)
