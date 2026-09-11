@@ -146,7 +146,10 @@ class Timbangan(Document):
 		else:
 			self.sisa_do_2 = 0
 
-		sisa_do_1 = self.get_sisa_do_available(self.do_no)
+		# dilantai di 0: sisa DO 1 bisa minus kalau timbangan lain sudah memakannya
+		# lebih dari qty DO-nya. Tanpa ini qty_do ikut minus, dan DN DO 1 dibuat
+		# dengan qty negatif sehingga submit-nya ditolak.
+		sisa_do_1 = max(0.0, self.get_sisa_do_available(self.do_no))
 		self.qty_do = min(flt(self.netto_2), sisa_do_1)
 		remaining = flt(self.netto_2) - self.qty_do
 
@@ -163,19 +166,42 @@ class Timbangan(Document):
 			self.qty_do_2 = 0
 
 	def get_sisa_do_available(self, do_no):
+		"""Sisa qty DO yang belum dibebani timbangan lain (draft ikut dihitung)."""
 		qty_do = frappe.db.get_value("Delivery Order Item",{"item_code":self.kode_barang,"parent": do_no},["qty"])
-		qty_timbangan = frappe.db.get_value("Timbangan",filters={"do_no":do_no,"name":["!=",self.name],"kode_barang": self.kode_barang,"docstatus":["!=",2]},fieldname=["sum(netto_2) as qty"])
+
+		# Yang dibebankan timbangan lain ke DO 1 bukan netto penuhnya melainkan
+		# qty_do — sisanya ditampung DO 2. Dulu yang dijumlahkan netto_2, jadi
+		# tiap timbangan yang terbelah ke dua DO terhitung memakan DO 1 sebesar
+		# netto penuh dan sisa DO 1 bisa jadi minus.
+		#
+		# Yang tidak memakai DO 2 tetap dihitung senetto_2-nya: itu yang dipakai
+		# create_delivery_notes, sekaligus menutup timbangan lama dari sebelum ada
+		# fitur dua DO yang qty_do-nya tidak pernah terisi.
+		qty_timbangan = frappe.db.sql("""
+			SELECT SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN COALESCE(netto_2, 0)
+						   ELSE COALESCE(qty_do, 0) END)
+			FROM `tabTimbangan`
+			WHERE do_no = %(do_no)s
+			  AND name != %(name)s
+			  AND kode_barang = %(kode_barang)s
+			  AND docstatus != 2
+		""", {"do_no": do_no, "name": self.name or "", "kode_barang": self.kode_barang})[0][0]
+
 		qty_timbangan_2 = frappe.db.get_value("Timbangan",filters={"no_do_2":do_no,"name":["!=",self.name],"kode_barang": self.kode_barang,"docstatus":["!=",2]},fieldname=["sum(qty_do_2) as qty"])
 		return flt(qty_do) - flt(qty_timbangan) - flt(qty_timbangan_2)
 
 	def create_delivery_notes(self):
 		dn_names = []
 
-		dn1 = make_delivery_note(self.name, do_no=self.do_no, qty=self.qty_do or self.netto_2)
-		dn1.insert()
-		dn1.submit()
-		self.db_set('delivery_note', dn1.name)
-		dn_names.append(dn1.name)
+		# qty_do 0 berarti DO 1 sudah habis dan seluruh netto ditampung DO 2, jadi
+		# DN untuk DO 1 tidak dibuat sama sekali. Fallback ke netto_2 cuma untuk
+		# timbangan yang tidak memakai DO 2.
+		if flt(self.qty_do) > 0 or not self.no_do_2:
+			dn1 = make_delivery_note(self.name, do_no=self.do_no, qty=self.qty_do or self.netto_2)
+			dn1.insert()
+			dn1.submit()
+			self.db_set('delivery_note', dn1.name)
+			dn_names.append(dn1.name)
 
 		if self.no_do_2 and flt(self.qty_do_2) > 0:
 			dn2 = make_delivery_note(self.name, do_no=self.no_do_2, qty=self.qty_do_2)
