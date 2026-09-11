@@ -33,6 +33,7 @@
 // field link-nya sendiri memang bernama kode_barang.
 const ATURAN = {
 	"Delivery Note": null,
+	"Delivery Order": null,
 	"Material Request": "item_name",
 	"Pengeluaran Barang": "item_name",
 	"Purchase Order": null,
