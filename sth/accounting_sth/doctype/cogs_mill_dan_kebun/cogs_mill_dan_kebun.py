@@ -1164,32 +1164,29 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 	return (flt(plasma[0][0]) if plasma else 0.0) + (flt(invoice[0][0]) if invoice else 0.0)
 
 
-def qty_produksi_tbs_internal(company, unit, dari, sampai):
-	"""Qty baris TBS Production: TBS ber-SPB yang ditimbang di PKS.
+def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
+	"""Qty baris TBS Production: seluruh TBS yang ditimbang masuk di PKS.
 
 	Sebelumnya angkanya diambil dari `tbs_olah` di Data TBS, yaitu TBS yang
-	diolah pabrik. Yang dimaksud baris Production sebenarnya tonase yang
-	dihasilkan kebun, dan itu tercatat di jembatan timbang — permintaan user.
+	diolah pabrik. Yang dimaksud baris Production sebenarnya tonase yang masuk
+	pabrik, dan itu tercatat di jembatan timbang — permintaan user.
 
 	Yang dijumlahkan `netto`, Netto 1, sebelum potongan sortasi. Beda dengan
 	baris FFB Purchase yang memakai netto 2: yang dibeli dinilai sebesar yang
-	lolos sortasi, sedangkan yang dihasilkan kebun dihitung sebesar yang dikirim.
+	lolos sortasi, sedangkan yang masuk pabrik dihitung sebesar yang ditimbang.
 
-	Kebun plasma ikut terjumlah. Sebelumnya dibuang lewat flag Plasma di Unit
-	pengirim supaya tidak dobel dengan baris FFB Purchase; permintaan user 11
-	September 2026 plasma tetap masuk Production, jadi saringan itu dilepas.
-	qty_pembelian_tbs tidak ikut diubah, jadi tonase plasma sekarang terhitung di
-	dua baris sekaligus — Production memakai netto 1, FFB Purchase netto 2.
+	Asal buahnya tidak ditelusuri sama sekali. Saringan flag Plasma dilepas 11
+	September 2026, lalu join ke Surat Pengantar Buah menyusul di hari yang sama:
+	permintaan user, angkanya diambil dari Timbangan saja. Jadi yang ikut bukan
+	cuma kebun sendiri dan plasma, tapi juga kiriman pihak ketiga — yang datang
+	dari Supplier tanpa SPB dan dulu terbuang lewat join itu.
 
-	Inner join ke SPB tetap dipasang karena itu yang membuang TBS pihak ketiga —
-	kiriman luar datang dari Supplier tanpa SPB. Join ke Unit dilepas bersama
-	flagnya: tanpa saringan plasma join itu cuma menambah risiko baris terbuang
-	kalau unit di SPB kosong atau tertaut ke Unit yang sudah dihapus.
+	Akibatnya tonase plasma dan pembelian luar terhitung juga di baris FFB
+	Purchase lewat qty_pembelian_tbs, yang sengaja tidak ikut diubah.
 
-	Field receive_type sengaja tidak dipakai walau nilainya persis "TBS
-	Internal". Isinya fetch_from ticket_number.receive_type, sedangkan Timbangan
-	kiriman API tidak mengisi ticket_number sama sekali, jadi menyaring lewat
-	field itu justru membuang dokumen yang paling banyak.
+	Unitnya dari field `unit` di Timbangan sendiri, yaitu pabrik yang menimbang.
+	Itu satu-satunya unit yang tersisa sesudah SPB dilepas; unit kebun pengirim
+	sudah tidak dibaca lagi.
 	"""
 	item_codes = get_item_produk("TBS")
 	if not item_codes:
@@ -1204,7 +1201,6 @@ def qty_produksi_tbs_internal(company, unit, dari, sampai):
 	row = frappe.db.sql("""
 		select sum(t.netto)
 		from `tabTimbangan` t
-		inner join `tabSurat Pengantar Buah` spb on spb.name = t.spb
 		where t.docstatus = 1 and t.type = 'Receive'
 			and t.company = %(company)s and t.kode_barang in %(items)s
 			and t.posting_date between %(dari)s and %(sampai)s
@@ -1404,12 +1400,12 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 
 		if prefiks == "tbs":
 			# TBS Production tidak diambil dari dokumen sumber seperti CPO dan PK:
-			# qty-nya tonase ber-SPB yang ditimbang di PKS, netto 1, kebun sendiri
-			# maupun plasma. Field tbs_olah di Data TBS adalah TBS yang diolah
-			# pabrik, bukan yang dihasilkan kebun. Permintaan user 10 September 2026,
-			# plasma diikutkan 11 September 2026. Data TBS tetap jadi sumber Closing
-			# dan Opening TBS.
-			qty_produksi = qty_produksi_tbs_internal(
+			# qty-nya seluruh tonase yang ditimbang masuk di PKS, netto 1, tanpa
+			# memandang asal buahnya. Field tbs_olah di Data TBS adalah TBS yang
+			# diolah pabrik, bukan yang masuk. Permintaan user 10 September 2026,
+			# disaring ke Timbangan saja 11 September 2026. Data TBS tetap jadi
+			# sumber Closing dan Opening TBS.
+			qty_produksi = qty_produksi_tbs_timbangan(
 				company, unit, periode_dari, periode_sampai
 			)
 		else:
