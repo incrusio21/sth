@@ -1165,7 +1165,7 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 
 
 def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
-	"""Qty baris TBS Production: seluruh TBS yang ditimbang masuk di PKS.
+	"""Qty baris TBS Production: TBS Internal yang ditimbang masuk di PKS.
 
 	Sebelumnya angkanya diambil dari `tbs_olah` di Data TBS, yaitu TBS yang
 	diolah pabrik. Yang dimaksud baris Production sebenarnya tonase yang masuk
@@ -1173,20 +1173,29 @@ def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
 
 	Yang dijumlahkan `netto`, Netto 1, sebelum potongan sortasi. Beda dengan
 	baris FFB Purchase yang memakai netto 2: yang dibeli dinilai sebesar yang
-	lolos sortasi, sedangkan yang masuk pabrik dihitung sebesar yang ditimbang.
+	lolos sortasi, sedangkan yang dihasilkan sendiri dihitung sebesar yang
+	ditimbang.
 
-	Asal buahnya tidak ditelusuri sama sekali. Saringan flag Plasma dilepas 11
-	September 2026, lalu join ke Surat Pengantar Buah menyusul di hari yang sama:
-	permintaan user, angkanya diambil dari Timbangan saja. Jadi yang ikut bukan
-	cuma kebun sendiri dan plasma, tapi juga kiriman pihak ketiga — yang datang
-	dari Supplier tanpa SPB dan dulu terbuang lewat join itu.
+	Asal buahnya tidak lagi ditelusuri lewat dokumen lain. Saringan flag Plasma
+	dilepas 11 September 2026, lalu join ke Surat Pengantar Buah menyusul di hari
+	yang sama: permintaan user, angkanya diambil dari Timbangan saja.
 
-	Akibatnya tonase plasma dan pembelian luar terhitung juga di baris FFB
-	Purchase lewat qty_pembelian_tbs, yang sengaja tidak ikut diubah.
+	Yang membatasi tinggal receive_type, disaring ke "TBS Internal" — permintaan
+	user. Kebun sendiri dan plasma dua-duanya masuk situ; SPB malah wajib diisi
+	kalau receive_type-nya TBS Internal, jadi saringan ini mencakup yang dulu
+	didapat lewat join SPB. "TBS Eksternal", yaitu pembelian dari pihak ketiga,
+	sengaja ditinggalkan karena sudah terhitung di baris FFB Purchase.
 
-	Unitnya dari field `unit` di Timbangan sendiri, yaitu pabrik yang menimbang.
-	Itu satu-satunya unit yang tersisa sesudah SPB dilepas; unit kebun pengirim
-	sudah tidak dibaca lagi.
+	Tonase plasma tetap terhitung dua kali: ikut di sini, dan ikut juga di FFB
+	Purchase lewat qty_pembelian_tbs, yang sengaja tidak diubah.
+
+	Saringan yang sama dipakai get_total_tbs di Data TBS, bedanya di sana TBS
+	Eksternal ikut — yang masuk pabrik memang semuanya, sedangkan yang dihitung
+	di sini cuma yang dihasilkan sendiri.
+
+	Unitnya dari field `unit` di Timbangan sendiri. Field itu memang cuma terisi
+	untuk TBS Internal, jadi cocok dengan saringan receive_type-nya; unit kebun
+	pengirim lewat SPB sudah tidak dibaca lagi.
 	"""
 	item_codes = get_item_produk("TBS")
 	if not item_codes:
@@ -1202,6 +1211,7 @@ def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
 		select sum(t.netto)
 		from `tabTimbangan` t
 		where t.docstatus = 1 and t.type = 'Receive'
+			and t.receive_type = 'TBS Internal'
 			and t.company = %(company)s and t.kode_barang in %(items)s
 			and t.posting_date between %(dari)s and %(sampai)s
 			{syarat_unit}
@@ -1400,11 +1410,11 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 
 		if prefiks == "tbs":
 			# TBS Production tidak diambil dari dokumen sumber seperti CPO dan PK:
-			# qty-nya seluruh tonase yang ditimbang masuk di PKS, netto 1, tanpa
-			# memandang asal buahnya. Field tbs_olah di Data TBS adalah TBS yang
-			# diolah pabrik, bukan yang masuk. Permintaan user 10 September 2026,
-			# disaring ke Timbangan saja 11 September 2026. Data TBS tetap jadi
-			# sumber Closing dan Opening TBS.
+			# qty-nya tonase Receive bertipe TBS Internal yang ditimbang di PKS,
+			# netto 1. Field tbs_olah di Data TBS adalah TBS yang diolah pabrik,
+			# bukan yang masuk. Permintaan user 10 September 2026, disaring ke
+			# Timbangan saja dan ke receive_type TBS Internal 11 September 2026.
+			# Data TBS tetap jadi sumber Closing dan Opening TBS.
 			qty_produksi = qty_produksi_tbs_timbangan(
 				company, unit, periode_dari, periode_sampai
 			)
