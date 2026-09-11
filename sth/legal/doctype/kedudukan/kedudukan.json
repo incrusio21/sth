@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{deskripsi}",
  "creation": "2026-09-10 13:20:19.536443",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -17,16 +18,19 @@
   {
    "fieldname": "deskripsi",
    "fieldtype": "Data",
-   "label": "Deskripsi"
+   "in_list_view": 1,
+   "label": "Deskripsi",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-10 13:20:31.856354",
+ "modified": "2026-09-11 10:39:51.684994",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Kedudukan",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

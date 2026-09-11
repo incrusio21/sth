@@ -38,8 +38,8 @@ frappe.query_reports["Laporan Penerimaan TBS Mill"] = {
 			"fieldname": "tbs",
 			"label": __("TBS"),
 			"fieldtype": "Select",
-			"options": ["External", "Internal"],
-			"default": "",
+			"options": ["All", "External", "Internal"],
+			"default": "All",
 			"reqd": 0
 		},
 		{

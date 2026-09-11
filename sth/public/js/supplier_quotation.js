@@ -113,7 +113,7 @@ frappe.ui.form.on("Supplier Quotation", {
 
                 // Referensinya baru ada sekarang, jadi angka yang sudah telanjur
                 // diketik sebelum ini belum sempat mendarat di tabel taxes.
-                sync_to_taxes(frm)
+                // sync_to_taxes(frm)
             })
         }
     },

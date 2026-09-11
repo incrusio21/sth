@@ -180,7 +180,7 @@ class DataTBS(Document):
 
 def get_total_tbs(tanggal,unit):
 	query = frappe.db.sql("""
-		SELECT sum(netto_2) as qty
+		SELECT sum(netto) as qty
 		FROM `tabTimbangan` t
 		WHERE receive_type IN ('TBS Internal', 'TBS Eksternal') AND docstatus = 1 AND posting_date = %s AND unit = %s
 	""",(tanggal,unit),as_dict=True)

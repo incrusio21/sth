@@ -35,10 +35,10 @@ class SupplierComparasion {
 		`)
 		this.page.main.append(this.content_wrapper)
 		this.setupSearchField()
-		this.setupRefreshIcon()
 		if (this.can_create_po) {
 			this.setupChoosenButton()
 		}
+		this.setupReload()
 		this.initTable()
 	}
 
@@ -140,18 +140,18 @@ class SupplierComparasion {
 
 	}
 
-	setupRefreshIcon() {
-		var me = this;
+	setupReload() {
 
 		this.page.add_action_icon(
 			"es-line-reload",
 			() => {
-				me.table.redraw(true);
+				this.table.redraw(true)
 			},
 			"",
-			__("Reload Data")
+			__("Reload Table")
 		);
 	}
+
 
 	initTable() {
 		const columns = this.generateColumns()
@@ -364,14 +364,14 @@ class SupplierComparasion {
 					},
 					{
 						title: "",
-						width: 100,
+						width: 60,
 						formatter: function (cell, formatterParams) {
 							const row = cell.getRow().getData()
 							const has_been_selected = me.selected_items.find((d) => d.item_name == row.mark)
 							if (!row[`${initials}_child_name`] || row[`${initials}_workflow_state`] == "Draft" || !me.can_create_po) {
 								return ""
 							} else if (has_been_selected) {
-								return "<div style='font-style:italic'>Selected</div>"
+								return "<div style='font-style: italic'>Selected</div>"
 							} else {
 								return "<i class='fa fa-plus' style='color: #0b680b'></i>";
 							}
@@ -392,7 +392,7 @@ class SupplierComparasion {
 									indicator: 'green'
 								})
 
-								me.table.redraw(true);
+								me.table.redraw(true)
 							}
 						}
 					}
@@ -615,12 +615,12 @@ class SupplierComparasion {
 		this.dialog.show()
 		const delete_button = this.dialog.get_field('items').grid.remove_rows_button
 		delete_button
-			.off("click.deleteSelected")
-			.on("click.deleteSelected", function () {
+			.off("click.filterSelected")
+			.on("click.filterSelected", function () {
 				setTimeout(() => {
 					const data = me.dialog.get_field('items').df.data.map((r) => r.item_code)
-					me.selected_items = me.selected_items.filter((r) => data.includes(r.item_name))
-				}, 500);
+					me.selected_items = me.selected_items.filter((r) => data.includes(r))
+				}, 500)
 			});
 	}
 
@@ -746,23 +746,22 @@ class SupplierComparasion {
 		}
 	}
 
-	// approve_sq() {
-	// 	if (!this.supllier_quotation) {
-	// 		return
-	// 	}
-	// 	frappe.xcall("sth.api.submit_sq", { "name": this.supllier_quotation, freeze: true, freeze_message: "Approving" })
-	// 		.then((res) => {
-	// 			frappe.show_alert({
-	// 				message: __(`Document ${this.supllier_quotation} successfully approved`),
-	// 				indicator: 'green'
-	// 			}, 5);
-	// 			this.page.fields_dict.sq.set_value('')
+	approve_sq() {
+		if (!this.supllier_quotation) {
+			return
+		}
+		frappe.xcall("sth.api.submit_sq", { "name": this.supllier_quotation, freeze: true, freeze_message: "Approving" })
+			.then((res) => {
+				frappe.show_alert({
+					message: __(`Document ${this.supllier_quotation} successfully approved`),
+					indicator: 'green'
+				}, 5);
+				this.page.fields_dict.sq.set_value('')
+			})
+			.catch((e) => {
+				console.error(e);
 
-	// 		})
-	// 		.catch((e) => {
-	// 			console.error(e);
-
-	// 		})
-	// }
+			})
+	}
 
 }
