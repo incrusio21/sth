@@ -32,12 +32,14 @@
 // Retur Ke Supplier menampilkan kode walau barisnya menyimpan nama_barang —
 // field link-nya sendiri memang bernama kode_barang.
 const ATURAN = {
+	"Delivery Note": null,
 	"Material Request": "item_name",
 	"Pengeluaran Barang": "item_name",
 	"Purchase Order": null,
 	"Purchase Receipt": null,
 	"Request for Quotation": "item_name",
 	"Retur Ke Supplier": null,
+	"Sales Order": null,
 	"Supplier Quotation": "item_name",
 };
 
@@ -53,7 +55,7 @@ function formatter_item(value, doc) {
 	// Doctype yang tidak disebut dibiarkan apa adanya: mengembalikan undefined
 	// berarti frappe yang memutuskan, termasuk memakai judul dokumen yang
 	// di-cache. Kalau di sini dipulangkan value, seluruh doctype lain — Stock
-	// Entry, Sales Order, Delivery Note — ikut berubah dari nama jadi kode,
+	// Entry, Sales Invoice, Pick List — ikut berubah dari nama jadi kode,
 	// padahal tidak ada yang meminta itu.
 	if (!(doctype in ATURAN)) {
 		return undefined;
