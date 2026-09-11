@@ -37,10 +37,11 @@ class SoundingStockCPOdiBST(Document):
 		if name := frappe.db.get_value(self.doctype,{"tanggal_proses":self.tanggal_proses,"unit":self.unit,"docstatus":["<",2],"name":["!=",self.name]},"name"):
 			frappe.throw(f"Terdapat document dengan tanggal proses yang sama untuk unit {self.unit}: {name}")
 
-	def validate_backdate(self):
-		allowed_diff = frappe.get_single_value("Mill Settings","max_backdate_proses") or 1
-		if date_diff(today(),self.tanggal_proses) > allowed_diff:
-			frappe.throw(f"Tanggal proses maksimal mundur : {allowed_diff} hari.")
+	# def validate_backdate(self):
+	# 	allowed_diff = frappe.db.get_value("Backdate Setting",{"backdate_doc":self.doctype},"max_days") or 1
+
+	# 	if date_diff(today(),self.tanggal_proses) > allowed_diff:
+	# 		frappe.throw(f"Tanggal proses maksimal mundur : {allowed_diff} hari.")
 
 	def validate_previous_documents(self):
 		draft_doc = frappe.get_all(
@@ -242,9 +243,11 @@ class SoundingStockCPOdiBST(Document):
 		docs = frappe.get_all(
 			"Sounding Stock CPO di BST",
 			filters=[
-				["creation",">",self.creation],
+				["tanggal_proses",">",self.tanggal_proses],
+				["docstatus","!=",2],
 			],
-			pluck="name"
+			pluck="name",
+			order_by="tanggal_proses"
 		)
 
 		for name in docs:
