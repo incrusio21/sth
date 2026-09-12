@@ -22,13 +22,16 @@ class SoundingStockCPOdiBST(Document):
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
 
 		set_rata_rata_rendemen_bulanan(self)
+		self.calculate_oer_netto()
 		self.calculate_totals()
 
 	def on_submit(self):
 		self.create_ste()
+		self.update_document_afterwards()
 	
 	def on_cancel(self):
 		self.cancel_ste()
+		self.update_document_afterwards()
 	
 	def on_trash(self):
 		self.delete_ste()
@@ -74,6 +77,8 @@ class SoundingStockCPOdiBST(Document):
 		self.set_adjustment()
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
 		self.potongan_sortasi = self.get_sortasi()
+
+		self.calculate_oer_netto()
 		self.calculate_totals()
 
 	def get_delivery(self):
@@ -141,7 +146,7 @@ class SoundingStockCPOdiBST(Document):
 	def calculate_oer_netto(self):
 		self.oer_netto_1 = 0
 		self.oer_netto_2 = 0
-		
+
 		if self.tbs_olah > 0 :
 			self.oer_netto_1 = (self.produksi_cpo / self.tbs_olah * 100) 
 			self.oer_netto_2 = (self.produksi_cpo / (self.tbs_olah - self.potongan_sortasi) * 100)
