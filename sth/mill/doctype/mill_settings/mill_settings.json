@@ -11,9 +11,7 @@
   "temperatur_cst",
   "column_break_bozd",
   "temperatur_stt",
-  "temperatur_st",
-  "section_break_ahtr",
-  "max_backdate_proses"
+  "temperatur_st"
  ],
  "fields": [
   {
@@ -54,23 +52,13 @@
    "fieldname": "temperatur_cst",
    "fieldtype": "Data",
    "label": "Temperatur (CST)"
-  },
-  {
-   "fieldname": "section_break_ahtr",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "1",
-   "fieldname": "max_backdate_proses",
-   "fieldtype": "Int",
-   "label": "Max backdate proses"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-09 10:23:10.436917",
+ "modified": "2026-09-11 15:48:07.137793",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Settings",

@@ -1212,7 +1212,7 @@ def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
 		from `tabTimbangan` t
 		where t.docstatus = 1 and t.type = 'Receive'
 			and t.receive_type = 'TBS Internal'
-			and t.company = %(company)s and t.kode_barang in %(items)s
+			and t.company = %(company)s
 			and t.posting_date between %(dari)s and %(sampai)s
 			{syarat_unit}
 	""".format(syarat_unit=syarat_unit), nilai)

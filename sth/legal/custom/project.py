@@ -190,7 +190,7 @@ class Project:
 
             subject = item.kegiatan_name or item.item_name
             if item.kegiatan:
-                subject = frappe.get_value("Kegiatan", item.kegiatan ,"nm_kgt")
+                subject = frappe.get_value("Kegiatan", item.kegiatan, "nm_kgt")
 
             task.update({
                 "subject": subject,

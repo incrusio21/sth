@@ -137,7 +137,15 @@ class SoundingStockCPOdiBST(Document):
 		total_produksi = (flt(total_stock) + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
 		self.stock_bst = total_stock
 		self.produksi_cpo = total_produksi
-    
+	
+	def calculate_oer_netto(self):
+		self.oer_netto_1 = 0
+		self.oer_netto_2 = 0
+		
+		if self.tbs_olah > 0 :
+			self.oer_netto_1 = (self.produksi_cpo / self.tbs_olah * 100) 
+			self.oer_netto_2 = (self.produksi_cpo / (self.tbs_olah - self.potongan_sortasi) * 100)
+
 
 	def create_ste(self):
 		if round(self.produksi_cpo,2) == 0: return

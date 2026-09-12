@@ -1,14 +1,17 @@
 import frappe,json
 
-@frappe.whitelist()
-def close_rfq(rfq):
-    frappe.db.set_value("Request for Quotation",rfq,"custom_offering_status","Closed",update_modified=False)
-
-
 def create_po_draft(doc,method):
     from sth.overrides.supplier_quotation import make_purchase_order
     po = make_purchase_order(doc.name)
     po.insert(ignore_mandatory=True)
+
+def validate_duplicate_supplier(doc,method=None):
+    if name := frappe.db.get_value(doc.doctype,{"supplier":doc.supplier_name,"name":["!=",doc.name],"docstatus":1},"name"):
+        frappe.throw(f"Quotation dengan supplier {doc.supplier} sudah ada: {name}")
+
+@frappe.whitelist()
+def close_rfq(rfq):
+    frappe.db.set_value("Request for Quotation",rfq,"custom_offering_status","Closed",update_modified=False)
 
 @frappe.whitelist()
 def close_status_another_sq(reference,except_name):

@@ -435,7 +435,7 @@ class Proposal(BuyingController):
 def validate_for_items(doc) -> None:
 	items = []
 	for d in doc.get("items"):
-		if d.kegiatan_name:
+		if d.item_code:
 			item = validate_item_and_get_basic_data(row=d)
 			validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
 
