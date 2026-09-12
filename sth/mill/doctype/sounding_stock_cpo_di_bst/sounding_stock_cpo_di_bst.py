@@ -137,14 +137,20 @@ class SoundingStockCPOdiBST(Document):
 		total_produksi = (flt(total_stock) + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
 		self.stock_bst = total_stock
 		self.produksi_cpo = total_produksi
-	
+
+		# OER-nya ikut di sini supaya tidak bisa ketinggalan lagi: produksi_cpo baru
+		# dihitung di baris atas, dan yang dipakai OER cuma angka itu dengan tbs olah
+		# serta potongan sortasi yang sudah terisi sebelum calculate_totals dipanggil.
+		self.calculate_oer_netto()
+
 	def calculate_oer_netto(self):
-		self.oer_netto_1 = 0
-		self.oer_netto_2 = 0
-		
-		if self.tbs_olah > 0 :
-			self.oer_netto_1 = (self.produksi_cpo / self.tbs_olah * 100) 
-			self.oer_netto_2 = (self.produksi_cpo / (self.tbs_olah - self.potongan_sortasi) * 100)
+		self.oer_netto_1 = self.produksi_cpo / self.tbs_olah * 100 if self.tbs_olah else 0
+
+		# Penjaganya penyebut netto 2 itu sendiri, bukan tbs_olah: kalau seluruh TBS
+		# yang masuk kena potongan sortasi, tbs_olah terisi tapi selisihnya nol dan
+		# pembagiannya error.
+		penyebut_netto_2 = flt(self.tbs_olah) - flt(self.potongan_sortasi)
+		self.oer_netto_2 = self.produksi_cpo / penyebut_netto_2 * 100 if penyebut_netto_2 else 0
 
 
 	def create_ste(self):
