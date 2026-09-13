@@ -32,15 +32,22 @@
 // Retur Ke Supplier menampilkan kode walau barisnya menyimpan nama_barang —
 // field link-nya sendiri memang bernama kode_barang.
 const ATURAN = {
+	"BOM": null,
 	"Delivery Note": null,
 	"Delivery Order": null,
 	"Material Request": "item_name",
 	"Pengeluaran Barang": "item_name",
+	"Pick List": null,
+	"Proposal": null,
+	"Purchase Invoice": null,
 	"Purchase Order": null,
 	"Purchase Receipt": null,
+	"Quotation": null,
 	"Request for Quotation": "item_name",
 	"Retur Ke Supplier": null,
 	"Sales Order": null,
+	"Stock Entry": null,
+	"Subcontracting Order": null,
 	"Supplier Quotation": "item_name",
 };
 
@@ -55,9 +62,24 @@ function formatter_item(value, doc) {
 
 	// Doctype yang tidak disebut dibiarkan apa adanya: mengembalikan undefined
 	// berarti frappe yang memutuskan, termasuk memakai judul dokumen yang
-	// di-cache. Kalau di sini dipulangkan value, seluruh doctype lain — Stock
-	// Entry, Sales Invoice, Pick List — ikut berubah dari nama jadi kode,
+	// di-cache. Kalau di sini dipulangkan value, seluruh doctype lain — Sales
+	// Invoice, Journal Entry, Pick List — ikut berubah dari nama jadi kode,
 	// padahal tidak ada yang meminta itu.
+	//
+	// Harganya ditanggung doctype yang memanggil
+	// `frm.set_indicator_formatter("item_code")` tanpa argumen get_text: form.js
+	// baris 1823 memanggil formatter ini langsung untuk merangkai label
+	// indikator dan **tidak menjaga hasilnya** — beda dengan jalur Link
+	// formatter di formatter_override.js yang pakai `if (diformat)`. undefined
+	// di sana jatuh ke `${label}` dan tercetak sebagai kata "undefined" di
+	// kolom Item.
+	//
+	// Jadi setiap doctype berindikator item_code wajib punya barisnya sendiri di
+	// ATURAN walau isinya null. Yang sekarang memakainya: Stock Entry, Quotation,
+	// Purchase Invoice, Pick List, Subcontracting Order, BOM, Material Request,
+	// Request for Quotation, Supplier Quotation, Purchase Order, Sales Order,
+	// Delivery Note (ERPNext), dan Proposal (sth). Kalau nanti ada doctype baru
+	// yang memasang indikator item_code, daftarkan di sini.
 	if (!(doctype in ATURAN)) {
 		return undefined;
 	}
