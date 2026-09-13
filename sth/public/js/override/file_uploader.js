@@ -1,5 +1,10 @@
 import { createApp } from "vue";
-import FileUploaderComponent from "/home/frappe/frappe-bench/apps/frappe/frappe/public/js/frappe/file_uploader/FileUploader.vue";
+// Lima tingkat ke atas dari sth/public/js/override/ sampai di apps/, lalu turun
+// ke app frappe. Harus relatif, bukan "frappe/public/js/..." yang bertumpu pada
+// nodePaths esbuild: plugin esbuild-plugin-vue3 menangkap resolusi berkas .vue
+// sendiri dan hanya melihat direktori berkas pengimpor, jadi impor tanpa titik
+// gagal khusus untuk .vue.
+import FileUploaderComponent from "../../../../../frappe/frappe/public/js/frappe/file_uploader/FileUploader.vue";
 import { watch } from "vue";
 
 class FileUploader {

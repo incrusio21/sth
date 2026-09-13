@@ -38,7 +38,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update_voucher_outstanding
 
-form_grid_templates = {"items": "/home/frappe/frappe-bench/apps/sth/sth/templates/form_grid/custom_item_grid.html","non_voucher_match": "templates/form_grid/non_voucher_grid.html"}
+form_grid_templates = {"items": "templates/form_grid/custom_item_grid.html","non_voucher_match": "templates/form_grid/non_voucher_grid.html"}
 
 from sth.custom import method_ambil_account
 from sth.buying_sth.custom.uang_muka_po import (
