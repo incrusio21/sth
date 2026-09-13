@@ -221,6 +221,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.docstatus===0",
    "fieldname": "get_data",
    "fieldtype": "Button",
    "label": "Get Data"

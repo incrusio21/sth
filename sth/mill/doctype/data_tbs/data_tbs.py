@@ -53,6 +53,17 @@ class DataTBS(Document):
 
 	@frappe.whitelist()
 	def get_data(self):
+		# Cuma selagi draft. Angka yang diisi method ini — TBS diterima, restan,
+		# dan seluruh turunannya — menentukan qty Stock Entry yang dibuat waktu
+		# submit, dan Stock Entry itu tidak ikut berubah kalau angkanya dihitung
+		# ulang belakangan. Tombolnya sendiri sudah disembunyikan lewat
+		# depends_on di doctype-nya; ini penjaga untuk jalur lain, karena
+		# methodnya whitelisted dan bisa dipanggil dari API.
+		if self.docstatus != 0:
+			frappe.throw(
+				"Get Data hanya bisa dipakai selagi {0} masih draft.".format(frappe.bold(self.name))
+			)
+
 		data_lori = frappe.db.sql("""
 			select 
 				tbs_olah as jumlah_lori_olah,
