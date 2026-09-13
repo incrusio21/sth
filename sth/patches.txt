@@ -14,7 +14,8 @@ sth.patches.hitung_ulang_oer_netto_sounding_cpo
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
-# perbaiki_restan_data_tbs dan isi_adjustment_sounding sengaja tidak didaftarkan:
-# keduanya perbaikan data sekali jalan yang mau diawasi sendiri waktu dijalankan,
-# yang restan Data TBS bahkan memposting ulang puluhan Stock Entry. Jalankan
-# dengan `bench --site <site> execute sth.patches.<nama>.execute`.
+# perbaiki_restan_data_tbs, hitung_ulang_tbs_diterima_data_tbs, dan
+# isi_adjustment_sounding sengaja tidak didaftarkan: ketiganya perbaikan data
+# sekali jalan yang mau diawasi sendiri waktu dijalankan, dan dua yang Data TBS
+# memposting ulang puluhan Stock Entry. Jalankan dengan
+# `bench --site <site> execute sth.patches.<nama>.execute`.
