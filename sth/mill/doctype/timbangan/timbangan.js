@@ -10,6 +10,24 @@ frappe.ui.form.on("Timbangan", {
 			}
 		})
 
+		// Satu SPB bisa punya lebih dari satu Security Check Point, jadi ticket
+		// tidak bisa ditebak dari SPB-nya. Daftarnya disaring, pilihannya di
+		// tangan operator.
+		frm.set_query("ticket_number", (doc) => {
+			const filters = { docstatus: 1 }
+
+			if (doc.spb) {
+				filters.spb = doc.spb
+			}
+
+			// "Wb Pabrik" tidak ada di transaction_type Security Check Point
+			if (["Receive", "Dispatch", "Return"].includes(doc.type)) {
+				filters.transaction_type = doc.type
+			}
+
+			return { filters }
+		})
+
 		frm.set_query("no_do_2", (doc) => {
 			return {
 				query: frappe.model.get_server_module_name(doc.doctype) + ".get_do_2_available",
@@ -156,18 +174,6 @@ frappe.ui.form.on("Timbangan", {
 					frm.add_child('spb_detail', row)
 				});
 				frm.refresh_field('spb_detail')
-			})
-
-		frappe
-			.xcall("frappe.client.get_value", {
-				doctype: "Security Check Point",
-				filters: {
-					spb: frm.doc.spb
-				},
-				fieldname: ["name"],
-			})
-			.then((res) => {
-				frm.set_value("ticket_number", res.name)
 			})
 	},
 
