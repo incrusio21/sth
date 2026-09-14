@@ -39,6 +39,7 @@ class Timbangan(Document):
 	def validate(self):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
+		self.set_data_dari_po()
 		self.validate_qty_do()
 
 		if self.do_no and not self.storage:
@@ -50,6 +51,41 @@ class Timbangan(Document):
 				if row.company == self.company:
 					self.unit = row.name
 	
+	def set_data_dari_po(self):
+		"""Isi kode_barang dan supplier dari PO untuk Receive "Lain - Lain".
+
+		Receive jenis ini tidak lewat SPB maupun DO, jadi Security Check Point
+		tidak pernah mengisi items_do dan fetch_from ticket_number.items_do di
+		kode_barang tidak menghasilkan apa-apa. PO-nya satu-satunya yang tahu
+		barang apa yang masuk.
+
+		Hanya PO berisi satu barang yang diisikan sendiri; kalau lebih, barangnya
+		dibiarkan dipilih operator supaya yang ditimbang tidak ditebak. Yang sudah
+		terisi tidak ditimpa — timbangan yang dibuat lewat UI sudah mengisinya
+		duluan, termasuk pilihan operator untuk PO berbaris banyak.
+		"""
+		if self.receive_type != "Lain - Lain" or not self.purchase_order:
+			return
+
+		# Supplier "Lain - Lain" tidak datang dari QR supir seperti TBS Eksternal;
+		# yang mengikat siapa pemasoknya cuma PO-nya. Tanpa ini Purchase Receipt
+		# yang dibuat dari timbangan lahir tanpa supplier.
+		if not self.supplier:
+			self.supplier = frappe.db.get_value("Purchase Order", self.purchase_order, "supplier")
+
+		if self.kode_barang:
+			return
+
+		items = get_item_purchase_order_list(self.purchase_order)
+		if len(items) != 1:
+			return
+
+		self.kode_barang = items[0]
+		# fetch_from kode_barang.item_name sudah lewat waktu validate dijalankan,
+		# jadi nama barangnya ikut diisi di sini supaya tidak baru muncul di
+		# penyimpanan berikutnya.
+		self.nama_barang = frappe.db.get_value("Item", self.kode_barang, "item_name")
+
 	def make_dn(self):
 		if self.type == "Dispatch":
 			self.create_delivery_notes()
@@ -366,6 +402,10 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"company": "company",
 					"transportir": "transporter_name",
 					"license_number": "lr_no",
+					# supplier ikut dipetakan supaya set_missing_values di atas sudah
+					# melihatnya; kalau baru diisi sesudah get_mapped_doc, alamat dan
+					# kontak supplier tidak ikut terisi.
+					"supplier": "supplier",
 				}
 			},
 		},
@@ -376,13 +416,71 @@ def make_purchase_receipt(source_name, target_doc=None):
 	source_doc = frappe.get_doc("Timbangan", source_name)
 	
 	if source_doc.kode_barang and source_doc.netto:
-		doclist.append('items', {
+		baris = {
 			'item_code': source_doc.kode_barang,
 			'qty': source_doc.netto_2,
 			'timbangan': source_doc.name
-		})
+		}
+		baris.update(get_referensi_po(source_doc))
+		doclist.append('items', baris)
 	
 	return doclist
+
+
+def get_referensi_po(source_doc):
+	"""Kolom baris Purchase Receipt yang mengikatnya ke baris PO.
+
+	Tanpa purchase_order_item, Purchase Receipt tidak pernah menutup PO-nya:
+	received_qty di baris PO tetap 0 dan PO-nya menggantung "To Receive and Bill"
+	selamanya, padahal barangnya sudah ditimbang masuk.
+
+	qty timbangan selalu kilogram hasil jembatan, jadi satuannya dipaksa ke stock
+	uom barangnya dengan conversion factor 1 dan harga PO dibagi conversion factor
+	baris PO supaya nilainya tetap sama biarpun PO-nya dipesan dalam satuan lain.
+	"""
+	if not source_doc.purchase_order or not source_doc.kode_barang:
+		return {}
+
+	baris_po = get_baris_purchase_order(source_doc.purchase_order, source_doc.kode_barang)
+	if not baris_po:
+		return {}
+
+	conversion_factor = flt(baris_po.conversion_factor) or 1
+
+	return {
+		"purchase_order": source_doc.purchase_order,
+		"purchase_order_item": baris_po.name,
+		"uom": baris_po.stock_uom,
+		"stock_uom": baris_po.stock_uom,
+		"conversion_factor": 1,
+		"rate": flt(baris_po.rate) / conversion_factor,
+		"warehouse": baris_po.warehouse,
+	}
+
+
+def get_baris_purchase_order(purchase_order, item_code):
+	"""Baris PO yang dipakai baris Purchase Receipt untuk barang ini.
+
+	Baris yang belum penuh didahulukan supaya penerimaan berikutnya tidak
+	menumpuk di baris yang sudah tertutup. Kalau semua barisnya sudah penuh,
+	baris pertama yang dipakai: kelebihannya lebih baik tetap menempel di PO —
+	dan kena batas over receipt ERPNext — ketimbang masuk tanpa PO sama sekali.
+	"""
+	rows = frappe.db.sql("""
+		select name, qty, received_qty, rate, uom, stock_uom, conversion_factor, warehouse
+		from `tabPurchase Order Item`
+		where parent = %(purchase_order)s and item_code = %(item_code)s
+		order by idx
+	""", {"purchase_order": purchase_order, "item_code": item_code}, as_dict=True)
+
+	if not rows:
+		return None
+
+	for row in rows:
+		if flt(row.received_qty) < flt(row.qty):
+			return row
+
+	return rows[0]
 
 @frappe.whitelist()
 def get_timbangan_settings():
@@ -475,3 +573,50 @@ def get_do_2_available(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_sisa_do_2(do_no, item_code):
 	return hitung_sisa_do(do_no, item_code)
+
+
+@frappe.whitelist()
+def get_item_purchase_order_list(purchase_order):
+	"""Kode barang yang ada di PO ini.
+
+	Receive "Lain - Lain" tidak membawa SPB maupun DO, jadi PO-nya satu-satunya
+	sumber barang untuk timbangan. Dipakai JS untuk mengisi kode_barang sendiri
+	kalau PO-nya cuma berisi satu barang.
+	"""
+	if not purchase_order:
+		return []
+
+	rows = frappe.db.sql("""
+		select item_code
+		from `tabPurchase Order Item`
+		where parent = %s
+		order by idx
+	""", purchase_order, pluck=True)
+
+	# Satu barang bisa muncul di beberapa baris PO (jadwal kirim berbeda); yang
+	# dihitung timbangan cuma barangnya, jadi barisnya diringkas tanpa mengubah
+	# urutan supaya barang pertama PO tetap yang pertama.
+	return list(dict.fromkeys(rows))
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_item_purchase_order(doctype, txt, searchfield, start, page_len, filters):
+	"""Daftar barang untuk field kode_barang, dibatasi isi PO yang dipilih."""
+	params = {
+		"purchase_order": filters.get("purchase_order"),
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len,
+	}
+
+	return frappe.db.sql("""
+		select i.name, i.item_name
+		from `tabPurchase Order Item` poi
+		join `tabItem` i on i.name = poi.item_code
+		where poi.parent = %(purchase_order)s
+			and (i.name like %(txt)s or i.item_name like %(txt)s)
+		group by i.name
+		order by min(poi.idx)
+		limit %(start)s, %(page_len)s
+	""", params)

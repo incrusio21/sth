@@ -19,6 +19,22 @@ frappe.ui.form.on("Timbangan", {
 				}
 			}
 		})
+
+		// Receive "Lain - Lain" tidak lewat SPB maupun DO, jadi barangnya hanya
+		// bisa dipertanggungjawabkan lewat PO-nya. Tanpa penyaringan ini operator
+		// bisa memilih barang yang tidak ada di PO, dan Purchase Receipt-nya nanti
+		// tidak punya baris PO untuk dicocokkan.
+		frm.set_query("kode_barang", (doc) => {
+			if (!doc.purchase_order) {
+				return {}
+			}
+			return {
+				query: frappe.model.get_server_module_name(doc.doctype) + ".get_item_purchase_order",
+				filters: {
+					purchase_order: doc.purchase_order
+				}
+			}
+		})
 	},
 
 	refresh(frm) {
@@ -40,6 +56,33 @@ frappe.ui.form.on("Timbangan", {
 
 		set_field_visibility(frm)
 		set_scan_nfc(frm)
+	},
+
+	purchase_order(frm) {
+		// Security Check Point cuma mengisi items_do untuk Dispatch/Return yang
+		// lewat DO, jadi fetch_from ticket_number.items_do tidak menghasilkan apa
+		// apa untuk Receive "Lain - Lain". Barangnya diambil dari PO-nya sendiri.
+		// PO berbaris satu diisikan langsung; yang lebih dari satu dibiarkan
+		// operator yang memilih lewat set_query di atas.
+		if (!frm.doc.purchase_order) {
+			return
+		}
+		const method = frappe.model.get_server_module_name(frm.doctype) + ".get_item_purchase_order_list"
+		frappe.xcall(method, { purchase_order: frm.doc.purchase_order })
+			.then((items) => {
+				if (items.length == 1) {
+					frm.set_value("kode_barang", items[0])
+				}
+			})
+
+		// Supplier "Lain - Lain" tidak datang dari QR supir seperti TBS Eksternal,
+		// jadi PO-nya yang menentukan siapa pemasoknya.
+		frappe.db.get_value("Purchase Order", frm.doc.purchase_order, "supplier")
+			.then((res) => {
+				if (res.message && res.message.supplier) {
+					frm.set_value("supplier", res.message.supplier)
+				}
+			})
 	},
 
 	receive_type(frm) {
