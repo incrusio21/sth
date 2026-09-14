@@ -1,3 +1,6 @@
+
+let deleted_price_history = [];
+
 frappe.ui.form.on("Harga Beli TBS", {
 	setup(frm){
 		if (!frm.doc.item_code) {
@@ -43,30 +46,7 @@ frappe.ui.form.on("Harga Beli TBS", {
 			}
 		});
 	},
-	// refresh(frm){
-	// 	frm.set_query("item_code", function() {
-	// 		return {
-	// 			filters: {
-	// 				tipe_barang: "TBS"
-	// 			}
-	// 		};
-	// 	});
-		
-	// 	// frm.disable_save();
-	// 	frm.events.load_price_history(frm);
-	// 	 frm.set_value('tanggal', frappe.datetime.get_today());
-
-	// 	const grid = frm.fields_dict.price_change_history.grid;
-
-	// 	grid.cannot_add_rows = true;
-	// 	grid.wrapper.find('.grid-remove-rows').hide();
-	// 	grid.wrapper.find('.row-check').hide();
-	// 	grid.wrapper.find('.grid-add-row').hide();
-
-	// 	grid.refresh();
-	// },
-
-	refresh(frm) {
+	refresh(frm){
 		frm.set_query("item_code", function() {
 			return {
 				filters: {
@@ -76,21 +56,25 @@ frappe.ui.form.on("Harga Beli TBS", {
 		});
 
 		frm.events.load_price_history(frm);
-		frm.set_value("tanggal", frappe.datetime.get_today());
+
+		frm.set_value('tanggal', frappe.datetime.get_today());
 
 		const grid = frm.fields_dict.price_change_history.grid;
 
-		// Tidak boleh tambah row manual
 		grid.cannot_add_rows = true;
-		grid.wrapper.find('.grid-add-row').hide();
-
-		// Hapus mekanisme delete massal
 		grid.wrapper.find('.grid-remove-rows').hide();
 		grid.wrapper.find('.row-check').hide();
+		grid.wrapper.find('.grid-add-row').hide();
 
 		grid.refresh();
 
-		setup_price_change_history_grid(frm);
+		setup_price_history_delete_handler(frm);
+	},
+	before_save(frm) {
+		frm.set_value(
+			"deleted_price_history",
+			JSON.stringify(deleted_price_history)
+		);
 	},
 	item_code(frm) {
 		if (!frm.doc.item_code) {
@@ -272,6 +256,72 @@ function resolve_price_list(frm) {
 	const finalJarak = jarak ? jarak : "TANPA RING";
 
 	return `${frm.doc.unit} - ${finalJarak}`;
+}
+
+function setup_price_history_delete_handler(frm) {
+	const grid = frm.fields_dict.price_change_history.grid;
+
+	if (grid.__delete_capture_added) {
+		return;
+	}
+
+	grid.__delete_capture_added = true;
+
+	grid.wrapper[0].addEventListener("click", function(e) {
+
+		const delete_btn = e.target.closest(".grid-delete-row");
+
+		if (!delete_btn) {
+			return;
+		}
+
+		const grid_row = delete_btn.closest(".grid-row");
+
+		if (!grid_row) {
+			return;
+		}
+
+		const cdn = grid_row.getAttribute("data-name");
+
+		if (!cdn) {
+			return;
+		}
+
+		const row = locals["Item Price Control History TBS"]?.[cdn];
+
+		if (!row) {
+			return;
+		}
+
+		console.log("DELETE CLICK:", row.no_transaksi, row.status);
+
+		if (row.status === "Approved") {
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+
+			frappe.msgprint({
+				title: "Tidak Dapat Dihapus",
+				message: `Transaksi ${row.no_transaksi} sudah Approved dan tidak boleh dihapus.`,
+				indicator: "red"
+			});
+
+			return false;
+		}
+
+		if (
+			row.no_transaksi &&
+			!deleted_price_history.includes(row.no_transaksi)
+		) {
+			deleted_price_history.push(row.no_transaksi);
+		}
+
+		console.log(
+			"DELETED PRICE HISTORY:",
+			deleted_price_history
+		);
+
+	}, true);
 }
 
 

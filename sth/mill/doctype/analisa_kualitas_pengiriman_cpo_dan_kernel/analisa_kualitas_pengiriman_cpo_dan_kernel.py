@@ -3,7 +3,7 @@
 
 import frappe,json
 from frappe.model.document import Document
-
+from frappe.utils import flt
 
 class AnalisaKualitasPengirimanCPOdanKERNEL(Document):
 	def validate(self):
@@ -12,9 +12,9 @@ class AnalisaKualitasPengirimanCPOdanKERNEL(Document):
 	def validate_rules(self):
 		
 		rules = [
-			(self.input_kualitas_ffa > 4.8 , "Presentase Kualitas FFA lebih besar dari 4.8%"),
-			(self.input_kualitas_moisture > 0.4 if self.tipe == "CPO" else False, "Presentase Kualitas Moisture lebih besar dari 0.4%"),
-			(self.input_kualitas_dirt > 0.05 if self.tipe == "CPO" else False, "Presentase Kualitas Dirt lebih besar dari 0.05%"),
+			(flt(self.input_kualitas_ffa) > 4.8 , "Presentase Kualitas FFA lebih besar dari 4.8%"),
+			(flt(self.input_kualitas_moisture) > 0.4 if self.tipe == "CPO" else False, "Presentase Kualitas Moisture lebih besar dari 0.4%"),
+			(flt(self.input_kualitas_dirt) > 0.05 if self.tipe == "CPO" else False, "Presentase Kualitas Dirt lebih besar dari 0.05%"),
 		]
 
 		errors = []

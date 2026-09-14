@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from datetime import datetime
 import calendar
+from frappe.utils import flt
 
 def execute(filters=None):
 	laporan_type = filters.get("laporan", "Laporan Penerimaan TBS")
@@ -14,13 +15,74 @@ def execute(filters=None):
 		data = get_rekap_data(filters)
 	else:
 		columns = get_columns()
-		data = get_data(filters)
+		raw_data = get_data(filters)
+		data = group_data_by_nama_barang(raw_data, columns)
 	
 	return columns, data
+
+def group_data_by_nama_barang(data, columns):
+	"""Group data by nama_barang: header grup (bold) + semua item + subtotal per grup"""
+
+	SUM_FIELDS = ["bruto", "tara", "netto", "potongan", "berat_normal"]
+	all_fieldnames = [c["fieldname"] for c in columns]
+
+	def empty_row():
+		row = {}
+		for fn in all_fieldnames:
+			if fn in SUM_FIELDS:
+				row[fn] = None   # numerik -> None supaya tidak jadi 0.00
+			else:
+				row[fn] = ""     # non-numerik -> string kosong
+		return row
+
+	data_sorted = sorted(data, key=lambda r: (r.get("nama_barang") or ""))
+
+	result = []
+	current_group = None
+	subtotal = {}
+
+	def flush_subtotal():
+		if current_group is None:
+			return
+		row = empty_row()
+		row["nama_barang"] = "<b>Total</b>"
+		for f in SUM_FIELDS:
+			row[f] = subtotal.get(f, 0)   # baris subtotal TETAP diisi angka asli
+		result.append(row)
+
+	for row in data_sorted:
+		group_name = row.get("nama_barang") or "Tanpa Nama"
+
+		if group_name != current_group:
+			flush_subtotal()
+
+			current_group = group_name
+			subtotal = {f: 0 for f in SUM_FIELDS}
+
+			header_row = empty_row()   # semua field numerik None -> kosong, bukan 0.00
+			header_row["nama_barang"] = f"<b>{group_name}</b>"
+			result.append(header_row)
+
+		data_row = dict(row)
+		data_row["nama_barang"] = ""
+		result.append(data_row)
+
+		for f in SUM_FIELDS:
+			subtotal[f] += flt(row.get(f) or 0)
+
+	flush_subtotal()
+
+	return result
 
 def get_columns():
 	"""Define kolom-kolom untuk laporan penerimaan TBS"""
 	return [
+		{
+			"fieldname": "nama_barang",
+			"label": _("Nama Barang"),
+			"fieldtype": "HTML",
+			"width": 120
+		},
 		{
 			"fieldname": "posting_date",
 			"label": _("Tanggal"),
@@ -71,6 +133,12 @@ def get_columns():
 			"fieldtype": "Data",
 			"width": 100
 		},
+		# {
+		# 	"fieldname": "contract_no_2",
+		# 	"label": _("Nomor Kontrak 2"),
+		# 	"fieldtype": "Data",
+		# 	"width": 100
+		# },
 		{
 			"fieldname": "bruto",
 			"label": _("Berat Masuk"),
@@ -114,30 +182,89 @@ def get_data(filters):
 	
 	conditions = get_conditions(filters)
 	
+	# data = frappe.db.sql("""
+	# 	SELECT
+	# 		posting_date,
+	# 		weight_in_time,
+	# 		weight_out_time,
+	# 		supplier,
+	# 		ticket_number,
+	# 		name as docname,
+	# 		license_number,
+	# 		do_no as contract_no,
+	# 		no_do_2 as contract_no_2,
+	# 		bruto,
+	# 		tara,
+	# 		netto,
+	# 		ROUND(potongan_sortasi * netto / 100, 0) as potongan,
+	# 		netto - ROUND(netto * (potongan_sortasi / 100), 0) as berat_normal,
+	# 		driver_name
+	# 	FROM
+	# 		`tabTimbangan`
+	# 	WHERE
+	# 		type = "Dispatch"
+	# 		AND docstatus = 1
+	# 		{conditions}
+	# 	ORDER BY
+	# 		posting_date, weight_in_time
+	# """.format(conditions=conditions), filters, as_dict=1)
+
 	data = frappe.db.sql("""
 		SELECT
-			posting_date,
-			weight_in_time,
-			weight_out_time,
-			supplier,
-			ticket_number,
-			name as docname,
-			license_number,
-			do_no as contract_no,
-			bruto,
-			tara,
-			netto,
-			ROUND(potongan_sortasi * netto / 100, 0) as potongan,
-			netto - ROUND(netto * (potongan_sortasi / 100), 0) as berat_normal,
-			driver_name
+			t.nama_barang,
+			t.posting_date,
+			t.weight_in_time,
+			t.weight_out_time,
+			t.supplier,
+			t.ticket_number,
+			t.name as docname,
+			t.license_number,
+			do1.sales_order as contract_no,
+			t.bruto,
+			t.tara,
+			t.netto,
+			ROUND(t.potongan_sortasi * t.netto / 100, 0) as potongan,
+			t.netto - ROUND(t.netto * (t.potongan_sortasi / 100), 0) as berat_normal,
+			t.driver_name
 		FROM
-			`tabTimbangan`
+			`tabTimbangan` t
+		LEFT JOIN
+			`tabDelivery Order` do1 ON do1.name = t.do_no
 		WHERE
-			type = "Dispatch"
-			AND docstatus = 1
+			t.type = "Dispatch"
+			AND t.docstatus = 1
 			{conditions}
-		ORDER BY
-			posting_date, weight_in_time
+
+		UNION ALL
+
+		SELECT
+			t.nama_barang,
+			t.posting_date,
+			t.weight_in_time,
+			t.weight_out_time,
+			t.supplier,
+			t.ticket_number,
+			t.name as docname,
+			t.license_number,
+			do2.sales_order as contract_no,
+			t.bruto,
+			t.tara,
+			t.netto,
+			ROUND(t.potongan_sortasi * t.netto / 100, 0) as potongan,
+			t.netto - ROUND(t.netto * (t.potongan_sortasi / 100), 0) as berat_normal,
+			t.driver_name
+		FROM
+			`tabTimbangan` t
+		LEFT JOIN
+			`tabDelivery Order` do2 ON do2.name = t.no_do_2
+		WHERE
+			t.type = "Dispatch"
+			AND t.docstatus = 1
+			AND t.no_do_2 IS NOT NULL
+			AND t.no_do_2 != ''
+			{conditions}
+
+		ORDER BY posting_date, weight_in_time
 	""".format(conditions=conditions), filters, as_dict=1)
 	
 	return data
@@ -153,19 +280,19 @@ def get_conditions(filters):
 	# 		conditions.append("AND receive_type = 'TBS Internal'")
 	
 	if filters.get("supplier"):
-		conditions.append("AND supplier = %(supplier)s")
+		conditions.append("AND t.supplier = %(supplier)s")
 	
 	if filters.get("tanggal_dari"):
-		conditions.append("AND posting_date >= %(tanggal_dari)s")
+		conditions.append("AND t.posting_date >= %(tanggal_dari)s")
 	
 	if filters.get("tanggal_sampai"):
-		conditions.append("AND posting_date <= %(tanggal_sampai)s")
+		conditions.append("AND t.posting_date <= %(tanggal_sampai)s")
 
 	if filters.get("company"):
-		conditions.append("AND company = %(company)s")
+		conditions.append("AND t.company = %(company)s")
 
 	if filters.get("unit"):
-		conditions.append("AND unit = %(unit)s")
+		conditions.append("AND t.unit = %(unit)s")
 	
 	return " ".join(conditions)
 

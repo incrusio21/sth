@@ -177,8 +177,8 @@ def get_data_external(filters):
 			FORMAT(t.bruto, 2) as bruto,
 			FORMAT(t.tara, 2) as tara,
 			FORMAT(t.netto, 2) as netto_1,
-			FORMAT(t.netto * (t.potongan_sortasi / 100), 2) as sort,
-			FORMAT(t.netto_2, 2) as netto_2,
+			ROUND(potongan_sortasi * netto / 100, 0) as sort,
+			netto - ROUND(netto * (potongan_sortasi / 100), 0) as netto_2,
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
