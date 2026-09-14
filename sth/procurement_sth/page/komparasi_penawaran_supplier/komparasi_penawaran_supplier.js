@@ -367,7 +367,7 @@ class SupplierComparasion {
 						width: 100,
 						formatter: function (cell, formatterParams) {
 							const row = cell.getRow().getData()
-							const has_been_selected = me.selected_items.find((d) => d.item_name == row.mark)
+							const has_been_selected = me.selected_items.find((d) => d.item_name == row.mark && d.child_name == row[`${initials}_child_name`])
 							if (!row[`${initials}_child_name`] || row[`${initials}_workflow_state`] == "Draft" || !me.can_create_po) {
 								return ""
 							} else if (has_been_selected) {
