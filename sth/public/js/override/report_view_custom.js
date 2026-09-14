@@ -3,6 +3,9 @@ frappe.listview_settings['Timbangan'] = frappe.listview_settings['Timbangan'] ||
 frappe.listview_settings['Timbangan'].onload = function (listview) {
   if (listview.doctype !== 'Timbangan') return;
 
+  // guard: hanya jalan kalau method ini benar-benar ada (khusus Report View)
+  if (typeof listview.get_columns_totals !== 'function') return;
+
   const original_get_columns_totals = listview.get_columns_totals.bind(listview);
 
   listview.get_columns_totals = function (data) {
@@ -18,6 +21,4 @@ frappe.listview_settings['Timbangan'].onload = function (listview) {
 
     return totals;
   };
-
-  // TIDAK panggil listview.refresh() di sini — biarkan proses setup awal selesai natural
 };

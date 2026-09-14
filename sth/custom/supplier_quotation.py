@@ -26,6 +26,18 @@ def close_status_another_sq(reference,except_name):
     for row in supplier_quotations:
         frappe.db.set_value("Supplier Quotation",row.name,"workflow_state","Closed")
 
+def reopen_status_another_sq(pr_sr):
+    supplier_quotations = frappe.db.sql("""
+        select sq.name from `tabSupplier Quotation` sq
+        join `tabSupplier Quotation Item` sqi on sqi.parent = sq.name
+        where sq.workflow_state = "Closed" and sq.custom_material_request = %(pr_sr)s
+        group by sq.name
+    """,{"pr_sr":pr_sr},as_dict=True)
+
+    for row in supplier_quotations:
+            frappe.db.set_value("Supplier Quotation",row.name,"workflow_state","Need To Compare")
+
+
 @frappe.whitelist()
 def reopen_rfq(name):
     frappe.db.set_value("Request for Quotation",name,{
