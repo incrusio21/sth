@@ -3,6 +3,7 @@
 
 import frappe,json
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class Sortasi(Document):
@@ -34,13 +35,15 @@ class Sortasi(Document):
 		# Sampah  ≤ 5  %
 		# Berondolan < 7 %
 
+		# field persentase yang belum diisi datang sebagai string kosong dari form,
+		# jadi dibandingkan lewat flt() supaya tidak meledak
 		rules = [
-			(self.p_mth >= 5 if self.tipe == "Internal" else False, "Presentase TBS mentah melebihi 5%"),
-			(self.p_msk <= 92 if self.tipe == "Internal" else False, "Presentase TBS masak kurang dari 92%"),
-			(self.brd_b_perc >= 3 if self.tipe == "Internal" else self.brd_e_b >= 3, "Persentase TBS Busuk melebihi 3%"),
-			(self.p_tp <= 1 if self.tipe == "Internal" else False, "Persentase tangkai panjang kurang dari 1%"),
-			(self.p_smph <= 5 if self.tipe == "Internal" else False, "Persentase sampah kurang dari 5%"),
-			(self.p_brd < 7 if self.tipe == "Internal" else self.brd_e < 7, "Persentase berondolan kurang dari 7%")
+			(flt(self.p_mth) >= 5 if self.tipe == "Internal" else False, "Presentase TBS mentah melebihi 5%"),
+			(flt(self.p_msk) <= 92 if self.tipe == "Internal" else False, "Presentase TBS masak kurang dari 92%"),
+			(flt(self.brd_b_perc) >= 3 if self.tipe == "Internal" else flt(self.brd_e_b) >= 3, "Persentase TBS Busuk melebihi 3%"),
+			(flt(self.p_tp) <= 1 if self.tipe == "Internal" else False, "Persentase tangkai panjang kurang dari 1%"),
+			(flt(self.p_smph) <= 5 if self.tipe == "Internal" else False, "Persentase sampah kurang dari 5%"),
+			(flt(self.p_brd) < 7 if self.tipe == "Internal" else flt(self.brd_e) < 7, "Persentase berondolan kurang dari 7%")
 		]
 
 		errors = []
