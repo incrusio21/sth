@@ -343,3 +343,19 @@ def get_history_service_request(asset):
         JOIN `tabMaterial Request Item` mri on mri.name = poi.material_request_item
         WHERE po.docstatus = 1 AND mr.kendaraan = %s AND mr.transaction_date BETWEEN %s AND %s
     """,(asset,start_year,today),as_dict=True)
+
+def update_quotation(doc,method=None):
+    from sth.custom.supplier_quotation import reopen_status_another_sq
+    if doc.workflow_state == "Rejected":
+        pr_sr = getattr(doc.items[0],"material_request",None)
+        sq = getattr(doc.items[0],"supplier_quotation",None)
+
+        if not sq or not pr_sr: return
+
+        sq_doc = frappe.get_doc("Supplier Quotation",sq)
+        sq_doc.cancel()
+
+        reopen_status_another_sq(pr_sr)
+
+
+
