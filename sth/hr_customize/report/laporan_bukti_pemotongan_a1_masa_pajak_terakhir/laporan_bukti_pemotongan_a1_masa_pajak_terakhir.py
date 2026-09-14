@@ -4,10 +4,14 @@
 import frappe
 from frappe import _
 
+from sth.hr_customize.pph21 import get_komponen_pph21_ter_gross_up
+
 def execute(filters=None):
 	conditions = get_condition(filters)
 	columns = get_columns(filters)
 	data = []
+
+	filters["komponen_pph21_gross_up"] = get_komponen_pph21_ter_gross_up()
 
 	query_data = frappe.db.sql("""
 		SELECT
@@ -52,7 +56,7 @@ def execute(filters=None):
 
 				SUM(
 						CASE 
-								WHEN sd.salary_component = 'PPH21 TER Gross Up'
+								WHEN sd.salary_component IN %(komponen_pph21_gross_up)s
 								AND sc.type = 'Earning'
 								THEN sd.amount ELSE 0
 						END

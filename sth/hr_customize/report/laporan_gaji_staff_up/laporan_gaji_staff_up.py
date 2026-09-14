@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 
+from sth.hr_customize.pph21 import get_komponen_pph21_ter_gross_up
+
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
@@ -217,7 +219,8 @@ def get_columns():
 def get_data(filters):
   data = []
   conditions = get_condition(filters)
-  
+  filters["komponen_pph21_gross_up"] = get_komponen_pph21_ter_gross_up()
+
   query = frappe.db.sql("""
 		SELECT 
 				ss.name as slip_name,
@@ -327,7 +330,7 @@ def get_data(filters):
 						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JKM' THEN sd.amount ELSE 0 END) as jkm,
 						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JHT (Perusahaan)' THEN sd.amount ELSE 0 END) as jht_perusahaan,
 						SUM(CASE WHEN sd.salary_component = 'BPJS TK - JP (Perusahaan)' THEN sd.amount ELSE 0 END) as jp_perusahaan,
-						SUM(CASE WHEN sd.salary_component = 'PPH21 TER Gross Up' THEN sd.amount ELSE 0 END) as pph21
+						SUM(CASE WHEN sd.salary_component IN %(komponen_pph21_gross_up)s THEN sd.amount ELSE 0 END) as pph21
 
 				FROM `tabSalary Detail` sd
 				JOIN `tabSalary Slip` ss ON ss.name = sd.parent 

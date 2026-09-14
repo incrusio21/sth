@@ -4,10 +4,14 @@
 import frappe
 from frappe import _
 
+from sth.hr_customize.pph21 import get_komponen_pph21_ter_gross_up
+
 def execute(filters=None):
 	conditions = get_condition(filters)
 	columns = get_columns(filters)
 	data = []
+
+	filters["komponen_pph21_gross_up"] = get_komponen_pph21_ter_gross_up()
  
 	query_data = frappe.db.sql("""
 		SELECT
@@ -48,7 +52,7 @@ def execute(filters=None):
 						parent,
 						SUM(amount) AS penghasilan_kotor
 				FROM `tabSalary Detail`
-				WHERE salary_component IN (
+				WHERE (salary_component IN (
 						'Gaji Pokok',
 						'Upah Panen',
 						'Upah Perawatan',
@@ -73,9 +77,9 @@ def execute(filters=None):
 						'BPJS TK - JKK-RSR',
 						'BPJS TK - JKK-RT',
 						'BPJS TK - JKK-RSD',
-						'BPJS TK - JKK-RS',
-						'PPH21 TER Gross Up'
+						'BPJS TK - JKK-RS'
 				)
+				OR salary_component IN %(komponen_pph21_gross_up)s)
 				GROUP BY parent
 		) sd_total
 				ON sd_total.parent = ss.name
