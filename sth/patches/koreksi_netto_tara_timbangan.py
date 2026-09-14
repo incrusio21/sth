@@ -98,8 +98,9 @@ def _koreksi_satu(nama, baris, dry_run):
 	if netto < 0:
 		return "dilewati", "netto jadi minus ({0}), bruto {1} lebih kecil dari tara {2}".format(netto, bruto, tara)
 
-	ringkas = "bruto {0} -> {1}, tara {2} -> {3}, netto {4} -> {5}, netto_2 {6} -> {7}".format(
-		flt(doc.bruto), bruto, flt(doc.tara), tara, flt(doc.netto), netto, flt(doc.netto_2), netto_2
+	ringkas = "bruto {0} -> {1}, tara {2} -> {3}, netto {4} -> {5}, netto_2 {6} -> {7} | {8}".format(
+		flt(doc.bruto), bruto, flt(doc.tara), tara, flt(doc.netto), netto, flt(doc.netto_2), netto_2,
+		_rencana_turunan(doc),
 	)
 
 	if dry_run:
@@ -135,6 +136,31 @@ def _koreksi_satu(nama, baris, dry_run):
 		_buat_ulang_delivery_note(doc)
 
 	return "berhasil", ringkas
+
+
+def _rencana_turunan(doc):
+	"""Sebutkan dokumen lain yang akan ikut disentuh.
+
+	Yang paling perlu terbaca sebelum dijalankan adalah pembatalan Delivery
+	Note: itu menyentuh stok dan bisa ditolak kalau DN-nya sudah dipakai
+	dokumen lain. Tanpa ini dry run cuma memperlihatkan angka timbangannya,
+	padahal bagian terberatnya ada di turunannya.
+	"""
+	rencana = []
+
+	if doc.receive_type == "TBS Internal":
+		rencana.append("SPB {0}".format(doc.spb or "(kosong)"))
+
+	if doc.type == "Receive" and doc.receive_type != "Lain - Lain":
+		rencana.append("TBS Ledger dibalik & dibuat ulang")
+
+	if doc.type == "Dispatch":
+		dn = [nama for nama in (doc.delivery_note, doc.delivery_note_2) if nama]
+		rencana.append(
+			"DN {0} dibatalkan & dibuat ulang".format(", ".join(dn)) if dn else "DN dibuat"
+		)
+
+	return "turunan: " + "; ".join(rencana) if rencana else "tanpa turunan"
 
 
 def _buat_ulang_delivery_note(doc):
