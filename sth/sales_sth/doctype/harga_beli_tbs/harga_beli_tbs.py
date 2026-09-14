@@ -8,34 +8,123 @@ from frappe.utils import flt, now_datetime, now
 from frappe import _
 
 class HargaBeliTBS(Document):
+
+
+	def delete_removed_price_history(self):
+		if not self.deleted_price_history:
+			return
+
+		try:
+			deleted_rows = json.loads(self.deleted_price_history)
+		except Exception:
+			frappe.throw(_("Data deleted price history tidak valid."))
+
+		for no_transaksi in deleted_rows:
+
+			ledger = frappe.db.get_value(
+				"Item Price Ledger TBS",
+				no_transaksi,
+				["name", "status"],
+				as_dict=True
+			)
+
+			if not ledger:
+				continue
+
+			if ledger.status == "Approved":
+				frappe.throw(
+					_("Transaksi {0} sudah Approved dan tidak boleh dihapus.").format(
+						no_transaksi
+					),
+					title=_("Cannot Delete Approved Price")
+				)
+
+			frappe.delete_doc(
+				"Item Price Ledger TBS",
+				no_transaksi
+			)
+
+		# Jangan simpan daftar delete ke dokumen
+		self.deleted_price_history = ""
+
 	def validate(self):
 		self.validate_approved_rows()
-	
+		self.delete_removed_price_history()
+
 	def validate_approved_rows(self):
-		if not self.is_new():
-			old_doc = self.get_doc_before_save()
-			
-			if old_doc and old_doc.price_change_history:
-				old_rows = {row.name: row for row in old_doc.price_change_history}
-				current_rows = {row.name: row.name for row in self.price_change_history}
-				
-				for old_row_name, old_row in old_rows.items():
-					if old_row.status == "Approved" and old_row_name not in current_rows:
-						frappe.throw(
-							_("Row #{0}: Cannot delete approved price change history").format(old_row.idx),
-							title=_("Cannot Delete Approved Row")
-						)
-				
-				for row in self.price_change_history:
-					if row.name in old_rows:
-						old_row = old_rows[row.name]
-						if old_row.status == "Approved":
-							if (old_row.supplier != row.supplier or 
-								old_row.new_price != row.new_price):
-								frappe.throw(
-									_("Row #{0}: Cannot modify supplier or price for approved rows").format(row.idx),
-									title=_("Cannot Modify Approved Row")
-								)
+		if self.is_new():
+			return
+
+		old_doc = self.get_doc_before_save()
+
+		if not old_doc or not old_doc.price_change_history:
+			return
+
+		old_rows = {
+			row.no_transaksi: row
+			for row in old_doc.price_change_history
+			if row.no_transaksi
+		}
+
+		current_rows = {
+			row.no_transaksi
+			for row in self.price_change_history
+			if row.no_transaksi
+		}
+
+		# Approved tidak boleh dihapus
+		for no_transaksi, old_row in old_rows.items():
+			if old_row.status == "Approved" and no_transaksi not in current_rows:
+				frappe.throw(
+					_("Row #{0}: Cannot delete approved price change history").format(
+						old_row.idx
+					),
+					title=_("Cannot Delete Approved Row")
+				)
+
+		# Approved tidak boleh diubah
+		for row in self.price_change_history:
+			if not row.no_transaksi:
+				continue
+
+			old_row = old_rows.get(row.no_transaksi)
+
+			if not old_row:
+				continue
+
+			if old_row.status == "Approved":
+				if (
+					old_row.supplier != row.supplier
+					or old_row.new_price != row.new_price
+				):
+					frappe.throw(
+						_("Row #{0}: Cannot modify supplier or price for approved rows").format(
+							row.idx
+						),
+						title=_("Cannot Modify Approved Row")
+					)
+
+
+@frappe.whitelist()
+def print_all_price_history_child():
+	rows = frappe.get_all(
+		"Item Price Control History TBS",
+		fields="*",
+		order_by="creation asc"
+	)
+
+	print("\n========== ITEM PRICE CONTROL HISTORY TBS ==========")
+	print(f"TOTAL ROW: {len(rows)}")
+
+	for i, row in enumerate(rows, 1):
+		print(f"\n--- ROW {i} ---")
+
+		for key, value in row.items():
+			print(f"{key}: {value}")
+
+	print("\n====================================================")
+
+	return rows
 
 @frappe.whitelist()
 def item_uom_query(doctype, txt, searchfield, start, page_len, filters):

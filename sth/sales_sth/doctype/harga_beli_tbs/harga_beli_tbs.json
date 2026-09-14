@@ -28,7 +28,8 @@
   "new_rate",
   "remark",
   "section_break_luvt",
-  "price_change_history"
+  "price_change_history",
+  "deleted_price_history"
  ],
  "fields": [
   {
@@ -159,13 +160,19 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "label": "Tanggal"
+  },
+  {
+   "fieldname": "deleted_price_history",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "deleted_price_history"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-25 10:03:11.603165",
+ "modified": "2026-09-14 16:35:26.920885",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Harga Beli TBS",
