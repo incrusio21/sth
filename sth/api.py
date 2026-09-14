@@ -245,6 +245,7 @@ def comparasion_create_sq(pr_sr,items):
 		copy_doc.status = "Draft"
 		copy_doc.items = []
 		copy_doc.workflow_state = "Draft"
+		copy_doc.from_comparasion = 1
 		
 		return copy_doc,warehouse,name
 

@@ -6,7 +6,7 @@ def create_po_draft(doc,method):
     po.insert(ignore_mandatory=True)
 
 def validate_duplicate_supplier(doc,method=None):
-    if name := frappe.db.get_value(doc.doctype,{"supplier":doc.supplier_name,"name":["!=",doc.name],"docstatus":1},"name"):
+    if name := frappe.db.get_value(doc.doctype,{"supplier":doc.supplier_name,"from_comparasion": 0,"name":["!=",doc.name],"docstatus":1},"name"):
         frappe.throw(f"Quotation dengan supplier {doc.supplier} sudah ada: {name}")
 
 @frappe.whitelist()
