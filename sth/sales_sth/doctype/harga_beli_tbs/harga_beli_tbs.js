@@ -43,7 +43,30 @@ frappe.ui.form.on("Harga Beli TBS", {
 			}
 		});
 	},
-	refresh(frm){
+	// refresh(frm){
+	// 	frm.set_query("item_code", function() {
+	// 		return {
+	// 			filters: {
+	// 				tipe_barang: "TBS"
+	// 			}
+	// 		};
+	// 	});
+		
+	// 	// frm.disable_save();
+	// 	frm.events.load_price_history(frm);
+	// 	 frm.set_value('tanggal', frappe.datetime.get_today());
+
+	// 	const grid = frm.fields_dict.price_change_history.grid;
+
+	// 	grid.cannot_add_rows = true;
+	// 	grid.wrapper.find('.grid-remove-rows').hide();
+	// 	grid.wrapper.find('.row-check').hide();
+	// 	grid.wrapper.find('.grid-add-row').hide();
+
+	// 	grid.refresh();
+	// },
+
+	refresh(frm) {
 		frm.set_query("item_code", function() {
 			return {
 				filters: {
@@ -51,19 +74,23 @@ frappe.ui.form.on("Harga Beli TBS", {
 				}
 			};
 		});
-		
-		// frm.disable_save();
+
 		frm.events.load_price_history(frm);
-		 frm.set_value('tanggal', frappe.datetime.get_today());
+		frm.set_value("tanggal", frappe.datetime.get_today());
 
 		const grid = frm.fields_dict.price_change_history.grid;
 
+		// Tidak boleh tambah row manual
 		grid.cannot_add_rows = true;
-		grid.wrapper.find('.grid-remove-rows').hide();
-		grid.wrapper.find('.row-check').hide();
 		grid.wrapper.find('.grid-add-row').hide();
 
+		// Hapus mekanisme delete massal
+		grid.wrapper.find('.grid-remove-rows').hide();
+		grid.wrapper.find('.row-check').hide();
+
 		grid.refresh();
+
+		setup_price_change_history_grid(frm);
 	},
 	item_code(frm) {
 		if (!frm.doc.item_code) {
