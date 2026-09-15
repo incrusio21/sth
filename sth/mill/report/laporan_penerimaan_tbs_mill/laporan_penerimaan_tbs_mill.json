@@ -10,7 +10,7 @@
  "idx": 11,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-11 10:47:39.073333",
+ "modified": "2026-09-15 13:28:00.352466",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Penerimaan TBS Mill",
@@ -52,6 +52,9 @@
   },
   {
    "role": "ASISTEN KEPALA MILL"
+  },
+  {
+   "role": "TECHNICAL SITE MANAGER"
   }
  ],
  "timeout": 0

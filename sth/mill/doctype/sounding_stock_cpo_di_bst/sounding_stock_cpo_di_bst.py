@@ -17,7 +17,9 @@ class SoundingStockCPOdiBST(Document):
 		self.gudang = get_warehouse_bst(self.unit)
 
 	def validate(self):
+		self.validate_minus_value()
 		self.validate_duplicate()
+
 		if not self.gudang:
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
 
@@ -38,6 +40,10 @@ class SoundingStockCPOdiBST(Document):
 	def validate_duplicate(self):
 		if name := frappe.db.get_value(self.doctype,{"tanggal_proses":self.tanggal_proses,"unit":self.unit,"docstatus":["<",2],"name":["!=",self.name]},"name"):
 			frappe.throw(f"Terdapat document dengan tanggal proses yang sama untuk unit {self.unit}: {name}")
+
+	def validate_minus_value(self):
+		if self.produksi_cpo < 0 or self.oer_netto_1 < 0 or self.oer_netto_2 or self.rata_rata_oer_bulanan < 0 or self.total_produksi_bulanan < 0:
+			frappe.throw(f"Produksi CPO/OER tidak boleh minus")
 
 	# def validate_backdate(self):
 	# 	allowed_diff = frappe.db.get_value("Backdate Setting",{"backdate_doc":self.doctype},"max_days") or 1
@@ -74,7 +80,7 @@ class SoundingStockCPOdiBST(Document):
 		self.pengiriman_cpo = self.get_delivery()
 		self.stock_awal = flt(stock_saat_ini)
 		self.set_adjustment()
-		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
+		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses,"pabrik":self.pabrik},"tbs_olah") or 0
 		self.potongan_sortasi = self.get_sortasi()
 
 		self.calculate_totals()
@@ -133,7 +139,10 @@ class SoundingStockCPOdiBST(Document):
 			self.tanggal_proses,
 			termasuk_tanggal_proses=True,
 		)
-		self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
+		if flt(self.stock_awal) > 0:
+			self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
+		else:
+			self.stock_awal = flt(self.stock_awal_sebelum_adjustment) + flt(self.adjustment)
 
 	def calculate_totals(self) :
 		total_stock = self.tonase_sebenarnya + self.tonase_sebenarnya_2

@@ -103,7 +103,7 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
             akta.nomor_sk_kehakiman, akta.tanggal_sk_kehakiman,
             akta.kedudukan, akta.alamat, akta.modal_dasar, 
             akta.modal_di_setor, akta.kegiatan_usaha, akta.bnri,
-            akta.tbnri, akta.keterangan,
+            akta.tbnri, akta.keterangan, akta.tanggal_bnri
         )
         .where(akta.name.isin(list(akta_dict.keys())))
     ).run()
@@ -115,7 +115,7 @@ def get_anggaran_dasar_akta(company=None, anggaran_dasar=None):
             "nomor_sk_kehakiman", "tanggal_sk_kehakiman",
             "kedudukan", "alamat", "modal_dasar",
             "modal_di_setor", "kegiatan_usaha", "bnri",
-            "tbnri", "keterangan"
+            "tbnri", "keterangan", "tanggal"
         ], d[2:], strict=False))
 
     # Sort by tanggal_akta

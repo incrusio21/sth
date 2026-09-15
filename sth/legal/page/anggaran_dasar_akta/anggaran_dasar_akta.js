@@ -252,7 +252,7 @@ sth.legal.AnggaranDasarAkta = class AnggaranDasarAkta {
 						<td>${details.kegiatan_usaha || ''}</td>
 						<td class="text-center">${details.bnri || ''}</td>
 						<td class="text-center">${details.tbnri || ''}</td>
-						<td>${details.tanggal || ''}</td>
+						<td>${details.tanggal ? frappe.datetime.str_to_user(details.tanggal) : ''}</td>
 						<td>${details.keterangan || ''}</td>
 					</tr>
 				`);

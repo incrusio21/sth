@@ -10,7 +10,7 @@
  "idx": 5,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-07-03 13:45:55.603104",
+ "modified": "2026-09-15 13:28:29.799465",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Losess Kernel",
@@ -46,6 +46,9 @@
   },
   {
    "role": "ASISTEN MAINTENANCE"
+  },
+  {
+   "role": "TECHNICAL SITE MANAGER"
   }
  ],
  "timeout": 0

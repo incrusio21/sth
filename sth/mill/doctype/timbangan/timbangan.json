@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-07-17 11:44:02.385788",
+ "creation": "2026-09-14 13:16:07.795717",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -30,6 +30,7 @@
   "dispatch_type",
   "return_type",
   "supplier",
+  "nama_supplier",
   "spb",
   "do_no",
   "no_do_2",
@@ -286,7 +287,8 @@
    "fetch_if_empty": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
-   "label": "Supplier",
+   "hidden": 1,
+   "label": "Kode Supplier",
    "options": "Supplier",
    "read_only": 1
   },
@@ -691,13 +693,21 @@
    "label": "WB Type",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_name",
+   "fetch_if_empty": 1,
+   "fieldname": "nama_supplier",
+   "fieldtype": "Data",
+   "label": "Nama Supplier",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-07 15:34:53.978855",
+ "modified": "2026-09-15 13:39:24.228858",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

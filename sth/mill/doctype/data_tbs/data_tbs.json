@@ -15,8 +15,8 @@
   "total_jam_olah",
   "kapasitas_pabrik",
   "column_break_pykt",
-  "company",
   "pabrik",
+  "company",
   "unit",
   "section_break_xief",
   "column_break_lfzm",
@@ -141,11 +141,13 @@
    "read_only": 1
   },
   {
+   "fetch_from": "pabrik.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_pykt",
@@ -294,7 +296,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-03 16:49:42.685111",
+ "modified": "2026-09-15 11:30:37.323717",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

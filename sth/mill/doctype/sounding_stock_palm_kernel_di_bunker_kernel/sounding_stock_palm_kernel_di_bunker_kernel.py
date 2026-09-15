@@ -25,6 +25,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		# self.ker_netto_2 = self.produksi/(self.tbs_olah - self.sortasi)*100 if self.tbs_olah else 0
 
 	def validate(self):
+		self.validate_minus_value()
 		self.hitung_produksi()
 		set_rata_rata_rendemen_bulanan(self)
 
@@ -54,6 +55,10 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		for row in ste:
 			doc = frappe.get_doc("Stock Entry",row)
 			doc.delete()
+
+	def validate_minus_value(self):
+		if self.produksi < 0 or self.ker_netto_1 < 0 or self.ker_netto_2 or self.rata_rata_ker_bulanan < 0 or self.total_produksi_bulanan < 0:
+			frappe.throw(f"Produksi PK/KER tidak boleh minus")
 
 	def calculate_hasil_titik_sounding(self):
 		result = frappe._dict()

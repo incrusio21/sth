@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-07-20 16:17:27.409911",
+ "modified": "2026-09-15 13:29:24.666818",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Pengiriman Produk",
@@ -67,6 +67,9 @@
   },
   {
    "role": "KERANI PRODUKSI"
+  },
+  {
+   "role": "TECHNICAL SITE MANAGER"
   }
  ],
  "timeout": 0

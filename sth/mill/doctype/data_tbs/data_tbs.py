@@ -71,8 +71,8 @@ class DataTBS(Document):
 				jumlah_restan_tbs_masak as jumlah_lori_masak,
 				jumlah_loading_ramp as lori_estimasi_loading_ramp
 			from `tabMonitoring TBS Olah` mto
-			where mto.docstatus = 1 and tgl = %s
-		""",(self.tanggal_produksi),as_dict=True)
+			where mto.docstatus = 1 and tgl = %s and pabrik = %s
+		""",(self.tanggal_produksi,self.pabrik),as_dict=True)
 
 		# Tanpa Monitoring TBS Olah lorinya dinolkan, bukan dibiarkan memakai
 		# angka Get Data sebelumnya yang tanggalnya sudah lain.

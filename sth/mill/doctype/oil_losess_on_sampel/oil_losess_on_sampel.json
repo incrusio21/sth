@@ -53,15 +53,13 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
+   "label": "Tanggal"
   },
   {
    "default": "Now",
    "fieldname": "jam",
    "fieldtype": "Time",
-   "label": "Jam",
-   "read_only": 1
+   "label": "Jam"
   },
   {
    "fieldname": "company",
@@ -206,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-25 11:23:33.148667",
+ "modified": "2026-09-15 13:38:19.088052",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Oil Losess On Sampel",

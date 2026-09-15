@@ -38,16 +38,14 @@
    "fieldname": "tgl",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
+   "label": "Tanggal"
   },
   {
    "default": "Now",
    "fieldname": "jam",
    "fieldtype": "Time",
    "in_preview": 1,
-   "label": "Jam",
-   "read_only": 1
+   "label": "Jam"
   },
   {
    "fieldname": "shift",
@@ -86,7 +84,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-02 10:15:25.002092",
+ "modified": "2026-09-15 13:07:32.365846",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Monitoring Proses Control",

@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 7,
+ "idx": 8,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-07-03 13:46:57.039012",
+ "modified": "2026-09-15 13:28:55.802640",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Laporan Oil Losess",
@@ -46,6 +46,9 @@
   },
   {
    "role": "ASISTEN MAINTENANCE"
+  },
+  {
+   "role": "TECHNICAL SITE MANAGER"
   }
  ],
  "timeout": 0
