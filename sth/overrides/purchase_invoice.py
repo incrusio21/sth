@@ -41,6 +41,7 @@ from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update
 form_grid_templates = {"items": "templates/form_grid/custom_item_grid.html","non_voucher_match": "templates/form_grid/non_voucher_grid.html"}
 
 from sth.custom import method_ambil_account
+from sth.custom.purchase_receipt import apply_item_overreceipt_allowance
 from sth.buying_sth.custom.uang_muka_po import (
 	advance_uang_muka_po,
 	gl_entries_uang_muka,
@@ -88,6 +89,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				"overflow_type": "billing",
 			}
 		)
+
+	def check_overflow_with_allowance(self, item, args):
+		apply_item_overreceipt_allowance(self, item, args)
+		super().check_overflow_with_allowance(item, args)
 
 	def before_submit(self):
 		pass

@@ -17,6 +17,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.accounts_controller import merge_taxes
 from frappe.model.mapper import get_mapped_doc
 from sth.custom import method_ambil_account
+from sth.custom.purchase_receipt import apply_item_overreceipt_allowance
 
 class SthPurchaseReceipt(PurchaseReceipt):
 
@@ -27,6 +28,10 @@ class SthPurchaseReceipt(PurchaseReceipt):
 	def on_cancel(self):
 		super().on_cancel()
 		make_gl_entries_for_non_stock_items(self, cancel=True)
+
+	def check_overflow_with_allowance(self, item, args):
+		apply_item_overreceipt_allowance(self, item, args)
+		super().check_overflow_with_allowance(item, args)
 
 	def update_valuation_rate_custom(self, reset_outgoing_rate=True):
 		"""

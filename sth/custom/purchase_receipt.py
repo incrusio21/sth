@@ -2,13 +2,49 @@ import frappe
 from frappe import _
 from frappe.utils import today, flt
 
+def get_item_overreceipt_map():
+	"""Peta item -> persen toleransi terima lebih dari Procurement Settings."""
+	try:
+		settings = frappe.get_cached_doc("Procurement Settings")
+	except Exception:
+		settings = frappe.get_single("Procurement Settings")
+
+	return {
+		row.item: flt(row.percent)
+		for row in settings.get("item_overreceipt_procurement_settings", [])
+		if row.item
+	}
+
+
+def get_overreceipt_percent(item_code):
+	"""Persen toleransi item. None kalau item tidak terdaftar di Procurement Settings."""
+	return get_item_overreceipt_map().get(item_code)
+
+
+def apply_item_overreceipt_allowance(doc, item, args):
+	"""Pakai toleransi Procurement Settings pada pengecekan over receipt bawaan ERPNext.
+
+	ERPNext hanya membaca Item.over_delivery_receipt_allowance atau Stock Settings,
+	sehingga tabel Item Overreceipt Procurement Settings tidak pernah dilihat dan
+	dokumen tetap ditolak saat submit. Nilai persen disuntikkan ke cache
+	`item_allowance` yang dibaca `get_allowance_for`.
+	"""
+	if "qty" not in (args.get("target_ref_field") or ""):
+		return
+
+	item_code = item.get("item_code")
+	percent = get_overreceipt_percent(item_code)
+	if not percent:
+		return
+
+	allowance = getattr(doc, "item_allowance", None) or {}
+	allowance.setdefault(item_code, frappe._dict())["qty"] = percent
+	doc.item_allowance = allowance
+
+
 def validate_overreceipt(doc, method):
 	# Ambil settings overreceipt
-	settings = frappe.get_single("Procurement Settings")
-	overreceipt_map = {
-		row.item: row.percent
-		for row in settings.get("item_overreceipt_procurement_settings", [])
-	}
+	overreceipt_map = get_item_overreceipt_map()
 
 	for item in doc.items:
 		item_code = item.item_code
