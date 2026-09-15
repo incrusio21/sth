@@ -15,6 +15,18 @@
   "pabrik",
   "company",
   "unit",
+  "location_section",
+  "latitude",
+  "longitude",
+  "column_break_lokasi",
+  "pabrik_latitude",
+  "pabrik_longitude",
+  "time_stamp_section",
+  "tanggal_scan",
+  "column_break_scan_1",
+  "jam_scan",
+  "column_break_scan_2",
+  "user_scan",
   "informasi_kompartemen_section",
   "tinggi_normal_bunker",
   "jumlah_hasil_sounding",
@@ -164,7 +176,9 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Pabrik",
+   "no_copy": 1,
    "options": "Mill Master",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -381,13 +395,84 @@
    "label": "Adjustment",
    "precision": "0",
    "read_only": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Data",
+   "label": "Latitude",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Data",
+   "label": "Longitude",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_lokasi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pabrik_latitude",
+   "fieldtype": "Data",
+   "label": "Pabrik Latitude",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "pabrik_longitude",
+   "fieldtype": "Data",
+   "label": "Pabrik Longitude",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "time_stamp_section",
+   "fieldtype": "Section Break",
+   "label": "Time Stamp"
+  },
+  {
+   "fieldname": "tanggal_scan",
+   "fieldtype": "Date",
+   "label": "Tanggal Scan",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_scan_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jam_scan",
+   "fieldtype": "Time",
+   "label": "Jam Scan",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_scan_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user_scan",
+   "fieldtype": "Data",
+   "label": "User Scan",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-10 22:42:15.116691",
+ "modified": "2026-09-15 22:49:45.357082",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",

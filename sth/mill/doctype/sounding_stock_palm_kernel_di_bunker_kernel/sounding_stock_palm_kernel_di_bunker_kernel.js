@@ -12,6 +12,58 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
         })
     },
 
+    onload(frm) {
+        if (!frm.is_new()) return
+
+        new frappe.ui.Scanner({
+            dialog: true,
+            multiple: false,
+            on_scan(data) {
+                frm.events.apply_qr_pabrik(frm, data)
+            },
+        })
+
+        frm.trigger('get_location')
+    },
+
+    apply_qr_pabrik(frm, data) {
+        // Isi QR pabrik dibuat Mill Master: { pabrik, unit, latitude, longitude }
+        const text = data && data.result && data.result.text
+        if (!text) return
+
+        let scan_data
+        try {
+            scan_data = JSON.parse(text)
+        } catch (e) {
+            scan_data = null
+        }
+
+        if (!scan_data || !scan_data.pabrik) {
+            frappe.msgprint(__("QR tidak dikenali. Pastikan yang discan adalah QR Pabrik."))
+            return
+        }
+
+        frm.set_value("pabrik", scan_data.pabrik)
+        frm.set_value("pabrik_latitude", scan_data.latitude)
+        frm.set_value("pabrik_longitude", scan_data.longitude)
+
+        frm.set_value("tanggal_scan", frappe.datetime.get_today())
+        frm.set_value("jam_scan", moment().format('HH:mm:ss'))
+        frm.set_value("user_scan", frappe.session.user)
+    },
+
+    get_location(frm) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                frm.set_value("latitude", position.coords.latitude)
+                frm.set_value("longitude", position.coords.longitude)
+            },
+            (err) => {
+                frappe.msgprint(err.message);
+            }
+        );
+    },
+
     refresh(frm) {
         frm.set_df_property("hasil_titik_sounding", "cannot_add_rows", true)
     },

@@ -16,7 +16,13 @@
   "column_break_sdzx",
   "unit",
   "company",
-  "jumlah_hasil_sounding"
+  "jumlah_hasil_sounding",
+  "lokasi_qr_section",
+  "latitude",
+  "longitude",
+  "column_break_qr",
+  "qr_code",
+  "qr_preview"
  ],
  "fields": [
   {
@@ -84,12 +90,45 @@
    "fieldtype": "Select",
    "label": "Jumlah Hasil Sounding",
    "options": "\n1 rata - rata\n2 rata - rata"
+  },
+  {
+   "fieldname": "lokasi_qr_section",
+   "fieldtype": "Section Break",
+   "label": "Lokasi & QR"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude",
+   "precision": "9"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude",
+   "precision": "9"
+  },
+  {
+   "fieldname": "column_break_qr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "QR Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_preview",
+   "fieldtype": "HTML",
+   "label": "QR Preview"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-11 12:43:50.860950",
+ "modified": "2026-09-15 22:45:15.555255",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Master",

@@ -456,6 +456,7 @@
    "fieldname": "stasiun",
    "fieldtype": "Link",
    "label": "Stasiun",
+   "no_copy": 1,
    "options": "Station Master",
    "read_only": 1,
    "reqd": 1
@@ -472,18 +473,21 @@
    "fieldname": "tanggal_scan",
    "fieldtype": "Date",
    "label": "Tanggal Scan",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "jam_scan",
    "fieldtype": "Time",
    "label": "Jam Scan",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "user_scan",
    "fieldtype": "Data",
    "label": "User Scan",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -516,12 +520,14 @@
    "fieldname": "latitude",
    "fieldtype": "Data",
    "label": "Latitude",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "longitude",
    "fieldtype": "Data",
    "label": "Longitude",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -532,19 +538,21 @@
    "fieldname": "stasiun_latitude",
    "fieldtype": "Data",
    "label": "Stasiun Latitude",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "stasiun_longitude",
    "fieldtype": "Data",
    "label": "Stasiun Longitude",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-06 09:57:24.849216",
+ "modified": "2026-09-15 22:49:45.357082",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemeriksaan Mesin Genset",
