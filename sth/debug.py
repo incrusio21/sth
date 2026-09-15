@@ -1,5 +1,13 @@
 import frappe
 from frappe import _
+
+def rename_wh():
+	lis = frappe.db.sql(""" SELECT name FROM `tabWarehouse` WHERE unit LIKE "WMNE%" """)
+	for row in lis:
+		doc = frappe.get_doc("Warehouse", row[0])
+		frappe.rename_doc("Warehouse", doc.name, doc.name.replace('"',''))
+		print(row[0])
+
 def debug():
 	no_doc = "SPB-26767"
 	# frappe.db.sql(""" DELETE FROM `tabPDO NON PDO Table` WHERE parent = "PDO-00070" and idx = 5 """.format())
