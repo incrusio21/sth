@@ -46,6 +46,61 @@ frappe.ui.form.on('Delivery Order', {
             }
         });
 
+		if (!frm.is_new() && (frm.doc.delivery_order_transporter || []).length) {
+			frm.add_custom_button(__('Terbitkan QR Kedaluwarsa'), function() {
+				frm.events.buat_ulang_qr(frm, 0);
+			}, __('QR Transporter'));
+
+			frm.add_custom_button(__('Terbitkan Ulang Semua QR'), function() {
+				frappe.confirm(
+					__('QR lama semua baris langsung mati, termasuk yang sudah dipegang sopir. Lanjutkan?'),
+					function() { frm.events.buat_ulang_qr(frm, 1); }
+				);
+			}, __('QR Transporter'));
+		}
+
+	},
+
+	buat_ulang_qr: function(frm, semua) {
+		frappe.call({
+			method: 'sth.sales_sth.doctype.delivery_order.delivery_order.buat_ulang_qr_transporter',
+			args: { delivery_order: frm.doc.name, semua: semua },
+			freeze: true,
+			freeze_message: __('Menerbitkan QR...')
+		}).then(function(r) {
+			if (!r.message) return;
+
+			frappe.show_alert({
+				message: __('{0} dari {1} baris transporter dapat QR baru.', [r.message.diperbarui, r.message.total]),
+				indicator: r.message.diperbarui ? 'green' : 'orange'
+			}, 5);
+
+			frm.reload_doc();
+		});
+	},
+
+	render_qr_transporter: function(row, wrapper) {
+		if (!row.qr_code) {
+			$(wrapper).html(`<div class="text-muted">${__('Belum ada QR. Simpan Delivery Order atau pakai tombol QR Transporter.')}</div>`);
+			return;
+		}
+
+		const kedaluwarsa = row.qr_berlaku_sampai && frappe.datetime.now_datetime() > row.qr_berlaku_sampai;
+		const batas = row.qr_berlaku_sampai ? frappe.datetime.str_to_user(row.qr_berlaku_sampai) : '-';
+		const catatan = kedaluwarsa
+			? `<div class="text-danger">${__('QR kedaluwarsa {0}', [batas])}</div>`
+			: `<div class="text-muted">${__('Berlaku sampai {0}', [batas])}</div>`;
+
+		$(wrapper).html(`
+			<div style="padding: 8px 0;">
+				<img
+					src="data:image/svg+xml;base64,${row.qr_code}"
+					alt="QR Code"
+					style="width: 140px; height: 140px;${kedaluwarsa ? ' opacity: 0.35;' : ''}"
+				/>
+				${catatan}
+			</div>
+		`);
 	}
 });
 
@@ -161,6 +216,16 @@ function create_delivery_note(frm, transporter_data) {
 }
 
 frappe.ui.form.on('Delivery Order Transporter', {
+    form_render: function(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+        const grid_row = frm.get_field('delivery_order_transporter').grid.grid_rows_by_docname[cdn];
+        const grid_form = grid_row && grid_row.grid_form;
+
+        if (!grid_form || !grid_form.fields_dict.qr_preview) return;
+
+        frm.events.render_qr_transporter(row, grid_form.fields_dict.qr_preview.wrapper);
+    },
+
     transporter: function(frm, cdt, cdn) {
         frm.set_query('driver', 'delivery_order_transporter', function(doc, cdt, cdn) {
             let row = locals[cdt][cdn];

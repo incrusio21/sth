@@ -17,6 +17,7 @@
   "receive_type",
   "dispatch_type",
   "return_type",
+  "scan_qr_do",
   "qr_code_scan",
   "no_pol_tidak_terdaftar",
   "do_no",
@@ -475,13 +476,20 @@
    "fieldtype": "Link",
    "label": "Kode Lokasi POS",
    "options": "Security Location"
+  },
+  {
+   "description": "Scan QR transporter dari Delivery Order untuk mengisi Transaction Type dan DO No.",
+   "fieldname": "scan_qr_do",
+   "fieldtype": "Data",
+   "label": "Scan QR DO",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-03 14:58:35.575152",
+ "modified": "2026-09-16 00:31:30.350896",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

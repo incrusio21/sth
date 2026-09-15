@@ -13,7 +13,14 @@
   "column_break_qxgm",
   "transport_receipt_no",
   "vehicle_no",
-  "transport_receipt_date"
+  "transport_receipt_date",
+  "qr_section",
+  "qr_token",
+  "qr_dibuat_pada",
+  "qr_berlaku_sampai",
+  "column_break_qr",
+  "qr_code",
+  "qr_preview"
  ],
  "fields": [
   {
@@ -71,13 +78,61 @@
   {
    "fieldname": "column_break_qxgm",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qr_section",
+   "fieldtype": "Section Break",
+   "label": "QR Dispatch"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "qr_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "QR Token",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "qr_dibuat_pada",
+   "fieldtype": "Datetime",
+   "label": "QR Dibuat",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "qr_berlaku_sampai",
+   "fieldtype": "Datetime",
+   "label": "QR Berlaku Sampai",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "qr_code",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "QR Code",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_preview",
+   "fieldtype": "HTML",
+   "label": "QR Preview"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-30 12:50:38.863829",
+ "modified": "2026-09-16 00:31:30.350896",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Delivery Order Transporter",

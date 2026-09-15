@@ -19,6 +19,64 @@ function set_series(frm) {
 frappe.ui.form.on("Security Check Point", {
 	refresh(frm) {
 		set_series(frm);
+
+		if (frm.doc.docstatus == 0) {
+			frm.add_custom_button(__('Scan QR DO'), function () {
+				new frappe.ui.Scanner({
+					dialog: true,
+					multiple: false,
+					on_scan(data) {
+						const teks = data && data.result && data.result.text
+						if (teks) {
+							frm.events.proses_qr_do(frm, teks)
+						}
+					},
+				})
+			})
+		}
+	},
+
+	scan_qr_do(frm) {
+		// Scanner kabel mengetik isinya lalu Enter; kolomnya langsung dikosongkan
+		// supaya scan berikutnya tetap memicu perubahan nilai.
+		const teks = frm.doc.scan_qr_do
+		if (!teks) return
+
+		frm.set_value('scan_qr_do', '')
+		frm.events.proses_qr_do(frm, teks)
+	},
+
+	proses_qr_do(frm, teks) {
+		frappe.call({
+			method: 'sth.sales_sth.doctype.delivery_order.delivery_order.resolve_qr_transporter',
+			args: { qr_text: teks },
+		}).then((r) => {
+			if (!r.message) return
+
+			const data = r.message
+
+			// Urutannya penting: transaction_type mereset ketiga jenis transaksi dan
+			// dispatch_type mengosongkan do_no, jadi DO selalu diisi paling akhir.
+			frm.set_value('transaction_type', 'Dispatch')
+				.then(() => frm.set_value('dispatch_type', 'Product'))
+				.then(() => {
+					if (!data.driver) return
+					return frm.set_value('qr_code_scan', data.driver)
+				})
+				.then(() => frm.set_value('do_no', data.delivery_order))
+				.then(() => {
+					// Baris tanpa Driver terdaftar tetap membawa no polisinya supaya
+					// petugas pos tidak mengetik ulang.
+					if (data.driver || !data.vehicle_no) return
+					return frm.set_value('license_plate', data.vehicle_no)
+				})
+				.then(() => {
+					frappe.show_alert({
+						message: __('DO {0} - {1}', [data.delivery_order, data.driver_name || data.vehicle_no || '']),
+						indicator: 'green'
+					}, 5)
+				})
+		})
 	},
 	setup(frm) {
 		frm.set_query("divisi", sth.queries.divisi)
