@@ -161,6 +161,59 @@ function ambil_detail_po(timbangan){
 }
 
 function tambah_item_timbangan(frm, timbangan, detail){
+	let terpakai = baris_barang_sama(frm, timbangan, detail);
+
+	let janji = terpakai
+		? isi_baris_terpakai(frm, terpakai, timbangan, detail)
+		: isi_baris_baru(frm, timbangan, detail);
+
+	janji.then(function() {
+		buang_baris_item_kosong(frm);
+		frm.refresh_field('items');
+
+		lapor_item_timbangan(frm, timbangan, detail, terpakai);
+	});
+}
+
+// Baris yang sudah memuat barang yang sama — biasanya hasil Get Items From
+// Purchase Order, yang membawa PR/SR dan PO Qty-nya sendiri. Barisnya dipakai
+// ulang, bukan ditambah lagi: yang dicatat Purchase Receipt itu satu penerimaan,
+// dan qty-nya yang benar adalah hasil timbang.
+//
+// Baris yang sudah menempel ke timbangan lain dilewati. Dua truk untuk satu
+// baris PO tetap butuh dua baris, karena satu baris cuma memuat satu Timbangan.
+function baris_barang_sama(frm, timbangan, detail){
+	let baris_po = detail.baris && detail.baris.name;
+
+	return (frm.doc.items || []).find(row => !row.timbangan && (baris_po
+		? row.purchase_order_item == baris_po
+		: row.item_code == timbangan.kode_barang));
+}
+
+function isi_baris_terpakai(frm, row, timbangan, detail){
+	// Barisnya sudah dipetakan dari PO-nya sendiri, jadi item_code tidak dipicu
+	// ulang: itu akan menimpa spesifikasi, merk, dan country dengan isi master
+	// Item, dan menghapus PR/SR yang dibawa pemetaan. Yang disamakan cuma baris
+	// yang belum tertaut ke PO sama sekali.
+	let siap = (detail.baris && !row.purchase_order_item)
+		? samakan_dengan_po(row, detail)
+		: Promise.resolve();
+
+	return siap
+		.then(() => frappe.model.set_value(row.doctype, row.name, 'timbangan', timbangan.name))
+		.then(() => frappe.model.set_value(row.doctype, row.name, 'qty', qty_timbangan(timbangan)))
+		.then(function() {
+			// Harga dari PO dibiarkan apa adanya. Yang dipasang cuma kalau
+			// barisnya memang lahir tanpa harga — lihat catatan rate di
+			// isi_baris_baru.
+			if (!detail.baris || flt(row.rate)) return;
+
+			return frappe.after_ajax(() =>
+				frappe.model.set_value(row.doctype, row.name, 'rate', detail.baris.rate));
+		});
+}
+
+function isi_baris_baru(frm, timbangan, detail){
 	// Baris kosong bawaan form baru dipakai ulang supaya item pertama tidak
 	// jatuh di baris kedua.
 	let row = baris_item_kosong(frm) || frm.add_child('items');
@@ -168,12 +221,11 @@ function tambah_item_timbangan(frm, timbangan, detail){
 
 	// Nama barang, UOM, dan gudang diisi handler item_code standar ERPNext,
 	// angka dari PO dan timbangan baru ditimpa setelah itu selesai.
-	frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
+	return frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
 		frappe.model.set_value(row.doctype, row.name, 'timbangan', timbangan.name);
 
 		return samakan_dengan_po(row, detail).then(function() {
-			return frappe.model.set_value(row.doctype, row.name, 'qty',
-				flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
+			return frappe.model.set_value(row.doctype, row.name, 'qty', qty_timbangan(timbangan));
 		}).then(function() {
 			if (!detail.baris) return;
 
@@ -187,12 +239,11 @@ function tambah_item_timbangan(frm, timbangan, detail){
 			return frappe.after_ajax(() =>
 				frappe.model.set_value(row.doctype, row.name, 'rate', detail.baris.rate));
 		});
-	}).then(function() {
-		buang_baris_item_kosong(frm);
-		frm.refresh_field('items');
-
-		lapor_item_timbangan(frm, timbangan, detail);
 	});
+}
+
+function qty_timbangan(timbangan){
+	return flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100;
 }
 
 // UOM harus sama persis dengan baris PO-nya, begitu juga project: ERPNext
@@ -225,8 +276,11 @@ function samakan_dengan_po(row, detail){
 		.then(() => frappe.model.set_value(row.doctype, row.name, 'conversion_factor', baris.conversion_factor));
 }
 
-function lapor_item_timbangan(frm, timbangan, detail){
-	let pesan = [__('Item added from Timbangan {0}', [timbangan.name])]
+function lapor_item_timbangan(frm, timbangan, detail, terpakai){
+	let pesan = [terpakai
+		? __('Baris {0} dipakai ulang untuk Timbangan {1}, qty-nya diisi dari hasil timbang.',
+			[terpakai.idx, timbangan.name])
+		: __('Item added from Timbangan {0}', [timbangan.name])]
 
 	if (timbangan.purchase_order && !detail.baris) {
 		pesan.push(__('{0} tidak punya baris untuk {1}, jadi barisnya tidak ditautkan ke PO.',
