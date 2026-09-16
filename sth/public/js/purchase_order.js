@@ -767,7 +767,20 @@ frappe.ui.form.on("Purchase Order", {
 				for (const row of res) {
 					frappe.refererence.__ref_tax[row.type] = row
 				}
-				sync_to_taxes(frm)
+
+				// Tabel taxes cuma dibangun ulang untuk dokumen yang belum
+				// tersimpan. sync_to_taxes memanggil frm.add_child dan
+				// frappe.model.set_value, dan keduanya menandai form kotor —
+				// frappe.model.add_child memang memanggil cur_frm.dirty()
+				// sendiri. Akibatnya PO draft yang cuma dibuka langsung jadi
+				// "Not Saved" padahal tidak ada yang disentuh.
+				//
+				// Yang tersimpan tidak perlu dibangun ulang: taxes-nya sudah ada
+				// di dokumen, dan tiap perubahan PPN atau PPh tetap memanggil
+				// sync_to_taxes lewat handler VAT Detail.
+				if (frm.is_new()) {
+					sync_to_taxes(frm)
+				}
 			})
 		}
 	},
