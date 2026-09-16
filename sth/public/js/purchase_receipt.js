@@ -135,6 +135,13 @@ function isi_dari_timbangan(frm, timbangan){
 			? frm.set_value('supplier', supplier)
 			: Promise.resolve();
 
+		// PO di header — field sth, bukan bawaan ERPNext — cuma diisi kalau masih
+		// kosong. Satu Purchase Receipt boleh memuat baris dari beberapa PO,
+		// sementara fieldnya cuma memuat satu; yang duluan yang dipegang.
+		if (detail.purchase_order && !frm.doc.purchase_order) {
+			siap = siap.then(() => frm.set_value('purchase_order', detail.purchase_order));
+		}
+
 		siap.then(() => tambah_item_timbangan(frm, timbangan, detail));
 	});
 }
@@ -167,47 +174,68 @@ function tambah_item_timbangan(frm, timbangan, detail){
 		return samakan_dengan_po(row, detail).then(function() {
 			return frappe.model.set_value(row.doctype, row.name, 'qty',
 				flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
+		}).then(function() {
+			if (!detail.baris) return;
+
+			// Rate paling belakang, dan baru sesudah semua panggilan server reda.
+			// Handler uom ERPNext memanggil apply_price_list di callback-nya, dan
+			// jawaban panggilan itu menulis ulang rate dari price list — 0 untuk
+			// barang yang tidak punya Item Price, dan barang PO seperti pupuk
+			// atau solar memang jarang punya. Panggilannya tidak ikut promise
+			// set_value, jadi rate yang dipasang lebih awal hilang belakangan
+			// tanpa jejak; itu yang bikin baris ini lahir dengan rate 0.
+			return frappe.after_ajax(() =>
+				frappe.model.set_value(row.doctype, row.name, 'rate', detail.baris.rate));
 		});
 	}).then(function() {
 		buang_baris_item_kosong(frm);
 		frm.refresh_field('items');
 
-		lapor_item_timbangan(timbangan, detail);
+		lapor_item_timbangan(frm, timbangan, detail);
 	});
 }
 
 // UOM harus sama persis dengan baris PO-nya, begitu juga project: ERPNext
 // membandingkan keduanya — beserta item_code — waktu Purchase Receipt
-// divalidasi terhadap PO, dan menolak dokumennya kalau berbeda. Rate ikut
-// disamakan karena Buying Settings bisa menuntut harga yang sama sepanjang
-// siklus pembelian.
+// divalidasi terhadap PO, dan menolak dokumennya kalau berbeda.
+//
+// Spesifikasi, merk, dan country diambil dari PO, bukan dari default Item:
+// itulah yang disepakati dengan supplier, dan handler item_code baru saja
+// menimpanya dengan isi master Item.
 function samakan_dengan_po(row, detail){
 	if (!detail.baris) return Promise.resolve();
 
 	let baris = detail.baris;
 	let nilai = {
 		purchase_order: detail.purchase_order,
-		purchase_order_item: baris.name
+		purchase_order_item: baris.name,
+		po_qty: baris.qty
 	};
 
 	if (baris.warehouse) nilai.warehouse = baris.warehouse;
 	if (baris.project) nilai.project = baris.project;
+	if (baris.description) nilai.description = baris.description;
+	if (baris.custom_merk) nilai.custom_merk = baris.custom_merk;
+	if (baris.custom_country) nilai.custom_country = baris.custom_country;
 
 	// Berurutan, bukan sekaligus: handler uom mengisi ulang conversion factor
-	// dari tabel konversi item, dan conversion factor menghitung ulang rate.
-	// Yang ditulis belakangan yang bertahan.
+	// dari tabel konversi item. Yang ditulis belakangan yang bertahan.
 	return frappe.model.set_value(row.doctype, row.name, nilai)
 		.then(() => frappe.model.set_value(row.doctype, row.name, 'uom', baris.uom))
-		.then(() => frappe.model.set_value(row.doctype, row.name, 'conversion_factor', baris.conversion_factor))
-		.then(() => frappe.model.set_value(row.doctype, row.name, 'rate', baris.rate));
+		.then(() => frappe.model.set_value(row.doctype, row.name, 'conversion_factor', baris.conversion_factor));
 }
 
-function lapor_item_timbangan(timbangan, detail){
+function lapor_item_timbangan(frm, timbangan, detail){
 	let pesan = [__('Item added from Timbangan {0}', [timbangan.name])]
 
 	if (timbangan.purchase_order && !detail.baris) {
 		pesan.push(__('{0} tidak punya baris untuk {1}, jadi barisnya tidak ditautkan ke PO.',
 			[timbangan.purchase_order, timbangan.kode_barang]))
+	}
+
+	if (detail.purchase_order && frm.doc.purchase_order && frm.doc.purchase_order != detail.purchase_order) {
+		pesan.push(__('PO di header tetap {0}; barisnya sendiri menunjuk {1}.',
+			[frm.doc.purchase_order, detail.purchase_order]))
 	}
 
 	// Netto timbangan selalu kilogram, sementara baris PO boleh memakai UOM

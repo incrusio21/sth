@@ -669,6 +669,13 @@ def baris_po_untuk_timbangan(timbangan):
 		"project": row.project,
 		"qty": flt(row.qty),
 		"received_qty": flt(row.received_qty),
+		# Spesifikasi, merk, dan country yang dipesan bisa berbeda dari default
+		# Item — itulah yang disepakati dengan supplier, jadi yang diterima harus
+		# menyebut hal yang sama. row.get supaya site yang tidak memasang custom
+		# field-nya tidak ikut pecah.
+		"description": row.description,
+		"custom_merk": row.get("custom_merk"),
+		"custom_country": row.get("custom_country"),
 	}
 
 	return hasil
