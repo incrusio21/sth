@@ -87,28 +87,7 @@ function make_timbangan_button(frm){
 								// }
 								
 								// Add item
-								if (!timbangan.kode_barang) {
-									frappe.msgprint(__('Timbangan {0} belum punya Kode Barang.', [timbangan.name]));
-									return;
-								}
-
-								// Baris kosong bawaan form baru dipakai ulang supaya item
-								// pertama tidak jatuh di baris kedua.
-								let row = baris_item_kosong(frm) || frm.add_child('items');
-								row.item_code = timbangan.kode_barang;
-
-								// Nama barang, UOM, dan gudang diisi handler item_code
-								// standar ERPNext, qty baru ditimpa setelah itu selesai.
-								frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
-									frappe.model.set_value(row.doctype, row.name, 'timbangan', timbangan.name);
-									frappe.model.set_value(row.doctype, row.name, 'qty',
-										flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
-
-									buang_baris_item_kosong(frm);
-									frm.refresh_field('items');
-
-									frappe.msgprint(__('Item added from Timbangan {0}', [timbangan.name]));
-								});
+								isi_dari_timbangan(frm, timbangan);
 							}
 						}
 					});
@@ -132,4 +111,61 @@ function buang_baris_item_kosong(frm){
 
 	frm.doc.items = terisi;
 	terisi.forEach((row, i) => row.idx = i + 1);
+}
+
+function isi_dari_timbangan(frm, timbangan){
+	if (!timbangan.kode_barang) {
+		frappe.msgprint(__('Timbangan {0} belum punya Kode Barang.', [timbangan.name]));
+		return;
+	}
+
+	ambil_supplier_timbangan(timbangan).then((supplier) => {
+		if (supplier && frm.doc.supplier && frm.doc.supplier != supplier) {
+			frappe.msgprint(__('Timbangan {0} memasok dari {1}, sedangkan Purchase Receipt ini untuk {2}. Barangnya tidak ditambahkan.',
+				[timbangan.name, supplier, frm.doc.supplier]));
+			return;
+		}
+
+		// Suppliernya dipasang lebih dulu, baru barangnya: harga, price list, dan
+		// termin baris item diambil handler item_code menurut supplier yang
+		// sedang terpasang di form.
+		let siap = (supplier && !frm.doc.supplier)
+			? frm.set_value('supplier', supplier)
+			: Promise.resolve();
+
+		siap.then(() => tambah_item_timbangan(frm, timbangan));
+	});
+}
+
+// Supplier Receive "Lain - Lain" tidak datang dari QR supir seperti TBS
+// Eksternal; yang mengikat siapa pemasoknya cuma PO-nya. Dibaca dari PO-nya
+// langsung, bukan dari field supplier di Timbangan, supaya dokumen lama dan yang
+// masuk lewat API — yang fieldnya bisa kosong — tetap kebagian.
+function ambil_supplier_timbangan(timbangan){
+	if (!timbangan.purchase_order) {
+		return Promise.resolve(timbangan.supplier);
+	}
+
+	return frappe.db.get_value('Purchase Order', timbangan.purchase_order, 'supplier')
+		.then((r) => (r.message && r.message.supplier) || timbangan.supplier);
+}
+
+function tambah_item_timbangan(frm, timbangan){
+	// Baris kosong bawaan form baru dipakai ulang supaya item pertama tidak
+	// jatuh di baris kedua.
+	let row = baris_item_kosong(frm) || frm.add_child('items');
+	row.item_code = timbangan.kode_barang;
+
+	// Nama barang, UOM, dan gudang diisi handler item_code standar ERPNext, qty
+	// baru ditimpa setelah itu selesai.
+	frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
+		frappe.model.set_value(row.doctype, row.name, 'timbangan', timbangan.name);
+		frappe.model.set_value(row.doctype, row.name, 'qty',
+			flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
+
+		buang_baris_item_kosong(frm);
+		frm.refresh_field('items');
+
+		frappe.msgprint(__('Item added from Timbangan {0}', [timbangan.name]));
+	});
 }
