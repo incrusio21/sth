@@ -330,7 +330,6 @@
    "fieldname": "do_no",
    "fieldtype": "Link",
    "label": "Delivery Order No",
-   "mandatory_depends_on": "eval:doc.receive_type == \"Lain - Lain\"",
    "options": "Delivery Order"
   },
   {
@@ -707,7 +706,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-15 13:39:24.228858",
+ "modified": "2026-09-16 10:45:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
