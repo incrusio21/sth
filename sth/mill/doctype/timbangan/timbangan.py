@@ -42,6 +42,7 @@ class Timbangan(Document):
 		self.map_api_ticket_number()
 		self.set_data_dari_po()
 		self.validate_qty_do()
+		self.hitung_netto()
 
 		if self.do_no and not self.storage:
 			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
@@ -90,6 +91,49 @@ class Timbangan(Document):
 	def make_dn(self):
 		if self.type == "Dispatch":
 			self.create_delivery_notes()
+
+	def hitung_netto(self):
+		"""Isi netto dan netto_2 dari bruto dan tara.
+
+		Kembaran calculate_weight di timbangan.js. Selama ini rumusnya cuma ada
+		di form, jadi dokumen yang masuk lewat API atau import tersimpan dengan
+		netto apa adanya — nol kalau pengirimnya tidak ikut mengisi — dan angka
+		itulah yang dibaca Data TBS, SPB, sampai stok.
+
+		Baru dihitung kalau bruto dan tara dua-duanya terisi. Truk ditimbang dua
+		kali, dan di antara keduanya salah satu masih nol; menghitung netto di
+		saat itu cuma menghasilkan berat truk penuh yang terlihat seperti muatan
+		— persis yang terjadi pada timbangan yang taranya tidak pernah diambil.
+		"""
+		if not (flt(self.bruto) and flt(self.tara)):
+			self.netto = 0
+			self.netto_2 = 0
+			return
+
+		self.netto = flt(self.bruto) - flt(self.tara)
+		self.netto_2 = self.netto - (self.netto * flt(self.potongan_sortasi) / 100)
+
+	def before_submit(self):
+		self.validate_berat()
+
+	def validate_berat(self):
+		"""Bruto dan tara dua-duanya harus sudah ditimbang sebelum disubmit.
+
+		Netto lahir dari selisih keduanya, dan netto itu yang mengalir ke Data
+		TBS, SPB, Purchase Receipt, dan stok. Salah satu yang masih nol membuat
+		seluruh rantai itu memakai angka yang terlalu besar, dan membetulkannya
+		belakangan jauh lebih mahal daripada berhenti di sini.
+		"""
+		kosong = [nama for nilai, nama in ((self.bruto, "Bruto"), (self.tara, "Tara")) if not flt(nilai)]
+
+		if not kosong:
+			return
+
+		frappe.throw(
+			_("{0} masih nol. Timbangan tidak bisa disubmit sebelum keduanya ditimbang.").format(
+				frappe.bold(" dan ".join(kosong))
+			)
+		)
 
 	def on_submit(self):
 		if self.type == "Receive" and self.receive_type != "Lain - Lain":

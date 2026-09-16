@@ -245,6 +245,16 @@ frappe.ui.form.on("Timbangan", {
 	},
 
 	calculate_weight(frm) {
+		// Selama salah satunya belum ditimbang, nettonya dibiarkan nol. Dulu
+		// tara yang masih kosong membuat netto sama dengan bruto — berat truk
+		// penuh yang terlihat seperti muatan — dan angka itu ikut tersimpan
+		// kalau dokumennya telanjur disubmit.
+		if (!frm.doc.bruto || !frm.doc.tara) {
+			frm.set_value("netto", 0)
+			frm.set_value("netto_2", 0)
+			return
+		}
+
 		frm.set_value("netto", frm.doc.bruto - frm.doc.tara)
 		frm.set_value("netto_2", frm.doc.bruto - frm.doc.tara - ((frm.doc.bruto - frm.doc.tara) * frm.doc.potongan_sortasi / 100))
 	},
