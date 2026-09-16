@@ -7,9 +7,15 @@ import frappe
 def validate_create_qr(doc,method):
 	generate_qr_for_doc(doc, 1)
 
-def get_qr_svg(data):
-	"""Get SVG code to display Qrcode for OTP."""
-	url = qrcreate(data)
+def get_qr_svg(data, error="H"):
+	"""Get SVG code to display Qrcode for OTP.
+
+	`error` menentukan tingkat koreksi kesalahan. Bawaannya "H" - paling tahan
+	kotor tapi paling boros, jadi QR yang isinya panjang jadi rapat dan susah
+	dibaca kamera murah. Pemanggil yang isinya panjang tapi kertasnya bersih
+	boleh menurunkannya ke "M" supaya jumlah kotaknya tidak bertambah.
+	"""
+	url = qrcreate(data, error=error)
 	svg = ""
 	stream = BytesIO()
 	try:

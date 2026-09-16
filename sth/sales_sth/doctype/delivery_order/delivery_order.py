@@ -15,6 +15,11 @@ import json
 # bisa memakainya lagi besok tanpa diterbitkan ulang oleh petugas DO.
 QR_BERLAKU_JAM = 12
 
+# Keterangan barang di dalam QR sengaja dibatasi: QR yang terlalu padat jadi
+# susah dibaca kamera di pos, sementara isinya cuma keterangan.
+BARANG_QR_MAKS_BARIS = 3
+BARANG_QR_PANJANG_NAMA = 30
+
 
 class DeliveryOrder(DeliveryNote):
 	def validate(self):
@@ -27,9 +32,10 @@ class DeliveryOrder(DeliveryNote):
 		QR yang masih berlaku sengaja tidak diganti: kertasnya sudah dibawa sopir,
 		dan menyimpan ulang DO tidak boleh membatalkan QR yang sedang dipakai.
 		"""
+		keterangan = ringkas_barang_do(self.get("items"))
 		for row in self.get("delivery_order_transporter") or []:
 			if not qr_masih_berlaku(row):
-				terbitkan_qr_baris(row)
+				terbitkan_qr_baris(row, keterangan)
 
 	def on_submit(self):
 		update_per_delivery_ordered_on_submit_cancel(self, "on_submit")
@@ -157,19 +163,53 @@ def qr_masih_berlaku(row):
 	return get_datetime(row.get("qr_berlaku_sampai")) > now_datetime()
 
 
-def terbitkan_qr_baris(row):
+def ringkas_barang_do(items):
+	"""Ringkasan barang DO untuk ditulis di QR sebagai keterangan.
+
+	Cuma keterangan: yang menentukan barang di Security Check Point tetap baris
+	item DO-nya sendiri, bukan tulisan ini. Karena itu isinya boleh dipangkas -
+	dan memang dipangkas, karena tiap huruf tambahan membuat QR makin rapat dan
+	makin susah dibaca kamera murah di pos yang remang.
+	"""
+	ringkas = []
+	for item in items or []:
+		nama = (item.get("item_name") or item.get("item_code") or "").strip()
+		if not nama:
+			continue
+
+		nama = nama[:BARANG_QR_PANJANG_NAMA]
+		qty = flt(item.get("qty"))
+		uom = item.get("uom") or item.get("stock_uom") or ""
+		ringkas.append(" ".join(bagian for bagian in [nama, f"{qty:g}", uom] if bagian))
+
+		if len(ringkas) >= BARANG_QR_MAKS_BARIS:
+			break
+
+	return ringkas
+
+
+def terbitkan_qr_baris(row, keterangan_barang=None):
 	"""Bikin token baru untuk satu baris transporter beserta gambar QR-nya.
 
-	Yang masuk ke dalam QR cuma nama DO dan token acak. Masa berlakunya tidak
-	ikut ditulis di sana supaya tidak ada yang bisa memperpanjang sendiri dengan
-	mencetak QR buatan tangan - pos satpam selalu membacanya dari baris ini.
+	Yang mengikat cuma nama DO dan token acak; barangnya ikut ditulis sekadar
+	keterangan supaya QR yang discan pakai aplikasi biasa masih memberi tahu
+	muatannya. Masa berlakunya tetap tidak ikut ditulis di sana supaya tidak ada
+	yang bisa memperpanjang sendiri dengan mencetak QR buatan tangan - pos satpam
+	selalu membacanya dari baris ini.
 	"""
 	dibuat = now_datetime()
 
-	row.qr_token = frappe.generate_hash(length=24)
+	isi = {"delivery_order": row.parent, "token": frappe.generate_hash(length=24)}
+	if keterangan_barang:
+		isi["barang"] = keterangan_barang
+
+	row.qr_token = isi["token"]
 	row.qr_dibuat_pada = dibuat
 	row.qr_berlaku_sampai = add_to_date(dibuat, hours=QR_BERLAKU_JAM)
-	row.qr_code = get_qr_svg(json.dumps({"delivery_order": row.parent, "token": row.qr_token}))
+	# Koreksi kesalahan diturunkan ke "M" supaya keterangan barang tidak menambah
+	# jumlah kotak QR: dengan "H" bawaan, QR dua barang jadi 69x69 kotak dan di
+	# cetakan 190px tiap kotak tinggal 2,7px - terlalu rapat untuk kamera pos.
+	row.qr_code = get_qr_svg(json.dumps(isi), error="M")
 
 
 @frappe.whitelist()
@@ -184,12 +224,13 @@ def buat_ulang_qr_transporter(delivery_order, semua=0):
 	doc = frappe.get_doc("Delivery Order", delivery_order)
 	doc.check_permission("write")
 
+	keterangan = ringkas_barang_do(doc.get("items"))
 	diperbarui = 0
 	for row in doc.get("delivery_order_transporter") or []:
 		if not cint(semua) and qr_masih_berlaku(row):
 			continue
 
-		terbitkan_qr_baris(row)
+		terbitkan_qr_baris(row, keterangan)
 		frappe.db.set_value(
 			"Delivery Order Transporter",
 			row.name,
@@ -260,6 +301,14 @@ def resolve_qr_transporter(qr_text):
 		"transporter": baris.transporter,
 		"transporter_name": baris.transporter_name,
 		"qr_berlaku_sampai": baris.qr_berlaku_sampai,
+		# Keterangan saja, dan dibaca ulang dari DO - bukan dari tulisan di QR,
+		# yang bisa saja dicetak sebelum baris itemnya terakhir diubah.
+		"barang": frappe.get_all(
+			"Delivery Order Item",
+			filters={"parent": baris.parent},
+			fields=["item_code", "item_name", "qty", "uom"],
+			order_by="idx",
+		),
 	}
 
 

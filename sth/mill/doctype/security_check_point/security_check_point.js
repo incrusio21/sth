@@ -71,13 +71,32 @@ frappe.ui.form.on("Security Check Point", {
 					return frm.set_value('license_plate', data.vehicle_no)
 				})
 				.then(() => {
-					frappe.show_alert({
-						message: __('DO {0} - {1}', [data.delivery_order, data.driver_name || data.vehicle_no || '']),
-						indicator: 'green'
-					}, 5)
+					frm.events.tampilkan_keterangan_do(frm, data)
 				})
 		})
 	},
+
+	tampilkan_keterangan_do(frm, data) {
+		// Muatannya cuma keterangan buat petugas pos mencocokkan isi bak; yang
+		// dipakai transaksi tetap items_do yang diisi handler do_no.
+		const baris = [
+			__('DO {0}', [data.delivery_order]),
+			data.driver_name || data.vehicle_no || '',
+		].filter((teks) => teks)
+
+		const muatan = (data.barang || []).map((row) => {
+			return [row.item_name || row.item_code, format_number(row.qty), row.uom || '']
+				.filter((bagian) => bagian)
+				.join(' ')
+		})
+
+		if (muatan.length) {
+			baris.push(__('Muatan') + ': ' + muatan.join(', '))
+		}
+
+		frappe.show_alert({ message: baris.join('<br>'), indicator: 'green' }, 10)
+	},
+
 	setup(frm) {
 		frm.set_query("divisi", sth.queries.divisi)
 		frm.set_query("unit", (doc) => {
