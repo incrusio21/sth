@@ -119,7 +119,9 @@ function isi_dari_timbangan(frm, timbangan){
 		return;
 	}
 
-	ambil_supplier_timbangan(timbangan).then((supplier) => {
+	ambil_detail_po(timbangan).then((detail) => {
+		let supplier = detail.supplier || timbangan.supplier;
+
 		if (supplier && frm.doc.supplier && frm.doc.supplier != supplier) {
 			frappe.msgprint(__('Timbangan {0} memasok dari {1}, sedangkan Purchase Receipt ini untuk {2}. Barangnya tidak ditambahkan.',
 				[timbangan.name, supplier, frm.doc.supplier]));
@@ -133,39 +135,92 @@ function isi_dari_timbangan(frm, timbangan){
 			? frm.set_value('supplier', supplier)
 			: Promise.resolve();
 
-		siap.then(() => tambah_item_timbangan(frm, timbangan));
+		siap.then(() => tambah_item_timbangan(frm, timbangan, detail));
 	});
 }
 
 // Supplier Receive "Lain - Lain" tidak datang dari QR supir seperti TBS
-// Eksternal; yang mengikat siapa pemasoknya cuma PO-nya. Dibaca dari PO-nya
-// langsung, bukan dari field supplier di Timbangan, supaya dokumen lama dan yang
-// masuk lewat API — yang fieldnya bisa kosong — tetap kebagian.
-function ambil_supplier_timbangan(timbangan){
+// Eksternal; yang mengikat siapa pemasoknya cuma PO-nya. Baris PO-nya ikut
+// diambil sekalian, dari PO-nya langsung dan bukan dari field di Timbangan,
+// supaya dokumen lama dan yang masuk lewat API — yang fieldnya bisa kosong —
+// tetap kebagian.
+function ambil_detail_po(timbangan){
 	if (!timbangan.purchase_order) {
-		return Promise.resolve(timbangan.supplier);
+		return Promise.resolve({});
 	}
 
-	return frappe.db.get_value('Purchase Order', timbangan.purchase_order, 'supplier')
-		.then((r) => (r.message && r.message.supplier) || timbangan.supplier);
+	return frappe.xcall('sth.mill.doctype.timbangan.timbangan.baris_po_untuk_timbangan',
+		{ timbangan: timbangan.name }).then((detail) => detail || {});
 }
 
-function tambah_item_timbangan(frm, timbangan){
+function tambah_item_timbangan(frm, timbangan, detail){
 	// Baris kosong bawaan form baru dipakai ulang supaya item pertama tidak
 	// jatuh di baris kedua.
 	let row = baris_item_kosong(frm) || frm.add_child('items');
 	row.item_code = timbangan.kode_barang;
 
-	// Nama barang, UOM, dan gudang diisi handler item_code standar ERPNext, qty
-	// baru ditimpa setelah itu selesai.
+	// Nama barang, UOM, dan gudang diisi handler item_code standar ERPNext,
+	// angka dari PO dan timbangan baru ditimpa setelah itu selesai.
 	frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
 		frappe.model.set_value(row.doctype, row.name, 'timbangan', timbangan.name);
-		frappe.model.set_value(row.doctype, row.name, 'qty',
-			flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
 
+		return samakan_dengan_po(row, detail).then(function() {
+			return frappe.model.set_value(row.doctype, row.name, 'qty',
+				flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
+		});
+	}).then(function() {
 		buang_baris_item_kosong(frm);
 		frm.refresh_field('items');
 
-		frappe.msgprint(__('Item added from Timbangan {0}', [timbangan.name]));
+		lapor_item_timbangan(timbangan, detail);
 	});
+}
+
+// UOM harus sama persis dengan baris PO-nya, begitu juga project: ERPNext
+// membandingkan keduanya — beserta item_code — waktu Purchase Receipt
+// divalidasi terhadap PO, dan menolak dokumennya kalau berbeda. Rate ikut
+// disamakan karena Buying Settings bisa menuntut harga yang sama sepanjang
+// siklus pembelian.
+function samakan_dengan_po(row, detail){
+	if (!detail.baris) return Promise.resolve();
+
+	let baris = detail.baris;
+	let nilai = {
+		purchase_order: detail.purchase_order,
+		purchase_order_item: baris.name
+	};
+
+	if (baris.warehouse) nilai.warehouse = baris.warehouse;
+	if (baris.project) nilai.project = baris.project;
+
+	// Berurutan, bukan sekaligus: handler uom mengisi ulang conversion factor
+	// dari tabel konversi item, dan conversion factor menghitung ulang rate.
+	// Yang ditulis belakangan yang bertahan.
+	return frappe.model.set_value(row.doctype, row.name, nilai)
+		.then(() => frappe.model.set_value(row.doctype, row.name, 'uom', baris.uom))
+		.then(() => frappe.model.set_value(row.doctype, row.name, 'conversion_factor', baris.conversion_factor))
+		.then(() => frappe.model.set_value(row.doctype, row.name, 'rate', baris.rate));
+}
+
+function lapor_item_timbangan(timbangan, detail){
+	let pesan = [__('Item added from Timbangan {0}', [timbangan.name])]
+
+	if (timbangan.purchase_order && !detail.baris) {
+		pesan.push(__('{0} tidak punya baris untuk {1}, jadi barisnya tidak ditautkan ke PO.',
+			[timbangan.purchase_order, timbangan.kode_barang]))
+	}
+
+	// Netto timbangan selalu kilogram, sementara baris PO boleh memakai UOM
+	// lain — PCS, Liter, Ton. Qty-nya tidak dikonversi sendiri karena faktor
+	// konversi item belum tentu berlaku untuk berat; yang tahu cuma operatornya.
+	if (detail.baris && !uom_kilogram(detail.baris.uom)) {
+		pesan.push(__('Qty diisi dari netto timbangan dalam kilogram, sementara baris PO memakai UOM {0}. Periksa qty-nya.',
+			[detail.baris.uom]))
+	}
+
+	frappe.msgprint(pesan.join('<br>'))
+}
+
+function uom_kilogram(uom){
+	return /^(kg|kgs|kilogram)$/i.test(String(uom || '').trim())
 }

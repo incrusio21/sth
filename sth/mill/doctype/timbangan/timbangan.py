@@ -625,3 +625,51 @@ def get_item_purchase_order(doctype, txt, searchfield, start, page_len, filters)
 		order by min(poi.idx)
 		limit %(start)s, %(page_len)s
 	""", params)
+
+@frappe.whitelist()
+def baris_po_untuk_timbangan(timbangan):
+	"""PO dan baris PO yang dipakai Timbangan ini, untuk mengisi baris Purchase Receipt.
+
+	Yang dipulangkan supplier PO-nya, nama PO-nya, dan satu baris PO yang barangnya
+	sama dengan kode_barang timbangan. UOM dan project baris itu wajib dipakai apa
+	adanya: ERPNext membandingkan keduanya — beserta item_code — waktu Purchase
+	Receipt divalidasi terhadap PO, dan menolak dokumennya kalau berbeda.
+
+	Kalau barangnya muncul di lebih dari satu baris, yang didahulukan baris yang
+	belum penuh diterima, supaya penerimaan kedua tidak menempel lagi ke baris
+	yang sudah lunas. Kalau tidak ada yang cocok sama sekali, barisnya kosong dan
+	yang memanggil boleh tetap menambahkan barangnya tanpa tautan ke PO.
+	"""
+	kode_barang, purchase_order = frappe.db.get_value(
+		"Timbangan", timbangan, ["kode_barang", "purchase_order"]
+	)
+
+	if not purchase_order:
+		return {}
+
+	po = frappe.get_doc("Purchase Order", purchase_order)
+	po.check_permission("read")
+
+	hasil = {"purchase_order": po.name, "supplier": po.supplier}
+
+	cocok = [row for row in po.items if row.item_code == kode_barang]
+	if not cocok:
+		return hasil
+
+	belum_penuh = [row for row in cocok if flt(row.received_qty) < flt(row.qty)]
+	row = (belum_penuh or cocok)[0]
+
+	hasil["baris"] = {
+		"name": row.name,
+		"item_code": row.item_code,
+		"uom": row.uom,
+		"conversion_factor": flt(row.conversion_factor),
+		"rate": flt(row.rate),
+		"warehouse": row.warehouse,
+		"project": row.project,
+		"qty": flt(row.qty),
+		"received_qty": flt(row.received_qty),
+	}
+
+	return hasil
+
