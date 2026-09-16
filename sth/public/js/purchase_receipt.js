@@ -23,6 +23,9 @@ function make_timbangan_button(frm){
 								filters: {
 									'company': frm.doc.company,
 									'type': "Receive",
+									// Hanya Receive "Lain - Lain" yang dibeli lewat PO dan
+									// berakhir di Purchase Receipt; TBS punya alurnya sendiri.
+									'receive_type': "Lain - Lain",
 									'docstatus': 1
 								}
 							};
@@ -84,16 +87,28 @@ function make_timbangan_button(frm){
 								// }
 								
 								// Add item
-								if (timbangan.kode_barang && timbangan.netto) {
-									let row = frm.add_child('items');
-									row.item_code = timbangan.kode_barang;
-									row.qty = timbangan.netto - (timbangan.potongan_sortasi / 100);
-									row.timbangan = timbangan.name;
-									
-									frm.refresh_field('items');
-									
-									frappe.msgprint(__('Item added from Timbangan {0}', [timbangan.name]));
+								if (!timbangan.kode_barang) {
+									frappe.msgprint(__('Timbangan {0} belum punya Kode Barang.', [timbangan.name]));
+									return;
 								}
+
+								// Baris kosong bawaan form baru dipakai ulang supaya item
+								// pertama tidak jatuh di baris kedua.
+								let row = baris_item_kosong(frm) || frm.add_child('items');
+								row.item_code = timbangan.kode_barang;
+
+								// Nama barang, UOM, dan gudang diisi handler item_code
+								// standar ERPNext, qty baru ditimpa setelah itu selesai.
+								frm.script_manager.trigger('item_code', row.doctype, row.name).then(function() {
+									frappe.model.set_value(row.doctype, row.name, 'timbangan', timbangan.name);
+									frappe.model.set_value(row.doctype, row.name, 'qty',
+										flt(timbangan.netto) - flt(timbangan.potongan_sortasi) / 100);
+
+									buang_baris_item_kosong(frm);
+									frm.refresh_field('items');
+
+									frappe.msgprint(__('Item added from Timbangan {0}', [timbangan.name]));
+								});
 							}
 						}
 					});
@@ -103,4 +118,18 @@ function make_timbangan_button(frm){
 			d.show();
 		}, __('Get Items From'));
 	}
+}
+
+// Baris yang belum terisi item_code: entah baris kosong bawaan grid saat form
+// baru, entah baris yang dibuka user lalu ditinggalkan.
+function baris_item_kosong(frm){
+	return (frm.doc.items || []).find(row => !row.item_code);
+}
+
+function buang_baris_item_kosong(frm){
+	let terisi = (frm.doc.items || []).filter(row => row.item_code);
+	if (terisi.length == (frm.doc.items || []).length) return;
+
+	frm.doc.items = terisi;
+	terisi.forEach((row, i) => row.idx = i + 1);
 }
