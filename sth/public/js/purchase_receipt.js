@@ -277,10 +277,10 @@ function samakan_dengan_po(row, detail){
 }
 
 function lapor_item_timbangan(frm, timbangan, detail, terpakai){
-	let pesan = [terpakai
-		? __('Baris {0} dipakai ulang untuk Timbangan {1}, qty-nya diisi dari hasil timbang.',
-			[terpakai.idx, timbangan.name])
-		: __('Item added from Timbangan {0}', [timbangan.name])]
+	// Baris yang dipakai ulang tidak diumumkan: qty barunya kelihatan langsung di
+	// gridnya. Yang tersisa cuma hal-hal yang perlu diperiksa operator, dan
+	// kalau tidak ada, tidak ada dialog sama sekali.
+	let pesan = terpakai ? [] : [__('Item added from Timbangan {0}', [timbangan.name])]
 
 	if (timbangan.purchase_order && !detail.baris) {
 		pesan.push(__('{0} tidak punya baris untuk {1}, jadi barisnya tidak ditautkan ke PO.',
@@ -299,6 +299,8 @@ function lapor_item_timbangan(frm, timbangan, detail, terpakai){
 		pesan.push(__('Qty diisi dari netto timbangan dalam kilogram, sementara baris PO memakai UOM {0}. Periksa qty-nya.',
 			[detail.baris.uom]))
 	}
+
+	if (!pesan.length) return;
 
 	frappe.msgprint(pesan.join('<br>'))
 }
