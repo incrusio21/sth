@@ -628,6 +628,7 @@ extend_cscript(cur_frm.cscript, new erpnext.buying.PurchaseOrderControllerCustom
 
 frappe.ui.form.on("Purchase Order", {
 	setup(frm) {
+		sembunyikan_supplier_name(frm)
 		sth.form.setup_fieldname_select(frm, "items")
 		frm.set_query("lokasi_pengiriman", function (doc) {
 			return {
@@ -1151,4 +1152,18 @@ function html_uang_muka(rekap) {
 		</table>
 		${tabel_pengembalian}
 	</div>`
+}
+
+// Property Setter supplier_name-hidden tidak bertahan sendirian: refresh milik
+// BuyingController ERPNext memanggil
+// `toggle_display("supplier_name", supplier_name && supplier_name !== supplier)`,
+// dan syarat itu hampir selalu benar, jadi fieldnya muncul lagi tiap kali
+// formnya digambar.
+//
+// Melawannya dari handler refresh biasa tidak bisa: script_manager menjalankan
+// handler frappe.ui.form.on lebih dulu, baru refresh milik cscript — punya
+// ERPNext justru yang belakangan. custom_refresh kait bawaan frappe yang
+// dijalankan sesudah keduanya, jadi di situ tempatnya.
+function sembunyikan_supplier_name(frm){
+	frm.cscript.custom_refresh = () => frm.toggle_display("supplier_name", false)
 }
