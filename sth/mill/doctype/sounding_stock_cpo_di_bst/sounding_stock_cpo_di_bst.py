@@ -41,9 +41,19 @@ class SoundingStockCPOdiBST(Document):
 		if name := frappe.db.get_value(self.doctype,{"tanggal_proses":self.tanggal_proses,"unit":self.unit,"docstatus":["<",2],"name":["!=",self.name]},"name"):
 			frappe.throw(f"Terdapat document dengan tanggal proses yang sama untuk unit {self.unit}: {name}")
 
+	# def validate_minus_value(self):
+	# 	if self.produksi_cpo < 0 or self.oer_netto_1 < 0 or self.oer_netto_2 or self.rata_rata_oer_bulanan < 0 or self.total_produksi_bulanan < 0:
+	# 		frappe.throw(f"Produksi CPO/OER tidak boleh minus")
+
 	def validate_minus_value(self):
-		if self.produksi_cpo < 0 or self.oer_netto_1 < 0 or self.oer_netto_2 or self.rata_rata_oer_bulanan < 0 or self.total_produksi_bulanan < 0:
-			frappe.throw(f"Produksi CPO/OER tidak boleh minus")
+		if (
+			flt(self.produksi_cpo) < 0
+			or flt(self.oer_netto_1) < 0
+			or flt(self.oer_netto_2) < 0
+			or flt(self.rata_rata_oer_bulanan) < 0
+			or flt(self.total_produksi_bulanan) < 0
+		):
+			frappe.throw("Produksi CPO/OER tidak boleh minus")
 
 	# def validate_backdate(self):
 	# 	allowed_diff = frappe.db.get_value("Backdate Setting",{"backdate_doc":self.doctype},"max_days") or 1
