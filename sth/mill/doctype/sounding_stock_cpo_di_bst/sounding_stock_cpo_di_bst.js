@@ -130,14 +130,14 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     ukuran_hasil_sounding(frm) {
         frm.events.get_ukuran_sounding(frm.doc.ukuran_hasil_sounding, "BST 01", frm.doc.pabrik || '').then((res) => {
             frm.set_value("ukuran_hasil_sounding_kg", res)
-            frm.set_value("tonase_sebenarnya", frm.doc.ukuran_hasil_sounding_kg * frm.doc.berat_jenis_suhu)
+            frm.set_value("tonase_sebenarnya", flt(frm.doc.ukuran_hasil_sounding_kg) * flt(frm.doc.berat_jenis_suhu))
         })
     },
 
     ukuran_hasil_sounding_2(frm) {
         frm.events.get_ukuran_sounding(frm.doc.ukuran_hasil_sounding_2, "BST 02", frm.doc.pabrik || '').then((res) => {
             frm.set_value("ukuran_hasil_sounding_kg_2", res)
-            frm.set_value("tonase_sebenarnya_2", frm.doc.ukuran_hasil_sounding_kg_2 * frm.doc.berat_jenis_suhu_2)
+            frm.set_value("tonase_sebenarnya_2", flt(frm.doc.ukuran_hasil_sounding_kg_2) * flt(frm.doc.berat_jenis_suhu_2))
         })
     },
 
@@ -155,11 +155,11 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     berat_jenis_suhu(frm) {
-        frm.set_value("tonase_sebenarnya", frm.doc.ukuran_hasil_sounding_kg * frm.doc.berat_jenis_suhu)
+        frm.set_value("tonase_sebenarnya", flt(frm.doc.ukuran_hasil_sounding_kg) * flt(frm.doc.berat_jenis_suhu))
     },
 
     berat_jenis_suhu_2(frm) {
-        frm.set_value("tonase_sebenarnya_2", frm.doc.ukuran_hasil_sounding_kg_2 * frm.doc.berat_jenis_suhu_2)
+        frm.set_value("tonase_sebenarnya_2", flt(frm.doc.ukuran_hasil_sounding_kg_2) * flt(frm.doc.berat_jenis_suhu_2))
     },
 
     tonase_sebenarnya(frm) {
@@ -183,21 +183,24 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     calculate_oer_netto(frm) {
-        const oer_netto_1 = frm.doc.tbs_olah ? frm.doc.produksi_cpo / frm.doc.tbs_olah * 100 : 0
+        const oer_netto_1 = frm.doc.tbs_olah ? flt(frm.doc.produksi_cpo) / frm.doc.tbs_olah * 100 : 0
 
         // Penjaganya penyebut netto 2 itu sendiri, bukan tbs_olah: kalau seluruh
         // TBS yang masuk kena potongan sortasi, tbs_olah terisi tapi selisihnya
         // nol dan hasil baginya jadi Infinity.
-        const penyebut_netto_2 = frm.doc.tbs_olah - frm.doc.potongan_sortasi
-        const oer_netto_2 = penyebut_netto_2 ? frm.doc.produksi_cpo / penyebut_netto_2 * 100 : 0
+        const penyebut_netto_2 = flt(frm.doc.tbs_olah) - flt(frm.doc.potongan_sortasi)
+        const oer_netto_2 = penyebut_netto_2 ? flt(frm.doc.produksi_cpo) / penyebut_netto_2 * 100 : 0
 
         frm.set_value("oer_netto_1", oer_netto_1)
         frm.set_value("oer_netto_2", oer_netto_2)
     },
 
     calculate_totals(frm) {
-        const total_stock = frm.doc.tonase_sebenarnya + frm.doc.tonase_sebenarnya_2
-        const total_produksi = (total_stock + frm.doc.pengiriman_cpo) - frm.doc.stock_awal
+        // flt di sepanjang sini bukan gaya-gayaan: hasil kali yang salah satu
+        // bahannya kosong jadi NaN, dan NaN yang dikirim ke server ditulis JSON
+        // sebagai null - di sana jadi None dan penjumlahannya error.
+        const total_stock = flt(frm.doc.tonase_sebenarnya) + flt(frm.doc.tonase_sebenarnya_2)
+        const total_produksi = (total_stock + flt(frm.doc.pengiriman_cpo)) - flt(frm.doc.stock_awal)
         frm.set_value("stock_bst", total_stock)
         frm.set_value("produksi_cpo", total_produksi)
     },

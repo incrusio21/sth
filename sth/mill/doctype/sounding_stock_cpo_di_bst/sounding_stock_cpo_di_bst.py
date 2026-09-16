@@ -155,8 +155,12 @@ class SoundingStockCPOdiBST(Document):
 			self.stock_awal = flt(self.stock_awal_sebelum_adjustment) + flt(self.adjustment)
 
 	def calculate_totals(self) :
-		total_stock = self.tonase_sebenarnya + self.tonase_sebenarnya_2
-		total_produksi = (flt(total_stock) + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
+		# Dua tonase ini dihitung di sisi JS dari hasil sounding dikali berat jenis.
+		# Kalau salah satu bahannya belum ada, hasil kalinya NaN dan JSON menuliskan
+		# NaN sebagai null, jadi yang sampai di sini None - bukan nol. Tanpa flt,
+		# penjumlahannya meledak sebelum sempat divalidasi.
+		total_stock = flt(self.tonase_sebenarnya) + flt(self.tonase_sebenarnya_2)
+		total_produksi = (total_stock + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
 		self.stock_bst = total_stock
 		self.produksi_cpo = total_produksi
 
