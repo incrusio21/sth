@@ -45,6 +45,9 @@ frappe.form.formatters = {
 			else if(df.fieldname == "kode_supplier"){
 				return `<a href="/app/supplier/${value}" onclick="frappe.set_route('Form', 'Supplier', '${value}'); return false;">${value}</a>`;
 			}
+			else if(df.fieldname == "kode_pelanggan"){
+				return `<a href="/app/customer/${value}" onclick="frappe.set_route('Form', 'Customer', '${value}'); return false;">${value}</a>`;
+			}
 			return `<a href="${value}" title="Open Link" target="_blank">${value}</a>`;
 		}
 		value = value == null ? "" : value;

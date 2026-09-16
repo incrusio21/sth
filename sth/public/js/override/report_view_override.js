@@ -148,7 +148,11 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 
 		const fieldTypeOverrides = {
 			"Customer": {
-				"kode_pelanggan": { fieldtype: "Link", options: this.doctype }
+				// Bukan Link ke Customer: doctype itu punya show_title_field_in_link,
+				// jadi kolomnya akan menampilkan nama pelanggan dan kodenya justru
+				// hilang dari report. Data + formatter memberi tautan yang sama
+				// tanpa menyembunyikan kodenya, seperti kode_supplier di bawah.
+				"kode_pelanggan": { fieldtype: "Data", options: "URL" }
 			},
 			"Supplier": {
 				"kode_supplier": { fieldtype: "Data", options: "URL"}
@@ -165,9 +169,11 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 
 		const override = fieldTypeOverrides[doctype]?.[fieldname];
 		if (override) {
-			docfield.fieldtype = override.fieldtype;
-			docfield.options = override.options;
-			docfield.read_only = 1;
+			// Disalin, bukan diubah di tempat: docfield ini objek milik
+			// frappe.meta.docfield_map yang dipakai bersama seluruh sesi - form,
+			// dialog, dan tampilan lain menunjuk objek yang sama. Menulis ke
+			// objeknya membuat perubahan ini menempel di luar report.
+			docfield = { ...docfield, ...override, read_only: 1 };
 			fineditable = false
 		}
 		// console.log(fieldname)
