@@ -422,6 +422,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.bruto && doc.tara",
    "fieldname": "netto",
    "fieldtype": "Float",
    "in_preview": 1,
@@ -497,6 +498,7 @@
    "label": "No Polisi"
   },
   {
+   "depends_on": "eval:doc.bruto && doc.tara",
    "fieldname": "netto_2",
    "fieldtype": "Float",
    "label": "Netto 2",
