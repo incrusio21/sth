@@ -2,9 +2,14 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, now
+from frappe.utils import cint, flt, getdate, now
 from frappe.model.mapper import get_mapped_doc
+
+from sth.mill.utils import buat_ulang_ste, izinkan_stock_minus
+
+DOCTYPE = "Data TBS"
 
 class DataTBS(Document):
 	def validate(self):
@@ -88,6 +93,23 @@ class DataTBS(Document):
 		self.total_jam_olah = frappe.db.get_value("CBC Monitoring",{"docstatus": 1, "posting_date": self.tanggal_produksi},"total_hour_meter") or 0
 
 		self.calculate_totals()
+
+	@frappe.whitelist()
+	def hitung_ulang(self):
+		"""Hitung ulang dokumen ini dan hari-hari sesudahnya di unit yang sama.
+
+		Dipakai sesudah Timbangan bertanggal mundur masuk atau dibatalkan:
+		Jumlah TBS Diterima cuma ditulis waktu Get Data ditekan, jadi dokumen
+		yang sudah disubmit tidak akan pernah menyusul sendiri.
+		"""
+		# Yang dikerjakan method ini membatalkan dan membuat ulang Stock Entry,
+		# jadi izin write atas Data TBS saja tidak cukup.
+		self.check_permission("submit")
+
+		hasil = hitung_ulang_rantai(self.unit, self.tanggal_produksi)
+		self.reload()
+
+		return hasil
 
 	def calculate_totals(self):
 		"""Bagi TBS hari ini ke olah, restan, dan loading ramp menurut porsi lorinya."""
@@ -233,3 +255,275 @@ def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 
 def get_warehouse_tbs(unit):
 	return frappe.db.get_value("Warehouse",{"unit":unit,"warehouse_category": "TBS"})
+
+def hitung_ulang_setelah_timbangan(doc, method=None):
+	"""Antrikan hitung ulang Data TBS sesudah Timbangan TBS disubmit atau dibatalkan.
+
+	Yang dikejar Timbangan yang jatuh ke hari yang Data TBS-nya sudah disubmit —
+	timbangan bertanggal mundur, tapi juga timbangan hari ini yang masuk sesudah
+	Data TBS hari ini ditutup. Jumlah TBS Diterima cuma ditulis waktu Get Data
+	ditekan, jadi tanpa ini angkanya berhenti di keadaan waktu tombol itu
+	ditekan, dan Stock Entry harian ikut tertinggal.
+
+	Selama hari itu dan hari-hari sesudahnya masih draft semua, tidak ada yang
+	diantrikan: angkanya akan terbaca sendiri waktu Get Data ditekan dan belum
+	ada Stock Entry yang bisa meleset.
+
+	Dikerjakan di latar belakang, bukan di dalam transaksi submit. Fase Stock
+	Entry membatalkan lalu membuat ulang dokumen stok dan sempat mematikan
+	larangan stok minus — pekerjaan yang tidak boleh menumpang di request orang
+	yang cuma menimbang truk.
+	"""
+	if doc.type != "Receive" or doc.receive_type not in ("TBS Internal", "TBS Eksternal"):
+		return
+
+	if not (doc.unit and doc.posting_date):
+		return
+
+	if not frappe.db.exists(DOCTYPE, {
+		"unit": doc.unit,
+		"docstatus": 1,
+		"tanggal_produksi": (">=", doc.posting_date),
+	}):
+		return
+
+	# Sengaja tidak di-deduplicate: kalau satu job sedang jalan, enqueue
+	# berikutnya akan dilewati frappe, dan timbangan yang baru saja masuk ikut
+	# hilang dari hitungan. Jobnya idempoten, jadi jalan dua kali lebih murah
+	# daripada tidak jalan sama sekali.
+	frappe.enqueue(
+		"sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_rantai",
+		queue="long",
+		timeout=3600,
+		# Wajib: tanpa ini jobnya bisa mulai sebelum submit-nya ter-commit, dan
+		# yang dibaca get_total_tbs masih keadaan sebelum timbangan ini.
+		enqueue_after_commit=True,
+		unit=doc.unit,
+		sejak=doc.posting_date,
+	)
+
+	frappe.msgprint(
+		_("Data TBS unit {0} sejak {1} dihitung ulang di latar belakang, termasuk Stock Entry-nya.").format(
+			doc.unit, frappe.format(doc.posting_date, {"fieldtype": "Date"})),
+		alert=True,
+		indicator="blue",
+	)
+
+def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None):
+	"""Baca ulang TBS diterima dan rantai restan satu unit sejak satu tanggal.
+
+	Yang diperbaiki terutama dokumen yang sudah disubmit. Jumlah TBS Diterima
+	cuma ditulis di `get_data`, yaitu waktu tombolnya ditekan, jadi Timbangan
+	yang baru masuk — atau dibatalkan — sesudah itu tidak pernah terbaca lagi.
+	Timbangan bertanggal mundur, misalnya yang baru dibuat hari ini untuk 1
+	September, selalu jatuh ke kasus ini.
+
+	Hari-hari sesudahnya ikut dihitung karena Jumlah TBS Diterima masuk ke Grand
+	Total TBS, yang membagi diri jadi tbs olah, tbs restan, dan tbs loading ramp,
+	dan Total TBS Restan-nya jadi restan awal hari berikutnya.
+
+	Restan awal dokumen pertama tidak ditetapkan sendiri, tapi diambil dari
+	dokumen terakhir sebelumnya lewat `get_restan_awal`, jadi rantai sebelum
+	`sejak` tidak ikut bergerak.
+
+	Dua fase: angka dokumennya dulu, lalu Stock Entry harian yang qty atau
+	arahnya jadi tidak cocok lagi diposting ulang. Dipisah supaya kalau
+	pembatalan STE tertahan periode akuntansi yang sudah tutup, angka dokumennya
+	tetap sudah benar. `posting_ulang=False` menjalankan fase pertama saja.
+
+	Aman dijalankan ulang: dokumen yang angkanya sudah cocok dan STE yang sudah
+	benar sama-sama dilewati. Dari konsol:
+
+	    bench --site NAMA execute sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_rantai \
+	        --kwargs "{'unit': 'TPRM', 'sejak': '2026-09-01'}"
+	"""
+	sejak = getdate(sejak)
+
+	dokumen = frappe.get_all(
+		DOCTYPE,
+		filters={"unit": unit, "docstatus": ("<", 2), "tanggal_produksi": (">=", sejak)},
+		fields=["name", "unit", "tanggal_produksi"],
+		order_by="tanggal_produksi asc, creation asc",
+		limit_page_length=0,
+	)
+
+	hasil = frappe._dict(dokumen=len(dokumen), angka=0, ste=0, kembar=[])
+
+	if not dokumen:
+		return hasil
+
+	kembar = cari_kembar(dokumen)
+	hasil.kembar = sorted(nama for daftar in kembar.values() for nama in daftar)
+
+	hasil.angka = hitung_ulang_dokumen(dokumen, kembar)
+
+	# Harus di-commit sebelum fase STE: izinkan_stock_minus me-rollback sisa
+	# pekerjaan yang belum di-commit waktu selesai, dan itu akan ikut membuang
+	# angka dokumen yang baru saja dibetulkan.
+	frappe.db.commit()
+
+	if posting_ulang:
+		dikerjakan = [row for row in dokumen if kunci(row) not in kembar]
+		hasil.ste = posting_ulang_ste(dikerjakan, lapor=lapor)
+
+	# Dicatat juga waktu dipanggil dari background job, yang tidak punya tempat
+	# lain untuk melapor: log jobnya cuma menyimpan sukses atau gagal.
+	frappe.logger("data_tbs").info(
+		"hitung_ulang_rantai {0} sejak {1}: {2} dokumen, {3} angka berubah, {4} Stock Entry dibuat ulang".format(
+			unit, sejak, hasil.dokumen, hasil.angka, hasil.ste))
+
+	return hasil
+
+
+def kunci(row):
+	return (row.unit, str(row.tanggal_produksi))
+
+
+def cari_kembar(dokumen):
+	"""unit + tanggal yang punya lebih dari satu dokumen hidup.
+
+	Hari kembar tidak ikut dihitung ulang. `get_total_tbs` menjumlahkan seluruh
+	timbangan sehari penuh tanpa tahu dokumen mana yang seharusnya memikulnya,
+	jadi dua dokumen di hari yang sama akan sama-sama diberi total penuh dan hari
+	itu masuk dua kali ke rantai restan.
+
+	Dokumen seperti ini tidak bisa dibuat lagi — `validate_duplikat` menolaknya —
+	tapi yang telanjur ada sejak sebelum penjagaan itu masih tertinggal. Mana
+	yang harus dibatalkan adalah keputusan orang, bukan tebakan fungsi ini.
+	"""
+	hitung = {}
+
+	for row in dokumen:
+		hitung.setdefault(kunci(row), []).append(row.name)
+
+	return {k: v for k, v in hitung.items() if len(v) > 1}
+
+
+def hitung_ulang_dokumen(dokumen, kembar):
+	"""Isi ulang TBS diterima tiap dokumen, lalu rantai restan awalnya."""
+	restan = None
+	diperbaiki = 0
+
+	for row in dokumen:
+		doc = frappe.get_doc(DOCTYPE, row.name)
+
+		if restan is None:
+			# Sambungan ke rantai sebelum rentang ini, dibaca sekali dari dokumen
+			# terakhir sebelum dokumen pertama yang dikerjakan.
+			restan = get_restan_awal(doc.unit, doc.tanggal_produksi, doc.name, doc.creation)
+
+		if kunci(row) in kembar:
+			# Dilewati, tapi rantainya tetap diteruskan dari angka tersimpannya:
+			# hari sesudahnya tidak boleh ikut hilang cuma karena hari ini kembar.
+			restan = flt(doc.total_tbs_restan)
+			continue
+
+		# Dibulatkan dulu sebelum dibanding: nilai yang dibaca dari kolom decimal
+		# selalu beda di digit terakhir dari hasil hitungan float.
+		sebelum = angka_turunan(doc)
+
+		# flt: get_total_tbs memulangkan None kalau tidak ada timbangan sama
+		# sekali di hari itu — SUM atas nol baris itu NULL, bukan 0.
+		doc.jumlah_tbs_diterima = flt(get_total_tbs(doc.tanggal_produksi, doc.unit))
+		doc.jumlah_tbs_restan = flt(restan)
+		doc.calculate_totals()
+		restan = flt(doc.total_tbs_restan)
+
+		if angka_turunan(doc) == sebelum:
+			continue
+
+		# db_update, bukan save: dokumennya sudah disubmit dan yang diubah cuma
+		# angka turunan yang seluruhnya read only di form.
+		doc.db_update()
+		diperbaiki += 1
+
+	return diperbaiki
+
+
+def angka_turunan(doc):
+	# Presisi field tidak dipakai: total_tbs_restan presisinya 0 supaya tampil
+	# bulat di form, padahal selisih setengah kilo tetap harus ikut dibetulkan.
+	return tuple(flt(doc.get(field), 3) for field in (
+		"jumlah_tbs_diterima", "jumlah_tbs_restan", "grand_total_tbs",
+		"berat_rata_rata_tbs", "tbs_olah", "tbs_restan", "tbs_loading_ramp",
+		"total_tbs_restan",
+	))
+
+
+def posting_ulang_ste(dokumen, lapor=None):
+	"""Buat ulang Stock Entry dokumen submitted yang STE-nya belum sesuai.
+
+	`lapor` dipanggil tiap satu dokumen selesai, supaya patch bisa mencetak
+	kemajuannya. Memulangkan jumlah Stock Entry yang jadi dibuat.
+	"""
+	lapor = lapor or (lambda pesan: None)
+	perlu = []
+
+	for row in dokumen:
+		doc = frappe.get_doc(DOCTYPE, row.name)
+		if doc.docstatus == 1 and not ste_sudah_benar(doc):
+			perlu.append(doc)
+
+	if not perlu:
+		lapor("Stock Entry Data TBS sudah sesuai semua, dilewati.")
+		return 0
+
+	perlu.sort(key=lambda doc: (getdate(doc.tanggal_produksi), doc.creation))
+	dibuat = 0
+
+	with izinkan_stock_minus():
+		for urutan, doc in enumerate(perlu, 1):
+			dibuat += buat_ulang_ste(doc)
+
+			frappe.db.commit()
+			lapor("[{0}/{1}] {2} selesai.".format(urutan, len(perlu), doc.name))
+
+	lapor("{0} Stock Entry Data TBS diposting ulang ke tanggal prosesnya.".format(dibuat))
+
+	antri = antrian_repost()
+	if antri:
+		lapor("{0} Repost Item Valuation mengantre, nilai stok menyesuaikan setelah scheduler selesai.".format(antri))
+
+	return dibuat
+
+
+def ste_sudah_benar(doc):
+	"""Benar kalau tanggal, arah, dan qty STE-nya sudah cocok dengan dokumennya."""
+	selisih = flt(doc.total_tbs_restan) - flt(doc.jumlah_tbs_restan)
+
+	ste = frappe.get_all(
+		"Stock Entry",
+		filters={"references": doc.name, "docstatus": 1},
+		fields=["name", "posting_date", "stock_entry_type"],
+	)
+
+	if not flt(selisih, 3):
+		return not ste
+
+	if len(ste) != 1:
+		return False
+
+	ste = ste[0]
+
+	if getdate(ste.posting_date) != getdate(doc.tanggal_produksi):
+		return False
+
+	arah = "Material Receipt" if selisih > 0 else "Material Issue"
+	if ste.stock_entry_type != arah:
+		return False
+
+	qty = frappe.db.get_value("Stock Entry Detail", {"parent": ste.name}, "sum(qty)")
+
+	# Toleransi sekilo per seratus, di bawah presisi qty Stock Entry, supaya STE
+	# yang cuma beda pembulatan tidak ikut diposting ulang.
+	return abs(flt(qty) - abs(selisih)) < 0.01
+
+
+def antrian_repost():
+	"""Penilaian stok dihitung ulang scheduler, bukan di sini.
+
+	STE bertanggal mundur bikin ERPNext mengantrikan Repost Item Valuation.
+	Menjalankannya langsung bisa memakan waktu berjam-jam dan menahan
+	pemanggilnya.
+	"""
+	return frappe.db.count("Repost Item Valuation", {"status": ("in", ("Queued", "In Progress"))})

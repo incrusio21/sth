@@ -6,13 +6,11 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 )
 from erpnext.stock.utils import get_stock_balance
 
-from sth.mill.doctype.data_tbs.data_tbs import get_total_tbs, get_warehouse_tbs
-
-# posting_ulang_ste dipinjam dari patch restan, bukan disalin: membatalkan lalu
-# membuat ulang Stock Entry bertanggal mundur itu bagian yang paling mudah salah,
-# dan dua salinan yang lama-lama berbeda lebih berbahaya daripada satu impor
-# antar-patch. Keduanya juga sama-sama patch manual yang tidak akan dihapus.
-from sth.patches.perbaiki_restan_data_tbs import posting_ulang_ste
+from sth.mill.doctype.data_tbs.data_tbs import (
+	get_total_tbs,
+	get_warehouse_tbs,
+	posting_ulang_ste,
+)
 
 DOCTYPE = "Data TBS"
 
@@ -101,7 +99,7 @@ def execute(sejak=SEJAK, restan_awal=None):
 
 	semai_stok(dokumen, sejak, restan_awal)
 
-	posting_ulang_ste(dikerjakan)
+	posting_ulang_ste(dikerjakan, lapor=print)
 
 
 def kunci(row):

@@ -1,7 +1,10 @@
 import frappe
-from frappe.utils import flt, getdate
+from frappe.utils import flt
 
-from sth.mill.utils import buat_ulang_ste, izinkan_stock_minus
+# posting_ulang_ste tinggal di controller Data TBS, bukan di patch ini:
+# membatalkan lalu membuat ulang Stock Entry bertanggal mundur juga dipakai
+# tombol Hitung Ulang di formnya.
+from sth.mill.doctype.data_tbs.data_tbs import posting_ulang_ste
 
 DOCTYPE = "Data TBS"
 
@@ -44,7 +47,7 @@ def execute():
 	diperbaiki = hitung_ulang_dokumen(dokumen)
 	print("{0} dari {1} Data TBS dihitung ulang restannya.".format(diperbaiki, len(dokumen)))
 
-	posting_ulang_ste(dokumen)
+	posting_ulang_ste(dokumen, lapor=print)
 
 
 def hitung_ulang_dokumen(dokumen):
@@ -82,75 +85,3 @@ def angka_restan(doc):
 		"jumlah_tbs_restan", "grand_total_tbs", "berat_rata_rata_tbs",
 		"tbs_olah", "tbs_restan", "tbs_loading_ramp", "total_tbs_restan",
 	))
-
-
-def posting_ulang_ste(dokumen):
-	"""Buat ulang Stock Entry dokumen submitted yang STE-nya belum sesuai."""
-	perlu = []
-
-	for row in dokumen:
-		doc = frappe.get_doc(DOCTYPE, row.name)
-		if doc.docstatus == 1 and not ste_sudah_benar(doc):
-			perlu.append(doc)
-
-	if not perlu:
-		print("Stock Entry Data TBS sudah sesuai semua, dilewati.")
-		return
-
-	perlu.sort(key=lambda doc: (getdate(doc.tanggal_produksi), doc.creation))
-	dibuat = 0
-
-	with izinkan_stock_minus():
-		for urutan, doc in enumerate(perlu, 1):
-			dibuat += buat_ulang_ste(doc)
-
-			frappe.db.commit()
-			print("[{0}/{1}] {2} selesai.".format(urutan, len(perlu), doc.name))
-
-	print("{0} Stock Entry Data TBS diposting ulang ke tanggal prosesnya.".format(dibuat))
-
-	laporkan_antrian_repost()
-
-
-def ste_sudah_benar(doc):
-	"""Benar kalau tanggal, arah, dan qty STE-nya sudah cocok dengan dokumennya."""
-	selisih = flt(doc.total_tbs_restan) - flt(doc.jumlah_tbs_restan)
-
-	ste = frappe.get_all(
-		"Stock Entry",
-		filters={"references": doc.name, "docstatus": 1},
-		fields=["name", "posting_date", "stock_entry_type"],
-	)
-
-	if not flt(selisih, 3):
-		return not ste
-
-	if len(ste) != 1:
-		return False
-
-	ste = ste[0]
-
-	if getdate(ste.posting_date) != getdate(doc.tanggal_produksi):
-		return False
-
-	arah = "Material Receipt" if selisih > 0 else "Material Issue"
-	if ste.stock_entry_type != arah:
-		return False
-
-	qty = frappe.db.get_value("Stock Entry Detail", {"parent": ste.name}, "sum(qty)")
-
-	# Toleransi sekilo per seratus, di bawah presisi qty Stock Entry, supaya
-	# patch ini tidak memposting ulang STE yang cuma beda pembulatan.
-	return abs(flt(qty) - abs(selisih)) < 0.01
-
-
-def laporkan_antrian_repost():
-	"""Penilaian stok dihitung ulang oleh scheduler, bukan oleh patch ini.
-
-	STE bertanggal mundur bikin ERPNext mengantrikan Repost Item Valuation.
-	Menjalankannya di dalam patch bisa memakan waktu berjam-jam dan menahan
-	migrate, jadi biar scheduler yang mengerjakan.
-	"""
-	antri = frappe.db.count("Repost Item Valuation", {"status": ("in", ("Queued", "In Progress"))})
-	if antri:
-		print("{0} Repost Item Valuation mengantre, nilai stok menyesuaikan setelah scheduler selesai.".format(antri))
