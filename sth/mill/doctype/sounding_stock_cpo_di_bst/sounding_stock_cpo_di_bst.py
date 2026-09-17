@@ -17,7 +17,8 @@ class SoundingStockCPOdiBST(Document):
 		self.gudang = get_warehouse_bst(self.unit)
 
 	def validate(self):
-		self.validate_minus_value()
+		# minta dipindah sebelum submit dari Rezky - 17-09
+		# self.validate_minus_value()
 		self.validate_duplicate()
 
 		if not self.gudang:
@@ -25,6 +26,9 @@ class SoundingStockCPOdiBST(Document):
 
 		set_rata_rata_rendemen_bulanan(self)
 		self.calculate_totals()
+		
+	def before_submit(self):
+		self.validate_minus_value()
 
 	def on_submit(self):
 		self.create_ste()

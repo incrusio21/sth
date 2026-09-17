@@ -478,6 +478,7 @@
    "options": "Security Location"
   },
   {
+   "depends_on": "eval:doc.transaction_type == \"Dispatch\" || doc.transaction_type == \"Return\"",
    "description": "Scan QR transporter dari Delivery Order untuk mengisi Transaction Type dan DO No.",
    "fieldname": "scan_qr_do",
    "fieldtype": "Data",
@@ -489,7 +490,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 00:31:30.350896",
+ "modified": "2026-09-17 14:56:18.875249",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

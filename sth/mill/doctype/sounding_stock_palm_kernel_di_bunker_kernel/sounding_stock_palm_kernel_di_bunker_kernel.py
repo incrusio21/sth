@@ -24,8 +24,12 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		# self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
 		# self.ker_netto_2 = self.produksi/(self.tbs_olah - self.sortasi)*100 if self.tbs_olah else 0
 
-	def validate(self):
+	def before_submit(self):
 		self.validate_minus_value()
+
+	def validate(self):
+		# minta dipindah sebelum submit dari Rezky - 17-09
+		# self.validate_minus_value()
 		self.hitung_produksi()
 		set_rata_rata_rendemen_bulanan(self)
 

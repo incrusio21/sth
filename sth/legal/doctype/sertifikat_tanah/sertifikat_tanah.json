@@ -33,7 +33,11 @@
   "tts",
   "tps",
   "nomor_nib",
-  "nomor_objek_pajak_nop"
+  "nomor_objek_pajak_nop",
+  "upload_file_tab",
+  "upload",
+  "kriteria_upload_html",
+  "kriteria_upload_sebelumnya"
  ],
  "fields": [
   {
@@ -101,8 +105,9 @@
   },
   {
    "fieldname": "lokasi",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Lokasi",
+   "options": "Lokasi",
    "reqd": 1
   },
   {
@@ -203,12 +208,36 @@
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "Nomor Objek Pajak (NOP)"
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Upload",
+   "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kriteria_upload_sebelumnya",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Sebelumnya",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-09 10:41:34.082676",
+ "modified": "2026-09-17 14:33:35.863735",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
