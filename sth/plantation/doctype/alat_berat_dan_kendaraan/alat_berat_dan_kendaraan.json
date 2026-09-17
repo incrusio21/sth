@@ -32,6 +32,7 @@
   "asset",
   "amended_from",
   "deskripsi",
+  "kategori_api",
   "api_status",
   "qr_code",
   "company",
@@ -245,12 +246,18 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "read_only": 1
+  },
+  {
+   "fieldname": "kategori_api",
+   "fieldtype": "Link",
+   "label": "Kategori API ",
+   "options": "Kategori Mesin"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-17 13:41:07.011518",
+ "modified": "2026-09-17 11:56:32.193602",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Alat Berat Dan Kendaraan",
