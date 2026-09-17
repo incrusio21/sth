@@ -39,7 +39,8 @@ def make_supplier_quotation(source_name, target_doc=None, args=None):
 				"doctype": "Supplier Quotation",
 				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Purchase"]},
 				"field_map":{
-					"name": "custom_material_request"
+					"name": "custom_material_request",
+					"unit":"lokasi_pengiriman"
 				}
 			},
 			"Material Request Item": {
@@ -84,6 +85,9 @@ def make_multiple_request_for_quotation(source_name, target_doc=None, args=None)
 		{
 			"Material Request": {
 				"doctype": "Request for Quotation",
+				"field_map": {
+					"unit":"lokasi_pengiriman"
+				},
 				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Purchase"]},
 			},
 			"Material Request Item": {
@@ -115,6 +119,9 @@ def make_request_for_quotation(source_name, target_doc=None):
 		{
 			"Material Request": {
 				"doctype": "Request for Quotation",
+				"field_map": {
+					"unit":"lokasi_pengiriman"
+				},
 				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Purchase"]},
 			},
 			"Material Request Item": {

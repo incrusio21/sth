@@ -57,7 +57,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			doc.delete()
 
 	def validate_minus_value(self):
-		if self.produksi < 0 or self.ker_netto_1 < 0 or self.ker_netto_2 or self.rata_rata_ker_bulanan < 0 or self.total_produksi_bulanan < 0:
+		if flt(self.produksi) < 0 or flt(self.ker_netto_1) < 0 or flt(self.ker_netto_2) or flt(self.rata_rata_ker_bulanan) < 0 or flt(self.total_produksi_bulanan) < 0:
 			frappe.throw(f"Produksi PK/KER tidak boleh minus")
 
 	def calculate_hasil_titik_sounding(self):

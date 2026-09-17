@@ -1128,8 +1128,10 @@
   {
    "fieldname": "isi_komidel",
    "fieldtype": "Float",
-   "label": "Isi Komidel",
-   "precision": "2"
+   "in_preview": 1,
+   "label": "Isi Komidel / BJR",
+   "precision": "2",
+   "reqd": 1
   },
   {
    "fieldname": "warning_message",
@@ -1198,7 +1200,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-01 11:17:58.946176",
+ "modified": "2026-09-17 11:07:52.582656",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",

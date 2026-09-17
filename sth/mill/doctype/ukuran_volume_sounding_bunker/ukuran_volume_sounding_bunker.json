@@ -26,8 +26,8 @@
    "fieldname": "volume",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Volume (Liter/Ton)",
-   "precision": "3",
+   "label": "Volume (Liter/KG)",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -65,7 +65,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-02 15:49:45.142342",
+ "modified": "2026-09-16 14:35:49.600769",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Volume Sounding Bunker",

@@ -174,21 +174,23 @@
   {
    "default": "0",
    "depends_on": "eval:doc.receive_type == \"TBS Eksternal\"",
+   "description": "Di Isi di Menu Sortasi",
    "fieldname": "potongan_sortasi",
    "fieldtype": "Percent",
    "in_preview": 1,
    "label": "Potongan Sortasi",
    "precision": "2",
-   "read_only": 1,
-   "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
+   "read_only": 1
   },
   {
    "default": "0",
+   "description": "Di Isi di Menu Sortasi",
    "fieldname": "isi_komidel",
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "BJR",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "driver_section",
@@ -708,7 +710,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 10:45:00.000000",
+ "modified": "2026-09-17 11:07:04.517059",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

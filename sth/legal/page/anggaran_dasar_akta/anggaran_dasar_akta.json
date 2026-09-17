@@ -3,8 +3,8 @@
  "creation": "2025-12-16 13:15:08.560189",
  "docstatus": 0,
  "doctype": "Page",
- "idx": 0,
- "modified": "2026-01-06 17:25:58.146088",
+ "idx": 3,
+ "modified": "2026-09-16 13:56:26.773813",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "anggaran-dasar-akta",
@@ -16,6 +16,15 @@
   },
   {
    "role": "Legal User"
+  },
+  {
+   "role": "LEGAL MANAGER"
+  },
+  {
+   "role": "LEGAL SPV"
+  },
+  {
+   "role": "LEGAL STAFF"
   }
  ],
  "script": null,
