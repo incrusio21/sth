@@ -95,8 +95,13 @@ FIELD_SIDIK_JARI_KEGIATAN = (
 FIELD_SIDIK_JARI_MATERIAL = ("item", "dosis", "uom")
 
 # Jabatan yang dianggap memegang peran mandor dan kerani di sebuah kemandoran.
-# Dicocokkan ke isi field Designation karyawan, yang di ERPNext memang berupa nama
-# jabatannya sendiri.
+#
+# Dicocokkan ke `designation_name`, bukan ke field `designation` karyawan: di ERP
+# ini nama dokumen Designation berupa kode (MD05, KR04, NS06) sementara teks
+# jabatannya — "MANDOR PERAWATAN", "KERANI DIVISI" — ada di designation_name.
+#
+# Sengaja tidak memakai awalan kodenya. KR09 misalnya bernama "KEPALA GUDANG",
+# bukan kerani; yang dicocokkan teksnya membuatnya tidak ikut terjaring.
 POLA_JABATAN = {
 	"mandor": "%MANDOR%",
 	"kerani": "%KERANI%",
@@ -174,9 +179,10 @@ def _cari_petugas(gang_code, peran):
 		"""
 		SELECT e.name
 		FROM `tabEmployee` e
+		INNER JOIN `tabDesignation` d ON d.name = e.designation
 		WHERE e.kemandoran = %(gang_code)s
 			AND e.status = 'Active'
-			AND UPPER(COALESCE(e.designation, '')) LIKE %(pola)s
+			AND UPPER(COALESCE(d.designation_name, '')) LIKE %(pola)s
 		ORDER BY e.name
 		LIMIT 1
 		""",
