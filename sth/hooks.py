@@ -225,6 +225,7 @@ override_doctype_class = {
 	"Event": "sth.overrides.event.Event",
 	"Exit Interview": "sth.overrides.exit_interview.ExitInterview",
 	"Expense Claim": "sth.overrides.expense_claim.ExpenseClaim",
+	"File": "sth.overrides.file.File",
 	"Item": "sth.overrides.item.Item",
 	"Leave Application": "sth.overrides.leave_application.LeaveApplication",
 	"Loan Disbursement": "sth.overrides.loan_disbursement.STHLoanDisbursement",
