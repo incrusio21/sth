@@ -34,17 +34,24 @@ class RencanaKerjaController(PlantationController):
         item.amount = flt(item.amount + (item.get("budget_tambahan") or 0), precision)
 
     def calculate_used_and_realized(self):
+        # Dijumlahkan dari baris kegiatan, bukan grand_total dokumennya. Satu RKH
+        # sekarang boleh memuat kegiatan dari beberapa RKB sekaligus, jadi
+        # grand_total-nya bukan lagi angka milik satu RKB — di dalamnya ikut
+        # material, pegawai, dan kendaraan yang tidak menunjuk RKB mana pun.
         rkh = frappe.qb.DocType("Rencana Kerja Harian")
+        rkh_k = frappe.qb.DocType("Detail RKH Kegiatan")
 
         self.used_total = (
-			frappe.qb.from_(rkh)
+			frappe.qb.from_(rkh_k)
+			.inner_join(rkh)
+			.on(rkh.name == rkh_k.parent)
 			.select(
-				Sum(rkh.grand_total)
+				Sum(rkh_k.amount)
             )
 			.where(
                 (rkh.docstatus == 1) &
-                (rkh.voucher_type == self.doctype) &
-                (rkh.voucher_no == self.name)
+                (rkh_k.voucher_type == self.doctype) &
+                (rkh_k.voucher_no == self.name)
 			)
 		).run()[0][0] or 0.0
 

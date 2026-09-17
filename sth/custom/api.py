@@ -148,6 +148,12 @@ def approve_api(self,method):
 	if self.owner != USER_API:
 		return
 
+	# Dokumen yang dibuat lewat endpoint create_or_update sengaja ditahan di draft
+	# supaya kiriman berikutnya masih bisa memperbaikinya. Yang memutuskan kapan
+	# disubmit adalah endpoint-nya sendiri, bukan hook ini.
+	if self.flags.get("lewati_submit_otomatis"):
+		return
+
 	# hook terpasang untuk semua doctype, lewati yang tidak submittable
 	# (Employee Payment Log, Buku Kerja Mandor Premi, dll yang dibuat saat on_submit)
 	if not self.meta.is_submittable or self.docstatus != 0:

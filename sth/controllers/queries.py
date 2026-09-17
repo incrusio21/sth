@@ -276,24 +276,41 @@ def employee_designation_query(
 def get_rencana_kerja_harian(kode_kegiatan, divisi, blok, posting_date, is_bibitan=False):
 	fieldname = "batch" if cint(is_bibitan) else "blok"
 
-	rkh = frappe.get_value("Rencana Kerja Harian", {
-		"kode_kegiatan": kode_kegiatan, "divisi": divisi, fieldname: blok, "posting_date": posting_date,
-		"docstatus": 1
-	}, ["name as rencana_kerja_harian", "voucher_type", "voucher_no"], as_dict=1)
+	# Kegiatan, blok, dan RKB-nya tinggal di baris Detail RKH Kegiatan sejak satu RKH
+	# boleh memuat beberapa kegiatan sekaligus, jadi pencariannya lewat baris itu.
+	rkh = frappe.db.sql("""
+		SELECT rkh.name AS rencana_kerja_harian, k.voucher_type, k.voucher_no
+		FROM `tabRencana Kerja Harian` rkh
+		INNER JOIN `tabDetail RKH Kegiatan` k ON k.parent = rkh.name
+		WHERE rkh.docstatus = 1
+			AND rkh.divisi = %(divisi)s
+			AND rkh.posting_date = %(posting_date)s
+			AND k.kegiatan = %(kode_kegiatan)s
+			AND k.{fieldname} = %(blok)s
+		ORDER BY rkh.creation
+		LIMIT 1
+	""".format(fieldname=fieldname), {
+		"divisi": divisi,
+		"posting_date": posting_date,
+		"kode_kegiatan": kode_kegiatan,
+		"blok": blok,
+	}, as_dict=1)
 
 	if not rkh:
-		frappe.throw(""" Rencana Kerja Harian not Found for Filters <br> 
-			Kegiatan : {} <br> 
-			Divisi : {} <br> 
+		frappe.throw(""" Rencana Kerja Harian not Found for Filters <br>
+			Kegiatan : {} <br>
+			Divisi : {} <br>
 			{} : {} <br>
 			Date : {} """.format(kode_kegiatan, divisi, unscrub(fieldname), blok, posting_date))
 
+	rkh = rkh[0]
+
 	# no rencana kerja harian
-	ress = { 
+	ress = {
 		**rkh,
-		"material": frappe.db.get_all("Detail RKH Material", 
-			filters={"parent": rkh}, fields=["item", "uom"]
-		) 
+		"material": frappe.db.get_all("Detail RKH Material",
+			filters={"parent": rkh["rencana_kerja_harian"]}, fields=["item", "uom"]
+		)
 	}
 
 	return ress

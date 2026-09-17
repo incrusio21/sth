@@ -25,7 +25,23 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 
 		rkh_m = frappe.qb.DocType("Detail RKH Material")
 		rkh = frappe.qb.DocType("Rencana Kerja Harian")
-		
+		rkh_k = frappe.qb.DocType("Detail RKH Kegiatan")
+
+		# RKB-nya menempel di baris kegiatan, bukan di dokumen RKH, sejak satu RKH
+		# boleh memuat kegiatan dari beberapa RKB. Dicari lewat subquery supaya RKH
+		# dengan dua baris ke RKB yang sama tidak menggandakan barisan materialnya.
+		rkh_dengan_rkb = (
+			frappe.qb.from_(rkh_k)
+			.select(rkh_k.parent)
+			.where(
+				(rkh_k.voucher_type == self.doctype) &
+				(rkh_k.voucher_no == self.name)
+			)
+		)
+
+		# Tabel material sendiri datar di level dokumen dan tidak menunjuk baris
+		# kegiatan mana pun; yang memilah miliknya RKB ini prevdoc_detail, karena
+		# nilainya dicocokkan ke nama baris material RKB di bawah.
 		material_used = frappe._dict(
 			(
 				frappe.qb.from_(rkh_m)
@@ -36,8 +52,7 @@ class RencanaKerjaBulananPerawatan(RencanaKerjaController):
 				)
 				.where(
 					(rkh.docstatus == 1) &
-					(rkh.voucher_type == self.doctype) &
-                	(rkh.voucher_no == self.name)
+					rkh.name.isin(rkh_dengan_rkb)
 				)
 				.groupby(rkh_m.prevdoc_detail)
 			).run()
