@@ -26,6 +26,18 @@ class DeliveryOrder(DeliveryNote):
 		super().validate()
 		self.terbitkan_qr_transporter()
 
+	def before_update_after_submit(self):
+		"""Baris transporter yang ditambah sesudah submit tetap dapat QR.
+
+		Tabel transporternya allow_on_submit, jadi barisnya boleh ditambah dan diubah
+		sesudah DO disubmit - dan di situ justru kebutuhannya, karena kendaraannya
+		sering baru ditunjuk sesudah DO terbit. Tapi `validate` tidak pernah jalan
+		lagi di jalur update-after-submit, jadi baris barunya tersimpan tanpa QR dan
+		sopirnya ditolak di pos. Penerbitannya dipanggil ulang di sini, dengan aturan
+		yang sama: QR yang masih berlaku tidak diganti.
+		"""
+		self.terbitkan_qr_transporter()
+
 	def terbitkan_qr_transporter(self):
 		"""Terbitkan QR untuk baris transporter yang belum punya atau sudah kedaluwarsa.
 
