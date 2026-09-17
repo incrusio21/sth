@@ -31,13 +31,14 @@ TIMBANGAN_FIELDS = [
 	"creation",
 	"wb_type",
 	"docstatus",
-	"receive_type"
+	"receive_type",
+	"no_polisi",
+	"driver_name",
 ]
 
 SPB_FIELDS = [
 	"name",
 	"posting_date",
-	"tipe_kendaraan",
 	"kendaraan",
 	"no_polisi",
 	"driver_code",
@@ -246,11 +247,13 @@ def _build_data(timbangan_rows):
 		driver = driver_map.get(spb.get("driver_code")) or {}
 		user = user_map.get(row.get("owner")) or {}
 
-		is_external = 1 if spb.get("tipe_kendaraan") == "Eksternal" else 0
-
-		trans_type = 0
-		if row.get("receive_type") == "TBS Eksternal":
-			trans_type = 2
+		# Keduanya turun dari receive_type. is_external dulu dibaca dari
+		# spb.tipe_kendaraan, yang tidak pernah bernilai "Eksternal": TBS
+		# Eksternal justru tidak punya SPB sama sekali, jadi nilainya selalu 0
+		# dan berlawanan dengan trans_type di baris yang sama.
+		eksternal = row.get("receive_type") == "TBS Eksternal"
+		is_external = 1 if eksternal else 0
+		trans_type = 2 if eksternal else 0
 
 		data.append({
 			"estate_code": row.get("unit"),
@@ -274,9 +277,14 @@ def _build_data(timbangan_rows):
 			# TODO: sumber data is_contract belum ditentukan
 			"is_contract": 0,
 			"veh_code": spb.get("kendaraan"),
-			"veh_regno": spb.get("no_polisi"),
+			# Nomor polisi dan nama sopir dibaca dari Timbangan-nya sendiri dulu,
+			# baru jatuh ke SPB. Keduanya di-fetch dari Security Check Point
+			# (license_plate & driver_name, asalnya dari Driver yang di-scan),
+			# jadi TBS Eksternal — yang tidak pernah punya SPB — tetap terisi.
+			# Untuk TBS Internal keduanya tidak pernah berbeda isi dari SPB.
+			"veh_regno": row.get("no_polisi") or spb.get("no_polisi"),
 			"driver_code": spb.get("driver_code"),
-			"driver_name": driver.get("first_name"),
+			"driver_name": row.get("driver_name") or driver.get("first_name"),
 			# Keduanya Float di doctype Timbangan, tapi EPCS menunggunya bulat.
 			# cint memotong pecahannya, bukan membulatkan; jumlah_janjang memang
 			# sudah berpresisi 0, jadi yang bisa kehilangan pecahan cuma
