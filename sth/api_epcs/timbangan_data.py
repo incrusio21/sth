@@ -3,6 +3,7 @@
 
 """API untuk menarik data dari doctype Timbangan."""
 
+import re
 from datetime import datetime, time as dtime, timedelta
 
 import frappe
@@ -77,6 +78,71 @@ def _combine_datetime(date_value, time_value):
 		return datetime.combine(date_value, time_value)
 
 	return get_datetime(f"{date_value} {time_value}")
+
+
+def _normalize_key(value):
+	"""Samakan bentuk nomor polisi / nama sebelum dicocokkan.
+
+	Huruf besar, tanpa spasi dan tanda baca — "BH 8043 MH" dan "bh8043mh" jadi satu
+	kunci, begitu juga "M. MUSTAMIR" dan "M MUSTAMIR".
+	"""
+	return re.sub(r"[^A-Z0-9]", "", (value or "").upper())
+
+
+def _map_unik(rows, key_field, value_field):
+	"""Index baris berdasarkan satu kolom, buang kunci yang dipakai lebih dari satu.
+
+	Pencocokan lewat teks selalu bisa kembar. Yang kembar sengaja dijatuhkan jadi
+	kosong: lebih baik kodenya tidak dikirim daripada menunjuk baris yang salah.
+	"""
+	hasil = {}
+
+	for row in rows:
+		key = _normalize_key(row.get(key_field))
+		if not key:
+			continue
+		hasil[key] = None if key in hasil else row.get(value_field)
+
+	return {key: value for key, value in hasil.items() if value}
+
+
+def _map_vra_by_plate():
+	"""Index Alat Berat Dan Kendaraan berdasarkan nomor polisinya.
+
+	SPB.kendaraan menunjuk doctype ini, tapi hampir tidak pernah diisi (5 dari 390
+	baris internal), sementara nomor polisinya ada di hampir semua baris. Plat yang
+	dipakai lebih dari satu kendaraan dibuang: lebih baik veh_code kosong daripada
+	menunjuk kendaraan yang salah.
+	"""
+	return _map_unik(
+		frappe.get_all(
+			"Alat Berat Dan Kendaraan",
+			filters=[["no_pol", "!=", ""]],
+			fields=["name", "no_pol"],
+			limit_page_length=0,
+		),
+		"no_pol",
+		"name",
+	)
+
+
+def _map_employee_by_name():
+	"""Index Employee berdasarkan nama lengkapnya.
+
+	Security Check Point menyimpan nama sopir sebagai teks, bukan link, jadi
+	kodenya cuma bisa dicari lewat nama. Nama kembar — 34 nama dipakai lebih dari
+	satu Employee — dibuang oleh _map_unik.
+	"""
+	return _map_unik(
+		frappe.get_all(
+			"Employee",
+			filters=[["employee_name", "!=", ""]],
+			fields=["name", "employee_name"],
+			limit_page_length=0,
+		),
+		"employee_name",
+		"name",
+	)
 
 
 def _map_by_name(doctype, names, fields):
@@ -219,7 +285,7 @@ def _build_data(timbangan_rows):
 	scp_map = _map_by_name(
 		"Security Check Point",
 		[r.get("ticket_number") for r in timbangan_rows],
-		["name", "supplier", "trans_no"],
+		["name", "supplier", "trans_no", "qr_code_scan"],
 	)
 	supplier_map = _map_by_name(
 		"Supplier",
@@ -236,6 +302,8 @@ def _build_data(timbangan_rows):
 		[r.get("owner") for r in timbangan_rows],
 		["name", "full_name"],
 	)
+	vra_by_plate = _map_vra_by_plate()
+	employee_by_name = _map_employee_by_name()
 
 	data = []
 
@@ -251,9 +319,24 @@ def _build_data(timbangan_rows):
 		# spb.tipe_kendaraan, yang tidak pernah bernilai "Eksternal": TBS
 		# Eksternal justru tidak punya SPB sama sekali, jadi nilainya selalu 0
 		# dan berlawanan dengan trans_type di baris yang sama.
+		no_polisi = row.get("no_polisi") or spb.get("no_polisi")
+
 		eksternal = row.get("receive_type") == "TBS Eksternal"
 		is_external = 1 if eksternal else 0
 		trans_type = 2 if eksternal else 0
+
+		driver_name = row.get("driver_name") or driver.get("first_name")
+
+		# Sopirnya tidak pernah jadi satu master. Yang internal karyawan sendiri,
+		# jadi dicari di Employee lewat namanya; yang eksternal sopir pihak ketiga
+		# yang QR-nya di-scan security, jadi yang dikirim ID Driver-nya. Dua jenis
+		# ID dalam satu field memang, tapi is_external membedakan barisnya.
+		driver_code = spb.get("driver_code")
+		if not driver_code:
+			if eksternal:
+				driver_code = scp.get("qr_code_scan")
+			else:
+				driver_code = employee_by_name.get(_normalize_key(driver_name))
 
 		data.append({
 			"estate_code": row.get("unit"),
@@ -276,15 +359,18 @@ def _build_data(timbangan_rows):
 			"spb_date": spb.get("posting_date"),
 			# TODO: sumber data is_contract belum ditentukan
 			"is_contract": 0,
-			"veh_code": spb.get("kendaraan"),
+			# Link kendaraan di SPB dipakai kalau ada; kalau tidak, kendaraannya
+			# dicari dari nomor polisi. Kendaraan pihak ketiga memang tidak
+			# terdaftar, jadi baris TBS Eksternal tetap kosong.
+			"veh_code": spb.get("kendaraan") or vra_by_plate.get(_normalize_key(no_polisi)),
 			# Nomor polisi dan nama sopir dibaca dari Timbangan-nya sendiri dulu,
 			# baru jatuh ke SPB. Keduanya di-fetch dari Security Check Point
 			# (license_plate & driver_name, asalnya dari Driver yang di-scan),
 			# jadi TBS Eksternal — yang tidak pernah punya SPB — tetap terisi.
 			# Untuk TBS Internal keduanya tidak pernah berbeda isi dari SPB.
-			"veh_regno": row.get("no_polisi") or spb.get("no_polisi"),
-			"driver_code": spb.get("driver_code"),
-			"driver_name": row.get("driver_name") or driver.get("first_name"),
+			"veh_regno": no_polisi,
+			"driver_code": driver_code,
+			"driver_name": driver_name,
 			# Keduanya Float di doctype Timbangan, tapi EPCS menunggunya bulat.
 			# cint memotong pecahannya, bukan membulatkan; jumlah_janjang memang
 			# sudah berpresisi 0, jadi yang bisa kehilangan pecahan cuma
