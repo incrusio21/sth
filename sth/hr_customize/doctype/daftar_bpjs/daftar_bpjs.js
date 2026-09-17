@@ -1,6 +1,6 @@
 frappe.ui.form.on('Daftar BPJS', {
 	refresh: function(frm) {
-		frm.tombol_general_ledger()
+		
 	
 		if (frm.doc.docstatus == 0 && frm.doc.daftar_bpjs_employee.length == 0)  {
 			frm.add_custom_button(__('Get Employee'), function() {
