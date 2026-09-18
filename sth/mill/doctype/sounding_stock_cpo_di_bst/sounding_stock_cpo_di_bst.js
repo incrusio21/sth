@@ -185,11 +185,14 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     calculate_oer_netto(frm) {
         const oer_netto_1 = frm.doc.tbs_olah ? flt(frm.doc.produksi_cpo) / frm.doc.tbs_olah * 100 : 0
 
-        // Penjaganya penyebut netto 2 itu sendiri, bukan tbs_olah: kalau seluruh
-        // TBS yang masuk kena potongan sortasi, tbs_olah terisi tapi selisihnya
-        // nol dan hasil baginya jadi Infinity.
+        // Dua penjaga, kembaran calculate_oer_netto di sisi server. Penyebut nol:
+        // seluruh TBS yang masuk kena potongan sortasi, hasil baginya Infinity.
+        // tbs_olah nol: potongan sortasinya sedang menumpuk untuk hari olah
+        // berikutnya, penyebutnya negatif dan OER-nya minus tanpa arti.
         const penyebut_netto_2 = flt(frm.doc.tbs_olah) - flt(frm.doc.potongan_sortasi)
-        const oer_netto_2 = penyebut_netto_2 ? flt(frm.doc.produksi_cpo) / penyebut_netto_2 * 100 : 0
+        const oer_netto_2 = (flt(frm.doc.tbs_olah) && penyebut_netto_2)
+            ? flt(frm.doc.produksi_cpo) / penyebut_netto_2 * 100
+            : 0
 
         frm.set_value("oer_netto_1", oer_netto_1)
         frm.set_value("oer_netto_2", oer_netto_2)

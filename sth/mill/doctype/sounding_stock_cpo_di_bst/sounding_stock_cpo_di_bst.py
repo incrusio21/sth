@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import today,flt,getdate,date_diff
 from frappe.model.mapper import get_mapped_doc
 
-from sth.mill.utils import get_adjustment_stock, set_rata_rata_rendemen_bulanan
+from sth.mill.utils import get_adjustment_stock, get_potongan_sortasi, set_rata_rata_rendemen_bulanan
 
 
 class SoundingStockCPOdiBST(Document):
@@ -110,14 +110,12 @@ class SoundingStockCPOdiBST(Document):
 		return data[0].qty if data else 0
 
 	def get_sortasi(self):
-		data_sortasi = frappe.db.sql("""
-			select sum(coalesce(netto - netto_2,0)) as qty
-			from `tabTimbangan` t
-			join `tabItem` i on t.kode_barang = i.name
-			where i.tipe_barang = 'TBS' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
-		""",(self.unit,self.tanggal_proses),as_dict=True)
+		"""Potongan sortasi yang belum terpakai sampai tanggal proses.
 
-		return data_sortasi[0].qty if data_sortasi else 0
+		Bukan cuma sortasi hari ini: hari yang pabriknya tidak mengolah ikut
+		terkumpul di sini sampai ada olah. Rinciannya di get_potongan_sortasi.
+		"""
+		return get_potongan_sortasi(self.unit, self.tanggal_proses, self.pabrik)
 
 	def get_total_stock(self):
 		warehouse = get_warehouse_bst(self.unit)
@@ -176,11 +174,17 @@ class SoundingStockCPOdiBST(Document):
 	def calculate_oer_netto(self):
 		self.oer_netto_1 = self.produksi_cpo / self.tbs_olah * 100 if self.tbs_olah else 0
 
-		# Penjaganya penyebut netto 2 itu sendiri, bukan tbs_olah: kalau seluruh TBS
-		# yang masuk kena potongan sortasi, tbs_olah terisi tapi selisihnya nol dan
-		# pembagiannya error.
+		# Dua penjaga sekaligus. Penyebut nol: seluruh TBS yang masuk kena potongan
+		# sortasi, tbs_olah terisi tapi selisihnya nol dan pembagiannya error.
+		# tbs_olah nol: potongan sortasinya sedang menumpuk untuk hari olah
+		# berikutnya, jadi penyebutnya negatif dan hasilnya OER minus yang tidak
+		# berarti apa-apa selain menahan submit lewat validate_minus_value.
 		penyebut_netto_2 = flt(self.tbs_olah) - flt(self.potongan_sortasi)
-		self.oer_netto_2 = self.produksi_cpo / penyebut_netto_2 * 100 if penyebut_netto_2 else 0
+		self.oer_netto_2 = (
+			self.produksi_cpo / penyebut_netto_2 * 100
+			if (flt(self.tbs_olah) and penyebut_netto_2)
+			else 0
+		)
 
 
 	def create_ste(self):

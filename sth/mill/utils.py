@@ -1,7 +1,7 @@
 import contextlib
 
 import frappe
-from frappe.utils import cint, flt, get_first_day
+from frappe.utils import add_days, cint, flt, get_first_day
 
 SEHARI = 24 * 3600
 
@@ -302,3 +302,75 @@ def hitung_rendemen(produksi, penyebut):
 	penyebut = flt(penyebut)
 
 	return flt(produksi) / penyebut * 100 if penyebut else 0.0
+
+
+def get_potongan_sortasi(unit, tanggal_proses, pabrik=None):
+	"""Potongan sortasi TBS yang belum terpakai sampai tanggal proses.
+
+	Sortasi dipotong waktu TBS ditimbang masuk, sedangkan yang memakainya baru
+	OER/KER netto 2 lewat penyebut `tbs olah - potongan sortasi`. Dua peristiwa
+	itu tidak selalu jatuh di hari yang sama: TBS yang masuk waktu pabrik tidak
+	mengolah baru diolah di hari berikutnya. Dibaca per hari seperti dulu,
+	potongan hari tanpa olah hilang tanpa pernah terpakai — dan hari olah
+	berikutnya memakai potongan yang terlalu kecil untuk TBS yang sebenarnya
+	diolah.
+
+	Karena itu jendelanya bukan satu hari, tapi sejak hari sesudah pabrik
+	terakhir mengolah sampai tanggal proses. Di hari tanpa olah angkanya
+	menumpuk, dan begitu ada olah seluruh tumpukan itu terpakai sekali lalu
+	jendelanya mulai lagi dari nol. Tidak ada batas mundur — permintaan user —
+	jadi berhenti mengolah berapa hari pun tetap terkumpul utuh.
+	"""
+	if not (unit and tanggal_proses):
+		return 0.0
+
+	args = {"unit": unit, "sampai": tanggal_proses}
+	batas_bawah = ""
+
+	if olah_terakhir := hari_olah_terakhir(unit, tanggal_proses, pabrik):
+		# hari olah terakhir sudah memakai sortasinya sendiri, jendelanya mulai
+		# sehari sesudahnya
+		args["mulai"] = add_days(olah_terakhir, 1)
+		batas_bawah = " and t.posting_date >= %(mulai)s"
+
+	nilai = frappe.db.sql("""
+		select sum(coalesce(t.netto - t.netto_2, 0))
+		from `tabTimbangan` t
+		join `tabItem` i on t.kode_barang = i.name
+		where i.tipe_barang = 'TBS' and t.docstatus = 1
+			and t.unit = %(unit)s and t.posting_date <= %(sampai)s
+	""" + batas_bawah, args)
+
+	return flt(nilai[0][0]) if nilai else 0.0
+
+
+def hari_olah_terakhir(unit, tanggal_proses, pabrik=None):
+	"""Tanggal terakhir sebelum tanggal proses yang pabriknya benar-benar mengolah.
+
+	Yang menandai "ada olah" cuma Data TBS dengan tbs_olah di atas nol; hari yang
+	Data TBS-nya belum dibuat terhitung tidak mengolah, sama seperti pembacaan
+	tbs_olah di kedua sounding. Data TBS yang dibatalkan tidak ikut.
+
+	Disaring pabrik kalau dokumennya membawa pabrik — itu yang dipakai sounding
+	CPO waktu membaca tbs_olah — dan jatuh ke unit kalau tidak, supaya pabrik
+	yang kosong tidak membuat pencarian ini kehilangan seluruh riwayat olah lalu
+	mengumpulkan sortasi sejak awal data.
+	"""
+	args = {"tanggal": tanggal_proses}
+
+	if pabrik:
+		saringan = "pabrik = %(pabrik)s"
+		args["pabrik"] = pabrik
+	else:
+		saringan = "unit = %(unit)s"
+		args["unit"] = unit
+
+	baris = frappe.db.sql("""
+		select max(tanggal_produksi)
+		from `tabData TBS`
+		where docstatus < 2 and coalesce(tbs_olah, 0) > 0
+			and tanggal_produksi < %(tanggal)s
+			and {saringan}
+	""".format(saringan=saringan), args)
+
+	return baris[0][0] if baris else None

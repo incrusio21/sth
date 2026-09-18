@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
 
-from sth.mill.utils import get_adjustment_stock, set_rata_rata_rendemen_bulanan
+from sth.mill.utils import get_adjustment_stock, get_potongan_sortasi, set_rata_rata_rendemen_bulanan
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def onload(self):
@@ -37,11 +37,17 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		self.stock_akhir = self.volume_sounding
 		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman)
 		self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
-		# Penjaganya penyebut netto 2 itu sendiri, bukan tbs_olah: kalau seluruh
-		# TBS yang masuk kena potongan sortasi, tbs_olah terisi tapi selisihnya nol
-		# dan pembagiannya error.
+		# Dua penjaga sekaligus. Penyebut nol: seluruh TBS yang masuk kena potongan
+		# sortasi, tbs_olah terisi tapi selisihnya nol dan pembagiannya error.
+		# tbs_olah nol: potongan sortasinya sedang menumpuk untuk hari olah
+		# berikutnya, jadi penyebutnya negatif dan hasilnya KER minus yang tidak
+		# berarti apa-apa selain menahan submit lewat validate_minus_value.
 		penyebut_netto_2 = flt(self.tbs_olah) - flt(self.sortasi)
-		self.ker_netto_2 = self.produksi/penyebut_netto_2*100 if penyebut_netto_2 else 0
+		self.ker_netto_2 = (
+			self.produksi / penyebut_netto_2 * 100
+			if (flt(self.tbs_olah) and penyebut_netto_2)
+			else 0
+		)
 
 	def on_submit(self):
 		if self.produksi > 0:
@@ -132,18 +138,13 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			where i.tipe_barang = 'Palm Kernel' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
-		data_sortasi = frappe.db.sql("""
-			select sum(coalesce(netto - netto_2,0)) as qty
-			from `tabTimbangan` t
-			join `tabItem` i on t.kode_barang = i.name
-			where i.tipe_barang = 'TBS' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
-		""",(self.unit,self.tanggal_proses),as_dict=True)
-
 		self.stock_awal = self.get_stock_awal()
 		self.set_adjustment()
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
 		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
-		self.sortasi = data_sortasi[0].qty if data_sortasi else 0
+		# Bukan cuma sortasi hari ini: hari yang pabriknya tidak mengolah ikut
+		# terkumpul sampai ada olah. Rinciannya di get_potongan_sortasi.
+		self.sortasi = get_potongan_sortasi(self.unit, self.tanggal_proses, self.pabrik)
 
 		# Stock akhir dan produksinya dihitung dengan rumus yang sama seperti waktu
 		# dokumen disimpan, supaya angka yang muncul begitu tombol ditekan tidak
