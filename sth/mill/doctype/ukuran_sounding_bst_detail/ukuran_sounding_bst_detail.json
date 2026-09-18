@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "detail_section",
   "tinggi",
   "volume"
  ],
@@ -14,7 +15,7 @@
    "fieldname": "tinggi",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Tinggi(CM)",
+   "label": "Tinggi (mm)",
    "non_negative": 1,
    "precision": "3",
    "reqd": 1
@@ -23,17 +24,22 @@
    "fieldname": "volume",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Volume(Liter)",
+   "label": "Volume (Liter)",
    "non_negative": 1,
    "precision": "3",
    "reqd": 1
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-11 10:08:41.491824",
+ "modified": "2026-09-18 14:53:14.657597",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Sounding BST Detail",

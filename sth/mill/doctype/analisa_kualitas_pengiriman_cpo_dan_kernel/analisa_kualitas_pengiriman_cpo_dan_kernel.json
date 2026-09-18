@@ -54,8 +54,7 @@
    "fieldname": "tanggal",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Tanggal",
-   "read_only": 1
+   "label": "Tanggal"
   },
   {
    "default": "Now",
@@ -249,7 +248,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-17 15:01:40.980507",
+ "modified": "2026-09-18 13:57:44.357040",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Analisa Kualitas Pengiriman CPO dan KERNEL",
