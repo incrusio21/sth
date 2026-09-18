@@ -279,6 +279,8 @@ doc_events = {
 			"sth.accounting_sth.validasi_closing.validasi_sebelum_closing",
 			"sth.overrides.accounting_period.check_unsubmitted_salary_slip",
 		],
+		# arah buka dijaga kebalikannya: mill dibuka dulu, baru kebun
+		"before_cancel": "sth.accounting_sth.validasi_closing.validasi_sebelum_batal",
 	},
 
 	"Data TBS": {
