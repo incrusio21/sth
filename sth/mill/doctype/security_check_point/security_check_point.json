@@ -30,6 +30,7 @@
   "tanggal_panen",
   "no_polisi",
   "supplier",
+  "nama_supplier",
   "purchase_order",
   "column_break_nccm",
   "company",
@@ -118,7 +119,7 @@
    "fieldname": "qr_code_scan",
    "fieldtype": "Link",
    "in_preview": 1,
-   "label": "QR Code Scan",
+   "label": "Plat Nomer",
    "options": "Driver"
   },
   {
@@ -277,6 +278,7 @@
    "fetch_from": "qr_code_scan.supplier",
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Supplier",
    "options": "Supplier",
    "read_only": 1
@@ -484,13 +486,21 @@
    "fieldtype": "Data",
    "label": "Scan QR DO",
    "no_copy": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "nama_supplier",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nama Supplier",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-17 14:56:18.875249",
+ "modified": "2026-09-18 09:23:28.111309",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

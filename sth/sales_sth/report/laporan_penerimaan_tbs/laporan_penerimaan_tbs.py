@@ -101,6 +101,27 @@ def get_data(filters):
 	
 	conditions = get_conditions(filters)
 	
+	# data = frappe.db.sql("""
+	# 	SELECT
+	# 		posting_date,
+	# 		weight_in_time,
+	# 		weight_out_time,
+	# 		supplier,
+	# 		ticket_number,
+	# 		license_number,
+	# 		bruto,
+	# 		tara,
+	# 		netto,
+	# 		ROUND(potongan_sortasi * netto / 100, 0) as potongan,
+	# 		netto - ROUND(netto * (potongan_sortasi / 100), 0) as berat_normal,
+	# 		driver_name
+	# 	FROM
+	# 		`tabTimbangan`
+	# 	WHERE docstatus = 1
+	# 		{conditions}
+	# 	ORDER BY
+	# 		posting_date, weight_in_time
+	# """.format(conditions=conditions), filters, as_dict=1)
 	data = frappe.db.sql("""
 		SELECT
 			posting_date,
@@ -113,13 +134,11 @@ def get_data(filters):
 			tara,
 			netto,
 			ROUND(potongan_sortasi * netto / 100, 0) as potongan,
-			netto - ROUND(netto * (potongan_sortasi / 100), 0) as berat_normal,
+			FORMAT(netto_2, 2) as berat_normal,
 			driver_name
 		FROM
 			`tabTimbangan`
-		WHERE
-			receive_type IN ('TBS Internal', 'TBS Eksternal')
-			AND docstatus = 1
+		WHERE docstatus = 1
 			{conditions}
 		ORDER BY
 			posting_date, weight_in_time
@@ -136,6 +155,8 @@ def get_conditions(filters):
 			conditions.append("AND receive_type = 'TBS Eksternal'")
 		elif filters.get("tbs") == "Internal":
 			conditions.append("AND receive_type = 'TBS Internal'")
+		else:
+			conditions.append("AND receive_type IN ('TBS Internal', 'TBS Eksternal')")
 	
 	if filters.get("supplier"):
 		conditions.append("AND supplier = %(supplier)s")

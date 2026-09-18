@@ -11,11 +11,23 @@ def execute(filters=None):
 	columns = get_columns()
 	data = []
 
+	grand_total = {
+		"bruto": 0,
+		"tara": 0,
+		"netto_1": 0,
+		"sort": 0,
+		"netto_2": 0,
+		"bjr": 0,
+		"grader": 0,
+	}
+
 	if laporan_type == "External":
 		report_rows = get_data_external(filters)
+
 	elif laporan_type == "Internal":
 		report_rows = get_data_internal(filters)
-	else:  # "All"
+
+	else:
 		report_rows = get_data_all(filters)
 
 	for row in report_rows:
@@ -28,9 +40,7 @@ def execute(filters=None):
 			child["is_group"] = 0
 			data.append(child)
 
-		data.append({
-			"is_group": 1,
-			"jam_keluar": "Total",
+		group_total = {
 			"bruto": round(sum(flt(d["bruto"] or 0) for d in row["data"]), 0),
 			"tara": round(sum(flt(d["tara"] or 0) for d in row["data"]), 0),
 			"netto_1": round(sum(flt(d["netto_1"] or 0) for d in row["data"]), 0),
@@ -38,7 +48,28 @@ def execute(filters=None):
 			"netto_2": round(sum(flt(d["netto_2"] or 0) for d in row["data"]), 0),
 			"bjr": round(sum(flt(d["bjr"] or 0) for d in row["data"]), 0),
 			"grader": round(sum(flt(d["grader"] or 0) for d in row["data"]), 0),
+		}
+
+		for field in grand_total:
+			grand_total[field] += group_total[field]
+
+		data.append({
+			"is_group": 1,
+			"jam_keluar": "Total",
+			**group_total
 		})
+
+	data.append({
+		"is_group": 1,
+		"jam_keluar": "Grand Total",
+		"bruto": round(grand_total["bruto"], 0),
+		"tara": round(grand_total["tara"], 0),
+		"netto_1": round(grand_total["netto_1"], 0),
+		"sort": round(grand_total["sort"], 0),
+		"netto_2": round(grand_total["netto_2"], 0),
+		"bjr": round(grand_total["bjr"], 0),
+		"grader": round(grand_total["grader"], 0),
+	})
 
 	return columns, data
 
@@ -162,6 +193,29 @@ def get_condition(filters, report_type):
 
 def get_data_external(filters):
 	conditions = get_condition(filters, "External")
+	# sql = frappe.db.sql("""
+	# 	SELECT
+	# 		t.name,
+	# 		s.supplier_name as grouping,
+	# 		t.no_polisi,
+	# 		t.ticket_number as no_referensi,
+	# 		t.name as no_slip_timbang,
+	# 		t.driver_name as nama_supir,
+	# 		t.posting_date as tgl_masuk,
+	# 		t.weight_in_time as jam_masuk,
+	# 		t.posting_date as tgl_keluar,
+	# 		t.weight_out_time as jam_keluar,
+	# 		FORMAT(t.bruto, 2) as bruto,
+	# 		FORMAT(t.tara, 2) as tara,
+	# 		FORMAT(t.netto, 2) as netto_1,
+	# 		ROUND(potongan_sortasi * netto / 100, 0) as sort,
+	# 		netto - ROUND(netto * (potongan_sortasi / 100), 0) as netto_2,
+	# 		FORMAT(t.isi_komidel, 2) as bjr,
+	# 		FORMAT(0, 2) as grader
+	# 	FROM `tabTimbangan` t
+	# 	LEFT JOIN `tabSupplier` s ON s.name = t.supplier
+	# 	WHERE t.receive_type = "TBS Eksternal" AND t.supplier IS NOT NULL AND t.docstatus = 1 {};
+	# """.format(conditions), filters, as_dict=True)
 	sql = frappe.db.sql("""
 		SELECT
 			t.name,
@@ -177,8 +231,8 @@ def get_data_external(filters):
 			FORMAT(t.bruto, 2) as bruto,
 			FORMAT(t.tara, 2) as tara,
 			FORMAT(t.netto, 2) as netto_1,
-			ROUND(potongan_sortasi * netto / 100, 0) as sort,
-			netto - ROUND(netto * (potongan_sortasi / 100), 0) as netto_2,
+			ROUND(t.potongan_sortasi * t.netto / 100, 0) as sort,
+			FORMAT(t.netto_2, 2) as netto_2,
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
 		FROM `tabTimbangan` t
@@ -190,6 +244,29 @@ def get_data_external(filters):
 
 def get_data_internal(filters):
 	conditions = get_condition(filters, "Internal")
+	# sql = frappe.db.sql("""
+	# 	SELECT
+	# 		t.name,
+	# 		spb.divisi as grouping,
+	# 		t.no_polisi,
+	# 		t.ticket_number as no_referensi,
+	# 		t.name as no_slip_timbang,
+	# 		t.driver_name as nama_supir,
+	# 		t.posting_date as tgl_masuk,
+	# 		t.weight_in_time as jam_masuk,
+	# 		t.posting_date as tgl_keluar,
+	# 		t.weight_out_time as jam_keluar,
+	# 		FORMAT(t.bruto, 2) as bruto,
+	# 		FORMAT(t.tara, 2) as tara,
+	# 		FORMAT(t.netto, 2) as netto_1,
+	# 		FORMAT(t.netto * (t.potongan_sortasi / 100), 2) as sort,
+	# 		FORMAT(t.netto_2, 2) as netto_2,
+	# 		FORMAT(t.isi_komidel, 2) as bjr,
+	# 		FORMAT(0, 2) as grader
+	# 	FROM `tabTimbangan` t
+	# 	LEFT JOIN `tabSurat Pengantar Buah` as spb ON spb.name = t.spb
+	# 	WHERE t.receive_type = "TBS Internal" AND t.spb IS NOT NULL AND t.docstatus = 1 {};
+	# """.format(conditions), filters, as_dict=True)
 	sql = frappe.db.sql("""
 		SELECT
 			t.name,
@@ -205,7 +282,7 @@ def get_data_internal(filters):
 			FORMAT(t.bruto, 2) as bruto,
 			FORMAT(t.tara, 2) as tara,
 			FORMAT(t.netto, 2) as netto_1,
-			FORMAT(t.netto * (t.potongan_sortasi / 100), 2) as sort,
+			ROUND(t.potongan_sortasi * t.netto / 100, 0) as sort, as sort,
 			FORMAT(t.netto_2, 2) as netto_2,
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
