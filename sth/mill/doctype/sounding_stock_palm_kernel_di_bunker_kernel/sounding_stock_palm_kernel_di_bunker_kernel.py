@@ -36,7 +36,18 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def hitung_produksi(self):
 		self.stock_akhir = self.volume_sounding
 		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman)
-		self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0 
+		self.hitung_ker_netto()
+
+	def hitung_ker_netto(self):
+		"""KER netto 1 dan 2 dari produksi, tbs olah, dan potongan sortasi.
+
+		Dipisah dari hitung_produksi supaya bisa dihitung ulang sendirian tanpa
+		ikut menyentuh produksi — produksi sudah jadi Stock Entry waktu dokumennya
+		disubmit, jadi patch yang cuma membetulkan rendemen tidak boleh
+		menggesernya. Sejajar dengan calculate_oer_netto di Sounding CPO.
+		"""
+		self.ker_netto_1 = self.produksi / self.tbs_olah*100 if self.tbs_olah else 0
+
 		# Dua penjaga sekaligus. Penyebut nol: seluruh TBS yang masuk kena potongan
 		# sortasi, tbs_olah terisi tapi selisihnya nol dan pembagiannya error.
 		# tbs_olah nol: potongan sortasinya sedang menumpuk untuk hari olah
