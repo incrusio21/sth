@@ -6,6 +6,10 @@ from frappe.utils import cint, flt, format_date, get_link_to_form, getdate
 from frappe.query_builder.functions import Coalesce, Sum
 
 from sth.controllers.buku_kerja_mandor import BukuKerjaMandorController
+from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import (
+	lepas_recap_dari_detail_spb,
+	sambungkan_recap_ke_detail_spb,
+)
 from sth.custom.api import (
 	USER_API,
 	fix_kegiatan_from_api,
@@ -496,6 +500,13 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 				rpb.save()
 				# message += f"<br>{b}"
 
+			# Baris SPB menautkan dirinya ke recap sekali saja, waktu SPB-nya
+			# disimpan. BKM Panen sering baru masuk berhari-hari sesudah itu,
+			# jadi di saat SPB disimpan recapnya belum ada dan tautannya
+			# ditinggal kosong selamanya. Recap-nya baru lahir di sini, jadi di
+			# sinilah barisnya masih bisa disusulkan.
+			sambungkan_recap_ke_detail_spb(b, self.posting_date, rpb.name)
+
 		# if message:
 		# 	frappe.throw(f"List Blok already used in {format_date(self.posting_date)}: {message}")
 
@@ -604,6 +615,10 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 
 			# rekap tanpa voucher tersisa tidak perlu disimpan sebagai baris kosong
 			if not rpb.voucher_recap and not flt(rpb.transfered_janjang):
+				# Baris SPB yang menunjuk recap ini dilepas dulu — Frappe menolak
+				# menghapus dokumen yang masih ditunjuk, dan sejak tautannya ikut
+				# dipasang dari sini yang menunjuk hampir selalu ada.
+				lepas_recap_dari_detail_spb(rpb.name)
 				rpb.flags.transaction_panen = True
 				rpb.delete()
 				continue

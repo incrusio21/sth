@@ -13,6 +13,7 @@ sth.patches.hitung_ulang_rata_rata_rendemen_sounding
 sth.patches.hitung_ulang_oer_netto_sounding_cpo
 sth.patches.buat_qr_pabrik
 sth.patches.pindahkan_kegiatan_rkh_ke_tabel
+sth.patches.sambungkan_recap_panen_ke_spb
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).

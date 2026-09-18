@@ -512,6 +512,92 @@ def _apply_recap(detail, suffix=""):
 
 	detail.set(f"recap_panen{suffix}", recap_panen)
 
+def sambungkan_recap_ke_detail_spb(blok, panen_date, recap_panen):
+	"""Pasang recap ke baris SPB yang blok dan tanggal panennya sama.
+
+	Arah kebalikan dari _apply_recap: di sana SPB yang mencari recap waktu
+	dirinya disimpan, di sini recap yang menyusul mencari barisnya. Recap Panen
+	by Blok lahir dari BKM Panen, dan BKM sering baru masuk berhari-hari sesudah
+	SPB-nya tersimpan — di saat SPB disimpan recapnya belum ada, jadi barisnya
+	ditinggal kosong dan selama ini tidak pernah ada yang menengoknya lagi.
+
+	Divisi sengaja tidak ikut disaring. Divisi BKM tidak selalu sama dengan
+	divisi blok yang dipanen, sementara divisi recap ikut master Blok — hampir
+	separuh BKM Panen berbeda divisi dari bloknya, jadi menyamakan divisi justru
+	membuat sebagian besar baris tidak pernah ketemu. Blok dan tanggal panen
+	sudah menunjuk satu recap, sama seperti yang dipakai get_recap_panen.
+
+	Yang sudah tertaut tidak ditimpa: tautan lama bisa saja menunjuk recap yang
+	sekarang dipakai dokumen lain, dan memindahkannya diam-diam menggeser janjang
+	yang sudah dihitung. Baris restan ikut diperiksa karena punya pasangan blok
+	dan tanggalnya sendiri.
+
+	Ditulis lewat db.set_value, bukan doc.save(), karena SPB-nya nyaris selalu
+	sudah disubmit waktu BKM-nya datang.
+
+	Kembaliannya jumlah baris yang tersambung.
+	"""
+	if not (blok and panen_date and recap_panen):
+		return 0
+
+	terisi = 0
+
+	for kolom_blok, kolom_tanggal, kolom_recap in (
+		("blok", "panen_date", "recap_panen"),
+		("blok_restan", "panen_date_restan", "recap_panen_restan"),
+	):
+		baris = frappe.db.sql_list("""
+			SELECT d.name
+			FROM `tabSPB Timbangan Pabrik` d
+			INNER JOIN `tabSurat Pengantar Buah` s ON s.name = d.parent
+			WHERE s.docstatus < 2
+				AND d.{kolom_blok} = %(blok)s
+				AND d.{kolom_tanggal} = %(panen_date)s
+				AND IFNULL(d.{kolom_recap}, '') = ''
+		""".format(
+			kolom_blok=kolom_blok, kolom_tanggal=kolom_tanggal, kolom_recap=kolom_recap
+		), {"blok": blok, "panen_date": panen_date})
+
+		for name in baris:
+			frappe.db.set_value(
+				"SPB Timbangan Pabrik", name, kolom_recap, recap_panen, update_modified=False
+			)
+			terisi += 1
+
+	return terisi
+
+def lepas_recap_dari_detail_spb(recap_panen):
+	"""Lepas tautan baris SPB ke recap yang sebentar lagi dihapus.
+
+	Recap Panen by Blok hidup mengikuti BKM Panen: begitu BKM terakhir yang
+	mengisinya dibatalkan, recapnya ikut dihapus. Frappe menolak menghapus
+	dokumen yang masih ditunjuk dokumen lain, jadi tanpa dilepas dari sini
+	pembatalan BKM-nya berhenti dengan LinkExistsError.
+
+	Melepasnya tidak menghilangkan apa-apa: yang ditunjuk memang akan lenyap,
+	dan tautannya terpasang lagi sendiri lewat sambungkan_recap_ke_detail_spb
+	begitu ada BKM baru untuk blok dan tanggal itu.
+
+	Kembaliannya jumlah baris yang dilepas.
+	"""
+	if not recap_panen:
+		return 0
+
+	terlepas = 0
+
+	for kolom_recap in ("recap_panen", "recap_panen_restan"):
+		baris = frappe.db.sql_list("""
+			SELECT name FROM `tabSPB Timbangan Pabrik` WHERE {kolom_recap} = %(recap_panen)s
+		""".format(kolom_recap=kolom_recap), {"recap_panen": recap_panen})
+
+		for name in baris:
+			frappe.db.set_value(
+				"SPB Timbangan Pabrik", name, kolom_recap, "", update_modified=False
+			)
+			terlepas += 1
+
+	return terlepas
+
 @frappe.whitelist()
 def get_recap_panen(blok, posting_date):
 	filters = {

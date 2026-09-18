@@ -7,6 +7,7 @@ from frappe.utils import flt, get_url_to_form, now
 from frappe.model.document import Document
 
 from sth.utils import generate_duplicate_key
+from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import get_recap_panen
 
 class RekapTimbanganPanen(Document):
 	def validate(self):
@@ -41,7 +42,10 @@ class RekapTimbanganPanen(Document):
 		self.update_transfered_bkm_panen()
 		
 	def update_transfered_bkm_panen(self):
-		list_rb = set(rp.recap_panen for rp in self.details)
+		# Baris yang recap-nya tidak ketemu tetap boleh ikut direkap — janjangnya
+		# cuma belum bisa dipulangkan ke BKM. Tanpa disaring, None-nya sampai ke
+		# frappe.get_doc dan menggagalkan seluruh submit.
+		list_rb = set(rp.recap_panen for rp in self.details if rp.recap_panen)
 
 		voucher_data = {}
 		for rb in list_rb:
@@ -93,6 +97,14 @@ def get_bkm_panen(unit, divisi, posting_date):
 	for rt in rekap_timbangan:
 		if rt.status != "Weighed":
 			frappe.throw(f"{get_url_to_form('Surat Pengantar Buah', rt.surat_pengantar_buah)} weight not verified")
+
+		# Jaring pengaman untuk baris SPB yang tautannya tidak pernah terpasang:
+		# recap-nya lahir sesudah SPB tersimpan, dan sebelum BKM Panen ikut
+		# menyusulkan tautannya tidak ada yang mengisi kolom itu. Dicari lagi di
+		# sini supaya rekapnya tidak lahir dengan recap_panen kosong — tanpa itu
+		# janjangnya tidak pernah pulang ke BKM.
+		if not rt.recap_panen:
+			rt.recap_panen = get_recap_panen(rt.blok, rt.panen_date).get("recap_panen")
 
 		details.append(rt)
 
