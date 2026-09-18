@@ -4,10 +4,10 @@
 import frappe,copy,random
 from frappe.utils import add_days
 from frappe.model.document import Document
-from frappe.utils import get_datetime,flt
+from frappe.utils import get_datetime,flt,get_link_to_form,get_first_day,get_last_day,formatdate
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
 from sth.mill.doctype.data_tbs.data_tbs import hitung_ulang_setelah_timbangan
-from sth.custom.api import submit_after_insert
+from sth.custom.api import submit_after_insert, USER_API
 from frappe import _, delete_doc
 from frappe.model.mapper import get_mapped_doc
 
@@ -144,6 +144,89 @@ class Timbangan(Document):
 			self.update_spb_weight()
 
 		hitung_ulang_setelah_timbangan(self)
+
+		self.ingatkan_timbangan_draft()
+
+	def ingatkan_timbangan_draft(self):
+		"""Sebut sisa timbangan draft sebulan ini sesudah yang ini disubmit.
+
+		Truk ditimbang dua kali, dan di antara bruto dan tara truk lain ikut
+		masuk, jadi beberapa draft hidup bersamaan di satu shift. Draft yang
+		sudah lengkap bruto dan taranya tapi tidak pernah disubmit tidak pernah
+		sampai ke Data TBS, SPB, maupun stok — dan baru ketahuan berhari-hari
+		kemudian waktu angkanya dicari. Saat kerani menutup satu timbangan
+		adalah saat dia paling mungkin masih ingat truk mana yang tertinggal.
+
+		Yang dilihat sebulan penuh, bukan cuma hari ini: draft yang ketinggalan
+		di awal bulan masih sempat dibereskan selama bulannya belum ditutup.
+		Bulan yang sudah lewat tidak ikut disebut supaya draft telantar lama
+		tidak muncul di tiap submit tanpa ada lagi yang bisa diperbuat.
+
+		Cuma pemberitahuan: submit yang ini tidak dihalangi.
+		"""
+		# Submit lewat API tidak punya orang yang membaca pesannya; pesannya
+		# cuma akan menumpang di respons tanpa pernah dilihat kerani.
+		if self.flags.get("submit_after_insert") or frappe.session.user == USER_API:
+			return
+
+		if not self.posting_date:
+			return
+
+		filters = {
+			"docstatus": 0,
+			"posting_date": ("between", [get_first_day(self.posting_date), get_last_day(self.posting_date)]),
+			"name": ("!=", self.name),
+		}
+
+		# Satu pabrik satu company, jadi tanpa saringan ini kerani unit lain
+		# ikut disebut-sebut drafnya.
+		if self.company:
+			filters["company"] = self.company
+
+		# Sebulan penuh bisa menyisakan draft jauh lebih banyak daripada yang
+		# muat dibaca sekali lihat; yang ditampilkan dibatasi, jumlah aslinya
+		# tetap dihitung utuh supaya angkanya tidak menipu.
+		jumlah = frappe.db.count("Timbangan", filters)
+
+		if not jumlah:
+			return
+
+		batas = 15
+		draft = frappe.get_all(
+			"Timbangan",
+			filters=filters,
+			fields=["name", "posting_date", "no_polisi", "license_number", "bruto", "tara"],
+			order_by="posting_date asc, creation asc",
+			limit_page_length=batas,
+		)
+
+		baris = []
+		for row in draft:
+			if flt(row.bruto) and flt(row.tara):
+				keterangan = _("sudah selesai timbang, tinggal disubmit")
+			elif flt(row.bruto):
+				keterangan = _("tara belum diambil")
+			else:
+				keterangan = _("belum ditimbang")
+
+			baris.append(
+				"<li>{0} — {1} — {2} ({3})</li>".format(
+					get_link_to_form("Timbangan", row.name),
+					formatdate(row.posting_date),
+					row.no_polisi or row.license_number or _("tanpa no polisi"),
+					keterangan,
+				)
+			)
+
+		if jumlah > batas:
+			baris.append("<li>{0}</li>".format(_("dan {0} lainnya").format(jumlah - batas)))
+
+		frappe.msgprint(
+			_("Masih ada {0} timbangan bulan ini yang belum disubmit:").format(frappe.bold(jumlah))
+			+ "<ul>{0}</ul>".format("".join(baris)),
+			title=_("Timbangan Belum Diselesaikan"),
+			indicator="orange",
+		)
 
 	def update_spb_weight(self):
 		"""Salin hasil timbang ke SPB.
