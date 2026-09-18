@@ -112,7 +112,7 @@
    "fieldname": "ukuran_hasil_sounding",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Ukuran Hasil Sounding Rata-Rata (CM)",
+   "label": "Ukuran Hasil Sounding Rata-Rata (mm)",
    "precision": "1",
    "read_only": 1
   },
@@ -245,7 +245,7 @@
    "fieldname": "ukuran_hasil_sounding_2",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Ukuran Hasil Sounding (CM)",
+   "label": "Ukuran Hasil Sounding (mm)",
    "precision": "1",
    "read_only": 1
   },
@@ -444,21 +444,21 @@
    "default": "0",
    "fieldname": "uhst1",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding Titik 1 (CM)",
+   "label": "Ukuran Hasil Sounding Titik 1 (mm)",
    "precision": "1"
   },
   {
    "default": "0",
    "fieldname": "uhst2",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding Titik 2 (CM)",
+   "label": "Ukuran Hasil Sounding Titik 2 (mm)",
    "precision": "1"
   },
   {
    "default": "0",
    "fieldname": "uhst3",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding Titik 3 (CM)",
+   "label": "Ukuran Hasil Sounding Titik 3 (mm)",
    "precision": "1"
   },
   {
@@ -486,21 +486,21 @@
    "default": "0",
    "fieldname": "uhst1_2",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding Titik 1 (CM)",
+   "label": "Ukuran Hasil Sounding Titik 1 (mm)",
    "precision": "1"
   },
   {
    "default": "0",
    "fieldname": "uhst2_2",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding Titik 2 (CM)",
+   "label": "Ukuran Hasil Sounding Titik 2 (mm)",
    "precision": "1"
   },
   {
    "default": "0",
    "fieldname": "uhst3_2",
    "fieldtype": "Float",
-   "label": "Ukuran Hasil Sounding Titik 3 (CM)",
+   "label": "Ukuran Hasil Sounding Titik 3 (mm)",
    "precision": "1"
   },
   {
@@ -619,7 +619,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-16 14:46:28.816545",
+ "modified": "2026-09-18 15:02:19.343556",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",
