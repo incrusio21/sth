@@ -258,8 +258,10 @@ class Timbangan(Document):
 				item_code=self.kode_barang
 			)
 		
-		if sort_doc:=frappe.db.get_value("Sortasi",{"no_timbangan": self.name}):
-			frappe.get_doc("Sortasi",sort_doc).cancel()
+		if sort_name:=frappe.db.get_value("Sortasi",{"no_timbangan": self.name}):
+			sort_doc = frappe.get_doc("Sortasi",sort_name)
+			if sort_doc.docstatus == 1:
+				sort_doc.cancel()
 
 		hitung_ulang_setelah_timbangan(self)
 

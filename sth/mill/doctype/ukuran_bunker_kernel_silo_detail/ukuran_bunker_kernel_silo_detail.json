@@ -16,7 +16,7 @@
    "fieldname": "ukuran",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Ukuran",
+   "label": "Ukuran ( CM )",
    "precision": "5"
   },
   {
@@ -39,7 +39,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-07 13:32:02.946470",
+ "modified": "2026-09-18 16:02:04.666585",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Bunker Kernel Silo Detail",

@@ -129,6 +129,8 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
 
     ukuran_hasil_sounding(frm) {
         frm.events.get_ukuran_sounding(frm.doc.ukuran_hasil_sounding, "BST 01", frm.doc.pabrik || '').then((res) => {
+            console.log(res);
+
             frm.set_value("ukuran_hasil_sounding_kg", res)
             frm.set_value("tonase_sebenarnya", flt(frm.doc.ukuran_hasil_sounding_kg) * flt(frm.doc.berat_jenis_suhu))
         })

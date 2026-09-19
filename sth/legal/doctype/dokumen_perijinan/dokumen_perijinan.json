@@ -11,8 +11,12 @@
   "company",
   "column_break_ilyf",
   "amended_from",
-  "informasi_perijinan_tab",
-  "details"
+  "informasi_detail_section",
+  "details",
+  "upload_file_tab",
+  "upload",
+  "kriteria_upload_html",
+  "kriteria_upload_sebelumnya"
  ],
  "fields": [
   {
@@ -33,11 +37,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "informasi_perijinan_tab",
-   "fieldtype": "Tab Break",
-   "label": "Informasi Perijinan"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -56,12 +55,42 @@
    "fieldtype": "Table",
    "label": "Details",
    "options": "Detail Informasi Dokumen Perijinan"
+  },
+  {
+   "fieldname": "informasi_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Informasi Detail"
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Upload",
+   "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kriteria_upload_sebelumnya",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Sebelumnya",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-04 10:18:26.552691",
+ "modified": "2026-09-18 16:37:17.272035",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",
@@ -82,7 +111,7 @@
   }
  ],
  "row_format": "Dynamic",
- "sort_field": "modified",
+ "sort_field": "company",
  "sort_order": "DESC",
  "states": []
 }

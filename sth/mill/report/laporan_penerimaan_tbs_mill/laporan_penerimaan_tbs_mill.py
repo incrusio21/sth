@@ -282,7 +282,7 @@ def get_data_internal(filters):
 			FORMAT(t.bruto, 2) as bruto,
 			FORMAT(t.tara, 2) as tara,
 			FORMAT(t.netto, 2) as netto_1,
-			ROUND(t.potongan_sortasi * t.netto / 100, 0) as sort, as sort,
+			ROUND(t.potongan_sortasi * t.netto / 100, 0) as sort,
 			FORMAT(t.netto_2, 2) as netto_2,
 			FORMAT(t.isi_komidel, 2) as bjr,
 			FORMAT(0, 2) as grader
