@@ -17,8 +17,8 @@ sth.patches.sambungkan_recap_panen_ke_spb
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
-# perbaiki_restan_data_tbs, hitung_ulang_tbs_diterima_data_tbs, dan
-# isi_adjustment_sounding sengaja tidak didaftarkan: ketiganya perbaikan data
-# sekali jalan yang mau diawasi sendiri waktu dijalankan, dan dua yang Data TBS
-# memposting ulang puluhan Stock Entry. Jalankan dengan
-# `bench --site <site> execute sth.patches.<nama>.execute`.
+# perbaiki_restan_data_tbs, hitung_ulang_tbs_diterima_data_tbs,
+# isi_adjustment_sounding, dan hitung_ulang_rekap_sounding sengaja tidak
+# didaftarkan: keempatnya perbaikan data sekali jalan yang mau diawasi sendiri
+# waktu dijalankan, dan tiga di antaranya memposting ulang puluhan Stock Entry.
+# Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

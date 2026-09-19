@@ -6,6 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
 
+from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulang_rekap
 from sth.mill.utils import get_adjustment_stock, get_potongan_sortasi, set_rata_rata_rendemen_bulanan
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
@@ -61,15 +62,38 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		)
 
 	def on_submit(self):
-		if self.produksi > 0:
-			self.create_ste()
-	
+		self.create_ste()
+		self.update_document_afterwards()
+
 	def on_cancel(self):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
 		for row in ste:
 			doc = frappe.get_doc("Stock Entry",row)
 			if doc.docstatus == 1:
 				doc.cancel()
+
+		self.update_document_afterwards()
+
+	def update_document_afterwards(self):
+		"""Sounding sesudah dokumen ini ikut dihitung ulang.
+
+		Sebelumnya tidak ada sama sekali di sini, padahal Palm Kernel punya
+		rantai yang sama dengan CPO: produksi dokumen ini jadi Stock Entry, dan
+		Stock Entry itu yang membentuk stock awal dokumen sesudahnya lewat
+		get_stock_awal. Sounding bertanggal mundur karena itu tidak pernah
+		menggeser hari-hari sesudahnya.
+		"""
+		hitung_ulang_dokumen_sesudahnya(self)
+
+	@frappe.whitelist()
+	def hitung_ulang(self):
+		"""Tombol Hitung Ulang: dokumen ini sendiri ikut, bukan cuma sesudahnya.
+
+		Yang dikejar pengiriman Palm Kernel atau koreksi stok yang masuk sesudah
+		dokumen ini disubmit — itu menggeser rekap dokumen ini sendiri, bukan
+		cuma dokumen sesudahnya.
+		"""
+		return hitung_ulang_rekap(self.doctype, self.unit, self.tanggal_proses)
 	
 	def on_trash(self):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
@@ -152,7 +176,11 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		self.stock_awal = self.get_stock_awal()
 		self.set_adjustment()
 		self.pengiriman = get_delivery[0].qty if get_delivery else 0
-		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses},"tbs_olah") or 0
+		# Disaring pabrik, sama dengan Sounding CPO. Tanpa saringan itu
+		# get_value memulangkan Data TBS mana saja yang tanggalnya cocok, jadi
+		# pabrik yang soundingnya dihitung belakangan bisa memakai tbs olah
+		# milik pabrik lain — dan KER-nya ikut salah.
+		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses,"pabrik":self.pabrik},"tbs_olah") or 0
 		# Bukan cuma sortasi hari ini: hari yang pabriknya tidak mengolah ikut
 		# terkumpul sampai ada olah. Rinciannya di get_potongan_sortasi.
 		self.sortasi = get_potongan_sortasi(self.unit, self.tanggal_proses, self.pabrik)
@@ -213,6 +241,15 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		return sum(left)/len(left), sum(right)/len(right)
 	
 	def create_ste(self):
+		# Penjaganya pindah ke sini dari on_submit. Selama ada di on_submit,
+		# tiap jalur yang membuat ulang Stock Entry — tombol Hitung Ulang,
+		# job sesudah Timbangan, patch — harus ingat sendiri untuk mengulang
+		# syarat yang sama, dan yang lupa akan membuatkan Material Receipt
+		# sebesar angka minus untuk dokumen yang waktu disubmit tidak dibuatkan
+		# apa-apa. Sejajar dengan create_ste Sounding CPO yang juga menjaga
+		# sendiri, bedanya CPO memang mengeluarkan Material Issue untuk minus.
+		if flt(self.produksi) <= 0: return
+
 		def postprocess(source,target):
 			target.stock_entry_type = "Material Receipt"
 			

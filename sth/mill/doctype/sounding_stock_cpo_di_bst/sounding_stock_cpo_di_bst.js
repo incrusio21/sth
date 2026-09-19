@@ -67,7 +67,7 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
     },
 
     refresh(frm) {
-
+        sth.sounding.buat_tombol_hitung_ulang(frm, { rekap: __("rekap CPO") })
     },
 
     get_data(frm) {

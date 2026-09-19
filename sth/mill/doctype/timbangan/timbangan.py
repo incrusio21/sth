@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.utils import get_datetime,flt,get_link_to_form
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
 from sth.mill.doctype.data_tbs.data_tbs import hitung_ulang_setelah_timbangan
+from sth.mill.rekap_sounding import hitung_ulang_setelah_timbangan as hitung_ulang_sounding_setelah_timbangan
 from sth.custom.api import submit_after_insert, USER_API
 from frappe import _, delete_doc
 from frappe.model.mapper import get_mapped_doc
@@ -145,6 +146,11 @@ class Timbangan(Document):
 
 		hitung_ulang_setelah_timbangan(self)
 
+		# Timbangan TBS memberi makan Data TBS, timbangan CPO/PK memberi makan
+		# soundingnya. Dua pemicu terpisah karena yang disaring beda: yang atas
+		# tipe timbangannya, yang bawah jenis barangnya.
+		hitung_ulang_sounding_setelah_timbangan(self)
+
 		self.ingatkan_timbangan_draft()
 
 	def ingatkan_timbangan_draft(self):
@@ -264,6 +270,7 @@ class Timbangan(Document):
 				sort_doc.cancel()
 
 		hitung_ulang_setelah_timbangan(self)
+		hitung_ulang_sounding_setelah_timbangan(self)
 
 	def map_api_ticket_number(self):
 		if self.owner and "api@sth" in self.owner and self.trans_no == self.ticket_number:

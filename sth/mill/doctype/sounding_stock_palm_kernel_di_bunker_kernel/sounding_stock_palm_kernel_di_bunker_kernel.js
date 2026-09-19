@@ -66,6 +66,7 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
 
     refresh(frm) {
         frm.set_df_property("hasil_titik_sounding", "cannot_add_rows", true)
+        sth.sounding.buat_tombol_hitung_ulang(frm, { rekap: __("rekap Palm Kernel") })
     },
 
     get_stock(frm) {

@@ -6,6 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import today,flt,getdate,date_diff
 from frappe.model.mapper import get_mapped_doc
 
+from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulang_rekap
 from sth.mill.utils import get_adjustment_stock, get_potongan_sortasi, set_rata_rata_rendemen_bulanan
 
 
@@ -281,29 +282,33 @@ class SoundingStockCPOdiBST(Document):
 			doc = frappe.get_doc("Stock Entry",row)
 			doc.delete()
 
-	def recreate_ste(self):
-		self.cancel_ste()
-		self.delete_ste()
-		self.create_ste()
-
+	# recreate_ste dihapus: satu-satunya pemakainya update_document_afterwards,
+	# dan sekarang yang membuat ulang Stock Entry buat_ulang_ste di mill/utils.py
+	# — yang dipakai Data TBS dan patch sounding juga. Dua salinan cara yang sama
+	# cuma menunggu salah satunya ketinggalan waktu aturannya berubah.
 
 	def update_document_afterwards(self):
-		docs = frappe.get_all(
-			"Sounding Stock CPO di BST",
-			filters=[
-				["tanggal_proses",">",self.tanggal_proses],
-				["docstatus","!=",2],
-			],
-			pluck="name",
-			order_by="tanggal_proses"
-		)
+		"""Sounding sesudah dokumen ini ikut dihitung ulang.
 
-		for name in docs:
-			doc = frappe.get_doc(self.doctype,name)
-			doc.get_data()
-			doc.recreate_ste()
+		Dulu dikerjakan di sini sendiri, dengan tiga cacat yang sekarang dipegang
+		hitung_ulang_dokumen_sesudahnya: dokumen unit lain ikut terseret karena
+		saringannya cuma tanggal, dokumen draft ikut dibuatkan Stock Entry
+		padahal yang membuatnya on_submit, dan Stock Entry yang sebetulnya sudah
+		cocok tetap dibatalkan lalu dibuat ulang — tiap pembatalan mengantrikan
+		Repost Item Valuation.
+		"""
+		hitung_ulang_dokumen_sesudahnya(self)
 
-			doc.db_update_all()
+	@frappe.whitelist()
+	def hitung_ulang(self):
+		"""Tombol Hitung Ulang: dokumen ini sendiri ikut, bukan cuma sesudahnya.
+
+		Bedanya dengan update_document_afterwards yang jalan otomatis waktu
+		submit. Yang dikejar di sini pengiriman CPO atau koreksi stok yang masuk
+		sesudah dokumen ini disubmit — itu menggeser rekap dokumen ini sendiri,
+		bukan cuma dokumen sesudahnya.
+		"""
+		return hitung_ulang_rekap(self.doctype, self.unit, self.tanggal_proses)
 
 
 
