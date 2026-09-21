@@ -48,7 +48,26 @@
   "angsuran_hutang",
   "pembayaran_ke_mitra",
   "tanda_tangan_section",
-  "tanggal_tanda_tangan"
+  "tanggal_tanda_tangan",
+  "tab_akun",
+  "akun_section",
+  "akun_pembelian_tbs",
+  "akun_biaya_plasma",
+  "akun_management_fee",
+  "column_break_akun",
+  "akun_pph22",
+  "akun_piutang_plasma",
+  "akun_hutang_plasma_antara",
+  "akun_lain_section",
+  "cost_center",
+  "column_break_akun_lain",
+  "akun_hutang_mitra",
+  "jurnal_section",
+  "jurnal_preview",
+  "column_break_jurnal",
+  "total_jurnal_debit",
+  "total_jurnal_kredit",
+  "status_jurnal"
  ],
  "fields": [
   {
@@ -336,13 +355,117 @@
   {
    "fieldname": "column_break_eong",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tab_akun",
+   "fieldtype": "Tab Break",
+   "label": "Akun & Jurnal"
+  },
+  {
+   "fieldname": "akun_section",
+   "fieldtype": "Section Break",
+   "label": "Akun Jurnal"
+  },
+  {
+   "fieldname": "akun_pembelian_tbs",
+   "fieldtype": "Link",
+   "label": "Pembelian TBS Plasma",
+   "options": "Account"
+  },
+  {
+   "fieldname": "akun_biaya_plasma",
+   "fieldtype": "Link",
+   "label": "Lawan Biaya Perawatan, Panen & Transport",
+   "options": "Account"
+  },
+  {
+   "fieldname": "akun_management_fee",
+   "fieldtype": "Link",
+   "label": "Pendapatan Management Fee",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_akun",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "akun_pph22",
+   "fieldtype": "Link",
+   "label": "Hutang Pajak PPh 22",
+   "options": "Account"
+  },
+  {
+   "fieldname": "akun_piutang_plasma",
+   "fieldtype": "Link",
+   "label": "Piutang Plasma",
+   "options": "Account"
+  },
+  {
+   "fieldname": "akun_hutang_plasma_antara",
+   "fieldtype": "Link",
+   "label": "Hutang Plasma Belum Ditagih",
+   "options": "Account"
+  },
+  {
+   "fieldname": "akun_lain_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_akun_lain",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "akun_hutang_mitra",
+   "fieldtype": "Link",
+   "label": "Credit To Purchase Invoice",
+   "options": "Account"
+  },
+  {
+   "fieldname": "jurnal_section",
+   "fieldtype": "Section Break",
+   "label": "Jurnal yang Akan Dibuat"
+  },
+  {
+   "fieldname": "jurnal_preview",
+   "fieldtype": "Table",
+   "label": "Jurnal",
+   "options": "Perhitungan KUD Jurnal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jurnal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_jurnal_debit",
+   "fieldtype": "Currency",
+   "label": "Total Debit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_jurnal_kredit",
+   "fieldtype": "Currency",
+   "label": "Total Kredit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status_jurnal",
+   "fieldtype": "Data",
+   "label": "Status Jurnal",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-08 11:57:23.806991",
+ "modified": "2026-09-21 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",

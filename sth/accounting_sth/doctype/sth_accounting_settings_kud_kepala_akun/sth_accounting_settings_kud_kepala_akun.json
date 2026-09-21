@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-21 17:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "kepala_akun"
+ ],
+ "fields": [
+  {"columns": 4, "description": "Cukup diisi untuk satu company; company lain mengikuti lewat nomor akun.", "fieldname": "company", "fieldtype": "Link", "in_list_view": 1, "label": "Company", "options": "Company", "reqd": 1},
+  {"columns": 6, "description": "Akun grup yang saldonya dinolkan saat Perhitungan KUD disubmit, misalnya 61 PANEN DAN PENGUMPULAN, 62 BIAYA TANAMAN MENGHASILKAN, 71 BIAYA TIDAK LANGSUNG. Semua akun turunannya ikut.", "fieldname": "kepala_akun", "fieldtype": "Link", "in_list_view": 1, "label": "Kepala Akun Biaya", "options": "Account", "reqd": 1}
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-21 17:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "STH Accounting Settings KUD Kepala Akun",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
