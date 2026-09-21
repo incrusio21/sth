@@ -6,7 +6,7 @@ from sth.mill.utils import buat_ulang_ste_sounding, izinkan_stock_minus
 DOCTYPE = "Sounding Stock CPO di BST"
 
 
-def execute():
+def execute(nama=None, sejak=None):
 	"""Posting ulang Stock Entry sounding CPO ke tanggal prosesnya.
 
 	Dua kali meleset. Mula-mula posting_date dipetakan dari field tanggal tapi
@@ -24,14 +24,49 @@ def execute():
 	Dokumen diurutkan menurut tanggal dan di-commit satu per satu, jadi kalau
 	ada yang gagal patch berhenti tapi yang sudah beres tidak ikut hangus. Aman
 	dijalankan ulang: dokumen yang tanggal STE-nya sudah benar dilewati.
+
+	Tanpa argumen seluruh dokumen submitted diperiksa, dan itu termasuk Agustus
+	yang memuat angka jelas rusak — SSCPODB-0056 berproduksi -7.302.367 — serta
+	periode yang mungkin sudah ditutup. Karena itu ada dua penyaring:
+
+	- `nama`: satu dokumen, atau beberapa dipisah koma.
+	- `sejak`: dokumen dengan tanggal proses mulai tanggal itu.
+
+	Yang dikejar sekarang SSCPODB-0062 (1 September 2026). Stock Entry-nya
+	mendarat di 2 September, jadi saldo pembuka 2 September kurang 79.177,59 kg
+	dan saldo pembuka 3 September kelebihan sebanyak itu — produksi dua hari itu
+	terbelah salah, OER-nya jadi 40,30% dan 0,18%. Dokumen itu sendiri angkanya
+	sudah benar, jadi yang boleh disentuh cuma tanggal STE-nya; membaca ulang
+	rekapnya lewat hitung_ulang_rekap justru merusaknya, karena stock awalnya
+	akan mengambil saldo ledger yang masih kekurangan produksi 31 Agustus.
+
+	    bench --site <site> execute
+	        sth.patches.perbaiki_tanggal_ste_sounding_cpo.execute
+	        --kwargs "{'nama': 'SSCPODB-0062'}"
+
+	Sesudah itu hari-hari sesudahnya perlu dihitung ulang supaya produksinya
+	terbelah benar, lewat sth.patches.hitung_ulang_rekap_sounding.
 	"""
+	filters = {"docstatus": 1}
+
+	if nama:
+		daftar = nama.split(",") if isinstance(nama, str) else list(nama)
+		filters["name"] = ("in", [n.strip() for n in daftar if n and n.strip()])
+
+	if sejak:
+		filters["tanggal_proses"] = (">=", getdate(sejak))
+
 	dokumen = frappe.get_all(
 		DOCTYPE,
-		filters={"docstatus": 1},
+		filters=filters,
 		fields=["name", "tanggal_proses", "produksi_cpo"],
 		order_by="tanggal_proses asc, creation asc",
 		limit_page_length=0,
 	)
+
+	if not dokumen:
+		print("Tidak ada dokumen sounding CPO submitted yang cocok dengan saringannya.")
+		return
 
 	salah_tanggal = [row.name for row in dokumen if ste_perlu_dibuat_ulang(row)]
 
