@@ -411,6 +411,12 @@ class TestHitungSHU(FrappeTestCase):
 # hanya meneruskan apa yang diberikan.
 AKUN_JURNAL = {kunci: f"AKUN-{kunci}" for kunci, *_ in BARIS_JURNAL}
 
+# Dua baris yang harus pasti kredit, dan field nilainya di dokumen.
+MITRA_FIELD = {
+	"akun_piutang_plasma": "angsuran_hutang",
+	"akun_hutang_plasma_antara": "pembayaran_ke_mitra",
+}
+
 
 class TestSusunBarisJurnal(FrappeTestCase):
 	"""Susunan jurnal dari Jurnal KUD.xlsx: satu debit, lima kredit."""
@@ -492,9 +498,37 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		self.assertNotIn("akun_hutang_plasma_antara", kunci)
 		self.assertIn("akun_pembelian_tbs", kunci)
 
-	def test_nilai_negatif_pindah_sisi_bukan_jadi_debit_minus(self):
-		# Biaya melampaui produksi: Hasil Bersih negatif, jadi Angsuran dan
-		# Pembayaran pindah ke debit. GL Entry menolak angka minus.
+	def test_nilai_negatif_tetap_kredit_bukan_pindah_ke_debit(self):
+		# Biaya melampaui produksi: Hasil Bersih negatif, tapi Angsuran dan
+		# Pembayaran tetap kredit — dicatat nilai mutlaknya, karena GL Entry
+		# menolak angka minus dan sisi baris tidak boleh ikut tandanya.
+		nilai = {
+			"jumlah_produksi": self.JUMLAH_PRODUKSI,
+			"total_biaya_perawatan_panen_dan_transport": 100000000.0,
+		}
+		nilai.update(hitung_shu(nilai["jumlah_produksi"], 100000000.0, 2.5, 0.25, 50))
+		self.assertLess(nilai["hasil_bersih"], 0)
+
+		baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
+
+		for row in baris:
+			self.assertGreaterEqual(row["debit"], 0, msg=row["kunci"])
+			self.assertGreaterEqual(row["credit"], 0, msg=row["kunci"])
+
+		for kunci in ("akun_piutang_plasma", "akun_hutang_plasma_antara"):
+			mitra = [row for row in baris if row["kunci"] == kunci]
+			self.assertTrue(mitra, msg=kunci)
+			self.assertEqual(mitra[0]["debit"], 0, msg=kunci)
+			self.assertEqual(mitra[0]["credit"], abs(nilai[MITRA_FIELD[kunci]]), msg=kunci)
+
+		self.assertEqual(
+			flt(sum(row["debit"] for row in baris), 2),
+			flt(sum(row["credit"] for row in baris), 2),
+		)
+
+	def test_penutup_menanggung_selisih_bukan_jumlah_produksi(self):
+		# Konsekuensi yang dipilih: di bulan minus, Pembelian TBS terdebit lebih
+		# besar dari nilai TBS yang sungguh dibeli, sebesar dua kali Hasil Bersih.
 		nilai = {
 			"jumlah_produksi": self.JUMLAH_PRODUKSI,
 			"total_biaya_perawatan_panen_dan_transport": 100000000.0,
@@ -502,15 +536,23 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		nilai.update(hitung_shu(nilai["jumlah_produksi"], 100000000.0, 2.5, 0.25, 50))
 		baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
 
-		for row in baris:
-			self.assertGreaterEqual(row["debit"], 0, msg=row["kunci"])
-			self.assertGreaterEqual(row["credit"], 0, msg=row["kunci"])
+		self.assertEqual(baris[0]["kunci"], "akun_pembelian_tbs")
+		self.assertEqual(
+			baris[0]["debit"],
+			flt(self.JUMLAH_PRODUKSI - 2 * nilai["hasil_bersih"], 2),
+		)
 
-		pindah = [row for row in baris if row["kunci"] == "akun_hutang_plasma_antara"]
-		self.assertTrue(pindah)
-		self.assertGreater(pindah[0]["debit"], 0)
-		self.assertEqual(pindah[0]["credit"], 0)
+	def test_produksi_nol_tetap_memakai_akun_pembelian_tbs(self):
+		# Dokumen yang produksinya belum ditarik tapi biayanya sudah masuk. Dulu
+		# baris debitnya hilang sama sekali karena jumlah_produksi nol, lalu kedua
+		# baris mitra mendarat di debit sebagai gantinya.
+		biaya = 40595964.30
+		nilai = {"jumlah_produksi": 0, "total_biaya_perawatan_panen_dan_transport": biaya}
+		nilai.update(hitung_shu(0, biaya, 3, 0.5, 50))
+		baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
 
+		self.assertEqual(baris[0]["kunci"], "akun_pembelian_tbs")
+		self.assertEqual(baris[0]["debit"], flt(2 * biaya, 2))
 		self.assertEqual(
 			flt(sum(row["debit"] for row in baris), 2),
 			flt(sum(row["credit"] for row in baris), 2),
