@@ -53,6 +53,41 @@ class DaftarBPJS(Document):
 		else:
 			self._submit()
 
+	def before_submit(self):
+		self.validate_komponen_lengkap()
+
+	def validate_komponen_lengkap(self):
+		"""Tolak submit kalau ada beban yang belum punya salary component.
+
+		create_payment_log() hanya membuat log untuk beban yang tidak nol, jadi
+		yang diperiksa persis pasangan itu. Tanpa penjagaan ini lognya lahir
+		dengan salary_component kosong dan baru ketahuan waktu salary slip.
+
+		Komponen yang kosong sebelah itu wajar — JKK dan JKM ditanggung penuh
+		perusahaan, jadi sisi karyawannya memang tidak dipakai. Yang tidak wajar
+		cuma kalau bebannya ada tapi komponennya tidak.
+		"""
+		kurang = set()
+
+		for emp in self.set_up_bpjs_detail_table:
+			for c_type in ("karyawan", "perusahaan"):
+				if emp.get(f"beban_{c_type}") and not emp.get(f"salary_component_{c_type}"):
+					kurang.add((emp.program, c_type))
+
+		if not kurang:
+			return
+
+		daftar = ", ".join(
+			f"{program} ({unscrub(c_type)})" for program, c_type in sorted(kurang)
+		)
+		frappe.throw(
+			_(
+				"Salary Component belum diisi untuk: {0}. Lengkapi dulu di Set Up BPJS PT "
+				"<b>{1}</b>, lalu simpan ulang daftar ini."
+			).format(daftar, self.set_up_bpjs),
+			title=_("Salary Component Belum Lengkap"),
+		)
+
 	def on_submit(self):
 		self.create_bpjs_document()
 		self.create_payment_log()
@@ -287,4 +322,143 @@ def pasang_bpjs(doc):
 		satu_row_employee.gol_darah = gol_darah
 
 		satu_row_employee.nama_jabatan = nama_jabatan
-			
+
+
+# ---------------------------------------------------------------------------
+# Penyelarasan ke master
+# ---------------------------------------------------------------------------
+
+# Kolom di Set Up BPJS Detail Table yang isinya salinan dari Set Up BPJS PT.
+KOLOM_IKUT_MASTER = (
+	"salary_component_karyawan",
+	"salary_component_perusahaan",
+	"expense_account",
+)
+
+
+def komponen_master(set_up_bpjs):
+	"""Peta program -> komponen dan akun menurut Set Up BPJS PT sekarang."""
+	rows = frappe.get_all(
+		"Set Up BPJS PT Table",
+		filters={"parent": set_up_bpjs, "parenttype": "Set Up BPJS PT"},
+		fields=["nama_program", *KOLOM_IKUT_MASTER],
+	)
+
+	return {row.nama_program: row for row in rows}
+
+
+def samakan_komponen_dengan_master(set_up_bpjs=None):
+	"""Samakan komponen dan akun BPJS yang sudah dibekukan dengan masternya.
+
+	set_missing_value() menyalin komponen dari Set Up BPJS PT waktu Daftar BPJS
+	divalidasi, lalu create_payment_log() membekukan salinan itu ke Employee
+	Payment Log waktu disubmit. Salary slip membacanya dari sana, sering
+	berbulan-bulan kemudian. Kalau masternya dibetulkan di antara kedua saat itu,
+	tidak ada yang menjalarkan perbaikannya: dokumen tersubmit tidak pernah
+	divalidasi lagi. Juni 2026 di TPRE 674 baris kena begitu — komponen beban
+	perusahaannya tetap versi Staff HO/RO, yang akunnya beban umum, padahal
+	masternya sudah dibetulkan ke Opr Kebun yang masuk gaji dialokasi kebun.
+
+	Yang disentuh cuma nama komponen dan akunnya, tidak pernah nilainya. Baris
+	yang sudah dipakai salary slip tersubmit (`is_paid`) dilewati dan dilaporkan,
+	karena mengubahnya berarti GL-nya tidak lagi cocok dengan slipnya.
+
+	Aman diulang: yang sudah sama tidak disentuh.
+
+	Balikan dict: detail, log, log_terkunci, slip_draft.
+
+	`slip_draft` berisi (nama slip, komponen lama, komponen baru) — barisnya
+	diganti namanya di tempat, slipnya jangan disimpan ulang. Penyimpanan ulang
+	menambah baris komponen baru tanpa membuang yang lama, karena
+	update_component_row() mencari baris lewat nama komponen dan yang lama tidak
+	dicari siapa-siapa lagi. Uji coba 21 September 2026: gross ke-17 slip naik
+	persis sebesar komponennya, dobel.
+	"""
+	syarat = {"docstatus": 1}
+	if set_up_bpjs:
+		syarat["set_up_bpjs"] = set_up_bpjs
+
+	hasil = {"detail": 0, "log": 0, "log_terkunci": [], "slip_draft": set()}
+
+	for daftar in frappe.get_all("Daftar BPJS", filters=syarat, fields=["name", "set_up_bpjs"]):
+		master = komponen_master(daftar.set_up_bpjs)
+		if not master:
+			continue
+
+		baris = frappe.get_all(
+			"Set Up BPJS Detail Table",
+			filters={"parent": daftar.name, "parenttype": "Daftar BPJS"},
+			fields=["name", "program", "beban_karyawan", "beban_perusahaan", *KOLOM_IKUT_MASTER],
+		)
+
+		for det in baris:
+			benar = master.get(det.program)
+			if not benar:
+				continue
+
+			beda = {
+				kolom: benar[kolom]
+				for kolom in KOLOM_IKUT_MASTER
+				if (det[kolom] or None) != (benar[kolom] or None)
+			}
+			if not beda:
+				continue
+
+			frappe.db.set_value("Set Up BPJS Detail Table", det.name, beda)
+			hasil["detail"] += 1
+
+			for c_type in ("karyawan", "perusahaan"):
+				kolom = f"salary_component_{c_type}"
+				if kolom in beda:
+					perbaiki_payment_log(daftar.name, det.name, c_type, beda[kolom], hasil)
+
+	return hasil
+
+
+def perbaiki_payment_log(daftar_bpjs, voucher_detail_no, c_type, komponen_benar, hasil):
+	"""Tulis komponen yang benar ke Employee Payment Log satu baris detail.
+
+	Lognya dicari lewat voucher_detail_no dan component_type, dua kolom yang
+	diisi create_payment_log() sendiri — bukan lewat nama komponen lamanya,
+	supaya baris yang sempat diperbaiki manual tetap ketemu.
+	"""
+	logs = frappe.get_all(
+		"Employee Payment Log",
+		filters={
+			"voucher_type": "Daftar BPJS",
+			"voucher_no": daftar_bpjs,
+			"voucher_detail_no": voucher_detail_no,
+			"component_type": f"BPJS {unscrub(c_type)}",
+		},
+		fields=["name", "employee", "payroll_date", "salary_component", "is_paid"],
+	)
+
+	for log in logs:
+		if log.salary_component == komponen_benar:
+			continue
+
+		if log.is_paid:
+			hasil["log_terkunci"].append(f"{log.name} ({log.salary_component})")
+			continue
+
+		frappe.db.set_value("Employee Payment Log", log.name, "salary_component", komponen_benar)
+		hasil["log"] += 1
+
+		if not log.salary_component:
+			continue
+
+		# Slip draft yang memuat periode log ini sudah telanjur menyalin komponen
+		# lamanya ke barisnya sendiri.
+		hasil["slip_draft"].update(
+			(slip, log.salary_component, komponen_benar)
+			for slip in frappe.get_all(
+				"Salary Slip",
+				filters={
+					"employee": log.employee,
+					"docstatus": 0,
+					"start_date": ("<=", log.payroll_date),
+					"end_date": (">=", log.payroll_date),
+				},
+				pluck="name",
+			)
+		)
