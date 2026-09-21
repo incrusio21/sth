@@ -355,6 +355,7 @@ class SupplierComparasion {
 					{ title: "Jumlah", field: `${initials}_jumlah`, headerSort: false, headerHozAlign: "center", },
 					{ title: "Harga", field: `${initials}_harga`, formatter: "money", headerSort: false, headerHozAlign: "center", },
 					{ title: "Sub <br> Total", field: `${initials}_sub_total`, formatter: "money", headerSort: false, headerHozAlign: "center", },
+					{ title: "Notes SQ", field: `${initials}_notes_sq`, headerSort: false, headerHozAlign: "center", },
 					{
 						title: "Document Number", field: `${initials}_doc_no`, headerSort: false, width: 200, headerHozAlign: "center", formatter: "link",
 						formatterParams: {
@@ -430,7 +431,7 @@ class SupplierComparasion {
 			},
 			{ title: "Satuan", field: "satuan", headerSort: false, frozen: true, headerHozAlign: "center", },
 			{ title: "Harga <br> Terakhir", field: "harga_terakhir", formatter: "money", headerSort: false, frozen: true, width: 80, headerHozAlign: "center", },
-			{ title: "Notes SQ", field: "notes_sq", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
+			// { title: "Notes SQ", field: "notes_sq", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
 			{ title: "Notes PR/SR", field: "notes_pr_sr", headerSort: false, frozen: true, width: 100, headerHozAlign: "center", },
 			{
 				title: "Asset", field: "asset", headerSort: false, frozen: true, width: 100, headerHozAlign: "center",

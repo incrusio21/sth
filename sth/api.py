@@ -147,7 +147,7 @@ def get_table_data(args):
 	""",filters,as_dict=True)
 
 	static_fields = ["idx","kode_barang","nama_barang","satuan","harga_terakhir"]
-	supplier_fields = ["merk","country","spesifikasi","jumlah","harga","sub_total","doc_no","child_name"]
+	supplier_fields = ["merk","country","spesifikasi","jumlah","harga","sub_total","doc_no","child_name","notes_sq","status","workflow_state"]
 	result = []
 	item_code = ""
 	for data in query:
@@ -164,8 +164,8 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					result[index][f"{title}_{sup_field}"] = data[sup_field]
 				
-				result[index][f"{title}_status"] = data.status
-				result[index][f"{title}_workflow_state"] = data.workflow_state
+				# result[index][f"{title}_status"] = data.status
+				# result[index][f"{title}_workflow_state"] = data.workflow_state
 			else:
 				for st_field in static_fields:
 					dict_data[st_field] = ""
@@ -174,14 +174,14 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
-				dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"]) or ("","")
-				dict_data.asset = frappe.get_value("Alat Berat Dan Kendaraan",asset,"no_pol")
-				dict_data[f"{title}_status"] = data.status
-				dict_data[f"{title}_workflow_state"] = data.workflow_state
+				# dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"]) or ("","")
+				# dict_data.asset = frappe.get_value("Alat Berat Dan Kendaraan",asset,"no_pol")
+				# dict_data[f"{title}_status"] = data.status
+				# dict_data[f"{title}_workflow_state"] = data.workflow_state
+				# dict_data[f"{title}_notes_sq"]= data.notes_sq
 
-				dict_data.notes_sq = data.notes_sq
-				dict_data.mark = data.kode_barang
-				result.append(dict_data)
+				# dict_data.mark = data.kode_barang
+				# result.append(dict_data)
 		else:
 			for st_field in static_fields:
 				dict_data[st_field] = data[st_field]
@@ -190,15 +190,26 @@ def get_table_data(args):
 			for sup_field in supplier_fields:
 				dict_data[f"{title}_{sup_field}"] = data[sup_field]
 
-			dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
-			dict_data.asset = frappe.get_value("Alat Berat Dan Kendaraan",asset,"no_pol")
-			dict_data.notes_sq = data.notes_sq
-			dict_data[f"{title}_status"] = data.status
-			dict_data[f"{title}_workflow_state"] = data.workflow_state
+			# dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"]) or ("","")
+			# dict_data.asset = frappe.get_value("Alat Berat Dan Kendaraan",asset,"no_pol")
 
-			dict_data.mark = data.kode_barang
+			# dict_data[f"{title}_status"] = data.status
+			# dict_data[f"{title}_workflow_state"] = data.workflow_state
+			# dict_data[f"{title}_notes_sq"]= data.notes_sq
 
-			result.append(dict_data)
+			# dict_data.mark = data.kode_barang
+
+			# result.append(dict_data)
+		
+		dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"]) or ("","")
+		dict_data.asset = frappe.get_value("Alat Berat Dan Kendaraan",asset,"no_pol")
+		# dict_data[f"{title}_status"] = data.status
+		# dict_data[f"{title}_workflow_state"] = data.workflow_state
+		# dict_data[f"{title}_notes_sq"]= data.notes_sq
+
+		dict_data.mark = data.kode_barang
+		result.append(dict_data)
+
 		item_code = data.kode_barang
 		# print(result)
 		# print("==========================================================================")
