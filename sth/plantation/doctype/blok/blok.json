@@ -74,7 +74,8 @@
   {
    "fieldname": "jumlah_pokok",
    "fieldtype": "Float",
-   "label": "Jumlah Pokok"
+   "label": "Jumlah Pokok",
+   "precision": "0"
   },
   {
    "fieldname": "cost_center",
@@ -279,7 +280,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-21 10:17:46.332146",
+ "modified": "2026-09-21 11:12:57.614577",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",
