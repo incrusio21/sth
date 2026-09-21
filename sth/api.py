@@ -86,7 +86,6 @@ def create_sq():
 		"docname": doc_sq.name,
 	}
 
-
 def validate_request(data):
 	message = []
 	req_data = ["rfq","supplier","file_url"]
@@ -330,6 +329,25 @@ def debug_create_po():
 	]
 
 	comparasion_create_sq(pr_sr,json.dumps(items))
+
+@frappe.whitelist()
+def get_filtered_sq(pr_sr=None,company=None):
+	fcond = ""
+	args = {}
+	if pr_sr:
+		fcond += "AND sqi.material_request = %(pr_sr)s "
+		args["pr_sr"] = pr_sr
+	
+	if company:
+		fcond += "AND sq.company = %(company)s "
+		args["company"] = company
+
+	return frappe.db.sql(f"""
+		select sq.name,sq.supplier_name as supplier from `tabSupplier Quotation` sq
+		join `tabSupplier Quotation Item` sqi on sqi.parent = sq.name
+		where sq.docstatus = 0 and sq.workflow_state = "Need To Compare" {fcond}
+		order by name
+	""",args,as_dict=True)
 
 # End Method for komparasi
 

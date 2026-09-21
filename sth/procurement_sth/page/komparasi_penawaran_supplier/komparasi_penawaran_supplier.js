@@ -96,18 +96,14 @@ class SupplierComparasion {
 			label: __("Supplier Quotation"),
 			get_data: function () {
 				return frappe.call({
-					method: 'frappe.client.get_list',
+					method: 'sth.api.get_filtered_sq',
 					args: {
-						doctype: 'Supplier Quotation',
-						filters: {
-							company: me.company,
-							custom_material_request: me.pr_sr
-						},
-						fields: ['name', "supplier"],
-						order_by: 'name asc',
-						limit_page_length: 0
+						company: me.company,
+						pr_sr: me.pr_sr
 					}
 				}).then(r => {
+					console.log(r);
+
 					return r.message.map(item => ({
 						value: item.name,
 						description: item.supplier
