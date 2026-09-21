@@ -10,11 +10,12 @@ from sth.mill.utils import get_adjustment_stock
 # dokumen semacam itu menghasilkan angka yang menyesatkan, bukan keterangan.
 MULAI = "2026-08-01"
 
-# Doctype sounding, item yang disounding, gudangnya, dan apakah stock awalnya
-# sudah mencakup mutasi di tanggal prosesnya sendiri.
+# Doctype sounding, item yang disounding, dan gudangnya. Jendela adjustment-nya
+# sama untuk keduanya — stock awal dua-duanya saldo Stock Ledger sebelum tanggal
+# proses — jadi tidak ada lagi yang perlu dibedakan di sini.
 SOUNDING = (
-	("Sounding Stock CPO di BST", "CPO", "Product CPO", True),
-	("Sounding Stock Palm Kernel di Bunker Kernel", "Palm Kernel", "Product Palm Kernel", False),
+	("Sounding Stock CPO di BST", "CPO", "Product CPO"),
+	("Sounding Stock Palm Kernel di Bunker Kernel", "Palm Kernel", "Product Palm Kernel"),
 )
 
 
@@ -30,7 +31,7 @@ def execute():
 
 	Aman dijalankan ulang — dokumen yang angkanya sudah cocok dilewati.
 	"""
-	for doctype, tipe_barang, kategori, termasuk_tanggal_proses in SOUNDING:
+	for doctype, tipe_barang, kategori in SOUNDING:
 		item_code = frappe.db.get_value("Item", {"tipe_barang": tipe_barang})
 
 		if not item_code:
@@ -38,11 +39,11 @@ def execute():
 			continue
 
 		print("{0}: {1} dokumen sejak {2} diperbarui.".format(
-			doctype, isi_dokumen(doctype, item_code, kategori, termasuk_tanggal_proses), MULAI
+			doctype, isi_dokumen(doctype, item_code, kategori), MULAI
 		))
 
 
-def isi_dokumen(doctype, item_code, kategori, termasuk_tanggal_proses):
+def isi_dokumen(doctype, item_code, kategori):
 	gudang = {}
 	diperbarui = 0
 
@@ -60,8 +61,7 @@ def isi_dokumen(doctype, item_code, kategori, termasuk_tanggal_proses):
 			)
 
 		adjustment = get_adjustment_stock(
-			item_code, gudang[row.unit], row.unit, doctype, row.tanggal_proses,
-			termasuk_tanggal_proses=termasuk_tanggal_proses,
+			item_code, gudang[row.unit], row.unit, doctype, row.tanggal_proses
 		)
 		sebelum = flt(row.stock_awal) - flt(adjustment)
 
