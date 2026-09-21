@@ -35,12 +35,21 @@ BKM_BIAYA = (
 #
 # (kunci akun di setelan, field nilai di dokumen, sisi, keterangan)
 #
-# Jumlahnya seimbang dengan sendirinya: hitung_shu() menyusun Hasil Bersih
-# sebagai sisa Jumlah Produksi dikurangi biaya, fee, dan PPh 22, lalu memecahnya
-# jadi Angsuran Hutang dan Pembayaran ke Mitra — juga sebagai sisa. Jadi kelima
-# kredit selalu berjumlah persis Jumlah Produksi tanpa baris pembulatan.
+# Sisi tiap baris tetap, tidak pernah bergeser karena tanda angkanya. Angsuran
+# Hutang dan Pembayaran ke Mitra karena itu selalu kredit, termasuk di bulan yang
+# Hasil Bersihnya minus — yang dicatat nilai mutlaknya.
+#
+# Pembelian TBS Plasma bersisi SISI_PENUTUP: nilainya tidak dibaca dari
+# `jumlah_produksi`, melainkan dihitung belakangan sebesar apa pun yang membuat
+# jurnal seimbang. Di bulan normal keduanya sama angka, karena hitung_shu()
+# menyusun Hasil Bersih sebagai sisa Jumlah Produksi dikurangi biaya, fee, dan
+# PPh 22, lalu memecahnya jadi Angsuran Hutang dan Pembayaran ke Mitra — juga
+# sebagai sisa, jadi kelima kredit memang berjumlah persis Jumlah Produksi.
+# Fieldnya tetap didaftar supaya pemetaan akun semua baris ada di satu tabel.
+SISI_PENUTUP = "penutup"
+
 BARIS_JURNAL = (
-	("akun_pembelian_tbs", "jumlah_produksi", "debit", "Pembelian TBS Plasma"),
+	("akun_pembelian_tbs", "jumlah_produksi", SISI_PENUTUP, "Pembelian TBS Plasma"),
 	(
 		"akun_biaya_plasma",
 		"total_biaya_perawatan_panen_dan_transport",
@@ -184,7 +193,11 @@ def hitung_shu(
 	setelah_biaya_operasional = flt(jumlah_produksi - jumlah_biaya_operasional, PRESISI_UANG)
 
 	pph22 = flt(jumlah_produksi * flt(persen_pph22) / 100, PRESISI_UANG)
-	hasil_bersih = abs(flt(setelah_biaya_operasional - pph22, PRESISI_UANG))
+	# Tandanya dibiarkan apa adanya. Bulan yang biayanya melampaui produksi memang
+	# minus, dan dokumen ini ikut ditandatangani — kalau di sini dimutlakkan, rugi
+	# 40 juta terbaca sebagai mitra berhak dibayar 20 juta. Sisi jurnalnya tidak
+	# bergantung pada tanda ini: susun_baris_jurnal() yang menetapkannya.
+	hasil_bersih = flt(setelah_biaya_operasional - pph22, PRESISI_UANG)
 
 	angsuran_hutang = flt(hasil_bersih * flt(persen_bagi_hasil) / 100, PRESISI_UANG)
 	# Sisa, bukan hitung ulang — supaya kedua bagian selalu berjumlah persis
@@ -377,30 +390,39 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 	BARIS_JURNAL ke nama akun. Baris bernilai nol dibuang: kalau mitra kebetulan
 	tidak punya biaya BKM bulan itu, jurnalnya tidak perlu baris kosong.
 
-	Nilai negatif pindah sisi, bukan dicatat sebagai debit negatif — GL Entry
-	menolak angka minus. Ini terjadi kalau biaya melampaui produksi, dan
-	hitung_shu() memang sengaja membiarkan hasilnya negatif.
+	Nilai negatif dicatat nilai mutlaknya di sisi yang sudah ditetapkan
+	BARIS_JURNAL — GL Entry menolak angka minus, dan sisi baris tidak boleh ikut
+	bergeser: Angsuran Hutang dan Pembayaran ke Mitra tetap kredit walaupun biaya
+	melampaui produksi.
+
+	Yang menanggung selisihnya baris penutup, Pembelian TBS Plasma: dihitung dari
+	baris-baris lain, bukan dari `jumlah_produksi`, jadi jurnalnya seimbang dengan
+	sendirinya. Di bulan normal angkanya persis Jumlah Produksi. Di bulan yang
+	biayanya melampaui produksi, kelebihannya ikut mendarat di situ — akun
+	pembelian bisa terdebit lebih besar dari nilai TBS yang sungguh dibeli, dan itu
+	memang konsekuensi yang dipilih supaya kedua baris mitra pasti kredit.
 
 	`pembalikan` memecah baris biaya jadi penolan per akun, lihat
-	baris_jurnal_biaya(). Totalnya tetap sama, jadi jurnalnya tetap seimbang.
+	baris_jurnal_biaya(). Totalnya tetap sama, jadi penutupnya tidak bergeser.
 
 	Balikan: list of dict {account, cost_center, debit, credit, keterangan, kunci}.
 	"""
 	baris = []
+	penutup = None
 
 	for kunci, fieldname, sisi, keterangan in BARIS_JURNAL:
-		jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
+		if sisi == SISI_PENUTUP:
+			penutup = (kunci, keterangan)
+			continue
 
 		if kunci == "akun_biaya_plasma":
+			jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
 			baris.extend(baris_jurnal_biaya(jumlah, pembalikan, akun.get(kunci)))
 			continue
 
+		jumlah = abs(flt(nilai.get(fieldname), PRESISI_UANG))
 		if not jumlah:
 			continue
-
-		if jumlah < 0:
-			# sisi = "credit" if sisi == "debit" else "debit"
-			jumlah = abs(jumlah)
 
 		baris.append({
 			"account": akun.get(kunci),
@@ -411,7 +433,32 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 			"kunci": kunci,
 		})
 
+	if penutup:
+		baris_penutup(baris, akun, *penutup)
+
 	return baris
+
+
+def baris_penutup(baris, akun, kunci, keterangan):
+	"""Sisipkan baris penyeimbang di kepala `baris`, kalau memang ada selisih.
+
+	Mengubah `baris` di tempat dan meletakkannya paling depan, mengikuti susunan
+	Jurnal KUD.xlsx: satu debit dulu, baru kredit yang memecahnya.
+	"""
+	selisih = flt(
+		sum(row["credit"] for row in baris) - sum(row["debit"] for row in baris), PRESISI_UANG
+	)
+	if not selisih:
+		return
+
+	baris.insert(0, {
+		"account": akun.get(kunci),
+		"cost_center": None,
+		"debit": selisih if selisih > 0 else 0.0,
+		"credit": -selisih if selisih < 0 else 0.0,
+		"keterangan": keterangan,
+		"kunci": kunci,
+	})
 
 
 class PerhitunganKUD(Document):
@@ -649,8 +696,7 @@ class PerhitunganKUD(Document):
 		dibiarkan kosong di sini — biar kelihatan mana yang belum diisi, bukan
 		melempar error waktu menyimpan.
 		"""
-		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL}
-		baris = susun_baris_jurnal(self.as_dict(), akun, self.pembalikan_biaya())
+		baris = self.baris_jurnal()
 
 		# `kunci` cuma penanda internal susun_baris_jurnal, bukan kolom tabelnya.
 		self.set(
@@ -674,32 +720,35 @@ class PerhitunganKUD(Document):
 		else:
 			self.status_jurnal = _("{0} baris, seimbang").format(len(baris))
 
-	def peta_akun(self):
-		"""Akun tiap baris jurnal, dibaca dari dokumen ini — bukan dari setelan.
+	def baris_jurnal(self):
+		"""Baris jurnal dokumen ini. Dipakai pratinjau maupun GL Entry, sekali susun.
 
-		Setelan hanya memberi nilai awal lewat isi_akun_dari_setelan(). Begitu
-		dokumen disubmit, yang berlaku persis apa yang tercatat di sini, jadi
-		setelan yang berubah belakangan tidak menggeser jurnal yang sudah jadi.
+		Akunnya dibaca dari dokumen ini — bukan dari setelan. Setelan hanya memberi
+		nilai awal lewat isi_akun_dari_setelan(). Begitu dokumen disubmit, yang
+		berlaku persis apa yang tercatat di sini, jadi setelan yang berubah
+		belakangan tidak menggeser jurnal yang sudah jadi.
 		"""
 		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL}
+		return susun_baris_jurnal(self.as_dict(), akun, self.pembalikan_biaya())
 
-		# Baris bernilai nol tidak masuk jurnal, jadi akunnya juga tidak wajib.
-		kosong = [
-			keterangan
-			for kunci, fieldname, _sisi, keterangan in BARIS_JURNAL
-			if not akun.get(kunci) and flt(self.get(fieldname))
-		]
-		if kosong:
-			frappe.throw(
-				_(
-					"Akun untuk baris ini belum diisi: {0}. "
-					"Lengkapi di bagian <b>Akun Jurnal</b> dokumen ini, atau isi setelannya "
-					"di STH Accounting Settings lalu tarik produksi ulang."
-				).format(", ".join(kosong)),
-				title=_("Akun Jurnal Belum Lengkap"),
-			)
+	def validate_akun_jurnal(self, baris):
+		"""Akun wajib diisi sejauh barisnya memang lahir, bukan sejauh fieldnya terisi.
 
-		return akun
+		Baris penutup bisa muncul walaupun Jumlah Produksi nol — kalau patokannya
+		field, akunnya lolos tanpa diisi dan GL Entry-nya gagal belakangan.
+		"""
+		kosong = [row["keterangan"] for row in baris if not row["account"]]
+		if not kosong:
+			return
+
+		frappe.throw(
+			_(
+				"Akun untuk baris ini belum diisi: {0}. "
+				"Lengkapi di bagian <b>Akun Jurnal</b> dokumen ini, atau isi setelannya "
+				"di STH Accounting Settings lalu tarik produksi ulang."
+			).format(", ".join(kosong)),
+			title=_("Akun Jurnal Belum Lengkap"),
+		)
 
 	def make_gl_entry(self):
 		if self.docstatus == 1:
@@ -710,19 +759,19 @@ class PerhitunganKUD(Document):
 			frappe.msgprint(_("Jurnal Perhitungan KUD dibatalkan."), indicator="orange", alert=True)
 
 	def get_gl_entries(self):
-		akun = self.peta_akun()
-
 		cost_center = self.cost_center or get_cost_center_kud(self.company)
 
-		baris = susun_baris_jurnal(self.as_dict(), akun, self.pembalikan_biaya())
+		baris = self.baris_jurnal()
 		if not baris:
 			return []
+
+		self.validate_akun_jurnal(baris)
 
 		total_debit = flt(sum(row["debit"] for row in baris), PRESISI_UANG)
 		total_credit = flt(sum(row["credit"] for row in baris), PRESISI_UANG)
 		if total_debit != total_credit:
-			# Tidak seharusnya terjadi: hitung_shu() memecah Jumlah Produksi
-			# sampai habis. Kalau muncul, ada field yang diubah di luar validate.
+			# Tidak seharusnya terjadi: baris penutup disusun justru dari selisih
+			# ini. Dibiarkan sebagai jaring pengaman kalau susunannya berubah.
 			frappe.throw(
 				_("Debit ({0}) dan Kredit ({1}) tidak seimbang. Simpan ulang dokumennya.").format(
 					total_debit, total_credit
