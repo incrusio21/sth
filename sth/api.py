@@ -125,7 +125,7 @@ def get_table_data(args):
 			"data": [],
 		}
 
-	where_clause = "WHERE sq.workflow_state NOT IN ('Approved','Closed') AND sq.custom_material_request = %(pr_sr)s "
+	where_clause = "WHERE sq.workflow_state NOT IN ('Approved','Closed') AND sqi.material_request = %(pr_sr)s "
 	filters = {"pr_sr":args.pr_sr}
 	
 	if args.item_name:

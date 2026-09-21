@@ -14,7 +14,7 @@ frappe.ui.form.on("Perhitungan KUD", {
 	refresh(frm) {
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__("Lihat Jurnal"), () => lihat_jurnal(frm), __("Akuntansi"));
-			tombol_turunan(frm);
+			// tombol_turunan(frm);
 			return;
 		}
 

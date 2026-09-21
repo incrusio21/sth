@@ -184,7 +184,7 @@ def hitung_shu(
 	setelah_biaya_operasional = flt(jumlah_produksi - jumlah_biaya_operasional, PRESISI_UANG)
 
 	pph22 = flt(jumlah_produksi * flt(persen_pph22) / 100, PRESISI_UANG)
-	hasil_bersih = flt(setelah_biaya_operasional - pph22, PRESISI_UANG)
+	hasil_bersih = abs(flt(setelah_biaya_operasional - pph22, PRESISI_UANG))
 
 	angsuran_hutang = flt(hasil_bersih * flt(persen_bagi_hasil) / 100, PRESISI_UANG)
 	# Sisa, bukan hitung ulang — supaya kedua bagian selalu berjumlah persis
@@ -399,8 +399,8 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 			continue
 
 		if jumlah < 0:
-			sisi = "credit" if sisi == "debit" else "debit"
-			jumlah = -jumlah
+			# sisi = "credit" if sisi == "debit" else "debit"
+			jumlah = abs(jumlah)
 
 		baris.append({
 			"account": akun.get(kunci),

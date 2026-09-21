@@ -99,6 +99,7 @@ function ambil_data_cogs(frm) {
         freeze_message: __("Mengambil data...")
     }).then((r) => {
         frm.refresh_fields();
+        frm.dirty()
 
         const peringatan = r.message || [];
         if (peringatan.length) {
