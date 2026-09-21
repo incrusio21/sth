@@ -2,6 +2,9 @@ import erpnext
 import frappe
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from frappe.model.document import Document
+from frappe.utils import flt
+
+from sth.accounting_sth.komponen_gaji import pecah_per_akun, rincian_komponen
 
 
 class CostingBengkel(Document):
@@ -239,76 +242,97 @@ def get_pengeluaran_barang_solar_bengkel(periode_dari, periode_sampai, company=N
 @frappe.whitelist()
 def get_payslip_karyawan_bengkel(periode_dari, periode_sampai, company=None, unit=None):
     """
-    Ambil GL Entry dari Payroll Entry yang designation-nya mengandung kata BENGKEL,
-    filter account LIKE '4121001%', debit > 0, dalam periode.
-    """
-    company_filter = "AND pe.company = %(company)s" if company else ""
-    unit_filter = "AND pe.unit = %(unit)s" if unit else ""
-    rows = frappe.db.sql("""
-        SELECT
-            pe.name AS payroll_entry,
-            pe.designation,
-            gl.account,
-            gl.debit AS amount,
-            "ALOKASI GAJI KARYAWAN BENGKEL" as keterangan
-        FROM `tabPayroll Entry` pe
-        JOIN `tabGL Entry` gl
-            ON gl.voucher_type = 'Payroll Entry'
-            AND gl.voucher_no = pe.name
-            AND gl.is_cancelled = 0
-            AND gl.account LIKE '4121001%%'
-            AND gl.debit > 0
-        JOIN `tabDesignation` d ON d.name = pe.designation
+    Gaji karyawan bengkel: komponen tiap slip di Payroll Entry yang designation-nya
+    mengandung kata BENGKEL, satu baris per akun komponen.
 
-        WHERE pe.docstatus = 1
+    Dulu dibaca dari GL Entry Payroll Entry yang akunnya diawali 4121001. Sejak
+    accrual dijurnal per Salary Component, satu Payroll Entry mendebit banyak
+    akun sekaligus: barisnya jadi berlipat dan yang bukan 4121001 hilang.
+    Sekarang dibaca dari komponen slipnya, sumber yang sama dengan accrual-nya,
+    jadi nilainya pun bruto seperti yang dibebankan di sana.
+    """
+    if not company:
+        frappe.throw("Company harus diisi supaya akun tiap komponen gaji bisa dicari.")
+
+    unit_filter = "AND pe.unit = %(unit)s" if unit else ""
+    slips = frappe.db.sql("""
+        SELECT ss.name, ss.payroll_entry
+        FROM `tabSalary Slip` ss
+        JOIN `tabPayroll Entry` pe ON pe.name = ss.payroll_entry
+        JOIN `tabDesignation` d ON d.name = pe.designation
+        WHERE ss.docstatus = 1
+          AND pe.docstatus = 1
           AND pe.start_date >= %(dari)s
           AND pe.end_date <= %(sampai)s
+          AND pe.company = %(company)s
           AND UPPER(d.designation_name) LIKE '%%BENGKEL%%'
-          {company_filter}
           {unit_filter}
-        ORDER BY pe.start_date, pe.name
-    """.format(company_filter=company_filter, unit_filter=unit_filter), {"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit}, as_dict=True)
+    """.format(unit_filter=unit_filter), {"dari": periode_dari, "sampai": periode_sampai, "company": company, "unit": unit}, as_dict=True)
 
-    result = []
-    for r in rows:
-        result.append({
-            "no_dokumen": r.payroll_entry,
-            "no_coa": r.account,
-            "amount": r.amount,
-            "keterangan": r.keterangan
-        })
+    if not slips:
+        return []
 
-    return result
+    payroll_entry = {d.name: d.payroll_entry for d in slips}
+    per_dokumen = {}
+    for r in rincian_komponen(company, list(payroll_entry)):
+        kunci = (payroll_entry[r.salary_slip], r.account)
+        per_dokumen[kunci] = per_dokumen.get(kunci, 0) + flt(r.amount)
+
+    return [
+        {
+            "no_dokumen": no_dokumen,
+            "no_coa": no_coa,
+            "amount": flt(amount, 2),
+            "keterangan": "ALOKASI GAJI KARYAWAN BENGKEL",
+        }
+        for (no_dokumen, no_coa), amount in sorted(per_dokumen.items())
+        if flt(amount, 2)
+    ]
 
 
 @frappe.whitelist()
 def get_gl_bkm_traksi_bengkel(periode_dari, periode_sampai, company=None, unit=None):
     """
-    Alokasi gaji operator VRA per kendaraan — 2 baris per kendaraan:
+    Alokasi gaji operator VRA per kendaraan:
       Debit  → 4112001 (Gaji Pengemudi)
-      Credit → 4121001 (Beban Gaji Operator)
+      Credit → akun komponen gaji operatornya, satu baris per akun
+
+    Kreditnya mengikuti akun yang didebit accrual Payroll Entry untuk komponen
+    itu, bukan lagi satu akun beban gaji; kalau tidak, akun komponennya tidak
+    pernah nol. Debitnya dijumlahkan dari pecahan kreditnya sendiri supaya
+    keduanya tidak meleset sesen pun karena pembulatan.
     """
     coa_debit = get_coa_gaji_pengemudi(company)
-    coa_credit = get_coa_beban_gaji_operator(company)
-    alokasi_map = _compute_alokasi_gaji_opr_per_kendaraan(periode_dari, periode_sampai, company, unit)
+    kredit_map = _alokasi_gaji_opr_per_kendaraan_akun(periode_dari, periode_sampai, company, unit)
+
+    per_kendaraan = {}
+    for (kendaraan, _akun), amount in kredit_map.items():
+        per_kendaraan[kendaraan] = per_kendaraan.get(kendaraan, 0) + flt(amount)
 
     result = []
-    for kendaraan, amount in alokasi_map.items():
-        if amount:
+    for kendaraan, total in sorted(per_kendaraan.items()):
+        if not total:
+            continue
+
+        result.append({
+            "no_coa": coa_debit,
+            "debit": total,
+            "credit": 0,
+            "kode_vra": kendaraan,
+            "keterangan": "ALOKASI GAJI OPERATOR VRA"
+        })
+
+        for (kend, akun), amount in sorted(kredit_map.items()):
+            if kend != kendaraan or not amount:
+                continue
             result.append({
-                "no_coa": coa_debit,
-                "debit": amount,
-                "credit": 0,
-                "kode_vra": kendaraan,
-                "keterangan": "ALOKASI GAJI OPERATOR VRA"
-            })
-            result.append({
-                "no_coa": coa_credit,
+                "no_coa": akun,
                 "debit": 0,
                 "credit": amount,
                 "kode_vra": kendaraan,
                 "keterangan": "ALOKASI GAJI OPERATOR VRA"
             })
+
     return result
 
 
@@ -536,7 +560,7 @@ def get_closing_vra_bengkel(periode_dari, periode_sampai, company=None, unit=Non
     Menggabungkan semua jurnal yang masuk ke costing_bengkel_closing_vra:
       1. Alokasi Gaji Karyawan Bengkel (debit per kendaraan, credit lawan ke pool = coa_alokasi)
       2. Closing Bengkel  (debit/credit dari _get_closing_bengkel_rows)
-      3. GL BKM Traksi    (alokasi gaji operator: debit 4112001, credit 4121001)
+      3. GL BKM Traksi    (alokasi gaji operator: debit 4112001, credit akun komponennya)
       4. Kegiatan BKM Traksi (alokasi VRA ke aktivitas)
       5. Closing VRA netting (debit Alokasi Gaji OPR + Biaya Bengkel Dialokasi, credit 4112099)
     Dipakai untuk mengisi costing_bengkel_closing_vra dan sebagai satu-satunya sumber jurnal GL.
@@ -552,12 +576,24 @@ def get_closing_vra_bengkel(periode_dari, periode_sampai, company=None, unit=Non
     rate_per_jam = (total_payslip_kbn / total_wkt_prb) if total_wkt_prb else 0
     alokasi_gaji_map = {r.kendaraan: (r.total_wkt_prb or 0) * rate_per_jam for r in wkt_prb_rows}
 
-    coa_beban_gaji = get_coa_beban_gaji_operator(company)
+    # Kreditnya dikembalikan ke akun komponen yang didebit accrual Payroll Entry,
+    # dibagi menurut komposisi akun pool gaji bengkelnya. Debit per kendaraan
+    # dijumlahkan dari pecahan itu supaya tetap seimbang setelah pembulatan.
+    campuran_pool = {}
+    for r in payslip_rows_kbn:
+        if r.get("no_coa") and r.get("amount"):
+            campuran_pool[r["no_coa"]] = campuran_pool.get(r["no_coa"], 0) + flt(r["amount"])
+
     for kendaraan, amount in alokasi_gaji_map.items():
-        if amount:
-            result.append({"no_coa": coa_alokasi, "debit": amount, "credit": 0,
-                           "kode_vra": kendaraan, "keterangan": "ALOKASI GAJI KARYAWAN BENGKEL"})
-            result.append({"no_coa": coa_beban_gaji, "debit": 0, "credit": amount,
+        pecahan = pecah_per_akun(amount, campuran_pool)
+        total = sum(pecahan.values())
+        if not total:
+            continue
+
+        result.append({"no_coa": coa_alokasi, "debit": total, "credit": 0,
+                       "kode_vra": kendaraan, "keterangan": "ALOKASI GAJI KARYAWAN BENGKEL"})
+        for akun, nilai in sorted(pecahan.items()):
+            result.append({"no_coa": akun, "debit": 0, "credit": nilai,
                            "kode_vra": kendaraan, "keterangan": "ALOKASI GAJI KARYAWAN BENGKEL"})
 
     # --- 2. Closing Bengkel ---
@@ -614,48 +650,47 @@ def get_payslip_operator_vra_bengkel(periode_dari, periode_sampai, company=None,
     if not employees:
         return []
 
+    if not company:
+        frappe.throw("Company harus diisi supaya akun tiap komponen gaji bisa dicari.")
+
     employee_list = tuple(e.employee for e in employees)
-    ss_company_filter = "AND ss.company = %(company)s" if company else ""
 
     rows = frappe.db.sql("""
-        SELECT
-            ss.name AS salary_slip,
-            ss.employee,
-            ss.net_pay AS amount,
-            gl.account,
-            "ALOKASI GAJI OPERATOR VRA" AS keterangan
+        SELECT ss.name
         FROM `tabSalary Slip` ss
-        LEFT JOIN (
-            SELECT voucher_no, account
-            FROM `tabGL Entry`
-            WHERE voucher_type = 'Payroll Entry'
-              AND is_cancelled = 0
-              AND account LIKE '4121001%%'
-              AND debit > 0
-            GROUP BY voucher_no, account
-        ) gl ON gl.voucher_no = ss.payroll_entry
         WHERE ss.docstatus = 1
           AND ss.start_date >= %(dari)s
           AND ss.end_date <= %(sampai)s
           AND ss.employee IN %(employees)s
-          {ss_company_filter}
+          AND ss.company = %(company)s
         ORDER BY ss.start_date, ss.name
-    """.format(ss_company_filter=ss_company_filter), {
+    """, {
         "dari": periode_dari, "sampai": periode_sampai,
         "employees": employee_list, "company": company
     }, as_dict=True)
 
-    result = []
-    for r in rows:
-        result.append({
-            "no_dokumen": r.salary_slip,
-            "employee": r.employee,
-            "no_coa": r.account,
-            "amount": r.amount or 0,
-            "keterangan": r.keterangan
-        })
+    if not rows:
+        return []
 
-    return result
+    # Akunnya dari komponen slipnya sendiri, bukan lagi dari GL Entry Payroll
+    # Entry yang akunnya diawali 4121001: satu Payroll Entry sekarang mendebit
+    # banyak akun, dan join ke GL seperti itu menggandakan baris slipnya.
+    per_slip = {}
+    for r in rincian_komponen(company, [d.name for d in rows]):
+        kunci = (r.salary_slip, r.employee, r.account)
+        per_slip[kunci] = per_slip.get(kunci, 0) + flt(r.amount)
+
+    return [
+        {
+            "no_dokumen": salary_slip,
+            "employee": employee,
+            "no_coa": account,
+            "amount": flt(amount, 2),
+            "keterangan": "ALOKASI GAJI OPERATOR VRA",
+        }
+        for (salary_slip, employee, account), amount in sorted(per_slip.items())
+        if flt(amount, 2)
+    ]
 
 
 @frappe.whitelist()
@@ -733,11 +768,6 @@ def get_coa_gaji_pengemudi(company):
     return frappe.db.get_value("Account", {"company": company, "name": ["like", "4112001%"]}, "name")
 
 
-@frappe.whitelist()
-def get_coa_beban_gaji_operator(company):
-    return frappe.db.get_value("Account", {"company": company, "name": ["like", "4121001%"]}, "name")
-
-
 def _get_kmhm_per_employee_kendaraan(periode_dari, periode_sampai, company, unit):
     """
     Selisih KM/HM per (employee, kendaraan) dari BKM Traksi.
@@ -777,20 +807,29 @@ def _get_kmhm_per_employee_kendaraan(periode_dari, periode_sampai, company, unit
     return result
 
 
-def _compute_alokasi_gaji_opr_per_kendaraan(periode_dari, periode_sampai, company, unit):
+def _alokasi_gaji_opr_per_employee_kendaraan(periode_dari, periode_sampai, company, unit):
     """
-    Alokasi gaji operator VRA per kendaraan berdasarkan proporsi KM/HM per employee.
-    Kontribusi employee ke kendaraan = (kmhm employee di kendaraan tsb / total kmhm employee) * gaji employee.
+    Alokasi gaji tiap operator VRA ke kendaraan yang dia pegang, berikut komposisi
+    akun komponen gajinya.
+
+    Kontribusi employee ke kendaraan = (kmhm employee di kendaraan tsb / total kmhm
+    employee) * gaji employee. Komposisi akunnya dibawa supaya kredit baliknya bisa
+    dikembalikan ke akun yang didebit accrual Payroll Entry.
     """
     payslip_rows = get_payslip_operator_vra_bengkel(periode_dari, periode_sampai, company, unit)
     salary_per_emp = {}
+    campuran_per_emp = {}
     for r in payslip_rows:
         emp = r.get("employee")
-        if emp:
-            salary_per_emp[emp] = salary_per_emp.get(emp, 0) + (r["amount"] or 0)
+        if not emp:
+            continue
+        salary_per_emp[emp] = salary_per_emp.get(emp, 0) + (r["amount"] or 0)
+        if r.get("no_coa"):
+            campuran = campuran_per_emp.setdefault(emp, {})
+            campuran[r["no_coa"]] = campuran.get(r["no_coa"], 0) + (r["amount"] or 0)
 
     if not salary_per_emp:
-        return {}
+        return {}, {}
 
     kmhm_emp_kend = _get_kmhm_per_employee_kendaraan(periode_dari, periode_sampai, company, unit)
 
@@ -803,8 +842,42 @@ def _compute_alokasi_gaji_opr_per_kendaraan(periode_dari, periode_sampai, compan
         total_emp_kmhm = total_kmhm_per_emp.get(emp, 0)
         salary = salary_per_emp.get(emp, 0)
         if total_emp_kmhm and salary:
-            alokasi[kend] = alokasi.get(kend, 0) + (kmhm / total_emp_kmhm) * salary
-    return alokasi
+            kunci = (emp, kend)
+            alokasi[kunci] = alokasi.get(kunci, 0) + (kmhm / total_emp_kmhm) * salary
+
+    return alokasi, campuran_per_emp
+
+
+def _compute_alokasi_gaji_opr_per_kendaraan(periode_dari, periode_sampai, company, unit):
+    """
+    Alokasi gaji operator VRA per kendaraan berdasarkan proporsi KM/HM per employee.
+    """
+    alokasi, _campuran = _alokasi_gaji_opr_per_employee_kendaraan(
+        periode_dari, periode_sampai, company, unit
+    )
+
+    per_kendaraan = {}
+    for (_emp, kend), amount in alokasi.items():
+        per_kendaraan[kend] = per_kendaraan.get(kend, 0) + amount
+
+    return per_kendaraan
+
+
+def _alokasi_gaji_opr_per_kendaraan_akun(periode_dari, periode_sampai, company, unit):
+    """
+    Alokasi gaji operator VRA per kendaraan, dipecah ke akun komponen tiap operator.
+    """
+    alokasi, campuran_per_emp = _alokasi_gaji_opr_per_employee_kendaraan(
+        periode_dari, periode_sampai, company, unit
+    )
+
+    hasil = {}
+    for (emp, kend), amount in alokasi.items():
+        for akun, nilai in pecah_per_akun(amount, campuran_per_emp.get(emp) or {}).items():
+            kunci = (kend, akun)
+            hasil[kunci] = hasil.get(kunci, 0) + nilai
+
+    return hasil
 
 
 @frappe.whitelist()

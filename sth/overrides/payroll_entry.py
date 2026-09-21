@@ -22,6 +22,7 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 )
 from frappe import _
+from sth.accounting_sth.komponen_gaji import rincian_komponen
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry, create_salary_slips_for_employees, get_salary_structure,set_fields_to_select,set_searchfield,set_filter_conditions,set_match_conditions,remove_payrolled_employees
 class PayrollEntry(PayrollEntry):
 
@@ -69,92 +70,6 @@ class PayrollEntry(PayrollEntry):
 		frappe.qb.from_(gle).delete().where(
 			(gle.voucher_type == self.doctype) & (gle.voucher_no == self.name)
 		).run()
-
-	def get_salary_components(self, component_type):
-		salary_slips = self.get_sal_slip_list(ss_status=1, as_dict=True)
-
-		if salary_slips:
-			ss = frappe.qb.DocType("Salary Slip")
-			ssd = frappe.qb.DocType("Salary Detail")
-			salary_components = (
-				frappe.qb.from_(ss)
-				.join(ssd)
-				.on(ss.name == ssd.parent)
-				.select(
-					ssd.salary_component,
-					ssd.amount,
-					ssd.parentfield,
-					ssd.additional_salary,
-					ssd.account_list_rate,
-					ss.salary_structure,
-					ss.employee,
-				)
-				.where((ssd.parentfield == component_type) & (ss.name.isin([d.name for d in salary_slips])))
-			).run(as_dict=True)
-
-			return salary_components
-		  
-	def get_salary_component_total(
-		self,
-		component_type=None,
-		employee_wise_accounting_enabled=False,
-	):
-		salary_components = self.get_salary_components(component_type)
-		if salary_components:
-			component_dict = {}
-			account_dict = {}
-
-			for item in salary_components:
-				if not self.should_add_component_to_accrual_jv(component_type, item):
-					continue
-				
-				employee_cost_centers = self.get_payroll_cost_centers_for_employee(
-					item.employee, item.salary_structure
-				)
-				employee_advance = self.get_advance_deduction(component_type, item)
-
-				for cost_center, percentage in employee_cost_centers.items():
-
-					acc_dict = json.loads(item.account_list_rate or "{}")
-					for acc, value in acc_dict.items():
-						accounting_key = (acc, cost_center)
-						acc_against_cost_center = flt(value) * percentage / 100
-						account_dict[accounting_key] = account_dict.get(accounting_key, 0) + acc_against_cost_center
-
-						item.amount -= acc_against_cost_center
-
-					if not item.amount:
-						continue
-
-					amount_against_cost_center = flt(item.amount) * percentage / 100
-					
-					if employee_advance:
-						self.add_advance_deduction_entry(
-							item, amount_against_cost_center, cost_center, employee_advance
-						)
-					else:
-						key = (item.salary_component, cost_center)
-						component_dict[key] = component_dict.get(key, 0) + amount_against_cost_center
-
-					if employee_wise_accounting_enabled:
-						self.set_employee_based_payroll_payable_entries(
-							component_type, item.employee, amount_against_cost_center
-						)
-
-			account_details = self.get_account(account_dict, component_dict=component_dict)
-
-			return account_details 
-		
-	def get_account(self, account_dict, component_dict=None):
-		for key, amount in component_dict.items():
-			component, cost_center = key
-			account = self.get_salary_component_account(component)
-			accounting_key = (account, cost_center)
-
-			account_dict[accounting_key] = account_dict.get(accounting_key, 0) + amount
-
-		return account_dict
-	
 
 	@frappe.whitelist()
 	def create_salary_slips(self):
@@ -316,37 +231,20 @@ class PayrollEntry(PayrollEntry):
 			"remarks":                   "Payment untuk Payroll Entry: {0}".format(self.name),
 		}
 	
-	def get_net_pay_per_cost_center_mill(self):
-		"""Net pay karyawan mill, dikelompokkan per cost center stasiunnya.
+	def cost_center_per_slip(self, slips):
+		"""Cost center tiap slip: karyawan mill ke stasiunnya, sisanya ke cost center dokumen.
 
 		Beban gaji mill dipisah per stasiun sejak accrual supaya jurnal reclass
 		di Costing Mill tinggal memindahkan akunnya, bukan cost center-nya.
-		Karyawan non-mill tidak lewat sini dan tetap satu baris di cost center
-		Payroll Entry.
+		Karyawan non-mill tetap memakai cost center Payroll Entry.
 		"""
 		from sth.accounting_sth.doctype.costing_mill.costing_mill import (
 			get_cost_center_stasiun,
 		)
 
-		slips = frappe.db.sql(
-			"""
-			SELECT
-				ss.employee,
-				ss.employee_name,
-				ss.net_pay,
-				e.stasiun,
-				e.unit
-			FROM `tabSalary Slip` ss
-			JOIN `tabEmployee` e ON e.name = ss.employee
-			JOIN `tabUnit` u ON u.name = e.unit AND u.mill = 1
-			WHERE ss.payroll_entry = %s
-			  AND ss.docstatus = 1
-			""",
-			self.name,
-			as_dict=True,
-		)
-
-		tanpa_stasiun = [d.employee_name or d.employee for d in slips if not d.stasiun]
+		tanpa_stasiun = [
+			d.employee_name or d.employee for d in slips if d.mill and not d.stasiun
+		]
 		if tanpa_stasiun:
 			frappe.throw(
 				_("Karyawan mill berikut belum diisi Stasiun-nya: {0}").format(
@@ -354,16 +252,20 @@ class PayrollEntry(PayrollEntry):
 				)
 			)
 
-		per_cost_center = {}
+		hasil = {}
 		tanpa_cost_center = []
 
 		for d in slips:
+			if not d.mill:
+				hasil[d.name] = self.cost_center
+				continue
+
 			cost_center = get_cost_center_stasiun(d.stasiun, self.company, d.unit)
 			if not cost_center:
 				tanpa_cost_center.append(d.stasiun)
 				continue
 
-			per_cost_center[cost_center] = per_cost_center.get(cost_center, 0) + flt(d.net_pay)
+			hasil[d.name] = cost_center
 
 		if tanpa_cost_center:
 			frappe.throw(
@@ -372,65 +274,100 @@ class PayrollEntry(PayrollEntry):
 				)
 			)
 
-		return per_cost_center
+		return hasil
 
-	def make_payroll_gl_entries(self):
+	def get_slip_accrual(self):
+		"""Slip yang diaccrual dokumen ini, lengkap dengan asal cost center-nya."""
+		kolom_angsuran = (
+			"IFNULL(ss.total_loan_repayment, 0)"
+			if frappe.get_meta("Salary Slip").has_field("total_loan_repayment")
+			else "0"
+		)
 
-		# ── 1. Hitung total dari semua Salary Slip yang terhubung ──────────────
-		total_amount = frappe.db.sql(
-			"""
-			SELECT COALESCE(SUM(net_pay), 0)
-			FROM `tabSalary Slip`
-			WHERE payroll_entry = %s
-			  AND docstatus = 1
-			""",
-			self.name,
-		)[0][0]
+		slips = frappe.db.sql("""
+			SELECT
+				ss.name,
+				ss.employee,
+				ss.employee_name,
+				ss.net_pay,
+				{kolom_angsuran} AS total_loan_repayment,
+				e.stasiun,
+				e.unit,
+				IFNULL(u.mill, 0) AS mill
+			FROM `tabSalary Slip` ss
+			JOIN `tabEmployee` e ON e.name = ss.employee
+			LEFT JOIN `tabUnit` u ON u.name = e.unit
+			WHERE ss.payroll_entry = %s
+			  AND ss.docstatus = 1
+		""".format(kolom_angsuran=kolom_angsuran), self.name, as_dict=True)
 
-		if not total_amount:
+		if not slips:
 			frappe.throw(
 				_("Tidak ada Salary Slip yang sudah di-submit pada Payroll Entry {0}").format(
 					self.name
 				)
 			)
 
-		debit_account = ""
-		# ── 2. Ambil akun debit berdasarkan company ───────────────────\
-		sth_accounting_settings = frappe.get_single("STH Accounting Settings")
-		for row in sth_accounting_settings.sth_accounting_settings_payroll:
-			if row.company == self.company:
-				debit_account = row.account
+		return slips
 
-		if not debit_account:
-			frappe.throw(
-				_("Akun di STH Accounting Setting Payroll tidak ditemukan untuk perusahaan {0}").format(
-					self.company
-				)
-			)
+	def make_payroll_gl_entries(self):
+		"""Accrual gaji, satu baris per akun komponen.
 
-		# ── 3. Validasi akun kredit ────────────────────────────────────────────
+		Akunnya diambil dari tabel Accounts di tiap Salary Component: earning
+		didebit ke akun bebannya, deduction dikredit ke akun potongannya, dan
+		sisanya - yang benar-benar dibayarkan - dikredit ke Payroll Payable.
+		Dulu seluruh net pay ditumpuk di satu akun dari STH Accounting Settings,
+		jadi gaji staf, gaji operator, dan potongan karyawan jatuh di akun yang
+		sama dan baru terpisah (itu pun kalau sempat) waktu costing mereclass.
+
+		Komponen yang dicentang "Not Include Net Pay" tidak ikut; aturan
+		lengkapnya ada di sth.accounting_sth.komponen_gaji, yang dipakai bersama
+		oleh costing supaya yang direclass persis yang diaccrual.
+
+		Payroll Payable dikredit sebesar net pay ditambah angsuran pinjaman:
+		Loan Repayment yang lahir dari tiap slip mendebit akun yang sama, jadi
+		yang tersisa di situ persis sebesar yang nanti dibayar Payment Entry.
+		"""
 		if not self.payroll_payable_account:
 			frappe.throw(_("Field 'Payroll Payable Account' belum diisi pada Payroll Entry ini"))
 
-		# ── 4. Buat baris GL Entry ─────────────────────────────────────────────
-		# Debit dipecah: karyawan mill per cost center stasiunnya, sisanya
-		# (non-mill) satu baris di cost center Payroll Entry.
+		slips = self.get_slip_accrual()
+		cost_center = self.cost_center_per_slip(slips)
+		nama_slip = [d.name for d in slips]
+
+		debit_per_akun = {}
+		for r in rincian_komponen(self.company, nama_slip, "earnings"):
+			kunci = (r.account, cost_center[r.salary_slip])
+			debit_per_akun[kunci] = debit_per_akun.get(kunci, 0) + flt(r.amount)
+
+		kredit_per_akun = {}
+		for r in rincian_komponen(self.company, nama_slip, "deductions"):
+			kunci = (r.account, cost_center[r.salary_slip])
+			kredit_per_akun[kunci] = kredit_per_akun.get(kunci, 0) + flt(r.amount)
+
+		if not (debit_per_akun or kredit_per_akun):
+			frappe.throw(
+				_("Tidak ada komponen gaji yang bisa dijurnal pada Payroll Entry {0}").format(
+					self.name
+				)
+			)
+
+		total_net_pay = flt(sum(flt(d.net_pay) for d in slips), 2)
+		total_angsuran = flt(sum(flt(d.total_loan_repayment) for d in slips), 2)
+		payable = flt(total_net_pay + total_angsuran, 2)
+
 		remarks = "Payroll Entry: {0}".format(self.name)
 
-		mill_per_cost_center = self.get_net_pay_per_cost_center_mill()
-		total_mill = flt(sum(mill_per_cost_center.values()), 2)
-		sisa_non_mill = flt(flt(total_amount) - total_mill, 2)
-
-		def baris_debit(amount, cost_center):
+		def baris(account, cost_center, debit=0, credit=0, against=None):
 			return frappe._dict({
 				"doctype": "GL Entry",
 				"posting_date": self.posting_date,
-				"account": debit_account,
-				"against": self.payroll_payable_account,
-				"debit": amount,
-				"debit_in_account_currency": amount,
-				"credit": 0,
-				"credit_in_account_currency": 0,
+				"account": account,
+				"against": against,
+				"debit": debit,
+				"debit_in_account_currency": debit,
+				"credit": credit,
+				"credit_in_account_currency": credit,
 				"voucher_type": self.doctype,
 				"voucher_no": self.name,
 				"company": self.company,
@@ -440,43 +377,78 @@ class PayrollEntry(PayrollEntry):
 			})
 
 		gl_entries = [
-			baris_debit(flt(amount, 2), cost_center)
-			for cost_center, amount in sorted(mill_per_cost_center.items())
+			baris(account, cc, debit=flt(amount, 2), against=self.payroll_payable_account)
+			for (account, cc), amount in sorted(debit_per_akun.items())
 			if flt(amount, 2)
 		]
 
-		if sisa_non_mill:
-			gl_entries.append(baris_debit(sisa_non_mill, self.cost_center))
+		gl_entries += [
+			baris(account, cc, credit=flt(amount, 2), against=self.payroll_payable_account)
+			for (account, cc), amount in sorted(kredit_per_akun.items())
+			if flt(amount, 2)
+		]
 
-		# CREDIT (Hutang Gaji) tetap satu baris: akun neraca, tidak dipecah per stasiun.
-		gl_entries.append(frappe._dict({
-			"doctype": "GL Entry",
-			"posting_date": self.posting_date,
-			"account": self.payroll_payable_account,
-			"against": debit_account,
-			"debit": 0,
-			"debit_in_account_currency": 0,
-			"credit": total_amount,
-			"credit_in_account_currency": total_amount,
-			"voucher_type": self.doctype,
-			"voucher_no": self.name,
-			"company": self.company,
-			"cost_center": self.cost_center or None,
-			"remarks": remarks,
-			"is_opening": "No",
-		}))
+		self.setarakan_accrual(gl_entries, payable)
+
+		against_payable = ", ".join(sorted({d.account for d in gl_entries if d.debit}))
+		gl_entries.append(
+			baris(self.payroll_payable_account, self.cost_center, credit=payable, against=against_payable)
+		)
 
 		post_gl_entries(gl_entries)
 
 		frappe.msgprint(
-			_("GL Entry berhasil dibuat: Debit {0} | Credit {1} | Total {2}").format(
-				debit_account,
+			_("GL Entry berhasil dibuat: {0} baris beban dan potongan, "
+			  "Payroll Payable {1} dikredit {2}").format(
+				len(gl_entries) - 1,
 				self.payroll_payable_account,
-				frappe.format(total_amount, {"fieldtype": "Currency"}),
+				frappe.format(payable, {"fieldtype": "Currency"}),
 			),
 			indicator="green",
 			alert=True,
 		)
+
+	def setarakan_accrual(self, gl_entries, payable):
+		"""Pastikan baris komponen ketemu dengan Payroll Payable.
+
+		Kalau penyaringnya benar, selisihnya cuma sisa pembulatan per baris dan
+		ditimpakan ke baris debit terbesar. Selisih yang lebih besar dari itu
+		bukan pembulatan - ada komponen yang penyaringnya tidak sama dengan yang
+		dipakai Salary Slip menghitung net pay - dan lebih baik ketahuan
+		sekarang daripada meninggalkan buku besar yang pincang.
+		"""
+		total_debit = flt(sum(flt(d.debit) for d in gl_entries), 2)
+		total_kredit = flt(sum(flt(d.credit) for d in gl_entries), 2)
+		selisih = flt(total_debit - total_kredit - payable, 2)
+
+		if not selisih:
+			return
+
+		if abs(selisih) > 1:
+			frappe.throw(
+				_("Jurnal komponen tidak ketemu dengan net pay: beban {0} dikurangi potongan {1} "
+				  "menghasilkan {2}, sedangkan net pay ditambah angsuran pinjaman {3}. "
+				  "Selisihnya {4}. Periksa centang Not Include Net Pay dan Do Not Include In "
+				  "Total di komponen yang dipakai periode ini.").format(
+					frappe.format(total_debit, {"fieldtype": "Currency"}),
+					frappe.format(total_kredit, {"fieldtype": "Currency"}),
+					frappe.format(flt(total_debit - total_kredit, 2), {"fieldtype": "Currency"}),
+					frappe.format(payable, {"fieldtype": "Currency"}),
+					frappe.format(selisih, {"fieldtype": "Currency"}),
+				),
+				title=_("Accrual Gaji Tidak Seimbang"),
+			)
+
+		penerima = max(
+			(d for d in gl_entries if d.debit),
+			key=lambda d: flt(d.debit),
+			default=None,
+		)
+		if not penerima:
+			frappe.throw(_("Tidak ada baris beban gaji yang bisa menampung sisa pembulatan"))
+
+		penerima.debit = flt(penerima.debit - selisih, 2)
+		penerima.debit_in_account_currency = penerima.debit
 
 	@frappe.whitelist()
 	def submit_salary_slips(self):

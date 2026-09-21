@@ -20,6 +20,8 @@ from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_ent
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from sth.accounting_sth.komponen_gaji import pecah_per_akun, rincian_komponen
+
 # Penanda di Salary Component untuk komponen yang dibagi ke kegiatan. Dulu
 # daftarnya ditulis di sini, termasuk pola nama BPJS beban perusahaan yang
 # variannya banyak; sekarang tinggal dicentang di masternya, jadi komponen baru
@@ -186,30 +188,22 @@ class CostingKebun(Document):
 # Sumber data
 # ---------------------------------------------------------------------------
 
-@frappe.whitelist()
-def get_coa_gaji_dialokasi(company):
-	"""Akun kredit alokasi gaji, diambil dari STH Accounting Settings.
-
-	Barisnya dicocokkan per company di tabel STH Accounting Settings Payroll,
-	akun yang sama yang dipakai Payroll Entry waktu mendebit beban gaji, jadi
-	alokasi ini murni reclass beban ke kegiatan.
-	"""
-	settings = frappe.get_single("STH Accounting Settings")
-	for row in settings.sth_accounting_settings_payroll:
-		if row.company == company:
-			return row.account
-	return None
-
-
 def get_komponen_gaji(periode_dari, periode_sampai, company=None, unit=None):
 	"""Total komponen gaji yang dibagi ke kegiatan, per karyawan.
 
 	Komponennya yang dicentang "Dibagi ke Kegiatan Kebun" di master Salary
-	Component - lihat FIELD_KOMPONEN_KEBUN.
+	Component - lihat FIELD_KOMPONEN_KEBUN - dan yang memang diaccrual Payroll
+	Entry. Komponen yang tidak ikut net pay (BPJS beban perusahaan, gross up
+	PPh21) tidak pernah dijurnal accrual karena bebannya lahir dari dokumen BPJS
+	sendiri, jadi tidak ada yang bisa direclass dari situ; lihat
+	sth.accounting_sth.komponen_gaji.
 
-	Cost center accrual ikut dibawa: itu cost center Payroll Entry yang mendebit
-	beban gaji, dan ke situ pula kreditnya harus dikembalikan waktu closing.
+	Akun tiap komponen ikut dibawa, sama seperti cost center accrual: ke akun dan
+	cost center itulah kreditnya harus kembali waktu closing.
 	"""
+	if not company:
+		frappe.throw("Company harus diisi supaya akun tiap komponen gaji bisa dicari.")
+
 	params = {
 		"dari": periode_dari,
 		"sampai": periode_sampai,
@@ -217,43 +211,44 @@ def get_komponen_gaji(periode_dari, periode_sampai, company=None, unit=None):
 		"unit": unit,
 	}
 
-	rows = frappe.db.sql("""
+	slips = frappe.db.sql("""
 		SELECT
+			ss.name,
 			ss.employee,
 			ss.employee_name,
-			pe.cost_center AS cost_center_accrual,
-			SUM(sd.amount) AS amount
+			pe.cost_center AS cost_center_accrual
 		FROM `tabSalary Slip` ss
-		JOIN `tabSalary Detail` sd
-			ON sd.parent = ss.name AND sd.parentfield = 'earnings'
 		JOIN `tabEmployee` e ON e.name = ss.employee
-		JOIN `tabSalary Component` sc ON sc.name = sd.salary_component
 		LEFT JOIN `tabPayroll Entry` pe ON pe.name = ss.payroll_entry
 		WHERE ss.docstatus = 1
 		  AND ss.start_date >= %(dari)s
 		  AND ss.end_date <= %(sampai)s
-		  AND sc.`{field}` = 1
-		  {company_filter}
+		  AND ss.company = %(company)s
 		  {unit_filter}
-		GROUP BY ss.employee, ss.employee_name, pe.cost_center
 	""".format(
-		field=FIELD_KOMPONEN_KEBUN,
-		company_filter="AND ss.company = %(company)s" if company else "",
 		unit_filter="AND e.unit = %(unit)s" if unit else "",
 	), params, as_dict=True)
 
+	if not slips:
+		return {}
+
+	asal = {d.name: d for d in slips}
 	komponen = {}
-	for r in rows:
+
+	for r in rincian_komponen(company, list(asal), hanya_kegiatan_kebun=True):
+		slip = asal[r.salary_slip]
 		data = komponen.setdefault(r.employee, {
-			"employee_name": r.employee_name,
-			"cost_center_accrual": r.cost_center_accrual,
+			"employee_name": slip.employee_name,
+			"cost_center_accrual": slip.cost_center_accrual,
 			"amount": 0,
+			"per_akun": {},
 		})
 		data["amount"] += flt(r.amount)
+		data["per_akun"][r.account] = data["per_akun"].get(r.account, 0) + flt(r.amount)
 		# Slip yang tidak lewat Payroll Entry tidak punya cost center accrual;
 		# yang ada dipakai supaya kreditnya tetap ketemu asalnya.
 		if not data["cost_center_accrual"]:
-			data["cost_center_accrual"] = r.cost_center_accrual
+			data["cost_center_accrual"] = slip.cost_center_accrual
 
 	return komponen
 
@@ -368,6 +363,7 @@ def bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company=None, unit=None)
 			r = dict(r)
 			r["employee_name"] = data["employee_name"]
 			r["cost_center_accrual"] = data["cost_center_accrual"]
+			r["per_akun"] = data["per_akun"]
 			r["total_komponen"] = total
 			r["jumlah_kegiatan"] = jumlah
 			r["amount"] = porsi
@@ -399,6 +395,7 @@ def gaji_tanpa_kegiatan(komponen, per_karyawan):
 			"employee": employee,
 			"employee_name": data["employee_name"],
 			"cost_center_accrual": data["cost_center_accrual"],
+			"per_akun": data["per_akun"],
 			"sumber": None,
 			"total_komponen": flt(data["amount"]),
 			"jumlah_kegiatan": 0,
@@ -492,25 +489,20 @@ def susun_gaji_karyawan(baris, sumber):
 
 @frappe.whitelist()
 def get_closing_kebun(sumber, periode_dari, periode_sampai, company=None, unit=None):
-	"""Baris jurnal: debit rekap per akun kegiatan, kredit gaji dialokasi.
+	"""Baris jurnal: debit rekap per akun kegiatan, kredit balik ke akun komponen.
 
-	Kreditnya dipecah per cost center Payroll Entry yang mendebit beban gajinya,
-	supaya kegiatan tidak kelihatan dobel beban dan cost center asal tidak minus.
+	Kreditnya dipecah per akun komponen dan per cost center Payroll Entry yang
+	mendebit beban gajinya, supaya akun komponennya benar-benar nol, kegiatan
+	tidak kelihatan dobel beban, dan cost center asal tidak minus.
 	"""
 	semua = bagi_gaji_ke_kegiatan(periode_dari, periode_sampai, company, unit)
 	return susun_closing_kebun(baris_sumber(semua, sumber), sumber, company)
 
 
 def susun_closing_kebun(baris, sumber, company):
-	coa_kredit = get_coa_gaji_dialokasi(company)
-	if not coa_kredit:
-		frappe.throw(
-			"Akun alokasi gaji untuk company {0} belum diisi di STH Accounting Settings "
-			"tabel Payroll.".format(company)
-		)
-
 	debit_per_akun = {}
-	kredit_per_cost_center = {}
+	dialokasi_per_karyawan = {}
+	campuran_karyawan = {}
 
 	for r in baris:
 		if not flt(r["amount"]):
@@ -520,8 +512,18 @@ def susun_closing_kebun(baris, sumber, company):
 		kunci = (r["kegiatan_account"], r["kegiatan"], cost_center)
 		debit_per_akun[kunci] = debit_per_akun.get(kunci, 0) + flt(r["amount"])
 
-		asal = r["cost_center_accrual"]
-		kredit_per_cost_center[asal] = kredit_per_cost_center.get(asal, 0) + flt(r["amount"])
+		# Kreditnya dihitung per karyawan, bukan per baris kegiatan: satu orang
+		# bisa punya puluhan baris, dan memecah tiap baris ke akun komponennya
+		# cuma menambah sisa pembulatan tanpa menambah keterangan apa pun.
+		asal = (r["employee"], r["cost_center_accrual"])
+		dialokasi_per_karyawan[asal] = dialokasi_per_karyawan.get(asal, 0) + flt(r["amount"])
+		campuran_karyawan[r["employee"]] = r.get("per_akun") or {}
+
+	kredit_per_akun = {}
+	for (employee, cost_center_accrual), amount in dialokasi_per_karyawan.items():
+		for akun, nilai in pecah_per_akun(amount, campuran_karyawan.get(employee) or {}).items():
+			kunci = (akun, cost_center_accrual)
+			kredit_per_akun[kunci] = kredit_per_akun.get(kunci, 0) + nilai
 
 	rows = []
 	for (no_coa, kegiatan, cost_center), amount in sorted(
@@ -542,13 +544,16 @@ def susun_closing_kebun(baris, sumber, company):
 		return rows
 
 	total_debit = sum(flt(r["debit"]) for r in rows)
-	rows.extend(baris_kredit_alokasi(coa_kredit, kredit_per_cost_center, total_debit, sumber))
+	rows.extend(baris_kredit_alokasi(kredit_per_akun, total_debit, sumber))
 
 	return rows
 
 
-def baris_kredit_alokasi(coa_kredit, kredit_per_cost_center, total_debit, sumber):
-	"""Baris kredit gaji dialokasi, satu per cost center asal.
+def baris_kredit_alokasi(kredit_per_akun, total_debit, sumber):
+	"""Baris kredit gaji, satu per akun komponen dan cost center asalnya.
+
+	Akunnya akun yang benar-benar didebit accrual Payroll Entry untuk komponen
+	itu, bukan lagi satu akun alokasi dari STH Accounting Settings.
 
 	Sisa pembulatan dibebankan ke baris terbesar supaya total kredit persis sama
 	dengan total debit; kalau tidak, submit-nya ditolak oleh cek keseimbangan di
@@ -556,15 +561,15 @@ def baris_kredit_alokasi(coa_kredit, kredit_per_cost_center, total_debit, sumber
 	"""
 	baris = [
 		{
-			"no_coa": coa_kredit,
+			"no_coa": no_coa,
 			"kegiatan": None,
 			"cost_center": cost_center,
 			"debit": 0,
 			"credit": flt(amount, 2),
 			"keterangan": KETERANGAN[sumber],
 		}
-		for cost_center, amount in sorted(
-			kredit_per_cost_center.items(), key=lambda d: -flt(d[1])
+		for (no_coa, cost_center), amount in sorted(
+			kredit_per_akun.items(), key=lambda d: -flt(d[1])
 		)
 		if flt(amount, 2)
 	]
