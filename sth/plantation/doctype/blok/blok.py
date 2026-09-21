@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
+from sth.utils.account import cari_akun, nama_akun_nanti, pastikan_akun
 from sth.utils.cost_center import pastikan_induk
 
 BULAN_MAP = {
@@ -301,8 +302,10 @@ def preview_naikkan_ke_tm(blok_name, selected_bloks):
 	unit_doc = frappe.get_doc("Unit", blok.unit)
 	company = unit_doc.company
 
-	debit_account = frappe.db.get_value("Account", {"account_number": "1271301", "company": company}, "name") or "1271301 - TANAMAN MENGHASILKAN"
-	credit_account = frappe.db.get_value("Account", {"account_number": "1269999", "company": company}, "name") or "1269999 - ASET DALAM PENYELESAIAN - LAINNYA"
+	# Preview tidak boleh menambah apa-apa ke bagan akun, jadi akun yang belum ada disebut
+	# dengan nama yang nanti dipakainya. Yang membuatnya naikkan_ke_tm, waktu jurnalnya jadi.
+	debit_account = cari_akun(company, "1271301") or nama_akun_nanti(company, "1271301")
+	credit_account = cari_akun(company, "1269999") or nama_akun_nanti(company, "1269999")
 
 	return {
 		"jumlah_blok": len(alokasi["selected"]),
@@ -340,19 +343,10 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 			"Deskripsi dibutuhkan untuk penamaan Cost Center saat naik TM."
 		)
 
-	debit_account = frappe.db.get_value("Account", {
-		"account_number": "1271301",
-		"company": company,
-	}, "name")
-	credit_account = frappe.db.get_value("Account", {
-		"account_number": "1269999",
-		"company": company,
-	}, "name")
-
-	if not debit_account:
-		frappe.throw(f"Akun 1271301 tidak ditemukan untuk company {company}.")
-	if not credit_account:
-		frappe.throw(f"Akun 1269999 tidak ditemukan untuk company {company}.")
+	# Akun 1269999 baru ada di company yang kebunnya pernah menaikkan Blok ke TM;
+	# di company lain akunnya dibuat di sini, di bawah grup 12690 miliknya sendiri.
+	debit_account = pastikan_akun(company, "1271301")
+	credit_account = pastikan_akun(company, "1269999")
 
 	if not frappe.db.exists("Kategori Kegiatan", "TM"):
 		frappe.throw('Kategori Kegiatan "TM" tidak ditemukan.')
