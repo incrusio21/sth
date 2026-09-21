@@ -150,7 +150,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 				self.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(po_doc.name,self.company)
 
-			if ada_po == 0 and ada_pro == 0:
+			# Invoice dari Perhitungan KUD dikecualikan: akun lawannya akun antara
+			# yang dikredit jurnal KUD, bukan akun biaya bawaan item. Kalau ikut
+			# ditimpa di sini, akun antara itu tidak pernah tertutup.
+			if ada_po == 0 and ada_pro == 0 and not self.get("perhitungan_kud"):
 				for item in self.items:
 					doc_item = frappe.get_doc("Item", item.item_code)
 					for row_item in doc_item.item_defaults:
@@ -162,6 +165,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				if row.kendaraan:
 					self.cost_center = get_or_create_cost_center(row.kendaraan, self.company)
 
+		self.validate_perhitungan_kud()
 		super().validate()
 		self.validate_term()
 		self.set_retensi_amount()
@@ -171,6 +175,32 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		validate_uang_muka_po(self)
 		self.set_grand_total_setelah_dp()
 		self.validate_uang_muka_wajib_diambil()
+
+	def validate_perhitungan_kud(self):
+		"""Satu Perhitungan KUD hanya boleh punya satu Purchase Invoice.
+
+		Tanpa ini, hutang ke mitra bisa ditagihkan berkali-kali dari perhitungan
+		yang sama dan akun antaranya jadi bersaldo debit.
+		"""
+		if not self.get("perhitungan_kud"):
+			return
+
+		lain = frappe.db.exists(
+			"Purchase Invoice",
+			{
+				"perhitungan_kud": self.perhitungan_kud,
+				"name": ("!=", self.name),
+				"docstatus": ("!=", 2),
+			},
+		)
+
+		if lain:
+			frappe.throw(
+				_("Perhitungan KUD {0} sudah dipakai Purchase Invoice {1}.").format(
+					frappe.bold(self.perhitungan_kud), frappe.bold(lain)
+				),
+				title=_("Duplikat Tidak Diizinkan"),
+			)
 
 	def set_expense_account(self, for_validate=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)

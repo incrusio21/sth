@@ -1,7 +1,9 @@
 # Copyright (c) 2026, DAS and contributors
 # For license information, please see license.txt
 
+import erpnext
 import frappe
+from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate
@@ -27,6 +29,34 @@ BKM_BIAYA = (
 	("Buku Kerja Mandor Panen", "biaya_bkm_panen"),
 	("Buku Kerja Mandor Traksi", "biaya_bkm_traksi"),
 )
+
+# Susunan jurnal: satu debit sebesar seluruh pembelian, lalu kredit yang
+# memecahnya sampai habis. Urutannya mengikuti Jurnal KUD.xlsx.
+#
+# (kunci akun di setelan, field nilai di dokumen, sisi, keterangan)
+#
+# Jumlahnya seimbang dengan sendirinya: hitung_shu() menyusun Hasil Bersih
+# sebagai sisa Jumlah Produksi dikurangi biaya, fee, dan PPh 22, lalu memecahnya
+# jadi Angsuran Hutang dan Pembayaran ke Mitra — juga sebagai sisa. Jadi kelima
+# kredit selalu berjumlah persis Jumlah Produksi tanpa baris pembulatan.
+BARIS_JURNAL = (
+	("akun_pembelian_tbs", "jumlah_produksi", "debit", "Pembelian TBS Plasma"),
+	(
+		"akun_biaya_plasma",
+		"total_biaya_perawatan_panen_dan_transport",
+		"credit",
+		"Biaya Perawatan, Panen & Transport",
+	),
+	("akun_management_fee", "management_fee", "credit", "Management Fee"),
+	("akun_pph22", "pph22", "credit", "PPh Pasal 22"),
+	("akun_piutang_plasma", "angsuran_hutang", "credit", "Angsuran Hutang Mitra"),
+	("akun_hutang_plasma_antara", "pembayaran_ke_mitra", "credit", "Pembayaran ke Mitra"),
+)
+
+# Tidak ada baris jurnal ini yang membawa party. Hutang ke mitra berhenti di
+# akun antara tanpa party, lalu Purchase Invoice yang menariknya memindahkannya
+# ke 2111091 lengkap dengan supplier-nya. Kalau party dipasang di dua tempat,
+# umur hutang mitra terhitung dua kali.
 
 
 def pecah_netto_tiket(rows):
@@ -290,6 +320,41 @@ def rekap_biaya_bkm(baris):
 	return {fieldname: flt(total, PRESISI_UANG) for fieldname, total in hasil.items()}
 
 
+def susun_baris_jurnal(nilai, akun):
+	"""Baris jurnal dari nilai dokumen dan peta akun. Fungsi murni — tanpa database.
+
+	`nilai` cukup punya field angka Perhitungan KUD, `akun` memetakan kunci di
+	BARIS_JURNAL ke nama akun. Baris bernilai nol dibuang: kalau mitra kebetulan
+	tidak punya biaya BKM bulan itu, jurnalnya tidak perlu baris kosong.
+
+	Nilai negatif pindah sisi, bukan dicatat sebagai debit negatif — GL Entry
+	menolak angka minus. Ini terjadi kalau biaya melampaui produksi, dan
+	hitung_shu() memang sengaja membiarkan hasilnya negatif.
+
+	Balikan: list of dict {account, debit, credit, keterangan, kunci}.
+	"""
+	baris = []
+
+	for kunci, fieldname, sisi, keterangan in BARIS_JURNAL:
+		jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
+		if not jumlah:
+			continue
+
+		if jumlah < 0:
+			sisi = "credit" if sisi == "debit" else "debit"
+			jumlah = -jumlah
+
+		baris.append({
+			"account": akun.get(kunci),
+			"debit": jumlah if sisi == "debit" else 0.0,
+			"credit": jumlah if sisi == "credit" else 0.0,
+			"keterangan": keterangan,
+			"kunci": kunci,
+		})
+
+	return baris
+
+
 class PerhitunganKUD(Document):
 	def autoname(self):
 		abbr = frappe.get_cached_value("Company", self.company, "abbr")
@@ -298,6 +363,12 @@ class PerhitunganKUD(Document):
 			frappe.throw(_("Bulan tidak dikenali: {0}").format(self.bulan))
 
 		self.name = f"PK-{abbr}-{cint(self.tahun):04d}-{bulan_no:02d}-{self.mitra}"
+
+	def onload(self):
+		# Dipakai tombol Buat di form: kalau turunannya sudah ada, tombolnya
+		# berubah jadi pembuka dokumen itu, bukan pembuat yang kedua.
+		if self.docstatus == 1:
+			self.set_onload("turunan", turunan_yang_ada(self.name))
 
 	def validate(self):
 		self.set_periode()
@@ -309,6 +380,17 @@ class PerhitunganKUD(Document):
 
 	def on_submit(self):
 		self.validate_semua_baris_berharga()
+		self.make_gl_entry()
+
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ("GL Entry",)
+		self.make_gl_entry()
+
+	def on_trash(self):
+		frappe.db.delete("GL Entry", {
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+		})
 
 	def masa_bulan_ini(self):
 		"""Masa bulan ini dari Master Harga SHU. Rentang tanggal tidak pernah dihitung sendiri."""
@@ -453,6 +535,117 @@ class PerhitunganKUD(Document):
 			title=_("Masih Ada Netto Tanpa Harga"),
 		)
 
+	# ------------------------------------------------------------------
+	# Jurnal
+	# ------------------------------------------------------------------
+
+	def peta_akun(self):
+		"""Nama akun untuk tiap baris jurnal, atau throw kalau setelannya belum lengkap.
+
+		Piutang Plasma diambil dari tabel per mitra, bukan dari setelan company:
+		tiap BUMDES punya akunnya sendiri di COA, misalnya '1293002 - PIUTANG
+		PLASMA - BUMDES JABUNG CIPTA USAHA'.
+		"""
+		setelan = get_setelan_kud(self.company)
+		if not setelan:
+			frappe.throw(
+				_(
+					"Akun jurnal Perhitungan KUD untuk {0} belum diatur. "
+					"Isi dulu tabel <b>Perhitungan KUD - Akun Jurnal</b> di STH Accounting Settings."
+				).format(self.company),
+				title=_("Setelan Akun Belum Ada"),
+			)
+
+		akun = {kunci: setelan.get(kunci) for kunci, *_ in BARIS_JURNAL}
+
+		# Dicari hanya kalau ada angsurannya — mitra yang bulan ini tidak
+		# mengangsur tidak perlu punya akun piutang dulu.
+		if flt(self.angsuran_hutang):
+			akun["akun_piutang_plasma"] = get_akun_piutang_plasma(self.company, self.mitra)
+
+		# Baris bernilai nol tidak masuk jurnal, jadi akunnya juga tidak wajib.
+		kosong = [
+			keterangan
+			for kunci, fieldname, _sisi, keterangan in BARIS_JURNAL
+			if not akun.get(kunci) and flt(self.get(fieldname))
+		]
+		if kosong:
+			frappe.throw(
+				_(
+					"Akun untuk baris ini belum diatur: {0}. "
+					"Lengkapi dulu setelan Perhitungan KUD di STH Accounting Settings."
+				).format(", ".join(kosong)),
+				title=_("Setelan Akun Belum Lengkap"),
+			)
+
+		return setelan, akun
+
+	def make_gl_entry(self):
+		if self.docstatus == 1:
+			make_gl_entries(self.get_gl_entries(), merge_entries=False)
+			frappe.msgprint(_("Jurnal Perhitungan KUD dibuat."), indicator="green", alert=True)
+		elif self.docstatus == 2:
+			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+			frappe.msgprint(_("Jurnal Perhitungan KUD dibatalkan."), indicator="orange", alert=True)
+
+	def get_gl_entries(self):
+		setelan, akun = self.peta_akun()
+
+		cost_center = get_cost_center_kud(self.company, setelan)
+
+		baris = susun_baris_jurnal(self.as_dict(), akun)
+		if not baris:
+			return []
+
+		total_debit = flt(sum(row["debit"] for row in baris), PRESISI_UANG)
+		total_credit = flt(sum(row["credit"] for row in baris), PRESISI_UANG)
+		if total_debit != total_credit:
+			# Tidak seharusnya terjadi: hitung_shu() memecah Jumlah Produksi
+			# sampai habis. Kalau muncul, ada field yang diubah di luar validate.
+			frappe.throw(
+				_("Debit ({0}) dan Kredit ({1}) tidak seimbang. Simpan ulang dokumennya.").format(
+					total_debit, total_credit
+				),
+				title=_("Jurnal Tidak Seimbang"),
+			)
+
+		gl_entries = []
+		for row in baris:
+			args = {
+				"account": row["account"],
+				"cost_center": cost_center,
+				"debit": row["debit"],
+				"credit": row["credit"],
+				"debit_in_account_currency": row["debit"],
+				"credit_in_account_currency": row["credit"],
+				"remarks": "{0} - {1}".format(row["keterangan"], self.name),
+			}
+
+			gl_entries.append(self.get_gl_dict(args))
+
+		return gl_entries
+
+	def get_gl_dict(self, args):
+		gl_dict = frappe._dict({
+			"company": self.company,
+			"posting_date": self.tanggal_selesai,
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"remarks": "Perhitungan KUD {0}".format(self.name),
+			"against": None,
+			"debit": 0,
+			"credit": 0,
+			"debit_in_account_currency": 0,
+			"credit_in_account_currency": 0,
+			"is_opening": "No",
+			"party_type": None,
+			"party": None,
+			"cost_center": None,
+			"company_currency": erpnext.get_company_currency(self.company),
+		})
+		gl_dict.update(args)
+		return gl_dict
+
 	@frappe.whitelist()
 	def tarik_produksi(self):
 		"""Isi ulang detail dari tiket timbangan, dan biayanya dari BKM. Tombol di form."""
@@ -525,3 +718,242 @@ def get_unit_plasma(company):
 		pluck="name",
 		order_by="name",
 	)
+
+
+# ---------------------------------------------------------------------------
+# Setelan akun jurnal
+# ---------------------------------------------------------------------------
+
+def get_setelan_kud(company):
+	"""Baris setelan akun jurnal KUD untuk company itu, atau None."""
+	if not company:
+		return None
+
+	setelan = frappe.get_single("STH Accounting Settings")
+	for row in setelan.get("sth_accounting_settings_kud") or []:
+		if row.company == company:
+			return row
+
+	return None
+
+
+def get_akun_piutang_plasma(company, mitra):
+	"""Akun Piutang Plasma milik mitra itu, atau throw kalau belum didaftarkan.
+
+	Sengaja melempar, bukan mengembalikan None: angsuran hutang yang salah akun
+	akan mengendap di akun mitra lain dan baru ketahuan waktu rekonsiliasi.
+	"""
+	setelan = frappe.get_single("STH Accounting Settings")
+	for row in setelan.get("sth_accounting_settings_kud_mitra") or []:
+		if row.company == company and row.mitra == mitra:
+			return row.akun_piutang_plasma
+
+	frappe.throw(
+		_(
+			"Akun Piutang Plasma untuk mitra {0} di {1} belum didaftarkan. "
+			"Tambahkan barisnya di tabel <b>Perhitungan KUD - Piutang Plasma per Mitra</b> "
+			"di STH Accounting Settings."
+		).format(mitra, company),
+		title=_("Akun Piutang Plasma Belum Ada"),
+	)
+
+
+def get_cost_center_kud(company, setelan=None):
+	"""Cost center untuk jurnal dan Purchase Invoice KUD."""
+	cost_center = (setelan.get("cost_center") if setelan else None) or erpnext.get_default_cost_center(
+		company
+	)
+
+	if not cost_center:
+		frappe.throw(
+			_("Cost Center untuk {0} belum diatur, baik di setelan Perhitungan KUD maupun di Company.").format(
+				company
+			),
+			title=_("Cost Center Belum Ada"),
+		)
+
+	return cost_center
+
+
+# ---------------------------------------------------------------------------
+# Dokumen turunan
+#
+# Dua baris jurnal KUD sengaja tidak berhenti di akun akhirnya:
+#
+#   Management Fee     dikredit ke 9190399, lalu Nota Piutang mendebitnya lagi
+#                      dan mengkredit 1162099 PIUTANG LAINNYA.
+#   Pembayaran ke Mitra dikredit ke akun antara, lalu Purchase Invoice
+#                      mendebit akun antara itu dan mengkredit 2111091 dengan
+#                      supplier-nya, supaya hutangnya jadi tagihan yang bisa
+#                      dipilih Payment Entry.
+#
+# Keduanya dibuat dari sini, bukan dari dokumen tujuan, supaya angkanya tidak
+# bisa menyimpang dari sumbernya.
+# ---------------------------------------------------------------------------
+
+# (doctype tujuan, field nilai di Perhitungan KUD)
+TURUNAN = (
+	("Nota Piutang", "management_fee"),
+	("Purchase Invoice", "pembayaran_ke_mitra"),
+)
+
+
+def turunan_yang_ada(perhitungan_kud):
+	"""Nama dokumen turunan yang sudah dibuat dan belum dibatalkan, per doctype."""
+	hasil = {}
+
+	for doctype, _fieldname in TURUNAN:
+		hasil[doctype] = frappe.db.get_value(
+			doctype,
+			{"perhitungan_kud": perhitungan_kud, "docstatus": ("!=", 2)},
+			"name",
+		)
+
+	return hasil
+
+
+def siapkan_turunan(source_name, doctype, fieldname):
+	"""Penjagaan yang sama untuk kedua dokumen turunan.
+
+	Balikan: (doc Perhitungan KUD, baris setelan, nilai).
+	"""
+	doc = frappe.get_doc("Perhitungan KUD", source_name)
+	doc.check_permission("read")
+
+	if doc.docstatus != 1:
+		frappe.throw(
+			_("Perhitungan KUD {0} belum disubmit.").format(source_name),
+			title=_("Belum Disubmit"),
+		)
+
+	nilai = flt(doc.get(fieldname), PRESISI_UANG)
+	if nilai <= 0:
+		frappe.throw(
+			_("{0} di {1} bernilai {2}, tidak ada yang perlu ditagihkan.").format(
+				_(doctype), source_name, nilai
+			),
+			title=_("Nilainya Nol"),
+		)
+
+	sudah_ada = turunan_yang_ada(source_name).get(doctype)
+	if sudah_ada:
+		frappe.throw(
+			_("{0} {1} sudah dibuat dari perhitungan ini. Batalkan dulu kalau mau membuat yang baru.").format(
+				_(doctype), sudah_ada
+			),
+			title=_("Sudah Pernah Dibuat"),
+		)
+
+	setelan = get_setelan_kud(doc.company)
+	if not setelan:
+		frappe.throw(
+			_("Setelan Perhitungan KUD untuk {0} belum ada di STH Accounting Settings.").format(
+				doc.company
+			),
+			title=_("Setelan Akun Belum Ada"),
+		)
+
+	return doc, setelan, nilai
+
+
+def peringatkan_po_wajib(mitra):
+	"""Ingatkan kalau Buying Settings mewajibkan PO dan mitra ini belum dikecualikan.
+
+	Tidak melempar: draftnya tetap boleh dibuat, yang gagal nanti submit-nya.
+	Lebih baik ketahuan di sini daripada sesudah orang mengisi seluruh form.
+	"""
+	if frappe.db.get_single_value("Buying Settings", "po_required") != "Yes":
+		return
+
+	if frappe.get_cached_value(
+		"Supplier", mitra, "allow_purchase_invoice_creation_without_purchase_order"
+	):
+		return
+
+	frappe.msgprint(
+		_(
+			"Buying Settings mewajibkan Purchase Order, dan mitra {0} belum dicentang "
+			"<b>Allow Purchase Invoice Creation Without Purchase Order</b>. "
+			"Invoice ini bisa disimpan tapi tidak bisa disubmit sebelum centang itu dipasang."
+		).format(mitra),
+		title=_("Purchase Order Diwajibkan"),
+		indicator="orange",
+	)
+
+
+@frappe.whitelist()
+def buat_nota_piutang(source_name):
+	"""Nota Piutang penagih Management Fee. Dipanggil lewat make_mapped_doc, belum tersimpan."""
+	doc, _setelan, nilai = siapkan_turunan(source_name, "Nota Piutang", "management_fee")
+
+	nota = frappe.new_doc("Nota Piutang")
+	nota.company = doc.company
+	nota.date = doc.tanggal_selesai
+	nota.tipe = "Others"
+	nota.sub_tipe_others = "Management Fee KUD"
+	nota.perhitungan_kud = doc.name
+	nota.nilai_management_fee = nilai
+	nota.keterangan = _("Management Fee {0}% {1} {2} - {3}").format(
+		flt(doc.persen_management_fee), doc.bulan, doc.tahun, doc.mitra
+	)
+
+	return nota
+
+
+@frappe.whitelist()
+def buat_purchase_invoice(source_name):
+	"""Purchase Invoice tagihan mitra. Dipanggil lewat make_mapped_doc, belum tersimpan."""
+	doc, setelan, nilai = siapkan_turunan(source_name, "Purchase Invoice", "pembayaran_ke_mitra")
+
+	if not setelan.item_purchase_invoice:
+		frappe.throw(
+			_("Item Purchase Invoice untuk {0} belum diatur di setelan Perhitungan KUD.").format(
+				doc.company
+			),
+			title=_("Item Belum Diatur"),
+		)
+
+	if not setelan.akun_hutang_plasma_antara:
+		frappe.throw(
+			_("Akun Hutang Plasma Belum Ditagih untuk {0} belum diatur.").format(doc.company),
+			title=_("Setelan Akun Belum Lengkap"),
+		)
+
+	if frappe.get_cached_value("Item", setelan.item_purchase_invoice, "is_stock_item"):
+		frappe.throw(
+			_("Item {0} adalah item stok, jadi invoice-nya akan menuntut Purchase Receipt. "
+			  "Pakai item non stok di setelan Perhitungan KUD.").format(setelan.item_purchase_invoice),
+			title=_("Item Harus Non Stok"),
+		)
+
+	peringatkan_po_wajib(doc.mitra)
+
+	keterangan = _("Pembayaran plasma {0} {1} - {2}").format(doc.bulan, doc.tahun, doc.mitra)
+
+	pi = frappe.new_doc("Purchase Invoice")
+	pi.company = doc.company
+	pi.supplier = doc.mitra
+	pi.posting_date = doc.tanggal_selesai
+	pi.perhitungan_kud = doc.name
+	# bill_no dan bill_date wajib di app ini (property setter), jadi diisi dari
+	# perhitungannya sendiri supaya draftnya tidak langsung merah.
+	pi.bill_no = doc.name
+	pi.bill_date = doc.tanggal_selesai
+	pi.keterangan = keterangan
+
+	if setelan.akun_hutang_mitra:
+		pi.credit_to = setelan.akun_hutang_mitra
+
+	pi.append(
+		"items",
+		{
+			"item_code": setelan.item_purchase_invoice,
+			"qty": 1,
+			"rate": nilai,
+			"description": keterangan,
+			"expense_account": setelan.akun_hutang_plasma_antara,
+			"cost_center": get_cost_center_kud(doc.company, setelan),
+		},
+	)
+
+	return pi

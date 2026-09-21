@@ -140,8 +140,69 @@ class NotaPiutang(Document):
 			self.validate_jual_asset()
 		elif self.sub_tipe_others == "Barang Non Stok":
 			self.calculate_barang_non_stok_table()
+		elif self.sub_tipe_others == "Management Fee KUD":
+			self.validate_management_fee_kud()
 		else:
 			frappe.throw("Sub Tipe Others tidak valid")
+
+	def validate_management_fee_kud(self):
+		"""Nota penagih Management Fee, ditarik dari Perhitungan KUD.
+
+		Nilainya dibaca ulang dari sumbernya, tidak dipercaya dari form: nota ini
+		yang menentukan uang yang ditagih ke mitra.
+		"""
+		if not self.perhitungan_kud:
+			frappe.throw(
+				"Perhitungan KUD wajib diisi untuk Sub Tipe <b>Management Fee KUD</b>. "
+				"Nota ini dibuat dari tombol <b>Nota Piutang</b> di Perhitungan KUD, "
+				"bukan dari menu Baru."
+			)
+
+		pk = frappe.db.get_value(
+			"Perhitungan KUD",
+			self.perhitungan_kud,
+			["company", "docstatus", "management_fee"],
+			as_dict=True,
+		)
+
+		if not pk:
+			frappe.throw(
+				f"Perhitungan KUD <b>{self.perhitungan_kud}</b> tidak ditemukan"
+			)
+
+		if pk.docstatus != 1:
+			frappe.throw(
+				f"Perhitungan KUD <b>{self.perhitungan_kud}</b> harus sudah disubmit"
+			)
+
+		if self.company and pk.company != self.company:
+			frappe.throw(
+				f"Perhitungan KUD <b>{self.perhitungan_kud}</b> milik Company <b>{pk.company}</b>, "
+				f"tidak sama dengan Company nota ini"
+			)
+
+		dipakai = frappe.db.exists(
+			"Nota Piutang",
+			{
+				"perhitungan_kud": self.perhitungan_kud,
+				"name": ("!=", self.name),
+				"docstatus": ("!=", 2),
+			}
+		)
+
+		if dipakai:
+			frappe.throw(
+				f"Perhitungan KUD <b>{self.perhitungan_kud}</b> sudah dipakai Nota Piutang <b>{dipakai}</b>",
+				title="Duplikat Tidak Diizinkan"
+			)
+
+		self.nilai_management_fee = flt(pk.management_fee)
+
+		if not self.nilai_management_fee > 0:
+			frappe.throw(
+				f"Management Fee di Perhitungan KUD <b>{self.perhitungan_kud}</b> nol, "
+				f"tidak ada yang bisa ditagihkan."
+			)
 
 	def validate_jual_asset(self):
 		if not self.sales_invoice:
@@ -378,6 +439,10 @@ class NotaPiutang(Document):
 			self.create_jual_asset_journal_entry()
 			return
 
+		if self.sub_tipe_others == "Management Fee KUD":
+			self.create_management_fee_kud_journal_entry()
+			return
+
 		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		akun_piutang_lain = self.get_account_by_number(AKUN_PIUTANG_LAIN_NUMBER)
 
@@ -425,6 +490,54 @@ class NotaPiutang(Document):
 			"cost_center"               : cost_center,
 			"reference_type"            : reference_type,
 			"reference_name"            : reference_name,
+			"user_remark"               : remarks,
+		})
+
+		je.insert(ignore_permissions=True)
+		je.submit()
+
+		frappe.msgprint(
+			f"Journal Entry <b>{je.name}</b> berhasil dibuat.",
+			alert=True
+		)
+
+	def create_management_fee_kud_journal_entry(self):
+		"""Management Fee: akun pendapatan didebit, Piutang Lainnya dikredit.
+
+		Arahnya kebalikan dari sub tipe Others yang lain, dan itu memang diminta
+		user 21 September 2026: jurnal Perhitungan KUD sudah mengkredit 9190399
+		waktu fee-nya dipotong dari pembayaran ke mitra, jadi nota ini
+		mendebitnya. Pasangan keduanya membuat 9190399 nol dan meninggalkan
+		saldo kredit di 1162099 — konsekuensi yang sudah disampaikan dan tetap
+		dipilih. Kalau nanti dibalik, yang ditukar cukup dua baris di bawah.
+		"""
+		nilai = flt(self.nilai_management_fee)
+
+		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+		akun_piutang_lain = self.get_account_by_number(AKUN_PIUTANG_LAIN_NUMBER)
+		akun_pendapatan = self.get_account_by_number(AKUN_DISPOSAL_NON_STOK_NUMBER)
+
+		remarks = f"Nota Piutang Others (Management Fee KUD) - {self.name} - {self.perhitungan_kud}"
+
+		je = frappe.new_doc("Journal Entry")
+		je.voucher_type = "Journal Entry"
+		je.company      = self.company
+		je.posting_date = self.date or nowdate()
+		je.user_remark  = remarks
+		je.nota_piutang = self.name
+
+		je.append("accounts", {
+			"account"                   : akun_pendapatan,
+			"debit_in_account_currency" : nilai,
+			"credit_in_account_currency": 0,
+			"cost_center"               : cost_center,
+			"user_remark"               : remarks,
+		})
+		je.append("accounts", {
+			"account"                   : akun_piutang_lain,
+			"debit_in_account_currency" : 0,
+			"credit_in_account_currency": nilai,
+			"cost_center"               : cost_center,
 			"user_remark"               : remarks,
 		})
 

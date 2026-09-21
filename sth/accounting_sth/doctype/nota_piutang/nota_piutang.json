@@ -21,6 +21,8 @@
   "ppn_jual_asset",
   "nilai_jual_asset",
   "nilai_barang_non_stok",
+  "perhitungan_kud",
+  "nilai_management_fee",
   "payment_entry",
   "dibuat_dari_payment_voucher",
   "column_break_qntg",
@@ -125,7 +127,7 @@
    "fieldname": "sub_tipe_others",
    "fieldtype": "Select",
    "label": "Sub Tipe",
-   "options": "Asset\nJual Asset\nBarang Non Stok"
+   "options": "Asset\nJual Asset\nBarang Non Stok\nManagement Fee KUD"
   },
   {
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Asset\"",
@@ -201,6 +203,26 @@
    "fieldname": "nilai_barang_non_stok",
    "fieldtype": "Currency",
    "label": "Nilai Barang Non Stok",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
+   "fieldname": "perhitungan_kud",
+   "fieldtype": "Link",
+   "label": "Perhitungan KUD",
+   "mandatory_depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
+   "no_copy": 1,
+   "options": "Perhitungan KUD",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
+   "description": "Diambil ulang dari Perhitungan KUD-nya saat disimpan, tidak bisa diketik.",
+   "fieldname": "nilai_management_fee",
+   "fieldtype": "Currency",
+   "label": "Nilai Management Fee",
    "no_copy": 1,
    "read_only": 1
   },
@@ -454,7 +476,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-24 12:53:42.210854",
+ "modified": "2026-09-21 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

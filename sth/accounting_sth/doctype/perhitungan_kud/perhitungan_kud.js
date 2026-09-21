@@ -12,6 +12,12 @@ frappe.ui.form.on("Perhitungan KUD", {
 	},
 
 	refresh(frm) {
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Lihat Jurnal"), () => lihat_jurnal(frm), __("Akuntansi"));
+			tombol_turunan(frm);
+			return;
+		}
+
 		if (frm.doc.docstatus !== 0) return;
 
 		frm.add_custom_button(__("Tarik Produksi"), () => tarik_produksi(frm)).addClass(
@@ -96,5 +102,59 @@ function jalankan(frm) {
 				indicator: "green",
 			});
 		},
+	});
+}
+
+function lihat_jurnal(frm) {
+	// Jurnalnya berupa GL Entry langsung, tanpa Journal Entry perantara, jadi
+	// yang bisa dibuka cuma General Ledger-nya.
+	frappe.route_options = {
+		company: frm.doc.company,
+		from_date: frm.doc.tanggal_mulai,
+		to_date: frm.doc.tanggal_selesai,
+		voucher_no: frm.doc.name,
+		group_by: "",
+	};
+	frappe.set_route("query-report", "General Ledger");
+}
+
+// Dua baris jurnal KUD diselesaikan dokumen lain: Management Fee oleh Nota
+// Piutang, Pembayaran ke Mitra oleh Purchase Invoice. Tombolnya di sini, bukan
+// di dokumen tujuan, supaya angkanya selalu ikut sumbernya.
+const TURUNAN = [
+	{
+		doctype: "Nota Piutang",
+		nilai: "management_fee",
+		method: "sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud.buat_nota_piutang",
+	},
+	{
+		doctype: "Purchase Invoice",
+		nilai: "pembayaran_ke_mitra",
+		method: "sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud.buat_purchase_invoice",
+	},
+];
+
+function tombol_turunan(frm) {
+	const sudah_ada = (frm.doc.__onload && frm.doc.__onload.turunan) || {};
+
+	TURUNAN.forEach((t) => {
+		const ada = sudah_ada[t.doctype];
+
+		if (ada) {
+			frm.add_custom_button(
+				__("Lihat {0}", [__(t.doctype)]),
+				() => frappe.set_route("Form", t.doctype, ada),
+				__("Akuntansi")
+			);
+			return;
+		}
+
+		if (!frm.doc[t.nilai]) return;
+
+		frm.add_custom_button(
+			__(t.doctype),
+			() => frappe.model.open_mapped_doc({ method: t.method, frm: frm }),
+			__("Buat")
+		);
 	});
 }
