@@ -6,6 +6,7 @@ from frappe.utils import flt
 from frappe.query_builder.functions import Sum
 
 from sth.controllers.status_updater import StatusUpdater
+from sth.utils.cost_center import pastikan_induk
 from frappe import _
 class DataPenyemaianBibit(StatusUpdater):
 	
@@ -115,8 +116,9 @@ class DataPenyemaianBibit(StatusUpdater):
 		if frappe.db.exists("Cost Center", {"cost_center_name": self.batch, "company": self.company}):
 			return
 
-		company_doc = frappe.get_doc("Company", self.company)
-		parent_cost_center = f"Batch Bibit - {company_doc.abbr}"
+		# Grup induknya dipastikan ada, bukan diasumsikan: di company yang baru
+		# mulai dipakai "Batch Bibit - <singkatan>" belum pernah dibuat.
+		parent_cost_center = pastikan_induk(self.company, "Batch Bibit")
 
 		cc = frappe.new_doc("Cost Center")
 		cc.cost_center_name = self.batch

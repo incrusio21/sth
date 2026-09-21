@@ -20,9 +20,7 @@ def execute():
 		if not company:
 			continue
 
-		abbr = frappe.get_cached_value("Company", company, "abbr")
-
-		blok_cc = _ensure_blok_cost_center(company, abbr, blok.deskripsi)
+		blok_cc = _ensure_blok_cost_center(company, blok.deskripsi)
 
 		if blok.cost_center != blok_cc:
 			frappe.db.set_value("Blok", blok.name, "cost_center", blok_cc, update_modified=False)

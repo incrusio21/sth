@@ -3,6 +3,7 @@
 
 import frappe,json
 from frappe.model.document import Document
+from sth.utils.cost_center import pastikan_induk
 from sth.utils.qr_generator import get_qr_svg
 
 class StationMaster(Document):
@@ -20,8 +21,9 @@ class StationMaster(Document):
 
 			unit_doc = frappe.get_doc("Unit", row.unit)
 			company = unit_doc.company
-			company_doc = frappe.get_doc("Company", company)
-			parent_cost_center = f"Station - {company_doc.abbr}"
+			# Grup induknya dipastikan ada, bukan diasumsikan: di company yang baru
+			# mulai dipakai "Station - <singkatan>" belum pernah dibuat.
+			parent_cost_center = pastikan_induk(company, "Station")
 
 			existing = frappe.db.get_value(
 				"Cost Center",
