@@ -8,6 +8,7 @@ from frappe.utils import flt
 
 class Sortasi(Document):
 	def validate(self):
+		self.validate_duplicate()
 		self.validate_rules()
 
 	def before_submit(self):
@@ -26,6 +27,12 @@ class Sortasi(Document):
 			
 		tim_doc.netto_2 = tim_doc.netto - (tim_doc.netto * tim_doc.potongan_sortasi / 100)
 		tim_doc.db_update()
+
+	def validate_duplicate(self):
+		exist = frappe.db.get_value(self.doctype,{"no_timbangan":self.no_timbangan,"docstatus":1,"name":["!=",self.name]})
+
+		if exist:
+			frappe.throw(f"Sortasi untuk timbangan {exist} sudah ada")
 
 	def validate_rules(self):
 		# TBS Mentah  ≥ 5 %
