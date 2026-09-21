@@ -424,10 +424,20 @@ class PerhitunganKUD(Document):
 		self.name = f"PK-{abbr}-{cint(self.tahun):04d}-{bulan_no:02d}-{self.mitra}"
 
 	def onload(self):
+		if self.docstatus != 1:
+			return
+
+		# Selama sakelarnya mati, grup tombol turunannya tidak dipasang sama
+		# sekali, jadi daftar dokumen yang sudah ada pun tidak perlu dicari.
+		aktif = turunan_kud_aktif()
+		self.set_onload("turunan_aktif", aktif)
+
+		if not aktif:
+			return
+
 		# Dipakai tombol Buat di form: kalau turunannya sudah ada, tombolnya
 		# berubah jadi pembuka dokumen itu, bukan pembuat yang kedua.
-		if self.docstatus == 1:
-			self.set_onload("turunan", turunan_yang_ada(self.name))
+		self.set_onload("turunan", turunan_yang_ada(self.name))
 
 	def validate(self):
 		self.set_periode()
@@ -983,6 +993,22 @@ TURUNAN = (
 )
 
 
+def turunan_kud_aktif():
+	"""Boleh tidaknya Nota Piutang dan Purchase Invoice dibuat dari Perhitungan KUD.
+
+	Sakelarnya satu centang di STH Accounting Settings, mati secara bawaan.
+	Keduanya ditutup sementara — permintaan user — dan bisa dinyalakan lagi
+	kapan saja tanpa menyentuh kode.
+
+	Yang ditutup seluruh grup tombolnya di form — yang "Buat" maupun yang
+	"Lihat" — dan jalur pembuatannya di sisi server. Jurnal KUD tetap jalan
+	seperti biasa, jadi selama sakelarnya mati Management Fee mengendap di
+	9190399 dan Pembayaran ke Mitra di akun hutang plasma antara — persis kondisi
+	yang nanti dibereskan kalau sakelarnya dinyalakan lagi.
+	"""
+	return bool(frappe.db.get_single_value("STH Accounting Settings", "aktifkan_turunan_kud"))
+
+
 def turunan_yang_ada(perhitungan_kud):
 	"""Nama dokumen turunan yang sudah dibuat dan belum dibatalkan, per doctype."""
 	hasil = {}
@@ -1002,6 +1028,16 @@ def siapkan_turunan(source_name, doctype, fieldname):
 
 	Balikan: (doc Perhitungan KUD, baris setelan atau None, nilai).
 	"""
+	if not turunan_kud_aktif():
+		frappe.throw(
+			_(
+				"Pembuatan {0} dari Perhitungan KUD sedang ditutup. Nyalakan "
+				"<b>Perhitungan KUD - Aktifkan Nota Piutang &amp; Purchase Invoice</b> "
+				"di STH Accounting Settings kalau mau dibuka lagi."
+			).format(_(doctype)),
+			title=_("Sedang Ditutup"),
+		)
+
 	doc = frappe.get_doc("Perhitungan KUD", source_name)
 	doc.check_permission("read")
 

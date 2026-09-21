@@ -14,7 +14,7 @@ frappe.ui.form.on("Perhitungan KUD", {
 	refresh(frm) {
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__("Lihat Jurnal"), () => lihat_jurnal(frm), __("Akuntansi"));
-			// tombol_turunan(frm);
+			tombol_turunan(frm);
 			return;
 		}
 
@@ -135,6 +135,12 @@ const TURUNAN = [
 ];
 
 function tombol_turunan(frm) {
+	// Sakelarnya satu centang di STH Accounting Settings. Selama mati, seluruh
+	// grup tombolnya hilang — yang "Buat" maupun yang "Lihat". Dokumen turunan
+	// yang sudah terlanjur dibuat tetap ada dan masih bisa dibuka lewat daftarnya
+	// sendiri, cuma pintasnya dari sini yang ikut ditutup.
+	if (!(frm.doc.__onload && frm.doc.__onload.turunan_aktif)) return;
+
 	const sudah_ada = (frm.doc.__onload && frm.doc.__onload.turunan) || {};
 
 	TURUNAN.forEach((t) => {

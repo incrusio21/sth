@@ -12,6 +12,7 @@
   "sth_accounting_settings_penjualan_asset",
   "sth_accounting_settings_cogs",
   "sth_accounting_settings_cogs_sumber_biaya",
+  "aktifkan_turunan_kud",
   "sth_accounting_settings_kud",
   "sth_accounting_settings_kud_mitra",
   "sth_accounting_settings_kud_kepala_akun"
@@ -60,6 +61,13 @@
    "options": "STH Accounting Settings COGS Sumber Biaya"
   },
   {
+   "default": "0",
+   "description": "Selama tidak dicentang, tombol Buat Nota Piutang dan Purchase Invoice di Perhitungan KUD tidak muncul dan pembuatannya ditolak dari sisi server. Jurnal KUD tetap jalan seperti biasa, dan dokumen turunan yang terlanjur dibuat tidak ikut terpengaruh.",
+   "fieldname": "aktifkan_turunan_kud",
+   "fieldtype": "Check",
+   "label": "Perhitungan KUD - Aktifkan Nota Piutang & Purchase Invoice"
+  },
+  {
    "fieldname": "sth_accounting_settings_kud",
    "fieldtype": "Table",
    "label": "Perhitungan KUD - Akun Jurnal",
@@ -82,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-21 17:30:00.000000",
+ "modified": "2026-09-21 18:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "STH Accounting Settings",
