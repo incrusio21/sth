@@ -311,7 +311,24 @@ class PayrollEntry(PayrollEntry):
 		return slips
 
 	def make_payroll_gl_entries(self):
-		"""Accrual gaji, satu baris per akun komponen.
+		"""Susun accrual gajinya, lalu posting."""
+		gl_entries, payable = self.susun_gl_accrual()
+
+		post_gl_entries(gl_entries)
+
+		frappe.msgprint(
+			_("GL Entry berhasil dibuat: {0} baris beban dan potongan, "
+			  "Payroll Payable {1} dikredit {2}").format(
+				len(gl_entries) - 1,
+				self.payroll_payable_account,
+				frappe.format(payable, {"fieldtype": "Currency"}),
+			),
+			indicator="green",
+			alert=True,
+		)
+
+	def susun_gl_accrual(self):
+		"""Baris accrual gaji, satu baris per akun komponen.
 
 		Akunnya diambil dari tabel Accounts di tiap Salary Component: earning
 		didebit ke akun bebannya, deduction dikredit ke akun potongannya, dan
@@ -327,6 +344,10 @@ class PayrollEntry(PayrollEntry):
 		Payroll Payable dikredit sebesar net pay ditambah angsuran pinjaman:
 		Loan Repayment yang lahir dari tiap slip mendebit akun yang sama, jadi
 		yang tersisa di situ persis sebesar yang nanti dibayar Payment Entry.
+
+		Barisnya dipulangkan, bukan langsung diposting, supaya bisa dihitung
+		lebih dulu tanpa menyentuh buku besar - itu yang dipakai patch repost
+		untuk membandingkannya dengan GL yang sudah ada.
 		"""
 		if not self.payroll_payable_account:
 			frappe.throw(_("Field 'Payroll Payable Account' belum diisi pada Payroll Entry ini"))
@@ -395,18 +416,7 @@ class PayrollEntry(PayrollEntry):
 			baris(self.payroll_payable_account, self.cost_center, credit=payable, against=against_payable)
 		)
 
-		post_gl_entries(gl_entries)
-
-		frappe.msgprint(
-			_("GL Entry berhasil dibuat: {0} baris beban dan potongan, "
-			  "Payroll Payable {1} dikredit {2}").format(
-				len(gl_entries) - 1,
-				self.payroll_payable_account,
-				frappe.format(payable, {"fieldtype": "Currency"}),
-			),
-			indicator="green",
-			alert=True,
-		)
+		return gl_entries, payable
 
 	def setarakan_accrual(self, gl_entries, payable):
 		"""Pastikan baris komponen ketemu dengan Payroll Payable.
