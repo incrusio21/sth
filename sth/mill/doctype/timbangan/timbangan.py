@@ -41,6 +41,7 @@ class Timbangan(Document):
 	def validate(self):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
+		self.set_kebun_dari_spb()
 		self.set_data_dari_po()
 		self.validate_qty_do()
 		self.hitung_netto()
@@ -54,6 +55,33 @@ class Timbangan(Document):
 				if row.company == self.company:
 					self.unit = row.name
 	
+	def set_kebun_dari_spb(self):
+		"""Isi kebun dari unit SPB-nya, menimpa isian pos penjagaan.
+
+		Kebun di-fetch dari ticket_number.unit, dan unit Security Check Point
+		sendiri ikut lokasi posnya — pos itu berdiri di pabrik, jadi yang mendarat
+		di sana kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang memanen. Yang tahu
+		kebun pengirimnya cuma SPB.
+
+		Arah sebaliknya diurus _resync_kebun_timbangan di Surat Pengantar Buah,
+		untuk koreksi unit SPB yang datang sesudah timbangannya tersimpan. Yang di
+		sini menutup arah satunya: timbangan yang baru dibuat sesudah SPB-nya
+		dikoreksi, yang kalau tidak begini kembali mengambil unit pos.
+
+		Yang tidak punya SPB — TBS Eksternal dan Lain - Lain — dibiarkan memakai
+		hasil fetch dari Security Check Point.
+
+		fetch_from dipasang _validate_links, yang jalan sebelum validate, jadi
+		nilai yang ditulis di sini tidak tertimpa lagi. Field `unit` sengaja tidak
+		ikut: itu pabrik yang menimbang.
+		"""
+		if not self.spb:
+			return
+
+		unit_spb = frappe.db.get_value("Surat Pengantar Buah", self.spb, "unit")
+		if unit_spb:
+			self.kebun = unit_spb
+
 	def set_data_dari_po(self):
 		"""Isi kode_barang dan supplier dari PO untuk Receive "Lain - Lain".
 

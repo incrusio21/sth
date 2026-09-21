@@ -369,6 +369,7 @@ def _update_spb(existing_name, args):
 		doc.db_set(nilai, notify=False)
 
 	_resync_timbangan(doc.name)
+	_resync_kebun_timbangan(doc)
 	_resync_security_check_point(doc)
 
 	frappe.db.commit()
@@ -443,6 +444,47 @@ def _resync_timbangan(spb_name):
 		return
 
 	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
+
+def _resync_kebun_timbangan(doc):
+	"""Turunkan unit SPB ke field kebun di Timbangan yang menempel padanya.
+
+	Kebun di Timbangan di-fetch dari ticket_number.unit, dan unit Security Check
+	Point sendiri ikut lokasi pos penjagaannya — pos itu berdiri di pabrik, jadi
+	yang mendarat di sana selalu kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang
+	memanen. Kiriman SPB inilah yang tahu kebunnya, dan unitnya masih boleh
+	diperbaiki lagi sesudah SPB submit lewat _HEADER_AFTER_SUBMIT — perbaikan itu
+	yang diteruskan ke sini.
+
+	Field `unit` di Timbangan sengaja tidak ikut disentuh: itu pabrik yang
+	menimbang, dan COGS Mill dan Kebun, laporan penerimaan TBS mill, serta
+	hitungan sortasi menyaring dengan arti itu.
+
+	Lewat db.set_value, bukan doc.save(): timbangannya nyaris selalu sudah
+	submit, dan kebun read-only dengan fetch_from, jadi menyimpan ulang lewat
+	dokumen malah mengembalikannya ke unit pos penjagaan. Yang masih draft ikut
+	ditulis, tapi nilainya memang baru pasti begitu dokumennya disubmit — selama
+	draft, tiap penyimpanan menarik ulang isinya dari Security Check Point.
+
+	Yang sudah dibatalkan dilewati.
+	"""
+	if not doc.unit:
+		return
+
+	rows = frappe.get_all(
+		"Timbangan",
+		filters={
+			"spb": doc.name,
+			"docstatus": ["<", 2],
+		},
+		fields=["name", "kebun"],
+		limit_page_length=0,
+	)
+
+	for row in rows:
+		if row.kebun == doc.unit:
+			continue
+
+		frappe.db.set_value("Timbangan", row.name, "kebun", doc.unit)
 
 def _resync_security_check_point(doc):
 	"""Turunkan nama supir SPB ke Security Check Point yang menempel padanya.
