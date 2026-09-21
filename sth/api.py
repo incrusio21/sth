@@ -159,6 +159,7 @@ def get_table_data(args):
 				if not getattr(d,f"{title}_spesifikasi",None) and d.mark == data.kode_barang:
 					index = idx
 					break
+
 			if index is not None:
 				for sup_field in supplier_fields:
 					result[index][f"{title}_{sup_field}"] = data[sup_field]
@@ -173,7 +174,7 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					dict_data[f"{title}_{sup_field}"] = data[sup_field]                
 				
-				dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"])
+				dict_data.notes_pr_sr, asset = frappe.get_value("Material Request Item",{"parent":args.pr_sr,"item_code":data.kode_barang},["notes","kendaraan as asset"]) or ("","")
 				dict_data.asset = frappe.get_value("Alat Berat Dan Kendaraan",asset,"no_pol")
 				dict_data[f"{title}_status"] = data.status
 				dict_data[f"{title}_workflow_state"] = data.workflow_state
