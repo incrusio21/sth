@@ -103,7 +103,6 @@ class SoundingStockCPOdiBST(Document):
 			self.unit,
 			self.doctype,
 			self.tanggal_proses,
-			termasuk_tanggal_proses=True,
 		)
 		self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
 

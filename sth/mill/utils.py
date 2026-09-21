@@ -153,7 +153,7 @@ def buat_ulang_ste_sounding(doc, produksi):
 	return buat_ulang_ste(doc)
 
 
-def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses, termasuk_tanggal_proses=False):
+def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses):
 	"""Mutasi gudang yang bukan berasal dari sounding maupun pengiriman.
 
 	Yang ikut dihitung Stock Ledger Entry item ini di gudang ini yang vouchernya
@@ -166,16 +166,22 @@ def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses, te
 	padahal yang mau dijawab cuma "stock awal hari ini bergeser berapa gara-gara
 	koreksi sejak sounding kemarin".
 
-	Rentangnya setengah terbuka, dan ujung mana yang terbuka mengikuti apa yang
-	sudah tercakup stock awal masing-masing dokumen. Sounding PK memakai saldo
-	sebelum tanggal proses, jadi rentangnya [sounding sebelumnya, tanggal proses).
-	Sounding CPO memakai saldo berjalan sehingga mutasi di tanggal prosesnya
-	sendiri ikut, jadi rentangnya (sounding sebelumnya, tanggal proses].
+	Rentangnya setengah terbuka — [sounding sebelumnya, tanggal proses) — dan itu
+	mengikuti apa yang sudah tercakup stock awal. Kedua sounding membaca saldo
+	Stock Ledger terakhir sebelum tanggal prosesnya, jadi koreksi yang diposting
+	tepat di tanggal sounding sebelumnya sudah ada di dalam stock awal dan harus
+	ikut, sedangkan koreksi di tanggal prosesnya sendiri belum masuk dan tidak
+	boleh ikut.
 
-	Dua-duanya harus setengah terbuka, bukan terbuka di kedua ujung: sounding
-	dibuat harian, jadi rentang yang terbuka di kedua ujung selalu kosong dan
-	koreksi yang diposting tepat di tanggal sounding sebelumnya tidak pernah
-	terhitung sama sekali.
+	Sounding CPO dulu memakai ujung sebaliknya lewat termasuk_tanggal_proses,
+	sisa dari masa stock awalnya masih saldo Bin berjalan. Sejak stock awal CPO
+	ikut dibaca dari Stock Ledger sebelum tanggal proses, jendelanya sama persis
+	dengan PK dan pilihannya dibuang — satu jendela lebih sedikit yang bisa
+	ketinggalan waktu dasar stock awalnya berubah lagi.
+
+	Terbuka di satu ujung saja, bukan dua: sounding dibuat harian, jadi rentang
+	yang terbuka di kedua ujung selalu kosong dan koreksi yang diposting tepat di
+	tanggal sounding sebelumnya tidak pernah terhitung sama sekali.
 	"""
 	if not (item_code and warehouse and tanggal_proses):
 		return 0.0
@@ -186,8 +192,6 @@ def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses, te
 	""".format(doctype=doctype), {"unit": unit, "tanggal_proses": tanggal_proses})
 
 	dari = (sebelumnya[0][0] if sebelumnya else None) or "1900-01-01"
-	batas_bawah = ">" if termasuk_tanggal_proses else ">="
-	batas_atas = "<=" if termasuk_tanggal_proses else "<"
 
 	total = frappe.db.sql("""
 		select coalesce(sum(sle.actual_qty), 0)
@@ -198,9 +202,9 @@ def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses, te
 			and sle.item_code = %(item_code)s and sle.warehouse = %(warehouse)s
 			and sle.voucher_type not in ('Delivery Note', 'Purchase Receipt')
 			and (se.reference_doctype is null or se.reference_doctype not like 'Sounding%%')
-			and sle.posting_date {batas_bawah} %(dari)s
-			and sle.posting_date {batas_atas} %(sampai)s
-	""".format(batas_bawah=batas_bawah, batas_atas=batas_atas), {
+			and sle.posting_date >= %(dari)s
+			and sle.posting_date < %(sampai)s
+	""", {
 		"item_code": item_code,
 		"warehouse": warehouse,
 		"dari": dari,

@@ -1,10 +1,12 @@
 # Copyright (c) 2026, DAS and contributors
 # For license information, please see license.txt
 
+import contextlib
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate, now
+from frappe.utils import add_days, cint, flt, getdate, now
 from frappe.model.mapper import get_mapped_doc
 
 from sth.mill.utils import buat_ulang_ste, izinkan_stock_minus
@@ -43,12 +45,42 @@ class DataTBS(Document):
 
 	def on_submit(self):
 		self.create_ste()
+		self.hitung_ulang_dokumen_sesudahnya()
 	
 	def on_cancel(self):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
 		for row in ste:
 			doc = frappe.get_doc("Stock Entry",row)
 			doc.cancel()
+
+		self.hitung_ulang_dokumen_sesudahnya()
+
+	def hitung_ulang_dokumen_sesudahnya(self):
+		"""Data TBS sesudah dokumen ini ikut dihitung ulang.
+
+		Restan awal sebuah dokumen adalah Total TBS Restan dokumen sebelumnya,
+		jadi begitu dokumen ini disubmit atau dibatalkan seluruh hari sesudahnya
+		di unit yang sama ikut bergeser. Selama ini tidak ada yang mengerjakannya:
+		pemicu yang ada cuma Timbangan dan tombol Hitung Ulang, sehingga Data TBS
+		bertanggal mundur, amend, maupun pembatalan meninggalkan hari-hari
+		sesudahnya memakai restan awal yang sudah basi — dan angkanya baru
+		ketahuan berhari-hari kemudian waktu dicari.
+
+		Dikerjakan langsung, bukan di latar belakang seperti pemicu Timbangan:
+		orang yang menekan submit memang sedang menunggu angkanya, dan rantainya
+		biasanya pendek. Larangan stok minus tidak dimatikan dan tidak ada commit
+		di tengah — keduanya akan merusak transaksi submit yang sedang berjalan.
+		Sejajar dengan hitung_ulang_dokumen_sesudahnya di kedua doctype sounding.
+		"""
+		if not (self.unit and self.tanggal_produksi):
+			return
+
+		hitung_ulang_rantai(
+			self.unit,
+			add_days(self.tanggal_produksi, 1),
+			izinkan_minus=False,
+			commit=False,
+		)
 	
 	def on_trash(self):
 		ste = frappe.db.get_all("Stock Entry",{"references": self.name})
@@ -309,7 +341,7 @@ def hitung_ulang_setelah_timbangan(doc, method=None):
 		indicator="blue",
 	)
 
-def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None):
+def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None, izinkan_minus=True, commit=True):
 	"""Baca ulang TBS diterima dan rantai restan satu unit sejak satu tanggal.
 
 	Yang diperbaiki terutama dokumen yang sudah disubmit. Jumlah TBS Diterima
@@ -330,6 +362,12 @@ def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None):
 	arahnya jadi tidak cocok lagi diposting ulang. Dipisah supaya kalau
 	pembatalan STE tertahan periode akuntansi yang sudah tutup, angka dokumennya
 	tetap sudah benar. `posting_ulang=False` menjalankan fase pertama saja.
+
+	`izinkan_minus` dan `commit` dua-duanya harus mati waktu dipanggil dari dalam
+	transaksi submit orang lain — itu yang dipakai hitung_ulang_dokumen_sesudahnya.
+	Penjaga stok minus me-rollback pekerjaan yang belum di-commit waktu selesai,
+	dan commit di tengah menutup transaksi submit yang sedang berjalan sebelum
+	dokumennya sendiri tuntas.
 
 	Aman dijalankan ulang: dokumen yang angkanya sudah cocok dan STE yang sudah
 	benar sama-sama dilewati. Dari konsol:
@@ -359,12 +397,16 @@ def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None):
 
 	# Harus di-commit sebelum fase STE: izinkan_stock_minus me-rollback sisa
 	# pekerjaan yang belum di-commit waktu selesai, dan itu akan ikut membuang
-	# angka dokumen yang baru saja dibetulkan.
-	frappe.db.commit()
+	# angka dokumen yang baru saja dibetulkan. Waktu penjaganya tidak dipakai,
+	# tidak ada yang me-rollback dan commitnya tidak perlu.
+	if commit:
+		frappe.db.commit()
 
 	if posting_ulang:
 		dikerjakan = [row for row in dokumen if kunci(row) not in kembar]
-		hasil.ste = posting_ulang_ste(dikerjakan, lapor=lapor)
+		hasil.ste = posting_ulang_ste(
+			dikerjakan, lapor=lapor, izinkan_minus=izinkan_minus, commit=commit
+		)
 
 	# Dicatat juga waktu dipanggil dari background job, yang tidak punya tempat
 	# lain untuk melapor: log jobnya cuma menyimpan sukses atau gagal.
@@ -450,11 +492,14 @@ def angka_turunan(doc):
 	))
 
 
-def posting_ulang_ste(dokumen, lapor=None):
+def posting_ulang_ste(dokumen, lapor=None, izinkan_minus=True, commit=True):
 	"""Buat ulang Stock Entry dokumen submitted yang STE-nya belum sesuai.
 
 	`lapor` dipanggil tiap satu dokumen selesai, supaya patch bisa mencetak
 	kemajuannya. Memulangkan jumlah Stock Entry yang jadi dibuat.
+
+	`izinkan_minus` dan `commit` dimatikan waktu dipanggil dari dalam transaksi
+	submit orang lain; alasannya di hitung_ulang_rantai.
 	"""
 	lapor = lapor or (lambda pesan: None)
 	perlu = []
@@ -471,11 +516,15 @@ def posting_ulang_ste(dokumen, lapor=None):
 	perlu.sort(key=lambda doc: (getdate(doc.tanggal_produksi), doc.creation))
 	dibuat = 0
 
-	with izinkan_stock_minus():
+	penjaga = izinkan_stock_minus() if izinkan_minus else contextlib.nullcontext()
+
+	with penjaga:
 		for urutan, doc in enumerate(perlu, 1):
 			dibuat += buat_ulang_ste(doc)
 
-			frappe.db.commit()
+			if commit:
+				frappe.db.commit()
+
 			lapor("[{0}/{1}] {2} selesai.".format(urutan, len(perlu), doc.name))
 
 	lapor("{0} Stock Entry Data TBS diposting ulang ke tanggal prosesnya.".format(dibuat))

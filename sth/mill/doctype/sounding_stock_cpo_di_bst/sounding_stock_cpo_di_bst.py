@@ -141,8 +141,16 @@ class SoundingStockCPOdiBST(Document):
 
 		Sekadar keterangan: produksi dan OER tetap dihitung dari stock_awal yang
 		utuh, yaitu yang sudah termasuk adjustment. Stock awal di sini saldo
-		berjalan ditambah pengiriman hari itu, jadi koreksi yang diposting di
-		tanggal prosesnya sendiri sudah ikut di dalamnya.
+		pembuka hari itu, persis seperti Sounding PK, jadi yang dihitung koreksi
+		sebelum tanggal proses saja.
+
+		Dulu di sini termasuk_tanggal_proses=True, dari masa stock awal CPO masih
+		saldo Bin berjalan ditambah pengiriman hari itu. Sejak get_total_stock
+		membaca saldo Stock Ledger sebelum tanggal proses, jendela itu meleset
+		sehari ke dua arah sekaligus: koreksi di tanggal prosesnya sendiri ikut
+		terhitung padahal belum masuk stock awal, sementara koreksi tepat di
+		tanggal sounding sebelumnya — yang justru ada di dalam stock awal — tidak
+		pernah terhitung sama sekali.
 		"""
 		self.adjustment = get_adjustment_stock(
 			frappe.db.get_value("Item", {"tipe_barang": "CPO"}),
@@ -150,7 +158,6 @@ class SoundingStockCPOdiBST(Document):
 			self.unit,
 			self.doctype,
 			self.tanggal_proses,
-			termasuk_tanggal_proses=True,
 		)
 		if flt(self.stock_awal) > 0:
 			self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
