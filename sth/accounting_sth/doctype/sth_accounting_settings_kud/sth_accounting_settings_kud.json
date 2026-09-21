@@ -23,10 +23,10 @@
   "item_purchase_invoice"
  ],
  "fields": [
-  {"fieldname": "company", "fieldtype": "Link", "in_list_view": 1, "label": "Company", "options": "Company", "reqd": 1},
+  {"description": "Cukup diisi untuk satu company. Company lain yang belum punya barisnya mengikuti baris ini lewat nomor akun, karena COA semua company disalin dari bagan yang sama.", "fieldname": "company", "fieldtype": "Link", "in_list_view": 1, "label": "Company", "options": "Company", "reqd": 1},
   {"fieldname": "column_break_head", "fieldtype": "Column Break"},
-  {"description": "Dipakai untuk semua baris jurnal. Kalau dikosongkan, dipakai cost center bawaan company.", "fieldname": "cost_center", "fieldtype": "Link", "label": "Cost Center", "options": "Cost Center"},
-  {"fieldname": "section_debit", "fieldtype": "Section Break", "label": "Debit"},
+  {"description": "Nilai awal Cost Center di dokumen. Tidak bisa diikuti company lain karena cost center tidak bernomor — di sana dipakai cost center bawaan company.", "fieldname": "cost_center", "fieldtype": "Link", "label": "Cost Center", "options": "Cost Center"},
+  {"description": "Nilai awal yang disalin ke dokumen Perhitungan KUD waktu Tarik Produksi. Yang menentukan jurnal tetap akun yang tercatat di dokumen, bukan yang di sini.", "fieldname": "section_debit", "fieldtype": "Section Break", "label": "Debit"},
   {"description": "Didebit sebesar Total Penjualan TBS. Contoh: 6511002 - PEMBELIAN TBS PLASMA.", "fieldname": "akun_pembelian_tbs", "fieldtype": "Link", "in_list_view": 1, "label": "Pembelian TBS Plasma", "options": "Account", "reqd": 1},
   {"fieldname": "section_kredit", "fieldtype": "Section Break", "label": "Kredit"},
   {"description": "Dikredit sebesar Total Biaya Perawatan, Panen & Transport (termasuk Lain Lain). Sementara satu akun kontra; kalau nanti biayanya mau dikembalikan ke akun kegiatan tiap BKM, yang diganti cukup baris ini.", "fieldname": "akun_biaya_plasma", "fieldtype": "Link", "in_list_view": 1, "label": "Lawan Biaya Perawatan, Panen & Transport", "options": "Account", "reqd": 1},

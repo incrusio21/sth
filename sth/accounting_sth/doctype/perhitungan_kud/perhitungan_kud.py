@@ -320,7 +320,57 @@ def rekap_biaya_bkm(baris):
 	return {fieldname: flt(total, PRESISI_UANG) for fieldname, total in hasil.items()}
 
 
-def susun_baris_jurnal(nilai, akun):
+def baris_jurnal_biaya(total, pembalikan, akun_kontra):
+	"""Baris kredit untuk Biaya Perawatan, Panen & Transport. Fungsi murni.
+
+	Biaya mitra dikembalikan ke akun biayanya sendiri sampai saldonya nol —
+	itulah `pembalikan`, satu baris per (akun, cost center) yang tersentuh BKM
+	di perhitungan ini. Sisanya, yaitu bagian yang GL-nya belum lahir karena
+	BKM-nya belum Posted, tetap dikredit ke akun kontra supaya jurnal seimbang
+	dan mitra tetap ditagih penuh.
+
+	Saldo akun kontra karena itu bisa dibaca sebagai berapa biaya BKM yang belum
+	masuk buku besar. Begitu BKM-nya Posted, debitnya muncul di akun aslinya dan
+	tidak ikut terbalas lagi — penyelesaiannya di luar dokumen ini.
+
+	Pembalikan yang jumlahnya melampaui total biaya tidak dipotong: kalau itu
+	terjadi, akun kontra jadi debit dan selisihnya kelihatan, bukan tersembunyi.
+	"""
+	baris = []
+	terbalas = 0.0
+
+	for row in pembalikan or []:
+		jumlah = flt(row.get("jumlah"), PRESISI_UANG)
+		if not jumlah:
+			continue
+
+		terbalas += jumlah
+		baris.append({
+			"account": row.get("account"),
+			"cost_center": row.get("cost_center"),
+			# Saldo kredit pada akun biaya itu ganjil, tapi kalau ada, menolkannya
+			# berarti mendebit. Tandanya diikuti, bukan dipaksa ke satu sisi.
+			"debit": -jumlah if jumlah < 0 else 0.0,
+			"credit": jumlah if jumlah > 0 else 0.0,
+			"keterangan": _("Nol-kan biaya {0}").format(row.get("account")),
+			"kunci": "pembalikan",
+		})
+
+	sisa = flt(flt(total, PRESISI_UANG) - terbalas, PRESISI_UANG)
+	if sisa:
+		baris.append({
+			"account": akun_kontra,
+			"cost_center": None,
+			"debit": -sisa if sisa < 0 else 0.0,
+			"credit": sisa if sisa > 0 else 0.0,
+			"keterangan": _("Biaya Perawatan, Panen & Transport belum masuk buku besar"),
+			"kunci": "akun_biaya_plasma",
+		})
+
+	return baris
+
+
+def susun_baris_jurnal(nilai, akun, pembalikan=None):
 	"""Baris jurnal dari nilai dokumen dan peta akun. Fungsi murni — tanpa database.
 
 	`nilai` cukup punya field angka Perhitungan KUD, `akun` memetakan kunci di
@@ -331,12 +381,20 @@ def susun_baris_jurnal(nilai, akun):
 	menolak angka minus. Ini terjadi kalau biaya melampaui produksi, dan
 	hitung_shu() memang sengaja membiarkan hasilnya negatif.
 
-	Balikan: list of dict {account, debit, credit, keterangan, kunci}.
+	`pembalikan` memecah baris biaya jadi penolan per akun, lihat
+	baris_jurnal_biaya(). Totalnya tetap sama, jadi jurnalnya tetap seimbang.
+
+	Balikan: list of dict {account, cost_center, debit, credit, keterangan, kunci}.
 	"""
 	baris = []
 
 	for kunci, fieldname, sisi, keterangan in BARIS_JURNAL:
 		jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
+
+		if kunci == "akun_biaya_plasma":
+			baris.extend(baris_jurnal_biaya(jumlah, pembalikan, akun.get(kunci)))
+			continue
+
 		if not jumlah:
 			continue
 
@@ -346,6 +404,7 @@ def susun_baris_jurnal(nilai, akun):
 
 		baris.append({
 			"account": akun.get(kunci),
+			"cost_center": None,
 			"debit": jumlah if sisi == "debit" else 0.0,
 			"credit": jumlah if sisi == "credit" else 0.0,
 			"keterangan": keterangan,
@@ -374,9 +433,11 @@ class PerhitunganKUD(Document):
 		self.set_periode()
 		self.validate_unit()
 		self.validate_duplikat()
+		self.isi_akun_dari_setelan()
 		self.hitung_baris()
 		self.hitung_rekap()
 		self.set_status_harga()
+		self.susun_pratinjau_jurnal()
 
 	def on_submit(self):
 		self.validate_semua_baris_berharga()
@@ -539,29 +600,78 @@ class PerhitunganKUD(Document):
 	# Jurnal
 	# ------------------------------------------------------------------
 
-	def peta_akun(self):
-		"""Nama akun untuk tiap baris jurnal, atau throw kalau setelannya belum lengkap.
+	def isi_akun_dari_setelan(self):
+		"""Isi akun yang masih kosong dari STH Accounting Settings.
 
-		Piutang Plasma diambil dari tabel per mitra, bukan dari setelan company:
-		tiap BUMDES punya akunnya sendiri di COA, misalnya '1293002 - PIUTANG
-		PLASMA - BUMDES JABUNG CIPTA USAHA'.
+		Yang sudah terisi tidak pernah ditimpa — itu inti dari membawa akunnya ke
+		dokumen: setelan cuma memberi nilai awal, dokumen yang menentukan. Karena
+		yang diisi cuma yang kosong, fungsi ini boleh dipanggil berkali-kali.
 		"""
 		setelan = get_setelan_kud(self.company)
-		if not setelan:
-			frappe.throw(
-				_(
-					"Akun jurnal Perhitungan KUD untuk {0} belum diatur. "
-					"Isi dulu tabel <b>Perhitungan KUD - Akun Jurnal</b> di STH Accounting Settings."
-				).format(self.company),
-				title=_("Setelan Akun Belum Ada"),
+
+		if setelan:
+			for kunci in (*KOLOM_AKUN_SETELAN, "cost_center"):
+				if not self.get(kunci):
+					self.set(kunci, setelan.get(kunci))
+
+		if self.mitra and not self.akun_piutang_plasma:
+			self.akun_piutang_plasma = get_akun_piutang_plasma(
+				self.company, self.mitra, lempar=False
 			)
 
-		akun = {kunci: setelan.get(kunci) for kunci, *_ in BARIS_JURNAL}
+		if not self.cost_center:
+			self.cost_center = erpnext.get_default_cost_center(self.company)
 
-		# Dicari hanya kalau ada angsurannya — mitra yang bulan ini tidak
-		# mengangsur tidak perlu punya akun piutang dulu.
-		if flt(self.angsuran_hutang):
-			akun["akun_piutang_plasma"] = get_akun_piutang_plasma(self.company, self.mitra)
+	def pembalikan_biaya(self):
+		"""Saldo akun biaya yang dinolkan jurnal ini.
+
+		Dibaca ulang tiap kali, bukan disimpan: BKM yang Posted bertambah terus
+		sampai periode ditutup, jadi angkanya memang bergerak sampai dokumen ini
+		disubmit. Yang berlaku adalah keadaan saat submit.
+		"""
+		return saldo_bkm_di_kepala_akun(self.company, self.detail_biaya)
+
+	def susun_pratinjau_jurnal(self):
+		"""Isi tabel Jurnal di tab Akun & Jurnal, apa adanya menurut isi dokumen.
+
+		Dipakai fungsi yang sama dengan yang membuat GL Entry, jadi pratinjau
+		tidak bisa berbeda dari jurnal sungguhannya. Akun yang masih kosong
+		dibiarkan kosong di sini — biar kelihatan mana yang belum diisi, bukan
+		melempar error waktu menyimpan.
+		"""
+		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL}
+		baris = susun_baris_jurnal(self.as_dict(), akun, self.pembalikan_biaya())
+
+		# `kunci` cuma penanda internal susun_baris_jurnal, bukan kolom tabelnya.
+		self.set(
+			"jurnal_preview",
+			[{k: v for k, v in row.items() if k != "kunci"} for row in baris],
+		)
+
+		self.total_jurnal_debit = flt(sum(row["debit"] for row in baris), PRESISI_UANG)
+		self.total_jurnal_kredit = flt(sum(row["credit"] for row in baris), PRESISI_UANG)
+
+		tanpa_akun = [row["keterangan"] for row in baris if not row["account"]]
+
+		if not baris:
+			self.status_jurnal = _("Belum ada angka, jurnal masih kosong")
+		elif tanpa_akun:
+			self.status_jurnal = _("Akun belum diisi: {0}").format(", ".join(tanpa_akun))
+		elif self.total_jurnal_debit != self.total_jurnal_kredit:
+			self.status_jurnal = _("Tidak seimbang, selisih {0}").format(
+				flt(self.total_jurnal_debit - self.total_jurnal_kredit, PRESISI_UANG)
+			)
+		else:
+			self.status_jurnal = _("{0} baris, seimbang").format(len(baris))
+
+	def peta_akun(self):
+		"""Akun tiap baris jurnal, dibaca dari dokumen ini — bukan dari setelan.
+
+		Setelan hanya memberi nilai awal lewat isi_akun_dari_setelan(). Begitu
+		dokumen disubmit, yang berlaku persis apa yang tercatat di sini, jadi
+		setelan yang berubah belakangan tidak menggeser jurnal yang sudah jadi.
+		"""
+		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL}
 
 		# Baris bernilai nol tidak masuk jurnal, jadi akunnya juga tidak wajib.
 		kosong = [
@@ -572,13 +682,14 @@ class PerhitunganKUD(Document):
 		if kosong:
 			frappe.throw(
 				_(
-					"Akun untuk baris ini belum diatur: {0}. "
-					"Lengkapi dulu setelan Perhitungan KUD di STH Accounting Settings."
+					"Akun untuk baris ini belum diisi: {0}. "
+					"Lengkapi di bagian <b>Akun Jurnal</b> dokumen ini, atau isi setelannya "
+					"di STH Accounting Settings lalu tarik produksi ulang."
 				).format(", ".join(kosong)),
-				title=_("Setelan Akun Belum Lengkap"),
+				title=_("Akun Jurnal Belum Lengkap"),
 			)
 
-		return setelan, akun
+		return akun
 
 	def make_gl_entry(self):
 		if self.docstatus == 1:
@@ -589,11 +700,11 @@ class PerhitunganKUD(Document):
 			frappe.msgprint(_("Jurnal Perhitungan KUD dibatalkan."), indicator="orange", alert=True)
 
 	def get_gl_entries(self):
-		setelan, akun = self.peta_akun()
+		akun = self.peta_akun()
 
-		cost_center = get_cost_center_kud(self.company, setelan)
+		cost_center = self.cost_center or get_cost_center_kud(self.company)
 
-		baris = susun_baris_jurnal(self.as_dict(), akun)
+		baris = susun_baris_jurnal(self.as_dict(), akun, self.pembalikan_biaya())
 		if not baris:
 			return []
 
@@ -613,7 +724,9 @@ class PerhitunganKUD(Document):
 		for row in baris:
 			args = {
 				"account": row["account"],
-				"cost_center": cost_center,
+				# Penolan mendarat di cost center biayanya sendiri; baris lain
+				# ikut cost center dokumen.
+				"cost_center": row.get("cost_center") or cost_center,
 				"debit": row["debit"],
 				"credit": row["credit"],
 				"debit_in_account_currency": row["debit"],
@@ -651,6 +764,7 @@ class PerhitunganKUD(Document):
 		"""Isi ulang detail dari tiket timbangan, dan biayanya dari BKM. Tombol di form."""
 		self.set_periode()
 		self.validate_unit()
+		self.isi_akun_dari_setelan()
 
 		units = [row.unit for row in self.unit]
 
@@ -724,35 +838,106 @@ def get_unit_plasma(company):
 # Setelan akun jurnal
 # ---------------------------------------------------------------------------
 
+# Kolom setelan yang isinya akun, jadi padanannya di company lain bisa dicari
+# lewat nomor akun. cost_center dan item_purchase_invoice tidak ikut: cost
+# center milik company masing-masing dan tidak bernomor, item-nya sudah berlaku
+# lintas company.
+KOLOM_AKUN_SETELAN = (
+	"akun_pembelian_tbs",
+	"akun_biaya_plasma",
+	"akun_management_fee",
+	"akun_pph22",
+	"akun_hutang_plasma_antara",
+	"akun_hutang_mitra",
+)
+
+
+def akun_bernomor_sama(account, company, is_group=0):
+	"""Akun di `company` yang nomornya sama dengan `account`, atau None.
+
+	COA semua company disalin dari bagan yang sama — nomornya identik, yang beda
+	cuma abbr di belakang nama. Jadi setelan cukup diisi untuk satu company dan
+	sisanya bisa mengikutinya lewat nomor.
+	"""
+	if not account:
+		return None
+
+	nomor = frappe.get_cached_value("Account", account, "account_number")
+	if not nomor:
+		return None
+
+	return frappe.db.get_value(
+		"Account", {"account_number": nomor, "company": company, "is_group": is_group}, "name"
+	)
+
+
+def setelan_kud_rows():
+	return frappe.get_single("STH Accounting Settings").get("sth_accounting_settings_kud") or []
+
+
 def get_setelan_kud(company):
-	"""Baris setelan akun jurnal KUD untuk company itu, atau None."""
+	"""Setelan akun jurnal KUD untuk company itu, atau None kalau tabelnya kosong.
+
+	Baris company sendiri dipakai apa adanya. Kalau belum ada, dipakai baris
+	company mana pun lalu tiap akunnya dicari padanannya lewat nomor. Akibatnya
+	tabel setelan cukup diisi sekali, dan company yang COA-nya menyimpang tetap
+	bisa diberi barisnya sendiri.
+
+	cost_center tidak bisa ikut nomor, jadi dikosongkan kalau barisnya milik
+	company lain — pemanggilnya jatuh ke cost center bawaan company.
+	"""
 	if not company:
 		return None
 
-	setelan = frappe.get_single("STH Accounting Settings")
-	for row in setelan.get("sth_accounting_settings_kud") or []:
+	rows = setelan_kud_rows()
+	if not rows:
+		return None
+
+	for row in rows:
 		if row.company == company:
 			return row
 
-	return None
+	contoh = rows[0]
+	ikut_nomor = frappe._dict(contoh.as_dict())
+	ikut_nomor.company = company
+	ikut_nomor.cost_center = None
+
+	for kunci in KOLOM_AKUN_SETELAN:
+		ikut_nomor[kunci] = akun_bernomor_sama(contoh.get(kunci), company)
+
+	return ikut_nomor
 
 
-def get_akun_piutang_plasma(company, mitra):
-	"""Akun Piutang Plasma milik mitra itu, atau throw kalau belum didaftarkan.
+def get_akun_piutang_plasma(company, mitra, lempar=True):
+	"""Akun Piutang Plasma milik mitra itu.
 
-	Sengaja melempar, bukan mengembalikan None: angsuran hutang yang salah akun
-	akan mengendap di akun mitra lain dan baru ketahuan waktu rekonsiliasi.
+	Sama seperti setelan akun: baris (company, mitra) dipakai apa adanya, dan
+	kalau belum ada, baris mitra itu di company lain diikuti lewat nomor akun.
+	Nomornya memang membedakan mitra — 1293001 KUD MITRA DASAL, 1293002 BUMDES
+	JABUNG CIPTA USAHA — dan nomor yang sama ada di semua company.
+
+	`lempar=False` dipakai waktu mengisi dokumen, karena di situ akun yang belum
+	ketemu masih boleh diisi tangan. Yang menjaga tetap validasi submit.
 	"""
-	setelan = frappe.get_single("STH Accounting Settings")
-	for row in setelan.get("sth_accounting_settings_kud_mitra") or []:
-		if row.company == company and row.mitra == mitra:
+	rows = frappe.get_single("STH Accounting Settings").get("sth_accounting_settings_kud_mitra") or []
+
+	for row in rows:
+		if row.mitra == mitra and row.company == company:
 			return row.akun_piutang_plasma
+
+	for row in rows:
+		if row.mitra == mitra:
+			if akun := akun_bernomor_sama(row.akun_piutang_plasma, company):
+				return akun
+
+	if not lempar:
+		return None
 
 	frappe.throw(
 		_(
 			"Akun Piutang Plasma untuk mitra {0} di {1} belum didaftarkan. "
 			"Tambahkan barisnya di tabel <b>Perhitungan KUD - Piutang Plasma per Mitra</b> "
-			"di STH Accounting Settings."
+			"di STH Accounting Settings, atau isi langsung akunnya di dokumen ini."
 		).format(mitra, company),
 		title=_("Akun Piutang Plasma Belum Ada"),
 	)
@@ -815,7 +1000,7 @@ def turunan_yang_ada(perhitungan_kud):
 def siapkan_turunan(source_name, doctype, fieldname):
 	"""Penjagaan yang sama untuk kedua dokumen turunan.
 
-	Balikan: (doc Perhitungan KUD, baris setelan, nilai).
+	Balikan: (doc Perhitungan KUD, baris setelan atau None, nilai).
 	"""
 	doc = frappe.get_doc("Perhitungan KUD", source_name)
 	doc.check_permission("read")
@@ -844,16 +1029,9 @@ def siapkan_turunan(source_name, doctype, fieldname):
 			title=_("Sudah Pernah Dibuat"),
 		)
 
-	setelan = get_setelan_kud(doc.company)
-	if not setelan:
-		frappe.throw(
-			_("Setelan Perhitungan KUD untuk {0} belum ada di STH Accounting Settings.").format(
-				doc.company
-			),
-			title=_("Setelan Akun Belum Ada"),
-		)
-
-	return doc, setelan, nilai
+	# Setelan boleh kosong: akun jurnalnya sudah tercatat di dokumen, dan yang
+	# masih dibutuhkan dari sini cuma Item Purchase Invoice.
+	return doc, get_setelan_kud(doc.company), nilai
 
 
 def peringatkan_po_wajib(mitra):
@@ -905,7 +1083,7 @@ def buat_purchase_invoice(source_name):
 	"""Purchase Invoice tagihan mitra. Dipanggil lewat make_mapped_doc, belum tersimpan."""
 	doc, setelan, nilai = siapkan_turunan(source_name, "Purchase Invoice", "pembayaran_ke_mitra")
 
-	if not setelan.item_purchase_invoice:
+	if not (setelan and setelan.item_purchase_invoice):
 		frappe.throw(
 			_("Item Purchase Invoice untuk {0} belum diatur di setelan Perhitungan KUD.").format(
 				doc.company
@@ -913,10 +1091,13 @@ def buat_purchase_invoice(source_name):
 			title=_("Item Belum Diatur"),
 		)
 
-	if not setelan.akun_hutang_plasma_antara:
+	if not doc.akun_hutang_plasma_antara:
 		frappe.throw(
-			_("Akun Hutang Plasma Belum Ditagih untuk {0} belum diatur.").format(doc.company),
-			title=_("Setelan Akun Belum Lengkap"),
+			_(
+				"Akun Hutang Plasma Belum Ditagih di {0} kosong, jadi tidak ada yang bisa "
+				"didebit invoice ini."
+			).format(source_name),
+			title=_("Akun Jurnal Belum Lengkap"),
 		)
 
 	if frappe.get_cached_value("Item", setelan.item_purchase_invoice, "is_stock_item"):
@@ -941,8 +1122,10 @@ def buat_purchase_invoice(source_name):
 	pi.bill_date = doc.tanggal_selesai
 	pi.keterangan = keterangan
 
-	if setelan.akun_hutang_mitra:
-		pi.credit_to = setelan.akun_hutang_mitra
+	# Akun diambil dari dokumennya, bukan dari setelan: di situlah orang
+	# menggantinya kalau perhitungan ini perlu akun lain.
+	if doc.akun_hutang_mitra:
+		pi.credit_to = doc.akun_hutang_mitra
 
 	pi.append(
 		"items",
@@ -951,9 +1134,120 @@ def buat_purchase_invoice(source_name):
 			"qty": 1,
 			"rate": nilai,
 			"description": keterangan,
-			"expense_account": setelan.akun_hutang_plasma_antara,
-			"cost_center": get_cost_center_kud(doc.company, setelan),
+			"expense_account": doc.akun_hutang_plasma_antara,
+			"cost_center": doc.cost_center or get_cost_center_kud(doc.company),
 		},
 	)
 
 	return pi
+
+
+# ---------------------------------------------------------------------------
+# Penolan akun biaya
+# ---------------------------------------------------------------------------
+
+def get_kepala_akun_kud(company):
+	"""Kepala akun biaya yang saldonya dinolkan, untuk company itu.
+
+	Sama seperti setelan akun lainnya: baris company sendiri dipakai apa adanya,
+	dan kalau belum ada, baris company lain diikuti lewat nomor akun.
+	"""
+	rows = (
+		frappe.get_single("STH Accounting Settings").get("sth_accounting_settings_kud_kepala_akun")
+		or []
+	)
+
+	milik_sendiri = [row.kepala_akun for row in rows if row.company == company and row.kepala_akun]
+	if milik_sendiri:
+		return sorted(set(milik_sendiri))
+
+	ikut_nomor = [
+		akun
+		for row in rows
+		if (akun := akun_bernomor_sama(row.kepala_akun, company, is_group=1))
+	]
+
+	return sorted(set(ikut_nomor))
+
+
+def akun_di_bawah(kepala, company):
+	"""Semua akun non grup di bawah kepala-kepala akun itu."""
+	akun = set()
+
+	for grup in kepala:
+		batas = frappe.db.get_value("Account", grup, ["lft", "rgt"])
+		if not batas:
+			continue
+
+		lft, rgt = batas
+		akun.update(
+			frappe.get_all(
+				"Account",
+				filters={
+					"company": company,
+					"is_group": 0,
+					"lft": (">=", lft),
+					"rgt": ("<=", rgt),
+				},
+				pluck="name",
+			)
+		)
+
+	return akun
+
+
+def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
+	"""Saldo tiap (akun, cost center) yang tersentuh BKM di perhitungan ini.
+
+	Yang dibaca GL Entry milik BKM yang terdaftar di Rincian Biaya BKM, bukan
+	semua GL di cost center unit plasma. Cuma dokumen-dokumen itu yang biayanya
+	ditagihkan ke mitra; menolkan yang lain berarti menghapus biaya inti yang
+	kebetulan menumpang cost center sama.
+
+	Cost center ikut dikelompokkan supaya penolannya mendarat persis di tempat
+	biayanya muncul — kalau tidak, akunnya nol secara total tapi tiap cost center
+	jadi punya saldo palsu.
+
+	Balikan: list of dict {account, cost_center, jumlah}, urut dan tanpa nol.
+	"""
+	if not baris_bkm:
+		return []
+
+	if kepala is None:
+		kepala = get_kepala_akun_kud(company)
+
+	akun = akun_di_bawah(kepala, company)
+	if not akun:
+		return []
+
+	voucher_no = sorted({row.voucher_no for row in baris_bkm if row.voucher_no})
+	voucher_type = sorted({row.voucher_type for row in baris_bkm if row.voucher_type})
+	if not voucher_no or not voucher_type:
+		return []
+
+	rows = frappe.db.sql(
+		"""
+		SELECT account, cost_center, SUM(debit) - SUM(credit) AS saldo
+		FROM `tabGL Entry`
+		WHERE company = %(company)s
+		  AND is_cancelled = 0
+		  AND voucher_type IN %(voucher_type)s
+		  AND voucher_no IN %(voucher_no)s
+		  AND account IN %(account)s
+		GROUP BY account, cost_center
+		HAVING saldo <> 0
+		ORDER BY account, cost_center
+		""",
+		{
+			"company": company,
+			"voucher_type": tuple(voucher_type),
+			"voucher_no": tuple(voucher_no),
+			"account": tuple(akun),
+		},
+		as_dict=True,
+	)
+
+	return [
+		{"account": row.account, "cost_center": row.cost_center, "jumlah": flt(row.saldo, PRESISI_UANG)}
+		for row in rows
+	]
