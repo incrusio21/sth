@@ -74,7 +74,8 @@
   {
    "fieldname": "jumlah_pokok",
    "fieldtype": "Float",
-   "label": "Jumlah Pokok"
+   "label": "Jumlah Pokok",
+   "precision": "0"
   },
   {
    "fieldname": "cost_center",
@@ -191,12 +192,12 @@
    "fetch_from": "unit.nama",
    "fieldname": "estate",
    "fieldtype": "Data",
-   "label": "Estate"
+   "label": "Nama Estate"
   },
   {
    "fieldname": "unit",
    "fieldtype": "Link",
-   "label": "Kode Unit/Kebun/Estate",
+   "label": "Estate",
    "options": "Unit"
   },
   {
@@ -279,7 +280,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-21 10:17:46.332146",
+ "modified": "2026-09-21 12:27:45.223617",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Blok",
