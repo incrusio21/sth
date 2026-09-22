@@ -4,7 +4,7 @@
 import frappe,copy,random
 from frappe.utils import add_days
 from frappe.model.document import Document
-from frappe.utils import get_datetime,flt,get_link_to_form
+from frappe.utils import get_datetime,flt,get_link_to_form,cint,now
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
 from sth.mill.doctype.data_tbs.data_tbs import hitung_ulang_setelah_timbangan
 from sth.mill.rekap_sounding import hitung_ulang_setelah_timbangan as hitung_ulang_sounding_setelah_timbangan
@@ -42,6 +42,7 @@ class Timbangan(Document):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
 		self.set_kebun_dari_spb()
+		self.isi_spb_detail()
 		self.set_data_dari_po()
 		self.validate_qty_do()
 		self.hitung_netto()
@@ -81,6 +82,29 @@ class Timbangan(Document):
 		unit_spb = frappe.db.get_value("Surat Pengantar Buah", self.spb, "unit")
 		if unit_spb:
 			self.kebun = unit_spb
+
+	def isi_spb_detail(self):
+		"""Isi rincian blok dari SPB kalau tabelnya masih kosong.
+
+		Pengisiannya selama ini cuma ada di trigger `spb` di form, jadi timbangan
+		yang datang lewat API EPCS rinciannya kosong. Tiket seperti itu hilang
+		sama sekali dari Perhitungan KUD: netto dicatat sekali di kepala tiket dan
+		baris-baris inilah yang membaginya ke tahun tanam, jadi tanpa baris tidak
+		ada yang bisa ditempeli harga.
+
+		Yang sudah berisi tidak disentuh, supaya koreksi di grid tidak terhapus
+		tiap dokumennya disimpan. Koreksi yang datang dari sisi SPB diurus
+		_resync_spb_detail_timbangan di Surat Pengantar Buah, dan dokumen lama
+		oleh patch isi_spb_detail_timbangan.
+
+		Restan tidak ikut, sama seperti get_spb_detail yang dipakai form: yang
+		masuk `jumlah_janjang` hanya qty panen.
+		"""
+		if not self.spb or self.spb_detail:
+			return
+
+		for row in get_spb_detail(self.spb):
+			self.append("spb_detail", row)
 
 	def set_data_dari_po(self):
 		"""Isi kode_barang dan supplier dari PO untuk Receive "Lain - Lain".
@@ -425,9 +449,86 @@ def get_spb_detail(spb):
 		from `tabSPB Timbangan Pabrik` stp
 		join `tabBlok` b on b.name = stp.blok
 		where stp.parent = %s
+		order by stp.idx
 	""",[spb],as_dict=True)
 
 	return spb_details
+
+
+# Kolom yang benar-benar dibaca dari rincian blok. `idx` diurus penyisipnya.
+KOLOM_SPB_DETAIL = ("blok", "tahun_tanam", "unit", "divisi", "jumlah_janjang", "total_janjang")
+
+
+def sinkronkan_spb_detail(timbangan, docstatus, spb):
+	"""Tulis ulang rincian blok satu Timbangan dari SPB-nya, langsung lewat db.
+
+	Dua pemanggilnya sama-sama menyentuh dokumen yang sudah submit: resync dari
+	Surat Pengantar Buah waktu rincian SPB dikoreksi kiriman API, dan patch
+	isi_spb_detail_timbangan untuk dokumen lama. Barisnya disisipkan lewat
+	db_insert, bukan doc.save(), supaya validate dan on_submit tidak jalan ulang
+	di tiket yang stok dan TBS Ledger-nya sudah jadi.
+
+	SPB yang belum punya rincian dilewati, dan rincian tiket tidak pernah
+	dikosongkan: SPB stub dari pos penjagaan memang baru berisi janjang beberapa
+	saat sesudah truknya ditimbang.
+
+	`modified` induknya ikut naik supaya sinkronisasi inkremental EPCS lewat
+	modified_after melihat tiketnya lagi.
+
+	Balikan: True kalau ada yang berubah.
+	"""
+	baru = get_spb_detail(spb) if spb else []
+	if not baru:
+		return False
+
+	lama = frappe.get_all(
+		"Timbangan SPB Detail",
+		filters={"parent": timbangan, "parenttype": "Timbangan"},
+		fields=list(KOLOM_SPB_DETAIL),
+		order_by="idx",
+		limit_page_length=0,
+	)
+
+	if _spb_detail_sama(lama, baru):
+		return False
+
+	frappe.db.delete("Timbangan SPB Detail", {"parent": timbangan, "parenttype": "Timbangan"})
+
+	for idx, row in enumerate(baru, start=1):
+		baris = frappe.new_doc("Timbangan SPB Detail")
+		baris.update({kolom: row.get(kolom) for kolom in KOLOM_SPB_DETAIL})
+		baris.parent = timbangan
+		baris.parenttype = "Timbangan"
+		baris.parentfield = "spb_detail"
+		baris.idx = idx
+		# barisnya harus seragam dengan induknya, supaya query yang menyaring
+		# docstatus tidak melihat baris draft menempel di tiket yang sudah submit
+		baris.docstatus = cint(docstatus)
+		baris.db_insert()
+
+	frappe.db.set_value("Timbangan", timbangan, "modified", now(), update_modified=False)
+
+	return True
+
+
+def _spb_detail_sama(lama, baru):
+	"""Dua daftar rincian sama kalau isinya sama baris per baris."""
+	if len(lama) != len(baru):
+		return False
+
+	for baris_lama, baris_baru in zip(lama, baru):
+		for kolom in KOLOM_SPB_DETAIL:
+			nilai_lama = baris_lama.get(kolom)
+			nilai_baru = baris_baru.get(kolom)
+
+			if kolom in ("jumlah_janjang", "total_janjang"):
+				if abs(flt(nilai_lama) - flt(nilai_baru)) > 0.001:
+					return False
+			elif (nilai_lama or "") != (nilai_baru or ""):
+				return False
+
+	return True
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

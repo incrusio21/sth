@@ -370,6 +370,7 @@ def _update_spb(existing_name, args):
 
 	_resync_timbangan(doc.name)
 	_resync_kebun_timbangan(doc)
+	_resync_spb_detail_timbangan(doc)
 	_resync_security_check_point(doc)
 
 	frappe.db.commit()
@@ -485,6 +486,36 @@ def _resync_kebun_timbangan(doc):
 			continue
 
 		frappe.db.set_value("Timbangan", row.name, "kebun", doc.unit)
+
+def _resync_spb_detail_timbangan(doc):
+	"""Turunkan rincian blok SPB ke tabel spb_detail Timbangan yang menempel padanya.
+
+	Rincian itu yang dipakai Perhitungan KUD membagi netto satu tiket ke tahun
+	tanam, dan satu-satunya yang pernah mengisinya adalah trigger `spb` di form
+	Timbangan. Truk yang ditimbang duluan — SPB-nya masih stub dari pos penjagaan
+	dan janjangnya baru datang di panggilan ini — karena itu tiketnya tetap kosong
+	selamanya, persis alasan _resync_timbangan ada untuk BJR.
+
+	Rincian yang sudah ada ikut ditulis ulang: sesudah SPB submit, kirimannya
+	masih boleh memperbaiki blok dan janjang, dan salinan di tiket tidak boleh
+	tertinggal beda dari sumbernya.
+
+	Yang sudah dibatalkan dilewati.
+	"""
+	from sth.mill.doctype.timbangan.timbangan import sinkronkan_spb_detail
+
+	rows = frappe.get_all(
+		"Timbangan",
+		filters={
+			"spb": doc.name,
+			"docstatus": ["<", 2],
+		},
+		fields=["name", "docstatus"],
+		limit_page_length=0,
+	)
+
+	for row in rows:
+		sinkronkan_spb_detail(row.name, row.docstatus, doc.name)
 
 def _resync_security_check_point(doc):
 	"""Turunkan nama supir SPB ke Security Check Point yang menempel padanya.

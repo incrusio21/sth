@@ -222,8 +222,18 @@ def ambil_baris_timbangan(company, units, tanggal_mulai, tanggal_selesai):
 	ke SPB — satu tiket menyalin netto yang sama ke semua baris SPB-nya, jadi
 	kalau dibaca dari sana buah satu truk bisa terhitung berkali-kali.
 
-	Tahun tanam ikut yang tercatat di tiket, dan unitnya dibaca dari baris
-	tiket karena unit di kepala tiket berisi PKS penerimanya.
+	Kebun penyaringnya diambil dari field `kebun` di kepala tiket. Itu turunan
+	unit SPB — satu-satunya yang tahu kebun pengirimnya — dan ikut terkoreksi
+	kalau unit SPB diperbaiki kiriman API sesudah timbangannya tersimpan. Unit di
+	baris tiket tidak dipakai: isinya unit master Blok, yang tidak ikut bergerak
+	waktu kebunnya dikoreksi. Field `unit` di kepala tiket juga bukan: itu pabrik
+	yang menimbang.
+
+	Tahun tanam ikut yang tercatat di baris tiket.
+
+	Join ke Unit ikut dilepas: validate_unit sudah memastikan tiap unit di daftar
+	milik company ini dan bertanda plasma, dan tanpa join itu baris yang bloknya
+	belum punya unit tidak lagi terjatuh diam-diam.
 
 	Pengelompokan sengaja tidak dilakukan di SQL: netto satu tiket bisa jatuh ke
 	beberapa tahun tanam, dan pemecahannya harus bisa dites tanpa database.
@@ -237,11 +247,9 @@ def ambil_baris_timbangan(company, units, tanggal_mulai, tanggal_selesai):
 		       d.blok, d.tahun_tanam, d.jumlah_janjang
 		FROM `tabTimbangan SPB Detail` d
 		INNER JOIN `tabTimbangan` t ON d.parent = t.name
-		INNER JOIN `tabUnit` u ON d.unit = u.name
 		WHERE t.docstatus = 1
 		  AND t.company = %(company)s
-		  AND u.plasma = 1
-		  AND d.unit IN %(units)s
+		  AND t.kebun IN %(units)s
 		  AND t.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
 		ORDER BY t.posting_date, t.name, d.idx
 		""",
