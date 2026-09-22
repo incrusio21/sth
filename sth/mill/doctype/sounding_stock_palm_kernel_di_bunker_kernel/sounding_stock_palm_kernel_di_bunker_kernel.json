@@ -200,7 +200,7 @@
    "fetch_from": "pabrik.tinggi_lubang_ukur",
    "fieldname": "tinggi_lubang_ukur",
    "fieldtype": "Float",
-   "label": "Tinggi Lubang Ukur ( CM )",
+   "label": "Tinggi Lubang Ukur ( mm )",
    "read_only": 1
   },
   {
@@ -208,7 +208,7 @@
    "fetch_from": "pabrik.tinggi_normal_bunker",
    "fieldname": "tinggi_normal_bunker",
    "fieldtype": "Float",
-   "label": "Tinggi Normal Bunker ( CM )",
+   "label": "Tinggi Normal Bunker ( mm )",
    "read_only": 1
   },
   {
@@ -472,7 +472,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-18 16:02:33.418411",
+ "modified": "2026-09-22 10:36:44.806131",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",
