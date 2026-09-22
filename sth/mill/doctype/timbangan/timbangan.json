@@ -16,6 +16,7 @@
   "reference_doctype",
   "reference_name",
   "kebun",
+  "divisi_kebun",
   "tujuan_pks",
   "total_janjang",
   "total_brondolan",
@@ -517,6 +518,17 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
+   "fetch_from": "spb.divisi",
+   "fieldname": "divisi_kebun",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Divisi Kebun",
+   "options": "Divisi",
+   "read_only": 1
+  },
+  {
    "fieldname": "tujuan_pks",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -710,7 +722,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 10:15:00.000000",
+ "modified": "2026-09-22 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

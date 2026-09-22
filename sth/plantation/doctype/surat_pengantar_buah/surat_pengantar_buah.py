@@ -447,14 +447,13 @@ def _resync_timbangan(spb_name):
 	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
 
 def _resync_kebun_timbangan(doc):
-	"""Turunkan unit SPB ke field kebun di Timbangan yang menempel padanya.
+	"""Turunkan unit dan divisi SPB ke field kebun di Timbangan yang menempel padanya.
 
-	Kebun di Timbangan di-fetch dari ticket_number.unit, dan unit Security Check
-	Point sendiri ikut lokasi pos penjagaannya — pos itu berdiri di pabrik, jadi
-	yang mendarat di sana selalu kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang
-	memanen. Kiriman SPB inilah yang tahu kebunnya, dan unitnya masih boleh
-	diperbaiki lagi sesudah SPB submit lewat _HEADER_AFTER_SUBMIT — perbaikan itu
-	yang diteruskan ke sini.
+	Kebun di Timbangan ikut pos penjagaannya, dan unit Security Check Point
+	sendiri ikut lokasi posnya — pos itu berdiri di pabrik, jadi yang mendarat di
+	sana selalu kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang memanen. Kiriman
+	SPB inilah yang tahu kebunnya, dan unitnya masih boleh diperbaiki lagi sesudah
+	SPB submit lewat _HEADER_AFTER_SUBMIT — perbaikan itu yang diteruskan ke sini.
 
 	Field `unit` di Timbangan sengaja tidak ikut disentuh: itu pabrik yang
 	menimbang, dan COGS Mill dan Kebun, laporan penerimaan TBS mill, serta
@@ -466,9 +465,20 @@ def _resync_kebun_timbangan(doc):
 	ditulis, tapi nilainya memang baru pasti begitu dokumennya disubmit — selama
 	draft, tiap penyimpanan menarik ulang isinya dari Security Check Point.
 
+	Divisi kebunnya ikut diturunkan ke field `divisi_kebun`, dari sumber dan
+	dengan alasan yang sama — divisi di SPB juga masih boleh diperbaiki sesudah
+	submit lewat _HEADER_AFTER_SUBMIT.
+
 	Yang sudah dibatalkan dilewati.
 	"""
-	if not doc.unit:
+	nilai = {}
+
+	if doc.unit:
+		nilai["kebun"] = doc.unit
+	if doc.divisi:
+		nilai["divisi_kebun"] = doc.divisi
+
+	if not nilai:
 		return
 
 	rows = frappe.get_all(
@@ -477,15 +487,15 @@ def _resync_kebun_timbangan(doc):
 			"spb": doc.name,
 			"docstatus": ["<", 2],
 		},
-		fields=["name", "kebun"],
+		fields=["name", *nilai.keys()],
 		limit_page_length=0,
 	)
 
 	for row in rows:
-		if row.kebun == doc.unit:
-			continue
+		beda = {field: value for field, value in nilai.items() if row.get(field) != value}
 
-		frappe.db.set_value("Timbangan", row.name, "kebun", doc.unit)
+		if beda:
+			frappe.db.set_value("Timbangan", row.name, beda)
 
 def _resync_spb_detail_timbangan(doc):
 	"""Turunkan rincian blok SPB ke tabel spb_detail Timbangan yang menempel padanya.

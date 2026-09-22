@@ -13,7 +13,7 @@ def execute(timbangan_names=None):
 	tersimpan di sana kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang memanen.
 	Kebun pengirimnya cuma diketahui SPB.
 
-	Dokumen baru sudah tertutup dua jalur: Timbangan.set_kebun_dari_spb waktu
+	Dokumen baru sudah tertutup dua jalur: Timbangan.set_kebun_dan_divisi_dari_spb waktu
 	timbangannya disimpan, dan _resync_kebun_timbangan di Surat Pengantar Buah
 	waktu unit SPB-nya dikoreksi kiriman API. Yang tersisa dokumen lama, dan itu
 	yang diurus di sini.
