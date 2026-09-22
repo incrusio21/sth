@@ -174,6 +174,48 @@ def debug_bpjs():
 	doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-02477")
 	pasang_bpjs(doc)
 
+# Indeks kolom hasil query di pasang_bpjs. Query-nya mengembalikan tuple, bukan
+# dict, jadi urutan select di sana dan angka-angka di sini harus bergerak bersama.
+KOLOM_EMPLOYEE = 0
+KOLOM_SSA_FROM_DATE = 13
+KOLOM_SSA_CREATION = 14
+
+
+def ssa_terakhir_per_employee(rows):
+	"""Sisakan satu baris per karyawan: Salary Structure Assignment terakhirnya.
+
+	Query di pasang_bpjs berangkat dari Salary Structure Assignment, jadi hasilnya
+	satu baris per SSA — bukan per karyawan. Karyawan yang SSA-nya pernah di-amend,
+	atau yang upahnya pernah naik lewat SSA baru, punya lebih dari satu SSA yang
+	from_date-nya masuk periode, dan dulu semuanya ikut terdaftar.
+
+	Akibatnya bukan cuma dobel di daftar: create_payment_log membuat satu Employee
+	Payment Log per baris set_up_bpjs_detail_table, dan slip membaca dari sana —
+	jadi satu karyawan tertagih dua kali.
+
+	Yang menang from_date terbesar; kalau seri, yang dibuat belakangan. Fungsi
+	murni supaya bisa dites tanpa database.
+	"""
+	terpilih = {}
+
+	for row in rows:
+		employee = row[KOLOM_EMPLOYEE]
+		lama = terpilih.get(employee)
+
+		if lama is None or _kunci_ssa(row) > _kunci_ssa(lama):
+			terpilih[employee] = row
+
+	return list(terpilih.values())
+
+
+def _kunci_ssa(row):
+	"""Kunci urut satu baris SSA: tanggal berlaku, lalu waktu pembuatan."""
+	return (
+		frappe.utils.getdate(row[KOLOM_SSA_FROM_DATE]),
+		row[KOLOM_SSA_CREATION],
+	)
+
+
 def pasang_bpjs(doc):
 	# doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
 
@@ -199,7 +241,12 @@ def pasang_bpjs(doc):
 				Employee.grade,
 
 				Employee.custom_kriteria,
-				Employee.jabatan
+				Employee.jabatan,
+
+				# dua kolom terakhir cuma dipakai ssa_terakhir_per_employee untuk
+				# memilih baris, tidak ikut masuk tabel mana pun
+				SSAssignment.from_date,
+				SSAssignment.creation
 				
 				)
 			.where(
@@ -207,12 +254,13 @@ def pasang_bpjs(doc):
 				& (Employee.company == doc.pt)
 				& (Employee.status == "Active")
 				& (Employee.grade == "NON STAFF" if doc.golongan == "Non Staf" else Employee.grade != "NON STAFF" )
+				& (SSAssignment.docstatus == 1)
 				& (SSAssignment.from_date <= doc.start_periode)
 			)
 		)
 
 	print(query)
-	list_employee = query.run()
+	list_employee = ssa_terakhir_per_employee(query.run())
 		
 	list_program_employee = {}
 	susunan_bpjs = frappe.get_doc("Set Up BPJS PT", doc.set_up_bpjs)
