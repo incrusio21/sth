@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-09-15 11:58:40.385332",
+ "creation": "2026-08-11 16:53:18.842887",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -17,6 +17,7 @@
   "is_rekap",
   "kebun",
   "kemandoran",
+  "perlu_persetujuan",
   "column_break_souy",
   "company",
   "payroll_date",
@@ -548,13 +549,19 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "perlu_persetujuan",
+   "fieldtype": "Check",
+   "label": "Perlu Persetujuan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-03 23:47:20.649717",
+ "modified": "2026-09-22 11:43:25.033761",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Panen",
