@@ -187,14 +187,17 @@ def ssa_terakhir_per_employee(rows):
 	Query di pasang_bpjs berangkat dari Salary Structure Assignment, jadi hasilnya
 	satu baris per SSA — bukan per karyawan. Karyawan yang SSA-nya pernah di-amend,
 	atau yang upahnya pernah naik lewat SSA baru, punya lebih dari satu SSA yang
-	from_date-nya masuk periode, dan dulu semuanya ikut terdaftar.
+	from_date-nya masuk periode, dan dulu semuanya ikut terdaftar. Draft ikut
+	terbaca — memang disengaja — jadi karyawan yang SSA-nya belum sempat disubmit
+	pun bisa punya dua baris.
 
 	Akibatnya bukan cuma dobel di daftar: create_payment_log membuat satu Employee
 	Payment Log per baris set_up_bpjs_detail_table, dan slip membaca dari sana —
 	jadi satu karyawan tertagih dua kali.
 
-	Yang menang from_date terbesar; kalau seri, yang dibuat belakangan. Fungsi
-	murni supaya bisa dites tanpa database.
+	Yang menang from_date terbesar; kalau seri, yang dibuat belakangan — termasuk
+	kalau yang belakangan itu masih draft, karena draft justru niat terbaru.
+	Fungsi murni supaya bisa dites tanpa database.
 	"""
 	terpilih = {}
 
@@ -254,7 +257,10 @@ def pasang_bpjs(doc):
 				& (Employee.company == doc.pt)
 				& (Employee.status == "Active")
 				& (Employee.grade == "NON STAFF" if doc.golongan == "Non Staf" else Employee.grade != "NON STAFF" )
-				& (SSAssignment.docstatus == 1)
+				# yang dibatalkan saja yang dibuang. Draft tetap ikut: SSA karyawan
+				# baru sering belum sempat disubmit waktu daftar BPJS-nya disusun, dan
+				# orangnya tetap harus terdaftar bulan itu
+				& (SSAssignment.docstatus < 2)
 				& (SSAssignment.from_date <= doc.start_periode)
 			)
 		)
