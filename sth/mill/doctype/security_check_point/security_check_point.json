@@ -420,6 +420,7 @@
    "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "lokasi_pos",
    "fieldtype": "Data",
    "label": "Lokasi POS"
@@ -485,6 +486,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "kode_lokasi_pos",
    "fieldtype": "Link",
    "label": "Kode Lokasi POS",
@@ -511,7 +513,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 13:14:17.656069",
+ "modified": "2026-09-22 14:09:17.374839",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
