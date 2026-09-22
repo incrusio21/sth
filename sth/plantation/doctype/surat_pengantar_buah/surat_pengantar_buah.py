@@ -518,22 +518,35 @@ def _resync_spb_detail_timbangan(doc):
 		sinkronkan_spb_detail(row.name, row.docstatus, doc.name)
 
 def _resync_security_check_point(doc):
-	"""Turunkan nama supir SPB ke Security Check Point yang menempel padanya.
+	"""Turunkan nama supir dan kebun SPB ke Security Check Point yang menempel padanya.
 
 	Kiriman SPB inilah data terakhir soal supir — pos penjagaan mencatat siapa
 	yang lewat, tapi supir pengganti hal biasa dan yang benar-benar jalan baru
 	tegas di SPB. Yang dilihat orang justru verifikasi security-nya, jadi nama
 	di sana ikut dibetulkan, bukan dibiarkan berbeda dengan SPB.
 
+	Kebun ikut diturunkan karena arah bacanya memang dari sini: `unit` di pos
+	berisi pabrik tempat posnya berdiri, dan kebun pengirimnya cuma diketahui
+	SPB. Field `kebun` di pos ber-fetch_from spb.unit, tapi fetch cuma jalan
+	waktu dokumen posnya sendiri disimpan — padahal urutan lazimnya kebalikannya:
+	pos duluan, SPB-nya menyusul, dan dokumen pos tidak pernah disimpan lagi
+	sesudah itu. Jadi nilainya didorong dari sini.
+
 	Cuma TBS Internal: penerimaan lain tidak menempel ke SPB sama sekali — field
 	spb di Security Check Point memang hanya muncul untuk penerimaan itu.
 
 	Lewat db.set_value, bukan doc.save(): dokumennya banyak yang sudah submit,
-	dan driver_name di sana read-only dengan fetch_from qr_code_scan.full_name,
-	jadi menyimpan ulang lewat dokumen malah mengembalikannya ke hasil pindaian
-	QR.
+	dan dua-duanya read-only ber-fetch_from, jadi menyimpan ulang lewat dokumen
+	malah mengembalikan supirnya ke hasil pindaian QR.
 	"""
-	if not doc.driver_name:
+	nilai = {}
+
+	if doc.driver_name:
+		nilai["driver_name"] = doc.driver_name
+	if doc.unit:
+		nilai["kebun"] = doc.unit
+
+	if not nilai:
 		return
 
 	rows = frappe.get_all(
@@ -543,15 +556,15 @@ def _resync_security_check_point(doc):
 			"receive_type": "TBS Internal",
 			"docstatus": ["<", 2],
 		},
-		fields=["name", "driver_name"],
+		fields=["name", *nilai.keys()],
 		limit_page_length=0,
 	)
 
 	for row in rows:
-		if row.driver_name == doc.driver_name:
-			continue
+		beda = {field: value for field, value in nilai.items() if row.get(field) != value}
 
-		frappe.db.set_value("Security Check Point", row.name, "driver_name", doc.driver_name)
+		if beda:
+			frappe.db.set_value("Security Check Point", row.name, beda)
 
 def set_recap_panen_in_details(details):
 	"""Isi recap_panen tiap baris detail dari blok + tanggal panennya.

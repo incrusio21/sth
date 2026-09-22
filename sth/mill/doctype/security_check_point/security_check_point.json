@@ -37,6 +37,7 @@
   "kode_lokasi_pos",
   "lokasi_pos",
   "unit",
+  "kebun",
   "divisi",
   "vehicle_entry_time",
   "vehicle_exit_time",
@@ -318,8 +319,17 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Unit",
+   "label": "Pabrik",
    "options": "Unit"
+  },
+  {
+   "fetch_from": "spb.unit",
+   "fieldname": "kebun",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Kebun",
+   "options": "Unit",
+   "read_only": 1
   },
   {
    "fetch_from": "qr_code_scan.custom_driver_image_upload",
@@ -500,7 +510,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-18 09:23:28.111309",
+ "modified": "2026-09-22 10:15:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
