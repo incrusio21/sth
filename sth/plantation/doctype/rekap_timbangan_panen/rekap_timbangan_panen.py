@@ -17,7 +17,7 @@ class RekapTimbanganPanen(Document):
 	def calculate_janjang(self):
 		total_janjang = total_weight = 0.0
 		for d in self.details:
-			d.bjr = flt(d.total_weight / d.jumlah_janjang)
+			d.bjr = flt(d.total_weight / d.jumlah_janjang) if d.jumlah_janjang else 0
 			total_janjang += d.jumlah_janjang
 			total_weight += d.total_weight
 

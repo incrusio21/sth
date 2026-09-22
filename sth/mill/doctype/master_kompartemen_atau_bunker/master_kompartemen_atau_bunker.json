@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:nama_kompartemen",
+ "autoname": "format:{nama_kompartemen}",
  "creation": "2026-04-03 20:03:17.491761",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -38,11 +38,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-08 08:54:04.325046",
+ "modified": "2026-09-22 10:29:23.333276",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Master Kompartemen atau Bunker",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
