@@ -41,7 +41,7 @@ class Timbangan(Document):
 	def validate(self):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
-		self.set_kebun_dari_spb()
+		self.set_kebun_dan_divisi_dari_spb()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
 		self.validate_qty_do()
@@ -56,13 +56,15 @@ class Timbangan(Document):
 				if row.company == self.company:
 					self.unit = row.name
 	
-	def set_kebun_dari_spb(self):
-		"""Isi kebun dari unit SPB-nya, menimpa isian pos penjagaan.
+	def set_kebun_dan_divisi_dari_spb(self):
+		"""Isi kebun dan divisinya dari SPB, menimpa isian pos penjagaan.
 
-		Kebun di-fetch dari ticket_number.unit, dan unit Security Check Point
-		sendiri ikut lokasi posnya — pos itu berdiri di pabrik, jadi yang mendarat
-		di sana kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang memanen. Yang tahu
-		kebun pengirimnya cuma SPB.
+		Kebun di-fetch dari ticket_number.kebun, dan field itu di Security Check
+		Point sendiri ber-fetch_from spb.unit — jadi ujungnya tetap SPB, cuma lewat
+		dua tingkat yang urutannya tidak dijamin dalam satu penyimpanan. Sebelum
+		pos punya field kebun, yang terbaca malah unitnya: pos berdiri di pabrik,
+		jadi yang mendarat di sana kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang
+		memanen. Yang tahu kebun pengirimnya cuma SPB.
 
 		Arah sebaliknya diurus _resync_kebun_timbangan di Surat Pengantar Buah,
 		untuk koreksi unit SPB yang datang sesudah timbangannya tersimpan. Yang di
@@ -75,13 +77,26 @@ class Timbangan(Document):
 		fetch_from dipasang _validate_links, yang jalan sebelum validate, jadi
 		nilai yang ditulis di sini tidak tertimpa lagi. Field `unit` sengaja tidak
 		ikut: itu pabrik yang menimbang.
+
+		Divisi kebunnya ikut dari sumber yang sama. Field `divisi_kebun` memang
+		sudah ber-fetch_from spb.divisi, tapi `spb` sendiri hasil fetch dari
+		ticket_number — rantai dua tingkat dalam satu penyimpanan, yang urutannya
+		tidak dijamin. Membacanya langsung di sini menghapus keraguan itu, dan
+		sekalian menutup jalur API yang SPB-nya baru ketemu di map_api_ticket_number.
 		"""
 		if not self.spb:
 			return
 
-		unit_spb = frappe.db.get_value("Surat Pengantar Buah", self.spb, "unit")
-		if unit_spb:
-			self.kebun = unit_spb
+		spb = frappe.db.get_value(
+			"Surat Pengantar Buah", self.spb, ["unit", "divisi"], as_dict=True
+		)
+		if not spb:
+			return
+
+		if spb.unit:
+			self.kebun = spb.unit
+		if spb.divisi:
+			self.divisi_kebun = spb.divisi
 
 	def isi_spb_detail(self):
 		"""Isi rincian blok dari SPB kalau tabelnya masih kosong.
