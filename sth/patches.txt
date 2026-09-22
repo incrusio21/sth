@@ -17,6 +17,7 @@ sth.patches.sambungkan_recap_panen_ke_spb
 sth.patches.isi_kebun_timbangan_dari_spb
 sth.patches.isi_spb_detail_timbangan
 sth.patches.isi_kebun_security_check_point
+sth.patches.isi_unit_pabrik_spb
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
