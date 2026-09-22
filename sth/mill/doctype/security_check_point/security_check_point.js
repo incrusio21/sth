@@ -147,7 +147,6 @@ frappe.ui.form.on("Security Check Point", {
 
 	onload(frm) {
 		// cur_frm.add_fetch("do_no", "unit", "unit")
-		// cur_frm.add_fetch("spb", "unit", "unit")
 
 		frm.set_query("spb", function () {
 			return {
@@ -156,6 +155,21 @@ frappe.ui.form.on("Security Check Point", {
 				}
 			};
 		});
+	},
+
+	// unit diambil dari SPB hanya kalau masih kosong. Dulu ini add_fetch, yang
+	// menimpa apa pun isinya tiap SPB diganti — padahal unit di sini pabrik yang
+	// menerima, dan biasanya sudah benar dari lokasi pos
+	spb(frm) {
+		if (!frm.doc.spb || frm.doc.unit) {
+			return
+		}
+
+		frappe.db.get_value("Surat Pengantar Buah", frm.doc.spb, "unit").then((r) => {
+			if (r.message && r.message.unit && !frm.doc.unit) {
+				frm.set_value("unit", r.message.unit)
+			}
+		})
 	},
 
 	company(frm) {
