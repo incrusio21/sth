@@ -64,7 +64,6 @@
   "akun_hutang_mitra",
   "jurnal_section",
   "jurnal_preview",
-  "column_break_jurnal",
   "total_jurnal_debit",
   "total_jurnal_kredit",
   "status_jurnal"
@@ -439,10 +438,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_jurnal",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "total_jurnal_debit",
    "fieldtype": "Currency",
    "label": "Total Debit",
@@ -457,6 +452,7 @@
   {
    "fieldname": "status_jurnal",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Status Jurnal",
    "read_only": 1
   }
@@ -465,7 +461,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-21 17:00:00.000000",
+ "modified": "2026-09-22 11:10:49.019626",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",
