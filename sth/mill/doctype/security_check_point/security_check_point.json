@@ -323,13 +323,14 @@
    "options": "Unit"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "spb.unit",
+   "fetch_if_empty": 1,
    "fieldname": "kebun",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Kebun",
-   "options": "Unit",
-   "read_only": 1
+   "options": "Unit"
   },
   {
    "fetch_from": "qr_code_scan.custom_driver_image_upload",
@@ -371,14 +372,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fetch_from": "spb.divisi",
    "fetch_if_empty": 1,
    "fieldname": "divisi",
    "fieldtype": "Link",
    "label": "Divisi",
-   "options": "Divisi",
-   "read_only_depends_on": "eval:doc.receive_type == \"TBS Internal\""
+   "options": "Divisi"
   },
   {
    "allow_on_submit": 1,
@@ -510,7 +511,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 11:30:00.000000",
+ "modified": "2026-09-22 13:14:17.656069",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
