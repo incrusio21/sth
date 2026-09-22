@@ -506,7 +506,8 @@ doc_events = {
 		"validate": "sth.custom.gl_entry.set_unit_from_parent"
 	},
 	"Warehouse": {
-		"autoname": "sth.custom.warehouse.autoname_warehouse"
+		"autoname": "sth.custom.warehouse.autoname_warehouse",
+		"before_validate": "sth.custom.warehouse.kosongkan_divisi_jadi_null",
 	}
 }
 

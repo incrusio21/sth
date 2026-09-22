@@ -9,6 +9,18 @@ def autoname_warehouse(self,method):
 
 	self.name = self.warehouse_name
 
+
+def kosongkan_divisi_jadi_null(self, method=None):
+	"""Divisi yang dikosongkan disimpan NULL, bukan string kosong.
+
+	Form mengirim "" waktu Link dikosongkan, dan Frappe menulis string kosong itu
+	apa adanya ke kolom `divisi`. Akibatnya query yang memakai `IS NULL` atau join
+	ke Divisi tidak konsisten antara baris lama dan baru.
+	"""
+	if not self.divisi:
+		self.divisi = None
+
+
 """
 ERPNext Warehouse Renamer — removes spaces from all Warehouse names.
 
