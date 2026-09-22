@@ -17,6 +17,7 @@
   "company",
   "pabrik",
   "pabrik_type",
+  "unit_pabrik",
   "tujuan_pks",
   "blok",
   "trans_no",
@@ -98,6 +99,15 @@
    "read_only": 1
   },
   {
+   "description": "Unit pabrik yang menimbang, diisi Timbangan.",
+   "fieldname": "unit_pabrik",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
@@ -124,7 +134,7 @@
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Unit",
+   "label": "Kebun",
    "options": "Unit",
    "reqd": 1
   },
@@ -369,7 +379,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-03 17:43:22.688990",
+ "modified": "2026-09-22 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Surat Pengantar Buah",

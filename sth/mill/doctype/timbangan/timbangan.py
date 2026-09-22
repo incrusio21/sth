@@ -288,6 +288,11 @@ class Timbangan(Document):
 		spb_doc.in_time = self.weight_in_time
 		spb_doc.out_time = self.weight_out_time
 		spb_doc.workflow_state = "Weighed"
+		# Pabrik yang menerima buah ini baru pasti di timbangannya: `unit` di sini
+		# dipaksa ke unit ber-mill 1 milik company, sedangkan SPB cuma tahu kebun
+		# pengirimnya. Field `pabrik` di SPB tidak dipakai — itu Link Mill Master
+		# dan isian tangan.
+		spb_doc.unit_pabrik = self.unit
 		# SPB yang dibuat otomatis dari Security Check Point belum punya detail
 		# blok, jadi total_janjang-nya masih 0 saat ditimbang
 		spb_doc.bjr = flt(spb_doc.total_weight / spb_doc.total_janjang) if spb_doc.total_janjang else 0
