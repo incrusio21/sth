@@ -369,7 +369,8 @@ def _update_spb(existing_name, args):
 		doc.db_set(nilai, notify=False)
 
 	_resync_timbangan(doc.name)
-	_resync_kebun_timbangan(doc)
+	_ambil_koreksi_pos(doc)
+	resync_kebun_timbangan(doc)
 	_resync_spb_detail_timbangan(doc)
 	_resync_security_check_point(doc)
 
@@ -446,14 +447,64 @@ def _resync_timbangan(spb_name):
 
 	frappe.get_doc("Timbangan", timbangan).update_spb_weight()
 
-def _resync_kebun_timbangan(doc):
+def _ambil_koreksi_pos(doc):
+	"""Tarik kebun dan divisi yang sudah dibetulkan pos ke SPB ini.
+
+	Pos penjagaan yang melihat truknya lewat, jadi dialah yang paling mungkin
+	tahu kebun dan divisi pengirimnya. Field `kebun` dan `divisi` di Security
+	Check Point boleh diubah bahkan sesudah submit justru untuk itu.
+
+	Koreksi pos menang atas kiriman: kalau EPCS mengirim ulang SPB yang sama
+	dengan unit lamanya, nilai di sini dikembalikan lagi ke yang sudah dibetulkan
+	pos. Tanpa ini koreksinya cuma bertahan sampai kiriman berikutnya datang.
+
+	Dijalankan sebelum resync_kebun_timbangan supaya yang turun ke tiket timbangan
+	sudah nilai yang benar, bukan yang barusan ditimpa kiriman.
+
+	Apa yang dihitung sebagai koreksi ditentukan koreksi_pos di Security Check
+	Point — satu tempat, supaya arah ini dan arah sebaliknya tidak pernah menilai
+	dengan cara berbeda.
+
+	Yang dibaca cuma pos TBS Internal yang **sudah disubmit**, sejalan dengan arah
+	sebaliknya yang cuma jalan dari on_update_after_submit: selama posnya draft,
+	isinya masih seadanya dari lokasi pos dan belum jadi pernyataan siapa-siapa.
+	Kalau posnya lebih dari satu — seharusnya tidak — yang terakhir dibuat dipakai.
+	"""
+	from sth.mill.doctype.security_check_point.security_check_point import koreksi_pos
+
+	pos = frappe.get_all(
+		"Security Check Point",
+		filters={
+			"spb": doc.name,
+			"receive_type": "TBS Internal",
+			"docstatus": 1,
+		},
+		fields=["name", "unit", "kebun", "divisi"],
+		order_by="creation desc",
+		limit_page_length=1,
+	)
+
+	if not pos:
+		return
+
+	koreksi = koreksi_pos(pos[0])
+	beda = {field: value for field, value in koreksi.items() if doc.get(field) != value}
+
+	if beda:
+		doc.db_set(beda, notify=False)
+
+
+def resync_kebun_timbangan(doc):
 	"""Turunkan unit dan divisi SPB ke field kebun di Timbangan yang menempel padanya.
 
-	Kebun di Timbangan ikut pos penjagaannya, dan unit Security Check Point
-	sendiri ikut lokasi posnya — pos itu berdiri di pabrik, jadi yang mendarat di
-	sana selalu kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang memanen. Kiriman
-	SPB inilah yang tahu kebunnya, dan unitnya masih boleh diperbaiki lagi sesudah
-	SPB submit lewat _HEADER_AFTER_SUBMIT — perbaikan itu yang diteruskan ke sini.
+	Kebun di Timbangan ikut pos penjagaannya, dan `unit` di pos sendiri ikut lokasi
+	posnya — pos itu berdiri di pabrik, jadi yang mendarat di sana selalu kode
+	pabrik (TPRM, ASRM, ABAM), bukan kebun yang memanen. Karena itu tiket tidak
+	membaca `unit` pos, dan unit SPB yang diturunkan ke sini.
+
+	Unit SPB masih bisa berubah dari dua sisi: kiriman EPCS lewat
+	_HEADER_AFTER_SUBMIT, dan koreksi pos lewat _ambil_koreksi_pos — yang menang
+	kalau keduanya bicara. Apa pun sumbernya, perbaikannya diteruskan ke sini.
 
 	Field `unit` di Timbangan sengaja tidak ikut disentuh: itu pabrik yang
 	menimbang, dan COGS Mill dan Kebun, laporan penerimaan TBS mill, serta
@@ -528,33 +579,29 @@ def _resync_spb_detail_timbangan(doc):
 		sinkronkan_spb_detail(row.name, row.docstatus, doc.name)
 
 def _resync_security_check_point(doc):
-	"""Turunkan nama supir dan kebun SPB ke Security Check Point yang menempel padanya.
+	"""Turunkan nama supir SPB ke Security Check Point yang menempel padanya.
 
 	Kiriman SPB inilah data terakhir soal supir — pos penjagaan mencatat siapa
 	yang lewat, tapi supir pengganti hal biasa dan yang benar-benar jalan baru
 	tegas di SPB. Yang dilihat orang justru verifikasi security-nya, jadi nama
 	di sana ikut dibetulkan, bukan dibiarkan berbeda dengan SPB.
 
-	Kebun ikut diturunkan karena arah bacanya memang dari sini: `unit` di pos
-	berisi pabrik tempat posnya berdiri, dan kebun pengirimnya cuma diketahui
-	SPB. Field `kebun` di pos ber-fetch_from spb.unit, tapi fetch cuma jalan
-	waktu dokumen posnya sendiri disimpan — padahal urutan lazimnya kebalikannya:
-	pos duluan, SPB-nya menyusul, dan dokumen pos tidak pernah disimpan lagi
-	sesudah itu. Jadi nilainya didorong dari sini.
+	Kebun dan divisi sengaja tidak ikut, walau sempat begitu: pos yang jadi
+	sumber koreksi untuk keduanya, bukan kiriman SPB. Arahnya sekarang terbalik,
+	lihat _ambil_koreksi_pos. Isian awal pos tetap datang dari SPB, tapi lewat
+	fetch_from yang ber-fetch_if_empty — jadi yang kosong saja.
 
 	Cuma TBS Internal: penerimaan lain tidak menempel ke SPB sama sekali — field
 	spb di Security Check Point memang hanya muncul untuk penerimaan itu.
 
 	Lewat db.set_value, bukan doc.save(): dokumennya banyak yang sudah submit,
-	dan dua-duanya read-only ber-fetch_from, jadi menyimpan ulang lewat dokumen
+	dan driver_name read-only ber-fetch_from, jadi menyimpan ulang lewat dokumen
 	malah mengembalikan supirnya ke hasil pindaian QR.
 	"""
 	nilai = {}
 
 	if doc.driver_name:
 		nilai["driver_name"] = doc.driver_name
-	if doc.unit:
-		nilai["kebun"] = doc.unit
 
 	if not nilai:
 		return

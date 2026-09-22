@@ -22,6 +22,47 @@ class SecurityCheckPoint(Document):
 	def validate(self):
 		self.set_data_kendaraan()
 
+	def on_update_after_submit(self):
+		self.dorong_koreksi_ke_spb()
+
+	def dorong_koreksi_ke_spb(self):
+		"""Turunkan kebun dan divisi yang dibetulkan pos ke SPB dan timbangannya.
+
+		Pos yang melihat truknya lewat, jadi dialah yang paling mungkin tahu kebun
+		dan divisi pengirimnya. Dua field itu boleh diubah bahkan sesudah submit
+		justru untuk itu, dan koreksinya menang atas kiriman EPCS berikutnya —
+		_ambil_koreksi_pos di Surat Pengantar Buah yang menjaga arah itu.
+
+		**Cuma dari on_update_after_submit, bukan on_update.** Selama dokumen pos
+		masih draft, isinya belum jadi pernyataan siapa-siapa: unit dan divisinya
+		masih seadanya dari lokasi pos, dan SPB stub-nya lahir dari nilai itu juga.
+		Yang diperlakukan sebagai koreksi hanya yang diubah orang sesudah dokumennya
+		disubmit — sekaligus membuat jelas kapan SPB bisa berubah dari arah sini.
+
+		SPB ditulis lewat db_set, bukan doc.save(), karena SPB-nya nyaris selalu
+		sudah submit. Tiketnya menyusul lewat resync_kebun_timbangan, jalur yang
+		sama dengan koreksi dari sisi SPB.
+		"""
+		if not self.spb:
+			return
+
+		koreksi = koreksi_pos(self)
+		if not koreksi:
+			return
+
+		from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import (
+			resync_kebun_timbangan,
+		)
+
+		spb = frappe.get_doc("Surat Pengantar Buah", self.spb)
+		beda = {field: value for field, value in koreksi.items() if spb.get(field) != value}
+
+		if not beda:
+			return
+
+		spb.db_set(beda, notify=False)
+		resync_kebun_timbangan(spb)
+
 	def is_from_api(self):
 		"""Dokumen ini kiriman REST API, bukan input orang lewat UI."""
 		return bool(self.owner and "api@sth" in self.owner)
@@ -174,6 +215,37 @@ class SecurityCheckPoint(Document):
 		)
 
 		return doc.name
+
+
+def koreksi_pos(scp):
+	"""Kebun dan divisi hasil koreksi pos, dalam bentuk field SPB. {} kalau tak ada.
+
+	Dipakai dua arah: waktu dokumen pos disimpan, dan waktu kiriman SPB masuk dan
+	koreksinya harus ditegakkan lagi. Satu tempat supaya dua arah itu tidak pernah
+	menilai "apa yang dikoreksi pos" dengan cara berbeda.
+
+	Kebun yang sama dengan `unit` pos **bukan** koreksi, melainkan sisa isian awal:
+	`unit` di pos ikut lokasi posnya, dan pos berdiri di pabrik, sedangkan kebun
+	yang memanen tidak pernah pabrik. Tanpa saringan ini kode pabrik justru akan
+	terdorong balik ke SPB dan menimpa unit yang benar dari kiriman.
+
+	Divisi hanya ikut kalau memang milik kebun yang dikoreksi — invarian yang sama
+	dengan penyaring divisi di form pos. Divisi sisa pabrik tidak ikut terbawa.
+
+	`scp` boleh dokumen maupun dict, asal punya unit, kebun, dan divisi.
+	"""
+	kebun = scp.get("kebun")
+
+	if not kebun or kebun == scp.get("unit"):
+		return {}
+
+	koreksi = {"unit": kebun}
+	divisi = scp.get("divisi")
+
+	if divisi and frappe.db.get_value("Divisi", divisi, "unit") == kebun:
+		koreksi["divisi"] = divisi
+
+	return koreksi
 
 
 @frappe.whitelist()

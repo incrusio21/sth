@@ -13,17 +13,20 @@ def execute(names=None):
 	posnya sendiri disimpan — padahal urutan lazimnya kebalikannya: pos duluan,
 	SPB-nya menyusul, dan dokumen pos tidak pernah disimpan lagi sesudah itu.
 
-	Dokumen baru sudah tertutup _resync_security_check_point di Surat Pengantar
-	Buah, yang mendorong unit SPB ke sini tiap kiriman SPB masuk. Yang tersisa
-	dokumen lama, dan itu yang diurus di sini.
+	Dokumen baru terisi sendiri lewat fetch_from spb.unit yang ber-fetch_if_empty.
+	Yang tersisa dokumen lama, dan itu yang diurus di sini.
+
+	**Hanya yang masih kosong yang diisi.** Kebun di pos boleh dibetulkan orang —
+	itulah sumber koreksi untuk SPB dan tiket timbangannya, lihat koreksi_pos di
+	Security Check Point — jadi isian yang sudah ada tidak boleh ditimpa unit SPB,
+	yang justru bisa jadi nilai keliru yang sedang dibetulkan.
 
 	Field `unit` tidak disentuh: itu pabrik tempat posnya berdiri, dan
 	get_security_location memakainya dengan arti itu.
 
-	Ditulis lewat db.set_value karena hampir semua dokumennya sudah submit, dan
-	kebun read-only ber-fetch_from sehingga menyimpan lewat dokumen tidak
-	mengubah apa-apa. Yang sudah dibatalkan dilewati, begitu juga yang kebunnya
-	sudah sama — patch ini aman dijalankan berulang.
+	Ditulis lewat db.set_value karena hampir semua dokumennya sudah submit. Yang
+	sudah dibatalkan dilewati, begitu juga yang kebunnya sudah terisi — patch ini
+	aman dijalankan berulang.
 
 	Untuk sebagian dokumen saja:
 
@@ -45,7 +48,7 @@ def execute(names=None):
 
 
 def _baris_beda(names):
-	"""Dokumen pos yang kebunnya berbeda dari unit SPB yang ditunjuknya."""
+	"""Dokumen pos yang kebunnya masih kosong, padahal SPB-nya sudah punya unit."""
 	if isinstance(names, str):
 		names = [n.strip() for n in names.split(",")]
 
@@ -64,7 +67,7 @@ def _baris_beda(names):
 		INNER JOIN `tabSurat Pengantar Buah` spb ON spb.name = scp.spb
 		WHERE scp.docstatus < 2
 			AND IFNULL(spb.unit, '') != ''
-			AND IFNULL(scp.kebun, '') != spb.unit
+			AND IFNULL(scp.kebun, '') = ''
 			{syarat}
 		ORDER BY scp.name
 	""".format(syarat=syarat), nilai, as_dict=True)
@@ -77,7 +80,7 @@ def _cetak_ringkasan(baris):
 		kunci = (b.kebun_lama or "", b.unit_spb)
 		rekap[kunci] = rekap.get(kunci, 0) + 1
 
-	print(f"Kebun Security Check Point: {len(baris)} dokumen diisi dari unit SPB-nya")
+	print(f"Kebun Security Check Point: {len(baris)} dokumen yang masih kosong diisi dari unit SPB-nya")
 
 	for (lama, baru), jumlah in sorted(rekap.items(), key=lambda pasangan: -pasangan[1]):
 		print(f"  {lama or '(kosong)'} -> {baru}: {jumlah} dokumen")

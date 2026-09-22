@@ -98,7 +98,25 @@ frappe.ui.form.on("Security Check Point", {
 	},
 
 	setup(frm) {
-		frm.set_query("divisi", sth.queries.divisi)
+		// kebun cuma boleh unit milik company dokumen ini
+		frm.set_query("kebun", (doc) => {
+			return {
+				filters: {
+					company: doc.company
+				}
+			}
+		})
+
+		// divisi ikut kebun, bukan unit: unit di dokumen ini pabrik tempat posnya
+		// berdiri, sedangkan divisi yang dicari milik kebun pengirimnya
+		frm.set_query("divisi", (doc) => {
+			return {
+				filters: {
+					unit: doc.kebun
+				}
+			}
+		})
+
 		frm.set_query("unit", (doc) => {
 			return {
 				filters: {

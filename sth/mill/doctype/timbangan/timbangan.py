@@ -66,7 +66,7 @@ class Timbangan(Document):
 		jadi yang mendarat di sana kode pabrik (TPRM, ASRM, ABAM), bukan kebun yang
 		memanen. Yang tahu kebun pengirimnya cuma SPB.
 
-		Arah sebaliknya diurus _resync_kebun_timbangan di Surat Pengantar Buah,
+		Arah sebaliknya diurus resync_kebun_timbangan di Surat Pengantar Buah,
 		untuk koreksi unit SPB yang datang sesudah timbangannya tersimpan. Yang di
 		sini menutup arah satunya: timbangan yang baru dibuat sesudah SPB-nya
 		dikoreksi, yang kalau tidak begini kembali mengambil unit pos.

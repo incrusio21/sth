@@ -13,7 +13,7 @@ def execute(timbangan_names=None):
 	penjagaan ikut lokasi posnya, bukan kebun yang memanen.
 
 	Dokumen baru sudah tertutup dua jalur: Timbangan.set_kebun_dan_divisi_dari_spb
-	waktu tiketnya disimpan, dan _resync_kebun_timbangan di Surat Pengantar Buah
+	waktu tiketnya disimpan, dan resync_kebun_timbangan di Surat Pengantar Buah
 	waktu divisi SPB-nya dikoreksi kiriman API. Yang tersisa dokumen lama, dan itu
 	yang diurus di sini.
 
