@@ -11,8 +11,21 @@
   "company",
   "column_break_ilyf",
   "amended_from",
-  "informasi_detail_section",
-  "details",
+  "details_section",
+  "nama_perijinan",
+  "kategori_perijinan",
+  "nomor_perijinan",
+  "tanggal_perijinan",
+  "tanggal_di_terbitkan",
+  "berlaku_selamanya",
+  "tanggal_berakhir",
+  "column_break_hzav",
+  "yang_mengeluarkan",
+  "kedudukan",
+  "kegiatan_usaha",
+  "penanggung_jawab",
+  "tanggal_daftar_ulang",
+  "keterangan",
   "upload_file_tab",
   "upload",
   "kriteria_upload_html",
@@ -51,17 +64,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "details",
-   "fieldtype": "Table",
-   "label": "Details",
-   "options": "Detail Informasi Dokumen Perijinan"
-  },
-  {
-   "fieldname": "informasi_detail_section",
-   "fieldtype": "Section Break",
-   "label": "Informasi Detail"
-  },
-  {
    "fieldname": "upload_file_tab",
    "fieldtype": "Tab Break",
    "hidden": 1,
@@ -85,12 +87,117 @@
    "fieldtype": "HTML",
    "label": "Kriteria Upload Sebelumnya",
    "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "nama_perijinan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Nama Perijinan",
+   "options": "Nama Perijinan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kategori_perijinan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Kategori Perijinan",
+   "options": "Kategori Perijinan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nomor_perijinan",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Nomor Perijinan",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_perijinan",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Perijinan",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "tanggal_di_terbitkan",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Di Terbitkan",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "berlaku_selamanya",
+   "fieldtype": "Check",
+   "label": "Berlaku Selamanya"
+  },
+  {
+   "depends_on": "eval:doc.berlaku_selamanya == 0",
+   "fieldname": "tanggal_berakhir",
+   "fieldtype": "Date",
+   "label": "Tanggal Berakhir",
+   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0"
+  },
+  {
+   "fieldname": "yang_mengeluarkan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Yang Mengeluarkan",
+   "options": "Yang Mengeluarkan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kedudukan",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Kedudukan",
+   "options": "Kedudukan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kegiatan_usaha",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Kegiatan Usaha",
+   "options": "Kegiatan Usaha",
+   "reqd": 1
+  },
+  {
+   "fieldname": "penanggung_jawab",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Penanggung Jawab",
+   "options": "Penanggung Jawab",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tanggal_daftar_ulang",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Daftar Ulang",
+   "options": "Today"
+  },
+  {
+   "fieldname": "keterangan",
+   "fieldtype": "Small Text",
+   "label": "Keterangan"
+  },
+  {
+   "fieldname": "column_break_hzav",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-18 16:37:17.272035",
+ "modified": "2026-09-22 16:08:09.392837",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",

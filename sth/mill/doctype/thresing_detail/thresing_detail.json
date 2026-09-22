@@ -16,7 +16,7 @@
    "fieldname": "lorry",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Lorry",
+   "label": "Lorry/Cycle",
    "read_only": 1
   },
   {
@@ -32,7 +32,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-03 14:49:32.544651",
+ "modified": "2026-09-22 16:22:21.906880",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Thresing Detail",

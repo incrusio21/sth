@@ -174,7 +174,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.receive_type == \"TBS Eksternal\"",
    "description": "Di Isi di Menu Sortasi",
    "fieldname": "potongan_sortasi",
    "fieldtype": "Percent",
@@ -722,7 +721,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 13:00:00.000000",
+ "modified": "2026-09-22 15:07:00.201755",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
