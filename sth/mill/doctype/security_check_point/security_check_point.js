@@ -98,11 +98,13 @@ frappe.ui.form.on("Security Check Point", {
 	},
 
 	setup(frm) {
-		// kebun cuma boleh unit milik company dokumen ini
+		// kebun cuma boleh unit kebun milik company dokumen ini — pabrik dan HO
+		// tidak pernah jadi pengirim buah
 		frm.set_query("kebun", (doc) => {
 			return {
 				filters: {
-					company: doc.company
+					company: doc.company,
+					plantation: 1
 				}
 			}
 		})
