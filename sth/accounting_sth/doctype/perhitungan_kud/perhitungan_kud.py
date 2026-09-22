@@ -862,6 +862,11 @@ class PerhitunganKUD(Document):
 		self.hitung_baris()
 		self.hitung_rekap()
 		self.set_status_harga()
+		# Pratinjau jurnal ikut disusun ulang di sini, bukan menunggu validate:
+		# angkanya baru saja berubah, dan tab Akun & Jurnal langsung dilihat orang
+		# sesudah menarik produksi. Tanpa ini yang tampil masih hasil tarikan
+		# sebelumnya sampai dokumennya disimpan.
+		self.susun_pratinjau_jurnal()
 
 		if terlewat:
 			frappe.msgprint(
@@ -886,6 +891,7 @@ class PerhitunganKUD(Document):
 			"jumlah_baris": len(self.detail),
 			"jumlah_bkm": len(self.detail_biaya),
 			"status_harga": self.status_harga,
+			"status_jurnal": self.status_jurnal,
 			"biaya_perawatan": self.biaya_perawatan,
 		}
 

@@ -93,11 +93,12 @@ function jalankan(frm) {
 			}
 
 			frappe.show_alert({
-				message: __("{0} baris ditarik, {1} BKM senilai {2}. {3}", [
+				message: __("{0} baris ditarik, {1} BKM senilai {2}. {3} Jurnal: {4}.", [
 					r.message.jumlah_baris,
 					r.message.jumlah_bkm,
 					biaya,
 					r.message.status_harga,
+					r.message.status_jurnal,
 				]),
 				indicator: "green",
 			});
