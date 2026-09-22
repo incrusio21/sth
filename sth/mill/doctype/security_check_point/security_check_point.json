@@ -313,7 +313,6 @@
    "options": "Company"
   },
   {
-   "fetch_from": "lokasi_pos.unit",
    "fetch_if_empty": 1,
    "fieldname": "unit",
    "fieldtype": "Link",
@@ -513,7 +512,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 14:09:17.374839",
+ "modified": "2026-09-22 14:26:35.704000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",

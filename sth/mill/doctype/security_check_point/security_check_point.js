@@ -146,8 +146,8 @@ frappe.ui.form.on("Security Check Point", {
 	},
 
 	onload(frm) {
-		cur_frm.add_fetch("do_no", "unit", "unit")
-		cur_frm.add_fetch("spb", "unit", "unit")
+		// cur_frm.add_fetch("do_no", "unit", "unit")
+		// cur_frm.add_fetch("spb", "unit", "unit")
 
 		frm.set_query("spb", function () {
 			return {
