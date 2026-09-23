@@ -9,6 +9,43 @@ from erpnext.accounts.doctype.accounting_period.accounting_period import (
 
 from sth.accounting_sth.validasi_closing import tutup_sementara
 
+# Dokumen pabrik yang didaftarkan sth ke Closed Documents lewat hook
+# period_closing_doctypes. Ketiganya cuma berlaku untuk unit yang dicentang
+# Mill: TBS olah dan sounding tangki cuma lahir di pabrik.
+DOCTYPE_MILL = (
+	"Data TBS",
+	"Sounding Stock CPO di BST",
+	"Sounding Stock Palm Kernel di Bunker Kernel",
+)
+
+
+def doctype_dikecualikan(unit=None):
+	"""Doctype yang tidak ikut Closed Documents untuk unit ini.
+
+	Dokumen pabrik hanya masuk kalau unitnya dicentang Mill. Selama unit belum
+	dipilih tidak ada yang dibuang, karena belum bisa diputuskan unit apa.
+	"""
+	if unit and not frappe.get_cached_value("Unit", unit, "mill"):
+		return list(DOCTYPE_MILL)
+
+	return []
+
+
+@frappe.whitelist()
+def dokumen_mill_untuk_unit(unit=None):
+	"""Dipakai form Accounting Period waktu unitnya diganti.
+
+	Grid ikut disesuaikan saat itu juga, bukan baru sesudah disimpan, dan ke dua
+	arah: baris pabrik dibuang untuk unit non-Mill, dan dikembalikan kalau unitnya
+	diganti ke unit Mill. Sumbernya sama dengan penyaring di sisi server, jadi
+	yang dilihat user dan yang tersimpan tidak pernah berbeda.
+	"""
+	return {
+		"doctype": list(DOCTYPE_MILL),
+		"berlaku": not doctype_dikecualikan(unit),
+	}
+
+
 class SthAccountingPeriod(AccountingPeriod):
 
 	def autoname(self):
@@ -17,6 +54,50 @@ class SthAccountingPeriod(AccountingPeriod):
 
 	def validate(self):
 		self.validate_overlap()
+		self.buang_dokumen_di_luar_unit()
+
+	@frappe.whitelist()
+	def get_doctypes_for_closing(self):
+		"""Daftar doctype untuk Closed Documents, tanpa yang tidak berlaku di unit ini.
+
+		Dipanggil bootstrap_doctypes_for_closing dan tombol Get Doctypes For Closing
+		di form, jadi penyaringnya cukup dipasang sekali di sini. Yang lewat onload
+		dokumen baru belum tentu tersaring — unitnya sering baru dipilih sesudah itu —
+		dan itu diurus buang_dokumen_di_luar_unit waktu disimpan.
+
+		Dekorator whitelist-nya wajib diulang: yang terdaftar di frappe objek
+		fungsinya, bukan namanya, jadi override tanpa dekorator membuat panggilan
+		dari form ditolak sebagai not permitted.
+		"""
+		semua = super().get_doctypes_for_closing()
+		buang = set(doctype_dikecualikan(self.unit))
+
+		if not buang:
+			return semua
+
+		return [baris for baris in semua if frappe._dict(baris).document_type not in buang]
+
+	def buang_dokumen_di_luar_unit(self):
+		"""Buang baris Closed Documents yang tidak berlaku untuk unit periode ini.
+
+		Grid-nya sudah terisi JS di onload sebelum unitnya dipilih, jadi baris pabrik
+		bisa telanjur mendarat di periode kebun. Yang tersimpan harus bersih apa pun
+		yang sempat tampil.
+		"""
+		buang = set(doctype_dikecualikan(self.unit))
+
+		if not buang:
+			return
+
+		sisa = [row for row in self.closed_documents if row.document_type not in buang]
+
+		if len(sisa) == len(self.closed_documents):
+			return
+
+		self.closed_documents = sisa
+
+		for idx, row in enumerate(self.closed_documents, start=1):
+			row.idx = idx
 
 	def validate_overlap(self):
 		existing_accounting_period = frappe.db.sql(
