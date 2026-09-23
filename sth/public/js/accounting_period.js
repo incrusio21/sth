@@ -14,8 +14,55 @@ frappe.ui.form.on('Accounting Period', {
 	},
 	company(frm) {
 		set_unit_filter(frm);
+	},
+	unit(frm) {
+		sesuaikan_dokumen_mill(frm);
 	}
 });
+
+// Grid Closed Documents sudah terisi di onload, sebelum unitnya dipilih. Dokumen
+// pabrik cuma berlaku untuk unit yang dicentang Mill, jadi begitu unitnya
+// diketahui barisnya dibuang — atau dikembalikan kalau sebelumnya sempat dibuang
+// untuk unit lain. Sisi server membuangnya lagi waktu validate; ini supaya yang
+// dilihat sama dengan yang nanti tersimpan.
+function sesuaikan_dokumen_mill(frm) {
+	if (!frm.doc.unit) {
+		return;
+	}
+
+	frappe.call({
+		method: "sth.overrides.accounting_period.dokumen_mill_untuk_unit",
+		args: { unit: frm.doc.unit }
+	}).then((r) => {
+		if (!r.message) {
+			return;
+		}
+
+		const mill = new Set(r.message.doctype);
+		const semula = (frm.doc.closed_documents || []).map((row) => ({
+			document_type: row.document_type,
+			closed: row.closed
+		}));
+
+		let hasil;
+		if (r.message.berlaku) {
+			const ada = new Set(semula.map((row) => row.document_type));
+			const kurang = [...mill].filter((doctype) => !ada.has(doctype));
+			// closed 1 sama dengan bawaan get_doctypes_for_closing ERPNext.
+			hasil = semula.concat(kurang.map((doctype) => ({ document_type: doctype, closed: 1 })));
+		} else {
+			hasil = semula.filter((row) => !mill.has(row.document_type));
+		}
+
+		if (hasil.length === semula.length) {
+			return;
+		}
+
+		frm.clear_table("closed_documents");
+		hasil.forEach((row) => frm.add_child("closed_documents", row));
+		frm.refresh_field("closed_documents");
+	});
+}
 
 function lihat_report_summary_bengkel(frm) {
 	frappe.db.get_value("Costing Bengkel", {
