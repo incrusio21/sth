@@ -82,6 +82,9 @@ class DataTBS(Document):
 			add_days(self.tanggal_produksi, 1),
 			izinkan_minus=False,
 			commit=False,
+			# Dokumen ini sendiri yang baru berubah, jadi restan awal besok
+			# harus dibaca ulang darinya, bukan dari angka tersimpan.
+			restan_tersimpan=False,
 		)
 	
 	def on_trash(self):
@@ -372,7 +375,9 @@ def hitung_ulang_setelah_timbangan(doc, method=None):
 		indicator="blue",
 	)
 
-def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None, izinkan_minus=True, commit=True):
+def hitung_ulang_rantai(
+	unit, sejak, posting_ulang=True, lapor=None, izinkan_minus=True, commit=True, restan_tersimpan=True
+):
 	"""Baca ulang TBS diterima dan rantai restan satu unit sejak satu tanggal.
 
 	Yang diperbaiki terutama dokumen yang sudah disubmit. Jumlah TBS Diterima
@@ -385,9 +390,19 @@ def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None, izinkan_min
 	Total TBS, yang membagi diri jadi tbs olah, tbs restan, dan tbs loading ramp,
 	dan Total TBS Restan-nya jadi restan awal hari berikutnya.
 
-	Restan awal dokumen pertama tidak ditetapkan sendiri, tapi diambil dari
-	dokumen terakhir sebelumnya lewat `get_restan_awal`, jadi rantai sebelum
-	`sejak` tidak ikut bergerak.
+	Restan awal dokumen pertama dipakai apa adanya dari yang tersimpan di
+	dokumennya, bukan dibaca ulang dari dokumen sebelumnya. Yang bergeser waktu
+	tombol Hitung Ulang ditekan atau Timbangan bertanggal mundur masuk cuma TBS
+	diterima mulai `sejak`; restan awal hari itu dibentuk hari-hari sebelumnya
+	yang tidak ikut berubah. Membacanya ulang malah menghapus restan awal yang
+	sengaja ditetapkan — misalnya 176.963 di Data TBS pertama TPRM sejak
+	1 September dari patch hitung_ulang_tbs_diterima_data_tbs — dan menggantinya
+	dengan Total TBS Restan dokumen Agustus. Restan tersimpan yang nol tetap
+	diisi lewat `get_restan_awal`.
+
+	`restan_tersimpan=False` membaca restan awal dokumen pertama dari dokumen
+	sebelumnya. Itu yang dipakai sesudah sebuah Data TBS disubmit atau
+	dibatalkan, karena justru dokumen sebelumnya itulah yang baru berubah.
 
 	Dua fase: angka dokumennya dulu, lalu Stock Entry harian yang qty atau
 	arahnya jadi tidak cocok lagi diposting ulang. Dipisah supaya kalau
@@ -424,7 +439,7 @@ def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None, izinkan_min
 	kembar = cari_kembar(dokumen)
 	hasil.kembar = sorted(nama for daftar in kembar.values() for nama in daftar)
 
-	hasil.angka = hitung_ulang_dokumen(dokumen, kembar)
+	hasil.angka = hitung_ulang_dokumen(dokumen, kembar, restan_tersimpan)
 
 	# Harus di-commit sebelum fase STE: izinkan_stock_minus me-rollback sisa
 	# pekerjaan yang belum di-commit waktu selesai, dan itu akan ikut membuang
@@ -472,7 +487,7 @@ def cari_kembar(dokumen):
 	return {k: v for k, v in hitung.items() if len(v) > 1}
 
 
-def hitung_ulang_dokumen(dokumen, kembar):
+def hitung_ulang_dokumen(dokumen, kembar, restan_tersimpan=True):
 	"""Isi ulang TBS diterima tiap dokumen, lalu rantai restan awalnya."""
 	restan = None
 	diperbaiki = 0
@@ -481,9 +496,11 @@ def hitung_ulang_dokumen(dokumen, kembar):
 		doc = frappe.get_doc(DOCTYPE, row.name)
 
 		if restan is None:
-			# Sambungan ke rantai sebelum rentang ini, dibaca sekali dari dokumen
-			# terakhir sebelum dokumen pertama yang dikerjakan.
-			restan = get_restan_awal(doc.unit, doc.tanggal_produksi, doc.name, doc.creation)
+			# Sambungan ke rantai sebelum rentang ini. Alasan memakai angka
+			# tersimpan dokumen pertama ada di hitung_ulang_rantai.
+			restan = (flt(doc.jumlah_tbs_restan) if restan_tersimpan else 0) or get_restan_awal(
+				doc.unit, doc.tanggal_produksi, doc.name, doc.creation
+			)
 
 		if kunci(row) in kembar:
 			# Dilewati, tapi rantainya tetap diteruskan dari angka tersimpannya:
