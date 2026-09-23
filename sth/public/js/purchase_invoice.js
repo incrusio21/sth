@@ -374,19 +374,6 @@ frappe.ui.form.on("Purchase Invoice", {
                     frm.script_manager.trigger("item_code", item.doctype, item.name)
                 }
                 refresh_field("items")
-
-                const fmt = (v) => format_number(v, null, 3)
-                frappe.msgprint({
-                    title: __("KG DO {0}", [res.delivery_order]),
-                    indicator: res.sisa > 0 ? "blue" : "orange",
-                    message: `<table class="table table-bordered table-sm">
-                        <tr><td>Qty DO</td><td class="text-right">${fmt(res.qty_do)} ${res.uom}</td></tr>
-                        <tr><td>Jumlah transportir</td><td class="text-right">${res.jumlah_transportir}</td></tr>
-                        <tr><td>Bagian ${res.supplier}</td><td class="text-right">${fmt(res.bagian)} ${res.uom}</td></tr>
-                        <tr><td>Sudah ditagih</td><td class="text-right">${fmt(res.sudah_ditagih)} ${res.uom}</td></tr>
-                        <tr><td><b>Sisa (masuk ke item)</b></td><td class="text-right"><b>${fmt(res.sisa)} ${res.uom}</b></td></tr>
-                    </table>`,
-                })
             })
             .finally(() => {
                 frappe.dom.unfreeze()
