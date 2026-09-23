@@ -11,6 +11,7 @@ from sth.mill.doctype.data_tbs.data_tbs import (
 	get_warehouse_tbs,
 	posting_ulang_ste,
 )
+from sth.patches import hitung_ulang_rekap_sounding
 
 DOCTYPE = "Data TBS"
 
@@ -36,7 +37,7 @@ AKUN_SELISIH = None
 COST_CENTER = None
 
 
-def execute(sejak=SEJAK, restan_awal=None):
+def execute(sejak=SEJAK, restan_awal=None, sounding=True, sejak_sounding=None):
 	"""Baca ulang Jumlah TBS Diterima September dengan rumus yang berlaku sekarang.
 
 	`get_total_tbs` dulu menjumlahkan `netto_2` — netto sesudah potongan sortasi.
@@ -66,12 +67,20 @@ def execute(sejak=SEJAK, restan_awal=None):
 	atau arahnya jadi tidak cocok lagi. Dipisah supaya kalau salah satunya
 	tertahan periode akuntansi yang sudah tutup, yang sudah lewat tetap benar.
 
+	Fase keempat membaca ulang rekap sounding CPO dan Palm Kernel lewat patch
+	hitung_ulang_rekap_sounding. Keduanya menyalin tbs olah dari Data TBS cuma
+	waktu Get Data ditekan, jadi OER dan KER netto-nya tertinggal di tbs olah
+	lama sampai dibaca ulang. Harus sesudah fase Data TBS, bukan sebelumnya:
+	kalau dibalik, yang tersalin masih angka yang belum dibetulkan. Rentangnya
+	ikut patch sounding, mulai 2 September — alasannya di sana — jadi sounding
+	1 September tidak ikut. `sounding=False` melewati fase ini.
+
 	Aman dijalankan ulang: dokumen yang angkanya sudah cocok, saldo gudang yang
 	sudah pas, dan STE yang sudah benar sama-sama dilewati. Dokumen batal tidak
 	ikut.
 
 	Rentang dan angka semaiannya bisa ditimpa waktu menjalankan, misalnya
-	`--kwargs "{'sejak': '2026-10-01', 'restan_awal': {'TPRM': 123456}}"`.
+	`--kwargs "{'sejak': '2026-10-01', 'restan_awal': {'TPRM': 123456}, 'sejak_sounding': '2026-10-01'}"`.
 	"""
 	sejak = getdate(sejak)
 	restan_awal = restan_awal if restan_awal is not None else RESTAN_AWAL
@@ -100,6 +109,11 @@ def execute(sejak=SEJAK, restan_awal=None):
 	semai_stok(dokumen, sejak, restan_awal)
 
 	posting_ulang_ste(dikerjakan, lapor=print)
+
+	if sounding:
+		hitung_ulang_rekap_sounding.execute(
+			sejak=sejak_sounding or hitung_ulang_rekap_sounding.SEJAK
+		)
 
 
 def kunci(row):
