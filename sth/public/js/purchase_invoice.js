@@ -329,16 +329,37 @@ frappe.ui.form.on("Purchase Invoice", {
         }
     },
 
-    tarik_kg_do(frm) {
+    tarik_kg_do(frm, supplier) {
         frappe.dom.freeze("Mengambil KG DO...")
         frappe.xcall("sth.buying_sth.custom.ongkos_angkut_transportir.ambil_kg_do", {
             delivery_order: frm.doc.document_no,
             company: frm.doc.company,
-            supplier: frm.doc.supplier,
+            supplier: supplier || frm.doc.supplier,
             purchase_invoice: frm.is_new() ? null : frm.doc.name,
         })
             .then(async (res) => {
-                if (!frm.doc.supplier) await frm.set_value("supplier", res.supplier)
+                // DO dengan beberapa transportir dan supplier PI bukan salah satunya:
+                // tanyakan transportir mana yang ditagih.
+                if (res.pilih_transportir) {
+                    frappe.dom.unfreeze()
+                    frappe.prompt(
+                        {
+                            label: __("Transportir"),
+                            fieldname: "supplier",
+                            fieldtype: "Link",
+                            options: "Supplier",
+                            reqd: 1,
+                            get_query: () => ({ filters: { name: ["in", res.pilih_transportir] } }),
+                        },
+                        (values) => frm.events.tarik_kg_do(frm, values.supplier),
+                        __("DO {0} punya {1} transportir", [res.delivery_order, res.pilih_transportir.length]),
+                        __("Ambil")
+                    )
+                    return
+                }
+
+                // Supplier PI selalu ditimpa transportir DO.
+                if (frm.doc.supplier != res.supplier) await frm.set_value("supplier", res.supplier)
                 if (res.unit) await frm.set_value("unit", res.unit)
 
                 // Rate sengaja tidak diisi: tarif transportir diisi manual.
@@ -364,7 +385,7 @@ frappe.ui.form.on("Purchase Invoice", {
                         <tr><td>Bagian ${res.supplier}</td><td class="text-right">${fmt(res.bagian)} ${res.uom}</td></tr>
                         <tr><td>Sudah ditagih</td><td class="text-right">${fmt(res.sudah_ditagih)} ${res.uom}</td></tr>
                         <tr><td><b>Sisa (masuk ke item)</b></td><td class="text-right"><b>${fmt(res.sisa)} ${res.uom}</b></td></tr>
-                    </table>${res.item_code ? "" : `<p class="text-warning">${__("Item Ongkos Angkut Transportir belum disetel di Procurement Settings. Pilih item di baris item sebelum menyimpan.")}</p>`}`,
+                    </table>`,
                 })
             })
             .finally(() => {
@@ -1653,19 +1674,11 @@ function show_pb_dialog(frm, bapp) {
 // Tombol Get Items From > Delivery Order: jalan pintas untuk invoice ongkos
 // angkut transportir. Mengisi tipe invoice dan nomor DO, lalu tarikan KG-nya
 // dikerjakan handler document_no seperti kalau DO dipilih langsung di field.
+// Supplier PI ditimpa transportir DO di tarik_kg_do.
 function pilih_do_ongkos_angkut(frm) {
     const dialog = new frappe.ui.Dialog({
         title: __("Ambil dari Delivery Order"),
         fields: [
-            {
-                label: __("Transportir"),
-                fieldname: "supplier",
-                fieldtype: "Link",
-                options: "Supplier",
-                default: frm.doc.supplier,
-                description: __("Boleh kosong kalau DO-nya hanya punya satu transportir."),
-                onchange: () => dialog.set_value("delivery_order", null),
-            },
             {
                 label: __("Delivery Order"),
                 fieldname: "delivery_order",
@@ -1674,17 +1687,13 @@ function pilih_do_ongkos_angkut(frm) {
                 reqd: 1,
                 get_query: () => ({
                     query: "sth.buying_sth.custom.ongkos_angkut_transportir.query_do_transportir",
-                    filters: { company: frm.doc.company, supplier: dialog.get_value("supplier") },
+                    filters: { company: frm.doc.company },
                 }),
             },
         ],
         primary_action_label: __("Ambil"),
         async primary_action(values) {
             dialog.hide()
-
-            if (values.supplier && values.supplier != frm.doc.supplier) {
-                await frm.set_value("supplier", values.supplier)
-            }
 
             // document_type diisi sendiri, jangan menunggu fetch dari invoice_type:
             // handler document_type mengosongkan document_no.

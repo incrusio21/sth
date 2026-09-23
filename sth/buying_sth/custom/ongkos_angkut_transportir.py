@@ -162,11 +162,15 @@ def ambil_kg_do(delivery_order, company, supplier=None, purchase_invoice=None):
 	frappe.has_permission("Delivery Order", "read", delivery_order, throw=True)
 
 	do = data_do(delivery_order, company)
-	if not supplier:
-		transportir = transportir_do(do.name)
-		if len(transportir) != 1:
-			frappe.throw(_("Delivery Order ini punya lebih dari satu transportir. Pilih supplier-nya dulu."))
+
+	# Supplier PI ditimpa transportir DO. Kalau DO punya beberapa transportir,
+	# supplier PI dipakai selama termasuk salah satunya; selain itu form diminta
+	# menanyakan transportir mana yang ditagih.
+	transportir = transportir_do(do.name)
+	if len(transportir) == 1:
 		supplier = transportir[0]
+	elif len(transportir) > 1 and supplier not in transportir:
+		return frappe._dict(delivery_order=do.name, pilih_transportir=transportir)
 
 	kg = hitung_kg_do(do, supplier, purchase_invoice)
 	kg.item_code = item_ongkos_angkut()
