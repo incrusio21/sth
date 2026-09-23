@@ -7,7 +7,7 @@ import re
 import frappe
 from frappe.model.document import Document
 from frappe.desk.reportview import get_filters_cond, get_match_cond
-from frappe.utils import cstr
+from frappe.utils import cstr, flt
 from frappe.utils.synchronization import filelock
 from erpnext.controllers.queries import get_fields
 
@@ -16,6 +16,7 @@ class SecurityCheckPoint(Document):
 	def before_insert(self):
 		self.validate_trans_no_kembar()
 		self.keep_api_no_polisi()
+		self.map_api_kebun_spb()
 		self.map_api_spb_trans_no()
 		self.map_lokasi_pos()
 
@@ -146,6 +147,28 @@ class SecurityCheckPoint(Document):
 		if kendaraan.operator and not self.driver_name:
 			self.driver_name = get_nama_operator(kendaraan.operator)
 
+	def map_api_kebun_spb(self):
+		"""Kebun dan divisi pengirim diambil dari spb_unit dan spb_divisi kiriman.
+
+		`unit` dan `divisi` di kiriman milik pos itu sendiri — pos berdiri di
+		pabrik, jadi isinya ASRM dan MILL-ASRM, bukan kebun yang memanen. Field
+		`divisi` di dokumen ini justru divisi kebun (fetch_from spb.divisi), dan
+		stub SPB dibuat dari nilai-nilai ini, jadi divisi pos yang dibiarkan
+		mendarat di sini ikut menyesatkan SPB-nya.
+
+		Begitu spb_unit dikirim, divisi pos dibuang walau spb_divisi kosong:
+		divisi pabrik tidak pernah milik kebun pengirim. Kiriman lama yang belum
+		membawa spb_unit dibiarkan seperti sebelumnya.
+
+		Dijalankan sebelum map_api_spb_trans_no karena stub SPB dibuat di sana.
+		"""
+		spb_unit = cstr(self.get("spb_unit")).strip()
+		if not spb_unit:
+			return
+
+		self.kebun = spb_unit
+		self.divisi = cstr(self.get("spb_divisi")).strip() or None
+
 	def map_api_spb_trans_no(self):
 		"""Field spb dari API berisi trans_no SPB, bukan nama dokumennya.
 
@@ -199,6 +222,14 @@ class SecurityCheckPoint(Document):
 		SPB baru dibuat sebagai draft tanpa detail blok — cukup sebagai pegangan
 		nomor buat timbangan. Data panennya menyusul lewat API SPB, yang memakai
 		trans_no yang sama sehingga jatuh ke dokumen ini juga.
+
+		Kebunnya `kebun`, bukan `unit` pos (lihat map_api_kebun_spb); `unit` cuma
+		cadangan untuk kiriman lama yang belum membawa spb_unit. total_jjg dan
+		total_brd yang dicatat pos ikut dibawa supaya SPB — dan BJR yang dihitung
+		timbangan — tidak nol selama rincian bloknya belum datang. Salinannya tetap
+		tersimpan di dokumen ini sebagai pembanding: begitu rincian SPB datang,
+		total SPB berganti ke hitungan rincian, dan selisihnya dengan catatan pos
+		hanya bisa dilihat dari sini.
 		"""
 		spb_name = frappe.db.get_value("Surat Pengantar Buah", {"trans_no": trans_no}, "name")
 		if spb_name:
@@ -209,9 +240,11 @@ class SecurityCheckPoint(Document):
 		doc = create_or_update(
 			trans_no=trans_no,
 			company=self.company,
-			unit=self.unit,
+			unit=self.kebun or self.unit,
 			divisi=self.divisi,
 			posting_date=self.tanggal_panen or self.posting_date,
+			total_janjang=flt(self.total_jjg),
+			total_brondolan=flt(self.total_brd),
 		)
 
 		return doc.name
