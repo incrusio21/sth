@@ -12,8 +12,12 @@ def set_unit_from_parent(doc, method):
 	except:
 		return
 
-	if hasattr(parent, "unit"):
-		doc.unit = parent.unit
+	# Hanya salin kalau unit di voucher berupa satu nilai. Di Perhitungan KUD
+	# `unit` adalah Table MultiSelect (list baris anak) dan tidak bisa masuk
+	# ke field Link di GL Entry.
+	unit = getattr(parent, "unit", None)
+	if isinstance(unit, str):
+		doc.unit = unit
 
 GL_SERIES_KEY = "GL-."
 
@@ -55,7 +59,7 @@ def patch_unit_gl_entry():
 			except frappe.DoesNotExistError:
 				continue
 
-			if hasattr(parent, "unit") and parent.unit:
+			if isinstance(getattr(parent, "unit", None), str) and parent.unit:
 
 				frappe.db.set_value(
 					"GL Entry",
