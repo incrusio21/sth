@@ -7,7 +7,12 @@ from frappe.utils import today,flt,getdate,date_diff
 from frappe.model.mapper import get_mapped_doc
 
 from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulang_rekap
-from sth.mill.utils import get_adjustment_stock, get_potongan_sortasi, set_rata_rata_rendemen_bulanan
+from sth.mill.utils import (
+	get_adjustment_stock,
+	get_potongan_sortasi,
+	get_saldo_tanggal_proses,
+	set_rata_rata_rendemen_bulanan,
+)
 
 
 class SoundingStockCPOdiBST(Document):
@@ -134,7 +139,10 @@ class SoundingStockCPOdiBST(Document):
 			limit 1
 		""",(item_code, warehouse, self.tanggal_proses))
 
-		return flt(terakhir[0][0]) if terakhir else 0
+		# Nol berarti belum ada saldo sebelum tanggal proses, jadi yang dipakai
+		# saldo di tanggal prosesnya sendiri. Sama dengan Sounding PK.
+		return (flt(terakhir[0][0]) if terakhir else 0) or get_saldo_tanggal_proses(
+			item_code, warehouse, self.tanggal_proses)
 
 	def set_adjustment(self):
 		"""Pecah stock awal jadi bagian sebelum koreksi dan koreksinya sendiri.

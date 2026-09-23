@@ -3,6 +3,8 @@ import contextlib
 import frappe
 from frappe.utils import add_days, cint, flt, get_first_day
 
+from erpnext.stock.utils import get_stock_balance
+
 SEHARI = 24 * 3600
 
 
@@ -212,6 +214,70 @@ def get_adjustment_stock(item_code, warehouse, unit, doctype, tanggal_proses):
 	})
 
 	return flt(total[0][0]) if total else 0.0
+
+
+def get_saldo_tanggal_proses(item_code, warehouse, tanggal_proses):
+	"""Saldo gudang di tanggal proses, cadangan kalau stock awal sounding nol.
+
+	Stock awal sounding saldo sebelum tanggal proses, jadi saldo awal yang
+	diposting tepat di tanggal proses — Stock Reconciliation pembuka gudang,
+	misalnya — tidak pernah terbaca dan produksi hari itu ikut memikulnya.
+	Sejajar dengan get_saldo_stok_tbs di Data TBS.
+
+	Yang dipakai saldo akhir hari itu dikurangi mutasi yang sudah dihitung
+	sendiri oleh rumus produksi: Stock Entry buatan sounding dan pengiriman
+	(Delivery Note / Purchase Receipt), di tanggal proses saja. Tanpa itu
+	pengiriman hari itu terhitung dua kali, sekali di stock awal dan sekali di
+	field pengiriman. Saldo minus tidak dipakai.
+
+	Kalau hari itu ada Stock Reconciliation, yang dikurangkan cuma mutasi
+	sesudah rekonsiliasi terakhirnya. Baris rekonsiliasi menimpa saldo dengan
+	actual_qty nol, jadi pengiriman sebelumnya sudah tercakup di angka
+	rekonsiliasi — di kloning, CPO TPRM 15 Juli punya dua Delivery Note lalu
+	rekonsiliasi pukul 23:59:59, dan mengurangkan DN-nya lagi membuat saldo
+	lebih 236.360 kg.
+	"""
+	if not (item_code and warehouse and tanggal_proses):
+		return 0.0
+
+	saldo = flt(get_stock_balance(item_code, warehouse, tanggal_proses, "23:59:59"))
+
+	filters = {"item_code": item_code, "warehouse": warehouse, "tanggal_proses": tanggal_proses}
+
+	rekonsiliasi = frappe.db.sql("""
+		select posting_time, creation
+		from `tabStock Ledger Entry`
+		where is_cancelled = 0 and voucher_type = 'Stock Reconciliation'
+			and item_code = %(item_code)s and warehouse = %(warehouse)s
+			and posting_date = %(tanggal_proses)s
+		order by posting_time desc, creation desc
+		limit 1
+	""", filters, as_dict=True)
+
+	sesudah_rekonsiliasi = ""
+	if rekonsiliasi:
+		filters.update(rekonsiliasi[0])
+		sesudah_rekonsiliasi = """
+			and (sle.posting_time > %(posting_time)s
+				or (sle.posting_time = %(posting_time)s and sle.creation > %(creation)s))
+		"""
+
+	sudah_dihitung = frappe.db.sql("""
+		select coalesce(sum(sle.actual_qty), 0)
+		from `tabStock Ledger Entry` sle
+		left join `tabStock Entry` se
+			on se.name = sle.voucher_no and sle.voucher_type = 'Stock Entry'
+		where sle.is_cancelled = 0
+			and sle.item_code = %(item_code)s and sle.warehouse = %(warehouse)s
+			and sle.posting_date = %(tanggal_proses)s
+			and (sle.voucher_type in ('Delivery Note', 'Purchase Receipt')
+				or se.reference_doctype like 'Sounding%%')
+			{0}
+	""".format(sesudah_rekonsiliasi), filters)
+
+	saldo -= flt(sudah_dihitung[0][0]) if sudah_dihitung else 0
+
+	return saldo if saldo > 0 else 0.0
 
 
 # Field tiap dokumen sounding yang dipakai menghitung rendemen rata-rata sebulan,

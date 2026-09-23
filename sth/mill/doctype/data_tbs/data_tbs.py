@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.utils import add_days, cint, flt, getdate, now
 from frappe.model.mapper import get_mapped_doc
 
+from erpnext.stock.utils import get_stock_balance
+
 from sth.mill.utils import buat_ulang_ste, izinkan_stock_minus
 
 DOCTYPE = "Data TBS"
@@ -264,6 +266,9 @@ def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 	Draft ikut dihitung dengan alasan yang sama: dokumen hari ini biasanya
 	disiapkan sebelum dokumen kemarin disubmit. Yang dibatalkan dilewati, jadi
 	sesudah amend yang terbaca dokumen penggantinya.
+
+	Kalau dokumen sebelumnya tidak ada atau restannya nol, yang dipakai saldo
+	gudang TBS di tanggal proses — lihat get_saldo_stok_tbs.
 	"""
 	if not (unit and tanggal_produksi):
 		return 0
@@ -283,7 +288,33 @@ def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 		"creation": creation or now(),
 	})
 
-	return flt(sebelumnya[0][0]) if sebelumnya else 0
+	restan = flt(sebelumnya[0][0]) if sebelumnya else 0
+
+	return restan or get_saldo_stok_tbs(unit, tanggal_produksi)
+
+def get_saldo_stok_tbs(unit, tanggal_produksi):
+	"""Saldo gudang TBS unit ini di tanggal proses, dipakai kalau rantai restan nol.
+
+	Rantai restan berhenti di nol pada dokumen pertama sebuah unit, atau sesudah
+	hari yang TBS-nya habis diolah — padahal gudangnya bisa sudah berisi dari
+	Stock Reconciliation saldo awal atau penyesuaian stok lain. Tanpa ini TBS
+	itu tidak pernah masuk Grand Total TBS dan Stock Entry hari itu memposting
+	restan seolah-olah gudangnya kosong.
+
+	Dibaca sampai 23:59:58 supaya seluruh transaksi hari itu ikut, kecuali
+	Stock Entry Data TBS hari itu sendiri yang diposting pukul 23:59:59 —
+	restan awal adalah saldo sebelum pergerakan dokumen ini. Saldo minus tidak
+	dipakai: restan awal negatif cuma akan mengecilkan TBS olah.
+	"""
+	gudang = get_warehouse_tbs(unit)
+	item = frappe.db.get_value("Item", {"tipe_barang": "TBS"})
+
+	if not (gudang and item):
+		return 0
+
+	saldo = flt(get_stock_balance(item, gudang, tanggal_produksi, "23:59:58"))
+
+	return saldo if saldo > 0 else 0
 
 def get_warehouse_tbs(unit):
 	return frappe.db.get_value("Warehouse",{"unit":unit,"warehouse_category": "TBS"})
@@ -467,7 +498,8 @@ def hitung_ulang_dokumen(dokumen, kembar):
 		# flt: get_total_tbs memulangkan None kalau tidak ada timbangan sama
 		# sekali di hari itu — SUM atas nol baris itu NULL, bukan 0.
 		doc.jumlah_tbs_diterima = flt(get_total_tbs(doc.tanggal_produksi, doc.unit))
-		doc.jumlah_tbs_restan = flt(restan)
+		# Sama dengan get_restan_awal: rantai yang nol diganti saldo gudang.
+		doc.jumlah_tbs_restan = flt(restan) or get_saldo_stok_tbs(doc.unit, doc.tanggal_produksi)
 		doc.calculate_totals()
 		restan = flt(doc.total_tbs_restan)
 

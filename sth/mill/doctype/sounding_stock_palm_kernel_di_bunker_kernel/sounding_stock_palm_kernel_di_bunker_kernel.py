@@ -7,7 +7,12 @@ from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
 
 from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulang_rekap
-from sth.mill.utils import get_adjustment_stock, get_potongan_sortasi, set_rata_rata_rendemen_bulanan
+from sth.mill.utils import (
+	get_adjustment_stock,
+	get_potongan_sortasi,
+	get_saldo_tanggal_proses,
+	set_rata_rata_rendemen_bulanan,
+)
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def onload(self):
@@ -213,6 +218,9 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		Yang dibaca qty_after_transaction baris paling akhir sebelum tanggal proses
 		di gudang unit ini — saldo pembuka hari itu, jadi mutasi pada tanggal
 		prosesnya sendiri tidak ikut. Entry batal tidak dihitung.
+
+		Kalau saldo itu nol, yang dipakai saldo di tanggal prosesnya sendiri —
+		lihat get_saldo_tanggal_proses.
 		"""
 		warehouse = get_warehouse_palm(self.unit)
 		item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
@@ -229,7 +237,8 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			limit 1
 		""",(item_code, warehouse, self.tanggal_proses))
 
-		return flt(terakhir[0][0]) if terakhir else 0
+		return (flt(terakhir[0][0]) if terakhir else 0) or get_saldo_tanggal_proses(
+			item_code, warehouse, self.tanggal_proses)
 
 	def split_and_avg(self,arr):
 		arr = list(map(int, arr))
