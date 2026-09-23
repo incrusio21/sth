@@ -248,6 +248,12 @@ frappe.ui.form.on("Purchase Invoice", {
                     nama_supplier: doc.supplier,
                     docstatus: 1,
                 }
+            } else if (doc.invoice_type == "Ongkos Angkut Transportir") {
+                // DO tidak punya field supplier; transportirnya ada di tabel armada.
+                return {
+                    query: "sth.buying_sth.custom.ongkos_angkut_transportir.query_do_transportir",
+                    filters: { company: doc.company, supplier: doc.supplier },
+                }
             } else {
                 filters = {
                     company: doc.company,
@@ -312,7 +318,47 @@ frappe.ui.form.on("Purchase Invoice", {
                 .finally(() => {
                     frappe.dom.unfreeze()
                 })
+        } else if (frm.doc.invoice_type == "Ongkos Angkut Transportir") {
+            frm.events.tarik_kg_do(frm)
         }
+    },
+
+    tarik_kg_do(frm) {
+        frappe.dom.freeze("Mengambil KG DO...")
+        frappe.xcall("sth.buying_sth.custom.ongkos_angkut_transportir.ambil_kg_do", {
+            delivery_order: frm.doc.document_no,
+            company: frm.doc.company,
+            supplier: frm.doc.supplier,
+            purchase_invoice: frm.is_new() ? null : frm.doc.name,
+        })
+            .then(async (res) => {
+                if (!frm.doc.supplier) await frm.set_value("supplier", res.supplier)
+                if (res.unit) await frm.set_value("unit", res.unit)
+
+                // Rate sengaja tidak diisi: tarif transportir diisi manual.
+                frm.clear_table("items")
+                let item = frm.add_child("items")
+                item.item_code = res.item_code
+                item.qty = res.sisa
+                frm.script_manager.trigger("item_code", item.doctype, item.name)
+                refresh_field("items")
+
+                const fmt = (v) => format_number(v, null, 3)
+                frappe.msgprint({
+                    title: __("KG DO {0}", [res.delivery_order]),
+                    indicator: res.sisa > 0 ? "blue" : "orange",
+                    message: `<table class="table table-bordered table-sm">
+                        <tr><td>Qty DO</td><td class="text-right">${fmt(res.qty_do)} ${res.uom}</td></tr>
+                        <tr><td>Jumlah transportir</td><td class="text-right">${res.jumlah_transportir}</td></tr>
+                        <tr><td>Bagian ${res.supplier}</td><td class="text-right">${fmt(res.bagian)} ${res.uom}</td></tr>
+                        <tr><td>Sudah ditagih</td><td class="text-right">${fmt(res.sudah_ditagih)} ${res.uom}</td></tr>
+                        <tr><td><b>Sisa (masuk ke item)</b></td><td class="text-right"><b>${fmt(res.sisa)} ${res.uom}</b></td></tr>
+                    </table>`,
+                })
+            })
+            .finally(() => {
+                frappe.dom.unfreeze()
+            })
     },
 
     tbs_map(frm, data) {

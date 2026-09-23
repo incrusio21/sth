@@ -444,7 +444,11 @@ doc_events = {
 		"on_submit": ["sth.custom.purchase_receipt.auto_create_assets_from_pr", "sth.custom.purchase_receipt.check_receipt_notification"]
 	},
 	"Purchase Invoice": {
-		"validate": ["sth.custom.purchase_invoice.check_tanggal_kirim","sth.custom.purchase_invoice.validate_qty_against_purchase_receipt"],
+		"validate": [
+			"sth.custom.purchase_invoice.check_tanggal_kirim",
+			"sth.custom.purchase_invoice.validate_qty_against_purchase_receipt",
+			"sth.buying_sth.custom.ongkos_angkut_transportir.validate_ongkos_angkut_transportir",
+		],
 		"on_submit": "sth.custom.purchase_invoice.set_training_event_purchase_invoice",
 		"before_save": "sth.custom.purchase_invoice.update_keterangan",
 	},
