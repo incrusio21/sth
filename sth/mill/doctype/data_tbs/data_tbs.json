@@ -20,6 +20,7 @@
   "unit",
   "section_break_xief",
   "column_break_lfzm",
+  "lewati_cek_monitoring",
   "get_data",
   "jumlah_tbs_restan",
   "jumlah_tbs_diterima",
@@ -223,6 +224,14 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "depends_on": "eval:doc.docstatus===0 || doc.lewati_cek_monitoring",
+   "description": "Centang untuk hari tidak olah. Selama tidak dicentang, Get Data mewajibkan Monitoring TBS Olah dan CBC Monitoring tanggal proses ini sudah disubmit.",
+   "fieldname": "lewati_cek_monitoring",
+   "fieldtype": "Check",
+   "label": "Lewati Cek Monitoring & CBC"
+  },
+  {
    "depends_on": "eval:doc.docstatus===0",
    "fieldname": "get_data",
    "fieldtype": "Button",
@@ -296,7 +305,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-15 11:30:37.323717",
+ "modified": "2026-09-23 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

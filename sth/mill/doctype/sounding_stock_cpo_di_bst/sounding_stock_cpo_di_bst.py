@@ -11,7 +11,9 @@ from sth.mill.utils import (
 	get_adjustment_stock,
 	get_potongan_sortasi,
 	get_saldo_tanggal_proses,
+	get_tbs_olah,
 	set_rata_rata_rendemen_bulanan,
+	wajib_ada_data_tbs,
 )
 
 
@@ -26,6 +28,7 @@ class SoundingStockCPOdiBST(Document):
 		# minta dipindah sebelum submit dari Rezky - 17-09
 		# self.validate_minus_value()
 		self.validate_duplicate()
+		wajib_ada_data_tbs(self)
 
 		if not self.gudang:
 			frappe.throw(f"Silahkan set default gudang product untuk unit {self.unit}")
@@ -100,7 +103,7 @@ class SoundingStockCPOdiBST(Document):
 		self.pengiriman_cpo = self.get_delivery()
 		self.stock_awal = flt(stock_saat_ini)
 		self.set_adjustment()
-		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses,"pabrik":self.pabrik},"tbs_olah") or 0
+		self.tbs_olah = get_tbs_olah(self.tanggal_proses, self.pabrik)
 		self.potongan_sortasi = self.get_sortasi()
 
 		self.calculate_totals()

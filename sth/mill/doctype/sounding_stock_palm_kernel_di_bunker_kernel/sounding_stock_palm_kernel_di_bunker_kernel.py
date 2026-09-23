@@ -11,7 +11,9 @@ from sth.mill.utils import (
 	get_adjustment_stock,
 	get_potongan_sortasi,
 	get_saldo_tanggal_proses,
+	get_tbs_olah,
 	set_rata_rata_rendemen_bulanan,
+	wajib_ada_data_tbs,
 )
 
 class SoundingStockPalmKerneldiBunkerKernel(Document):
@@ -36,6 +38,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 	def validate(self):
 		# minta dipindah sebelum submit dari Rezky - 17-09
 		# self.validate_minus_value()
+		wajib_ada_data_tbs(self)
 		self.hitung_produksi()
 		set_rata_rata_rendemen_bulanan(self)
 
@@ -185,7 +188,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 		# get_value memulangkan Data TBS mana saja yang tanggalnya cocok, jadi
 		# pabrik yang soundingnya dihitung belakangan bisa memakai tbs olah
 		# milik pabrik lain — dan KER-nya ikut salah.
-		self.tbs_olah = frappe.db.get_value("Data TBS",{"tanggal_produksi":self.tanggal_proses,"pabrik":self.pabrik},"tbs_olah") or 0
+		self.tbs_olah = get_tbs_olah(self.tanggal_proses, self.pabrik)
 		# Bukan cuma sortasi hari ini: hari yang pabriknya tidak mengolah ikut
 		# terkumpul sampai ada olah. Rinciannya di get_potongan_sortasi.
 		self.sortasi = get_potongan_sortasi(self.unit, self.tanggal_proses, self.pabrik)

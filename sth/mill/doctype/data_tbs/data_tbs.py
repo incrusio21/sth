@@ -103,6 +103,8 @@ class DataTBS(Document):
 				"Get Data hanya bisa dipakai selagi {0} masih draft.".format(frappe.bold(self.name))
 			)
 
+		self.cek_monitoring_dan_cbc()
+
 		data_lori = frappe.db.sql("""
 			select 
 				tbs_olah as jumlah_lori_olah,
@@ -124,9 +126,47 @@ class DataTBS(Document):
 
 		self.jumlah_tbs_restan = get_restan_awal(self.unit, self.tanggal_produksi, self.name, self.creation)
 		self.jumlah_tbs_diterima = get_total_tbs(self.tanggal_produksi,self.unit)
-		self.total_jam_olah = frappe.db.get_value("CBC Monitoring",{"docstatus": 1, "posting_date": self.tanggal_produksi},"total_hour_meter") or 0
+		self.total_jam_olah = get_total_jam_olah(self.unit, self.tanggal_produksi)
 
 		self.calculate_totals()
+
+	def cek_monitoring_dan_cbc(self):
+		"""Monitoring TBS Olah dan CBC Monitoring harus sudah disubmit sebelum Get Data.
+
+		Lori dan jam olah cuma dibaca waktu Get Data ditekan. Kalau salah satunya
+		menyusul belakangan, Data TBS-nya telanjur memakai nol: DTBS-0081 (16
+		September) jam olahnya nol karena CBC Monitoring-nya baru disubmit
+		sesudah itu. Lori nol lebih parah lagi — seluruh TBS hari itu jadi restan
+		dan tbs olah yang dipakai sounding ikut nol.
+
+		Hari tidak olah memang tidak punya keduanya, jadi pengecekannya bisa
+		dimatikan lewat centang Lewati Cek Monitoring & CBC.
+		"""
+		if cint(self.lewati_cek_monitoring):
+			return
+
+		kurang = []
+
+		if not frappe.db.exists("Monitoring TBS Olah", {
+			"docstatus": 1, "tgl": self.tanggal_produksi, "pabrik": self.pabrik,
+		}):
+			kurang.append("Monitoring TBS Olah")
+
+		if not frappe.db.exists("CBC Monitoring", {
+			"docstatus": 1, "posting_date": self.tanggal_produksi, "unit": self.unit,
+		}):
+			kurang.append("CBC Monitoring")
+
+		if kurang:
+			frappe.throw(
+				"{0} tanggal {1} untuk unit {2} belum ada atau belum disubmit. "
+				"Buat dan submit dulu sebelum Get Data, atau centang Lewati Cek "
+				"Monitoring & CBC kalau hari ini tidak olah.".format(
+					" dan ".join(frappe.bold(dt) for dt in kurang),
+					frappe.bold(frappe.format(self.tanggal_produksi, {"fieldtype": "Date"})),
+					frappe.bold(self.unit),
+				)
+			)
 
 	@frappe.whitelist()
 	def hitung_ulang(self):
@@ -171,7 +211,7 @@ class DataTBS(Document):
 			self.tbs_loading_ramp = 0
 
 		self.total_tbs_restan = flt(self.tbs_restan) + flt(self.tbs_loading_ramp)
-		self.kapasitas_pabrik = self.tbs_olah / self.total_jam_olah / 1000 if self.total_jam_olah else 0
+		self.kapasitas_pabrik = hitung_kapasitas_pabrik(self.tbs_olah, self.total_jam_olah)
 
 	def create_ste(self):
 		# Pergerakan stok TBS hari itu: yang diterima dikurangi yang diolah.
@@ -253,6 +293,61 @@ def get_total_tbs(tanggal,unit):
 	""",(tanggal,unit),as_dict=True)
 
 	return query[0].qty if query else 0
+
+def get_total_jam_olah(unit, tanggal):
+	"""Jumlah jam hour meter CBC Monitoring submitted unit ini di satu tanggal.
+
+	Dulu disaring tanggal saja dan diambil satu baris, jadi Data TBS bisa
+	memakai jam olah pabrik lain: DTBS-0083 (TPRM, 18 September) tercatat 920
+	jam dari CBC/ASRM//00006, padahal CBC/TPRM//00060 hari itu 17,1 jam.
+	Dijumlahkan karena CBC Monitoring dibuat per shift — ASRM 23 Juni punya dua.
+	"""
+	if not (unit and tanggal):
+		return 0
+
+	return flt(frappe.db.get_value(
+		"CBC Monitoring",
+		{"docstatus": 1, "unit": unit, "posting_date": tanggal},
+		"sum(total_hour_meter)",
+	))
+
+def hitung_kapasitas_pabrik(tbs_olah, total_jam_olah):
+	"""Ton TBS olah per jam."""
+	return flt(tbs_olah) / flt(total_jam_olah) / 1000 if flt(total_jam_olah) else 0
+
+def perbarui_jam_olah(unit, tanggal):
+	"""Tulis ulang jam olah dan kapasitas pabrik Data TBS unit ini di satu tanggal.
+
+	Dipanggil waktu CBC Monitoring disubmit atau dibatalkan, termasuk amend
+	yang datang sesudah Data TBS-nya disubmit. Kedua angka ini cuma keterangan —
+	tidak masuk rantai restan, Stock Entry, maupun tbs olah yang dipakai
+	sounding — jadi aman ditulis langsung ke dokumen submitted. Memulangkan
+	jumlah dokumen yang angkanya berubah.
+	"""
+	if not (unit and tanggal):
+		return 0
+
+	jam = get_total_jam_olah(unit, tanggal)
+	diperbarui = 0
+
+	for row in frappe.get_all(
+		DOCTYPE,
+		filters={"unit": unit, "tanggal_produksi": tanggal, "docstatus": ("<", 2)},
+		fields=["name", "tbs_olah", "total_jam_olah", "kapasitas_pabrik"],
+	):
+		kapasitas = hitung_kapasitas_pabrik(row.tbs_olah, jam)
+
+		if flt(row.total_jam_olah, 3) == flt(jam, 3) and flt(row.kapasitas_pabrik, 3) == flt(kapasitas, 3):
+			continue
+
+		frappe.db.set_value(
+			DOCTYPE, row.name,
+			{"total_jam_olah": jam, "kapasitas_pabrik": kapasitas},
+			update_modified=False,
+		)
+		diperbarui += 1
+
+	return diperbarui
 
 def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 	"""Restan awal hari ini adalah Total TBS Restan dokumen sebelumnya.

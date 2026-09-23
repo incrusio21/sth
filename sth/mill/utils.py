@@ -444,3 +444,43 @@ def hari_olah_terakhir(unit, tanggal_proses, pabrik=None):
 	""".format(saringan=saringan), args)
 
 	return baris[0][0] if baris else None
+
+
+def get_tbs_olah(tanggal_proses, pabrik):
+	"""tbs_olah Data TBS submitted pabrik ini di tanggal proses, penyebut OER/KER.
+
+	Dulu dibaca tanpa saringan docstatus, jadi Data TBS yang sudah dibatalkan
+	— dokumen asal sebuah amend — bisa ikut terbaca sebagai penyebut.
+	"""
+	return flt(frappe.db.get_value(
+		"Data TBS",
+		{"tanggal_produksi": tanggal_proses, "pabrik": pabrik, "docstatus": 1},
+		"tbs_olah",
+	))
+
+
+def wajib_ada_data_tbs(doc):
+	"""Sounding baru boleh dibuat sesudah Data TBS tanggal prosesnya disubmit.
+
+	tbs_olah Data TBS itu penyebut OER/KER, dan dibacanya cuma waktu Get Data.
+	Sounding yang mendahului Data TBS membaca nol — atau angka draft yang
+	masih bisa berubah — dan submit Data TBS belakangan tidak menghitung ulang
+	soundingnya. Tidak dipasang di Get Data karena hitung_ulang_rekap
+	memanggilnya untuk dokumen lama yang tidak boleh ikut tertahan.
+	"""
+	if not (doc.tanggal_proses and doc.pabrik):
+		return
+
+	if frappe.db.exists("Data TBS", {
+		"tanggal_produksi": doc.tanggal_proses, "pabrik": doc.pabrik, "docstatus": 1,
+	}):
+		return
+
+	frappe.throw(
+		"Data TBS tanggal proses {0} untuk pabrik {1} belum ada atau belum disubmit. "
+		"Submit Data TBS-nya dulu sebelum membuat {2}.".format(
+			frappe.bold(frappe.format(doc.tanggal_proses, {"fieldtype": "Date"})),
+			frappe.bold(doc.pabrik),
+			doc.doctype,
+		)
+	)
