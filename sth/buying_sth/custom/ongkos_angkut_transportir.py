@@ -1,11 +1,13 @@
 """Purchase Invoice ongkos angkut transportir yang ditarik dari nomor Delivery Order.
 
 Aturan yang disepakati user (23 Sep 2026):
-- KG yang ditagih berbasis qty DO, bukan netto timbangan atau qty Delivery Note.
-- Kalau DO punya lebih dari satu transportir, qty DO dibagi rata per supplier
+- KG yang ditagih berbasis qty DO yang sudah jadi Sales Invoice (submit, retur
+  ikut mengurangi). Qty SI dipakai apa adanya, jadi kalau SI memakai timbangan
+  customer, KG itulah yang ditagih transportir.
+- Kalau DO punya lebih dari satu transportir, qty itu dibagi rata per supplier
   transportir. Baris tabel Delivery Order Transporter itu per armada, jadi satu
   transportir dengan tujuh truk tetap dihitung satu.
-- Tarif diisi manual di Purchase Invoice.
+- Tarif diambil dari field Ongkos Angkut di DO, masih bisa diubah di Purchase Invoice.
 - Penagihan boleh bertahap: tiap invoice mengambil sisa bagian transportir itu
   yang belum masuk invoice lain yang sudah submit.
 """
@@ -35,7 +37,7 @@ def data_do(delivery_order, company=None):
 	do = frappe.db.get_value(
 		"Delivery Order",
 		delivery_order,
-		["name", "docstatus", "is_return", "company", "unit"],
+		["name", "docstatus", "is_return", "company", "unit", "ongkos_angkut"],
 		as_dict=True,
 	)
 	if not do:
@@ -49,17 +51,40 @@ def data_do(delivery_order, company=None):
 			)
 		)
 
-	qty = frappe.db.sql(
+	do.uom = frappe.db.sql(
 		"""
-		SELECT SUM(stock_qty), GROUP_CONCAT(DISTINCT stock_uom)
+		SELECT GROUP_CONCAT(DISTINCT stock_uom)
 		FROM `tabDelivery Order Item`
 		WHERE parenttype = 'Delivery Order' AND parent = %s
 		""",
 		do.name,
-	)[0]
-	do.qty_do = flt(qty[0], PRESISI_KG)
-	do.uom = qty[1]
+	)[0][0]
+	do.qty_do = qty_sales_invoice(do.name)
 	return do
+
+
+def qty_sales_invoice(delivery_order):
+	"""Qty stok Sales Invoice submit yang berasal dari DO ini, retur ikut mengurangi.
+
+	SI menempel ke DO lewat Delivery Note: baris DN menyimpan delivery_order_item,
+	headernya menyimpan delivery_order. Ada DN yang cuma mengisi salah satunya,
+	jadi baris dulu, header sebagai cadangan. Dipakai qty, bukan stock_qty: validasi
+	timbangan SI menimpa qty dengan timbangan customer tanpa menghitung ulang stock_qty.
+	"""
+	hasil = frappe.db.sql(
+		"""
+		SELECT SUM(sii.qty * IFNULL(NULLIF(sii.conversion_factor, 0), 1))
+		FROM `tabSales Invoice Item` sii
+		INNER JOIN `tabSales Invoice` si ON si.name = sii.parent
+		INNER JOIN `tabDelivery Note` dn ON dn.name = sii.delivery_note
+		LEFT JOIN `tabDelivery Note Item` dni ON dni.name = sii.dn_detail
+		LEFT JOIN `tabDelivery Order Item` doi ON doi.name = dni.delivery_order_item
+		WHERE si.docstatus = 1
+		  AND COALESCE(doi.parent, NULLIF(dn.delivery_order, '')) = %s
+		""",
+		delivery_order,
+	)[0][0]
+	return flt(hasil, PRESISI_KG)
 
 
 def sudah_ditagih(delivery_order, supplier, kecuali_invoice=None):
@@ -97,6 +122,9 @@ def hitung_kg_do(do, supplier, kecuali_invoice=None):
 				frappe.bold(supplier), frappe.bold(do.name), ", ".join(transportir)
 			)
 		)
+
+	if do.qty_do <= 0:
+		frappe.throw(_("Delivery Order {0} belum punya Sales Invoice yang submit.").format(frappe.bold(do.name)))
 
 	bagian = flt(do.qty_do / len(transportir), PRESISI_KG)
 	ditagih = sudah_ditagih(do.name, supplier, kecuali_invoice)
@@ -175,6 +203,7 @@ def ambil_kg_do(delivery_order, company, supplier=None, purchase_invoice=None):
 	kg = hitung_kg_do(do, supplier, purchase_invoice)
 	kg.item_code = item_ongkos_angkut()
 	kg.unit = do.unit
+	kg.ongkos_angkut = flt(do.ongkos_angkut)
 	return kg
 
 
@@ -205,7 +234,7 @@ def validate_ongkos_angkut_transportir(doc, method=None):
 		frappe.throw(
 			_(
 				"Qty yang ditagih {0} {1} melebihi sisa DO {2} untuk {3}: {4} {1}.<br><br>"
-				"Qty DO {5} dibagi {6} transportir = {7}, sudah ditagih di invoice lain {8}."
+				"Qty Sales Invoice {5} dibagi {6} transportir = {7}, sudah ditagih di invoice lain {8}."
 			).format(
 				frappe.bold(total),
 				do.uom,
