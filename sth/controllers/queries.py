@@ -707,3 +707,37 @@ def monitoring_proses_control_query(
 			"page_len": page_len,
 		},
 	)
+ 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def unit_query_for_plantation_and_mill(doctype, txt, searchfield, start, page_len, filters):
+	filters = frappe.parse_json(filters) if filters else {}
+
+	company = filters.get("company")
+
+	return frappe.db.sql(
+		f"""
+		SELECT
+			name,
+			nama
+		FROM `tabUnit`
+		WHERE
+			company = %(company)s
+			AND (
+				mill = 1
+				OR plantation = 1
+			)
+			AND (
+				name LIKE %(txt)s
+				OR nama LIKE %(txt)s
+			)
+		ORDER BY name
+		LIMIT %(start)s, %(page_len)s
+		""",
+		{
+			"company": company,
+			"txt": f"%{txt}%",
+			"start": start,
+			"page_len": page_len,
+		},
+	)

@@ -1,4 +1,4 @@
-// console.log("run unit_filter.js");
+console.log("run unit_filter.js");
 
 $(document).on("form-refresh", function (event, frm) {
   if (frm.meta.module !== "Mill") return;
@@ -6,9 +6,9 @@ $(document).on("form-refresh", function (event, frm) {
   if (frm.fields_dict.unit) {
     frm.set_query("unit", function () {
       return {
+        query: "sth.controllers.queries.unit_query_for_plantation_and_mill",
         filters: {
-          company: frm.doc.company,
-          mill: 1
+          company: frm.doc.company
         }
       };
     });
@@ -19,9 +19,9 @@ $(document).on("form-refresh", function (event, frm) {
       frm.set_value("unit", null);
       frm.set_query("unit", function () {
         return {
+          query: "sth.controllers.queries.unit_query_for_plantation_and_mill",
           filters: {
-            company: frm.doc.company,
-            mill: 1
+            company: frm.doc.company
           }
         };
       });
