@@ -355,7 +355,7 @@ def update_quotation(doc,method=None):
         sq_doc = frappe.get_doc("Supplier Quotation",sq)
         sq_doc.cancel()
 
-        reopen_status_another_sq(pr_sr)
+        # reopen_status_another_sq(pr_sr)
 
 
 
