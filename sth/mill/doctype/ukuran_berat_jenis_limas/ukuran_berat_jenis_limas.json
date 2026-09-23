@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{pabrik}-{bst}",
+ "autoname": "format:{pabrik}-{kompartemen}",
  "creation": "2026-04-18 11:03:48.122002",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -18,7 +18,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "PKS TPRM",
+   "fetch_from": "kompartemen.pabrik",
    "fieldname": "pabrik",
    "fieldtype": "Link",
    "label": "Pabrik",
@@ -45,7 +45,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-20 15:23:07.529232",
+ "modified": "2026-09-23 15:18:27.556480",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Ukuran Berat Jenis Limas",

@@ -681,31 +681,51 @@ def get_non_stock_non_asset_items(doctype, txt, searchfield, start, page_len, fi
 # 	""", values)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def monitoring_proses_control_query(
 	doctype,
 	txt,
 	searchfield,
 	start,
 	page_len,
-	filters,
+	filters=None,
 ):
+	filters = json.loads(filters) if isinstance(filters, str) else (filters or {})
+
+	conditions = [
+		"docstatus < 2"
+	]
+
+	values = {
+		"txt": f"%{txt}%",
+		"start": start,
+		"page_len": page_len,
+	}
+
+	if filters.get("company"):
+			conditions.append("company = %(company)s")
+			values["company"] = filters["company"]
+
+	if filters.get("unit"):
+			conditions.append("unit = %(unit)s")
+			values["unit"] = filters["unit"]
+
 	return frappe.db.sql(
 		f"""
 		SELECT
 			name
 		FROM `tabMonitoring Proses Control`
 		WHERE
-			docstatus < 2
-			AND ({searchfield} LIKE %(txt)s OR name LIKE %(txt)s)
+			{" AND ".join(conditions)}
+			AND (
+				{searchfield} LIKE %(txt)s
+				OR name LIKE %(txt)s
+			)
 		ORDER BY
 			tgl DESC
 		LIMIT %(start)s, %(page_len)s
 		""",
-		{
-			"txt": f"%{txt}%",
-			"start": start,
-			"page_len": page_len,
-		},
+		values,
 	)
  
 @frappe.whitelist()

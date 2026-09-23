@@ -212,7 +212,7 @@ frappe.ui.form.on("Purchase Invoice", {
                 }, __("Get Items From"));
 
             frm.add_custom_button(
-                __("Delivery Order"),
+                __("Pembayaran Transportir"),
                 function () {
                     pilih_do_ongkos_angkut(frm);
                 }, __("Get Items From"));
