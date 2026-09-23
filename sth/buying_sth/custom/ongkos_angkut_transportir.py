@@ -114,13 +114,8 @@ def hitung_kg_do(do, supplier, kecuali_invoice=None):
 
 
 def item_ongkos_angkut():
-	item = frappe.db.get_single_value("Procurement Settings", "item_ongkos_angkut_transportir")
-	if not item:
-		frappe.throw(
-			_("Isi <b>Item Ongkos Angkut Transportir</b> di Procurement Settings, tab Ongkos Angkut Transportir."),
-			title=_("Setelan Belum Lengkap"),
-		)
-	return item
+	"""Boleh kosong: baris item tetap dibuat dengan qty KG, item-nya dipilih user sendiri."""
+	return frappe.db.get_single_value("Procurement Settings", "item_ongkos_angkut_transportir")
 
 
 @frappe.whitelist()

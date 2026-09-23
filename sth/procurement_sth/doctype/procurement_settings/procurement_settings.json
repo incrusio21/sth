@@ -202,7 +202,7 @@
    "label": "Ongkos Angkut Transportir"
   },
   {
-   "description": "Item jasa yang dipakai Purchase Invoice tipe Ongkos Angkut Transportir. Satuan stoknya harus KG, akun biayanya diambil dari Item Default per company.",
+   "description": "Item jasa yang dipakai Purchase Invoice tipe Ongkos Angkut Transportir. Satuan stoknya harus KG, akun biayanya diambil dari Item Default per company. Boleh kosong: item-nya lalu dipilih manual di baris PI.",
    "fieldname": "item_ongkos_angkut_transportir",
    "fieldtype": "Link",
    "label": "Item Ongkos Angkut Transportir",

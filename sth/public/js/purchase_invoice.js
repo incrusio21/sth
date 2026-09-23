@@ -210,6 +210,12 @@ frappe.ui.form.on("Purchase Invoice", {
                 function () {
                     showTrainingEventSelector(frm);
                 }, __("Get Items From"));
+
+            frm.add_custom_button(
+                __("Delivery Order"),
+                function () {
+                    pilih_do_ongkos_angkut(frm);
+                }, __("Get Items From"));
         }
     },
 
@@ -336,11 +342,16 @@ frappe.ui.form.on("Purchase Invoice", {
                 if (res.unit) await frm.set_value("unit", res.unit)
 
                 // Rate sengaja tidak diisi: tarif transportir diisi manual.
+                // Item boleh belum disetel di Procurement Settings; kalau begitu
+                // barisnya dibuat dengan qty saja dan item dipilih user.
                 frm.clear_table("items")
                 let item = frm.add_child("items")
-                item.item_code = res.item_code
                 item.qty = res.sisa
-                frm.script_manager.trigger("item_code", item.doctype, item.name)
+                item.uom = res.uom
+                if (res.item_code) {
+                    item.item_code = res.item_code
+                    frm.script_manager.trigger("item_code", item.doctype, item.name)
+                }
                 refresh_field("items")
 
                 const fmt = (v) => format_number(v, null, 3)
@@ -353,7 +364,7 @@ frappe.ui.form.on("Purchase Invoice", {
                         <tr><td>Bagian ${res.supplier}</td><td class="text-right">${fmt(res.bagian)} ${res.uom}</td></tr>
                         <tr><td>Sudah ditagih</td><td class="text-right">${fmt(res.sudah_ditagih)} ${res.uom}</td></tr>
                         <tr><td><b>Sisa (masuk ke item)</b></td><td class="text-right"><b>${fmt(res.sisa)} ${res.uom}</b></td></tr>
-                    </table>`,
+                    </table>${res.item_code ? "" : `<p class="text-warning">${__("Item Ongkos Angkut Transportir belum disetel di Procurement Settings. Pilih item di baris item sebelum menyimpan.")}</p>`}`,
                 })
             })
             .finally(() => {
@@ -1637,6 +1648,59 @@ function show_pb_dialog(frm, bapp) {
             });
         },
     });
+}
+
+// Tombol Get Items From > Delivery Order: jalan pintas untuk invoice ongkos
+// angkut transportir. Mengisi tipe invoice dan nomor DO, lalu tarikan KG-nya
+// dikerjakan handler document_no seperti kalau DO dipilih langsung di field.
+function pilih_do_ongkos_angkut(frm) {
+    const dialog = new frappe.ui.Dialog({
+        title: __("Ambil dari Delivery Order"),
+        fields: [
+            {
+                label: __("Transportir"),
+                fieldname: "supplier",
+                fieldtype: "Link",
+                options: "Supplier",
+                default: frm.doc.supplier,
+                description: __("Boleh kosong kalau DO-nya hanya punya satu transportir."),
+                onchange: () => dialog.set_value("delivery_order", null),
+            },
+            {
+                label: __("Delivery Order"),
+                fieldname: "delivery_order",
+                fieldtype: "Link",
+                options: "Delivery Order",
+                reqd: 1,
+                get_query: () => ({
+                    query: "sth.buying_sth.custom.ongkos_angkut_transportir.query_do_transportir",
+                    filters: { company: frm.doc.company, supplier: dialog.get_value("supplier") },
+                }),
+            },
+        ],
+        primary_action_label: __("Ambil"),
+        async primary_action(values) {
+            dialog.hide()
+
+            if (values.supplier && values.supplier != frm.doc.supplier) {
+                await frm.set_value("supplier", values.supplier)
+            }
+
+            // document_type diisi sendiri, jangan menunggu fetch dari invoice_type:
+            // handler document_type mengosongkan document_no.
+            await frm.set_value({
+                invoice_type: "Ongkos Angkut Transportir",
+                document_type: "Delivery Order",
+            })
+
+            if (frm.doc.document_no == values.delivery_order) {
+                frm.events.tarik_kg_do(frm)
+            } else {
+                await frm.set_value("document_no", values.delivery_order)
+            }
+        },
+    })
+    dialog.show()
 }
 
 async function showTrainingEventSelector(frm) {
