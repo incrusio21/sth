@@ -9,8 +9,22 @@ from sth.put_company import ACCOUNT_FIELDS, SOURCE_COMPANY, fix_company
 # Company yang dibuat, beserta singkatannya. Singkatan dipakai sebagai akhiran
 # nama akun ("Sales - STA"), jadi tidak boleh sama dengan company yang sudah ada.
 COMPANY_BARU = {
-	"PT Sumber Tani Agung": "STA",
-	"PT Sumber Pelita Jaya": "SPJ",
+	"KUD Mitra Dasal": "TMD",
+	"CV. Lubuk Muara Rantau": "APL",
+	"Koperasi Matang Rape": "AMR",
+	"Koperasi Wira Usahatama Lestari Palingkau Jaya": "WPJ",
+	"Koperasi Wira Usahatama Lestari Palingkau Asri": "WPA",
+	"Koperasi Wira Usahatama Lestari Palingkau Sejahtera": "WPS",
+	"Koperasi Makmur Bersama Asia Sejahtera": "MSJ",
+	"PT. Agrindo Dwi Mitra Lestari": "ADL",
+	"PT. Nusantara Investindo Lestari": "NIL",
+	"PT. Jambi Pelabuhan Jaya Perkasa": "JPP",
+	"PT. Era Sawit Sejati": "ESS",
+	"PT. Flora Nusa Persada": "FNP",
+	"PT. Jaya Selamat Abadiraya": "JSA",
+	"PT. Sumber Eka Mandiri": "SEM",
+	"PT. Satamadian": "STM",
+	"PT. Tantahan Panduhup Asi": "TPA"
 }
 
 
