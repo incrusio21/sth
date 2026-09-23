@@ -82,9 +82,6 @@ class DataTBS(Document):
 			add_days(self.tanggal_produksi, 1),
 			izinkan_minus=False,
 			commit=False,
-			# Dokumen ini sendiri yang baru berubah, jadi restan awal besok
-			# harus dibaca ulang darinya, bukan dari angka tersimpan.
-			restan_tersimpan=False,
 		)
 	
 	def on_trash(self):
@@ -271,13 +268,15 @@ def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 	sesudah amend yang terbaca dokumen penggantinya.
 
 	Kalau dokumen sebelumnya tidak ada atau restannya nol, yang dipakai saldo
-	gudang TBS di tanggal proses — lihat get_saldo_stok_tbs.
+	gudang TBS di tanggal proses — lihat get_saldo_stok_tbs. Restan Awal TBS
+	yang tanggalnya jatuh sesudah dokumen sebelumnya mengalahkan keduanya —
+	lihat tentukan_restan_awal.
 	"""
 	if not (unit and tanggal_produksi):
 		return 0
 
 	sebelumnya = frappe.db.sql("""
-		select total_tbs_restan
+		select total_tbs_restan, tanggal_produksi
 		from `tabData TBS`
 		where unit = %(unit)s and docstatus < 2 and name != %(name)s
 			and (tanggal_produksi < %(tanggal_produksi)s
@@ -291,9 +290,40 @@ def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 		"creation": creation or now(),
 	})
 
-	restan = flt(sebelumnya[0][0]) if sebelumnya else 0
+	restan, tanggal_sebelumnya = sebelumnya[0] if sebelumnya else (0, None)
 
-	return restan or get_saldo_stok_tbs(unit, tanggal_produksi)
+	return tentukan_restan_awal(unit, tanggal_produksi, restan, tanggal_sebelumnya)
+
+def tentukan_restan_awal(unit, tanggal_produksi, restan_sebelumnya, tanggal_sebelumnya=None):
+	"""Restan awal Data TBS dari restan dokumen sebelumnya, kecuali ada patokan di antaranya.
+
+	Restan Awal TBS yang tanggalnya sesudah dokumen sebelumnya — atau yang mana
+	saja sampai tanggal proses, kalau tidak ada dokumen sebelumnya — memutus
+	rantai: angkanya dipakai apa adanya, juga kalau nol, karena nol pun angka
+	yang sengaja ditetapkan. Patokan yang tanggalnya sama dengan dokumen
+	sebelumnya sudah dipakai dokumen itu, jadi tidak dipakai dua kali.
+
+	Tanpa patokan, restan dokumen sebelumnya yang dipakai, dan yang nol diganti
+	saldo gudang di tanggal proses.
+	"""
+	patokan = get_patokan_restan(unit, tanggal_produksi, tanggal_sebelumnya)
+	if patokan is not None:
+		return patokan
+
+	return flt(restan_sebelumnya) or get_saldo_stok_tbs(unit, tanggal_produksi)
+
+def get_patokan_restan(unit, sampai, sesudah=None):
+	"""Restan awal dari Restan Awal TBS terakhir unit ini di (sesudah, sampai], atau None."""
+	patokan = frappe.db.sql("""
+		select restan_awal
+		from `tabRestan Awal TBS`
+		where unit = %(unit)s and docstatus = 1 and tanggal <= %(sampai)s
+			and (%(sesudah)s is null or tanggal > %(sesudah)s)
+		order by tanggal desc
+		limit 1
+	""", {"unit": unit, "sampai": sampai, "sesudah": sesudah})
+
+	return flt(patokan[0][0]) if patokan else None
 
 def get_saldo_stok_tbs(unit, tanggal_produksi):
 	"""Saldo gudang TBS unit ini di tanggal proses, dipakai kalau rantai restan nol.
@@ -375,9 +405,7 @@ def hitung_ulang_setelah_timbangan(doc, method=None):
 		indicator="blue",
 	)
 
-def hitung_ulang_rantai(
-	unit, sejak, posting_ulang=True, lapor=None, izinkan_minus=True, commit=True, restan_tersimpan=True
-):
+def hitung_ulang_rantai(unit, sejak, posting_ulang=True, lapor=None, izinkan_minus=True, commit=True):
 	"""Baca ulang TBS diterima dan rantai restan satu unit sejak satu tanggal.
 
 	Yang diperbaiki terutama dokumen yang sudah disubmit. Jumlah TBS Diterima
@@ -390,19 +418,11 @@ def hitung_ulang_rantai(
 	Total TBS, yang membagi diri jadi tbs olah, tbs restan, dan tbs loading ramp,
 	dan Total TBS Restan-nya jadi restan awal hari berikutnya.
 
-	Restan awal dokumen pertama dipakai apa adanya dari yang tersimpan di
-	dokumennya, bukan dibaca ulang dari dokumen sebelumnya. Yang bergeser waktu
-	tombol Hitung Ulang ditekan atau Timbangan bertanggal mundur masuk cuma TBS
-	diterima mulai `sejak`; restan awal hari itu dibentuk hari-hari sebelumnya
-	yang tidak ikut berubah. Membacanya ulang malah menghapus restan awal yang
-	sengaja ditetapkan — misalnya 176.963 di Data TBS pertama TPRM sejak
-	1 September dari patch hitung_ulang_tbs_diterima_data_tbs — dan menggantinya
-	dengan Total TBS Restan dokumen Agustus. Restan tersimpan yang nol tetap
-	diisi lewat `get_restan_awal`.
-
-	`restan_tersimpan=False` membaca restan awal dokumen pertama dari dokumen
-	sebelumnya. Itu yang dipakai sesudah sebuah Data TBS disubmit atau
-	dibatalkan, karena justru dokumen sebelumnya itulah yang baru berubah.
+	Restan awal dokumen pertama diambil dari dokumen terakhir sebelumnya lewat
+	`get_restan_awal`, jadi rantai sebelum `sejak` tidak ikut bergerak. Restan
+	Awal TBS yang jatuh di rentang ini memutus rantainya: Data TBS pertama di
+	tanggal patokan atau sesudahnya memakai angka patokan, bukan Total TBS
+	Restan hari sebelumnya — lihat tentukan_restan_awal.
 
 	Dua fase: angka dokumennya dulu, lalu Stock Entry harian yang qty atau
 	arahnya jadi tidak cocok lagi diposting ulang. Dipisah supaya kalau
@@ -439,7 +459,7 @@ def hitung_ulang_rantai(
 	kembar = cari_kembar(dokumen)
 	hasil.kembar = sorted(nama for daftar in kembar.values() for nama in daftar)
 
-	hasil.angka = hitung_ulang_dokumen(dokumen, kembar, restan_tersimpan)
+	hasil.angka = hitung_ulang_dokumen(dokumen, kembar)
 
 	# Harus di-commit sebelum fase STE: izinkan_stock_minus me-rollback sisa
 	# pekerjaan yang belum di-commit waktu selesai, dan itu akan ikut membuang
@@ -487,20 +507,25 @@ def cari_kembar(dokumen):
 	return {k: v for k, v in hitung.items() if len(v) > 1}
 
 
-def hitung_ulang_dokumen(dokumen, kembar, restan_tersimpan=True):
+def hitung_ulang_dokumen(dokumen, kembar):
 	"""Isi ulang TBS diterima tiap dokumen, lalu rantai restan awalnya."""
-	restan = None
+	# Total TBS Restan dan tanggal proses dokumen yang baru dikerjakan, yaitu
+	# bahan restan awal dokumen berikutnya.
+	restan = tanggal_sebelumnya = None
 	diperbaiki = 0
 
 	for row in dokumen:
 		doc = frappe.get_doc(DOCTYPE, row.name)
 
-		if restan is None:
-			# Sambungan ke rantai sebelum rentang ini. Alasan memakai angka
-			# tersimpan dokumen pertama ada di hitung_ulang_rantai.
-			restan = (flt(doc.jumlah_tbs_restan) if restan_tersimpan else 0) or get_restan_awal(
-				doc.unit, doc.tanggal_produksi, doc.name, doc.creation
-			)
+		if tanggal_sebelumnya is None:
+			# Sambungan ke rantai sebelum rentang ini, dibaca sekali dari dokumen
+			# terakhir sebelum dokumen pertama yang dikerjakan.
+			restan_awal = get_restan_awal(doc.unit, doc.tanggal_produksi, doc.name, doc.creation)
+		else:
+			restan_awal = tentukan_restan_awal(
+				doc.unit, doc.tanggal_produksi, restan, tanggal_sebelumnya)
+
+		tanggal_sebelumnya = doc.tanggal_produksi
 
 		if kunci(row) in kembar:
 			# Dilewati, tapi rantainya tetap diteruskan dari angka tersimpannya:
@@ -515,8 +540,7 @@ def hitung_ulang_dokumen(dokumen, kembar, restan_tersimpan=True):
 		# flt: get_total_tbs memulangkan None kalau tidak ada timbangan sama
 		# sekali di hari itu — SUM atas nol baris itu NULL, bukan 0.
 		doc.jumlah_tbs_diterima = flt(get_total_tbs(doc.tanggal_produksi, doc.unit))
-		# Sama dengan get_restan_awal: rantai yang nol diganti saldo gudang.
-		doc.jumlah_tbs_restan = flt(restan) or get_saldo_stok_tbs(doc.unit, doc.tanggal_produksi)
+		doc.jumlah_tbs_restan = restan_awal
 		doc.calculate_totals()
 		restan = flt(doc.total_tbs_restan)
 
