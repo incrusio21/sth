@@ -86,6 +86,11 @@ class SuratPengantarBuah(Document):
 			frappe.throw("<br>".join(errors))
 
 	def calculate_janjang(self):
+		# Stub dari Security Check Point belum punya rincian blok; totalnya
+		# hitungan pos, dan dibiarkan sampai rinciannya datang lewat API SPB.
+		if not self.details:
+			return
+
 		total_janjang = 0.0
 		total_brondolan = 0.0
 		for d in self.details:
@@ -360,13 +365,19 @@ def _update_spb(existing_name, args):
 		set_recap_panen_in_details(doc.details)
 
 		nilai = _header_after_submit(doc, args)
-		nilai.update({
-			"total_janjang": sum(flt(d.total_janjang) for d in doc.details),
-			"total_brondolan": sum(flt(d.brondolan_terkirim) for d in doc.details)
-		})
+
+		# Tanpa rincian, total hitungan pos di stub yang dipertahankan —
+		# sama dengan calculate_janjang di jalur draft.
+		if doc.details:
+			nilai.update({
+				"total_janjang": sum(flt(d.total_janjang) for d in doc.details),
+				"total_brondolan": sum(flt(d.brondolan_terkirim) for d in doc.details)
+			})
 
 		doc.update_child_table("details")
-		doc.db_set(nilai, notify=False)
+
+		if nilai:
+			doc.db_set(nilai, notify=False)
 
 	_resync_timbangan(doc.name)
 	_ambil_koreksi_pos(doc)
