@@ -362,18 +362,24 @@ frappe.ui.form.on("Purchase Invoice", {
                 if (frm.doc.supplier != res.supplier) await frm.set_value("supplier", res.supplier)
                 if (res.unit) await frm.set_value("unit", res.unit)
 
-                // Rate sengaja tidak diisi: tarif transportir diisi manual.
+                // Qty dari Sales Invoice DO, rate dari Ongkos Angkut DO. Tarif dipasang
+                // sebagai price_list_rate supaya tidak hilang waktu erpnext menghitung
+                // ulang rate (lihat handler price_list_rate Purchase Invoice Item).
                 // Item boleh belum disetel di Procurement Settings; kalau begitu
-                // barisnya dibuat dengan qty saja dan item dipilih user.
+                // barisnya dibuat dengan qty dan rate saja dan item dipilih user.
+                frm.__tarif_do = { [res.delivery_order]: res.ongkos_angkut }
                 frm.clear_table("items")
                 let item = frm.add_child("items")
                 item.qty = res.sisa
                 item.uom = res.uom
+                item.price_list_rate = res.ongkos_angkut
+                item.rate = res.ongkos_angkut
                 if (res.item_code) {
                     item.item_code = res.item_code
                     frm.script_manager.trigger("item_code", item.doctype, item.name)
                 }
                 refresh_field("items")
+                recalculate_item_amount(frm, item.doctype, item.name)
             })
             .finally(() => {
                 frappe.dom.unfreeze()
@@ -835,10 +841,32 @@ frappe.ui.form.on("Purchase Invoice Item", {
         recalculate_item_amount(frm, cdt, cdn);
     },
 
+    // Jalan sebelum price_list_rate milik controller erpnext, yang menghitung rate
+    // dari price_list_rate. Item ongkos angkut tidak punya harga di price list, jadi
+    // tanpa ini memilih item atau mengubah qty mengembalikan rate ke 0.
+    async price_list_rate(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+        if (frm.doc.invoice_type != "Ongkos Angkut Transportir" || !frm.doc.document_no || flt(row.price_list_rate)) return;
+
+        const tarif = await tarif_ongkos_angkut_do(frm);
+        if (tarif) row.price_list_rate = tarif;
+    },
+
     amount(frm) {
         calculate_sub_total(frm);
     }
 });
+
+// Tarif per KG dari field Ongkos Angkut di Delivery Order, disimpan per nomor DO.
+async function tarif_ongkos_angkut_do(frm) {
+    const cache = (frm.__tarif_do = frm.__tarif_do || {});
+    const delivery_order = frm.doc.document_no;
+    if (!(delivery_order in cache)) {
+        const r = await frappe.db.get_value("Delivery Order", delivery_order, "ongkos_angkut");
+        cache[delivery_order] = flt(r.message && r.message.ongkos_angkut);
+    }
+    return cache[delivery_order];
+}
 
 function recalculate_item_amount(frm, cdt, cdn) {
     const row = locals[cdt][cdn];
