@@ -12,6 +12,8 @@
   "posting_time",
   "set_posting_time",
   "catatan",
+  "total_jjg",
+  "total_brd",
   "column_break_mtrn",
   "transaction_type",
   "receive_type",
@@ -28,8 +30,6 @@
   "items_do_name",
   "items_do_reference",
   "tanggal_panen",
-  "total_jjg",
-  "total_brd",
   "no_polisi",
   "supplier",
   "nama_supplier",
@@ -422,17 +422,19 @@
   },
   {
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "description": "Janjang yang dicatat pos, pembanding janjang di SPB dan timbangan",
+   "description": "dari API",
    "fieldname": "total_jjg",
    "fieldtype": "Int",
-   "label": "Total Janjang"
+   "label": "Total Janjang",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
-   "description": "Brondolan yang dicatat pos, pembanding brondolan di SPB dan timbangan",
+   "description": "dari API",
    "fieldname": "total_brd",
    "fieldtype": "Float",
-   "label": "Total Brondolan"
+   "label": "Total Brondolan",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -528,7 +530,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-24 09:55:08.808409",
+ "modified": "2026-09-24 10:24:00.609881",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
