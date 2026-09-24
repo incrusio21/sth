@@ -45,21 +45,27 @@ class RekapTimbanganPanen(Document):
 		# Baris yang recap-nya tidak ketemu tetap boleh ikut direkap — janjangnya
 		# cuma belum bisa dipulangkan ke BKM. Tanpa disaring, None-nya sampai ke
 		# frappe.get_doc dan menggagalkan seluruh submit.
-		list_rb = set(rp.recap_panen for rp in self.details if rp.recap_panen)
+		hitung_ulang_bjr_recap(rp.recap_panen for rp in self.details if rp.recap_panen)
 
-		voucher_data = {}
-		for rb in list_rb:
-			doc = frappe.get_doc("Recap Panen by Blok", rb)
-			doc.set_data_rekap_weight()
+def hitung_ulang_bjr_recap(list_rb):
+	"""Hitung ulang berat recap dari rekap timbangan lalu turunkan BJR-nya ke BKM Panen.
 
-			for vc in doc.voucher_recap:
-				voucher_data.setdefault(
-					(vc.voucher_type, vc.voucher_no), {}
-				).setdefault(doc.blok, doc.bjr)
+	Dipakai juga oleh update_tanggal_panen di Surat Pengantar Buah: baris yang
+	pindah tanggal panen memindahkan beratnya dari recap lama ke recap baru.
+	"""
+	voucher_data = {}
+	for rb in set(list_rb):
+		doc = frappe.get_doc("Recap Panen by Blok", rb)
+		doc.set_data_rekap_weight()
 
-		for (v_type, v_no), blok in voucher_data.items():
-			voucher_obj = frappe.get_doc(v_type, v_no)
-			voucher_obj.update_hasil_kerja_bjr(blok)
+		for vc in doc.voucher_recap:
+			voucher_data.setdefault(
+				(vc.voucher_type, vc.voucher_no), {}
+			).setdefault(doc.blok, doc.bjr)
+
+	for (v_type, v_no), blok in voucher_data.items():
+		voucher_obj = frappe.get_doc(v_type, v_no)
+		voucher_obj.update_hasil_kerja_bjr(blok)
 
 @frappe.whitelist()
 def get_bkm_panen(unit, divisi, posting_date):

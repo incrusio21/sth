@@ -4,9 +4,9 @@
 import json
 import re
 import frappe
-from frappe import unscrub
+from frappe import _, unscrub
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr, flt, format_date, getdate, now
 from frappe.model.document import Document
 from frappe.utils.synchronization import filelock
 
@@ -34,56 +34,7 @@ class SuratPengantarBuah(Document):
 		set_recap_panen_in_details(self.details)
 
 	def validate_recap_panen(self):
-		# SPB bisa dibuat sebagai stub tanpa detail (mis. dari Security Check Point),
-		# dan isin([]) menghasilkan "IN ()" yang bukan SQL valid di MariaDB.
-		recap_panen = list({d.recap_panen for d in self.details if d.recap_panen})
-		if not recap_panen:
-			return
-
-		rpb = frappe.qb.DocType("Recap Panen by Blok")
-		voucher = frappe.qb.DocType("Rekap Panen Voucher")
-
-		# BKM-nya diambil dari tabel voucher, bukan dari kolom voucher_no di header
-		# recap. Kolom header itu sisa rancangan lama waktu satu recap berarti satu
-		# BKM; sejak recap menampung banyak BKM, tidak ada lagi yang menulisnya.
-		# Membacanya berarti dua kebocoran sekaligus: recap yang headernya kosong
-		# tidak ikut terambil sehingga pemeriksaan ini diam sama sekali, dan recap
-		# yang headernya terisi cuma diperiksa satu BKM dari sekian yang ditampung.
-		query = (
-			frappe.qb.from_(voucher)
-			.inner_join(rpb)
-			.on(rpb.name == voucher.parent)
-			.select(rpb.kontanan, voucher.voucher_no)
-			.where(
-				(voucher.voucher_type == "Buku Kerja Mandor Panen") &
-				(voucher.parent.isin(recap_panen))
-			)
-		).run(as_dict=True)
-
-		kontanan = [r.voucher_no for r in query if r.kontanan]
-		non_kontanan = [r.voucher_no for r in query if not r.kontanan]
-
-		errors = []
-
-		if kontanan:
-			e_kontanan = frappe.db.exists("Pengajuan Panen Kontanan", {
-				"bkm_panen": ["in", kontanan], 
-				"docstatus": 1
-			})
-			if e_kontanan:
-				errors.append("Some harvests already have submitted Kontanan")
-
-		if non_kontanan:
-			p_payment = frappe.db.exists("Employee Payment Log", {
-				"voucher_type": "Buku Kerja Mandor Panen",
-				"voucher_no": ["in", non_kontanan], 
-				"is_paid": 1
-			})
-			if p_payment:
-				errors.append("Some harvests have already been paid")
-
-		if errors:
-			frappe.throw("<br>".join(errors))
+		cek_panen_belum_dibayar(d.recap_panen for d in self.details)
 
 	def calculate_janjang(self):
 		# Stub dari Security Check Point belum punya rincian blok; totalnya
@@ -634,6 +585,63 @@ def _resync_security_check_point(doc):
 		if beda:
 			frappe.db.set_value("Security Check Point", row.name, beda)
 
+def cek_panen_belum_dibayar(recap_panen):
+	"""Tolak perubahan kalau BKM Panen di balik recap-recap ini sudah dibayar.
+
+	Dipakai validate SPB dan update_tanggal_panen: memindahkan janjang antar
+	recap menggeser BJR, dan BJR itu dasar upah yang sudah telanjur dibayarkan.
+	"""
+	# SPB bisa dibuat sebagai stub tanpa detail (mis. dari Security Check Point),
+	# dan isin([]) menghasilkan "IN ()" yang bukan SQL valid di MariaDB.
+	recap_panen = list({r for r in recap_panen if r})
+	if not recap_panen:
+		return
+
+	rpb = frappe.qb.DocType("Recap Panen by Blok")
+	voucher = frappe.qb.DocType("Rekap Panen Voucher")
+
+	# BKM-nya diambil dari tabel voucher, bukan dari kolom voucher_no di header
+	# recap. Kolom header itu sisa rancangan lama waktu satu recap berarti satu
+	# BKM; sejak recap menampung banyak BKM, tidak ada lagi yang menulisnya.
+	# Membacanya berarti dua kebocoran sekaligus: recap yang headernya kosong
+	# tidak ikut terambil sehingga pemeriksaan ini diam sama sekali, dan recap
+	# yang headernya terisi cuma diperiksa satu BKM dari sekian yang ditampung.
+	query = (
+		frappe.qb.from_(voucher)
+		.inner_join(rpb)
+		.on(rpb.name == voucher.parent)
+		.select(rpb.kontanan, voucher.voucher_no)
+		.where(
+			(voucher.voucher_type == "Buku Kerja Mandor Panen") &
+			(voucher.parent.isin(recap_panen))
+		)
+	).run(as_dict=True)
+
+	kontanan = [r.voucher_no for r in query if r.kontanan]
+	non_kontanan = [r.voucher_no for r in query if not r.kontanan]
+
+	errors = []
+
+	if kontanan:
+		e_kontanan = frappe.db.exists("Pengajuan Panen Kontanan", {
+			"bkm_panen": ["in", kontanan], 
+			"docstatus": 1
+		})
+		if e_kontanan:
+			errors.append("Some harvests already have submitted Kontanan")
+
+	if non_kontanan:
+		p_payment = frappe.db.exists("Employee Payment Log", {
+			"voucher_type": "Buku Kerja Mandor Panen",
+			"voucher_no": ["in", non_kontanan], 
+			"is_paid": 1
+		})
+		if p_payment:
+			errors.append("Some harvests have already been paid")
+
+	if errors:
+		frappe.throw("<br>".join(errors))
+
 def set_recap_panen_in_details(details):
 	"""Isi recap_panen tiap baris detail dari blok + tanggal panennya.
 
@@ -751,6 +759,219 @@ def lepas_recap_dari_detail_spb(recap_panen):
 			terlepas += 1
 
 	return terlepas
+
+@frappe.whitelist()
+def update_tanggal_panen(spb, details):
+	"""Ganti tanggal panen baris-baris SPB, termasuk yang sudah submit.
+
+	`details` berisi daftar baris yang diubah, dikenali lewat `name` baris atau
+	`harvest_no`, dengan `panen_date` dan/atau `panen_date_restan` barunya:
+
+		[{"harvest_no": "H-001", "panen_date": "2026-09-20"}]
+
+	Tanggal panen menentukan Recap Panen by Blok yang ditunjuk baris itu, jadi
+	recap_panen ikut diambil ulang untuk tanggal barunya — sama dengan
+	_apply_recap, tapi di sini recap lama dikosongkan kalau recap untuk tanggal
+	baru belum ada: tautan lama sudah pasti salah blok-tanggalnya. Begitu BKM-nya
+	masuk, sambungkan_recap_ke_detail_spb memasangnya lagi.
+
+	Sesudah SPB submit, janjang yang terkirim ke recap lama dan recap baru
+	dihitung ulang; recap baru yang jadi melebihi janjang panennya menggagalkan
+	seluruh perubahan. Salinan baris ini di Rekap Timbangan Panen ikut dipindah,
+	lalu berat dan BJR recap lama dan barunya diturunkan lagi ke BKM Panen.
+
+	Ditulis lewat db, bukan doc.save(): panen_date tidak allow_on_submit, dan
+	validate SPB tidak perlu jalan ulang untuk urusan tanggal saja.
+	"""
+	if isinstance(details, str):
+		details = json.loads(details)
+	if isinstance(details, dict):
+		details = [details]
+	if not details:
+		frappe.throw(_("Rincian tanggal panen wajib diisi."))
+
+	doc = frappe.get_doc("Surat Pengantar Buah", spb)
+	doc.check_permission("write")
+
+	if doc.docstatus == 2:
+		frappe.throw(_("Surat Pengantar Buah {0} sudah dibatalkan.").format(doc.name))
+
+	by_name = {d.name: d for d in doc.details}
+	by_harvest_no = {d.harvest_no: d for d in doc.details if d.harvest_no}
+
+	recap_terdampak = set()
+	# (blok, tanggal lama) -> (tanggal baru, recap baru), untuk Rekap Timbangan Panen
+	pindah_rekap = {}
+	perubahan = []
+
+	for args in details:
+		row = by_name.get(args.get("name")) or by_harvest_no.get(args.get("harvest_no"))
+		if not row:
+			frappe.throw(_("Baris {0} tidak ada di Surat Pengantar Buah {1}.").format(
+				args.get("name") or args.get("harvest_no"), doc.name
+			))
+
+		for suffix in ("", "_restan"):
+			kolom_tanggal = f"panen_date{suffix}"
+			if kolom_tanggal not in args:
+				continue
+
+			if not args[kolom_tanggal]:
+				frappe.throw(_("Tanggal panen baris {0} tidak boleh kosong.").format(row.idx))
+
+			baru = getdate(args[kolom_tanggal])
+			lama = getdate(row.get(kolom_tanggal)) if row.get(kolom_tanggal) else None
+			if baru == lama:
+				continue
+
+			blok = row.get(f"blok{suffix}")
+			recap_lama = row.get(f"recap_panen{suffix}")
+			recap_baru = get_recap_panen(blok, baru).get("recap_panen") if blok else None
+
+			row.set(kolom_tanggal, baru)
+			row.set(f"recap_panen{suffix}", recap_baru or "")
+			recap_terdampak.update(r for r in (recap_lama, recap_baru) if r)
+
+			# Rekap Timbangan Panen cuma menyalin blok dan tanggal panen utama
+			if not suffix and blok:
+				key = (blok, lama)
+				if pindah_rekap.get(key, (baru, recap_baru)) != (baru, recap_baru):
+					frappe.throw(_(
+						"Blok {0} tanggal {1} dipindah ke dua tanggal berbeda dalam satu SPB."
+					).format(blok, format_date(lama) if lama else "-"))
+
+				pindah_rekap[key] = (baru, recap_baru)
+
+			perubahan.append(_("Baris {0} blok {1}{2}: {3} → {4}{5}").format(
+				row.idx,
+				blok or "-",
+				" (restan)" if suffix else "",
+				format_date(lama) if lama else "-",
+				format_date(baru),
+				"" if recap_baru else _(" (recap belum ada)"),
+			))
+
+	if not perubahan:
+		return {"updated": 0}
+
+	cek_panen_belum_dibayar(recap_terdampak)
+
+	doc.update_child_table("details")
+	# modified ikut naik supaya sinkronisasi inkremental lewat modified_after melihatnya
+	doc.db_set("modified", now(), update_modified=False, notify=False)
+
+	if doc.docstatus == 1:
+		for recap in recap_terdampak:
+			frappe.get_doc("Recap Panen by Blok", recap).calculate_transfered_weight()
+
+	_pindahkan_rekap_timbangan(doc, pindah_rekap)
+
+	doc.add_comment("Info", _("Tanggal panen diubah:") + "<br>" + "<br>".join(perubahan))
+
+	return {"updated": len(perubahan), "details": perubahan}
+
+@frappe.whitelist()
+def pasang_tanggal_panen(harvest_no, panen_date, spb=None):
+	"""Pasang tanggal panen ke baris SPB yang dikenali lewat harvest_no saja.
+
+	Pengirimnya cukup tahu nomor harvest dan tanggal panennya; SPB-nya dicari di
+	sini, lalu pemasangannya — tanggal, recap_panen, janjang terkirim, dan Rekap
+	Timbangan Panen — diserahkan ke update_tanggal_panen.
+
+	harvest_no hampir selalu menunjuk satu baris, tapi ada yang terkirim ke dua
+	SPB yang sama-sama hidup. Untuk itu `spb` wajib disebut, bukan dipasang ke
+	semuanya: janjang yang sama akan terhitung dua kali di recap barunya.
+	"""
+	harvest_no = cstr(harvest_no).strip()
+	if not harvest_no:
+		frappe.throw(_("Parameter harvest_no wajib diisi."))
+	if not panen_date:
+		frappe.throw(_("Parameter panen_date wajib diisi."))
+
+	filters = {
+		"parenttype": "Surat Pengantar Buah",
+		"harvest_no": harvest_no,
+		"docstatus": ["<", 2],
+	}
+	if spb:
+		filters["parent"] = spb
+
+	rows = frappe.get_all(
+		"SPB Timbangan Pabrik", filters=filters, fields=["name", "parent"], limit_page_length=0
+	)
+
+	if not rows:
+		frappe.throw(_("Harvest No {0} tidak ditemukan di Surat Pengantar Buah{1}.").format(
+			harvest_no, f" {spb}" if spb else ""
+		))
+
+	if len({r.parent for r in rows}) > 1:
+		frappe.throw(_(
+			"Harvest No {0} ada di lebih dari satu Surat Pengantar Buah: {1}. Sebutkan spb-nya."
+		).format(harvest_no, ", ".join(sorted({r.parent for r in rows}))))
+
+	hasil = update_tanggal_panen(
+		rows[0].parent, [{"name": r.name, "panen_date": panen_date} for r in rows]
+	)
+	hasil["spb"] = rows[0].parent
+
+	return hasil
+
+def _pindahkan_rekap_timbangan(doc, pindah_rekap):
+	"""Ikutkan tanggal panen dan recap baru ke baris Rekap Timbangan Panen.
+
+	Rekap timbangan mengelompokkan SPB menurut tanggal SPB, bukan tanggal panen,
+	jadi barisnya tetap di rekap yang sama; yang berubah cuma tanggal panen dan
+	recap yang ditunjuknya. Untuk rekap yang sudah submit, berat recap lama dan
+	baru dihitung ulang dan BJR-nya diturunkan ke BKM Panen.
+	"""
+	from sth.plantation.doctype.rekap_timbangan_panen.rekap_timbangan_panen import (
+		hitung_ulang_bjr_recap,
+	)
+
+	recap_dihitung = set()
+
+	for (blok, lama), (baru, recap_baru) in pindah_rekap.items():
+		# Baris rekap dikenali lewat SPB + blok + tanggal panen; kalau masih ada baris
+		# SPB lain dengan blok dan tanggal lama yang sama, tidak jelas mana yang pindah.
+		tersisa = any(
+			d.blok == blok and (getdate(d.panen_date) if d.panen_date else None) == lama
+			for d in doc.details
+		)
+
+		rows = frappe.get_all(
+			"Timbangan Panen Details",
+			filters={
+				"parenttype": "Rekap Timbangan Panen",
+				"surat_pengantar_buah": doc.name,
+				"blok": blok,
+				"panen_date": lama or ["is", "not set"],
+				"docstatus": ["<", 2],
+			},
+			fields=["name", "docstatus", "recap_panen"],
+			limit_page_length=0,
+		)
+
+		if rows and tersisa:
+			frappe.throw(_(
+				"Blok {0} tanggal {1} sudah masuk Rekap Timbangan Panen dan masih dipakai "
+				"baris lain di SPB ini. Pindahkan semua barisnya sekaligus."
+			).format(blok, format_date(lama) if lama else "-"))
+
+		for r in rows:
+			frappe.db.set_value(
+				"Timbangan Panen Details",
+				r.name,
+				{"panen_date": baru, "recap_panen": recap_baru or ""},
+				update_modified=False,
+			)
+
+			if r.docstatus == 1:
+				recap_dihitung.update(x for x in (r.recap_panen, recap_baru) if x)
+
+	if recap_dihitung:
+		cek_panen_belum_dibayar(recap_dihitung)
+		hitung_ulang_bjr_recap(recap_dihitung)
 
 @frappe.whitelist()
 def get_recap_panen(blok, posting_date):
