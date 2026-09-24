@@ -29,4 +29,7 @@ sth.patches.isi_ulang_jam_olah_data_tbs
 # isi_adjustment_sounding, dan hitung_ulang_rekap_sounding sengaja tidak
 # didaftarkan: keempatnya perbaikan data sekali jalan yang mau diawasi sendiri
 # waktu dijalankan, dan tiga di antaranya memposting ulang puluhan Stock Entry.
+# koreksi_unit_kebun_security_check_point juga tidak didaftarkan: datanya satu
+# excel pos September 2026, dan ikut menurunkan koreksinya ke ratusan SPB serta
+# Timbangan-nya.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
