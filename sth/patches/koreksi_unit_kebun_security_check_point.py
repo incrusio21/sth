@@ -65,7 +65,7 @@ def execute(names=None, simpan=True, dorong_ke_spb=True):
 
 	if simpan:
 		for b in rencana["ubah"]:
-			frappe.db.set_value("Security Check Point", b.name, b.beda)
+			frappe.db.set_value("Security Check Point", b.name, dict(b.beda))
 
 		frappe.db.commit()
 
