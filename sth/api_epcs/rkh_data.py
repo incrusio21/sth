@@ -327,7 +327,7 @@ def _buat(kiriman, trans_no, submit):
 	doc = frappe.new_doc("Rencana Kerja Harian")
 	doc.trans_no = trans_no
 	_isi_dokumen(doc, kiriman)
-	_validasi_petugas(doc)
+	# _validasi_petugas(doc)
 
 	# ditahan di draft dulu supaya kiriman berikutnya masih bisa memperbaikinya;
 	# submit di bawah dijalankan sendiri kalau pengirim memang sudah final
@@ -371,7 +371,7 @@ def _perbarui(nama, kiriman, submit):
 			"memang berubah."
 		).format(doc.name, doc.trans_no))
 
-	_validasi_petugas(doc)
+	# _validasi_petugas(doc)
 	doc.save()
 
 	if submit:
