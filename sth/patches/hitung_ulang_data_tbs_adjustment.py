@@ -10,7 +10,8 @@ from sth.mill.doctype.data_tbs.data_tbs import (
 
 # Nama field angka_turunan, urutannya sama, untuk mencetak apa yang bergeser.
 FIELDS = (
-	"jumlah_tbs_diterima", "jumlah_tbs_restan", "adjustment_stok", "grand_total_tbs",
+	"jumlah_tbs_diterima", "jumlah_tbs_restan", "adjustment_stok", "restan_setelah_adjustment",
+	"grand_total_tbs",
 	"berat_rata_rata_tbs", "tbs_olah", "tbs_restan", "tbs_loading_ramp", "total_tbs_restan",
 )
 

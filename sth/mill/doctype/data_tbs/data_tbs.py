@@ -195,9 +195,8 @@ class DataTBS(Document):
 			+ cint(self.jumlah_lori_masak)
 			+ cint(self.lori_estimasi_loading_ramp)
 		)
-		self.grand_total_tbs = (
-			flt(self.jumlah_tbs_restan) + flt(self.adjustment_stok) + flt(self.jumlah_tbs_diterima)
-		)
+		self.restan_setelah_adjustment = flt(self.jumlah_tbs_restan) + flt(self.adjustment_stok)
+		self.grand_total_tbs = self.restan_setelah_adjustment + flt(self.jumlah_tbs_diterima)
 
 		if self.grand_total_lori:
 			self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori
@@ -710,7 +709,8 @@ def angka_turunan(doc):
 	# Presisi field tidak dipakai: total_tbs_restan presisinya 0 supaya tampil
 	# bulat di form, padahal selisih setengah kilo tetap harus ikut dibetulkan.
 	return tuple(flt(doc.get(field), 3) for field in (
-		"jumlah_tbs_diterima", "jumlah_tbs_restan", "adjustment_stok", "grand_total_tbs",
+		"jumlah_tbs_diterima", "jumlah_tbs_restan", "adjustment_stok", "restan_setelah_adjustment",
+		"grand_total_tbs",
 		"berat_rata_rata_tbs", "tbs_olah", "tbs_restan", "tbs_loading_ramp",
 		"total_tbs_restan",
 	))

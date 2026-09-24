@@ -24,6 +24,7 @@
   "get_data",
   "jumlah_tbs_restan",
   "adjustment_stok",
+  "restan_setelah_adjustment",
   "jumlah_tbs_diterima",
   "grand_total_tbs",
   "column_break_rjip",
@@ -61,7 +62,7 @@
    "fieldname": "jumlah_tbs_restan",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Jumlah TBS Restan",
+   "label": "Jumlah TBS Restan Awal",
    "no_copy": 1,
    "precision": "0",
    "read_only": 1
@@ -72,6 +73,17 @@
    "fieldname": "adjustment_stok",
    "fieldtype": "Float",
    "label": "Adjustment Stok",
+   "no_copy": 1,
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Jumlah TBS Restan Awal ditambah Adjustment Stok.",
+   "fieldname": "restan_setelah_adjustment",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah TBS Restan",
    "no_copy": 1,
    "precision": "0",
    "read_only": 1
@@ -317,7 +329,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-24 12:00:00.000000",
+ "modified": "2026-09-24 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
