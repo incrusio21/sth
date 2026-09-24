@@ -18,7 +18,8 @@ DOCTYPE = "Data TBS"
 class DataTBS(Document):
 	def validate(self):
 		self.validate_duplikat()
-		self.jumlah_tbs_restan = get_restan_awal(self.unit, self.tanggal_produksi, self.name, self.creation)
+		self.jumlah_tbs_restan, self.adjustment_stok = get_restan_awal(
+			self.unit, self.tanggal_produksi, self.name, self.creation)
 		self.calculate_totals()
 
 	def validate_duplikat(self):
@@ -124,7 +125,8 @@ class DataTBS(Document):
 			"lori_estimasi_loading_ramp": 0,
 		})
 
-		self.jumlah_tbs_restan = get_restan_awal(self.unit, self.tanggal_produksi, self.name, self.creation)
+		self.jumlah_tbs_restan, self.adjustment_stok = get_restan_awal(
+			self.unit, self.tanggal_produksi, self.name, self.creation)
 		self.jumlah_tbs_diterima = get_total_tbs(self.tanggal_produksi,self.unit)
 		self.total_jam_olah = get_total_jam_olah(self.unit, self.tanggal_produksi)
 
@@ -193,7 +195,9 @@ class DataTBS(Document):
 			+ cint(self.jumlah_lori_masak)
 			+ cint(self.lori_estimasi_loading_ramp)
 		)
-		self.grand_total_tbs = flt(self.jumlah_tbs_restan) + flt(self.jumlah_tbs_diterima)
+		self.grand_total_tbs = (
+			flt(self.jumlah_tbs_restan) + flt(self.adjustment_stok) + flt(self.jumlah_tbs_diterima)
+		)
 
 		if self.grand_total_lori:
 			self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori
@@ -214,12 +218,7 @@ class DataTBS(Document):
 		self.kapasitas_pabrik = hitung_kapasitas_pabrik(self.tbs_olah, self.total_jam_olah)
 
 	def create_ste(self):
-		# Pergerakan stok TBS hari itu: yang diterima dikurangi yang diolah.
-		# Sengaja tidak dibulatkan ke presisi field — total_tbs_restan presisinya
-		# 0 supaya tampil bulat di form, dan memakainya di sini bikin stok
-		# meleset sampai setengah kilo tiap hari. Pembulatannya diserahkan ke
-		# presisi qty Stock Entry.
-		selisih = flt(self.total_tbs_restan) - flt(self.jumlah_tbs_restan)
+		selisih = pergerakan_stok(self)
 
 		if not flt(selisih, 3):
 			return
@@ -366,9 +365,11 @@ def get_restan_awal(unit, tanggal_produksi, name=None, creation=None):
 	gudang TBS di tanggal proses — lihat get_saldo_stok_tbs. Restan Awal TBS
 	yang tanggalnya jatuh sesudah dokumen sebelumnya mengalahkan keduanya —
 	lihat tentukan_restan_awal.
+
+	Memulangkan pasangan (restan awal, adjustment stok).
 	"""
 	if not (unit and tanggal_produksi):
-		return 0
+		return 0, 0
 
 	sebelumnya = frappe.db.sql("""
 		select total_tbs_restan, tanggal_produksi
@@ -400,17 +401,31 @@ def tentukan_restan_awal(unit, tanggal_produksi, restan_sebelumnya, tanggal_sebe
 
 	Tanpa patokan, restan dokumen sebelumnya yang dipakai, dan yang nol diganti
 	saldo gudang di tanggal proses.
+
+	Memulangkan pasangan (restan awal, adjustment stok). Adjustment-nya Stock
+	Entry manual di gudang TBS sejak titik restan awal itu diambil — tanggal
+	dokumen sebelumnya, atau tanggal patokan — lihat get_adjustment_tbs.
 	"""
 	patokan = get_patokan_restan(unit, tanggal_produksi, tanggal_sebelumnya)
 	if patokan is not None:
-		return patokan
+		restan, tanggal_patokan = patokan
+		return restan, get_adjustment_tbs(unit, tanggal_patokan, tanggal_produksi)
 
-	return flt(restan_sebelumnya) or get_saldo_stok_tbs(unit, tanggal_produksi)
+	if flt(restan_sebelumnya):
+		return flt(restan_sebelumnya), get_adjustment_tbs(unit, tanggal_sebelumnya, tanggal_produksi)
+
+	# Saldo gudang sampai 23:59:58 sudah memuat adjustment hari ini, padahal
+	# adjustment hari ini milik dokumen berikutnya. Dikeluarkan di sini supaya
+	# tidak terhitung dua kali.
+	saldo = get_saldo_stok_tbs(unit, tanggal_produksi) - get_adjustment_tbs(
+		unit, tanggal_produksi, add_days(tanggal_produksi, 1))
+
+	return max(saldo, 0), 0
 
 def get_patokan_restan(unit, sampai, sesudah=None):
-	"""Restan awal dari Restan Awal TBS terakhir unit ini di (sesudah, sampai], atau None."""
+	"""(restan awal, tanggal) Restan Awal TBS terakhir unit ini di (sesudah, sampai], atau None."""
 	patokan = frappe.db.sql("""
-		select restan_awal
+		select restan_awal, tanggal
 		from `tabRestan Awal TBS`
 		where unit = %(unit)s and docstatus = 1 and tanggal <= %(sampai)s
 			and (%(sesudah)s is null or tanggal > %(sesudah)s)
@@ -418,7 +433,47 @@ def get_patokan_restan(unit, sampai, sesudah=None):
 		limit 1
 	""", {"unit": unit, "sampai": sampai, "sesudah": sesudah})
 
-	return flt(patokan[0][0]) if patokan else None
+	return (flt(patokan[0][0]), patokan[0][1]) if patokan else None
+
+def get_adjustment_tbs(unit, dari, sampai):
+	"""Stock Entry manual di gudang TBS unit ini yang tanggalnya di [dari, sampai).
+
+	Rantai restan Data TBS dirangkai dari dokumen ke dokumen, bukan dari saldo
+	gudang, jadi pengeluaran atau penerimaan TBS yang diketik sendiri — mis.
+	Material Issue 11 kg bertanggal mundur — menggeser stok gudang tanpa pernah
+	terbaca rantai: restan dokumen berikutnya tetap angka lama, dan selisihnya
+	terbawa terus.
+
+	Yang dihitung Stock Ledger Entry item TBS di gudang TBS kecuali Stock Entry
+	buatan Data TBS sendiri. Stock Reconciliation tidak ikut: barisnya menimpa
+	saldo dengan actual_qty nol, dan menetapkan restan memang tugas Restan Awal
+	TBS, bukan rekonsiliasi.
+
+	Rentangnya setengah terbuka, sama dengan adjustment sounding: koreksi yang
+	diposting di tanggal dokumen sebelumnya belum tercakup restannya — Stock
+	Entry harian dokumen itu cuma membawa pergerakannya sendiri — jadi ikut;
+	koreksi di tanggal proses ini milik dokumen berikutnya.
+	"""
+	gudang = get_warehouse_tbs(unit)
+	item = frappe.db.get_value("Item", {"tipe_barang": "TBS"})
+
+	if not (gudang and item and dari and sampai):
+		return 0
+
+	total = frappe.db.sql("""
+		select coalesce(sum(sle.actual_qty), 0)
+		from `tabStock Ledger Entry` sle
+		left join `tabStock Entry` se
+			on se.name = sle.voucher_no and sle.voucher_type = 'Stock Entry'
+		where sle.is_cancelled = 0
+			and sle.item_code = %(item)s and sle.warehouse = %(gudang)s
+			and sle.voucher_type != 'Stock Reconciliation'
+			and ifnull(se.reference_doctype, '') != %(doctype)s
+			and sle.posting_date >= %(dari)s
+			and sle.posting_date < %(sampai)s
+	""", {"item": item, "gudang": gudang, "doctype": DOCTYPE, "dari": dari, "sampai": sampai})
+
+	return flt(total[0][0]) if total else 0
 
 def get_saldo_stok_tbs(unit, tanggal_produksi):
 	"""Saldo gudang TBS unit ini di tanggal proses, dipakai kalau rantai restan nol.
@@ -615,9 +670,9 @@ def hitung_ulang_dokumen(dokumen, kembar):
 		if tanggal_sebelumnya is None:
 			# Sambungan ke rantai sebelum rentang ini, dibaca sekali dari dokumen
 			# terakhir sebelum dokumen pertama yang dikerjakan.
-			restan_awal = get_restan_awal(doc.unit, doc.tanggal_produksi, doc.name, doc.creation)
+			restan_awal, adjustment = get_restan_awal(doc.unit, doc.tanggal_produksi, doc.name, doc.creation)
 		else:
-			restan_awal = tentukan_restan_awal(
+			restan_awal, adjustment = tentukan_restan_awal(
 				doc.unit, doc.tanggal_produksi, restan, tanggal_sebelumnya)
 
 		tanggal_sebelumnya = doc.tanggal_produksi
@@ -636,6 +691,7 @@ def hitung_ulang_dokumen(dokumen, kembar):
 		# sekali di hari itu — SUM atas nol baris itu NULL, bukan 0.
 		doc.jumlah_tbs_diterima = flt(get_total_tbs(doc.tanggal_produksi, doc.unit))
 		doc.jumlah_tbs_restan = restan_awal
+		doc.adjustment_stok = adjustment
 		doc.calculate_totals()
 		restan = flt(doc.total_tbs_restan)
 
@@ -654,7 +710,7 @@ def angka_turunan(doc):
 	# Presisi field tidak dipakai: total_tbs_restan presisinya 0 supaya tampil
 	# bulat di form, padahal selisih setengah kilo tetap harus ikut dibetulkan.
 	return tuple(flt(doc.get(field), 3) for field in (
-		"jumlah_tbs_diterima", "jumlah_tbs_restan", "grand_total_tbs",
+		"jumlah_tbs_diterima", "jumlah_tbs_restan", "adjustment_stok", "grand_total_tbs",
 		"berat_rata_rata_tbs", "tbs_olah", "tbs_restan", "tbs_loading_ramp",
 		"total_tbs_restan",
 	))
@@ -706,7 +762,7 @@ def posting_ulang_ste(dokumen, lapor=None, izinkan_minus=True, commit=True):
 
 def ste_sudah_benar(doc):
 	"""Benar kalau tanggal, arah, dan qty STE-nya sudah cocok dengan dokumennya."""
-	selisih = flt(doc.total_tbs_restan) - flt(doc.jumlah_tbs_restan)
+	selisih = pergerakan_stok(doc)
 
 	ste = frappe.get_all(
 		"Stock Entry",
@@ -734,6 +790,81 @@ def ste_sudah_benar(doc):
 	# Toleransi sekilo per seratus, di bawah presisi qty Stock Entry, supaya STE
 	# yang cuma beda pembulatan tidak ikut diposting ulang.
 	return abs(flt(qty) - abs(selisih)) < 0.01
+
+
+def pergerakan_stok(doc):
+	"""Qty yang harus dibawa Stock Entry harian Data TBS, positif berarti masuk.
+
+	Yang diterima dikurangi yang diolah — restan akhir dikurangi restan awal —
+	tanpa adjustment stok: pergerakan itu sudah diposting Stock Entry manualnya
+	sendiri, dan memasukkannya lagi membuat gudang bergeser dua kali.
+
+	Sengaja tidak dibulatkan ke presisi field — total_tbs_restan presisinya 0
+	supaya tampil bulat di form, dan memakainya di sini bikin stok meleset
+	sampai setengah kilo tiap hari. Pembulatannya diserahkan ke presisi qty
+	Stock Entry.
+	"""
+	return flt(doc.total_tbs_restan) - flt(doc.jumlah_tbs_restan) - flt(doc.adjustment_stok)
+
+
+def hitung_ulang_setelah_adjustment(doc, method=None):
+	"""Antrikan hitung ulang Data TBS sesudah Stock Entry manual di gudang TBS disubmit atau dibatalkan.
+
+	Adjustment stok Data TBS dibaca dari Stock Ledger, tapi cuma waktu dokumennya
+	divalidasi atau dihitung ulang — jadi Stock Entry bertanggal mundur yang
+	masuk sesudah Data TBS-nya disubmit tidak pernah terbaca. Sejajar dengan
+	hitung_ulang_setelah_timbangan, termasuk dikerjakan di latar belakang.
+
+	Stock Entry buatan Data TBS sendiri dilewati: hitung_ulang_rantai membatalkan
+	dan membuat ulang Stock Entry itu, dan memicu hitung ulang dari sana cuma
+	akan mengantrikan dirinya lagi.
+
+	Hitungnya mulai dari tanggal Stock Entry-nya, bukan hari sesudahnya: dokumen
+	di tanggal itu tidak berubah kalau restan awalnya dari rantai, tapi berubah
+	kalau diambil dari saldo gudang — lihat tentukan_restan_awal.
+	"""
+	if doc.get("reference_doctype") == DOCTYPE or not doc.posting_date:
+		return
+
+	gudang = {
+		gudang
+		for row in doc.get("items") or []
+		for gudang in (row.s_warehouse, row.t_warehouse)
+		if gudang
+	}
+
+	if not gudang:
+		return
+
+	units = frappe.get_all(
+		"Warehouse",
+		filters={"name": ("in", list(gudang)), "warehouse_category": "TBS"},
+		pluck="unit",
+	)
+
+	for unit in {unit for unit in units if unit}:
+		if not frappe.db.exists(DOCTYPE, {
+			"unit": unit,
+			"docstatus": 1,
+			"tanggal_produksi": (">=", doc.posting_date),
+		}):
+			continue
+
+		frappe.enqueue(
+			"sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_rantai",
+			queue="long",
+			timeout=3600,
+			enqueue_after_commit=True,
+			unit=unit,
+			sejak=doc.posting_date,
+		)
+
+		frappe.msgprint(
+			_("Data TBS unit {0} sejak {1} dihitung ulang di latar belakang, termasuk Stock Entry-nya.").format(
+				unit, frappe.format(doc.posting_date, {"fieldtype": "Date"})),
+			alert=True,
+			indicator="blue",
+		)
 
 
 def antrian_repost():

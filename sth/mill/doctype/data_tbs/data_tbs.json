@@ -23,6 +23,7 @@
   "lewati_cek_monitoring",
   "get_data",
   "jumlah_tbs_restan",
+  "adjustment_stok",
   "jumlah_tbs_diterima",
   "grand_total_tbs",
   "column_break_rjip",
@@ -61,6 +62,16 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah TBS Restan",
+   "no_copy": 1,
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Stock Entry manual di gudang TBS sejak tanggal proses Data TBS sebelumnya. Stoknya sudah bergerak lewat Stock Entry itu, jadi ikut Grand Total TBS tapi tidak diposting ulang.",
+   "fieldname": "adjustment_stok",
+   "fieldtype": "Float",
+   "label": "Adjustment Stok",
    "no_copy": 1,
    "precision": "0",
    "read_only": 1
@@ -306,7 +317,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-23 19:18:09.021040",
+ "modified": "2026-09-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

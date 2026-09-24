@@ -502,6 +502,11 @@ doc_events = {
 	("Delivery Note","Sales Invoice","Purchase Receipt","Purchase Invoice","Stock Entry"): {
 		"validate": "sth.custom.stock_ledger.validate_posting_date"
 	},
+	# Stock Entry manual di gudang TBS jadi adjustment stok Data TBS sesudahnya.
+	"Stock Entry": {
+		"on_submit": "sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_setelah_adjustment",
+		"on_cancel": "sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_setelah_adjustment",
+	},
 	"Delivery Order": {
 		"validate": "sth.sales_sth.custom.delivery_order.set_default_tax_fields",
 	},
