@@ -214,6 +214,9 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			self.tanggal_proses,
 		)
 		self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
+		if self.stock_awal_sebelum_adjustment < 0:
+			self.adjustment += self.stock_awal_sebelum_adjustment
+			self.stock_awal_sebelum_adjustment = 0
 
 	def get_stock_awal(self):
 		"""Saldo Palm Kernel dari Stock Ledger Entry terakhir sebelum tanggal proses.

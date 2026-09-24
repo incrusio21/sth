@@ -172,6 +172,9 @@ class SoundingStockCPOdiBST(Document):
 		)
 		if flt(self.stock_awal) > 0:
 			self.stock_awal_sebelum_adjustment = flt(self.stock_awal) - flt(self.adjustment)
+			if self.stock_awal_sebelum_adjustment < 0:
+				self.adjustment += self.stock_awal_sebelum_adjustment
+				self.stock_awal_sebelum_adjustment = 0
 		else:
 			self.stock_awal = flt(self.stock_awal_sebelum_adjustment) + flt(self.adjustment)
 
