@@ -3,6 +3,7 @@
 
 
 import re
+from collections import Counter
 
 import frappe
 from frappe.model.document import Document
@@ -162,12 +163,12 @@ class SecurityCheckPoint(Document):
 
 		Dijalankan sebelum map_api_spb_trans_no karena stub SPB dibuat di sana.
 		"""
-		spb_unit = cstr(self.get("spb_unit")).strip()
+		spb_unit = nilai_per_blok(self.get("spb_unit"))
 		if not spb_unit:
 			return
 
 		self.kebun = spb_unit
-		self.divisi = cstr(self.get("spb_divisi")).strip() or None
+		self.divisi = nilai_per_blok(self.get("spb_divisi")) or None
 
 	def map_api_spb_trans_no(self):
 		"""Field spb dari API berisi trans_no SPB, bukan nama dokumennya.
@@ -248,6 +249,26 @@ class SecurityCheckPoint(Document):
 		)
 
 		return doc.name
+
+
+def nilai_per_blok(value):
+	"""Satu nilai dari isian per blok yang disambung "*", mis. "TPRE*TPRE*TPRE".
+
+	Pos TPRM mengirim spb_unit dan spb_divisi satu per blok SPB, disambung
+	bintang — dipakai apa adanya, teks itu jadi kebun yang tidak pernah ada dan
+	insert-nya ditolak validasi Link. Pos ASRM mengirim satu nilai saja, dan itu
+	lolos tanpa berubah.
+
+	Kalau bloknya dari lebih dari satu divisi — satu truk mengangkut dua divisi —
+	yang diambil yang bloknya paling banyak; kalau sama banyak, yang disebut
+	lebih dulu.
+	"""
+	nilai = [v.strip() for v in cstr(value).split("*") if v.strip()]
+	if not nilai:
+		return ""
+
+	jumlah = Counter(nilai)
+	return max(jumlah, key=lambda v: (jumlah[v], -nilai.index(v)))
 
 
 def koreksi_pos(scp):

@@ -39,6 +39,7 @@ TIMBANGAN_FIELDS = [
 
 SPB_FIELDS = [
 	"name",
+	"unit",
 	"posting_date",
 	"kendaraan",
 	"no_polisi",
@@ -285,7 +286,7 @@ def _build_data(timbangan_rows):
 	scp_map = _map_by_name(
 		"Security Check Point",
 		[r.get("ticket_number") for r in timbangan_rows],
-		["name", "supplier", "trans_no", "qr_code_scan"],
+		["name", "supplier", "trans_no", "qr_code_scan", "total_jjg", "total_brd"],
 	)
 	supplier_map = _map_by_name(
 		"Supplier",
@@ -377,6 +378,15 @@ def _build_data(timbangan_rows):
 			# total_brondolan.
 			"total_jjg": cint(row.get("jumlah_janjang")),
 			"total_brd": cint(row.get("total_brondolan")),
+			# Angka yang dicatat pos sendiri, sebagai pembanding hitungan
+			# rincian SPB di atas. Dibulatkan ke bawah dengan alasan yang sama.
+			"total_jjg_scp": cint(scp.get("total_jjg")),
+			"total_brd_scp": cint(scp.get("total_brd")),
+			# Kebun yang memanen, dari SPB — estate_code di atas pabrik yang
+			# menimbang. Unit SPB sudah memuat koreksi kebun dari pos (lihat
+			# koreksi_pos di Security Check Point). TBS Eksternal tidak punya SPB,
+			# jadi kosong.
+			"estate_spb": spb.get("unit"),
 			"bruto": row.get("bruto"),
 			"tarra": row.get("tara"),
 			"netto": row.get("netto"),
