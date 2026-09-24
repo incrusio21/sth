@@ -315,7 +315,7 @@
    "options": "Company"
   },
   {
-   "fetch_if_empty": 1,
+   "allow_on_submit": 1,
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_preview": 1,
@@ -528,7 +528,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-23 14:00:00.000000",
+ "modified": "2026-09-24 09:55:08.808409",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Security Check Point",
