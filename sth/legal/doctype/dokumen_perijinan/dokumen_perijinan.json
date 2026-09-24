@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:DP-{#####}",
  "creation": "2025-09-10 13:36:01.755721",
@@ -9,6 +10,7 @@
  "field_order": [
   "section_break_j2oz",
   "company",
+  "is_group",
   "column_break_ilyf",
   "amended_from",
   "details_section",
@@ -25,6 +27,12 @@
   "penanggung_jawab",
   "tanggal_daftar_ulang",
   "keterangan",
+  "section_break_fzcr",
+  "parent_dokumen_perijinan",
+  "lft",
+  "column_break_pifn",
+  "old_parent",
+  "rgt",
   "upload_file_tab",
   "upload",
   "kriteria_upload_html",
@@ -88,6 +96,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval!:doc.is_group",
    "fieldname": "details_section",
    "fieldtype": "Section Break",
    "label": "Details"
@@ -183,16 +192,61 @@
   {
    "fieldname": "column_break_hzav",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Dokumen Perijinan"
+  },
+  {
+   "fieldname": "parent_dokumen_perijinan",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Dokumen Perijinan",
+   "options": "Dokumen Perijinan"
+  },
+  {
+   "fieldname": "section_break_fzcr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_pifn",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2026-09-23 11:17:07.930007",
+ "modified": "2026-09-24 15:45:48.435363",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",
  "naming_rule": "Expression",
+ "nsm_parent_field": "parent_dokumen_perijinan",
  "owner": "Administrator",
  "permissions": [
   {
