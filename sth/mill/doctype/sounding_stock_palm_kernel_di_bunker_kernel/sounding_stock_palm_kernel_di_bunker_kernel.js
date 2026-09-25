@@ -104,7 +104,7 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
                     }
                 },
                 {
-                    label: __('Berat (Kg/M3)'),
+                    label: __('Volume Liter'),
                     fieldname: 'berat_kg',
                     fieldtype: 'Float',
                     read_only: 1,
@@ -113,7 +113,7 @@ frappe.ui.form.on("Sounding Stock Palm Kernel di Bunker Kernel", {
             ],
             primary_action_label: __('Hitung Limas'),
             primary_action(values) {
-                const result = values.perkiraan * values.berat_kg
+                const result = values.perkiraan * values.density * values.berat_kg
                 frappe.model.set_value(row.doctype, row.name, 'netto', result)
                 dialog.hide()
             }
