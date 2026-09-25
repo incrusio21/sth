@@ -743,10 +743,7 @@ def unit_query_for_plantation_and_mill(doctype, txt, searchfield, start, page_le
 		FROM `tabUnit`
 		WHERE
 			company = %(company)s
-			AND (
-				mill = 1
-				OR plantation = 1
-			)
+			AND mill = 1
 			AND (
 				name LIKE %(txt)s
 				OR nama LIKE %(txt)s
