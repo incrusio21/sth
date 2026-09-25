@@ -207,7 +207,8 @@ frappe.ui.form.on("Sounding Stock CPO di BST", {
         const total_stock = flt(frm.doc.tonase_sebenarnya) + flt(frm.doc.tonase_sebenarnya_2)
         const total_produksi = (total_stock + flt(frm.doc.pengiriman_cpo)) - flt(frm.doc.stock_awal)
         frm.set_value("stock_bst", total_stock)
-        frm.set_value("produksi_cpo", total_produksi)
+        // Dua desimal, kembaran pembulatan di calculate_totals sisi server.
+        frm.set_value("produksi_cpo", flt(total_produksi, 2))
     },
 
 });

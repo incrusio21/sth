@@ -186,7 +186,11 @@ class SoundingStockCPOdiBST(Document):
 		total_stock = flt(self.tonase_sebenarnya) + flt(self.tonase_sebenarnya_2)
 		total_produksi = (total_stock + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
 		self.stock_bst = total_stock
-		self.produksi_cpo = total_produksi
+		# Dua desimal, sama dengan qty di Stock Ledger. stock_awal dibaca dari
+		# ledger yang sudah dibulatkan, sedangkan tonase hasil kali belum; tangki
+		# yang tidak berubah jadi menyisakan pecahan seperti -0.0012 yang
+		# menahan submit lewat validate_minus_value.
+		self.produksi_cpo = flt(total_produksi, 2)
 
 		# OER-nya ikut di sini supaya tidak bisa ketinggalan lagi: produksi_cpo baru
 		# dihitung di baris atas, dan yang dipakai OER cuma angka itu dengan tbs olah
