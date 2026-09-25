@@ -10,6 +10,7 @@ from frappe.utils import flt
 from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	BARIS_JURNAL,
 	BKM_BIAYA,
+	KUNCI_BIAYA,
 	cari_masa,
 	hitung_shu,
 	jenis_bkm,
@@ -409,7 +410,11 @@ class TestHitungSHU(FrappeTestCase):
 
 # Peta akun sekadar penanda, bukan nama akun sungguhan — susun_baris_jurnal
 # hanya meneruskan apa yang diberikan.
-AKUN_JURNAL = {kunci: f"AKUN-{kunci}" for kunci, *_ in BARIS_JURNAL}
+AKUN_JURNAL = {kunci: f"AKUN-{kunci}" for kunci, *_ in BARIS_JURNAL if kunci != KUNCI_BIAYA}
+
+# Biaya yang seluruhnya sudah masuk buku besar, satu akun satu cost center.
+def biaya_posted(jumlah):
+	return [{"account": "AKUN-BIAYA", "cost_center": "CC-1", "jumlah": jumlah}] if jumlah else []
 
 # Dua baris yang harus pasti kredit, dan field nilainya di dokumen.
 MITRA_FIELD = {
@@ -445,7 +450,7 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		return dasar
 
 	def test_urutan_dan_sisi_sesuai_excel(self):
-		baris = susun_baris_jurnal(self.nilai(), AKUN_JURNAL)
+		baris = susun_baris_jurnal(self.nilai(), AKUN_JURNAL, biaya_posted(self.BIAYA))
 
 		self.assertEqual(len(baris), 6)
 		self.assertEqual(baris[0]["kunci"], "akun_pembelian_tbs")
@@ -457,10 +462,11 @@ class TestSusunBarisJurnal(FrappeTestCase):
 			self.assertGreater(row["credit"], 0, msg=row["kunci"])
 
 	def test_akun_diambil_dari_peta(self):
-		baris = susun_baris_jurnal(self.nilai(), AKUN_JURNAL)
+		baris = susun_baris_jurnal(self.nilai(), AKUN_JURNAL, biaya_posted(self.BIAYA))
+		lain = [row for row in baris if row["kunci"] != KUNCI_BIAYA]
 		self.assertEqual(
-			[row["account"] for row in baris],
-			[AKUN_JURNAL[row["kunci"]] for row in baris],
+			[row["account"] for row in lain],
+			[AKUN_JURNAL[row["kunci"]] for row in lain],
 		)
 
 	def test_debit_dan_kredit_seimbang_tanpa_baris_pembulatan(self):
@@ -481,7 +487,7 @@ class TestSusunBarisJurnal(FrappeTestCase):
 					persen_bagi_hasil,
 				)
 			)
-			baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
+			baris = susun_baris_jurnal(nilai, AKUN_JURNAL, biaya_posted(self.BIAYA))
 
 			self.assertEqual(
 				flt(sum(row["debit"] for row in baris), 2),
@@ -494,7 +500,7 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		nilai = self.nilai(total_biaya_perawatan_panen_dan_transport=0, pembayaran_ke_mitra=0)
 		kunci = [row["kunci"] for row in susun_baris_jurnal(nilai, AKUN_JURNAL)]
 
-		self.assertNotIn("akun_biaya_plasma", kunci)
+		self.assertNotIn(KUNCI_BIAYA, kunci)
 		self.assertNotIn("akun_hutang_plasma_antara", kunci)
 		self.assertIn("akun_pembelian_tbs", kunci)
 
@@ -509,7 +515,7 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		nilai.update(hitung_shu(nilai["jumlah_produksi"], 100000000.0, 2.5, 0.25, 50))
 		self.assertLess(nilai["hasil_bersih"], 0)
 
-		baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
+		baris = susun_baris_jurnal(nilai, AKUN_JURNAL, biaya_posted(100000000.0))
 
 		for row in baris:
 			self.assertGreaterEqual(row["debit"], 0, msg=row["kunci"])
@@ -534,7 +540,7 @@ class TestSusunBarisJurnal(FrappeTestCase):
 			"total_biaya_perawatan_panen_dan_transport": 100000000.0,
 		}
 		nilai.update(hitung_shu(nilai["jumlah_produksi"], 100000000.0, 2.5, 0.25, 50))
-		baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
+		baris = susun_baris_jurnal(nilai, AKUN_JURNAL, biaya_posted(100000000.0))
 
 		self.assertEqual(baris[0]["kunci"], "akun_pembelian_tbs")
 		self.assertEqual(
@@ -549,7 +555,7 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		biaya = 40595964.30
 		nilai = {"jumlah_produksi": 0, "total_biaya_perawatan_panen_dan_transport": biaya}
 		nilai.update(hitung_shu(0, biaya, 3, 0.5, 50))
-		baris = susun_baris_jurnal(nilai, AKUN_JURNAL)
+		baris = susun_baris_jurnal(nilai, AKUN_JURNAL, biaya_posted(biaya))
 
 		self.assertEqual(baris[0]["kunci"], "akun_pembelian_tbs")
 		self.assertEqual(baris[0]["debit"], flt(2 * biaya, 2))
@@ -561,11 +567,33 @@ class TestSusunBarisJurnal(FrappeTestCase):
 	def test_dokumen_kosong_tidak_menghasilkan_baris(self):
 		self.assertEqual(susun_baris_jurnal({}, AKUN_JURNAL), [])
 
+	def test_biaya_belum_posted_tidak_dijurnal_penutup_mengecil(self):
+		# Keadaan sebenarnya: BKM TMDE Juli 2026, dari 37.595.964,30 yang ditagih
+		# baru 11.918.879,86 yang GL-nya lahir. Sisanya tidak punya baris, dan
+		# Pembelian TBS terdebit lebih kecil sebesar itu. Mitra tetap ditagih penuh.
+		biaya, posted = 37595964.30, 11918879.86
+		nilai = {"jumlah_produksi": self.JUMLAH_PRODUKSI, "total_biaya_perawatan_panen_dan_transport": biaya}
+		nilai.update(hitung_shu(self.JUMLAH_PRODUKSI, biaya, 2.5, 0.25, 50))
+		baris = susun_baris_jurnal(nilai, AKUN_JURNAL, biaya_posted(posted))
+
+		biaya_rows = [row for row in baris if row["kunci"] == KUNCI_BIAYA]
+		self.assertEqual(len(biaya_rows), 1)
+		self.assertEqual(biaya_rows[0]["credit"], posted)
+		self.assertEqual(baris[0]["debit"], flt(self.JUMLAH_PRODUKSI - (biaya - posted), 2))
+		self.assertEqual(
+			flt(sum(row["debit"] for row in baris), 2),
+			flt(sum(row["credit"] for row in baris), 2),
+		)
+
+	def test_tanpa_bkm_posted_tidak_ada_baris_biaya(self):
+		baris = susun_baris_jurnal(self.nilai(), AKUN_JURNAL)
+
+		self.assertNotIn(KUNCI_BIAYA, [row["kunci"] for row in baris])
+		self.assertEqual(baris[0]["debit"], flt(self.JUMLAH_PRODUKSI - self.BIAYA, 2))
+
 
 class TestBarisJurnalBiaya(FrappeTestCase):
-	"""Baris biaya: akunnya dinolkan sejauh GL-nya sudah ada, sisanya ke kontra."""
-
-	KONTRA = "AKUN-akun_biaya_plasma"
+	"""Baris biaya: tiap akun di bawah Kepala Akun Biaya dinolkan, tanpa akun kontra."""
 
 	def pembalikan(self, *jumlah):
 		return [
@@ -573,61 +601,25 @@ class TestBarisJurnalBiaya(FrappeTestCase):
 			for i, n in enumerate(jumlah, start=1)
 		]
 
-	def test_tanpa_pembalikan_jadi_satu_baris_kontra(self):
-		baris = baris_jurnal_biaya(31654532.0, None, self.KONTRA)
+	def test_tanpa_pembalikan_tidak_ada_baris(self):
+		# BKM-nya belum ada yang Posted: tidak ada yang dijurnal.
+		self.assertEqual(baris_jurnal_biaya(None), [])
+		self.assertEqual(baris_jurnal_biaya([]), [])
 
-		self.assertEqual(len(baris), 1)
-		self.assertEqual(baris[0]["account"], self.KONTRA)
-		self.assertEqual(baris[0]["credit"], 31654532.0)
-
-	def test_pembalikan_penuh_tidak_menyisakan_baris_kontra(self):
-		# Kalau semua BKM sudah Posted, tidak ada yang perlu mampir ke kontra.
-		baris = baris_jurnal_biaya(37595964.30, self.pembalikan(28594222.76, 9001741.54), self.KONTRA)
+	def test_satu_baris_per_akun_dan_cost_center(self):
+		baris = baris_jurnal_biaya(self.pembalikan(28594222.76, 9001741.54))
 
 		self.assertEqual(len(baris), 2)
-		self.assertNotIn(self.KONTRA, [row["account"] for row in baris])
-
-	def test_pembalikan_sebagian_menyisakan_kontra(self):
-		# Keadaan sebenarnya: BKM Panen TMDE Juli 2026, 8 dari 66 dokumen yang
-		# GL-nya sudah lahir. Sisanya tetap ditagih ke mitra lewat kontra.
-		baris = baris_jurnal_biaya(37595964.30, self.pembalikan(11918879.86), self.KONTRA)
-		kontra = [row for row in baris if row["account"] == self.KONTRA]
-
-		self.assertEqual(len(baris), 2)
-		self.assertEqual(flt(kontra[0]["credit"], 2), 25677084.44)
-
-	def test_totalnya_selalu_sama_berapapun_yang_sudah_posted(self):
-		# Inilah yang menjaga jurnal tetap seimbang: berapa pun bagian yang sudah
-		# masuk buku besar, jumlah kreditnya tetap sebesar biaya di perhitungan.
-		for terbalas in (0, 1, 11918879.86, 37595964.29, 37595964.30):
-			baris = baris_jurnal_biaya(37595964.30, self.pembalikan(terbalas), self.KONTRA)
-			total = sum(row["credit"] - row["debit"] for row in baris)
-
-			self.assertEqual(flt(total, 2), 37595964.30, msg=f"terbalas={terbalas}")
-
-	def test_pembalikan_melebihi_biaya_membuat_kontra_jadi_debit(self):
-		# Tidak dipotong diam-diam — selisihnya harus kelihatan di buku besar.
-		baris = baris_jurnal_biaya(10000000.0, self.pembalikan(12000000.0), self.KONTRA)
-		kontra = [row for row in baris if row["account"] == self.KONTRA][0]
-
-		self.assertEqual(kontra["debit"], 2000000.0)
-		self.assertEqual(kontra["credit"], 0)
+		self.assertEqual([row["account"] for row in baris], ["AKUN-BIAYA-1", "AKUN-BIAYA-2"])
+		self.assertEqual([row["cost_center"] for row in baris], ["CC-1", "CC-2"])
+		self.assertEqual([row["credit"] for row in baris], [28594222.76, 9001741.54])
+		self.assertTrue(all(row["kunci"] == KUNCI_BIAYA for row in baris))
 
 	def test_saldo_kredit_di_akun_biaya_jadi_debit(self):
-		baris = baris_jurnal_biaya(31654532.0, self.pembalikan(-500000.0), self.KONTRA)
+		baris = baris_jurnal_biaya(self.pembalikan(-500000.0))
 
 		self.assertEqual(baris[0]["debit"], 500000.0)
 		self.assertEqual(baris[0]["credit"], 0)
 
-	def test_cost_center_ikut_asal_biayanya(self):
-		baris = baris_jurnal_biaya(37595964.30, self.pembalikan(11918879.86), self.KONTRA)
-
-		self.assertEqual(baris[0]["cost_center"], "CC-1")
-		# Baris kontra tidak punya cost center sendiri — ikut dokumennya.
-		self.assertIsNone(baris[1]["cost_center"])
-
 	def test_pembalikan_nol_dilewati(self):
-		baris = baris_jurnal_biaya(31654532.0, self.pembalikan(0, 0), self.KONTRA)
-
-		self.assertEqual(len(baris), 1)
-		self.assertEqual(baris[0]["account"], self.KONTRA)
+		self.assertEqual(baris_jurnal_biaya(self.pembalikan(0, 0)), [])

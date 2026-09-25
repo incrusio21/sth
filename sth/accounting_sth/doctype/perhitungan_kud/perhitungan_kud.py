@@ -44,14 +44,21 @@ BKM_BIAYA = (
 # jurnal seimbang. Di bulan normal keduanya sama angka, karena hitung_shu()
 # menyusun Hasil Bersih sebagai sisa Jumlah Produksi dikurangi biaya, fee, dan
 # PPh 22, lalu memecahnya jadi Angsuran Hutang dan Pembayaran ke Mitra — juga
-# sebagai sisa, jadi kelima kredit memang berjumlah persis Jumlah Produksi.
+# sebagai sisa, jadi kelima kredit memang berjumlah persis Jumlah Produksi —
+# selama seluruh biaya BKM-nya sudah masuk buku besar. Yang belum tidak ikut
+# dijurnal, dan penutupnya mengecil sebesar itu.
 # Fieldnya tetap didaftar supaya pemetaan akun semua baris ada di satu tabel.
 SISI_PENUTUP = "penutup"
+
+# Baris biaya tidak punya satu akun: dipecah per (akun, cost center) di bawah
+# Kepala Akun Biaya, lihat baris_jurnal_biaya(). Kuncinya karena itu cuma
+# penanda, bukan field akun di dokumen.
+KUNCI_BIAYA = "pembalikan"
 
 BARIS_JURNAL = (
 	("akun_pembelian_tbs", "jumlah_produksi", SISI_PENUTUP, "Pembelian TBS Plasma"),
 	(
-		"akun_biaya_plasma",
+		KUNCI_BIAYA,
 		"total_biaya_perawatan_panen_dan_transport",
 		"credit",
 		"Biaya Perawatan, Panen & Transport",
@@ -341,31 +348,27 @@ def rekap_biaya_bkm(baris):
 	return {fieldname: flt(total, PRESISI_UANG) for fieldname, total in hasil.items()}
 
 
-def baris_jurnal_biaya(total, pembalikan, akun_kontra):
+def baris_jurnal_biaya(pembalikan):
 	"""Baris kredit untuk Biaya Perawatan, Panen & Transport. Fungsi murni.
 
 	Biaya mitra dikembalikan ke akun biayanya sendiri sampai saldonya nol —
-	itulah `pembalikan`, satu baris per (akun, cost center) yang tersentuh BKM
-	di perhitungan ini. Sisanya, yaitu bagian yang GL-nya belum lahir karena
-	BKM-nya belum Posted, tetap dikredit ke akun kontra supaya jurnal seimbang
-	dan mitra tetap ditagih penuh.
+	itulah `pembalikan`, satu baris per (akun, cost center) di bawah Kepala Akun
+	Biaya yang tersentuh BKM di perhitungan ini.
 
-	Saldo akun kontra karena itu bisa dibaca sebagai berapa biaya BKM yang belum
-	masuk buku besar. Begitu BKM-nya Posted, debitnya muncul di akun aslinya dan
-	tidak ikut terbalas lagi — penyelesaiannya di luar dokumen ini.
-
-	Pembalikan yang jumlahnya melampaui total biaya tidak dipotong: kalau itu
-	terjadi, akun kontra jadi debit dan selisihnya kelihatan, bukan tersembunyi.
+	Hanya itu yang dijurnal. Bagian yang GL-nya belum lahir karena BKM-nya belum
+	Posted, begitu juga Lain Lain dan material BKM Perawatan yang memang tidak
+	pernah lewat GL BKM, tidak punya baris di sini. Mitra tetap ditagih penuh
+	lewat Hasil Bersih; yang menanggung selisihnya baris penutup, jadi Pembelian
+	TBS terdebit lebih kecil dari Jumlah Produksi sebesar bagian yang tidak
+	dijurnal itu.
 	"""
 	baris = []
-	terbalas = 0.0
 
 	for row in pembalikan or []:
 		jumlah = flt(row.get("jumlah"), PRESISI_UANG)
 		if not jumlah:
 			continue
 
-		terbalas += jumlah
 		baris.append({
 			"account": row.get("account"),
 			"cost_center": row.get("cost_center"),
@@ -374,18 +377,7 @@ def baris_jurnal_biaya(total, pembalikan, akun_kontra):
 			"debit": -jumlah if jumlah < 0 else 0.0,
 			"credit": jumlah if jumlah > 0 else 0.0,
 			"keterangan": _("Nol-kan biaya {0}").format(row.get("account")),
-			"kunci": "pembalikan",
-		})
-
-	sisa = flt(flt(total, PRESISI_UANG) - terbalas, PRESISI_UANG)
-	if sisa:
-		baris.append({
-			"account": akun_kontra,
-			"cost_center": None,
-			"debit": -sisa if sisa < 0 else 0.0,
-			"credit": sisa if sisa > 0 else 0.0,
-			"keterangan": _("Biaya Perawatan, Panen & Transport belum masuk buku besar"),
-			"kunci": "akun_biaya_plasma",
+			"kunci": KUNCI_BIAYA,
 		})
 
 	return baris
@@ -405,13 +397,16 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 
 	Yang menanggung selisihnya baris penutup, Pembelian TBS Plasma: dihitung dari
 	baris-baris lain, bukan dari `jumlah_produksi`, jadi jurnalnya seimbang dengan
-	sendirinya. Di bulan normal angkanya persis Jumlah Produksi. Di bulan yang
-	biayanya melampaui produksi, kelebihannya ikut mendarat di situ — akun
-	pembelian bisa terdebit lebih besar dari nilai TBS yang sungguh dibeli, dan itu
-	memang konsekuensi yang dipilih supaya kedua baris mitra pasti kredit.
+	sendirinya. Di bulan normal, dengan semua BKM-nya sudah Posted, angkanya persis
+	Jumlah Produksi. Di bulan yang biayanya melampaui produksi, kelebihannya ikut
+	mendarat di situ — akun pembelian bisa terdebit lebih besar dari nilai TBS yang
+	sungguh dibeli, dan itu memang konsekuensi yang dipilih supaya kedua baris mitra
+	pasti kredit.
 
-	`pembalikan` memecah baris biaya jadi penolan per akun, lihat
-	baris_jurnal_biaya(). Totalnya tetap sama, jadi penutupnya tidak bergeser.
+	Baris biaya tidak dibaca dari `total_biaya_perawatan_panen_dan_transport`,
+	melainkan dari `pembalikan`: penolan per akun, lihat baris_jurnal_biaya().
+	Biaya yang belum masuk buku besar tidak dijurnal, jadi penutupnya berkurang
+	sebesar itu.
 
 	Balikan: list of dict {account, cost_center, debit, credit, keterangan, kunci}.
 	"""
@@ -423,9 +418,8 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 			penutup = (kunci, keterangan)
 			continue
 
-		if kunci == "akun_biaya_plasma":
-			jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
-			baris.extend(baris_jurnal_biaya(jumlah, pembalikan, akun.get(kunci)))
+		if kunci == KUNCI_BIAYA:
+			baris.extend(baris_jurnal_biaya(pembalikan))
 			continue
 
 		jumlah = abs(flt(nilai.get(fieldname), PRESISI_UANG))
@@ -687,14 +681,39 @@ class PerhitunganKUD(Document):
 		if not self.cost_center:
 			self.cost_center = erpnext.get_default_cost_center(self.company)
 
-	def pembalikan_biaya(self):
-		"""Saldo akun biaya yang dinolkan jurnal ini.
+	def saldo_biaya_bkm(self):
+		"""(pembalikan, di_luar): saldo akun biaya yang dinolkan jurnal ini, dan
+		biaya BKM yang jatuh di luar Kepala Akun Biaya.
 
 		Dibaca ulang tiap kali, bukan disimpan: BKM yang Posted bertambah terus
 		sampai periode ditutup, jadi angkanya memang bergerak sampai dokumen ini
 		disubmit. Yang berlaku adalah keadaan saat submit.
 		"""
 		return saldo_bkm_di_kepala_akun(self.company, self.detail_biaya)
+
+	def validate_biaya_di_luar_kepala(self, di_luar):
+		"""Biaya BKM mitra harus berada di bawah Kepala Akun Biaya.
+
+		Di luar itu tidak ada baris yang menolkannya, dan tidak ada akun penampung
+		lagi — biayanya tinggal di akun asalnya tanpa kelihatan. Karena itu
+		ditolak, bukan dilewati: setelannya yang dilengkapi.
+		"""
+		if not di_luar:
+			return
+
+		daftar = "".join(
+			"<li>{0}: {1}</li>".format(row["account"], frappe.format(row["jumlah"], "Currency"))
+			for row in di_luar
+		)
+		frappe.throw(
+			_(
+				"Biaya BKM di perhitungan ini masuk ke akun yang tidak berada di bawah "
+				"Kepala Akun Biaya mana pun:<ul>{0}</ul>"
+				"Tambahkan akun grupnya di <b>STH Accounting Settings</b>, tabel "
+				"<b>Perhitungan KUD - Kepala Akun Biaya yang Dinolkan</b>."
+			).format(daftar),
+			title=_("Kepala Akun Biaya Belum Lengkap"),
+		)
 
 	def susun_pratinjau_jurnal(self):
 		"""Isi tabel Jurnal di tab Akun & Jurnal, apa adanya menurut isi dokumen.
@@ -704,7 +723,8 @@ class PerhitunganKUD(Document):
 		dibiarkan kosong di sini — biar kelihatan mana yang belum diisi, bukan
 		melempar error waktu menyimpan.
 		"""
-		baris = self.baris_jurnal()
+		pembalikan, di_luar = self.saldo_biaya_bkm()
+		baris = self.baris_jurnal(pembalikan)
 
 		# `kunci` cuma penanda internal susun_baris_jurnal, bukan kolom tabelnya.
 		self.set(
@@ -721,6 +741,10 @@ class PerhitunganKUD(Document):
 			self.status_jurnal = _("Belum ada angka, jurnal masih kosong")
 		elif tanpa_akun:
 			self.status_jurnal = _("Akun belum diisi: {0}").format(", ".join(tanpa_akun))
+		elif di_luar:
+			self.status_jurnal = _("Biaya BKM di luar Kepala Akun Biaya: {0}").format(
+				", ".join(row["account"] for row in di_luar)
+			)
 		elif self.total_jurnal_debit != self.total_jurnal_kredit:
 			self.status_jurnal = _("Tidak seimbang, selisih {0}").format(
 				flt(self.total_jurnal_debit - self.total_jurnal_kredit, PRESISI_UANG)
@@ -728,16 +752,32 @@ class PerhitunganKUD(Document):
 		else:
 			self.status_jurnal = _("{0} baris, seimbang").format(len(baris))
 
-	def baris_jurnal(self):
+			# Bagian biaya yang GL BKM-nya belum ada tidak dijurnal. Disebut di
+			# sini supaya kecilnya debit Pembelian TBS tidak jadi teka-teki.
+			belum = flt(
+				flt(self.total_biaya_perawatan_panen_dan_transport)
+				- sum(flt(row["jumlah"]) for row in pembalikan),
+				PRESISI_UANG,
+			)
+			if belum:
+				self.status_jurnal += _(". Biaya belum masuk buku besar, tidak dijurnal: {0}").format(
+					frappe.format(belum, "Currency")
+				)
+
+	def baris_jurnal(self, pembalikan=None):
 		"""Baris jurnal dokumen ini. Dipakai pratinjau maupun GL Entry, sekali susun.
 
 		Akunnya dibaca dari dokumen ini — bukan dari setelan. Setelan hanya memberi
 		nilai awal lewat isi_akun_dari_setelan(). Begitu dokumen disubmit, yang
 		berlaku persis apa yang tercatat di sini, jadi setelan yang berubah
-		belakangan tidak menggeser jurnal yang sudah jadi.
+		belakangan tidak menggeser jurnal yang sudah jadi. Kecuali baris biaya: akunnya
+		dari GL BKM di bawah Kepala Akun Biaya, lihat saldo_biaya_bkm().
 		"""
-		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL}
-		return susun_baris_jurnal(self.as_dict(), akun, self.pembalikan_biaya())
+		if pembalikan is None:
+			pembalikan, _di_luar = self.saldo_biaya_bkm()
+
+		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL if kunci != KUNCI_BIAYA}
+		return susun_baris_jurnal(self.as_dict(), akun, pembalikan)
 
 	def validate_akun_jurnal(self, baris):
 		"""Akun wajib diisi sejauh barisnya memang lahir, bukan sejauh fieldnya terisi.
@@ -769,7 +809,10 @@ class PerhitunganKUD(Document):
 	def get_gl_entries(self):
 		cost_center = self.cost_center or get_cost_center_kud(self.company)
 
-		baris = self.baris_jurnal()
+		pembalikan, di_luar = self.saldo_biaya_bkm()
+		self.validate_biaya_di_luar_kepala(di_luar)
+
+		baris = self.baris_jurnal(pembalikan)
 		if not baris:
 			return []
 
@@ -917,7 +960,6 @@ def get_unit_plasma(company):
 # lintas company.
 KOLOM_AKUN_SETELAN = (
 	"akun_pembelian_tbs",
-	"akun_biaya_plasma",
 	"akun_management_fee",
 	"akun_pph22",
 	"akun_hutang_plasma_antara",
@@ -1296,33 +1338,38 @@ def akun_di_bawah(kepala, company):
 
 
 def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
-	"""Saldo tiap (akun, cost center) yang tersentuh BKM di perhitungan ini.
+	"""Saldo GL BKM di perhitungan ini, dipilah ke dalam dan ke luar Kepala Akun Biaya.
 
 	Yang dibaca GL Entry milik BKM yang terdaftar di Rincian Biaya BKM, bukan
 	semua GL di cost center unit plasma. Cuma dokumen-dokumen itu yang biayanya
 	ditagihkan ke mitra; menolkan yang lain berarti menghapus biaya inti yang
 	kebetulan menumpang cost center sama.
 
-	Cost center ikut dikelompokkan supaya penolannya mendarat persis di tempat
-	biayanya muncul — kalau tidak, akunnya nol secara total tapi tiap cost center
-	jadi punya saldo palsu.
+	Balikan: (pembalikan, di_luar).
 
-	Balikan: list of dict {account, cost_center, jumlah}, urut dan tanpa nol.
+	`pembalikan` — list of dict {account, cost_center, jumlah} untuk akun non grup
+	di bawah kepala akun, urut dan tanpa nol. Cost center ikut dikelompokkan
+	supaya penolannya mendarat persis di tempat biayanya muncul — kalau tidak,
+	akunnya nol secara total tapi tiap cost center jadi punya saldo palsu.
+
+	`di_luar` — list of dict {account, jumlah}: akun bersaldo debit, jadi biaya,
+	yang tidak berada di bawah kepala akun mana pun. Sisi kredit BKM (akun hutang
+	upahnya) bersaldo kredit dan karena itu tidak ikut. Kalau kepala akunnya belum
+	diatur sama sekali, seluruh biaya BKM yang sudah masuk buku besar jatuh ke
+	sini.
 	"""
 	if not baris_bkm:
-		return []
+		return [], []
+
+	voucher_no = sorted({row.voucher_no for row in baris_bkm if row.voucher_no})
+	voucher_type = sorted({row.voucher_type for row in baris_bkm if row.voucher_type})
+	if not voucher_no or not voucher_type:
+		return [], []
 
 	if kepala is None:
 		kepala = get_kepala_akun_kud(company)
 
 	akun = akun_di_bawah(kepala, company)
-	if not akun:
-		return []
-
-	voucher_no = sorted({row.voucher_no for row in baris_bkm if row.voucher_no})
-	voucher_type = sorted({row.voucher_type for row in baris_bkm if row.voucher_type})
-	if not voucher_no or not voucher_type:
-		return []
 
 	rows = frappe.db.sql(
 		"""
@@ -1332,7 +1379,6 @@ def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
 		  AND is_cancelled = 0
 		  AND voucher_type IN %(voucher_type)s
 		  AND voucher_no IN %(voucher_no)s
-		  AND account IN %(account)s
 		GROUP BY account, cost_center
 		HAVING saldo <> 0
 		ORDER BY account, cost_center
@@ -1341,12 +1387,21 @@ def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
 			"company": company,
 			"voucher_type": tuple(voucher_type),
 			"voucher_no": tuple(voucher_no),
-			"account": tuple(akun),
 		},
 		as_dict=True,
 	)
 
-	return [
-		{"account": row.account, "cost_center": row.cost_center, "jumlah": flt(row.saldo, PRESISI_UANG)}
-		for row in rows
-	]
+	pembalikan = []
+	di_luar = {}
+
+	for row in rows:
+		jumlah = flt(row.saldo, PRESISI_UANG)
+
+		if row.account in akun:
+			pembalikan.append(
+				{"account": row.account, "cost_center": row.cost_center, "jumlah": jumlah}
+			)
+		elif jumlah > 0:
+			di_luar[row.account] = flt(di_luar.get(row.account, 0) + jumlah, PRESISI_UANG)
+
+	return pembalikan, [{"account": a, "jumlah": j} for a, j in sorted(di_luar.items())]

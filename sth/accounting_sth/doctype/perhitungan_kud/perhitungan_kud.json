@@ -52,7 +52,6 @@
   "tab_akun",
   "akun_section",
   "akun_pembelian_tbs",
-  "akun_biaya_plasma",
   "akun_management_fee",
   "column_break_akun",
   "akun_pph22",
@@ -372,12 +371,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "akun_biaya_plasma",
-   "fieldtype": "Link",
-   "label": "Lawan Biaya Perawatan, Panen & Transport",
-   "options": "Account"
-  },
-  {
    "fieldname": "akun_management_fee",
    "fieldtype": "Link",
    "label": "Pendapatan Management Fee",
@@ -461,7 +454,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 11:10:49.019626",
+ "modified": "2026-09-25 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",
