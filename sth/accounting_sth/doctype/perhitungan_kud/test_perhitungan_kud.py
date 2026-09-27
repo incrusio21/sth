@@ -241,8 +241,19 @@ class TestRekapBiayaBKM(FrappeTestCase):
 				"biaya_bkm_perawatan": 25.0,
 				"biaya_bkm_panen": 20.0,
 				"biaya_bkm_traksi": 5.0,
+				"biaya_bapp": 0.0,
 			},
 		)
+
+	def test_bapp_dipisah_dari_bkm(self):
+		baris = [
+			baris_bkm("Buku Kerja Mandor Panen", 20.0),
+			baris_bkm("BAPP", 7.5, jenis="BAPP", divisi=None),
+		]
+
+		rekap = rekap_biaya_bkm(baris)
+		self.assertEqual(rekap["biaya_bapp"], 7.5)
+		self.assertEqual(rekap["biaya_bkm_panen"], 20.0)
 
 	def test_tanpa_baris_semuanya_nol(self):
 		self.assertEqual(set(rekap_biaya_bkm([]).values()), {0.0})
@@ -292,6 +303,20 @@ class TestHitungBiaya(FrappeTestCase):
 
 		self.assertEqual(doc.biaya_bkm_panen, 0.0)
 		self.assertEqual(doc.biaya_perawatan, 10.0)
+
+	def test_bapp_masuk_total_bukan_biaya_perawatan(self):
+		doc = self.doc(
+			[
+				baris_bkm("Buku Kerja Mandor Perawatan", 10.0),
+				baris_bkm("BAPP", 6.0, jenis="BAPP", divisi=None),
+			],
+			lain_lain=4.0,
+		)
+		doc.hitung_biaya()
+
+		self.assertEqual(doc.biaya_bapp, 6.0)
+		self.assertEqual(doc.biaya_perawatan, 10.0)
+		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 20.0)
 
 	def test_lain_lain_masuk_lewat_total(self):
 		doc = self.doc([baris_bkm("Buku Kerja Mandor Perawatan", 10.0)], lain_lain=4.0)

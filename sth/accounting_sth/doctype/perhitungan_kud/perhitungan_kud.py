@@ -30,6 +30,14 @@ BKM_BIAYA = (
 	("Buku Kerja Mandor Traksi", "biaya_bkm_traksi"),
 )
 
+# BAPP kontraktor di unit plasma juga ditanggung mitra — permintaan user
+# 28 September 2026. Barisnya ikut Rincian Biaya supaya GL BAPP ikut dinolkan
+# bersama GL BKM, tapi angkanya tidak dijumlah ke Biaya Perawatan: fieldnya
+# sendiri, langsung ke Total Biaya.
+BAPP_BIAYA = ("BAPP", "biaya_bapp")
+
+BIAYA_DOKUMEN = (*BKM_BIAYA, BAPP_BIAYA)
+
 # Susunan jurnal: satu debit sebesar seluruh pembelian, lalu kredit yang
 # memecahnya sampai habis. Urutannya mengikuti Jurnal KUD.xlsx.
 #
@@ -330,14 +338,55 @@ def ambil_baris_bkm(company, units, tanggal_mulai, tanggal_selesai):
 	return baris
 
 
-def rekap_biaya_bkm(baris):
-	"""Total per jenis BKM dari daftar barisnya. Fungsi murni — tanpa database.
+def ambil_baris_bapp(company, units, tanggal_mulai, tanggal_selesai):
+	"""BAPP yang jadi biaya mitra, satu baris per dokumen, sebentuk dengan ambil_baris_bkm.
 
-	Balikan: dict fieldname → total, satu untuk tiap jenis BKM. Dipakai baik
-	untuk baris mentah dari SQL maupun untuk baris child table yang tersimpan,
-	supaya angka ringkasan tidak pernah beda dari daftarnya.
+	Yang diambil `net_total`, nilai sebelum pajak: PPN BAPP bukan biaya kebun,
+	dan nilai itulah yang didebit BAPP ke akun kegiatannya di buku besar.
+	Unitnya dari kepala dokumen, disaring plasma seperti BKM.
 	"""
-	fieldname_per_doctype = dict(BKM_BIAYA)
+	if not units:
+		return []
+
+	rows = frappe.db.sql(
+		"""
+		SELECT b.name AS voucher_no, b.posting_date, b.unit,
+		       b.net_total AS nilai
+		FROM `tabBAPP` b
+		INNER JOIN `tabUnit` u ON b.unit = u.name
+		WHERE b.docstatus = 1
+		  AND b.company = %(company)s
+		  AND u.plasma = 1
+		  AND b.unit IN %(units)s
+		  AND b.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+		ORDER BY b.posting_date, b.name
+		""",
+		{
+			"company": company,
+			"units": tuple(units),
+			"tanggal_mulai": getdate(tanggal_mulai),
+			"tanggal_selesai": getdate(tanggal_selesai),
+		},
+		as_dict=True,
+	)
+
+	doctype = BAPP_BIAYA[0]
+	for row in rows:
+		row["voucher_type"] = doctype
+		row["jenis"] = doctype
+		row["nilai"] = flt(row["nilai"], PRESISI_UANG)
+
+	return rows
+
+
+def rekap_biaya_bkm(baris):
+	"""Total per jenis dokumen biaya dari daftar barisnya. Fungsi murni — tanpa database.
+
+	Balikan: dict fieldname → total, satu untuk tiap jenis BKM dan satu untuk
+	BAPP. Dipakai baik untuk baris mentah dari SQL maupun untuk baris child
+	table yang tersimpan, supaya angka ringkasan tidak pernah beda dari daftarnya.
+	"""
+	fieldname_per_doctype = dict(BIAYA_DOKUMEN)
 	hasil = {fieldname: 0.0 for fieldname in fieldname_per_doctype.values()}
 
 	for row in baris:
@@ -591,6 +640,9 @@ class PerhitunganKUD(Document):
 		Ketiga nilai itu sendiri dijumlah ulang dari daftar BKM-nya, jadi angka
 		ringkasan tidak bisa menyimpang dari daftar yang ditampilkan.
 
+		Biaya BAPP dijumlah dari daftar yang sama, tapi berdiri sendiri di luar
+		Biaya Perawatan dan baru bertemu di totalnya.
+
 		Lain-lain tetap manual dan ikut terpotong lewat totalnya — kalau tidak,
 		angka yang diketik di situ tidak berpengaruh apa-apa.
 		"""
@@ -600,7 +652,7 @@ class PerhitunganKUD(Document):
 			sum(flt(self.get(fieldname)) for _, fieldname in BKM_BIAYA), PRESISI_UANG
 		)
 		self.total_biaya_perawatan_panen_dan_transport = flt(
-			self.biaya_perawatan + flt(self.lain_lain), PRESISI_UANG
+			self.biaya_perawatan + flt(self.biaya_bapp) + flt(self.lain_lain), PRESISI_UANG
 		)
 
 	def hitung_rekap(self):
@@ -899,7 +951,8 @@ class PerhitunganKUD(Document):
 
 		self.set(
 			"detail_biaya",
-			ambil_baris_bkm(self.company, units, self.tanggal_mulai, self.tanggal_selesai),
+			ambil_baris_bkm(self.company, units, self.tanggal_mulai, self.tanggal_selesai)
+			+ ambil_baris_bapp(self.company, units, self.tanggal_mulai, self.tanggal_selesai),
 		)
 
 		self.hitung_baris()
@@ -932,10 +985,12 @@ class PerhitunganKUD(Document):
 
 		return {
 			"jumlah_baris": len(self.detail),
-			"jumlah_bkm": len(self.detail_biaya),
+			"jumlah_bkm": len([r for r in self.detail_biaya if r.voucher_type != BAPP_BIAYA[0]]),
+			"jumlah_bapp": len([r for r in self.detail_biaya if r.voucher_type == BAPP_BIAYA[0]]),
 			"status_harga": self.status_harga,
 			"status_jurnal": self.status_jurnal,
 			"biaya_perawatan": self.biaya_perawatan,
+			"biaya_bapp": self.biaya_bapp,
 		}
 
 
@@ -1340,8 +1395,8 @@ def akun_di_bawah(kepala, company):
 def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
 	"""Saldo GL BKM di perhitungan ini, dipilah ke dalam dan ke luar Kepala Akun Biaya.
 
-	Yang dibaca GL Entry milik BKM yang terdaftar di Rincian Biaya BKM, bukan
-	semua GL di cost center unit plasma. Cuma dokumen-dokumen itu yang biayanya
+	Yang dibaca GL Entry milik BKM dan BAPP yang terdaftar di Rincian Biaya,
+	bukan semua GL di cost center unit plasma. Cuma dokumen-dokumen itu yang biayanya
 	ditagihkan ke mitra; menolkan yang lain berarti menghapus biaya inti yang
 	kebetulan menumpang cost center sama.
 

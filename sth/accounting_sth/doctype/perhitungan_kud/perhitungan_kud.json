@@ -29,6 +29,7 @@
   "biaya_bkm_panen",
   "biaya_bkm_traksi",
   "biaya_perawatan",
+  "biaya_bapp",
   "lain_lain",
   "total_biaya_perawatan_panen_dan_transport",
   "column_break_biaya",
@@ -231,6 +232,13 @@
    "read_only": 1
   },
   {
+   "description": "Net Total BAPP tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi, dijumlah dari Rincian Biaya.",
+   "fieldname": "biaya_bapp",
+   "fieldtype": "Currency",
+   "label": "Biaya BAPP",
+   "read_only": 1
+  },
+  {
    "default": "2.5",
    "fieldname": "persen_management_fee",
    "fieldtype": "Percent",
@@ -264,13 +272,13 @@
    "collapsible": 1,
    "fieldname": "detail_biaya_section",
    "fieldtype": "Section Break",
-   "label": "Rincian Biaya BKM"
+   "label": "Rincian Biaya BKM & BAPP"
   },
   {
-   "description": "Semua BKM tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi \u2014 ketiga angka Biaya BKM di atas dijumlah dari daftar ini.",
+   "description": "Semua BKM dan BAPP tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi \u2014 angka Biaya BKM dan Biaya BAPP di atas dijumlah dari daftar ini.",
    "fieldname": "detail_biaya",
    "fieldtype": "Table",
-   "label": "Rincian Biaya BKM",
+   "label": "Rincian Biaya BKM & BAPP",
    "options": "Perhitungan KUD Biaya BKM",
    "read_only": 1
   },
@@ -343,7 +351,7 @@
   },
   {
    "bold": 1,
-   "description": "Biaya Perawatan,Panen & transport + Lain Lain",
+   "description": "Biaya Perawatan,Panen & transport + Biaya BAPP + Lain Lain",
    "fieldname": "total_biaya_perawatan_panen_dan_transport",
    "fieldtype": "Currency",
    "in_preview": 1,
@@ -454,7 +462,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-25 14:00:00.000000",
+ "modified": "2026-09-28 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",

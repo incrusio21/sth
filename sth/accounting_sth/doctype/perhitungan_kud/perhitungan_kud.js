@@ -60,7 +60,7 @@ function isi_unit_plasma(frm) {
 function tarik_produksi(frm) {
 	if ((frm.doc.detail || []).length) {
 		frappe.confirm(
-			__("Detail produksi dan biaya BKM yang sekarang akan diganti. Lanjutkan?"),
+			__("Detail produksi dan biaya BKM & BAPP yang sekarang akan diganti. Lanjutkan?"),
 			() => jalankan(frm)
 		);
 		return;
@@ -74,29 +74,32 @@ function jalankan(frm) {
 		doc: frm.doc,
 		method: "tarik_produksi",
 		freeze: true,
-		freeze_message: __("Menarik produksi dari timbangan dan biaya dari BKM..."),
+		freeze_message: __("Menarik produksi dari timbangan dan biaya dari BKM & BAPP..."),
 		callback(r) {
 			frm.refresh();
 
 			if (!r.message) return;
 
 			const biaya = frappe.format(r.message.biaya_perawatan, { fieldtype: "Currency" });
+			const biaya_bapp = frappe.format(r.message.biaya_bapp, { fieldtype: "Currency" });
 
 			if (!r.message.jumlah_baris) {
 				frappe.msgprint(
 					__(
-						"Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih. Biaya dari {0} BKM tetap ditarik: {1}.",
-						[r.message.jumlah_bkm, biaya]
+						"Tidak ada timbangan tersubmit di rentang tanggal ini untuk unit yang dipilih. Biaya dari {0} BKM ({1}) dan {2} BAPP ({3}) tetap ditarik.",
+						[r.message.jumlah_bkm, biaya, r.message.jumlah_bapp, biaya_bapp]
 					)
 				);
 				return;
 			}
 
 			frappe.show_alert({
-				message: __("{0} baris ditarik, {1} BKM senilai {2}. {3} Jurnal: {4}.", [
+				message: __("{0} baris ditarik, {1} BKM senilai {2}, {3} BAPP senilai {4}. {5} Jurnal: {6}.", [
 					r.message.jumlah_baris,
 					r.message.jumlah_bkm,
 					biaya,
+					r.message.jumlah_bapp,
+					biaya_bapp,
 					r.message.status_harga,
 					r.message.status_jurnal,
 				]),
