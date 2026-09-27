@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-28 12:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "akun",
+  "keterangan",
+  "voucher_type",
+  "voucher_no",
+  "posting_date",
+  "status_dokumen",
+  "nilai_dokumen",
+  "sudah_buku_besar",
+  "belum"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "description": "Akun yang nanti didebit dokumen ini waktu Posted. Kosong untuk biaya yang memang tidak lewat GL dokumennya.",
+   "fieldname": "akun",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Akun",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "keterangan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Keterangan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Jenis Dokumen",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Dokumen",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Tanggal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status_dokumen",
+   "fieldtype": "Data",
+   "label": "Status Dokumen",
+   "read_only": 1
+  },
+  {
+   "description": "Nilai dokumen yang ditagihkan ke mitra, utuh.",
+   "fieldname": "nilai_dokumen",
+   "fieldtype": "Currency",
+   "label": "Nilai Dokumen",
+   "read_only": 1
+  },
+  {
+   "description": "Saldo GL dokumen ini di bawah Kepala Akun Biaya — yang ikut dinolkan jurnal KUD.",
+   "fieldname": "sudah_buku_besar",
+   "fieldtype": "Currency",
+   "label": "Sudah di Buku Besar",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "belum",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Belum di Buku Besar",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-28 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounting STH",
+ "name": "Perhitungan KUD Belum Buku Besar",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

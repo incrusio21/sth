@@ -66,7 +66,10 @@
   "jurnal_preview",
   "total_jurnal_debit",
   "total_jurnal_kredit",
-  "status_jurnal"
+  "status_jurnal",
+  "belum_bb_section",
+  "belum_bb_html",
+  "belum_bb"
  ],
  "fields": [
   {
@@ -456,13 +459,32 @@
    "hidden": 1,
    "label": "Status Jurnal",
    "read_only": 1
+  },
+  {
+   "fieldname": "belum_bb_section",
+   "fieldtype": "Section Break",
+   "label": "Biaya Belum Masuk Buku Besar"
+  },
+  {
+   "fieldname": "belum_bb_html",
+   "fieldtype": "HTML",
+   "label": "Rincian per Akun"
+  },
+  {
+   "description": "Biaya yang ditagihkan ke mitra tapi tidak ikut dijurnal karena belum ada GL-nya. Disusun ulang tiap simpan, dibekukan saat submit.",
+   "fieldname": "belum_bb",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Biaya Belum Masuk Buku Besar",
+   "options": "Perhitungan KUD Belum Buku Besar",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-28 10:00:00.000000",
+ "modified": "2026-09-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",

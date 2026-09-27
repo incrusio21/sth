@@ -12,6 +12,8 @@ frappe.ui.form.on("Perhitungan KUD", {
 	},
 
 	refresh(frm) {
+		tampilkan_belum_bb(frm);
+
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__("Lihat Jurnal"), () => lihat_jurnal(frm), __("Akuntansi"));
 			tombol_turunan(frm);
@@ -167,4 +169,134 @@ function tombol_turunan(frm) {
 			__("Buat")
 		);
 	});
+}
+
+// Biaya yang ditagih ke mitra tapi belum punya GL, jadi tidak ikut dijurnal.
+// Barisnya tersimpan per dokumen di child table tersembunyi `belum_bb`; di sini
+// dikelompokkan per akun, dan klik satu akun membuka daftar dokumennya.
+function tampilkan_belum_bb(frm) {
+	const wrapper = frm.get_field("belum_bb_html").$wrapper;
+	const rows = frm.doc.belum_bb || [];
+	const esc = frappe.utils.escape_html;
+	const uang = (v) => format_currency(v, frm.doc.currency);
+
+	if (!rows.length) {
+		wrapper.html(
+			`<p class="text-muted small">${__("Semua biaya sudah masuk buku besar, atau produksi belum ditarik.")}</p>`
+		);
+		return;
+	}
+
+	const grup = kelompokkan_belum_bb(rows);
+	const total = grup.reduce((n, g) => n + g.belum, 0);
+
+	const baris = grup
+		.map(
+			(g, i) => `
+			<tr class="belum-bb-grup" data-idx="${i}" style="cursor: pointer">
+				<td>${esc(g.label)}</td>
+				<td class="text-right">${g.dokumen.size || "-"}</td>
+				<td class="text-right">${uang(g.belum)}</td>
+			</tr>`
+		)
+		.join("");
+
+	wrapper.html(`
+		<p class="text-muted small">${esc(frm.doc.status_jurnal || "")}</p>
+		<table class="table table-bordered table-hover table-sm">
+			<thead>
+				<tr>
+					<th>${__("Akun")}</th>
+					<th class="text-right" style="width: 12%">${__("Dokumen")}</th>
+					<th class="text-right" style="width: 25%">${__("Belum di Buku Besar")}</th>
+				</tr>
+			</thead>
+			<tbody>${baris}</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="2">${__("Total")}</th>
+					<th class="text-right">${uang(total)}</th>
+				</tr>
+			</tfoot>
+		</table>
+		<p class="text-muted small">${__("Klik satu akun untuk melihat dokumennya.")}</p>
+	`);
+
+	wrapper.find(".belum-bb-grup").on("click", function () {
+		detail_belum_bb(frm, grup[$(this).data("idx")]);
+	});
+}
+
+function kelompokkan_belum_bb(rows) {
+	const peta = new Map();
+
+	rows.forEach((row) => {
+		const label = row.akun || row.keterangan || __("Tanpa akun");
+		if (!peta.has(label)) {
+			peta.set(label, { label, belum: 0, dokumen: new Set(), rows: [] });
+		}
+
+		const g = peta.get(label);
+		g.belum += flt(row.belum);
+		g.rows.push(row);
+		if (row.voucher_no) g.dokumen.add(row.voucher_no);
+	});
+
+	return [...peta.values()].sort((a, b) => b.belum - a.belum);
+}
+
+function detail_belum_bb(frm, grup) {
+	const esc = frappe.utils.escape_html;
+	const uang = (v) => format_currency(v, frm.doc.currency);
+
+	const baris = grup.rows
+		.map((row) => {
+			const dokumen = row.voucher_no
+				? `<a href="${frappe.utils.get_form_link(row.voucher_type, row.voucher_no)}" target="_blank">${esc(row.voucher_no)}</a>
+				   <div class="text-muted small">${esc(__(row.voucher_type))}</div>`
+				: esc(row.keterangan || "");
+
+			return `
+				<tr>
+					<td>${dokumen}</td>
+					<td>${row.posting_date ? frappe.datetime.str_to_user(row.posting_date) : ""}</td>
+					<td>${esc(row.status_dokumen || "")}</td>
+					<td class="text-right">${row.voucher_no ? uang(row.nilai_dokumen) : ""}</td>
+					<td class="text-right">${row.voucher_no ? uang(row.sudah_buku_besar) : ""}</td>
+					<td class="text-right">${uang(row.belum)}</td>
+				</tr>`;
+		})
+		.join("");
+
+	const dialog = new frappe.ui.Dialog({
+		title: grup.label,
+		size: "extra-large",
+		fields: [{ fieldtype: "HTML", fieldname: "isi" }],
+	});
+
+	dialog.fields_dict.isi.$wrapper.html(`
+		<div style="max-height: 60vh; overflow: auto">
+			<table class="table table-bordered table-sm">
+				<thead>
+					<tr>
+						<th>${__("Dokumen")}</th>
+						<th>${__("Tanggal")}</th>
+						<th>${__("Status")}</th>
+						<th class="text-right">${__("Nilai Dokumen")}</th>
+						<th class="text-right">${__("Sudah di Buku Besar")}</th>
+						<th class="text-right">${__("Belum (bagian akun ini)")}</th>
+					</tr>
+				</thead>
+				<tbody>${baris}</tbody>
+				<tfoot>
+					<tr>
+						<th colspan="5">${__("Total")}</th>
+						<th class="text-right">${uang(grup.belum)}</th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	`);
+
+	dialog.show();
 }

@@ -490,6 +490,77 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 	return baris
 
 
+KETERANGAN_MATERIAL = "Material BKM Perawatan (dijurnal Stock Entry)"
+KETERANGAN_LAIN_LAIN = "Lain Lain (isian manual)"
+KETERANGAN_SELISIH = "Selisih nilai dokumen dengan buku besar"
+
+
+def susun_belum_buku_besar(baris_biaya, gl_dokumen, rencana, lain_lain):
+	"""Rincian biaya yang ditagih ke mitra tapi tidak ikut dijurnal. Fungsi murni.
+
+	Jumlah seluruh barisnya persis angka "Biaya belum masuk buku besar" di
+	status jurnal: Total Biaya dikurangi yang dinolkan dari GL.
+
+	`gl_dokumen` — dict (voucher_type, voucher_no) → saldo GL dokumen itu di
+	bawah Kepala Akun Biaya. Dokumen yang ada di sini sudah punya GL, walau
+	saldonya nol di bawah kepala akun.
+
+	`rencana` — dict (voucher_type, voucher_no) → {"status", "bagian"}, dengan
+	`bagian` list of (akun, keterangan, jumlah): ke mana nilai dokumen itu
+	nanti mendarat. Bagian berakun lewat GL dokumennya sendiri, jadi hanya
+	dihitung belum kalau dokumennya belum punya GL. Bagian tanpa akun (material)
+	memang tidak pernah lewat GL dokumennya dan selalu dihitung belum.
+
+	Sisa yang tidak terjelaskan rencana jatuh ke baris Selisih, supaya totalnya
+	tetap cocok dengan status jurnal.
+
+	Balikan: list of dict, sebentuk dengan child table Perhitungan KUD Belum
+	Buku Besar.
+	"""
+	hasil = []
+
+	for row in baris_biaya:
+		kunci = (row.get("voucher_type"), row.get("voucher_no"))
+		nilai = flt(row.get("nilai"), PRESISI_UANG)
+		ada_gl = kunci in gl_dokumen
+		sudah = flt(gl_dokumen.get(kunci), PRESISI_UANG)
+		belum = flt(nilai - sudah, PRESISI_UANG)
+		if not belum:
+			continue
+
+		info = rencana.get(kunci) or {}
+		umum = {
+			"voucher_type": kunci[0],
+			"voucher_no": kunci[1],
+			"posting_date": row.get("posting_date"),
+			"status_dokumen": info.get("status"),
+			"nilai_dokumen": nilai,
+			"sudah_buku_besar": sudah,
+		}
+
+		bagian = [
+			(akun, keterangan, flt(jumlah, PRESISI_UANG))
+			for akun, keterangan, jumlah in info.get("bagian") or []
+			if flt(jumlah, PRESISI_UANG) and not (ada_gl and akun)
+		]
+
+		sisa = flt(belum - sum(jumlah for *_, jumlah in bagian), PRESISI_UANG)
+		if sisa:
+			bagian.append((None, KETERANGAN_SELISIH, sisa))
+
+		for akun, keterangan, jumlah in bagian:
+			hasil.append({**umum, "akun": akun, "keterangan": keterangan, "belum": jumlah})
+
+	if flt(lain_lain, PRESISI_UANG):
+		hasil.append({
+			"akun": None,
+			"keterangan": KETERANGAN_LAIN_LAIN,
+			"belum": flt(lain_lain, PRESISI_UANG),
+		})
+
+	return hasil
+
+
 def baris_penutup(baris, akun, kunci, keterangan):
 	"""Sisipkan baris penyeimbang di kepala `baris`, kalau memang ada selisih.
 
@@ -778,6 +849,14 @@ class PerhitunganKUD(Document):
 		pembalikan, di_luar = self.saldo_biaya_bkm()
 		baris = self.baris_jurnal(pembalikan)
 
+		# Rinciannya disusun di saat yang sama dengan jurnalnya, jadi sesudah
+		# submit yang tersimpan persis bagian yang waktu itu tidak dijurnal —
+		# bukan keadaan BKM hari ini yang mungkin sudah Posted.
+		self.set(
+			"belum_bb",
+			rincian_belum_buku_besar(self.company, self.detail_biaya, self.lain_lain),
+		)
+
 		# `kunci` cuma penanda internal susun_baris_jurnal, bukan kolom tabelnya.
 		self.set(
 			"jurnal_preview",
@@ -812,9 +891,9 @@ class PerhitunganKUD(Document):
 				PRESISI_UANG,
 			)
 			if belum:
-				self.status_jurnal += _(". Biaya belum masuk buku besar, tidak dijurnal: {0}").format(
-					frappe.format(belum, "Currency")
-				)
+				self.status_jurnal += _(
+					". Biaya belum masuk buku besar, tidak dijurnal: {0} (rincian per akun di bawah)"
+				).format(frappe.format(belum, "Currency"))
 
 	def baris_jurnal(self, pembalikan=None):
 		"""Baris jurnal dokumen ini. Dipakai pratinjau maupun GL Entry, sekali susun.
@@ -1460,3 +1539,136 @@ def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
 			di_luar[row.account] = flt(di_luar.get(row.account, 0) + jumlah, PRESISI_UANG)
 
 	return pembalikan, [{"account": a, "jumlah": j} for a, j in sorted(di_luar.items())]
+
+
+# ---------------------------------------------------------------------------
+# Biaya yang belum masuk buku besar
+# ---------------------------------------------------------------------------
+
+def gl_per_dokumen(company, baris_biaya, akun):
+	"""(voucher_type, voucher_no) → saldo GL di bawah kepala akun, untuk dokumen yang sudah punya GL."""
+	voucher_no = tuple(sorted({row.voucher_no for row in baris_biaya if row.voucher_no}))
+	voucher_type = tuple(sorted({row.voucher_type for row in baris_biaya if row.voucher_type}))
+	if not voucher_no or not voucher_type:
+		return {}
+
+	rows = frappe.db.sql(
+		"""
+		SELECT voucher_type, voucher_no,
+		       SUM(CASE WHEN account IN %(akun)s THEN debit - credit ELSE 0 END) AS saldo
+		FROM `tabGL Entry`
+		WHERE company = %(company)s
+		  AND is_cancelled = 0
+		  AND voucher_type IN %(voucher_type)s
+		  AND voucher_no IN %(voucher_no)s
+		GROUP BY voucher_type, voucher_no
+		""",
+		{
+			"company": company,
+			# IN () itu SQL yang tidak sah; nama akun kosong tidak pernah cocok.
+			"akun": tuple(akun) or ("",),
+			"voucher_type": voucher_type,
+			"voucher_no": voucher_no,
+		},
+		as_dict=True,
+	)
+
+	return {(row.voucher_type, row.voucher_no): flt(row.saldo) for row in rows}
+
+
+def akun_transit_traksi(company):
+	"""(akun transit upah, akun transit premi) BKM Traksi dari Plantation Settings."""
+	setelan = frappe.get_cached_doc("Plantation Settings")
+
+	def ambil(tabel):
+		return next((row.account for row in setelan.get(tabel) or [] if row.company == company), None)
+
+	return (
+		ambil("plantation_settings_akun_transit_upah_bkm_traksi"),
+		ambil("plantation_settings_akun_transit_premi_bkm_traksi"),
+	)
+
+
+def rencana_dokumen_biaya(company, baris_biaya):
+	"""(voucher_type, voucher_no) → {"status", "bagian"}: ke akun mana nilai dokumen itu mendarat.
+
+	Mengikuti make_gl_entry masing-masing dokumen, supaya biaya BKM yang belum
+	Posted tampil di akun yang nanti memang didebitnya:
+
+	- BKM Panen: seluruh grand_total ke akun kegiatannya.
+	- BKM Perawatan: upah + premi ke akun kegiatan; material tidak lewat GL BKM
+	  karena sudah dijurnal Stock Entry-nya.
+	- BKM Traksi: upah ke akun transit upah, premi ke akun transit premi.
+	- BAPP: GL-nya lahir saat submit, jadi tidak perlu rencana.
+	"""
+	per_doctype = {}
+	for row in baris_biaya:
+		if row.voucher_no:
+			per_doctype.setdefault(row.voucher_type, []).append(row.voucher_no)
+
+	kolom = {
+		"Buku Kerja Mandor Panen": ["kegiatan_account", "grand_total"],
+		"Buku Kerja Mandor Perawatan": [
+			"kegiatan_account", "hasil_kerja_amount", "hasil_kerja_premi_amount", "material_amount",
+		],
+		"Buku Kerja Mandor Traksi": [
+			"hasil_kerja_amount", "hasil_kerja_premi_tbs_amount",
+			"hasil_kerja_premi_angkut_amount", "hasil_kerja_premi_trans_amount",
+		],
+		"BAPP": ["status"],
+	}
+
+	transit_upah = transit_premi = None
+	if "Buku Kerja Mandor Traksi" in per_doctype:
+		transit_upah, transit_premi = akun_transit_traksi(company)
+
+	hasil = {}
+	for doctype, names in per_doctype.items():
+		fields = ["name", "docstatus", *kolom.get(doctype, [])]
+		if frappe.db.has_column(doctype, "workflow_state"):
+			fields.append("workflow_state")
+
+		for doc in frappe.get_all(doctype, filters={"name": ("in", names)}, fields=fields):
+			status = doc.get("workflow_state") or doc.get("status") or (
+				_("Submitted") if doc.docstatus == 1 else _("Draft")
+			)
+
+			if doctype == "Buku Kerja Mandor Panen":
+				bagian = [(doc.kegiatan_account, None, doc.grand_total)]
+			elif doctype == "Buku Kerja Mandor Perawatan":
+				bagian = [
+					(doc.kegiatan_account, None, flt(doc.hasil_kerja_amount) + flt(doc.hasil_kerja_premi_amount)),
+					(None, KETERANGAN_MATERIAL, doc.material_amount),
+				]
+			elif doctype == "Buku Kerja Mandor Traksi":
+				bagian = [
+					(transit_upah, None, doc.hasil_kerja_amount),
+					(
+						transit_premi,
+						None,
+						flt(doc.hasil_kerja_premi_tbs_amount)
+						+ flt(doc.hasil_kerja_premi_angkut_amount)
+						+ flt(doc.hasil_kerja_premi_trans_amount),
+					),
+				]
+			else:
+				bagian = []
+
+			hasil[(doctype, doc.name)] = {"status": status, "bagian": bagian}
+
+	return hasil
+
+
+def rincian_belum_buku_besar(company, baris_biaya, lain_lain, kepala=None):
+	"""Baris child table Biaya Belum Masuk Buku Besar untuk rincian biaya ini."""
+	if kepala is None:
+		kepala = get_kepala_akun_kud(company)
+
+	akun = akun_di_bawah(kepala, company)
+
+	return susun_belum_buku_besar(
+		baris_biaya,
+		gl_per_dokumen(company, baris_biaya, akun),
+		rencana_dokumen_biaya(company, baris_biaya),
+		lain_lain,
+	)
