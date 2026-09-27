@@ -419,7 +419,21 @@ def tentukan_restan_awal(unit, tanggal_produksi, restan_sebelumnya, tanggal_sebe
 	saldo = get_saldo_stok_tbs(unit, tanggal_produksi) - get_adjustment_tbs(
 		unit, tanggal_produksi, add_days(tanggal_produksi, 1))
 
-	return max(saldo, 0), 0
+	# Adjustment sebelum tanggal proses juga sudah ada di saldo itu — STE
+	# adjustment selalu dibuat bertanggal sebelum Data TBS-nya. Dipisahkan ke
+	# Adjustment Stok, permintaan user 28 September 2026: di dokumen pertama
+	# sebuah unit restan awalnya 0 dan adjustment-nya X, bukan restan awal X.
+	# Totalnya (Restan Setelah Adjustment) dan Stock Entry hariannya tidak
+	# berubah. Dihitung sejak dokumen sebelumnya, atau sejak Stock
+	# Reconciliation terakhir kalau tidak ada — rekonsiliasi menimpa saldo, jadi
+	# adjustment sebelum itu sudah tidak ada di dalamnya.
+	sejak = max(filter(None, (
+		getdate(tanggal_sebelumnya) if tanggal_sebelumnya else None,
+		get_tanggal_rekonsiliasi_tbs(unit, tanggal_produksi),
+	)), default=None)
+	adjustment = get_adjustment_tbs(unit, sejak, tanggal_produksi)
+
+	return max(saldo - adjustment, 0), adjustment
 
 def get_patokan_restan(unit, sampai, sesudah=None):
 	"""(restan awal, tanggal) Restan Awal TBS terakhir unit ini di (sesudah, sampai], atau None."""
@@ -452,11 +466,14 @@ def get_adjustment_tbs(unit, dari, sampai):
 	diposting di tanggal dokumen sebelumnya belum tercakup restannya — Stock
 	Entry harian dokumen itu cuma membawa pergerakannya sendiri — jadi ikut;
 	koreksi di tanggal proses ini milik dokumen berikutnya.
+
+	`dari` kosong berarti tanpa batas bawah — dipakai dokumen pertama unit yang
+	gudangnya belum pernah direkonsiliasi.
 	"""
 	gudang = get_warehouse_tbs(unit)
 	item = frappe.db.get_value("Item", {"tipe_barang": "TBS"})
 
-	if not (gudang and item and dari and sampai):
+	if not (gudang and item and sampai):
 		return 0
 
 	total = frappe.db.sql("""
@@ -468,11 +485,29 @@ def get_adjustment_tbs(unit, dari, sampai):
 			and sle.item_code = %(item)s and sle.warehouse = %(gudang)s
 			and sle.voucher_type != 'Stock Reconciliation'
 			and ifnull(se.reference_doctype, '') != %(doctype)s
-			and sle.posting_date >= %(dari)s
+			and (%(dari)s is null or sle.posting_date >= %(dari)s)
 			and sle.posting_date < %(sampai)s
 	""", {"item": item, "gudang": gudang, "doctype": DOCTYPE, "dari": dari, "sampai": sampai})
 
 	return flt(total[0][0]) if total else 0
+
+def get_tanggal_rekonsiliasi_tbs(unit, sampai):
+	"""Tanggal Stock Reconciliation terakhir di gudang TBS unit ini sampai `sampai`, atau None."""
+	gudang = get_warehouse_tbs(unit)
+	item = frappe.db.get_value("Item", {"tipe_barang": "TBS"})
+
+	if not (gudang and item):
+		return None
+
+	tanggal = frappe.db.sql("""
+		select max(posting_date)
+		from `tabStock Ledger Entry`
+		where is_cancelled = 0 and voucher_type = 'Stock Reconciliation'
+			and item_code = %(item)s and warehouse = %(gudang)s
+			and posting_date <= %(sampai)s
+	""", {"item": item, "gudang": gudang, "sampai": sampai})
+
+	return getdate(tanggal[0][0]) if tanggal and tanggal[0][0] else None
 
 def get_saldo_stok_tbs(unit, tanggal_produksi):
 	"""Saldo gudang TBS unit ini di tanggal proses, dipakai kalau rantai restan nol.
