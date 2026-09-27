@@ -3,14 +3,18 @@
  "creation": "2025-11-07 13:46:15.175128",
  "docstatus": 0,
  "doctype": "Page",
- "idx": 0,
- "modified": "2025-11-07 13:46:15.175128",
+ "idx": 1,
+ "modified": "2026-09-25 16:14:40.440254",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "ess",
  "owner": "Administrator",
  "page_name": "ess",
- "roles": [],
+ "roles": [
+  {
+   "role": "Administrator"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,

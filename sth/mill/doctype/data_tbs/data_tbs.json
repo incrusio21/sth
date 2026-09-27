@@ -116,7 +116,7 @@
    "fieldname": "berat_rata_rata_tbs",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "Berat Rata-rata Lori ( Kg )",
+   "label": "Berat Rata-rata Lori/Cycle( Kg )",
    "no_copy": 1,
    "precision": "0",
    "read_only": 1
@@ -190,7 +190,7 @@
    "fieldname": "jumlah_lori_mentah",
    "fieldtype": "Int",
    "in_preview": 1,
-   "label": "Jumlah Lori Mentah",
+   "label": "Jumlah Lori/Cycle Mentah",
    "no_copy": 1,
    "read_only": 1
   },
@@ -199,7 +199,7 @@
    "fieldname": "lori_estimasi_loading_ramp",
    "fieldtype": "Int",
    "in_preview": 1,
-   "label": "Lori Estimasi Loading Ramp",
+   "label": "Lori/Cycle Estimasi Loading Ramp",
    "no_copy": 1,
    "read_only": 1
   },
@@ -218,7 +218,7 @@
    "fieldname": "grand_total_lori",
    "fieldtype": "Int",
    "in_preview": 1,
-   "label": "Grand Total Lori",
+   "label": "Grand Total Lori/Cycle",
    "no_copy": 1,
    "read_only": 1
   },
@@ -227,7 +227,7 @@
    "fieldname": "jumlah_lori_olah",
    "fieldtype": "Int",
    "in_preview": 1,
-   "label": "Jumlah Lori Olah",
+   "label": "Jumlah Lori/Cycle Olah",
    "no_copy": 1,
    "read_only": 1
   },
@@ -236,7 +236,7 @@
    "fieldname": "jumlah_lori_masak",
    "fieldtype": "Int",
    "in_preview": 1,
-   "label": "Jumlah Lori Masak",
+   "label": "Jumlah Lori/Cycle Masak",
    "no_copy": 1,
    "read_only": 1
   },
@@ -327,7 +327,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-24 11:29:44.476568",
+ "modified": "2026-09-27 11:35:07.355550",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
