@@ -170,7 +170,9 @@ class NotaPiutang(Document):
 		if self.tipe == "Others":
 			self.validate_others()
 
-		self.grandtotal = self.sisa_dpp + self.sisa_ppn
+		# flt(): keduanya diisi sisi client, jadi masih None di nota yang dibuat
+		# dari kode — seperti Management Fee KUD yang ditarik dari Perhitungan KUD
+		self.grandtotal = flt(self.sisa_dpp) + flt(self.sisa_ppn)
 
 	def validate_others(self):
 		if not self.sub_tipe_others:
