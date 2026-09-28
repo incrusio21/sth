@@ -96,6 +96,28 @@ def get_rate_ppn(tax_rate):
 	return rate
 
 
+@frappe.whitelist()
+def piutang_lain_butuh_customer(company):
+	"""Akun Piutang Lainnya company ini menuntut party atau tidak.
+
+	ERPNext hanya menuntut party di akun bertipe Receivable atau Payable, dan
+	di akun Receivable party-nya wajib bertipe Customer. Di bagan akun yang
+	dipakai sekarang 1162099 memang Receivable di semua company, tapi itu data,
+	bukan hukum alam — jadi yang ditanya tipe akunnya, bukan nomornya.
+	"""
+	if not company:
+		return False
+
+	akun = frappe.db.get_value(
+		"Account",
+		{"account_number": AKUN_PIUTANG_LAIN_NUMBER, "company": company},
+		["name", "account_type"],
+		as_dict=True,
+	)
+
+	return bool(akun and akun.account_type in ("Receivable", "Payable"))
+
+
 def get_customer_mitra(mitra):
 	"""Customer pasangan mitra KUD, yang jadi party baris Piutang Lainnya.
 
@@ -197,13 +219,18 @@ class NotaPiutang(Document):
 		if not self.sub_tipe_others:
 			frappe.throw("Sub Tipe wajib diisi untuk Tipe <b>Others</b>")
 
-		# Baris Piutang Lainnya di jurnalnya wajib berparty karena akunnya bertipe
-		# Receivable. Management Fee KUD tidak disebut di sini: partynya diisi
+		# Customer cuma dituntut kalau akun Piutang Lainnya company ini memang
+		# menuntut party. Management Fee KUD tidak disebut di sini: partynya diisi
 		# validate_management_fee_kud() dari mitra perhitungannya.
-		if self.sub_tipe_others in ("Asset", "Barang Non Stok") and not self.customer:
+		if (
+			self.sub_tipe_others in ("Asset", "Barang Non Stok")
+			and not self.customer
+			and piutang_lain_butuh_customer(self.company)
+		):
 			frappe.throw(
 				f"Customer wajib diisi untuk Sub Tipe <b>{self.sub_tipe_others}</b>: "
-				f"baris Piutang Lainnya di jurnalnya harus berparty."
+				f"akun Piutang Lainnya di company ini bertipe Receivable, jadi baris "
+				f"jurnalnya harus berparty."
 			)
 
 		if self.sub_tipe_others == "Asset":
@@ -285,8 +312,12 @@ class NotaPiutang(Document):
 			)
 
 		# party baris piutangnya tidak dipilih orang: mitra perhitungannya yang
-		# ditagih, jadi Customer-nya ikut dari sana
-		self.customer = get_customer_mitra(pk.mitra)
+		# ditagih, jadi Customer-nya ikut dari sana — dan hanya dicari kalau
+		# akunnya memang menuntut party, supaya company yang akunnya bukan
+		# Receivable tidak tertahan Customer yang tidak akan dipakai
+		self.customer = (
+			get_customer_mitra(pk.mitra) if piutang_lain_butuh_customer(pk.company) else None
+		)
 
 		self.hitung_dpp_ppn_management_fee()
 
@@ -589,8 +620,8 @@ class NotaPiutang(Document):
 
 		je.append("accounts", {
 			"account"                   : akun_piutang_lain,
-			"party_type"                : "Customer",
-			"party"                     : self.customer,
+			"party_type"                : "Customer" if self.customer else None,
+			"party"                     : self.customer or None,
 			"debit_in_account_currency" : nilai,
 			"credit_in_account_currency": 0,
 			"cost_center"               : cost_center,
@@ -659,8 +690,8 @@ class NotaPiutang(Document):
 		})
 		je.append("accounts", {
 			"account"                   : akun_piutang_lain,
-			"party_type"                : "Customer",
-			"party"                     : self.customer,
+			"party_type"                : "Customer" if self.customer else None,
+			"party"                     : self.customer or None,
 			"debit_in_account_currency" : 0,
 			"credit_in_account_currency": dpp,
 			"cost_center"               : cost_center,
