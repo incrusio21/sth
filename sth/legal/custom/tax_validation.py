@@ -16,10 +16,11 @@ def validate_custom_tax(self, method=None):
 		self.ppn_rate = tax["rate"]
 		self.ppn_amount = flt(self.net_total * (self.ppn_rate / 100))
 
-		tax_list.append({
-			"account": self.ppn_account,
-			"amount": self.ppn_amount
-		})
+		if self.ppn_account:
+			tax_list.append({
+				"account": self.ppn_account,
+				"amount": self.ppn_amount
+			})
 	
 	for pph in self.pph_details:
 		tax = tax_rate(self.company, pph.type, "PPh")
@@ -27,11 +28,12 @@ def validate_custom_tax(self, method=None):
 		pph.percentage = tax["rate"]
 		pph.amount = flt(self.net_total * (pph.percentage / 100))
 
-		tax_list.append({
-			"account": pph.account,
-			"add_deduct": "Deduct",
-			"amount": pph.amount
-		})
+		if pph.account:
+			tax_list.append({
+				"account": pph.account,
+				"add_deduct": "Deduct",
+				"amount": pph.amount
+			})
 
 	for t in tax_list:
 		self.append("taxes", {
