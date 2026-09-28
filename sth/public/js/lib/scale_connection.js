@@ -136,6 +136,15 @@ sth.utils.scale_connection = class ScaleConnection {
                             if (clean && callback) callback(clean);
                         });
                     }
+
+                    const text = new TextDecoder().decode(value);
+                    console.log("Text:", JSON.stringify(text));
+
+                    const hex = Array.from(value)
+                        .map(byte => byte.toString(16).padStart(2, "0"))
+                        .join(" ");
+
+                    console.log("HEX:", hex);
                 }
             } catch (error) {
                 console.error('Error saat membaca:', error);

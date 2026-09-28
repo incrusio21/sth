@@ -148,6 +148,8 @@ frappe.ui.form.on("Timbangan", {
 		}
 		frappe.scaleConnection.connect().then(() => {
 			frappe.scaleConnection.startReading((weight) => {
+				console.log(weight);
+
 				const match = weight.match(/([+-]?\d+)\s*kg/i);
 				const weight_number = match ? Number(match[1]) : null;
 				frm.doc.live_weight = weight_number || 0
@@ -261,7 +263,7 @@ frappe.ui.form.on("Timbangan", {
 	potongan_sortasi(frm) {
 		frm.trigger('calculate_weight')
 	},
-	onload(frm){
+	onload(frm) {
 		link_for(frm)
 	}
 })
@@ -317,80 +319,80 @@ function make_transaction_button(frm) {
 	}
 }
 
-function set_scan_nfc(frm){
-	frm.add_custom_button(__('Scan NFC'), function() {
-        let d = new frappe.ui.Dialog({
-            title: 'Input Data NFC',
-            fields: [
-                {
-                    fieldtype: 'Small Text',
-                    fieldname: 'qr_data',
-                    label: 'Data NFC',
-                    reqd: 1
-                }
-            ],
-            primary_action_label: 'Proses',
-            primary_action: function(values) {
-                decode_gzip_base64(values.qr_data.trim())
-                    .then(decoded => {
-                        const trans_no = decoded.split('#')[0];
+function set_scan_nfc(frm) {
+	frm.add_custom_button(__('Scan NFC'), function () {
+		let d = new frappe.ui.Dialog({
+			title: 'Input Data NFC',
+			fields: [
+				{
+					fieldtype: 'Small Text',
+					fieldname: 'qr_data',
+					label: 'Data NFC',
+					reqd: 1
+				}
+			],
+			primary_action_label: 'Proses',
+			primary_action: function (values) {
+				decode_gzip_base64(values.qr_data.trim())
+					.then(decoded => {
+						const trans_no = decoded.split('#')[0];
 
-                        frappe.db.get_value(
-                            'Surat Pengantar Buah',
-                            { trans_no: trans_no },
-                            'name'
-                        ).then(r => {
-                            if (r.message && r.message.name) {
-                                frm.set_value('spb', r.message.name);
-                                d.hide();
-                            } else {
-                                frappe.msgprint(__('Surat Pengantar Buah dengan Trans No <b>{0}</b> tidak ditemukan.', [trans_no]));
-                            }
-                        });
-                    })
-                    .catch(err => {
-                        frappe.msgprint(__('Gagal mendecode data: ') + err);
-                    });
-            }
-        });
+						frappe.db.get_value(
+							'Surat Pengantar Buah',
+							{ trans_no: trans_no },
+							'name'
+						).then(r => {
+							if (r.message && r.message.name) {
+								frm.set_value('spb', r.message.name);
+								d.hide();
+							} else {
+								frappe.msgprint(__('Surat Pengantar Buah dengan Trans No <b>{0}</b> tidak ditemukan.', [trans_no]));
+							}
+						});
+					})
+					.catch(err => {
+						frappe.msgprint(__('Gagal mendecode data: ') + err);
+					});
+			}
+		});
 
-        d.show();
-    });
+		d.show();
+	});
 }
 
 
 function decode_gzip_base64(base64str) {
-    return new Promise((resolve, reject) => {
-        try {
-            const binary = atob(base64str);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
+	return new Promise((resolve, reject) => {
+		try {
+			const binary = atob(base64str);
+			const bytes = new Uint8Array(binary.length);
+			for (let i = 0; i < binary.length; i++) {
+				bytes[i] = binary.charCodeAt(i);
+			}
 
-            const ds = new DecompressionStream('gzip');
-            const writer = ds.writable.getWriter();
-            const reader = ds.readable.getReader();
+			const ds = new DecompressionStream('gzip');
+			const writer = ds.writable.getWriter();
+			const reader = ds.readable.getReader();
 
-            writer.write(bytes);
-            writer.close();
+			writer.write(bytes);
+			writer.close();
 
-            let result = '';
-            const decoder = new TextDecoder();
+			let result = '';
+			const decoder = new TextDecoder();
 
-            reader.read().then(function process({ done, value }) {
-                if (done) {
-                    resolve(result);
-                    return;
-                }
-                result += decoder.decode(value, { stream: true });
-                return reader.read().then(process);
-            }).catch(reject);
+			reader.read().then(function process({ done, value }) {
+				if (done) {
+					resolve(result);
+					return;
+				}
+				result += decoder.decode(value, { stream: true });
+				return reader.read().then(process);
+			}).catch(reject);
 
-        } catch (e) {
-            reject(e.message);
-        }
-    });
+		} catch (e) {
+			reject(e.message);
+		}
+	});
 }
 
 function set_field_visibility(frm) {

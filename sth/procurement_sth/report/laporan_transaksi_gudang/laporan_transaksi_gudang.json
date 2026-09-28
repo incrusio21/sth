@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 4,
+ "idx": 8,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-22 13:32:29.701155",
+ "modified": "2026-09-28 17:31:18.315314",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Transaksi Gudang",
@@ -40,6 +40,9 @@
   },
   {
    "role": "Mill UAT"
+  },
+  {
+   "role": "PROCUREMENT SPV"
   }
  ],
  "timeout": 0

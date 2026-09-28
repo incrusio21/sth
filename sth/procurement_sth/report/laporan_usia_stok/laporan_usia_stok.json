@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 9,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-12-21 20:20:57.301428",
+ "modified": "2026-09-28 17:29:43.461376",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Usia Stok",
@@ -43,6 +43,9 @@
   },
   {
    "role": "Manufacturing User"
+  },
+  {
+   "role": "PROCUREMENT SPV"
   }
  ],
  "timeout": 0
