@@ -248,9 +248,9 @@
   {
    "default": "0",
    "depends_on": "eval:doc.docstatus===0 || doc.lewati_cek_monitoring",
+   "description": "Centang untuk hari tidak olah. Selama tidak dicentang, Get Data mewajibkan Monitoring TBS Olah dan CBC Monitoring tanggal proses ini sudah disubmit.",
    "fieldname": "lewati_cek_monitoring",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Lewati Cek Monitoring & CBC"
   },
   {
@@ -327,7 +327,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-27 11:35:07.355550",
+ "modified": "2026-09-28 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",
