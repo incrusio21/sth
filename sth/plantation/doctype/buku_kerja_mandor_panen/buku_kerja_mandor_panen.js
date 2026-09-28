@@ -97,7 +97,7 @@ sth.plantation.BukuKerjaMandorPanen = class BukuKerjaMandorPanen extends sth.pla
 		item.brondolan = doc.upah_brondolan
 
 		if (!self.manual_hk){
-			item.hari_kerja = Math.min(flt(item.qty / doc.volume_basis), 1)
+			item.hari_kerja = Math.min(flt(item.qty / (flt(doc.volume_basis) || 1)), 1)
 		}
 	}
 

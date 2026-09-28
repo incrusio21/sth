@@ -635,7 +635,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		item.status = "Pending" if not item.bjr else "Approved"
 
 		if not self.manual_hk:
-			item.hari_kerja = min(flt(item.qty / self.volume_basis), 1)
+			# Kegiatan tanpa volume basis dianggap 1 supaya tidak membagi nol
+			item.hari_kerja = min(flt(item.qty / (flt(self.volume_basis) or 1)), 1)
 
 	def update_value_after_amount(self, item, precision):
 		# Hitung total brondolan
