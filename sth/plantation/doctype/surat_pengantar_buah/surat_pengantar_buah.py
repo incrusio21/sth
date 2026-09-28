@@ -761,13 +761,20 @@ def lepas_recap_dari_detail_spb(recap_panen):
 	return terlepas
 
 @frappe.whitelist()
-def update_tanggal_panen(spb, details):
+def update_tanggal_panen(spb, details, timpa=0):
 	"""Ganti tanggal panen baris-baris SPB, termasuk yang sudah submit.
 
 	`details` berisi daftar baris yang diubah, dikenali lewat `name` baris atau
 	`harvest_no`, dengan `panen_date` dan/atau `panen_date_restan` barunya:
 
 		[{"harvest_no": "H-001", "panen_date": "2026-09-20"}]
+
+	Baris yang tanggalnya sudah terisi ditolak kecuali `timpa` diisi. Tanpa itu
+	pemanggil yang cuma mau menambal baris kosong — pengiriman yang tanggal
+	panennya tidak ikut terkirim — bisa diam-diam menggeser tanggal baris lain
+	yang sudah benar, lengkap dengan pindah recap dan hitung ulang janjangnya.
+	Mengirim tanggal yang sama dengan yang sudah ada tetap dianggap bukan
+	perubahan, jadi pemanggil yang mengulang kiriman tidak perlu `timpa`.
 
 	Tanggal panen menentukan Recap Panen by Blok yang ditunjuk baris itu, jadi
 	recap_panen ikut diambil ulang untuk tanggal barunya — sama dengan
@@ -789,6 +796,8 @@ def update_tanggal_panen(spb, details):
 		details = [details]
 	if not details:
 		frappe.throw(_("Rincian tanggal panen wajib diisi."))
+
+	timpa = cint(timpa)
 
 	doc = frappe.get_doc("Surat Pengantar Buah", spb)
 	doc.check_permission("write")
@@ -823,6 +832,17 @@ def update_tanggal_panen(spb, details):
 			lama = getdate(row.get(kolom_tanggal)) if row.get(kolom_tanggal) else None
 			if baru == lama:
 				continue
+
+			if lama and not timpa:
+				frappe.throw(_(
+					"Tanggal panen baris {0}{1} sudah terisi {2}, tidak sama dengan {3} "
+					"yang dikirim. Kirim timpa=1 kalau memang mau diganti."
+				).format(
+					row.idx,
+					_(" (restan)") if suffix else "",
+					format_date(lama),
+					format_date(baru),
+				))
 
 			blok = row.get(f"blok{suffix}")
 			recap_lama = row.get(f"recap_panen{suffix}")
@@ -871,7 +891,7 @@ def update_tanggal_panen(spb, details):
 	return {"updated": len(perubahan), "details": perubahan}
 
 @frappe.whitelist()
-def pasang_tanggal_panen(harvest_no, panen_date, spb=None):
+def pasang_tanggal_panen(harvest_no, panen_date, spb=None, timpa=0):
 	"""Pasang tanggal panen ke baris SPB yang dikenali lewat harvest_no saja.
 
 	Pengirimnya cukup tahu nomor harvest dan tanggal panennya; SPB-nya dicari di
@@ -881,6 +901,9 @@ def pasang_tanggal_panen(harvest_no, panen_date, spb=None):
 	harvest_no hampir selalu menunjuk satu baris, tapi ada yang terkirim ke dua
 	SPB yang sama-sama hidup. Untuk itu `spb` wajib disebut, bukan dipasang ke
 	semuanya: janjang yang sama akan terhitung dua kali di recap barunya.
+
+	`timpa` diteruskan apa adanya: tanpa itu baris yang tanggalnya sudah terisi
+	ditolak update_tanggal_panen, bukan diganti.
 	"""
 	harvest_no = cstr(harvest_no).strip()
 	if not harvest_no:
@@ -911,7 +934,9 @@ def pasang_tanggal_panen(harvest_no, panen_date, spb=None):
 		).format(harvest_no, ", ".join(sorted({r.parent for r in rows}))))
 
 	hasil = update_tanggal_panen(
-		rows[0].parent, [{"name": r.name, "panen_date": panen_date} for r in rows]
+		rows[0].parent,
+		[{"name": r.name, "panen_date": panen_date} for r in rows],
+		timpa=timpa,
 	)
 	hasil["spb"] = rows[0].parent
 
