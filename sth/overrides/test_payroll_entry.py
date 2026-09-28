@@ -13,8 +13,16 @@ Perhatian utamanya PPh21. Potongan PPh21 punya akun sendiri di tabel Accounts
 Salary Component, dan di sebagian company akun itu sama dengan akun beban
 gajinya - kalau debit dan kreditnya sampai dijaring jadi satu baris netto,
 PPh21 yang dipotong dari karyawan tidak pernah kelihatan di buku besar.
+
+Susunan Payroll Entry tiap skenario berikut jurnal yang dihasilkannya bisa
+dicetak untuk dibaca mata, dengan menyalakan STH_DUMP_JURNAL:
+
+	STH_DUMP_JURNAL=1 ~/frappe-bench/env/bin/python -c "..."
+
+Bawaannya mati supaya keluaran test tetap bersih.
 """
 
+import os
 from datetime import date
 from unittest.mock import patch
 
@@ -32,6 +40,56 @@ HUTANG_PPH21 = "2161005 - HUTANG PPH 21 - TML"
 
 CC_UMUM = "UMUM - TML"
 CC_STASIUN = "STASIUN PRESSING - TML"
+
+DUMP = bool(os.environ.get("STH_DUMP_JURNAL"))
+
+
+def rupiah(nilai):
+	"""Angka dengan titik ribuan dan koma desimal, supaya enak dibaca."""
+	return "{0:,.2f}".format(nilai).translate(str.maketrans(",.", ".,"))
+
+
+def cetak_susunan_dan_jurnal(judul, doc, slips, cost_center_slip, earnings, deductions,
+                             gl_entries, payable):
+	"""Cetak Payroll Entry skenario ini berikut jurnal yang dihasilkannya.
+
+	Dipakai untuk dilihat orang, bukan untuk diperiksa test - assert-nya tetap
+	di masing-masing test.
+	"""
+	print("\n" + "=" * 100)
+	print("{0}\nPAYROLL ENTRY {1}  ({2}, {3})  payable: {4}".format(
+		judul, doc.name, doc.company, doc.posting_date, doc.payroll_payable_account
+	))
+
+	for d in slips:
+		print("\nSlip {0}  net {1}  angsuran {2}  cost center {3}".format(
+			d.name, rupiah(d.net_pay), rupiah(d.total_loan_repayment),
+			cost_center_slip.get(d.name),
+		))
+
+		for parentfield, baris in (("earning", earnings), ("deduction", deductions)):
+			for r in baris:
+				if r.salary_slip != d.name:
+					continue
+
+				print("  {0:9} {1:32} {2:>18}  -> {3}".format(
+					parentfield, r.salary_component, rupiah(r.amount), r.account
+				))
+
+	print("\nJURNAL")
+	print("  {0:52} {1:16} {2:>18} {3:>18}".format("AKUN", "COST CENTER", "DEBIT", "KREDIT"))
+
+	for d in gl_entries:
+		print("  {0:52} {1:16} {2:>18} {3:>18}".format(
+			d.account, d.cost_center or "", rupiah(d.debit), rupiah(d.credit)
+		))
+
+	print("  {0:52} {1:16} {2:>18} {3:>18}".format(
+		"TOTAL", "",
+		rupiah(sum(d.debit for d in gl_entries)),
+		rupiah(sum(d.credit for d in gl_entries)),
+	))
+	print("  Payroll Payable dikredit: {0}".format(rupiah(payable)))
 
 
 def slip(name, net_pay, total_loan_repayment=0):
@@ -98,7 +156,15 @@ class TestAccrualPayrollEntry(FrappeTestCase):
 			return [d for d in baris if d.salary_slip in nama_slip]
 
 		with patch("sth.overrides.payroll_entry.rincian_komponen", side_effect=rincian):
-			return doc.susun_gl_accrual()
+			gl_entries, payable = doc.susun_gl_accrual()
+
+		if DUMP:
+			cetak_susunan_dan_jurnal(
+				self._testMethodName, doc, slips, cost_center_slip,
+				earnings, deductions, gl_entries, payable,
+			)
+
+		return gl_entries, payable
 
 	def baris_akun(self, gl_entries, account, cost_center=None):
 		return [
