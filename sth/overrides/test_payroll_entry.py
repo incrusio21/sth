@@ -131,14 +131,21 @@ class PayrollEntryPalsu:
 	setarakan_accrual = PayrollEntry.setarakan_accrual
 	make_payroll_gl_entries = PayrollEntry.make_payroll_gl_entries
 
-	def __init__(self, slips, cost_center_slip, payroll_payable_account=HUTANG_GAJI):
+	party_akun_potongan = PayrollEntry.party_akun_potongan
+
+	def __init__(self, slips, cost_center_slip, payroll_payable_account=HUTANG_GAJI,
+	             supplier_potongan=None):
 		self.name = "HR-PRUN-TEST-0001"
 		self.company = "PT. TRIMITRA LESTARI"
 		self.posting_date = date(2026, 9, 30)
 		self.cost_center = CC_UMUM
 		self.payroll_payable_account = payroll_payable_account
+		self.supplier_potongan = supplier_potongan
 		self._slips = slips
 		self._cost_center_slip = cost_center_slip
+
+	def get(self, fieldname, default=None):
+		return getattr(self, fieldname, default)
 
 	def get_slip_accrual(self):
 		return self._slips
@@ -148,15 +155,21 @@ class PayrollEntryPalsu:
 
 
 class TestAccrualPayrollEntry(FrappeTestCase):
-	def susun(self, slips, cost_center_slip, earnings, deductions, **kwargs):
-		"""Jalankan susun_gl_accrual dengan rincian komponen yang dipasok test."""
+	def susun(self, slips, cost_center_slip, earnings, deductions, tipe_akun_party=None, **kwargs):
+		"""Jalankan susun_gl_accrual dengan rincian komponen yang dipasok test.
+
+		Tanpa `tipe_akun_party`, tidak ada akun yang dianggap butuh party -
+		itu keadaan yang berlaku di sebagian besar skenario di sini.
+		"""
 		doc = PayrollEntryPalsu(slips, cost_center_slip, **kwargs)
 
 		def rincian(company, nama_slip, parentfield="earnings", hanya_kegiatan_kebun=False):
 			baris = earnings if parentfield == "earnings" else deductions
 			return [d for d in baris if d.salary_slip in nama_slip]
 
-		with patch("sth.overrides.payroll_entry.rincian_komponen", side_effect=rincian):
+		with patch("sth.overrides.payroll_entry.rincian_komponen", side_effect=rincian), \
+				patch("sth.overrides.payroll_entry.tipe_akun_party",
+				      return_value=tipe_akun_party or {}):
 			gl_entries, payable = doc.susun_gl_accrual()
 
 		if DUMP:
@@ -284,6 +297,52 @@ class TestAccrualPayrollEntry(FrappeTestCase):
 			{(CC_UMUM, 200_000), (CC_STASIUN, 100_000)},
 		)
 		self.assertEqual(payable, 9_700_000)
+
+	def susun_dengan_party(self, tipe_akun, **kwargs):
+		"""susun_gl_accrual dengan tipe akun party yang dipasok test.
+
+		BPJS dipotong dari karyawan dan mendarat di Hutang BPJS, akun bertipe
+		Payable - itu yang dulu menggagalkan seluruh accrual-nya.
+		"""
+		return self.susun(
+			slips=[slip("SS-0001", net_pay=9_826_712.88)],
+			cost_center_slip={"SS-0001": CC_UMUM},
+			earnings=[komponen("SS-0001", "Gaji Pokok-Opr Kebun", BEBAN_KEBUN, 10_000_000)],
+			deductions=[
+				komponen("SS-0001", "BPJS Kesehatan (Karyawan)", HUTANG_BPJS, 173_287.12)
+			],
+			tipe_akun_party=tipe_akun,
+			**kwargs,
+		)
+
+	def test_potongan_ke_akun_payable_dapat_party_supplier(self):
+		"""Akun Payable dijurnal dengan Supplier Potongan sebagai party-nya."""
+		gl_entries, payable = self.susun_dengan_party(
+			{HUTANG_BPJS: "Payable"}, supplier_potongan="BPJS KESEHATAN"
+		)
+
+		bpjs = self.baris_akun(gl_entries, HUTANG_BPJS)
+		self.assertEqual(len(bpjs), 1)
+		self.assertEqual(bpjs[0].credit, 173_287.12)
+		self.assertEqual(bpjs[0].party_type, "Supplier")
+		self.assertEqual(bpjs[0].party, "BPJS KESEHATAN")
+
+		# Akun biasa tidak ikut dipasangi party
+		beban = self.baris_akun(gl_entries, BEBAN_KEBUN)[0]
+		self.assertIsNone(beban.get("party_type"))
+		self.assertEqual(payable, 9_826_712.88)
+
+	def test_akun_payable_tanpa_supplier_dilempar(self):
+		"""Lebih baik ditegur sekarang daripada ditolak ERPNext di tengah posting."""
+		with self.assertRaises(frappe.ValidationError):
+			self.susun_dengan_party({HUTANG_BPJS: "Payable"})
+
+	def test_akun_receivable_dilempar(self):
+		"""Piutang Karyawan butuh party juga, tapi partynya tidak boleh ditebak."""
+		with self.assertRaises(frappe.ValidationError):
+			self.susun_dengan_party(
+				{HUTANG_BPJS: "Receivable"}, supplier_potongan="BPJS KESEHATAN"
+			)
 
 	def test_jurnalnya_seimbang(self):
 		"""Total debit sama dengan total kredit, termasuk waktu ada PPh21 dan BPJS."""

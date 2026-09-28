@@ -30,6 +30,16 @@ class PayrollEntry(PayrollEntry):
 		self.batalkan_gl_payroll()
 		super().on_cancel()
 
+		# Payment Ledger Entry lahir dari baris GL yang berparty - potongan BPJS
+		# yang mendarat di akun bertipe Payable. Barisnya sudah didelink waktu
+		# GL-nya dibalik (create_payment_ledger_entry dengan cancel=1), tapi
+		# tetap ada di tabelnya, dan pemeriksaan tautan sesudah on_cancel akan
+		# menolak pembatalan kalau tidak disebut di sini. ERPNext memperlakukan
+		# vouchernya sendiri persis begini.
+		self.ignore_linked_doctypes = tuple(self.ignore_linked_doctypes or ()) + (
+			"Payment Ledger Entry",
+		)
+
 	def batalkan_gl_payroll(self):
 		"""Balik GL accrual yang diposting make_payroll_gl_entries().
 
@@ -390,8 +400,12 @@ class PayrollEntry(PayrollEntry):
 
 		remarks = "Payroll Entry: {0}".format(self.name)
 
+		party = self.party_akun_potongan(
+			{a for a, _cc in debit_per_akun} | {a for a, _cc in kredit_per_akun}
+		)
+
 		def baris(account, cost_center, debit=0, credit=0, against=None):
-			return frappe._dict({
+			row = frappe._dict({
 				"doctype": "GL Entry",
 				"posting_date": self.posting_date,
 				"account": account,
@@ -407,6 +421,11 @@ class PayrollEntry(PayrollEntry):
 				"remarks": remarks,
 				"is_opening": "No",
 			})
+
+			if account in party:
+				row.party_type, row.party = party[account]
+
+			return row
 
 		gl_entries = [
 			baris(account, cc, debit=flt(amount, 2), against=self.payroll_payable_account)
@@ -428,6 +447,50 @@ class PayrollEntry(PayrollEntry):
 		)
 
 		return gl_entries, payable
+
+	def party_akun_potongan(self, accounts):
+		"""Party untuk akun komponen yang bertipe Payable, misalnya Hutang BPJS.
+
+		ERPNext menolak GL Entry tanpa party di akun bertipe Receivable atau
+		Payable, dan potongan BPJS karyawan memang mendarat di akun begitu -
+		Hutang BPJS. Sebelum ada ini, accrual-nya berhenti dengan "Supplier is
+		required against Payable account" dan seluruh jurnalnya tidak jadi.
+
+		Supplier-nya satu untuk seluruh Payroll Entry, diisi di field Supplier
+		Potongan. Itu cukup selama akun hutang potongan menunjuk satu badan
+		seperti BPJS; kalau nanti ada potongan ke lawan yang berbeda dalam satu
+		payroll, pilihannya pindah ke master komponennya, bukan di sini.
+
+		Akun bertipe Receivable dilempar, bukan ditebak: yang berhutang di situ
+		karyawannya sendiri (Piutang Karyawan untuk premi kontanan), sementara
+		Party Type Employee di ERPNext terdaftar sebagai Payable - memasangkannya
+		ke akun Receivable bukan sesuatu yang boleh diputuskan diam-diam di sini.
+		"""
+		tipe = tipe_akun_party(accounts)
+		if not tipe:
+			return {}
+
+		receivable = sorted(a for a, t in tipe.items() if t == "Receivable")
+		if receivable:
+			frappe.throw(
+				_("Akun komponen berikut bertipe Receivable sehingga butuh party, "
+				  "dan accrual belum tahu harus memakai party apa: {0}. Ubah tipe "
+				  "akunnya, atau pindahkan komponennya ke akun lain.").format(
+					comma_and(receivable)
+				),
+				title=_("Akun Potongan Butuh Party"),
+			)
+
+		if not self.get("supplier_potongan"):
+			frappe.throw(
+				_("Akun komponen berikut bertipe Payable sehingga GL-nya wajib punya "
+				  "party: {0}. Isi field Supplier Potongan di Payroll Entry ini.").format(
+					comma_and(sorted(tipe))
+				),
+				title=_("Supplier Potongan Belum Diisi"),
+			)
+
+		return {a: ("Supplier", self.supplier_potongan) for a in tipe}
 
 	def setarakan_accrual(self, gl_entries, payable):
 		"""Pastikan baris komponen ketemu dengan Payroll Payable.
@@ -522,6 +585,27 @@ class PayrollEntry(PayrollEntry):
 		).run(as_dict=as_dict)
 
 		return ss_list
+
+def tipe_akun_party(accounts):
+	"""Akun yang tidak boleh dijurnal tanpa party, beserta tipenya.
+
+	Cuma Receivable dan Payable yang diperiksa ERPNext di validate_party;
+	Current Liability dan kawan-kawannya lewat tanpa party.
+	"""
+	accounts = {a for a in accounts if a}
+	if not accounts:
+		return {}
+
+	rows = frappe.get_all(
+		"Account",
+		filters={
+			"name": ["in", sorted(accounts)],
+			"account_type": ["in", ("Receivable", "Payable")],
+		},
+		fields=["name", "account_type"],
+	)
+
+	return {r.name: r.account_type for r in rows}
 
 def submit_salary_slips_no_jv(payroll_entry, salary_slips, publish_progress=True):
 	payroll_entry = frappe.get_doc("Payroll Entry", payroll_entry)
