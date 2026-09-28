@@ -1215,7 +1215,10 @@ def get_cost_center_kud(company, setelan=None):
 # Dua baris jurnal KUD sengaja tidak berhenti di akun akhirnya:
 #
 #   Management Fee     dikredit ke 9190399, lalu Nota Piutang mendebitnya lagi
-#                      dan mengkredit 1162099 PIUTANG LAINNYA.
+#                      dan mengkredit 1162099 PIUTANG LAINNYA. Nilainya termasuk
+#                      PPN, dan yang memecahnya Nota Piutang: kreditnya jadi DPP
+#                      ke 1162099 dan PPN ke akun PPN Keluaran. Yang di sini
+#                      tetap grossnya, jadi 9190399 masih habis persis.
 #   Pembayaran ke Mitra dikredit ke akun antara, lalu Purchase Invoice
 #                      mendebit akun antara itu dan mengkredit 2111091 dengan
 #                      supplier-nya, supaya hutangnya jadi tagihan yang bisa

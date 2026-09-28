@@ -21,8 +21,13 @@
   "ppn_jual_asset",
   "nilai_jual_asset",
   "nilai_barang_non_stok",
+  "customer",
   "perhitungan_kud",
   "nilai_management_fee",
+  "tax_rate_management_fee",
+  "exclude_ppn_management_fee",
+  "dpp_management_fee",
+  "ppn_management_fee",
   "payment_entry",
   "dibuat_dari_payment_voucher",
   "column_break_qntg",
@@ -207,6 +212,16 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.tipe==\"Others\" && [\"Asset\", \"Barang Non Stok\", \"Management Fee KUD\"].includes(doc.sub_tipe_others)",
+   "description": "Party baris Piutang Lainnya di jurnalnya, yang wajib ada karena akunnya bertipe Receivable. Untuk Management Fee KUD diisi otomatis dengan Customer yang kodenya sama dengan mitra Perhitungan KUD-nya.",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "mandatory_depends_on": "eval:doc.tipe==\"Others\" && [\"Asset\", \"Barang Non Stok\"].includes(doc.sub_tipe_others)",
+   "options": "Customer",
+   "read_only_depends_on": "eval:doc.sub_tipe_others==\"Management Fee KUD\""
+  },
+  {
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
    "fieldname": "perhitungan_kud",
    "fieldtype": "Link",
@@ -219,10 +234,47 @@
   {
    "default": "0",
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
-   "description": "Diambil ulang dari Perhitungan KUD-nya saat disimpan, tidak bisa diketik.",
+   "description": "Diambil ulang dari Perhitungan KUD-nya saat disimpan, tidak bisa diketik. Nilainya sudah termasuk PPN.",
    "fieldname": "nilai_management_fee",
    "fieldtype": "Currency",
    "label": "Nilai Management Fee",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\" && !doc.exclude_ppn_management_fee",
+   "description": "Tarif pemecah Nilai Management Fee jadi DPP dan PPN, sekaligus sumber akun PPN Keluaran yang dikredit jurnalnya.",
+   "fieldname": "tax_rate_management_fee",
+   "fieldtype": "Link",
+   "label": "Tax Rate",
+   "mandatory_depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\" && !doc.exclude_ppn_management_fee",
+   "no_copy": 1,
+   "options": "Tax Rate"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
+   "description": "Centang kalau fee-nya memang tanpa PPN. Nilai yang ditagih tidak berubah: seluruhnya jadi DPP dan PPN-nya nol.",
+   "fieldname": "exclude_ppn_management_fee",
+   "fieldtype": "Check",
+   "label": "Tanpa PPN",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
+   "fieldname": "dpp_management_fee",
+   "fieldtype": "Currency",
+   "label": "DPP Management Fee",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
+   "fieldname": "ppn_management_fee",
+   "fieldtype": "Currency",
+   "label": "PPN Keluaran Management Fee",
    "no_copy": 1,
    "read_only": 1
   },

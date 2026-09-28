@@ -2,13 +2,16 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import nowdate, flt
+from frappe.utils import nowdate, flt, cint
 from frappe.model.document import Document
 
 # Nomor akun (Account.account_number) untuk jurnal Nota Piutang tipe "Others"
 AKUN_PIUTANG_LAIN_NUMBER       = "1162099"
 AKUN_DISPOSAL_ASSET_NUMBER     = "9190201"
 AKUN_DISPOSAL_NON_STOK_NUMBER  = "9190399"
+
+# Pembulatan uang, sama dengan Perhitungan KUD yang jadi sumber nilainya.
+PRESISI_UANG = 2
 
 
 def get_nilai_disposal_asset(asset, akun_lawan):
@@ -59,6 +62,72 @@ def get_ppn_dari_tax_rate(dpp, tax_rate):
 	rate = frappe.db.get_value("Tax Rate", tax_rate, "rate")
 
 	return flt(dpp) * flt(rate) / 100.0
+
+
+def pecah_dpp_ppn(nilai, rate):
+	"""Pecah nilai yang sudah termasuk PPN jadi (DPP, PPN). Fungsi murni.
+
+	PPN diambil sebagai sisa, bukan dihitung ulang dari DPP, supaya keduanya selalu
+	berjumlah persis nilai aslinya walaupun pembulatan DPP-nya meleset.
+
+	Tarif nol berarti tanpa PPN: seluruh nilainya jadi DPP.
+	"""
+	nilai = flt(nilai, PRESISI_UANG)
+	rate = flt(rate)
+
+	if rate <= 0:
+		return nilai, 0.0
+
+	dpp = flt(nilai / (1 + rate / 100.0), PRESISI_UANG)
+
+	return dpp, flt(nilai - dpp, PRESISI_UANG)
+
+
+def get_rate_ppn(tax_rate):
+	"""Tarif Tax Rate yang dipakai memecah nilai gross jadi DPP dan PPN."""
+	rate = flt(frappe.db.get_value("Tax Rate", tax_rate, "rate"))
+
+	if rate <= 0:
+		frappe.throw(
+			f"Tax Rate <b>{tax_rate}</b> tarifnya <b>{rate}</b>, tidak bisa dipakai "
+			f"memecah DPP dan PPN. Centang <b>Tanpa PPN</b> kalau memang tanpa PPN."
+		)
+
+	return rate
+
+
+def get_customer_mitra(mitra):
+	"""Customer pasangan mitra KUD, yang jadi party baris Piutang Lainnya.
+
+	Mitra tercatat sebagai Supplier — dari situ TBS-nya dibeli — tapi 1162099
+	PIUTANG LAINNYA bertipe Receivable, dan Journal Entry hanya menerima party
+	bertipe Customer di akun begitu. Kode Customer dan Supplier mitra memang sama,
+	jadi yang dicari Customer dengan nama yang sama.
+	"""
+	if frappe.db.exists("Customer", mitra):
+		return mitra
+
+	frappe.throw(
+		f"Mitra <b>{mitra}</b> belum punya Customer dengan kode yang sama. "
+		f"Baris Piutang Lainnya di jurnal nota ini wajib berparty bertipe Customer, "
+		f"jadi buat dulu Customer <b>{mitra}</b>.",
+		title="Customer Mitra Belum Ada",
+	)
+
+
+@frappe.whitelist()
+def get_dpp_ppn_management_fee(nilai, tax_rate=None, exclude_ppn=0):
+	"""DPP dan PPN dari Nilai Management Fee yang sudah termasuk PPN.
+
+	Dipakai form supaya pecahannya kelihatan sebelum disimpan. Yang menentukan
+	jurnal tetap hitungan di validate, bukan balikan ini.
+	"""
+	if cint(exclude_ppn) or not tax_rate:
+		return {"dpp": flt(nilai, PRESISI_UANG), "ppn": 0}
+
+	dpp, ppn = pecah_dpp_ppn(nilai, get_rate_ppn(tax_rate))
+
+	return {"dpp": dpp, "ppn": ppn}
 
 
 @frappe.whitelist()
@@ -120,11 +189,22 @@ class NotaPiutang(Document):
 		if self.tipe == "Others":
 			self.validate_others()
 
-		self.grandtotal = self.sisa_dpp + self.sisa_ppn
+		# flt(): keduanya diisi sisi client, jadi masih None di nota yang dibuat
+		# dari kode — seperti Management Fee KUD yang ditarik dari Perhitungan KUD
+		self.grandtotal = flt(self.sisa_dpp) + flt(self.sisa_ppn)
 
 	def validate_others(self):
 		if not self.sub_tipe_others:
 			frappe.throw("Sub Tipe wajib diisi untuk Tipe <b>Others</b>")
+
+		# Baris Piutang Lainnya di jurnalnya wajib berparty karena akunnya bertipe
+		# Receivable. Management Fee KUD tidak disebut di sini: partynya diisi
+		# validate_management_fee_kud() dari mitra perhitungannya.
+		if self.sub_tipe_others in ("Asset", "Barang Non Stok") and not self.customer:
+			frappe.throw(
+				f"Customer wajib diisi untuk Sub Tipe <b>{self.sub_tipe_others}</b>: "
+				f"baris Piutang Lainnya di jurnalnya harus berparty."
+			)
 
 		if self.sub_tipe_others == "Asset":
 			if not self.asset:
@@ -161,7 +241,7 @@ class NotaPiutang(Document):
 		pk = frappe.db.get_value(
 			"Perhitungan KUD",
 			self.perhitungan_kud,
-			["company", "docstatus", "management_fee"],
+			["company", "docstatus", "management_fee", "mitra"],
 			as_dict=True,
 		)
 
@@ -203,6 +283,39 @@ class NotaPiutang(Document):
 				f"Management Fee di Perhitungan KUD <b>{self.perhitungan_kud}</b> nol, "
 				f"tidak ada yang bisa ditagihkan."
 			)
+
+		# party baris piutangnya tidak dipilih orang: mitra perhitungannya yang
+		# ditagih, jadi Customer-nya ikut dari sana
+		self.customer = get_customer_mitra(pk.mitra)
+
+		self.hitung_dpp_ppn_management_fee()
+
+	def hitung_dpp_ppn_management_fee(self):
+		"""Pecah Nilai Management Fee, yang selalu sudah termasuk PPN, jadi DPP dan PPN.
+
+		Dihitung di server seperti DPP dan PPN penjualan asset, supaya pecahan yang
+		dipakai jurnal tidak bisa dikarang dari sisi client.
+		"""
+		nilai = flt(self.nilai_management_fee)
+
+		if self.exclude_ppn_management_fee:
+			# Tax Rate-nya dikosongkan supaya tidak ada tarif yang menganggur di form
+			# sementara PPN-nya nol.
+			self.tax_rate_management_fee = None
+			self.dpp_management_fee = nilai
+			self.ppn_management_fee = 0
+			return
+
+		if not self.tax_rate_management_fee:
+			frappe.throw(
+				"Tax Rate wajib diisi: Nilai Management Fee sudah termasuk PPN, dan "
+				"tarifnya itu yang memecah DPP dengan PPN. Centang <b>Tanpa PPN</b> "
+				"kalau fee-nya memang tanpa PPN."
+			)
+
+		self.dpp_management_fee, self.ppn_management_fee = pecah_dpp_ppn(
+			nilai, get_rate_ppn(self.tax_rate_management_fee)
+		)
 
 	def validate_jual_asset(self):
 		if not self.sales_invoice:
@@ -328,12 +441,12 @@ class NotaPiutang(Document):
 
 		return account
 
-	def get_akun_ppn_keluaran(self):
+	def get_akun_ppn_keluaran(self, tax_rate):
 		"""Akun PPN Keluaran milik Tax Rate yang dipilih, untuk company nota ini."""
 		akun = frappe.db.get_value(
 			"Tax Rate Account",
 			{
-				"parent": self.tax_rate_jual_asset,
+				"parent": tax_rate,
 				"company": self.company,
 				"tipe": "Keluaran",
 			},
@@ -342,7 +455,7 @@ class NotaPiutang(Document):
 
 		if not akun:
 			frappe.throw(
-				f"Tax Rate <b>{self.tax_rate_jual_asset}</b> belum punya akun bertipe "
+				f"Tax Rate <b>{tax_rate}</b> belum punya akun bertipe "
 				f"<b>Keluaran</b> untuk Company <b>{self.company}</b>."
 			)
 
@@ -381,7 +494,7 @@ class NotaPiutang(Document):
 			)
 			return
 
-		akun_ppn = self.get_akun_ppn_keluaran()
+		akun_ppn = self.get_akun_ppn_keluaran(self.tax_rate_jual_asset)
 
 		si = frappe.db.get_value(
 			"Sales Invoice",
@@ -476,6 +589,8 @@ class NotaPiutang(Document):
 
 		je.append("accounts", {
 			"account"                   : akun_piutang_lain,
+			"party_type"                : "Customer",
+			"party"                     : self.customer,
 			"debit_in_account_currency" : nilai,
 			"credit_in_account_currency": 0,
 			"cost_center"               : cost_center,
@@ -502,16 +617,25 @@ class NotaPiutang(Document):
 		)
 
 	def create_management_fee_kud_journal_entry(self):
-		"""Management Fee: akun pendapatan didebit, Piutang Lainnya dikredit.
+		"""Management Fee: akun pendapatan didebit, Piutang Lainnya dan PPN dikredit.
 
 		Arahnya kebalikan dari sub tipe Others yang lain, dan itu memang diminta
 		user 21 September 2026: jurnal Perhitungan KUD sudah mengkredit 9190399
 		waktu fee-nya dipotong dari pembayaran ke mitra, jadi nota ini
 		mendebitnya. Pasangan keduanya membuat 9190399 nol dan meninggalkan
 		saldo kredit di 1162099 — konsekuensi yang sudah disampaikan dan tetap
-		dipilih. Kalau nanti dibalik, yang ditukar cukup dua baris di bawah.
+		dipilih.
+
+		Nilai Management Fee sudah termasuk PPN, jadi yang didebit ke pendapatan
+		tetap sebesar grossnya — itu yang membuat kredit 9190399 dari Perhitungan
+		KUD habis persis — sedangkan kreditnya dipecah: DPP ke 1162099 dan PPN ke
+		akun PPN Keluaran milik Tax Rate yang dipilih. Dengan centang Tanpa PPN,
+		PPN-nya nol dan jurnalnya kembali dua baris seperti sebelum ada pemecahan
+		ini.
 		"""
 		nilai = flt(self.nilai_management_fee)
+		dpp = flt(self.dpp_management_fee)
+		ppn = flt(self.ppn_management_fee)
 
 		cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		akun_piutang_lain = self.get_account_by_number(AKUN_PIUTANG_LAIN_NUMBER)
@@ -535,11 +659,24 @@ class NotaPiutang(Document):
 		})
 		je.append("accounts", {
 			"account"                   : akun_piutang_lain,
+			"party_type"                : "Customer",
+			"party"                     : self.customer,
 			"debit_in_account_currency" : 0,
-			"credit_in_account_currency": nilai,
+			"credit_in_account_currency": dpp,
 			"cost_center"               : cost_center,
 			"user_remark"               : remarks,
 		})
+
+		if ppn > 0:
+			je.append("accounts", {
+				"account"                   : self.get_akun_ppn_keluaran(
+					self.tax_rate_management_fee
+				),
+				"debit_in_account_currency" : 0,
+				"credit_in_account_currency": ppn,
+				"cost_center"               : cost_center,
+				"user_remark"               : remarks,
+			})
 
 		je.insert(ignore_permissions=True)
 		je.submit()

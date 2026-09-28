@@ -26,6 +26,21 @@ Tanpa `contoh`, penyaringnya disebut satu per satu: company, unit, grade,
 department, designation, tipe_salary, cost_center, payroll_payable_account.
 Yang disebut langsung selalu menang atas yang disalin dari `contoh`.
 
+Periode di server tes biasanya tidak punya BKM atau absensi, jadi semua
+komponen keluar nol dan accrual-nya tidak jadi apa-apa - tidak ada yang bisa
+dijurnal dari slip kosong. Untuk itu ada `tambahan`: nilai per karyawan yang
+dipasang lewat Additional Salary, memakai Salary Component yang sudah ada
+sehingga akunnya tetap akun yang sungguhan. `batas_karyawan` membatasi berapa
+karyawan yang ikut supaya percobaannya kecil:
+
+    bench --site <site> execute sth.buat_payroll_entry_percobaan.execute \\
+        --kwargs "{'contoh': 'HR-PRUN-2026-00067', 'start_date': '2026-10-01',
+                   'end_date': '2026-10-31', 'terapkan': 1, 'batas_karyawan': 2,
+                   'tambahan': {'Gaji Pokok-Opr Kebun': 10000000, 'PPH21 TER': 393355}}"
+
+Additional Salary yang dibuat menyimpan tautan ke Payroll Entry-nya, jadi
+hapus() ikut membuangnya.
+
 Yang perlu diketahui sebelum menjalankannya dengan terapkan=1:
 
 - Periodenya harus periode yang karyawannya belum punya Salary Slip. Yang sudah
@@ -59,7 +74,8 @@ FIELD_DISALIN = (
 )
 
 
-def execute(contoh=None, terapkan=0, start_date=None, end_date=None, posting_date=None, **penyaring):
+def execute(contoh=None, terapkan=0, start_date=None, end_date=None, posting_date=None,
+            tambahan=None, batas_karyawan=None, **penyaring):
 	"""Susun Payroll Entry percobaan, laporkan, dan kalau diminta buat sungguhan."""
 	terapkan = cint(terapkan)
 
@@ -73,10 +89,11 @@ def execute(contoh=None, terapkan=0, start_date=None, end_date=None, posting_dat
 		"posting_date": getdate(posting_date or end_date),
 	})
 
-	doc = susun_dokumen(args)
+	doc = susun_dokumen(args, batas_karyawan)
 	karyawan = doc.employees
 
 	cetak_penyaring(args, karyawan)
+	cetak_tambahan(tambahan)
 
 	if not terapkan:
 		print("\nMode laporan saja - tidak ada dokumen yang dibuat.")
@@ -85,6 +102,9 @@ def execute(contoh=None, terapkan=0, start_date=None, end_date=None, posting_dat
 
 	doc.insert()
 	print("\nPayroll Entry dibuat: {0}".format(doc.name))
+
+	if tambahan:
+		buat_tambahan(doc, tambahan)
 
 	try:
 		doc.submit()
@@ -135,13 +155,77 @@ def kumpulkan_penyaring(contoh, penyaring):
 	return args
 
 
-def susun_dokumen(args):
+def susun_dokumen(args, batas_karyawan=None):
 	"""Payroll Entry yang belum disimpan, karyawannya sudah dijaring."""
 	doc = frappe.new_doc("Payroll Entry")
 	doc.update(args)
 	doc.fill_employee_details()
 
+	if cint(batas_karyawan):
+		doc.employees = doc.employees[:cint(batas_karyawan)]
+		doc.number_of_employees = len(doc.employees)
+
 	return doc
+
+
+def buat_tambahan(doc, tambahan):
+	"""Pasang nilai lewat Additional Salary supaya slipnya tidak nol.
+
+	Periode di server tes sering tidak punya BKM atau absensi, jadi semua
+	komponen keluar nol dan accrual-nya menolak menjurnal yang kosong. Nilai di
+	sini ditulis sebagai Additional Salary, bukan diisikan langsung ke baris
+	slip: slip menghitung ulang komponennya dari Salary Structure tiap kali
+	disimpan, dan yang diisikan tangan akan tersapu. Additional Salary memang
+	jalur resminya untuk nilai sekali jalan.
+
+	Komponennya komponen yang sudah ada - akunnya ikut master, jadi jurnalnya
+	mendarat di akun yang sungguhan dipakai.
+
+	Sengaja tidak memakai ref_doctype/ref_docname ke Payroll Entry-nya: tautan
+	dinamis itu justru membuat Payroll Entry-nya tidak bisa dibatalkan lagi.
+	hapus() menemukannya lewat kolom additional_salary di baris slip.
+
+	Komponen yang dihitung sendiri oleh aplikasi - PPH21 TER dan pasangan gross
+	up-nya - jangan dititipkan ke sini: nilainya akan ditulis ulang waktu slip
+	menghitung pajak, sementara total_deduction slip terlanjur memakai nilai
+	kiriman, dan accrual-nya menolak karena tidak ketemu dengan net pay.
+	"""
+	dibuat = []
+
+	for row in doc.employees:
+		for komponen, nilai in tambahan.items():
+			tipe = frappe.get_cached_value("Salary Component", komponen, "type")
+			if not tipe:
+				frappe.throw("Salary Component {0} tidak ada di site ini.".format(komponen))
+
+			ads = frappe.get_doc({
+				"doctype": "Additional Salary",
+				"employee": row.employee,
+				"salary_component": komponen,
+				"type": tipe,
+				"amount": flt(nilai),
+				"payroll_date": doc.end_date,
+				"company": doc.company,
+				"currency": doc.currency,
+				"overwrite_salary_structure_amount": 0,
+			})
+			ads.insert()
+			ads.submit()
+			dibuat.append(ads.name)
+
+	print("Additional Salary dibuat: {0}".format(len(dibuat)))
+
+	return dibuat
+
+
+def cetak_tambahan(tambahan):
+	if not tambahan:
+		return
+
+	print("\nTAMBAHAN LEWAT ADDITIONAL SALARY (per karyawan)")
+	for komponen, nilai in tambahan.items():
+		tipe = frappe.get_cached_value("Salary Component", komponen, "type") or "?"
+		print("  {0:9} {1:32} {2:>18,.2f}".format(tipe, komponen, flt(nilai)))
 
 
 def submit_slip(doc):
@@ -160,6 +244,11 @@ def submit_slip(doc):
 	try:
 		doc.submit_salary_slips()
 	except Exception as e:
+		# Accrual yang gagal di tengah jalan sudah sempat menulis sebagian baris
+		# GL; dibuang supaya tidak ada setengah jurnal yang tertinggal. Submit
+		# slipnya tidak ikut terbuang - submit_salary_slips_no_jv sudah commit
+		# sendiri sebelum accrual dipanggil.
+		frappe.db.rollback()
 		gagal = str(e)
 
 	slip = frappe.get_all(
@@ -246,12 +335,72 @@ def hapus(nama, benar_benar_hapus=0):
 	"""
 	doc = frappe.get_doc("Payroll Entry", nama)
 
+	# Dikumpulkan sebelum cancel: slipnya ikut terhapus waktu Payroll Entry
+	# dibatalkan, dan sesudah itu tidak ada lagi yang menunjuk Additional Salary
+	# yang dibuat untuk percobaan ini.
+	tambahan = cari_tambahan(nama)
+
 	if doc.docstatus == 1:
 		doc.cancel()
+		# Di-commit di sini supaya pembatalannya tetap berlaku walaupun langkah
+		# penghapusan di bawah tersandung sesuatu.
+		frappe.db.commit()
 		print("{0} dibatalkan, GL accrual-nya dibalik.".format(nama))
 
 	if cint(benar_benar_hapus):
+		buang_payment_ledger(nama)
 		frappe.delete_doc("Payroll Entry", nama)
 		print("{0} dihapus.".format(nama))
 
+	for ads in tambahan:
+		frappe.get_doc("Additional Salary", ads).cancel()
+
+		if cint(benar_benar_hapus):
+			frappe.delete_doc("Additional Salary", ads)
+
+		print("Additional Salary {0} dibuang.".format(ads))
+
 	frappe.db.commit()
+
+
+def buang_payment_ledger(nama):
+	"""Buang Payment Ledger Entry milik percobaan ini sebelum dokumennya dihapus.
+
+	Baris itu lahir dari potongan yang mendarat di akun bertipe Payable, misalnya
+	Hutang BPJS dengan party Supplier Potongan. Waktu GL-nya dibalik, barisnya
+	cuma ditandai delink, bukan dihapus - dan pemeriksaan tautan waktu menghapus
+	dokumen hanya melewatkan yang docstatus-nya cancelled, sementara PLE tetap
+	submitted. Jadi tanpa ini Payroll Entry percobaan tidak akan pernah bisa
+	dihapus, cuma bisa dibatalkan.
+
+	Sengaja hanya di skrip percobaan: buku besar sungguhan tidak seharusnya
+	kehilangan jejak begini, dan di sana pembatalan memang sudah cukup.
+	"""
+	rows = frappe.get_all(
+		"Payment Ledger Entry",
+		filters={"voucher_type": "Payroll Entry", "voucher_no": nama},
+		pluck="name",
+	)
+
+	if not rows:
+		return
+
+	frappe.db.delete("Payment Ledger Entry", {"name": ["in", rows]})
+	print("Payment Ledger Entry dibuang: {0}".format(len(rows)))
+
+
+def cari_tambahan(nama):
+	"""Additional Salary yang terpakai di slip Payroll Entry ini."""
+	slip = frappe.get_all("Salary Slip", filters={"payroll_entry": nama}, pluck="name")
+	if not slip:
+		return []
+
+	return list({
+		d.additional_salary
+		for d in frappe.get_all(
+			"Salary Detail",
+			filters={"parent": ["in", slip], "additional_salary": ["is", "set"]},
+			fields=["additional_salary"],
+		)
+		if d.additional_salary
+	})
