@@ -21,10 +21,12 @@ frappe.ui.form.on('Nota Piutang', {
 		setup_filter(frm);
 		calculate_net_total(frm);
 		hitung_dpp_ppn_management_fee(frm);
+		atur_wajib_customer(frm);
 	},
 
 	company: function(frm) {
 		setup_filter(frm);
+		atur_wajib_customer(frm);
 	},
 
 	nota_hutang_pemenuhan_kontrak_table_remove(frm) {
@@ -132,6 +134,7 @@ frappe.ui.form.on('Nota Piutang', {
 
 		hitung_nilai_jual_asset(frm);
 		hitung_dpp_ppn_management_fee(frm);
+		atur_wajib_customer(frm);
 	}
 });
 
@@ -152,6 +155,27 @@ function hitung_nilai_jual_asset(frm) {
 			frm.set_value('dpp_jual_asset', d.dpp || 0);
 			frm.set_value('ppn_jual_asset', d.ppn || 0);
 			frm.set_value('nilai_jual_asset', d.nilai || 0);
+		}
+	});
+}
+
+function atur_wajib_customer(frm) {
+	// Customer cuma wajib kalau akun Piutang Lainnya company ini bertipe
+	// Receivable — sama dengan syarat yang dipakai server waktu menyimpan.
+	// Management Fee KUD tidak pernah wajib di form: partynya diisi dari mitra
+	// Perhitungan KUD-nya waktu disimpan.
+	const sub_tipe_pakai_customer = ['Asset', 'Barang Non Stok'].includes(frm.doc.sub_tipe_others);
+
+	if (frm.doc.tipe !== 'Others' || !sub_tipe_pakai_customer || !frm.doc.company) {
+		frm.set_df_property('customer', 'reqd', 0);
+		return;
+	}
+
+	frappe.call({
+		method: 'sth.accounting_sth.doctype.nota_piutang.nota_piutang.piutang_lain_butuh_customer',
+		args: { company: frm.doc.company },
+		callback: function(r) {
+			frm.set_df_property('customer', 'reqd', r.message ? 1 : 0);
 		}
 	});
 }
