@@ -311,10 +311,21 @@ class PayrollEntry(PayrollEntry):
 		return slips
 
 	def make_payroll_gl_entries(self):
-		"""Susun accrual gajinya, lalu posting."""
+		"""Susun accrual gajinya, lalu posting.
+
+		merge_entries dimatikan supaya tiap baris yang disusun tetap jadi satu
+		baris GL. Kalau dibiarkan menyala, make_gl_entries menggabungkan baris
+		berakun dan bercost center sama jadi satu - dan di sini itu berarti
+		potongan yang seakun dengan bebannya, seperti PPh21 di company yang akun
+		PPh21-nya sama dengan akun beban gaji, menempel di baris bebannya. Nilainya
+		tidak hilang (debit dan kreditnya tetap dua kolom terpisah), tapi buku
+		besarnya tidak lagi menunjukkan potongan itu sebagai barisnya sendiri,
+		dan itu yang membuat orang harus menghitung mundur untuk tahu berapa yang
+		dipotong.
+		"""
 		gl_entries, payable = self.susun_gl_accrual()
 
-		post_gl_entries(gl_entries)
+		post_gl_entries(gl_entries, merge_entries=False)
 
 		frappe.msgprint(
 			_("GL Entry berhasil dibuat: {0} baris beban dan potongan, "

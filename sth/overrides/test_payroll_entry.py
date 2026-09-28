@@ -129,6 +129,7 @@ class PayrollEntryPalsu:
 
 	susun_gl_accrual = PayrollEntry.susun_gl_accrual
 	setarakan_accrual = PayrollEntry.setarakan_accrual
+	make_payroll_gl_entries = PayrollEntry.make_payroll_gl_entries
 
 	def __init__(self, slips, cost_center_slip, payroll_payable_account=HUTANG_GAJI):
 		self.name = "HR-PRUN-TEST-0001"
@@ -234,6 +235,32 @@ class TestAccrualPayrollEntry(FrappeTestCase):
 		self.assertEqual([d.debit for d in baris], [10_000_000, 0])
 		self.assertEqual([d.credit for d in baris], [0, 393_355])
 		self.assertEqual(payable, 9_606_645)
+
+	def test_posting_tidak_menggabungkan_baris_berakun_sama(self):
+		"""make_gl_entries dipanggil dengan merge_entries mati.
+
+		Kalau dibiarkan menyala, baris berakun dan bercost center sama digabung
+		jadi satu waktu ditulis ke buku besar - kredit PPh21 yang seakun dengan
+		bebannya akan menempel di baris beban itu, bukan berdiri sendiri.
+		"""
+		doc = PayrollEntryPalsu(
+			[slip("SS-0001", net_pay=9_606_645)], {"SS-0001": CC_UMUM}
+		)
+
+		earnings = [komponen("SS-0001", "Gaji Pokok-Opr Kebun", BEBAN_KEBUN, 10_000_000)]
+		deductions = [komponen("SS-0001", "PPH21 TER", BEBAN_KEBUN, 393_355)]
+
+		def rincian(company, nama_slip, parentfield="earnings", hanya_kegiatan_kebun=False):
+			return earnings if parentfield == "earnings" else deductions
+
+		with patch("sth.overrides.payroll_entry.rincian_komponen", side_effect=rincian), \
+				patch("sth.overrides.payroll_entry.post_gl_entries") as posting:
+			doc.make_payroll_gl_entries()
+
+		baris, kwargs = posting.call_args[0][0], posting.call_args[1]
+
+		self.assertFalse(kwargs.get("merge_entries", True))
+		self.assertEqual(len(baris), 3)
 
 	def test_pph21_dipisah_per_cost_center(self):
 		"""Potongan karyawan mill jatuh di cost center stasiunnya, bukan cost center dokumen."""
