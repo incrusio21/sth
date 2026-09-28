@@ -20,6 +20,7 @@ frappe.ui.form.on('Nota Piutang', {
 		}
 		setup_filter(frm);
 		calculate_net_total(frm);
+		hitung_dpp_ppn_management_fee(frm);
 	},
 
 	company: function(frm) {
@@ -108,6 +109,20 @@ frappe.ui.form.on('Nota Piutang', {
 		hitung_nilai_jual_asset(frm);
 	},
 
+	tax_rate_management_fee: function(frm) {
+		hitung_dpp_ppn_management_fee(frm);
+	},
+
+	exclude_ppn_management_fee: function(frm) {
+		// tarif yang sudah dipilih dilepas supaya form tidak memperlihatkan tarif
+		// yang tidak dipakai. Server melakukan hal yang sama waktu menyimpan.
+		if (frm.doc.exclude_ppn_management_fee && frm.doc.tax_rate_management_fee) {
+			frm.set_value('tax_rate_management_fee', '');
+		}
+
+		hitung_dpp_ppn_management_fee(frm);
+	},
+
 	sub_tipe_others: function(frm) {
 		if (frm.doc.sub_tipe_others === 'Asset' && frm.doc.asset) {
 			frm.trigger('asset');
@@ -116,6 +131,7 @@ frappe.ui.form.on('Nota Piutang', {
 		}
 
 		hitung_nilai_jual_asset(frm);
+		hitung_dpp_ppn_management_fee(frm);
 	}
 });
 
@@ -138,6 +154,41 @@ function hitung_nilai_jual_asset(frm) {
 			frm.set_value('nilai_jual_asset', d.nilai || 0);
 		}
 	});
+}
+
+function hitung_dpp_ppn_management_fee(frm) {
+	if (frm.doc.docstatus !== 0) return;
+
+	if (frm.doc.sub_tipe_others !== 'Management Fee KUD' || !flt(frm.doc.nilai_management_fee)) {
+		kosongkan_dpp_ppn_management_fee(frm);
+		return;
+	}
+
+	// tanpa Tax Rate dan tanpa centang Tanpa PPN belum ada dasar pemecahannya:
+	// dibiarkan nol supaya tidak terbaca seolah seluruh nilainya DPP
+	if (!frm.doc.exclude_ppn_management_fee && !frm.doc.tax_rate_management_fee) {
+		kosongkan_dpp_ppn_management_fee(frm);
+		return;
+	}
+
+	frappe.call({
+		method: 'sth.accounting_sth.doctype.nota_piutang.nota_piutang.get_dpp_ppn_management_fee',
+		args: {
+			nilai: frm.doc.nilai_management_fee,
+			tax_rate: frm.doc.tax_rate_management_fee,
+			exclude_ppn: frm.doc.exclude_ppn_management_fee ? 1 : 0,
+		},
+		callback: function(r) {
+			const d = r.message || {};
+			frm.set_value('dpp_management_fee', d.dpp || 0);
+			frm.set_value('ppn_management_fee', d.ppn || 0);
+		}
+	});
+}
+
+function kosongkan_dpp_ppn_management_fee(frm) {
+	if (flt(frm.doc.dpp_management_fee)) frm.set_value('dpp_management_fee', 0);
+	if (flt(frm.doc.ppn_management_fee)) frm.set_value('ppn_management_fee', 0);
 }
 
 function kosongkan_nilai_jual_asset(frm) {
@@ -398,6 +449,14 @@ function setup_filter(frm) {
 		return {
 			filters: [
 				['Asset', 'status', '=', 'Scrapped']
+			]
+		};
+	});
+	frm.set_query('tax_rate_management_fee', function() {
+		return {
+			filters: [
+				['Tax Rate', 'type', '=', 'PPN'],
+				['Tax Rate', 'is_group', '=', 0]
 			]
 		};
 	});
