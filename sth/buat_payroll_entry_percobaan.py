@@ -342,9 +342,13 @@ def hapus(nama, benar_benar_hapus=0):
 
 	if doc.docstatus == 1:
 		doc.cancel()
+		# Di-commit di sini supaya pembatalannya tetap berlaku walaupun langkah
+		# penghapusan di bawah tersandung sesuatu.
+		frappe.db.commit()
 		print("{0} dibatalkan, GL accrual-nya dibalik.".format(nama))
 
 	if cint(benar_benar_hapus):
+		buang_payment_ledger(nama)
 		frappe.delete_doc("Payroll Entry", nama)
 		print("{0} dihapus.".format(nama))
 
@@ -357,6 +361,32 @@ def hapus(nama, benar_benar_hapus=0):
 		print("Additional Salary {0} dibuang.".format(ads))
 
 	frappe.db.commit()
+
+
+def buang_payment_ledger(nama):
+	"""Buang Payment Ledger Entry milik percobaan ini sebelum dokumennya dihapus.
+
+	Baris itu lahir dari potongan yang mendarat di akun bertipe Payable, misalnya
+	Hutang BPJS dengan party Supplier Potongan. Waktu GL-nya dibalik, barisnya
+	cuma ditandai delink, bukan dihapus - dan pemeriksaan tautan waktu menghapus
+	dokumen hanya melewatkan yang docstatus-nya cancelled, sementara PLE tetap
+	submitted. Jadi tanpa ini Payroll Entry percobaan tidak akan pernah bisa
+	dihapus, cuma bisa dibatalkan.
+
+	Sengaja hanya di skrip percobaan: buku besar sungguhan tidak seharusnya
+	kehilangan jejak begini, dan di sana pembatalan memang sudah cukup.
+	"""
+	rows = frappe.get_all(
+		"Payment Ledger Entry",
+		filters={"voucher_type": "Payroll Entry", "voucher_no": nama},
+		pluck="name",
+	)
+
+	if not rows:
+		return
+
+	frappe.db.delete("Payment Ledger Entry", {"name": ["in", rows]})
+	print("Payment Ledger Entry dibuang: {0}".format(len(rows)))
 
 
 def cari_tambahan(nama):
