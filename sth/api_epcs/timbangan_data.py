@@ -376,12 +376,21 @@ def _build_data(timbangan_rows):
 			# cint memotong pecahannya, bukan membulatkan; jumlah_janjang memang
 			# sudah berpresisi 0, jadi yang bisa kehilangan pecahan cuma
 			# total_brondolan.
-			"total_jjg": cint(row.get("jumlah_janjang")),
-			"total_brd": cint(row.get("total_brondolan")),
+			
+			# "total_jjg": cint(row.get("jumlah_janjang")),
+			# "total_brd": cint(row.get("total_brondolan")),
+
+			"total_jjg_tbg": cint(row.get("jumlah_janjang")),
+			"total_brd_tbg": cint(row.get("total_brondolan")),
+
 			# Angka yang dicatat pos sendiri, sebagai pembanding hitungan
 			# rincian SPB di atas. Dibulatkan ke bawah dengan alasan yang sama.
-			"total_jjg_scp": cint(scp.get("total_jjg")),
-			"total_brd_scp": cint(scp.get("total_brd")),
+			
+			# "total_jjg_scp": cint(scp.get("total_jjg")),
+			# "total_brd_scp": cint(scp.get("total_brd")),
+			
+			"total_jjg": cint(scp.get("total_jjg")),
+			"total_brd": cint(scp.get("total_brd")),
 			# Kebun yang memanen, dari SPB — estate_code di atas pabrik yang
 			# menimbang. Unit SPB sudah memuat koreksi kebun dari pos (lihat
 			# koreksi_pos di Security Check Point). TBS Eksternal tidak punya SPB,
