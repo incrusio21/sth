@@ -46,6 +46,22 @@ frappe.ui.form.on('Delivery Order', {
             }
         });
 
+		frm.set_query('pecahan_dari', function(doc) {
+			let filters = { docstatus: 1, name: ['!=', doc.name] };
+			if (doc.sales_order) filters.sales_order = doc.sales_order;
+			return { filters: filters };
+		});
+
+		if (frm.doc.docstatus == 1) {
+			frm.add_custom_button(__('Kurangi Qty DO Ini'), function() {
+				frm.events.dialog_pecah_do(frm);
+			}, __('Pecah DO'));
+
+			frm.add_custom_button(__('Buat DO Pecahan'), function() {
+				frm.events.buat_do_pecahan(frm);
+			}, __('Pecah DO'));
+		}
+
 		if (!frm.is_new() && (frm.doc.delivery_order_transporter || []).length) {
 			frm.add_custom_button(__('Terbitkan QR Kedaluwarsa'), function() {
 				frm.events.buat_ulang_qr(frm, 0);
@@ -59,6 +75,83 @@ frappe.ui.form.on('Delivery Order', {
 			}, __('QR Transporter'));
 		}
 
+	},
+
+	// Pengganti "unpost" di program lama: qty DO diturunkan, sisanya kembali ke
+	// kontrak, lalu ditarik jadi DO pecahan (051 -> 051A).
+	dialog_pecah_do: function(frm) {
+		frappe.call({
+			method: 'sth.sales_sth.doctype.delivery_order.delivery_order.get_data_pecah_do',
+			args: { delivery_order: frm.doc.name }
+		}).then(function(r) {
+			let data = (r.message || []).map(function(row) {
+				return Object.assign({}, row, { qty_baru: row.terpakai });
+			});
+
+			let d = new frappe.ui.Dialog({
+				title: __('Pecah DO {0}', [frm.doc.name]),
+				size: 'large',
+				fields: [
+					{
+						fieldtype: 'HTML',
+						options: `<p class="text-muted">${__('Isi qty yang tetap di DO ini. Selisihnya dilepas kembali ke kontrak dan bisa ditarik jadi DO pecahan. Qty tidak bisa lebih kecil dari yang sudah terpakai Delivery Note atau timbangan.')}</p>`
+					},
+					{
+						fieldname: 'items',
+						fieldtype: 'Table',
+						cannot_add_rows: true,
+						cannot_delete_rows: true,
+						in_place_edit: true,
+						data: data,
+						fields: [
+							{ fieldname: 'name', fieldtype: 'Data', hidden: 1 },
+							{ fieldname: 'item_code', label: __('Item'), fieldtype: 'Data', read_only: 1, in_list_view: 1, columns: 3 },
+							{ fieldname: 'qty', label: __('Qty DO'), fieldtype: 'Float', read_only: 1, in_list_view: 1, columns: 2 },
+							{ fieldname: 'terpakai', label: __('Terpakai'), fieldtype: 'Float', read_only: 1, in_list_view: 1, columns: 2 },
+							{ fieldname: 'qty_baru', label: __('Qty Tetap di DO Ini'), fieldtype: 'Float', in_list_view: 1, columns: 3, reqd: 1 }
+						]
+					}
+				],
+				primary_action_label: __('Pecah'),
+				primary_action: function(values) {
+					let qty_baru = {};
+					let dilepas = 0;
+					(values.items || []).forEach(function(row) {
+						qty_baru[row.name] = row.qty_baru;
+						dilepas += flt(row.qty) - flt(row.qty_baru);
+					});
+
+					frappe.confirm(
+						__('Qty {0} dilepas dari DO {1} dan kembali jadi sisa kontrak. Lanjutkan?', [format_number(dilepas), frm.doc.name]),
+						function() {
+							frappe.call({
+								method: 'sth.sales_sth.doctype.delivery_order.delivery_order.pecah_delivery_order',
+								args: { delivery_order: frm.doc.name, qty_baru: qty_baru },
+								freeze: true,
+								freeze_message: __('Memecah DO...')
+							}).then(function() {
+								d.hide();
+								frm.reload_doc().then(function() {
+									frappe.confirm(
+										__('DO {0} sudah dikurangi. Buat DO pecahan untuk sisanya sekarang?', [frm.doc.name]),
+										function() { frm.events.buat_do_pecahan(frm); }
+									);
+								});
+							});
+						}
+					);
+				}
+			});
+
+			d.show();
+		});
+	},
+
+	buat_do_pecahan: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: 'sth.sales_sth.doctype.delivery_order.delivery_order.make_do_pecahan',
+			frm: frm
+		});
 	},
 
 	buat_ulang_qr: function(frm, semua) {

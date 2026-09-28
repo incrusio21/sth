@@ -7,7 +7,8 @@ from frappe.model.document import Document
 from erpnext.stock.doctype.delivery_note.delivery_note import DeliveryNote
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_to_date, cint, flt, format_datetime, get_datetime, now_datetime, nowdate, nowtime
-from sth.sales_sth.custom.sales_order import update_per_delivery_ordered_on_submit_cancel
+from sth.mill.doctype.timbangan.timbangan import perbarui_sisa_do_timbangan
+from sth.sales_sth.custom.sales_order import make_delivery_order, update_per_delivery_ordered_on_submit_cancel
 from sth.utils.qr_generator import get_qr_svg
 import json
 
@@ -22,9 +23,40 @@ BARANG_QR_PANJANG_NAMA = 30
 
 
 class DeliveryOrder(DeliveryNote):
+	def autoname(self):
+		"""DO pecahan dinamai nomor DO asalnya ditambah huruf (051 -> 051A, 051B).
+
+		Sama dengan kebiasaan di program lama, supaya pembeli dan pos tetap bisa
+		mengenali bahwa DO-nya masih bagian dari DO yang sama. DO biasa dibiarkan
+		tanpa nama di sini sehingga frappe lanjut memakai naming series.
+		"""
+		if self.pecahan_dari:
+			self.name = nama_do_pecahan(self.pecahan_dari)
+
 	def validate(self):
 		super().validate()
+		self.validasi_pecahan_dari()
 		self.terbitkan_qr_transporter()
+
+	def validasi_pecahan_dari(self):
+		if not self.pecahan_dari or self.docstatus != 0:
+			return
+
+		if self.pecahan_dari == self.name:
+			frappe.throw(_("Pecahan dari DO tidak boleh DO ini sendiri."))
+
+		induk = frappe.db.get_value(
+			"Delivery Order", self.pecahan_dari, ["docstatus", "sales_order"], as_dict=True
+		)
+		if not induk or induk.docstatus != 1:
+			frappe.throw(_("Pecahan dari DO {0} harus DO yang sudah disubmit.").format(self.pecahan_dari))
+
+		if self.sales_order and induk.sales_order and self.sales_order != induk.sales_order:
+			frappe.throw(
+				_("DO {0} milik kontrak {1}, sedangkan DO ini dari kontrak {2}. Pecahan harus dari kontrak yang sama.").format(
+					self.pecahan_dari, induk.sales_order, self.sales_order
+				)
+			)
 
 	def before_update_after_submit(self):
 		"""Baris transporter yang ditambah sesudah submit tetap dapat QR.
@@ -54,6 +86,239 @@ class DeliveryOrder(DeliveryNote):
 
 	def on_cancel(self):
 		update_per_delivery_ordered_on_submit_cancel(self, "on_cancel")
+
+
+# Field header yang dibawa DO pecahan dari DO asalnya. Transporter dan ongkos
+# angkut sengaja tidak ikut: DO dipecah justru karena transporternya diganti, dan
+# ongkos_angkut dipakai sebagai tarif tagihan transportir.
+FIELD_IKUT_INDUK = (
+	"unit",
+	"cost_center",
+	"project",
+	"set_warehouse",
+	"komoditi",
+	"tempat_penyerahan",
+	"jenis_berikat",
+	"force_majeure",
+	"perselisihan",
+	"lainnya",
+	"penandatangan",
+	"jabatan_penandatangan",
+	"mulai_tanggal_pengiriman",
+	"akhir_tanggal_pengiriman",
+)
+
+
+def akar_do_pecahan(delivery_order):
+	"""DO paling awal dari rantai pecahan, supaya pecahan dari 051A jadi 051B, bukan 051AA."""
+	akar = delivery_order
+	for _i in range(50):
+		induk = frappe.db.get_value("Delivery Order", akar, "pecahan_dari")
+		if not induk:
+			break
+		akar = induk
+
+	return akar
+
+
+def urutan_huruf():
+	"""A..Z, lalu AA..AZ, BA.. dan seterusnya."""
+	huruf = [chr(kode) for kode in range(ord("A"), ord("Z") + 1)]
+	yield from huruf
+	for depan in huruf:
+		for belakang in huruf:
+			yield depan + belakang
+
+
+def nama_do_pecahan(pecahan_dari):
+	akar = akar_do_pecahan(pecahan_dari)
+	# DO pecahan yang dibatalkan namanya tetap terpakai, jadi yang dicek nama
+	# yang ada di tabel, bukan jumlah pecahan yang masih hidup.
+	for huruf in urutan_huruf():
+		nama = akar + huruf
+		if not frappe.db.exists("Delivery Order", nama):
+			return nama
+
+	frappe.throw(_("Nomor pecahan untuk DO {0} sudah habis.").format(akar))
+
+
+def qty_terpakai_do(delivery_order, item_code, delivered_qty=0):
+	"""Qty DO yang sudah dipakai dan tidak boleh dilepas waktu DO dipecah.
+
+	Diambil yang terbesar dari dua basis: yang sudah jadi Delivery Note
+	(delivered_qty) dan yang sudah dibebankan timbangan, termasuk timbangan draft
+	yang truknya masih di dalam. Basis timbangannya sama dengan
+	Timbangan.get_sisa_do_available supaya DO yang dipecah tidak langsung menolak
+	timbangan yang sedang berjalan.
+	"""
+	qty_timbangan = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN COALESCE(netto_2, 0)
+					   ELSE COALESCE(qty_do, 0) END), 0)
+		FROM `tabTimbangan`
+		WHERE do_no = %(do)s AND kode_barang = %(item)s AND docstatus != 2
+		""",
+		{"do": delivery_order, "item": item_code},
+	)[0][0]
+
+	qty_timbangan_2 = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(qty_do_2), 0)
+		FROM `tabTimbangan`
+		WHERE no_do_2 = %(do)s AND kode_barang = %(item)s AND docstatus != 2
+		""",
+		{"do": delivery_order, "item": item_code},
+	)[0][0]
+
+	return max(flt(delivered_qty), flt(qty_timbangan) + flt(qty_timbangan_2))
+
+
+@frappe.whitelist()
+def get_data_pecah_do(delivery_order):
+	"""Qty tiap baris DO beserta yang sudah terpakai, untuk dialog Pecah DO."""
+	doc = frappe.get_doc("Delivery Order", delivery_order)
+	doc.check_permission("read")
+
+	return [
+		{
+			"name": item.name,
+			"item_code": item.item_code,
+			"item_name": item.item_name,
+			"uom": item.uom,
+			"qty": flt(item.qty),
+			"delivered_qty": flt(item.delivered_qty),
+			"terpakai": qty_terpakai_do(doc.name, item.item_code, item.delivered_qty),
+		}
+		for item in doc.items
+	]
+
+
+@frappe.whitelist()
+def pecah_delivery_order(delivery_order, qty_baru):
+	"""Kurangi qty DO yang sudah disubmit supaya sisanya bisa ditarik jadi DO pecahan.
+
+	Pengganti "unpost" di program lama: DO tidak dibatalkan (DN, timbangan, dan
+	QR-nya tetap menempel), cuma qty-nya diturunkan sampai paling rendah qty yang
+	sudah terpakai. Sisa yang dilepas kembali jadi sisa kontrak, sehingga DO
+	berikutnya yang ditarik dari Sales Order yang sama otomatis mendapat sisanya.
+	"""
+	qty_baru = frappe.parse_json(qty_baru) or {}
+
+	doc = frappe.get_doc("Delivery Order", delivery_order)
+	# Mengubah DO yang sudah terbit setara dengan membatalkannya, jadi yang boleh
+	# hanya yang berhak submit.
+	doc.check_permission("submit")
+
+	if doc.docstatus != 1:
+		frappe.throw(_("Hanya DO yang sudah disubmit yang bisa dipecah."))
+
+	berubah = []
+	for item in doc.items:
+		if item.name not in qty_baru:
+			continue
+
+		lama = flt(item.qty)
+		baru = flt(qty_baru[item.name], item.precision("qty"))
+		if baru == lama:
+			continue
+
+		if baru > lama:
+			frappe.throw(
+				_("Baris {0}: qty baru {1} lebih besar dari qty DO {2}. Pecah DO hanya bisa mengurangi.").format(
+					item.idx, baru, lama
+				)
+			)
+
+		terpakai = qty_terpakai_do(doc.name, item.item_code, item.delivered_qty)
+		if baru < terpakai:
+			frappe.throw(
+				_("Baris {0} ({1}): qty baru {2} lebih kecil dari yang sudah terpakai {3} (Delivery Note / timbangan).").format(
+					item.idx, item.item_code, baru, terpakai
+				)
+			)
+
+		item.qty = baru
+		item.stock_qty = flt(baru * flt(item.conversion_factor or 1), item.precision("stock_qty"))
+		berubah.append((item, lama, baru))
+
+	if not berubah:
+		frappe.throw(_("Tidak ada qty yang berubah."))
+
+	doc.calculate_taxes_and_totals()
+	if hasattr(doc, "set_total_in_words"):
+		doc.set_total_in_words()
+
+	doc.modified = frappe.utils.now()
+	doc.modified_by = frappe.session.user
+	doc.db_update_all()
+
+	doc.add_comment(
+		"Info",
+		_("DO dipecah: {0}").format(
+			", ".join(
+				"{0} {1} -> {2} (dilepas {3})".format(item.item_code, lama, baru, flt(lama - baru))
+				for item, lama, baru in berubah
+			)
+		),
+	)
+
+	update_per_delivery_ordered_on_submit_cancel(doc, "pecah_do")
+	for item, _lama, _baru in berubah:
+		perbarui_sisa_do_timbangan(doc.name, item.item_code)
+
+	return {"dilepas": sum(flt(lama - baru) for _item, lama, baru in berubah)}
+
+
+@frappe.whitelist()
+def make_do_pecahan(source_name, target_doc=None):
+	"""DO baru dari kontrak yang sama untuk menampung sisa DO yang sudah dipecah.
+
+	Itemnya ditarik lewat Sales Order seperti DO biasa, jadi qty-nya otomatis sisa
+	kontrak; yang diambil hanya baris kontrak milik DO asalnya.
+	"""
+	induk = frappe.get_doc("Delivery Order", source_name)
+	induk.check_permission("read")
+
+	if induk.docstatus != 1:
+		frappe.throw(_("DO {0} belum disubmit.").format(induk.name))
+
+	sales_order = induk.sales_order or next(
+		(item.against_sales_order for item in induk.items if item.against_sales_order), None
+	)
+	if not sales_order:
+		frappe.throw(_("DO {0} tidak ditarik dari kontrak, jadi sisanya tidak bisa dibuat DO pecahan.").format(induk.name))
+
+	baris_induk = {item.so_detail: item for item in induk.items if item.so_detail}
+
+	target = make_delivery_order(sales_order, target_doc)
+	target.set("items", [item for item in target.get("items") if item.so_detail in baris_induk])
+
+	if not target.get("items"):
+		frappe.throw(
+			_("Kontrak {0} tidak punya sisa untuk barang DO {1}. Kurangi dulu qty DO lewat tombol Pecah DO.").format(
+				sales_order, induk.name
+			)
+		)
+
+	target.pecahan_dari = induk.name
+	for fieldname in FIELD_IKUT_INDUK:
+		if induk.get(fieldname):
+			target.set(fieldname, induk.get(fieldname))
+
+	for item in target.items:
+		asal = baris_induk[item.so_detail]
+		if asal.warehouse:
+			item.warehouse = asal.warehouse
+
+	if induk.get("keterangan_per_komoditi"):
+		target.set("keterangan_per_komoditi", [])
+		for row in induk.keterangan_per_komoditi:
+			target.append("keterangan_per_komoditi", row.as_dict(no_default_fields=True))
+
+	for idx, item in enumerate(target.items, start=1):
+		item.idx = idx
+
+	return target
 
 
 @frappe.whitelist()

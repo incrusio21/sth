@@ -13,6 +13,7 @@
   "tax_id",
   "customer_name",
   "sales_order",
+  "pecahan_dari",
   "column_break1",
   "posting_date",
   "posting_time",
@@ -1435,12 +1436,22 @@
    "label": "Sales Order",
    "options": "Sales Order",
    "read_only": 1
+  },
+  {
+   "description": "Isi kalau DO ini menampung sisa DO lain yang dipecah. Nomornya jadi nomor DO asal ditambah huruf (A, B, ...).",
+   "fieldname": "pecahan_dari",
+   "fieldtype": "Link",
+   "label": "Pecahan dari DO",
+   "no_copy": 1,
+   "options": "Delivery Order",
+   "read_only_depends_on": "eval:!doc.__islocal",
+   "search_index": 1
   }
  ],
  "icon": "fa fa-truck",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-28 12:22:28.075351",
+ "modified": "2026-09-29 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Sales STH",
  "name": "Delivery Order",
