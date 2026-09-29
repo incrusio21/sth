@@ -13,7 +13,7 @@
  "fields": [
   {"columns": 3, "fieldname": "company", "fieldtype": "Link", "in_list_view": 1, "label": "Company", "options": "Company", "reqd": 1},
   {"columns": 2, "fieldname": "kelompok", "fieldtype": "Select", "in_list_view": 1, "label": "Kelompok", "options": "Kebun\nMill", "reqd": 1},
-  {"columns": 5, "description": "Akun grup. Semua akun turunannya ikut dijumlahkan.", "fieldname": "akun", "fieldtype": "Link", "in_list_view": 1, "label": "Akun Biaya", "options": "Account", "reqd": 1}
+  {"columns": 5, "description": "Boleh akun grup. Semua akun turunannya ikut dijumlahkan.", "fieldname": "akun", "fieldtype": "Link", "in_list_view": 1, "label": "Akun Biaya", "options": "Account", "reqd": 1}
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
