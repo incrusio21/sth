@@ -58,6 +58,7 @@
   "akun_pph22",
   "akun_piutang_plasma",
   "akun_hutang_plasma_antara",
+  "akun_lain_lain",
   "akun_lain_section",
   "cost_center",
   "column_break_akun_lain",
@@ -347,6 +348,7 @@
   },
   {
    "description": "Isi Manual",
+   "description": "Ikut memotong hasil mitra lewat Total Biaya, dan dijurnal kredit ke akun Lain Lain di tab Akun & Jurnal.",
    "fieldname": "lain_lain",
    "fieldtype": "Currency",
    "in_preview": 1,
@@ -407,6 +409,12 @@
    "fieldname": "akun_hutang_plasma_antara",
    "fieldtype": "Link",
    "label": "Hutang Plasma Belum Ditagih",
+   "options": "Account"
+  },
+  {
+   "fieldname": "akun_lain_lain",
+   "fieldtype": "Link",
+   "label": "Lain Lain",
    "options": "Account"
   },
   {
@@ -484,7 +492,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-28 12:00:00.000000",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",

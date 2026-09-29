@@ -11,6 +11,8 @@ from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	BARIS_JURNAL,
 	BKM_BIAYA,
 	KUNCI_BIAYA,
+	KUNCI_LAIN_LAIN,
+	ringkas_per_akun,
 	cari_masa,
 	hitung_shu,
 	jenis_bkm,
@@ -23,7 +25,7 @@ from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	susun_belum_buku_besar,
 	gabung_pembalikan,
 	pembalikan_dari_rencana,
-	KETERANGAN_LAIN_LAIN,
+	KETERANGAN_DI_MUKA,
 	KETERANGAN_MATERIAL,
 	KETERANGAN_SELISIH,
 )
@@ -622,6 +624,37 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		self.assertNotIn(KUNCI_BIAYA, [row["kunci"] for row in baris])
 		self.assertEqual(baris[0]["debit"], flt(self.JUMLAH_PRODUKSI - self.BIAYA, 2))
 
+	def nilai_lain_lain(self, lain_lain):
+		# Lain Lain bagian dari Total Biaya; biaya BKM-nya sendiri sudah Posted semua.
+		total = self.BIAYA + lain_lain
+		nilai = {
+			"jumlah_produksi": self.JUMLAH_PRODUKSI,
+			"total_biaya_perawatan_panen_dan_transport": total,
+			"lain_lain": lain_lain,
+		}
+		nilai.update(hitung_shu(self.JUMLAH_PRODUKSI, total, 2.5, 0.25, 50))
+		return nilai
+
+	def test_lain_lain_dikredit_penutup_kembali_jumlah_produksi(self):
+		baris = susun_baris_jurnal(self.nilai_lain_lain(3000000.0), AKUN_JURNAL, biaya_posted(self.BIAYA))
+
+		lain = [row for row in baris if row["kunci"] == KUNCI_LAIN_LAIN]
+		self.assertEqual(len(lain), 1)
+		self.assertEqual(lain[0]["account"], AKUN_JURNAL[KUNCI_LAIN_LAIN])
+		self.assertEqual((lain[0]["debit"], lain[0]["credit"]), (0.0, 3000000.0))
+		self.assertEqual(baris[0]["debit"], self.JUMLAH_PRODUKSI)
+
+	def test_lain_lain_minus_pindah_ke_debit(self):
+		baris = susun_baris_jurnal(self.nilai_lain_lain(-500000.0), AKUN_JURNAL, biaya_posted(self.BIAYA))
+
+		lain = [row for row in baris if row["kunci"] == KUNCI_LAIN_LAIN]
+		self.assertEqual((lain[0]["debit"], lain[0]["credit"]), (500000.0, 0.0))
+		self.assertEqual(baris[0]["debit"], self.JUMLAH_PRODUKSI)
+		self.assertEqual(
+			flt(sum(row["debit"] for row in baris), 2),
+			flt(sum(row["credit"] for row in baris), 2),
+		)
+
 
 class TestBarisJurnalBiaya(FrappeTestCase):
 	"""Baris biaya: tiap akun di bawah Kepala Akun Biaya dinolkan, tanpa akun kontra."""
@@ -666,7 +699,7 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
 		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
 
-		hasil = susun_belum_buku_besar(baris, {}, rencana, 0)
+		hasil = susun_belum_buku_besar(baris, {}, rencana)
 
 		self.assertEqual(len(hasil), 1)
 		self.assertEqual(hasil[0]["akun"], "6110 - PANEN")
@@ -677,7 +710,7 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
 		rencana = {(self.PANEN, "P1"): {"status": "Posted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
 
-		self.assertEqual(susun_belum_buku_besar(baris, {(self.PANEN, "P1"): 100.0}, rencana, 0), [])
+		self.assertEqual(susun_belum_buku_besar(baris, {(self.PANEN, "P1"): 100.0}, rencana), [])
 
 	def test_perawatan_posted_sisa_material(self):
 		# Upah + premi sudah di GL, material tidak pernah lewat GL BKM.
@@ -687,7 +720,7 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 			(None, KETERANGAN_MATERIAL, 50.0, None),
 		]}}
 
-		hasil = susun_belum_buku_besar(baris, {(self.RAWAT, "R1"): 100.0}, rencana, 0)
+		hasil = susun_belum_buku_besar(baris, {(self.RAWAT, "R1"): 100.0}, rencana)
 
 		self.assertEqual([(r["akun"], r["keterangan"], r["belum"]) for r in hasil],
 			[(None, KETERANGAN_MATERIAL, 50.0)])
@@ -699,17 +732,18 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 			(None, KETERANGAN_MATERIAL, 50.0, None),
 		]}}
 
-		hasil = susun_belum_buku_besar(baris, {}, rencana, 0)
+		hasil = susun_belum_buku_besar(baris, {}, rencana)
 
 		self.assertEqual([(r["akun"], r["belum"]) for r in hasil], [("6210 - RAWAT", 100.0), (None, 50.0)])
 
-	def test_sisa_tak_terjelaskan_jadi_selisih_dan_lain_lain_ikut(self):
+	def test_sisa_tak_terjelaskan_jadi_selisih(self):
+		# Lain Lain tidak lagi di sini: barisnya sendiri di jurnal.
 		baris = [baris_bkm("BAPP", 90.0, voucher_no="B1", jenis="BAPP")]
 
-		hasil = susun_belum_buku_besar(baris, {("BAPP", "B1"): 80.0}, {}, 25.0)
+		hasil = susun_belum_buku_besar(baris, {("BAPP", "B1"): 80.0}, {})
 
-		self.assertEqual([(r["keterangan"], r["belum"]) for r in hasil],
-			[(KETERANGAN_SELISIH, 10.0), (KETERANGAN_LAIN_LAIN, 25.0)])
+		self.assertEqual([(r["keterangan"], r["belum"], r["dijurnal"]) for r in hasil],
+			[(KETERANGAN_SELISIH, 10.0, 0)])
 
 	def test_total_sama_dengan_status_jurnal(self):
 		# Status jurnal: Total Biaya - saldo yang dinolkan.
@@ -724,35 +758,40 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 			(self.PANEN, "P2"): {"bagian": [("A", None, 200.0, "CC-A")]},
 			(self.RAWAT, "R1"): {"bagian": [("B", None, 100.0, "CC-B"), (None, KETERANGAN_MATERIAL, 50.0, None)]},
 		}
-		lain_lain = 30.0
+		hasil = susun_belum_buku_besar(baris, gl, rencana)
 
-		hasil = susun_belum_buku_besar(baris, gl, rencana, lain_lain)
-
-		total_biaya = sum(r["nilai"] for r in baris) + lain_lain
+		total_biaya = sum(r["nilai"] for r in baris)
 		self.assertEqual(sum(r["belum"] for r in hasil), total_biaya - sum(gl.values()))
 
 	def test_belum_posted_di_bawah_kepala_dijurnal_di_muka(self):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
 		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
 
-		self.assertEqual(susun_belum_buku_besar(baris, {}, rencana, 0, {"6110 - PANEN"}), [])
+		# Tetap tampil di rincian, dengan tanda ikut dijurnal.
+		hasil = susun_belum_buku_besar(baris, {}, rencana, {"6110 - PANEN"})
+
+		self.assertEqual([(r["akun"], r["cost_center"], r["belum"], r["dijurnal"]) for r in hasil],
+			[("6110 - PANEN", "CC-P", 100.0, 1)])
+		self.assertEqual(pembalikan_dari_rencana(baris, {}, rencana, {"6110 - PANEN"}), [
+			{"account": "6110 - PANEN", "cost_center": "CC-P", "jumlah": 100.0, "keterangan": KETERANGAN_DI_MUKA},
+		])
 
 	def test_belum_posted_di_luar_kepala_tetap_belum(self):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
 		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("1262201 - TBM", None, 100.0, "CC-P")]}}
 
-		hasil = susun_belum_buku_besar(baris, {}, rencana, 0, {"6110 - PANEN"})
+		hasil = susun_belum_buku_besar(baris, {}, rencana, {"6110 - PANEN"})
 
-		self.assertEqual([(r["akun"], r["belum"]) for r in hasil], [("1262201 - TBM", 100.0)])
+		self.assertEqual([(r["akun"], r["belum"], r["dijurnal"]) for r in hasil], [("1262201 - TBM", 100.0, 0)])
 
 	def test_tanpa_cost_center_tidak_dijurnal_di_muka(self):
 		# BKM Perawatan tanpa cost center tidak pernah dibuatkan GL.
 		baris = [baris_bkm(self.RAWAT, 100.0, voucher_no="R1")]
 		rencana = {(self.RAWAT, "R1"): {"status": "Submitted", "bagian": [("6210 - RAWAT", None, 100.0, "")]}}
 
-		hasil = susun_belum_buku_besar(baris, {}, rencana, 0, {"6210 - RAWAT"})
+		hasil = susun_belum_buku_besar(baris, {}, rencana, {"6210 - RAWAT"})
 
-		self.assertEqual([r["belum"] for r in hasil], [100.0])
+		self.assertEqual([(r["belum"], r["dijurnal"]) for r in hasil], [(100.0, 0)])
 		self.assertEqual(pembalikan_dari_rencana(baris, {}, rencana, {"6210 - RAWAT"}), [])
 
 	def test_perawatan_belum_posted_upah_dijurnal_material_tetap_belum(self):
@@ -762,12 +801,12 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 			(None, KETERANGAN_MATERIAL, 50.0, None),
 		]}}
 
-		hasil = susun_belum_buku_besar(baris, {}, rencana, 0, {"6210 - RAWAT"})
+		hasil = susun_belum_buku_besar(baris, {}, rencana, {"6210 - RAWAT"})
 
-		self.assertEqual([(r["akun"], r["keterangan"], r["belum"], r["sudah_buku_besar"]) for r in hasil],
-			[(None, KETERANGAN_MATERIAL, 50.0, 100.0)])
+		self.assertEqual([(r["akun"], r["keterangan"], r["belum"], r["dijurnal"]) for r in hasil],
+			[("6210 - RAWAT", None, 100.0, 1), (None, KETERANGAN_MATERIAL, 50.0, 0)])
 		self.assertEqual(pembalikan_dari_rencana(baris, {}, rencana, {"6210 - RAWAT"}),
-			[{"account": "6210 - RAWAT", "cost_center": "CC-R", "jumlah": 100.0}])
+			[{"account": "6210 - RAWAT", "cost_center": "CC-R", "jumlah": 100.0, "keterangan": KETERANGAN_DI_MUKA}])
 
 	def test_sudah_ada_gl_tidak_dijurnal_dua_kali(self):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
@@ -793,11 +832,50 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 		gl_pembalikan = [{"account": "A", "cost_center": "CC-A", "jumlah": 200.0}]
 
 		pembalikan = gabung_pembalikan(gl_pembalikan, pembalikan_dari_rencana(baris, gl, rencana, akun))
-		hasil = susun_belum_buku_besar(baris, gl, rencana, 30.0, akun)
+		hasil = susun_belum_buku_besar(baris, gl, rencana, akun)
 
+		# GL yang ada dan yang di muka tetap dua baris walau akun & cost center sama.
 		self.assertEqual(pembalikan, [
-			{"account": "A", "cost_center": "CC-A", "jumlah": 300.0},
-			{"account": "B", "cost_center": "CC-B", "jumlah": 100.0},
+			{"account": "A", "cost_center": "CC-A", "jumlah": 200.0, "keterangan": None},
+			{"account": "A", "cost_center": "CC-A", "jumlah": 100.0, "keterangan": KETERANGAN_DI_MUKA},
+			{"account": "B", "cost_center": "CC-B", "jumlah": 100.0, "keterangan": KETERANGAN_DI_MUKA},
 		])
-		total_biaya = sum(r["nilai"] for r in baris) + 30.0
-		self.assertEqual(sum(r["belum"] for r in hasil), total_biaya - sum(r["jumlah"] for r in pembalikan))
+		total_biaya = sum(r["nilai"] for r in baris)
+		tidak_dijurnal = sum(r["belum"] for r in hasil if not r["dijurnal"])
+		self.assertEqual(tidak_dijurnal, total_biaya - sum(r["jumlah"] for r in pembalikan))
+		self.assertEqual(sum(r["belum"] for r in hasil if r["dijurnal"]), 200.0)
+
+
+class TestRingkasPerAkun(FrappeTestCase):
+	"""Pratinjau jurnal: baris biaya satu per akun, cost center baru dipecah di GL Entry."""
+
+	def test_cost_center_digabung_per_akun_dan_keterangan(self):
+		pembalikan = [
+			{"account": "A", "cost_center": "CC-1", "jumlah": 100.0, "keterangan": KETERANGAN_DI_MUKA},
+			{"account": "A", "cost_center": "CC-2", "jumlah": 50.0, "keterangan": KETERANGAN_DI_MUKA},
+			{"account": "A", "cost_center": "CC-1", "jumlah": 30.0},
+			{"account": "B", "cost_center": "CC-1", "jumlah": 20.0, "keterangan": KETERANGAN_DI_MUKA},
+		]
+		baris = susun_baris_jurnal({"jumlah_produksi": 1000.0}, AKUN_JURNAL, pembalikan)
+
+		ringkas = ringkas_per_akun(baris)
+		biaya = [(r["account"], r["keterangan"], r["cost_center"], r["credit"]) for r in ringkas if r["kunci"] == KUNCI_BIAYA]
+
+		self.assertEqual(biaya, [
+			("A", KETERANGAN_DI_MUKA, None, 150.0),
+			("A", "Nol-kan biaya A", None, 30.0),
+			("B", KETERANGAN_DI_MUKA, None, 20.0),
+		])
+		self.assertEqual(sum(r["debit"] for r in ringkas), sum(r["debit"] for r in baris))
+		self.assertEqual(sum(r["credit"] for r in ringkas), sum(r["credit"] for r in baris))
+
+	def test_dua_sisi_dinetto(self):
+		pembalikan = [
+			{"account": "A", "cost_center": "CC-1", "jumlah": 100.0},
+			{"account": "A", "cost_center": "CC-2", "jumlah": -40.0},
+		]
+		baris = susun_baris_jurnal({}, AKUN_JURNAL, pembalikan)
+
+		biaya = [r for r in ringkas_per_akun(baris) if r["kunci"] == KUNCI_BIAYA]
+
+		self.assertEqual([(r["debit"], r["credit"]) for r in biaya], [(0.0, 60.0)])
