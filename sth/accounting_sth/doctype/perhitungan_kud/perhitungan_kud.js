@@ -171,7 +171,8 @@ function tombol_turunan(frm) {
 	});
 }
 
-// Biaya yang ditagih ke mitra tapi belum punya GL, jadi tidak ikut dijurnal.
+// Biaya yang ditagih ke mitra tapi belum punya GL. Sebagian tetap dijurnal di
+// muka (akunnya di bawah Kepala Akun Biaya), sisanya tidak — kolom Dijurnal.
 // Barisnya tersimpan per dokumen di child table tersembunyi `belum_bb`; di sini
 // dikelompokkan per akun, dan klik satu akun membuka daftar dokumennya.
 function tampilkan_belum_bb(frm) {
@@ -189,12 +190,14 @@ function tampilkan_belum_bb(frm) {
 
 	const grup = kelompokkan_belum_bb(rows);
 	const total = grup.reduce((n, g) => n + g.belum, 0);
+	const total_dijurnal = grup.reduce((n, g) => n + (g.dijurnal ? g.belum : 0), 0);
 
 	const baris = grup
 		.map(
 			(g, i) => `
 			<tr class="belum-bb-grup" data-idx="${i}" style="cursor: pointer">
 				<td>${esc(g.label)}</td>
+				<td>${g.dijurnal ? __("Ya") : __("Tidak")}</td>
 				<td class="text-right">${g.dokumen.size || "-"}</td>
 				<td class="text-right">${uang(g.belum)}</td>
 			</tr>`
@@ -207,6 +210,7 @@ function tampilkan_belum_bb(frm) {
 			<thead>
 				<tr>
 					<th>${__("Akun")}</th>
+					<th style="width: 10%">${__("Dijurnal")}</th>
 					<th class="text-right" style="width: 12%">${__("Dokumen")}</th>
 					<th class="text-right" style="width: 25%">${__("Belum di Buku Besar")}</th>
 				</tr>
@@ -214,7 +218,15 @@ function tampilkan_belum_bb(frm) {
 			<tbody>${baris}</tbody>
 			<tfoot>
 				<tr>
-					<th colspan="2">${__("Total")}</th>
+					<th colspan="3">${__("Ikut dijurnal")}</th>
+					<th class="text-right">${uang(total_dijurnal)}</th>
+				</tr>
+				<tr>
+					<th colspan="3">${__("Tidak dijurnal")}</th>
+					<th class="text-right">${uang(total - total_dijurnal)}</th>
+				</tr>
+				<tr>
+					<th colspan="3">${__("Total")}</th>
 					<th class="text-right">${uang(total)}</th>
 				</tr>
 			</tfoot>
@@ -232,11 +244,14 @@ function kelompokkan_belum_bb(rows) {
 
 	rows.forEach((row) => {
 		const label = row.akun || row.keterangan || __("Tanpa akun");
-		if (!peta.has(label)) {
-			peta.set(label, { label, belum: 0, dokumen: new Set(), rows: [] });
+		// Satu akun bisa punya bagian yang dijurnal dan yang tidak (misalnya
+		// BKM Perawatan tanpa cost center), jadi keduanya grup terpisah.
+		const kunci = `${label}|${row.dijurnal ? 1 : 0}`;
+		if (!peta.has(kunci)) {
+			peta.set(kunci, { label, dijurnal: !!row.dijurnal, belum: 0, dokumen: new Set(), rows: [] });
 		}
 
-		const g = peta.get(label);
+		const g = peta.get(kunci);
 		g.belum += flt(row.belum);
 		g.rows.push(row);
 		if (row.voucher_no) g.dokumen.add(row.voucher_no);
@@ -261,6 +276,7 @@ function detail_belum_bb(frm, grup) {
 					<td>${dokumen}</td>
 					<td>${row.posting_date ? frappe.datetime.str_to_user(row.posting_date) : ""}</td>
 					<td>${esc(row.status_dokumen || "")}</td>
+				<td>${esc(row.cost_center || "")}</td>
 					<td class="text-right">${row.voucher_no ? uang(row.nilai_dokumen) : ""}</td>
 					<td class="text-right">${row.voucher_no ? uang(row.sudah_buku_besar) : ""}</td>
 					<td class="text-right">${uang(row.belum)}</td>
@@ -269,7 +285,7 @@ function detail_belum_bb(frm, grup) {
 		.join("");
 
 	const dialog = new frappe.ui.Dialog({
-		title: grup.label,
+		title: `${grup.label} — ${grup.dijurnal ? __("ikut dijurnal") : __("tidak dijurnal")}`,
 		size: "extra-large",
 		fields: [{ fieldtype: "HTML", fieldname: "isi" }],
 	});
@@ -282,15 +298,16 @@ function detail_belum_bb(frm, grup) {
 						<th>${__("Dokumen")}</th>
 						<th>${__("Tanggal")}</th>
 						<th>${__("Status")}</th>
+						<th>${__("Cost Center")}</th>
 						<th class="text-right">${__("Nilai Dokumen")}</th>
-						<th class="text-right">${__("Sudah Dijurnal")}</th>
+						<th class="text-right">${__("Sudah di Buku Besar")}</th>
 						<th class="text-right">${__("Belum (bagian akun ini)")}</th>
 					</tr>
 				</thead>
 				<tbody>${baris}</tbody>
 				<tfoot>
 					<tr>
-						<th colspan="5">${__("Total")}</th>
+						<th colspan="6">${__("Total")}</th>
 						<th class="text-right">${uang(grup.belum)}</th>
 					</tr>
 				</tfoot>

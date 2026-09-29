@@ -63,6 +63,13 @@ SISI_PENUTUP = "penutup"
 # penanda, bukan field akun di dokumen.
 KUNCI_BIAYA = "pembalikan"
 
+# Lain Lain ikut memotong hasil mitra lewat Total Biaya, tapi tidak lewat GL
+# dokumen mana pun, jadi punya akun lawannya sendiri. Berbeda dari baris lain,
+# sisinya ikut tanda: Lain Lain minus berarti mitra justru ditambah, dan
+# mengkreditnya sebesar nilai mutlak membuat penutupnya meleset dua kali lipat.
+KUNCI_LAIN_LAIN = "akun_lain_lain"
+IKUT_TANDA = {KUNCI_LAIN_LAIN}
+
 BARIS_JURNAL = (
 	("akun_pembelian_tbs", "jumlah_produksi", SISI_PENUTUP, "Pembelian TBS Plasma"),
 	(
@@ -71,6 +78,7 @@ BARIS_JURNAL = (
 		"credit",
 		"Biaya Perawatan, Panen & Transport",
 	),
+	(KUNCI_LAIN_LAIN, "lain_lain", "credit", "Lain Lain"),
 	("akun_management_fee", "management_fee", "credit", "Management Fee"),
 	("akun_pph22", "pph22", "credit", "PPh Pasal 22"),
 	("akun_piutang_plasma", "angsuran_hutang", "credit", "Angsuran Hutang Mitra"),
@@ -405,9 +413,10 @@ def baris_jurnal_biaya(pembalikan):
 	Biaya yang tersentuh BKM di perhitungan ini, termasuk BKM yang belum Posted
 	(dijurnal di muka, lihat pembalikan_dari_rencana).
 
-	Hanya itu yang dijurnal. Bagian yang akunnya tidak di bawah Kepala Akun Biaya
-	atau tidak ketahuan cost center-nya, begitu juga Lain Lain dan material BKM
-	Perawatan yang memang tidak pernah lewat GL BKM, tidak punya baris di sini. Mitra tetap ditagih penuh
+	Hanya itu yang dijurnal di sini; Lain Lain punya baris sendiri di BARIS_JURNAL.
+	Bagian yang akunnya tidak di bawah Kepala Akun Biaya atau tidak ketahuan cost
+	center-nya, begitu juga material BKM Perawatan yang memang tidak pernah lewat
+	GL BKM, tidak punya baris di mana pun. Mitra tetap ditagih penuh
 	lewat Hasil Bersih; yang menanggung selisihnya baris penutup, jadi Pembelian
 	TBS terdebit lebih kecil dari Jumlah Produksi sebesar bagian yang tidak
 	dijurnal itu.
@@ -426,7 +435,7 @@ def baris_jurnal_biaya(pembalikan):
 			# berarti mendebit. Tandanya diikuti, bukan dipaksa ke satu sisi.
 			"debit": -jumlah if jumlah < 0 else 0.0,
 			"credit": jumlah if jumlah > 0 else 0.0,
-			"keterangan": _("Nol-kan biaya {0}").format(row.get("account")),
+			"keterangan": _(row.get("keterangan") or KETERANGAN_NOL_KAN).format(row.get("account")),
 			"kunci": KUNCI_BIAYA,
 		})
 
@@ -443,7 +452,8 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 	Nilai negatif dicatat nilai mutlaknya di sisi yang sudah ditetapkan
 	BARIS_JURNAL — GL Entry menolak angka minus, dan sisi baris tidak boleh ikut
 	bergeser: Angsuran Hutang dan Pembayaran ke Mitra tetap kredit walaupun biaya
-	melampaui produksi.
+	melampaui produksi. Kecualinya baris di IKUT_TANDA (Lain Lain): minus
+	berpindah ke debit.
 
 	Yang menanggung selisihnya baris penutup, Pembelian TBS Plasma: dihitung dari
 	baris-baris lain, bukan dari `jumlah_produksi`, jadi jurnalnya seimbang dengan
@@ -472,9 +482,14 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 			baris.extend(baris_jurnal_biaya(pembalikan))
 			continue
 
-		jumlah = abs(flt(nilai.get(fieldname), PRESISI_UANG))
+		jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
 		if not jumlah:
 			continue
+
+		if jumlah < 0 and kunci in IKUT_TANDA:
+			sisi = "debit" if sisi == "credit" else "credit"
+
+		jumlah = abs(jumlah)
 
 		baris.append({
 			"account": akun.get(kunci),
@@ -492,8 +507,13 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 
 
 KETERANGAN_MATERIAL = "Material BKM Perawatan (dijurnal Stock Entry)"
-KETERANGAN_LAIN_LAIN = "Lain Lain (isian manual)"
 KETERANGAN_SELISIH = "Selisih nilai dokumen dengan buku besar"
+
+# Keterangan baris jurnal: penolan GL yang sudah ada, dan penolan di muka untuk
+# BKM yang belum Posted. Keduanya dipisah supaya jelas mana yang nanti baru
+# ditutup debit BKM-nya.
+KETERANGAN_NOL_KAN = "Nol-kan biaya {0}"
+KETERANGAN_DI_MUKA = "Biaya Belum masuk buku besar"
 
 
 def bagian_dijurnal_di_muka(akun, cost_center, ada_gl, akun_kepala):
@@ -514,7 +534,8 @@ def pembalikan_dari_rencana(baris_biaya, gl_dokumen, rencana, akun_kepala):
 	Pasangan saldo_bkm_di_kepala_akun(): yang itu membaca GL yang sudah ada,
 	yang ini meramal GL yang belum ada dari `rencana` (lihat
 	rencana_dokumen_biaya). Bentuk balikannya sama, list of dict
-	{account, cost_center, jumlah}, supaya bisa digabung lewat gabung_pembalikan().
+	{account, cost_center, jumlah}, ditambah `keterangan` KETERANGAN_DI_MUKA,
+	supaya bisa digabung lewat gabung_pembalikan().
 	"""
 	hasil = []
 
@@ -525,31 +546,76 @@ def pembalikan_dari_rencana(baris_biaya, gl_dokumen, rencana, akun_kepala):
 		for akun, _keterangan, jumlah, cost_center in (rencana.get(kunci) or {}).get("bagian") or []:
 			jumlah = flt(jumlah, PRESISI_UANG)
 			if jumlah and bagian_dijurnal_di_muka(akun, cost_center, ada_gl, akun_kepala):
-				hasil.append({"account": akun, "cost_center": cost_center, "jumlah": jumlah})
+				hasil.append({
+					"account": akun,
+					"cost_center": cost_center,
+					"jumlah": jumlah,
+					"keterangan": KETERANGAN_DI_MUKA,
+				})
 
 	return hasil
 
 
 def gabung_pembalikan(*daftar):
-	"""Jumlahkan beberapa daftar penolan per (akun, cost center). Fungsi murni."""
+	"""Jumlahkan beberapa daftar penolan per (akun, cost center, keterangan). Fungsi murni.
+
+	Keterangan ikut jadi kunci: penolan GL yang ada dan penolan di muka tetap dua
+	baris walau akun dan cost center-nya sama.
+	"""
 	total = {}
 	for rows in daftar:
 		for row in rows or []:
-			kunci = (row["account"], row["cost_center"])
+			kunci = (row["account"], row["cost_center"], row.get("keterangan"))
 			total[kunci] = flt(total.get(kunci, 0) + flt(row["jumlah"]), PRESISI_UANG)
 
 	return [
-		{"account": akun, "cost_center": cost_center, "jumlah": jumlah}
-		for (akun, cost_center), jumlah in sorted(total.items(), key=lambda x: (x[0][0], x[0][1] or ""))
+		{"account": akun, "cost_center": cost_center, "jumlah": jumlah, "keterangan": keterangan}
+		for (akun, cost_center, keterangan), jumlah in sorted(
+			total.items(), key=lambda x: (x[0][0], x[0][1] or "", x[0][2] or "")
+		)
 		if jumlah
 	]
 
 
-def susun_belum_buku_besar(baris_biaya, gl_dokumen, rencana, lain_lain, akun_kepala=frozenset()):
-	"""Rincian biaya yang ditagih ke mitra tapi tidak ikut dijurnal. Fungsi murni.
+def ringkas_per_akun(baris):
+	"""Baris biaya digabung per (akun, keterangan) untuk pratinjau. Fungsi murni.
 
-	Jumlah seluruh barisnya persis angka "Biaya belum masuk buku besar" di
-	status jurnal: Total Biaya dikurangi yang dinolkan jurnal.
+	GL Entry tetap dipecah per cost center — itu yang membuat saldo tiap cost
+	center kembali nol. Pratinjau cukup satu baris per akun; rinciannya ada di
+	tabel Biaya Belum Masuk Buku Besar. Baris selain biaya tidak disentuh, dan
+	urutannya tetap mengikuti kemunculan pertama.
+	"""
+	hasil = []
+	grup = {}
+
+	for row in baris:
+		if row.get("kunci") != KUNCI_BIAYA:
+			hasil.append(row)
+			continue
+
+		kunci = (row["account"], row["keterangan"])
+		if kunci not in grup:
+			grup[kunci] = {**row, "cost_center": None, "debit": 0.0, "credit": 0.0}
+			hasil.append(grup[kunci])
+
+		# Dinetto: satu akun tidak perlu tampil di dua sisi sekaligus.
+		bersih = flt(
+			grup[kunci]["credit"] - grup[kunci]["debit"] + row["credit"] - row["debit"], PRESISI_UANG
+		)
+		grup[kunci]["credit"] = bersih if bersih > 0 else 0.0
+		grup[kunci]["debit"] = -bersih if bersih < 0 else 0.0
+
+	return [row for row in hasil if row.get("kunci") != KUNCI_BIAYA or row["debit"] or row["credit"]]
+
+
+def susun_belum_buku_besar(baris_biaya, gl_dokumen, rencana, akun_kepala=frozenset()):
+	"""Rincian biaya yang ditagih ke mitra tapi belum masuk buku besar. Fungsi murni.
+
+	Tiap baris diberi `dijurnal`: 1 kalau bagian itu tetap dinolkan jurnal KUD di
+	muka (lihat pembalikan_dari_rencana), 0 kalau tidak dijurnal sama sekali.
+	Jumlah baris `dijurnal` = 0 persis angka "tidak dijurnal" di status jurnal:
+	Total Biaya dikurangi Lain Lain (barisnya sendiri di jurnal) dan dikurangi
+	seluruh penolan.
 
 	`gl_dokumen` — dict (voucher_type, voucher_no) → saldo GL dokumen itu di
 	bawah Kepala Akun Biaya. Dokumen yang ada di sini sudah punya GL, walau
@@ -558,9 +624,7 @@ def susun_belum_buku_besar(baris_biaya, gl_dokumen, rencana, lain_lain, akun_kep
 	`rencana` — dict (voucher_type, voucher_no) → {"status", "bagian"}, dengan
 	`bagian` list of (akun, keterangan, jumlah, cost_center): ke mana nilai
 	dokumen itu nanti mendarat. Bagian berakun lewat GL dokumennya sendiri, jadi
-	hanya dihitung belum kalau dokumennya belum punya GL — dan itu pun tidak
-	kalau akunnya di bawah Kepala Akun Biaya (`akun_kepala`), karena bagian itu
-	dijurnal di muka, lihat pembalikan_dari_rencana(). Bagian tanpa akun
+	hanya dihitung belum kalau dokumennya belum punya GL. Bagian tanpa akun
 	(material) memang tidak pernah lewat GL dokumennya dan selalu dihitung belum.
 
 	Sisa yang tidak terjelaskan rencana jatuh ke baris Selisih, supaya totalnya
@@ -575,21 +639,12 @@ def susun_belum_buku_besar(baris_biaya, gl_dokumen, rencana, lain_lain, akun_kep
 		kunci = (row.get("voucher_type"), row.get("voucher_no"))
 		nilai = flt(row.get("nilai"), PRESISI_UANG)
 		ada_gl = kunci in gl_dokumen
-		info = rencana.get(kunci) or {}
-
-		di_muka = flt(
-			sum(
-				flt(jumlah, PRESISI_UANG)
-				for akun, _keterangan, jumlah, cost_center in info.get("bagian") or []
-				if bagian_dijurnal_di_muka(akun, cost_center, ada_gl, akun_kepala)
-			),
-			PRESISI_UANG,
-		)
-		sudah = flt(flt(gl_dokumen.get(kunci)) + di_muka, PRESISI_UANG)
+		sudah = flt(gl_dokumen.get(kunci), PRESISI_UANG)
 		belum = flt(nilai - sudah, PRESISI_UANG)
 		if not belum:
 			continue
 
+		info = rencana.get(kunci) or {}
 		umum = {
 			"voucher_type": kunci[0],
 			"voucher_no": kunci[1],
@@ -600,26 +655,30 @@ def susun_belum_buku_besar(baris_biaya, gl_dokumen, rencana, lain_lain, akun_kep
 		}
 
 		bagian = [
-			(akun, keterangan, flt(jumlah, PRESISI_UANG))
+			(
+				akun,
+				keterangan,
+				flt(jumlah, PRESISI_UANG),
+				cost_center,
+				bagian_dijurnal_di_muka(akun, cost_center, ada_gl, akun_kepala),
+			)
 			for akun, keterangan, jumlah, cost_center in info.get("bagian") or []
-			if flt(jumlah, PRESISI_UANG)
-			and not (ada_gl and akun)
-			and not bagian_dijurnal_di_muka(akun, cost_center, ada_gl, akun_kepala)
+			if flt(jumlah, PRESISI_UANG) and not (ada_gl and akun)
 		]
 
-		sisa = flt(belum - sum(jumlah for *_, jumlah in bagian), PRESISI_UANG)
+		sisa = flt(belum - sum(b[2] for b in bagian), PRESISI_UANG)
 		if sisa:
-			bagian.append((None, KETERANGAN_SELISIH, sisa))
+			bagian.append((None, KETERANGAN_SELISIH, sisa, None, False))
 
-		for akun, keterangan, jumlah in bagian:
-			hasil.append({**umum, "akun": akun, "keterangan": keterangan, "belum": jumlah})
-
-	if flt(lain_lain, PRESISI_UANG):
-		hasil.append({
-			"akun": None,
-			"keterangan": KETERANGAN_LAIN_LAIN,
-			"belum": flt(lain_lain, PRESISI_UANG),
-		})
+		for akun, keterangan, jumlah, cost_center, dijurnal in bagian:
+			hasil.append({
+				**umum,
+				"akun": akun,
+				"cost_center": cost_center,
+				"keterangan": keterangan,
+				"belum": jumlah,
+				"dijurnal": 1 if dijurnal else 0,
+			})
 
 	return hasil
 
@@ -923,17 +982,19 @@ class PerhitunganKUD(Document):
 		baris = self.baris_jurnal(pembalikan)
 
 		# Rinciannya disusun di saat yang sama dengan jurnalnya, jadi sesudah
-		# submit yang tersimpan persis bagian yang waktu itu tidak dijurnal —
-		# bukan keadaan BKM hari ini yang mungkin sudah Posted.
+		# submit yang tersimpan persis keadaan waktu itu — bukan keadaan BKM hari
+		# ini yang mungkin sudah Posted.
 		self.set(
 			"belum_bb",
-			rincian_belum_buku_besar(self.company, self.detail_biaya, self.lain_lain),
+			rincian_belum_buku_besar(self.company, self.detail_biaya),
 		)
 
-		# `kunci` cuma penanda internal susun_baris_jurnal, bukan kolom tabelnya.
+		# Pratinjau satu baris per akun; pecahan per cost center baru muncul di
+		# GL Entry, dan rinciannya bisa dilihat di tabel Biaya Belum Masuk Buku
+		# Besar. `kunci` cuma penanda internal, bukan kolom tabelnya.
 		self.set(
 			"jurnal_preview",
-			[{k: v for k, v in row.items() if k != "kunci"} for row in baris],
+			[{k: v for k, v in row.items() if k != "kunci"} for row in ringkas_per_akun(baris)],
 		)
 
 		self.total_jurnal_debit = flt(sum(row["debit"] for row in baris), PRESISI_UANG)
@@ -954,19 +1015,29 @@ class PerhitunganKUD(Document):
 				flt(self.total_jurnal_debit - self.total_jurnal_kredit, PRESISI_UANG)
 			)
 		else:
-			self.status_jurnal = _("{0} baris, seimbang").format(len(baris))
+			self.status_jurnal = _("{0} baris GL, seimbang").format(len(baris))
 
-			# Bagian biaya yang tidak punya penolan tidak dijurnal. Disebut di
-			# sini supaya kecilnya debit Pembelian TBS tidak jadi teka-teki.
-			belum = flt(
+			# Biaya yang belum masuk buku besar dipilah: yang tetap dijurnal di
+			# muka, dan yang tidak punya penolan sama sekali. Yang kedua disebut
+			# supaya kecilnya debit Pembelian TBS tidak jadi teka-teki.
+			dijurnal = flt(
+				sum(flt(row.belum) for row in self.belum_bb if row.dijurnal), PRESISI_UANG
+			)
+			tidak = flt(
 				flt(self.total_biaya_perawatan_panen_dan_transport)
+				- flt(self.lain_lain)
 				- sum(flt(row["jumlah"]) for row in pembalikan),
 				PRESISI_UANG,
 			)
-			if belum:
-				self.status_jurnal += _(
-					". Biaya belum masuk buku besar, tidak dijurnal: {0} (rincian per akun di bawah)"
-				).format(frappe.format(belum, "Currency"))
+			bagian = []
+			if dijurnal:
+				bagian.append(_("{0} ikut dijurnal").format(frappe.format(dijurnal, "Currency")))
+			if tidak:
+				bagian.append(_("{0} tidak dijurnal").format(frappe.format(tidak, "Currency")))
+			if bagian:
+				self.status_jurnal += _(". Biaya belum masuk buku besar: {0} (rincian per akun di bawah)").format(
+					", ".join(bagian)
+				)
 
 	def baris_jurnal(self, pembalikan=None):
 		"""Baris jurnal dokumen ini. Dipakai pratinjau maupun GL Entry, sekali susun.
@@ -1171,6 +1242,7 @@ KOLOM_AKUN_SETELAN = (
 	"akun_pph22",
 	"akun_hutang_plasma_antara",
 	"akun_hutang_mitra",
+	"akun_lain_lain",
 )
 
 
@@ -1755,7 +1827,7 @@ def rencana_dokumen_biaya(company, baris_biaya):
 	return hasil
 
 
-def rincian_belum_buku_besar(company, baris_biaya, lain_lain, kepala=None):
+def rincian_belum_buku_besar(company, baris_biaya, kepala=None):
 	"""Baris child table Biaya Belum Masuk Buku Besar untuk rincian biaya ini."""
 	if kepala is None:
 		kepala = get_kepala_akun_kud(company)
@@ -1766,7 +1838,6 @@ def rincian_belum_buku_besar(company, baris_biaya, lain_lain, kepala=None):
 		baris_biaya,
 		gl_per_dokumen(company, baris_biaya, akun),
 		rencana_dokumen_biaya(company, baris_biaya),
-		lain_lain,
 		akun,
 	)
 

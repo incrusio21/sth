@@ -8,6 +8,8 @@
  "field_order": [
   "akun",
   "keterangan",
+  "cost_center",
+  "dijurnal",
   "voucher_type",
   "voucher_no",
   "posting_date",
@@ -33,6 +35,23 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Keterangan",
+   "read_only": 1
+  },
+  {
+   "description": "Cost center yang nanti didebit dokumen ini waktu Posted. Di situ pula jurnal KUD mengkreditnya kalau baris ini ikut dijurnal.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Tercentang kalau bagian ini tetap dikredit jurnal KUD walau dokumennya belum Posted: akunnya di bawah Kepala Akun Biaya dan cost center-nya diketahui.",
+   "fieldname": "dijurnal",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Dijurnal",
    "read_only": 1
   },
   {
@@ -71,10 +90,10 @@
    "read_only": 1
   },
   {
-   "description": "Bagian dokumen ini yang ikut dinolkan jurnal KUD: saldo GL-nya di bawah Kepala Akun Biaya, ditambah bagian yang dijurnal di muka karena akunnya di bawah Kepala Akun walau BKM-nya belum Posted.",
+   "description": "Saldo GL dokumen ini di bawah Kepala Akun Biaya — yang ikut dinolkan jurnal KUD.",
    "fieldname": "sudah_buku_besar",
    "fieldtype": "Currency",
-   "label": "Sudah Dijurnal",
+   "label": "Sudah di Buku Besar",
    "read_only": 1
   },
   {
@@ -90,7 +109,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-29 10:00:00.000000",
+ "modified": "2026-09-29 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD Belum Buku Besar",
