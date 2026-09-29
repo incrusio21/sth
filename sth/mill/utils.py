@@ -390,26 +390,28 @@ def get_potongan_sortasi(unit, tanggal_proses, pabrik=None):
 	menumpuk, dan begitu ada olah seluruh tumpukan itu terpakai sekali lalu
 	jendelanya mulai lagi dari nol. Tidak ada batas mundur — permintaan user —
 	jadi berhenti mengolah berapa hari pun tetap terkumpul utuh.
+
+	Entry pertama — belum ada satu pun hari olah sebelum tanggal proses — hanya
+	membaca tanggal proses itu sendiri. Timbangan sebelum pabrik pertama kali
+	mengolah tidak ditumpuk ke olah perdananya.
 	"""
 	if not (unit and tanggal_proses):
 		return 0.0
 
-	args = {"unit": unit, "sampai": tanggal_proses}
-	batas_bawah = ""
+	olah_terakhir = hari_olah_terakhir(unit, tanggal_proses, pabrik)
 
-	if olah_terakhir := hari_olah_terakhir(unit, tanggal_proses, pabrik):
-		# hari olah terakhir sudah memakai sortasinya sendiri, jendelanya mulai
-		# sehari sesudahnya
-		args["mulai"] = add_days(olah_terakhir, 1)
-		batas_bawah = " and t.posting_date >= %(mulai)s"
+	# hari olah terakhir sudah memakai sortasinya sendiri, jendelanya mulai
+	# sehari sesudahnya
+	mulai = add_days(olah_terakhir, 1) if olah_terakhir else tanggal_proses
 
 	nilai = frappe.db.sql("""
 		select sum(coalesce(t.netto - t.netto_2, 0))
 		from `tabTimbangan` t
 		join `tabItem` i on t.kode_barang = i.name
 		where i.tipe_barang = 'TBS' and t.docstatus = 1
-			and t.unit = %(unit)s and t.posting_date <= %(sampai)s
-	""" + batas_bawah, args)
+			and t.unit = %(unit)s
+			and t.posting_date between %(mulai)s and %(sampai)s
+	""", {"unit": unit, "mulai": mulai, "sampai": tanggal_proses})
 
 	return flt(nilai[0][0]) if nilai else 0.0
 
@@ -424,7 +426,7 @@ def hari_olah_terakhir(unit, tanggal_proses, pabrik=None):
 	Disaring pabrik kalau dokumennya membawa pabrik — itu yang dipakai sounding
 	CPO waktu membaca tbs_olah — dan jatuh ke unit kalau tidak, supaya pabrik
 	yang kosong tidak membuat pencarian ini kehilangan seluruh riwayat olah lalu
-	mengumpulkan sortasi sejak awal data.
+	diperlakukan seperti entry pertama.
 	"""
 	args = {"tanggal": tanggal_proses}
 
