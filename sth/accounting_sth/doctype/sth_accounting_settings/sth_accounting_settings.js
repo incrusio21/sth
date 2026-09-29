@@ -8,10 +8,10 @@ frappe.ui.form.on("STH Accounting Settings", {
 });
 
 // Field Account dan Cost Center tiap tabel, semuanya disaring ke company
-// barisnya. Akun grup hanya untuk dua tabel yang memang menunjuk kepala akun:
-// Kepala Akun Biaya KUD dan Sumber Biaya COGS — keduanya menjumlah semua akun
-// turunannya. Tabel lain dipakai langsung untuk GL Entry, jadi harus akun
-// (dan cost center) non grup.
+// barisnya. Kepala Akun Biaya KUD hanya akun grup, karena yang dinolkan akun
+// turunannya. Sumber Biaya COGS boleh keduanya (`is_group: null`): akun grup
+// ikut menjumlah turunannya. Tabel lain dipakai langsung untuk GL Entry, jadi
+// harus akun (dan cost center) non grup.
 const FILTER_TABEL = {
 	sth_accounting_settings_payroll: { account: ["account"] },
 	sth_accounting_settings_alokasi_gaji_bengkel: { account: ["account"] },
@@ -32,7 +32,7 @@ const FILTER_TABEL = {
 		],
 		cost_center: ["cost_center_kebun", "cost_center_mill"],
 	},
-	sth_accounting_settings_cogs_sumber_biaya: { account: ["akun"], is_group: 1 },
+	sth_accounting_settings_cogs_sumber_biaya: { account: ["akun"], is_group: null },
 	sth_accounting_settings_kud: {
 		account: [
 			"akun_pembelian_tbs",
@@ -53,18 +53,18 @@ function set_account_filters(frm) {
 		const fieldnames = [...(aturan.account || []), ...(aturan.cost_center || [])];
 
 		fieldnames.forEach((fieldname) => {
-			// Cost center selalu non grup: dipakai langsung di GL Entry.
-			const is_group = (aturan.account || []).includes(fieldname) ? aturan.is_group || 0 : 0;
+			// Cost center selalu non grup: dipakai langsung di GL Entry. Akun
+			// ikut aturan tabelnya, bawaannya non grup; null berarti bebas.
+			const is_group = (aturan.account || []).includes(fieldname)
+				? aturan.is_group === undefined ? 0 : aturan.is_group
+				: 0;
 
 			frm.set_query(fieldname, tabel, function (doc, cdt, cdn) {
 				const row = locals[cdt][cdn];
+				const filters = { company: row.company };
+				if (is_group !== null) filters.is_group = is_group;
 
-				return {
-					filters: {
-						company: row.company,
-						is_group: is_group,
-					},
-				};
+				return { filters };
 			});
 		});
 	});
