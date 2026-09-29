@@ -21,6 +21,8 @@ from sth.accounting_sth.doctype.perhitungan_kud.perhitungan_kud import (
 	rekap_biaya_bkm,
 	susun_baris_jurnal,
 	susun_belum_buku_besar,
+	gabung_pembalikan,
+	pembalikan_dari_rencana,
 	KETERANGAN_LAIN_LAIN,
 	KETERANGAN_MATERIAL,
 	KETERANGAN_SELISIH,
@@ -662,7 +664,7 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 
 	def test_bkm_belum_posted_ke_akun_kegiatan(self):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
-		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("6110 - PANEN", None, 100.0)]}}
+		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
 
 		hasil = susun_belum_buku_besar(baris, {}, rencana, 0)
 
@@ -673,7 +675,7 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 
 	def test_bkm_posted_tidak_muncul(self):
 		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
-		rencana = {(self.PANEN, "P1"): {"status": "Posted", "bagian": [("6110 - PANEN", None, 100.0)]}}
+		rencana = {(self.PANEN, "P1"): {"status": "Posted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
 
 		self.assertEqual(susun_belum_buku_besar(baris, {(self.PANEN, "P1"): 100.0}, rencana, 0), [])
 
@@ -681,8 +683,8 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 		# Upah + premi sudah di GL, material tidak pernah lewat GL BKM.
 		baris = [baris_bkm(self.RAWAT, 150.0, voucher_no="R1")]
 		rencana = {(self.RAWAT, "R1"): {"status": "Posted", "bagian": [
-			("6210 - RAWAT", None, 100.0),
-			(None, KETERANGAN_MATERIAL, 50.0),
+			("6210 - RAWAT", None, 100.0, "CC-R"),
+			(None, KETERANGAN_MATERIAL, 50.0, None),
 		]}}
 
 		hasil = susun_belum_buku_besar(baris, {(self.RAWAT, "R1"): 100.0}, rencana, 0)
@@ -693,8 +695,8 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 	def test_perawatan_belum_posted_dipecah_dua(self):
 		baris = [baris_bkm(self.RAWAT, 150.0, voucher_no="R1")]
 		rencana = {(self.RAWAT, "R1"): {"status": "Submitted", "bagian": [
-			("6210 - RAWAT", None, 100.0),
-			(None, KETERANGAN_MATERIAL, 50.0),
+			("6210 - RAWAT", None, 100.0, "CC-R"),
+			(None, KETERANGAN_MATERIAL, 50.0, None),
 		]}}
 
 		hasil = susun_belum_buku_besar(baris, {}, rencana, 0)
@@ -718,9 +720,9 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 		]
 		gl = {(self.PANEN, "P2"): 200.0, (self.RAWAT, "R1"): 100.0}
 		rencana = {
-			(self.PANEN, "P1"): {"bagian": [("A", None, 100.0)]},
-			(self.PANEN, "P2"): {"bagian": [("A", None, 200.0)]},
-			(self.RAWAT, "R1"): {"bagian": [("B", None, 100.0), (None, KETERANGAN_MATERIAL, 50.0)]},
+			(self.PANEN, "P1"): {"bagian": [("A", None, 100.0, "CC-A")]},
+			(self.PANEN, "P2"): {"bagian": [("A", None, 200.0, "CC-A")]},
+			(self.RAWAT, "R1"): {"bagian": [("B", None, 100.0, "CC-B"), (None, KETERANGAN_MATERIAL, 50.0, None)]},
 		}
 		lain_lain = 30.0
 
@@ -728,3 +730,74 @@ class TestSusunBelumBukuBesar(FrappeTestCase):
 
 		total_biaya = sum(r["nilai"] for r in baris) + lain_lain
 		self.assertEqual(sum(r["belum"] for r in hasil), total_biaya - sum(gl.values()))
+
+	def test_belum_posted_di_bawah_kepala_dijurnal_di_muka(self):
+		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
+		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
+
+		self.assertEqual(susun_belum_buku_besar(baris, {}, rencana, 0, {"6110 - PANEN"}), [])
+
+	def test_belum_posted_di_luar_kepala_tetap_belum(self):
+		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
+		rencana = {(self.PANEN, "P1"): {"status": "Submitted", "bagian": [("1262201 - TBM", None, 100.0, "CC-P")]}}
+
+		hasil = susun_belum_buku_besar(baris, {}, rencana, 0, {"6110 - PANEN"})
+
+		self.assertEqual([(r["akun"], r["belum"]) for r in hasil], [("1262201 - TBM", 100.0)])
+
+	def test_tanpa_cost_center_tidak_dijurnal_di_muka(self):
+		# BKM Perawatan tanpa cost center tidak pernah dibuatkan GL.
+		baris = [baris_bkm(self.RAWAT, 100.0, voucher_no="R1")]
+		rencana = {(self.RAWAT, "R1"): {"status": "Submitted", "bagian": [("6210 - RAWAT", None, 100.0, "")]}}
+
+		hasil = susun_belum_buku_besar(baris, {}, rencana, 0, {"6210 - RAWAT"})
+
+		self.assertEqual([r["belum"] for r in hasil], [100.0])
+		self.assertEqual(pembalikan_dari_rencana(baris, {}, rencana, {"6210 - RAWAT"}), [])
+
+	def test_perawatan_belum_posted_upah_dijurnal_material_tetap_belum(self):
+		baris = [baris_bkm(self.RAWAT, 150.0, voucher_no="R1")]
+		rencana = {(self.RAWAT, "R1"): {"status": "Submitted", "bagian": [
+			("6210 - RAWAT", None, 100.0, "CC-R"),
+			(None, KETERANGAN_MATERIAL, 50.0, None),
+		]}}
+
+		hasil = susun_belum_buku_besar(baris, {}, rencana, 0, {"6210 - RAWAT"})
+
+		self.assertEqual([(r["akun"], r["keterangan"], r["belum"], r["sudah_buku_besar"]) for r in hasil],
+			[(None, KETERANGAN_MATERIAL, 50.0, 100.0)])
+		self.assertEqual(pembalikan_dari_rencana(baris, {}, rencana, {"6210 - RAWAT"}),
+			[{"account": "6210 - RAWAT", "cost_center": "CC-R", "jumlah": 100.0}])
+
+	def test_sudah_ada_gl_tidak_dijurnal_dua_kali(self):
+		baris = [baris_bkm(self.PANEN, 100.0, voucher_no="P1")]
+		rencana = {(self.PANEN, "P1"): {"status": "Posted", "bagian": [("6110 - PANEN", None, 100.0, "CC-P")]}}
+
+		self.assertEqual(pembalikan_dari_rencana(baris, {(self.PANEN, "P1"): 100.0}, rencana, {"6110 - PANEN"}), [])
+
+	def test_total_sama_dengan_status_jurnal_dengan_jurnal_di_muka(self):
+		baris = [
+			baris_bkm(self.PANEN, 100.0, voucher_no="P1"),
+			baris_bkm(self.PANEN, 200.0, voucher_no="P2"),
+			baris_bkm(self.RAWAT, 150.0, voucher_no="R1"),
+			baris_bkm(self.RAWAT, 70.0, voucher_no="R2"),
+		]
+		gl = {(self.PANEN, "P2"): 200.0}
+		rencana = {
+			(self.PANEN, "P1"): {"bagian": [("A", None, 100.0, "CC-A")]},
+			(self.PANEN, "P2"): {"bagian": [("A", None, 200.0, "CC-A")]},
+			(self.RAWAT, "R1"): {"bagian": [("B", None, 100.0, "CC-B"), (None, KETERANGAN_MATERIAL, 50.0, None)]},
+			(self.RAWAT, "R2"): {"bagian": [("LUAR", None, 70.0, "CC-B")]},
+		}
+		akun = {"A", "B"}
+		gl_pembalikan = [{"account": "A", "cost_center": "CC-A", "jumlah": 200.0}]
+
+		pembalikan = gabung_pembalikan(gl_pembalikan, pembalikan_dari_rencana(baris, gl, rencana, akun))
+		hasil = susun_belum_buku_besar(baris, gl, rencana, 30.0, akun)
+
+		self.assertEqual(pembalikan, [
+			{"account": "A", "cost_center": "CC-A", "jumlah": 300.0},
+			{"account": "B", "cost_center": "CC-B", "jumlah": 100.0},
+		])
+		total_biaya = sum(r["nilai"] for r in baris) + 30.0
+		self.assertEqual(sum(r["belum"] for r in hasil), total_biaya - sum(r["jumlah"] for r in pembalikan))

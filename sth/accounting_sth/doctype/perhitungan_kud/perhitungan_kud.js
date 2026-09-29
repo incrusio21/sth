@@ -283,7 +283,7 @@ function detail_belum_bb(frm, grup) {
 						<th>${__("Tanggal")}</th>
 						<th>${__("Status")}</th>
 						<th class="text-right">${__("Nilai Dokumen")}</th>
-						<th class="text-right">${__("Sudah di Buku Besar")}</th>
+						<th class="text-right">${__("Sudah Dijurnal")}</th>
 						<th class="text-right">${__("Belum (bagian akun ini)")}</th>
 					</tr>
 				</thead>
