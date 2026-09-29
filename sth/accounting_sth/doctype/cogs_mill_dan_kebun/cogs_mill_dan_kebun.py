@@ -8,7 +8,9 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_first_day, get_last_day, getdate
+from frappe.utils import add_days, flt, get_first_day, get_last_day, getdate, strip_html
+
+from sth.accounting_sth.revaluasi_stok import ganti_rate_masuk, repost_item_gudang
 
 # Produk dikenali lewat Item.tipe_barang. Gudangnya ikut Default Warehouse di
 # Item Defaults item itu sendiri, bukan Warehouse Category.
@@ -115,36 +117,73 @@ AWAL_MULA = "1900-01-01"
 
 KETERANGAN_KEBUN = "KAPITALISASI BIAYA KEBUN KE PERSEDIAAN TBS"
 KETERANGAN_OLAH = "PENGOLAHAN TBS MENJADI CPO DAN PALM KERNEL"
-KETERANGAN_HPP = "HARGA POKOK PENJUALAN {0}"
+
+# Revaluasi HPP jalan di background: repost bisa makan menit-menitan, lebih
+# lama dari batas waktu request. Statusnya dicatat di dokumen.
+METHOD_REVALUASI = "sth.accounting_sth.doctype.cogs_mill_dan_kebun.cogs_mill_dan_kebun.proses_revaluasi"
+STATUS_JALAN = ("Antri", "Berjalan")
+
+# Transaksi yang GL-nya ditulis ulang repost. Kalau salah satunya sudah ditutup
+# Accounting Period, repost mati di tengah jalan, jadi diperiksa sebelum mulai.
+VOUCHER_DIREPOST = (
+	"Stock Entry",
+	"Delivery Note",
+	"Stock Reconciliation",
+	"Purchase Receipt",
+	"Purchase Invoice",
+	"Sales Invoice",
+)
 
 
 class COGSMilldanKebun(Document):
 
 	def validate(self):
 		self.validasi_periode()
-		self.validasi_mode_posting()
 		self.hitung()
 
+	def before_submit(self):
+		if self.revaluasi_hpp:
+			self.validasi_periode_akuntansi_terbuka()
+
 	def on_submit(self):
-		if self.buat_stock_reconciliation:
-			self.buat_rekonsiliasi()
-			return
-		if not self.posting_jurnal:
+		if self.posting_jurnal:
+			self.make_gl_entry()
+		else:
 			frappe.msgprint(
 				"Tabel Closing sudah tersusun tapi tidak diposting ke buku besar karena "
 				"<b>Posting Jurnal ke Buku Besar</b> masih mati.",
 				indicator="orange",
 				alert=True,
 			)
-			return
-		self.make_gl_entry()
+
+		# Revaluasi sudah membuat Stock Reconciliation sisa selisihnya sendiri
+		# sesudah repost, jadi yang dibuat langsung di sini cuma kalau revaluasi
+		# dimatikan.
+		if self.revaluasi_hpp:
+			self.antrikan_revaluasi()
+		elif self.buat_stock_reconciliation:
+			self.buat_rekonsiliasi()
+
+	def before_cancel(self):
+		if self.status_revaluasi in STATUS_JALAN:
+			frappe.throw(
+				"Revaluasi HPP dokumen ini masih <b>{0}</b>. Tunggu sampai selesai sebelum "
+				"membatalkan.".format(self.status_revaluasi)
+			)
+		self.validasi_periode_sesudahnya()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry",)
-		self.batalkan_rekonsiliasi()
-		if not self.posting_jurnal:
-			return
-		self.make_gl_entry()
+		if self.posting_jurnal:
+			self.make_gl_entry()
+
+		# Rate asal Stock Entry dikembalikan di background, dengan repost yang
+		# sama beratnya dengan waktu submit. Dokumen lama tanpa revaluasi cukup
+		# membatalkan Stock Reconciliation-nya.
+		if self.get("revaluasi"):
+			self.antrikan_revaluasi()
+		else:
+			self.batalkan_rekonsiliasi()
 
 	def on_trash(self):
 		frappe.db.delete("GL Entry", {
@@ -157,8 +196,7 @@ class COGSMilldanKebun(Document):
 	# ------------------------------------------------------------------
 
 	def validasi_periode(self):
-		if self.periode_dari and self.periode_sampai and self.periode_dari > self.periode_sampai:
-			frappe.throw("Periode Dari tidak boleh melewati Periode Sampai.")
+		validasi_sebulan(self.periode_dari, self.periode_sampai)
 
 		filters = {
 			"company": self.company,
@@ -176,15 +214,47 @@ class COGSMilldanKebun(Document):
 				title="Duplikat Tidak Diizinkan",
 			)
 
-	def validasi_mode_posting(self):
-		"""Stock Reconciliation dan jurnal Closing sama-sama menyentuh akun
-		persediaan, jadi kalau keduanya jalan nilainya dobel."""
-		if self.buat_stock_reconciliation and self.posting_jurnal:
+	def validasi_periode_sesudahnya(self):
+		"""Opening bulan berikutnya diambil dari Closing dokumen ini, dan rate yang
+		dipulihkan waktu cancel ikut menggeser nilai bulan-bulan sesudahnya. Jadi
+		yang dibatalkan harus yang paling akhir lebih dulu."""
+		filters = {
+			"company": self.company,
+			"docstatus": 1,
+			"periode_dari": (">", self.periode_sampai),
+			"name": ("!=", self.name),
+		}
+		filters["unit"] = self.unit if self.unit else ("is", "not set")
+
+		sesudahnya = frappe.db.get_value(
+			"COGS Mill dan Kebun", filters, "name", order_by="periode_dari asc"
+		)
+		if sesudahnya:
 			frappe.throw(
-				"<b>Buat Stock Reconciliation saat Submit</b> dan <b>Posting Jurnal ke Buku "
-				"Besar</b> tidak bisa menyala bersamaan karena keduanya sama-sama menjurnal "
-				"akun persediaan. Pilih salah satu.",
-				title="Dua Sumber Jurnal Persediaan",
+				"Periode sesudahnya sudah punya dokumen <b>{0}</b> yang disubmit. Batalkan "
+				"dokumen itu lebih dulu.".format(sesudahnya)
+			)
+
+	def validasi_periode_akuntansi_terbuka(self):
+		"""Repost menulis ulang GL transaksi stok sejak awal periode ini sampai
+		hari ini, termasuk bulan-bulan sesudahnya. Accounting Period yang sudah
+		menutup salah satu jenis transaksi itu membuat repost mati di tengah
+		jalan, jadi ditolak sebelum mulai."""
+		tertutup = frappe.db.sql("""
+			select distinct ap.name
+			from `tabAccounting Period` ap
+			inner join `tabClosed Document` cd on cd.parent = ap.name
+			where ap.company = %(company)s and cd.closed = 1
+				and cd.document_type in %(voucher)s
+				and ap.end_date >= %(dari)s
+		""", {"company": self.company, "voucher": VOUCHER_DIREPOST, "dari": self.periode_dari})
+
+		if tertutup:
+			frappe.throw(
+				"Accounting Period <b>{0}</b> sudah menutup transaksi stok pada atau sesudah "
+				"periode ini, padahal revaluasi HPP harus menulis ulang GL-nya. Submit COGS "
+				"sebelum periodenya ditutup, atau matikan <b>Revaluasi HPP saat Submit</b>."
+				.format(", ".join(row[0] for row in tertutup))
 			)
 
 	# ------------------------------------------------------------------
@@ -205,6 +275,8 @@ class COGSMilldanKebun(Document):
 		"""
 		if not (self.periode_dari and self.periode_sampai):
 			frappe.throw("Harap isi Periode Dari dan Periode Sampai terlebih dahulu.")
+
+		validasi_sebulan(self.periode_dari, self.periode_sampai)
 
 		if not self.company:
 			frappe.throw("Harap isi Company terlebih dahulu.")
@@ -385,7 +457,14 @@ class COGSMilldanKebun(Document):
 
 		self.tulis_rincian(nilai)
 		self.susun_closing(nilai)
-		self.susun_rekonsiliasi(nilai)
+		# Dengan revaluasi, Stock Reconciliation cuma menutup sisa selisih yang
+		# baru ketahuan sesudah repost. Pratinjau sebelum repost akan menampilkan
+		# angka yang tidak akan pernah diposting, jadi tabelnya diisi proses
+		# revaluasi saja.
+		if self.revaluasi_hpp:
+			self.set("rekonsiliasi", [])
+		else:
+			self.susun_rekonsiliasi(nilai)
 		self.hitung_selisih_gl(nilai)
 
 	def tulis_rincian(self, nilai):
@@ -404,33 +483,234 @@ class COGSMilldanKebun(Document):
 			})
 
 	def hitung_selisih_gl(self, nilai):
-		"""Informasi saja: saldo GL akun persediaan setelah jurnal dokumen ini
-		dibandingkan dengan nilai Closing Stock hasil perhitungan."""
+		"""Informasi saja: saldo GL akun persediaan waktu Ambil Data dibandingkan
+		dengan nilai Closing Stock hasil perhitungan.
+
+		Jurnal dokumen ini tidak lagi menyentuh akun persediaan — nilainya
+		digeser revaluasi HPP dan Stock Reconciliation lewat transaksi stok —
+		jadi selisih ini besarnya nilai yang akan digeser keduanya.
+		"""
 
 		def a(kode):
 			return flt(nilai.get(kode, {}).get("amount"))
 
-		# Closing dan Sold disimpan negatif di ketiga produk, jadi ikut
-		# dijumlahkan, bukan dikurangkan.
-		self.selisih_gl_tbs = flt(
-			flt(self.saldo_gl_tbs)
-			+ a("tbs_production")
-			- a("tbs_internal")
-			+ a("tbs_sold")
-			+ a("tbs_closing"),
-			2,
-		)
-		for prefiks in ("cpo", "pk"):
+		# Closing disimpan negatif di ketiga produk, jadi ikut dijumlahkan.
+		for prefiks in ("tbs", "cpo", "pk"):
 			self.set(
 				"selisih_gl_" + prefiks,
-				flt(
-					flt(self.get("saldo_gl_" + prefiks))
-					+ a(prefiks + "_production")
-					- a(prefiks + "_cogs")
-					+ a(prefiks + "_closing"),
-					2,
-				),
+				flt(flt(self.get("saldo_gl_" + prefiks)) + a(prefiks + "_closing"), 2),
 			)
+
+	# ------------------------------------------------------------------
+	# Revaluasi HPP
+	#
+	# Permintaan user 29 September 2026: HPP bulan ini harus kena ke semua
+	# barang yang masuk dan keluar bulan itu, bukan cuma saldo akhirnya. Rate
+	# masuk Stock Entry produksi diganti rate hasil dokumen ini, lalu Repost
+	# Item Valuation menghitung ulang nilai setiap Delivery Note, Material Issue
+	# gudang transit, dan GL-nya. Rate asalnya dicatat di tabel revaluasi supaya
+	# cancel bisa mengembalikannya persis.
+	#
+	# Valuasinya moving average, jadi barang yang keluar di awal bulan tetap
+	# membawa campuran rate bulan lalu dan rate baru. Sisa selisih terhadap
+	# Closing ditutup Stock Reconciliation di akhir periode.
+	# ------------------------------------------------------------------
+
+	def antrikan_revaluasi(self):
+		self.set_status_revaluasi("Antri")
+		frappe.enqueue(
+			METHOD_REVALUASI,
+			queue="long",
+			timeout=7200,
+			enqueue_after_commit=True,
+			job_id="cogs-revaluasi-" + self.name,
+			deduplicate=True,
+			nama=self.name,
+		)
+		frappe.msgprint(
+			"Revaluasi HPP diantrikan dan berjalan di background. Statusnya terlihat di "
+			"bagian Revaluasi HPP dokumen ini.",
+			indicator="blue",
+			alert=True,
+		)
+
+	@frappe.whitelist()
+	def jalankan_ulang_revaluasi(self):
+		"""Tombol untuk revaluasi yang gagal. Semua langkahnya aman diulang: rate
+		asal yang sudah tercatat tidak ditimpa, dan Stock Reconciliation yang
+		sudah jadi tidak dibuat dua kali."""
+		self.check_permission("submit" if self.docstatus == 1 else "cancel")
+		if self.status_revaluasi != "Gagal":
+			frappe.throw("Revaluasi cuma bisa dijalankan ulang kalau statusnya Gagal.")
+		self.antrikan_revaluasi()
+
+	def set_status_revaluasi(self, status, catatan=None):
+		self.db_set(
+			{"status_revaluasi": status, "catatan_revaluasi": catatan},
+			update_modified=False,
+		)
+
+	def nilai_rincian(self):
+		return {
+			row.kode: {"qty": flt(row.qty), "amount": flt(row.amount)}
+			for row in self.rincian
+			if row.kode
+		}
+
+	def rate_revaluasi(self):
+		"""Rate masuk baru Stock Entry produksi tiap produk: nilai barang yang
+		masuk lewat Stock Entry itu dibagi qty-nya.
+
+		CPO dan PK cuma Production, karena pembeliannya masuk lewat Purchase
+		Receipt dengan rate-nya sendiri. TBS ditambah FFB Purchase: TBS beli
+		tidak punya transaksi stok sendiri, dia ikut masuk bersama TBS kebun di
+		Stock Entry Data TBS yang memposting selisih restan.
+		"""
+		nilai = self.nilai_rincian()
+
+		def rate(*kode):
+			qty = sum(flt(nilai.get(k, {}).get("qty")) for k in kode)
+			amount = sum(flt(nilai.get(k, {}).get("amount")) for k in kode)
+			return amount / qty if qty else 0.0
+
+		return {
+			"tbs": rate("tbs_production", "tbs_purchase"),
+			"cpo": rate("cpo_production"),
+			"pk": rate("pk_production"),
+		}
+
+	def terapkan_revaluasi(self):
+		"""Ganti rate masuk Stock Entry produksi, nilai ulang semua transaksi
+		sesudahnya, lalu tutup sisa selisih Closing dengan Stock Reconciliation.
+
+		Repost ERPNext melakukan commit sendiri, jadi keadaan setengah jadi bisa
+		tertinggal kalau prosesnya berhenti. Setiap langkah di sini karena itu
+		aman diulang dari awal. Mengembalikan catatan untuk dokumen.
+		"""
+		rate = self.rate_revaluasi()
+		tercatat = {row.stock_entry_detail: row for row in self.get("revaluasi") or []}
+
+		per_stock_entry = {}
+		tanpa_rate = []
+		for baris in stock_entry_produksi(
+			self.company, self.unit, self.periode_dari, self.periode_sampai
+		):
+			row = tercatat.get(baris.detail)
+			if not row:
+				rate_baru = flt(rate.get(baris.prefiks))
+				if not rate_baru:
+					# Rate nol menghapus nilai barang yang masuk, jadi produk tanpa
+					# nilai produksi dibiarkan dengan rate-nya sendiri.
+					if baris.produk not in tanpa_rate:
+						tanpa_rate.append(baris.produk)
+					continue
+				# Rate asal dicatat sekali, sebelum diganti. Kalau prosesnya
+				# diulang, baris yang sudah tercatat tidak ditimpa dengan rate
+				# yang sudah diganti.
+				row = self.append("revaluasi", {
+					"produk": baris.produk,
+					"stock_entry": baris.stock_entry,
+					"stock_entry_detail": baris.detail,
+					"item_code": baris.item_code,
+					"gudang": baris.gudang,
+					"tanggal": baris.posting_date,
+					"qty": baris.qty,
+					"rate_asal": baris.basic_rate,
+					"rate_baru": rate_baru,
+				})
+				row.db_insert()
+			per_stock_entry.setdefault(row.stock_entry, {})[row.stock_entry_detail] = row.rate_baru
+
+		pasangan = set()
+		for stock_entry, rate_per_baris in per_stock_entry.items():
+			pasangan |= ganti_rate_masuk(stock_entry, rate_per_baris)
+		frappe.db.commit()
+
+		self.repost_dan_sinkronkan_transit(pasangan)
+
+		if self.buat_stock_reconciliation:
+			# Disusun sesudah repost, dari saldo yang sudah bergeser, supaya yang
+			# direkonsiliasi cuma sisa selisihnya.
+			if not self.rekonsiliasi_sudah_dibuat():
+				self.susun_rekonsiliasi(self.nilai_rincian())
+				self.simpan_rekonsiliasi()
+				self.buat_rekonsiliasi()
+				frappe.db.commit()
+
+			# Stock Reconciliation di akhir periode menggeser nilai keluar bulan
+			# sesudahnya, termasuk Delivery Note yang punya penerimaan transit.
+			pasangan_sr = {
+				(row.item_code, row.gudang)
+				for row in self.rekonsiliasi
+				if row.stock_reconciliation
+			}
+			if pasangan_sr:
+				self.repost_dan_sinkronkan_transit(pasangan_sr)
+
+		if tanpa_rate:
+			return (
+				"Rate Production {0} nol, jadi Stock Entry produksinya tidak direvaluasi."
+				.format(", ".join(tanpa_rate))
+			)
+		return None
+
+	def pulihkan_revaluasi(self):
+		"""Kebalikan terapkan_revaluasi, dijalankan sesudah dokumen dibatalkan:
+		Stock Reconciliation dibatalkan, rate asal Stock Entry produksi
+		dikembalikan, lalu semua transaksi sesudahnya dinilai ulang lagi."""
+		pasangan = {
+			(row.item_code, row.gudang)
+			for row in self.get("rekonsiliasi") or []
+			if row.stock_reconciliation
+		}
+		self.batalkan_rekonsiliasi()
+		frappe.db.commit()
+
+		per_stock_entry = {}
+		for row in self.get("revaluasi") or []:
+			if frappe.db.get_value("Stock Entry", row.stock_entry, "docstatus") != 1:
+				continue
+			per_stock_entry.setdefault(row.stock_entry, {})[row.stock_entry_detail] = row.rate_asal
+
+		for stock_entry, rate_per_baris in per_stock_entry.items():
+			pasangan |= ganti_rate_masuk(stock_entry, rate_per_baris)
+		frappe.db.commit()
+
+		self.repost_dan_sinkronkan_transit(pasangan)
+
+	def repost_dan_sinkronkan_transit(self, pasangan):
+		"""Repost pasangan item-gudang, lalu samakan penerimaan gudang transit
+		dengan nilai keluar Delivery Note yang baru dan repost gudang transitnya.
+
+		Urutannya penting: nilai keluar Delivery Note baru bergeser sesudah gudang
+		asalnya direpost, sedangkan Material Receipt transit tidak ikut bergeser
+		sendiri.
+		"""
+		from sth.mill.gudang_transit import sinkronkan_penerimaan_transit
+
+		repost_item_gudang(pasangan, self.company, self.periode_dari)
+
+		transit = sinkronkan_penerimaan_transit(self.company, self.periode_dari)
+		frappe.db.commit()
+		repost_item_gudang(transit, self.company, self.periode_dari)
+
+	def rekonsiliasi_sudah_dibuat(self):
+		return any(
+			frappe.db.get_value("Stock Reconciliation", row.stock_reconciliation, "docstatus") == 1
+			for row in self.get("rekonsiliasi") or []
+			if row.stock_reconciliation
+		)
+
+	def simpan_rekonsiliasi(self):
+		"""Tabel rekonsiliasi disusun ulang di dokumen yang sudah disubmit, jadi
+		barisnya ditulis langsung ke database, bukan lewat save."""
+		frappe.db.delete("COGS Mill dan Kebun Rekonsiliasi", {
+			"parent": self.name,
+			"parenttype": self.doctype,
+			"parentfield": "rekonsiliasi",
+		})
+		for row in self.rekonsiliasi:
+			row.db_insert()
 
 	# ------------------------------------------------------------------
 	# Stock Reconciliation
@@ -639,6 +919,24 @@ class COGSMilldanKebun(Document):
 		cc_kebun = setelan.cost_center_kebun
 		cc_mill = setelan.cost_center_mill
 
+		# Jurnal kapitalisasi saja. Persediaan dan HPP sudah dibukukan transaksi
+		# stok — Stock Entry produksi mendebit persediaan, Delivery Note dan
+		# gudang transit mendebit HPP — dan revaluasi menyamakan nilainya dengan
+		# angka dokumen ini. Menjurnal keduanya lagi di sini membuatnya dobel.
+		#
+		# Yang tersisa: Stock Entry produksi mengkredit akun lawannya sendiri
+		# (Stock Adjustment untuk CPO dan PK, akun pembelian TBS untuk Data TBS),
+		# bukan akun alokasi. Kolom persediaan jurnal lama karena itu diganti
+		# akun lawan tersebut, supaya kreditnya pindah ke akun alokasi dan biaya
+		# periode keluar dari laba rugi. Keputusan user 29 September 2026.
+		lawan = akun_lawan_produksi(
+			self.company, self.unit, self.periode_dari, self.periode_sampai
+		) if self.company and self.periode_dari and self.periode_sampai else {}
+
+		def akun_lawan(prefiks):
+			daftar = lawan.get(prefiks) or []
+			return daftar[0] if len(daftar) == 1 else None
+
 		baris = []
 
 		def tambah(akun, cost_center, debit, credit, keterangan):
@@ -652,30 +950,37 @@ class COGSMilldanKebun(Document):
 				"keterangan": keterangan,
 			})
 
-		# 1. Biaya kebun dikapitalisasi jadi nilai persediaan TBS
-		tambah(setelan.akun_persediaan_tbs, cc_kebun, a("tbs_production"), 0, KETERANGAN_KEBUN)
+		# 1. Biaya kebun dikapitalisasi jadi nilai TBS
+		tambah(akun_lawan("tbs"), cc_kebun, a("tbs_production"), 0, KETERANGAN_KEBUN)
 		tambah(setelan.akun_alokasi_kebun, cc_kebun, 0, a("tbs_production"), KETERANGAN_KEBUN)
 
-		# 2. TBS yang diolah plus biaya mill pindah ke persediaan CPO dan PK
-		tambah(setelan.akun_persediaan_cpo, cc_mill, a("cpo_production"), 0, KETERANGAN_OLAH)
-		tambah(setelan.akun_persediaan_pk, cc_mill, a("pk_production"), 0, KETERANGAN_OLAH)
-		tambah(setelan.akun_persediaan_tbs, cc_mill, 0, a("tbs_internal"), KETERANGAN_OLAH)
+		# 2. TBS yang diolah plus biaya mill pindah ke nilai CPO dan PK
+		tambah(akun_lawan("cpo"), cc_mill, a("cpo_production"), 0, KETERANGAN_OLAH)
+		tambah(akun_lawan("pk"), cc_mill, a("pk_production"), 0, KETERANGAN_OLAH)
+		tambah(akun_lawan("tbs"), cc_mill, 0, a("tbs_internal"), KETERANGAN_OLAH)
 		tambah(setelan.akun_alokasi_pabrik, cc_mill, 0, flt(self.biaya_mill, 2), KETERANGAN_OLAH)
 
-		# 3. Harga pokok penjualan masing-masing produk
-		tambah(setelan.akun_hpp_tbs, cc_kebun, a("tbs_sold"), 0, KETERANGAN_HPP.format("TBS"))
-		tambah(setelan.akun_persediaan_tbs, cc_kebun, 0, a("tbs_sold"), KETERANGAN_HPP.format("TBS"))
-		tambah(setelan.akun_hpp_cpo, cc_mill, a("cpo_cogs"), 0, KETERANGAN_HPP.format("CPO"))
-		tambah(setelan.akun_persediaan_cpo, cc_mill, 0, a("cpo_cogs"), KETERANGAN_HPP.format("CPO"))
-		tambah(setelan.akun_hpp_pk, cc_mill, a("pk_cogs"), 0, KETERANGAN_HPP.format("PALM KERNEL"))
-		tambah(setelan.akun_persediaan_pk, cc_mill, 0, a("pk_cogs"), KETERANGAN_HPP.format("PALM KERNEL"))
-
 		if self.docstatus == 1 and self.posting_jurnal:
+			ganda = {
+				prefiks: daftar for prefiks, daftar in lawan.items() if len(daftar) > 1
+			}
+			if ganda:
+				frappe.throw(
+					"Stock Entry produksi periode ini memakai lebih dari satu akun lawan, jadi "
+					"jurnal kapitalisasinya tidak tahu harus mendebit yang mana: {0}".format(
+						"; ".join(
+							"{0}: {1}".format(prefiks.upper(), ", ".join(daftar))
+							for prefiks, daftar in ganda.items()
+						)
+					)
+				)
+
 			kurang = sorted({row["keterangan"] for row in baris if not row["no_coa"]})
 			if kurang:
 				frappe.throw(
-					"Akun untuk jurnal berikut belum diisi di STH Accounting Settings: "
-					"<b>{0}</b>".format(", ".join(kurang))
+					"Akun untuk jurnal berikut belum ada: <b>{0}</b>. Akun alokasi diisi di STH "
+					"Accounting Settings; akun lawan diambil dari Stock Entry produksi periode "
+					"ini, jadi kosong kalau Stock Entry-nya belum ada.".format(", ".join(kurang))
 				)
 
 		self.set("closing", [])
@@ -995,9 +1300,8 @@ def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
 	dokumen Sounding terakhir — termasuk hari yang produksinya nol atau minus,
 	yang tetap ikut lewat pembilang.
 
-	Karena rentang field itu selalu mulai dari awal bulan tanggal prosesnya,
-	periode COGS yang bukan satu bulan penuh akan membawa hari-hari sebelum
-	Periode Dari. Peringatannya keluar dari peringatan_periode_bukan_sebulan.
+	Rentang field itu selalu mulai dari awal bulan tanggal prosesnya, dan itu
+	cocok karena periode COGS selalu satu bulan penuh — lihat validasi_sebulan.
 
 	Tanpa Unit, tiap unit diambil dokumen terakhirnya sendiri lalu dirata-rata —
 	dijumlahkan seperti Closing tidak masuk akal untuk angka persen. Unit yang
@@ -1028,24 +1332,27 @@ def rendemen_dari_sounding(prefiks, company, unit, dari, sampai):
 	return sum(terkumpul) / len(terkumpul) if terkumpul else 0.0
 
 
-def peringatan_periode_bukan_sebulan(dari, sampai):
-	"""OER dan KER dibaca dari field rata-rata di dokumen Sounding terakhir, dan
-	rentang field itu selalu mulai dari awal bulan tanggal prosesnya sendiri.
+def validasi_sebulan(dari, sampai):
+	"""COGS selalu dibuat per satu bulan takwim penuh — permintaan user
+	29 September 2026, yang sebelumnya cuma peringatan.
 
-	Periode yang bukan satu bulan takwim penuh karena itu menghasilkan rendemen
-	yang rentangnya beda dengan rentang periode ini: periode 10-20 Agustus tetap
-	membawa rendemen sejak 1 Agustus, dan periode dua bulan cuma membawa rendemen
-	bulan terakhirnya. Angkanya tidak salah, tapi bukan yang diminta, jadi
-	dikatakan terus terang alih-alih diam-diam dipakai.
+	Tiga hal cuma benar untuk satu bulan utuh: OER dan KER dibaca dari
+	rata-rata bulanan dokumen Sounding terakhir, yang rentangnya selalu mulai
+	awal bulan; Opening diambil dari Closing bulan sebelumnya; dan revaluasi HPP
+	mengganti rate seluruh Stock Entry produksi bulan itu.
 	"""
-	if get_first_day(dari) == get_first_day(sampai) and 			getdate(dari) == getdate(get_first_day(dari)) and 			getdate(sampai) == getdate(get_last_day(sampai)):
-		return None
+	if not (dari and sampai):
+		return
 
-	return (
-		"Periode {0} sampai {1} bukan satu bulan takwim penuh. OER dan KER diambil "
-		"dari dokumen Sounding terakhir, yang rata-ratanya selalu dihitung sejak "
-		"awal bulan tanggal prosesnya, jadi rentang rendemennya tidak sama dengan "
-		"rentang periode ini.".format(dari, sampai)
+	dari, sampai = getdate(dari), getdate(sampai)
+	if dari == getdate(get_first_day(dari)) and sampai == getdate(get_last_day(dari)):
+		return
+
+	frappe.throw(
+		"COGS dibuat per satu bulan penuh: Periode Dari tanggal 1 dan Periode Sampai "
+		"tanggal terakhir bulan yang sama. {0} sampai {1} bukan satu bulan penuh."
+		.format(frappe.format(dari, "Date"), frappe.format(sampai, "Date")),
+		title="Periode Bukan Satu Bulan",
 	)
 
 
@@ -1115,9 +1422,66 @@ def rate_dari_stock_entry(prefiks, produk, company, unit, dari, sampai):
 	return flt(row[0].basic_rate) or flt(row[0].valuation_rate)
 
 
+def stock_entry_produksi(company, unit, dari, sampai):
+	"""Baris masuk Stock Entry bikinan dokumen sumber ketiga produk dalam
+	periode ini, yaitu baris yang rate-nya diganti revaluasi HPP.
+
+	Baris keluar tidak ikut — Material Issue Data TBS waktu restannya turun,
+	misalnya. Nilainya dihitung ulang repost dari rate masuk.
+	"""
+	hasil = []
+	for produk, prefiks in PREFIKS.items():
+		cfg = _sumber(prefiks)
+		nilai = {
+			"company": company,
+			"dari": dari,
+			"sampai": sampai,
+			"doctype": cfg["doctype"],
+			"tipe": TIPE_BARANG[produk],
+		}
+		syarat = _syarat_unit(unit, nilai)
+
+		rows = frappe.db.sql("""
+			select se.name as stock_entry, sed.name as detail, sed.item_code,
+				sed.t_warehouse as gudang, sed.transfer_qty as qty, sed.basic_rate,
+				sed.expense_account, se.posting_date
+			from `tabStock Entry Detail` sed
+			inner join `tabStock Entry` se on se.name = sed.parent
+			inner join `tab{doctype}` d on d.name = se.references
+			inner join `tabUnit` u on u.name = d.unit
+			inner join `tabItem` i on i.name = sed.item_code
+			where se.docstatus = 1 and se.reference_doctype = %(doctype)s
+				and se.company = %(company)s and u.company = %(company)s
+				and i.tipe_barang = %(tipe)s
+				and ifnull(sed.t_warehouse, '') != '' and ifnull(sed.s_warehouse, '') = ''
+				and se.posting_date between %(dari)s and %(sampai)s
+				{syarat}
+			order by se.posting_date, se.name, sed.idx
+		""".format(doctype=cfg["doctype"], syarat=syarat), nilai, as_dict=True)
+
+		for row in rows:
+			row.produk = produk
+			row.prefiks = prefiks
+		hasil.extend(rows)
+
+	return hasil
+
+
+def akun_lawan_produksi(company, unit, dari, sampai):
+	"""Akun lawan Stock Entry produksi tiap produk dalam periode ini, dari
+	expense_account baris masuknya. Normalnya satu akun per produk; lebih dari
+	satu ditolak waktu jurnal diposting."""
+	lawan = {}
+	for row in stock_entry_produksi(company, unit, dari, sampai):
+		daftar = lawan.setdefault(row.prefiks, [])
+		if row.expense_account and row.expense_account not in daftar:
+			daftar.append(row.expense_account)
+	return lawan
+
+
 def qty_pembelian_tbs(company, unit, dari, sampai):
 	"""Qty baris FFB Purchase: TBS unit plasma yang ditimbang di PKS ditambah
-	pembelian TBS lewat Purchase Invoice.
+	pembelian TBS lewat Pengakuan Pembelian TBS.
 
 	Yang plasma dibaca dari dokumen Timbangan bertipe Receive: unit asalnya
 	ditelusuri lewat Surat Pengantar Buah, dan yang ikut cuma SPB dari Unit yang
@@ -1127,9 +1491,28 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 	Yang dijumlahkan netto 2 — netto sesudah potongan sortasi — karena itu yang
 	benar-benar diterima pabrik; kalau kosong dipakai netto apa adanya.
 
-	Purchase Invoice tidak punya dimensi unit, jadi saringan Unit cuma berlaku
-	untuk Timbangan, mengikuti Biaya Kebun dan Biaya Mill yang juga per company.
-	Retur ikut terjumlah dengan sendirinya karena qty-nya negatif.
+	Pembelian pihak ketiga dibaca dari Pengakuan Pembelian TBS, bukan lagi dari
+	Purchase Invoice — permintaan user. Purchase Invoice cuma turunan pengakuan
+	itu (make_purchase_invoice mengisi qty-nya dari total_terima), dan selama
+	sumbernya PI, faktur yang dihapus meninggalkan baris dengan qty tersisa dari
+	plasma saja tanpa ketahuan dari mana. Pengakuan adalah dokumen tempat tonase
+	pembeliannya benar-benar dicatat.
+
+	Disaring `tanggal_timbangan`, bukan tanggal dokumennya — permintaan user.
+	Itu tanggal TBS-nya benar-benar masuk pabrik, sejajar dengan baris TBS
+	Production dan bagian plasma di atas yang sama-sama memakai tanggal timbang,
+	jadi buah akhir bulan yang pengakuannya dibuat awal bulan berikutnya tetap
+	jatuh di bulan yang benar.
+
+	Saringan Unit sekarang berlaku untuk dua-duanya. Purchase Invoice memang
+	tidak dipakai lagi; Pengakuan Pembelian TBS punya field unit sendiri, dan
+	unit itu yang ikut diturunkan ke PI-nya. Barangnya tidak disaring: seluruh
+	doctype itu memang pembelian TBS.
+
+	Nilai barisnya tidak ikut pindah ke sini — tetap dari akun pembelian TBS di
+	buku besar lewat nilai_pembelian_tbs, permintaan user. Pengakuan yang belum
+	difakturkan karena itu tampil sebagai qty tanpa nilai, dan itu memang
+	penandanya.
 	"""
 	item_codes = get_item_produk("TBS")
 	if not item_codes:
@@ -1137,9 +1520,11 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 
 	nilai = {"company": company, "dari": dari, "sampai": sampai, "items": tuple(item_codes)}
 	syarat_unit = ""
+	syarat_unit_ppt = ""
 	if unit:
 		nilai["unit"] = unit
 		syarat_unit = "and t.unit = %(unit)s"
+		syarat_unit_ppt = "and ppt.unit = %(unit)s"
 
 	plasma = frappe.db.sql("""
 		select sum(case when t.netto_2 then t.netto_2 else t.netto end)
@@ -1152,16 +1537,15 @@ def qty_pembelian_tbs(company, unit, dari, sampai):
 			{syarat_unit}
 	""".format(syarat_unit=syarat_unit), nilai)
 
-	invoice = frappe.db.sql("""
-		select sum(pii.qty)
-		from `tabPurchase Invoice Item` pii
-		inner join `tabPurchase Invoice` pi on pi.name = pii.parent
-		where pi.docstatus = 1 and pi.company = %(company)s
-			and pii.item_code in %(items)s
-			and pi.posting_date between %(dari)s and %(sampai)s
-	""", nilai)
+	pengakuan = frappe.db.sql("""
+		select sum(ppt.total_terima)
+		from `tabPengakuan Pembelian TBS` ppt
+		where ppt.docstatus = 1 and ppt.company = %(company)s
+			and ppt.tanggal_timbangan between %(dari)s and %(sampai)s
+			{syarat_unit_ppt}
+	""".format(syarat_unit_ppt=syarat_unit_ppt), nilai)
 
-	return (flt(plasma[0][0]) if plasma else 0.0) + (flt(invoice[0][0]) if invoice else 0.0)
+	return (flt(plasma[0][0]) if plasma else 0.0) + (flt(pengakuan[0][0]) if pengakuan else 0.0)
 
 
 def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
@@ -1324,10 +1708,6 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 	nilai = {}
 	peringatan = []
 
-	pesan_periode = peringatan_periode_bukan_sebulan(periode_dari, periode_sampai)
-	if pesan_periode:
-		peringatan.append(pesan_periode)
-
 	for produk, prefiks in PREFIKS.items():
 		item_codes = get_item_produk(produk)
 		if not item_codes:
@@ -1380,8 +1760,10 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		nilai[prefiks + "_purchase"] = (mutasi["pembelian_qty"], mutasi["pembelian_nilai"])
 
 		# FFB Purchase tidak diambil dari Stock Ledger seperti Purchase CPO dan PK:
-		# qty-nya TBS plasma yang ditimbang di PKS ditambah Purchase Invoice item
-		# TBS, nilainya dari akun pembelian TBS. Permintaan user 7 September 2026.
+		# qty-nya TBS plasma yang ditimbang di PKS ditambah tonase Pengakuan
+		# Pembelian TBS, nilainya dari akun pembelian TBS. Permintaan user
+		# 7 September 2026, sumber pembeliannya dipindah dari Purchase Invoice ke
+		# Pengakuan Pembelian TBS 18 September 2026.
 		if prefiks == "tbs":
 			nilai["tbs_purchase"] = (
 				qty_pembelian_tbs(company, unit, periode_dari, periode_sampai),
@@ -1482,3 +1864,73 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		"saldo_gl_pk": saldo_akun(company, setelan and setelan.akun_persediaan_pk, periode_sampai),
 		"peringatan": peringatan,
 	}
+
+
+# ---------------------------------------------------------------------------
+# Revaluasi HPP: job background dan pengaman Stock Entry
+# ---------------------------------------------------------------------------
+
+def proses_revaluasi(nama):
+	"""Dijalankan worker untuk dokumen yang baru disubmit (revaluasi) atau baru
+	dibatalkan (pemulihan). Galatnya ditangkap dan dicatat di dokumen, bukan
+	dibiarkan hilang di log worker, supaya tombol Jalankan Ulang muncul."""
+	doc = frappe.get_doc("COGS Mill dan Kebun", nama)
+	doc.set_status_revaluasi("Berjalan")
+	frappe.db.commit()
+
+	try:
+		if doc.docstatus == 1:
+			catatan = doc.terapkan_revaluasi()
+			status = "Selesai"
+		else:
+			doc.pulihkan_revaluasi()
+			catatan = None
+			status = "Dipulihkan"
+	except Exception as e:
+		frappe.db.rollback()
+		doc.log_error("Revaluasi HPP COGS Mill dan Kebun gagal")
+		doc.set_status_revaluasi(
+			"Gagal", (strip_html(str(e)) or "Lihat Error Log.")[:1000]
+		)
+		frappe.db.commit()
+		doc.notify_update()
+		return
+
+	doc.set_status_revaluasi(status, catatan)
+	frappe.db.commit()
+	doc.notify_update()
+
+
+def jaga_stock_entry_produksi(doc, method=None):
+	"""Stock Entry produksi di periode yang HPP-nya sudah direvaluasi tidak boleh
+	bertambah atau dibatalkan. Stock Entry baru tidak akan pernah diganti
+	rate-nya, dan yang dibatalkan membawa pergi rate yang sudah diganti —
+	nilai yang sudah dibagi COGS itu bergeser tanpa ketahuan.
+
+	Dipasang di before_submit dan before_cancel Stock Entry. Hitung Ulang Data
+	TBS dan Sounding membatalkan lalu membuat ulang Stock Entry-nya, jadi ikut
+	tertahan di sini, dan memang itu maksudnya.
+	"""
+	doctypes = {cfg["doctype"] for cfg in SUMBER_PRODUK.values()}
+	if doc.get("reference_doctype") not in doctypes or not doc.get("references"):
+		return
+
+	unit = frappe.db.get_value(doc.reference_doctype, doc.references, "unit")
+	cogs = frappe.db.sql("""
+		select name
+		from `tabCOGS Mill dan Kebun`
+		where docstatus = 1 and revaluasi_hpp = 1 and company = %(company)s
+			and %(tanggal)s between periode_dari and periode_sampai
+			and (ifnull(unit, '') = '' or unit = %(unit)s)
+		limit 1
+	""", {"company": doc.company, "tanggal": doc.posting_date, "unit": unit})
+
+	if cogs:
+		frappe.throw(
+			"HPP periode ini sudah direvaluasi oleh COGS Mill dan Kebun <b>{0}</b>, jadi "
+			"Stock Entry produksi {1} <b>{2}</b> tidak bisa diubah lagi. Batalkan COGS itu "
+			"lebih dulu, lalu submit ulang sesudahnya.".format(
+				cogs[0][0], doc.reference_doctype, doc.references
+			),
+			title="Periode Sudah Direvaluasi",
+		)

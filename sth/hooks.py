@@ -506,6 +506,9 @@ doc_events = {
 	"Stock Entry": {
 		"on_submit": "sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_setelah_adjustment",
 		"on_cancel": "sth.mill.doctype.data_tbs.data_tbs.hitung_ulang_setelah_adjustment",
+		# Stock Entry produksi di periode yang HPP-nya sudah direvaluasi COGS.
+		"before_submit": "sth.accounting_sth.doctype.cogs_mill_dan_kebun.cogs_mill_dan_kebun.jaga_stock_entry_produksi",
+		"before_cancel": "sth.accounting_sth.doctype.cogs_mill_dan_kebun.cogs_mill_dan_kebun.jaga_stock_entry_produksi",
 	},
 	"Delivery Order": {
 		"validate": "sth.sales_sth.custom.delivery_order.set_default_tax_fields",

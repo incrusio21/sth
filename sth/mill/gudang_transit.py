@@ -191,6 +191,50 @@ def nilai_keluar_dn(delivery_note, dn_item):
 	return abs(flt(frappe.db.get_value("Delivery Note Item", dn_item, "incoming_rate")))
 
 
+def sinkronkan_penerimaan_transit(company, dari):
+	"""Samakan rate Material Receipt gudang transit sejak tanggal `dari` dengan
+	nilai keluar Delivery Note-nya yang sekarang.
+
+	Rate itu diambil dari Delivery Note waktu penerimaannya dibuat, lalu
+	terkunci: Material Receipt tidak ikut dihitung ulang Repost Item Valuation.
+	Begitu Delivery Note-nya dinilai ulang — oleh revaluasi COGS atau transaksi
+	mundur mana pun — debit yang ditinggalkannya di Stock In Transit Account
+	tidak lagi sama dengan kredit penerimaan ini, dan Material Issue waktu Sales
+	Invoice tetap keluar dengan rate lama.
+
+	Mengembalikan pasangan item-gudang yang rate-nya diganti; repost-nya urusan
+	pemanggil.
+	"""
+	from sth.accounting_sth.revaluasi_stok import ganti_rate_masuk
+
+	setelan = get_setelan_transit(company)
+	if not setelan.warehouse:
+		return set()
+
+	rows = frappe.db.sql("""
+		select sed.parent, sed.name, sed.basic_rate,
+			sed.delivery_note_transit, sed.delivery_note_item_transit
+		from `tabStock Entry Detail` sed
+		inner join `tabStock Entry` se on se.name = sed.parent
+		where se.docstatus = 1 and se.company = %s and se.purpose = %s
+			and ifnull(se.delivery_note_transit, '') != ''
+			and ifnull(sed.delivery_note_item_transit, '') != ''
+			and sed.t_warehouse = %s and se.posting_date >= %s
+	""", (company, PURPOSE_MASUK, setelan.warehouse, dari), as_dict=True)
+
+	per_stock_entry = {}
+	for row in rows:
+		rate = nilai_keluar_dn(row.delivery_note_transit, row.delivery_note_item_transit)
+		if flt(rate, 6) != flt(row.basic_rate, 6):
+			per_stock_entry.setdefault(row.parent, {})[row.name] = rate
+
+	berubah = set()
+	for stock_entry, rate_per_baris in per_stock_entry.items():
+		berubah |= ganti_rate_masuk(stock_entry, rate_per_baris)
+
+	return berubah
+
+
 def batalkan_penerimaan_transit(doc, method=None):
 	"""Batalkan penerimaan transit waktu Delivery Note-nya dibatalkan."""
 	batalkan_stock_entry_transit(

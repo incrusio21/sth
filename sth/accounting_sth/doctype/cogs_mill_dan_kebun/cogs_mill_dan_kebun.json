@@ -37,6 +37,10 @@
   "total_closing",
   "total_credit",
   "section_rekonsiliasi",
+  "revaluasi_hpp",
+  "status_revaluasi",
+  "catatan_revaluasi",
+  "revaluasi",
   "buat_stock_reconciliation",
   "rekonsiliasi",
   "section_pemeriksaan",
@@ -203,7 +207,7 @@
    "label": "Closing (Jurnal)"
   },
   {
-   "default": "0",
+   "default": "1",
    "description": "Kalau dimatikan, dokumen tetap bisa disubmit dan tabel Closing tetap tersusun, tapi tidak ada GL Entry yang dibuat. Dipakai untuk memeriksa dampak jurnal sebelum benar-benar diposting.",
    "fieldname": "posting_jurnal",
    "fieldtype": "Check",
@@ -231,11 +235,45 @@
   {
    "fieldname": "section_rekonsiliasi",
    "fieldtype": "Section Break",
-   "label": "Stock Reconciliation"
+   "label": "Revaluasi HPP dan Stock Reconciliation"
   },
   {
    "default": "1",
-   "description": "Menyamakan nilai persediaan di Stock Ledger dengan rate Closing Stock hasil perhitungan ini, untuk tiap gudang yang punya stok atau mutasi. Tidak bisa dinyalakan bersama Posting Jurnal ke Buku Besar karena keduanya menyentuh akun persediaan.",
+   "fieldname": "revaluasi_hpp",
+   "fieldtype": "Check",
+   "label": "Revaluasi HPP saat Submit"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "status_revaluasi",
+   "fieldname": "status_revaluasi",
+   "fieldtype": "Select",
+   "label": "Status Revaluasi",
+   "no_copy": 1,
+   "options": "\nAntri\nBerjalan\nSelesai\nGagal\nDipulihkan",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "catatan_revaluasi",
+   "fieldname": "catatan_revaluasi",
+   "fieldtype": "Small Text",
+   "label": "Catatan Revaluasi",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "revaluasi_hpp",
+   "fieldname": "revaluasi",
+   "fieldtype": "Table",
+   "label": "Revaluasi",
+   "no_copy": 1,
+   "options": "COGS Mill dan Kebun Revaluasi",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "description": "Menyamakan nilai persediaan di Stock Ledger dengan rate Closing Stock hasil perhitungan ini, untuk tiap gudang yang punya stok atau mutasi. Kalau Revaluasi HPP menyala, dibuat sesudah revaluasi dan cuma menutup sisa selisihnya.",
    "fieldname": "buat_stock_reconciliation",
    "fieldtype": "Check",
    "label": "Buat Stock Reconciliation saat Submit"
@@ -255,7 +293,7 @@
    "label": "Pemeriksaan Saldo GL"
   },
   {
-   "description": "Saldo akun persediaan di GL per Periode Sampai, diambil sebelum jurnal dokumen ini.",
+   "description": "Saldo akun persediaan di GL per Periode Sampai, diambil waktu Ambil Data, sebelum revaluasi.",
    "fieldname": "saldo_gl_tbs",
    "fieldtype": "Currency",
    "label": "Saldo GL Persediaan TBS",
@@ -278,7 +316,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Saldo GL setelah jurnal dokumen ini dikurangi nilai Closing Stock menurut form. Idealnya nol.",
+   "description": "Saldo GL di atas dikurangi nilai Closing Stock menurut form: nilai persediaan yang akan digeser revaluasi HPP dan Stock Reconciliation.",
    "fieldname": "selisih_gl_tbs",
    "fieldtype": "Currency",
    "label": "Selisih TBS",
@@ -310,7 +348,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-01 12:00:00.000000",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "COGS Mill dan Kebun",
