@@ -4,17 +4,14 @@
  "allow_rename": 1,
  "autoname": "format:DP-{#####}",
  "creation": "2025-09-10 13:36:01.755721",
- "default_view": "Tree",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_j2oz",
   "company",
-  "parent_dokumen_perijinan",
-  "is_group",
   "column_break_ilyf",
   "amended_from",
-  "old_parent",
   "details_section",
   "nama_perijinan",
   "kategori_perijinan",
@@ -29,10 +26,6 @@
   "penanggung_jawab",
   "tanggal_daftar_ulang",
   "keterangan",
-  "section_break_fzcr",
-  "lft",
-  "column_break_pifn",
-  "rgt",
   "upload_file_tab",
   "upload",
   "kriteria_upload_html",
@@ -45,13 +38,13 @@
    "label": "Header"
   },
   {
-   "depends_on": "eval:doc.is_group == 1",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Perusahaan",
-   "mandatory_depends_on": "eval:doc.is_group == 1",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -93,7 +86,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.is_group == 0",
    "fieldname": "details_section",
    "fieldtype": "Section Break",
    "label": "Details"
@@ -101,25 +93,28 @@
   {
    "fieldname": "nama_perijinan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Nama Perijinan",
-   "mandatory_depends_on": "eval:doc.is_group == 0",
-   "options": "Nama Perijinan"
+   "options": "Nama Perijinan",
+   "reqd": 1
   },
   {
    "fieldname": "kategori_perijinan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Kategori Perijinan",
-   "mandatory_depends_on": "eval:doc.is_group == 0",
-   "options": "Kategori Perijinan"
+   "options": "Kategori Perijinan",
+   "reqd": 1
   },
   {
    "fieldname": "nomor_perijinan",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_preview": 1,
    "label": "Nomor Perijinan",
-   "mandatory_depends_on": "eval:doc.is_group == 0"
+   "reqd": 1
   },
   {
    "default": "Today",
@@ -127,7 +122,7 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal Di Terbitkan",
-   "mandatory_depends_on": "eval:doc.is_group == 0"
+   "reqd": 1
   },
   {
    "default": "0",
@@ -136,42 +131,43 @@
    "label": "Berlaku Selamanya"
   },
   {
-   "depends_on": "eval:doc.berlaku_selamanya == 0 && doc.is_group == 0",
+   "depends_on": "eval:doc.berlaku_selamanya == 0",
    "fieldname": "tanggal_berakhir",
    "fieldtype": "Date",
    "label": "Tanggal Berakhir",
-   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0 && doc.is_group == 0"
+   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0"
   },
   {
    "fieldname": "yang_mengeluarkan",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Yang Mengeluarkan",
-   "mandatory_depends_on": "eval:doc.is_group == 0",
-   "options": "Yang Mengeluarkan"
+   "options": "Yang Mengeluarkan",
+   "reqd": 1
   },
   {
    "fieldname": "kedudukan",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Kedudukan",
-   "options": "Kedudukan"
+   "options": "Kedudukan",
+   "reqd": 1
   },
   {
    "fieldname": "kegiatan_usaha",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Kegiatan Usaha",
-   "mandatory_depends_on": "eval:doc.is_group == 0",
-   "options": "Kegiatan Usaha"
+   "options": "Kegiatan Usaha",
+   "reqd": 1
   },
   {
    "fieldname": "penanggung_jawab",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Penanggung Jawab",
-   "mandatory_depends_on": "eval:doc.is_group == 0",
-   "options": "Penanggung Jawab"
+   "options": "Penanggung Jawab",
+   "reqd": 1
   },
   {
    "fieldname": "tanggal_daftar_ulang",
@@ -188,58 +184,12 @@
   {
    "fieldname": "column_break_hzav",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "lft",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Left",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "rgt",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Right",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_group",
-   "fieldtype": "Check",
-   "label": "Is Group"
-  },
-  {
-   "depends_on": "eval:doc.is_group == 0",
-   "fieldname": "old_parent",
-   "fieldtype": "Link",
-   "label": "Old Parent",
-   "options": "Dokumen Perijinan"
-  },
-  {
-   "depends_on": "eval:doc.is_group == 0",
-   "fieldname": "parent_dokumen_perijinan",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Parent Dokumen Perijinan",
-   "options": "Dokumen Perijinan"
-  },
-  {
-   "fieldname": "section_break_fzcr",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_pifn",
-   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_tree": 1,
  "links": [],
- "modified": "2026-09-25 10:37:44.901914",
+ "modified": "2026-09-29 10:48:13.892987",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",

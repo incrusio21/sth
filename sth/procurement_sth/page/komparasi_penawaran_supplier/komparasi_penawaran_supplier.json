@@ -3,8 +3,8 @@
  "creation": "2026-01-17 09:39:04.264456",
  "docstatus": 0,
  "doctype": "Page",
- "idx": 13,
- "modified": "2026-09-28 16:29:15.217854",
+ "idx": 14,
+ "modified": "2026-09-29 09:51:35.691726",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "komparasi-penawaran-supplier",
@@ -13,6 +13,9 @@
  "roles": [
   {
    "role": "Purchase Master Manager"
+  },
+  {
+   "role": "PROCUREMENT SPV"
   }
  ],
  "script": null,

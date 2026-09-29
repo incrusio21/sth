@@ -6,8 +6,9 @@ from frappe.model.document import Document
 
 
 class DokumenPerijinan(Document):
+	# pass
 	def autoname(self):
-		if self.is_group == 1:
-			self.name = self.company
-		else:
+		# if self.is_group == 1:
+		# 	self.name = self.company
+		# else:
 			self.name = self.nama_perijinan
