@@ -4,7 +4,11 @@
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
-from sth.accounting_sth.doctype.nota_piutang.nota_piutang import pecah_dpp_ppn
+from sth.accounting_sth.doctype.nota_piutang.nota_piutang import (
+	hitung_dpp_ppn,
+	pecah_dpp_ppn,
+	tambah_ppn,
+)
 
 
 class TestPecahDppPpn(FrappeTestCase):
@@ -38,6 +42,31 @@ class TestPecahDppPpn(FrappeTestCase):
 
 	def test_nilai_nol(self):
 		self.assertEqual(pecah_dpp_ppn(0, 11), (0, 0))
+
+
+class TestTambahPpn(FrappeTestCase):
+	"""Nilai yang belum termasuk PPN: utuh jadi DPP, PPN di atasnya. Tanpa database."""
+
+	def test_tarif_11_persen(self):
+		self.assertEqual(tambah_ppn(1_000_000, 11), (1_000_000, 110_000))
+
+	def test_dibulatkan_ke_sen(self):
+		self.assertEqual(tambah_ppn(1_961_473.78, 11), (1_961_473.78, 215_762.12))
+
+	def test_tanpa_tarif(self):
+		self.assertEqual(tambah_ppn(1_000_000, 0), (1_000_000, 0))
+
+
+class TestHitungDppPpn(FrappeTestCase):
+	def test_exclude_menambahkan(self):
+		self.assertEqual(hitung_dpp_ppn(1_000_000, 11, "Exclude"), (1_000_000, 110_000))
+
+	def test_include_memecah(self):
+		self.assertEqual(hitung_dpp_ppn(1_110_000, 11, "Include"), (1_000_000, 110_000))
+
+	def test_kosong_dianggap_include(self):
+		"""Nota yang dibuat sebelum ada Jenis PPN."""
+		self.assertEqual(hitung_dpp_ppn(1_110_000, 11, None), (1_000_000, 110_000))
 
 
 class TestNotaPiutang(FrappeTestCase):

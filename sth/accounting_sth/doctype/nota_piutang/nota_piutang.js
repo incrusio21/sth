@@ -115,6 +115,10 @@ frappe.ui.form.on('Nota Piutang', {
 		hitung_dpp_ppn_management_fee(frm);
 	},
 
+	jenis_ppn_management_fee: function(frm) {
+		hitung_dpp_ppn_management_fee(frm);
+	},
+
 	exclude_ppn_management_fee: function(frm) {
 		// tarif yang sudah dipilih dilepas supaya form tidak memperlihatkan tarif
 		// yang tidak dipakai. Server melakukan hal yang sama waktu menyimpan.
@@ -201,6 +205,7 @@ function hitung_dpp_ppn_management_fee(frm) {
 			nilai: frm.doc.nilai_management_fee,
 			tax_rate: frm.doc.tax_rate_management_fee,
 			exclude_ppn: frm.doc.exclude_ppn_management_fee ? 1 : 0,
+			jenis_ppn: frm.doc.jenis_ppn_management_fee,
 		},
 		callback: function(r) {
 			const d = r.message || {};

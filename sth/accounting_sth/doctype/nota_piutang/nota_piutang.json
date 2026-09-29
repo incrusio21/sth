@@ -25,6 +25,7 @@
   "perhitungan_kud",
   "nilai_management_fee",
   "tax_rate_management_fee",
+  "jenis_ppn_management_fee",
   "exclude_ppn_management_fee",
   "dpp_management_fee",
   "ppn_management_fee",
@@ -233,7 +234,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\"",
-   "description": "Diambil ulang dari Perhitungan KUD-nya saat disimpan, tidak bisa diketik. Nilainya sudah termasuk PPN.",
+   "description": "Diambil ulang dari Perhitungan KUD-nya saat disimpan, tidak bisa diketik.",
    "fieldname": "nilai_management_fee",
    "fieldtype": "Currency",
    "label": "Nilai Management Fee",
@@ -242,13 +243,22 @@
   },
   {
    "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\" && !doc.exclude_ppn_management_fee",
-   "description": "Tarif pemecah Nilai Management Fee jadi DPP dan PPN, sekaligus sumber akun PPN Keluaran yang dikredit jurnalnya.",
+   "description": "Tarif PPN Management Fee, sekaligus sumber akun PPN Keluaran yang dikredit jurnalnya.",
    "fieldname": "tax_rate_management_fee",
    "fieldtype": "Link",
    "label": "Tax Rate",
    "mandatory_depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\" && !doc.exclude_ppn_management_fee",
    "no_copy": 1,
    "options": "Tax Rate"
+  },
+  {
+   "default": "Include",
+   "depends_on": "eval:doc.tipe==\"Others\" && doc.sub_tipe_others==\"Management Fee KUD\" && !doc.exclude_ppn_management_fee",
+   "fieldname": "jenis_ppn_management_fee",
+   "fieldtype": "Select",
+   "label": "Jenis PPN",
+   "no_copy": 1,
+   "options": "Include\nExclude"
   },
   {
    "default": "0",
@@ -527,7 +537,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-21 12:00:00.000000",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Nota Piutang",

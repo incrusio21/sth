@@ -83,6 +83,24 @@ def pecah_dpp_ppn(nilai, rate):
 	return dpp, flt(nilai - dpp, PRESISI_UANG)
 
 
+def tambah_ppn(nilai, rate):
+	"""Nilai yang belum termasuk PPN jadi (DPP, PPN). Fungsi murni.
+
+	Kebalikan pecah_dpp_ppn: nilainya utuh jadi DPP, PPN dihitung di atasnya.
+	"""
+	nilai = flt(nilai, PRESISI_UANG)
+
+	return nilai, flt(nilai * max(flt(rate), 0) / 100.0, PRESISI_UANG)
+
+
+def hitung_dpp_ppn(nilai, rate, jenis_ppn):
+	"""(DPP, PPN) sesuai Jenis PPN: Exclude menambahkan, selain itu memecah."""
+	if jenis_ppn == "Exclude":
+		return tambah_ppn(nilai, rate)
+
+	return pecah_dpp_ppn(nilai, rate)
+
+
 def get_rate_ppn(tax_rate):
 	"""Tarif Tax Rate yang dipakai memecah nilai gross jadi DPP dan PPN."""
 	rate = flt(frappe.db.get_value("Tax Rate", tax_rate, "rate"))
@@ -138,8 +156,8 @@ def get_customer_mitra(mitra):
 
 
 @frappe.whitelist()
-def get_dpp_ppn_management_fee(nilai, tax_rate=None, exclude_ppn=0):
-	"""DPP dan PPN dari Nilai Management Fee yang sudah termasuk PPN.
+def get_dpp_ppn_management_fee(nilai, tax_rate=None, exclude_ppn=0, jenis_ppn=None):
+	"""DPP dan PPN dari Nilai Management Fee, menurut Jenis PPN-nya.
 
 	Dipakai form supaya pecahannya kelihatan sebelum disimpan. Yang menentukan
 	jurnal tetap hitungan di validate, bukan balikan ini.
@@ -147,7 +165,7 @@ def get_dpp_ppn_management_fee(nilai, tax_rate=None, exclude_ppn=0):
 	if cint(exclude_ppn) or not tax_rate:
 		return {"dpp": flt(nilai, PRESISI_UANG), "ppn": 0}
 
-	dpp, ppn = pecah_dpp_ppn(nilai, get_rate_ppn(tax_rate))
+	dpp, ppn = hitung_dpp_ppn(nilai, get_rate_ppn(tax_rate), jenis_ppn)
 
 	return {"dpp": dpp, "ppn": ppn}
 
@@ -322,7 +340,10 @@ class NotaPiutang(Document):
 		self.hitung_dpp_ppn_management_fee()
 
 	def hitung_dpp_ppn_management_fee(self):
-		"""Pecah Nilai Management Fee, yang selalu sudah termasuk PPN, jadi DPP dan PPN.
+		"""DPP dan PPN dari Nilai Management Fee.
+
+		Jenis PPN Include: nilainya sudah termasuk PPN, jadi dipecah. Exclude:
+		nilainya DPP, PPN ditambahkan di atasnya.
 
 		Dihitung di server seperti DPP dan PPN penjualan asset, supaya pecahan yang
 		dipakai jurnal tidak bisa dikarang dari sisi client.
@@ -339,13 +360,17 @@ class NotaPiutang(Document):
 
 		if not self.tax_rate_management_fee:
 			frappe.throw(
-				"Tax Rate wajib diisi: Nilai Management Fee sudah termasuk PPN, dan "
-				"tarifnya itu yang memecah DPP dengan PPN. Centang <b>Tanpa PPN</b> "
-				"kalau fee-nya memang tanpa PPN."
+				"Tax Rate wajib diisi: tarifnya itu yang menentukan DPP dan PPN "
+				"Management Fee. Centang <b>Tanpa PPN</b> kalau fee-nya memang tanpa PPN."
 			)
 
-		self.dpp_management_fee, self.ppn_management_fee = pecah_dpp_ppn(
-			nilai, get_rate_ppn(self.tax_rate_management_fee)
+		# nota lama belum punya Jenis PPN, dan semuanya dihitung sebagai Include
+		self.jenis_ppn_management_fee = self.jenis_ppn_management_fee or "Include"
+
+		self.dpp_management_fee, self.ppn_management_fee = hitung_dpp_ppn(
+			nilai,
+			get_rate_ppn(self.tax_rate_management_fee),
+			self.jenis_ppn_management_fee,
 		)
 
 	def validate_jual_asset(self):
@@ -663,8 +688,13 @@ class NotaPiutang(Document):
 		akun PPN Keluaran milik Tax Rate yang dipilih. Dengan centang Tanpa PPN,
 		PPN-nya nol dan jurnalnya kembali dua baris seperti sebelum ada pemecahan
 		ini.
+
+		Jenis PPN Exclude (diputuskan user 29 September 2026): nilainya utuh jadi
+		DPP dan PPN ditambahkan di atasnya, dan PPN tambahan itu ikut didebit ke
+		9190399. Jadi pendapatan didebit DPP + PPN, lebih besar dari kredit
+		Perhitungan KUD sebesar PPN-nya — 9190399 tersisa debit sebesar itu.
+		Untuk Include DPP + PPN sama dengan nilainya, jadi tidak ada yang berubah.
 		"""
-		nilai = flt(self.nilai_management_fee)
 		dpp = flt(self.dpp_management_fee)
 		ppn = flt(self.ppn_management_fee)
 
@@ -683,7 +713,7 @@ class NotaPiutang(Document):
 
 		je.append("accounts", {
 			"account"                   : akun_pendapatan,
-			"debit_in_account_currency" : nilai,
+			"debit_in_account_currency" : flt(dpp + ppn, PRESISI_UANG),
 			"credit_in_account_currency": 0,
 			"cost_center"               : cost_center,
 			"user_remark"               : remarks,
