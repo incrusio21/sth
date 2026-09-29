@@ -537,6 +537,14 @@ def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	fields = ", ".join(["`tabItem`.name","`tabItem`.item_name","ig1.item_group_name", "ig2.item_group_name","`tabItem`.description","`tabItem`.stock_uom","COALESCE(FORMAT(bin.total_qty, 2), '0.00')"])
 	# fields = ", ".join(get_fields(doctype,["name"]))
+
+	ccond = ""
+
+	if filters:
+		if filters.get("warehouse"):
+			ccond += " AND b.warehouse = '{}'".format(filters.get("warehouse"))
+			filters.pop("warehouse", None)
+
 	fcond = get_filters_cond(doctype, filters, conditions) if filters else ""
 
 	searchfields = frappe.get_meta(doctype).get_search_fields()
@@ -549,9 +557,9 @@ def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 			left join `tabItem Group` ig2 on ig2.name = `tabItem`.kelompok_barang
 			left join (
 				select sum(b.actual_qty) as total_qty , b.item_code from `tabBin` b
-				group by b.item_code 
+				group by b.item_code {ccond}
 			) bin on bin.item_code = `tabItem`.name
-			where ({searchfields}) {fcond}
+			where ({searchfields}) {fcond} 
 			order by
 				(case when locate(%(_txt)s, `tabItem`.item_name) > 0 then locate(%(_txt)s, `tabItem`.item_name) else 99999 end),
 				`tabItem`.item_name, `tabItem`.name

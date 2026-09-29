@@ -11,6 +11,7 @@
   "tanggal",
   "jam",
   "get_data",
+  "bypass_check_data_tbs",
   "column_break_eokt",
   "tanggal_proses",
   "pabrik",
@@ -608,6 +609,12 @@
    "label": "User Scan",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "bypass_check_data_tbs",
+   "fieldtype": "Check",
+   "label": "Bypass Check Data TBS"
   }
  ],
  "grid_page_length": 50,
@@ -619,7 +626,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-09-24 10:52:29.986387",
+ "modified": "2026-09-29 14:08:00.700156",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock CPO di BST",

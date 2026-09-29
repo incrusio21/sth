@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"ksQSfx4JsR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Finance</span>\",\"col\":12}},{\"id\":\"Yxz7NalXhg\",\"type\":\"card\",\"data\":{\"card_name\":\"Bank Setting\",\"col\":4}},{\"id\":\"WIvqmOY8Nz\",\"type\":\"card\",\"data\":{\"card_name\":\"Currency\",\"col\":4}},{\"id\":\"zE586eJ1XN\",\"type\":\"card\",\"data\":{\"card_name\":\"Posisi Saldo Bank\",\"col\":4}},{\"id\":\"jv_rGJzwLS\",\"type\":\"card\",\"data\":{\"card_name\":\"Outstanding Penjualan\",\"col\":4}},{\"id\":\"7Pd8J2g2UZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payment\",\"col\":4}},{\"id\":\"fLwbAT99M_\",\"type\":\"card\",\"data\":{\"card_name\":\"Deposito\",\"col\":4}},{\"id\":\"NC5I_Oe8kH\",\"type\":\"card\",\"data\":{\"card_name\":\"Dividen\",\"col\":4}},{\"id\":\"NCf8OfD-Jq\",\"type\":\"card\",\"data\":{\"card_name\":\"Cheque Book\",\"col\":4}},{\"id\":\"2hHdP7JnHd\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Bank\",\"col\":4}}]",
+ "content": "[]",
  "creation": "2025-10-29 13:20:04.900745",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,36 +13,6 @@
  "is_hidden": 0,
  "label": "Finance",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank Setting",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank",
-   "link_count": 0,
-   "link_to": "Bank",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank Account",
-   "link_count": 0,
-   "link_to": "Bank Account",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Bank Account",
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -60,26 +30,6 @@
    "link_to": "Outstanding Penjualan",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Deposito",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Deposito",
-   "link_count": 0,
-   "link_to": "Deposito",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Deposito",
    "type": "Link"
   },
   {
@@ -105,26 +55,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Cheque Book",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Buku Cek",
-   "link_count": 0,
-   "link_to": "Buku Cek",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Cheque Book",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Loan Bank",
    "link_count": 1,
    "link_type": "DocType",
@@ -140,36 +70,6 @@
    "link_type": "Report",
    "onboard": 0,
    "report_ref_doctype": "Loan Bank",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Currency",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Currency",
-   "link_count": 0,
-   "link_to": "Currency",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Currency Exchange",
-   "link_count": 0,
-   "link_to": "Currency Exchange",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Currency Exchange",
    "type": "Link"
   },
   {
@@ -191,38 +91,9 @@
    "onboard": 0,
    "report_ref_doctype": "Payment Entry",
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Posisi Saldo Bank",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Posisi Saldo",
-   "link_count": 0,
-   "link_to": "Posisi Saldo",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Summary Posisi Saldo",
-   "link_count": 0,
-   "link_to": "Summary Posisi Saldo",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2026-09-29 13:31:06.016826",
+ "modified": "2026-09-29 15:02:27.077016",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Finance",

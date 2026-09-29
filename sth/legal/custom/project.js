@@ -59,13 +59,13 @@ frappe.ui.form.on("Project", {
         frm.trigger("set_dynamic_labels")
     },
     onload(frm) {
-        frm.set_query("unit", () => {
+        frm.set_query("unit", function () {
             return {
                 filters: {
                     company: frm.doc.company,
                 }
-            }
-        })
+            };
+        });
     },
 
     project_type(frm) {

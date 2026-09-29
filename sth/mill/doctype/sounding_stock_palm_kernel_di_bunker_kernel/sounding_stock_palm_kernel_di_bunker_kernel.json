@@ -10,6 +10,7 @@
   "naming_series",
   "tanggal",
   "jam",
+  "bypass_check_data_tbs",
   "column_break_bbxq",
   "tanggal_proses",
   "pabrik",
@@ -466,13 +467,19 @@
    "label": "User Scan",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "bypass_check_data_tbs",
+   "fieldtype": "Check",
+   "label": "Bypass Check Data TBS"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-22 10:36:44.806131",
+ "modified": "2026-09-29 14:07:56.101469",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sounding Stock Palm Kernel di Bunker Kernel",

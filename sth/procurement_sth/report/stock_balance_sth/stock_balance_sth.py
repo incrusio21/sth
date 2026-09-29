@@ -254,6 +254,80 @@ class StockBalanceReport:
 					}
 				)
 
+		if self.filters.get("include_zero_stock_items"):
+			item_warehouse_map = self.add_missing_item_warehouse_combinations(item_warehouse_map)
+
+		return item_warehouse_map
+
+	def add_missing_item_warehouse_combinations(self, item_warehouse_map):
+		item_table = frappe.qb.DocType("Item")
+		ig_kelompok = Table("tabItem Group").as_("ig_kelompok")
+		ig_sub_kelompok = Table("tabItem Group").as_("ig_sub_kelompok")
+
+		item_query = (
+			frappe.qb.from_(item_table)
+			.left_join(ig_kelompok)
+			.on(ig_kelompok.name == item_table.kelompok_barang)
+			.left_join(ig_sub_kelompok)
+			.on(ig_sub_kelompok.name == item_table.item_group)
+			.select(
+				item_table.name,
+				item_table.item_name,
+				item_table.item_group,
+				item_table.stock_uom,
+				item_table.kode_kelompok_barang,
+				ig_kelompok.item_group_name.as_("kelompok_barang"),
+				item_table.kode_sub_kelompok_barang,
+				ig_sub_kelompok.item_group_name.as_("sub_kelompok_barang"),
+			)
+		)
+		item_query = self.apply_items_filters(item_query, item_table)
+		items = item_query.run(as_dict=True)
+
+		warehouses = []
+		if self.filters.get("warehouse"):
+			warehouses = [self.filters.get("warehouse")]
+		else:
+			warehouse_filters = {}
+			if self.filters.get("company"):
+				warehouse_filters["company"] = self.filters.get("company")
+			warehouses = frappe.get_all("Warehouse", pluck="name", filters=warehouse_filters)
+
+		existing_keys = {(k[1], k[2]) for k in item_warehouse_map}
+
+		for item in items:
+			for wh in warehouses:
+				if (item.name, wh) in existing_keys:
+					continue
+
+				group_by_key = (self.filters.get("company"), item.name, wh)
+
+				item_warehouse_map[group_by_key] = frappe._dict(
+					{
+						"item_code": item.name,
+						"warehouse": wh,
+						"item_group": item.item_group,
+						"company": self.filters.get("company"),
+						"currency": self.company_currency,
+						"stock_uom": item.stock_uom,
+						"item_name": item.item_name,
+						"kode_kelompok_barang": item.kode_kelompok_barang,
+						"kelompok_barang": item.kelompok_barang,
+						"kode_sub_kelompok_barang": item.kode_sub_kelompok_barang,
+						"sub_kelompok_barang": item.sub_kelompok_barang,
+						"opening_qty": 0.0,
+						"opening_val": 0.0,
+						"opening_fifo_queue": [],
+						"in_qty": 0.0,
+						"in_val": 0.0,
+						"out_qty": 0.0,
+						"out_val": 0.0,
+						"bal_qty": 0.0,
+						"bal_val": 0.0,
+						"val_rate": 0.0,
+					}
+				)
+
 		return item_warehouse_map
 
 	def get_sre_reserved_qty_details(self) -> dict:

@@ -29,7 +29,12 @@
   "upload_file_tab",
   "upload",
   "kriteria_upload_html",
-  "kriteria_upload_sebelumnya"
+  "kriteria_upload_sebelumnya",
+  "lft",
+  "rgt",
+  "old_parent",
+  "parent_dokumen_perijinan",
+  "is_group"
  ],
  "fields": [
   {
@@ -100,76 +105,85 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "kategori_perijinan",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Kategori Perijinan",
-   "options": "Kategori Perijinan",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0",
+   "options": "Kategori Perijinan"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "nomor_perijinan",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Nomor Perijinan",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0"
   },
   {
    "default": "Today",
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "tanggal_di_terbitkan",
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal Di Terbitkan",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0"
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "berlaku_selamanya",
    "fieldtype": "Check",
    "label": "Berlaku Selamanya"
   },
   {
-   "depends_on": "eval:doc.berlaku_selamanya == 0",
+   "depends_on": "eval:doc.berlaku_selamanya == 0 && doc.is_group==0",
    "fieldname": "tanggal_berakhir",
    "fieldtype": "Date",
    "label": "Tanggal Berakhir",
-   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0"
+   "mandatory_depends_on": "eval:doc.berlaku_selamanya == 0 && doc.is_group==0"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "yang_mengeluarkan",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Yang Mengeluarkan",
-   "options": "Yang Mengeluarkan",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0",
+   "options": "Yang Mengeluarkan"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "kedudukan",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Kedudukan",
-   "options": "Kedudukan",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0",
+   "options": "Kedudukan"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "kegiatan_usaha",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Kegiatan Usaha",
-   "options": "Kegiatan Usaha",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0",
+   "options": "Kegiatan Usaha"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "penanggung_jawab",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Penanggung Jawab",
-   "options": "Penanggung Jawab",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_group==0",
+   "options": "Penanggung Jawab"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "tanggal_daftar_ulang",
    "fieldtype": "Date",
    "in_preview": 1,
@@ -177,6 +191,7 @@
    "options": "Today"
   },
   {
+   "depends_on": "eval:doc.is_group==0",
    "fieldname": "keterangan",
    "fieldtype": "Small Text",
    "label": "Keterangan"
@@ -184,12 +199,47 @@
   {
    "fieldname": "column_break_hzav",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Dokumen Perijinan"
+  },
+  {
+   "fieldname": "parent_dokumen_perijinan",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Dokumen Perijinan",
+   "options": "Dokumen Perijinan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-29 10:48:13.892987",
+ "modified": "2026-09-29 17:12:43.476357",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",
@@ -211,6 +261,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "nama_perijinan",
  "sort_field": "company",
  "sort_order": "DESC",
  "states": []

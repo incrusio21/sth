@@ -475,12 +475,12 @@ def wajib_ada_data_tbs(doc):
 		"tanggal_produksi": doc.tanggal_proses, "pabrik": doc.pabrik, "docstatus": 1,
 	}):
 		return
-
-	frappe.throw(
-		"Data TBS tanggal proses {0} untuk pabrik {1} belum ada atau belum disubmit. "
-		"Submit Data TBS-nya dulu sebelum membuat {2}.".format(
-			frappe.bold(frappe.format(doc.tanggal_proses, {"fieldtype": "Date"})),
-			frappe.bold(doc.pabrik),
-			doc.doctype,
+	if doc.get("bypass_check_data_tbs") == 0:
+		frappe.throw(
+			"Data TBS tanggal proses {0} untuk pabrik {1} belum ada atau belum disubmit. "
+			"Submit Data TBS-nya dulu sebelum membuat {2}.".format(
+				frappe.bold(frappe.format(doc.tanggal_proses, {"fieldtype": "Date"})),
+				frappe.bold(doc.pabrik),
+				doc.doctype,
+			)
 		)
-	)
