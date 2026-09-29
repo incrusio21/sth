@@ -71,10 +71,10 @@
    "read_only": 1
   },
   {
-   "description": "Saldo GL dokumen ini di bawah Kepala Akun Biaya — yang ikut dinolkan jurnal KUD.",
+   "description": "Bagian dokumen ini yang ikut dinolkan jurnal KUD: saldo GL-nya di bawah Kepala Akun Biaya, ditambah bagian yang dijurnal di muka karena akunnya di bawah Kepala Akun walau BKM-nya belum Posted.",
    "fieldname": "sudah_buku_besar",
    "fieldtype": "Currency",
-   "label": "Sudah di Buku Besar",
+   "label": "Sudah Dijurnal",
    "read_only": 1
   },
   {
@@ -90,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-28 12:00:00.000000",
+ "modified": "2026-09-29 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD Belum Buku Besar",
