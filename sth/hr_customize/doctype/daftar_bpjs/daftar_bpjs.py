@@ -53,6 +53,18 @@ class DaftarBPJS(Document):
 		else:
 			self._submit()
 
+	def cancel(self):
+		if len(self.set_up_bpjs_detail_table) > 50:
+			frappe.msgprint(
+				_(
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, " \
+					"the system will add a comment about the error on this Daftar BPJS and revert to the Submitted stage"
+				)
+			)
+			self.queue_action("cancel", timeout=4600)
+		else:
+			self._cancel()
+
 	def before_submit(self):
 		self.validate_komponen_lengkap()
 
@@ -156,15 +168,58 @@ class DaftarBPJS(Document):
 					doc.save()
 
 	def on_cancel(self):
+		self.cancel_bpjs_document()
 		self.remove_employee_payment_log()
 
-	def remove_employee_payment_log(self):
-		for epl in frappe.get_all(
-			"Employee Payment Log", 
-			filters={"voucher_type": self.doctype, "voucher_no": self.name}, 
-			pluck="name"
+	def cancel_bpjs_document(self):
+		"""Batalkan BPJS TK/KES yang dibuat create_bpjs_document().
+
+		no_daftar_bpjs di sana bertipe Data, bukan Link, jadi frappe tidak
+		menahan cancel daftar ini — dokumennya dulu tertinggal Submitted beserta
+		GL-nya. Dicari lewat no_daftar_bpjs, bukan nama, karena doctype itu
+		boleh di-rename. Kalau sudah ada Payment Entry yang menautnya, cancel
+		ini ditolak frappe dan seluruh cancel daftar ikut batal.
+		"""
+		for name in frappe.get_all(
+			self.jenis_bpjs,
+			filters={"no_daftar_bpjs": self.name, "docstatus": 1},
+			pluck="name",
 		):
-			frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
+			bpjs_doc = frappe.get_doc(self.jenis_bpjs, name)
+			bpjs_doc.flags.ignore_permissions = True
+			bpjs_doc.cancel()
+
+	def remove_employee_payment_log(self):
+		"""Hapus semua Employee Payment Log daftar ini dalam satu query.
+
+		Dulu dihapus satu per satu lewat frappe.delete_doc. Tiap panggilan memuat
+		dokumennya, memeriksa semua doctype yang punya Link ke Employee Payment
+		Log, lalu menyalinnya ke Deleted Document. Daftar BPJS TK 400+ baris
+		melahirkan ribuan log, jadi cancel-nya bermenit-menit.
+
+		Dari on_trash Employee Payment Log yang benar-benar menjaga cuma
+		document_already_paid — remove_document dilewati flag transaction_employee.
+		Penjagaan itu dipindah ke sini sebagai satu query. Pemeriksaan Link tidak
+		kehilangan apa-apa: doctype yang menaut Employee Payment Log cuma menaut
+		log transaksinya sendiri (lembur, bonus, THR, BKM, PHK), bukan log BPJS.
+		"""
+		filters = {"voucher_type": self.doctype, "voucher_no": self.name}
+
+		sudah_dibayar = frappe.get_all(
+			"Employee Payment Log",
+			filters={**filters, "is_paid": 1},
+			fields=["employee", "salary_slip"],
+		)
+		if sudah_dibayar:
+			frappe.throw(
+				_("{0} Employee Payment Log sudah ditarik salary slip tersubmit, cancel slipnya dulu: {1}").format(
+					len(sudah_dibayar),
+					", ".join(sorted({d.salary_slip or d.employee for d in sudah_dibayar})),
+				),
+				title=_("Sudah Dibayar"),
+			)
+
+		frappe.db.delete("Employee Payment Log", filters)
 
 	@frappe.whitelist()
 	def get_employee(self):
