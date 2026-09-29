@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-09-21 09:00:00",
+ "creation": "2026-09-21 09:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -23,7 +23,6 @@
   "item_purchase_invoice"
  ],
  "fields": [
-<<<<<<< Updated upstream
   {"description": "Cukup diisi untuk satu company. Company lain yang belum punya barisnya mengikuti baris ini lewat nomor akun, karena COA semua company disalin dari bagan yang sama.", "fieldname": "company", "fieldtype": "Link", "in_list_view": 1, "label": "Company", "options": "Company", "reqd": 1},
   {"fieldname": "column_break_head", "fieldtype": "Column Break"},
   {"description": "Nilai awal Cost Center di dokumen. Tidak bisa diikuti company lain karena cost center tidak bernomor — di sana dipakai cost center bawaan company.", "fieldname": "cost_center", "fieldtype": "Link", "label": "Cost Center", "options": "Cost Center"},
@@ -39,110 +38,12 @@
   {"description": "Dipasang sebagai Credit To Purchase Invoice yang dibuat dari Perhitungan KUD. Contoh: 2111091 - HUTANG INVOICE - PEMASOK. Kalau dikosongkan, dipakai akun hutang bawaan supplier.", "fieldname": "akun_hutang_mitra", "fieldtype": "Link", "label": "Credit To Purchase Invoice", "options": "Account"},
   {"fieldname": "column_break_pi", "fieldtype": "Column Break"},
   {"description": "Item satu-satunya di baris Purchase Invoice. Harus non stok, supaya tidak menuntut Purchase Receipt.", "fieldname": "item_purchase_invoice", "fieldtype": "Link", "label": "Item Purchase Invoice", "options": "Item"}
-=======
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_head",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-   "description": "Nilai awal yang disalin ke dokumen Perhitungan KUD waktu Tarik Produksi. Yang menentukan jurnal tetap akun yang tercatat di dokumen, bukan yang di sini.",
-   "fieldname": "section_debit",
-   "fieldtype": "Section Break",
-   "label": "Debit"
-  },
-  {
-   "fieldname": "akun_pembelian_tbs",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Pembelian TBS Plasma",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_kredit",
-   "fieldtype": "Section Break",
-   "label": "Kredit"
-  },
-  {
-   "fieldname": "akun_biaya_plasma",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Lawan Biaya Perawatan, Panen & Transport",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "akun_management_fee",
-   "fieldtype": "Link",
-   "label": "Pendapatan Management Fee",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_kredit",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "akun_pph22",
-   "fieldtype": "Link",
-   "label": "Hutang Pajak PPh 22",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "akun_hutang_plasma_antara",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Hutang Plasma Belum Ditagih",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_purchase_invoice",
-   "fieldtype": "Section Break",
-   "label": "Purchase Invoice"
-  },
-  {
-   "fieldname": "akun_hutang_mitra",
-   "fieldtype": "Link",
-   "label": "Credit To Purchase Invoice",
-   "options": "Account"
-  },
-  {
-   "fieldname": "column_break_pi",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "item_purchase_invoice",
-   "fieldtype": "Link",
-   "label": "Item Purchase Invoice",
-   "options": "Item"
-  }
->>>>>>> Stashed changes
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< Updated upstream
  "modified": "2026-09-29 12:00:00.000000",
-=======
- "modified": "2026-09-25 13:27:40.840464",
->>>>>>> Stashed changes
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "STH Accounting Settings KUD",
