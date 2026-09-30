@@ -22,7 +22,9 @@ frappe.ui.form.on("Employee Potongan", {
                 }
             };
         });
-        createPayment(frm);
+        // Disembunyikan dulu: potongan dijurnal Payroll Entry, dokumen ini
+        // tidak lagi punya hutang yang bisa dibayar.
+        // createPayment(frm);
     },
 });
 
