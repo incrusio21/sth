@@ -14,9 +14,11 @@ frappe.ui.form.on("Material Request", {
     },
 
     onload: function (frm) {
+        // Stok hanya disegarkan untuk tampilan: set_value di sini membuat dokumen
+        // yang baru dibuka langsung "Not Saved" begitu stok gudang sudah bergeser.
         if (frm.doc.docstatus == 0) {
             frm.doc.items.forEach(function (item) {
-                get_stock_for_item(frm, item.doctype, item.name);
+                get_stock_for_item(frm, item.doctype, item.name, true);
             });
         }
     },
@@ -166,8 +168,17 @@ frappe.ui.form.on("Material Request Item", {
     }
 })
 
-function get_stock_for_item(frm, cdt, cdn) {
+function get_stock_for_item(frm, cdt, cdn, silent) {
     let row = locals[cdt][cdn];
+
+    const set_stock = (value) => {
+        if (!silent) {
+            frappe.model.set_value(cdt, cdn, 'stock', value);
+        } else if (row.stock !== value) {
+            row.stock = value;
+            frm.fields_dict.items.grid.refresh_row(cdn);
+        }
+    };
 
     if (!row.item_code) {
         return;
@@ -203,11 +214,12 @@ function get_stock_for_item(frm, cdt, cdn) {
                         warehouse: warehouses.length === 1 ? warehouses[0] : null
                     },
                     callback: function (stock_response) {
-                        frappe.model.set_value(cdt, cdn, 'stock', stock_response.message || 0);
+                        set_stock(stock_response.message || 0);
                     }
                 });
             } else {
-                frappe.model.set_value(cdt, cdn, 'stock', 0);
+                set_stock(0);
+                if (silent) return;
                 frappe.msgprint(__('No central warehouse found for company {0} and unit {1}', [company, frm.doc.unit]));
             }
         }
