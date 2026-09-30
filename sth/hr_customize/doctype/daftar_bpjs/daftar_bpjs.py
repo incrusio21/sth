@@ -274,6 +274,30 @@ def _kunci_ssa(row):
 	)
 
 
+def employee_dengan_attendance(employees, from_date, to_date):
+	"""Karyawan yang punya Attendance tersubmit di antara from_date dan to_date.
+
+	Karyawan baru ikut Daftar BPJS begitu SSA-nya ada, padahal bisa saja
+	belum mulai bekerja bulan itu. Attendance tersubmit jadi tanda dia sudah
+	benar-benar masuk kerja di periode ini. Statusnya tidak dilihat.
+	"""
+	if not employees:
+		return set()
+
+	return set(
+		frappe.get_all(
+			"Attendance",
+			filters={
+				"employee": ("in", employees),
+				"docstatus": 1,
+				"attendance_date": ("between", [from_date, to_date]),
+			},
+			pluck="employee",
+			distinct=True,
+		)
+	)
+
+
 def pasang_bpjs(doc):
 	# doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
 
@@ -322,7 +346,24 @@ def pasang_bpjs(doc):
 
 	print(query)
 	list_employee = ssa_terakhir_per_employee(query.run())
-		
+
+	hadir = employee_dengan_attendance(
+		[row[KOLOM_EMPLOYEE] for row in list_employee],
+		doc.start_periode,
+		doc.end_periode or frappe.utils.get_last_day(doc.start_periode),
+	)
+	tanpa_attendance = [row for row in list_employee if row[KOLOM_EMPLOYEE] not in hadir]
+	list_employee = [row for row in list_employee if row[KOLOM_EMPLOYEE] in hadir]
+
+	if tanpa_attendance:
+		frappe.msgprint(
+			_("{0} karyawan dilewati karena belum punya Attendance di periode ini: {1}").format(
+				len(tanpa_attendance),
+				", ".join(f"{row[KOLOM_EMPLOYEE]} ({row[2]})" for row in tanpa_attendance),
+			),
+			title=_("Belum Ada Attendance"),
+		)
+
 	list_program_employee = {}
 	susunan_bpjs = frappe.get_doc("Set Up BPJS PT", doc.set_up_bpjs)
 	for satu_employee in list_employee:
