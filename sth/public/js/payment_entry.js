@@ -331,8 +331,6 @@ frappe.ui.form.on("Payment Entry", {
 				frm.set_value("company", d.company);
 				frm.set_value("paid_to", d.paid_to);
 				frm.set_value("paid_to_account_currency", d.paid_to_account_currency);
-				frm.set_value("paid_amount", d.paid_amount);
-				frm.set_value("received_amount", d.received_amount);
 				frm.set_value("remarks", d.remarks);
 
 				if (d.cost_center) {

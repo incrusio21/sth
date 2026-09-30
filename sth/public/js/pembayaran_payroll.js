@@ -197,10 +197,31 @@ $.extend(sth.pembayaran_payroll, {
 		});
 	},
 
+	// Keempat nilai diisi langsung, bukan lewat set_value satu per satu. Tiap
+	// set_value memicu event ERPNext, dan di antara paid_amount dan
+	// received_amount keduanya sempat berbeda - ERPNext membacanya sebagai
+	// selisih kurs dan menambah baris deduction yang tidak pernah terhapus lagi.
 	hitung_total(frm) {
-		const total = (frm.doc.rincian_payroll || []).reduce((s, d) => s + flt(d.amount), 0);
-		frm.set_value("paid_amount", total);
-		frm.set_value("received_amount", total);
+		const doc = frm.doc;
+		const total = flt(
+			(doc.rincian_payroll || []).reduce((s, d) => s + flt(d.amount), 0),
+			precision("paid_amount")
+		);
+
+		doc.paid_amount = doc.received_amount = total;
+		doc.base_paid_amount = flt(total * flt(doc.source_exchange_rate || 1), precision("base_paid_amount"));
+		doc.base_received_amount = flt(total * flt(doc.target_exchange_rate || 1), precision("base_received_amount"));
+
+		// Rupiah ke Rupiah tidak punya selisih kurs; buang yang terlanjur dibuat.
+		(doc.deductions || [])
+			.filter((d) => d.is_exchange_gain_loss)
+			.forEach((d) => frappe.model.clear_doc(d.doctype, d.name));
+		doc.deductions = (doc.deductions || []).filter((d) => !d.is_exchange_gain_loss);
+		doc.deductions.forEach((d, i) => (d.idx = i + 1));
+
+		frm.refresh_fields(["paid_amount", "received_amount", "base_paid_amount", "base_received_amount", "deductions"]);
+		frm.events.set_unallocated_amount(frm);
+		frm.dirty();
 	},
 
 	// Dipanggil dari Payroll Entry: tagihan per tipe, yang sudah dibayar, dan

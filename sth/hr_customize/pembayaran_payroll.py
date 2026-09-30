@@ -403,7 +403,18 @@ def validate_pembayaran_payroll(pe):
 				frappe.format(t.sisa, {"fieldtype": "Currency"}),
 			))
 
+	# Rupiah ke Rupiah tidak punya selisih kurs. Baris selisih kurs lahir dari
+	# JS ERPNext waktu paid_amount dan received_amount sempat berbeda di tengah
+	# pengisian, dan kalau ikut tersimpan, add_deductions_gl_entries menjurnalnya
+	# di samping baris rincian. Deduction lain tidak punya tempat di sini karena
+	# yang dikredit bank persis jumlah rinciannya.
+	pe.set("deductions", [d for d in pe.get("deductions") or [] if not d.is_exchange_gain_loss])
+	if pe.deductions:
+		frappe.throw(_("Deduction tidak dipakai untuk pembayaran Payroll Entry; hapus barisnya dulu"))
+
 	total = flt(sum(flt(d.amount) for d in rows), pe.precision("paid_amount"))
+	pe.difference_amount = 0
+	pe.unallocated_amount = 0
 	pe.paid_to = rows[0].account
 	pe.paid_amount = pe.received_amount = total
 	pe.base_paid_amount = flt(total * flt(pe.source_exchange_rate or 1), pe.precision("base_paid_amount"))
