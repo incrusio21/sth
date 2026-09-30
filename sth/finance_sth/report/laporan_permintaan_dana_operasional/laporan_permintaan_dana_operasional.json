@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 9,
+ "idx": 10,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-11 11:24:44.511135",
+ "modified": "2026-09-30 15:34:22.769030",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Permintaan Dana Operasional",
@@ -31,6 +31,15 @@
   },
   {
    "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE SPV/AST FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE STAFF"
   }
  ],
  "timeout": 0
