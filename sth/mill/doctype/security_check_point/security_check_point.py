@@ -14,6 +14,31 @@ from erpnext.controllers.queries import get_fields
 
 class SecurityCheckPoint(Document):
 
+	def insert(self, *args, **kwargs):
+		"""Kiriman API dengan trans_no yang sudah tercatat mengembalikan dokumen lama.
+
+		Sistem luar mengirim ulang transaksi yang sama kalau koneksinya putus
+		padahal dokumennya sudah masuk. Dulu kiriman kedua itu ditolak
+		validate_trans_no_kembar, sehingga di sisi pengirim tercatat gagal dan
+		nomor Security Check Point-nya tidak pernah sampai. Sekarang dokumen yang
+		sudah ada dikembalikan apa adanya — /api/resource membalas isi dokumen ini,
+		jadi pengirim menerima nomornya seperti insert yang berhasil. Isi kiriman
+		ulang tidak ditulis ke dokumen lama.
+
+		Hanya untuk kiriman REST. Dari form, save() juga lewat insert() tapi
+		savedocs mengirim balik objek form-nya sendiri, bukan nilai kembalian ini —
+		dokumen baru akan tampak tersimpan padahal tidak. Di sana duplikat tetap
+		ditolak validate_trans_no_kembar.
+		"""
+		trans_no = cstr(self.trans_no).strip()
+
+		if trans_no and not self.amended_from and dari_rest_api():
+			kembar = get_security_check_point_by_trans_no(trans_no)
+			if kembar:
+				return frappe.get_doc(self.doctype, kembar)
+
+		return super().insert(*args, **kwargs)
+
 	def before_insert(self):
 		self.validate_trans_no_kembar()
 		self.keep_api_no_polisi()
@@ -251,6 +276,22 @@ class SecurityCheckPoint(Document):
 		return doc.name
 
 
+def dari_rest_api():
+	"""Request ini kiriman REST sistem luar, bukan simpan dari form.
+
+	User api@sth dianggap kiriman luar di jalur mana pun. Selain itu dilihat
+	path-nya, karena tidak semua pengirim memakai user api@sth — timbangan
+	memakai akun operatornya sendiri (lihat map_lokasi_pos).
+	"""
+	if "api@sth" in cstr(frappe.session.user):
+		return True
+
+	request = getattr(frappe.local, "request", None)
+	path = cstr(getattr(request, "path", ""))
+
+	return path.startswith(("/api/resource/", "/api/v1/document/", "/api/v2/document/"))
+
+
 def nilai_per_blok(value):
 	"""Satu nilai dari isian per blok yang disambung "*", mis. "TPRE*TPRE*TPRE".
 
@@ -306,10 +347,11 @@ def koreksi_pos(scp):
 def create_or_update(**kwargs):
 	"""Buat Security Check Point, atau kembalikan yang trans_no-nya sudah tercatat.
 
-	Endpoint /api/resource menolak kiriman kembar sebagai error karena insert tidak
-	bisa dibelokkan jadi "pakai yang lama". Lewat sini pemanggil cukup menerima
-	dokumen yang sudah ada, jadi kiriman ulang setelah koneksi putus tidak perlu
-	diperlakukan sebagai kegagalan.
+	/api/resource kini juga mengembalikan dokumen lama untuk trans_no kembar (lihat
+	SecurityCheckPoint.insert), tapi hanya dengan pengecekan biasa: dua kiriman
+	yang masuk barengan belum saling melihat karena sama-sama belum commit, jadi
+	keduanya bisa tercatat. Endpoint ini memegang lock per trans_no, jadi
+	kiriman barengan pun sama-sama menerima dokumen yang sama.
 	"""
 	args = dict(kwargs)
 	args.pop("doctype", None)
