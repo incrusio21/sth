@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import flt, get_link_to_form
 from frappe.model.mapper import get_mapped_doc
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 from sth.controllers.accounts_controller import AccountsController
 
@@ -23,7 +24,9 @@ class EmployeePotongan(AccountsController):
 			totals += flt(d.rate)
 		
 		self.grand_total = flt(totals, self.precision("grand_total"))
-		self.outstanding_amount = flt(totals, self.precision("grand_total"))
+		# Potongan dijurnal Payroll Entry lewat Additional Salary, dokumen ini
+		# tidak membuat hutang apa pun, jadi tidak ada yang perlu dibayar.
+		self.outstanding_amount = 0
 		
 	def check_employee_status(self):
 		emp_list = [d.employee for d in self.details]
@@ -53,7 +56,6 @@ class EmployeePotongan(AccountsController):
 
 	def on_submit(self):
 		self.create_additional_salary()
-		self.make_gl_entry()
 
 	def create_additional_salary(self):
 		for d in self.details:
@@ -73,7 +75,9 @@ class EmployeePotongan(AccountsController):
 		super().on_cancel()
 
 		self.remove_additional_salary()
-		self.make_gl_entry()
+		# Dokumen lama masih punya GL dari submit dulu, itu yang dibalik.
+		# Dokumen baru tidak punya GL, pemanggilan ini tidak berbuat apa-apa.
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 	
 	def remove_additional_salary(self):
 		for d in self.get("details", {"additional_salary": True}):
