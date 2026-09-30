@@ -557,7 +557,8 @@ def get_items_query(doctype, txt, searchfield, start, page_len, filters):
 			left join `tabItem Group` ig2 on ig2.name = `tabItem`.kelompok_barang
 			left join (
 				select sum(b.actual_qty) as total_qty , b.item_code from `tabBin` b
-				group by b.item_code {ccond}
+				where 1=1 {ccond}
+				group by b.item_code 
 			) bin on bin.item_code = `tabItem`.name
 			where ({searchfields}) {fcond} 
 			order by
