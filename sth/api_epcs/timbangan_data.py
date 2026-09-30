@@ -161,6 +161,37 @@ def _map_by_name(doctype, names, fields):
 	return {row["name"]: row for row in rows}
 
 
+def _wb_type(scp):
+	"""0 selama kendaraannya masih di dalam pabrik, 1 kalau sudah keluar.
+
+	Dibaca dari Security Check Point, bukan docstatus Timbangan: Timbangan bisa
+	sudah submit padahal kendaraannya belum keluar pos. Masih di dalam artinya
+	vehicle_entry_time terisi tapi vehicle_exit_time belum. Jam keluar tidak
+	mungkin 00:00:00 — itu default field-nya — jadi 00:00:00 sama dengan kosong.
+	"""
+	masuk = scp.get("vehicle_entry_time") is not None
+	keluar = bool(scp.get("vehicle_exit_time"))
+	return 0 if masuk and not keluar else 1
+
+
+def _tiket_wb_type_1():
+	"""ticket_number Timbangan yang _wb_type-nya 1, untuk penyaring wb_type.
+
+	Sama persis dengan _wb_type di atas, hanya dikerjakan di SQL. Dihitung dari
+	sisi Timbangan supaya tiket yang Security Check Point-nya sudah dihapus ikut
+	jadi 1. Yang diambil sisi wb_type 1 karena itu yang sedikit: jam keluar
+	jarang diisi pos.
+	"""
+	return frappe.db.sql_list(
+		"""
+		select distinct ifnull(t.ticket_number, '')
+		from `tabTimbangan` t
+		left join `tabSecurity Check Point` s on s.name = t.ticket_number
+		where s.vehicle_entry_time is null or s.vehicle_exit_time > '00:00:00'
+		"""
+	)
+
+
 def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_after, date, receive_type=None):
 	filters = []
 
@@ -178,7 +209,13 @@ def _build_filters(estate_code, from_date, to_date, spb_no, wb_type, modified_af
 	if spb_no:
 		filters.append(["spb", "=", spb_no])
 	if wb_type is not None and wb_type != "":
-		filters.append(["wb_type", "=", int(wb_type)])
+		sudah_keluar = _tiket_wb_type_1()
+		if int(wb_type):
+			# Daftar kosong dijaga sendiri: "in" dengan list kosong tidak boleh
+			# diserahkan ke frappe begitu saja.
+			filters.append(["ticket_number", "in", sudah_keluar or [""]])
+		elif sudah_keluar:
+			filters.append(["ticket_number", "not in", sudah_keluar])
 	if modified_after:
 		filters.append(["modified", ">", get_datetime(modified_after)])
 
@@ -257,7 +294,8 @@ def get_all_timbangan(
 		from_date      : posting_date >= from_date
 		to_date        : posting_date <= to_date
 		spb_no         : Surat Pengantar Buah
-		wb_type        : 0 = baru WB in, 1 = sudah WB out
+		wb_type        : 0 = kendaraan masih di dalam (sudah masuk pos, belum
+		                 keluar), 1 = sudah keluar
 		modified_after : untuk sinkronisasi inkremental
 		limit/offset   : paging, limit kosong berarti semua baris
 		receive_type   : "internal" / "eksternal" (atau nilai penuhnya, mis.
@@ -286,7 +324,16 @@ def _build_data(timbangan_rows):
 	scp_map = _map_by_name(
 		"Security Check Point",
 		[r.get("ticket_number") for r in timbangan_rows],
-		["name", "supplier", "trans_no", "qr_code_scan", "total_jjg", "total_brd"],
+		[
+			"name",
+			"supplier",
+			"trans_no",
+			"qr_code_scan",
+			"total_jjg",
+			"total_brd",
+			"vehicle_entry_time",
+			"vehicle_exit_time",
+		],
 	)
 	supplier_map = _map_by_name(
 		"Supplier",
@@ -407,7 +454,7 @@ def _build_data(timbangan_rows):
 			"created_at": row.get("creation"),
 			"created_by": user.get("full_name"),
 			"created_by_code": row.get("owner"),
-			"wb_type": 0 if row.get("docstatus", 0) < 1 else 1,
+			"wb_type": _wb_type(scp),
 			"is_active": 1 if row.get("docstatus", 0) < 2 else 0,
 		})
 
