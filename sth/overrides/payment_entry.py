@@ -14,6 +14,7 @@ from hrms.overrides.employee_payment_entry import (
 
 from sth.controllers.accounts_controller import update_voucher_outstanding
 from sth.hr_customize import get_payment_settings
+from sth.hr_customize.pembayaran_payroll import gl_pembayaran_payroll, validate_pembayaran_payroll
 
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -146,6 +147,7 @@ class PaymentEntry(EmployeePaymentEntry):
 		self.reset_flag_uang_muka_terpisah()
 		self.validate_paid_amount_with_outstanding()
 		self.validate_pengembalian_uang_muka_po()
+		validate_pembayaran_payroll(self)
 
 	def set_paid_to_uang_muka_po(self):
 		"""Pembayaran terhadap Purchase Order masuk ke akun Uang Muka.
@@ -1094,7 +1096,11 @@ class PaymentEntry(EmployeePaymentEntry):
 					)
 				)
 
-			if self.payment_type == "Internal Transfer" and (self.tipe_transfer == "PDO" or self.tipe_transfer == "Penerimaan Dana PDO" or self.tipe_transfer == "Dividen Sent" or self.tipe_transfer == "Dividen Receive" or self.tipe_transfer == "Payroll Entry" or self.tipe_transfer == "Leasing"):
+			if self.tipe_transfer == "Payroll Entry" and self.get("rincian_payroll"):
+				for args in gl_pembayaran_payroll(self):
+					gl_entries.append(self.get_gl_dict(args, item=self))
+
+			elif self.payment_type == "Internal Transfer" and (self.tipe_transfer == "PDO" or self.tipe_transfer == "Penerimaan Dana PDO" or self.tipe_transfer == "Dividen Sent" or self.tipe_transfer == "Dividen Receive" or self.tipe_transfer == "Payroll Entry" or self.tipe_transfer == "Leasing"):
 				gl_entries.append(
 					self.get_gl_dict(
 						{

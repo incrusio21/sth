@@ -196,16 +196,9 @@ class PayrollEntry(PayrollEntry):
 		if self.docstatus != 1:
 			frappe.throw(_("Payroll Entry harus sudah di-Submit"))
 
-		existing = frappe.db.get_value(
-			"Payment Entry",
-			{"no_payroll_entry": self.name, "docstatus": ["!=", 2]},
-			"name",
-		)
-		if existing:
-			frappe.throw(
-				_("Payment Entry sudah ada: {0}").format(frappe.bold(existing))
-			)
-
+		# Satu Payroll Entry boleh dibayar beberapa Payment Entry, satu per tipe
+		# atau sub tipe. Yang dijaga sisa tagihannya, di validate Payment Entry
+		# (sth.hr_customize.pembayaran_payroll), bukan jumlah dokumennya.
 		total_amount = frappe.db.sql(
 			"""
 			SELECT COALESCE(SUM(net_pay), 0)

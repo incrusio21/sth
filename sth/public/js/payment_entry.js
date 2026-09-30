@@ -338,6 +338,11 @@ frappe.ui.form.on("Payment Entry", {
 				if (d.cost_center) {
 					frm.set_value("cost_center", d.cost_center);
 				}
+
+				frm.set_value("tipe_transfer", "Payroll Entry");
+				frm.clear_table("rincian_payroll");
+				frm.refresh_field("rincian_payroll");
+				sth.pembayaran_payroll.pilih_tagihan(frm);
 			}
 		});
 	},
@@ -589,6 +594,45 @@ frappe.ui.form.on("Payment Entry", {
 				);
 			},
 		});
+	},
+});
+
+// Pembayaran Payroll Entry per tipe, lihat public/js/pembayaran_payroll.js.
+frappe.ui.form.on("Payment Entry", {
+	refresh(frm) {
+		if (frm.doc.tipe_transfer !== "Payroll Entry" || !frm.doc.no_payroll_entry) return;
+
+		// Baris hanya lahir dari pemilih tagihan, supaya tipe dan akunnya pasti
+		// cocok dengan tagihan Payroll Entry.
+		frm.set_df_property("rincian_payroll", "cannot_add_rows", true);
+
+		if (frm.doc.docstatus === 0) {
+			frm.add_custom_button(__("Pilih Tagihan Payroll"), () => {
+				sth.pembayaran_payroll.pilih_tagihan(frm);
+			}, __("Payroll"));
+		}
+
+		if ((frm.doc.rincian_payroll || []).length) {
+			frm.add_custom_button(__("Lihat Dokumen Terkait"), () => {
+				sth.pembayaran_payroll.lihat_dokumen(frm.doc.no_payroll_entry, frm.doc.rincian_payroll);
+			}, __("Payroll"));
+		}
+
+		// Dokumen baru dari tombol Buat Payment Voucher di Payroll Entry datang
+		// tanpa rincian; langsung minta tagihannya dipilih.
+		if (frm.is_new() && !(frm.doc.rincian_payroll || []).length && !frm.__tagihan_payroll_ditawarkan) {
+			frm.__tagihan_payroll_ditawarkan = true;
+			sth.pembayaran_payroll.pilih_tagihan(frm);
+		}
+	},
+});
+
+frappe.ui.form.on("Payment Entry Payroll", {
+	amount(frm) {
+		sth.pembayaran_payroll.hitung_total(frm);
+	},
+	rincian_payroll_remove(frm) {
+		sth.pembayaran_payroll.hitung_total(frm);
 	},
 });
 

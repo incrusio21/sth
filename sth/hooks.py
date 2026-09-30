@@ -58,10 +58,10 @@ doctype_js = {
 	"Loan": "hr_customize/custom/loan.js",
 	"Leave Application": "public/js/leave_application.js",
 	"Material Request": "public/js/material_request.js",
-	"Payroll Entry": "hr_customize/custom/payroll_entry.js",
+	"Payroll Entry": ["hr_customize/custom/payroll_entry.js", "public/js/pembayaran_payroll.js"],
 	# "Payment Entry": ["hr_customize/custom/payment_entry.js",
 	# 				  "public/js/payment_entry.js","public/js/payment_entry_leasing.js"],
-	"Payment Entry": ["public/js/payment_entry.js","public/js/payment_entry_leasing.js"],
+	"Payment Entry": ["public/js/payment_entry.js","public/js/payment_entry_leasing.js", "public/js/pembayaran_payroll.js"],
 	"Project": "legal/custom/project.js",
 	# "Purchase Invoice": [
 	#     "buying_sth/custom/purchase_invoice.js", 

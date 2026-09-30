@@ -234,6 +234,10 @@ frappe.ui.form.on("Payroll Entry", {
                     },
                 });
             }, __("Keuangan"));
+
+            frm.add_custom_button(__("Rincian Pembayaran"), () => {
+                sth.pembayaran_payroll.lihat_rincian(frm);
+            }, __("Keuangan"));
         }
     
 	},

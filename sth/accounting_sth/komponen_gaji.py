@@ -61,6 +61,7 @@ def rincian_komponen(company, salary_slips, parentfield="earnings", hanya_kegiat
 			ss.employee_name,
 			sd.salary_component,
 			sd.amount,
+			sd.additional_salary,
 			sca.account
 		FROM `tabSalary Slip` ss
 		JOIN `tabSalary Detail` sd

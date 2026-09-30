@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-30 16:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tipe",
+  "sub_tipe",
+  "account",
+  "party_type",
+  "party",
+  "column_break_nilai",
+  "tagihan",
+  "sisa",
+  "amount"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "tipe",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tipe",
+   "options": "Gaji\nPPh 21\nPotongan\nBPJS",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "sub_tipe",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sub Tipe",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nilai",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tagihan",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Tagihan",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "sisa",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Sisa",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Dibayar",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-30 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Finance STH",
+ "name": "Payment Entry Payroll",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
