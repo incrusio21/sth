@@ -1,6 +1,7 @@
-from frappe.utils import get_defaults
-from num2words import num2words
 import frappe
+
+from frappe.utils import get_defaults, flt, fmt_money
+from num2words import num2words
 from datetime import datetime
 
 def money_in_words_idr(
@@ -109,3 +110,19 @@ def get_account_balance(account, posting_date):
 def strip_html(text):
     import re
     return re.sub(r'<[^>]+>', '', text)
+
+def format_item_values(proposal, field, kind="float", precision=2, currency="IDR", sep=", ", unique=True):
+    doc = frappe.get_doc("Proposal", proposal)
+    hasil = []
+    for row in doc.items:
+        nilai = flt(row.get(field))
+        if kind == "currency":
+            teks = fmt_money(nilai, precision=precision, currency=currency)
+        else:
+            teks = frappe.format_value(
+                nilai, {"fieldtype": "Float", "precision": precision}
+            )
+        if unique and teks in hasil:
+            continue
+        hasil.append(teks)
+    return sep.join(hasil)
