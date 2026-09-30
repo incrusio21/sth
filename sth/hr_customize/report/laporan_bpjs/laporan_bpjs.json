@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 6,
+ "idx": 10,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-05 13:50:19.607770",
+ "modified": "2026-09-30 10:10:19.244186",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Laporan BPJS",
@@ -40,6 +40,9 @@
   },
   {
    "role": "ASISTEN PERSONALIA"
+  },
+  {
+   "role": "KERANI PERSONALIA"
   }
  ],
  "timeout": 0
