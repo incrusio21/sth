@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 9,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-12-30 15:29:37.045171",
+ "modified": "2026-09-30 15:10:28.963801",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Angsuran Pinjaman Bank",
@@ -25,6 +25,15 @@
   },
   {
    "role": "Finance UAT"
+  },
+  {
+   "role": "FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE SPV/AST FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE STAFF"
   }
  ],
  "timeout": 0

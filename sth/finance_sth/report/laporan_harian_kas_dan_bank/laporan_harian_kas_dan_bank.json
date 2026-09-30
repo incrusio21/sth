@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 10,
+ "idx": 11,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-11 11:24:56.444419",
+ "modified": "2026-09-30 15:09:15.618911",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Harian Kas dan Bank",
@@ -21,7 +21,7 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Accounts Manager"
+   "role": "Accounting Manager"
   },
   {
    "role": "Accounts User"
@@ -34,6 +34,15 @@
   },
   {
    "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE SPV/AST FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE STAFF"
   }
  ],
  "timeout": 0

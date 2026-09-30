@@ -10,7 +10,7 @@
  "idx": 7,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-06-12 09:21:27.387460",
+ "modified": "2026-09-30 15:11:03.392319",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan List Bayar Harian",
@@ -21,13 +21,22 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Accounts Manager"
+   "role": "Accounting Manager"
   },
   {
    "role": "Accounts User"
   },
   {
    "role": "Finance UAT"
+  },
+  {
+   "role": "FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE SPV/AST FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE STAFF"
   }
  ],
  "timeout": 0

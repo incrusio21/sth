@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 4,
+ "idx": 8,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-01-01 19:45:49.267463",
+ "modified": "2026-09-30 15:16:27.762117",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Summary Posisi Saldo",
@@ -26,6 +26,15 @@
   },
   {
    "role": "Finance UAT"
+  },
+  {
+   "role": "FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE SPV/AST FINANCE MANAGER"
+  },
+  {
+   "role": "FINANCE STAFF"
   }
  ],
  "timeout": 0
