@@ -44,7 +44,7 @@ class PenginputanStockByProduct(Document):
 		stock_saat_ini = get_total_stock[0].qty if get_total_stock else 0
 		self.stock_awal = flt(stock_saat_ini) + flt(self.pengiriman)
 
-		self.data_olah_tbs = frappe.db.get_value("Data TBS",{"tanggal_produksi": self.tanggal_proses},["tbs_olah"])
+		self.data_olah_tbs = frappe.db.get_value("Data TBS",{"tanggal_produksi": self.tanggal_proses, "unit": self.unit},["tbs_olah"])
 		
 		fields = []
 		if self.tipe == "Cangkang":
