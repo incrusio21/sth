@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 11:23:55.258659",
+ "modified": "2026-10-01 15:59:03.846651",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Accounts Payable STH",
@@ -34,6 +34,9 @@
   },
   {
    "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

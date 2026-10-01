@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 11:22:52.400187",
+ "modified": "2026-10-01 15:57:58.999640",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Informasi Progress BAPP",
@@ -37,6 +37,9 @@
   },
   {
    "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

@@ -10,7 +10,7 @@
  "idx": 9,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 14:07:44.958038",
+ "modified": "2026-10-01 16:18:39.555683",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Trial Balance",
@@ -31,6 +31,9 @@
   },
   {
    "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

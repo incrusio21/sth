@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 14:17:57.473892",
+ "modified": "2026-10-01 16:25:58.495282",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Stock Aging STH",
@@ -46,6 +46,9 @@
   },
   {
    "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

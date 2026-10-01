@@ -10,7 +10,7 @@
  "idx": 2,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 14:10:47.510426",
+ "modified": "2026-10-01 16:21:01.786618",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Laporan Equalisasi Pajak",
@@ -37,6 +37,9 @@
   },
   {
    "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

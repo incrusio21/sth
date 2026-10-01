@@ -10,7 +10,7 @@
  "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 11:23:26.106950",
+ "modified": "2026-10-01 15:58:25.174122",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Remaining Retensi",
@@ -41,6 +41,9 @@
   },
   {
    "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0
