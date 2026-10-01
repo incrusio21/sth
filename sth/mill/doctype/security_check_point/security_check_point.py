@@ -48,6 +48,7 @@ class SecurityCheckPoint(Document):
 
 	def validate(self):
 		self.set_data_kendaraan()
+		self.set_kendaraan_eksternal()
 
 	def on_update_after_submit(self):
 		self.dorong_koreksi_ke_spb()
@@ -173,6 +174,33 @@ class SecurityCheckPoint(Document):
 		if kendaraan.operator and not self.driver_name:
 			self.driver_name = get_nama_operator(kendaraan.operator)
 
+	def set_kendaraan_eksternal(self):
+		"""No polisi dan supir dari SPB kendaraan eksternal, untuk input lewat form.
+
+		Truk eksternal tidak di-scan QR-nya di pos TBS Internal — field-nya
+		tersembunyi untuk penerimaan itu — jadi license_plate dan driver_name tidak
+		pernah terisi, dan Timbangan yang menariknya dari sini ikut kosong. Nilainya
+		diambil dari SPB; kendaraan internal tetap lewat jalurnya sendiri.
+
+		Kiriman API dilewati: jalur itu punya set_data_kendaraan.
+		"""
+		if not self.spb or scp_dari_api(self) or dari_rest_api():
+			return
+
+		from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import (
+			get_kendaraan_eksternal,
+		)
+
+		data = get_kendaraan_eksternal(self.spb)
+		if not data:
+			return
+
+		if data.no_polisi:
+			self.no_polisi = self.license_plate = data.no_polisi
+
+		if data.driver_name:
+			self.driver_name = data.driver_name
+
 	def map_api_kebun_spb(self):
 		"""Kebun dan divisi pengirim diambil dari spb_unit dan spb_divisi kiriman.
 
@@ -274,6 +302,17 @@ class SecurityCheckPoint(Document):
 		)
 
 		return doc.name
+
+
+def scp_dari_api(doc):
+	"""Security Check Point ini tersimpan dari kiriman API.
+
+	Bisa dipakai untuk dokumen maupun baris get_all yang membawa owner dan
+	trans_no. Pemilik saja tidak cukup: pengirim REST tidak selalu memakai user
+	api@sth (lihat dari_rest_api), tapi trans_no selalu dikirim sistem luar dan
+	tidak pernah diisi form.
+	"""
+	return "api@sth" in cstr(doc.get("owner")) or bool(cstr(doc.get("trans_no")).strip())
 
 
 def dari_rest_api():

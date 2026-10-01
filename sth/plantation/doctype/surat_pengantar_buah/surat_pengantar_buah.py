@@ -28,10 +28,21 @@ class SuratPengantarBuah(Document):
 		self.in_weight = self.in_weight_internal = self.out_weight = self.out_weight_internal = self.mill_cut = 0
 
 	def set_missing_value(self):
-		doctype, fieldname, nopol = ["Driver", "kendaraan_eksternal", "custom_license_plate"]if self.tipe_kendaraan == "External" else ["Alat Berat Dan Kendaraan", "kendaraan", "no_pol"]
-		self.no_polisi = frappe.get_value(doctype, self.get(fieldname), nopol)
+		# Dulu dibandingkan dengan "External", yang tidak ada di opsi Select-nya,
+		# sehingga SPB kendaraan eksternal mencari platnya di Alat Berat Dan
+		# Kendaraan lewat field kendaraan yang kosong dan no_polisi-nya selalu
+		# kosong. Kiriman API tidak disentuh: kendaraan eksternal hanya diisi
+		# lewat form.
+		if self.tipe_kendaraan == "Eksternal":
+			if not spb_dari_api(self.owner):
+				self.no_polisi = get_plat_driver(self.kendaraan_eksternal)
+		else:
+			self.no_polisi = frappe.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "no_pol")
 
 		set_recap_panen_in_details(self.details)
+
+	def on_update(self):
+		turunkan_kendaraan_eksternal(self)
 
 	def validate_recap_panen(self):
 		cek_panen_belum_dibayar(d.recap_panen for d in self.details)
@@ -584,6 +595,105 @@ def _resync_security_check_point(doc):
 
 		if beda:
 			frappe.db.set_value("Security Check Point", row.name, beda)
+
+def spb_dari_api(owner):
+	return "api@sth" in cstr(owner)
+
+def get_plat_driver(driver):
+	"""No polisi kendaraan eksternal.
+
+	kendaraan_eksternal menunjuk ke Driver yang dinamai naming series
+	(HR-DRI-2026-02269), jadi yang dipakai sebagai no polisi plat yang dicatat di
+	Driver itu, bukan nama dokumennya.
+	"""
+	if not driver:
+		return None
+
+	return frappe.db.get_value("Driver", driver, "custom_license_plate")
+
+def get_kendaraan_eksternal(spb):
+	"""No polisi dan nama supir yang dibawa SPB kendaraan eksternal ke pos dan timbangan.
+
+	None kalau SPB-nya bukan kendaraan eksternal atau kiriman API. spb boleh nama
+	dokumen, boleh dokumennya sendiri.
+
+	Nama supir diambil dari driver_name, yang diketik kerani dan bisa berbeda
+	dengan nama di master Driver (supir pengganti); driver_eksternal cuma
+	cadangan kalau driver_name kosong.
+	"""
+	if isinstance(spb, str):
+		spb = frappe.db.get_value(
+			"Surat Pengantar Buah",
+			spb,
+			["owner", "tipe_kendaraan", "kendaraan_eksternal", "driver_name", "driver_eksternal"],
+			as_dict=True,
+		)
+
+	if not spb or spb.get("tipe_kendaraan") != "Eksternal" or spb_dari_api(spb.get("owner")):
+		return None
+
+	return frappe._dict(
+		no_polisi=get_plat_driver(spb.get("kendaraan_eksternal")),
+		driver_name=spb.get("driver_name") or spb.get("driver_eksternal"),
+	)
+
+def turunkan_kendaraan_eksternal(spb, update_modified=True):
+	"""Tulis no polisi dan supir SPB kendaraan eksternal ke pos dan timbangannya.
+
+	SPB eksternal biasanya masih draft waktu truknya sudah lewat pos dan
+	ditimbang, jadi koreksinya datang sesudah kedua dokumen itu submit. Ditulis
+	lewat db.set_value karena itu; Security Check Point dan Timbangan sendiri
+	menarik nilai yang sama di validate-nya untuk dokumen yang baru dibuat.
+
+	Yang kiriman API tidak disentuh, di sisi SPB maupun di sisi pos dan timbangan.
+	Kembalikan jumlah dokumen yang berubah, per doctype.
+	"""
+	from sth.mill.doctype.security_check_point.security_check_point import scp_dari_api
+	from sth.mill.doctype.timbangan.timbangan import timbangan_dari_api
+
+	jumlah = {"Security Check Point": 0, "Timbangan": 0}
+
+	spb_name = spb if isinstance(spb, str) else spb.get("name")
+	data = get_kendaraan_eksternal(spb)
+	if not data:
+		return jumlah
+
+	targets = {
+		"Security Check Point": (
+			{"no_polisi": data.no_polisi, "license_plate": data.no_polisi, "driver_name": data.driver_name},
+			["owner", "trans_no"],
+			scp_dari_api,
+		),
+		"Timbangan": (
+			{"no_polisi": data.no_polisi, "driver_name": data.driver_name},
+			["owner", "api_ticket_number"],
+			timbangan_dari_api,
+		),
+	}
+
+	for doctype, (nilai, fields_asal, dari_api) in targets.items():
+		nilai = {field: value for field, value in nilai.items() if value}
+		if not nilai:
+			continue
+
+		rows = frappe.get_all(
+			doctype,
+			filters={"spb": spb_name, "docstatus": ["<", 2]},
+			fields=["name", *fields_asal, *nilai.keys()],
+			limit_page_length=0,
+		)
+
+		for row in rows:
+			if dari_api(row):
+				continue
+
+			beda = {field: value for field, value in nilai.items() if row.get(field) != value}
+
+			if beda:
+				frappe.db.set_value(doctype, row.name, beda, update_modified=update_modified)
+				jumlah[doctype] += 1
+
+	return jumlah
 
 def cek_panen_belum_dibayar(recap_panen):
 	"""Tolak perubahan kalau BKM Panen di balik recap-recap ini sudah dibayar.

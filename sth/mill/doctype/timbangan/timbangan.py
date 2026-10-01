@@ -4,7 +4,7 @@
 import frappe,copy,random
 from frappe.utils import add_days
 from frappe.model.document import Document
-from frappe.utils import get_datetime,flt,get_link_to_form,cint,now
+from frappe.utils import get_datetime,flt,get_link_to_form,cint,cstr,now
 from sth.mill.doctype.tbs_ledger_entry.tbs_ledger_entry import create_tbs_ledger,reverse_tbs_ledger,repost_qty_tbs
 from sth.mill.doctype.data_tbs.data_tbs import hitung_ulang_setelah_timbangan
 from sth.mill.rekap_sounding import hitung_ulang_setelah_timbangan as hitung_ulang_sounding_setelah_timbangan
@@ -42,6 +42,7 @@ class Timbangan(Document):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
 		self.set_kebun_dan_divisi_dari_spb()
+		self.set_kendaraan_eksternal()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
 		self.validate_qty_do()
@@ -97,6 +98,34 @@ class Timbangan(Document):
 			self.kebun = spb.unit
 		if spb.divisi:
 			self.divisi_kebun = spb.divisi
+
+	def set_kendaraan_eksternal(self):
+		"""No polisi dan supir dari SPB kendaraan eksternal, untuk input lewat form.
+
+		Keduanya ber-fetch_from ke Security Check Point, yang untuk truk eksternal
+		tidak pernah mengisinya; dibaca langsung dari SPB supaya tidak bergantung
+		pada urutan fetch dua tingkat. Kiriman API dilewati.
+		"""
+		if not self.spb or timbangan_dari_api(self):
+			return
+
+		from sth.mill.doctype.security_check_point.security_check_point import dari_rest_api
+		from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import (
+			get_kendaraan_eksternal,
+		)
+
+		if dari_rest_api():
+			return
+
+		data = get_kendaraan_eksternal(self.spb)
+		if not data:
+			return
+
+		if data.no_polisi:
+			self.no_polisi = data.no_polisi
+
+		if data.driver_name:
+			self.driver_name = data.driver_name
 
 	def isi_spb_detail(self):
 		"""Isi rincian blok dari SPB kalau tabelnya masih kosong.
@@ -460,6 +489,18 @@ class Timbangan(Document):
 			"voucher_no": self.name,
 			"balance_qty": self.netto_2,
 		}))
+
+
+def timbangan_dari_api(doc):
+	"""Timbangan ini tersimpan dari kiriman API.
+
+	Bisa dipakai untuk dokumen maupun baris get_all yang membawa owner dan
+	api_ticket_number. api_ticket_number hanya diisi map_api_ticket_number, jadi
+	ikut jadi penanda walau pemiliknya kelak berganti. trans_no tidak dipakai:
+	Timbangan salinan Administrator juga punya trans_no yang berbeda dengan
+	namanya.
+	"""
+	return "api@sth" in cstr(doc.get("owner")) or bool(doc.get("api_ticket_number"))
 
 
 @frappe.whitelist()
