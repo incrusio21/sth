@@ -612,7 +612,7 @@ def get_plat_driver(driver):
 	return frappe.db.get_value("Driver", driver, "custom_license_plate")
 
 def get_kendaraan_eksternal(spb):
-	"""No polisi dan nama supir yang dibawa SPB kendaraan eksternal ke pos dan timbangan.
+	"""No polisi, nama supir, dan transportir yang dibawa SPB kendaraan eksternal ke pos dan timbangan.
 
 	None kalau SPB-nya bukan kendaraan eksternal atau kiriman API. spb boleh nama
 	dokumen, boleh dokumennya sendiri.
@@ -632,13 +632,30 @@ def get_kendaraan_eksternal(spb):
 	if not spb or spb.get("tipe_kendaraan") != "Eksternal" or spb_dari_api(spb.get("owner")):
 		return None
 
+	transporter = get_transporter_driver(spb.get("kendaraan_eksternal"))
+
 	return frappe._dict(
 		no_polisi=get_plat_driver(spb.get("kendaraan_eksternal")),
 		driver_name=spb.get("driver_name") or spb.get("driver_eksternal"),
+		transporter=transporter,
+		nama_transporter=frappe.db.get_value("Supplier", transporter, "supplier_name") if transporter else None,
 	)
 
+def get_transporter_driver(driver):
+	"""Supplier transportir pemilik kendaraan eksternal.
+
+	Ditulis sebagai kode supplier, sama dengan yang ditarik Security Check Point
+	dari Driver hasil pindaian QR (transporter_name ber-fetch_from
+	qr_code_scan.transporter). Driver tanpa transportir — tipe_driver kosong atau
+	TBS — mengembalikan None, dan pos serta timbangannya dibiarkan apa adanya.
+	"""
+	if not driver:
+		return None
+
+	return frappe.db.get_value("Driver", driver, "transporter")
+
 def turunkan_kendaraan_eksternal(spb, update_modified=True):
-	"""Tulis no polisi dan supir SPB kendaraan eksternal ke pos dan timbangannya.
+	"""Tulis no polisi, supir, dan transportir SPB kendaraan eksternal ke pos dan timbangannya.
 
 	SPB eksternal biasanya masih draft waktu truknya sudah lewat pos dan
 	ditimbang, jadi koreksinya datang sesudah kedua dokumen itu submit. Ditulis
@@ -660,12 +677,18 @@ def turunkan_kendaraan_eksternal(spb, update_modified=True):
 
 	targets = {
 		"Security Check Point": (
-			{"no_polisi": data.no_polisi, "license_plate": data.no_polisi, "driver_name": data.driver_name},
+			{
+				"no_polisi": data.no_polisi,
+				"license_plate": data.no_polisi,
+				"driver_name": data.driver_name,
+				"transporter_name": data.transporter,
+				"nama_transporter": data.nama_transporter,
+			},
 			["owner", "trans_no"],
 			scp_dari_api,
 		),
 		"Timbangan": (
-			{"no_polisi": data.no_polisi, "driver_name": data.driver_name},
+			{"no_polisi": data.no_polisi, "driver_name": data.driver_name, "transportir": data.transporter},
 			["owner", "api_ticket_number"],
 			timbangan_dari_api,
 		),

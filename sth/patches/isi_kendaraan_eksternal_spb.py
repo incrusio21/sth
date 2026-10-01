@@ -2,20 +2,25 @@ import frappe
 
 from sth.plantation.doctype.surat_pengantar_buah.surat_pengantar_buah import (
 	get_plat_driver,
+	get_transporter_driver,
 	turunkan_kendaraan_eksternal,
 )
 
 
 def execute(spb_names=None):
-	"""Isi no polisi dan supir dokumen lama dari SPB kendaraan eksternal.
+	"""Isi no polisi, supir, dan transportir dokumen lama dari SPB kendaraan eksternal.
 
 	SPB eksternal tidak pernah punya no_polisi — set_missing_value dulu
 	membandingkan tipe_kendaraan dengan "External", yang tidak ada di opsinya — dan
-	pos maupun timbangannya tidak pernah membawa plat dan supirnya:
+	pos maupun timbangannya tidak pernah membawa plat, supir, dan transportirnya:
 
 	    Surat Pengantar Buah : no_polisi dari plat Driver kendaraan_eksternal
-	    Security Check Point : no_polisi, license_plate, driver_name
-	    Timbangan            : no_polisi, driver_name
+	    Security Check Point : no_polisi, license_plate, driver_name,
+	                           transporter_name, nama_transporter
+	    Timbangan            : no_polisi, driver_name, transportir
+
+	Transportirnya Driver.transporter; Driver yang tidak punya transportir
+	dibiarkan, field transportir di pos dan timbangannya tidak disentuh.
 
 	Cuma SPB yang diinput lewat form, dan di pos serta timbangannya juga cuma yang
 	bukan kiriman API — turunkan_kendaraan_eksternal yang memilahnya. Ditulis
@@ -48,6 +53,7 @@ def execute(spb_names=None):
 
 	jumlah = {"Surat Pengantar Buah": 0, "Security Check Point": 0, "Timbangan": 0}
 	tanpa_plat = []
+	tanpa_transporter = []
 
 	for row in rows:
 		plat = get_plat_driver(row.kendaraan_eksternal)
@@ -57,6 +63,9 @@ def execute(spb_names=None):
 		elif row.no_polisi != plat:
 			frappe.db.set_value("Surat Pengantar Buah", row.name, "no_polisi", plat, update_modified=False)
 			jumlah["Surat Pengantar Buah"] += 1
+
+		if not get_transporter_driver(row.kendaraan_eksternal):
+			tanpa_transporter.append(row.name)
 
 		for doctype, n in turunkan_kendaraan_eksternal(row, update_modified=False).items():
 			jumlah[doctype] += n
@@ -75,5 +84,12 @@ def execute(spb_names=None):
 		print(
 			"  {0} SPB Driver-nya tanpa custom_license_plate, no polisinya tetap kosong: {1}".format(
 				len(tanpa_plat), ", ".join(tanpa_plat)
+			)
+		)
+
+	if tanpa_transporter:
+		print(
+			"  {0} SPB Driver-nya tanpa transporter, transportirnya tidak diisi: {1}".format(
+				len(tanpa_transporter), ", ".join(tanpa_transporter)
 			)
 		)

@@ -175,11 +175,11 @@ class SecurityCheckPoint(Document):
 			self.driver_name = get_nama_operator(kendaraan.operator)
 
 	def set_kendaraan_eksternal(self):
-		"""No polisi dan supir dari SPB kendaraan eksternal, untuk input lewat form.
+		"""No polisi, supir, dan transportir dari SPB kendaraan eksternal, untuk input lewat form.
 
 		Truk eksternal tidak di-scan QR-nya di pos TBS Internal — field-nya
-		tersembunyi untuk penerimaan itu — jadi license_plate dan driver_name tidak
-		pernah terisi, dan Timbangan yang menariknya dari sini ikut kosong. Nilainya
+		tersembunyi untuk penerimaan itu — jadi license_plate, driver_name, dan
+		transportirnya tidak pernah terisi, dan Timbangan yang menariknya dari sini ikut kosong. Nilainya
 		diambil dari SPB; kendaraan internal tetap lewat jalurnya sendiri.
 
 		Kiriman API dilewati: jalur itu punya set_data_kendaraan.
@@ -200,6 +200,10 @@ class SecurityCheckPoint(Document):
 
 		if data.driver_name:
 			self.driver_name = data.driver_name
+
+		if data.transporter:
+			self.transporter_name = data.transporter
+			self.nama_transporter = data.nama_transporter
 
 	def map_api_kebun_spb(self):
 		"""Kebun dan divisi pengirim diambil dari spb_unit dan spb_divisi kiriman.

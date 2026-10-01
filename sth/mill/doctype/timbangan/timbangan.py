@@ -100,9 +100,9 @@ class Timbangan(Document):
 			self.divisi_kebun = spb.divisi
 
 	def set_kendaraan_eksternal(self):
-		"""No polisi dan supir dari SPB kendaraan eksternal, untuk input lewat form.
+		"""No polisi, supir, dan transportir dari SPB kendaraan eksternal, untuk input lewat form.
 
-		Keduanya ber-fetch_from ke Security Check Point, yang untuk truk eksternal
+		Ketiganya ber-fetch_from ke Security Check Point, yang untuk truk eksternal
 		tidak pernah mengisinya; dibaca langsung dari SPB supaya tidak bergantung
 		pada urutan fetch dua tingkat. Kiriman API dilewati.
 		"""
@@ -126,6 +126,9 @@ class Timbangan(Document):
 
 		if data.driver_name:
 			self.driver_name = data.driver_name
+
+		if data.transporter:
+			self.transportir = data.transporter
 
 	def isi_spb_detail(self):
 		"""Isi rincian blok dari SPB kalau tabelnya masih kosong.
