@@ -34,4 +34,7 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 # koreksi_unit_kebun_security_check_point juga tidak didaftarkan: datanya satu
 # excel pos September 2026, dan ikut menurunkan koreksinya ke ratusan SPB serta
 # Timbangan-nya.
+# gabung_berkas_akhiran_hash_legal juga tidak didaftarkan: membuang versi lama
+# lampiran Legal tanpa bisa dikembalikan, jadi lihat dulu daftarnya dengan
+# --kwargs "{'dry_run': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
