@@ -632,27 +632,29 @@ def get_kendaraan_eksternal(spb):
 	if not spb or spb.get("tipe_kendaraan") != "Eksternal" or spb_dari_api(spb.get("owner")):
 		return None
 
-	transporter = get_transporter_driver(spb.get("kendaraan_eksternal"))
-
 	return frappe._dict(
 		no_polisi=get_plat_driver(spb.get("kendaraan_eksternal")),
 		driver_name=spb.get("driver_name") or spb.get("driver_eksternal"),
-		transporter=transporter,
-		nama_transporter=frappe.db.get_value("Supplier", transporter, "supplier_name") if transporter else None,
+		transporter=get_transporter_driver(spb.get("kendaraan_eksternal")),
 	)
 
 def get_transporter_driver(driver):
-	"""Supplier transportir pemilik kendaraan eksternal.
+	"""Nama supplier transportir pemilik kendaraan eksternal.
 
-	Ditulis sebagai kode supplier, sama dengan yang ditarik Security Check Point
-	dari Driver hasil pindaian QR (transporter_name ber-fetch_from
-	qr_code_scan.transporter). Driver tanpa transportir — tipe_driver kosong atau
-	TBS — mengembalikan None, dan pos serta timbangannya dibiarkan apa adanya.
+	Yang ditulis supplier_name, bukan kode suppliernya — termasuk ke field yang
+	untuk Driver hasil pindaian QR berisi kode (transporter_name di Security
+	Check Point, transportir di Timbangan). Driver tanpa transportir —
+	tipe_driver kosong atau TBS — mengembalikan None, dan pos serta timbangannya
+	dibiarkan apa adanya.
 	"""
 	if not driver:
 		return None
 
-	return frappe.db.get_value("Driver", driver, "transporter")
+	transporter = frappe.db.get_value("Driver", driver, "transporter")
+	if not transporter:
+		return None
+
+	return frappe.db.get_value("Supplier", transporter, "supplier_name")
 
 def turunkan_kendaraan_eksternal(spb, update_modified=True):
 	"""Tulis no polisi, supir, dan transportir SPB kendaraan eksternal ke pos dan timbangannya.
@@ -682,7 +684,7 @@ def turunkan_kendaraan_eksternal(spb, update_modified=True):
 				"license_plate": data.no_polisi,
 				"driver_name": data.driver_name,
 				"transporter_name": data.transporter,
-				"nama_transporter": data.nama_transporter,
+				"nama_transporter": data.transporter,
 			},
 			["owner", "trans_no"],
 			scp_dari_api,

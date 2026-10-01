@@ -19,8 +19,9 @@ def execute(spb_names=None):
 	                           transporter_name, nama_transporter
 	    Timbangan            : no_polisi, driver_name, transportir
 
-	Transportirnya Driver.transporter; Driver yang tidak punya transportir
-	dibiarkan, field transportir di pos dan timbangannya tidak disentuh.
+	Transportirnya supplier_name dari Driver.transporter, di ketiga field itu;
+	Driver yang tidak punya transportir dibiarkan, field transportir di pos dan
+	timbangannya tidak disentuh.
 
 	Cuma SPB yang diinput lewat form, dan di pos serta timbangannya juga cuma yang
 	bukan kiriman API — turunkan_kendaraan_eksternal yang memilahnya. Ditulis

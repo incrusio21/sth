@@ -202,8 +202,7 @@ class SecurityCheckPoint(Document):
 			self.driver_name = data.driver_name
 
 		if data.transporter:
-			self.transporter_name = data.transporter
-			self.nama_transporter = data.nama_transporter
+			self.transporter_name = self.nama_transporter = data.transporter
 
 	def map_api_kebun_spb(self):
 		"""Kebun dan divisi pengirim diambil dari spb_unit dan spb_divisi kiriman.
