@@ -47,5 +47,11 @@ frappe.query_reports["Rekap Attendance"] = {
             "fieldtype": "Link",
             "options": "Designation",
         },
+        {
+            "fieldname": "employment_type",
+            "label": __("Tipe Karyawan"),
+            "fieldtype": "Link",
+            "options": "Employment Type",
+        },
     ]
 };
