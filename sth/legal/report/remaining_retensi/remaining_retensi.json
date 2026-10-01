@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-03-03 15:34:07.696485",
+ "modified": "2026-10-01 11:23:26.106950",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Remaining Retensi",
@@ -28,10 +28,19 @@
    "role": "Purchase User"
   },
   {
-   "role": "Accounts Manager"
+   "role": "Accounting Manager"
   },
   {
    "role": "Auditor"
+  },
+  {
+   "role": "LEGAL MANAGER"
+  },
+  {
+   "role": "LEGAL STAFF"
+  },
+  {
+   "role": "ACCT MANAGER"
   }
  ],
  "timeout": 0

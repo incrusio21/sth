@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-06-05 10:22:58.610970",
+ "modified": "2026-10-01 11:23:55.258659",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Accounts Payable STH",
@@ -27,10 +27,13 @@
    "role": "Purchase User"
   },
   {
-   "role": "Accounts Manager"
+   "role": "Accounting Manager"
   },
   {
    "role": "Auditor"
+  },
+  {
+   "role": "ACCT MANAGER"
   }
  ],
  "timeout": 0

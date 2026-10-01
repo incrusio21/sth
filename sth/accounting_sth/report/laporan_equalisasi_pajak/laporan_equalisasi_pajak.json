@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 2,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-05-07 15:36:57.445952",
+ "modified": "2026-10-01 14:10:47.510426",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Laporan Equalisasi Pajak",
@@ -30,10 +30,13 @@
    "role": "Accounts User"
   },
   {
-   "role": "Accounts Manager"
+   "role": "Accounting Manager"
   },
   {
    "role": "Finance UAT"
+  },
+  {
+   "role": "ACCT MANAGER"
   }
  ],
  "timeout": 0

@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-06-05 09:31:10.082643",
+ "modified": "2026-10-01 11:34:13.774483",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Accounts Receivable STH",
@@ -21,10 +21,13 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Accounts Manager"
+   "role": "Accounting Manager"
   },
   {
    "role": "Accounts User"
+  },
+  {
+   "role": "ACCT MANAGER"
   }
  ],
  "timeout": 0
