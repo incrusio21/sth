@@ -291,6 +291,11 @@ class COGSMilldanKebun(Document):
 			"saldo_gl_tbs",
 			"saldo_gl_cpo",
 			"saldo_gl_pk",
+			"qty_tbs_internal",
+			"qty_tbs_eksternal",
+			"nilai_tbs_eksternal",
+			"qty_tbs_plasma",
+			"nilai_tbs_plasma",
 		):
 			self.set(fieldname, data[fieldname])
 
@@ -455,6 +460,7 @@ class COGSMilldanKebun(Document):
 				amount=a(prefiks + "_available") + a(prefiks + "_adjustment") + a(prefiks + "_closing"),
 			)
 
+		self.hitung_rate_tbs_per_sumber()
 		self.tulis_rincian(nilai)
 		self.susun_closing(nilai)
 		# Dengan revaluasi, Stock Reconciliation cuma menutup sisa selisih yang
@@ -466,6 +472,19 @@ class COGSMilldanKebun(Document):
 		else:
 			self.susun_rekonsiliasi(nilai)
 		self.hitung_selisih_gl(nilai)
+
+	def hitung_rate_tbs_per_sumber(self):
+		"""Informasi saja, tidak ikut ke rincian maupun jurnal: rupiah per kg TBS
+		dari kebun sendiri, dari pembelian pihak ketiga, dan dari plasma.
+
+		Nilai Internal mengikuti Biaya Kebun di form, jadi ikut berubah kalau
+		Biaya Kebun dikoreksi manual. Qty dan nilai dua sumber lain tetap angka
+		waktu Ambil Data."""
+		self.nilai_tbs_internal = flt(self.biaya_kebun)
+		for sumber in ("internal", "eksternal", "plasma"):
+			qty = flt(self.get("qty_tbs_" + sumber))
+			nilai = flt(self.get("nilai_tbs_" + sumber))
+			self.set("rate_tbs_" + sumber, (nilai / qty) if qty else 0)
 
 	def tulis_rincian(self, nilai):
 		self.set("rincian", [])
@@ -1604,6 +1623,120 @@ def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
 	return flt(row[0][0]) if row else 0.0
 
 
+def qty_tbs_internal(company, unit, dari, sampai):
+	"""Qty Rate TBS Internal: TBS Internal yang ditimbang di PKS, tanpa plasma.
+
+	Saringannya sama dengan qty_produksi_tbs_timbangan, netto 1 juga, bedanya
+	tiket dari kebun bertanda Plasma dibuang. Biaya kebun plasma dinolkan
+	Perhitungan KUD dan buahnya dinilai sendiri di Rate TBS Plasma, jadi kalau
+	tonasenya ikut membagi, rate kebun sendiri terbaca terlalu murah.
+
+	Kebun pengirimnya dari field `kebun` di kepala tiket, patokan yang sama
+	dengan Perhitungan KUD. Tiket yang kebunnya kosong dianggap kebun sendiri.
+	"""
+	nilai = {"company": company, "dari": dari, "sampai": sampai}
+	syarat_unit = ""
+	if unit:
+		nilai["unit"] = unit
+		syarat_unit = "and t.unit = %(unit)s"
+
+	row = frappe.db.sql("""
+		select sum(t.netto)
+		from `tabTimbangan` t
+		left join `tabUnit` k on k.name = t.kebun
+		where t.docstatus = 1 and t.type = 'Receive'
+			and t.receive_type = 'TBS Internal'
+			and ifnull(k.plasma, 0) = 0
+			and t.company = %(company)s
+			and t.posting_date between %(dari)s and %(sampai)s
+			{syarat_unit}
+	""".format(syarat_unit=syarat_unit), nilai)
+
+	return flt(row[0][0]) if row else 0.0
+
+
+def pembelian_tbs_eksternal(company, unit, dari, sampai):
+	"""Qty dan nilai Rate TBS Eksternal dari Purchase Invoice item TBS.
+
+	Nilainya net amount, sebelum pajak: PPh 22 yang dipotong bukan harga TBS.
+	Faktur turunan Perhitungan KUD dibuang karena itu buah plasma.
+
+	Faktur yang dibuat dari Pengakuan Pembelian TBS disaring `tanggal_timbangan`
+	pengakuannya, sejajar dengan qty baris FFB Purchase, supaya buah akhir bulan
+	yang difakturkan bulan berikutnya tetap jatuh di bulan timbangnya. Faktur
+	lain memakai posting_date-nya sendiri. Unit mengikuti pengakuan kalau ada.
+	"""
+	item_codes = get_item_produk("TBS")
+	if not item_codes:
+		return 0.0, 0.0
+
+	nilai = {"company": company, "dari": dari, "sampai": sampai, "items": tuple(item_codes)}
+	syarat_unit = ""
+	if unit:
+		nilai["unit"] = unit
+		syarat_unit = "and ifnull(ppt.unit, pi.unit) = %(unit)s"
+
+	row = frappe.db.sql("""
+		select sum(pii.stock_qty), sum(pii.base_net_amount)
+		from `tabPurchase Invoice Item` pii
+		inner join `tabPurchase Invoice` pi on pi.name = pii.parent
+		left join `tabPengakuan Pembelian TBS` ppt on ppt.name = pi.document_no
+		where pi.docstatus = 1 and pi.is_return = 0
+			and pi.company = %(company)s
+			and ifnull(pi.perhitungan_kud, '') = ''
+			and pii.item_code in %(items)s
+			and ifnull(ppt.tanggal_timbangan, pi.posting_date) between %(dari)s and %(sampai)s
+			{syarat_unit}
+	""".format(syarat_unit=syarat_unit), nilai)
+
+	if not row:
+		return 0.0, 0.0
+	return flt(row[0][0]), flt(row[0][1])
+
+
+def pembelian_tbs_plasma(company, unit, dari, sampai):
+	"""Qty dan nilai Rate TBS Plasma dari Perhitungan KUD yang disubmit.
+
+	Nilainya Total Penjualan TBS (jumlah_produksi), yaitu yang didebit ke
+	Pembelian TBS Plasma, sebelum dipotong biaya, management fee, dan PPh 22.
+	Qty-nya Total Netto KUD, netto 2.
+
+	Perhitungan KUD dipilih lewat bulan dan tahunnya, bukan tanggal: rentangnya
+	ikut masa SHU dan bisa melewati batas bulan kalender, sedangkan COGS selalu
+	sebulan penuh.
+
+	Unit di KUD adalah kebun plasma, bukan pabrik. Kalau COGS diisi Unit, yang
+	ikut cuma KUD yang buahnya ditimbang di pabrik itu selama masanya.
+	"""
+	awal = getdate(dari)
+	nilai = {"company": company, "tahun": awal.year, "bulan_no": awal.month}
+	syarat_unit = ""
+	if unit:
+		nilai["unit"] = unit
+		syarat_unit = """
+			and exists (
+				select 1
+				from `tabPerhitungan KUD Unit` ku
+				inner join `tabTimbangan` t on t.kebun = ku.unit
+				where ku.parent = kud.name and ku.parenttype = 'Perhitungan KUD'
+					and t.docstatus = 1 and t.unit = %(unit)s
+					and t.posting_date between kud.tanggal_mulai and kud.tanggal_selesai
+			)
+		"""
+
+	row = frappe.db.sql("""
+		select sum(kud.total_netto), sum(kud.jumlah_produksi)
+		from `tabPerhitungan KUD` kud
+		where kud.docstatus = 1 and kud.company = %(company)s
+			and kud.tahun = %(tahun)s and kud.bulan_no = %(bulan_no)s
+			{syarat_unit}
+	""".format(syarat_unit=syarat_unit), nilai)
+
+	if not row:
+		return 0.0, 0.0
+	return flt(row[0][0]), flt(row[0][1])
+
+
 def nilai_pembelian_tbs(company, dari, sampai):
 	"""Nilai pembelian TBS dari akun 6511001 dan 6511002 sepanjang periode.
 
@@ -1834,6 +1967,11 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 			# tetap dihitung di mutasi_sle kalau nanti mau dipakai lagi.
 			nilai[prefiks + "_adjustment"] = (0, 0)
 
+	qty_eksternal, nilai_eksternal = pembelian_tbs_eksternal(
+		company, unit, periode_dari, periode_sampai
+	)
+	qty_plasma, nilai_plasma = pembelian_tbs_plasma(company, unit, periode_dari, periode_sampai)
+
 	rincian = []
 	for kode, produk, label in BARIS:
 		qty, amount = nilai.get(kode, (0, 0))
@@ -1862,6 +2000,11 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		"saldo_gl_tbs": saldo_akun(company, setelan and setelan.akun_persediaan_tbs, periode_sampai),
 		"saldo_gl_cpo": saldo_akun(company, setelan and setelan.akun_persediaan_cpo, periode_sampai),
 		"saldo_gl_pk": saldo_akun(company, setelan and setelan.akun_persediaan_pk, periode_sampai),
+		"qty_tbs_internal": qty_tbs_internal(company, unit, periode_dari, periode_sampai),
+		"qty_tbs_eksternal": qty_eksternal,
+		"nilai_tbs_eksternal": nilai_eksternal,
+		"qty_tbs_plasma": qty_plasma,
+		"nilai_tbs_plasma": nilai_plasma,
 		"peringatan": peringatan,
 	}
 

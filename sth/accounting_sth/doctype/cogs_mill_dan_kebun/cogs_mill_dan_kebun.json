@@ -29,6 +29,18 @@
   "biaya_kebun",
   "column_break_biaya",
   "biaya_mill",
+  "section_rate_tbs",
+  "qty_tbs_internal",
+  "nilai_tbs_internal",
+  "rate_tbs_internal",
+  "column_break_rate_tbs_eksternal",
+  "qty_tbs_eksternal",
+  "nilai_tbs_eksternal",
+  "rate_tbs_eksternal",
+  "column_break_rate_tbs_plasma",
+  "qty_tbs_plasma",
+  "nilai_tbs_plasma",
+  "rate_tbs_plasma",
   "section_rincian",
   "rincian",
   "section_closing",
@@ -191,6 +203,82 @@
    "precision": "2"
   },
   {
+   "fieldname": "section_rate_tbs",
+   "fieldtype": "Section Break",
+   "label": "Rate TBS per Sumber"
+  },
+  {
+   "fieldname": "qty_tbs_internal",
+   "fieldtype": "Float",
+   "label": "Qty TBS Internal (Kg)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nilai_tbs_internal",
+   "fieldtype": "Currency",
+   "label": "Nilai TBS Internal",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_tbs_internal",
+   "fieldtype": "Currency",
+   "label": "Rate TBS Internal",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rate_tbs_eksternal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty_tbs_eksternal",
+   "fieldtype": "Float",
+   "label": "Qty TBS Eksternal (Kg)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nilai_tbs_eksternal",
+   "fieldtype": "Currency",
+   "label": "Nilai TBS Eksternal",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_tbs_eksternal",
+   "fieldtype": "Currency",
+   "label": "Rate TBS Eksternal",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rate_tbs_plasma",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty_tbs_plasma",
+   "fieldtype": "Float",
+   "label": "Qty TBS Plasma (Kg)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nilai_tbs_plasma",
+   "fieldtype": "Currency",
+   "label": "Nilai TBS Plasma",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate_tbs_plasma",
+   "fieldtype": "Currency",
+   "label": "Rate TBS Plasma",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_rincian",
    "fieldtype": "Section Break",
    "label": "Rincian Pergerakan dan Nilai"
@@ -348,7 +436,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-29 12:00:00.000000",
+ "modified": "2026-10-02 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "COGS Mill dan Kebun",
