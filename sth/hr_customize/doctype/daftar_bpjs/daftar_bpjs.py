@@ -340,11 +340,10 @@ def pasang_bpjs(doc):
 				# baru sering belum sempat disubmit waktu daftar BPJS-nya disusun, dan
 				# orangnya tetap harus terdaftar bulan itu
 				& (SSAssignment.docstatus < 2)
-				& (SSAssignment.from_date <= doc.start_periode)
+				& (SSAssignment.from_date <= doc.end_periode)
 			)
 		)
 
-	print(query)
 	list_employee = ssa_terakhir_per_employee(query.run())
 
 	hadir = employee_dengan_attendance(

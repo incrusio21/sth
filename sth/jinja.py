@@ -111,18 +111,18 @@ def strip_html(text):
     import re
     return re.sub(r'<[^>]+>', '', text)
 
-def format_item_values(proposal, field, kind="float", precision=2, currency="IDR", sep=", ", unique=True):
-    doc = frappe.get_doc("Proposal", proposal)
-    hasil = []
-    for row in doc.items:
-        nilai = flt(row.get(field))
-        if kind == "currency":
-            teks = fmt_money(nilai, precision=precision, currency=currency)
-        else:
-            teks = frappe.format_value(
-                nilai, {"fieldtype": "Float", "precision": precision}
-            )
-        if unique and teks in hasil:
-            continue
-        hasil.append(teks)
-    return sep.join(hasil)
+# def format_item_values(proposal, field, kind="float", precision=2, currency="IDR", sep=", ", unique=True):
+#     doc = frappe.get_doc("Proposal", proposal)
+#     hasil = []
+#     for row in doc.items:
+#         nilai = flt(row.get(field))
+#         if kind == "currency":
+#             teks = fmt_money(nilai, precision=precision, currency=currency)
+#         else:
+#             teks = frappe.format_value(
+#                 nilai, {"fieldtype": "Float", "precision": precision}
+#             )
+#         if unique and teks in hasil:
+#             continue
+#         hasil.append(teks)
+#     return sep.join(hasil)
