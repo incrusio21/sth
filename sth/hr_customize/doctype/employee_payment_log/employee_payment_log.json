@@ -29,6 +29,7 @@
   "account",
   "column_break_nxan",
   "salary_slip",
+  "salary_slip_terlewat",
   "amended_from"
  ],
  "fields": [
@@ -138,6 +139,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "salary_slip_terlewat",
+   "fieldtype": "Link",
+   "label": "Terlewat di Salary Slip",
+   "options": "Salary Slip",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "against_salary_component",
    "fieldtype": "Link",
    "label": "Against Salary Component",
@@ -193,7 +202,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-03 13:28:34.231405",
+ "modified": "2026-10-02 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Payment Log",

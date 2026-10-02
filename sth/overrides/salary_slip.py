@@ -84,14 +84,16 @@ class SalarySlip(SalarySlip):
 	def on_submit(self):
 		super().on_submit()
 		self.update_payment_related("Employee Payment Log", "payment_log_list")
+		self.tandai_payment_log_terlewat()
 		self.update_payment_related("Loan Repayment", "loan_repayment_list")
 		self.update_pesangon_payment_status()
-		
+
 	def on_cancel(self):
 		# super().on_submit()
 		super().on_cancel()
 
 		self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
+		self.tandai_payment_log_terlewat(cancel=1)
 		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
 		self.update_pesangon_payment_status()
 
@@ -111,6 +113,7 @@ class SalarySlip(SalarySlip):
 			super().on_trash()
 
 		self.update_payment_related("Employee Payment Log", "payment_log_list", cancel=1)
+		self.tandai_payment_log_terlewat(cancel=1)
 		self.update_payment_related("Loan Repayment", "loan_repayment_list", cancel=1)
 
 	def set_pesangon_amount_from_periode(self):
@@ -598,6 +601,27 @@ class SalarySlip(SalarySlip):
 
 		query.run()
 
+	def tandai_payment_log_terlewat(self, cancel=0):
+		# Log Pending yang dilewati set_employee_payment_doc. Penandanya dipasang
+		# di dokumen log, bukan di slip, supaya yang harus dibayar manual bisa
+		# disaring langsung dari daftar Employee Payment Log. Seperti
+		# update_payment_related, pelepasannya bersandar pada kolom di log karena
+		# payment_log_terlewat kosong waktu cancel.
+		if not cancel and not self.get("payment_log_terlewat"):
+			return
+
+		dt = frappe.qb.DocType("Employee Payment Log")
+		(
+			frappe.qb.update(dt)
+			.set(dt.salary_slip_terlewat, "" if cancel else self.name)
+			.set(dt.modified, now())
+			.set(dt.modified_by, frappe.session.user)
+			.where(
+				(dt.salary_slip_terlewat == self.name) if cancel
+				else (dt.name.isin(self.payment_log_terlewat))
+			)
+		).run()
+
 	def get_working_days_details(self, lwp=None, for_preview=0):
 		super().get_working_days_details(lwp, for_preview)
 
@@ -990,6 +1014,7 @@ class SalarySlip(SalarySlip):
 		
 		# agar payment log selalu generate ulang
 		self.payment_log_list = []
+		self.payment_log_terlewat = []
 		self.loan_repayment_list = []
 		
 		def set_gross_pay_and_base_gross_pay():
@@ -1196,6 +1221,15 @@ class SalarySlip(SalarySlip):
 		self._against_employee_payment = {}
 		# print(str(emp_pl))
 		for pl in emp_pl:
+			# Pending = upah BKM Panen yang BJR-nya belum datang, nilainya masih 0.
+			# Dilewati, bukan ditolak: satu log tanpa timbangan tidak boleh
+			# menahan gaji seluruh karyawan. Log-nya tetap is_paid 0 karena tidak
+			# masuk payment_log_list, dan pembayarannya dikerjakan manual — untuk
+			# itu ia ditandai salary_slip_terlewat waktu slipnya disubmit.
+			if pl.status == "Pending":
+				self.payment_log_terlewat.append(pl.name)
+				continue
+
 			# throw jika status payment log belum approved (document belum fix)
 			if pl.status != "Approved":
 				frappe.throw("There are still Payment Logs for Employee {} that have not been Approved".format(self.employee))
