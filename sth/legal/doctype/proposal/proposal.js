@@ -200,6 +200,9 @@ frappe.ui.form.on("Proposal", {
 	setup: function (frm) {
 		sth.form.setup_fieldname_select(frm, "items")
 
+		// Supplier diset tampil nama di semua link, khusus di sini cukup kodenya
+		frm.fields_dict.supplier.is_title_link = () => false
+
 		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 
 		frm.set_indicator_formatter("item_code", function (doc) {
@@ -286,6 +289,7 @@ frappe.ui.form.on("Proposal", {
 
 	refresh: function (frm) {
 		sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
+		toggle_item_code(frm)
 
 		if (frm.doc.docstatus == 0) {
 			erpnext.set_unit_price_items_note(frm);
@@ -302,6 +306,7 @@ frappe.ui.form.on("Proposal", {
 
 	proposal_type(frm) {
 		sth.form.setup_column_table_items(frm, frm.doc.proposal_type)
+		toggle_item_code(frm)
 		frm.clear_table("items")
 		frm.refresh_fields()
 	},
@@ -996,6 +1001,17 @@ cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc
 		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
 	};
 };
+
+// Borongan tidak memilih item; item_code diisi server dari Kegiatan
+// (atau default item Legal Settings), jadi wajib isinya ikut dilepas
+function toggle_item_code(frm) {
+	const show = frm.doc.proposal_type != "Borongan"
+	const grid = frm.fields_dict.items.grid
+
+	grid.toggle_display("item_code", show)
+	grid.toggle_display("item_name", show)
+	grid.toggle_reqd("item_code", show)
+}
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {
