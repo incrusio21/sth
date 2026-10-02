@@ -165,13 +165,14 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def set_details_diffrence(self, kmhm_awal=None, raise_error=False):
 		if not self.kendaraan:
 			return
+
 			
 		kmhm_awal = self.kmhm_awal
 		# if not kmhm_awal:
 		# 	kmhm_awal = frappe.db.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "kmhm_akhir", for_update=self.docstatus)
 		
-		self.kmhm_awal = kmhm_awal
-
+		self.kmhm_awal = kmhm_awal if not frappe.flags.in_import else self.task[0].kmhm_awal
+	
 		kmhm_akhir = kmhm_awal
 		for tk in self.task:
 			tk.kmhm_awal = kmhm_akhir
@@ -183,7 +184,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 
 		self.kmhm_akhir = kmhm_akhir
 		if raise_error and (self.kmhm_akhir - self.kmhm_awal) <= 0:
-			frappe.throw("KM/HM Akhir cannot less than or same with KM/HM Awal")
+			frappe.throw(f"KM/HM Akhir ({self.kmhm_akhir}) cannot less than or same with KM/HM Awal ({self.kmhm_awal})")
 
 		self.validate_upah_kegiatan()
 
