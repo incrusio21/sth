@@ -62,6 +62,13 @@ def sync_kmhm_akhir(kendaraan, candidate_kmhm_akhir=None, candidate_sort_dt=None
 
 class AlatBeratDanKendaraan(Document):
 
+	def validate(self):
+		if not self.name:
+			return
+		
+		if not self.no_pol:
+			self.no_pol = self.name
+
 	def after_insert(self):
 		self.make_cost_center()
 
