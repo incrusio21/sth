@@ -381,6 +381,9 @@ def cek_upah_belum_masuk_gaji(doc):
 	oleh create_or_update_payment_log (removed_if_zero False) dan tetap ditarik
 	slip gaji seperti yang lain, tapi tidak ada upah yang tertinggal karenanya,
 	jadi tidak perlu menahan closing.
+
+	Log bertanda salary_slip_terlewat juga tidak ikut: slip periode ini sudah
+	melewatinya karena masih Pending, dan ia dibawa ke slip bulan berikutnya.
 	"""
 	kondisi_unit = ""
 	if frappe.get_meta("Employee").has_field("unit"):
@@ -399,6 +402,7 @@ def cek_upah_belum_masuk_gaji(doc):
 		  AND epl.payroll_date BETWEEN %(start)s AND %(end)s
 		  AND IFNULL(epl.is_paid, 0) = 0
 		  AND IFNULL(epl.amount, 0) <> 0
+		  AND IFNULL(epl.salary_slip_terlewat, '') = ''
 		  {kondisi_unit}
 		GROUP BY epl.voucher_type, epl.voucher_no
 		ORDER BY epl.voucher_type, epl.voucher_no

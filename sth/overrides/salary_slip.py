@@ -603,10 +603,15 @@ class SalarySlip(SalarySlip):
 
 	def tandai_payment_log_terlewat(self, cancel=0):
 		# Log Pending yang dilewati set_employee_payment_doc. Penandanya dipasang
-		# di dokumen log, bukan di slip, supaya yang harus dibayar manual bisa
-		# disaring langsung dari daftar Employee Payment Log. Seperti
+		# di dokumen log, bukan di slip, karena kolom inilah yang membuat log
+		# periode lama ikut ditarik slip bulan berikutnya. Seperti
 		# update_payment_related, pelepasannya bersandar pada kolom di log karena
 		# payment_log_terlewat kosong waktu cancel.
+		#
+		# Yang dicatat slip pertama yang melewatinya, tidak ditimpa slip bulan
+		# berikutnya yang melewatinya lagi. Kalau ditimpa, cancel slip bulan itu
+		# menghapus penandanya padahal slip asalnya masih tersubmit — log-nya
+		# lalu tidak terbawa ke mana pun lagi.
 		if not cancel and not self.get("payment_log_terlewat"):
 			return
 
@@ -618,7 +623,10 @@ class SalarySlip(SalarySlip):
 			.set(dt.modified_by, frappe.session.user)
 			.where(
 				(dt.salary_slip_terlewat == self.name) if cancel
-				else (dt.name.isin(self.payment_log_terlewat))
+				else (
+					dt.name.isin(self.payment_log_terlewat)
+					& (IfNull(dt.salary_slip_terlewat, "") == "")
+				)
 			)
 		).run()
 
@@ -1211,7 +1219,14 @@ class SalarySlip(SalarySlip):
 			.where(
 				(epl.employee == self.employee)
 				& (epl.company == self.company)
-				& (epl.payroll_date.between(self.start_date, self.end_date))
+				& (
+					epl.payroll_date.between(self.start_date, self.end_date)
+					# log yang terlewat slip periode sebelumnya ikut ke slip ini
+					| (
+						(epl.payroll_date < self.start_date)
+						& (IfNull(epl.salary_slip_terlewat, "") != "")
+					)
+				)
 				& (epl.is_paid != 1)
 			)
 			.for_update()
@@ -1224,8 +1239,9 @@ class SalarySlip(SalarySlip):
 			# Pending = upah BKM Panen yang BJR-nya belum datang, nilainya masih 0.
 			# Dilewati, bukan ditolak: satu log tanpa timbangan tidak boleh
 			# menahan gaji seluruh karyawan. Log-nya tetap is_paid 0 karena tidak
-			# masuk payment_log_list, dan pembayarannya dikerjakan manual — untuk
-			# itu ia ditandai salary_slip_terlewat waktu slipnya disubmit.
+			# masuk payment_log_list, lalu ditandai salary_slip_terlewat waktu
+			# slipnya disubmit. Penanda itu yang membawanya ke slip bulan
+			# berikutnya, sampai BJR-nya datang dan ia terbayar.
 			if pl.status == "Pending":
 				self.payment_log_terlewat.append(pl.name)
 				continue
