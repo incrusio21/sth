@@ -118,6 +118,7 @@ sth.utils.scale_connection = class ScaleConnection {
 
                 while (true) {
                     const { value, done } = await this.reader.read();
+                    console.log("RAW: " + value);
 
                     if (done || !this.keepReading) {
                         console.log('Pembacaan selesai atau dihentikan');
@@ -137,14 +138,11 @@ sth.utils.scale_connection = class ScaleConnection {
                         });
                     }
 
-                    const text = new TextDecoder().decode(value);
-                    console.log("Text:", JSON.stringify(text));
-
-                    const hex = Array.from(value)
-                        .map(byte => byte.toString(16).padStart(2, "0"))
-                        .join(" ");
-
-                    console.log("HEX:", hex);
+                    if (value) {
+                        console.log("HEX:", Array.from(value)
+                            .map(b => b.toString(16).padStart(2, "0"))
+                            .join(" "));
+                    }
                 }
             } catch (error) {
                 console.error('Error saat membaca:', error);

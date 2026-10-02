@@ -586,7 +586,8 @@ override_whitelisted_methods = {
 	"erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc": "sth.overrides.asset.get_values_from_purchase_doc",
 	"frappe.model.mapper.map_docs": "sth.model.mapper.map_docs",
 	"hrms.overrides.employee_payment_entry.get_payment_entry_for_employee": "sth.overrides.employee_advance.get_payment_entry_for_employee",
-	"erpnext.selling.doctype.quotation.quotation.make_sales_order": "sth.overrides.quotation.make_sales_order"
+	"erpnext.selling.doctype.quotation.quotation.make_sales_order": "sth.overrides.quotation.make_sales_order",
+	"frappe.desk.search.get_link_title": "sth.overrides.search.get_link_title",
 }
 #
 # each overriding function accepts a `data` argument;
