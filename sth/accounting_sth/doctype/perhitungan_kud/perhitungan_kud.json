@@ -87,7 +87,6 @@
    "reqd": 1
   },
   {
-   "description": "Bumdes/KUD penerima bagi hasil.",
    "fieldname": "mitra",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -125,7 +124,6 @@
    "read_only": 1
   },
   {
-   "description": "Diambil dari tabel Masa di Master Harga SHU, tidak dihitung sendiri.",
    "fieldname": "tanggal_mulai",
    "fieldtype": "Date",
    "label": "Tanggal Mulai",
@@ -154,7 +152,6 @@
    "search_index": 1
   },
   {
-   "description": "Unit plasma yang buahnya masuk perhitungan mitra ini. Terisi otomatis dari semua unit plasma milik company \u2014 kurangi kalau company punya lebih dari satu mitra.",
    "fieldname": "unit_section",
    "fieldtype": "Section Break",
    "label": "Unit Plasma"
@@ -172,7 +169,6 @@
    "label": "Produksi TBS"
   },
   {
-   "description": "Terisi lewat tombol Tarik Produksi. Netto dikelompokkan per masa dan tahun tanam.",
    "fieldname": "detail",
    "fieldtype": "Table",
    "label": "Detail",
@@ -208,35 +204,30 @@
    "label": "Biaya Operasional"
   },
   {
-   "description": "Jumlah grand total Buku Kerja Mandor Perawatan unit plasma di bulan ini.",
    "fieldname": "biaya_bkm_perawatan",
    "fieldtype": "Currency",
    "label": "Biaya BKM Perawatan",
    "read_only": 1
   },
   {
-   "description": "Jumlah grand total Buku Kerja Mandor Panen unit plasma di bulan ini.",
    "fieldname": "biaya_bkm_panen",
    "fieldtype": "Currency",
    "label": "Biaya BKM Panen",
    "read_only": 1
   },
   {
-   "description": "Jumlah grand total Buku Kerja Mandor Traksi unit plasma di bulan ini \u2014 bagian transportnya.",
    "fieldname": "biaya_bkm_traksi",
    "fieldtype": "Currency",
    "label": "Biaya BKM Traksi",
    "read_only": 1
   },
   {
-   "description": "Jumlah ketiga nilai BKM di atas. Terisi lewat tombol Tarik Produksi, tidak diketik tangan.",
    "fieldname": "biaya_perawatan",
    "fieldtype": "Currency",
    "label": "Biaya Perawatan, Panen & Transport",
    "read_only": 1
   },
   {
-   "description": "Net Total BAPP tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi, dijumlah dari Rincian Biaya.",
    "fieldname": "biaya_bapp",
    "fieldtype": "Currency",
    "label": "Biaya BAPP",
@@ -249,7 +240,6 @@
    "label": "Management Fee (%)"
   },
   {
-   "description": "Dihitung dari Jumlah Produksi TBS, bukan dari angka setelah potongan.",
    "fieldname": "management_fee",
    "fieldtype": "Currency",
    "label": "Management Fee",
@@ -279,7 +269,6 @@
    "label": "Rincian Biaya BKM & BAPP"
   },
   {
-   "description": "Semua BKM dan BAPP tersubmit milik unit plasma di rentang tanggal ini. Terisi lewat tombol Tarik Produksi \u2014 angka Biaya BKM dan Biaya BAPP di atas dijumlah dari daftar ini.",
    "fieldname": "detail_biaya",
    "fieldtype": "Table",
    "label": "Rincian Biaya BKM & BAPP",
@@ -298,7 +287,6 @@
    "label": "PPh Pasal 22 (%)"
   },
   {
-   "description": "Dihitung dari Jumlah Produksi TBS, bukan dari angka setelah potongan.",
    "fieldname": "pph22",
    "fieldtype": "Currency",
    "label": "Potongan PPh Pasal 22",
@@ -329,7 +317,6 @@
   },
   {
    "bold": 1,
-   "description": "Sisa dari Hasil Bersih setelah angsuran \u2014 dihitung sebagai selisih supaya kedua bagian selalu berjumlah persis Hasil Bersih.",
    "fieldname": "pembayaran_ke_mitra",
    "fieldtype": "Currency",
    "label": "Pembayaran ke Mitra",
@@ -341,13 +328,11 @@
    "label": "Tanda Tangan"
   },
   {
-   "description": "Diisi manual \u2014 di Excel ditandai GANTI TANGGAL.",
    "fieldname": "tanggal_tanda_tangan",
    "fieldtype": "Date",
    "label": "Tanggal Tanda Tangan"
   },
   {
-   "description": "Ikut memotong hasil mitra lewat Total Biaya, dan dijurnal kredit ke akun Lain Lain di tab Akun & Jurnal.",
    "fieldname": "lain_lain",
    "fieldtype": "Currency",
    "in_preview": 1,
@@ -355,7 +340,6 @@
   },
   {
    "bold": 1,
-   "description": "Biaya Perawatan,Panen & transport + Biaya BAPP + Lain Lain",
    "fieldname": "total_biaya_perawatan_panen_dan_transport",
    "fieldtype": "Currency",
    "in_preview": 1,
@@ -478,7 +462,6 @@
    "label": "Rincian per Akun"
   },
   {
-   "description": "Biaya yang ditagihkan ke mitra tapi tidak ikut dijurnal karena belum ada GL-nya. Disusun ulang tiap simpan, dibekukan saat submit.",
    "fieldname": "belum_bb",
    "fieldtype": "Table",
    "hidden": 1,
@@ -491,7 +474,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-29 13:47:40.877958",
+ "modified": "2026-10-02 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",
