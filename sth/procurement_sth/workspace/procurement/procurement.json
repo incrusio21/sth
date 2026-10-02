@@ -296,7 +296,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-15 13:54:00.384587",
+ "modified": "2026-10-02 16:59:49.293675",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Procurement",
@@ -307,7 +307,7 @@
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 37.0,
+ "sequence_id": 39.0,
  "shortcuts": [],
  "title": "Procurement"
 }
