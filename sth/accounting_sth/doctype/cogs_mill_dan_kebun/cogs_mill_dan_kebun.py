@@ -292,6 +292,7 @@ class COGSMilldanKebun(Document):
 			"saldo_gl_cpo",
 			"saldo_gl_pk",
 			"qty_tbs_internal",
+			"nilai_tbs_internal",
 			"qty_tbs_eksternal",
 			"nilai_tbs_eksternal",
 			"qty_tbs_plasma",
@@ -477,10 +478,7 @@ class COGSMilldanKebun(Document):
 		"""Informasi saja, tidak ikut ke rincian maupun jurnal: rupiah per kg TBS
 		dari kebun sendiri, dari pembelian pihak ketiga, dan dari plasma.
 
-		Nilai Internal mengikuti Biaya Kebun di form, jadi ikut berubah kalau
-		Biaya Kebun dikoreksi manual. Qty dan nilai dua sumber lain tetap angka
-		waktu Ambil Data."""
-		self.nilai_tbs_internal = flt(self.biaya_kebun)
+		Qty dan nilainya tetap angka waktu Ambil Data."""
 		for sumber in ("internal", "eksternal", "plasma"):
 			qty = flt(self.get("qty_tbs_" + sumber))
 			nilai = flt(self.get("nilai_tbs_" + sumber))
@@ -1623,36 +1621,24 @@ def qty_produksi_tbs_timbangan(company, unit, dari, sampai):
 	return flt(row[0][0]) if row else 0.0
 
 
-def qty_tbs_internal(company, unit, dari, sampai):
-	"""Qty Rate TBS Internal: TBS Internal yang ditimbang di PKS, tanpa plasma.
+def stok_tbs_internal(company, unit, sampai):
+	"""Qty dan nilai Rate TBS Internal: saldo stok TBS di gudang per Periode
+	Sampai, dijumlahkan dari SLE terakhir tiap gudang yang pernah dilewati item
+	TBS. Permintaan user 2 Oktober 2026, untuk ditunjukkan ke klien dulu;
+	sebelumnya Biaya Kebun dibagi tonase timbangan kebun non-plasma.
 
-	Saringannya sama dengan qty_produksi_tbs_timbangan, netto 1 juga, bedanya
-	tiket dari kebun bertanda Plasma dibuang. Biaya kebun plasma dinolkan
-	Perhitungan KUD dan buahnya dinilai sendiri di Rate TBS Plasma, jadi kalau
-	tonasenya ikut membagi, rate kebun sendiri terbaca terlalu murah.
-
-	Kebun pengirimnya dari field `kebun` di kepala tiket, patokan yang sama
-	dengan Perhitungan KUD. Tiket yang kebunnya kosong dianggap kebun sendiri.
+	Rate gudang adalah rata-rata bergerak semua TBS yang masuk — kebun sendiri,
+	plasma, dan pembelian — dan sesudah COGS disubmit, rate masuk Stock Entry
+	Data TBS diganti revaluasi. Angka ini dibekukan waktu Ambil Data, jadi yang
+	tampil di dokumen submitted adalah rate sebelum revaluasinya sendiri.
 	"""
-	nilai = {"company": company, "dari": dari, "sampai": sampai}
-	syarat_unit = ""
-	if unit:
-		nilai["unit"] = unit
-		syarat_unit = "and t.unit = %(unit)s"
-
-	row = frappe.db.sql("""
-		select sum(t.netto)
-		from `tabTimbangan` t
-		left join `tabUnit` k on k.name = t.kebun
-		where t.docstatus = 1 and t.type = 'Receive'
-			and t.receive_type = 'TBS Internal'
-			and ifnull(k.plasma, 0) = 0
-			and t.company = %(company)s
-			and t.posting_date between %(dari)s and %(sampai)s
-			{syarat_unit}
-	""".format(syarat_unit=syarat_unit), nilai)
-
-	return flt(row[0][0]) if row else 0.0
+	qty = nilai = 0.0
+	for item_code in get_item_produk("TBS"):
+		for gudang, _unit in gudang_berstok(item_code, company, unit, sampai):
+			qty_gudang, nilai_gudang = saldo_sle(item_code, gudang, sampai)
+			qty += qty_gudang
+			nilai += nilai_gudang
+	return qty, nilai
 
 
 def pembelian_tbs_eksternal(company, unit, dari, sampai):
@@ -1771,7 +1757,14 @@ def nilai_pembelian_tbs(company, dari, sampai):
 	return flt(total[0][0]) if total else 0.0
 
 
-def total_biaya(company, kelompok, dari, sampai):
+def total_biaya(company, kelompok, dari, sampai, kecuali_voucher=()):
+	"""Mutasi debit dikurangi kredit akun di bawah kepala akun kelompok itu.
+
+	`kecuali_voucher` membuang GL Entry bertipe voucher tertentu. Biaya Kebun
+	membuang Perhitungan KUD — permintaan user 2 Oktober 2026, dicoba dulu:
+	jurnal KUD mengkredit biaya BKM unit plasma sampai nol, jadi tanpa
+	pengecualian ini biaya kebun plasma tidak pernah ikut Biaya Kebun.
+	"""
 	akun_induk = get_sumber_biaya(company, kelompok)
 	if not akun_induk:
 		return 0.0
@@ -1796,12 +1789,19 @@ def total_biaya(company, kelompok, dari, sampai):
 	if not akun:
 		return 0.0
 
+	syarat_voucher = ""
+	nilai = [company, dari, sampai, tuple(akun)]
+	if kecuali_voucher:
+		syarat_voucher = "and voucher_type not in %s"
+		nilai.append(tuple(kecuali_voucher))
+
 	total = frappe.db.sql("""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry`
 		where company = %s and posting_date between %s and %s
 			and is_cancelled = 0 and account in %s
-	""", (company, dari, sampai, tuple(akun)))
+			{syarat_voucher}
+	""".format(syarat_voucher=syarat_voucher), nilai)
 
 	return flt(total[0][0]) if total else 0.0
 
@@ -1971,6 +1971,7 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		company, unit, periode_dari, periode_sampai
 	)
 	qty_plasma, nilai_plasma = pembelian_tbs_plasma(company, unit, periode_dari, periode_sampai)
+	qty_internal, nilai_internal = stok_tbs_internal(company, unit, periode_sampai)
 
 	rincian = []
 	for kode, produk, label in BARIS:
@@ -1986,7 +1987,9 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 
 	return {
 		"rincian": rincian,
-		"biaya_kebun": total_biaya(company, "Kebun", periode_dari, periode_sampai),
+		"biaya_kebun": total_biaya(
+			company, "Kebun", periode_dari, periode_sampai, kecuali_voucher=("Perhitungan KUD",)
+		),
 		# Nilai pembelian TBS masuk dua kali dengan sengaja: sekali lewat baris FFB
 		# Purchase, yang mengalir ke Available lalu Internal Consumption, sekali lagi
 		# di sini. Keduanya jadi dasar alokasi ke CPO dan PK. Ditanyakan dan
@@ -2000,7 +2003,8 @@ def ambil_data(periode_dari, periode_sampai, company, unit=None):
 		"saldo_gl_tbs": saldo_akun(company, setelan and setelan.akun_persediaan_tbs, periode_sampai),
 		"saldo_gl_cpo": saldo_akun(company, setelan and setelan.akun_persediaan_cpo, periode_sampai),
 		"saldo_gl_pk": saldo_akun(company, setelan and setelan.akun_persediaan_pk, periode_sampai),
-		"qty_tbs_internal": qty_tbs_internal(company, unit, periode_dari, periode_sampai),
+		"qty_tbs_internal": qty_internal,
+		"nilai_tbs_internal": nilai_internal,
 		"qty_tbs_eksternal": qty_eksternal,
 		"nilai_tbs_eksternal": nilai_eksternal,
 		"qty_tbs_plasma": qty_plasma,

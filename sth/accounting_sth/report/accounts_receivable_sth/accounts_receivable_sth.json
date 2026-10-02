@@ -10,7 +10,7 @@
  "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 16:00:09.759566",
+ "modified": "2026-10-02 09:00:22.562274",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Accounts Receivable STH",
@@ -31,6 +31,9 @@
   },
   {
    "role": "ACCT SPV"
+  },
+  {
+   "role": "ACCT STAFF"
   }
  ],
  "timeout": 0
