@@ -1,5 +1,62 @@
 frappe.provide("sth.queries")
 frappe.provide("sth.form")
+
+// Tampilan link title (title field) untuk Item dimatikan selama berada di Material Request,
+// supaya item_code tampil sebagai kode item, bukan item_name.
+// frappe.utils bersifat global dan desk tidak reload saat pindah menu, jadi fungsi
+// aslinya disimpan lalu dikembalikan begitu route keluar dari doctype ini.
+const MR_DOCTYPE = "Material Request";
+// Kosongkan untuk semua doctype.
+const MR_HIDE_LINK_TITLE_FOR = ["Item"];
+
+let mr_original_link_title = null;
+
+function mr_is_link_title_hidden(doctype) {
+    return !MR_HIDE_LINK_TITLE_FOR.length || MR_HIDE_LINK_TITLE_FOR.includes(doctype);
+}
+
+function mr_hide_link_title() {
+    if (mr_original_link_title) return;
+
+    mr_original_link_title = {
+        get: frappe.utils.get_link_title,
+        fetch: frappe.utils.fetch_link_title
+    };
+
+    // Mengembalikan name apa adanya; formatter Link menganggapnya "tanpa title".
+    frappe.utils.get_link_title = function (doctype, name) {
+        if (mr_is_link_title_hidden(doctype)) return name;
+        return mr_original_link_title.get.apply(this, arguments);
+    };
+
+    frappe.utils.fetch_link_title = function (doctype, name) {
+        if (mr_is_link_title_hidden(doctype)) return Promise.resolve(name);
+        return mr_original_link_title.fetch.apply(this, arguments);
+    };
+}
+
+function mr_restore_link_title() {
+    if (!mr_original_link_title) return;
+
+    frappe.utils.get_link_title = mr_original_link_title.get;
+    frappe.utils.fetch_link_title = mr_original_link_title.fetch;
+    mr_original_link_title = null;
+}
+
+function mr_sync_link_title() {
+    const route = frappe.get_route() || [];
+    if (route[1] === MR_DOCTYPE) {
+        mr_hide_link_title();
+    } else {
+        mr_restore_link_title();
+    }
+}
+
+if (!frappe.__mr_link_title_watcher) {
+    frappe.__mr_link_title_watcher = true;
+    frappe.router.on("change", mr_sync_link_title);
+}
+
 // frappe.ui.form.off("Material Request", "make_request_for_quotation")
 frappe.ui.form.on("Material Request", {
     setup(frm) {
@@ -14,6 +71,9 @@ frappe.ui.form.on("Material Request", {
     },
 
     onload: function (frm) {
+        // dipanggil sebelum field dirender, supaya item_code tidak sempat tampil sebagai title
+        mr_sync_link_title();
+
         // Stok hanya disegarkan untuk tampilan: set_value di sini membuat dokumen
         // yang baru dibuka langsung "Not Saved" begitu stok gudang sudah bergeser.
         if (frm.doc.docstatus == 0) {
@@ -25,6 +85,8 @@ frappe.ui.form.on("Material Request", {
 
 
     refresh(frm) {
+        mr_sync_link_title();
+
         if (frm.is_new()) {
             frm.trigger('set_default_reqdate')
         }
