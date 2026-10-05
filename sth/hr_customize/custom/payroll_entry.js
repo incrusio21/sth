@@ -286,16 +286,16 @@ frappe.ui.form.on("Payroll Entry", {
 			// frm.events.add_bank_entry_button(frm);
 			
         
-		} else if (frm.doc.salary_slips_created && frm.doc.status !== "Queued") {
+		} else if (frm.doc.salary_slips_created) {
 			frm.add_custom_button(__("Submit Salary Slip"), function () {
 				submit_salary_slips(frm);
 			}).addClass("btn-primary");
-		} else if (!frm.doc.salary_slips_created && frm.doc.status !== "Queued") {
+		} else {
 			// bukan cuma Failed: Payroll Entry yang pembuatan slipnya terputus timeout
 			// tertinggal berstatus Submitted dengan slip setengah jadi, dan butuh jalan
 			// untuk melanjutkan. Slip yang sudah ada dilewati.
 			frm.add_custom_button(__("Create Salary Slips"), function () {
-				frm.trigger("create_salary_slips");
+				konfirmasi_kalau_queued(frm, () => frm.trigger("create_salary_slips"));
 			}).addClass("btn-primary");
 		}
 	},
@@ -536,9 +536,28 @@ frappe.ui.form.on("Payroll Entry", {
 	},
 });
 
+// Tombol Create dan Submit Salary Slip tetap tampil selama Queued, untuk jaga-jaga
+// job antreannya mati di tengah jalan. Server menolak kalau job-nya ternyata masih
+// hidup di worker, jadi di sini cukup diberi tahu dulu.
+const pesan_queued = () => __(
+	"Status Payroll Entry ini masih <b>Queued</b>. Lanjutkan hanya kalau job antreannya " +
+	"sudah berhenti (worker mati atau di-restart); kalau ternyata masih berjalan, " +
+	"permintaan ini akan ditolak. Lanjutkan?"
+);
+
+const konfirmasi_kalau_queued = function (frm, lanjut) {
+	if (frm.doc.status === "Queued") {
+		frappe.confirm(pesan_queued(), lanjut);
+	} else {
+		lanjut();
+	}
+};
+
 const submit_salary_slips = function (frm) {
 	frappe.confirm(
-		__("This will submit Salary Slips. Do you want to proceed?"),
+		frm.doc.status === "Queued"
+			? pesan_queued()
+			: __("This will submit Salary Slips. Do you want to proceed?"),
 		function () {
 			frappe.call({
 				method: "submit_salary_slips",

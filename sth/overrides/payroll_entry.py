@@ -85,6 +85,7 @@ class PayrollEntry(PayrollEntry):
 	def create_salary_slips(self):
 
 		self.check_permission("write")
+		self.tolak_kalau_job_slip_berjalan()
 
 		employees_data, employee_names, args = self.bahan_pembuatan_slip()
 
@@ -100,6 +101,8 @@ class PayrollEntry(PayrollEntry):
 
 				frappe.enqueue(
 					create_salary_slips_for_employees_custom,
+					job_id=self.job_id_slip("buat"),
+					deduplicate=True,
 					queue="long",
 					timeout=max(3000, len(employees_data) * 10),
 					employees_data=employees_data,
@@ -566,6 +569,7 @@ class PayrollEntry(PayrollEntry):
 	@frappe.whitelist()
 	def submit_salary_slips(self):
 		self.check_permission("write")
+		self.tolak_kalau_job_slip_berjalan()
 
 		salary_slips = self.get_sal_slip_list_draft(ss_status=0)
 
@@ -584,6 +588,8 @@ class PayrollEntry(PayrollEntry):
 
 			frappe.enqueue(
 				submit_salary_slips_no_jv,
+				job_id=self.job_id_slip("submit"),
+				deduplicate=True,
 				queue="long",
 				timeout=max(3000, len(salary_slips) * 10),
 				payroll_entry=self.name,
@@ -600,6 +606,57 @@ class PayrollEntry(PayrollEntry):
 			)
 		else:
 			submit_salary_slips_no_jv(self.name, salary_slips, publish_progress=False)
+
+	def job_id_slip(self, proses):
+		"""ID job antrean pembuatan ("buat") atau submit ("submit") slip dokumen ini."""
+		return "payroll_entry::{0}_slip::{1}".format(proses, self.name)
+
+	def job_slip_berjalan(self):
+		"""Job slip dokumen ini yang masih menunggu atau sedang jalan di worker.
+
+		Dipulangkan (proses, status RQ), atau None kalau tidak ada.
+		"""
+		from frappe.utils.background_jobs import get_job_status
+		from redis.exceptions import ConnectionError as RedisConnectionError
+
+		for proses in ("buat", "submit"):
+			try:
+				status = get_job_status(self.job_id_slip(proses))
+			except RedisConnectionError:
+				# redis antrean mati: tidak ada job yang bisa sedang jalan, dan
+				# Payroll Entry kecil yang dikerjakan langsung tidak perlu ikut gagal
+				return None
+
+			if status in ("queued", "started"):
+				return proses, status
+
+		return None
+
+	def tolak_kalau_job_slip_berjalan(self):
+		"""Jangan mulai pembuatan atau submit slip selagi job sebelumnya masih hidup.
+
+		Tombol Create dan Submit Salary Slip tetap tampil selama status Queued,
+		untuk jaga-jaga job-nya mati di tengah jalan (worker di-restart paksa,
+		server mati) dan statusnya tidak pernah pulih. Tapi kalau job-nya ternyata
+		masih jalan, proses kedua tidak melihat slip yang belum di-commit proses
+		pertama, dan slip karyawan yang sama bisa terbuat dua kali. Status job
+		ditanyakan ke RQ, bukan dibaca dari field status dokumen.
+		"""
+		berjalan = self.job_slip_berjalan()
+		if not berjalan:
+			return
+
+		proses, status = berjalan
+		frappe.throw(
+			_("Job {0} Salary Slip untuk Payroll Entry ini masih {1} di worker antrean long. "
+			  "Tunggu sampai selesai; halaman akan termuat ulang sendiri. Kalau worker-nya "
+			  "mati, RQ menandai job-nya gagal dalam beberapa menit, dan sesudah itu tombol "
+			  "ini bisa dipakai lagi.").format(
+				_("pembuatan") if proses == "buat" else _("submit"),
+				_("menunggu giliran") if status == "queued" else _("berjalan"),
+			),
+			title=_("Job Masih Berjalan"),
+		)
 
 	def posting_accrual_kalau_belum(self):
 		"""Posting accrual gaji sekali saja per Payroll Entry.
@@ -1122,9 +1179,10 @@ def lanjutkan_slip_setengah_jadi(payroll_entry=None, terapkan=0):
 	    bench --site <site> execute sth.overrides.payroll_entry.lanjutkan_slip_setengah_jadi \\
 	        --kwargs "{'payroll_entry': 'HR-PRUN-2026-00071', 'terapkan': 1}"
 
-	Dokumen berstatus Queued dilewati kecuali disebut namanya: bisa jadi
-	job-nya memang sedang jalan di worker. Slipnya dibuat langsung di sini,
-	bukan diantrekan, jadi hasilnya terlihat begitu perintahnya selesai.
+	Dokumen yang job slipnya masih menunggu atau berjalan di worker dilewati;
+	yang berstatus Queued tapi job-nya sudah mati ikut dilengkapi. Slipnya
+	dibuat langsung di sini, bukan diantrekan, jadi hasilnya terlihat begitu
+	perintahnya selesai.
 	Karyawan yang sudah punya slip di periode itu dilewati.
 	"""
 	terapkan = cint(terapkan)
@@ -1163,8 +1221,10 @@ def lanjutkan_slip_setengah_jadi(payroll_entry=None, terapkan=0):
 			d.jumlah_slip, d.jumlah_karyawan,
 		))
 
-		if d.status == "Queued" and not payroll_entry:
-			print("     dilewati: masih Queued, sebut namanya kalau job-nya memang sudah mati")
+		doc = frappe.get_doc("Payroll Entry", d.name)
+		berjalan = doc.job_slip_berjalan()
+		if berjalan:
+			print("     dilewati: job {0} slip masih {1} di worker".format(*berjalan))
 			dilewati.append(d.name)
 			continue
 
@@ -1172,7 +1232,6 @@ def lanjutkan_slip_setengah_jadi(payroll_entry=None, terapkan=0):
 			continue
 
 		try:
-			doc = frappe.get_doc("Payroll Entry", d.name)
 			employees_data, employee_names, args = doc.bahan_pembuatan_slip()
 
 			# di_antrean: kegagalan dicatat ke dokumennya (status Failed dan
