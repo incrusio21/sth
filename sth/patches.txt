@@ -37,4 +37,6 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 # gabung_berkas_akhiran_hash_legal juga tidak didaftarkan: membuang versi lama
 # lampiran Legal tanpa bisa dikembalikan, jadi lihat dulu daftarnya dengan
 # --kwargs "{'dry_run': 1}".
+# hitung_ulang_salary_slip_draft juga tidak didaftarkan: menghitung ulang semua
+# Salary Slip draft, dijalankan sendiri tiap kali formula Salary Structure diganti.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
