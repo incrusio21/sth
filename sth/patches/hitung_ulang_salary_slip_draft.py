@@ -2,7 +2,7 @@ import frappe
 from frappe.utils import cint, flt
 
 # Commit tiap sekian slip: ratusan slip dalam satu transaksi memegang kunci
-# baris terlalu lama, dan migrate yang terputus di tengah tidak perlu
+# baris terlalu lama, dan jalan yang terputus di tengah tidak perlu
 # mengulang dari nol.
 COMMIT_TIAP = 50
 
@@ -21,8 +21,8 @@ def execute(dry_run=0):
 
 	Slip yang menolak disimpan (karyawan sudah nonaktif, slip ganda di periode
 	yang sama, dan sejenisnya) dilewati dan dilaporkan, bukan menghentikan
-	migrate. Aman dijalankan berulang, dan bisa dijalankan sendiri kapan saja
-	formulanya berubah lagi:
+	sisanya. Tidak didaftarkan di patches.txt: dijalankan sendiri tiap kali
+	formulanya diganti, dan aman diulang:
 
 	    bench --site <site> execute sth.patches.hitung_ulang_salary_slip_draft.execute
 	    bench --site <site> execute sth.patches.hitung_ulang_salary_slip_draft.execute \\

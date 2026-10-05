@@ -24,7 +24,6 @@ sth.patches.buat_tipe_invoice_ongkos_angkut_transportir
 sth.patches.isi_ulang_jam_olah_data_tbs
 sth.patches.isi_restan_setelah_adjustment_data_tbs
 sth.patches.tambah_supplier_potongan_payroll_entry
-sth.patches.hitung_ulang_salary_slip_draft
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
@@ -38,4 +37,6 @@ sth.patches.hitung_ulang_salary_slip_draft
 # gabung_berkas_akhiran_hash_legal juga tidak didaftarkan: membuang versi lama
 # lampiran Legal tanpa bisa dikembalikan, jadi lihat dulu daftarnya dengan
 # --kwargs "{'dry_run': 1}".
+# hitung_ulang_salary_slip_draft juga tidak didaftarkan: menghitung ulang semua
+# Salary Slip draft, dijalankan sendiri tiap kali formula Salary Structure diganti.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
