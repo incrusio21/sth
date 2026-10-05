@@ -125,14 +125,41 @@ class PayrollEntry(PayrollEntry):
 				"tipe_salary": self.tipe_salary
 			})
 
-			create_salary_slips_for_employees_custom(
-				employees_data,
-				employee_names,
-				args,
-				publish_progress=False
-			)
+			# Ratusan slip tidak muat dalam satu request web. Dulu semuanya dibuat
+			# langsung di sini, dan untuk 500+ karyawan gunicorn membunuh worker-nya
+			# di tengah jalan. Matinya lewat sys.exit, jadi finally di
+			# create_salary_slips_for_employees_custom masih sempat commit: Payroll
+			# Entry-nya tersubmit dengan slip setengah jadi dan salary_slips_created
+			# tidak pernah dicentang. Batas 30 dan timeout-nya mengikuti hrms.
+			if len(employees_data) > 30 or frappe.flags.enqueue_payroll_entry:
+				self.db_set("status", "Queued")
 
-			self.reload()
+				frappe.enqueue(
+					create_salary_slips_for_employees_custom,
+					queue="long",
+					timeout=max(3000, len(employees_data) * 10),
+					employees_data=employees_data,
+					employee_names=employee_names,
+					args=args,
+					publish_progress=False,
+					di_antrean=True,
+					enqueue_after_commit=True,
+				)
+
+				frappe.msgprint(
+					_("Pembuatan Salary Slip masuk antrean. Halaman akan termuat ulang sendiri kalau sudah selesai."),
+					alert=True,
+					indicator="blue",
+				)
+			else:
+				create_salary_slips_for_employees_custom(
+					employees_data,
+					employee_names,
+					args,
+					publish_progress=False
+				)
+
+				self.reload()
 
 	@frappe.whitelist()
 	def fill_employee_details(self):
@@ -531,32 +558,56 @@ class PayrollEntry(PayrollEntry):
 	def submit_salary_slips(self):
 		self.check_permission("write")
 
-		salary_slips = self.get_sal_slip_list_draft(ss_status=0)  
+		salary_slips = self.get_sal_slip_list_draft(ss_status=0)
 
 		if not salary_slips:
-			frappe.msgprint(_("No draft Salary Slips found"))
+			# Semua slip sudah tersubmit, tapi accrual-nya bisa saja belum jadi
+			# karena gagal di percobaan sebelumnya. Tombol yang sama menyusulkannya.
+			if not self.posting_accrual_kalau_belum():
+				frappe.msgprint(_("No draft Salary Slips found"))
 			return
 
+		# Accrual diposting di ujung submit_salary_slips_no_jv, sesudah semua slip
+		# tersubmit. Dulu dipanggil di sini, sesudah enqueue: untuk lebih dari 30
+		# slip job-nya belum jalan, jadi accrual menghitung dari nol slip.
 		if len(salary_slips) > 30 or frappe.flags.enqueue_payroll_entry:
 			self.db_set("status", "Queued")
 
 			frappe.enqueue(
 				submit_salary_slips_no_jv,
-				timeout=3000,
+				queue="long",
+				timeout=max(3000, len(salary_slips) * 10),
 				payroll_entry=self.name,
 				salary_slips=salary_slips,
 				publish_progress=False,
+				di_antrean=True,
+				enqueue_after_commit=True,
 			)
 
 			frappe.msgprint(
-				_("Salary Slip submission is queued. It may take a few minutes"),
+				_("Submit Salary Slip masuk antrean. Halaman akan termuat ulang sendiri kalau sudah selesai."),
 				alert=True,
 				indicator="blue",
 			)
 		else:
 			submit_salary_slips_no_jv(self.name, salary_slips, publish_progress=False)
 
+	def posting_accrual_kalau_belum(self):
+		"""Posting accrual gaji sekali saja per Payroll Entry.
+
+		Submit slip bisa diulang (sebagian slip gagal, atau accrual-nya yang
+		gagal), dan tiap ulangan lewat sini. Tanpa penjaga ini, ulangan kedua
+		memposting accrual seluruh slip yang sudah submit untuk kedua kalinya.
+		"""
+		if frappe.db.exists("GL Entry", {
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"is_cancelled": 0,
+		}):
+			return False
+
 		self.make_payroll_gl_entries()
+		return True
 
 	def get_sal_slip_list_draft(self, ss_status, as_dict=False):
 		"""
@@ -600,23 +651,36 @@ def tipe_akun_party(accounts):
 
 	return {r.name: r.account_type for r in rows}
 
-def submit_salary_slips_no_jv(payroll_entry, salary_slips, publish_progress=True):
+def submit_salary_slips_no_jv(payroll_entry, salary_slips, publish_progress=True, di_antrean=False):
+	"""Submit slip draft, lalu posting accrual-nya kalau semuanya sudah tersubmit.
+
+	Slip yang ditolak dicatat, bukan menghentikan sisanya; savepoint per slip
+	memastikan tulisan setengah jadi dari slip yang ditolak ikut terbuang.
+	Selama masih ada yang ditolak, accrual ditahan dan dokumennya ditandai
+	Failed - accrual sebagian lalu disusul accrual sisanya tidak bisa dibedakan
+	dari accrual ganda, jadi lebih aman menunggu semuanya lolos.
+	"""
 	payroll_entry = frappe.get_doc("Payroll Entry", payroll_entry)
 
-	try:
-		submitted = []
-		failed = []
+	submitted = []
+	failed = []
 
+	try:
 		count = 0
 
 		for entry in salary_slips:
 			slip = frappe.get_doc("Salary Slip", entry[0])
+			titik = "submit_salary_slip"
 
 			try:
+				frappe.db.savepoint(titik)
 				slip.submit()
 				submitted.append(slip.name)
-			except frappe.ValidationError:
-				failed.append(slip.name)
+			except frappe.ValidationError as e:
+				frappe.db.rollback(save_point=titik)
+				if frappe.message_log:
+					frappe.message_log.pop()
+				failed.append("{0}: {1}".format(slip.name, frappe.utils.strip_html(str(e)).strip()))
 
 			count += 1
 
@@ -626,21 +690,47 @@ def submit_salary_slips_no_jv(payroll_entry, salary_slips, publish_progress=True
 					title=_("Submitting Salary Slips...")
 				)
 
-		if submitted:
+		# Slip yang lolos disimpan dulu, supaya accrual yang gagal sesudah ini
+		# tidak ikut membatalkan submit-nya.
+		frappe.db.commit()
+
+		if failed:
 			payroll_entry.db_set({
-				"salary_slips_submitted": 1,
-				"status": "Submitted",
-				"error_message": ""
+				"status": "Failed",
+				"error_message": _("{0} Salary Slip tersubmit, {1} ditolak. Accrual GL ditahan "
+				                   "sampai semuanya tersubmit; perbaiki lalu klik Submit Salary Slip lagi.\n\n{2}").format(
+					len(submitted), len(failed), "\n".join(failed)
+				),
 			})
+			frappe.msgprint(
+				_("{0} Salary Slip tersubmit, {1} ditolak. Lihat Error Message di Payroll Entry.").format(
+					len(submitted), len(failed)
+				),
+				indicator="orange",
+			)
+			return
+
+		payroll_entry.posting_accrual_kalau_belum()
+
+		payroll_entry.db_set({
+			"salary_slips_submitted": 1,
+			"status": "Submitted",
+			"error_message": ""
+		})
 
 		frappe.msgprint(_("Salary Slips submitted: {0}").format(len(submitted)))
 
 	except Exception as e:
 		frappe.db.rollback()
-		frappe.log_error(frappe.get_traceback(), "Payroll Submit Failed")
+
+		if not di_antrean:
+			raise
+
+		log_payroll_failure("submission", payroll_entry, e)
 
 	finally:
 		frappe.db.commit()
+		frappe.publish_realtime("completed_salary_slip_submission", user=frappe.session.user)
 
 def get_employee_list_custom(
 	filters: frappe._dict,
@@ -813,7 +903,7 @@ def get_filtered_employees_custom(
 # 	return query.run(as_dict=as_dict)
 
 
-def create_salary_slips_for_employees_custom(employees_data, employee_names, args, publish_progress=True):
+def create_salary_slips_for_employees_custom(employees_data, employee_names, args, publish_progress=True, di_antrean=False):
 
 	payroll_entry = frappe.get_cached_doc("Payroll Entry", args.payroll_entry)
 
@@ -857,7 +947,14 @@ def create_salary_slips_for_employees_custom(employees_data, employee_names, arg
 
 	except Exception as e:
 		frappe.db.rollback()
-		raise
+
+		# Di antrean tidak ada yang menerima exception-nya: tanpa ini dokumennya
+		# terkunci di Queued selamanya. Status Failed memunculkan lagi tombol
+		# Create Salary Slips, dan percobaan berikutnya melewati slip yang sudah ada.
+		if not di_antrean:
+			raise
+
+		log_payroll_failure("creation", payroll_entry, e)
 
 	finally:
 		frappe.db.commit()

@@ -290,7 +290,10 @@ frappe.ui.form.on("Payroll Entry", {
 			frm.add_custom_button(__("Submit Salary Slip"), function () {
 				submit_salary_slips(frm);
 			}).addClass("btn-primary");
-		} else if (!frm.doc.salary_slips_created && frm.doc.status === "Failed") {
+		} else if (!frm.doc.salary_slips_created && frm.doc.status !== "Queued") {
+			// bukan cuma Failed: Payroll Entry yang pembuatan slipnya terputus timeout
+			// tertinggal berstatus Submitted dengan slip setengah jadi, dan butuh jalan
+			// untuk melanjutkan. Slip yang sudah ada dilewati.
 			frm.add_custom_button(__("Create Salary Slips"), function () {
 				frm.trigger("create_salary_slips");
 			}).addClass("btn-primary");
