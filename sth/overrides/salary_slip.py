@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+import re
 from collections import Counter
 import pprint
 
@@ -1675,6 +1676,9 @@ class SalarySlip(SalarySlip):
 			return
 
 		amount = self.eval_condition_and_formula(struct_row, self.data)
+		if self.gaji_pokok_habis_oleh_hari_kegiatan(struct_row):
+			amount = 0
+
 		if struct_row.statistical_component:
 			# update statitical component amount in reference data based on payment days
 			# since row for statistical component is not added to salary slip
@@ -1703,6 +1707,9 @@ class SalarySlip(SalarySlip):
 				or (not remove_if_zero_valued and amount is not None and not self.data[struct_row.abbr])
 			):
 				default_amount = self.eval_condition_and_formula(struct_row, self.default_data)
+				if self.gaji_pokok_habis_oleh_hari_kegiatan(struct_row):
+					default_amount = 0
+
 				amount = round(amount,-1)
 				self.update_component_row(
 					struct_row,
@@ -1712,6 +1719,23 @@ class SalarySlip(SalarySlip):
 					default_amount=default_amount,
 					remove_if_zero_valued=remove_if_zero_valued,
 				)
+
+	def gaji_pokok_habis_oleh_hari_kegiatan(self, struct_row):
+		# Gaji Pokok Satuan Hasil = ump_harian * (total_attendance_present_non_libur
+		# - hari_kegiatan - ...). hari_kegiatan menghitung semua tanggal BKM, termasuk
+		# yang jatuh di hari libur, sedangkan hadir non libur tidak, jadi
+		# hari_kegiatan bisa melampauinya dan Gaji Pokoknya minus. Kalau begitu
+		# Gaji Pokoknya 0. Yang dikenai cuma rumus berbasis base (langsung atau lewat
+		# ump_harian) yang mengurangkan hari_kegiatan; HKnE tetap dibayar.
+		if flt(self.get("hari_kegiatan")) <= flt(self.get("total_attendance_present_non_libur")):
+			return False
+
+		formula = struct_row.formula or ""
+		return bool(
+			struct_row.amount_based_on_formula
+			and re.search(r"\bhari_kegiatan\b", formula)
+			and re.search(r"\b(base|ump_harian)\b", formula)
+		)
 
 @frappe.whitelist()
 def debug():
