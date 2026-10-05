@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "unit",
   "account",
   "column_break_rlow",
   "position",
@@ -154,13 +155,20 @@
    "fieldname": "use_basic_salary",
    "fieldtype": "Check",
    "label": "Use Basic Salary"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-03 09:33:44.736307",
+ "modified": "2026-10-05 10:58:33.071529",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan Company",

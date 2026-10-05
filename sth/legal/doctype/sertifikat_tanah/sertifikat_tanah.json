@@ -20,7 +20,6 @@
   "mb",
   "status",
   "last_updt",
-  "fs",
   "ket",
   "section_break_ddbg",
   "np",
@@ -72,11 +71,6 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Draft\nAktif\nNon Aktif"
-  },
-  {
-   "fieldname": "fs",
-   "fieldtype": "Attach",
-   "label": "File Sertifikat"
   },
   {
    "fieldname": "ket",
@@ -212,6 +206,7 @@
   {
    "fieldname": "upload_file_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Upload File"
   },
   {
@@ -237,7 +232,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-17 14:33:35.863735",
+ "modified": "2026-10-05 10:49:16.787226",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
