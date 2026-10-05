@@ -263,6 +263,31 @@ frappe.ui.form.on("Timbangan", {
 	potongan_sortasi(frm) {
 		frm.trigger('calculate_weight')
 	},
+
+	bruto_eksternal(frm) {
+		frm.trigger('calculate_weight_eksternal')
+	},
+
+	tara_eksternal(frm) {
+		frm.trigger('calculate_weight_eksternal')
+	},
+
+	netto(frm) {
+		frm.trigger('calculate_weight_eksternal')
+	},
+
+	// Kembaran hitung_netto_eksternal di timbangan.py
+	calculate_weight_eksternal(frm) {
+		if (!frm.doc.bruto_eksternal || !frm.doc.tara_eksternal) {
+			frm.set_value("netto_eksternal", 0)
+			frm.set_value("selisih_netto_eksternal", 0)
+			return
+		}
+
+		const netto_eksternal = frm.doc.bruto_eksternal - frm.doc.tara_eksternal
+		frm.set_value("netto_eksternal", netto_eksternal)
+		frm.set_value("selisih_netto_eksternal", frm.doc.netto ? frm.doc.netto - netto_eksternal : 0)
+	},
 	onload(frm) {
 		link_for(frm)
 	}

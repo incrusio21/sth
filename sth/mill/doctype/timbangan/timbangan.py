@@ -47,6 +47,7 @@ class Timbangan(Document):
 		self.set_data_dari_po()
 		self.validate_qty_do()
 		self.hitung_netto()
+		self.hitung_netto_eksternal()
 
 		if self.do_no and not self.storage:
 			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
@@ -212,6 +213,29 @@ class Timbangan(Document):
 
 		self.netto = flt(self.bruto) - flt(self.tara)
 		self.netto_2 = self.netto - (self.netto * flt(self.potongan_sortasi) / 100)
+
+	def before_update_after_submit(self):
+		self.hitung_netto_eksternal()
+
+	def hitung_netto_eksternal(self):
+		"""Isi netto eksternal dan selisihnya terhadap netto pabrik.
+
+		Hanya untuk company yang mencentang Manual Timbangan: hasil timbang pihak
+		luar (pembeli, supplier) diketik dari tiketnya sebagai pembanding, tidak
+		menggantikan bruto/tara pabrik dan tidak mengalir ke stok. Tiket luar
+		sering baru datang setelah truk pergi, jadi field ini boleh diisi
+		sesudah submit.
+
+		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
+		masih nol, netto dan selisihnya dibiarkan nol.
+		"""
+		if not (flt(self.bruto_eksternal) and flt(self.tara_eksternal)):
+			self.netto_eksternal = 0
+			self.selisih_netto_eksternal = 0
+			return
+
+		self.netto_eksternal = flt(self.bruto_eksternal) - flt(self.tara_eksternal)
+		self.selisih_netto_eksternal = flt(self.netto) - self.netto_eksternal if flt(self.netto) else 0
 
 	def before_submit(self):
 		self.validate_berat()
