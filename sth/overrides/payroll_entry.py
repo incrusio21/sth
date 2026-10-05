@@ -26,6 +26,24 @@ from sth.accounting_sth.komponen_gaji import rincian_komponen
 from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry, create_salary_slips_for_employees, get_salary_structure,set_fields_to_select,set_searchfield,set_filter_conditions,set_match_conditions,remove_payrolled_employees
 class PayrollEntry(PayrollEntry):
 
+	def onload(self):
+		super().onload()
+
+		# Form menamai tombolnya "Resume ..." kalau pembuatan atau submit slipnya
+		# sudah pernah dijalankan dan belum tuntas.
+		if self.docstatus == 1 and not self.salary_slips_submitted:
+			jumlah = dict(frappe.db.sql("""
+				SELECT docstatus, COUNT(*)
+				FROM `tabSalary Slip`
+				WHERE payroll_entry = %s AND docstatus < 2
+				GROUP BY docstatus
+			""", self.name))
+			self.set_onload("jumlah_slip", {
+				"draft": cint(jumlah.get(0)),
+				"submit": cint(jumlah.get(1)),
+				"karyawan": len(self.employees),
+			})
+
 	def on_cancel(self):
 		self.batalkan_gl_payroll()
 		super().on_cancel()

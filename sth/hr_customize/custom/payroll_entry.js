@@ -278,23 +278,30 @@ frappe.ui.form.on("Payroll Entry", {
 	},
 
 	add_context_buttons: function (frm) {
+		// "Resume" kalau prosesnya sudah pernah dijalankan dan belum tuntas: masih
+		// Queued, pernah Failed, atau sebagian slipnya sudah jadi.
+		const jumlah = (frm.doc.__onload && frm.doc.__onload.jumlah_slip) || {};
+		const pernah_jalan = ["Queued", "Failed"].includes(frm.doc.status);
+
 		if (
 			frm.doc.salary_slips_submitted ||
 			(frm.doc.__onload && frm.doc.__onload.submitted_ss)
 		) {
 			frm.set_value("status", "Submitted")
 			// frm.events.add_bank_entry_button(frm);
-			
-        
+
+
 		} else if (frm.doc.salary_slips_created) {
-			frm.add_custom_button(__("Submit Salary Slip"), function () {
+			const resume = pernah_jalan || cint(jumlah.submit) > 0;
+			frm.add_custom_button(resume ? __("Resume Submit Salary Slip") : __("Submit Salary Slip"), function () {
 				submit_salary_slips(frm);
 			}).addClass("btn-primary");
 		} else {
 			// bukan cuma Failed: Payroll Entry yang pembuatan slipnya terputus timeout
 			// tertinggal berstatus Submitted dengan slip setengah jadi, dan butuh jalan
 			// untuk melanjutkan. Slip yang sudah ada dilewati.
-			frm.add_custom_button(__("Create Salary Slips"), function () {
+			const resume = pernah_jalan || cint(jumlah.draft) + cint(jumlah.submit) > 0;
+			frm.add_custom_button(resume ? __("Resume Create Salary Slips") : __("Create Salary Slips"), function () {
 				konfirmasi_kalau_queued(frm, () => frm.trigger("create_salary_slips"));
 			}).addClass("btn-primary");
 		}
