@@ -60,8 +60,14 @@ def get_columns():
 			"width": 120
 		},
 		{
-			"fieldname": "premi",
-			"label": _("Premi"),
+			"fieldname": "premi_angkut",
+			"label": _("Premi Angkut"),
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"fieldname": "premi_transport",
+			"label": _("Premi Transport"),
 			"fieldtype": "Currency",
 			"width": 120
 		},
@@ -81,17 +87,20 @@ def get_data(filters):
 			parent.name as no_transaksi,
 			parent.kendaraan as kode_kendaraan,
 			parent.posting_date as tanggal,
-			parent.kegiatan as kegiatan,
-			parent.kegiatan_account as kegiatan_account,
-			bkmt.qty as hasil_kerja,
-			bkmt.rate as rupiah_satuan,
-			bkmt.amount as upah,
-			bkmt.premi_amount as premi
+			dbtk.kegiatan as kegiatan,
+			dbtk.kegiatan_account as kegiatan_account,
+			dbtk.hasil_kerja as hasil_kerja,
+			dbtk.upah_hasil as rupiah_satuan,
+			dbtk.amount as upah,
+			dbhkt.premi_angkut_amount as premi_angkut,
+			dbhkt.premi_trans_amount as premi_transport
 		FROM 
-			`tabDetail BKM Hasil Kerja Traksi` as bkmt
+			`tabDetail BKM Traksi Kegiatan` as dbtk
 	 	JOIN 
 			`tabBuku Kerja Mandor Traksi` as parent 
-			ON bkmt.parent = parent.name
+			ON dbtk.parent = parent.name
+		LEFT JOIN `tabDetail BKM Hasil Kerja Traksi` as dbhkt 
+			ON dbhkt.parent = parent.name
 		WHERE 
 			parent.docstatus = 1
 			{conditions}
@@ -100,10 +109,11 @@ def get_data(filters):
 	""".format(conditions=conditions)
 	
 	result = frappe.db.sql(query, filters, as_dict=1)
-	
+
 	data = []
 	kendaraan_totals = {}
-	
+	seen_voucher = set()
+
 	for row in result:
 		# Get UOM dari master Kegiatan
 		try:
@@ -111,13 +121,24 @@ def get_data(filters):
 			satuan = kegiatan_doc.uom
 		except:
 			satuan = ""
-		
+
 		# Format tanggal ke M/d/YYYY
 		tanggal_formatted = formatdate(row.tanggal, "M/d/YYYY") if row.tanggal else ""
-		
+
+		# premi_angkut & premi_transport nilainya per voucher (dari dbhkt),
+		# bukan per baris kegiatan - JOIN-nya hanya berdasarkan parent sehingga
+		# nilainya terbawa/duplikat ke setiap baris kegiatan dalam voucher yang
+		# sama. Supaya tidak tampil berulang (dan tidak double count di total),
+		# hanya tampilkan di baris pertama tiap no_transaksi.
+		is_first_in_voucher = row.no_transaksi not in seen_voucher
+		seen_voucher.add(row.no_transaksi)
+
+		premi_angkut = (row.premi_angkut or 0) if is_first_in_voucher else 0
+		premi_transport = (row.premi_transport or 0) if is_first_in_voucher else 0
+
 		# Hitung Total Rp
-		total_rp = (row.upah or 0) + (row.premi or 0)
-		
+		total_rp = (row.upah or 0) + premi_angkut + premi_transport
+
 		# Tambahkan ke data
 		data_row = {
 			"kode_kendaraan": row.kode_kendaraan,
@@ -128,22 +149,25 @@ def get_data(filters):
 			"satuan": satuan,
 			"rupiah_satuan": row.rupiah_satuan or 0,
 			"upah": row.upah or 0,
-			"premi": row.premi or 0,
-			"total_rp": total_rp
+			"premi_angkut": premi_angkut,
+			"premi_transport": premi_transport,
+			"total_rp": total_rp if is_first_in_voucher else 0
 		}
-		
+
 		data.append(data_row)
 		
 		# Akumulasi total per kendaraan
 		if row.kode_kendaraan not in kendaraan_totals:
 			kendaraan_totals[row.kode_kendaraan] = {
 				"upah": 0,
-				"premi": 0,
+				"premi_angkut": 0,
+				"premi_transport": 0,
 				"total_rp": 0
 			}
 		
 		kendaraan_totals[row.kode_kendaraan]["upah"] += row.upah or 0
-		kendaraan_totals[row.kode_kendaraan]["premi"] += row.premi or 0
+		kendaraan_totals[row.kode_kendaraan]["premi_angkut"] += row.premi_angkut or 0
+		kendaraan_totals[row.kode_kendaraan]["premi_transport"] += row.premi_transport or 0
 		kendaraan_totals[row.kode_kendaraan]["total_rp"] += total_rp
 	
 	# Tambahkan baris total per kendaraan
@@ -162,7 +186,8 @@ def get_data(filters):
 				"satuan": "",
 				"rupiah_satuan": None,
 				"upah": kendaraan_totals[current_kendaraan]["upah"],
-				"premi": kendaraan_totals[current_kendaraan]["premi"],
+				"premi_angkut": kendaraan_totals[current_kendaraan]["premi_angkut"],
+				"premi_transport": kendaraan_totals[current_kendaraan]["premi_transport"],
 				"total_rp": kendaraan_totals[current_kendaraan]["total_rp"]
 			})
 		
@@ -180,7 +205,8 @@ def get_data(filters):
 			"satuan": "",
 			"rupiah_satuan": None,
 			"upah": kendaraan_totals[current_kendaraan]["upah"],
-			"premi": kendaraan_totals[current_kendaraan]["premi"],
+			"premi_angkut": kendaraan_totals[current_kendaraan]["premi_angkut"],
+			"premi_transport": kendaraan_totals[current_kendaraan]["premi_transport"],
 			"total_rp": kendaraan_totals[current_kendaraan]["total_rp"]
 		})
 	
