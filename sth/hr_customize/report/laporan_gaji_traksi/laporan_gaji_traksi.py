@@ -93,7 +93,8 @@ def get_data(filters):
 			dbtk.upah_hasil as rupiah_satuan,
 			dbtk.amount as upah,
 			dbhkt.premi_angkut_amount as premi_angkut,
-			dbhkt.premi_trans_amount as premi_transport
+			dbhkt.premi_trans_amount as premi_transport,
+			parent.grand_total as total_rp
 		FROM 
 			`tabDetail BKM Traksi Kegiatan` as dbtk
 	 	JOIN 
@@ -137,7 +138,8 @@ def get_data(filters):
 		premi_transport = (row.premi_transport or 0) if is_first_in_voucher else 0
 
 		# Hitung Total Rp
-		total_rp = (row.upah or 0) + premi_angkut + premi_transport
+		# total_rp = (row.upah or 0) + premi_angkut + premi_transport
+		total_rp = (row.total_rp or 0) if is_first_in_voucher else 0
 
 		# Tambahkan ke data
 		data_row = {
@@ -151,7 +153,7 @@ def get_data(filters):
 			"upah": row.upah or 0,
 			"premi_angkut": premi_angkut,
 			"premi_transport": premi_transport,
-			"total_rp": total_rp if is_first_in_voucher else 0
+			"total_rp": total_rp
 		}
 
 		data.append(data_row)
