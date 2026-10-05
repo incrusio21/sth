@@ -78,14 +78,28 @@ def get_data(conditions, filters):
 	# 	"rapel",
 	# }
 
+	# Beberapa salary_component yang berbeda bisa sengaja diberi label_column
+	# yang sama di Bonus and Allowance Settings (misal "Gaji Pokok-Kebun" dan
+	# "Gaji Pokok-Opr Kebun" sama-sama berlabel "GAJI POKOK") - keduanya harus
+	# digabung jadi satu kolom laporan, bukan dua kolom terpisah.
+	component_label_key_map = {
+		frappe.scrub(row.salary_component): frappe.scrub(row.label_column or row.salary_component)
+		for row in settings.table_laporan_gaji_kebun_column
+		if row.salary_component
+	}
+
 	detail_map = {}
 	gaji_kotor_map = {}
 	for d in details:
-		detail_map.setdefault(d.parent, {})[frappe.scrub(d.salary_component)] = d.amount
+		comp_key = frappe.scrub(d.salary_component)
+		label_key = component_label_key_map.get(comp_key, comp_key)
 
-		if frappe.scrub(d.salary_component) in GAJI_KOTOR_KEYS:
+		bucket = detail_map.setdefault(d.parent, {})
+		bucket[label_key] = bucket.get(label_key, 0) + (d.amount or 0)
+
+		if comp_key in GAJI_KOTOR_KEYS:
 			gaji_kotor_map[d.parent] = gaji_kotor_map.get(d.parent, 0) + (d.amount or 0)
-  
+
 	lembur_map = {
 		l.employee: l.total_jam_lembur
 		for l in lembur_map
@@ -137,20 +151,33 @@ def get_salary_columns():
 
 	q_column_earning = []
 	q_column_deduction = []
+	seen_earning_keys = set()
+	seen_deduction_keys = set()
 
 	for row in rows:
 		if not row.salary_component:
 			continue
 
+		label = row.label_column or row.salary_component
+		# key berdasarkan label, bukan salary_component, supaya beberapa
+		# salary_component dengan label_column yang sama hanya jadi 1 kolom
+		key = frappe.scrub(label)
+
 		item = {
-			"label": row.label_column or row.salary_component,
-			"key": frappe.scrub(row.salary_component),
+			"label": label,
+			"key": key,
 		}
 
 		if row.type == "Earning":
+			if key in seen_earning_keys:
+				continue
+			seen_earning_keys.add(key)
 			q_column_earning.append(item)
 
 		elif row.type == "Deduction":
+			if key in seen_deduction_keys:
+				continue
+			seen_deduction_keys.add(key)
 			q_column_deduction.append(item)
 
 	return q_column_earning, q_column_deduction
