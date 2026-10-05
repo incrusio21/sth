@@ -86,45 +86,9 @@ class PayrollEntry(PayrollEntry):
 
 		self.check_permission("write")
 
-		employees_data = []
-
-		for row in self.employees:
-			employees_data.append({
-				"employee": row.employee,
-				"pesangon_doc": row.pesangon if self.tipe_salary == "Pesangon" else None
-			})
-
-		employee_names = [emp["employee"] for emp in employees_data]
-
-		if self.grade == "NON STAF":
-			for bkm in ["Traksi", "Panen", "Perawatan"]:
-				if frappe.db.exists(f"Buku Kerja Mandor {bkm}", {
-					"docstatus": ["<", 1],
-					"company": self.company,
-					"posting_date": ["between", [self.start_date, self.end_date]]
-				}):
-					frappe.throw(
-						f"There are still documents Buku Kerja Mandor {bkm} "
-						f"that have not been submitted for the period of "
-						f"{self.start_date} to {self.end_date}"
-					)
+		employees_data, employee_names, args = self.bahan_pembuatan_slip()
 
 		if employees_data:
-
-			args = frappe._dict({
-				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
-				"payroll_frequency": self.payroll_frequency,
-				"start_date": self.start_date,
-				"end_date": self.end_date,
-				"company": self.company,
-				"posting_date": self.posting_date,
-				"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
-				"payroll_entry": self.name,
-				"exchange_rate": self.exchange_rate,
-				"currency": self.currency,
-				"tipe_salary": self.tipe_salary
-			})
-
 			# Ratusan slip tidak muat dalam satu request web. Dulu semuanya dibuat
 			# langsung di sini, dan untuk 500+ karyawan gunicorn membunuh worker-nya
 			# di tengah jalan. Matinya lewat sys.exit, jadi finally di
@@ -160,6 +124,51 @@ class PayrollEntry(PayrollEntry):
 				)
 
 				self.reload()
+
+	def bahan_pembuatan_slip(self):
+		"""Karyawan dan argumen Salary Slip, sesudah lolos penjaga BKM.
+
+		Dipakai tombol Create Salary Slips dan lanjutkan_slip_setengah_jadi,
+		supaya keduanya membuat slip dengan penjaga dan isian yang sama.
+		"""
+		employees_data = []
+
+		for row in self.employees:
+			employees_data.append({
+				"employee": row.employee,
+				"pesangon_doc": row.pesangon if self.tipe_salary == "Pesangon" else None
+			})
+
+		employee_names = [emp["employee"] for emp in employees_data]
+
+		if self.grade == "NON STAF":
+			for bkm in ["Traksi", "Panen", "Perawatan"]:
+				if frappe.db.exists(f"Buku Kerja Mandor {bkm}", {
+					"docstatus": ["<", 1],
+					"company": self.company,
+					"posting_date": ["between", [self.start_date, self.end_date]]
+				}):
+					frappe.throw(
+						f"There are still documents Buku Kerja Mandor {bkm} "
+						f"that have not been submitted for the period of "
+						f"{self.start_date} to {self.end_date}"
+					)
+
+		args = frappe._dict({
+			"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
+			"payroll_frequency": self.payroll_frequency,
+			"start_date": self.start_date,
+			"end_date": self.end_date,
+			"company": self.company,
+			"posting_date": self.posting_date,
+			"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
+			"payroll_entry": self.name,
+			"exchange_rate": self.exchange_rate,
+			"currency": self.currency,
+			"tipe_salary": self.tipe_salary
+		})
+
+		return employees_data, employee_names, args
 
 	@frappe.whitelist()
 	def fill_employee_details(self):
@@ -1092,3 +1101,113 @@ def balikkan_gl_payroll_batal():
 	print("Selesai: {0} dibalik, {1} gagal".format(len(berhasil), len(gagal)))
 
 	return {"berhasil": berhasil, "gagal": gagal}
+
+
+def lanjutkan_slip_setengah_jadi(payroll_entry=None, terapkan=0):
+	"""Lengkapi Salary Slip Payroll Entry yang pembuatannya terputus.
+
+	Sebelum pembuatan slip diantrekan, Payroll Entry ratusan karyawan dibuat di
+	request submit dan terputus timeout gunicorn di tengah jalan: dokumennya
+	tersubmit, sebagian slipnya ada, dan salary_slips_created tidak tercentang.
+	Tombol Create Salary Slips di form sudah bisa melanjutkannya; ini jalannya
+	dari terminal untuk banyak dokumen sekaligus.
+
+	Bukan patch karena membuat slip gaji keputusan payroll, bukan keputusan
+	migrate - BKM atau absensi periodenya bisa saja sudah berubah sejak slip
+	pertama dibuat. Bawaannya cuma melaporkan; slipnya dibuat dengan terapkan=1:
+
+	    bench --site <site> execute sth.overrides.payroll_entry.lanjutkan_slip_setengah_jadi
+	    bench --site <site> execute sth.overrides.payroll_entry.lanjutkan_slip_setengah_jadi \\
+	        --kwargs "{'terapkan': 1}"
+	    bench --site <site> execute sth.overrides.payroll_entry.lanjutkan_slip_setengah_jadi \\
+	        --kwargs "{'payroll_entry': 'HR-PRUN-2026-00071', 'terapkan': 1}"
+
+	Dokumen berstatus Queued dilewati kecuali disebut namanya: bisa jadi
+	job-nya memang sedang jalan di worker. Slipnya dibuat langsung di sini,
+	bukan diantrekan, jadi hasilnya terlihat begitu perintahnya selesai.
+	Karyawan yang sudah punya slip di periode itu dilewati.
+	"""
+	terapkan = cint(terapkan)
+
+	syarat = ""
+	nilai = {}
+	if payroll_entry:
+		syarat = "AND pe.name = %(payroll_entry)s"
+		nilai["payroll_entry"] = payroll_entry
+
+	daftar = frappe.db.sql("""
+		SELECT pe.name, pe.status, pe.unit, pe.start_date, pe.end_date,
+			(SELECT COUNT(*) FROM `tabPayroll Employee Detail` d
+			  WHERE d.parent = pe.name AND d.parenttype = 'Payroll Entry') AS jumlah_karyawan,
+			(SELECT COUNT(*) FROM `tabSalary Slip` ss
+			  WHERE ss.payroll_entry = pe.name AND ss.docstatus < 2) AS jumlah_slip
+		FROM `tabPayroll Entry` pe
+		WHERE pe.docstatus = 1
+		  AND IFNULL(pe.salary_slips_created, 0) = 0
+		  {syarat}
+		HAVING jumlah_slip < jumlah_karyawan
+		ORDER BY pe.name
+	""".format(syarat=syarat), nilai, as_dict=True)
+
+	if not daftar:
+		print("Tidak ada Payroll Entry yang slipnya setengah jadi")
+		return {"lengkap": [], "gagal": [], "dilewati": []}
+
+	lengkap = []
+	gagal = []
+	dilewati = []
+
+	for d in daftar:
+		print("{0:22} {1:10} {2:6} {3} s/d {4}  slip {5}/{6}".format(
+			d.name, d.status or "", d.unit or "", d.start_date, d.end_date,
+			d.jumlah_slip, d.jumlah_karyawan,
+		))
+
+		if d.status == "Queued" and not payroll_entry:
+			print("     dilewati: masih Queued, sebut namanya kalau job-nya memang sudah mati")
+			dilewati.append(d.name)
+			continue
+
+		if not terapkan:
+			continue
+
+		try:
+			doc = frappe.get_doc("Payroll Entry", d.name)
+			employees_data, employee_names, args = doc.bahan_pembuatan_slip()
+
+			# di_antrean: kegagalan dicatat ke dokumennya (status Failed dan
+			# Error Message) alih-alih menghentikan dokumen sesudahnya.
+			create_salary_slips_for_employees_custom(
+				employees_data, employee_names, args, publish_progress=False, di_antrean=True
+			)
+		except Exception as e:
+			if frappe.message_log:
+				frappe.message_log.pop()
+			frappe.db.rollback()
+			pesan = frappe.utils.strip_html(str(e)).strip()
+			gagal.append({"payroll_entry": d.name, "sebab": pesan})
+			print("     GAGAL {0}".format(pesan))
+			continue
+
+		doc.reload()
+		jumlah_slip = frappe.db.count("Salary Slip", {"payroll_entry": d.name, "docstatus": ["<", 2]})
+
+		if doc.salary_slips_created:
+			lengkap.append(d.name)
+			print("     OK    slip sekarang {0}/{1}".format(jumlah_slip, d.jumlah_karyawan))
+		else:
+			pesan = frappe.utils.strip_html(doc.error_message or "").strip().splitlines()
+			gagal.append({"payroll_entry": d.name, "sebab": pesan[0] if pesan else doc.status})
+			print("     GAGAL {0}".format(pesan[0] if pesan else doc.status))
+
+	print("")
+	if terapkan:
+		print("Selesai: {0} dilengkapi, {1} gagal, {2} dilewati".format(
+			len(lengkap), len(gagal), len(dilewati)
+		))
+	else:
+		print("{0} Payroll Entry setengah jadi. Jalankan dengan terapkan=1 untuk melengkapinya.".format(
+			len(daftar)
+		))
+
+	return {"lengkap": lengkap, "gagal": gagal, "dilewati": dilewati}
