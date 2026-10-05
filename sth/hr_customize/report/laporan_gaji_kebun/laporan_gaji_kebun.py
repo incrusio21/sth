@@ -53,24 +53,30 @@ def get_data(conditions, filters):
 		GROUP BY employee
 	""", as_dict=True)
 
+	settings = frappe.get_doc("Bonus and Allowance Settings")
 	GAJI_KOTOR_KEYS = {
-		"gaji_pokok",
-		"upah_panen",
-		"upah_perawatan",
-		"upah_traksi",
-		"hkne",
-		"lembur",
-		"natura",
-		"premi_brondolan",
-		"premi_kehadiran",
-		"premi_tutup_buku",
-		"premi_angkut",
-		"premi_supervisi",
-		"incentif_hke_panen",
-		"incentif_output",
-		"subsidi_tambahan",
-		"rapel",
+		frappe.scrub(row.salary_component)
+		for row in settings.table_laporan_gaji_kebun_column
+		if row.type == "Earning" and row.salary_component
 	}
+	# GAJI_KOTOR_KEYS = {
+	# 	"gaji_pokok",
+	# 	"upah_panen",
+	# 	"upah_perawatan",
+	# 	"upah_traksi",
+	# 	"hkne",
+	# 	"lembur",
+	# 	"natura",
+	# 	"premi_brondolan",
+	# 	"premi_kehadiran",
+	# 	"premi_tutup_buku",
+	# 	"premi_angkut",
+	# 	"premi_supervisi",
+	# 	"incentif_hke_panen",
+	# 	"incentif_output",
+	# 	"subsidi_tambahan",
+	# 	"rapel",
+	# }
 
 	detail_map = {}
 	gaji_kotor_map = {}
@@ -125,6 +131,30 @@ def get_condition(filters):
 
 	return conditions
 
+def get_salary_columns():
+	settings = frappe.get_doc("Bonus and Allowance Settings")
+	rows = settings.get("table_laporan_gaji_kebun_column") or []
+
+	q_column_earning = []
+	q_column_deduction = []
+
+	for row in rows:
+		if not row.salary_component:
+			continue
+
+		item = {
+			"label": row.label_column or row.salary_component,
+			"key": frappe.scrub(row.salary_component),
+		}
+
+		if row.type == "Earning":
+			q_column_earning.append(item)
+
+		elif row.type == "Deduction":
+			q_column_deduction.append(item)
+
+	return q_column_earning, q_column_deduction
+
 def get_columns(filters):
 	columns = [
 		{
@@ -159,68 +189,69 @@ def get_columns(filters):
 			"fieldname": "jabatan",
 		},
 	]
+	q_column_earning, q_column_deduction = get_salary_columns()
 
 	# q_column_earning = frappe.db.sql("""
 	# 	SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Earning' AND sc.disabled != 1 AND sc.name != 'HKnE';
   # """, as_dict=True)
-	q_column_earning = [
-		{"label": "GAJI POKOK", "key": "gaji_pokok"},
-		{"label": "UPAH PANEN", "key": "upah_panen"},
-		{"label": "UPAH PERAWATAN", "key": "upah_perawatan"},
-		{"label": "UPAH TRAKSI", "key": "upah_traksi"},
-		{"label": "HKNE", "key": "hkne"},
-		{"label": "LEMBUR", "key": "lembur"},
-		{"label": "NATURA", "key": "natura"},
-		{"label": "PREMI BRONDOLAN", "key": "premi_brondolan"},
-		{"label": "PREMI KEHADIRAN", "key": "premi_kehadiran"},
-		{"label": "PREMI TUTUP BUKU", "key": "premi_tutup_buku"},
-		{"label": "PREMI ANGKUT", "key": "premi_angkut"},
-		{"label": "PREMI SUPERVISI", "key": "premi_supervisi"},
-		{"label": "INCENTIF HKE PANEN", "key": "incentif_hke_panen"},
-		{"label": "INCENTIF OUTPUT", "key": "incentif_output"},
-		{"label": "Subsidi Tambahan", "key": "subsidi_tambahan"},
-		{"label": "Rapel", "key": "rapel"},
-		# {"label": "Lembur", "key": "lembur"},
-		# {"label": "HKNe", "key": "hkne"},
-		# {"label": "Premi Panen", "key": "premi_panen_kontanan"},
-		# {"label": "Premi Kehadiran", "key": "premi_kehadiran"},
-		# {"label": "Premi Brondolan", "key": "upah_brondolan"},
-		# {"label": "Catu Beras", "key": "natura"},
-		# {"label": "Premi", "key": "premi"},
-		# {"label": "Premi Perawatan", "key": "premi_perawatan"},
-		# {"label": "Premi Transport", "key": "premi_transport"},
-		# {"label": "Premi bmtbs", "key": "premi_tbs"},
-		# {"label": "Premi Angkut", "key": "premi_angkut"},
-		# {"label": "Premi Pengawasan", "key": "premi_pengawas"},
-	]
+	# q_column_earning = [
+	# 	{"label": "GAJI POKOK", "key": "gaji_pokok"},
+	# 	{"label": "UPAH PANEN", "key": "upah_panen"},
+	# 	{"label": "UPAH PERAWATAN", "key": "upah_perawatan"},
+	# 	{"label": "UPAH TRAKSI", "key": "upah_traksi"},
+	# 	{"label": "HKNE", "key": "hkne"},
+	# 	{"label": "LEMBUR", "key": "lembur"},
+	# 	{"label": "NATURA", "key": "natura"},
+	# 	{"label": "PREMI BRONDOLAN", "key": "premi_brondolan"},
+	# 	{"label": "PREMI KEHADIRAN", "key": "premi_kehadiran"},
+	# 	{"label": "PREMI TUTUP BUKU", "key": "premi_tutup_buku"},
+	# 	{"label": "PREMI ANGKUT", "key": "premi_angkut"},
+	# 	{"label": "PREMI SUPERVISI", "key": "premi_supervisi"},
+	# 	{"label": "INCENTIF HKE PANEN", "key": "incentif_hke_panen"},
+	# 	{"label": "INCENTIF OUTPUT", "key": "incentif_output"},
+	# 	{"label": "Subsidi Tambahan", "key": "subsidi_tambahan"},
+	# 	{"label": "Rapel", "key": "rapel"},
+	# 	# {"label": "Lembur", "key": "lembur"},
+	# 	# {"label": "HKNe", "key": "hkne"},
+	# 	# {"label": "Premi Panen", "key": "premi_panen_kontanan"},
+	# 	# {"label": "Premi Kehadiran", "key": "premi_kehadiran"},
+	# 	# {"label": "Premi Brondolan", "key": "upah_brondolan"},
+	# 	# {"label": "Catu Beras", "key": "natura"},
+	# 	# {"label": "Premi", "key": "premi"},
+	# 	# {"label": "Premi Perawatan", "key": "premi_perawatan"},
+	# 	# {"label": "Premi Transport", "key": "premi_transport"},
+	# 	# {"label": "Premi bmtbs", "key": "premi_tbs"},
+	# 	# {"label": "Premi Angkut", "key": "premi_angkut"},
+	# 	# {"label": "Premi Pengawasan", "key": "premi_pengawas"},
+	# ]
   
 	# q_column_deduction = frappe.db.sql("""
 	# 	SELECT sc.name FROM `tabSalary Component` as sc WHERE sc.type = 'Deduction' AND sc.disabled != 1;
   # """, as_dict=True)
-	q_column_deduction = [
-		{"label": "JHT 2%", "key": "bpjs_tk___jht_(karyawan)"},
-		{"label": "JP 1%", "key": "bpjs_tk___jp_(karyawan)"},
-		{"label": "BPJS KES 1%", "key": "bpjs_kesehatan_(karyawan)"},
-		{"label": "PINALTI DENDA PANEN", "key": "denda_panen"},
-		{"label": "POTONGAN KOPERASI", "key": "potongan_koperasi"},
-		{"label": "POTONGAN SPSI", "key": "potongan_spsi"},
-		{"label": "POTONGAN SBSI", "key": "potongan_sp_sbsi"},
-		{"label": "POTONGAN KSBSI", "key": "potongan_ksbsi"},
-		{"label": "POTONGAN SERBUK", "key": "potongan_serbuk"},
-		{"label": "POTONGAN UANG SEKOLAH", "key": "potongan_uang_sekolah"},
-		# {"label": "Potongan HK", "key": "potongan_hk"},
-		# {"label": "BPJS Kesehatan (-)", "key": "bpjs_kesehatan_karyawan"},
-		# {"label": "Potongan Basis HK", "key": "potongan_basis_hk"},
-		# {"label": "BPJS JHT (-)", "key": "bpjs_tk_jht_karyawan"},
-		# {"label": "Potongan Koperasi", "key": "potongan_koperasi"},
-		# {"label": "Potongan Uang Sekolah", "key": "potongan_uang_sekolah"},
-		# {"label": "BPJS Pensiun (-)", "key": "bpjs_pensiun"},
-		# {"label": "Potongan SBSI", "key": "potongan_sp_sbsi"},
-		# {"label": "Potongan SPSI", "key": "potongan_spsi"},
-		# {"label": "Potongan HO", "key": "potongan_ho"},
-		# {"label": "Potongan KSBSI", "key": "potongan_ksbsi"},
-		# {"label": "Potongan Serbuk", "key": "potongan_serbuk"},
-	]
+	# q_column_deduction = [
+	# 	{"label": "JHT 2%", "key": "bpjs_tk___jht_(karyawan)"},
+	# 	{"label": "JP 1%", "key": "bpjs_tk___jp_(karyawan)"},
+	# 	{"label": "BPJS KES 1%", "key": "bpjs_kesehatan_(karyawan)"},
+	# 	{"label": "PINALTI DENDA PANEN", "key": "denda_panen"},
+	# 	{"label": "POTONGAN KOPERASI", "key": "potongan_koperasi"},
+	# 	{"label": "POTONGAN SPSI", "key": "potongan_spsi"},
+	# 	{"label": "POTONGAN SBSI", "key": "potongan_sp_sbsi"},
+	# 	{"label": "POTONGAN KSBSI", "key": "potongan_ksbsi"},
+	# 	{"label": "POTONGAN SERBUK", "key": "potongan_serbuk"},
+	# 	{"label": "POTONGAN UANG SEKOLAH", "key": "potongan_uang_sekolah"},
+	# 	# {"label": "Potongan HK", "key": "potongan_hk"},
+	# 	# {"label": "BPJS Kesehatan (-)", "key": "bpjs_kesehatan_karyawan"},
+	# 	# {"label": "Potongan Basis HK", "key": "potongan_basis_hk"},
+	# 	# {"label": "BPJS JHT (-)", "key": "bpjs_tk_jht_karyawan"},
+	# 	# {"label": "Potongan Koperasi", "key": "potongan_koperasi"},
+	# 	# {"label": "Potongan Uang Sekolah", "key": "potongan_uang_sekolah"},
+	# 	# {"label": "BPJS Pensiun (-)", "key": "bpjs_pensiun"},
+	# 	# {"label": "Potongan SBSI", "key": "potongan_sp_sbsi"},
+	# 	# {"label": "Potongan SPSI", "key": "potongan_spsi"},
+	# 	# {"label": "Potongan HO", "key": "potongan_ho"},
+	# 	# {"label": "Potongan KSBSI", "key": "potongan_ksbsi"},
+	# 	# {"label": "Potongan Serbuk", "key": "potongan_serbuk"},
+	# ]
 
 	for earning in q_column_earning:
 		# columns.append({

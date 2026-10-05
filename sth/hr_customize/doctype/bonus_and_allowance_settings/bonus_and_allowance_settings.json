@@ -23,7 +23,9 @@
   "subsidy_component",
   "against_subsidy_component",
   "column_break_rioy",
-  "monthly_subsidy_component"
+  "monthly_subsidy_component",
+  "laporan_gaji_kebun_section",
+  "table_laporan_gaji_kebun_column"
  ],
  "fields": [
   {
@@ -130,13 +132,24 @@
    "fieldtype": "Table",
    "label": "PHK Natura Settings",
    "options": "PHK Natura Settings"
+  },
+  {
+   "fieldname": "laporan_gaji_kebun_section",
+   "fieldtype": "Section Break",
+   "label": "Laporan Gaji Kebun"
+  },
+  {
+   "fieldname": "table_laporan_gaji_kebun_column",
+   "fieldtype": "Table",
+   "label": "Table Laporan Gaji Kebun Column",
+   "options": "Laporan Gaji Kebun Table Column"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-10 14:15:04.351718",
+ "modified": "2026-10-05 11:16:34.060394",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Bonus and Allowance Settings",
