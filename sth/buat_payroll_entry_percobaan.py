@@ -41,6 +41,17 @@ karyawan yang ikut supaya percobaannya kecil:
 Additional Salary yang dibuat menyimpan tautan ke Payroll Entry-nya, jadi
 hapus() ikut membuangnya.
 
+Untuk mencoba tombol Resume, `tahap` membentuk dokumennya setengah jadi:
+resume_create menyisakan sebagian slip dan mengosongkan salary_slips_created
+(tombol Resume Create Salary Slips), resume_submit membuat semua slip tapi
+hanya menyubmit sebagian tanpa accrual (tombol Resume Submit Salary Slip).
+`sisakan` mengatur berapa slip yang tersisa atau tersubmit (bawaannya
+separuh), dan `status` bisa diisi Queued untuk mencoba jalur job terputus:
+
+    bench --site <site> execute sth.buat_payroll_entry_percobaan.execute \\
+        --kwargs "{'contoh': 'HR-PRUN-2026-00067', 'start_date': '2026-10-01',
+                   'end_date': '2026-10-31', 'terapkan': 1, 'tahap': 'resume_create'}"
+
 Yang perlu diketahui sebelum menjalankannya dengan terapkan=1:
 
 - Periodenya harus periode yang karyawannya belum punya Salary Slip. Yang sudah
@@ -53,6 +64,8 @@ Yang perlu diketahui sebelum menjalankannya dengan terapkan=1:
 - Attendance yang belum ditandai bisa menggagalkan submit Payroll Entry, itu
   penjaga bawaan hrms, bukan dari sini.
 """
+
+from contextlib import contextmanager
 
 import frappe
 from frappe.utils import cint, flt, get_url_to_form, getdate
@@ -74,10 +87,17 @@ FIELD_DISALIN = (
 )
 
 
+TAHAP = ("selesai", "resume_create", "resume_submit")
+
+
 def execute(contoh=None, terapkan=0, start_date=None, end_date=None, posting_date=None,
-            tambahan=None, batas_karyawan=None, **penyaring):
+            tambahan=None, batas_karyawan=None, tahap="selesai", sisakan=None, status=None,
+            **penyaring):
 	"""Susun Payroll Entry percobaan, laporkan, dan kalau diminta buat sungguhan."""
 	terapkan = cint(terapkan)
+
+	if tahap not in TAHAP:
+		frappe.throw("tahap harus salah satu dari: {0}".format(", ".join(TAHAP)))
 
 	if not (start_date and end_date):
 		frappe.throw("start_date dan end_date wajib diisi.")
@@ -107,12 +127,19 @@ def execute(contoh=None, terapkan=0, start_date=None, end_date=None, posting_dat
 		buat_tambahan(doc, tambahan)
 
 	try:
-		doc.submit()
+		if tahap == "selesai":
+			doc.submit()
+		else:
+			with slip_dibuat_langsung():
+				doc.submit()
 	except Exception as e:
 		frappe.db.rollback()
 		print("\nSubmit Payroll Entry gagal, tidak ada yang tersimpan: {0}".format(e))
 		print(petunjuk_gagal())
 		return
+
+	if tahap != "selesai":
+		return jadikan_setengah_jadi(doc, tahap, sisakan, status)
 
 	slip, gagal = submit_slip(doc)
 	cetak_jurnal(doc.name, slip, gagal)
@@ -129,6 +156,90 @@ def petunjuk_gagal():
 		"Assignment yang belum menutupi periodenya, atau attendance yang belum "
 		"ditandai. Semuanya penjaga dokumennya sendiri, bukan dari skrip ini."
 	)
+
+
+@contextmanager
+def slip_dibuat_langsung():
+	"""Kerjakan pembuatan slip saat itu juga, bukan lewat worker.
+
+	Lebih dari 30 karyawan, submit Payroll Entry menitipkan pembuatan slip ke
+	antrean long, dan job-nya baru jalan sesudah skrip ini commit - terlambat
+	untuk dibentuk jadi setengah jadi, dan bisa bertabrakan dengan langkah
+	berikutnya. Untuk tahap resume, job itu dijalankan di sini juga.
+	"""
+	from sth.overrides.payroll_entry import create_salary_slips_for_employees_custom
+
+	asli = frappe.enqueue
+
+	def enqueue(method, *args, **kwargs):
+		if method is not create_salary_slips_for_employees_custom:
+			return asli(method, *args, **kwargs)
+
+		for kunci in ("queue", "timeout", "job_id", "deduplicate", "enqueue_after_commit"):
+			kwargs.pop(kunci, None)
+		# di_antrean dimatikan: kalau gagal, biar meledak di sini dan skripnya
+		# melaporkan, bukan diam-diam menandai dokumennya Failed
+		kwargs["di_antrean"] = False
+		return method(**kwargs)
+
+	frappe.enqueue = enqueue
+	try:
+		yield
+	finally:
+		frappe.enqueue = asli
+
+
+def jadikan_setengah_jadi(doc, tahap, sisakan=None, status=None):
+	"""Bentuk Payroll Entry yang tombolnya bernama Resume.
+
+	resume_create: slip yang dibuat dipangkas sampai tinggal `sisakan`, dan
+	salary_slips_created dikosongkan - persis yang ditinggalkan pembuatan slip
+	yang terputus timeout. Tombolnya: Resume Create Salary Slips.
+
+	resume_submit: semua slip ada, tapi hanya `sisakan` yang disubmit dan
+	accrual-nya belum diposting - yang ditinggalkan job submit yang mati di
+	tengah jalan. Tombolnya: Resume Submit Salary Slip.
+
+	`sisakan` bawaannya separuh karyawan. `status` bawaannya Submitted; isi
+	"Queued" untuk mencoba konfirmasi job yang terputus, atau "Failed".
+	"""
+	slip = frappe.get_all(
+		"Salary Slip", filters={"payroll_entry": doc.name, "docstatus": 0},
+		pluck="name", order_by="name",
+	)
+	sisakan = len(slip) // 2 if sisakan is None else min(cint(sisakan), len(slip))
+
+	if tahap == "resume_create":
+		for nama in slip[sisakan:]:
+			frappe.delete_doc("Salary Slip", nama, force=1)
+
+		doc.db_set({"salary_slips_created": 0, "status": status or "Submitted"})
+		tombol = "Resume Create Salary Slips"
+	else:
+		for nama in slip[:sisakan]:
+			frappe.get_doc("Salary Slip", nama).submit()
+
+		doc.db_set({"salary_slips_created": 1, "status": status or "Submitted"})
+		tombol = "Resume Submit Salary Slip"
+
+	frappe.db.commit()
+
+	jumlah = dict(frappe.db.sql("""
+		SELECT docstatus, COUNT(*) FROM `tabSalary Slip`
+		WHERE payroll_entry = %s AND docstatus < 2 GROUP BY docstatus
+	""", doc.name))
+
+	print("\nPayroll Entry setengah jadi: {0}".format(doc.name))
+	print("  karyawan {0}, slip draft {1}, slip submit {2}, status {3}".format(
+		len(doc.employees), cint(jumlah.get(0)), cint(jumlah.get(1)), status or "Submitted"
+	))
+	print("  tombol di form: {0}".format(tombol))
+	print("  " + get_url_to_form("Payroll Entry", doc.name))
+	print("\nSesudah selesai mencoba, buang dengan")
+	print("  bench --site <site> execute sth.buat_payroll_entry_percobaan.hapus "
+	      "--kwargs \"{{'nama': '{0}', 'benar_benar_hapus': 1}}\"".format(doc.name))
+
+	return doc.name
 
 
 def kumpulkan_penyaring(contoh, penyaring):
