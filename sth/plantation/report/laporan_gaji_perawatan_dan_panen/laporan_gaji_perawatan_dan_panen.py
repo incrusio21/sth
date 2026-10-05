@@ -1118,11 +1118,39 @@ def build_conditions(filters, date_field, employee_field):
 
 
 def get_conditions_epl(filters):
-	return build_conditions(filters, "epl.posting_date", "epl.employee")
+	return build_conditions(
+		filters,
+		"epl.posting_date",
+		"epl.employee"
+	)
+ 
+
+def get_conditions_employee(filters):
+	conditions = []
+
+	if filters.get("unit"):
+		conditions.append("e.unit = %(unit)s")
+
+	if filters.get("employment_type"):
+		conditions.append("e.employment_type = %(employment_type)s")
+
+	return " AND " + " AND ".join(conditions) if conditions else ""
 
 
 def get_conditions_panen(filters):
-	return build_conditions(filters, "bkmp.posting_date", "dbhkp.employee")
+	conditions = build_conditions(
+		filters,
+		"bkmp.posting_date",
+		"dbhkp.employee"
+	)
+
+	if filters.get("unit"):
+		conditions += " AND e.unit = %(unit)s"
+
+	if filters.get("employment_type"):
+		conditions += " AND e.employment_type = %(employment_type)s"
+
+	return conditions
 
 
 def get_data(filters):
@@ -1200,7 +1228,8 @@ def get_data(filters):
 
 def get_perawatan_data(filters):
 	"""Satu query JOIN menggantikan N+1 get_doc() di versi lama."""
-	conditions = get_conditions_epl(filters)
+	epl_conditions = get_conditions_epl(filters)
+	employee_conditions = get_conditions_employee(filters)
 
 	rows = frappe.db.sql("""
 		SELECT
@@ -1220,30 +1249,72 @@ def get_perawatan_data(filters):
 			e.employee_name,
 			k.uom AS satuan,
 			det.qty AS hasil_kerja_qty
+
 		FROM (
 			SELECT
 				epl.voucher_no,
 				epl.voucher_type,
 				epl.employee,
 				MIN(epl.posting_date) AS posting_date,
-				SUM(CASE WHEN epl.component_type = 'Upah' THEN epl.amount ELSE 0 END) AS p_upah,
-				SUM(CASE WHEN epl.component_type = 'Premi' THEN epl.amount ELSE 0 END) AS p_premi
+
+				SUM(
+					CASE
+						WHEN epl.component_type = 'Upah'
+						THEN epl.amount
+						ELSE 0
+					END
+				) AS p_upah,
+
+				SUM(
+					CASE
+						WHEN epl.component_type = 'Premi'
+						THEN epl.amount
+						ELSE 0
+					END
+					) AS p_premi
+
 			FROM `tabEmployee Payment Log` epl
+
 			WHERE epl.status = 'Approved'
 				AND epl.voucher_type = 'Buku Kerja Mandor Perawatan'
-				{conditions}
-			GROUP BY epl.voucher_no, epl.voucher_type, epl.employee
+				{epl_conditions}
+
+			GROUP BY
+				epl.voucher_no,
+				epl.voucher_type,
+				epl.employee
+
 		) agg
-		JOIN `tabBuku Kerja Mandor Perawatan` bkm ON bkm.name = agg.voucher_no
-		JOIN `tabEmployee` e ON e.name = agg.employee
-		LEFT JOIN `tabKegiatan` k ON k.name = bkm.kegiatan
+
+		JOIN `tabBuku Kerja Mandor Perawatan` bkm
+			ON bkm.name = agg.voucher_no
+
+		JOIN `tabEmployee` e
+			ON e.name = agg.employee
+				{employee_conditions}
+
+		LEFT JOIN `tabKegiatan` k
+			ON k.name = bkm.kegiatan
+
 		LEFT JOIN (
-			SELECT parent, employee, SUM(qty) AS qty
+			SELECT
+				parent,
+				employee,
+				SUM(qty) AS qty
 			FROM `tabDetail BKM Hasil Kerja Perawatan`
 			GROUP BY parent, employee
-		) det ON det.parent = agg.voucher_no AND det.employee = agg.employee
-		ORDER BY agg.employee, agg.posting_date, agg.voucher_no
-	""".format(conditions=conditions), filters, as_dict=1)
+		) det
+			ON det.parent = agg.voucher_no
+			AND det.employee = agg.employee
+
+		ORDER BY
+			agg.employee,
+			agg.posting_date,
+			agg.voucher_no
+	""".format(
+			epl_conditions=epl_conditions,
+			employee_conditions=employee_conditions
+	), filters, as_dict=1)
 
 	data = []
 	for r in rows:
