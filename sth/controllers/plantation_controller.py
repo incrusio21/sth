@@ -36,7 +36,7 @@ class PlantationController(AccountsController):
                     self.kegiatan_fetch_fieldname.append(fieldname)
 
             if self.kegiatan_fetch_fieldname:
-                nilai = fetch_kegiatan_company(self.kegiatan, self.company, self.kegiatan_fetch_fieldname)
+                nilai = fetch_kegiatan_company(self.kegiatan, self.company, self.unit, self.kegiatan_fetch_fieldname)
 
                 # tanpa baris Kegiatan Company tidak ada akun maupun tarifnya, jadi
                 # upah dan jurnalnya pasti salah. dulu ini lolos sampai self.update(None)
@@ -147,11 +147,21 @@ class PlantationController(AccountsController):
         pass
 
 @frappe.whitelist()
-def fetch_kegiatan_company(kegiatan, company, fieldname):
-	if isinstance(fieldname, str):
-		fieldname = json.loads(fieldname)
+def fetch_kegiatan_company(kegiatan, company, unit, fieldname):
+    if isinstance(fieldname, str):
+        fieldname = json.loads(fieldname)
 
-	return frappe.get_value("Kegiatan Company", {
-		"parent": kegiatan,
-		"company": company
-	}, fieldname, as_dict=1)
+    kegiatan_company = frappe.get_value("Kegiatan Company", {
+        "parent": kegiatan,
+        "company": company,
+        "unit": unit,
+    }, fieldname, as_dict=1)
+
+    if not kegiatan_company:
+        kegiatan_company = frappe.get_value("Kegiatan Company", {
+                "parent": kegiatan,
+                "company": company,
+                "unit": ["is", "not set"],
+            }, fieldname, as_dict=1)
+        
+    return kegiatan_company

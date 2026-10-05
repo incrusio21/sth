@@ -118,7 +118,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		if self.flags.re_calculate:
 			self.validate_upah_kegiatan()
 	
-		get_details_kegiatan(self.task, self.company)
+		get_details_kegiatan(self.task, self.company, self.unit)
 		get_details_employee(self.hasil_kerja, self.posting_date)
 
 		super().calculate()
@@ -665,16 +665,16 @@ def get_details_employee(childrens, posting_date, new_employee=None):
 	return childrens
 
 @frappe.whitelist()
-def get_details_kegiatan(childrens, company, update_upah=True):
+def get_details_kegiatan(childrens, company, unit, update_upah=True):
 	if isinstance(childrens, str):
 		childrens = json.loads(childrens)
 	
 	# load detail kegiatan
-	def _get_kegiatan_upah():
+	def _get_kegiatan_upah(unit):
 		k_company = frappe.qb.DocType("Kegiatan Company")
 		kegiatan = frappe.qb.DocType("Kegiatan")
 
-		result = (
+		query = (
 			frappe.qb.from_(k_company)
 			.inner_join(kegiatan)
 			.on(k_company.parent == kegiatan.name)
@@ -685,17 +685,22 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 				k_company.workday_base, k_company.holiday_base
 			)
 			.where(
-				(k_company.company == company) &
+				(k_company.company == company)
 				(k_company.parent.isin([d.get("kegiatan") for d in childrens]))
 			)
-		).run()
+		)
 
+		if unit:
+			query = query.where(k_company.unit == unit)
+		else:
+			query = query.where(IfNull(k_company.unit, "") == "")
+
+		result = query.run() 
 		ress = {}
 		for (
-			parent, position, traksi_type, account, use_basic_salary, rupiah_basis,
+			parent, position, unit, traksi_type, account, use_basic_salary, rupiah_basis,
 			volume_basis, workday, holiday, workday_base, holiday_base
 		) in result:
-
 			data = ress.setdefault(parent, {"position": {}})
 			
 			# jika kegiatan operator maka d anggap kegiatan utama
@@ -719,6 +724,7 @@ def get_details_kegiatan(childrens, company, update_upah=True):
 		return ress
 	
 	kegiatan_details = _get_kegiatan_upah()
+	kegiatan_details.update(unit)
 
 	for ch in childrens:
 		upah = ch.get("upah_hasil")

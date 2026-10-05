@@ -398,7 +398,8 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 			method: "sth.plantation.doctype.buku_kerja_mandor_traksi.buku_kerja_mandor_traksi.get_details_kegiatan",
 			args: {
 				childrens: data,
-				company: this.frm.doc.company
+				company: this.frm.doc.company,
+				unit: this.frm.doc.unit
 			}
 		})
 	}
