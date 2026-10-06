@@ -10,7 +10,7 @@
  "idx": 10,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-01 16:02:54.671998",
+ "modified": "2026-10-05 17:17:55.336641",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "General Ledger",
@@ -34,6 +34,9 @@
   },
   {
    "role": "ACCT SPV"
+  },
+  {
+   "role": "ACCT STAFF"
   }
  ],
  "timeout": 0

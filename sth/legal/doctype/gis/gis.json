@@ -35,7 +35,11 @@
   "ul_y",
   "lr_x",
   "lr_y",
-  "keterangan"
+  "keterangan",
+  "upload_file_tab",
+  "upload",
+  "kriteria_upload_html",
+  "kriteria_upload_sebelumnya"
  ],
  "fields": [
   {
@@ -233,12 +237,34 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "No. PBB"
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Upload",
+   "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML"
+  },
+  {
+   "fieldname": "kriteria_upload_sebelumnya",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Sebelumnya"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:06:53.150385",
+ "modified": "2026-10-06 09:11:55.763292",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "GIS",

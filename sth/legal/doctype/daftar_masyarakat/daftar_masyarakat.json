@@ -12,6 +12,7 @@
   "nama",
   "unit",
   "npr",
+  "nama_bank",
   "norek",
   "hp",
   "pd",
@@ -20,7 +21,11 @@
   "kecamatan",
   "desa",
   "address",
-  "ktp"
+  "ktp",
+  "upload_file_tab",
+  "upload",
+  "kriteria_upload_html",
+  "kriteria_upload_sebelumnya"
  ],
  "fields": [
   {
@@ -121,12 +126,41 @@
    "label": "Unit",
    "options": "Unit",
    "reqd": 1
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Upload",
+   "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML"
+  },
+  {
+   "fieldname": "kriteria_upload_sebelumnya",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Sebelumnya"
+  },
+  {
+   "fieldname": "nama_bank",
+   "fieldtype": "Link",
+   "label": "Nama Bank",
+   "options": "Bank",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 10:54:55.687598",
+ "modified": "2026-10-05 16:24:08.305082",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Daftar Masyarakat",
