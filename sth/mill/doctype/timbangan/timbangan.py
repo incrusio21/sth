@@ -280,10 +280,11 @@ class Timbangan(Document):
 
 		Hanya untuk company yang mencentang Manual Timbangan: hasil timbang pihak
 		luar (pembeli, supplier) diketik dari tiketnya, dan wajib terisi sebelum
-		submit (validate_berat). Untuk Receive, angka ini yang ditulis ke SPB
-		(berat_untuk_spb) tapi tidak mengalir ke stok, dan masih boleh dikoreksi
-		sesudah submit — SPB-nya ikut diperbarui. Untuk Dispatch, netto
-		eksternal yang jadi qty Delivery Note (lihat berat_kirim).
+		submit (validate_berat). Untuk Receive cuma pembanding — tidak
+		menggantikan bruto/tara pabrik dan tidak mengalir ke stok maupun SPB — dan
+		masih boleh dikoreksi sesudah submit. Untuk Dispatch, netto eksternal yang
+		jadi qty Delivery Note (lihat berat_kirim) sekaligus berat Mill di SPB
+		(lihat update_spb_weight_dispatch).
 
 		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
 		masih nol, netto dan selisihnya dibiarkan nol.
@@ -334,7 +335,7 @@ class Timbangan(Document):
 			self.make_tbs_ledger()
 		elif self.type == "Dispatch":
 			self.create_delivery_notes()
-		if self.receive_type == "TBS Internal":
+		if self.receive_type == "TBS Internal" or self.type == "Dispatch":
 			self.update_spb_weight()
 
 		hitung_ulang_setelah_timbangan(self)
@@ -418,12 +419,21 @@ class Timbangan(Document):
 		berubah sesudah timbangan disubmit (lihat create_or_update di Surat
 		Pengantar Buah) — tanpa ikut menjalankan lagi make_tbs_ledger yang akan
 		menggandakan TBS Ledger Entry.
+
+		Dispatch punya jalurnya sendiri (update_spb_weight_dispatch); pemilahannya
+		di sini supaya pemanggil dari Surat Pengantar Buah ikut benar.
 		"""
 		if not self.spb:
 			return
 
+		if self.type == "Dispatch":
+			self.update_spb_weight_dispatch()
+			return
+
 		spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
-		spb_doc.in_weight, spb_doc.out_weight, spb_doc.total_weight = self.berat_untuk_spb()
+		spb_doc.in_weight = self.bruto
+		spb_doc.out_weight = self.tara
+		spb_doc.total_weight = self.netto or self.bruto - self.tara
 		spb_doc.in_time = self.weight_in_time
 		spb_doc.out_time = self.weight_out_time
 		spb_doc.workflow_state = "Weighed"
@@ -446,32 +456,50 @@ class Timbangan(Document):
 
 		spb_doc.db_update()
 
-	def berat_untuk_spb(self):
-		"""Bruto, tara, dan netto yang ditulis ke SPB.
+	def update_spb_weight_dispatch(self):
+		"""Salin hasil timbang TBS yang dijual ke pabrik luar ke SPB-nya.
 
-		Company Manual Timbangan memakai hasil timbangan eksternal. Selama netto
-		eksternalnya belum terisi — kiriman API yang dikecualikan validate_berat —
-		SPB tetap menerima berat pabrik, supaya tidak tertulis nol.
+		Hanya company Manual Timbangan. SPB ke pabrik luar memegang dua berat,
+		yang selama ini diketik lewat tombol Weighbridge di form SPB:
+
+		- Internal: timbangan sendiri. Truk masuk kosong dan keluar bermuatan —
+		  calculate_total_weight di SPB menghitungnya out - in — jadi tara ke
+		  `in_weight_internal` dan bruto ke `out_weight_internal`.
+		- Mill: timbangan pembeli, yang di sini timbangan eksternal. Truk datang
+		  bermuatan, jadi bruto eksternal ke `in_weight`, dan netto-nya dikurangi
+		  mill_cut yang mungkin sudah diisi di SPB.
+
+		Selama netto eksternal kosong — kiriman API yang dikecualikan
+		validate_berat — yang ditulis cuma berat internal, dan SPB tidak ditandai
+		Weighed supaya tombol Mill di SPB masih ada untuk mengisinya.
 		"""
-		if cint(self.manual_timbangan) and flt(self.netto_eksternal):
-			return flt(self.bruto_eksternal), flt(self.tara_eksternal), flt(self.netto_eksternal)
-
-		return flt(self.bruto), flt(self.tara), flt(self.netto) or flt(self.bruto) - flt(self.tara)
-
-	def on_update_after_submit(self):
-		self.perbarui_spb_dari_eksternal()
-
-	def perbarui_spb_dari_eksternal(self):
-		"""Tulis ulang berat SPB kalau timbangan eksternalnya dikoreksi sesudah submit.
-
-		Receive boleh mengubah bruto/tara eksternal sesudah submit, dan untuk
-		company Manual Timbangan angka itulah yang dipegang SPB (berat_untuk_spb).
-		"""
-		if self.receive_type != "TBS Internal" or not cint(self.manual_timbangan):
+		if not cint(self.manual_timbangan):
 			return
 
-		if any(self.has_value_changed(f) for f in ("bruto_eksternal", "tara_eksternal", "netto_eksternal")):
-			self.update_spb_weight()
+		spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
+		spb_doc.in_weight_internal = flt(self.tara)
+		spb_doc.out_weight_internal = flt(self.bruto)
+		spb_doc.total_weight_internal = flt(self.netto) or flt(self.bruto) - flt(self.tara)
+		spb_doc.in_time_internal = self.weight_in_time
+		spb_doc.out_time_internal = self.weight_out_time
+
+		if flt(self.netto_eksternal):
+			spb_doc.in_weight = flt(self.bruto_eksternal)
+			spb_doc.out_weight = flt(self.tara_eksternal)
+			spb_doc.total_weight = flt(self.netto_eksternal) - flt(spb_doc.mill_cut)
+			spb_doc.workflow_state = "Weighed"
+
+		# SPB dari pos penjagaan bisa belum punya rincian blok, jadi janjangnya 0
+		if spb_doc.total_janjang:
+			spb_doc.bjr = flt(spb_doc.total_weight / spb_doc.total_janjang)
+			spb_doc.bjr_internal = flt(spb_doc.total_weight_internal / spb_doc.total_janjang)
+
+		spb_doc.bagi_berat_ke_baris(spb_doc.total_weight)
+
+		for row in spb_doc.details:
+			row.db_update()
+
+		spb_doc.db_update()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (

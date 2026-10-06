@@ -29,13 +29,14 @@ def execute(pasangan=None, dry_run=False):
 
 	Yang diisi: `spb`, lalu `kebun` dan `divisi_kebun` dari SPB-nya. Untuk yang
 	sudah submit, berat juga ditulis ke SPB lewat update_spb_weight, seperti
-	yang mestinya terjadi di on_submit — untuk company Manual Timbangan berat
-	itu hasil timbangan eksternal. Data TBS tidak disentuh: angkanya dibaca per
-	unit pabrik, bukan per SPB.
+	yang mestinya terjadi di on_submit. Data TBS tidak disentuh: angkanya dibaca
+	per unit pabrik, bukan per SPB.
 
-	Sesudahnya, Timbangan Manual yang SPB-nya tidak pernah hilang ikut
-	diselaraskan: SPB-nya telanjur menerima berat pabrik
-	(_selaraskan_berat_manual).
+	Penebakan cuma untuk Receive TBS Internal. Dispatch TBS company Manual
+	Timbangan tidak punya petunjuk — SPB-nya dari pos tanpa rincian blok — jadi
+	yang SPB-nya hilang dipasangkan lewat `pasangan`. Dispatch Manual yang
+	SPB-nya utuh tapi beratnya belum pernah ditulis (dulu on_submit cuma
+	menulis untuk Receive) dikejar _selaraskan_berat_dispatch_manual.
 
 	Aman dijalankan berulang: yang SPB-nya sudah terisi tidak lagi dicari.
 
@@ -61,29 +62,31 @@ def execute(pasangan=None, dry_run=False):
 	_cetak_ringkasan(hasil, dry_run)
 
 	if not pasangan:
-		_selaraskan_berat_manual(dry_run)
+		_selaraskan_berat_dispatch_manual(dry_run)
 
 
-def _selaraskan_berat_manual(dry_run):
-	"""Tulis ulang berat SPB dari timbangan eksternal untuk company Manual Timbangan.
+def _selaraskan_berat_dispatch_manual(dry_run):
+	"""Tulis berat SPB dari Dispatch company Manual Timbangan yang terlewat.
 
-	SPB menerima hasil timbangan eksternal sejak berat_untuk_spb, tapi Timbangan
-	Manual yang SPB-nya tidak hilang sudah telanjur menulis berat pabrik ke
-	SPB-nya. Yang dikejar di sini cuma itu: sudah submit, netto eksternal terisi,
-	dan berat SPB-nya belum sama dengan timbangan eksternal.
+	Sebelum update_spb_weight_dispatch, on_submit cuma menulis ke SPB untuk
+	Receive, jadi SPB yang dijual lewat Dispatch tidak pernah menerima beratnya.
+	Yang dikejar: sudah submit, ber-SPB, dan berat internal SPB-nya belum sama
+	dengan bruto/tara timbangan — atau berat Mill-nya belum sama dengan
+	timbangan eksternal.
 	"""
 	baris = frappe.db.sql("""
-		SELECT t.name, t.spb, t.netto_eksternal, spb.total_weight
+		SELECT t.name, t.spb, t.netto, t.netto_eksternal,
+			spb.total_weight_internal, spb.total_weight
 		FROM `tabTimbangan` t
 		INNER JOIN `tabSurat Pengantar Buah` spb ON spb.name = t.spb
 		WHERE t.docstatus = 1
-			AND t.type = 'Receive'
-			AND t.receive_type = 'TBS Internal'
+			AND t.type = 'Dispatch'
 			AND t.manual_timbangan = 1
-			AND IFNULL(t.netto_eksternal, 0) > 0
-			AND (ABS(IFNULL(spb.in_weight, 0) - IFNULL(t.bruto_eksternal, 0)) > 0.001
-				OR ABS(IFNULL(spb.out_weight, 0) - IFNULL(t.tara_eksternal, 0)) > 0.001
-				OR ABS(IFNULL(spb.total_weight, 0) - t.netto_eksternal) > 0.001)
+			AND (ABS(IFNULL(spb.in_weight_internal, 0) - IFNULL(t.tara, 0)) > 0.001
+				OR ABS(IFNULL(spb.out_weight_internal, 0) - IFNULL(t.bruto, 0)) > 0.001
+				OR (IFNULL(t.netto_eksternal, 0) > 0
+					AND (ABS(IFNULL(spb.in_weight, 0) - IFNULL(t.bruto_eksternal, 0)) > 0.001
+						OR ABS(IFNULL(spb.out_weight, 0) - IFNULL(t.tara_eksternal, 0)) > 0.001)))
 		ORDER BY t.name
 	""", as_dict=True)
 
@@ -91,11 +94,14 @@ def _selaraskan_berat_manual(dry_run):
 		for b in baris:
 			frappe.get_doc("Timbangan", b.name).update_spb_weight()
 
-	kata = "akan ditulis ulang" if dry_run else "ditulis ulang"
-	print(f"Berat SPB Manual Timbangan: {len(baris)} {kata} dari timbangan eksternal")
+	kata = "akan ditulis" if dry_run else "ditulis"
+	print(f"Berat SPB Dispatch Manual Timbangan: {len(baris)} {kata}")
 
 	for b in baris[:BATAS_RINCIAN]:
-		print(f"  {b.name} {b.spb}: {flt(b.total_weight)} -> {flt(b.netto_eksternal)}")
+		print(
+			f"  {b.name} {b.spb}: internal {flt(b.total_weight_internal)} -> {flt(b.netto)}, "
+			f"mill {flt(b.total_weight)} -> {flt(b.netto_eksternal)}"
+		)
 	if len(baris) > BATAS_RINCIAN:
 		print(f"  ... dan {len(baris) - BATAS_RINCIAN} lain")
 
