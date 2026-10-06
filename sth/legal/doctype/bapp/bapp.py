@@ -408,13 +408,8 @@ class BAPP(BuyingController):
 				continue
 
 			proposal_doc = frappe.get_doc("Proposal", self.proposal)
-			if "Jasa" in proposal_doc.proposal_type or "Capex" in proposal_doc.proposal_type:
-				# ── Ambil debit account dari Kegiatan ───────────────────────
-				if not item.item_code:
-					frappe.throw(
-						_("Baris {0}: Field <b>Item Code</b> belum diisi.").format(item.idx)
-					)
-
+			# Jasa/Capex memakai akun dari Item; baris tanpa item code jatuh ke akun Kegiatan
+			if item.item_code and ("Jasa" in proposal_doc.proposal_type or "Capex" in proposal_doc.proposal_type):
 				debit_account = self._get_item_code_account(item.item_code, item.idx)
 
 			else:
