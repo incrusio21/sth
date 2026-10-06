@@ -50,8 +50,53 @@ class SecurityCheckPoint(Document):
 		self.set_data_kendaraan()
 		self.set_kendaraan_eksternal()
 
+	def on_update(self):
+		self.isi_kendaraan_spb()
+
+	def on_submit(self):
+		self.isi_kendaraan_spb()
+
 	def on_update_after_submit(self):
 		self.dorong_koreksi_ke_spb()
+
+	def isi_kendaraan_spb(self):
+		"""Isi no polisi dan nama supir SPB yang masih kosong dari kiriman API pos ini.
+
+		Stub SPB dibuat di before_insert (get_or_create_spb), sebelum
+		set_data_kendaraan merapikan plat dan mengisi supir dari master, jadi stub
+		itu lahir tanpa keduanya — dan SPB yang sudah ada duluan tidak ditulisi apa
+		pun. Di sini datanya sudah lengkap.
+
+		Cuma field yang kosong di SPB: yang terisi datang dari form atau kiriman
+		SPB, dan itu lebih dipercaya daripada pos. Lewat db.set_value, bukan
+		doc.save(), karena SPB-nya bisa sudah submit, dan validate SPB mengosongkan
+		no_polisi kendaraan Internal yang tidak punya field kendaraan.
+		"""
+		if not self.spb or not (scp_dari_api(self) or dari_rest_api()):
+			return
+
+		no_polisi = cstr(self.no_polisi).strip() or cstr(self.license_plate).strip()
+		driver_name = cstr(self.driver_name).strip()
+
+		if not (no_polisi or driver_name):
+			return
+
+		spb = frappe.db.get_value(
+			"Surat Pengantar Buah", self.spb, ["no_polisi", "driver_name"], as_dict=True
+		)
+		if not spb:
+			return
+
+		nilai = {}
+
+		if no_polisi and not cstr(spb.no_polisi).strip():
+			nilai["no_polisi"] = no_polisi
+
+		if driver_name and not cstr(spb.driver_name).strip():
+			nilai["driver_name"] = driver_name
+
+		if nilai:
+			frappe.db.set_value("Surat Pengantar Buah", self.spb, nilai)
 
 	def dorong_koreksi_ke_spb(self):
 		"""Turunkan kebun dan divisi yang dibetulkan pos ke SPB dan timbangannya.
