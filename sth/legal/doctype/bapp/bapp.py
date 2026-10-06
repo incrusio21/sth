@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from sth.custom import method_ambil_account
+from sth.legal import get_legal_settings
 
 import frappe
 from frappe import _, throw
@@ -164,6 +165,7 @@ class BAPP(BuyingController):
 
 	def validate(self):
 		self.title = self.supplier
+		self.set_item_global()
 		self.update_expense_account()
 		self.validate_posting_time()
 		super().validate()
@@ -184,6 +186,28 @@ class BAPP(BuyingController):
 			throw(_("Posting Date cannot be future date"))
 		
 		self.validate_terms()
+
+	def set_item_global(self):
+		"""Baris tanpa item code diisi item global dari Legal Settings.
+
+		Baris BAPP yang cuma berisi kegiatan tidak punya barangnya sendiri, tapi
+		dokumen turunannya tetap butuh item code. Item global itu cuma pengisi:
+		jurnal BAPP tetap mengambil akun dari Kegiatan (lihat make_gl_entries).
+		"""
+		kosong = [item for item in self.get("items") if not item.item_code]
+		if not kosong:
+			return
+
+		item_global = get_legal_settings("default_item_code")
+		if not item_global:
+			frappe.throw(
+				_("Baris {0} tidak punya Item Code. Isi <b>Default Item Code</b> di Legal Settings sebagai item global untuk baris kegiatan.").format(
+					", ".join(str(item.idx) for item in kosong)
+				)
+			)
+
+		for item in kosong:
+			item.item_code = item_global
 
 	def update_expense_account(self):
 		if not self.company:
@@ -401,6 +425,7 @@ class BAPP(BuyingController):
 		  AMOUNT → amount per baris (total seluruh baris = grand_total)
 		"""
 		gl_entries = []
+		item_global = get_legal_settings("default_item_code")
 
 		for item in self.get("items"):
 			amount = flt(item.amount)
@@ -408,8 +433,13 @@ class BAPP(BuyingController):
 				continue
 
 			proposal_doc = frappe.get_doc("Proposal", self.proposal)
-			# Jasa/Capex memakai akun dari Item; baris tanpa item code jatuh ke akun Kegiatan
-			if item.item_code and ("Jasa" in proposal_doc.proposal_type or "Capex" in proposal_doc.proposal_type):
+			# Jasa/Capex memakai akun dari Item; baris tanpa item code — atau yang
+			# cuma diisi item global, lihat set_item_global — jatuh ke akun Kegiatan
+			if (
+				item.item_code
+				and item.item_code != item_global
+				and ("Jasa" in proposal_doc.proposal_type or "Capex" in proposal_doc.proposal_type)
+			):
 				debit_account = self._get_item_code_account(item.item_code, item.idx)
 
 			else:
