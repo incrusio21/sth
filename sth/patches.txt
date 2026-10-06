@@ -45,4 +45,7 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 # bersihkan_attendance_dobel juga tidak didaftarkan: membatalkan ratusan
 # Attendance beserta Employee Payment Log preminya, jadi lihat dulu daftarnya
 # dengan --kwargs "{'dry_run': 1}". Jalankan sesudah migrate commit 5d36b01d.
+# isi_catatan_bkm_attendance juga tidak didaftarkan: pengisian mundur catatan
+# BKM di Attendance per rentang tanggal (bawaannya September 2026), jalankan
+# sendiri sesudah migrate commit 5d36b01d.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

@@ -100,19 +100,27 @@ def timpa_field_dari_api(doc, kiriman):
 		doc.set(field, nilai)
 
 
-def catat_attendance_bkm(bkm, employee, status, peran, kegiatan=None):
+def catat_attendance_bkm(bkm, employee, status, peran, kegiatan=None, buat_baru=True):
 	"""Pastikan employee punya Attendance di tanggal BKM, lalu catat BKM-nya di sana.
 
 	Attendance yang sudah ada — dari mesin absensi, input manual, atau BKM lain di
 	hari yang sama — dipakai apa adanya, statusnya tidak diubah. BKM cuma menambah
 	baris di tabel bkm_attendance, dengan status versi BKM-nya sendiri, supaya
 	kelihatan kegiatan mana saja yang menyatakan employee ini masuk hari itu.
+
+	buat_baru=False dipakai pengisian mundur: Attendance yang belum ada tidak
+	dibuat, karena itu berarti menambah premi ke periode yang sudah berjalan.
+	Mengembalikan nama Attendance-nya, atau None kalau tidak ada.
 	"""
 	if not employee:
 		return
 
 	kunci = frappe._dict(employee=employee, attendance_date=bkm.posting_date, shift=None, name=None)
-	nama = cari_attendance_kembar(kunci) or buat_attendance_bkm(bkm, employee, status, kunci)
+	nama = cari_attendance_kembar(kunci)
+	if not nama and buat_baru:
+		nama = buat_attendance_bkm(bkm, employee, status, kunci)
+	if not nama:
+		return
 
 	attendance = frappe.get_doc("Attendance", nama)
 	for k in kegiatan or [None]:
@@ -138,6 +146,8 @@ def catat_attendance_bkm(bkm, employee, status, peran, kegiatan=None):
 		})
 		row.docstatus = attendance.docstatus
 		row.db_insert()
+
+	return nama
 
 
 def buat_attendance_bkm(bkm, employee, status, kunci):

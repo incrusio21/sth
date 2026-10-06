@@ -269,7 +269,7 @@ class BukuKerjaMandorController(PlantationController):
         bkm_obj.flags.transaction_employee = 1
         bkm_obj.save()
 
-    def make_attendance(self, hasil_kerja=None):
+    def make_attendance(self, hasil_kerja=None, buat_baru=True):
         # hasil_kerja bisa dipersempit ke sebagian baris saja. Dipakai waktu baris
         # baru disisipkan ke dokumen yang sudah disubmit: employee lama sudah punya
         # Attendance, dan menyentuhnya lagi cuma menulis ulang nilai yang sama lalu
@@ -279,13 +279,21 @@ class BukuKerjaMandorController(PlantationController):
 
         from sth.overrides.attendance import catat_attendance_bkm
 
+        # employee yang Attendance-nya tidak ada, cuma terisi kalau buat_baru=False
+        tanpa_attendance = []
+
         employee = list(hasil_kerja) + self.get_mandor_details()
         for emp in employee:
-            catat_attendance_bkm(
+            nama = catat_attendance_bkm(
                 self, emp.employee, emp.attendance_status,
                 peran=emp.get("peran") or "Pekerja",
-                kegiatan=self.get_kegiatan_attendance(emp)
+                kegiatan=self.get_kegiatan_attendance(emp),
+                buat_baru=buat_baru
             )
+            if emp.employee and not nama:
+                tanpa_attendance.append(emp.employee)
+
+        return tanpa_attendance
 
     def get_kegiatan_attendance(self, emp):
         # dicatat di Attendance bersama nomor BKM-nya, lihat catat_attendance_bkm

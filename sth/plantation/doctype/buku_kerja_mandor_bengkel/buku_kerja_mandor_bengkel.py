@@ -37,12 +37,19 @@ class BukuKerjaMandorBengkel(Document):
 				exclude=self.name,
 			)
 
-	def make_attendance(self):
+	def make_attendance(self, buat_baru=True):
 		from sth.overrides.attendance import catat_attendance_bkm
+
+		# lihat make_attendance di BukuKerjaMandorController
+		tanpa_attendance = []
 
 		# Bengkel tidak punya kegiatan, cukup nomor BKM-nya yang dicatat
 		for emp in self.hasil_kerja:
-			catat_attendance_bkm(self, emp.employee, emp.status, peran="Pekerja")
+			nama = catat_attendance_bkm(self, emp.employee, emp.status, peran="Pekerja", buat_baru=buat_baru)
+			if emp.employee and not nama:
+				tanpa_attendance.append(emp.employee)
+
+		return tanpa_attendance
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
