@@ -18,6 +18,11 @@ def debug():
 	# frappe.get_doc("Purchase Invoice",no_doc).on_submit()
 	_resync_timbangan(no_doc)
 
+def debug_ss():
+	ls = frappe.db.sql(""" SELECT name FROM `tabSalary Slip` WHERE docstatus = 0 """)
+	for row in ls:
+		do = frappe.get_doc("Salary Slip",row[0])
+		do.save()
 
 def debug_gl():
 	no_doc = "ACC-PINV-2026-00136"
