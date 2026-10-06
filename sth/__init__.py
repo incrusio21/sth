@@ -178,4 +178,22 @@ from sth.overrides.accounting_period import validate_accounting_period_on_doc_sa
 
 accounting_period.validate_accounting_period_on_doc_save = validate_accounting_period_on_doc_save
 
+from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
+
+_get_tax_amount_if_for_valuation_or_deduction = calculate_taxes_and_totals.get_tax_amount_if_for_valuation_or_deduction
+
+def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
+	# ERPNext hanya membalik tanda "Deduct" untuk PO/PI/PR/SQ, padahal JS membaliknya untuk
+	# semua doctype; tanpa ini PPh di BAPP/Proposal ikut menambah grand_total saat disimpan
+	tax_amount = _get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax)
+	if (
+		self.doc.doctype in ("BAPP", "Proposal")
+		and getattr(tax, "category", None)
+		and tax.add_deduct_tax == "Deduct"
+	):
+		tax_amount *= -1.0
+	return tax_amount
+
+calculate_taxes_and_totals.get_tax_amount_if_for_valuation_or_deduction = get_tax_amount_if_for_valuation_or_deduction
+
 
