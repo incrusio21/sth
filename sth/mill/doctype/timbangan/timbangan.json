@@ -305,6 +305,7 @@
   },
   {
    "fetch_from": "ticket_number.spb",
+   "fetch_if_empty": 1,
    "fieldname": "spb",
    "fieldtype": "Link",
    "label": "SPB",
@@ -795,7 +796,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-05 10:00:00.000000",
+ "modified": "2026-10-06 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

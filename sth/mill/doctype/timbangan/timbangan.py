@@ -41,13 +41,15 @@ class Timbangan(Document):
 	def validate(self):
 		# self.validate_ticket()
 		self.map_api_ticket_number()
+		self.validate_spb_pos()
 		self.set_kebun_dan_divisi_dari_spb()
 		self.set_kendaraan_eksternal()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
-		self.validate_qty_do()
+		# netto dihitung dulu: validate_qty_do membagi netto itu ke DO 1 dan DO 2
 		self.hitung_netto()
 		self.hitung_netto_eksternal()
+		self.validate_qty_do()
 
 		if self.do_no and not self.storage:
 			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
@@ -58,6 +60,27 @@ class Timbangan(Document):
 				if row.company == self.company:
 					self.unit = row.name
 	
+	def validate_spb_pos(self):
+		"""SPB yang dipilih tangan tidak boleh beda dengan SPB pos penjagaannya.
+
+		Field `spb` ber-fetch_from ticket_number.spb dengan fetch_if_empty, supaya
+		SPB yang dipilih operator untuk pos yang tidak mencatat SPB tidak
+		ditimpa kosong tiap kali disimpan — dulu begitu, dan SPB-nya hilang saat
+		submit sehingga update_spb_weight tidak pernah menulis berat ke SPB.
+		Akibatnya pos yang punya SPB juga tidak lagi memaksakan SPB-nya, jadi
+		bedanya ditolak di sini.
+		"""
+		if not (self.spb and self.ticket_number):
+			return
+
+		spb_pos = frappe.db.get_value("Security Check Point", self.ticket_number, "spb")
+		if spb_pos and spb_pos != self.spb:
+			frappe.throw(
+				_("SPB {0} berbeda dengan SPB {1} di Security Check Point {2}.").format(
+					frappe.bold(self.spb), frappe.bold(spb_pos), frappe.bold(self.ticket_number)
+				)
+			)
+
 	def set_kebun_dan_divisi_dari_spb(self):
 		"""Isi kebun dan divisinya dari SPB, menimpa isian pos penjagaan.
 
@@ -216,15 +239,51 @@ class Timbangan(Document):
 
 	def before_update_after_submit(self):
 		self.hitung_netto_eksternal()
+		self.validate_netto_eksternal_setelah_dn()
+
+	def validate_netto_eksternal_setelah_dn(self):
+		"""Netto eksternal Dispatch tidak boleh berubah sesudah DN-nya dibuat.
+
+		Untuk Dispatch company Manual Timbangan, angka ini qty Delivery Note-nya
+		(lihat berat_kirim), dan DN sudah tersubmit sejak timbangannya disubmit.
+		Mengubahnya di sini cuma membuat timbangan dan DN berselisih diam-diam.
+		"""
+		if not (self.pakai_netto_eksternal() and (self.delivery_note or self.delivery_note_2)):
+			return
+
+		if self.has_value_changed("netto_eksternal"):
+			frappe.throw(
+				_("Netto eksternal sudah menjadi qty Delivery Note {0}. Cancel timbangan ini untuk mengubahnya.").format(
+					", ".join(filter(None, (self.delivery_note, self.delivery_note_2)))
+				)
+			)
+
+	def pakai_netto_eksternal(self):
+		"""Dispatch company Manual Timbangan: yang dikirim menurut timbangan pembeli."""
+		return self.type == "Dispatch" and cint(self.manual_timbangan)
+
+	def berat_kirim(self):
+		"""Berat yang dibebankan ke DO dan menjadi qty Delivery Note.
+
+		Company Manual Timbangan menagih menurut timbangan pembeli, jadi Dispatch
+		di sana memakai netto eksternal. Selebihnya netto_2 pabrik, termasuk
+		selama netto eksternalnya belum diisi — submit tetap menahannya di
+		validate_berat, kecuali kiriman API.
+		"""
+		if self.pakai_netto_eksternal() and flt(self.netto_eksternal):
+			return flt(self.netto_eksternal)
+
+		return flt(self.netto_2)
 
 	def hitung_netto_eksternal(self):
 		"""Isi netto eksternal dan selisihnya terhadap netto pabrik.
 
 		Hanya untuk company yang mencentang Manual Timbangan: hasil timbang pihak
-		luar (pembeli, supplier) diketik dari tiketnya sebagai pembanding, tidak
-		menggantikan bruto/tara pabrik dan tidak mengalir ke stok. Tiket luar
-		sering baru datang setelah truk pergi, jadi field ini boleh diisi
-		sesudah submit.
+		luar (pembeli, supplier) diketik dari tiketnya, dan wajib terisi sebelum
+		submit (validate_berat). Untuk Receive cuma pembanding — tidak
+		menggantikan bruto/tara pabrik dan tidak mengalir ke stok — dan masih
+		boleh dikoreksi sesudah submit. Untuk Dispatch, netto eksternal yang jadi
+		qty Delivery Note (lihat berat_kirim).
 
 		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
 		masih nol, netto dan selisihnya dibiarkan nol.
@@ -249,6 +308,17 @@ class Timbangan(Document):
 		belakangan jauh lebih mahal daripada berhenti di sini.
 		"""
 		kosong = [nama for nilai, nama in ((self.bruto, "Bruto"), (self.tara, "Tara")) if not flt(nilai)]
+
+		# Company Manual Timbangan wajib membawa hasil timbangan eksternal. Untuk
+		# Dispatch angka itu juga yang jadi qty DN saat submit (lihat berat_kirim).
+		# Kiriman API dilewati: disubmit otomatis, dan penolakan di sini
+		# menggagalkan seluruh kirimannya.
+		if not kosong and cint(self.manual_timbangan) and not timbangan_dari_api(self):
+			kosong = [
+				nama
+				for nilai, nama in ((self.bruto_eksternal, "Bruto Eksternal"), (self.tara_eksternal, "Tara Eksternal"))
+				if not flt(nilai)
+			]
 
 		if not kosong:
 			return
@@ -439,8 +509,9 @@ class Timbangan(Document):
 		# lebih dari qty DO-nya. Tanpa ini qty_do ikut minus, dan DN DO 1 dibuat
 		# dengan qty negatif sehingga submit-nya ditolak.
 		sisa_do_1 = max(0.0, self.get_sisa_do_available(self.do_no))
-		self.qty_do = min(flt(self.netto_2), sisa_do_1)
-		remaining = flt(self.netto_2) - self.qty_do
+		berat = self.berat_kirim()
+		self.qty_do = min(berat, sisa_do_1)
+		remaining = berat - self.qty_do
 
 		if remaining > 0:
 			if not self.no_do_2:
@@ -465,9 +536,14 @@ class Timbangan(Document):
 		#
 		# Yang tidak memakai DO 2 tetap dihitung senetto_2-nya: itu yang dipakai
 		# create_delivery_notes, sekaligus menutup timbangan lama dari sebelum ada
-		# fitur dua DO yang qty_do-nya tidak pernah terisi.
+		# fitur dua DO yang qty_do-nya tidak pernah terisi. Dispatch Manual
+		# Timbangan dihitung senetto eksternalnya, seperti di berat_kirim.
 		qty_timbangan = frappe.db.sql("""
-			SELECT SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN COALESCE(netto_2, 0)
+			SELECT SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN
+								(CASE WHEN type = 'Dispatch' AND manual_timbangan = 1
+										AND COALESCE(netto_eksternal, 0) > 0
+									  THEN netto_eksternal
+									  ELSE COALESCE(netto_2, 0) END)
 						   ELSE COALESCE(qty_do, 0) END)
 			FROM `tabTimbangan`
 			WHERE do_no = %(do_no)s
@@ -483,10 +559,10 @@ class Timbangan(Document):
 		dn_names = []
 
 		# qty_do 0 berarti DO 1 sudah habis dan seluruh netto ditampung DO 2, jadi
-		# DN untuk DO 1 tidak dibuat sama sekali. Fallback ke netto_2 cuma untuk
-		# timbangan yang tidak memakai DO 2.
+		# DN untuk DO 1 tidak dibuat sama sekali. Fallback ke berat_kirim cuma
+		# untuk timbangan yang tidak memakai DO 2.
 		if flt(self.qty_do) > 0 or not self.no_do_2:
-			dn1 = make_delivery_note(self.name, do_no=self.do_no, qty=self.qty_do or self.netto_2)
+			dn1 = make_delivery_note(self.name, do_no=self.do_no, qty=self.qty_do or self.berat_kirim())
 			dn1.insert()
 			dn1.submit()
 			self.db_set('delivery_note', dn1.name)
@@ -710,7 +786,7 @@ def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 				item = next((r for r in do_doc.items if r.item_code == source.kode_barang),[])
 				new_item = copy.deepcopy(item)
 				new_item = new_item.as_dict()
-				new_item.qty = flt(qty) if qty is not None else source.netto_2
+				new_item.qty = flt(qty) if qty is not None else source.berat_kirim()
 				new_item.timbangan = source.name
 				new_item.delivery_order_item = item.name
 
