@@ -39,4 +39,7 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 # --kwargs "{'dry_run': 1}".
 # hitung_ulang_salary_slip_draft juga tidak didaftarkan: menghitung ulang semua
 # Salary Slip draft, dijalankan sendiri tiap kali formula Salary Structure diganti.
+# isi_ulang_spb_timbangan juga tidak didaftarkan: SPB-nya ditebak dari rincian
+# blok, dan yang ragu harus dipasangkan sendiri lewat --kwargs "{'pasangan': ...}",
+# jadi keluarannya perlu dibaca. Jalankan sesudah migrate commit 8e1e0078.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
