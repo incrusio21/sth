@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-08-11 11:53:01.822291",
+ "creation": "2026-10-02 10:33:44.396992",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -31,6 +31,7 @@
   "biaya_perawatan",
   "biaya_bapp",
   "lain_lain",
+  "akun_lain_lain",
   "total_biaya_perawatan_panen_dan_transport",
   "column_break_biaya",
   "persen_management_fee",
@@ -58,7 +59,6 @@
   "akun_pph22",
   "akun_piutang_plasma",
   "akun_hutang_plasma_antara",
-  "akun_lain_lain",
   "akun_lain_section",
   "cost_center",
   "column_break_akun_lain",
@@ -397,7 +397,7 @@
   {
    "fieldname": "akun_lain_lain",
    "fieldtype": "Link",
-   "label": "Lain Lain",
+   "label": "Akun Lain Lain",
    "options": "Account"
   },
   {
@@ -474,7 +474,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-02 14:00:00.000000",
+ "modified": "2026-10-06 11:05:22.884838",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",

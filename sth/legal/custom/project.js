@@ -149,6 +149,6 @@ frappe.ui.form.on("Project", {
         }
 
         frm.fields_dict.company.set_label(label)
-        this.frm.refresh_fields();
+        frm.refresh_fields();
     }
 });

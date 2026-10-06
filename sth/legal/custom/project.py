@@ -216,7 +216,7 @@ def get_proposal_data(doctype, docname=None):
     if docname:
         fieldname = ["company", "supplier"]
         if doctype == "Proposal":
-            fieldname.append(["spesifikasi_kerja", "keperluan", "jangka_waktu", "denda"])
+            fieldname.extend(["spesifikasi_kerja", "keperluan", "jangka_waktu", "denda"])
 
         detail_proposal.update(
             frappe.get_value(doctype, docname, fieldname, as_dict=1)
