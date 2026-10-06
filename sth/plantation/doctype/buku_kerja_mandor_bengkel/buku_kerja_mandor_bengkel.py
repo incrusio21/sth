@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.model.document import Document
-from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 class BukuKerjaMandorBengkel(Document):
 	def validate(self):
@@ -11,10 +10,12 @@ class BukuKerjaMandorBengkel(Document):
 
 	def on_submit(self):
 		self.make_attendance()
-		self.make_attendance()
 
 	def on_cancel(self):
+		from sth.overrides.attendance import hapus_catatan_bkm
+
 		self.update_kendaraan_field(cancel=1)
+		hapus_catatan_bkm(self)
 
 	def on_trash(self):
 		self.update_kendaraan_field(cancel=1)
@@ -37,27 +38,12 @@ class BukuKerjaMandorBengkel(Document):
 			)
 
 	def make_attendance(self):
-		for emp in self.hasil_kerja:
-			attendance_detail = {
-				"employee": emp.employee, "company": self.company, "attendance_date": self.posting_date
-			}
+		from sth.overrides.attendance import catat_attendance_bkm
 
-			add_att = "add_attendance"
-			try:
-				frappe.db.savepoint(add_att)
-				attendance = frappe.get_doc({
-					"doctype": "Attendance",
-					"status": emp.status,
-					**attendance_detail
-				})
-				attendance.flags.ignore_permissions = 1
-				attendance.submit()
-			except DuplicateAttendanceError:
-				if frappe.message_log:
-					frappe.message_log.pop()
-					
-				frappe.db.rollback(save_point=add_att)  # preserve transaction in postgres
-				
+		# Bengkel tidak punya kegiatan, cukup nomor BKM-nya yang dicatat
+		for emp in self.hasil_kerja:
+			catat_attendance_bkm(self, emp.employee, emp.status, peran="Pekerja")
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_employee_traksi_query(doctype, txt, searchfield, start, page_len, filters):

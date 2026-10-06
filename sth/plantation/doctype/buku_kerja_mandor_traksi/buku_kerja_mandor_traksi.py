@@ -208,6 +208,26 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		if update:
 			self.update_child_table("hasil_kerja")
 
+	def get_kegiatan_attendance(self, emp):
+		# Traksi tidak punya field kegiatan di header. Kegiatan operator/helper
+		# ditunjuk kegiatan_list-nya (nama baris task), tanpa itu dianggap ikut
+		# semua task. Mandor tidak punya kegiatan_list, jadi ikut semua task juga.
+		#
+		# kegiatan_list baru diterjemahkan ke nama baris task di on_update, yang
+		# tidak dilewati kiriman API yang langsung disubmit. Jadi isinya bisa masih
+		# last_name kiriman, dan keduanya diterima.
+		kegiatan_task = {}
+		for tk in self.task:
+			kegiatan_task[tk.name] = tk.kegiatan
+			if tk.last_name:
+				kegiatan_task[tk.last_name] = tk.kegiatan
+
+		task_dipilih = [s.strip() for s in cstr(emp.get("kegiatan_list")).replace(",", "\n").split("\n") if s.strip()]
+
+		kegiatan = [kegiatan_task[t] for t in task_dipilih if t in kegiatan_task] or list(kegiatan_task.values())
+
+		return list(dict.fromkeys(k for k in kegiatan if k))
+
 	def on_submit(self):
 		super().on_submit()
 		# self.make_gl_entry()

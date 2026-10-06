@@ -7,7 +7,6 @@ from frappe.exceptions import DoesNotExistError
 from frappe.query_builder.functions import Sum
 
 from frappe.utils import get_first_day
-from hrms.hr.doctype.attendance.attendance import DuplicateAttendanceError
 
 from sth.controllers.plantation_controller import PlantationController
 
@@ -278,28 +277,19 @@ class BukuKerjaMandorController(PlantationController):
         if hasil_kerja is None:
             hasil_kerja = self.hasil_kerja
 
+        from sth.overrides.attendance import catat_attendance_bkm
+
         employee = list(hasil_kerja) + self.get_mandor_details()
         for emp in employee:
-            attendance_detail = {
-                "employee": emp.employee, "company": self.company, "attendance_date": self.posting_date
-            }
+            catat_attendance_bkm(
+                self, emp.employee, emp.attendance_status,
+                peran=emp.get("peran") or "Pekerja",
+                kegiatan=self.get_kegiatan_attendance(emp)
+            )
 
-            add_att = "add_attendance"
-            try:
-                frappe.db.savepoint(add_att)
-                attendance = frappe.get_doc({
-                    "doctype": "Attendance",
-                    "status": emp.attendance_status,
-                    **attendance_detail
-                })
-                attendance.flags.ignore_permissions = 1
-                attendance.submit()
-            except DuplicateAttendanceError:
-
-                if frappe.message_log:
-                    frappe.message_log.pop()
-                    
-                frappe.db.rollback(save_point=add_att)  # preserve transaction in postgres
+    def get_kegiatan_attendance(self, emp):
+        # dicatat di Attendance bersama nomor BKM-nya, lihat catat_attendance_bkm
+        return [self.kegiatan] if self.get("kegiatan") else []
 
     def check_emp_hari_kerja(self, validate=False):
         employee_list = [emp.employee for emp in self.hasil_kerja]
@@ -329,6 +319,7 @@ class BukuKerjaMandorController(PlantationController):
         super().on_cancel()
         # self.remove_journal()
         self.delete_payment_log()
+        self.remove_attendance_log()
         # if not frappe.flags.mass_delete_bkm:
         self.create_or_update_mandor_premi()
         # self.update_rkb_realization()
@@ -341,6 +332,11 @@ class BukuKerjaMandorController(PlantationController):
         ):
             frappe.delete_doc("Employee Payment Log", epl, flags=frappe._dict(transaction_employee=True))
 
+    def remove_attendance_log(self):
+        from sth.overrides.attendance import hapus_catatan_bkm
+
+        hapus_catatan_bkm(self)
+
     def get_mandor_details(self):
         mandor_list = []
         for m in self._mandor_dict:
@@ -350,7 +346,8 @@ class BukuKerjaMandorController(PlantationController):
 
             m_dict = frappe._dict({
                 "employee": mandor,
-                "attendance_status": "Present"
+                "attendance_status": "Present",
+                "peran": self.meta.get_label(m["fieldname"])
             })
             
             mandor_list.append(m_dict)

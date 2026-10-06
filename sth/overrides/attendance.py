@@ -1,6 +1,6 @@
 import frappe
 from frappe.utils import getdate
-from hrms.hr.doctype.attendance.attendance import Attendance
+from hrms.hr.doctype.attendance.attendance import Attendance, DuplicateAttendanceError
 from hrms.hr.utils import (
 	get_holiday_dates_for_employee,
 	get_holidays_for_employee,
@@ -100,6 +100,87 @@ def timpa_field_dari_api(doc, kiriman):
 		doc.set(field, nilai)
 
 
+def catat_attendance_bkm(bkm, employee, status, peran, kegiatan=None):
+	"""Pastikan employee punya Attendance di tanggal BKM, lalu catat BKM-nya di sana.
+
+	Attendance yang sudah ada — dari mesin absensi, input manual, atau BKM lain di
+	hari yang sama — dipakai apa adanya, statusnya tidak diubah. BKM cuma menambah
+	baris di tabel bkm_attendance, dengan status versi BKM-nya sendiri, supaya
+	kelihatan kegiatan mana saja yang menyatakan employee ini masuk hari itu.
+	"""
+	if not employee:
+		return
+
+	kunci = frappe._dict(employee=employee, attendance_date=bkm.posting_date, shift=None, name=None)
+	nama = cari_attendance_kembar(kunci) or buat_attendance_bkm(bkm, employee, status, kunci)
+
+	attendance = frappe.get_doc("Attendance", nama)
+	for k in kegiatan or [None]:
+		sudah_dicatat = any(
+			r.voucher_type == bkm.doctype
+			and r.voucher_no == bkm.name
+			and (r.kegiatan or None) == k
+			and r.peran == peran
+			for r in attendance.bkm_attendance
+		)
+		if sudah_dicatat:
+			continue
+
+		# disisipkan langsung, bukan lewat save(): Attendance yang sudah disubmit
+		# tidak perlu menjalankan validate dan menghitung ulang preminya cuma
+		# karena ada BKM baru yang menunjuknya
+		row = attendance.append("bkm_attendance", {
+			"voucher_type": bkm.doctype,
+			"voucher_no": bkm.name,
+			"kegiatan": k,
+			"peran": peran,
+			"status": status,
+		})
+		row.docstatus = attendance.docstatus
+		row.db_insert()
+
+
+def buat_attendance_bkm(bkm, employee, status, kunci):
+	savepoint = "add_attendance"
+	try:
+		frappe.db.savepoint(savepoint)
+		attendance = frappe.get_doc({
+			"doctype": "Attendance",
+			"employee": employee,
+			"company": bkm.company,
+			"attendance_date": bkm.posting_date,
+			"status": status,
+		})
+		attendance.flags.ignore_permissions = 1
+		attendance.submit()
+
+		return attendance.name
+
+	except DuplicateAttendanceError:
+		if frappe.message_log:
+			frappe.message_log.pop()
+
+		frappe.db.rollback(save_point=savepoint)  # preserve transaction in postgres
+
+		# keduluan permintaan lain yang menyisipkan di saat bersamaan
+		return cari_attendance_kembar(kunci)
+
+
+def hapus_catatan_bkm(bkm):
+	"""Lepas catatan BKM yang dibatalkan dari Attendance yang ditunjuknya.
+
+	Attendance-nya sendiri tidak ikut dibatalkan — perilakunya sama seperti
+	sebelum ada catatan ini. Harus jalan di on_cancel, sebelum frappe mengecek
+	back link: baris yang tertinggal membuat Attendance tersubmit masih menunjuk
+	BKM-nya, dan pembatalan ditolak.
+	"""
+	frappe.db.delete("BKM Attendance", {
+		"parenttype": "Attendance",
+		"voucher_type": bkm.doctype,
+		"voucher_no": bkm.name,
+	})
+
+
 def perbarui_attendance(nama, kiriman):
 	"""Perbarui Attendance yang sudah ada dengan isi kiriman API."""
 	doc = frappe.get_doc("Attendance", nama)
@@ -164,8 +245,11 @@ class Attendance(Attendance):
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"])
 		# validate_active_employee(self.employee)
 		self.validate_attendance_date()
-		if self.designation not in ["NS29","NS30","NS08"]:
-			self.validate_duplicate_record()
+		# Dulu Montir, Danru, dan Satpam (NS08, NS29, NS30) dikecualikan di sini,
+		# dan itulah sumber Attendance dobel di tanggal yang sama. Kiriman ulang
+		# mesin sudah ditangani insert() di atas, jadi tidak ada lagi alasan
+		# membolehkan dua Attendance untuk satu employee di satu tanggal.
+		self.validate_duplicate_record()
 
 		self.validate_overlapping_shift_attendance()
 		# self.validate_employee_status()
