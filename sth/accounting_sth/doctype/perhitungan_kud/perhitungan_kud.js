@@ -9,6 +9,12 @@ frappe.ui.form.on("Perhitungan KUD", {
 		frm.set_query("unit", () => ({
 			filters: { company: frm.doc.company, plasma: 1 },
 		}));
+
+		[...FIELD_AKUN, "cost_center"].forEach((fieldname) => {
+			frm.set_query(fieldname, () => ({
+				filters: { company: frm.doc.company, is_group: 0 },
+			}));
+		});
 	},
 
 	refresh(frm) {
@@ -31,8 +37,22 @@ frappe.ui.form.on("Perhitungan KUD", {
 		frm.clear_table("unit");
 		frm.refresh_field("unit");
 		isi_unit_plasma(frm);
+
+		// Akun company lama dikosongkan, bukan dibiarkan: server cuma mengisi
+		// yang kosong dari setelan, jadi sisa company lama tidak akan tertimpa.
+		[...FIELD_AKUN, "cost_center"].forEach((fieldname) => frm.set_value(fieldname, null));
 	},
 });
+
+const FIELD_AKUN = [
+	"akun_pembelian_tbs",
+	"akun_management_fee",
+	"akun_pph22",
+	"akun_piutang_plasma",
+	"akun_hutang_plasma_antara",
+	"akun_lain_lain",
+	"akun_hutang_mitra",
+];
 
 function isi_unit_plasma(frm) {
 	if (!frm.doc.company) return;

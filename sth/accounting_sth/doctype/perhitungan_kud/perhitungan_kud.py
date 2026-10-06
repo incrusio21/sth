@@ -749,6 +749,7 @@ class PerhitunganKUD(Document):
 		self.validate_unit()
 		self.validate_duplikat()
 		self.isi_akun_dari_setelan()
+		self.validate_akun_company()
 		self.hitung_baris()
 		self.hitung_rekap()
 		self.set_status_harga()
@@ -939,6 +940,28 @@ class PerhitunganKUD(Document):
 
 		if not self.cost_center:
 			self.cost_center = erpnext.get_default_cost_center(self.company)
+
+	def validate_akun_company(self):
+		"""Semua akun dan cost center harus milik company dokumen ini.
+
+		Filter di form tidak cukup: dokumen hasil duplikat atau kiriman API tetap
+		bisa membawa akun company lain, dan isi_akun_dari_setelan() tidak menimpa
+		yang sudah terisi.
+		"""
+		salah = []
+		for fieldname, doctype in (
+			*((kunci, "Account") for kunci in (*KOLOM_AKUN_SETELAN, "akun_piutang_plasma")),
+			("cost_center", "Cost Center"),
+		):
+			nilai = self.get(fieldname)
+			if nilai and frappe.get_cached_value(doctype, nilai, "company") != self.company:
+				salah.append(f"{self.meta.get_label(fieldname)}: {nilai}")
+
+		if salah:
+			frappe.throw(
+				_("Bukan milik {0}:<br>{1}").format(self.company, "<br>".join(salah)),
+				title=_("Akun Beda Company"),
+			)
 
 	def saldo_biaya_bkm(self):
 		"""(pembalikan, di_luar): saldo akun biaya yang dinolkan jurnal ini, dan
