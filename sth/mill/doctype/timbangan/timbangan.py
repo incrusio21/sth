@@ -621,20 +621,50 @@ def _spb_detail_sama(lama, baru):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_spb_available(doctype, txt, searchfield, start, page_len, filters):
+	"""Pilihan SPB untuk Timbangan, yang paling mungkin dicari di atas.
+
+	Urutannya: yang belum ditimbang dan sudah lewat pos penjagaan, lalu yang
+	belum ditimbang tanpa Security Check Point, lalu yang sudah ditimbang.
+	SPB tanpa SCP tetap boleh dipilih karena memang ada SPB yang tidak lewat
+	pos. Yang sudah ditimbang juga tidak dibuang: satu SPB bisa ditimbang
+	lebih dari sekali, cuma ditaruh paling bawah supaya tidak menimbun yang
+	masih menunggu.
+
+	"Sudah ditimbang" dibaca dari Timbangan aktif atau workflow_state Weighed,
+	karena SPB lama banyak yang Weighed tanpa dokumen Timbangan yang merujuknya.
+	Draft tetap ikut: SPB yang dibuat pos penjagaan dari kiriman API masih
+	draft sampai rincian bloknya datang (lihat get_or_create_spb).
+
+	Ketikan dicocokkan ke nama, trans_no, dan no polisi, sebab operator lebih
+	sering memegang nomor kiriman atau plat daripada nama dokumen.
+	"""
+	filters = filters or {}
 	params = {
 		"txt": f"%{txt}%",
 		"start": start,
-		"page_len": page_len
+		"page_len": page_len,
+		"company": filters.get("company"),
 	}
-	return frappe.db.sql("""
-		select spb.name,spb.pabrik,spb.no_polisi 
+	kondisi_company = "and spb.company = %(company)s" if params["company"] else ""
+
+	return frappe.db.sql(f"""
+		select spb.name, spb.trans_no, spb.no_polisi, spb.posting_date
 		from `tabSurat Pengantar Buah` spb
-		join `tabSecurity Check Point` scp on scp.spb = spb.name
-		where spb.name LIKE %(txt)s AND scp.docstatus = 1 
-		group by spb.name
-		LIMIT %(start)s, %(page_len)s
-	""",params)
-	
+		where spb.docstatus < 2
+			and (spb.name like %(txt)s or spb.trans_no like %(txt)s or spb.no_polisi like %(txt)s)
+			{kondisi_company}
+		order by
+			(spb.workflow_state = 'Weighed' or exists(
+				select 1 from `tabTimbangan` t where t.spb = spb.name and t.docstatus < 2
+			)),
+			not exists(
+				select 1 from `tabSecurity Check Point` scp where scp.spb = spb.name and scp.docstatus = 1
+			),
+			spb.posting_date desc,
+			spb.name desc
+		limit %(start)s, %(page_len)s
+	""", params)
+
 @frappe.whitelist()
 def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 

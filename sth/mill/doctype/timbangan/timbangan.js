@@ -6,7 +6,8 @@ frappe.ui.form.on("Timbangan", {
 	setup(frm) {
 		frm.set_query("spb", (doc) => {
 			return {
-				query: frappe.model.get_server_module_name(doc.doctype) + ".get_spb_available"
+				query: frappe.model.get_server_module_name(doc.doctype) + ".get_spb_available",
+				filters: { company: doc.company }
 			}
 		})
 
