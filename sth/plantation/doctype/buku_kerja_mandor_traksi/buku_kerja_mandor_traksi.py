@@ -685,7 +685,7 @@ def get_details_kegiatan(childrens, company, unit, update_upah=True):
 				k_company.workday_base, k_company.holiday_base
 			)
 			.where(
-				(k_company.company == company)
+				(k_company.company == company) &
 				(k_company.parent.isin([d.get("kegiatan") for d in childrens]))
 			)
 		)
@@ -698,7 +698,7 @@ def get_details_kegiatan(childrens, company, unit, update_upah=True):
 		result = query.run() 
 		ress = {}
 		for (
-			parent, position, unit, traksi_type, account, use_basic_salary, rupiah_basis,
+			parent, position, traksi_type, account, use_basic_salary, rupiah_basis,
 			volume_basis, workday, holiday, workday_base, holiday_base
 		) in result:
 			data = ress.setdefault(parent, {"position": {}})
@@ -723,8 +723,7 @@ def get_details_kegiatan(childrens, company, unit, update_upah=True):
 
 		return ress
 	
-	kegiatan_details = _get_kegiatan_upah()
-	kegiatan_details.update(unit)
+	kegiatan_details = _get_kegiatan_upah(unit)
 
 	for ch in childrens:
 		upah = ch.get("upah_hasil")

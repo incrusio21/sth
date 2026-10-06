@@ -78,6 +78,9 @@ frappe.ui.form.on("Buku Kerja Mandor Traksi", {
 		frappe.db.get_value("Unit", frm.doc.unit, "mill", (r) => {
 			frm.doc.__is_mill = cint(r && r.mill)
 		})
+
+		// upah kegiatan diambil per unit, jadi ganti unit ambil ulang
+		frm.cscript.get_kegiatan((frm.doc.task || []).filter((d) => d.kegiatan))
 	},
 	kendaraan(frm){
 		frappe.call({
@@ -149,6 +152,16 @@ frappe.ui.form.on("Detail BKM Traksi Kegiatan", {
 	kegiatan(frm, cdt, cdn){
 		let data = frappe.get_doc(cdt, cdn)
 		if(!data.kegiatan) return
+
+		if(!frm.doc.unit){
+			frappe.msgprint({
+				title: __("Unit Belum Dipilih"),
+				message: __("Pilih Unit terlebih dahulu sebelum memilih Kegiatan."),
+				indicator: "orange",
+			})
+			frappe.model.set_value(cdt, cdn, "kegiatan", "")
+			return
+		}
 
 		frm.cscript.get_kegiatan([data])
 	},
@@ -368,6 +381,10 @@ sth.plantation.BukuKerjaMandorTraksi = class BukuKerjaMandorTraksi extends sth.p
 		});
 
 		this.frm.set_query("kegiatan", "task", function (doc) {
+			if (!doc.unit) {
+				frappe.throw(__("Pilih Unit terlebih dahulu sebelum memilih Kegiatan."))
+			}
+
 			if(doc.__is_mill){
 				return {
 					filters: {
