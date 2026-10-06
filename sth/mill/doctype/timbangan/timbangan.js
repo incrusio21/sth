@@ -273,6 +273,10 @@ frappe.ui.form.on("Timbangan", {
 		frm.trigger('calculate_weight_eksternal')
 	},
 
+	sortasi_eksternal(frm) {
+		frm.trigger('calculate_weight_eksternal')
+	},
+
 	netto(frm) {
 		frm.trigger('calculate_weight_eksternal')
 	},
@@ -281,12 +285,14 @@ frappe.ui.form.on("Timbangan", {
 	calculate_weight_eksternal(frm) {
 		if (!frm.doc.bruto_eksternal || !frm.doc.tara_eksternal) {
 			frm.set_value("netto_eksternal", 0)
+			frm.set_value("netto_2_eksternal", 0)
 			frm.set_value("selisih_netto_eksternal", 0)
 			return
 		}
 
 		const netto_eksternal = frm.doc.bruto_eksternal - frm.doc.tara_eksternal
 		frm.set_value("netto_eksternal", netto_eksternal)
+		frm.set_value("netto_2_eksternal", netto_eksternal - (netto_eksternal * flt(frm.doc.sortasi_eksternal) / 100))
 		frm.set_value("selisih_netto_eksternal", frm.doc.netto ? frm.doc.netto - netto_eksternal : 0)
 	},
 	onload(frm) {

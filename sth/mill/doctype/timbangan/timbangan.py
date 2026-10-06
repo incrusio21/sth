@@ -244,14 +244,15 @@ class Timbangan(Document):
 	def validate_netto_eksternal_setelah_dn(self):
 		"""Netto eksternal Dispatch tidak boleh berubah sesudah DN-nya dibuat.
 
-		Untuk Dispatch company Manual Timbangan, angka ini qty Delivery Note-nya
-		(lihat berat_kirim), dan DN sudah tersubmit sejak timbangannya disubmit.
-		Mengubahnya di sini cuma membuat timbangan dan DN berselisih diam-diam.
+		Untuk Dispatch company Manual Timbangan, netto 2 eksternal — netto
+		eksternal sesudah sortasi — qty Delivery Note-nya (lihat berat_kirim),
+		dan DN sudah tersubmit sejak timbangannya disubmit. Mengubahnya di sini
+		cuma membuat timbangan dan DN berselisih diam-diam.
 		"""
 		if not (self.pakai_netto_eksternal() and (self.delivery_note or self.delivery_note_2)):
 			return
 
-		if self.has_value_changed("netto_eksternal"):
+		if self.has_value_changed("netto_eksternal") or self.has_value_changed("netto_2_eksternal"):
 			frappe.throw(
 				_("Netto eksternal sudah menjadi qty Delivery Note {0}. Cancel timbangan ini untuk mengubahnya.").format(
 					", ".join(filter(None, (self.delivery_note, self.delivery_note_2)))
@@ -265,13 +266,13 @@ class Timbangan(Document):
 	def berat_kirim(self):
 		"""Berat yang dibebankan ke DO dan menjadi qty Delivery Note.
 
-		Company Manual Timbangan menagih menurut timbangan pembeli, jadi Dispatch
-		di sana memakai netto eksternal. Selebihnya netto_2 pabrik, termasuk
-		selama netto eksternalnya belum diisi — submit tetap menahannya di
-		validate_berat, kecuali kiriman API.
+		Company Manual Timbangan dibayar menurut timbangan pembeli sesudah
+		dipotong sortasinya, jadi Dispatch di sana memakai netto 2 eksternal.
+		Selebihnya netto_2 pabrik, termasuk selama netto eksternalnya belum
+		diisi — submit tetap menahannya di validate_berat, kecuali kiriman API.
 		"""
 		if self.pakai_netto_eksternal() and flt(self.netto_eksternal):
-			return flt(self.netto_eksternal)
+			return flt(self.netto_2_eksternal)
 
 		return flt(self.netto_2)
 
@@ -282,19 +283,23 @@ class Timbangan(Document):
 		luar (pembeli, supplier) diketik dari tiketnya, dan wajib terisi sebelum
 		submit (validate_berat). Untuk Receive cuma pembanding — tidak
 		menggantikan bruto/tara pabrik dan tidak mengalir ke stok maupun SPB — dan
-		masih boleh dikoreksi sesudah submit. Untuk Dispatch, netto eksternal yang
-		jadi qty Delivery Note (lihat berat_kirim) sekaligus berat Mill di SPB
-		(lihat update_spb_weight_dispatch).
+		masih boleh dikoreksi sesudah submit. Untuk Dispatch, netto eksternal jadi
+		berat Mill di SPB (lihat update_spb_weight_dispatch), sedangkan netto 2
+		eksternal — netto eksternal dipotong sortasi pembeli, rumusnya sama
+		dengan netto_2 pabrik — yang dibayar, jadi itu qty Delivery Note (lihat
+		berat_kirim).
 
 		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
 		masih nol, netto dan selisihnya dibiarkan nol.
 		"""
 		if not (flt(self.bruto_eksternal) and flt(self.tara_eksternal)):
 			self.netto_eksternal = 0
+			self.netto_2_eksternal = 0
 			self.selisih_netto_eksternal = 0
 			return
 
 		self.netto_eksternal = flt(self.bruto_eksternal) - flt(self.tara_eksternal)
+		self.netto_2_eksternal = self.netto_eksternal - (self.netto_eksternal * flt(self.sortasi_eksternal) / 100)
 		self.selisih_netto_eksternal = flt(self.netto) - self.netto_eksternal if flt(self.netto) else 0
 
 	def before_submit(self):
@@ -590,12 +595,14 @@ class Timbangan(Document):
 		# Yang tidak memakai DO 2 tetap dihitung senetto_2-nya: itu yang dipakai
 		# create_delivery_notes, sekaligus menutup timbangan lama dari sebelum ada
 		# fitur dua DO yang qty_do-nya tidak pernah terisi. Dispatch Manual
-		# Timbangan dihitung senetto eksternalnya, seperti di berat_kirim.
+		# Timbangan dihitung senetto 2 eksternalnya, seperti di berat_kirim —
+		# dirumuskan dari netto eksternal karena timbangan dari sebelum ada
+		# sortasi eksternal belum punya netto_2_eksternal.
 		qty_timbangan = frappe.db.sql("""
 			SELECT SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN
 								(CASE WHEN type = 'Dispatch' AND manual_timbangan = 1
 										AND COALESCE(netto_eksternal, 0) > 0
-									  THEN netto_eksternal
+									  THEN netto_eksternal * (1 - COALESCE(sortasi_eksternal, 0) / 100)
 									  ELSE COALESCE(netto_2, 0) END)
 						   ELSE COALESCE(qty_do, 0) END)
 			FROM `tabTimbangan`
