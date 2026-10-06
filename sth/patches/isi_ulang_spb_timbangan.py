@@ -29,8 +29,13 @@ def execute(pasangan=None, dry_run=False):
 
 	Yang diisi: `spb`, lalu `kebun` dan `divisi_kebun` dari SPB-nya. Untuk yang
 	sudah submit, berat juga ditulis ke SPB lewat update_spb_weight, seperti
-	yang mestinya terjadi di on_submit. Data TBS tidak disentuh: angkanya dibaca
-	per unit pabrik, bukan per SPB.
+	yang mestinya terjadi di on_submit — untuk company Manual Timbangan berat
+	itu hasil timbangan eksternal. Data TBS tidak disentuh: angkanya dibaca per
+	unit pabrik, bukan per SPB.
+
+	Sesudahnya, Timbangan Manual yang SPB-nya tidak pernah hilang ikut
+	diselaraskan: SPB-nya telanjur menerima berat pabrik
+	(_selaraskan_berat_manual).
 
 	Aman dijalankan berulang: yang SPB-nya sudah terisi tidak lagi dicari.
 
@@ -54,6 +59,45 @@ def execute(pasangan=None, dry_run=False):
 			_isi(h)
 
 	_cetak_ringkasan(hasil, dry_run)
+
+	if not pasangan:
+		_selaraskan_berat_manual(dry_run)
+
+
+def _selaraskan_berat_manual(dry_run):
+	"""Tulis ulang berat SPB dari timbangan eksternal untuk company Manual Timbangan.
+
+	SPB menerima hasil timbangan eksternal sejak berat_untuk_spb, tapi Timbangan
+	Manual yang SPB-nya tidak hilang sudah telanjur menulis berat pabrik ke
+	SPB-nya. Yang dikejar di sini cuma itu: sudah submit, netto eksternal terisi,
+	dan berat SPB-nya belum sama dengan timbangan eksternal.
+	"""
+	baris = frappe.db.sql("""
+		SELECT t.name, t.spb, t.netto_eksternal, spb.total_weight
+		FROM `tabTimbangan` t
+		INNER JOIN `tabSurat Pengantar Buah` spb ON spb.name = t.spb
+		WHERE t.docstatus = 1
+			AND t.type = 'Receive'
+			AND t.receive_type = 'TBS Internal'
+			AND t.manual_timbangan = 1
+			AND IFNULL(t.netto_eksternal, 0) > 0
+			AND (ABS(IFNULL(spb.in_weight, 0) - IFNULL(t.bruto_eksternal, 0)) > 0.001
+				OR ABS(IFNULL(spb.out_weight, 0) - IFNULL(t.tara_eksternal, 0)) > 0.001
+				OR ABS(IFNULL(spb.total_weight, 0) - t.netto_eksternal) > 0.001)
+		ORDER BY t.name
+	""", as_dict=True)
+
+	if not dry_run:
+		for b in baris:
+			frappe.get_doc("Timbangan", b.name).update_spb_weight()
+
+	kata = "akan ditulis ulang" if dry_run else "ditulis ulang"
+	print(f"Berat SPB Manual Timbangan: {len(baris)} {kata} dari timbangan eksternal")
+
+	for b in baris[:BATAS_RINCIAN]:
+		print(f"  {b.name} {b.spb}: {flt(b.total_weight)} -> {flt(b.netto_eksternal)}")
+	if len(baris) > BATAS_RINCIAN:
+		print(f"  ... dan {len(baris) - BATAS_RINCIAN} lain")
 
 
 def _timbangan_tanpa_spb():

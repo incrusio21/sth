@@ -280,10 +280,10 @@ class Timbangan(Document):
 
 		Hanya untuk company yang mencentang Manual Timbangan: hasil timbang pihak
 		luar (pembeli, supplier) diketik dari tiketnya, dan wajib terisi sebelum
-		submit (validate_berat). Untuk Receive cuma pembanding — tidak
-		menggantikan bruto/tara pabrik dan tidak mengalir ke stok — dan masih
-		boleh dikoreksi sesudah submit. Untuk Dispatch, netto eksternal yang jadi
-		qty Delivery Note (lihat berat_kirim).
+		submit (validate_berat). Untuk Receive, angka ini yang ditulis ke SPB
+		(berat_untuk_spb) tapi tidak mengalir ke stok, dan masih boleh dikoreksi
+		sesudah submit — SPB-nya ikut diperbarui. Untuk Dispatch, netto
+		eksternal yang jadi qty Delivery Note (lihat berat_kirim).
 
 		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
 		masih nol, netto dan selisihnya dibiarkan nol.
@@ -423,9 +423,7 @@ class Timbangan(Document):
 			return
 
 		spb_doc = frappe.get_doc("Surat Pengantar Buah", self.spb)
-		spb_doc.in_weight = self.bruto
-		spb_doc.out_weight = self.tara
-		spb_doc.total_weight = self.netto or self.bruto - self.tara
+		spb_doc.in_weight, spb_doc.out_weight, spb_doc.total_weight = self.berat_untuk_spb()
 		spb_doc.in_time = self.weight_in_time
 		spb_doc.out_time = self.weight_out_time
 		spb_doc.workflow_state = "Weighed"
@@ -447,6 +445,33 @@ class Timbangan(Document):
 			row.db_update()
 
 		spb_doc.db_update()
+
+	def berat_untuk_spb(self):
+		"""Bruto, tara, dan netto yang ditulis ke SPB.
+
+		Company Manual Timbangan memakai hasil timbangan eksternal. Selama netto
+		eksternalnya belum terisi — kiriman API yang dikecualikan validate_berat —
+		SPB tetap menerima berat pabrik, supaya tidak tertulis nol.
+		"""
+		if cint(self.manual_timbangan) and flt(self.netto_eksternal):
+			return flt(self.bruto_eksternal), flt(self.tara_eksternal), flt(self.netto_eksternal)
+
+		return flt(self.bruto), flt(self.tara), flt(self.netto) or flt(self.bruto) - flt(self.tara)
+
+	def on_update_after_submit(self):
+		self.perbarui_spb_dari_eksternal()
+
+	def perbarui_spb_dari_eksternal(self):
+		"""Tulis ulang berat SPB kalau timbangan eksternalnya dikoreksi sesudah submit.
+
+		Receive boleh mengubah bruto/tara eksternal sesudah submit, dan untuk
+		company Manual Timbangan angka itulah yang dipegang SPB (berat_untuk_spb).
+		"""
+		if self.receive_type != "TBS Internal" or not cint(self.manual_timbangan):
+			return
+
+		if any(self.has_value_changed(f) for f in ("bruto_eksternal", "tara_eksternal", "netto_eksternal")):
+			self.update_spb_weight()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
