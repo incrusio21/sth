@@ -220,7 +220,9 @@ def _pasangan_tangan(timbangan, spb):
 		t.alasan = "Timbangan tidak ada"
 	elif data.docstatus == 2:
 		t.alasan = "Timbangan sudah dibatalkan"
-	elif data.spb:
+	# SPB yang sama tetap diterima: beratnya ditulis ulang. Itu yang dibutuhkan
+	# Dispatch yang SPB-nya utuh tapi beratnya belum pernah sampai ke SPB.
+	elif data.spb and data.spb != spb:
 		t.alasan = f"SPB-nya sudah terisi {data.spb}"
 	elif not frappe.db.exists("Surat Pengantar Buah", spb):
 		t.alasan = f"SPB {spb} tidak ada"
