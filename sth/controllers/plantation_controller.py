@@ -147,15 +147,19 @@ class PlantationController(AccountsController):
         pass
 
 @frappe.whitelist()
-def fetch_kegiatan_company(kegiatan, company, unit, fieldname):
+def fetch_kegiatan_company(kegiatan, company, unit=None, fieldname=None):
+    # unit opsional: pemanggil yang belum mengirim unit langsung jatuh ke baris
+    # Kegiatan Company tanpa unit, bukan meledak karena argumen kurang
     if isinstance(fieldname, str):
         fieldname = json.loads(fieldname)
 
-    kegiatan_company = frappe.get_value("Kegiatan Company", {
-        "parent": kegiatan,
-        "company": company,
-        "unit": unit,
-    }, fieldname, as_dict=1)
+    kegiatan_company = None
+    if unit:
+        kegiatan_company = frappe.get_value("Kegiatan Company", {
+            "parent": kegiatan,
+            "company": company,
+            "unit": unit,
+        }, fieldname, as_dict=1)
 
     if not kegiatan_company:
         kegiatan_company = frappe.get_value("Kegiatan Company", {

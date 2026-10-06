@@ -69,7 +69,7 @@ class RencanaKerjaHarian(PlantationController):
 				frappe.db.get_value("Kategori Kegiatan", row.kategori_kegiatan, "is_bibitan")
 			) if row.kategori_kegiatan else 0
 
-			basis = fetch_kegiatan_company(row.kegiatan, self.company, list(FIELD_BASIS_KEGIATAN))
+			basis = fetch_kegiatan_company(row.kegiatan, self.company, self.unit, list(FIELD_BASIS_KEGIATAN))
 			if not basis:
 				frappe.throw(
 					_("Baris {0}: Kegiatan {1} belum punya baris untuk Company {2} di tabel "

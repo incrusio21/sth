@@ -109,6 +109,7 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
             args: {
                 kegiatan: row.kegiatan,
                 company: me.frm.doc.company,
+                unit: me.frm.doc.unit,
                 fieldname: ["volume_basis", "rupiah_basis"],
             },
             callback: function (data) {

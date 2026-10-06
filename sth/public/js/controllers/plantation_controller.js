@@ -19,9 +19,9 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
             sth.plantation.setup_doctype_ref(doctype)
         }
 
-        for (const fieldname of ["company", "kegiatan"]) {
+        for (const fieldname of ["company", "kegiatan", "unit"]) {
 			frappe.ui.form.on(doctype, fieldname, function (frm) {
-                me.fetch_data_kegiatan(frm.doc.kegiatan, frm.doc.company)
+                me.fetch_data_kegiatan(frm.doc.kegiatan, frm.doc.company, frm.doc.unit)
 			});
 		}
     }
@@ -286,7 +286,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
         })
     }
 
-    fetch_data_kegiatan(kegiatan, company) {
+    fetch_data_kegiatan(kegiatan, company, unit) {
         let me = this
         if (!me.kegiatan_fetch_fieldname) return
 
@@ -298,6 +298,7 @@ sth.plantation.TransactionController = class TransactionController extends sth.p
                 args: {
                     kegiatan: kegiatan,
                     company: company,
+                    unit: unit,
                     fieldname: me.kegiatan_fetch_fieldname
                 },
                 callback: (data) => {
