@@ -42,4 +42,7 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 # isi_ulang_spb_timbangan juga tidak didaftarkan: SPB-nya ditebak dari rincian
 # blok, dan yang ragu harus dipasangkan sendiri lewat --kwargs "{'pasangan': ...}",
 # jadi keluarannya perlu dibaca. Jalankan sesudah migrate commit 8e1e0078.
+# bersihkan_attendance_dobel juga tidak didaftarkan: membatalkan ratusan
+# Attendance beserta Employee Payment Log preminya, jadi lihat dulu daftarnya
+# dengan --kwargs "{'dry_run': 1}". Jalankan sesudah migrate commit 5d36b01d.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
