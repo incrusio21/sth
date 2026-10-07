@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-09-14 13:16:07.795717",
+ "creation": "2026-10-07 11:33:39.418958",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -83,13 +83,14 @@
   "qty_do",
   "qty_do_2",
   "timbangan_eksternal_section",
+  "tanggal_timbang_eksternal",
   "no_tiket_eksternal",
-  "bruto_eksternal",
   "column_break_tbex",
   "tara_eksternal",
-  "sortasi_eksternal",
+  "bruto_eksternal",
   "column_break_ntex",
   "netto_eksternal",
+  "sortasi_eksternal",
   "netto_2_eksternal",
   "selisih_netto_eksternal",
   "driver_data_tab",
@@ -774,10 +775,9 @@
   {
    "allow_on_submit": 1,
    "default": "0",
-   "depends_on": "eval:doc.type == \"Dispatch\"",
    "fieldname": "sortasi_eksternal",
    "fieldtype": "Percent",
-   "label": "Sortasi Eksternal",
+   "label": "Sortasi Eksternal (%)",
    "precision": "2"
   },
   {
@@ -811,13 +811,21 @@
    "label": "Selisih Netto",
    "precision": "0",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Today",
+   "fieldname": "tanggal_timbang_eksternal",
+   "fieldtype": "Date",
+   "in_preview": 1,
+   "label": "Tanggal Timbang Eksternal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-06 14:00:00.000000",
+ "modified": "2026-10-07 13:34:30.397605",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",
