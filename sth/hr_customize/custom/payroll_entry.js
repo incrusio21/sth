@@ -268,13 +268,10 @@ frappe.ui.form.on("Payroll Entry", {
 	create_salary_slips: function (frm) {
 		frm.call({
 			doc: frm.doc,
-			method: "run_doc_method",
-			args: {
-				method: "create_salary_slips",
-				dt: "Payroll Entry",
-				dn: frm.doc.name,
-			},
-		});
+			method: "create_salary_slips",
+			freeze: true,
+			freeze_message: __("Creating Salary Slips..."),
+		}).then(() => frm.reload_doc());
 	},
 
 	add_context_buttons: function (frm) {
