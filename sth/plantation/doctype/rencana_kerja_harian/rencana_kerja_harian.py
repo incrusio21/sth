@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _, unscrub
-from frappe.utils import cint, flt
+from frappe.utils import cint, cstr, flt
 
 from sth.controllers.plantation_controller import PlantationController, fetch_kegiatan_company
 
@@ -15,6 +15,8 @@ force_item_fields = (
 # Tarif dan basis upah tidak ikut dikirim sistem luar maupun diisi tangan: semuanya
 # diambil dari master Kegiatan Company tiap kali dokumen disimpan.
 FIELD_BASIS_KEGIATAN = ["volume_basis", "rupiah_basis"]
+
+PPB = "Permintaan Pengeluaran Barang"
 
 
 class RencanaKerjaHarian(PlantationController):
@@ -43,6 +45,159 @@ class RencanaKerjaHarian(PlantationController):
 		self.validate_duplicate_rkh()
 
 		super().validate()
+
+	def on_submit(self):
+		self.buat_permintaan_pengeluaran_barang()
+
+	def on_cancel(self):
+		self.batalkan_permintaan_pengeluaran_barang()
+
+	def buat_permintaan_pengeluaran_barang(self):
+		"""Ajukan material RKH ini ke gudang central sebagai Permintaan Pengeluaran Barang.
+
+		RKH tidak boleh gagal karena permintaannya. Yang bisa dilengkapi langsung
+		disubmit; yang terganjal — stok kurang, penerima atau akun belum ada —
+		ditinggal di draft untuk dibereskan gudang, dan alasannya dicatat di RKH.
+		"""
+		if frappe.db.exists(PPB, {"rencana_kerja_harian": self.name, "docstatus": ["<", 2]}):
+			return
+
+		items = self.susun_item_permintaan_pengeluaran()
+		if not items:
+			return
+
+		ppb = frappe.new_doc(PPB)
+		ppb.update({
+			"pt_pemilik_barang": self.company,
+			"gudang": self.gudang_central,
+			"tanggal": self.posting_date,
+			"nama_karyawan": self.nik_penerima_material or self.mandor,
+			"catatan": _("Material RKH {0}").format(self.name)
+				+ (" / Trans No {0}".format(self.trans_no) if self.trans_no else ""),
+			"rencana_kerja_harian": self.name,
+		})
+		ppb.set("items", items)
+
+		ppb.flags.ignore_permissions = True
+		# submit diputuskan di sini, bukan oleh approve_api yang menyubmit semua
+		# dokumen milik user API begitu di-insert
+		ppb.flags.lewati_submit_otomatis = True
+
+		# Pesan validasi PPB yang ditangkap di bawah jangan sampai muncul sebagai
+		# popup error di RKH yang sebenarnya berhasil disubmit.
+		mute_messages = frappe.flags.mute_messages
+		frappe.flags.mute_messages = True
+
+		try:
+			frappe.db.savepoint("rkh_buat_ppb")
+			try:
+				# field wajib yang kosong tidak boleh menggagalkan draft-nya;
+				# baru ditagih waktu submit
+				ppb.flags.ignore_mandatory = True
+				ppb.insert()
+			except Exception as e:
+				frappe.db.rollback(save_point="rkh_buat_ppb")
+				frappe.log_error(
+					title=_("Permintaan Pengeluaran Barang RKH {0} gagal dibuat").format(self.name),
+					reference_doctype=self.doctype, reference_name=self.name,
+				)
+				self.add_comment("Comment", _(
+					"Permintaan Pengeluaran Barang tidak bisa dibuat otomatis: {0}"
+				).format(pesan_error(e)))
+				return
+
+			frappe.db.savepoint("rkh_submit_ppb")
+			try:
+				ppb.flags.ignore_mandatory = False
+				ppb.submit()
+			except Exception as e:
+				frappe.db.rollback(save_point="rkh_submit_ppb")
+				self.add_comment("Comment", _(
+					"Permintaan Pengeluaran Barang {0} ditinggal di Draft: {1}"
+				).format(frappe.bold(ppb.name), pesan_error(e)))
+		finally:
+			frappe.flags.mute_messages = mute_messages
+
+	def susun_item_permintaan_pengeluaran(self):
+		"""Baris Permintaan Pengeluaran Barang dari tabel material.
+
+		Material RKH tidak menunjuk blok, padahal blok yang menentukan cost center
+		waktu barangnya keluar. Total dosis tiap barang dibagi ke baris kegiatan
+		Perawatan sebanding luasnya — sama dengan anggapan qty = dosis / total_luas
+		di update_rate_or_qty_value. Sisa pembulatan jatuh ke baris terakhir supaya
+		jumlahnya tetap sama dengan dosis.
+		"""
+		perawatan = [r for r in self.kegiatan_detail if r.tipe_kegiatan == "Perawatan"]
+		if not perawatan:
+			return []
+
+		kebutuhan = {}
+		for m in self.material:
+			if m.item and flt(m.dosis):
+				kebutuhan.setdefault((m.item, m.uom), 0)
+				kebutuhan[(m.item, m.uom)] += flt(m.dosis)
+
+		luas = sum(flt(r.target_volume) for r in perawatan)
+		precision = cint(frappe.get_meta(PPB + " Item").get_field("jumlah").precision) or 2
+		akun = {}
+		items = []
+
+		for (item, uom), dosis in kebutuhan.items():
+			sisa = dosis
+
+			for i, row in enumerate(perawatan):
+				if i == len(perawatan) - 1:
+					jumlah = flt(sisa, precision)
+				elif luas:
+					jumlah = flt(dosis * flt(row.target_volume) / luas, precision)
+				else:
+					jumlah = flt(dosis / len(perawatan), precision)
+
+				sisa -= jumlah
+				if not jumlah:
+					continue
+
+				if row.kegiatan not in akun:
+					akun[row.kegiatan] = (fetch_kegiatan_company(
+						row.kegiatan, self.company, self.unit, ["account"]
+					) or {}).get("account")
+
+				items.append({
+					"kode_barang": item,
+					"satuan": uom or frappe.db.get_value("Item", item, "stock_uom"),
+					"jumlah": jumlah,
+					"sub_unit": self.divisi,
+					"blok": row.blok,
+					"kegiatan": row.kegiatan,
+					"account": akun[row.kegiatan],
+				})
+
+		return items
+
+	def batalkan_permintaan_pengeluaran_barang(self):
+		"""Tarik permintaan barang yang lahir dari RKH ini.
+
+		Draft dihapus, yang sudah disubmit dibatalkan. Kalau barangnya sudah ada
+		yang keluar, RKH tidak boleh batal sebelum Pengeluaran Barang-nya dibatalkan.
+		"""
+		for nama in frappe.get_all(
+			PPB, filters={"rencana_kerja_harian": self.name, "docstatus": ["<", 2]}, pluck="name"
+		):
+			ppb = frappe.get_doc(PPB, nama)
+
+			if ppb.docstatus == 0:
+				frappe.delete_doc(PPB, nama, ignore_permissions=True)
+				continue
+
+			if flt(ppb.outgoing) > 0:
+				frappe.throw(
+					_("Barang di Permintaan Pengeluaran Barang {0} sudah dikeluarkan. Batalkan "
+					  "dulu Pengeluaran Barang-nya.").format(frappe.bold(nama)),
+					title=_("Barang Sudah Keluar")
+				)
+
+			ppb.flags.ignore_permissions = True
+			ppb.cancel()
 
 	def isi_data_kegiatan(self):
 		"""Lengkapi tiap baris kegiatan dari master: kategori, tipe, dan basis upah.
@@ -225,6 +380,10 @@ class RencanaKerjaHarian(PlantationController):
 					),
 					title=_("Rencana Kerja Harian Kembar")
 				)
+
+
+def pesan_error(e):
+	return frappe.utils.strip_html(cstr(e)).strip() or type(e).__name__
 
 
 def cari_rencana_kerja_bulanan(kegiatan, tipe_kegiatan, divisi, blok, posting_date, is_bibitan=0):

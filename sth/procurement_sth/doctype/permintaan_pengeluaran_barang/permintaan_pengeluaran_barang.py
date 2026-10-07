@@ -32,14 +32,36 @@ class PermintaanPengeluaranBarang(Document):
 		self.db_set("status","Cancelled")
 
 	def validate_stock(self):
+		"""Tolak permintaan yang melebihi stok gudang saat ini.
+
+		Stok dibaca ulang dari Bin, bukan dari angka yang diisi form waktu barang
+		dipilih: permintaan dari Rencana Kerja Harian boleh menunggu di draft
+		sampai stoknya datang, dan angka lamanya sudah basi saat itu.
+
+		Dibandingkan per barang, bukan per baris. Permintaan dari RKH memecah satu
+		barang ke beberapa blok, dan tiap pecahannya sendiri-sendiri bisa lolos
+		sementara jumlahnya melebihi stok.
+		"""
+		kebutuhan = {}
+
 		for row in self.items:
 			if flt(row.jumlah) == 0:
 				frappe.throw(f'Qty Barang {row.kode_barang} tidak boleh kosong')
 
-			if flt(row.jumlah) > flt(row.jumlah_saat_ini):
-				frappe.throw(f'Barang {row.kode_barang} tidak cukup stock untuk dikeluarkan')
-			
-			
+			row.jumlah_saat_ini = flt(frappe.db.get_value(
+				"Bin", {"warehouse": self.gudang, "item_code": row.kode_barang}, "actual_qty"
+			))
+			kebutuhan.setdefault(row.kode_barang, [0, row.jumlah_saat_ini])
+			kebutuhan[row.kode_barang][0] += flt(row.jumlah)
+
+		# Permintaan dari RKH tetap disimpan walau stoknya kurang — RKH-nya tidak
+		# boleh tertahan karena gudang. Stoknya baru ditagih waktu submit.
+		if self.docstatus == 0 and self.rencana_kerja_harian:
+			return
+
+		for kode_barang, (jumlah, stok) in kebutuhan.items():
+			if jumlah > stok:
+				frappe.throw(f'Barang {kode_barang} tidak cukup stock untuk dikeluarkan')
 
 	def update_outgoing_percentage(self):
 		qty = 0
