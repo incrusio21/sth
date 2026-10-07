@@ -48,4 +48,7 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 # isi_catatan_bkm_attendance juga tidak didaftarkan: pengisian mundur catatan
 # BKM di Attendance per rentang tanggal (bawaannya September 2026), jalankan
 # sendiri sesudah migrate commit 5d36b01d.
+# buat_ppb_rkh_submitted juga tidak didaftarkan: RKH lama bisa saja materialnya
+# sudah diminta lewat PPB manual, jadi batasi tanggalnya dan lihat dulu dengan
+# --kwargs "{'dry_run': 1, 'dari_tanggal': ...}". Jalankan sesudah migrate.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

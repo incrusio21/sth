@@ -6,6 +6,8 @@ frappe.ui.form.on("Rencana Kerja Harian", {
         frm.set_df_property("material", "cannot_add_rows", true);
         frm.set_df_property("kendaraan", "cannot_add_rows", true);
         frm.set_df_property("angkut", "cannot_add_rows", true);
+        // nama karyawannya sudah tampil di nama_penerima_material
+        frm.set_df_property("nik_penerima_material", "tanpa_judul_link", 1);
     }
 });
 

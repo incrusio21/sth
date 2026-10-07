@@ -182,7 +182,9 @@ frappe.form.formatters = {
 		var original_value = value;
 		let link_title = frappe.utils.get_link_title(doctype, value);
 
-		if (link_title === value) {
+		// Field yang ditandai tanpa_judul_link menampilkan nama dokumennya apa
+		// adanya walau doctype tujuannya memakai show_title_field_in_link.
+		if (link_title === value || (docfield && docfield.tanpa_judul_link)) {
 			link_title = null;
 		}
 
@@ -483,6 +485,28 @@ frappe.get_format_helper = function (doc) {
 	$.extend(helper, doc);
 	return helper;
 };
+
+// Pasangan formatter Link di atas untuk kotak isiannya: tanpa ini field yang
+// ditandai tanpa_judul_link tetap berganti jadi judul begitu bisa diedit.
+// Dipasang per field lewat frm.set_df_property(fieldname, "tanpa_judul_link", 1).
+(function () {
+	const kelas = frappe.ui && frappe.ui.form && frappe.ui.form.ControlLink;
+	if (!kelas || kelas.prototype.sth_tanpa_judul_link) {
+		return;
+	}
+
+	const asal = kelas.prototype.is_title_link;
+
+	kelas.prototype.is_title_link = function () {
+		if (this.df && this.df.tanpa_judul_link) {
+			return false;
+		}
+
+		return asal.call(this);
+	};
+
+	kelas.prototype.sth_tanpa_judul_link = true;
+})();
 
 frappe.form.link_formatters["User"] = function (value, doc, docfield) {
 	let full_name = doc && (doc.full_name || (docfield && doc[`${docfield.fieldname}_full_name`]));

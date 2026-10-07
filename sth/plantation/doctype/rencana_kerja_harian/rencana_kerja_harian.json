@@ -353,8 +353,13 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-10-06 15:48:23.204390",
+ "links": [
+  {
+   "link_doctype": "Permintaan Pengeluaran Barang",
+   "link_fieldname": "rencana_kerja_harian"
+  }
+ ],
+ "modified": "2026-10-07 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Rencana Kerja Harian",
