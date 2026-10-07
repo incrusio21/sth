@@ -1,5 +1,8 @@
 frappe.ui.form.on('Salary Slip', {
     refresh: function(frm) {
+        // nama karyawannya sudah tampil di employee_name
+        frm.set_df_property("employee", "tanpa_judul_link", 1);
+
         if (frm.doc.docstatus == 1) {
             frm.add_custom_button(__('Payment Voucher'), function() {
                 frappe.model.open_mapped_doc({
