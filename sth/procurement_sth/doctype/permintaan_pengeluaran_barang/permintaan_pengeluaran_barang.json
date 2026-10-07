@@ -25,6 +25,7 @@
   "nama_jabatan",
   "column_break_gyfv",
   "catatan",
+  "rencana_kerja_harian",
   "persetujuan_1",
   "persetujuan_2",
   "section_break_ubqb",
@@ -74,6 +75,14 @@
    "label": "Nama Karyawan",
    "options": "Employee",
    "reqd": 1
+  },
+  {
+   "fieldname": "rencana_kerja_harian",
+   "fieldtype": "Link",
+   "label": "Rencana Kerja Harian",
+   "options": "Rencana Kerja Harian",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "kode_jabatan.designation_name",
@@ -206,7 +215,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-17 10:52:43.803175",
+ "modified": "2026-10-07 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
