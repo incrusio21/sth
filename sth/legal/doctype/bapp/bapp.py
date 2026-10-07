@@ -1112,6 +1112,13 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 		portion = frappe.db.get_value("Proposal Schedule", doc.term_detail, "invoice_portion") if doc.term_detail else 0
 		invoiced_qty_map = get_invoiced_qty_map(source_name)
 
+		# BAPP yang submit sebelum set_item_global masih menyimpan item code kosong
+		item_global = None
+		if any(not d.item_code for d in doc.items):
+			item_global = get_legal_settings("default_item_code")
+			if not item_global:
+				frappe.throw(_("BAPP {0} punya baris tanpa Item Code. Isi <b>Default Item Code</b> di Legal Settings sebagai item global untuk baris kegiatan.").format(source_name))
+
 		def set_missing_values(source, target):
 			if len(target.get("items")) == 0:
 				frappe.throw(_("All items have already been Invoiced/Returned"))
@@ -1154,6 +1161,9 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 			# 	target_doc.amount = flt(source_doc.rate) * flt(target_doc.qty)
 			# 	target_doc.base_amount = target_doc.amount * flt(source_parent.conversion_rate)
 			# else:
+			if not target_doc.item_code:
+				target_doc.item_code = item_global
+
 			pending = get_pending_qty(source_doc)
 			if selected_supplier and num_suppliers > 1:
 				# Qty per PI = qty BAPP dibagi jumlah supplier, tidak melebihi pending
