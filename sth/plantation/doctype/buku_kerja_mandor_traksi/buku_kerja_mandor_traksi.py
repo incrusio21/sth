@@ -753,7 +753,6 @@ def get_details_kegiatan(childrens, company, unit, update_upah=True):
 		upah_kegiatan = not kc.get("use_basic_salary", 0)
 		if update_upah:
 			upah = kc.get("rupiah_basis", 0) if upah_kegiatan else 0
-			print(upah)			
 
 		ch.update({
 			"upah_hasil": upah,
