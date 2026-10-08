@@ -17,6 +17,8 @@ class GantiRugiLahan(AccountsController):
 		return self.jenis_biaya or "GRLTT"
 	
 	def validate(self):
+		for row in self.items:
+			row.expense_account = ""
 		self.set_missing_value()
 		self.validate_duplicate_sppt()
 		self.calculate_total()
