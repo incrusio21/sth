@@ -181,6 +181,7 @@ frappe.ui.form.on("Material Request", {
                     frm.set_value({
                         "unit": res["unit"],
                         "company": res.company,
+                        "berita_acara": res.berita_acara,
                         "sub_purchase_type": res["sub_purchase_type"],
                         "purchase_type": res["purchase_type"]
                     })
