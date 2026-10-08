@@ -14,10 +14,39 @@ def execute(filters=None):
 def get_columns(filters):
 	columns = [
 		{
+			"fieldname": "unit",
+			"label": _("Unit"),
+			"fieldtype": "Link",
+			"options": "Unit",
+			"width": 150,
+			"align": "left"
+		},
+		{
+			"fieldname": "employee",
+			"label": _("NIK"),
+			"fieldtype": "Data",
+			"width": 120,
+			"align": "left"
+		},
+		{
 			"fieldname": "employee_name",
 			"label": _("Nama"),
 			"fieldtype": "Data",
 			"width": 200,
+			"align": "left"
+		},
+		{
+			"fieldname": "jabatan",
+			"label": _("Jabatan"),
+			"fieldtype": "Data",
+			"width": 180,
+			"align": "left"
+		},
+		{
+			"fieldname": "tipe_karyawan",
+			"label": _("Tipe Karyawan"),
+			"fieldtype": "Data",
+			"width": 150,
 			"align": "left"
 		}
 	]
@@ -152,10 +181,20 @@ def get_data(filters):
 
 	employees = frappe.get_all("Employee", 
 		filters=employee_filters,
-		fields=["name", "employee_name", "employment_type", "holiday_list", "designation"],
+		fields=["name", "employee_name", "employment_type", "holiday_list", "designation", "unit"],
 		order_by="employee_name"
 	)
-	
+
+	# Jabatan dan Tipe Karyawan ditampilkan dengan judulnya, bukan name-nya
+	designation_title_map = {
+		d.name: d.designation_name
+		for d in frappe.get_all("Designation", fields=["name", "designation_name"])
+	}
+	employment_type_title_map = {
+		et.name: et.employee_type_name
+		for et in frappe.get_all("Employment Type", fields=["name", "employee_type_name"])
+	}
+
 	status_codes = frappe.get_all("Leave Type",
 		filters={"status_code": ["!=", ""]},
 		fields=["status_code"],
@@ -174,7 +213,11 @@ def get_data(filters):
 	
 	for emp in employees:
 		row = {
+			"unit": emp.unit,
+			"employee": emp.name,
 			"employee_name": emp.employee_name,
+			"jabatan": designation_title_map.get(emp.designation) or emp.designation,
+			"tipe_karyawan": employment_type_title_map.get(emp.employment_type) or emp.employment_type,
 			"hke": 0,
 			"mg": 0,
 			"ln": 0,
@@ -206,7 +249,7 @@ def get_data(filters):
 			day = att.attendance_date.day
 			attendance_dict[day] = att
 		
-		is_karyawan_tetap = emp.employment_type == "KARYAWAN TETAP"
+		is_karyawan_tetap = emp.employment_type == "PKWTT"
 		
 		adakah_attendance_di_bulan_ini = 0
 		for day in range(1, num_days + 1):
