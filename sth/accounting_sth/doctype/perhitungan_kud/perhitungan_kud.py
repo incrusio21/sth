@@ -68,11 +68,11 @@ SISI_PENUTUP = "penutup"
 KUNCI_BIAYA = "pembalikan"
 
 # Lain Lain ikut memotong hasil mitra lewat Total Biaya, tapi tidak lewat GL
-# dokumen mana pun, jadi punya akun lawannya sendiri. Berbeda dari baris lain,
-# sisinya ikut tanda: Lain Lain minus berarti mitra justru ditambah, dan
-# mengkreditnya sebesar nilai mutlak membuat penutupnya meleset dua kali lipat.
-KUNCI_LAIN_LAIN = "akun_lain_lain"
-IKUT_TANDA = {KUNCI_LAIN_LAIN}
+# dokumen mana pun, jadi tiap barisnya punya akun lawan sendiri — dipecah per
+# baris Rincian Lain Lain, lihat baris_jurnal_lain_lain(). Seperti KUNCI_BIAYA,
+# kuncinya cuma penanda, bukan field akun di dokumen.
+KUNCI_LAIN_LAIN = "lain_lain"
+KUNCI_TANPA_FIELD_AKUN = {KUNCI_BIAYA, KUNCI_LAIN_LAIN}
 
 BARIS_JURNAL = (
 	("akun_pembelian_tbs", "jumlah_produksi", SISI_PENUTUP, "Pembelian TBS Plasma"),
@@ -456,6 +456,34 @@ def baris_jurnal_biaya(pembalikan):
 	return baris
 
 
+def baris_jurnal_lain_lain(rincian):
+	"""Baris jurnal Lain Lain, satu per baris Rincian Lain Lain. Fungsi murni.
+
+	Akun dan cost center ikut barisnya; cost center kosong jatuh ke cost center
+	dokumen di get_gl_entries(). Berbeda dari baris lain di BARIS_JURNAL, sisinya
+	ikut tanda: jumlah minus berarti mitra justru ditambah, dan mengkreditnya
+	sebesar nilai mutlak membuat penutupnya meleset dua kali lipat.
+	"""
+	baris = []
+
+	for row in rincian or []:
+		jumlah = flt(row.get("jumlah"), PRESISI_UANG)
+		if not jumlah:
+			continue
+
+		keterangan = row.get("keterangan")
+		baris.append({
+			"account": row.get("akun"),
+			"cost_center": row.get("cost_center"),
+			"debit": -jumlah if jumlah < 0 else 0.0,
+			"credit": jumlah if jumlah > 0 else 0.0,
+			"keterangan": _("Lain Lain: {0}").format(keterangan) if keterangan else _("Lain Lain"),
+			"kunci": KUNCI_LAIN_LAIN,
+		})
+
+	return baris
+
+
 def susun_baris_jurnal(nilai, akun, pembalikan=None):
 	"""Baris jurnal dari nilai dokumen dan peta akun. Fungsi murni — tanpa database.
 
@@ -466,8 +494,8 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 	Nilai negatif dicatat nilai mutlaknya di sisi yang sudah ditetapkan
 	BARIS_JURNAL — GL Entry menolak angka minus, dan sisi baris tidak boleh ikut
 	bergeser: Angsuran Hutang dan Pembayaran ke Mitra tetap kredit walaupun biaya
-	melampaui produksi. Kecualinya baris di IKUT_TANDA (Lain Lain): minus
-	berpindah ke debit.
+	melampaui produksi. Kecualinya Lain Lain: dibaca per baris dari
+	`rincian_lain_lain`, dan yang minus berpindah ke debit.
 
 	Yang menanggung selisihnya baris penutup, Pembelian TBS Plasma: dihitung dari
 	baris-baris lain, bukan dari `jumlah_produksi`, jadi jurnalnya seimbang dengan
@@ -496,14 +524,13 @@ def susun_baris_jurnal(nilai, akun, pembalikan=None):
 			baris.extend(baris_jurnal_biaya(pembalikan))
 			continue
 
-		jumlah = flt(nilai.get(fieldname), PRESISI_UANG)
-		if not jumlah:
+		if kunci == KUNCI_LAIN_LAIN:
+			baris.extend(baris_jurnal_lain_lain(nilai.get("rincian_lain_lain")))
 			continue
 
-		if jumlah < 0 and kunci in IKUT_TANDA:
-			sisi = "debit" if sisi == "credit" else "credit"
-
-		jumlah = abs(jumlah)
+		jumlah = abs(flt(nilai.get(fieldname), PRESISI_UANG))
+		if not jumlah:
+			continue
 
 		baris.append({
 			"account": akun.get(kunci),
@@ -852,9 +879,13 @@ class PerhitunganKUD(Document):
 		Biaya Perawatan dan baru bertemu di totalnya.
 
 		Lain-lain tetap manual dan ikut terpotong lewat totalnya — kalau tidak,
-		angka yang diketik di situ tidak berpengaruh apa-apa.
+		angka yang diketik di situ tidak berpengaruh apa-apa. Yang diketik barisnya
+		di Rincian Lain Lain; field Lain Lain cuma jumlahnya.
 		"""
 		self.update(rekap_biaya_bkm(self.detail_biaya))
+		self.lain_lain = flt(
+			sum(flt(row.jumlah, PRESISI_UANG) for row in self.rincian_lain_lain), PRESISI_UANG
+		)
 
 		self.biaya_perawatan = flt(
 			sum(flt(self.get(fieldname)) for _, fieldname in BKM_BIAYA), PRESISI_UANG
@@ -929,9 +960,13 @@ class PerhitunganKUD(Document):
 		setelan = get_setelan_kud(self.company)
 
 		if setelan:
-			for kunci in (*KOLOM_AKUN_SETELAN, "cost_center"):
+			for kunci in (*KOLOM_AKUN_DOKUMEN, "cost_center"):
 				if not self.get(kunci):
 					self.set(kunci, setelan.get(kunci))
+
+			for row in self.rincian_lain_lain:
+				if not row.akun:
+					row.akun = setelan.get(AKUN_LAIN_LAIN_SETELAN)
 
 		if self.mitra and not self.akun_piutang_plasma:
 			self.akun_piutang_plasma = get_akun_piutang_plasma(
@@ -950,12 +985,18 @@ class PerhitunganKUD(Document):
 		"""
 		salah = []
 		for fieldname, doctype in (
-			*((kunci, "Account") for kunci in (*KOLOM_AKUN_SETELAN, "akun_piutang_plasma")),
+			*((kunci, "Account") for kunci in (*KOLOM_AKUN_DOKUMEN, "akun_piutang_plasma")),
 			("cost_center", "Cost Center"),
 		):
 			nilai = self.get(fieldname)
 			if nilai and frappe.get_cached_value(doctype, nilai, "company") != self.company:
 				salah.append(f"{self.meta.get_label(fieldname)}: {nilai}")
+
+		for row in self.rincian_lain_lain:
+			for fieldname, doctype in (("akun", "Account"), ("cost_center", "Cost Center")):
+				nilai = row.get(fieldname)
+				if nilai and frappe.get_cached_value(doctype, nilai, "company") != self.company:
+					salah.append(_("Rincian Lain Lain baris {0}: {1}").format(row.idx, nilai))
 
 		if salah:
 			frappe.throw(
@@ -1088,7 +1129,7 @@ class PerhitunganKUD(Document):
 		if pembalikan is None:
 			pembalikan, _di_luar = self.saldo_biaya_bkm()
 
-		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL if kunci != KUNCI_BIAYA}
+		akun = {kunci: self.get(kunci) for kunci, *_ in BARIS_JURNAL if kunci not in KUNCI_TANPA_FIELD_AKUN}
 		return susun_baris_jurnal(self.as_dict(), akun, pembalikan)
 
 	def validate_akun_jurnal(self, baris):
@@ -1104,7 +1145,8 @@ class PerhitunganKUD(Document):
 		frappe.throw(
 			_(
 				"Akun untuk baris ini belum diisi: {0}. "
-				"Lengkapi di bagian <b>Akun Jurnal</b> dokumen ini, atau isi setelannya "
+				"Lengkapi di bagian <b>Akun Jurnal</b> dokumen ini (akun Lain Lain di tabel "
+				"<b>Rincian Lain Lain</b>), atau isi setelannya "
 				"di STH Accounting Settings lalu tarik produksi ulang."
 			).format(", ".join(kosong)),
 			title=_("Akun Jurnal Belum Lengkap"),
@@ -1273,14 +1315,19 @@ def get_unit_plasma(company):
 # lewat nomor akun. cost_center dan item_purchase_invoice tidak ikut: cost
 # center milik company masing-masing dan tidak bernomor, item-nya sudah berlaku
 # lintas company.
-KOLOM_AKUN_SETELAN = (
+KOLOM_AKUN_DOKUMEN = (
 	"akun_pembelian_tbs",
 	"akun_management_fee",
 	"akun_pph22",
 	"akun_hutang_plasma_antara",
 	"akun_hutang_mitra",
-	"akun_lain_lain",
 )
+
+# Akun Lain Lain tidak punya field di dokumen: akunnya per baris Rincian Lain
+# Lain, dan setelan cuma mengisi baris yang akunnya masih kosong.
+AKUN_LAIN_LAIN_SETELAN = "akun_lain_lain"
+
+KOLOM_AKUN_SETELAN = (*KOLOM_AKUN_DOKUMEN, AKUN_LAIN_LAIN_SETELAN)
 
 
 def akun_bernomor_sama(account, company, is_group=0):

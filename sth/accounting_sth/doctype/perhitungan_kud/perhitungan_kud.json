@@ -31,7 +31,6 @@
   "biaya_perawatan",
   "biaya_bapp",
   "lain_lain",
-  "akun_lain_lain",
   "total_biaya_perawatan_panen_dan_transport",
   "column_break_biaya",
   "persen_management_fee",
@@ -39,6 +38,8 @@
   "jumlah_biaya_operasional",
   "column_break_eong",
   "setelah_biaya_operasional",
+  "lain_lain_section",
+  "rincian_lain_lain",
   "detail_biaya_section",
   "detail_biaya",
   "bagi_hasil_section",
@@ -263,6 +264,17 @@
    "read_only": 1
   },
   {
+   "fieldname": "lain_lain_section",
+   "fieldtype": "Section Break",
+   "label": "Rincian Lain Lain"
+  },
+  {
+   "fieldname": "rincian_lain_lain",
+   "fieldtype": "Table",
+   "label": "Rincian Lain Lain",
+   "options": "Perhitungan KUD Lain Lain"
+  },
+  {
    "collapsible": 1,
    "fieldname": "detail_biaya_section",
    "fieldtype": "Section Break",
@@ -336,7 +348,8 @@
    "fieldname": "lain_lain",
    "fieldtype": "Currency",
    "in_preview": 1,
-   "label": "Lain Lain"
+   "label": "Lain Lain",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -392,12 +405,6 @@
    "fieldname": "akun_hutang_plasma_antara",
    "fieldtype": "Link",
    "label": "Hutang Plasma Belum Ditagih",
-   "options": "Account"
-  },
-  {
-   "fieldname": "akun_lain_lain",
-   "fieldtype": "Link",
-   "label": "Akun Lain Lain",
    "options": "Account"
   },
   {
@@ -474,7 +481,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-06 11:05:22.884838",
+ "modified": "2026-10-08 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "Perhitungan KUD",

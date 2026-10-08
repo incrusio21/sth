@@ -24,6 +24,7 @@ sth.patches.buat_tipe_invoice_ongkos_angkut_transportir
 sth.patches.isi_ulang_jam_olah_data_tbs
 sth.patches.isi_restan_setelah_adjustment_data_tbs
 sth.patches.tambah_supplier_potongan_payroll_entry
+sth.patches.pindahkan_lain_lain_kud_ke_tabel
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).

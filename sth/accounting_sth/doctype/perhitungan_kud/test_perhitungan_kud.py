@@ -318,7 +318,7 @@ class TestHitungBiaya(FrappeTestCase):
 				baris_bkm("Buku Kerja Mandor Perawatan", 10.0),
 				baris_bkm("BAPP", 6.0, jenis="BAPP", divisi=None),
 			],
-			lain_lain=4.0,
+			rincian_lain_lain=[{"akun": "AKUN-LAIN", "jumlah": 4.0}],
 		)
 		doc.hitung_biaya()
 
@@ -327,16 +327,28 @@ class TestHitungBiaya(FrappeTestCase):
 		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 20.0)
 
 	def test_lain_lain_masuk_lewat_total(self):
-		doc = self.doc([baris_bkm("Buku Kerja Mandor Perawatan", 10.0)], lain_lain=4.0)
+		doc = self.doc(
+			[baris_bkm("Buku Kerja Mandor Perawatan", 10.0)],
+			rincian_lain_lain=[{"akun": "AKUN-A", "jumlah": 4.0}, {"akun": "AKUN-B", "jumlah": 1.5}],
+		)
 		doc.hitung_biaya()
 
-		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 14.0)
+		self.assertEqual(doc.lain_lain, 5.5)
+		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 15.5)
+
+	def test_lain_lain_ketikan_ditimpa_jumlah_rincian(self):
+		# Field Lain Lain cuma jumlah tabelnya; angka lepas tanpa baris tidak berlaku.
+		doc = self.doc([baris_bkm("Buku Kerja Mandor Perawatan", 10.0)], lain_lain=999.0)
+		doc.hitung_biaya()
+
+		self.assertEqual(doc.lain_lain, 0.0)
+		self.assertEqual(doc.total_biaya_perawatan_panen_dan_transport, 10.0)
 
 	def test_lain_lain_ikut_terpotong_di_biaya_operasional(self):
 		# Kalau lain-lain tidak sampai ke hitung_shu, angkanya cuma hiasan.
 		doc = self.doc(
 			[baris_bkm("Buku Kerja Mandor Perawatan", 1000.0)],
-			lain_lain=250.0,
+			rincian_lain_lain=[{"akun": "AKUN-LAIN", "jumlah": 250.0}],
 			persen_management_fee=0,
 		)
 		doc.hitung_rekap()
@@ -443,7 +455,9 @@ class TestHitungSHU(FrappeTestCase):
 
 # Peta akun sekadar penanda, bukan nama akun sungguhan — susun_baris_jurnal
 # hanya meneruskan apa yang diberikan.
-AKUN_JURNAL = {kunci: f"AKUN-{kunci}" for kunci, *_ in BARIS_JURNAL if kunci != KUNCI_BIAYA}
+AKUN_JURNAL = {
+	kunci: f"AKUN-{kunci}" for kunci, *_ in BARIS_JURNAL if kunci not in (KUNCI_BIAYA, KUNCI_LAIN_LAIN)
+}
 
 # Biaya yang seluruhnya sudah masuk buku besar, satu akun satu cost center.
 def biaya_posted(jumlah):
@@ -624,13 +638,20 @@ class TestSusunBarisJurnal(FrappeTestCase):
 		self.assertNotIn(KUNCI_BIAYA, [row["kunci"] for row in baris])
 		self.assertEqual(baris[0]["debit"], flt(self.JUMLAH_PRODUKSI - self.BIAYA, 2))
 
-	def nilai_lain_lain(self, lain_lain):
+	def nilai_lain_lain(self, *rincian):
 		# Lain Lain bagian dari Total Biaya; biaya BKM-nya sendiri sudah Posted semua.
+		# Tiap rincian (jumlah) atau (jumlah, akun, cost_center, keterangan).
+		rincian = [
+			dict(zip(("jumlah", "akun", "cost_center", "keterangan"), r if isinstance(r, tuple) else (r, "AKUN-LAIN")))
+			for r in rincian
+		]
+		lain_lain = sum(row["jumlah"] for row in rincian)
 		total = self.BIAYA + lain_lain
 		nilai = {
 			"jumlah_produksi": self.JUMLAH_PRODUKSI,
 			"total_biaya_perawatan_panen_dan_transport": total,
 			"lain_lain": lain_lain,
+			"rincian_lain_lain": rincian,
 		}
 		nilai.update(hitung_shu(self.JUMLAH_PRODUKSI, total, 2.5, 0.25, 50))
 		return nilai
@@ -640,9 +661,45 @@ class TestSusunBarisJurnal(FrappeTestCase):
 
 		lain = [row for row in baris if row["kunci"] == KUNCI_LAIN_LAIN]
 		self.assertEqual(len(lain), 1)
-		self.assertEqual(lain[0]["account"], AKUN_JURNAL[KUNCI_LAIN_LAIN])
+		self.assertEqual(lain[0]["account"], "AKUN-LAIN")
 		self.assertEqual((lain[0]["debit"], lain[0]["credit"]), (0.0, 3000000.0))
 		self.assertEqual(baris[0]["debit"], self.JUMLAH_PRODUKSI)
+
+	def test_lain_lain_satu_baris_jurnal_per_rincian(self):
+		baris = susun_baris_jurnal(
+			self.nilai_lain_lain(
+				(2000000.0, "AKUN-A", "CC-1", "Potongan pupuk"),
+				(1000000.0, "AKUN-B", None, None),
+				(0.0, "AKUN-C", None, "Nol tidak jadi baris"),
+			),
+			AKUN_JURNAL,
+			biaya_posted(self.BIAYA),
+		)
+
+		lain = [row for row in baris if row["kunci"] == KUNCI_LAIN_LAIN]
+		self.assertEqual(
+			[(row["account"], row["cost_center"], row["credit"], row["keterangan"]) for row in lain],
+			[
+				("AKUN-A", "CC-1", 2000000.0, "Lain Lain: Potongan pupuk"),
+				("AKUN-B", None, 1000000.0, "Lain Lain"),
+			],
+		)
+		self.assertEqual(baris[0]["debit"], self.JUMLAH_PRODUKSI)
+
+	def test_lain_lain_campur_tanda_tetap_seimbang(self):
+		baris = susun_baris_jurnal(
+			self.nilai_lain_lain((750000.0, "AKUN-A", None, None), (-250000.0, "AKUN-B", None, None)),
+			AKUN_JURNAL,
+			biaya_posted(self.BIAYA),
+		)
+
+		lain = {row["account"]: (row["debit"], row["credit"]) for row in baris if row["kunci"] == KUNCI_LAIN_LAIN}
+		self.assertEqual(lain, {"AKUN-A": (0.0, 750000.0), "AKUN-B": (250000.0, 0.0)})
+		self.assertEqual(baris[0]["debit"], self.JUMLAH_PRODUKSI)
+		self.assertEqual(
+			flt(sum(row["debit"] for row in baris), 2),
+			flt(sum(row["credit"] for row in baris), 2),
+		)
 
 	def test_lain_lain_minus_pindah_ke_debit(self):
 		baris = susun_baris_jurnal(self.nilai_lain_lain(-500000.0), AKUN_JURNAL, biaya_posted(self.BIAYA))

@@ -15,6 +15,12 @@ frappe.ui.form.on("Perhitungan KUD", {
 				filters: { company: frm.doc.company, is_group: 0 },
 			}));
 		});
+
+		["akun", "cost_center"].forEach((fieldname) => {
+			frm.set_query(fieldname, "rincian_lain_lain", () => ({
+				filters: { company: frm.doc.company, is_group: 0 },
+			}));
+		});
 	},
 
 	refresh(frm) {
@@ -41,8 +47,29 @@ frappe.ui.form.on("Perhitungan KUD", {
 		// Akun company lama dikosongkan, bukan dibiarkan: server cuma mengisi
 		// yang kosong dari setelan, jadi sisa company lama tidak akan tertimpa.
 		[...FIELD_AKUN, "cost_center"].forEach((fieldname) => frm.set_value(fieldname, null));
+		(frm.doc.rincian_lain_lain || []).forEach((row) => {
+			row.akun = null;
+			row.cost_center = null;
+		});
+		frm.refresh_field("rincian_lain_lain");
 	},
 });
+
+// Field Lain Lain cuma jumlah tabel Rincian Lain Lain. Total Biaya dan
+// turunannya baru dihitung ulang server waktu disimpan.
+frappe.ui.form.on("Perhitungan KUD Lain Lain", {
+	jumlah(frm) {
+		hitung_lain_lain(frm);
+	},
+	rincian_lain_lain_remove(frm) {
+		hitung_lain_lain(frm);
+	},
+});
+
+function hitung_lain_lain(frm) {
+	const total = (frm.doc.rincian_lain_lain || []).reduce((n, row) => n + flt(row.jumlah), 0);
+	frm.set_value("lain_lain", flt(total, precision("lain_lain")));
+}
 
 const FIELD_AKUN = [
 	"akun_pembelian_tbs",
@@ -50,7 +77,6 @@ const FIELD_AKUN = [
 	"akun_pph22",
 	"akun_piutang_plasma",
 	"akun_hutang_plasma_antara",
-	"akun_lain_lain",
 	"akun_hutang_mitra",
 ];
 
