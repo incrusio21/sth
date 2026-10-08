@@ -35,7 +35,7 @@ const ATURAN = {
 	"BOM": null,
 	"Delivery Note": null,
 	"Delivery Order": null,
-	"Material Request": "item_name",
+	"Material Request": null,
 	"Pengeluaran Barang": "item_name",
 	"Pick List": null,
 	"Proposal": null,
