@@ -19,7 +19,7 @@ def debug():
 	_resync_timbangan(no_doc)
 
 def debug_ss():
-	ls = frappe.db.sql(""" SELECT name FROM `tabSalary Slip` WHERE docstatus = 0 """)
+	ls = frappe.db.sql(""" SELECT a.name FROM `tabSalary Slip` a JOIN `tabEmployee` b ON a.employee=b.name WHERE b.designation = "NS30"; """)
 	for row in ls:
 		do = frappe.get_doc("Salary Slip",row[0])
 		do.save()
