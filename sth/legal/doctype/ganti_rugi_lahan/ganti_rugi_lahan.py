@@ -13,6 +13,9 @@ from erpnext.accounts.general_ledger import merge_similar_entries
 from sth.controllers.accounts_controller import AccountsController
 
 class GantiRugiLahan(AccountsController):
+	# Account GRL (credit_to) dipakai sebagai akun aset, bukan Payable
+	_validate_party_account_type = False
+
 	def document_kriteria(self):
 		return self.jenis_biaya or "GRLTT"
 	

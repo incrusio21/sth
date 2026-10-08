@@ -25,6 +25,9 @@ from erpnext.controllers.accounts_controller import (
 from sth.hr_customize import get_payment_settings
 
 class AccountsController(Document):
+	# False: akun party cukup Balance Sheet, tidak wajib Payable/Receivable
+	_validate_party_account_type = True
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._party_type = "Employee"
@@ -106,7 +109,7 @@ class AccountsController(Document):
 				)
 
 			account_type = "Payable" if self._party_account_field == "credit_to" else "Receivable"
-			if self.get(scrub(self._party_type)) and account.account_type != account_type:
+			if self._validate_party_account_type and self.get(scrub(self._party_type)) and account.account_type != account_type:
 				frappe.throw(
 					_(
 						"Please ensure that the {0} account {1} is a {2} account. " \
