@@ -86,6 +86,7 @@ doctype_js = {
 	"Salary Slip": "hr_customize/custom/salary_slip.js",
 	"Sales Invoice": "public/js/sales_invoice.js",
 	"Sales Order": "public/js/sales_order.js",
+	"Stock Entry": "public/js/stock_entry.js",
 	"Stock Reconciliation": "public/js/stock_reconciliation.js",
 	"Supplier": "public/js/supplier.js",
 	"Supplier Quotation": "public/js/supplier_quotation.js",
