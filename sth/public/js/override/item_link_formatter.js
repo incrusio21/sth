@@ -43,12 +43,12 @@ const ATURAN = {
 	"Purchase Order": null,
 	"Purchase Receipt": null,
 	"Quotation": null,
-	"Request for Quotation": "item_name",
+	"Request for Quotation": null,
 	"Retur Ke Supplier": null,
 	"Sales Order": null,
 	"Stock Entry": null,
 	"Subcontracting Order": null,
-	"Supplier Quotation": "item_name",
+	"Supplier Quotation": null,
 };
 
 function formatter_item(value, doc) {
