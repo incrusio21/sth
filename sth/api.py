@@ -163,6 +163,7 @@ def get_table_data(args):
 				for sup_field in supplier_fields:
 					result[index][f"{title}_{sup_field}"] = data[sup_field]
 				
+				continue
 				# result[index][f"{title}_status"] = data.status
 				# result[index][f"{title}_workflow_state"] = data.workflow_state
 			else:
