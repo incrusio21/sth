@@ -493,6 +493,8 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 
 
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
+	from sth.legal.custom.tax_validation import set_pajak_purchase_invoice
+
 	term = frappe.flags.args.term
 	portion = frappe.db.get_value("Proposal Schedule", term, "invoice_portion")
 	def postprocess(source, target):
@@ -509,6 +511,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		
 		target.invoice_type = "SPK"
 		target.term_detail = term
+		set_pajak_purchase_invoice(source, target)
+		target.run_method("calculate_taxes_and_totals")
 		target.set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
@@ -550,7 +554,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"postprocess": update_item,
 			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 		},
-		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		# PPN/PPh diisi set_pajak_purchase_invoice dari field ppn dan pph_details
+		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "ignore": True},
 	}
 
 	doc = get_mapped_doc(

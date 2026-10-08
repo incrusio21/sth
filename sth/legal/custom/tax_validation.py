@@ -46,5 +46,68 @@ def validate_custom_tax(self, method=None):
 			"tax_amount": t.get("amount"),
 		})
 
-	
+
 	self.run_method("calculate_taxes_and_totals")
+
+# Penanda yang sama dengan sync_to_taxes di public/js/purchase_invoice.js. GL
+# Purchase Invoice hanya membukukan baris taxes yang membawa penanda ini.
+PPN_MARKER = "__from_ppn__"
+PPH_LAINNYA_MARKER = "__from_pph_lainnya__"
+
+def set_pajak_purchase_invoice(source, target):
+	"""Salin PPN dan PPh BAPP/Proposal ke tabel ppn dan pph_lainnya Purchase Invoice.
+
+	Tabel taxes sumber tidak ikut di-map: barisnya tanpa penanda, jadi tidak
+	dijurnal, dan ditimpa sync_to_taxes begitu form dibuka.
+	"""
+	target.pakai_ppn = 1 if source.ppn else 0
+	target.set("ppn", [])
+	if source.ppn:
+		target.append("ppn", {
+			"type": source.ppn,
+			"tax_type": "PPN",
+			"account": source.ppn_account,
+			"percentage": source.ppn_rate,
+		})
+
+	# Beberapa BAPP bisa digabung ke satu invoice; PPh berjenis sama cukup satu baris
+	for pph in source.get("pph_details"):
+		if not pph.type or any(d.type == pph.type for d in target.get("pph_lainnya")):
+			continue
+		target.append("pph_lainnya", {
+			"type": pph.type,
+			"tax_type": "PPH",
+			"account": pph.account,
+			"percentage": pph.percentage,
+		})
+
+	# Dasar pengenaan sama dengan recalculate_vat_details di purchase_invoice.js
+	sub_total = (
+		sum(flt(d.amount) for d in target.get("items"))
+		+ sum(flt(d.total) for d in target.get("charges_purchase_invoice"))
+		- sum(flt(d.amount) for d in target.get("purchase_invoice_pengeluaran_barang"))
+	)
+	for d in target.get("ppn"):
+		d.amount = flt((sub_total - flt(target.jumlah_diskon)) * flt(d.percentage) / 100, d.precision("amount"))
+	for d in target.get("pph_lainnya"):
+		d.amount = flt(sub_total * flt(d.percentage) / 100, d.precision("amount"))
+
+	target.total_ppn = sum(flt(d.amount) for d in target.get("ppn"))
+	target.total_pph_lainnya = sum(flt(d.amount) for d in target.get("pph_lainnya"))
+
+	target.set("taxes", [
+		t for t in target.get("taxes")
+		if PPN_MARKER not in (t.description or "") and PPH_LAINNYA_MARKER not in (t.description or "")
+	])
+	for fieldname, marker, sign in (("pph_lainnya", PPH_LAINNYA_MARKER, -1), ("ppn", PPN_MARKER, 1)):
+		for d in target.get(fieldname):
+			if not d.amount:
+				continue
+			target.append("taxes", {
+				"category": "Total",
+				"charge_type": "Actual",
+				"add_deduct_tax": "Add",
+				"account_head": d.account,
+				"tax_amount": d.amount * sign,
+				"description": f"{marker}{d.type}",
+			})

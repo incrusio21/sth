@@ -3,6 +3,7 @@
 
 from sth.custom import method_ambil_account
 from sth.legal import get_legal_settings
+from sth.legal.custom.tax_validation import set_pajak_purchase_invoice
 
 import frappe
 from frappe import _, throw
@@ -16,7 +17,6 @@ import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
@@ -1139,16 +1139,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 			doc.run_method("onload")
 			doc.run_method("set_missing_values")
 
-			doc.ppn = []
-			if source.ppn:
-				doc.append("ppn", {
-					"type": source.ppn,
-					"account": source.ppn_account,
-					"percentage": source.ppn_rate
-				})
-
-			if args and args.get("merge_taxes"):
-				merge_taxes(source.get("taxes") or [], doc)
+			set_pajak_purchase_invoice(source, doc)
 
 			doc.run_method("calculate_taxes_and_totals")
 			doc.set_payment_schedule()
@@ -1213,10 +1204,10 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 					"postprocess": update_item,
 					"filter": lambda d: get_pending_qty(d) <= 0,
 				},
+				# PPN/PPh diisi set_pajak_purchase_invoice dari field ppn dan pph_details
 				"Purchase Taxes and Charges": {
 					"doctype": "Purchase Taxes and Charges",
-					"reset_value": not (args and args.get("merge_taxes")),
-					"ignore": args.get("merge_taxes") if args else 0,
+					"ignore": True,
 				},
 			},
 			target_doc,
