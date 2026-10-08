@@ -38,6 +38,9 @@
   "section_break_fghk",
   "supplier_address_active",
   "column_break_bqcj",
+  "kategori",
+  "tanggal_perjanjian_induk",
+  "nomor_perjanjian_induk",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -1174,7 +1177,6 @@
   {
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
-   "hidden": 1,
    "label": "More Info"
   },
   {
@@ -1504,13 +1506,29 @@
    "oldfieldtype": "Date",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "tanggal_perjanjian_induk",
+   "fieldtype": "Date",
+   "label": "Tanggal Perjanjian Induk"
+  },
+  {
+   "fieldname": "nomor_perjanjian_induk",
+   "fieldtype": "Data",
+   "label": "Nomor Perjanjian Induk"
+  },
+  {
+   "fieldname": "kategori",
+   "fieldtype": "Select",
+   "label": "Kategori",
+   "options": "Pusat\nLokal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 16:19:27.443634",
+ "modified": "2026-10-08 11:45:45.497925",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
