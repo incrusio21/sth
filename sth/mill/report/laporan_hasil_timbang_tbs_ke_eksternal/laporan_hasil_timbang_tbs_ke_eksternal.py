@@ -13,7 +13,7 @@ def get_columns(filters):
 	columns = [
 		{
 			"label": _("Tanggal"),
-			"fieldname": "tanggal_1",
+			"fieldname": "tanggal",
 			"fieldtype": "Date",
 		},
 		{
@@ -23,38 +23,76 @@ def get_columns(filters):
 			"options": "Security Check Point"
 		},
 		{
-			"label": _("Jjg"),
-			"fieldname": "jjg",
+			"label": _("SPB No."),
+			"fieldname": "spb_no",
+			"fieldtype": "Link",
+			"options": "Surat Pengantar Buah"
+		},
+		{
+			"label": _("Kontrak"),
+			"fieldname": "kontrak",
+			"fieldtype": "Link",
+			"options": "Sales Order"
+		},
+		{
+			"label": _("Pelanggan"),
+			"fieldname": "pelanggan",
+			"fieldtype": "Link",
+			"options": "Customer"
+		},
+		{
+			"label": _("No. Polisi"),
+			"fieldname": "no_polisi",
 			"fieldtype": "Data"
 		},
 		{
-			"label": _("Tanggal"),
-			"fieldname": "tanggal_2",
-			"fieldtype": "Date",
+			"label": _("Supir"),
+			"fieldname": "supir",
+			"fieldtype": "Data"
 		},
 		{
-			"label": _("Berat Masuk"),
-			"fieldname": "berat_masuk",
+			"label": _("Internal Berat Masuk"),
+			"fieldname": "internal_berat_masuk",
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("Berat Keluar"),
-			"fieldname": "berat_keluar",
+			"label": _("Internal Berat Keluar"),
+			"fieldname": "internal_berat_keluar",
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("Berat Bersih"),
-			"fieldname": "berat_bersih",
+			"label": _("Internal Berat Bersih"),
+			"fieldname": "internal_berat_bersih",
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("Potongan"),
-			"fieldname": "potongan",
+			"label": _("Internal Jenjang"),
+			"fieldname": "internal_jenjang",
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("Berat Normal"),
-			"fieldname": "berat_normal",
+			"label": _("External Berat Masuk"),
+			"fieldname": "external_berat_masuk",
+			"fieldtype": "Float"
+		},
+		{
+			"label": _("External Berat Keluar"),
+			"fieldname": "external_berat_keluar",
+			"fieldtype": "Float"
+		},
+		{
+			"label": _("External Berat Bersih"),
+			"fieldname": "external_berat_bersih",
+			"fieldtype": "Float"
+		},
+		{
+			"label": _("External Potongan"),
+			"fieldname": "external_potongan",
+			"fieldtype": "Float"
+		},
+		{
+			"label": _("External Berat Normal"),
+			"fieldname": "external_berat_normal",
 			"fieldtype": "Float"
 		},
 		{
@@ -63,39 +101,39 @@ def get_columns(filters):
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("Kg"),
-			"fieldname": "kg_1",
+			"label": _("Varian Kg"),
+			"fieldname": "varian_kg",
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("%"),
-			"fieldname": "percent",
-			"fieldtype": "Data"
+			"label": _("Varian %"),
+			"fieldname": "varian_percent",
+			"fieldtype": "Percent"
 		},
 		{
 			"label": _("Transportir"),
 			"fieldname": "transportir",
-			"fieldtype": "Data",
+			"fieldtype": "Data"
 		},
 		{
-			"label": _("Kg"),
-			"fieldname": "kg_2",
-			"fieldtype": "Float",
+			"label": _("Denda Kg"),
+			"fieldname": "denda_kg",
+			"fieldtype": "Float"
 		},
 		{
-			"label": _("Harga TBS (Rp/Kg)"),
-			"fieldname": "harga_tbs",
-			"fieldtype": "Float",
+			"label": _("Denda Harga TBS (Rp/Kg)"),
+			"fieldname": "denda_harga_tbs",
+			"fieldtype": "Float"
 		},
 		{
-			"label": _("Total Denda (Rp)"),
-			"fieldname": "total_denda",
-			"fieldtype": "Currency",
+			"label": _("Denda Total Denda (Rp)"),
+			"fieldname": "denda_total_denda",
+			"fieldtype": "Currency"
 		},
 		{
 			"label": _("Keterangan"),
 			"fieldname": "keterangan",
-			"fieldtype": "Data",
+			"fieldtype": "Data"
 		},
 	]
  
@@ -104,8 +142,51 @@ def get_columns(filters):
 def get_data(filters):
 	data = []
  
-	data.append({
-		"tanggal_1": "2025-05"
-	})
+	query = frappe.db.sql("""
+		SELECT 
+		t.posting_date as tanggal,
+		t.ticket_number as ticket_no,
+		t.spb as spb_no,
+		do.sales_order as kontrak,
+		do.customer as pelanggan,
+		t.no_polisi as no_polisi,
+		t.driver_name as supir,
+
+		t.tara as internal_berat_masuk,
+		t.bruto as internal_berat_keluar,
+		t.netto as internal_berat_bersih,
+		"" as internal_jenjang,
+
+		t.bruto_eksternal as external_berat_masuk,
+		t.tara_eksternal as external_berat_keluar,
+		t.netto_eksternal as external_berat_bersih,
+		(t.sortasi_eksternal * t.netto_eksternal) as external_potongan,
+		(t.netto_eksternal - t.sortasi_eksternal) as external_berat_normal,
+
+		(t.netto_eksternal - t.sortasi_eksternal) as berat_pengakuan_jual,
+
+		(t.netto - t.netto_eksternal) as varian_kg,
+		(((t.netto - t.netto_eksternal) / t.netto) * 100) as varian_percent,
+
+		t.transportir as transportir,
+
+		(((t.netto - t.netto_eksternal) - t.netto) * (3/100)) as denda_kg,
+		doi.rate as denda_harga_tbs,
+		(((t.netto - t.netto_eksternal) - t.netto) * (3/100)) * 2 * doi.rate as denda_total_denda,
+
+		CASE
+				WHEN (((t.netto - t.netto_eksternal) / NULLIF(t.netto, 0)) * 100) >= 3
+				THEN 'Melebihi toleransi 3%'
+				ELSE ''
+		END AS keterangan
+
+		FROM `tabTimbangan` as t
+		LEFT JOIN `tabDelivery Order` as do ON do.name = t.do_no
+		LEFT JOIN `tabDelivery Order Item` as doi ON doi.parent = do.name
+		WHERE t.company = 'PT. ALAO KUNING';
+  """, as_dict=True)
+ 
+	for row in query:
+		data.append(row)
 
 	return data

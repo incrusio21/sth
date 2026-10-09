@@ -4,11 +4,11 @@
 frappe.provide("sth.legal");
 
 frappe.ui.form.on("Ganti Rugi Lahan", {
-	refresh(frm) {
+    refresh(frm) {
         frm.events.set_no_rekening(frm);
         frm.events.calculate_payment_schedule_total(frm);
         frm.events.make_payment_entry_button(frm);
-	},
+    },
 
     make_payment_entry_button(frm) {
         if (frm.doc.docstatus !== 1) return;
@@ -30,7 +30,7 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
         })
     },
 
-    pembayaran_lahan(frm){
+    pembayaran_lahan(frm) {
         frm.cscript.get_details_account({
             method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_details_sppt",
             args: {
@@ -89,7 +89,7 @@ frappe.ui.form.on("Ganti Rugi Lahan", {
 });
 
 frappe.ui.form.on("Ganti Rugi Lahan Item", {
-    jenis_biaya(frm, cdt, cdn){
+    jenis_biaya(frm, cdt, cdn) {
         let data = frappe.get_doc(cdt, cdn)
 
         frm.cscript.get_details_account({
@@ -97,14 +97,14 @@ frappe.ui.form.on("Ganti Rugi Lahan Item", {
             args: {
                 company: frm.doc.company,
                 childrens: [data],
-                sppt_update: 1 
+                sppt_update: 1
             }
         })
     },
-    sppt(frm, cdt, cdn){
+    sppt(frm, cdt, cdn) {
         let data = frappe.get_doc(cdt, cdn)
 
-        if(!data.sppt) return;
+        if (!data.sppt) return;
 
         frm.cscript.get_details_account({
             method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.get_details_sppt",
@@ -188,7 +188,7 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
             });
         }
     }
-    
+
     refresh() {
         this.set_query_field()
         this.set_dynamic_labels()
@@ -196,46 +196,46 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
 
     set_query_field() {
         this.frm.set_query("unit", function (doc) {
-			return {
-				filters: {
-					company: ["=", doc.company]
-				}
-			};
-		});
+            return {
+                filters: {
+                    company: ["=", doc.company]
+                }
+            };
+        });
 
-		this.frm.set_query("sppt", "items", function (doc, cdt, cdn) {
+        this.frm.set_query("sppt", "items", function (doc, cdt, cdn) {
             let item = locals[cdt][cdn]
 
-			return {
-				filters: {
-					perangkat_desa: ["=", item.perangkat_desa]
-				}
-			};
-		});
+            return {
+                filters: {
+                    perangkat_desa: ["=", item.perangkat_desa]
+                }
+            };
+        });
 
         this.frm.set_query("pemilik_lahan", "items", function (doc, cdt, cdn) {
             let item = locals[cdt][cdn]
 
-			return {
-				filters: {
-					pd: ["=", item.perangkat_desa]
-				}
-			};
-		});
+            return {
+                filters: {
+                    pd: ["=", item.perangkat_desa]
+                }
+            };
+        });
     }
 
-    get_details_account(opts){
+    get_details_account(opts) {
         let me = this
 
         frappe.call({
             method: opts.method,
             args: opts.args,
-            callback: function(r) {
-                if(!r.exc && r.message) {
+            callback: function (r) {
+                if (!r.exc && r.message) {
                     for (const [key, value] of Object.entries(r.message)) {
-                        if(key == "childrens"){
+                        if (key == "childrens") {
                             me._set_values_for_item_list(r.message.childrens, false)
-                        }else{
+                        } else {
                             me.frm.doc[key] = value
                         }
                     }
@@ -246,27 +246,27 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
         });
     }
 
-    _set_values_for_item_list(children, recalculate=true) {
-		for (const child of children) {
-			let data = frappe.get_doc(child.doctype, child.name)
+    _set_values_for_item_list(children, recalculate = true) {
+        for (const child of children) {
+            let data = frappe.get_doc(child.doctype, child.name)
 
-			for (const [key, value] of Object.entries(child)) {
-				data[key] = value 
-			}
-		}
+            for (const [key, value] of Object.entries(child)) {
+                data[key] = value
+            }
+        }
 
-        if(recalculate) this.calculate_total();
-	}
+        if (recalculate) this.calculate_total();
+    }
 
-    calculate_total(){
+    calculate_total() {
         let doc = this.frm.doc
 
         let grand_total = 0
 
         for (const child of doc.items) {
             child.amount = flt(child.qty) * flt(child.rate) + flt(child.biaya_surat)
-			grand_total += child.amount
-		}
+            grand_total += child.amount
+        }
 
         doc.grand_total = flt(grand_total)
 
@@ -274,44 +274,44 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
     }
 
     payment_term(doc, cdt, cdn) {
-		const me = this;
-		var row = locals[cdt][cdn];
-		if(row.payment_term) {
-			frappe.call({
-				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
-				args: {
-					term: row.payment_term,
-					posting_date: this.frm.doc.posting_date,
-					grand_total: this.frm.doc.grand_total
-				},
-				callback: function(r) {
-					if(r.message && !r.exc) {
-						for (var d in r.message) {
-							frappe.model.set_value(cdt, cdn, d, r.message[d]);
+        const me = this;
+        var row = locals[cdt][cdn];
+        if (row.payment_term) {
+            frappe.call({
+                method: "erpnext.controllers.accounts_controller.get_payment_term_details",
+                args: {
+                    term: row.payment_term,
+                    posting_date: this.frm.doc.posting_date,
+                    grand_total: this.frm.doc.grand_total
+                },
+                callback: function (r) {
+                    if (r.message && !r.exc) {
+                        for (var d in r.message) {
+                            frappe.model.set_value(cdt, cdn, d, r.message[d]);
                             const company_currency = me.get_company_currency();
-							me.update_payment_schedule_grid_labels(company_currency);
-						}
-					}
-				}
-			})
-		}
-	}
+                            me.update_payment_schedule_grid_labels(company_currency);
+                        }
+                    }
+                }
+            })
+        }
+    }
 
     update_payment_schedule_grid_labels(company_currency) {
-		const me = this;
-		if (this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length > 0) {
-			this.frm.set_currency_labels(["base_payment_amount", "base_outstanding", "base_paid_amount"],
-				company_currency, "payment_schedule");
-			this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
-				this.frm.doc.currency, "payment_schedule");
+        const me = this;
+        if (this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length > 0) {
+            this.frm.set_currency_labels(["base_payment_amount", "base_outstanding", "base_paid_amount"],
+                company_currency, "payment_schedule");
+            this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
+                this.frm.doc.currency, "payment_schedule");
 
-			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
-			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function(i, fname) {
-				if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
-					schedule_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
-			});
-		}
-	}
+            var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
+            $.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function (i, fname) {
+                if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
+                    schedule_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
+            });
+        }
+    }
 
 }
 

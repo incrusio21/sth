@@ -212,7 +212,6 @@
   {
    "fieldname": "upload",
    "fieldtype": "Table",
-   "hidden": 1,
    "label": "Upload",
    "options": "Kriteria Upload Dokumen Finance"
   },
@@ -232,7 +231,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-05 10:49:16.787226",
+ "modified": "2026-10-09 10:15:45.537991",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
