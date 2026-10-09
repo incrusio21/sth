@@ -201,7 +201,9 @@ frappe.ui.form.on("Purchase Invoice", {
                 __("Get Items From")
             );
 
-            check_and_show_button(frm);
+            frm.add_custom_button("Pecah Item", () => {
+                show_pecah_dialog(frm);
+            });
         }
 
         if (frm.doc.docstatus === 0 || frm.is_new()) {
@@ -1456,31 +1458,60 @@ function _apply_credit_to_filter(frm) {
     frm.refresh_field("credit_to");
 }
 
-async function check_and_show_button(frm) {
-    const first_item = frm.doc.items?.[0];
-    if (!first_item?.purchase_order) return;
-
-    const po = await frappe.db.get_doc("Purchase Order", first_item.purchase_order);
-    if (po.sub_purchase_type !== "Service Request") return;
-
-    frm.add_custom_button("Pecah Item", () => {
-        show_pecah_dialog(frm);
-    });
-}
+// Memecah satu baris item jadi dua berdasarkan amount; sisanya tetap di baris asal
+// sehingga totalnya tidak berubah. Dua cara:
+// - Qty Tetap: qty kedua baris sama dengan baris asal, rate = amount / qty, jadi
+//   amount-nya persis. Rate jadi beda dari PO/BAPP, maka kedua baris ditandai
+//   pecah_amount supaya lolos cek maintain_same_rate; penagihan PO tetap dihitung
+//   dari amount sehingga billed-nya penuh.
+// - Qty Proporsional: rate tetap, qty dibagi proporsional lalu dibulatkan ke
+//   presisi qty, jadi amount baris baru bisa sedikit meleset dari yang diketik.
+const PECAH_QTY_TETAP = "Qty Tetap (Jasa)";
+const PECAH_QTY_PROPORSIONAL = "Qty Proporsional";
 
 function show_pecah_dialog(frm) {
-    const items = frm.doc.items;
-    if (!items || items.length === 0) {
+    const rows = (frm.doc.items || []).filter((r) => flt(r.qty) > 0 && flt(r.amount) > 0);
+    if (!rows.length) {
         frappe.msgprint("Tidak ada item untuk dipecah.");
         return;
     }
 
-    const item_options = items
-        .filter((r) => r.qty > 0)
-        .map((r) => ({
-            label: `${r.item_name || r.item_code} — Qty: ${r.qty} — Harga: ${format_currency(r.rate)}`,
-            value: r.name,
-        }));
+    const get_row = () => rows.find((r) => r.name === dialog.get_value("item_row"));
+
+    const pecahan = (row, amount_pecah, cara) => {
+        const amount_precision = precision("amount", row);
+
+        if (cara === PECAH_QTY_TETAP) {
+            const rate_precision = precision("rate", row);
+            const rate_baru = flt(flt(amount_pecah) / row.qty, rate_precision);
+            const rate_sisa = flt((row.amount - flt(amount_pecah)) / row.qty, rate_precision);
+            return {
+                qty_baru: row.qty,
+                rate_baru,
+                amount_baru: flt(row.qty * rate_baru, amount_precision),
+                qty_sisa: row.qty,
+                rate_sisa,
+                amount_sisa: flt(row.qty * rate_sisa, amount_precision),
+            };
+        }
+
+        const qty_precision = precision("qty", row);
+        const qty_baru = flt((row.qty * flt(amount_pecah)) / row.amount, qty_precision);
+        const qty_sisa = flt(row.qty - qty_baru, qty_precision);
+        return {
+            qty_baru,
+            rate_baru: row.rate,
+            amount_baru: flt(qty_baru * row.rate, amount_precision),
+            qty_sisa,
+            rate_sisa: row.rate,
+            amount_sisa: flt(qty_sisa * row.rate, amount_precision),
+        };
+    };
+
+    const hitung = () => {
+        const row = get_row();
+        if (row) dialog.set_values(pecahan(row, dialog.get_value("amount_pecah"), dialog.get_value("cara")));
+    };
 
     const dialog = new frappe.ui.Dialog({
         title: "Pecah Item",
@@ -1489,103 +1520,113 @@ function show_pecah_dialog(frm) {
                 label: "Pilih Item",
                 fieldname: "item_row",
                 fieldtype: "Select",
-                options: item_options.map((o) => o.label).join("\n"),
+                options: rows.map((r) => ({
+                    label: `${r.idx}. ${r.item_name || r.item_code} — Qty ${r.qty} — ${format_currency(r.amount, frm.doc.currency)}`,
+                    value: r.name,
+                })),
+                default: rows[0].name,
                 reqd: 1,
                 change() {
-                    const selected_label = dialog.get_value("item_row");
-                    const opt = item_options.find((o) => o.label === selected_label);
-                    if (!opt) return;
-                    const row = items.find((r) => r.name === opt.value);
-                    if (row) {
-                        dialog.set_value("qty_original", row.qty);
-                        dialog.set_value("qty_bagian1", "");
-                        dialog.set_value("qty_bagian2", "");
-                    }
+                    const row = get_row();
+                    if (!row) return;
+                    dialog.set_values({ qty_asal: row.qty, rate: row.rate, amount_asal: row.amount });
+                    hitung();
                 },
             },
             {
-                label: "Qty Original",
-                fieldname: "qty_original",
-                fieldtype: "Float",
-                read_only: 1,
-            },
-            {
-                label: "Qty Bagian 1",
-                fieldname: "qty_bagian1",
-                fieldtype: "Float",
-                reqd: 1,
-                description: "Masukkan qty untuk bagian pertama",
-                change() {
-                    const qty_original = dialog.get_value("qty_original");
-                    const qty1 = dialog.get_value("qty_bagian1");
-                    if (qty_original && qty1 !== undefined) {
-                        const qty2 = flt(qty_original - qty1, 9);
-                        dialog.set_value("qty_bagian2", qty2);
-                    }
-                },
-            },
-            {
-                label: "Qty Bagian 2 (sisa)",
-                fieldname: "qty_bagian2",
-                fieldtype: "Float",
-                read_only: 1,
-            },
-            {
-                label: "Tandai PPH di bagian",
-                fieldname: "pph_on",
+                label: "Cara Pecah",
+                fieldname: "cara",
                 fieldtype: "Select",
-                options: ["Bagian 1", "Bagian 2"],
+                options: [PECAH_QTY_TETAP, PECAH_QTY_PROPORSIONAL],
+                default: frm.doc.update_stock ? PECAH_QTY_PROPORSIONAL : PECAH_QTY_TETAP,
+                read_only: frm.doc.update_stock ? 1 : 0,
                 reqd: 1,
-                description: "Pilih baris mana yang akan dicentang sebagai PPH",
+                change: hitung,
             },
+            { fieldtype: "Section Break" },
+            { label: "Qty", fieldname: "qty_asal", fieldtype: "Float", read_only: 1 },
+            { fieldtype: "Column Break" },
+            { label: "Rate", fieldname: "rate", fieldtype: "Currency", options: "currency", read_only: 1 },
+            { fieldtype: "Column Break" },
+            { label: "Amount", fieldname: "amount_asal", fieldtype: "Currency", options: "currency", read_only: 1 },
+            { fieldtype: "Section Break", label: "Baris Baru" },
+            {
+                label: "Amount Dipecah",
+                fieldname: "amount_pecah",
+                fieldtype: "Currency",
+                options: "currency",
+                reqd: 1,
+                change: hitung,
+            },
+            { fieldtype: "Column Break" },
+            { label: "Qty", fieldname: "qty_baru", fieldtype: "Float", read_only: 1 },
+            { label: "Rate", fieldname: "rate_baru", fieldtype: "Currency", options: "currency", read_only: 1 },
+            { fieldtype: "Column Break" },
+            { label: "Amount Jadi", fieldname: "amount_baru", fieldtype: "Currency", options: "currency", read_only: 1 },
+            { fieldtype: "Section Break", label: "Sisa di Baris Asal" },
+            { label: "Qty", fieldname: "qty_sisa", fieldtype: "Float", read_only: 1 },
+            { fieldtype: "Column Break" },
+            { label: "Rate", fieldname: "rate_sisa", fieldtype: "Currency", options: "currency", read_only: 1 },
+            { fieldtype: "Column Break" },
+            { label: "Amount", fieldname: "amount_sisa", fieldtype: "Currency", options: "currency", read_only: 1 },
+            { fieldname: "currency", fieldtype: "Data", hidden: 1, default: frm.doc.currency },
         ],
         primary_action_label: "Pecah",
-        primary_action(values) {
-            const opt = item_options.find((o) => o.label === values.item_row);
-            if (!opt) return;
+        async primary_action(values) {
+            const row = get_row();
+            if (!row) return;
 
-            const original_row = items.find((r) => r.name === opt.value);
-            if (!original_row) return;
-
-            const qty1 = flt(values.qty_bagian1);
-            const qty2 = flt(values.qty_bagian2);
-
-            if (qty1 <= 0 || qty2 <= 0) {
-                frappe.msgprint("Qty masing-masing bagian harus lebih dari 0.");
+            const qty_tetap = values.cara === PECAH_QTY_TETAP;
+            const p = pecahan(row, values.amount_pecah, values.cara);
+            if (p.qty_baru <= 0 || p.qty_sisa <= 0 || p.amount_baru <= 0 || p.amount_sisa <= 0) {
+                frappe.msgprint("Amount dipecah harus lebih dari 0 dan kurang dari amount item, dan qty kedua baris tidak boleh jadi 0.");
                 return;
             }
 
-            if (Math.abs(qty1 + qty2 - original_row.qty) > 0.0001) {
-                frappe.msgprint("Total qty bagian harus sama dengan qty original.");
-                return;
-            }
+            const received_ikut_qty = flt(row.received_qty) === flt(row.qty);
 
-            const pph_on_bagian1 = values.pph_on === "Bagian 1";
-
-            frappe.model.set_value(original_row.doctype, original_row.name, {
-                qty: qty1,
-                amount: flt(qty1 * original_row.rate, precision("amount", original_row)),
-                pph: pph_on_bagian1 ? 1 : 0
-            });
-
+            // Salin seluruh field baris asal supaya project, kegiatan, gudang dan
+            // referensi PO/BAPP/Proposal ikut; field yang bergantung qty/rate diisi ulang.
             const new_row = frm.add_child("items");
+            const lewati = new Set(["name", "idx", "doctype", "parent", "parentfield", "parenttype", "docstatus",
+                "owner", "creation", "modified", "modified_by"]);
+            for (const [key, value] of Object.entries(row)) {
+                if (!lewati.has(key) && !key.startsWith("__")) new_row[key] = value;
+            }
+            new_row.qty = p.qty_baru;
+            new_row.stock_qty = flt(p.qty_baru * flt(new_row.conversion_factor || 1), precision("stock_qty", new_row));
+            new_row.amount = p.amount_baru;
+            if (received_ikut_qty) new_row.received_qty = p.qty_baru;
 
-            const fields_to_copy = [
-                "item_code", "item_name", "description", "uom", "conversion_factor",
-                "rate", "price_list_rate", "discount_percentage", "expense_account",
-                "cost_center", "purchase_order", "po_detail", "purchase_receipt",
-                "pr_detail", "custom_merk"
-            ];
+            // Baris baru diletakkan tepat di bawah baris asal.
+            frm.doc.items = frm.doc.items.filter((r) => r !== new_row);
+            frm.doc.items.splice(frm.doc.items.indexOf(row) + 1, 0, new_row);
+            frm.doc.items.forEach((r, i) => (r.idx = i + 1));
 
-            fields_to_copy.forEach((f) => {
-                if (original_row[f] !== undefined) new_row[f] = original_row[f];
-            });
-
-            new_row.qty = qty2;
-            new_row.pph = pph_on_bagian1 ? 0 : 1;
-            new_row.amount = flt(qty2 * original_row.rate, precision("amount", original_row));
+            if (qty_tetap) {
+                // Diisi langsung tanpa set_value: handler rate erpnext akan mengubah
+                // selisih rate terhadap price_list_rate jadi diskon/margin. price_list_rate
+                // disamakan supaya pricing rule tidak mengembalikan rate PO.
+                for (const [r, rate, amount] of [[new_row, p.rate_baru, p.amount_baru], [row, p.rate_sisa, p.amount_sisa]]) {
+                    Object.assign(r, {
+                        rate,
+                        price_list_rate: rate,
+                        discount_percentage: 0,
+                        discount_amount: 0,
+                        margin_rate_or_amount: 0,
+                        rate_with_margin: 0,
+                        amount,
+                        pecah_amount: 1,
+                    });
+                }
+            } else {
+                const sisa = { qty: p.qty_sisa };
+                if (received_ikut_qty) sisa.received_qty = p.qty_sisa;
+                await frappe.model.set_value(row.doctype, row.name, sisa);
+            }
 
             frm.refresh_field("items");
+            calculate_sub_total(frm);
             frm.trigger("calculate_taxes_and_totals");
             frm.dirty();
             frappe.show_alert({ message: "Item berhasil dipecah.", indicator: "green" });
@@ -1594,6 +1635,7 @@ function show_pecah_dialog(frm) {
     });
 
     dialog.show();
+    dialog.fields_dict.item_row.df.change();
 }
 
 function show_pb_dialog(frm, bapp) {
