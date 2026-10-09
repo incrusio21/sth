@@ -66,8 +66,8 @@ def get_columns(filters):
 			"fieldtype": "Float"
 		},
 		{
-			"label": _("Internal Jenjang"),
-			"fieldname": "internal_jenjang",
+			"label": _("Internal Janjang"),
+			"fieldname": "internal_janjang",
 			"fieldtype": "Float"
 		},
 		{
@@ -155,7 +155,7 @@ def get_data(filters):
 		t.tara as internal_berat_masuk,
 		t.bruto as internal_berat_keluar,
 		t.netto as internal_berat_bersih,
-		"" as internal_jenjang,
+		"" as internal_janjang,
 
 		t.bruto_eksternal as external_berat_masuk,
 		t.tara_eksternal as external_berat_keluar,
@@ -170,9 +170,9 @@ def get_data(filters):
 
 		t.transportir as transportir,
 
-		(((t.netto - t.netto_eksternal) - t.netto) * (3/100)) as denda_kg,
+		((t.netto - t.netto_eksternal) - (t.netto * (3/100))) as denda_kg,
 		doi.rate as denda_harga_tbs,
-		(((t.netto - t.netto_eksternal) - t.netto) * (3/100)) * 2 * doi.rate as denda_total_denda,
+		((t.netto - t.netto_eksternal) - (t.netto * (3/100))) * 2 * doi.rate as denda_total_denda,
 
 		CASE
 				WHEN (((t.netto - t.netto_eksternal) / NULLIF(t.netto, 0)) * 100) >= 3
@@ -183,7 +183,7 @@ def get_data(filters):
 		FROM `tabTimbangan` as t
 		LEFT JOIN `tabDelivery Order` as do ON do.name = t.do_no
 		LEFT JOIN `tabDelivery Order Item` as doi ON doi.parent = do.name
-		WHERE t.company = 'PT. ALAO KUNING';
+		WHERE t.company = 'PT. ALAO KUNING' AND (((t.netto - t.netto_eksternal) / NULLIF(t.netto, 0)) * 100) >= 3;
   """, as_dict=True)
  
 	for row in query:
