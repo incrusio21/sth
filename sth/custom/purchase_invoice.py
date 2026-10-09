@@ -24,16 +24,19 @@ def validate_qty_against_purchase_receipt(doc, method=None):
 		if not item.pr_detail:
 			continue
 
-		if item.pr_detail not in pr_detail_rows:
-			pr_detail_rows[item.pr_detail] = {
-				"current_qty": flt(item.qty),
-				"item_code": item.item_code,
-				"item_name": item.item_name or item.item_code,
-				"row_name": item.idx,
-			}
+		row = pr_detail_rows.setdefault(item.pr_detail, {
+			"current_qty": 0.0,
+			"current_pecah_amount": 0.0,
+			"item_code": item.item_code,
+			"item_name": item.item_name or item.item_code,
+			"row_name": item.idx,
+		})
+		# Baris hasil Pecah Item qty tetap membawa qty penuh baris asal, jadi yang
+		# dihitung amount-nya; nanti dikonversi ke qty setara lewat rate PR.
+		if item.get("pecah_amount"):
+			row["current_pecah_amount"] += flt(item.amount)
 		else:
-			# Jika pr_detail muncul lebih dari sekali dalam 1 PINV
-			pr_detail_rows[item.pr_detail]["current_qty"] += flt(item.qty)
+			row["current_qty"] += flt(item.qty)
 
 	if not pr_detail_rows:
 		return
@@ -46,7 +49,7 @@ def validate_qty_against_purchase_receipt(doc, method=None):
 	received_data = frappe.get_all(
 		"Purchase Receipt Item",
 		filters={"name": ["in", pr_detail_list]},
-		fields=["name", "qty", "parent as purchase_receipt"],
+		fields=["name", "qty", "rate", "parent as purchase_receipt"],
 	)
 	received_map = {r["name"]: r for r in received_data}
 
@@ -54,11 +57,17 @@ def validate_qty_against_purchase_receipt(doc, method=None):
 	# 2. Hitung qty yang sudah diinvoice di PINV lain
 	#    (status submitted atau draft, kecuali cancelled & dokumen ini)
 	# -----------------------------------------------------------
+	# Kolom pecah_amount baru ada sesudah migrate.
+	if frappe.db.has_column("Purchase Invoice Item", "pecah_amount"):
+		invoiced_qty = "SUM(IF(pii.pecah_amount, 0, pii.qty)) AS invoiced_qty, SUM(IF(pii.pecah_amount, pii.amount, 0)) AS pecah_amount"
+	else:
+		invoiced_qty = "SUM(pii.qty) AS invoiced_qty, 0 AS pecah_amount"
+
 	already_invoiced_data = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			pii.pr_detail,
-			SUM(pii.qty) AS invoiced_qty
+			{invoiced_qty}
 		FROM
 			`tabPurchase Invoice Item` pii
 		INNER JOIN
@@ -76,9 +85,10 @@ def validate_qty_against_purchase_receipt(doc, method=None):
 		},
 		as_dict=True,
 	)
-	already_invoiced_map = {
-		row["pr_detail"]: flt(row["invoiced_qty"]) for row in already_invoiced_data
-	}
+	already_invoiced_map = {row["pr_detail"]: row for row in already_invoiced_data}
+
+	def qty_setara(qty, pecah_amount, rate):
+		return flt(qty) + (flt(pecah_amount) / flt(rate) if flt(rate) else 0.0)
 
 	# -----------------------------------------------------------
 	# 3. Bandingkan dan lempar error jika melebihi
@@ -92,8 +102,15 @@ def validate_qty_against_purchase_receipt(doc, method=None):
 			continue
 
 		received_qty = flt(received_info["qty"])
-		already_invoiced_qty = already_invoiced_map.get(pr_detail, 0.0)
-		total_invoiced = already_invoiced_qty + info["current_qty"]
+		invoiced = already_invoiced_map.get(pr_detail) or {}
+		already_invoiced_qty = flt(
+			qty_setara(invoiced.get("invoiced_qty"), invoiced.get("pecah_amount"), received_info["rate"]), 9
+		)
+		total_invoiced = flt(
+			already_invoiced_qty
+			+ qty_setara(info["current_qty"], info["current_pecah_amount"], received_info["rate"]),
+			9,
+		)
 
 		if total_invoiced > received_qty:
 			errors.append(
