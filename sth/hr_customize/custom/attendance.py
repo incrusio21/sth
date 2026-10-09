@@ -58,16 +58,28 @@ class Attendance:
         designation = frappe.get_cached_doc("Designation", self.doc.designation)
         self.doc.premi_amount = 0
 
-        # set nilai premi dan tipe apa saja yang bisa di dapatkan
+        # set nilai premi dan tipe apa saja yang bisa di dapatkan.
+        # baris tanpa company berlaku untuk semua company, tapi kalah dari baris
+        # yang company-nya sama persis
         pt = "Hari Biasa" if not self.doc.is_holiday else "Hari Libur"
-        for premi in designation.premi:
-            if premi.company == self.doc.company and premi.premi_type != pt:
+        premi = None
+        for row in designation.premi:
+            if row.premi_type != pt or (row.company and row.company != self.doc.company):
                 continue
-            
-            self.doc.salary_component = premi.salary_component \
-                or get_premi_attendance_settings(premi.premi_type) \
-                or designation.salary_component
-            self.doc.premi_amount = premi.amount or 0
+
+            if row.company:
+                premi = row
+                break
+
+            premi = premi or row
+
+        if not premi:
+            return
+
+        self.doc.salary_component = premi.salary_component \
+            or get_premi_attendance_settings(premi.premi_type) \
+            or designation.salary_component
+        self.doc.premi_amount = premi.amount or 0
             
     def create_or_update_payment_log(self):
         if self.doc.status not in ("Present"):
