@@ -208,7 +208,7 @@ sth.legal.GantiRugiLahan = class GantiRugiLahan extends sth.plantation.AccountsC
 
 			return {
 				filters: {
-					perangkat_desa: ["=", item.perangkat_desa]
+					perangkat_desa: ["=", "Ya"]
 				}
 			};
 		});

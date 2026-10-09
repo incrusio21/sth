@@ -206,7 +206,6 @@
   {
    "fieldname": "upload_file_tab",
    "fieldtype": "Tab Break",
-   "hidden": 1,
    "label": "Upload File"
   },
   {
@@ -232,7 +231,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-05 10:49:16.787226",
+ "modified": "2026-10-09 10:05:31.695519",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
