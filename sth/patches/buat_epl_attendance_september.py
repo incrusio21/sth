@@ -8,7 +8,7 @@ BATAS_RINCIAN = 30
 COMMIT_TIAP = 200
 
 
-def execute(dari="2026-09-01", sampai="2026-09-30", dry_run=False, termasuk_slip_submit=False):
+def execute(dari="2026-09-01", sampai="2026-09-30", dry_run=False, termasuk_slip_submit=False, employee=None):
 	"""Buat Employee Payment Log untuk Attendance Present yang belum punya EPL.
 
 	Dibuat lewat repair_employee_payment_log, jalur yang sama dengan kiriman API
@@ -22,10 +22,17 @@ def execute(dari="2026-09-01", sampai="2026-09-30", dry_run=False, termasuk_slip
 	mengambil EPL lama yang ditandai salary_slip_terlewat). Mereka dicetak; pakai
 	termasuk_slip_submit=1 kalau tetap mau dibuatkan.
 
+	employee membatasi ke employee tertentu: satu ID atau list ID. Kosong berarti
+	semua employee.
+
 	Tidak didaftarkan di patches.txt. Lihat dulu jumlahnya tanpa menulis:
 
 	    bench --site <site> execute sth.patches.buat_epl_attendance_september.execute --kwargs "{'dry_run': 1}"
+	    bench --site <site> execute sth.patches.buat_epl_attendance_september.execute --kwargs "{'dry_run': 1, 'employee': ['EMP-001', 'EMP-002']}"
 	"""
+	if isinstance(employee, str):
+		employee = [employee]
+
 	attendance = frappe.db.sql(
 		"""
 		SELECT att.name, att.employee, att.attendance_date
@@ -33,23 +40,24 @@ def execute(dari="2026-09-01", sampai="2026-09-30", dry_run=False, termasuk_slip
 		WHERE att.docstatus = 1
 			AND att.status = 'Present'
 			AND att.attendance_date BETWEEN %(dari)s AND %(sampai)s
+			{filter_employee}
 			AND NOT EXISTS (
 				SELECT 1 FROM `tabEmployee Payment Log` epl
 				WHERE epl.voucher_type = 'Attendance' AND epl.voucher_no = att.name
 			)
 		ORDER BY att.attendance_date, att.name
-		""",
-		{"dari": dari, "sampai": sampai},
+		""".format(filter_employee="AND att.employee IN %(employee)s" if employee else ""),
+		{"dari": dari, "sampai": sampai, "employee": tuple(employee or [])},
 		as_dict=True,
 	)
 
 	slip_submit = set()
 	if not termasuk_slip_submit:
-		slip_submit = set(frappe.get_all(
-			"Salary Slip",
-			filters={"docstatus": 1, "start_date": ("<=", sampai), "end_date": (">=", dari)},
-			pluck="employee",
-		))
+		filters = {"docstatus": 1, "start_date": ("<=", sampai), "end_date": (">=", dari)}
+		if employee:
+			filters["employee"] = ("in", employee)
+
+		slip_submit = set(frappe.get_all("Salary Slip", filters=filters, pluck="employee"))
 
 	dibuat = []
 	premi_nol = []
