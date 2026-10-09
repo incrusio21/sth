@@ -395,6 +395,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					# "compare_fields": [["project", "="], ["item_code", "="], ["kegiatan", "="], ["kegiatan_name", "="], ["uom", "="]],
 					"compare_fields": [["project", "="], ["kegiatan", "="], ["uom", "="]],
 					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
 				},
 			}
 		)
@@ -412,6 +413,17 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					["BAPP", "bapp", "bapp_detail"],
 				]
 			)
+
+	def validate_rate_with_reference_doc(self, ref_details):
+		# Baris hasil Pecah Item per amount sengaja ber-rate beda dari dokumen
+		# acuannya (qty tetap, rate = amount). Penagihannya tetap dibatasi amount
+		# oleh status updater billing, jadi rate cukup dicek di baris lain.
+		items = self.items
+		self.items = [d for d in items if not d.get("pecah_amount")]
+		try:
+			super().validate_rate_with_reference_doc(ref_details)
+		finally:
+			self.items = items
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
