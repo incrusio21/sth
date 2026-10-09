@@ -1,5 +1,8 @@
 frappe.ui.form.on('Purchase Receipt', {
 	refresh: function(frm) {
+		// nama suppliernya sudah tampil di supplier_name
+		frm.set_df_property("supplier", "tanpa_judul_link", 1);
+
 		make_timbangan_button(frm)
 	}
 });

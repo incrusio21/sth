@@ -656,6 +656,9 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	refresh(frm) {
+		// nama suppliernya sudah tampil di supplier_name
+		frm.set_df_property("supplier", "tanpa_judul_link", 1);
+
 		frm.trigger('get_tax_template')
 		frm.page.sidebar.hide()
 		frm.set_query("purchase_type", () => {

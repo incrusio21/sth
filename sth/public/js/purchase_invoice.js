@@ -35,6 +35,9 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     refresh(frm) {
+        // nama suppliernya sudah tampil di supplier_name
+        frm.set_df_property("supplier", "tanpa_judul_link", 1);
+
         if (frm.is_new() && frm.doc.invoice_type === "Pengakuan Pembelian TBS") {
             for (const row of (frm.doc.pph_lainnya || [])) {
                 if (row.type && !row.account) {
