@@ -510,8 +510,8 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     recalculate_vat_details(frm) {
-        const base_pph = frm.doc.sub_total || 0
-        const base_ppn = (frm.doc.sub_total || 0) - (frm.doc.jumlah_diskon || 0)
+        const base_pph = base_vat(frm, "pph_lainnya")
+        const base_ppn = base_vat(frm, "ppn")
 
         for (const row of (frm.doc.pph_lainnya || [])) {
             if (!row.percentage) continue
@@ -785,35 +785,7 @@ frappe.ui.form.on("VAT Detail", {
 
     percentage(frm, dt, dn) {
         let row = locals[dt][dn]
-        let base = 0
-
-        // if(frm.doc.invoice_type == "SPK"){
-        base = frm.doc.total
-
-        let total_centang_pph = 0
-        
-        if(row.parentfield == "pph_lainnya"){
-            for(var baris in frm.doc.items){
-                var satu_baris = frm.doc.items[baris]
-                if(satu_baris.pph == 1){
-                    total_centang_pph += satu_baris.amount
-                }
-            }
-
-            if(total_centang_pph > 0){
-                base = total_centang_pph
-            }
-        }
-        
-
-        // }
-        // else{
-        //     base = row.parentfield == "pph_lainnya"
-        //         ? (frm.doc.sub_total || 0)
-        //         : (frm.doc.sub_total || 0) - (frm.doc.jumlah_diskon || 0)
-        // }
-       
-        const amount = base * (row.percentage || 0) / 100
+        const amount = base_vat(frm, row.parentfield) * (row.percentage || 0) / 100
 
         frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
         frappe.model.set_value(dt, dn, "amount", amount)
@@ -856,6 +828,10 @@ frappe.ui.form.on("Purchase Invoice Item", {
 
     amount(frm) {
         calculate_sub_total(frm);
+    },
+
+    pph(frm) {
+        frm.trigger('recalculate_vat_details');
     }
 });
 
@@ -901,6 +877,19 @@ const PB_MARKER = "__from_pb__";
 const DISKON_MARKER = "__diskon__";
 
 const TAX_ROW_FIELDS = ["account_head", "charge_type", "add_deduct_tax", "category", "tax_amount", "description"];
+
+// Dasar pajak tabel ppn / pph_lainnya. Dipakai handler percentage maupun
+// recalculate_vat_details (jalan saat refresh dan before_save), supaya angka
+// sebelum dan sesudah simpan sama. PPh hanya dikenakan pada baris item yang
+// dicentang pph; kalau tidak ada yang dicentang, seluruh sub total.
+function base_vat(frm, parentfield) {
+    if (parentfield === "pph_lainnya") {
+        const dicentang = (frm.doc.items || []).filter((r) => r.pph);
+        if (dicentang.length) return dicentang.reduce((total, r) => total + flt(r.amount), 0);
+        return flt(frm.doc.sub_total);
+    }
+    return flt(frm.doc.sub_total) - flt(frm.doc.jumlah_diskon);
+}
 
 function sync_to_taxes(frm) {
     const new_rows = [
@@ -1088,16 +1077,20 @@ function toggle_kegiatan_unit_columns(frm) {
     frm.fields_dict.items.grid.refresh();
 }
 
-function toggle_ppn_12(frm) {
+async function toggle_ppn_12(frm) {
     const PPN_TYPE = "PPN 12%";
-    const PPN_PERCENTAGE = 12;
 
     if (frm.doc.pakai_ppn) {
         const exists = (frm.doc.ppn || []).some(row => row.type === PPN_TYPE);
         if (!exists) {
+            // percentage di-fetch dari Tax Rate.rate saat simpan; kalau diisi angka
+            // lain di sini, hitungan sebelum dan sesudah simpan berbeda.
+            const { message } = await frappe.db.get_value("Tax Rate", PPN_TYPE, "rate");
+            if ((frm.doc.ppn || []).some(row => row.type === PPN_TYPE)) return;
+
             let row = frm.add_child("ppn");
             row.type = PPN_TYPE;
-            row.percentage = PPN_PERCENTAGE;
+            row.percentage = flt(message && message.rate);
             frm.refresh_field("ppn");
             frm.script_manager.trigger("type", row.doctype, row.name);
             frm.script_manager.trigger("percentage", row.doctype, row.name);
