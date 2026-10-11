@@ -51,7 +51,33 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         this.isi_tenaga_kerja_dari_rincian(cdt, cdn)
     }
 
+    blok(_, cdt, cdn) {
+        let row = locals[cdt][cdn]
+        if (!row || row.parentfield != "kegiatan_detail") return
+
+        // material dari form ditambahkan waktu kegiatannya dipilih, sebelum ada
+        // bloknya; begitu blok terisi atau diganti, material yang belum punya blok
+        // atau bloknya tidak ada lagi di tabel kegiatan ikut menunjuk blok ini
+        let baris = this.frm.doc.kegiatan_detail || []
+        for (const m of this.frm.doc.material || []) {
+            if (m.kegiatan != row.kegiatan) continue
+
+            let yatim = !baris.some(r => r.kegiatan == m.kegiatan && r.blok == m.blok)
+            if (!m.blok || yatim) m.blok = row.blok
+        }
+
+        this.frm.refresh_field("material")
+    }
+
     kegiatan_detail_remove() {
+        // material milik baris kegiatan yang dihapus ikut dibuang
+        let baris = this.frm.doc.kegiatan_detail || []
+        this.frm.doc.material = (this.frm.doc.material || []).filter(m =>
+            !m.kegiatan || baris.some(r => r.kegiatan == m.kegiatan && (!m.blok || r.blok == m.blok))
+        )
+        this.frm.doc.material.forEach((m, i) => m.idx = i + 1)
+        this.frm.refresh_field("material")
+
         this.hitung_kegiatan_dan_material(null, null)
     }
 
@@ -116,28 +142,30 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
             },
             callback: function (data) {
                 frappe.model.set_value(cdt, cdn, data.message || { volume_basis: 0, rupiah_basis: 0 })
-                me.tambah_material_kegiatan(row.kegiatan)
+                me.tambah_material_kegiatan(row)
                 me.hitung_kegiatan_dan_material(cdt, cdn)
             }
         })
     }
 
-    tambah_material_kegiatan(kegiatan) {
+    tambah_material_kegiatan(row) {
         let me = this
 
         frappe.call({
             method: "sth.plantation.doctype.rencana_kerja_harian.rencana_kerja_harian.get_material",
-            args: { kode_kegiatan: kegiatan },
+            args: { kode_kegiatan: row.kegiatan },
             callback: function (data) {
-                // ditambahkan, bukan menimpa: satu RKH memuat beberapa kegiatan dan
-                // tabel materialnya dipakai bersama-sama
-                let sudah_ada = (me.frm.doc.material || []).map(d => d.item)
+                // ditambahkan, bukan menimpa: satu RKH memuat beberapa kegiatan, dan
+                // tiap baris material menunjuk kegiatan pemiliknya
+                let kunci = d => [d.item, d.kegiatan, d.blok || ""].join("|")
+                let sudah_ada = (me.frm.doc.material || []).map(kunci)
 
                 for (const m of (data.message || {}).material || []) {
-                    if (sudah_ada.includes(m.item)) continue
+                    let baru = { ...m, kegiatan: row.kegiatan, blok: row.blok }
+                    if (sudah_ada.includes(kunci(baru))) continue
 
-                    me.frm.add_child("material", m)
-                    sudah_ada.push(m.item)
+                    me.frm.add_child("material", baru)
+                    sudah_ada.push(kunci(baru))
                 }
 
                 me.frm.refresh_field("material")
@@ -153,7 +181,14 @@ sth.plantation.RencanaKerjaHarian = class RencanaKerjaHarian extends sth.plantat
         }
 
         if (item.parentfield == "material") {
-            item.qty = this.frm.doc.total_luas ? flt(item.dosis / this.frm.doc.total_luas) : 0
+            // sama dengan server: dibagi luas baris pemiliknya, atau total luas
+            // kalau materialnya tidak menunjuk kegiatan
+            let pemilik = item.kegiatan && (this.frm.doc.kegiatan_detail || []).find(r =>
+                r.kegiatan == item.kegiatan && (r.blok || "") == (item.blok || "")
+                && (r.batch || "") == (item.batch || "")
+            )
+            let luas = pemilik ? flt(pemilik.target_volume) : flt(this.frm.doc.total_luas)
+            item.qty = luas ? flt(item.dosis / luas) : 0
         }
     }
 

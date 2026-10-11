@@ -27,11 +27,13 @@ class RencanaKerjaHarian(PlantationController):
 			item.rate = flt(item.rupiah_basis)
 			item.qty = flt(item.target_volume) if item.tipe_kegiatan == "Panen" else cint(item.qty_tenaga_kerja)
 
-		if item.parentfield == "material" and self.total_luas:
-			# Pembaginya total luas seluruh baris kegiatan, bukan luas satu kegiatan:
-			# tabel material berdiri sendiri di level dokumen dan tidak menunjuk
-			# baris kegiatan mana pun.
-			item.qty = flt(item.dosis / self.total_luas, precision)
+		if item.parentfield == "material":
+			# Material yang menunjuk baris kegiatan dibagi luas baris itu saja.
+			# Yang tidak menunjuk apa-apa — data lama dan baris dari form —
+			# dianggap dipakai bersama, jadi pembaginya total luas seluruh baris.
+			row = self.baris_kegiatan_material(item)
+			luas = flt(row.target_volume) if row else self.total_luas
+			item.qty = flt(item.dosis / luas, precision) if luas else 0
 
 	def validate(self):
 		# Urutannya penting. calculate() di super().validate() membaca rupiah_basis
@@ -39,6 +41,7 @@ class RencanaKerjaHarian(PlantationController):
 		# sebelum sampai ke sana.
 		self.isi_data_kegiatan()
 		self.hitung_total_kegiatan()
+		self.hubungkan_material_ke_kegiatan()
 		self.isi_rencana_kerja_bulanan()
 		self.isi_rate_material()
 		self.buang_material_tanpa_perawatan()
@@ -121,28 +124,35 @@ class RencanaKerjaHarian(PlantationController):
 	def susun_item_permintaan_pengeluaran(self):
 		"""Baris Permintaan Pengeluaran Barang dari tabel material.
 
-		Material RKH tidak menunjuk blok, padahal blok yang menentukan cost center
-		waktu barangnya keluar. Total dosis tiap barang dibagi ke baris kegiatan
-		Perawatan sebanding luasnya — sama dengan anggapan qty = dosis / total_luas
-		di update_rate_or_qty_value. Sisa pembulatan jatuh ke baris terakhir supaya
-		jumlahnya tetap sama dengan dosis.
+		Blok yang menentukan cost center waktu barangnya keluar. Material yang
+		menunjuk baris kegiatan langsung memakai kegiatan dan blok baris itu.
+
+		Yang tidak menunjuk apa-apa — RKH lama dan baris dari form — total dosis
+		tiap barangnya dibagi ke baris kegiatan Perawatan sebanding luasnya, sama
+		dengan anggapan qty = dosis / total_luas di update_rate_or_qty_value. Sisa
+		pembulatan jatuh ke baris terakhir supaya jumlahnya tetap sama dengan dosis.
 		"""
-		perawatan = [r for r in self.kegiatan_detail if r.tipe_kegiatan == "Perawatan"]
-		if not perawatan:
-			return []
-
-		kebutuhan = {}
-		for m in self.material:
-			if m.item and flt(m.dosis):
-				kebutuhan.setdefault((m.item, m.uom), 0)
-				kebutuhan[(m.item, m.uom)] += flt(m.dosis)
-
-		luas = sum(flt(r.target_volume) for r in perawatan)
 		precision = cint(frappe.get_meta(PPB + " Item").get_field("jumlah").precision) or 2
-		akun = {}
-		items = []
+		perawatan = [r for r in self.kegiatan_detail if r.tipe_kegiatan == "Perawatan"]
+		luas = sum(flt(r.target_volume) for r in perawatan)
 
-		for (item, uom), dosis in kebutuhan.items():
+		# (item, uom, idx baris kegiatan) -> jumlah; baris kembar dijumlahkan supaya
+		# PPB-nya tidak memuat dua baris untuk barang dan blok yang sama
+		jatah = {}
+		bersama = {}
+
+		for m in self.material:
+			if not (m.item and flt(m.dosis)):
+				continue
+
+			row = self.baris_kegiatan_material(m)
+			if row:
+				kunci = (m.item, m.uom, row.idx)
+				jatah[kunci] = jatah.get(kunci, 0) + flt(m.dosis)
+			else:
+				bersama[(m.item, m.uom)] = bersama.get((m.item, m.uom), 0) + flt(m.dosis)
+
+		for (item, uom), dosis in bersama.items():
 			sisa = dosis
 
 			for i, row in enumerate(perawatan):
@@ -154,23 +164,33 @@ class RencanaKerjaHarian(PlantationController):
 					jumlah = flt(dosis / len(perawatan), precision)
 
 				sisa -= jumlah
-				if not jumlah:
-					continue
+				kunci = (item, uom, row.idx)
+				jatah[kunci] = jatah.get(kunci, 0) + jumlah
 
-				if row.kegiatan not in akun:
-					akun[row.kegiatan] = (fetch_kegiatan_company(
-						row.kegiatan, self.company, self.unit, ["account"]
-					) or {}).get("account")
+		baris = {r.idx: r for r in self.kegiatan_detail}
+		akun = {}
+		items = []
 
-				items.append({
-					"kode_barang": item,
-					"satuan": uom or frappe.db.get_value("Item", item, "stock_uom"),
-					"jumlah": jumlah,
-					"sub_unit": self.divisi,
-					"blok": row.blok,
-					"kegiatan": row.kegiatan,
-					"account": akun[row.kegiatan],
-				})
+		for (item, uom, idx), jumlah in jatah.items():
+			jumlah = flt(jumlah, precision)
+			if not jumlah:
+				continue
+
+			row = baris[idx]
+			if row.kegiatan not in akun:
+				akun[row.kegiatan] = (fetch_kegiatan_company(
+					row.kegiatan, self.company, self.unit, ["account"]
+				) or {}).get("account")
+
+			items.append({
+				"kode_barang": item,
+				"satuan": uom or frappe.db.get_value("Item", item, "stock_uom"),
+				"jumlah": jumlah,
+				"sub_unit": self.divisi,
+				"blok": row.blok,
+				"kegiatan": row.kegiatan,
+				"account": akun[row.kegiatan],
+			})
 
 		return items
 
@@ -251,6 +271,55 @@ class RencanaKerjaHarian(PlantationController):
 		self.total_tk_laki_laki = sum(cint(r.jumlah_tk_laki_laki) for r in self.kegiatan_detail)
 		self.total_tk_perempuan = sum(cint(r.jumlah_tk_perempuan) for r in self.kegiatan_detail)
 
+	def hubungkan_material_ke_kegiatan(self):
+		"""Pastikan material yang menyebut kegiatan menunjuk tepat satu baris kegiatan.
+
+		Tabel material tetap satu tabel di dokumen — child table tidak bisa
+		bersarang — jadi pemiliknya dicatat lewat kegiatan, blok, dan batch.
+		Ketiganya cukup jadi kunci karena validate_duplicate_rkh melarang kegiatan
+		yang sama di blok yang sama muncul dua kali.
+
+		Blok dan batch yang kosong diisi kalau kegiatannya cuma ada di satu baris;
+		baris dari form ditambahkan sebelum bloknya dipilih.
+		"""
+		for m in self.material:
+			if not m.kegiatan:
+				continue
+
+			cocok = [
+				r for r in self.kegiatan_detail
+				if r.kegiatan == m.kegiatan
+				and (not m.blok or (r.blok or "") == m.blok)
+				and (not m.batch or (r.batch or "") == m.batch)
+			]
+
+			if len(cocok) != 1:
+				frappe.throw(
+					_("Baris material {0}: {1} kegiatan {2}{3} di tabel kegiatan. {4}").format(
+						m.idx,
+						_("tidak ada") if not cocok else _("ada lebih dari satu"),
+						frappe.bold(m.kegiatan),
+						" / " + frappe.bold(m.blok or m.batch) if (m.blok or m.batch) else "",
+						_("Sebutkan bloknya.") if cocok else _("Tambahkan dulu baris kegiatannya."),
+					),
+					title=_("Material Tidak Menunjuk Kegiatan")
+				)
+
+			m.blok = cocok[0].blok
+			m.batch = cocok[0].batch
+
+	def baris_kegiatan_material(self, m):
+		"""Baris kegiatan pemilik material ini, atau None untuk material bersama."""
+		if not m.kegiatan:
+			return None
+
+		for r in self.kegiatan_detail:
+			if (r.kegiatan == m.kegiatan and (r.blok or "") == (m.blok or "")
+					and (r.batch or "") == (m.batch or "")):
+				return r
+
+		return None
+
 	def isi_rencana_kerja_bulanan(self):
 		"""Tempelkan Rencana Kerja Bulanan yang menaungi tiap baris kegiatan.
 
@@ -300,16 +369,21 @@ class RencanaKerjaHarian(PlantationController):
 			return
 
 		per_item = {}
+		per_rkb = {}
 		for r in frappe.get_all(
 			"Detail Material RK",
 			filters={"parent": ["in", rkb]},
-			fields=["item", "rate", "name"],
+			fields=["parent", "item", "rate", "name"],
 			order_by="parent, idx",
 		):
 			per_item.setdefault(r.item, r)
+			per_rkb.setdefault((r.parent, r.item), r)
 
 		for d in kosong:
-			ref = per_item.get(d.item)
+			# material yang menunjuk baris kegiatan diambil dari RKB baris itu dulu,
+			# supaya pemakaiannya tercatat di anggaran blok yang benar
+			row = self.baris_kegiatan_material(d)
+			ref = (row and per_rkb.get((row.voucher_no, d.item))) or per_item.get(d.item)
 			if not ref:
 				continue
 

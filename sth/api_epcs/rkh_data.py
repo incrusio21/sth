@@ -7,6 +7,10 @@ Satu kiriman EPCS = satu dokumen Rencana Kerja Harian. Kegiatan, blok, dan luas
 pekerjaannya datang sebagai daftar dan disimpan di tabel Detail RKH Kegiatan;
 gudang, penerima material, dan kemandoran berlaku untuk seluruh dokumen.
 
+Material dikirim di dalam baris kegiatannya. Di RKH semuanya tetap masuk satu
+tabel material, tapi tiap barisnya mencatat kegiatan dan blok pemiliknya, supaya
+Permintaan Pengeluaran Barang tahu barang itu untuk blok mana.
+
 `trans_no` adalah patokannya. Kiriman dengan trans_no yang sudah pernah masuk
 memperbarui dokumen yang sama, bukan melahirkan dokumen baru — jadi pengirim boleh
 mengulang request tanpa takut dobel.
@@ -66,6 +70,9 @@ ALIAS_KEGIATAN = {
 	"tk_perempuan": "jumlah_tk_perempuan",
 	"tenaga_kerja_perempuan": "jumlah_tk_perempuan",
 	"jumlah_tenaga_kerja_perempuan": "jumlah_tk_perempuan",
+	"materials": "material",
+	"rincian_material": "material",
+	"detail_material": "material",
 }
 
 ALIAS_MATERIAL = {
@@ -92,7 +99,7 @@ FIELD_SIDIK_JARI_KEGIATAN = (
 	"jumlah_tk_laki_laki", "jumlah_tk_perempuan",
 )
 
-FIELD_SIDIK_JARI_MATERIAL = ("item", "dosis", "uom")
+FIELD_SIDIK_JARI_MATERIAL = ("item", "dosis", "uom", "kegiatan", "blok", "batch")
 
 # Jabatan yang dianggap memegang peran mandor dan kerani di sebuah kemandoran.
 #
@@ -220,7 +227,8 @@ def _isi_dokumen(doc, kiriman):
 
 	Tabelnya lain: kalau dikirim, diisi ulang dari nol. Kiriman EPCS selalu membawa
 	rencana harian itu secara utuh, jadi baris yang tidak ada lagi di kiriman memang
-	sudah dihapus dari rencananya.
+	sudah dihapus dari rencananya. Material di dalam baris kegiatan ikut terkirim
+	bersama kegiatannya, jadi tabel material diisi ulang juga.
 	"""
 	if "unit" in kiriman:
 		unit = _cari_unit(kiriman.get("unit"))
@@ -250,13 +258,18 @@ def _isi_dokumen(doc, kiriman):
 		if not doc.get(peran):
 			doc.set(peran, _cari_petugas(doc.gang_code, peran))
 
+	material_kegiatan = []
+	# daftar kosong pun berarti "kegiatan ini tidak butuh material", jadi yang
+	# dilihat ada tidaknya kuncinya, bukan isinya
+	kirim_material = "material" in kiriman
+
 	if "kegiatan_detail" in kiriman:
 		doc.set("kegiatan_detail", [])
 		for baris in _as_list(kiriman.get("kegiatan_detail")):
 			baris = _terjemahkan(baris, ALIAS_KEGIATAN)
 			kegiatan = cstr(baris.get("kegiatan")).strip()
 
-			doc.append("kegiatan_detail", {
+			row = doc.append("kegiatan_detail", {
 				# kode induk yang dikirim sistem luar diterjemahkan ke kode anaknya,
 				# sama seperti yang dilakukan BKM lewat fix_kegiatan_from_api
 				"kegiatan": KEGIATAN_API_MAP.get(kegiatan, kegiatan),
@@ -267,9 +280,16 @@ def _isi_dokumen(doc, kiriman):
 				"jumlah_tk_perempuan": cint(baris.get("jumlah_tk_perempuan")),
 			})
 
-	if "material" in kiriman:
+			if "material" in baris:
+				kirim_material = True
+				material_kegiatan.extend((m, row) for m in _as_list(baris.get("material")))
+
+	# Bentuk lama — material datar di level dokumen — masih diterima. Barisnya
+	# tidak menunjuk kegiatan dan dibagi ke semua baris Perawatan sebanding luas.
+	if kirim_material:
 		doc.set("material", [])
-		for baris in _as_list(kiriman.get("material")):
+
+		for baris, row in [(m, None) for m in _as_list(kiriman.get("material"))] + material_kegiatan:
 			baris = _terjemahkan(baris, ALIAS_MATERIAL)
 			item = cstr(baris.get("item")).strip()
 
@@ -278,6 +298,9 @@ def _isi_dokumen(doc, kiriman):
 				"dosis": flt(baris.get("dosis")),
 				"uom": baris.get("uom"),
 				"rate": flt(baris.get("rate")),
+				"kegiatan": row.kegiatan if row else None,
+				"blok": row.blok if row else None,
+				"batch": row.batch if row else None,
 			})
 
 
@@ -395,17 +418,21 @@ def create_or_update(**kwargs):
 	    gudang_central           (Gudang Central)
 	    gudang_virtual           (Gudang Virtual)
 	    nik_penerima_material    (NIK Penerima Material)
-	    kegiatan_detail          daftar baris kegiatan
-	    material                 daftar baris material
+	    kegiatan_detail          daftar baris kegiatan, masing-masing dengan materialnya
+	    material                 daftar baris material tanpa kegiatan (bentuk lama)
 	    submit                   1 (bawaan) untuk langsung disubmit, 0 untuk draft
 
 	Baris kegiatan: kegiatan (Kode/Nama Kegiatan), blok (Kode blok), target_volume
-	(Luas Pekerjaan), jumlah_tk_laki_laki, jumlah_tk_perempuan. Kategori kegiatan
-	tidak perlu dikirim — diambil dari master Kegiatan.
+	(Luas Pekerjaan), jumlah_tk_laki_laki, jumlah_tk_perempuan, material. Kategori
+	kegiatan tidak perlu dikirim — diambil dari master Kegiatan.
 
-	Baris material: item (Kode Material), dosis (Jumlah Material), uom (Satuan).
-	Kategori material diambil dari master Item, tarifnya dari Rencana Kerja Bulanan
-	Perawatan yang menaungi kegiatannya.
+	Baris material: item (Kode Material), dosis (Jumlah Material untuk baris
+	kegiatan itu saja), uom (Satuan). Kategori material diambil dari master Item,
+	tarifnya dari Rencana Kerja Bulanan Perawatan yang menaungi kegiatannya.
+	Permintaan Pengeluaran Barang memakai kegiatan dan blok baris pemiliknya.
+
+	Material level dokumen masih diterima untuk pengirim lama; jumlahnya dibagi ke
+	semua kegiatan Perawatan sebanding luas.
 
 	mandor dan kerani wajib ada di RKH tapi tidak dikirim EPCS; keduanya dicari dari
 	karyawan aktif di kemandoran yang sama. Boleh juga dikirim langsung sebagai NIK
