@@ -39,7 +39,7 @@ sth.utils.EfillingSelector = class EfillingSelector {
 			fieldname: "entries",
 			fieldtype: "Table",
             cannot_add_rows: this.submited,
-			cannot_delete_rows: true,
+			cannot_delete_rows: this.submited,
 			allow_bulk_edit: true,
 			data: [],
 			fields: this.get_dialog_table_fields(),
