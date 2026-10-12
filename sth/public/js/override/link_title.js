@@ -18,13 +18,12 @@ function aturan_link_title() {
 	return (frappe.boot && frappe.boot.sth_link_title) || {};
 }
 
-// Judul link ke `doctype` disembunyikan kalau route sekarang ada di daftar
-// pengecualian. Route-nya dibaca tiap kali, bukan diingat, supaya pindah menu
-// tidak pernah meninggalkan apa-apa.
-function link_title_disembunyikan(doctype) {
+frappe.provide("sth.link_title");
+
+// Judul link ke `doctype` disembunyikan di `di_doctype` menurut tabel
+// pengecualian master. Dipakai juga oleh item_link_formatter.js.
+sth.link_title.disembunyikan_di = function (di_doctype, doctype) {
 	const disembunyikan = aturan_link_title().disembunyikan || {};
-	const route = frappe.get_route() || [];
-	const di_doctype = route[1];
 
 	if (!di_doctype || !Object.prototype.hasOwnProperty.call(disembunyikan, di_doctype)) {
 		return false;
@@ -33,9 +32,50 @@ function link_title_disembunyikan(doctype) {
 	// null berarti semua link di doctype itu.
 	const daftar = disembunyikan[di_doctype];
 	return !daftar || daftar.includes(doctype);
+};
+
+// Doctype tempat link sedang ditampilkan. Baris tabel anak membawa doctype
+// anaknya sendiri, jadi induknya dikenali lewat parenttype. Yang tidak punya doc
+// — dialog, filter, report — jatuh ke route sekarang, yang dibaca tiap kali,
+// bukan diingat, supaya pindah menu tidak pernah meninggalkan apa-apa.
+function doctype_konteks(doc) {
+	if (doc && (doc.parenttype || doc.doctype)) {
+		return doc.parenttype || doc.doctype;
+	}
+
+	return (frappe.get_route() || [])[1];
+}
+
+function link_title_disembunyikan(doctype) {
+	return sth.link_title.disembunyikan_di(doctype_konteks(), doctype);
+}
+
+// Pasangan untuk kotak isian, dikenali dari doc kontrolnya. ControlLink
+// menampilkan judul selama doctype tujuannya ada di link_title_doctypes, jadi
+// tanpa ini kolom "Kode Barang" berubah jadi nama barang begitu selnya disentuh.
+function pasang_is_title_link() {
+	const kelas = frappe.ui && frappe.ui.form && frappe.ui.form.ControlLink;
+	if (!kelas || kelas.prototype.sth_link_title) {
+		return;
+	}
+
+	const asal = kelas.prototype.is_title_link;
+
+	kelas.prototype.is_title_link = function () {
+		const di_doctype = doctype_konteks(this.doc || (this.frm && this.frm.doc));
+		if (sth.link_title.disembunyikan_di(di_doctype, this.get_options())) {
+			return false;
+		}
+
+		return asal.call(this);
+	};
+
+	kelas.prototype.sth_link_title = true;
 }
 
 function pasang_link_title() {
+	pasang_is_title_link();
+
 	const utils = frappe.utils;
 	if (!utils || utils.sth_link_title) {
 		return;

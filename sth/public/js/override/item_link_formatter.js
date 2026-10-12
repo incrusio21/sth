@@ -26,11 +26,14 @@
 // jadi pemasangan kedua ini pasti menang tanpa bergantung urutan.
 
 // Doctype yang tampilan link Item-nya kita tentukan sendiri: nilainya nama field
-// tempat nama barang disimpan, atau null kalau yang mau ditampilkan kode Item apa
-// adanya.
+// tempat nama barang disimpan, atau null kalau kode atau namanya ikut
+// Pengaturan Link Title — kode kalau doctype itu ada di tabel pengecualian untuk
+// Item (atau semua link), nama kalau tidak. Dulu null berarti selalu kode, dan
+// master tidak bisa mengubahnya.
 //
 // Retur Ke Supplier menampilkan kode walau barisnya menyimpan nama_barang —
-// field link-nya sendiri memang bernama kode_barang.
+// field link-nya sendiri memang bernama kode_barang. Pengecualiannya diisi patch
+// isi_pengecualian_item_link_title.
 const ATURAN = {
 	"BOM": null,
 	"Delivery Note": null,
@@ -88,51 +91,31 @@ function formatter_item(value, doc) {
 
 	// Jatuh ke kode Item kalau namanya belum terisi — mis. baris yang barusan
 	// ditambah dan item_name-nya belum sempat ditarik.
-	return (field && doc[field]) || value;
-}
-
-// Sel diamnya lewat formatter di atas, tapi kotak isiannya tidak. ControlLink
-// menampilkan judul dokumen — untuk Item berarti item_name — kalau doctype-nya
-// masuk frappe.boot.link_title_doctypes, dan Item punya Property Setter
-// show_title_field_in_link. Akibatnya kolom "Kode Barang" berubah jadi nama
-// barang begitu selnya disentuh, dan di Purchase Receipt itulah yang kelihatan
-// sepanjang baris sedang diisi.
-//
-// Aturannya diambil dari tabel yang sama: doctype yang nilainya null minta kode,
-// jadi kotaknya pun kode. Yang memetakan ke field nama tetap memakai judul,
-// begitu juga doctype yang tidak terdaftar.
-function pasang_is_title_link() {
-	const kelas = frappe.ui && frappe.ui.form && frappe.ui.form.ControlLink;
-
-	// Sekali saja. pasang_formatter_item dipanggil dua kali — level modul dan
-	// app_ready — dan membungkus dua lapis bikin pemanggilan asalnya berantai.
-	if (!kelas || kelas.prototype.sth_is_title_link) {
-		return;
+	if (field) {
+		return doc[field] || value;
 	}
 
-	const asal = kelas.prototype.is_title_link;
+	if (kode_item_ditampilkan(doctype)) {
+		return value;
+	}
 
-	kelas.prototype.is_title_link = function () {
-		if (this.get_options() === "Item") {
-			// Baris tabel anak membawa doctype anaknya sendiri, sama seperti di
-			// formatter. Kontrol di dialog atau filter tidak punya doc sama
-			// sekali, dan itu jatuh ke perilaku asal.
-			const doctype = this.doc && (this.doc.parenttype || this.doc.doctype);
-
-			if (doctype && ATURAN[doctype] === null) {
-				return false;
-			}
-		}
-
-		return asal.call(this);
-	};
-
-	kelas.prototype.sth_is_title_link = true;
+	return doc.item_name || frappe.utils.get_link_title("Item", value) || value;
 }
 
+// Kode kalau Link Title Item dimatikan di master, atau doctype ini menyembunyikan
+// judul link Item lewat tabel pengecualian.
+function kode_item_ditampilkan(doctype) {
+	const link_title_doctypes = (frappe.boot && frappe.boot.link_title_doctypes) || [];
+
+	return (
+		!link_title_doctypes.includes("Item") ||
+		(sth.link_title && sth.link_title.disembunyikan_di(doctype, "Item"))
+	);
+}
+
+// Kotak isiannya diurus link_title.js lewat tabel pengecualian yang sama.
 function pasang_formatter_item() {
 	frappe.form.link_formatters["Item"] = formatter_item;
-	pasang_is_title_link();
 }
 
 pasang_formatter_item();
