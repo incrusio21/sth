@@ -27,6 +27,7 @@ sth.patches.tambah_supplier_potongan_payroll_entry
 sth.patches.pindahkan_lain_lain_kud_ke_tabel
 sth.patches.isi_pengaturan_link_title
 sth.patches.isi_pengecualian_item_link_title
+sth.patches.isi_pengecualian_field_link_title
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).

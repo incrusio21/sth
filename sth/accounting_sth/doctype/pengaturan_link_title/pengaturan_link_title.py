@@ -73,10 +73,38 @@ class PengaturanLinkTitle(Document):
 	def validate_pengecualian(self):
 		sudah = set()
 		for d in self.pengecualian:
-			kunci = (d.di_doctype, d.document_type or "")
+			if d.fieldname:
+				self.validate_field_pengecualian(d)
+
+			kunci = (d.di_doctype, d.document_type or "", d.fieldname or "")
 			if kunci in sudah:
 				frappe.throw(_("Baris {0}: pengecualian ini sudah ada di tabel").format(d.idx))
 			sudah.add(kunci)
+
+	def validate_field_pengecualian(self, d):
+		"""Field boleh milik doctype-nya sendiri atau salah satu tabel anaknya —
+		kolom Item di baris items, misalnya."""
+		meta = frappe.get_meta(d.di_doctype)
+		df = meta.get_field(d.fieldname)
+		for tabel in meta.get_table_fields():
+			if df:
+				break
+			df = frappe.get_meta(tabel.options).get_field(d.fieldname)
+
+		if not df or df.fieldtype not in ("Link", "Dynamic Link"):
+			frappe.throw(
+				_("Baris {0}: {1} tidak punya field Link {2}").format(d.idx, d.di_doctype, d.fieldname)
+			)
+
+		if df.fieldtype == "Link":
+			if not d.document_type:
+				d.document_type = df.options
+			elif d.document_type != df.options:
+				frappe.throw(
+					_("Baris {0}: field {1} menunjuk {2}, bukan {3}").format(
+						d.idx, d.fieldname, df.options, d.document_type
+					)
+				)
 
 
 def terapkan(doc=None):
@@ -149,15 +177,16 @@ def isi_boot(bootinfo):
 
 	doc = frappe.get_cached_doc("Pengaturan Link Title")
 
-	# Nilai None berarti semua link di doctype itu menampilkan nama dokumennya.
-	disembunyikan = {}
-	for d in doc.pengecualian:
-		if not d.document_type:
-			disembunyikan[d.di_doctype] = None
-		elif disembunyikan.get(d.di_doctype, []) is not None:
-			disembunyikan.setdefault(d.di_doctype, []).append(d.document_type)
-
+	# document_type atau fieldname kosong berarti semua. d.get: kolom fieldname
+	# baru ada sesudah migrate.
 	bootinfo.sth_link_title = {
 		"nonaktif": [d.document_type for d in doc.doctype_link_title if not cint(d.tampilkan)],
-		"disembunyikan": disembunyikan,
+		"disembunyikan": [
+			{
+				"di_doctype": d.di_doctype,
+				"document_type": d.document_type or None,
+				"fieldname": d.get("fieldname") or None,
+			}
+			for d in doc.pengecualian
+		],
 	}
