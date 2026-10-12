@@ -890,6 +890,26 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 		return gl_entries
 
+	def get_gl_dict(self, args, account_currency=None, item=None):
+		# Remarks GL Entry diambil dari keterangan: baris item memakai keterangan
+		# item-nya, baris lain (hutang, pajak, uang muka) memakai keterangan
+		# header. Barisnya dikenali dari argumen item, atau dari voucher_detail_no
+		# untuk pemanggilan yang tidak mengoper item. Kalau keterangan kosong,
+		# remarks bawaan dibiarkan.
+		gl_dict = super().get_gl_dict(args, account_currency, item)
+
+		row = item if item and item.get("doctype") == "Purchase Invoice Item" else None
+		if not row and gl_dict.get("voucher_detail_no"):
+			row = next(
+				(d for d in self.get("items") if d.name == gl_dict.voucher_detail_no), None
+			)
+
+		keterangan = (row and row.get("keterangan")) or self.get("keterangan")
+		if keterangan:
+			gl_dict.remarks = keterangan
+
+		return gl_dict
+
 	def make_supplier_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introduction of posting GLE based on rounded total
