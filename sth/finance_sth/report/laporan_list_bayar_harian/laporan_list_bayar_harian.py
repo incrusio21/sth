@@ -116,7 +116,7 @@ def get_data(filters=None):
 		LEFT JOIN
 			`tabCompany` ct ON ct.name = at.company
 		WHERE
-			pe.docstatus = 0 AND pe.permintaan_dana_operasional IS NULL
+			pe.workflow_state = 'Butuh Persetujuan 3' AND pe.permintaan_dana_operasional IS NULL
 			{conditions}
 		ORDER BY
 			FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),

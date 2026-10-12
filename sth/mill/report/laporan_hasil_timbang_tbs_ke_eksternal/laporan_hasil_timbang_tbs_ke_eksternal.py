@@ -148,27 +148,27 @@ def get_data(filters):
 		t.ticket_number as ticket_no,
 		t.spb as spb_no,
 		do.sales_order as kontrak,
-		do.customer as pelanggan,
+		do.customer_name as pelanggan,
 		t.no_polisi as no_polisi,
 		t.driver_name as supir,
 
 		t.tara as internal_berat_masuk,
 		t.bruto as internal_berat_keluar,
 		t.netto as internal_berat_bersih,
-		"" as internal_janjang,
+		spb.total_janjang as internal_janjang,
 
 		t.bruto_eksternal as external_berat_masuk,
 		t.tara_eksternal as external_berat_keluar,
 		t.netto_eksternal as external_berat_bersih,
-		(t.sortasi_eksternal * t.netto_eksternal) as external_potongan,
-		(t.netto_eksternal - t.sortasi_eksternal) as external_berat_normal,
+		((t.sortasi_eksternal / 100) * t.netto_eksternal) as external_potongan,
+		(t.netto_eksternal - ((t.sortasi_eksternal / 100) * t.netto_eksternal)) as external_berat_normal,
 
-		(t.netto_eksternal - t.sortasi_eksternal) as berat_pengakuan_jual,
+		(t.netto_eksternal - ((t.sortasi_eksternal / 100) * t.netto_eksternal)) as berat_pengakuan_jual,
 
 		(t.netto - t.netto_eksternal) as varian_kg,
 		(((t.netto - t.netto_eksternal) / t.netto) * 100) as varian_percent,
 
-		t.transportir as transportir,
+		s.supplier_name as transportir,
 
 		((t.netto - t.netto_eksternal) - (t.netto * (3/100))) as denda_kg,
 		doi.rate as denda_harga_tbs,
@@ -181,6 +181,8 @@ def get_data(filters):
 		END AS keterangan
 
 		FROM `tabTimbangan` as t
+		LEFT JOIN `tabSurat Pengantar Buah` as spb ON spb.name = t.spb
+		LEFT JOIN `tabSupplier` as s ON s.name = t.transportir
 		LEFT JOIN `tabDelivery Order` as do ON do.name = t.do_no
 		LEFT JOIN `tabDelivery Order Item` as doi ON doi.parent = do.name
 		WHERE t.company = 'PT. ALAO KUNING' AND (((t.netto - t.netto_eksternal) / NULLIF(t.netto, 0)) * 100) >= 3;
