@@ -175,6 +175,10 @@ def check_tanggal_kirim(self,method):
 
 
 def update_keterangan(doc, method):
+	# Hanya mengisi keterangan yang masih kosong, supaya isian user tidak ditimpa.
+	if doc.keterangan:
+		return
+
 	values = [doc.supplier_name]
 
 	if doc.document_no:
