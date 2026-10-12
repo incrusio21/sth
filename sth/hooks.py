@@ -151,6 +151,10 @@ jinja = {
 
 boot_session = "sth.startup.boot.boot_session"
 
+after_migrate = [
+	"sth.accounting_sth.doctype.pengaturan_link_title.pengaturan_link_title.terapkan_setelah_migrate",
+]
+
 # Uninstallation
 # ------------
 

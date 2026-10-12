@@ -14,6 +14,7 @@ import "./override/report_view_override";
 import "./override/formatter_override";
 // sesudah formatter_override: berkas itu mengosongkan frappe.form.link_formatters
 import "./override/item_link_formatter";
+import "./override/link_title";
 import "./override/file_uploader";
 import "./override/link_selector";
 import "./override/efilling_html";

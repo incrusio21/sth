@@ -3,11 +3,14 @@
 
 import frappe
 
+from sth.accounting_sth.doctype.pengaturan_link_title.pengaturan_link_title import isi_boot
+
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
 
 	if frappe.session["user"] != "Guest":
 		update_page_info(bootinfo)
+		isi_boot(bootinfo)
 
 	employee = frappe.db.get_value(
 		"Employee",
