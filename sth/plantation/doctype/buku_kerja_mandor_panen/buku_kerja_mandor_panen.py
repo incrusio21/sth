@@ -630,7 +630,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			return
 		
 		item.qty = flt((item.bjr or 0) * item.jumlah_janjang)
-		item.rate = item.get("rate") or self.rupiah_basis
+		item.rate = self.rupiah_basis
 		item.brondolan = flt(self.upah_brondolan)
 		item.status = "Pending" if not item.bjr else "Approved"
 

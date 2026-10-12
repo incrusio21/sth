@@ -644,18 +644,23 @@ def get_wh_prec(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_non_stock_non_asset_items(doctype, txt, searchfield, start, page_len, filters):
+
+	condition = ""
+	if filters and filters.get("proposal_type") != "Capex":
+		condition = "AND ig.kelompok_asset = 0"
+		
 	return frappe.db.sql("""
 		SELECT i.name, i.item_name
 		FROM `tabItem` i
 		JOIN `tabItem Group` ig ON ig.name = i.item_group
 		WHERE i.is_stock_item = 0
-			AND ig.kelompok_asset = 0
+			{condition}
 			AND (
 				i.name LIKE %(txt)s
 				OR i.item_name LIKE %(txt)s
 			)
 		LIMIT %(start)s, %(page_len)s
-	""", {
+	""".format(condition=condition), {
 		"txt": f"%{txt}%",
 		"start": start,
 		"page_len": page_len

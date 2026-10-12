@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "format:BKL-{unit}",
  "creation": "2025-07-22 11:11:07.460717",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -59,11 +59,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 09:48:11.814712",
+ "modified": "2026-10-12 11:15:02.869236",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Data Bengkel",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -36,14 +36,13 @@ frappe.ui.form.on('Delivery Order', {
         
         frm.set_query('driver', 'delivery_order_transporter', function(doc, cdt, cdn) {
             let row = locals[cdt][cdn];
-            if (row.transporter) {
-                return {
-                    filters: {
-                        'transporter': row.transporter
+			return {
+				filters: {
+					'transporter': ["=", row.transporter],
+					'unit': ["=", doc.unit]
 
-                    }
-                };
-            }
+				}
+			};
         });
 
 		frm.set_query('pecahan_dari', function(doc) {
@@ -318,19 +317,5 @@ frappe.ui.form.on('Delivery Order Transporter', {
 
         frm.events.render_qr_transporter(row, grid_form.fields_dict.qr_preview.wrapper);
     },
-
-    transporter: function(frm, cdt, cdn) {
-        frm.set_query('driver', 'delivery_order_transporter', function(doc, cdt, cdn) {
-            let row = locals[cdt][cdn];
-            if (row.transporter) {
-                return {
-                    filters: {
-                        'transporter': row.transporter
-                        
-                    }
-                };
-            }
-        });
-    }
 });
 

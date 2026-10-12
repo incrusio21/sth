@@ -296,9 +296,12 @@ frappe.ui.form.on("Proposal", {
 		}
 
 		setTimeout(() => {
-			frm.set_query("item_code", "items", function () {
+			frm.set_query("item_code", "items", function (doc) {
 				return {
-					query: "sth.controllers.queries.get_non_stock_non_asset_items"
+					query: "sth.controllers.queries.get_non_stock_non_asset_items",
+					filters: {
+						"proposal_type": doc.proposal_type
+					}
 				};
 			});
 		}, 500);
