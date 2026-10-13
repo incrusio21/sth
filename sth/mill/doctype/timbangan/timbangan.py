@@ -283,11 +283,10 @@ class Timbangan(Document):
 		luar (pembeli, supplier) diketik dari tiketnya, dan wajib terisi sebelum
 		submit (validate_berat). Untuk Receive cuma pembanding — tidak
 		menggantikan bruto/tara pabrik dan tidak mengalir ke stok maupun SPB — dan
-		masih boleh dikoreksi sesudah submit. Untuk Dispatch, netto eksternal jadi
-		berat Mill di SPB (lihat update_spb_weight_dispatch), sedangkan netto 2
-		eksternal — netto eksternal dipotong sortasi pembeli, rumusnya sama
-		dengan netto_2 pabrik — yang dibayar, jadi itu qty Delivery Note (lihat
-		berat_kirim).
+		masih boleh dikoreksi sesudah submit. Untuk Dispatch, netto 2 eksternal —
+		netto eksternal dipotong sortasi pembeli, rumusnya sama dengan netto_2
+		pabrik — yang dibayar, jadi itu qty Delivery Note (lihat berat_kirim)
+		sekaligus berat Mill di SPB (lihat update_spb_weight_dispatch).
 
 		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
 		masih nol, netto dan selisihnya dibiarkan nol.
@@ -471,8 +470,10 @@ class Timbangan(Document):
 		  calculate_total_weight di SPB menghitungnya out - in — jadi tara ke
 		  `in_weight_internal` dan bruto ke `out_weight_internal`.
 		- Mill: timbangan pembeli, yang di sini timbangan eksternal. Truk datang
-		  bermuatan, jadi bruto eksternal ke `in_weight`, dan netto-nya dikurangi
-		  mill_cut yang mungkin sudah diisi di SPB.
+		  bermuatan, jadi bruto eksternal ke `in_weight`. Beratnya netto 2
+		  eksternal — yang dibayar pembeli, sama dengan qty DN (berat_kirim) —
+		  jadi potongan sortasi eksternal dalam kg ditulis ke `mill_cut`, supaya
+		  in - out - mill_cut di SPB (calculate_total_weight) tetap sama hasilnya.
 
 		Selama netto eksternal kosong — kiriman API yang dikecualikan
 		validate_berat — yang ditulis cuma berat internal, dan SPB tidak ditandai
@@ -491,7 +492,8 @@ class Timbangan(Document):
 		if flt(self.netto_eksternal):
 			spb_doc.in_weight = flt(self.bruto_eksternal)
 			spb_doc.out_weight = flt(self.tara_eksternal)
-			spb_doc.total_weight = flt(self.netto_eksternal) - flt(spb_doc.mill_cut)
+			spb_doc.mill_cut = flt(self.netto_eksternal) - flt(self.netto_2_eksternal)
+			spb_doc.total_weight = flt(self.netto_2_eksternal)
 			spb_doc.workflow_state = "Weighed"
 
 		# SPB dari pos penjagaan bisa belum punya rincian blok, jadi janjangnya 0

@@ -72,10 +72,11 @@ def _selaraskan_berat_dispatch_manual(dry_run):
 	Receive, jadi SPB yang dijual lewat Dispatch tidak pernah menerima beratnya.
 	Yang dikejar: sudah submit, ber-SPB, dan berat internal SPB-nya belum sama
 	dengan bruto/tara timbangan — atau berat Mill-nya belum sama dengan
-	timbangan eksternal.
+	timbangan eksternal. Berat Mill itu netto 2 eksternal; SPB yang dulu
+	terisi netto eksternal sebelum sortasi ikut tertangkap di sini.
 	"""
 	baris = frappe.db.sql("""
-		SELECT t.name, t.spb, t.netto, t.netto_eksternal,
+		SELECT t.name, t.spb, t.netto, t.netto_2_eksternal,
 			spb.total_weight_internal, spb.total_weight
 		FROM `tabTimbangan` t
 		INNER JOIN `tabSurat Pengantar Buah` spb ON spb.name = t.spb
@@ -86,7 +87,8 @@ def _selaraskan_berat_dispatch_manual(dry_run):
 				OR ABS(IFNULL(spb.out_weight_internal, 0) - IFNULL(t.bruto, 0)) > 0.001
 				OR (IFNULL(t.netto_eksternal, 0) > 0
 					AND (ABS(IFNULL(spb.in_weight, 0) - IFNULL(t.bruto_eksternal, 0)) > 0.001
-						OR ABS(IFNULL(spb.out_weight, 0) - IFNULL(t.tara_eksternal, 0)) > 0.001)))
+						OR ABS(IFNULL(spb.out_weight, 0) - IFNULL(t.tara_eksternal, 0)) > 0.001
+						OR ABS(IFNULL(spb.total_weight, 0) - IFNULL(t.netto_2_eksternal, 0)) > 0.001)))
 		ORDER BY t.name
 	""", as_dict=True)
 
@@ -100,7 +102,7 @@ def _selaraskan_berat_dispatch_manual(dry_run):
 	for b in baris[:BATAS_RINCIAN]:
 		print(
 			f"  {b.name} {b.spb}: internal {flt(b.total_weight_internal)} -> {flt(b.netto)}, "
-			f"mill {flt(b.total_weight)} -> {flt(b.netto_eksternal)}"
+			f"mill {flt(b.total_weight)} -> {flt(b.netto_2_eksternal)}"
 		)
 	if len(baris) > BATAS_RINCIAN:
 		print(f"  ... dan {len(baris) - BATAS_RINCIAN} lain")
