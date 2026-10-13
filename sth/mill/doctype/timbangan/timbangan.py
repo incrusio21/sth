@@ -696,7 +696,9 @@ class Timbangan(Document):
 		mengurangi delivered_qty adalah before_cancel Sales Invoice sendiri
 		(update_delivered_do).
 
-		Invoice yang sudah punya pembayaran ditolak cancel-nya oleh ERPNext, dan
+		Hak akses Sales Invoice dilewati: yang berhak membatalkan timbangan berhak
+		membatalkan invoicenya. Invoice yang sudah punya pembayaran tetap ditolak
+		cancel-nya oleh ERPNext, dan
 		penolakan itu ikut menggagalkan cancel timbangan ini: pembayarannya yang
 		dibereskan dulu.
 		"""
@@ -706,7 +708,11 @@ class Timbangan(Document):
 			if not si_name or frappe.db.get_value("Sales Invoice", si_name, "docstatus") != 1:
 				continue
 
-			frappe.get_doc("Sales Invoice", si_name).cancel()
+			si = frappe.get_doc("Sales Invoice", si_name)
+			# Kerani timbangan belum tentu boleh cancel Sales Invoice, padahal
+			# invoice ini cuma turunan otomatis timbangannya.
+			si.flags.ignore_permissions = True
+			si.cancel()
 			si_names.append(si_name)
 
 		if si_names:
