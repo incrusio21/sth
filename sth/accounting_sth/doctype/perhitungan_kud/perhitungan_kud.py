@@ -35,9 +35,9 @@ BKM_BIAYA = (
 # bersama GL BKM, tapi angkanya tidak dijumlah ke Biaya Perawatan: fieldnya
 # sendiri, langsung ke Total Biaya.
 #
-# Sejak 2 Oktober 2026 nilainya dari Purchase Invoice BAPP yang sudah Paid, bukan
-# dari BAPP-nya. Barisnya tetap atas nama BAPP karena GL biayanya lahir di BAPP;
-# yang dinolkan hanya porsi GL BAPP sebesar PI yang ikut, lihat porsi_gl_bapp().
+# Nilainya dari BAPP itu sendiri, tidak melihat Purchase Invoice-nya sudah dibuat
+# atau sudah dibayar — permintaan user 13 Oktober 2026, membatalkan versi PI Paid
+# dari 2 Oktober. GL BAPP karena itu dinolkan utuh.
 BAPP_BIAYA = ("BAPP", "biaya_bapp")
 
 BIAYA_DOKUMEN = (*BKM_BIAYA, BAPP_BIAYA)
@@ -351,36 +351,29 @@ def ambil_baris_bkm(company, units, tanggal_mulai, tanggal_selesai):
 
 
 def ambil_baris_bapp(company, units, tanggal_mulai, tanggal_selesai):
-	"""BAPP yang jadi biaya mitra, satu baris per BAPP, sebentuk dengan ambil_baris_bkm.
+	"""BAPP yang jadi biaya mitra, satu baris per dokumen, sebentuk dengan ambil_baris_bkm.
 
-	Nilainya jumlah `base_net_amount` baris Purchase Invoice yang menunjuk BAPP
-	itu, hanya PI berstatus Paid yang posting date-nya di rentang ini. Sebelum
-	pajak: PPN bukan biaya kebun. BAPP yang ditagih bertahap atau dibagi ke
-	beberapa kontraktor karena itu hanya terhitung bagian yang sudah dibayar.
-
-	Status Paid dibaca saat ditarik, jadi PI bulan ini yang baru lunas sesudahnya
-	tidak ikut, dan bulan berikutnya pun tidak karena posting date-nya di luar
-	rentang. Unitnya dari kepala BAPP, disaring plasma seperti BKM.
+	Yang diambil `net_total`, nilai sebelum pajak: PPN BAPP bukan biaya kebun,
+	dan nilai itulah yang didebit BAPP ke akun kegiatannya di buku besar.
+	Purchase Invoice-nya tidak dilihat sama sekali — BAPP tersubmit yang posting
+	date-nya di rentang ini ikut, sudah ditagih atau dibayar ataupun belum.
+	Unitnya dari kepala dokumen, disaring plasma seperti BKM.
 	"""
 	if not units:
 		return []
 
 	rows = frappe.db.sql(
 		"""
-		SELECT pii.bapp AS voucher_no, MAX(pi.posting_date) AS posting_date, b.unit,
-		       SUM(pii.base_net_amount) AS nilai
-		FROM `tabPurchase Invoice Item` pii
-		INNER JOIN `tabPurchase Invoice` pi ON pi.name = pii.parent
-		INNER JOIN `tabBAPP` b ON b.name = pii.bapp
+		SELECT b.name AS voucher_no, b.posting_date, b.unit,
+		       b.net_total AS nilai
+		FROM `tabBAPP` b
 		INNER JOIN `tabUnit` u ON b.unit = u.name
-		WHERE pi.docstatus = 1
-		  AND pi.company = %(company)s
-		  AND pi.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
-		  AND b.docstatus = 1
+		WHERE b.docstatus = 1
+		  AND b.company = %(company)s
 		  AND u.plasma = 1
 		  AND b.unit IN %(units)s
-		GROUP BY pii.bapp, b.unit
-		ORDER BY posting_date, pii.bapp
+		  AND b.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
+		ORDER BY b.posting_date, b.name
 		""",
 		{
 			"company": company,
@@ -1736,18 +1729,17 @@ def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
 
 	akun = akun_di_bawah(kepala, company)
 
-	# Dikelompokkan per dokumen dulu supaya GL BAPP bisa dipotong ke porsinya
-	# sebelum dijumlah per (akun, cost center).
 	rows = frappe.db.sql(
 		"""
-		SELECT voucher_type, voucher_no, account, cost_center,
-		       SUM(debit) - SUM(credit) AS saldo
+		SELECT account, cost_center, SUM(debit) - SUM(credit) AS saldo
 		FROM `tabGL Entry`
 		WHERE company = %(company)s
 		  AND is_cancelled = 0
 		  AND voucher_type IN %(voucher_type)s
 		  AND voucher_no IN %(voucher_no)s
-		GROUP BY voucher_type, voucher_no, account, cost_center
+		GROUP BY account, cost_center
+		HAVING saldo <> 0
+		ORDER BY account, cost_center
 		""",
 		{
 			"company": company,
@@ -1757,67 +1749,20 @@ def saldo_bkm_di_kepala_akun(company, baris_bkm, kepala=None):
 		as_dict=True,
 	)
 
-	porsi = porsi_gl_bapp(company, baris_bkm)
-	saldo = {}
-
-	for row in rows:
-		faktor = porsi.get(row.voucher_no, 1) if row.voucher_type == BAPP_BIAYA[0] else 1
-		kunci = (row.account, row.cost_center)
-		saldo[kunci] = saldo.get(kunci, 0) + flt(row.saldo) * faktor
-
 	pembalikan = []
 	di_luar = {}
 
-	for (account, cost_center), nilai in sorted(saldo.items(), key=lambda x: (x[0][0], x[0][1] or "")):
-		jumlah = flt(nilai, PRESISI_UANG)
-		if not jumlah:
-			continue
+	for row in rows:
+		jumlah = flt(row.saldo, PRESISI_UANG)
 
-		if account in akun:
-			pembalikan.append({"account": account, "cost_center": cost_center, "jumlah": jumlah})
+		if row.account in akun:
+			pembalikan.append(
+				{"account": row.account, "cost_center": row.cost_center, "jumlah": jumlah}
+			)
 		elif jumlah > 0:
-			di_luar[account] = flt(di_luar.get(account, 0) + jumlah, PRESISI_UANG)
+			di_luar[row.account] = flt(di_luar.get(row.account, 0) + jumlah, PRESISI_UANG)
 
 	return pembalikan, [{"account": a, "jumlah": j} for a, j in sorted(di_luar.items())]
-
-
-def porsi_gl_bapp(company, baris_biaya):
-	"""voucher_no BAPP → bagian GL BAPP yang ikut perhitungan ini.
-
-	Nilai BAPP di Rincian Biaya adalah PI Paid-nya (lihat ambil_baris_bapp),
-	sedangkan GL biayanya lahir utuh di BAPP. Tanpa dipotong, BAPP yang ditagih
-	bertahap dinolkan penuh di bulan PI pertamanya, lalu dinolkan lagi di bulan
-	PI berikutnya. Porsinya nilai baris dibagi total debit GL BAPP itu, jadi
-	yang dinolkan persis sebesar yang ditagih ke mitra.
-
-	BAPP tanpa GL tidak ada di balikan; pemanggil memperlakukannya sebagai utuh.
-	"""
-	nilai = {}
-	for row in baris_biaya:
-		if row.get("voucher_type") == BAPP_BIAYA[0] and row.get("voucher_no"):
-			nilai[row.get("voucher_no")] = nilai.get(row.get("voucher_no"), 0) + flt(row.get("nilai"))
-
-	if not nilai:
-		return {}
-
-	debit = frappe.db.sql(
-		"""
-		SELECT voucher_no, SUM(debit) AS debit
-		FROM `tabGL Entry`
-		WHERE company = %(company)s
-		  AND is_cancelled = 0
-		  AND voucher_type = %(voucher_type)s
-		  AND voucher_no IN %(voucher_no)s
-		GROUP BY voucher_no
-		""",
-		{
-			"company": company,
-			"voucher_type": BAPP_BIAYA[0],
-			"voucher_no": tuple(nilai),
-		},
-	)
-
-	return {voucher_no: nilai[voucher_no] / flt(total) for voucher_no, total in debit if flt(total)}
 
 
 # ---------------------------------------------------------------------------
@@ -1852,13 +1797,7 @@ def gl_per_dokumen(company, baris_biaya, akun):
 		as_dict=True,
 	)
 
-	porsi = porsi_gl_bapp(company, baris_biaya)
-
-	return {
-		(row.voucher_type, row.voucher_no): flt(row.saldo)
-		* (porsi.get(row.voucher_no, 1) if row.voucher_type == BAPP_BIAYA[0] else 1)
-		for row in rows
-	}
+	return {(row.voucher_type, row.voucher_no): flt(row.saldo) for row in rows}
 
 
 def akun_transit_traksi(company):
