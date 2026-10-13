@@ -138,6 +138,7 @@ jinja = {
 		"sth.jinja.sum_pengakuan_penjualan_by_nota_piutang",
 		"sth.jinja.get_payment_entry_ledger_preview",
 		"sth.jinja.get_account_balance",
+		"sth.jinja.terbilang",
 		# "sth.jinja.format_item_values",
 	],
 	# "filters": "sth.utils.jinja_filters"

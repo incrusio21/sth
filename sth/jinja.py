@@ -126,3 +126,40 @@ def strip_html(text):
 #             continue
 #         hasil.append(teks)
 #     return sep.join(hasil)
+
+def terbilang(angka):
+	satuan = ["", "satu", "dua", "tiga", "empat", "lima", "enam",
+	          "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"]
+
+	def _t(n):
+		n = int(n)
+		if n < 12:
+			return satuan[n]
+		if n < 20:
+			return _t(n - 10) + " belas"
+		if n < 100:
+			return _t(n // 10) + " puluh" + (" " + _t(n % 10) if n % 10 else "")
+		if n < 200:
+			return "seratus" + (" " + _t(n - 100) if n - 100 else "")
+		if n < 1000:
+			return _t(n // 100) + " ratus" + (" " + _t(n % 100) if n % 100 else "")
+		if n < 2000:
+			return "seribu" + (" " + _t(n - 1000) if n - 1000 else "")
+		if n < 1000000:
+			return _t(n // 1000) + " ribu" + (" " + _t(n % 1000) if n % 1000 else "")
+		if n < 1000000000:
+			return _t(n // 1000000) + " juta" + (" " + _t(n % 1000000) if n % 1000000 else "")
+		if n < 1000000000000:
+			return _t(n // 1000000000) + " miliar" + (" " + _t(n % 1000000000) if n % 1000000000 else "")
+		return _t(n // 1000000000000) + " triliun" + (" " + _t(n % 1000000000000) if n % 1000000000000 else "")
+
+	angka = float(angka or 0)
+	bulat = int(angka)
+	desimal = round(angka - bulat, 2)
+
+	hasil = "nol" if bulat == 0 else _t(bulat)
+	if desimal:
+		digit = str(desimal).split(".")[1].rstrip("0")
+		hasil += " koma " + " ".join(satuan[int(d)] or "nol" for d in digit)
+
+	return hasil.strip().capitalize()
