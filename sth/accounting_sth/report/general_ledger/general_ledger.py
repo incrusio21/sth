@@ -298,34 +298,53 @@ def is_reversal_document(voucher_type, voucher_no):
 
 def set_purchase_invoice_info(gl_entries):
 	"""
-	Set Supplier Invoice Number (bill_no) dan No Faktur Pajak (no_fp)
+	Set Supplier Invoice Number (bill_no), No Faktur Pajak (no_fp), keterangan header dan keterangan detail
 	untuk GL Entry yang berasal dari Purchase Invoice.
 	"""
 
-	pi_map = {}
+	from frappe.utils import strip_html_tags
 
-	pi_list = {
-		d.voucher_no
+	HEADER_FIELD = "keterangan"  # GANTI dengan fieldname di Purchase Invoice
+
+	pi_map = {}
+	item_map = {}
+
+	pi_list = {d.voucher_no for d in gl_entries if d.voucher_type == "Purchase Invoice"}
+	detail_list = {
+		d.voucher_detail_no
 		for d in gl_entries
-		if d.voucher_type == "Purchase Invoice"
+		if d.voucher_type == "Purchase Invoice" and d.voucher_detail_no
 	}
 
 	if pi_list:
 		for d in frappe.get_all(
 			"Purchase Invoice",
 			filters={"name": ("in", list(pi_list))},
-			fields=["name", "bill_no", "no_fp"],
+			fields=["name", "bill_no", "no_fp", HEADER_FIELD],
 		):
 			pi_map[d.name] = d
+
+	if detail_list:
+		for d in frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"name": ("in", list(detail_list)), "parenttype": "Purchase Invoice"},
+			fields=["name", "keterangan"],
+		):
+			item_map[d.name] = strip_html_tags(d.keterangan or "").strip()
 
 	for gle in gl_entries:
 		gle["bill_no"] = ""
 		gle["tax_invoice_no"] = ""
+		gle["keterangan_header"] = ""
+		gle["keterangan_detail"] = ""
 
 		if gle.voucher_type == "Purchase Invoice":
 			if pi := pi_map.get(gle.voucher_no):
 				gle["bill_no"] = pi.bill_no
 				gle["tax_invoice_no"] = pi.no_fp
+				gle["keterangan_header"] = pi.get(HEADER_FIELD) or ""
+
+			gle["keterangan_detail"] = item_map.get(gle.get("voucher_detail_no"), "")
 
 def get_conditions(filters):
 	conditions = []
@@ -895,6 +914,18 @@ def get_columns(filters):
 			{
 				"label": _("No Faktur Pajak"),
 				"fieldname": "tax_invoice_no",
+				"fieldtype": "Data",
+				"width": 180,
+			},
+			{
+				"label": _("Keterangan Header"),
+				"fieldname": "keterangan_header",
+				"fieldtype": "Data",
+				"width": 180,
+			},
+			{
+				"label": _("Keterangan Detail"),
+				"fieldname": "keterangan_detail",
 				"fieldtype": "Data",
 				"width": 180,
 			},
