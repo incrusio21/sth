@@ -539,6 +539,9 @@ class Timbangan(Document):
 			if sort_doc.docstatus == 1:
 				sort_doc.cancel()
 
+		if self.type == "Dispatch":
+			self.cancel_sales_invoices()
+
 		hitung_ulang_setelah_timbangan(self)
 		hitung_ulang_sounding_setelah_timbangan(self)
 
@@ -683,6 +686,35 @@ class Timbangan(Document):
 			title=_("Sales Invoice Dibuat"),
 			indicator="green"
 		)
+
+	def cancel_sales_invoices(self):
+		"""Batalkan Sales Invoice yang dibuat create_sales_invoices.
+
+		Field sales_invoice dan sales_invoice_2 bertipe Data, jadi Frappe tidak
+		menahan cancel timbangan selama invoicenya masih submitted — tanpa ini
+		piutangnya tertinggal dan delivered_qty DO tidak kembali. Yang kembali
+		mengurangi delivered_qty adalah before_cancel Sales Invoice sendiri
+		(update_delivered_do).
+
+		Invoice yang sudah punya pembayaran ditolak cancel-nya oleh ERPNext, dan
+		penolakan itu ikut menggagalkan cancel timbangan ini: pembayarannya yang
+		dibereskan dulu.
+		"""
+		si_names = []
+
+		for si_name in (self.sales_invoice, self.sales_invoice_2):
+			if not si_name or frappe.db.get_value("Sales Invoice", si_name, "docstatus") != 1:
+				continue
+
+			frappe.get_doc("Sales Invoice", si_name).cancel()
+			si_names.append(si_name)
+
+		if si_names:
+			frappe.msgprint(
+				msg=_("Sales Invoice {0} ikut dibatalkan").format(", ".join(si_names)),
+				title=_("Sales Invoice Dibatalkan"),
+				indicator="orange"
+			)
 
 	def make_tbs_ledger(self):
 		create_tbs_ledger(frappe._dict({
