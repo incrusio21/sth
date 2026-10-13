@@ -1026,6 +1026,8 @@ def make_sales_invoice(source_name, do_no=None, qty=None):
 	if sales_order:
 		si.no_kontrak_external = frappe.db.get_value("Sales Order", sales_order, "no_kontrak_external")
 
+	qty = flt(qty) if qty is not None else source.berat_kirim()
+
 	si.append("items", {
 		"item_code": item.item_code,
 		"item_name": item.item_name,
@@ -1033,7 +1035,10 @@ def make_sales_invoice(source_name, do_no=None, qty=None):
 		"uom": item.uom,
 		"stock_uom": item.stock_uom,
 		"conversion_factor": item.conversion_factor,
-		"qty": flt(qty) if qty is not None else source.berat_kirim(),
+		"qty": qty,
+		# qty-nya sudah netto 2 eksternal — timbangan pembeli — jadi berat
+		# timbang customer sama persis dengannya
+		"qty_timbang_customer": qty,
 		"price_list_rate": item.price_list_rate,
 		"rate": item.rate,
 		"item_tax_template": item.item_tax_template,
