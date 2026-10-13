@@ -54,7 +54,7 @@ const ATURAN = {
 	"Supplier Quotation": null,
 };
 
-function formatter_item(value, doc) {
+function formatter_item(value, doc, docfield) {
 	if (!doc) {
 		return undefined;
 	}
@@ -95,7 +95,7 @@ function formatter_item(value, doc) {
 		return doc[field] || value;
 	}
 
-	if (kode_item_ditampilkan(doctype)) {
+	if (kode_item_ditampilkan(doc, docfield)) {
 		return value;
 	}
 
@@ -104,12 +104,12 @@ function formatter_item(value, doc) {
 
 // Kode kalau Link Title Item dimatikan di master, atau doctype ini menyembunyikan
 // judul link Item lewat tabel pengecualian.
-function kode_item_ditampilkan(doctype) {
+function kode_item_ditampilkan(doc, docfield) {
 	const link_title_doctypes = (frappe.boot && frappe.boot.link_title_doctypes) || [];
 
 	return (
 		!link_title_doctypes.includes("Item") ||
-		(sth.link_title && sth.link_title.disembunyikan_di(doctype, "Item"))
+		(sth.link_title && sth.link_title.disembunyikan_untuk(doc, docfield, "Item"))
 	);
 }
 

@@ -200,9 +200,6 @@ frappe.ui.form.on("Proposal", {
 	setup: function (frm) {
 		sth.form.setup_fieldname_select(frm, "items")
 
-		// Supplier diset tampil nama di semua link, khusus di sini cukup kodenya
-		frm.fields_dict.supplier.is_title_link = () => false
-
 		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 
 		frm.set_indicator_formatter("item_code", function (doc) {

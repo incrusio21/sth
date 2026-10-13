@@ -21,17 +21,20 @@ function aturan_link_title() {
 frappe.provide("sth.link_title");
 
 // Judul link ke `doctype` disembunyikan di `di_doctype` menurut tabel
-// pengecualian master. Dipakai juga oleh item_link_formatter.js.
-sth.link_title.disembunyikan_di = function (di_doctype, doctype) {
-	const disembunyikan = aturan_link_title().disembunyikan || {};
-
-	if (!di_doctype || !Object.prototype.hasOwnProperty.call(disembunyikan, di_doctype)) {
+// pengecualian master. document_type atau fieldname yang kosong di barisnya
+// berarti semua. Pemanggil yang tidak tahu field-nya — pembungkus
+// get_link_title di bawah — hanya kena baris tanpa field.
+sth.link_title.disembunyikan_di = function (di_doctype, doctype, fieldname) {
+	if (!di_doctype) {
 		return false;
 	}
 
-	// null berarti semua link di doctype itu.
-	const daftar = disembunyikan[di_doctype];
-	return !daftar || daftar.includes(doctype);
+	return (aturan_link_title().disembunyikan || []).some(
+		(d) =>
+			d.di_doctype === di_doctype &&
+			(!d.document_type || d.document_type === doctype) &&
+			(!d.fieldname || d.fieldname === fieldname)
+	);
 };
 
 // Doctype tempat link sedang ditampilkan. Baris tabel anak membawa doctype
@@ -45,6 +48,11 @@ function doctype_konteks(doc) {
 
 	return (frappe.get_route() || [])[1];
 }
+
+// Untuk yang memegang doc dan docfield: formatter Link dan item_link_formatter.js.
+sth.link_title.disembunyikan_untuk = function (doc, df, doctype) {
+	return sth.link_title.disembunyikan_di(doctype_konteks(doc), doctype, df && df.fieldname);
+};
 
 function link_title_disembunyikan(doctype) {
 	return sth.link_title.disembunyikan_di(doctype_konteks(), doctype);
@@ -62,8 +70,8 @@ function pasang_is_title_link() {
 	const asal = kelas.prototype.is_title_link;
 
 	kelas.prototype.is_title_link = function () {
-		const di_doctype = doctype_konteks(this.doc || (this.frm && this.frm.doc));
-		if (sth.link_title.disembunyikan_di(di_doctype, this.get_options())) {
+		const doc = this.doc || (this.frm && this.frm.doc);
+		if (sth.link_title.disembunyikan_untuk(doc, this.df, this.get_options())) {
 			return false;
 		}
 
