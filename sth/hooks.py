@@ -472,6 +472,11 @@ doc_events = {
 		# ERPNext ikut memeriksa akun yang kita pasang, bukan akun sebelumnya
 		"before_validate": ["sth.sales_sth.custom.sales_invoice.set_debit_to"],
 		"validate": ["sth.sales_sth.custom.sales_order.validate_price_list","sth.sales_sth.custom.sales_invoice.validate_expense_account","sth.sales_sth.custom.sales_invoice.validate_penjualan_asset"],
+		# invoice dari Timbangan Dispatch Manual Timbangan menggantikan Delivery
+		# Note: ia yang menambah delivered_qty DO dan membawa berkas timbangannya
+		"after_insert": "sth.custom.delivery_note.create_kriteria_upload_document",
+		"before_submit": "sth.sales_sth.custom.sales_invoice.update_delivered_do",
+		"before_cancel": "sth.sales_sth.custom.sales_invoice.update_delivered_do",
 		"on_submit": "sth.mill.gudang_transit.buat_pengeluaran_transit",
 		"on_cancel": "sth.mill.gudang_transit.batalkan_pengeluaran_transit",
 	},

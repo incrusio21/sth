@@ -38,6 +38,8 @@
   "no_do_2",
   "delivery_note",
   "delivery_note_2",
+  "sales_invoice",
+  "sales_invoice_2",
   "purchase_order",
   "trans_no",
   "rkh_no",
@@ -819,13 +821,31 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Tanggal Timbang Eksternal"
+  },
+  {
+   "depends_on": "eval:doc.sales_invoice",
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Sales Invoice",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.sales_invoice_2",
+   "fieldname": "sales_invoice_2",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Sales Invoice 2",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 13:34:30.397605",
+ "modified": "2026-10-13 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

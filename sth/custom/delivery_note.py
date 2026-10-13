@@ -62,12 +62,19 @@ def update_delivered_do(self,method):
 
 
 def create_kriteria_upload_document(doc, method):
+    """Salin dokumen kriteria Timbangan ke Delivery Note atau Sales Invoice-nya.
 
-    if not doc.timbangan_ref:
+    Dokumen yang dibuat otomatis dari Timbangan Dispatch (DN, atau Sales Invoice
+    untuk company Manual Timbangan) tidak membuat kriteria sendiri — lihat
+    create_kriteria_upload_document di kriteria_dokumen_finance — melainkan
+    memakai berkas yang sudah diunggah di timbangannya.
+    """
+
+    if not doc.get("timbangan_ref"):
         return
 
     if frappe.db.exists("Kriteria Upload Document", {
-        "voucher_type": "Delivery Note",
+        "voucher_type": doc.doctype,
         "voucher_no": doc.name
     }):
         return
@@ -84,7 +91,7 @@ def create_kriteria_upload_document(doc, method):
     sumber_kud = frappe.get_doc("Kriteria Upload Document", kud_name)
 
     kud = frappe.new_doc("Kriteria Upload Document")
-    kud.voucher_type = "Delivery Note"
+    kud.voucher_type = doc.doctype
     kud.voucher_no = doc.name
 
     for row in sumber_kud.file_upload:

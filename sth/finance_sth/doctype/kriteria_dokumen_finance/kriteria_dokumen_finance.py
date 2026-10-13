@@ -18,8 +18,9 @@ def create_kriteria_upload_document(self, method):
 	if self.doctype == "DocType" or frappe.db.exists("Kriteria Upload Document", {"voucher_type": self.doctype, "voucher_no": self.name}):
 		return
 
-	# skip kalau Delivery Note punya timbangan_ref
-	if self.doctype == "Delivery Note" and self.timbangan_ref:
+	# skip kalau Delivery Note atau Sales Invoice punya timbangan_ref: berkasnya
+	# disalin dari Timbangan (create_kriteria_upload_document di custom/delivery_note)
+	if self.doctype in ("Delivery Note", "Sales Invoice") and self.get("timbangan_ref"):
 		return
 
 	kriteria_type = self.run_method("document_kriteria")

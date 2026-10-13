@@ -33,7 +33,10 @@ class SalesInvoice(SalesInvoice):
 	def on_submit(self):
 		super().on_submit()
 		if self.jenis_penagihan == "Pengiriman" and self.is_return == 0:
-			self.create_timbang_journal_entry()
+			# Invoice dari Timbangan Manual Timbangan tidak punya Delivery Note dan
+			# tidak menggerakkan stok, jadi tidak ada nilai DN yang perlu dijurnal
+			if not self.get("timbangan_ref"):
+				self.create_timbang_journal_entry()
 			self.create_dp_payment_journal_entry()
 
 	def on_cancel(self):
@@ -207,7 +210,19 @@ class SalesInvoice(SalesInvoice):
 				  AND dn.docstatus = 1
 			""", {"sales_orders": sales_orders})[0][0] or 0
 
-			self.qty_do_belum_terkirim = flt(do_qty) - flt(dn_qty)
+			# Dispatch Manual Timbangan mengirim lewat Sales Invoice tanpa DN
+			si_qty = frappe.db.sql("""
+				SELECT COALESCE(SUM(sii.qty), 0)
+				FROM `tabSales Invoice Item` sii
+				INNER JOIN `tabSales Invoice` si
+					ON si.name = sii.parent
+				WHERE sii.sales_order IN %(sales_orders)s
+				  AND si.docstatus = 1
+				  AND si.is_return = 0
+				  AND IFNULL(si.timbangan_ref, '') != ''
+			""", {"sales_orders": sales_orders})[0][0] or 0
+
+			self.qty_do_belum_terkirim = flt(do_qty) - flt(dn_qty) - flt(si_qty)
 	
 	def _apply_timbang_qty_tanpa_ganti(self):
 		self._original_values = {}

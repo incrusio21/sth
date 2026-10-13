@@ -223,3 +223,38 @@ def set_account_from_item_default(doc):
 
 		item.expense_account = default["expense_account"]
 		item.income_account = default["income_account"]
+
+
+def update_delivered_do(self, method=None):
+	"""Delivered qty DO untuk Sales Invoice pengganti Delivery Note.
+
+	Dispatch company Manual Timbangan menagih lewat Sales Invoice tanpa Delivery
+	Note (lihat make_sales_invoice di Timbangan), jadi invoice itu yang menambah
+	delivered_qty baris DO-nya — pekerjaan update_delivered_do Delivery Note.
+	Cuma invoice yang membawa timbangan_ref dan delivery_order; invoice biasa,
+	termasuk yang dibuat dari DN, tidak menyentuh DO.
+	"""
+	from sth.mill.doctype.timbangan.timbangan import perbarui_sisa_do_timbangan
+
+	if not (self.get("timbangan_ref") and self.get("delivery_order")) or self.get("is_return"):
+		return
+
+	tanda = 1 if method == "before_submit" else -1
+
+	for item in self.items:
+		do_item = frappe.db.get_value(
+			"Delivery Order Item",
+			{"parent": self.delivery_order, "item_code": item.item_code},
+			["name", "delivered_qty"],
+			as_dict=True,
+		)
+		if not do_item:
+			continue
+
+		frappe.db.set_value(
+			"Delivery Order Item",
+			do_item.name,
+			"delivered_qty",
+			flt(do_item.delivered_qty) + tanda * flt(item.qty),
+		)
+		perbarui_sisa_do_timbangan(self.delivery_order, item.item_code)

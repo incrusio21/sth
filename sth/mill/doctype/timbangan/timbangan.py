@@ -242,20 +242,28 @@ class Timbangan(Document):
 		self.validate_netto_eksternal_setelah_dn()
 
 	def validate_netto_eksternal_setelah_dn(self):
-		"""Netto eksternal Dispatch tidak boleh berubah sesudah DN-nya dibuat.
+		"""Netto eksternal Dispatch tidak boleh berubah sesudah dokumen jualnya dibuat.
 
 		Untuk Dispatch company Manual Timbangan, netto 2 eksternal — netto
-		eksternal sesudah sortasi — qty Delivery Note-nya (lihat berat_kirim),
-		dan DN sudah tersubmit sejak timbangannya disubmit. Mengubahnya di sini
-		cuma membuat timbangan dan DN berselisih diam-diam.
+		eksternal sesudah sortasi — qty Sales Invoice-nya (lihat berat_kirim),
+		dan invoice itu sudah tersubmit sejak timbangannya disubmit. Timbangan
+		lama dari sebelum alur Sales Invoice masih memegang Delivery Note.
+		Mengubahnya di sini cuma membuat timbangan dan dokumen itu berselisih
+		diam-diam.
 		"""
-		if not (self.pakai_netto_eksternal() and (self.delivery_note or self.delivery_note_2)):
+		if not self.pakai_netto_eksternal():
+			return
+
+		dokumen = [
+			d for d in (self.delivery_note, self.delivery_note_2, self.sales_invoice, self.sales_invoice_2) if d
+		]
+		if not dokumen:
 			return
 
 		if self.has_value_changed("netto_eksternal") or self.has_value_changed("netto_2_eksternal"):
 			frappe.throw(
-				_("Netto eksternal sudah menjadi qty Delivery Note {0}. Cancel timbangan ini untuk mengubahnya.").format(
-					", ".join(filter(None, (self.delivery_note, self.delivery_note_2)))
+				_("Netto eksternal sudah menjadi qty {0}. Cancel timbangan ini untuk mengubahnya.").format(
+					", ".join(dokumen)
 				)
 			)
 
@@ -264,7 +272,8 @@ class Timbangan(Document):
 		return self.type == "Dispatch" and cint(self.manual_timbangan)
 
 	def berat_kirim(self):
-		"""Berat yang dibebankan ke DO dan menjadi qty Delivery Note.
+		"""Berat yang dibebankan ke DO dan menjadi qty Delivery Note atau, untuk
+		company Manual Timbangan, qty Sales Invoice.
 
 		Company Manual Timbangan dibayar menurut timbangan pembeli sesudah
 		dipotong sortasinya, jadi Dispatch di sana memakai netto 2 eksternal.
@@ -285,7 +294,7 @@ class Timbangan(Document):
 		menggantikan bruto/tara pabrik dan tidak mengalir ke stok maupun SPB — dan
 		masih boleh dikoreksi sesudah submit. Untuk Dispatch, netto 2 eksternal —
 		netto eksternal dipotong sortasi pembeli, rumusnya sama dengan netto_2
-		pabrik — yang dibayar, jadi itu qty Delivery Note (lihat berat_kirim)
+		pabrik — yang dibayar, jadi itu qty Sales Invoice (lihat berat_kirim)
 		sekaligus berat Mill di SPB (lihat update_spb_weight_dispatch).
 
 		Aturannya sama dengan hitung_netto: selama bruto atau tara eksternal
@@ -338,7 +347,10 @@ class Timbangan(Document):
 		if self.type == "Receive" and self.receive_type != "Lain - Lain":
 			self.make_tbs_ledger()
 		elif self.type == "Dispatch":
-			self.create_delivery_notes()
+			if self.pakai_netto_eksternal():
+				self.create_sales_invoices()
+			else:
+				self.create_delivery_notes()
 		if self.receive_type == "TBS Internal" or self.type == "Dispatch":
 			self.update_spb_weight()
 
@@ -643,6 +655,35 @@ class Timbangan(Document):
 			indicator="green"
 		)
 
+	def create_sales_invoices(self):
+		"""Sales Invoice langsung dari DO untuk Dispatch company Manual Timbangan.
+
+		Penjualan di company ini tidak menggerakkan stok, jadi tidak ada Delivery
+		Note: yang ditagih langsung netto 2 eksternal lewat invoice tanpa update
+		stock. Pembagiannya ke DO 1 dan DO 2 sama dengan create_delivery_notes.
+		"""
+		si_names = []
+
+		if flt(self.qty_do) > 0 or not self.no_do_2:
+			si1 = make_sales_invoice(self.name, do_no=self.do_no, qty=self.qty_do or self.berat_kirim())
+			si1.insert()
+			si1.submit()
+			self.db_set("sales_invoice", si1.name)
+			si_names.append(si1.name)
+
+		if self.no_do_2 and flt(self.qty_do_2) > 0:
+			si2 = make_sales_invoice(self.name, do_no=self.no_do_2, qty=self.qty_do_2)
+			si2.insert()
+			si2.submit()
+			self.db_set("sales_invoice_2", si2.name)
+			si_names.append(si2.name)
+
+		frappe.msgprint(
+			msg=_("Sales Invoice {0} sudah dibuat dan disubmit").format(", ".join(si_names)),
+			title=_("Sales Invoice Dibuat"),
+			indicator="green"
+		)
+
 	def make_tbs_ledger(self):
 		create_tbs_ledger(frappe._dict({
 			"item_code": self.kode_barang,
@@ -894,6 +935,81 @@ def make_delivery_note(source_name, do_no=None, qty=None, target_doc=None):
 					row.warehouse = row_item.default_warehouse
 	
 	return doclist
+
+def make_sales_invoice(source_name, do_no=None, qty=None):
+	"""Sales Invoice Pengiriman tanpa update stock untuk satu DO timbangan ini.
+
+	Pengganti make_delivery_note untuk company Manual Timbangan. Harga, Sales
+	Order, dan atribut penjualan diambil dari baris DO barang ini, seperti
+	Delivery Note mengambilnya. timbangan_ref dan delivery_order yang membuat
+	invoice ini dikenali sebagai pengganti DN: delivered_qty DO ditambah dari
+	sini (lihat update_delivered_do di sales_invoice), dan jurnal selisih
+	timbang yang butuh DN dilewati.
+	"""
+	source = frappe.get_doc("Timbangan", source_name)
+	do_no = do_no or source.do_no
+	do_doc = frappe.get_doc("Delivery Order", do_no)
+
+	item = next((r for r in do_doc.items if r.item_code == source.kode_barang), None)
+	if not item:
+		frappe.throw(_("Barang {0} tidak ada di Delivery Order {1}.").format(
+			frappe.bold(source.kode_barang), get_link_to_form("Delivery Order", do_no)
+		))
+
+	si = frappe.new_doc("Sales Invoice")
+	si.company = source.company
+	si.customer = do_doc.customer
+	# Invoice mengikuti tanggal timbangannya, sama dengan DN
+	si.set_posting_time = 1
+	si.posting_date = source.posting_date
+	si.posting_time = source.posting_time
+	si.update_stock = 0
+	si.jenis_penagihan = "Pengiriman"
+	si.timbangan_ref = source.name
+	si.delivery_order = do_no
+
+	si.currency = do_doc.currency
+	si.conversion_rate = do_doc.conversion_rate
+	si.selling_price_list = do_doc.selling_price_list
+	si.price_list_currency = do_doc.price_list_currency
+	si.plc_conversion_rate = do_doc.plc_conversion_rate
+
+	si.unit = do_doc.unit
+	si.komoditi = do_doc.komoditi
+	si.tempat_penyerahan = do_doc.tempat_penyerahan
+	si.jenis_berikat = do_doc.jenis_berikat
+	for row in do_doc.get("keterangan_per_komoditi") or []:
+		si.append("keterangan_per_komoditi", {
+			"parameter": row.parameter,
+			"keterangan": row.keterangan,
+		})
+
+	sales_order = item.against_sales_order or do_doc.sales_order
+	if sales_order:
+		si.no_kontrak_external = frappe.db.get_value("Sales Order", sales_order, "no_kontrak_external")
+
+	si.append("items", {
+		"item_code": item.item_code,
+		"item_name": item.item_name,
+		"description": item.description,
+		"uom": item.uom,
+		"stock_uom": item.stock_uom,
+		"conversion_factor": item.conversion_factor,
+		"qty": flt(qty) if qty is not None else source.berat_kirim(),
+		"price_list_rate": item.price_list_rate,
+		"rate": item.rate,
+		"item_tax_template": item.item_tax_template,
+		"cost_center": item.cost_center,
+		"project": item.project,
+		"sales_order": sales_order,
+		"so_detail": item.so_detail,
+	})
+
+	si.run_method("set_missing_values")
+	si.run_method("calculate_taxes_and_totals")
+
+	return si
+
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
 	
