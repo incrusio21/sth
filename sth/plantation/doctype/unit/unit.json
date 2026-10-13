@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:{unit} - {company}",
+ "autoname": "field:unit",
  "creation": "2025-06-24 12:02:05.033709",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -178,11 +178,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-10 15:07:23.862234",
+ "modified": "2026-10-13 03:34:06.334742",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Unit",
- "naming_rule": "Expression",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

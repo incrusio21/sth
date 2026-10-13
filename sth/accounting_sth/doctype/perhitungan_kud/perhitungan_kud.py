@@ -374,7 +374,6 @@ def ambil_baris_bapp(company, units, tanggal_mulai, tanggal_selesai):
 		INNER JOIN `tabBAPP` b ON b.name = pii.bapp
 		INNER JOIN `tabUnit` u ON b.unit = u.name
 		WHERE pi.docstatus = 1
-		  AND pi.status = 'Paid'
 		  AND pi.company = %(company)s
 		  AND pi.posting_date BETWEEN %(tanggal_mulai)s AND %(tanggal_selesai)s
 		  AND b.docstatus = 1
