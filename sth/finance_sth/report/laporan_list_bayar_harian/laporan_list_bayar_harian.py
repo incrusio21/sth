@@ -96,7 +96,8 @@ def get_data(filters=None):
 			per.reference_doctype,
 			per.outstanding_amount,
 			pe.paid_amount,
-			pe.request_release_date
+			pe.request_release_date,
+			pe.workflow_state as workflow_state
 		FROM
 			`tabPayment Entry` pe
 		LEFT JOIN
@@ -116,7 +117,7 @@ def get_data(filters=None):
 		LEFT JOIN
 			`tabCompany` ct ON ct.name = at.company
 		WHERE
-			pe.workflow_state = 'Butuh Persetujuan 3' AND pe.permintaan_dana_operasional IS NULL
+			pe.workflow_state IN ('Butuh Persetujuan 3', 'Approved') AND pe.permintaan_dana_operasional IS NULL
 			{conditions}
 		ORDER BY
 			FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
@@ -156,11 +157,12 @@ def get_data(filters=None):
 			"submit_button": pe.name,
 		}
 
-		row["select_row"] = f"""
-			<input type="checkbox"
-					class="payment-row"
-					data-name="{pe.name}">
-		"""
+		if pe.workflow_state == "Butuh Persetujuan 3":
+			row["select_row"] = f"""
+				<input type="checkbox"
+						class="payment-row"
+						data-name="{pe.name}">
+			"""
 
 		if pe.get("payment_type") == "Internal Transfer":
 			row["jenis_transaksi"] = "PINDAH DANA"

@@ -997,6 +997,20 @@ def get_columns(filters):
 			"align": "right"
 		},
 		{
+			"label": _("Premi Brondolan"),
+			"fieldname": "premi_brondolan",
+			"fieldtype": "Currency",
+			"width": 150,
+			"align": "right"
+		},
+		{
+			"label": _("Subtotal Brondolan"),
+			"fieldname": "subtotal_brondolan",
+			"fieldtype": "Currency",
+			"width": 150,
+			"align": "right"
+		},
+		{
 			"label": _("Total Tonase"),
 			"fieldname": "total_tonase",
 			"fieldtype": "Float",
@@ -1363,6 +1377,8 @@ def get_panen_data(filters):
 			bkmp.kegiatan_account as kegiatan,
 			dbhkp.jumlah_janjang as hasil_kerja_qty,
 			bkmp.hasil_kerja_qty_brondolan as brondolan,
+			dbhkp.brondolan as premi_brondolan,
+			dbhkp.brondolan_amount as subtotal_brondolan,
 			dbhkp.qty as total_tonase,
 			k.uom as satuan,
 			bkmp.volume_basis as basis,
@@ -1398,6 +1414,8 @@ def get_panen_data(filters):
 			'kegiatan': row.kegiatan or '',
 			'hasil_kerja_qty': row.hasil_kerja_qty or 0,
 			'brondolan': row.brondolan or 0,
+			'premi_brondolan': row.premi_brondolan or 0,
+			'subtotal_brondolan': row.subtotal_brondolan or 0,
 			'total_tonase': row.total_tonase or 0,
 			'satuan': row.satuan or '',
 			'basis': row.basis or 0,
