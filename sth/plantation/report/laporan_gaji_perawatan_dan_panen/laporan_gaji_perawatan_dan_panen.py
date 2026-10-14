@@ -997,20 +997,6 @@ def get_columns(filters):
 			"align": "right"
 		},
 		{
-			"label": _("Premi Brondolan"),
-			"fieldname": "premi_brondolan",
-			"fieldtype": "Currency",
-			"width": 150,
-			"align": "right"
-		},
-		{
-			"label": _("Subtotal Brondolan"),
-			"fieldname": "subtotal_brondolan",
-			"fieldtype": "Currency",
-			"width": 150,
-			"align": "right"
-		},
-		{
 			"label": _("Total Tonase"),
 			"fieldname": "total_tonase",
 			"fieldtype": "Float",
@@ -1046,6 +1032,13 @@ def get_columns(filters):
 			"align": "right"
 		},
 		{
+			"label": _("Premi Brondolan"),
+			"fieldname": "premi_brondolan",
+			"fieldtype": "Currency",
+			"width": 150,
+			"align": "right"
+		},
+		{
 			"label": _("Kondisi"),
 			"fieldname": "kondisi",
 			"fieldtype": "Data",
@@ -1064,6 +1057,13 @@ def get_columns(filters):
 			"fieldname": "p_upah",
 			"fieldtype": "Currency",
 			"width": 120,
+			"align": "right"
+		},
+		{
+			"label": _("Subtotal Brondolan"),
+			"fieldname": "subtotal_brondolan",
+			"fieldtype": "Currency",
+			"width": 150,
 			"align": "right"
 		},
 		{
@@ -1388,7 +1388,7 @@ def get_panen_data(filters):
 			IF(bkmp.manual_hk = 1, 'Manual', '') AS tipe,
 			dbhkp.amount AS p_upah,
 			0 AS p_premi,
-			dbhkp.amount AS total,
+			(dbhkp.amount + dbhkp.brondolan_amount) AS total,
 			'Buku Kerja Mandor Panen' as voucher_type
 		FROM `tabDetail BKM Hasil Kerja Panen` as dbhkp
 		JOIN `tabBuku Kerja Mandor Panen` as bkmp ON bkmp.name = dbhkp.parent
