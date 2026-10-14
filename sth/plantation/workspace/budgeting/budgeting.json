@@ -270,7 +270,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-02 16:59:42.696215",
+ "modified": "2026-10-13 15:19:51.853765",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Budgeting",
@@ -279,7 +279,26 @@
  "parent_page": "Plantation",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "HEAD PLANTATION"
+  },
+  {
+   "role": "OPR PLANTATION SPV"
+  },
+  {
+   "role": "SENIOR ESTATE MANAGER"
+  },
+  {
+   "role": "ESTATE MANAGER"
+  },
+  {
+   "role": "KEPALA TATA USAHA"
+  },
+  {
+   "role": "STH DCDS"
+  }
+ ],
  "sequence_id": 6.0,
  "shortcuts": [],
  "title": "Budgeting"

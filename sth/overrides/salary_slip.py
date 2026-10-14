@@ -812,6 +812,9 @@ class SalarySlip(SalarySlip):
 			apakah_karyawan_tetap = 1
 
 		self.total_attendance_present = self._get_present_attendance_days()
+		self.total_attendance_7th_day_off = (
+			self._get_7th_day_off_attendance_days() if emp_doc.designation == "NS30" else 0
+		)
 		self.total_hari_dinas = self._get_dinas_days()
 
 		end_date = getdate(self.actual_end_date)
@@ -959,6 +962,21 @@ class SalarySlip(SalarySlip):
 			)
 		)
 		# print(query.run()[0][0])
+		return query.run()[0][0]
+
+	def _get_7th_day_off_attendance_days(self) -> float:
+		Attendance = frappe.qb.DocType("Attendance")
+		query = (
+			frappe.qb.from_(Attendance)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (Attendance.status == "7th Day Off")
+			)
+		)
+
 		return query.run()[0][0]
 
 	def _get_dinas_days(self) -> float:
