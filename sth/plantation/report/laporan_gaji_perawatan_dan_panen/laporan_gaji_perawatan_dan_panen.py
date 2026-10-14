@@ -976,6 +976,13 @@ def get_columns(filters):
 			"align": "left"
 		},
 		{
+			"label": _("Kode Kegiatan"),
+			"fieldname": "kode_kegiatan",
+			"fieldtype": "Data",
+			"width": 100,
+			"align": "left"
+		},
+		{
 			"label": _("Kegiatan"),
 			"fieldname": "kegiatan",
 			"fieldtype": "Data",
@@ -1254,6 +1261,7 @@ def get_perawatan_data(filters):
 			agg.p_upah,
 			agg.p_premi,
 			bkm.blok,
+			k.name AS kode_kegiatan,
 			k.nm_kgt AS kegiatan,
 			bkm.volume_basis AS basis,
 			bkm.rupiah_basis AS rupiah_satuan,
@@ -1343,6 +1351,7 @@ def get_perawatan_data(filters):
 			'norek_karyawan': r.norek_karyawan or '',
 			'employee_name': r.employee_name or '',
 			'posting_date': r.posting_date,
+			'kode_kegiatan': r.kode_kegiatan or '',
 			'kegiatan': r.kegiatan or '',
 			'hasil_kerja_qty': r.hasil_kerja_qty or 0,
 			'brondolan': 0,
@@ -1374,6 +1383,7 @@ def get_panen_data(filters):
 			e.employee_name as employee_name,
 			e.bank_ac_no as norek_karyawan,
 			bkmp.posting_date as posting_date,
+			k.name AS kode_kegiatan,
 			k.nm_kgt as kegiatan,
 			dbhkp.jumlah_janjang as hasil_kerja_qty,
 			dbhkp.qty_brondolan as brondolan,
@@ -1411,6 +1421,7 @@ def get_panen_data(filters):
 			'norek_karyawan': row.norek_karyawan or '',
 			'employee_name': row.employee_name or '',
 			'posting_date': row.posting_date,
+			'kode_kegiatan': row.kode_kegiatan or '',
 			'kegiatan': row.kegiatan or '',
 			'hasil_kerja_qty': row.hasil_kerja_qty or 0,
 			'brondolan': row.brondolan or 0,
