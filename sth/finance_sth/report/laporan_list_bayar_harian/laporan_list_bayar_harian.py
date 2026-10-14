@@ -358,4 +358,7 @@ def get_condition(filters):
 	if filters.get("to_date"):
 			conditions += " AND pe.request_release_date <= %(to_date)s"
 
+	if filters.get("status"):
+			conditions += " AND pe.workflow_state = %(status)s"
+
 	return conditions

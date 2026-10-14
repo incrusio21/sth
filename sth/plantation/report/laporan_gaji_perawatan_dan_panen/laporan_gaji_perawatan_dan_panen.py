@@ -1376,7 +1376,7 @@ def get_panen_data(filters):
 			bkmp.posting_date as posting_date,
 			bkmp.kegiatan_account as kegiatan,
 			dbhkp.jumlah_janjang as hasil_kerja_qty,
-			bkmp.hasil_kerja_qty_brondolan as brondolan,
+			dbhkp.qty_brondolan as brondolan,
 			dbhkp.brondolan as premi_brondolan,
 			dbhkp.brondolan_amount as subtotal_brondolan,
 			dbhkp.qty as total_tonase,

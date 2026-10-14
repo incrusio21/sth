@@ -21,6 +21,13 @@ frappe.query_reports["Laporan List Bayar Harian"] = {
 			"fieldtype": "Date",
 			"reqd": 0
 		},
+		{
+			"fieldname": "status",
+			"label": __("Status"),
+			"fieldtype": "Select",
+			"options": ["", "Butuh Persetujuan 3", "Approved"],
+			"reqd": 0
+		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
