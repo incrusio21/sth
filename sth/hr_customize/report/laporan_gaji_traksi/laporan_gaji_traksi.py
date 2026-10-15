@@ -173,11 +173,6 @@ def get_data(filters):
 		t["premi_angkut"] += premi_angkut
 		t["premi_transport"] += premi_transport
 		t["total_rp"] += total_rp
-		
-		kendaraan_totals[row.kode_kendaraan]["upah"] += row.upah or 0
-		kendaraan_totals[row.kode_kendaraan]["premi_angkut"] += row.premi_angkut or 0
-		kendaraan_totals[row.kode_kendaraan]["premi_transport"] += row.premi_transport or 0
-		kendaraan_totals[row.kode_kendaraan]["total_rp"] += total_rp
 	
 	# Tambahkan baris total per kendaraan
 	final_data = []
