@@ -6,6 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import today,flt,getdate,date_diff
 from frappe.model.mapper import get_mapped_doc
 
+from sth.mill.doctype.mill_settings.mill_settings import get_akun_difference
 from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulang_rekap
 from sth.mill.utils import (
 	get_adjustment_stock,
@@ -248,6 +249,8 @@ class SoundingStockCPOdiBST(Document):
 			item = target.append("items")
 			item.item_code = frappe.db.get_value("Item",{"tipe_barang": "CPO"})
 			item.qty = abs(self.produksi_cpo)
+			# Diisi sebelum get_item_details supaya tidak ditimpa akun bawaan.
+			item.expense_account = get_akun_difference(target.company)
 
 			if ste_type == "Material Receipt":
 				item.t_warehouse = self.gudang
