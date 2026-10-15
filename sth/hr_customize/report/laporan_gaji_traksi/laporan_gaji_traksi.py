@@ -17,6 +17,12 @@ def get_columns():
 			"width": 150
 		},
 		{
+			"fieldname": "nama_karyawan",
+			"label": _("Nama Karyawan"),
+			"fieldtype": "Data",
+			"width": 300
+		},
+		{
 			"fieldname": "no_transaksi",
 			"label": _("No Transaksi"),
 			"fieldtype": "Link",
@@ -26,6 +32,12 @@ def get_columns():
 		{
 			"fieldname": "tanggal",
 			"label": _("Tanggal"),
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
+			"fieldname": "kode_kegiatan",
+			"label": _("Kode Kegiatan"),
 			"fieldtype": "Data",
 			"width": 100
 		},
@@ -86,8 +98,10 @@ def get_data(filters):
 		SELECT 
 			parent.name as no_transaksi,
 			parent.kendaraan as kode_kendaraan,
+			e.first_name as nama_karyawan,
 			parent.posting_date as tanggal,
-			dbtk.kegiatan as kegiatan,
+			k.name as kode_kegiatan,
+			k.nm_kgt as kegiatan,
 			dbtk.kegiatan_account as kegiatan_account,
 			dbtk.hasil_kerja as hasil_kerja,
 			dbtk.upah_hasil as rupiah_satuan,
@@ -102,6 +116,8 @@ def get_data(filters):
 			ON dbtk.parent = parent.name
 		LEFT JOIN `tabDetail BKM Hasil Kerja Traksi` as dbhkt 
 			ON dbhkt.parent = parent.name
+		LEFT JOIN `tabKegiatan` as k ON k.name = dbtk.kegiatan
+		LEFT JOIN `tabEmployee` as e ON e.name = dbhkt.employee
 		WHERE 
 			parent.docstatus = 1
 			{conditions}
@@ -118,7 +134,7 @@ def get_data(filters):
 	for row in result:
 		# Get UOM dari master Kegiatan
 		try:
-			kegiatan_doc = frappe.get_doc("Kegiatan", row.kegiatan)
+			kegiatan_doc = frappe.get_doc("Kegiatan", row.kode_kegiatan)
 			satuan = kegiatan_doc.uom
 		except:
 			satuan = ""
@@ -146,7 +162,9 @@ def get_data(filters):
 			"kode_kendaraan": row.kode_kendaraan,
 			"no_transaksi": row.no_transaksi,
 			"tanggal": tanggal_formatted,
-			"kegiatan": row.kegiatan_account,
+			"kode_kegiatan": row.kode_kegiatan,
+			"kegiatan": row.kegiatan,
+			"nama_karyawan": row.nama_karyawan,
 			"hasil_kerja": row.hasil_kerja or 0,
 			"satuan": satuan,
 			"rupiah_satuan": row.rupiah_satuan or 0,
