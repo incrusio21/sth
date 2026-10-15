@@ -11,9 +11,7 @@
   "temperatur_cst",
   "column_break_bozd",
   "temperatur_stt",
-  "temperatur_st",
-  "akun_difference_tab",
-  "akun_difference"
+  "temperatur_st"
  ],
  "fields": [
   {
@@ -54,24 +52,13 @@
    "fieldname": "temperatur_cst",
    "fieldtype": "Data",
    "label": "Temperatur (CST)"
-  },
-  {
-   "fieldname": "akun_difference_tab",
-   "fieldtype": "Tab Break",
-   "label": "Akun Difference"
-  },
-  {
-   "fieldname": "akun_difference",
-   "fieldtype": "Table",
-   "label": "Akun Difference",
-   "options": "Akun Difference Mill"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-15 10:00:00.000000",
+ "modified": "2026-09-11 15:48:07.137793",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Mill Settings",

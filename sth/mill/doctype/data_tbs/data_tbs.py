@@ -11,7 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.stock.utils import get_stock_balance
 
-from sth.mill.doctype.mill_settings.mill_settings import get_akun_difference
+from sth.accounting_sth.doctype.sth_accounting_settings.sth_accounting_settings import get_akun_difference
 from sth.mill.utils import buat_ulang_ste, izinkan_stock_minus
 
 DOCTYPE = "Data TBS"
@@ -244,7 +244,7 @@ class DataTBS(Document):
 			item.item_code = frappe.db.get_value("Item",{"tipe_barang": "TBS"})
 			item.qty = abs(selisih)
 			# Diisi sebelum get_item_details supaya tidak ditimpa akun bawaan.
-			item.expense_account = get_akun_difference(target.company)
+			item.expense_account = get_akun_difference(target.company, "TBS")
 			gudang = get_warehouse_tbs(self.unit)
 			if selisih > 0:
 				item.t_warehouse = gudang

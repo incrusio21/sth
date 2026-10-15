@@ -33,6 +33,9 @@ const FILTER_TABEL = {
 		cost_center: ["cost_center_kebun", "cost_center_mill"],
 	},
 	sth_accounting_settings_cogs_sumber_biaya: { account: ["akun"], is_group: null },
+	sth_accounting_settings_akun_difference: {
+		account: ["akun_difference_tbs", "akun_difference_cpo", "akun_difference_pk"],
+	},
 	sth_accounting_settings_kud: {
 		account: [
 			"akun_pembelian_tbs",

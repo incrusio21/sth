@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate,flt
 from frappe.model.mapper import get_mapped_doc
 
-from sth.mill.doctype.mill_settings.mill_settings import get_akun_difference
+from sth.accounting_sth.doctype.sth_accounting_settings.sth_accounting_settings import get_akun_difference
 from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulang_rekap
 from sth.mill.utils import (
 	get_adjustment_stock,
@@ -291,7 +291,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			item.item_code = frappe.db.get_value("Item",{"tipe_barang": "Palm Kernel"})
 			item.qty = self.produksi
 			# Diisi sebelum get_item_details supaya tidak ditimpa akun bawaan.
-			item.expense_account = get_akun_difference(target.company)
+			item.expense_account = get_akun_difference(target.company, "Palm Kernel")
 			item.t_warehouse = frappe.db.get_value("Warehouse",{"unit": self.unit,"warehouse_category": "Product Palm Kernel"})
 
 			item_details = target.get_item_details(
