@@ -129,36 +129,26 @@ def get_data(filters):
 
 	data = []
 	kendaraan_totals = {}
-	seen_voucher = set()
 
 	for row in result:
 		# Get UOM dari master Kegiatan
 		try:
 			kegiatan_doc = frappe.get_doc("Kegiatan", row.kode_kegiatan)
 			satuan = kegiatan_doc.uom
-		except:
+		except Exception:
 			satuan = ""
 
 		# Format tanggal ke M/d/YYYY
 		tanggal_formatted = formatdate(row.tanggal, "M/d/YYYY") if row.tanggal else ""
 
-		# premi_angkut & premi_transport nilainya per voucher (dari dbhkt),
-		# bukan per baris kegiatan - JOIN-nya hanya berdasarkan parent sehingga
-		# nilainya terbawa/duplikat ke setiap baris kegiatan dalam voucher yang
-		# sama. Supaya tidak tampil berulang (dan tidak double count di total),
-		# hanya tampilkan di baris pertama tiap no_transaksi.
-		is_first_in_voucher = row.no_transaksi not in seen_voucher
-		seen_voucher.add(row.no_transaksi)
+		upah = row.upah or 0
+		premi_angkut = row.premi_angkut or 0
+		premi_transport = row.premi_transport or 0
 
-		premi_angkut = (row.premi_angkut or 0) if is_first_in_voucher else 0
-		premi_transport = (row.premi_transport or 0) if is_first_in_voucher else 0
+		# Total Rp per baris
+		total_rp = upah + premi_angkut + premi_transport
 
-		# Hitung Total Rp
-		# total_rp = (row.upah or 0) + premi_angkut + premi_transport
-		total_rp = (row.total_rp or 0) if is_first_in_voucher else 0
-
-		# Tambahkan ke data
-		data_row = {
+		data.append({
 			"kode_kendaraan": row.kode_kendaraan,
 			"no_transaksi": row.no_transaksi,
 			"tanggal": tanggal_formatted,
@@ -168,22 +158,21 @@ def get_data(filters):
 			"hasil_kerja": row.hasil_kerja or 0,
 			"satuan": satuan,
 			"rupiah_satuan": row.rupiah_satuan or 0,
-			"upah": row.upah or 0,
+			"upah": upah,
 			"premi_angkut": premi_angkut,
 			"premi_transport": premi_transport,
-			"total_rp": total_rp
-		}
+			"total_rp": total_rp,
+		})
 
-		data.append(data_row)
-		
 		# Akumulasi total per kendaraan
-		if row.kode_kendaraan not in kendaraan_totals:
-			kendaraan_totals[row.kode_kendaraan] = {
-				"upah": 0,
-				"premi_angkut": 0,
-				"premi_transport": 0,
-				"total_rp": 0
-			}
+		t = kendaraan_totals.setdefault(
+			row.kode_kendaraan,
+			{"upah": 0, "premi_angkut": 0, "premi_transport": 0, "total_rp": 0},
+		)
+		t["upah"] += upah
+		t["premi_angkut"] += premi_angkut
+		t["premi_transport"] += premi_transport
+		t["total_rp"] += total_rp
 		
 		kendaraan_totals[row.kode_kendaraan]["upah"] += row.upah or 0
 		kendaraan_totals[row.kode_kendaraan]["premi_angkut"] += row.premi_angkut or 0
