@@ -56,7 +56,7 @@ class RencanaKerjaHarian(PlantationController):
 		self.batalkan_permintaan_pengeluaran_barang()
 
 	def buat_permintaan_pengeluaran_barang(self):
-		"""Ajukan material RKH ini ke gudang virtual sebagai Permintaan Pengeluaran Barang.
+		"""Ajukan material RKH ini ke gudang central sebagai Permintaan Pengeluaran Barang.
 
 		RKH tidak boleh gagal karena permintaannya. Yang bisa dilengkapi langsung
 		disubmit; yang terganjal — stok kurang, penerima atau akun belum ada —
@@ -74,7 +74,8 @@ class RencanaKerjaHarian(PlantationController):
 		ppb = frappe.new_doc(PPB)
 		ppb.update({
 			"pt_pemilik_barang": self.company,
-			"gudang": self.gudang_virtual,
+			"gudang": self.gudang_central,
+			"gudang_tujuan": self.gudang_virtual,
 			"tanggal": self.posting_date,
 			"nama_karyawan": penerima,
 			"no_induk_karyawan": frappe.db.get_value("Employee", penerima, "no_ktp") if penerima else None,
