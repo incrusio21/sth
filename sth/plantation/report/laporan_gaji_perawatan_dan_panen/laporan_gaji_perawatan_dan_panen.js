@@ -51,6 +51,13 @@ frappe.query_reports["Laporan Gaji Perawatan Dan Panen"] = {
 			"default": ""
 		},
 		{
+			"fieldname": "divisi",
+			"label": __("Divisi"),
+			"fieldtype": "Link",
+			"options": "Divisi",
+			"default": ""
+		},
+		{
 			"fieldname": "bkm",
 			"label": __("Buku Kerja Mandor"),
 			"fieldtype": "Select",

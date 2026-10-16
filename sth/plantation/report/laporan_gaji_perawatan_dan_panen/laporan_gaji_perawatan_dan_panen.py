@@ -1155,6 +1155,9 @@ def get_conditions_employee(filters):
 	if filters.get("employment_type"):
 		conditions.append("e.employment_type = %(employment_type)s")
 
+	if filters.get("divisi"):
+		conditions.append("e.divisi = %(divisi)s")
+
 	return " AND " + " AND ".join(conditions) if conditions else ""
 
 
@@ -1170,6 +1173,9 @@ def get_conditions_panen(filters):
 
 	if filters.get("employment_type"):
 		conditions += " AND e.employment_type = %(employment_type)s"
+
+	if filters.get("divisi"):
+		conditions += " AND e.divisi = %(divisi)s"
 
 	return conditions
 
