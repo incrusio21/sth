@@ -60,6 +60,12 @@ def get_columns():
 			"fieldtype": "Data",
 			"width": 250,
 		},
+		{
+			"fieldname": "status",
+			"label": _("STATUS"),
+			"fieldtype": "Data",
+			"width": 250,
+		},
 		# {
 		# 	"fieldname": "submit_button",
 		# 	"label": _("ACTION"),
@@ -154,6 +160,7 @@ def get_data(filters=None):
 			"no_reff_mcm": pe.reference_no,
 			"nilai_tagihan": flt(pe.outstanding_amount),
 			"payment_schedule": pe.request_release_date,
+			"status": pe.workflow_state,
 			"submit_button": pe.name,
 		}
 
