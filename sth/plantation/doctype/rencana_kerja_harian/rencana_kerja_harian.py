@@ -56,7 +56,7 @@ class RencanaKerjaHarian(PlantationController):
 		self.batalkan_permintaan_pengeluaran_barang()
 
 	def buat_permintaan_pengeluaran_barang(self):
-		"""Ajukan material RKH ini ke gudang central sebagai Permintaan Pengeluaran Barang.
+		"""Ajukan material RKH ini ke gudang virtual sebagai Permintaan Pengeluaran Barang.
 
 		RKH tidak boleh gagal karena permintaannya. Yang bisa dilengkapi langsung
 		disubmit; yang terganjal — stok kurang, penerima atau akun belum ada —
@@ -69,12 +69,15 @@ class RencanaKerjaHarian(PlantationController):
 		if not items:
 			return
 
+		penerima = self.nik_penerima_material or self.mandor
+
 		ppb = frappe.new_doc(PPB)
 		ppb.update({
 			"pt_pemilik_barang": self.company,
-			"gudang": self.gudang_central,
+			"gudang": self.gudang_virtual,
 			"tanggal": self.posting_date,
-			"nama_karyawan": self.nik_penerima_material or self.mandor,
+			"nama_karyawan": penerima,
+			"no_induk_karyawan": frappe.db.get_value("Employee", penerima, "no_ktp") if penerima else None,
 			"catatan": _("Material RKH {0}").format(self.name)
 				+ (" / Trans No {0}".format(self.trans_no) if self.trans_no else ""),
 			"rencana_kerja_harian": self.name,
@@ -168,6 +171,8 @@ class RencanaKerjaHarian(PlantationController):
 				jatah[kunci] = jatah.get(kunci, 0) + jumlah
 
 		baris = {r.idx: r for r in self.kegiatan_detail}
+		# sub unit mengikuti divisi gudang virtual tempat barangnya diminta
+		sub_unit = frappe.db.get_value("Warehouse", self.gudang_virtual, "divisi") if self.gudang_virtual else None
 		akun = {}
 		items = []
 
@@ -186,7 +191,7 @@ class RencanaKerjaHarian(PlantationController):
 				"kode_barang": item,
 				"satuan": uom or frappe.db.get_value("Item", item, "stock_uom"),
 				"jumlah": jumlah,
-				"sub_unit": self.divisi,
+				"sub_unit": sub_unit,
 				"blok": row.blok,
 				"kegiatan": row.kegiatan,
 				"account": akun[row.kegiatan],

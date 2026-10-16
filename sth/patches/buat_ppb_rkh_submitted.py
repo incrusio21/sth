@@ -8,7 +8,7 @@ def execute(dry_run=False, dari_tanggal=None, sampai_tanggal=None):
 	"""Buat Permintaan Pengeluaran Barang untuk RKH yang disubmit sebelum PPB otomatis ada.
 
 	Sejak RencanaKerjaHarian.on_submit, material RKH langsung diajukan ke gudang
-	central sebagai PPB. RKH yang sudah disubmit sebelumnya tidak punya PPB, dan
+	virtual sebagai PPB. RKH yang sudah disubmit sebelumnya tidak punya PPB, dan
 	patch ini memanggil pembuat yang sama untuk mereka: yang lolos langsung
 	disubmit, yang stoknya kurang atau datanya belum lengkap ditinggal di Draft
 	dengan alasannya dicatat di RKH. RKH yang sudah punya PPB dilewati, jadi
@@ -83,8 +83,10 @@ def perkiraan(rkh):
 		return "kosong", "tidak ada material untuk kegiatan Perawatan"
 
 	kendala = []
-	if not rkh.gudang_central:
-		kendala.append("gudang_central kosong")
+	if not rkh.gudang_virtual:
+		kendala.append("gudang_virtual kosong")
+	elif not frappe.db.get_value("Warehouse", rkh.gudang_virtual, "divisi"):
+		kendala.append("divisi gudang_virtual kosong")
 	if not (rkh.nik_penerima_material or rkh.mandor):
 		kendala.append("penerima material kosong")
 
@@ -98,7 +100,7 @@ def perkiraan(rkh):
 
 	for item, jumlah in kebutuhan.items():
 		stok = flt(frappe.db.get_value(
-			"Bin", {"warehouse": rkh.gudang_central, "item_code": item}, "actual_qty"
+			"Bin", {"warehouse": rkh.gudang_virtual, "item_code": item}, "actual_qty"
 		))
 		if jumlah > stok:
 			kendala.append(f"stok {item} {stok:g} < {jumlah:g}")
