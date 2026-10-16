@@ -6,8 +6,27 @@ def create_po_draft(doc,method):
     po.insert(ignore_mandatory=True)
 
 def validate_duplicate_supplier(doc,method=None):
-    if name := frappe.db.get_value(doc.doctype,{"supplier":doc.supplier,"from_comparasion": 0,"name":["!=",doc.name],"docstatus":1},"name"):
-        frappe.throw(f"Quotation dengan supplier {doc.supplier} sudah ada: {name}")
+    material_requests = [ d.material_request for d in doc.items ]
+    if not material_requests: return
+
+    args = {
+        "pr_sr": material_requests,
+        "supplier": doc.supplier,
+        "name": doc.name
+    }
+
+    exists = frappe.db.sql("""
+        select sq.name from `tabSupplier Quotation` sq
+        join `tabSupplier Quotation Item` sqi on sq.name = sqi.parent
+        where sqi.material_request in %(pr_sr)s and sq.supplier = %(supplier)s and sq.name <> %(name)s and sq.docstatus = 0 and sq.from_comparasion = 0
+        group by sq.name
+    """,args,as_dict=True)
+
+    name = [ r.name for r in exists ]
+
+    if exists:
+        frappe.throw("Quotation dengan supplier {0} sudah ada: {1}".format(doc.supplier_name, ",".join(name)))
+
 
 @frappe.whitelist()
 def close_rfq(rfq):
