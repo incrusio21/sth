@@ -60,5 +60,5 @@ sth.patches.isi_akun_difference_produksi_mill
 # pindahkan_piutang_sales_invoice_timbangan_manual juga tidak didaftarkan:
 # memindah akun GL dan Payment Ledger Entry invoice yang sudah submit, dan
 # invoice yang sudah dibayar dilewati untuk dibereskan tangan. Default-nya dry
-# run; tulis dengan --kwargs "{'dry_run': 0}". Jalankan sesudah commit eb657d59.
+# run; tulis dengan --kwargs "{'dry_run': 0}". Jalankan sesudah commit f308354c.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

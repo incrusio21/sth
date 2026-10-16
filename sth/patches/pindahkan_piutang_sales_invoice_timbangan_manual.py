@@ -9,7 +9,7 @@ DOCTYPE = "Sales Invoice"
 def execute(sales_invoice=None, company=None, dari=None, sampai=None, dry_run=True):
 	"""Pindahkan piutang Sales Invoice Timbangan Manual ke akun 1132003.
 
-	Sejak commit eb657d59 invoice yang dibuat Timbangan company Manual Timbangan
+	Sejak commit f308354c invoice yang dibuat Timbangan company Manual Timbangan
 	(timbangan_ref dan delivery_order terisi) memakai debit_to 1132003 - PIUTANG
 	USAHA - TBS. Yang dibuat sebelumnya masih di piutang default Customer atau
 	Company.
