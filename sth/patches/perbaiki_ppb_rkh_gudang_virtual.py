@@ -12,20 +12,25 @@ def execute(dry_run=False, dari_tanggal=None, sampai_tanggal=None):
 	PPB lama sub_unit barisnya divisi RKH dan no_induk_karyawan-nya kosong.
 	Sekarang sub_unit diambil dari divisi Warehouse gudang_virtual RKH dan
 	no_induk_karyawan dari no_ktp penerimanya. Gudangnya tetap gudang_central
-	RKH; yang sempat berbeda ikut dikembalikan.
+	RKH; yang sempat berbeda ikut dikembalikan. gudang_tujuan diisi
+	gudang_virtual RKH.
 
 	Draft disimpan ulang lewat save() supaya cost center dan stoknya dihitung
 	lagi. Yang sudah disubmit tidak punya field allow_on_submit, jadi ditulis
 	langsung ke DB — aman karena PPB tidak membuat ledger apa pun.
 
 	PPB yang sudah punya Pengeluaran Barang (draft maupun submit) hanya diisi
-	no_induk_karyawan-nya: barangnya sudah diambil dan sub_unit-nya sudah
-	tersalin ke Pengeluaran Barang. Yang begini dibereskan tangan.
+	no_induk_karyawan dan gudang_tujuan-nya: barangnya sudah diambil dan
+	sub_unit-nya sudah tersalin ke Pengeluaran Barang. Yang begini dibereskan
+	tangan.
 
 	Tidak didaftarkan di patches.txt. Jalankan dry_run dulu dan baca daftarnya.
 
 	    bench --site <site> execute sth.patches.perbaiki_ppb_rkh_gudang_virtual.execute --kwargs "{'dry_run': 1}"
 	"""
+	if not frappe.db.has_column(PPB, "gudang_tujuan"):
+		frappe.throw("Kolom gudang_tujuan belum ada di PPB. Jalankan bench migrate dulu.")
+
 	kondisi = ""
 	if dari_tanggal:
 		kondisi += " AND ppb.tanggal >= %(dari_tanggal)s"
@@ -48,7 +53,7 @@ def execute(dry_run=False, dari_tanggal=None, sampai_tanggal=None):
 		as_dict=True,
 	)
 
-	hitung = {"diubah": 0, "no_induk_saja": 0, "sudah_benar": 0, "dilewati": 0}
+	hitung = {"diubah": 0, "kepala_saja": 0, "sudah_benar": 0, "dilewati": 0}
 
 	for d in daftar:
 		ppb = frappe.get_doc(PPB, d.name)
@@ -72,25 +77,31 @@ def execute(dry_run=False, dari_tanggal=None, sampai_tanggal=None):
 
 def perbaiki(ppb, rkh, dry_run):
 	no_induk = frappe.db.get_value("Employee", ppb.nama_karyawan, "no_ktp") if ppb.nama_karyawan else None
-	ganti_no_induk = bool(no_induk) and ppb.no_induk_karyawan != no_induk
+	gudang_tujuan = rkh.gudang_virtual if rkh else None
 
-	def no_induk_saja(alasan):
-		if ganti_no_induk and not dry_run:
-			ppb.db_set("no_induk_karyawan", no_induk, update_modified=False)
-		return ("no_induk_saja" if ganti_no_induk else "dilewati"), alasan
+	kepala = {}
+	if no_induk and ppb.no_induk_karyawan != no_induk:
+		kepala["no_induk_karyawan"] = no_induk
+	if gudang_tujuan and ppb.gudang_tujuan != gudang_tujuan:
+		kepala["gudang_tujuan"] = gudang_tujuan
+
+	def kepala_saja(alasan):
+		if kepala and not dry_run:
+			ppb.db_set(kepala, update_modified=False)
+		return ("kepala_saja" if kepala else "dilewati"), alasan
 
 	if not (rkh and rkh.gudang_virtual):
-		return no_induk_saja("gudang_virtual RKH kosong")
+		return kepala_saja("gudang_virtual RKH kosong")
 
 	sub_unit = frappe.db.get_value("Warehouse", rkh.gudang_virtual, "divisi")
 	if not sub_unit:
-		return no_induk_saja(f"divisi Warehouse {rkh.gudang_virtual} kosong")
+		return kepala_saja(f"divisi Warehouse {rkh.gudang_virtual} kosong")
 
 	pengeluaran = frappe.db.get_value(
 		"Pengeluaran Barang", {"no_permintaan_pengeluaran": ppb.name, "docstatus": ["<", 2]}, "name"
 	)
 	if pengeluaran or flt(ppb.outgoing) > 0:
-		return no_induk_saja(
+		return kepala_saja(
 			f"sudah ada Pengeluaran Barang {pengeluaran or ''}".strip() + ", sub_unit dibereskan tangan"
 		)
 
@@ -98,7 +109,7 @@ def perbaiki(ppb, rkh, dry_run):
 	ganti_gudang = ppb.gudang != gudang
 	baris_beda = [r for r in ppb.items if r.sub_unit != sub_unit]
 
-	if not (ganti_gudang or baris_beda or ganti_no_induk):
+	if not (ganti_gudang or baris_beda or kepala):
 		return "sudah_benar", ""
 
 	keterangan = []
@@ -106,7 +117,9 @@ def perbaiki(ppb, rkh, dry_run):
 		keterangan.append(f"gudang {ppb.gudang} -> {gudang}")
 	if baris_beda:
 		keterangan.append(f"sub_unit {len(baris_beda)} baris -> {sub_unit}")
-	if ganti_no_induk:
+	if "gudang_tujuan" in kepala:
+		keterangan.append(f"gudang_tujuan -> {gudang_tujuan}")
+	if "no_induk_karyawan" in kepala:
 		keterangan.append(f"no_induk -> {no_induk}")
 
 	if dry_run:
@@ -114,8 +127,7 @@ def perbaiki(ppb, rkh, dry_run):
 
 	if ppb.docstatus == 0:
 		ppb.gudang = gudang
-		if no_induk:
-			ppb.no_induk_karyawan = no_induk
+		ppb.update(kepala)
 		for r in ppb.items:
 			r.sub_unit = sub_unit
 
@@ -124,8 +136,7 @@ def perbaiki(ppb, rkh, dry_run):
 		ppb.save()
 		return "diubah", "; ".join(keterangan)
 
-	ppb.db_set({"gudang": gudang, "no_induk_karyawan": no_induk or ppb.no_induk_karyawan},
-		update_modified=False)
+	ppb.db_set({"gudang": gudang, **kepala}, update_modified=False)
 
 	cost_center = get_cost_center_from_divisi(sub_unit, ppb.pt_pemilik_barang)
 	for r in ppb.items:

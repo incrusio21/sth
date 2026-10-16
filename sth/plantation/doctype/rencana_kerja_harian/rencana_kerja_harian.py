@@ -75,6 +75,7 @@ class RencanaKerjaHarian(PlantationController):
 		ppb.update({
 			"pt_pemilik_barang": self.company,
 			"gudang": self.gudang_central,
+			"gudang_tujuan": self.gudang_virtual,
 			"tanggal": self.posting_date,
 			"nama_karyawan": penerima,
 			"no_induk_karyawan": frappe.db.get_value("Employee", penerima, "no_ktp") if penerima else None,

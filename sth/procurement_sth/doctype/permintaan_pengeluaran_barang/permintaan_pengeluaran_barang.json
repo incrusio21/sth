@@ -11,6 +11,7 @@
   "pt_pemilik_barang",
   "column_break_xvef",
   "gudang",
+  "gudang_tujuan",
   "unit",
   "column_break_ljmw",
   "tanggal",
@@ -67,6 +68,12 @@
    "label": "Gudang",
    "options": "Warehouse",
    "reqd": 1
+  },
+  {
+   "fieldname": "gudang_tujuan",
+   "fieldtype": "Link",
+   "label": "Gudang Tujuan",
+   "options": "Warehouse"
   },
   {
    "fieldname": "nama_karyawan",
@@ -216,7 +223,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 13:00:00.000000",
+ "modified": "2026-10-16 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
