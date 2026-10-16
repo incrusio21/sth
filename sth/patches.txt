@@ -57,4 +57,8 @@ sth.patches.isi_akun_difference_produksi_mill
 # buat_ppb_rkh_submitted juga tidak didaftarkan: RKH lama bisa saja materialnya
 # sudah diminta lewat PPB manual, jadi batasi tanggalnya dan lihat dulu dengan
 # --kwargs "{'dry_run': 1, 'dari_tanggal': ...}". Jalankan sesudah migrate.
+# pindahkan_piutang_sales_invoice_timbangan_manual juga tidak didaftarkan:
+# memindah akun GL dan Payment Ledger Entry invoice yang sudah submit, dan
+# invoice yang sudah dibayar dilewati untuk dibereskan tangan. Default-nya dry
+# run; tulis dengan --kwargs "{'dry_run': 0}". Jalankan sesudah commit eb657d59.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
