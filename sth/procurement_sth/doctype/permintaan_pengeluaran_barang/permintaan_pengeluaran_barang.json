@@ -100,7 +100,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "nama_karyawan.custom_nip",
+   "fetch_from": "nama_karyawan.no_ktp",
    "fieldname": "no_induk_karyawan",
    "fieldtype": "Data",
    "label": "No Induk Karyawan",
@@ -223,7 +223,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-16 13:00:00.000000",
+ "modified": "2026-10-16 14:45:31.533858",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Permintaan Pengeluaran Barang",
