@@ -26,4 +26,4 @@ def cek_status_awal(doc, method):
 		doc.workflow_state = "Approved"
 		frappe.db.set_value('Item', doc.name, 'workflow_state', 'Approved', update_modified=False)
 	else:
-		frappe.db.set_value('Item', doc.name, 'workflow_state', 'Butuh Persetujuan 1', update_modified=False)
+		frappe.db.set_value('Item', doc.name, 'workflow_state', 'Draft', update_modified=False)
