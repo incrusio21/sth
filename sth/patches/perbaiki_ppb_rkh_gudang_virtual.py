@@ -9,18 +9,18 @@ PPB = "Permintaan Pengeluaran Barang"
 def execute(dry_run=False, dari_tanggal=None, sampai_tanggal=None):
 	"""Samakan PPB dari RKH yang sudah terbuat dengan aturan pembuatnya sekarang.
 
-	PPB lama dibuat ke gudang central, sub_unit barisnya divisi RKH, dan
-	no_induk_karyawan kosong. Sekarang gudangnya gudang_virtual RKH, sub_unit
-	divisi Warehouse gudang_virtual, dan no_induk_karyawan no_ktp penerimanya.
+	PPB lama sub_unit barisnya divisi RKH dan no_induk_karyawan-nya kosong.
+	Sekarang sub_unit diambil dari divisi Warehouse gudang_virtual RKH dan
+	no_induk_karyawan dari no_ktp penerimanya. Gudangnya tetap gudang_central
+	RKH; yang sempat berbeda ikut dikembalikan.
 
 	Draft disimpan ulang lewat save() supaya cost center dan stoknya dihitung
 	lagi. Yang sudah disubmit tidak punya field allow_on_submit, jadi ditulis
 	langsung ke DB — aman karena PPB tidak membuat ledger apa pun.
 
 	PPB yang sudah punya Pengeluaran Barang (draft maupun submit) hanya diisi
-	no_induk_karyawan-nya: barangnya sudah diambil dari gudang lama dan
-	sub_unit-nya sudah tersalin ke Pengeluaran Barang. Yang begini dibereskan
-	tangan.
+	no_induk_karyawan-nya: barangnya sudah diambil dan sub_unit-nya sudah
+	tersalin ke Pengeluaran Barang. Yang begini dibereskan tangan.
 
 	Tidak didaftarkan di patches.txt. Jalankan dry_run dulu dan baca daftarnya.
 
@@ -53,7 +53,8 @@ def execute(dry_run=False, dari_tanggal=None, sampai_tanggal=None):
 	for d in daftar:
 		ppb = frappe.get_doc(PPB, d.name)
 		rkh = frappe.db.get_value(
-			"Rencana Kerja Harian", d.rencana_kerja_harian, ["name", "gudang_virtual"], as_dict=True
+			"Rencana Kerja Harian", d.rencana_kerja_harian,
+			["name", "gudang_central", "gudang_virtual"], as_dict=True
 		)
 
 		hasil, keterangan = perbaiki(ppb, rkh, dry_run)
@@ -73,37 +74,36 @@ def perbaiki(ppb, rkh, dry_run):
 	no_induk = frappe.db.get_value("Employee", ppb.nama_karyawan, "no_ktp") if ppb.nama_karyawan else None
 	ganti_no_induk = bool(no_induk) and ppb.no_induk_karyawan != no_induk
 
-	if not (rkh and rkh.gudang_virtual):
+	def no_induk_saja(alasan):
 		if ganti_no_induk and not dry_run:
 			ppb.db_set("no_induk_karyawan", no_induk, update_modified=False)
-		return ("no_induk_saja" if ganti_no_induk else "dilewati"), "gudang_virtual RKH kosong"
+		return ("no_induk_saja" if ganti_no_induk else "dilewati"), alasan
+
+	if not (rkh and rkh.gudang_virtual):
+		return no_induk_saja("gudang_virtual RKH kosong")
 
 	sub_unit = frappe.db.get_value("Warehouse", rkh.gudang_virtual, "divisi")
 	if not sub_unit:
-		if ganti_no_induk and not dry_run:
-			ppb.db_set("no_induk_karyawan", no_induk, update_modified=False)
-		return ("no_induk_saja" if ganti_no_induk else "dilewati"), f"divisi Warehouse {rkh.gudang_virtual} kosong"
+		return no_induk_saja(f"divisi Warehouse {rkh.gudang_virtual} kosong")
 
 	pengeluaran = frappe.db.get_value(
 		"Pengeluaran Barang", {"no_permintaan_pengeluaran": ppb.name, "docstatus": ["<", 2]}, "name"
 	)
 	if pengeluaran or flt(ppb.outgoing) > 0:
-		if ganti_no_induk and not dry_run:
-			ppb.db_set("no_induk_karyawan", no_induk, update_modified=False)
-		return (
-			("no_induk_saja" if ganti_no_induk else "dilewati"),
-			f"sudah ada Pengeluaran Barang {pengeluaran or ''}".strip() + ", gudang/sub_unit dibereskan tangan",
+		return no_induk_saja(
+			f"sudah ada Pengeluaran Barang {pengeluaran or ''}".strip() + ", sub_unit dibereskan tangan"
 		)
 
+	gudang = rkh.gudang_central or ppb.gudang
+	ganti_gudang = ppb.gudang != gudang
 	baris_beda = [r for r in ppb.items if r.sub_unit != sub_unit]
-	ganti_gudang = ppb.gudang != rkh.gudang_virtual
 
 	if not (ganti_gudang or baris_beda or ganti_no_induk):
 		return "sudah_benar", ""
 
 	keterangan = []
 	if ganti_gudang:
-		keterangan.append(f"gudang {ppb.gudang} -> {rkh.gudang_virtual}")
+		keterangan.append(f"gudang {ppb.gudang} -> {gudang}")
 	if baris_beda:
 		keterangan.append(f"sub_unit {len(baris_beda)} baris -> {sub_unit}")
 	if ganti_no_induk:
@@ -113,7 +113,7 @@ def perbaiki(ppb, rkh, dry_run):
 		return "diubah", "; ".join(keterangan)
 
 	if ppb.docstatus == 0:
-		ppb.gudang = rkh.gudang_virtual
+		ppb.gudang = gudang
 		if no_induk:
 			ppb.no_induk_karyawan = no_induk
 		for r in ppb.items:
@@ -122,31 +122,30 @@ def perbaiki(ppb, rkh, dry_run):
 		ppb.flags.ignore_permissions = True
 		ppb.flags.ignore_mandatory = True
 		ppb.save()
-	else:
-		ppb.db_set({"gudang": rkh.gudang_virtual, "no_induk_karyawan": no_induk or ppb.no_induk_karyawan},
-			update_modified=False)
+		return "diubah", "; ".join(keterangan)
 
-		cost_center = get_cost_center_from_divisi(sub_unit, ppb.pt_pemilik_barang)
+	ppb.db_set({"gudang": gudang, "no_induk_karyawan": no_induk or ppb.no_induk_karyawan},
+		update_modified=False)
+
+	cost_center = get_cost_center_from_divisi(sub_unit, ppb.pt_pemilik_barang)
+	for r in ppb.items:
+		r.db_set({"sub_unit": sub_unit, "cost_center": cost_center}, update_modified=False)
+
+	if ganti_gudang:
+		# stoknya dulu dicek terhadap gudang lain; yang kurang di gudang ini
+		# tetap submit, tapi Pengeluaran Barang-nya nanti akan tertahan
 		stok = {}
 		kebutuhan = {}
-
 		for r in ppb.items:
 			if r.kode_barang not in stok:
 				stok[r.kode_barang] = flt(frappe.db.get_value(
-					"Bin", {"warehouse": rkh.gudang_virtual, "item_code": r.kode_barang}, "actual_qty"
+					"Bin", {"warehouse": gudang, "item_code": r.kode_barang}, "actual_qty"
 				))
 			kebutuhan[r.kode_barang] = kebutuhan.get(r.kode_barang, 0) + flt(r.jumlah)
+			r.db_set("jumlah_saat_ini", stok[r.kode_barang], update_modified=False)
 
-			r.db_set({
-				"sub_unit": sub_unit,
-				"cost_center": cost_center,
-				"jumlah_saat_ini": stok[r.kode_barang],
-			}, update_modified=False)
-
-		# stoknya dulu dicek terhadap gudang lama; yang kurang di gudang baru
-		# tetap submit, tapi Pengeluaran Barang-nya nanti akan tertahan
 		kurang = sorted(k for k, jumlah in kebutuhan.items() if jumlah > stok[k])
 		if kurang:
-			keterangan.append("stok kurang di gudang baru: " + ", ".join(kurang))
+			keterangan.append("stok kurang di gudang ini: " + ", ".join(kurang))
 
 	return "diubah", "; ".join(keterangan)
