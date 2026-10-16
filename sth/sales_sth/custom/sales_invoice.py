@@ -13,14 +13,26 @@ AKUN_PIUTANG_LAIN = "1131004"
 # Jenis Penagihan yang piutangnya tidak mengikuti default Customer/Company
 JENIS_PENAGIHAN_PIUTANG_LAIN = ("Others", "Disposal")
 
+# Piutang Sales Invoice yang dibuat Timbangan company Manual Timbangan
+AKUN_PIUTANG_TIMBANGAN_MANUAL = "1132003"
+
 
 def set_debit_to(self, method=None):
-	"""Piutang untuk Jenis Penagihan Others dan Disposal.
+	"""Piutang untuk Jenis Penagihan Others dan Disposal, dan untuk invoice
+	Timbangan company Manual Timbangan.
 
 	Dipasang di before_validate supaya validate_debit_to_acc bawaan ERPNext ikut
 	memeriksa akun ini — kalau disetel setelah validate, party_account_currency
 	dan pemeriksaan tipe akunnya masih memakai akun yang lama.
 	"""
+	# Invoice pengganti DN dari Timbangan (lihat make_sales_invoice di Timbangan)
+	# dikenali dari timbangan_ref dan delivery_order, sama dengan update_delivered_do
+	if self.get("timbangan_ref") and self.get("delivery_order"):
+		self.debit_to = cari_akun(
+			self.company, AKUN_PIUTANG_TIMBANGAN_MANUAL, _("piutang Sales Invoice Timbangan Manual")
+		)
+		return
+
 	if self.jenis_penagihan not in JENIS_PENAGIHAN_PIUTANG_LAIN:
 		return
 
