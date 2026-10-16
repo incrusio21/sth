@@ -502,7 +502,11 @@ class SalesInvoice(SalesInvoice):
 		# 		f"Default Expense Account belum diset di Company <b>{self.company}</b>"
 		# 	)
 
-		expense_account = self.items[0].income_account
+		expense_account = self.items[0].expense_account
+		if not expense_account:
+			frappe.throw(
+				f"Expense Account belum diisi di baris pertama item Sales Invoice <b>{self.name}</b>."
+			)
 
 		dn_names = list(set([
 			item.delivery_note
@@ -535,6 +539,15 @@ class SalesInvoice(SalesInvoice):
 					f"Akun Debit tidak ditemukan di GL Entry Delivery Note <b>{dn_name}</b>"
 				)
 			dn_account_map[dn_name] = debit_account
+
+			# Expense account yang ikut tersalin dari Delivery Note adalah akun
+			# stock in transit, jurnalnya jadi mendebit dan mengkredit akun yang sama
+			if debit_account == expense_account:
+				frappe.throw(
+					f"Expense Account item Sales Invoice <b>{expense_account}</b> sama dengan "
+					f"akun debit Delivery Note <b>{dn_name}</b>. Ganti Expense Account item "
+					f"ke akun HPP sebelum submit."
+				)
 
 			debit_value = frappe.db.get_value(
 				"GL Entry",

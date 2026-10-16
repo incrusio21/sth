@@ -61,4 +61,9 @@ sth.patches.isi_akun_difference_produksi_mill
 # memindah akun GL dan Payment Ledger Entry invoice yang sudah submit, dan
 # invoice yang sudah dibayar dilewati untuk dibereskan tangan. Default-nya dry
 # run; tulis dengan --kwargs "{'dry_run': 0}". Jalankan sesudah commit f308354c.
+# koreksi_akun_je_selisih_timbang juga tidak didaftarkan: memindah akun debit
+# GL Journal Entry selisih timbang yang sudah submit dari income account ke
+# expense account item invoice-nya. Default-nya dry run; kalau expense account
+# invoicenya ikut akun stock in transit, paksa akun HPP lewat --kwargs
+# "{'akun': ..., 'dry_run': 0}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
