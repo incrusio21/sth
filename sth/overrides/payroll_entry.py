@@ -431,7 +431,8 @@ class PayrollEntry(PayrollEntry):
 		jadi gaji staf, gaji operator, dan potongan karyawan jatuh di akun yang
 		sama dan baru terpisah (itu pun kalau sempat) waktu costing mereclass.
 
-		Komponen yang dicentang "Not Include Net Pay" tidak ikut; aturan
+		Komponen yang dicentang "Not Include Net Pay" tidak ikut, kecuali BPJS
+		beban perusahaan yang dipotong balik ke hutang BPJS; aturan
 		lengkapnya ada di sth.accounting_sth.komponen_gaji, yang dipakai bersama
 		oleh costing supaya yang direclass persis yang diaccrual.
 

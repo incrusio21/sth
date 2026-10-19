@@ -11,13 +11,18 @@ direclass.
 
 Aturannya ditaruh di satu tempat:
 
-- Earning yang dicentang "Not Include Net Pay" tidak ikut. Itu BPJS beban
-  perusahaan dan gross up PPh21: bebannya sudah lahir dari dokumen BPJS TK/Kes
-  sendiri, dan nilainya memang tidak menambah net pay.
+- Earning yang dicentang "Not Include Net Pay" tidak ikut, seperti gross up
+  PPh21: nilainya memang tidak menambah net pay.
 - Deduction ikut penyaring "Do Not Include In Total", penyaring yang sama yang
   dipakai Salary Slip waktu menghitung total potongan. Kalau tidak sama,
   jurnalnya tidak akan pernah ketemu dengan net pay.
+- Kecuali BPJS beban perusahaan. Komponen earning-nya dipotong balik di
+  deductions sebesar yang sama (potong_balik_bpjs_perusahaan di
+  sth/overrides/salary_slip.py), dan pasangan itu selalu ikut dua-duanya,
+  apa pun centangnya: earning mendebit bebannya, deduction mengkredit hutang
+  BPJS. Karena nilainya sama, net pay tidak bergeser.
 - Akunnya dari tabel Accounts di Salary Component, dicocokkan per company.
+  Baris deduction dari komponen earning memakai kolom Akun Potongan-nya.
 
 Dengan aturan itu berlaku:
 
@@ -46,10 +51,22 @@ def rincian_komponen(company, salary_slips, parentfield="earnings", hanya_kegiat
 	if not salary_slips:
 		return []
 
+	# Earning yang punya pasangan potongan di slip yang sama ikut walau tidak
+	# masuk net pay; deduction dari komponen earning adalah pasangan itu.
+	# Slip lama tanpa pasangan tetap dibaca seperti dulu.
 	if parentfield == "earnings":
-		kondisi = "AND IFNULL(sc.not_include_net_pay, 0) = 0"
+		kondisi = """AND (
+			IFNULL(sc.not_include_net_pay, 0) = 0
+			OR EXISTS (
+				SELECT 1 FROM `tabSalary Detail` pot
+				WHERE pot.parent = ss.name
+				  AND pot.parenttype = 'Salary Slip'
+				  AND pot.parentfield = 'deductions'
+				  AND pot.salary_component = sd.salary_component
+			)
+		)"""
 	else:
-		kondisi = "AND IFNULL(sd.do_not_include_in_total, 0) = 0"
+		kondisi = "AND (IFNULL(sd.do_not_include_in_total, 0) = 0 OR sc.type = 'Earning')"
 
 	if hanya_kegiatan_kebun:
 		kondisi += " AND IFNULL(sc.`{0}`, 0) = 1".format(FIELD_KEGIATAN_KEBUN)
@@ -62,7 +79,9 @@ def rincian_komponen(company, salary_slips, parentfield="earnings", hanya_kegiat
 			sd.salary_component,
 			sd.amount,
 			sd.additional_salary,
-			sca.account
+			(sd.parentfield = 'deductions' AND sc.type = 'Earning') AS potong_balik,
+			IF(sd.parentfield = 'deductions' AND sc.type = 'Earning',
+				sca.akun_potongan, sca.account) AS account
 		FROM `tabSalary Slip` ss
 		JOIN `tabSalary Detail` sd
 			ON sd.parent = ss.name AND sd.parentfield = %(parentfield)s
@@ -78,13 +97,17 @@ def rincian_komponen(company, salary_slips, parentfield="earnings", hanya_kegiat
 		"slips": tuple(salary_slips),
 	}, as_dict=True)
 
-	tanpa_akun = sorted({r.salary_component for r in rows if not r.account})
+	tanpa_akun = sorted({(r.salary_component, r.potong_balik) for r in rows if not r.account})
 	if tanpa_akun:
 		frappe.throw(
 			_("Salary Component berikut belum punya akun untuk company {0} "
 			  "(lihat tabel Accounts di masternya): {1}").format(
 				frappe.bold(company),
-				", ".join(get_link_to_form("Salary Component", d) for d in tanpa_akun),
+				", ".join(
+					get_link_to_form("Salary Component", d)
+					+ (" ({0})".format(_("Akun Potongan")) if potong_balik else "")
+					for d, potong_balik in tanpa_akun
+				),
 			),
 			title=_("Akun Komponen Belum Diisi"),
 		)

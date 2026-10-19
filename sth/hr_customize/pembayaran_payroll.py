@@ -9,9 +9,9 @@ itu, tapi penerimanya berbeda-beda, jadi dipecah per tipe:
 - Potongan: potongan dari Employee Potongan, sub tipenya Jenis Potongan.
   Potongan lain yang tidak lewat Employee Potongan, Daftar BPJS, atau PPh 21
   ikut di sini dengan sub tipe nama Salary Component-nya.
-- BPJS: porsi karyawan dari Daftar BPJS, sub tipenya BPJS TK atau BPJS KES.
-  Porsi perusahaan tidak ikut karena memang tidak diaccrual (komponennya
-  dicentang Not Include Net Pay).
+- BPJS: porsi karyawan dan perusahaan dari Daftar BPJS, sub tipenya BPJS TK
+  atau BPJS KES. Porsi perusahaan ditagih lewat baris potongan pasangannya;
+  slip lama tanpa pasangan cuma menagih porsi karyawan.
 
 Potongan dibaca lewat rincian_komponen, penyaring yang sama dengan accrual,
 jadi jumlah tiap akun di sini persis yang dikredit accrual. Baris yang akunnya
@@ -127,7 +127,8 @@ def daftar_bpjs_per_slip_komponen(nama_slip):
 	"""Daftar BPJS asal potongan BPJS tiap slip.
 
 	Employee Payment Log menaut slipnya lewat salary_slip begitu slip
-	disubmit, dan tagihan cuma membaca slip tersubmit.
+	disubmit, dan tagihan cuma membaca slip tersubmit. Log beban perusahaan
+	(earning) ikut: potongan pasangannya memakai komponen yang sama.
 	"""
 	rows = frappe.db.sql("""
 		SELECT epl.salary_slip, epl.salary_component, db.name, db.jenis_bpjs
@@ -135,7 +136,6 @@ def daftar_bpjs_per_slip_komponen(nama_slip):
 		JOIN `tabDaftar BPJS` db ON db.name = epl.voucher_no
 		WHERE epl.salary_slip IN %(slips)s
 		  AND epl.voucher_type = 'Daftar BPJS'
-		  AND epl.type = 'Deduction'
 	""", {"slips": tuple(nama_slip)}, as_dict=True)
 
 	return {(r.salary_slip, r.salary_component): r for r in rows}

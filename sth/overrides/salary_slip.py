@@ -35,6 +35,9 @@ from frappe.model.mapper import get_mapped_doc
 
 LEAVE_CODE_MAP = "leave_code_map"
 
+# component_type Employee Payment Log beban perusahaan dari Daftar BPJS
+BPJS_PERUSAHAAN = "BPJS Perusahaan"
+
 class SalarySlip(SalarySlip):
 	# def validate(self):
 	# 	super().validate()
@@ -1232,8 +1235,9 @@ class SalarySlip(SalarySlip):
 		emp_pl = (
 			frappe.qb.from_(epl)
 			.select(
-				epl.name, epl.account, epl.salary_component, 
-				epl.type, epl.against_salary_component, epl.amount, epl.status
+				epl.name, epl.account, epl.salary_component,
+				epl.type, epl.against_salary_component, epl.amount, epl.status,
+				epl.component_type
 			)
 			.where(
 				(epl.employee == self.employee)
@@ -1253,6 +1257,7 @@ class SalarySlip(SalarySlip):
 		
 		self._employee_payment = {}
 		self._against_employee_payment = {}
+		self._potongan_bpjs_perusahaan = {}
 		# print(str(emp_pl))
 		for pl in emp_pl:
 			# Pending = upah BKM Panen yang BJR-nya belum datang, nilainya masih 0.
@@ -1288,6 +1293,10 @@ class SalarySlip(SalarySlip):
 				self._against_employee_payment[key_against] += (
 					pl.amount if pl.type == "deductions" else -pl.amount
 				)
+
+			if pl.component_type == BPJS_PERUSAHAAN:
+				self._potongan_bpjs_perusahaan.setdefault(pl.salary_component, 0)
+				self._potongan_bpjs_perusahaan[pl.salary_component] += pl.amount
 
 			self.payment_log_list.append(pl.name)
 
@@ -1467,10 +1476,40 @@ class SalarySlip(SalarySlip):
 			print(self._against_employee_payment)
 			component_type = "earnings" if total_amount > 0 else "deductions"
 			self.add_component_custom(
-				component, 
-				component_type, 
+				component,
+				component_type,
 				abs(total_amount)
 			)
+
+		self.potong_balik_bpjs_perusahaan()
+
+	def potong_balik_bpjs_perusahaan(self):
+		"""BPJS beban perusahaan dipotong balik di deductions dengan komponen yang sama.
+
+		Beban perusahaan dibayar perusahaan ke BPJS, bukan ke karyawan. Di slip
+		ia tampil di earnings sebagai beban, lalu di deductions sebesar yang sama
+		sebagai yang disetor ke BPJS. Accrual Payroll Entry mendebit akun earning
+		komponennya dan mengkredit Akun Potongan-nya (hutang BPJS) - lihat
+		sth.accounting_sth.komponen_gaji.
+
+		Baris potongannya ikut mengurangi net pay hanya kalau earning-nya ikut
+		menambah net pay, jadi pasangan ini tidak pernah menggeser net pay.
+		Komponen yang tidak dicentang "Not Include Net Pay", seperti JKK, selama
+		ini masuk net pay karyawan; dengan pasangannya ia keluar lagi.
+		"""
+		for component, amount in self._potongan_bpjs_perusahaan.items():
+			self.add_component_custom(component, "deductions", abs(amount))
+
+			# dipasang di barisnya, bukan lewat add_struck: get_salary_component_data
+			# memulangkan dict dari cache, dan mengubahnya menular ke baris earning
+			# slip berikutnya yang dibuat di request yang sama
+			ikut_net_pay = not cint(
+				frappe.get_cached_value("Salary Component", component, "not_include_net_pay")
+			)
+			for row in self.deductions:
+				if row.salary_component == component and not row.additional_salary:
+					row.do_not_include_in_total = 0 if ikut_net_pay else 1
+					row.exempted_from_income_tax = 0
 
 	def calculate_subsidy_loan(self):
 		self.add_repaymant_subsidy()
