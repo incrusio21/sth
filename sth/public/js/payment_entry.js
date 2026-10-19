@@ -259,6 +259,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	unit: function (frm) {
 		pasang_company_account(frm);
+		set_no_rekening(frm);
 		if (!frm.doc.unit) return;
 		filter_bank_accounts(frm);
 	},
@@ -291,6 +292,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	paid_to: function (frm) {
 		set_ft_service(frm);
+		set_no_rekening(frm);
 	},
 
 	ft_service: function (frm) {
@@ -343,6 +345,9 @@ frappe.ui.form.on("Payment Entry", {
 				if (d.unit) {
 					frm.set_value("unit", d.unit);
 				}
+
+				// rekening tujuan ikut unit Payroll Entry-nya
+				set_no_rekening(frm);
 				frm.clear_table("rincian_payroll");
 				frm.refresh_field("rincian_payroll");
 				sth.pembayaran_payroll.pilih_tagihan(frm);
@@ -967,6 +972,10 @@ function set_no_rekening(frm) {
 		paid_to = frm.doc.paid_to;
 	}
 
+	// beberapa field memanggil ini berurutan; jawaban yang datang belakangan
+	// dari panggilan lama tidak boleh menimpa yang terbaru
+	const urutan = (frm.__urutan_no_rekening = (frm.__urutan_no_rekening || 0) + 1);
+
 	frappe.call({
 		method: "sth.custom.payment_entry.get_no_rekening",
 		args: {
@@ -979,17 +988,18 @@ function set_no_rekening(frm) {
 			no_payroll_entry: frm.doc.no_payroll_entry
 		},
 		callback: function (r) {
-			if (r.message) {
-				frm.set_value("no_rekening", r.message.no_rekening || "");
-				frm.set_value("nama_bank", r.message.nama_bank || "");
-				frm.set_value("no_rekening_tujuan", r.message.no_rekening_tujuan || "");
-				frm.set_value("bank_tujuan", r.message.bank_tujuan || "");
-			} else {
-				frm.set_value("no_rekening", "");
-				frm.set_value("nama_bank", "");
-				frm.set_value("no_rekening_tujuan", "");
-				frm.set_value("bank_tujuan", "");
-			}
+			if (urutan !== frm.__urutan_no_rekening) return;
+
+			const d = r.message || {};
+			frm.set_value("no_rekening", d.no_rekening || "");
+			frm.set_value("nama_bank", d.nama_bank || "");
+			frm.set_value("no_rekening_tujuan", d.no_rekening_tujuan || "");
+			frm.set_value("bank_tujuan", d.bank_tujuan || "");
+
+			// sama dengan yang dihitung set_no_rekening di server waktu disimpan,
+			// supaya sudah terlihat sebelum save
+			frm.set_value("beneficary_account", d.no_rekening || d.no_rekening_tujuan || "");
+			frm.set_value("beneficary_bank", d.nama_bank || d.bank_tujuan || "");
 		}
 	});
 }
