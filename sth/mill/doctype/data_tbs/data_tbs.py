@@ -194,7 +194,8 @@ class DataTBS(Document):
 			cint(self.jumlah_lori_olah)
 			+ cint(self.jumlah_lori_mentah)
 			+ cint(self.jumlah_lori_masak)
-			+ cint(self.lori_estimasi_loading_ramp)
+			# Loading ramp diestimasi dari cycle, jadi lorinya bisa pecahan.
+			+ flt(self.lori_estimasi_loading_ramp)
 		)
 		self.restan_setelah_adjustment = flt(self.jumlah_tbs_restan) + flt(self.adjustment_stok)
 		self.grand_total_tbs = self.restan_setelah_adjustment + flt(self.jumlah_tbs_diterima)
@@ -203,7 +204,7 @@ class DataTBS(Document):
 			self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori
 			self.tbs_olah = self.berat_rata_rata_tbs * cint(self.jumlah_lori_olah)
 			self.tbs_restan = self.berat_rata_rata_tbs * (cint(self.jumlah_lori_mentah) + cint(self.jumlah_lori_masak))
-			self.tbs_loading_ramp = self.berat_rata_rata_tbs * cint(self.lori_estimasi_loading_ramp)
+			self.tbs_loading_ramp = self.berat_rata_rata_tbs * flt(self.lori_estimasi_loading_ramp)
 		else:
 			# Tidak ada lori berarti tidak ada yang diolah, jadi seluruh TBS —
 			# restan awal maupun yang diterima hari itu — jadi restan hari
