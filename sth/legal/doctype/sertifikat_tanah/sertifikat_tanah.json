@@ -109,16 +109,14 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Nomor Surat Ukur",
-   "reqd": 1
+   "label": "Nomor Surat Ukur"
   },
   {
    "fieldname": "tsu",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Tanggal Surat Ukur",
-   "reqd": 1
+   "label": "Tanggal Surat Ukur"
   },
   {
    "fieldname": "npp",
@@ -232,7 +230,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-12 11:20:42.898451",
+ "modified": "2026-10-19 13:54:19.958136",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",

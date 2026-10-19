@@ -113,7 +113,7 @@ def get_data(filters):
 		LEFT JOIN `tabDelivery Order Item` as doi ON doi.parent = do.name
 		LEFT JOIN `tabSales Invoice Item` as sii ON sii.parent = t.sales_invoice
 		LEFT JOIN `tabSupplier` as s ON s.name = t.transportir
-  	WHERE t.docstatus = 1 {conditions};
+  	WHERE t.docstatus = 1 AND t.nama_barang IN ('PALM KERNEL', 'CRUDE PALM OIL [CPO]') {conditions};
   """, filters, as_dict=True)
  
 	for row in query:
