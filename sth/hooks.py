@@ -354,7 +354,7 @@ doc_events = {
 	},
 	"Item": {
 		# "validate": ["sth.procurement_sth.custom.item.check_persetujuan","sth.overrides.item.validate_item_name","sth.overrides.item.cek_status"],
-		"validate": ["sth.overrides.item.validate_item_name","sth.controllers.persetujuan_ulang.kembali_ke_persetujuan_1","sth.overrides.item.cek_status"],
+		"validate": ["sth.overrides.item.validate_item_name","sth.controllers.persetujuan_ulang.kembali_ke_persetujuan_1","sth.controllers.persetujuan_ulang.tetap_aktif_selama_revisi","sth.overrides.item.cek_status"],
 		"after_insert": "sth.procurement_sth.custom.item.cek_status_awal"
 	},
 	# "Item Group": {
@@ -482,7 +482,7 @@ doc_events = {
 		"on_cancel": "sth.mill.gudang_transit.batalkan_pengeluaran_transit",
 	},
 	"Supplier": {
-		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening","sth.controllers.persetujuan_ulang.kembali_ke_persetujuan_1"],
+		"validate": ["sth.overrides.supplier.cek_upload","sth.overrides.supplier.validate_ktp_name","sth.overrides.supplier.validate_supplier_name","sth.overrides.supplier.validate_sppkp_name","sth.overrides.supplier.non_aktifkan_table","sth.overrides.supplier.validate_no_rekening","sth.controllers.persetujuan_ulang.kembali_ke_persetujuan_1","sth.controllers.persetujuan_ulang.tetap_aktif_selama_revisi"],
 		"before_save": ["sth.overrides.supplier.update_supplier_email","sth.overrides.supplier.update_supplier_contact"],
 	},
 	"Stock Reconciliation": {
