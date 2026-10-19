@@ -598,7 +598,8 @@ def set_no_rekening(doc, method):
 		paid_to=doc.paid_to,
 		tipe_transfer=doc.tipe_transfer,
 		permintaan_dana_operasional=doc.permintaan_dana_operasional,
-		payment_type=doc.payment_type
+		payment_type=doc.payment_type,
+		no_payroll_entry=doc.get("no_payroll_entry")
 	)
 
 	doc.no_rekening = None
@@ -691,7 +692,8 @@ def set_no_rekening(doc, method):
 @frappe.whitelist()
 def get_no_rekening(party_type=None, party=None, 
 					paid_to=None, tipe_transfer=None, 
-					permintaan_dana_operasional=None, payment_type=None):
+					permintaan_dana_operasional=None, payment_type=None,
+					no_payroll_entry=None):
 
 	result = {
 		"no_rekening": None,
@@ -699,6 +701,16 @@ def get_no_rekening(party_type=None, party=None,
 		"no_rekening_tujuan": None,
 		"bank_tujuan": None
 	}
+
+	from sth.overrides.payroll_entry import rekening_unit_payroll
+
+	rekening_payroll = None
+	if (
+		payment_type == "Internal Transfer"
+		and tipe_transfer == "Payroll Entry"
+		and no_payroll_entry
+	):
+		rekening_payroll = rekening_unit_payroll(no_payroll_entry)
 
 	if (
 		payment_type == "Internal Transfer"
@@ -738,6 +750,17 @@ def get_no_rekening(party_type=None, party=None,
 					result["bank_tujuan"] = (
 						bank_account.bank
 					)
+
+	elif rekening_payroll:
+
+		# gaji unit dibayar dari rekening TJHO ke rekening unit payroll-nya
+		result["no_rekening_tujuan"] = (
+			rekening_payroll.bank_account_no
+		)
+
+		result["bank_tujuan"] = (
+			rekening_payroll.bank
+		)
 
 	elif paid_to:
 

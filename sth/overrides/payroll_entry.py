@@ -284,8 +284,22 @@ class PayrollEntry(PayrollEntry):
 			"Account", self.payroll_payable_account, "account_currency"
 		) or frappe.get_cached_value("Company", self.company, "default_currency")
 
+		# Gaji unit TML dibayar dari rekening TJHO; paid_from-nya akun bank unit itu,
+		# sama seperti waktu unit diisi manual di Payment Entry. Rekening tujuannya
+		# diisi set_no_rekening dari rekening unit payroll (rekening_unit_payroll).
+		unit = unit_pembayar_payroll(self.company, self.unit) or self.unit
+		pembayaran_unit_lain = {}
+		if unit != self.unit:
+			paid_from = frappe.db.get_value("Unit", unit, "bank_account")
+			if paid_from:
+				pembayaran_unit_lain = {
+					"paid_from": paid_from,
+					"paid_from_account_currency": frappe.db.get_value("Account", paid_from, "account_currency"),
+				}
+
 		# ← Tidak insert, cukup return data
 		return {
+			**pembayaran_unit_lain,
 			"payment_type":              "Internal Transfer",
 			"company":                   self.company,
 			"posting_date":              frappe.utils.today(),
@@ -296,7 +310,7 @@ class PayrollEntry(PayrollEntry):
 			"no_payroll_entry":          self.name,
 			"cost_center":               self.cost_center or None,
 			"tipe_transfer":		     "Payroll Entry",
-			"unit":						 self.unit,
+			"unit":						 unit,
 			"remarks":                   "Payment untuk Payroll Entry: {0}".format(self.name),
 		}
 	
@@ -766,6 +780,40 @@ class PayrollEntry(PayrollEntry):
 
 		return ss_list
 
+# Unit kantor pusat yang mentransfer gaji ke rekening unit-unit TML.
+UNIT_PEMBAYAR_PAYROLL = "TJHO"
+
+def unit_pembayar_payroll(company, unit):
+	"""Unit yang membayar gaji Payroll Entry, kalau bukan unit itu sendiri.
+
+	Cuma untuk company milik TJHO (TML): gaji unitnya ditransfer dari rekening
+	TJHO ke rekening unit. Company lain, dan payroll TJHO sendiri, membayar dari
+	unit Payroll Entry-nya seperti biasa, dan di situ hasilnya None.
+	"""
+	if unit == UNIT_PEMBAYAR_PAYROLL:
+		return None
+
+	if frappe.db.get_value("Unit", UNIT_PEMBAYAR_PAYROLL, "company") != company:
+		return None
+
+	return UNIT_PEMBAYAR_PAYROLL
+
+def rekening_unit_payroll(payroll_entry):
+	"""Rekening tujuan transfer gaji: Bank Account default unit Payroll Entry.
+
+	Cuma ada kalau gajinya dibayar unit lain (unit_pembayar_payroll); dipakai
+	get_no_rekening untuk beneficary_account dan beneficary_bank Payment Entry.
+	"""
+	data = frappe.db.get_value("Payroll Entry", payroll_entry, ["company", "unit"], as_dict=True)
+	if not data or not unit_pembayar_payroll(data.company, data.unit):
+		return None
+
+	bank_account = frappe.db.get_value("Unit", data.unit, "default_bank_account")
+	if not bank_account:
+		return None
+
+	return frappe.db.get_value("Bank Account", bank_account, ["bank_account_no", "bank"], as_dict=True)
+
 def tipe_akun_party(accounts):
 	"""Akun yang tidak boleh dijurnal tanpa party, beserta tipenya.
 
@@ -1177,7 +1225,7 @@ def get_payroll_entry_for_payment(payroll_entry):
 		"paid_amount"             : total_amount,
 		"received_amount"         : total_amount,
 		"cost_center"             : doc.cost_center or "",
-		"unit"					  : doc.unit,
+		"unit"					  : unit_pembayar_payroll(doc.company, doc.unit) or doc.unit,
 		"remarks"                 : "Payment untuk Payroll Entry: {0}".format(payroll_entry),
 	}
 

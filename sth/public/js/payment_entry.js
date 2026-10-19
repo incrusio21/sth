@@ -338,6 +338,11 @@ frappe.ui.form.on("Payment Entry", {
 				}
 
 				frm.set_value("tipe_transfer", "Payroll Entry");
+
+				// TJHO untuk payroll TML; handler unit mengisi paid_from-nya
+				if (d.unit) {
+					frm.set_value("unit", d.unit);
+				}
 				frm.clear_table("rincian_payroll");
 				frm.refresh_field("rincian_payroll");
 				sth.pembayaran_payroll.pilih_tagihan(frm);
@@ -614,6 +619,14 @@ frappe.ui.form.on("Payment Entry", {
 			frm.add_custom_button(__("Lihat Dokumen Terkait"), () => {
 				sth.pembayaran_payroll.lihat_dokumen(frm.doc.no_payroll_entry, frm.doc.rincian_payroll);
 			}, __("Payroll"));
+		}
+
+		// Unit-nya (TJHO untuk payroll TML) datang sebagai isian awal, jadi
+		// handler unit tidak jalan sendiri; jalankan sekali seperti diisi manual,
+		// supaya Bank Account dan paid_from-nya ikut unit itu.
+		if (frm.is_new() && frm.doc.unit && !frm.__unit_payroll_dipasang) {
+			frm.__unit_payroll_dipasang = true;
+			frm.trigger("unit");
 		}
 
 		// Dokumen baru dari tombol Buat Payment Voucher di Payroll Entry datang
@@ -962,7 +975,8 @@ function set_no_rekening(frm) {
 			paid_to: paid_to,
 			tipe_transfer: frm.doc.tipe_transfer,
 			permintaan_dana_operasional: frm.doc.permintaan_dana_operasional,
-			payment_type: frm.doc.payment_type
+			payment_type: frm.doc.payment_type,
+			no_payroll_entry: frm.doc.no_payroll_entry
 		},
 		callback: function (r) {
 			if (r.message) {
@@ -1199,7 +1213,11 @@ async function set_ft_service(frm) {
 				party: frm.doc.party,
 				paid_to: frm.doc.payment_type === "Internal Transfer"
 					? frm.doc.paid_to
-					: null
+					: null,
+				// transfer gaji TJHO: bank tujuannya bank rekening unit payroll
+				payment_type: frm.doc.payment_type,
+				tipe_transfer: frm.doc.tipe_transfer,
+				no_payroll_entry: frm.doc.no_payroll_entry
 			}
 		});
 
