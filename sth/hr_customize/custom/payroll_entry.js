@@ -279,6 +279,8 @@ frappe.ui.form.on("Payroll Entry", {
 		// Queued, pernah Failed, atau sebagian slipnya sudah jadi.
 		const jumlah = (frm.doc.__onload && frm.doc.__onload.jumlah_slip) || {};
 		const pernah_jalan = ["Queued", "Failed"].includes(frm.doc.status);
+		// dibaca sebelum set_value status di bawah menimpanya di form
+		const gagal = frm.doc.status === "Failed";
 
 		if (
 			frm.doc.salary_slips_submitted ||
@@ -288,11 +290,16 @@ frappe.ui.form.on("Payroll Entry", {
 			// frm.events.add_bank_entry_button(frm);
 
 			// slip yang disubmit dari list atau form Salary Slip tidak memposting
-			// accrual-nya; tombol ini menyusulkannya
-			if (frm.doc.__onload && frm.doc.__onload.ada_gl_accrual === false) {
-				frm.add_custom_button(__("Posting GL Accrual"), function () {
-					posting_gl_accrual(frm);
-				}).addClass("btn-primary");
+			// accrual-nya, dan Payroll Entry yang pernah Failed tetap Failed;
+			// tombol ini menyusulkan accrual-nya dan membersihkan statusnya
+			const tanpa_gl = frm.doc.__onload && frm.doc.__onload.ada_gl_accrual === false;
+			if (tanpa_gl || gagal) {
+				frm.add_custom_button(
+					tanpa_gl ? __("Posting GL Accrual") : __("Tuntaskan Submit Salary Slip"),
+					function () {
+						posting_gl_accrual(frm, tanpa_gl);
+					}
+				).addClass("btn-primary");
 			}
 
 
@@ -590,9 +597,11 @@ const submit_salary_slips = function (frm) {
 	);
 };
 
-const posting_gl_accrual = function (frm) {
+const posting_gl_accrual = function (frm, tanpa_gl) {
 	frappe.confirm(
-		__("Semua Salary Slip sudah tersubmit tapi GL accrual-nya belum ada. Posting GL accrual sekarang?"),
+		tanpa_gl
+			? __("Semua Salary Slip sudah tersubmit tapi GL accrual-nya belum ada. Posting GL accrual sekarang?")
+			: __("Semua Salary Slip sudah tersubmit dan GL accrual-nya sudah ada. Tandai Payroll Entry ini selesai?"),
 		function () {
 			frappe.call({
 				method: "posting_gl_accrual",

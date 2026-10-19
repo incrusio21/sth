@@ -16,6 +16,7 @@ from frappe.utils import (
 	getdate,
 )
 from frappe.query_builder.functions import Coalesce, Count
+from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.general_ledger import (
 	make_gl_entries as post_gl_entries,
@@ -225,6 +226,7 @@ class PayrollEntry(PayrollEntry):
 				error_msg += "<br>" + _("End date: {0}").format(frappe.bold(self.end_date))
 			if self.unit:
 				error_msg += "<br>" + _("Unit: {0}").format(frappe.bold(self.unit))
+			error_msg += "<br><br>" + _("Hanya karyawan yang punya Attendance submit di periode ini yang diambil.")
 			frappe.throw(error_msg, title=_("No employees found"))
 
 		self.set("employees", employees)
@@ -599,10 +601,11 @@ class PayrollEntry(PayrollEntry):
 		salary_slips = self.get_sal_slip_list_draft(ss_status=0)
 
 		if not salary_slips:
-			# Semua slip sudah tersubmit, tapi accrual-nya bisa saja belum jadi
-			# karena gagal di percobaan sebelumnya. Tombol yang sama menyusulkannya.
-			if not self.posting_accrual_kalau_belum():
-				frappe.msgprint(_("No draft Salary Slips found"))
+			# Semua slip sudah tersubmit - di percobaan sebelumnya, atau manual dari
+			# Salary Slip sesudah sebagian ditolak - tapi accrual-nya bisa saja
+			# belum jadi, dan statusnya masih Failed. Tombol yang sama menuntaskannya.
+			if not self.tuntaskan_accrual():
+				frappe.msgprint(_("Semua Salary Slip sudah tersubmit dan GL accrual-nya sudah ada."))
 			return
 
 		# Accrual diposting di ujung submit_salary_slips_no_jv, sesudah semua slip
@@ -696,6 +699,25 @@ class PayrollEntry(PayrollEntry):
 		self.make_payroll_gl_entries()
 		return True
 
+	def tuntaskan_accrual(self):
+		"""Posting accrual kalau belum, lalu tandai submit slipnya tuntas.
+
+		Status dan Error Message ikut dibersihkan: selama statusnya Failed dengan
+		Error Message, form hrms terus menampilkan "Salary Slip submission failed"
+		dan tombol Resume Submit, walaupun accrual-nya sudah jadi.
+
+		Dipulangkan True kalau GL-nya baru diposting di sini.
+		"""
+		diposting = self.posting_accrual_kalau_belum()
+
+		self.db_set({
+			"salary_slips_submitted": 1,
+			"status": "Submitted",
+			"error_message": "",
+		})
+
+		return diposting
+
 	@frappe.whitelist()
 	def posting_gl_accrual(self):
 		"""Susulkan accrual gaji untuk slip yang disubmit di luar Payroll Entry.
@@ -720,15 +742,8 @@ class PayrollEntry(PayrollEntry):
 				  "accrual-nya diposting sesudah semua slip tersubmit.")
 			)
 
-		if not self.posting_accrual_kalau_belum():
-			frappe.msgprint(_("GL accrual Payroll Entry ini sudah ada."))
-			return
-
-		self.db_set({
-			"salary_slips_submitted": 1,
-			"status": "Submitted",
-			"error_message": "",
-		})
+		if not self.tuntaskan_accrual():
+			frappe.msgprint(_("GL accrual Payroll Entry ini sudah ada; statusnya ditandai selesai."))
 
 	def get_sal_slip_list_draft(self, ss_status, as_dict=False):
 		"""
@@ -831,13 +846,7 @@ def submit_salary_slips_no_jv(payroll_entry, salary_slips, publish_progress=True
 			)
 			return
 
-		payroll_entry.posting_accrual_kalau_belum()
-
-		payroll_entry.db_set({
-			"salary_slips_submitted": 1,
-			"status": "Submitted",
-			"error_message": ""
-		})
+		payroll_entry.tuntaskan_accrual()
 
 		frappe.msgprint(_("Salary Slips submitted: {0}").format(len(submitted)))
 
@@ -906,9 +915,23 @@ def get_filtered_employees_custom(
 
 	SalaryStructureAssignment = frappe.qb.DocType("Salary Structure Assignment")
 	Employee = frappe.qb.DocType("Employee")
+	Attendance = frappe.qb.DocType("Attendance")
+
+	# Karyawan tanpa satu pun Attendance submit di periode ini tidak digaji
+	# lewat Payroll Entry ini, apa pun tipe salary-nya.
+	ada_attendance = (
+		frappe.qb.from_(Attendance)
+		.select(Attendance.name)
+		.where(
+			(Attendance.employee == Employee.name)
+			& (Attendance.docstatus == 1)
+			& (Attendance.attendance_date.between(filters.start_date, filters.end_date))
+		)
+	)
 
 	conditions = (
-		(SalaryStructureAssignment.docstatus == 1)
+		ExistsCriterion(ada_attendance)
+		& (SalaryStructureAssignment.docstatus == 1)
 		& (Employee.company == filters.company)
 		& (Employee.unit == filters.unit)
 		& ((Employee.date_of_joining <= filters.end_date) | (Employee.date_of_joining.isnull()))
