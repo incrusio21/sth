@@ -287,6 +287,14 @@ frappe.ui.form.on("Payroll Entry", {
 			frm.set_value("status", "Submitted")
 			// frm.events.add_bank_entry_button(frm);
 
+			// slip yang disubmit dari list atau form Salary Slip tidak memposting
+			// accrual-nya; tombol ini menyusulkannya
+			if (frm.doc.__onload && frm.doc.__onload.ada_gl_accrual === false) {
+				frm.add_custom_button(__("Posting GL Accrual"), function () {
+					posting_gl_accrual(frm);
+				}).addClass("btn-primary");
+			}
+
 
 		} else if (frm.doc.salary_slips_created) {
 			const resume = pernah_jalan || cint(jumlah.submit) > 0;
@@ -578,6 +586,23 @@ const submit_salary_slips = function (frm) {
 			if (frappe.dom.freeze_count) {
 				frappe.dom.unfreeze();
 			}
+		},
+	);
+};
+
+const posting_gl_accrual = function (frm) {
+	frappe.confirm(
+		__("Semua Salary Slip sudah tersubmit tapi GL accrual-nya belum ada. Posting GL accrual sekarang?"),
+		function () {
+			frappe.call({
+				method: "posting_gl_accrual",
+				doc: frm.doc,
+				freeze: true,
+				freeze_message: __("Memposting GL Accrual..."),
+				callback: function () {
+					frm.reload_doc();
+				},
+			});
 		},
 	);
 };

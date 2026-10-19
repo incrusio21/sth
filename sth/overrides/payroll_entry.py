@@ -44,6 +44,19 @@ class PayrollEntry(PayrollEntry):
 				"karyawan": len(self.employees),
 			})
 
+		# Tombol Posting GL Accrual muncul kalau semua slip sudah submit tapi
+		# accrual-nya belum ada.
+		if self.docstatus == 1:
+			self.set_onload("ada_gl_accrual", self.ada_gl_accrual())
+
+	def ada_gl_accrual(self):
+		"""Apakah accrual gaji dokumen ini sudah diposting (dan belum dibalik)."""
+		return bool(frappe.db.exists("GL Entry", {
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"is_cancelled": 0,
+		}))
+
 	def on_cancel(self):
 		self.batalkan_gl_payroll()
 		super().on_cancel()
@@ -70,13 +83,7 @@ class PayrollEntry(PayrollEntry):
 		Payroll Entry-nya dibatalkan, dan dokumennya juga tidak bisa dihapus karena
 		GL-nya masih menautinya.
 		"""
-		ada_gl = frappe.db.exists("GL Entry", {
-			"voucher_type": self.doctype,
-			"voucher_no": self.name,
-			"is_cancelled": 0,
-		})
-
-		if ada_gl:
+		if self.ada_gl_accrual():
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def on_trash(self):
@@ -683,15 +690,45 @@ class PayrollEntry(PayrollEntry):
 		gagal), dan tiap ulangan lewat sini. Tanpa penjaga ini, ulangan kedua
 		memposting accrual seluruh slip yang sudah submit untuk kedua kalinya.
 		"""
-		if frappe.db.exists("GL Entry", {
-			"voucher_type": self.doctype,
-			"voucher_no": self.name,
-			"is_cancelled": 0,
-		}):
+		if self.ada_gl_accrual():
 			return False
 
 		self.make_payroll_gl_entries()
 		return True
+
+	@frappe.whitelist()
+	def posting_gl_accrual(self):
+		"""Susulkan accrual gaji untuk slip yang disubmit di luar Payroll Entry.
+
+		Accrual cuma diposting di ujung submit_salary_slips_no_jv. Slip yang
+		disubmit dari list atau form Salary Slip tidak lewat situ, dan begitu
+		semuanya tersubmit form menyembunyikan tombol Submit Salary Slip (hrms
+		menandainya submitted_ss) - dokumennya tampak beres, GL-nya kosong, dan
+		tidak ada tombol untuk menyusulkannya. Tombol Posting GL Accrual memanggil ini.
+		"""
+		self.check_permission("write")
+		self.tolak_kalau_job_slip_berjalan()
+
+		if self.docstatus != 1:
+			frappe.throw(_("Payroll Entry harus sudah di-Submit"))
+
+		# accrual sebagian lalu disusul accrual sisanya tidak bisa dibedakan dari
+		# accrual ganda, jadi sama seperti submit_salary_slips_no_jv: tunggu semua slip
+		if self.get_sal_slip_list_draft(ss_status=0):
+			frappe.throw(
+				_("Masih ada Salary Slip draft di Payroll Entry ini. Pakai tombol Submit Salary Slip; "
+				  "accrual-nya diposting sesudah semua slip tersubmit.")
+			)
+
+		if not self.posting_accrual_kalau_belum():
+			frappe.msgprint(_("GL accrual Payroll Entry ini sudah ada."))
+			return
+
+		self.db_set({
+			"salary_slips_submitted": 1,
+			"status": "Submitted",
+			"error_message": "",
+		})
 
 	def get_sal_slip_list_draft(self, ss_status, as_dict=False):
 		"""
