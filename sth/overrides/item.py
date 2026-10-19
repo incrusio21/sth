@@ -8,7 +8,15 @@ class Item(Item):
 			self.name = self.generate_item_code()
 		else:
 			self.name = self.item_code
-	
+
+	def validate_workflow(self):
+		# Approved -> Butuh Persetujuan 1 dari persetujuan_ulang.kembali_ke_persetujuan_1
+		# bukan aksi workflow pengguna, jadi tidak perlu ada transisinya
+		if self.flags.kembali_ke_persetujuan_1:
+			return
+
+		super().validate_workflow()
+
 	def generate_item_code(self):
 		if not self.item_group:
 			frappe.throw("Item Group is required to generate Item Code")

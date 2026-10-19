@@ -2,6 +2,7 @@
 import frappe
 from erpnext.buying.doctype.supplier.supplier import Supplier
 from frappe import _
+from frappe.model.workflow import get_workflow
 
 class Supplier(Supplier):    
 	# begin: auto-generated types
@@ -54,6 +55,14 @@ class Supplier(Supplier):
 		warn_rfqs: DF.Check
 		website: DF.Data | None
 	# end: auto-generated types
+
+	def validate_workflow(self):
+		# Approved -> Butuh Persetujuan 1 dari persetujuan_ulang.kembali_ke_persetujuan_1
+		# bukan aksi workflow pengguna, jadi tidak perlu ada transisinya
+		if self.flags.kembali_ke_persetujuan_1:
+			return
+
+		super().validate_workflow()
 
 	def document_kriteria(self):
 		skip_sppkp = "Not SPPKP"
@@ -257,17 +266,39 @@ def validate_ktp_name(doc, method):
 
 
 def cek_upload(self, method):
-	if not self.is_new():
-		old_doc = self.get_doc_before_save()
-		old_state = old_doc.get("status_supplier") if old_doc else None
-		new_state = self.get("status_supplier")
+	"""Calon Supplier baru boleh jadi Supplier kalau semua dokumennya sudah diupload.
 
-		if "Calon Supplier" in old_state and old_state != new_state:
-			# cek upload
-			doc_upload = frappe.get_doc("Kriteria Upload Document",{"voucher_type":"Supplier","voucher_no":self.name})
-			for row in doc_upload.file_upload:
-				if not row.upload_file:
-					frappe.throw("Upload File harus lengkap untuk Calon Supplier menjadi Supplier.")
+	Dulu status_supplier sendiri state workflow-nya, jadi pemeriksaannya saat
+	status_supplier meninggalkan Calon Supplier. Sekarang state workflow-nya
+	workflow_state, jadi pemeriksaan juga jalan saat supplier yang masih Calon
+	Supplier masuk Approved.
+	"""
+	if self.is_new():
+		return
+
+	old_doc = self.get_doc_before_save()
+	if not old_doc:
+		return
+
+	old_status = old_doc.get("status_supplier")
+	jadi_supplier = old_status == "Calon Supplier" and self.get("status_supplier") != old_status
+
+	if not jadi_supplier and self.meta.get_workflow():
+		field_state = get_workflow(self.doctype).workflow_state_field
+		jadi_supplier = (
+			field_state != "status_supplier"
+			and self.get("status_supplier") == "Calon Supplier"
+			and old_doc.get(field_state) != "Approved"
+			and self.get(field_state) == "Approved"
+		)
+
+	if not jadi_supplier:
+		return
+
+	upload = frappe.db.get_value("Kriteria Upload Document", {"voucher_type": "Supplier", "voucher_no": self.name})
+	file_upload = frappe.get_doc("Kriteria Upload Document", upload).file_upload if upload else []
+	if any(not row.upload_file for row in file_upload):
+		frappe.throw("Upload File harus lengkap untuk Calon Supplier menjadi Supplier.")
 
 def non_aktifkan_table(doc,method):
 	aktif_rows = []

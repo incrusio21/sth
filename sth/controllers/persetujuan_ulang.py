@@ -20,9 +20,11 @@ def kembali_ke_persetujuan_1(doc, method=None):
 	tidak ikut diisi: data yang sedang direvisi tetap bisa dipakai sampai disetujui
 	lagi. Lihat tetap_aktif_selama_revisi untuk tahap persetujuan sesudahnya.
 
-	Perpindahan dari Approved ke Butuh Persetujuan 1 tetap diperiksa
-	validate_workflow sesudah ini, jadi workflow-nya harus punya transisi itu
-	untuk role penggunanya (di Item: Disable, role All).
+	Perpindahan dari Approved ke Butuh Persetujuan 1 ini bukan aksi workflow
+	pengguna, jadi workflow-nya tidak perlu punya transisi itu: dokumennya ditandai
+	flags.kembali_ke_persetujuan_1, dan validate_workflow di class Item dan
+	Supplier melewatkan pemeriksaan transisi untuk save itu. Tanpa itu workflow
+	Supplier, yang tidak punya transisi dari Approved, menolak setiap suntingan.
 
 	Save yang mengubah state-nya sendiri adalah aksi workflow, bukan suntingan
 	data, dan dibiarkan. Doctype yang workflow-nya tidak punya state Butuh
@@ -52,6 +54,7 @@ def kembali_ke_persetujuan_1(doc, method=None):
 		return
 
 	doc.set(field_state, STATE_PERSETUJUAN_1)
+	doc.flags.kembali_ke_persetujuan_1 = True
 
 	frappe.msgprint(
 		_("Data {0} yang sudah Approved berubah ({1}), jadi state-nya kembali ke {2}.").format(
