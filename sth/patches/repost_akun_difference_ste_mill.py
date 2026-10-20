@@ -224,29 +224,9 @@ def alasan_dilewati(nama_ste, rows):
 	"""
 	pertama = rows[0]
 
-	periode = frappe.db.sql("""
-		select ap.name
-		from `tabAccounting Period` ap
-		inner join `tabClosed Document` cd on cd.parent = ap.name
-		where ap.company = %(company)s and cd.closed = 1
-			and cd.document_type = 'Stock Entry'
-			and %(tanggal)s between ap.start_date and ap.end_date
-		limit 1
-	""", {"company": pertama.company, "tanggal": pertama.posting_date})
-	if periode:
-		return "periode ditutup Accounting Period {0}".format(periode[0][0])
-
-	beku = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
-	if beku and getdate(pertama.posting_date) <= getdate(beku):
-		return "akun dibekukan sampai {0}".format(beku)
-
-	pcv = frappe.db.get_value(
-		"Period Closing Voucher",
-		{"docstatus": 1, "company": pertama.company, "period_end_date": (">=", pertama.posting_date)},
-		"name",
-	)
-	if pcv:
-		return "sudah ada Period Closing Voucher {0}".format(pcv)
+	alasan = alasan_periode(pertama.company, pertama.posting_date)
+	if alasan:
+		return alasan
 
 	detail = tuple(row.detail for row in rows)
 	for row in rows:
@@ -267,6 +247,35 @@ def alasan_dilewati(nama_ste, rows):
 			return "baris {0} juga memakai {1}, GL-nya tidak bisa dipisah".format(
 				lain[0][0], row.expense_account
 			)
+
+
+def alasan_periode(company, posting_date):
+	"""Penjaga periode yang biasanya diperiksa make_gl_entries: Accounting
+	Period yang menutup Stock Entry, tanggal beku akun, dan Period Closing
+	Voucher. Memulangkan alasannya, atau None."""
+	periode = frappe.db.sql("""
+		select ap.name
+		from `tabAccounting Period` ap
+		inner join `tabClosed Document` cd on cd.parent = ap.name
+		where ap.company = %(company)s and cd.closed = 1
+			and cd.document_type = 'Stock Entry'
+			and %(tanggal)s between ap.start_date and ap.end_date
+		limit 1
+	""", {"company": company, "tanggal": posting_date})
+	if periode:
+		return "periode ditutup Accounting Period {0}".format(periode[0][0])
+
+	beku = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
+	if beku and getdate(posting_date) <= getdate(beku):
+		return "akun dibekukan sampai {0}".format(beku)
+
+	pcv = frappe.db.get_value(
+		"Period Closing Voucher",
+		{"docstatus": 1, "company": company, "period_end_date": (">=", posting_date)},
+		"name",
+	)
+	if pcv:
+		return "sudah ada Period Closing Voucher {0}".format(pcv)
 
 
 def ganti_langsung(nama_ste, rows):
