@@ -7,18 +7,25 @@ def create_po_draft(doc,method):
 
 def validate_duplicate_supplier(doc,method=None):
     material_requests = [ d.material_request for d in doc.items ]
-    if not material_requests: return
+    if not material_requests or doc.from_comparasion: return
 
     args = {
         "pr_sr": material_requests,
         "supplier": doc.supplier,
-        "name": doc.name
+        "name": doc.name,
+        "company": doc.company
     }
 
     exists = frappe.db.sql("""
         select sq.name from `tabSupplier Quotation` sq
         join `tabSupplier Quotation Item` sqi on sq.name = sqi.parent
-        where sqi.material_request in %(pr_sr)s and sq.supplier = %(supplier)s and sq.name <> %(name)s and sq.docstatus = 0 and sq.from_comparasion = 0
+        where 
+            sqi.material_request in %(pr_sr)s 
+            and sq.supplier = %(supplier)s 
+            and sq.company = %(company)s
+            and sq.name <> %(name)s 
+            and sq.docstatus = 0 
+            and sq.from_comparasion = 0
         group by sq.name
     """,args,as_dict=True)
 
