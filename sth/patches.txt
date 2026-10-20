@@ -66,4 +66,8 @@ sth.patches.isi_akun_difference_produksi_mill
 # expense account item invoice-nya. Default-nya dry run; kalau expense account
 # invoicenya ikut akun stock in transit, paksa akun HPP lewat --kwargs
 # "{'akun': ..., 'dry_run': 0}".
+# isi_kriteria_upload_payment_rantai_bapp juga tidak didaftarkan: membangun
+# ulang Kriteria Upload Payment PV lama supaya berkas Proposal, SPK dan BAPP
+# ikut. Default-nya dry run; tulis dengan --kwargs "{'dry_run': 0}". Jalankan
+# sesudah commit da0a5755.
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
