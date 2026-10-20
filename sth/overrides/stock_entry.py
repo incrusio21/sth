@@ -5,6 +5,11 @@ import frappe
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
+from sth.accounting_sth.doctype.sth_accounting_settings.sth_accounting_settings import (
+    KOLOM_AKUN_PERSEDIAAN,
+    get_akun_persediaan,
+)
+
 class StockEntry(StockEntry):
     def calculate_rate_and_amount(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
         self.set_basic_rate(reset_outgoing_rate, False)
@@ -61,7 +66,22 @@ class StockEntry(StockEntry):
 
                         wh_account = ""
 
-                        if sle.get("item_code"):
+                        # Item TBS, CPO dan PK: akun persediaan dari tabel COGS
+                        # STH Accounting Settings, bukan Kelompok Barang.
+                        tipe_barang = sle.get("item_code") and frappe.get_cached_value(
+                            "Item", sle.item_code, "tipe_barang"
+                        )
+                        if tipe_barang in KOLOM_AKUN_PERSEDIAAN:
+                            wh_account = get_akun_persediaan(self.company, tipe_barang)
+                            if not wh_account:
+                                frappe.throw(
+                                    _(
+                                        "Akun Persediaan {0} untuk Company <b>{1}</b> belum diatur. "
+                                        "Harap isi tabel COGS di STH Accounting Settings."
+                                    ).format(tipe_barang, self.company)
+                                )
+
+                        elif sle.get("item_code"):
                             check_sth_ss = 0
                             st_setting = frappe.get_single("STH Stock Settings")
                             for st_row in st_setting.sth_stock_settings_persediaan_account:

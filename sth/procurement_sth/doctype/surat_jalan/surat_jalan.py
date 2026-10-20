@@ -275,3 +275,63 @@ def map_from_po(source_name, target_doc=None, args=None):
 	)
 
 	return doclist
+
+
+@frappe.whitelist()
+def map_from_ppb(source_name, target_doc=None, args=None):
+    args = frappe.parse_json(args) if isinstance(args, str) else (args or {})
+    filtered_items = args.get("filtered_children", [])
+
+    def select_item(source):
+        # no rows ticked in the dialog = take all rows of the PPB
+        return (not filtered_items) or source.name in filtered_items
+
+    def update_item(source, target, source_parent):
+        target.no_purchase_request = source_parent.name
+        target.jenis = "Permintaan Pengeluaran Barang"
+        target.nama_barang = (
+            frappe.db.get_value("Item", source.kode_barang, "item_name")
+            or source.kode_barang
+        )
+
+    def update_parent(source, target):
+        # don't inherit the PPB numbering series, status or amendment link
+        target.naming_series = "SJ-.DD.MM.YY.-.####"
+        target.status = "Draft"
+        target.amended_from = None
+        if source.nama_karyawan:
+            user_id = frappe.db.get_value("Employee", source.nama_karyawan, "user_id")
+            if user_id:
+                target.user = user_id
+
+    return get_mapped_doc(
+        "Permintaan Pengeluaran Barang",
+        source_name,
+        {
+            "Permintaan Pengeluaran Barang": {
+                "doctype": "Surat Jalan",
+                "field_map": {
+                    "pt_pemilik_barang": "company",
+                    "gudang": "gudang_asal",
+                    "gudang_tujuan": "gudang_tujuan",
+                    "nama_karyawan": "diterima_oleh",
+                    "no_induk_karyawan": "no_induk_karyawan",
+                    "unit": "unit",
+                    "catatan": "catatan",
+                },
+            },
+            "Permintaan Pengeluaran Barang Item": {
+                "doctype": "Surat Jalan Item",
+                "field_map": {
+                    "kode_barang": "kode_barang",
+                    "jumlah": "jumlah",
+                    "satuan": "satuan",
+                    "jumlah_saat_ini": "jumlah_saat_ini",
+                },
+                "condition": select_item,
+                "postprocess": update_item,
+            },
+        },
+        target_doc,
+        postprocess=update_parent,
+    )

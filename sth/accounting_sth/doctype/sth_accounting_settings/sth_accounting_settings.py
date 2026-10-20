@@ -12,6 +12,13 @@ KOLOM_AKUN_DIFFERENCE = {
 	"Palm Kernel": "akun_difference_pk",
 }
 
+# Kolom akun persediaan per tipe_barang di tabel COGS.
+KOLOM_AKUN_PERSEDIAAN = {
+	"TBS": "akun_persediaan_tbs",
+	"CPO": "akun_persediaan_cpo",
+	"Palm Kernel": "akun_persediaan_pk",
+}
+
 
 class STHAccountingSettings(Document):
 	def validate(self):
@@ -46,6 +53,23 @@ def get_akun_difference(company, tipe_barang):
 		"STH Accounting Settings Akun Difference",
 		{"parent": "STH Accounting Settings", "company": company},
 		KOLOM_AKUN_DIFFERENCE[tipe_barang],
+	)
+
+
+def get_akun_persediaan(company, tipe_barang):
+	"""Akun persediaan Item TBS, CPO atau Palm Kernel untuk company ini, dari
+	tabel COGS. Akun yang sama dibaca COGS Mill dan Kebun sebagai saldo GL
+	persediaan, jadi jurnal stok produk ini harus mendarat di sini.
+
+	None kalau tipe_barang bukan ketiganya atau akunnya belum diatur.
+	"""
+	kolom = KOLOM_AKUN_PERSEDIAAN.get(tipe_barang)
+	if not kolom:
+		return None
+	return frappe.db.get_value(
+		"STH Accounting Settings COGS",
+		{"parent": "STH Accounting Settings", "company": company},
+		kolom,
 	)
 
 
