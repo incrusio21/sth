@@ -245,13 +245,13 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			return
 		
 		# cek apakah terdapat future pemakaian kendaraan
-		# if not cancel and (future_bkm := frappe.get_value(
-		# 	"Buku Kerja Mandor Traksi",
-		# 	{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]},
-		# 	"name",
-		# 	order_by="posting_datetime"
-		# )):
-		# 	frappe.throw(f"Document cannot be Submitted because Document {future_bkm} with a future date and time already exists.")
+		if not cancel and (future_bkm := frappe.get_value(
+			"Buku Kerja Mandor Traksi",
+			{"kendaraan": self.kendaraan, "docstatus": 1, "posting_datetime": [">", get_datetime(self.posting_datetime)]},
+			"name",
+			order_by="posting_datetime"
+		)):
+			frappe.throw(f"Document cannot be Submitted because Document {future_bkm} with a future date and time already exists.")
 
 		from sth.plantation.doctype.alat_berat_dan_kendaraan.alat_berat_dan_kendaraan import sync_kmhm_akhir
 
