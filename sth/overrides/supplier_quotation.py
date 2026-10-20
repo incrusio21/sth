@@ -66,12 +66,11 @@ class STHSupplierQuotation(SupplierQuotation):
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		data_type = frappe.db.get_value("Material Request",source.custom_material_request,["purchase_type","sub_purchase_type"],as_dict=True)
+		sub_purchase_type = frappe.db.get_value("Material Request",source.custom_material_request,["sub_purchase_type"],pluck="sub_purchase_type")
 
-		if getattr(data_type,"purchase_type",None) == "Berita Acara":
-			target.purchase_type = "Non Capex"
-			target.sub_purchase_type = data_type.sub_purchase_type
-			target.set_warehouse = frappe.db.get_value("Warehouse",{"company": target.company, "unit": target.unit, "central": 1})
+		target.purchase_type = "Capex" if target.items[0].is_fixed_asset else "Non Capex"
+		target.sub_purchase_type = sub_purchase_type
+		target.set_warehouse = frappe.db.get_value("Warehouse",{"company": target.company, "unit": target.unit, "central": 1})
 		
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
