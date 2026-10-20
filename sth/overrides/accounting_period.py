@@ -146,6 +146,7 @@ class SthAccountingPeriod(AccountingPeriod):
 			})
 
 	def on_submit(self):
+		naikkan_blok_tbm_on_submit(self)
 		post_bkm_on_submit(self)
 		create_costing_on_submit(self)
 
@@ -236,6 +237,76 @@ def throw_bkm_gagal(gagal, title, intro):
 			</table>
 		""".format(intro=intro, rows=rows)
 	)
+
+
+def blok_tbm_dengan_bkm_tm(doc):
+	"""Blok yang masih TBM padahal di periode ini sudah dikerjakan sebagai TM.
+
+	Yang dihitung TM: blok di hasil kerja BKM Panen, dan blok BKM Perawatan
+	berkategori TM. Keduanya menjurnal ke Cost Center Blok (nama = Deskripsi
+	Blok), dan selama bloknya belum naik TM cost center itu bukan yang benar
+	sehingga posting BKM-nya gagal.
+	"""
+	filters = filter_bkm_periode(doc)
+
+	bloks = set(frappe.get_all(
+		"Buku Kerja Mandor Perawatan",
+		filters={**filters, "kategori_kegiatan": "TM", "blok": ["is", "set"]},
+		pluck="blok",
+	))
+
+	panen = frappe.get_all("Buku Kerja Mandor Panen", filters=filters, pluck="name")
+	if panen:
+		bloks.update(frappe.get_all(
+			"Detail BKM Hasil Kerja Panen",
+			filters={"parenttype": "Buku Kerja Mandor Panen", "parent": ["in", panen], "blok": ["is", "set"]},
+			pluck="blok",
+		))
+
+	if not bloks:
+		return []
+
+	return frappe.get_all(
+		"Blok",
+		filters={"name": ["in", list(bloks)], "workflow_state": "TBM"},
+		fields=["name", "blok", "tahun_tanam", "unit"],
+		order_by="tahun_tanam asc, unit asc, name asc",
+	)
+
+
+def naikkan_blok_tbm_on_submit(doc, method=None):
+	"""Naikkan dulu Blok TBM yang di periode ini sudah dipanen atau dirawat TM.
+
+	Harus sebelum post_bkm_on_submit: naik TM yang membuat Cost Center Blok dan
+	mengarahkan Blok ke sana, dan GL Entry BKM-nya butuh cost center itu.
+
+	Satu JE "Naik TM" per kelompok tahun tanam + unit, sama dengan tombol Naik TM
+	di Blok kalau beberapa Blok dipilih sekaligus, bertanggal hari ini. Tidak
+	commit sendiri: kalau submit-nya gagal di belakang, naik TM-nya ikut batal.
+	Membatalkan Accounting Period tidak menurunkannya lagi ke TBM.
+	"""
+	if doc.get("workflow_state") != "Submitted":
+		return
+
+	from sth.plantation.doctype.blok.blok import naikkan_ke_tm
+
+	kelompok = {}
+	for b in blok_tbm_dengan_bkm_tm(doc):
+		kelompok.setdefault((b.tahun_tanam, b.unit), []).append(b)
+
+	for (tahun_tanam, unit), bloks in kelompok.items():
+		nama = [b.name for b in bloks]
+		try:
+			naikkan_ke_tm(nama[0], nama, commit=False)
+		except frappe.ValidationError as e:
+			frappe.throw(
+				title=_("Blok Gagal Dinaikkan ke TM"),
+				msg=_(
+					"Accounting Period tidak dapat disubmit. Blok TBM berikut sudah dipanen atau "
+					"dirawat sebagai TM di periode ini dan harus naik TM dulu (Tahun Tanam {0}, "
+					"Unit {1}): {2}<br><br>{3}"
+				).format(tahun_tanam, unit, ", ".join(b.blok or b.name for b in bloks), e),
+			)
 
 
 def post_bkm_on_submit(doc, method=None):

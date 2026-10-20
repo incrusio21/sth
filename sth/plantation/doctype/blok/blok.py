@@ -125,6 +125,10 @@ class Blok(Document):
 def _ensure_tahun_tanam_cost_center(company, tahun_tanam):
 	"""Pastikan Cost Center Tahun Tanam ada, lalu kembalikan namanya.
 
+	Tidak commit sendiri, sama seperti pastikan_induk: naikkan_ke_tm memanggilnya
+	dari tengah submit Accounting Period, dan commit di sini ikut menyimpan
+	periodenya walaupun sisa submit-nya gagal.
+
 	Grup induknya ikut dipastikan lewat pastikan_induk: di company yang baru
 	mulai dipakai grup itu belum ada, dan tanpa ini Blok pertamanya gagal disimpan
 	dengan pesan link tidak ketemu yang tidak menyebut grup mana yang kurang.
@@ -145,7 +149,6 @@ def _ensure_tahun_tanam_cost_center(company, tahun_tanam):
 	cc.is_group = 0
 	cc.flags.ignore_permissions = True
 	cc.insert()
-	frappe.db.commit()
 
 	return cc.name
 
@@ -171,7 +174,6 @@ def _ensure_blok_cost_center(company, deskripsi):
 	blok_cc.is_group = 0
 	blok_cc.flags.ignore_permissions = True
 	blok_cc.insert()
-	frappe.db.commit()
 
 	return blok_cc.name
 
@@ -322,7 +324,12 @@ def preview_naikkan_ke_tm(blok_name, selected_bloks):
 
 
 @frappe.whitelist()
-def naikkan_ke_tm(blok_name, selected_bloks):
+def naikkan_ke_tm(blok_name, selected_bloks, commit=True):
+	"""Naikkan Blok terpilih ke TM dan kapitalisasi biaya TBM-nya lewat JE.
+
+	commit=False dipakai Accounting Period, yang memanggilnya dari tengah submit:
+	transaksinya milik submit itu, dan ikut batal kalau submit-nya gagal.
+	"""
 	blok = frappe.get_doc("Blok", blok_name)
 	selected_bloks = _parse_list(selected_bloks)
 
@@ -408,7 +415,8 @@ def naikkan_ke_tm(blok_name, selected_bloks):
 			"status": "TM",
 		}, update_modified=False)
 
-	frappe.db.commit()
+	if commit:
+		frappe.db.commit()
 
 	return {
 		"blok_diproses": len(selected),
