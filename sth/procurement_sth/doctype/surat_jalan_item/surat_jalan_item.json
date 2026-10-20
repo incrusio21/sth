@@ -23,7 +23,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Jenis",
-   "options": "Purchase Order\nMaterial"
+   "options": "Purchase Order\nMaterial\nPermintaan Pengeluaran Barang"
   },
   {
    "columns": 1,

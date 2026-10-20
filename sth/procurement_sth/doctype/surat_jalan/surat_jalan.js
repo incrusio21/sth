@@ -38,7 +38,14 @@ frappe.ui.form.on("Surat Jalan", {
         })
     },
 
+    onload(frm) {
+        if (frm.is_new() && !frm.doc.user) {
+            frm.set_value("user", frappe.session.user)
+        }
+    },
+
     refresh(frm) {
+        frm.trigger('show_item_names')
         if (frm.doc.docstatus == 0) {
             frm.add_custom_button("Purchase Order", function () {
                 frm.trigger('open_dialog_po')
@@ -46,6 +53,9 @@ frappe.ui.form.on("Surat Jalan", {
 
             frm.add_custom_button("Material", function () {
                 frm.trigger('open_dialog_material')
+            }, __("Get Items From"))
+            frm.add_custom_button("Permintaan Pengeluaran Barang", function () {
+                frm.trigger('open_dialog_permintaan_pengeluaran')
             }, __("Get Items From"))
         }
         if (frm.doc.docstatus === 1 && frm.doc.status === "Terkirim") {
@@ -93,6 +103,22 @@ frappe.ui.form.on("Surat Jalan", {
                 dialog.show();
             });
         }
+    },
+
+    show_item_names(frm) {
+        // show item name instead of item code in the kode_barang link column
+        if (!frappe._link_titles) frappe._link_titles = {}
+        let changed = false
+        ;(frm.doc.items || []).forEach((row) => {
+            if (row.kode_barang && row.nama_barang) {
+                const key = "Item::" + row.kode_barang
+                if (frappe._link_titles[key] !== row.nama_barang) {
+                    frappe._link_titles[key] = row.nama_barang
+                    changed = true
+                }
+            }
+        })
+        if (changed) frm.refresh_field("items")
     },
 
     open_dialog_material(frm) {
@@ -266,28 +292,25 @@ frappe.ui.form.on("Surat Jalan", {
     open_dialog_permintaan_pengeluaran(frm) {
         const base = frappe.model.get_server_module_name(frm.doctype)
         const d = erpnext.utils.map_current_doc({
-            method: base + ".map_from_po",
-            source_doctype: "Purchase Order",
+            method: base + ".map_from_ppb",
+            source_doctype: "Permintaan Pengeluaran Barang",
             target: frm,
             allow_child_item_selection: 1,
             child_fieldname: "items",
-            child_columns: ["item_code", "item_name", "qty", "uom"],
+            child_columns: ["kode_barang", "jumlah", "satuan"],
             size: "extra-large",
             setters: {
-                purchase_type: undefined,
+                pt_pemilik_barang: undefined,
                 unit: undefined,
-                transaction_date: undefined,
+                tanggal: undefined,
             },
             get_query_filters: {
                 docstatus: 1,
-                company: frm.doc.company,
             },
         }, (res) => {
             console.log(res);
         });
-
         setTimeout(() => {
-            // console.log(d.dialog);
             d.dialog.set_value("allow_child_item_selection", 1)
         }, 500);
     }
