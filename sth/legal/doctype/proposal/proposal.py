@@ -670,7 +670,7 @@ def update_progress_item(parent_doctype, trans_items, parent_doctype_name, child
 		parent.save()
 
 	parent.reload()
-	validate_workflow_conditions(parent)
+	# validate_workflow_conditions(parent)
 
 	# update percentase task
 	order_item, cond = [], ""   
