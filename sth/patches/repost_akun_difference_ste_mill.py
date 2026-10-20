@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
@@ -14,10 +14,9 @@ SUMBER = {
 }
 
 
-def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None):
+def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None, cara="langsung"):
 	"""Ganti akun difference Stock Entry Data TBS / Sounding CPO / Sounding PK
-	yang sudah disubmit ke akun di STH Accounting Settings, lalu posting ulang
-	GL-nya.
+	yang sudah disubmit ke akun di STH Accounting Settings, berikut GL-nya.
 
 	Stock Entry yang dibuat sebelum tabel Akun Difference Produksi Mill diisi
 	memakai akun bawaan ERPNext (Item Default lalu Stock Adjustment Account
@@ -39,16 +38,31 @@ def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None):
 	aman diulang. Tipe barang yang akunnya belum diatur untuk company itu juga
 	dilewati - tidak ada tujuan untuk dipindahkan.
 
-	Expense account barisnya ditulis langsung, lalu GL lamanya dibalik dengan
-	tanggal posting yang sama dan GL baru disusun dari Stock Ledger yang ada.
-	Nilainya tidak berubah, cuma akun lawannya; Repost Item Valuation sesudahnya
-	juga akan memakai akun baru karena membaca dari baris yang sama. Periode yang
-	sudah ditutup menolak - dokumennya dilaporkan gagal dan sisanya tetap jalan.
+	cara="langsung" (bawaan): expense_account baris dan akun GL Entry-nya yang
+	masih hidup diganti di tempat dengan UPDATE. Cepat dan tidak membuat GL
+	baru, tapi tidak meninggalkan jejak dan melewati penjaga ERPNext, jadi
+	penjaganya diperiksa sendiri lebih dulu: Accounting Period yang menutup
+	Stock Entry, tanggal beku akun, dan Period Closing Voucher (saldo Account
+	Closing Balance-nya tidak ikut berubah). Stock Entry yang kena salah satunya,
+	atau yang punya baris lain dengan akun lama yang sama, dilewati dan
+	dilaporkan.
 
-	Sengaja tidak didaftarkan di patches.txt: memposting ulang jurnal persediaan
-	bukan sesuatu yang boleh jalan sendiri tiap migrate.
+	cara="balik": GL lama dibalik dengan tanggal posting yang sama lalu GL baru
+	disusun dari Stock Ledger. Ada jejaknya dan penjaga ERPNext berlaku sendiri,
+	tapi lambat dan rawan lock wait timeout di produksi yang sedang ramai.
+
+	Nilainya tidak berubah di kedua cara, cuma akun lawannya; Repost Item
+	Valuation sesudahnya juga memakai akun baru karena membaca dari baris yang
+	sama. Tiap Stock Entry di-commit sendiri begitu selesai, jadi kalau patch
+	berhenti di tengah cukup dijalankan ulang.
+
+	Sengaja tidak didaftarkan di patches.txt: mengubah jurnal persediaan bukan
+	sesuatu yang boleh jalan sendiri tiap migrate.
 	"""
 	terapkan = cint(terapkan)
+	if cara not in ("langsung", "balik"):
+		frappe.throw("cara harus 'langsung' atau 'balik'.")
+
 	baris = cari_baris(company=company, dari=dari, sampai=sampai, nama=nama)
 
 	if not baris:
@@ -74,8 +88,8 @@ def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None):
 		row.tujuan = tujuan
 		per_ste.setdefault(row.stock_entry, []).append(row)
 
-	print("{0} baris Stock Entry Detail diperiksa, mode {1}\n".format(
-		len(baris), "TERAPKAN" if terapkan else "LAPORAN SAJA"
+	print("{0} baris Stock Entry Detail diperiksa, cara {1}, mode {2}\n".format(
+		len(baris), cara.upper(), "TERAPKAN" if terapkan else "LAPORAN SAJA"
 	))
 
 	for company_, tipe in sorted(belum_diatur):
@@ -84,6 +98,7 @@ def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None):
 		print()
 
 	berhasil = []
+	dilewati = []
 	gagal = []
 
 	for nama_ste, rows in per_ste.items():
@@ -96,15 +111,31 @@ def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None):
 				row.item_code, flt(row.amount, 2), row.expense_account or "-", row.tujuan
 			))
 
+		if cara == "langsung":
+			alasan = alasan_dilewati(nama_ste, rows)
+			if alasan:
+				dilewati.append((nama_ste, alasan))
+				print("    DILEWATI — {0}".format(alasan))
+				continue
+
 		if not terapkan:
 			continue
 
+		# Di-commit per Stock Entry. Satu transaksi untuk semuanya menahan kunci
+		# sampai patch selesai, sehingga pengguna lain dan patch ini saling
+		# menunggu sampai lock wait timeout.
 		titik = "repost_akun_difference_ste"
 		try:
 			frappe.db.savepoint(titik)
-			posting_ulang(nama_ste, rows)
+			if cara == "langsung":
+				jumlah_gl = ganti_langsung(nama_ste, rows)
+				keterangan = "diganti langsung, {0} baris GL".format(jumlah_gl)
+			else:
+				posting_ulang(nama_ste, rows)
+				keterangan = "diposting ulang"
+			frappe.db.commit()
 			berhasil.append(pertama)
-			print("    diposting ulang")
+			print("    {0}".format(keterangan))
 		except Exception as e:
 			if frappe.message_log:
 				frappe.message_log.pop()
@@ -115,22 +146,27 @@ def execute(terapkan=0, company=None, dari=None, sampai=None, nama=None):
 			print("    GAGAL — {0}".format(pesan))
 
 	print("\nStock Entry dengan akun berbeda : {0}".format(len(per_ste)))
+	print("dilewati                        : {0}".format(len(dilewati)))
 	if terapkan:
-		print("diposting ulang                 : {0}".format(len(berhasil)))
+		print("diubah                          : {0}".format(len(berhasil)))
 		print("gagal                           : {0}".format(len(gagal)))
 
 	for nama_ste, pesan in gagal:
 		print("  {0}: {1}".format(nama_ste, pesan[:200]))
 
-	if not terapkan and per_ste:
+	if not terapkan and len(per_ste) > len(dilewati):
 		print(
-			"\nBelum ada yang disentuh. Ulangi dengan terapkan=1 untuk memposting "
-			"ulang Stock Entry di atas."
+			"\nBelum ada yang disentuh. Ulangi dengan terapkan=1 untuk mengubah "
+			"Stock Entry di atas yang tidak dilewati."
 		)
 
 	# Jurnal kapitalisasi COGS yang sudah disubmit mendebit akun lawan lama;
 	# sesudah Stock Entry-nya pindah akun, akun lama itu tidak nol lagi.
-	terdampak = berhasil if terapkan else [rows[0] for rows in per_ste.values()]
+	if terapkan:
+		terdampak = berhasil
+	else:
+		lewat = {n for n, _ in dilewati}
+		terdampak = [rows[0] for n, rows in per_ste.items() if n not in lewat]
 	if terdampak:
 		lapor_cogs_terdampak(terdampak)
 
@@ -177,6 +213,96 @@ def cari_baris(company=None, dari=None, sampai=None, nama=None):
 			hasil.append(row)
 
 	return hasil
+
+
+def alasan_dilewati(nama_ste, rows):
+	"""Kenapa Stock Entry ini tidak boleh diganti langsung, atau None.
+
+	UPDATE langsung melewati penjaga yang biasanya diperiksa make_gl_entries,
+	jadi diperiksa di sini dengan aturan yang sama - tanpa pengecualian peran
+	untuk tanggal beku, karena patch ini tidak dijalankan atas nama siapa pun.
+	"""
+	pertama = rows[0]
+
+	periode = frappe.db.sql("""
+		select ap.name
+		from `tabAccounting Period` ap
+		inner join `tabClosed Document` cd on cd.parent = ap.name
+		where ap.company = %(company)s and cd.closed = 1
+			and cd.document_type = 'Stock Entry'
+			and %(tanggal)s between ap.start_date and ap.end_date
+		limit 1
+	""", {"company": pertama.company, "tanggal": pertama.posting_date})
+	if periode:
+		return "periode ditutup Accounting Period {0}".format(periode[0][0])
+
+	beku = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
+	if beku and getdate(pertama.posting_date) <= getdate(beku):
+		return "akun dibekukan sampai {0}".format(beku)
+
+	pcv = frappe.db.get_value(
+		"Period Closing Voucher",
+		{"docstatus": 1, "company": pertama.company, "period_end_date": (">=", pertama.posting_date)},
+		"name",
+	)
+	if pcv:
+		return "sudah ada Period Closing Voucher {0}".format(pcv)
+
+	detail = tuple(row.detail for row in rows)
+	for row in rows:
+		if not row.expense_account:
+			return "baris {0} tidak punya akun lama, pakai cara='balik'".format(row.item_code)
+
+		mata_uang_lama = frappe.db.get_value("Account", row.expense_account, "account_currency")
+		mata_uang_baru = frappe.db.get_value("Account", row.tujuan, "account_currency")
+		if mata_uang_lama != mata_uang_baru:
+			return "mata uang {0} dan {1} berbeda".format(row.expense_account, row.tujuan)
+
+		lain = frappe.db.sql("""
+			select item_code from `tabStock Entry Detail`
+			where parent = %s and expense_account = %s and name not in %s
+			limit 1
+		""", (nama_ste, row.expense_account, detail))
+		if lain:
+			return "baris {0} juga memakai {1}, GL-nya tidak bisa dipisah".format(
+				lain[0][0], row.expense_account
+			)
+
+
+def ganti_langsung(nama_ste, rows):
+	"""Ganti akun di Stock Entry Detail dan GL Entry hidup milik Stock Entry ini.
+
+	Baris GL persediaan menyimpan akun lawannya di kolom against, jadi ikut
+	diganti. Memulangkan jumlah baris GL yang akunnya diganti.
+	"""
+	pasangan = set()
+	for row in rows:
+		frappe.db.set_value(
+			"Stock Entry Detail", row.detail, "expense_account", row.tujuan, update_modified=False
+		)
+		pasangan.add((row.expense_account, row.tujuan))
+
+	jumlah = 0
+	for lama, baru in pasangan:
+		nilai = {"voucher_no": nama_ste, "lama": lama, "baru": baru}
+		jumlah += frappe.db.sql("""
+			select count(*) from `tabGL Entry`
+			where voucher_type = 'Stock Entry' and voucher_no = %(voucher_no)s
+				and is_cancelled = 0 and account = %(lama)s
+		""", nilai)[0][0]
+
+		frappe.db.sql("""
+			update `tabGL Entry` set account = %(baru)s
+			where voucher_type = 'Stock Entry' and voucher_no = %(voucher_no)s
+				and is_cancelled = 0 and account = %(lama)s
+		""", nilai)
+		frappe.db.sql("""
+			update `tabGL Entry` set against = %(baru)s
+			where voucher_type = 'Stock Entry' and voucher_no = %(voucher_no)s
+				and is_cancelled = 0 and against = %(lama)s
+		""", nilai)
+
+	return jumlah
 
 
 def posting_ulang(nama_ste, rows):
