@@ -121,7 +121,20 @@ def add_criteria(entries, document_no, doc, do_not_save=False):
 
 def update_kriteria_document(document_no, entries, doc):
 	doc = frappe.get_doc("Kriteria Upload Document", document_no)
-	
+
+	# Baris mandatory tidak boleh dihapus dari popup
+	sisa_kriteria = {frappe._dict(row).rincian_dokumen_finance for row in entries}
+	mandatory_hilang = [
+		row.rincian_dokumen_finance
+		for row in doc.get("file_upload")
+		if row.mandatory and row.rincian_dokumen_finance not in sisa_kriteria
+	]
+	if mandatory_hilang:
+		frappe.throw(
+			_("Mandatory document cannot be removed: <br> {0}").format("<br>".join(mandatory_hilang)),
+			title=_("Mandatory Document")
+		)
+
 	# Ambil mapping file lama: rincian_dokumen_finance -> upload_file
 	old_files = {
 		row.rincian_dokumen_finance: row.upload_file
