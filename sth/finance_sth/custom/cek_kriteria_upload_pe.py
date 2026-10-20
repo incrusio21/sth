@@ -179,6 +179,15 @@ def get_kriteria_rows_for_reference(reference_doctype, reference_name):
 		for ba_name in linked["berita_acara"]:
 			rows.extend(get_file_upload_rows("Berita Acara", ba_name))
 
+		for proposal_name in linked["proposals"]:
+			rows.extend(get_file_upload_rows("Proposal", proposal_name))
+
+		for project_name in linked["projects"]:
+			rows.extend(get_file_upload_rows("Project", project_name))
+
+		for bapp_name in linked["bapps"]:
+			rows.extend(get_file_upload_rows("BAPP", bapp_name))
+
 		rows.extend(get_file_upload_rows("Purchase Invoice", reference_name))
 
 	elif reference_doctype == "Employee Advance":
@@ -286,6 +295,9 @@ def get_purchase_invoice_links(purchase_invoice_name):
 		)
 		berita_acara_list = list({r.berita_acara for r in mr_docs if r.berita_acara})
 
+	# 6. Jalur kontraktor: BAPP -> SPK (Project) -> Proposal
+	bapp_links = get_bapp_links(bapps=[row.bapp for row in pi_doc.items if row.get("bapp")])
+
 	return {
 		"purchase_invoices":   purchase_invoices,
 		"purchase_receipts":   purchase_receipts,
@@ -293,6 +305,35 @@ def get_purchase_invoice_links(purchase_invoice_name):
 		"supplier_quotations": supplier_quotations,
 		"material_requests":   material_requests,
 		"berita_acara":        berita_acara_list,
+		**bapp_links,
+	}
+
+def get_bapp_links(bapps=(), projects=()):
+	"""Dokumen di belakang BAPP: SPK (Project) dan Proposal-nya.
+
+	Proposal diambil dari BAPP sendiri dan dari Project — proposal awal dan
+	last_proposal, yang terisi kalau SPK-nya pernah diadendum — karena keduanya
+	bisa berbeda dan berkas masing-masing ikut dibutuhkan.
+	"""
+	bapps = list(dict.fromkeys(b for b in bapps if b))
+	projects = list(projects)
+	proposals = []
+
+	if bapps:
+		for b in frappe.get_all("BAPP", filters={"name": ["in", bapps]}, fields=["project", "proposal"]):
+			projects.append(b.project)
+			proposals.append(b.proposal)
+
+	projects = list(dict.fromkeys(p for p in projects if p))
+
+	if projects:
+		for p in frappe.get_all("Project", filters={"name": ["in", projects]}, fields=["proposal", "last_proposal"]):
+			proposals.extend((p.proposal, p.last_proposal))
+
+	return {
+		"bapps":     bapps,
+		"projects":  projects,
+		"proposals": list(dict.fromkeys(p for p in proposals if p)),
 	}
 
 def get_file_upload_rows(voucher_type, voucher_no):
@@ -323,6 +364,8 @@ def get_file_upload_rows(voucher_type, voucher_no):
 		"Purchase Order": "Purchase Order",
 		"Purchase Receipt": "Purchase Receipt",
 		"Purchase Invoice": "Purchase Invoice",
+
+		"Project": "SPK",
 
 		"Travel Request": "Pengajuan Perjalanan Dinas"
 	}

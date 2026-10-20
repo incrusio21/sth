@@ -4,6 +4,7 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import m
 from erpnext.stock.get_item_details import get_item_details
 from sth.utils import decrypt
 from sth.custom.supplier_quotation import get_taxes_template,close_status_another_sq,close_rfq
+from sth.finance_sth.custom.cek_kriteria_upload_pe import get_bapp_links
 
 @frappe.whitelist(allow_guest=True)
 def create_sq():
@@ -509,7 +510,9 @@ def get_previous_kriteria_documents(doctype, docname):
 		"Supplier Quotation": "Supplier Quotation",
 		"Purchase Order": "Purchase Order",
 		"Purchase Receipt": "Purchase Receipt",
-		"Purchase Invoice": "Purchase Invoice"
+		"Purchase Invoice": "Purchase Invoice",
+
+		"Project": "SPK",
 	}
 
 	chain = []
@@ -646,6 +649,14 @@ def get_previous_kriteria_documents(doctype, docname):
 							"voucher_no": prev_1_doc.berita_acara
 						})
 
+		# jalur kontraktor: BAPP -> SPK (Project) -> Proposal
+		tambah_rantai_bapp(chain, get_bapp_links(bapps=[row.bapp for row in doc.items if row.get("bapp")]))
+
+	elif doctype == "BAPP":
+		tambah_rantai_bapp(chain, get_bapp_links(bapps=[docname]), lewati="BAPP")
+
+	elif doctype == "Project":
+		tambah_rantai_bapp(chain, get_bapp_links(projects=[docname]), lewati="Project")
 
 	elif doctype == "Sales Invoice":
 
@@ -735,6 +746,18 @@ def get_previous_kriteria_documents(doctype, docname):
 				})
 
 	return results
+
+def tambah_rantai_bapp(chain, links, lewati=None):
+	"""Tambahkan BAPP, SPK (Project) dan Proposal ke chain, dari yang terdekat.
+
+	`lewati` membuang doctype dokumen yang sedang dibuka supaya berkasnya sendiri
+	tidak ikut tampil sebagai dokumen sebelumnya.
+	"""
+	for voucher_type, key in (("BAPP", "bapps"), ("Project", "projects"), ("Proposal", "proposals")):
+		if voucher_type == lewati:
+			continue
+
+		chain.extend({"voucher_type": voucher_type, "voucher_no": name} for name in links[key])
 
 @frappe.whitelist()
 def submit_payment_entry(docname, status):
