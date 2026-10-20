@@ -68,7 +68,10 @@ def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		sub_purchase_type = frappe.db.get_value("Material Request",source.custom_material_request,["sub_purchase_type"],pluck="sub_purchase_type")
 
-		target.purchase_type = "Capex" if target.items[0].is_fixed_asset else "Non Capex"
+		# Supplier Quotation Item tidak punya is_fixed_asset, jadi baris PO hasil
+		# pemetaan masih 0 di titik ini; baca langsung dari master Item.
+		is_fixed_asset = frappe.db.get_value("Item", target.items[0].item_code, "is_fixed_asset")
+		target.purchase_type = "Capex" if is_fixed_asset else "Non Capex"
 		target.sub_purchase_type = sub_purchase_type
 		target.set_warehouse = frappe.db.get_value("Warehouse",{"company": target.company, "unit": target.unit, "central": 1})
 		
