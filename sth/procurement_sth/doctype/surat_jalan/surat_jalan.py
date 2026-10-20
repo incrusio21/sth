@@ -295,6 +295,10 @@ def map_from_ppb(source_name, target_doc=None, args=None):
         )
 
     def update_parent(source, target):
+        # don't inherit the PPB numbering series, status or amendment link
+        target.naming_series = "SJ-.DD.MM.YY.-.####"
+        target.status = "Draft"
+        target.amended_from = None
         if source.nama_karyawan:
             user_id = frappe.db.get_value("Employee", source.nama_karyawan, "user_id")
             if user_id:
