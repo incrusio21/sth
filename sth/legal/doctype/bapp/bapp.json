@@ -105,6 +105,9 @@
   "pricing_rules",
   "file_upload_tab",
   "file_upload_bapp",
+  "upload",
+  "kriteria_upload_html",
+  "kriteria_upload_sebelumnya",
   "address_and_contact_tab",
   "section_addresses",
   "supplier_address",
@@ -1290,13 +1293,30 @@
    "label": "Kontraktor Proposal",
    "options": "Kontraktor Proposal",
    "read_only": 1
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Upload",
+   "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML"
+  },
+  {
+   "fieldname": "kriteria_upload_sebelumnya",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Sebelumnya"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 23:13:08.869901",
+ "modified": "2026-10-20 15:47:34.785715",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "BAPP",
