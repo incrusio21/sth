@@ -70,4 +70,7 @@ sth.patches.isi_akun_difference_produksi_mill
 # ulang Kriteria Upload Payment PV lama supaya berkas Proposal, SPK dan BAPP
 # ikut. Default-nya dry run; tulis dengan --kwargs "{'dry_run': 0}". Jalankan
 # sesudah commit da0a5755.
+# naikkan_tm_blok_bkm_perawatan juga tidak didaftarkan: menaikkan ke TM Blok
+# TBM dari daftar BKM Perawatan TM tertentu, satu JE per tahun tanam + unit.
+# Default-nya dry run; tulis dengan --kwargs "{'dry_run': 0}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
