@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 14,
- "modified": "2026-09-29 09:51:35.691726",
+ "modified": "2026-10-19 15:06:40.337520",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "komparasi-penawaran-supplier",
@@ -16,6 +16,12 @@
   },
   {
    "role": "PROCUREMENT SPV"
+  },
+  {
+   "role": "STH DCDS"
+  },
+  {
+   "role": "BOD"
   }
  ],
  "script": null,
