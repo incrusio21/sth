@@ -1,6 +1,7 @@
 frappe.ui.form.on('Accounting Period', {
 	refresh(frm) {
 		set_unit_filter(frm);
+		tampilkan_status_antrean(frm);
 
 		if (frm.doc.workflow_state === "Submitted" && !frm.is_new()) {
 			frm.add_custom_button(__("Lihat Report Summary"), () => {
@@ -61,6 +62,40 @@ function sesuaikan_dokumen_mill(frm) {
 		frm.clear_table("closed_documents");
 		hasil.forEach((row) => frm.add_child("closed_documents", row));
 		frm.refresh_field("closed_documents");
+	});
+}
+
+// Submit Accounting Period jalan di background lewat Submission Queue, jadi
+// sesudah tombol Submit ditekan dokumennya masih Draft sampai job-nya selesai.
+// Banner bawaan frappe untuk ini cuma muncul di doctype is_submittable, dan
+// Accounting Period bukan — docstatus-nya dipindah oleh workflow.
+function tampilkan_status_antrean(frm) {
+	if (frm.is_new() || frm.doc.docstatus !== 0) {
+		return;
+	}
+
+	frappe.call({
+		method: "frappe.core.doctype.submission_queue.submission_queue.get_latest_submissions",
+		args: { doctype: frm.doctype, docname: frm.docname }
+	}).then((r) => {
+		const antrean = r.message;
+		if (!antrean || frm.doc.docstatus !== 0) {
+			return;
+		}
+
+		const tautan = `<a href="/app/submission-queue/${encodeURIComponent(antrean.latest_submission)}">${__("lihat antrean")}</a>`;
+
+		if (antrean.status === "Queued") {
+			frm.dashboard.set_headline_alert(
+				__("Submit sedang diproses di background ({0}). Muat ulang halaman ini setelah selesai.", [tautan]),
+				"blue"
+			);
+		} else if (antrean.status === "Failed") {
+			frm.dashboard.set_headline_alert(
+				__("Submit terakhir gagal ({0}). Rincian penolakannya ada di timeline di bawah.", [tautan]),
+				"red"
+			);
+		}
 	});
 }
 

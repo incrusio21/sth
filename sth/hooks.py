@@ -244,6 +244,7 @@ override_doctype_class = {
 	"Salary Slip": "sth.overrides.salary_slip.SalarySlip",
 	"Stock Entry": "sth.overrides.stock_entry.StockEntry",
 	"Stock Reconciliation": "sth.overrides.stock_reconciliation.StockReconciliation",
+	"Submission Queue": "sth.overrides.submission_queue.SthSubmissionQueue",
 	"Supplier": "sth.overrides.supplier.Supplier",
 	"Supplier Quotation": "sth.overrides.supplier_quotation.STHSupplierQuotation",
 	"Payment Entry": "sth.overrides.payment_entry.PaymentEntry",
