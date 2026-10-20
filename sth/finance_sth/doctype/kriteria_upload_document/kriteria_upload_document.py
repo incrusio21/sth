@@ -22,3 +22,8 @@ class KriteriaUploadDocument(Document):
 				break
 			
 		frappe.db.set_value(self.voucher_type, self.voucher_no, "document_status", status)
+
+
+def on_doctype_update():
+	# semua pencarian dokumen ini lewat pasangan voucher_type + voucher_no
+	frappe.db.add_index("Kriteria Upload Document", ["voucher_type", "voucher_no"])

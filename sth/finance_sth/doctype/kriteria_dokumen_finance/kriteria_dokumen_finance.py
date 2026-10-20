@@ -8,13 +8,42 @@ from frappe.utils import parse_json
 
 from frappe.model.document import Document
 
+CACHE_DOCTYPE_BERKRITERIA = "sth:doctype_berkriteria"
+
 class KriteriaDokumenFinance(Document):
 	def autoname(self):
 		self.name = self.dokumen_finance
 		if self.criteria_type:
 			self.name += "-" + self.criteria_type
 
+	def on_update(self):
+		frappe.cache.delete_value(CACHE_DOCTYPE_BERKRITERIA)
+
+	def on_trash(self):
+		frappe.cache.delete_value(CACHE_DOCTYPE_BERKRITERIA)
+
+	def after_rename(self, old, new, merge=False):
+		frappe.cache.delete_value(CACHE_DOCTYPE_BERKRITERIA)
+
+def doctype_berkriteria():
+	"""Doctype yang punya Kriteria Dokumen Finance, disimpan di cache.
+
+	create_kriteria_upload_document dipasang di on_update semua doctype, jadi
+	ikut jalan untuk tiap GL Entry, Stock Ledger Entry dan sejenisnya. Doctype
+	tanpa kriteria tidak pernah mendapat Kriteria Upload Document — get_criteria
+	menyaring lewat dokumen_finance — jadi cukup ditolak di depan tanpa query.
+	Dulu tiap GL Entry menjalankan dua scan penuh tabKriteria Upload Document,
+	dan posting BKM saat Accounting Period disubmit habis di sana.
+	"""
+	return frappe.cache.get_value(
+		CACHE_DOCTYPE_BERKRITERIA,
+		lambda: set(frappe.get_all("Kriteria Dokumen Finance", pluck="dokumen_finance", distinct=True)),
+	)
+
 def create_kriteria_upload_document(self, method):
+	if self.doctype not in doctype_berkriteria():
+		return
+
 	if self.doctype == "DocType" or frappe.db.exists("Kriteria Upload Document", {"voucher_type": self.doctype, "voucher_no": self.name}):
 		return
 
