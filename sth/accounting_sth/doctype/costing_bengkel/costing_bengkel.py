@@ -127,6 +127,9 @@ def get_pengeluaran_barang_bengkel(periode_dari, periode_sampai, company=None, u
     Ambil Pengeluaran Barang Item yang sub_unit = BENGKEL dan punya kendaraan (asset),
     hitung nilai per item dari Stock Ledger Entry berdasarkan STE reference + item_code.
     Return breakdown per kendaraan + COA.
+
+    Sub Unit (Divisi) bernama per unit, mis. BENGKEL-TPRE, jadi dicocokkan dengan
+    awalannya. Solar diambil get_pengeluaran_barang_solar_bengkel.
     """
     company_filter = "AND pb.pt_pemilik_barang = %(company)s" if company else ""
     unit_filter = "AND pb.unit = %(unit)s" if unit else ""
@@ -143,10 +146,11 @@ def get_pengeluaran_barang_bengkel(periode_dari, periode_sampai, company=None, u
         JOIN `tabStock Entry` ste ON ste.pengeluaran_barang = pb.name AND ste.docstatus = 1
         WHERE pb.docstatus = 1
           AND pb.tanggal BETWEEN %(dari)s AND %(sampai)s
-          AND pbi.sub_unit = 'BENGKEL'
+          AND pbi.sub_unit LIKE 'BENGKEL%%'
           AND pbi.kendaraan != ''
           AND pbi.kendaraan IS NOT NULL
           AND pbi.account LIKE '%%4111004%%'
+          AND pbi.kode_barang != '50101001'
           {company_filter}
           {unit_filter}
         ORDER BY pb.tanggal, pb.name, pbi.kendaraan;
@@ -186,6 +190,10 @@ def get_pengeluaran_barang_solar_bengkel(periode_dari, periode_sampai, company=N
     Ambil Pengeluaran Barang Item dengan kode_barang = '50101001' (Solar) yang sub_unit = BENGKEL
     dan punya kendaraan (asset), hitung nilai per item dari Stock Ledger Entry berdasarkan
     STE reference + item_code. Return breakdown per kendaraan + COA.
+
+    Selain solar, barang yang langsung dibebankan ke kendaraan (akun 4112xxx, mis.
+    4112003 pelumas, 4112004 suku cadang) ikut diambil di sini: sama-sama biaya
+    langsung VRA yang masuk Cost Per KM/HM, dan kolomnya di Summary dipilah dari no_coa.
     """
     company_filter = "AND pb.pt_pemilik_barang = %(company)s" if company else ""
     unit_filter = "AND pb.unit = %(unit)s" if unit else ""
@@ -202,10 +210,10 @@ def get_pengeluaran_barang_solar_bengkel(periode_dari, periode_sampai, company=N
         JOIN `tabStock Entry` ste ON ste.pengeluaran_barang = pb.name AND ste.docstatus = 1
         WHERE pb.docstatus = 1
           AND pb.tanggal BETWEEN %(dari)s AND %(sampai)s
-          AND (pbi.sub_unit = 'TRAKSI' or pbi.sub_unit = "BENGKEL")
+          AND (pbi.sub_unit LIKE 'TRAKSI%%' OR pbi.sub_unit LIKE 'BENGKEL%%')
           AND pbi.kendaraan != ''
           AND pbi.kendaraan IS NOT NULL
-          AND pbi.kode_barang = '50101001'
+          AND (pbi.kode_barang = '50101001' OR pbi.account LIKE '4112%%')
           {company_filter}
           {unit_filter}
         ORDER BY pb.tanggal, pb.name, pbi.kendaraan;
