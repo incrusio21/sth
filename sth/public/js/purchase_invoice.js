@@ -1431,6 +1431,10 @@ function build_ppn_tax_rows(frm) {
 
 const REF_TAX_MARKER = "__from_ref_tax__";
 
+// __ref_tax diisi async oleh get_tax_template, jadi saat form baru dibuka cache-nya
+// masih kosong ketika refresh menjalankan sync_to_taxes. Selama itu akun baris lama
+// dipakai (sama dengan retensi), kalau tidak baris ref_tax dibuang lalu dibangun
+// ulang dan form langsung dirty.
 function build_ref_tax_rows(frm) {
     const ref_tax = frappe.refererence.__ref_tax || {}
     const field_map = [
@@ -1442,11 +1446,12 @@ function build_ref_tax_rows(frm) {
 
     const rows = []
     for (const { key, value, add_deduct } of field_map) {
-        const ref = ref_tax[key]
-        if (!ref) continue
+        const lama = (frm.doc.taxes || []).find(t => t.description === `${REF_TAX_MARKER}${key}`)
+        const akun = ref_tax[key]?.account || lama?.account_head
+        if (!akun) continue
 
         rows.push({
-            account_head: ref.account,
+            account_head: akun,
             charge_type: "Actual",
             add_deduct_tax: add_deduct,
             category: "Total",
