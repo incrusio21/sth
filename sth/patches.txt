@@ -73,4 +73,8 @@ sth.patches.isi_akun_difference_produksi_mill
 # naikkan_tm_blok_bkm_perawatan juga tidak didaftarkan: menaikkan ke TM Blok
 # TBM dari daftar BKM Perawatan TM tertentu, satu JE per tahun tanam + unit.
 # Default-nya dry run; tulis dengan --kwargs "{'dry_run': 0}".
+# pindahkan_hutang_purchase_invoice_bapp juga tidak didaftarkan: memindah
+# credit_to, GL dan Payment Ledger Entry Purchase Invoice BAPP yang sudah submit
+# ke akun Hutang Invoice Proposal Type; invoice yang sudah dibayar dilewati.
+# Default-nya dry run; tulis dengan --kwargs "{'dry_run': 0}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

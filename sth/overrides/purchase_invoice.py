@@ -160,6 +160,15 @@ class SthPurchaseInvoice(PurchaseInvoice):
 						if self.company == row_item.company:
 							item.expense_account = row_item.expense_account
 
+		# BAPP Item tidak punya link proposal (proposal-nya cuma di header BAPP),
+		# jadi cabang item.proposal di atas tidak pernah jalan untuk invoice BAPP.
+		# Tanpa ini credit_to ikut akun party yang diisi form begitu supplier
+		# terisi, biasanya default payable Company.
+		if not ada_po and not ada_pro:
+			proposal = proposal_bapp_purchase_invoice(self)
+			if proposal:
+				self.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(proposal, self.company)
+
 		if self.voucher_type == "Non Voucher Match":
 			for row in self.non_voucher_match:
 				if row.kendaraan:
@@ -1690,6 +1699,13 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 			if item.is_fixed_asset and item.landed_cost_voucher_amount:
 				self.update_gross_purchase_amount_for_linked_assets(item)
+
+def proposal_bapp_purchase_invoice(doc):
+	"""Proposal dari BAPP yang ditagih invoice ini, kalau invoice-nya dari BAPP."""
+	if doc.get("document_type") != "BAPP" or not doc.get("document_no"):
+		return None
+
+	return frappe.db.get_value("BAPP", doc.document_no, "proposal")
 
 @frappe.whitelist()
 def get_all_training_event_by_supplier(supplier):
