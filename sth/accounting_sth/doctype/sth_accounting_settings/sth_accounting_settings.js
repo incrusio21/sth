@@ -49,6 +49,7 @@ const FILTER_TABEL = {
 	},
 	sth_accounting_settings_kud_mitra: { account: ["akun_piutang_plasma"] },
 	sth_accounting_settings_kud_kepala_akun: { account: ["kepala_akun"], is_group: 1 },
+	sth_accounting_settings_retensi: { account: ["akun_retensi"] },
 };
 
 function set_account_filters(frm) {

@@ -71,6 +71,10 @@ VAT_TOTAL_BASE_FIELDS = {
 	"total_pph_lainnya": "base_total_pph_lainnya",
 }
 
+# Penanda baris taxes potongan retensi (field Retensi %). Sama dengan
+# RETENSI_MARKER di public/js/purchase_invoice.js.
+RETENSI_MARKER = "__from_retensi__"
+
 
 class SthPurchaseInvoice(PurchaseInvoice):
 	def __init__(self, *args, **kwargs):
@@ -176,6 +180,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		super().validate()
 		self.validate_term()
 		self.set_retensi_amount()
+		self.set_retensi_tax_row()
 		self.set_charges_total()
 		self.set_non_voucher_base_amounts()
 		self.set_base_vat_totals()
@@ -763,17 +768,49 @@ class SthPurchaseInvoice(PurchaseInvoice):
 
 	def set_retensi_amount(self):
 		reten_am = 0
-		reten_am += flt(self.rounded_total or self.grand_total) \
-			if self.term_detail and self.payment_term in ("Retensi") \
-			else flt(
-				self.net_total * flt(self.retensi)/100,
-				self.precision("retensi_amount")
-			)
+		if self.term_detail and self.payment_term in ("Retensi"):
+			reten_am += flt(self.rounded_total or self.grand_total)
 
 		# RETENSI BAPP DINYALAIN LAGI TANGGAL 21 OKTOBER KARENA RETENSI TERM DAN RETENSI DI FORM LUAR TERNYATA DIPERLUKAN 2 2 e TPI TIDAK BARENGAN
-		reten_am += flt(self.net_total * self.retensi/100, self.precision("retensi_amount"))
+		reten_am += jumlah_retensi_form(self)
 
 		self.retensi_amount = reten_am
+
+	def set_retensi_tax_row(self):
+		"""Retensi (%) memotong grand total lewat satu baris taxes bertanda.
+
+		Barisnya mengikuti pola PPh Lainnya (Actual, Add, nilai minus) supaya
+		ikut dijurnal make_tax_gl_entries dan mengurangi credit_to. Baris yang
+		sama dibangun sync_to_taxes di JS; server tetap yang menentukan karena
+		net_total baru final setelah super().validate(), jadi kalau barisnya
+		berubah totalnya dihitung ulang di sini.
+		"""
+		jumlah = jumlah_retensi_form(self)
+		akun = get_akun_retensi(self.company) if jumlah else None
+		if jumlah and not akun:
+			frappe.throw(
+				_("Akun retensi company {0} belum diisi di STH Accounting Settings, "
+				  "tabel <b>Retensi Purchase Invoice</b>.").format(frappe.bold(self.company)),
+				title=_("Akun Retensi Belum Diatur"),
+			)
+
+		precision = self.precision("retensi_amount")
+		lama = [t for t in self.get("taxes") if t.description == RETENSI_MARKER]
+		if [(t.account_head, flt(t.tax_amount, precision)) for t in lama] == ([(akun, -jumlah)] if jumlah else []):
+			return
+
+		self.set("taxes", [t for t in self.get("taxes") if t.description != RETENSI_MARKER])
+		if jumlah:
+			self.append("taxes", {
+				"category": "Total",
+				"charge_type": "Actual",
+				"add_deduct_tax": "Add",
+				"account_head": akun,
+				"tax_amount": -jumlah,
+				"description": RETENSI_MARKER,
+			})
+
+		self.calculate_taxes_and_totals()
 
 	def validate_term(self):
 		if not self.term_detail:
@@ -808,8 +845,9 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		total = get_total_in_party_account_currency(self)
 
 		# ceck jika ada retensi dan
-		if self.retensi and not self.retensi_paid and outstanding_amount < self.retensi_amount:
-			frappe.throw(f"Outstanding can't less than {self.retensi_amount} because there is still a Restan to confirm")
+		ditahan = retensi_ditahan(self)
+		if self.retensi and not self.retensi_paid and outstanding_amount < ditahan:
+			frappe.throw(f"Outstanding can't less than {ditahan} because there is still a Restan to confirm")
 
 		if not status:
 			if self.docstatus == 2:
@@ -1069,6 +1107,7 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				or "__from_ppn__" in (tax.description or "")
 				or "__from_charges__" in (tax.description or "")
 				or "__from_pb__" in (tax.description or "")
+				or tax.description == RETENSI_MARKER
 			):
 				account_currency = get_account_currency(tax.account_head)
 
@@ -1232,7 +1271,8 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			if ("__from_pph_lainnya__" in (tax.description or "")
 				or "__from_ppn__" in (tax.description or "")
 				or "__from_charges__" in (tax.description or "")
-				or "__from_pb__" in (tax.description or "")):
+				or "__from_pb__" in (tax.description or "")
+				or tax.description == RETENSI_MARKER):
 
 				if "__from_charges__" in (tax.description or ""):
 					total_charges_pp += flt(tax.tax_amount) * conversion_rate * -1
@@ -1710,6 +1750,34 @@ def proposal_bapp_purchase_invoice(doc):
 		return None
 
 	return frappe.db.get_value("BAPP", doc.document_no, "proposal")
+
+def jumlah_retensi_form(doc):
+	"""Retensi dari field Retensi (%) di form, dihitung dari net total."""
+	return flt(flt(doc.net_total) * flt(doc.get("retensi")) / 100, doc.precision("retensi_amount"))
+
+def retensi_ditahan(doc):
+	"""Bagian retensi_amount yang masih ditahan di outstanding hutang supplier.
+
+	Retensi yang sudah dipotong lewat baris taxes RETENSI_MARKER tidak ada lagi
+	di outstanding (sudah pindah ke akun retensi), jadi tidak ikut ditahan.
+	Invoice lama tanpa baris itu tetap ditahan penuh seperti sebelumnya.
+	"""
+	dipotong = -sum(
+		flt(t.tax_amount) for t in doc.get("taxes") or [] if t.description == RETENSI_MARKER
+	)
+	return max(flt(doc.get("retensi_amount")) - dipotong, 0)
+
+@frappe.whitelist()
+def get_akun_retensi(company):
+	"""Akun retensi company dari STH Accounting Settings, tabel Retensi Purchase Invoice."""
+	if not company:
+		return None
+
+	setelan = frappe.get_cached_doc("STH Accounting Settings")
+	for row in setelan.get("sth_accounting_settings_retensi") or []:
+		if row.company == company:
+			return row.akun_retensi
+	return None
 
 @frappe.whitelist()
 def get_all_training_event_by_supplier(supplier):

@@ -11,13 +11,24 @@ def execute(filters=None):
 
 def get_result(filters):
 	
+	# Retensi yang dipotong lewat baris taxes __from_retensi__ (tax_amount minus)
+	# sudah pindah ke akun retensi, jadi tidak lagi ditahan di outstanding.
+	# Sama dengan retensi_ditahan() di overrides/purchase_invoice.py.
 	return frappe.db.sql(
 		"""
-		select 
-			name as purchase_invoice, 
-			posting_date, 
+		select
+			name as purchase_invoice,
+			posting_date,
 			supplier,
-			if(retensi_amount > outstanding_amount, outstanding_amount, retensi_amount) as rem_retensi
+			least(
+				outstanding_amount,
+				retensi_amount + ifnull((
+					select sum(t.tax_amount) from `tabPurchase Taxes and Charges` t
+					where t.parent = `tabPurchase Invoice`.name
+						and t.parenttype = 'Purchase Invoice'
+						and t.description = '__from_retensi__'
+				), 0)
+			) as rem_retensi
 		from `tabPurchase Invoice`
 		where 
 			company = %(company)s and 

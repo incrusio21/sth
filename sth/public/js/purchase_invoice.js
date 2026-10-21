@@ -493,6 +493,18 @@ frappe.ui.form.on("Purchase Invoice", {
                 }
             })
         }
+
+        if (frm.doc.company && frm._retensi_account_company !== frm.doc.company) {
+            frm._retensi_account_company = frm.doc.company
+            frappe.xcall("sth.overrides.purchase_invoice.get_akun_retensi", { company: frm.doc.company }).then((akun) => {
+                frm._retensi_account = akun || null
+                if (frm.doc.docstatus == 0) sync_to_taxes(frm)
+            })
+        }
+    },
+
+    retensi(frm) {
+        sync_to_taxes(frm)
     },
 
     sub_total(frm) {
@@ -899,6 +911,7 @@ function sync_to_taxes(frm) {
         ...build_pph_lainnya_tax_rows(frm),
         ...build_ppn_tax_rows(frm),
         ...build_ref_tax_rows(frm),
+        ...build_retensi_tax_rows(frm),
     ];
 
     // Menyamakan taxes lama vs baru dulu sebelum menyentuh frm.doc.taxes.
@@ -913,6 +926,28 @@ function sync_to_taxes(frm) {
 
     frm.refresh_field("taxes");
     frm.trigger("calculate_taxes_and_totals");
+}
+
+const RETENSI_MARKER = "__from_retensi__";
+
+// Retensi (%) memotong grand total, akunnya dari STH Accounting Settings.
+// Sama dengan set_retensi_tax_row di overrides/purchase_invoice.py. Selama
+// akunnya belum termuat, akun baris lama dipakai supaya baris dari server
+// tidak terhapus waktu form baru dibuka.
+function build_retensi_tax_rows(frm) {
+    const jumlah = flt(flt(frm.doc.net_total) * flt(frm.doc.retensi) / 100, precision("retensi_amount", frm.doc))
+    const lama = (frm.doc.taxes || []).find(t => t.description === RETENSI_MARKER)
+    const akun = frm._retensi_account || lama?.account_head
+    if (!jumlah || !akun) return []
+
+    return [{
+        charge_type: "Actual",
+        category: "Total",
+        account_head: akun,
+        tax_amount: -jumlah,
+        add_deduct_tax: "Add",
+        description: RETENSI_MARKER,
+    }]
 }
 
 function build_diskon_tax_rows(frm) {

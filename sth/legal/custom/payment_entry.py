@@ -61,7 +61,13 @@ def get_payment_entry(
 
     # jika ada field retensi amount kurangi nilai outstanding
     if doc.get("retensi_amount") and not doc.get("retensi_paid"):
-        outstanding_amount -= doc.retensi_amount
+        if dt == "Purchase Invoice":
+            # retensi yang sudah dipotong lewat taxes tidak ada di outstanding
+            from sth.overrides.purchase_invoice import retensi_ditahan
+
+            outstanding_amount -= retensi_ditahan(doc)
+        else:
+            outstanding_amount -= doc.retensi_amount
         
     # bank or cash
     bank = get_bank_cash_account(doc, bank_account)

@@ -16,7 +16,8 @@
   "aktifkan_turunan_kud",
   "sth_accounting_settings_kud",
   "sth_accounting_settings_kud_mitra",
-  "sth_accounting_settings_kud_kepala_akun"
+  "sth_accounting_settings_kud_kepala_akun",
+  "sth_accounting_settings_retensi"
  ],
  "fields": [
   {
@@ -91,13 +92,20 @@
    "fieldtype": "Table",
    "label": "Perhitungan KUD - Kepala Akun Biaya yang Dinolkan",
    "options": "STH Accounting Settings KUD Kepala Akun"
+  },
+  {
+   "description": "Akun pengurang grand total Purchase Invoice bila field Retensi (%) diisi. Retensinya dibukukan ke akun ini lewat baris Taxes and Charges, tidak lagi ditahan di hutang supplier.",
+   "fieldname": "sth_accounting_settings_retensi",
+   "fieldtype": "Table",
+   "label": "Retensi Purchase Invoice",
+   "options": "STH Accounting Settings Retensi"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-15 12:00:00.000000",
+ "modified": "2026-10-21 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "STH Accounting Settings",
