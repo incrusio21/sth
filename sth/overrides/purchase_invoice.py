@@ -762,12 +762,18 @@ class SthPurchaseInvoice(PurchaseInvoice):
 			self.advances = semua
 
 	def set_retensi_amount(self):
-		self.retensi_amount = flt(self.rounded_total or self.grand_total) \
+		reten_am = 0
+		reten_am += flt(self.rounded_total or self.grand_total) \
 			if self.term_detail and self.payment_term in ("Retensi") \
 			else flt(
 				self.net_total * flt(self.retensi)/100,
 				self.precision("retensi_amount")
 			)
+
+		# RETENSI BAPP DINYALAIN LAGI TANGGAL 21 OKTOBER KARENA RETENSI TERM DAN RETENSI DI FORM LUAR TERNYATA DIPERLUKAN 2 2 e TPI TIDAK BARENGAN
+		reten_am += flt(self.net_total * self.retensi/100, self.precision("retensi_amount"))
+
+		self.retensi_amount = reten_am
 
 	def validate_term(self):
 		if not self.term_detail:
