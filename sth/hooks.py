@@ -271,6 +271,7 @@ doc_events = {
 	"*": {
 		"after_insert": "sth.custom.api.approve_api",
 		"on_update": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.create_kriteria_upload_document",
+		"validate": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document_workflow",
 		"before_submit": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.validate_mandatory_document",
 		"on_trash": "sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance.delete_kriteria_upload_document",
 		"on_submit":"sth.custom.payment_entry.check_payment_notification"

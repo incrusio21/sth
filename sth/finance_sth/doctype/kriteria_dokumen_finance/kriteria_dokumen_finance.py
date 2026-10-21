@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import parse_json
+from frappe.model.workflow import get_workflow_name
 
 from frappe.model.document import Document
 
@@ -69,10 +70,43 @@ def delete_kriteria_upload_document(self, method):
 	for kud in kud_list:
 		frappe.delete_doc("Kriteria Upload Document", kud.name)
 
+def validate_mandatory_document_workflow(self, method):
+	"""Dokumen ber-workflow dicek saat meninggalkan state awal workflow-nya (Draft
+	ke Butuh Persetujuan 1, atau aksi pertama approver kalau workflow-nya langsung
+	mulai di Butuh Persetujuan 1), bukan saat submit. Submit dijalankan approval
+	terakhir, yaitu direksi, yang tidak semestinya mengurus berkas. Menolak ke
+	Rejected tidak dicek.
+	"""
+	if self.doctype not in doctype_berkriteria() or frappe.flags.skip_validate_file:
+		return
+
+	workflow_name = get_workflow_name(self.doctype)
+	before = self.get_doc_before_save()
+	if not workflow_name or not before:
+		return
+
+	workflow = frappe.get_cached_doc("Workflow", workflow_name)
+	lama = before.get(workflow.workflow_state_field)
+	baru = self.get(workflow.workflow_state_field)
+	if lama == baru or (lama and lama != workflow.states[0].state):
+		return
+	if (baru or "").startswith("Reject"):
+		return
+
+	cek_mandatory_document(self)
+
 def validate_mandatory_document(self, method):
 	# skip jika doctype tidak memiliki document kriteria
 	if not frappe.db.exists("Kriteria Dokumen Finance", {"dokumen_finance": self.doctype}) or frappe.flags.skip_validate_file:
 		return
+
+	# Dokumen ber-workflow sudah dicek di validate_mandatory_document_workflow.
+	if get_workflow_name(self.doctype):
+		return
+
+	cek_mandatory_document(self)
+
+def cek_mandatory_document(self):
 	
 	parent = frappe.qb.DocType("Kriteria Upload Document")
 	child = frappe.qb.DocType("Kriteria Upload Dokumen Finance")
