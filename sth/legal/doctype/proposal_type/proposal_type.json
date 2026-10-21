@@ -16,7 +16,8 @@
   "account_tab",
   "hutang_usaha_proposal_type",
   "hutang_invoice_proposal_type",
-  "uang_muka_proposal_type"
+  "uang_muka_proposal_type",
+  "retensi_proposal_type"
  ],
  "fields": [
   {
@@ -81,12 +82,19 @@
    "fieldtype": "Table",
    "label": "Uang Muka Proposal Type",
    "options": "Uang Muka Proposal Type"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "retensi_proposal_type",
+   "fieldtype": "Table",
+   "label": "Retensi Proposal Type",
+   "options": "Retensi Proposal Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-09 15:52:55.141913",
+ "modified": "2026-10-21 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal Type",

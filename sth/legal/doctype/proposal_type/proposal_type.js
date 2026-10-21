@@ -50,7 +50,17 @@ function set_akun_query(frm, cdt, cdn) {
         return {
             filters: {
                 company: row.company,
-                is_group: 0 
+                is_group: 0
+            }
+        };
+    });
+      frm.set_query("account", "retensi_proposal_type", function (doc, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        return {
+            filters: {
+                company: row.company,
+                is_group: 0
             }
         };
     });

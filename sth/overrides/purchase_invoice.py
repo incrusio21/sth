@@ -786,7 +786,9 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		berubah totalnya dihitung ulang di sini.
 		"""
 		jumlah = jumlah_retensi_form(self)
-		akun = get_akun_retensi(self.company) if jumlah else None
+		# Invoice proposal/BAPP: akun dari Proposal Type (throw kalau belum diisi),
+		# selain itu dari STH Accounting Settings.
+		akun = akun_retensi_invoice(self) if jumlah else None
 		if jumlah and not akun:
 			frappe.throw(
 				_("Akun retensi company {0} belum diisi di STH Accounting Settings, "
@@ -1115,22 +1117,22 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				# if "__from_charges__" in tax.description:
 				# 	base_amount = base_amount * -1
 
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": tax.account_head,
-							"against": self.supplier,
-							dr_or_cr: base_amount,
-							dr_or_cr + "_in_account_currency": base_amount
-							if account_currency == self.company_currency
-							else amount,
-							dr_or_cr + "_in_transaction_currency": amount,
-							"cost_center": tax.cost_center,
-						},
-						account_currency,
-						item=tax,
-					)
-				)
+				gl = {
+					"account": tax.account_head,
+					"against": self.supplier,
+					dr_or_cr: base_amount,
+					dr_or_cr + "_in_account_currency": base_amount
+					if account_currency == self.company_currency
+					else amount,
+					dr_or_cr + "_in_transaction_currency": amount,
+					"cost_center": tax.cost_center,
+				}
+				# Retensi masih hutang ke supplier, jadi GL-nya membawa party
+				# supaya bisa ditagih/dibayar per supplier.
+				if tax.description == RETENSI_MARKER:
+					gl.update({"party_type": "Supplier", "party": self.supplier})
+
+				gl_entries.append(self.get_gl_dict(gl, account_currency, item=tax))
 			# accumulate valuation tax
 			if (
 				self.is_opening == "No"
@@ -1767,8 +1769,38 @@ def retensi_ditahan(doc):
 	)
 	return max(flt(doc.get("retensi_amount")) - dipotong, 0)
 
+def proposal_purchase_invoice(doc):
+	"""Proposal invoice: dari item, atau dari BAPP kalau invoice-nya dari BAPP."""
+	for item in doc.get("items") or []:
+		if item.get("proposal"):
+			return item.proposal
+
+	return proposal_bapp_purchase_invoice(doc)
+
+def akun_retensi_invoice(doc, throw=True):
+	"""Akun retensi invoice: Proposal Type untuk invoice proposal/BAPP, selain itu
+	STH Accounting Settings."""
+	proposal = proposal_purchase_invoice(doc)
+	if proposal:
+		return method_ambil_account.ambil_proposal_retensi(proposal, doc.company, throw=throw)
+
+	return akun_retensi_setting(doc.company)
+
 @frappe.whitelist()
-def get_akun_retensi(company):
+def get_akun_retensi(company, proposal=None, document_type=None, document_no=None):
+	"""Akun retensi untuk form PINV (sync_to_taxes); tidak throw, validasi di server."""
+	if not company:
+		return None
+
+	doc = frappe._dict(
+		company=company,
+		document_type=document_type,
+		document_no=document_no,
+		items=[frappe._dict(proposal=proposal)],
+	)
+	return akun_retensi_invoice(doc, throw=False) or None
+
+def akun_retensi_setting(company):
 	"""Akun retensi company dari STH Accounting Settings, tabel Retensi Purchase Invoice."""
 	if not company:
 		return None

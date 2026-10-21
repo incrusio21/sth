@@ -134,3 +134,20 @@ def ambil_proposal_uang_muka(proposal, company):
 		)
 
 	return akun_expense
+
+def ambil_proposal_retensi(proposal, company, throw=True):
+	akun_retensi = ''
+	proposal_type = frappe.db.get_value("Proposal", proposal, "proposal_type")
+	proposal_type_doc = frappe.get_cached_doc("Proposal Type", proposal_type) if proposal_type else frappe._dict()
+
+	for row in proposal_type_doc.get("retensi_proposal_type") or []:
+		if row.company == company:
+			akun_retensi = row.account
+
+	if not akun_retensi and throw:
+		frappe.throw(
+			_("Account Retensi untuk proposal tipe <b>{0}</b> company <b>{1}</b> tidak ditemukan. "
+			  "Pastikan akun tersebut sudah dipasang di Proposal Type").format(proposal_type, company)
+		)
+
+	return akun_retensi

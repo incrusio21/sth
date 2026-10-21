@@ -494,9 +494,18 @@ frappe.ui.form.on("Purchase Invoice", {
             })
         }
 
-        if (frm.doc.company && frm._retensi_account_company !== frm.doc.company) {
-            frm._retensi_account_company = frm.doc.company
-            frappe.xcall("sth.overrides.purchase_invoice.get_akun_retensi", { company: frm.doc.company }).then((akun) => {
+        // Akun retensi dari Proposal Type kalau invoice proposal/BAPP, jadi
+        // di-cache per company + proposal/BAPP.
+        const proposal = ((frm.doc.items || []).find((d) => d.proposal) || {}).proposal || null
+        const retensi_key = [frm.doc.company, proposal, frm.doc.document_type, frm.doc.document_no].join("|")
+        if (frm.doc.company && frm._retensi_account_company !== retensi_key) {
+            frm._retensi_account_company = retensi_key
+            frappe.xcall("sth.overrides.purchase_invoice.get_akun_retensi", {
+                company: frm.doc.company,
+                proposal: proposal,
+                document_type: frm.doc.document_type,
+                document_no: frm.doc.document_no,
+            }).then((akun) => {
                 frm._retensi_account = akun || null
                 if (frm.doc.docstatus == 0) sync_to_taxes(frm)
             })
