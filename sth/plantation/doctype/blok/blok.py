@@ -89,6 +89,41 @@ class Blok(Document):
 
 	def after_insert(self):
 		self.make_cost_center()
+		self.naikkan_ke_tm_saat_import()
+
+	def naikkan_ke_tm_saat_import(self):
+		"""Blok yang di-import dengan Status/Jenis TM langsung dijadikan TM.
+
+		Blok dari master data kebun sudah TM di lapangan, jadi tidak perlu lewat
+		TBM dan tidak ada biaya TBM yang dialokasikan — tidak ada Journal Entry
+		Naik TM. Workflow tidak mengizinkan dokumen baru langsung masuk state
+		selain state pertamanya, jadi state-nya dipasang di sini setelah insert,
+		sama seperti naikkan_ke_tm() memasangnya.
+		"""
+		if not frappe.flags.in_import:
+			return
+
+		if "TM" not in ((self.status or "").strip().upper(), (self.jenis or "").strip().upper()):
+			return
+
+		if not self.tahun_tanam or not self.unit:
+			frappe.throw("Tahun Tanam dan Estate wajib diisi untuk Blok TM.")
+
+		if not self.deskripsi:
+			frappe.throw("Deskripsi wajib diisi untuk Blok TM, dipakai sebagai nama Cost Center Blok.")
+
+		if not frappe.db.exists("Kategori Kegiatan", "TM"):
+			frappe.throw('Kategori Kegiatan "TM" tidak ditemukan.')
+
+		company = frappe.get_cached_value("Unit", self.unit, "company")
+		nilai = {
+			"workflow_state": "TM",
+			"status": "TM",
+			"cost_center": _ensure_blok_cost_center(company, self.deskripsi),
+			"docstatus": 1,
+		}
+		self.db_set(nilai, update_modified=False)
+		self.update(nilai)
 
 	def on_update(self):
 		self.make_cost_center()
