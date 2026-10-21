@@ -723,6 +723,14 @@ frappe.ui.form.on("Purchase Order", {
 		frm.trigger('get_tax_template')
 	},
 
+	transaction_date(frm) {
+		console.log("Oke");
+
+		if (frm.doc.transaction_date) {
+			frm.set_value('waktu_penyerahan', frappe.datetime.add_days(frm.doc.transaction_date, 7))
+		}
+	},
+
 	waktu_penyerahan(frm) {
 		const day = frm.doc.waktu_penyerahan ? frm.doc.waktu_penyerahan.split(' ')[0] : 0
 		frm.set_value('accept_day', parseInt(day))
@@ -840,10 +848,10 @@ frappe.ui.form.on("Purchase Order Item", {
 	item_name(frm) {
 		sth.form.toggle_pph_22(frm)
 	},
-	qty(frm){
+	qty(frm) {
 		calculate_sub_total(frm)
 	},
-	rate(frm){
+	rate(frm) {
 		calculate_sub_total(frm)
 	}
 });
@@ -859,37 +867,37 @@ frappe.ui.form.on("VAT Detail", {
 	},
 
 	ph_lainnya_remove(frm, dt, dn) {
-        sync_to_taxes(frm);
-        frm.trigger('calculate_total_pph_lainnya')
-        frm.trigger('calculate_total_ppn')
-        frm.trigger('calculate_taxes_and_totals')
-    },
+		sync_to_taxes(frm);
+		frm.trigger('calculate_total_pph_lainnya')
+		frm.trigger('calculate_total_ppn')
+		frm.trigger('calculate_taxes_and_totals')
+	},
 
-    ppn_remove(frm, dt, dn) {
-        sync_to_taxes(frm);
-        frm.trigger('calculate_total_pph_lainnya')
-        frm.trigger('calculate_total_ppn')
-        frm.trigger('calculate_taxes_and_totals')
-    },
+	ppn_remove(frm, dt, dn) {
+		sync_to_taxes(frm);
+		frm.trigger('calculate_total_pph_lainnya')
+		frm.trigger('calculate_total_ppn')
+		frm.trigger('calculate_taxes_and_totals')
+	},
 
 	type(frm, dt, dn) {
-        let row = locals[dt][dn]
-        if (!frm.doc.company) {
-            frappe.throw("Silahkan isi company lebih dahulu")
-        }
-        const tipe = row.parentfield == "ppn" ? "Masukan" : "PPh"
-        frappe.xcall("sth.custom.supplier_quotation.get_account_tax_rate", { name: row.type, company: frm.doc.company, tipe: tipe }).then((res) => {
-            frappe.model.set_value(dt, dn, "account", res)
-            if(tipe == "PPh"){
-                row.tax_type= "PPH"
-            }
-            else{
-                row.tax_type="PPN"
-            }
-            frm.refresh_field(row.parentfield)
-            sync_to_taxes(frm)
-        })
-    },
+		let row = locals[dt][dn]
+		if (!frm.doc.company) {
+			frappe.throw("Silahkan isi company lebih dahulu")
+		}
+		const tipe = row.parentfield == "ppn" ? "Masukan" : "PPh"
+		frappe.xcall("sth.custom.supplier_quotation.get_account_tax_rate", { name: row.type, company: frm.doc.company, tipe: tipe }).then((res) => {
+			frappe.model.set_value(dt, dn, "account", res)
+			if (tipe == "PPh") {
+				row.tax_type = "PPH"
+			}
+			else {
+				row.tax_type = "PPN"
+			}
+			frm.refresh_field(row.parentfield)
+			sync_to_taxes(frm)
+		})
+	},
 
 
 	amount(frm, dt, dn) {
@@ -918,89 +926,89 @@ frappe.ui.form.on("VAT Detail", {
 // ─── Sync Taxes ──────────────────────────────────────────────────────────────
 
 const PO_FIELD_MAP = [
-    { key: "Ongkos Angkut", marker: "__ongkos_angkut__", field: "total_biaya_ongkos_angkut" },
-    { key: "PPH 22",        marker: "__pph_22__",         field: "pph_22" },
-    { key: "PBBKB",         marker: "__pbbkb__",          field: "pbbkb" },
-    { key: "Cost",          marker: "__cost__",            field: "cost" },
+	{ key: "Ongkos Angkut", marker: "__ongkos_angkut__", field: "total_biaya_ongkos_angkut" },
+	{ key: "PPH 22", marker: "__pph_22__", field: "pph_22" },
+	{ key: "PBBKB", marker: "__pbbkb__", field: "pbbkb" },
+	{ key: "Cost", marker: "__cost__", field: "cost" },
 ]
 
 const CHARGES_MARKER = "__from_charges__";
 const PB_MARKER = "__from_pb__";
 
-function sync_to_taxes(frm){
-    frm.doc.taxes = []
-    sync_diskon_to_taxes(frm, true)
-    sync_ppn_to_taxes(frm, true)
-    sync_all_to_taxes(frm)
+function sync_to_taxes(frm) {
+	frm.doc.taxes = []
+	sync_diskon_to_taxes(frm, true)
+	sync_ppn_to_taxes(frm, true)
+	sync_all_to_taxes(frm)
 
-    frm.refresh_field("taxes");
-    frm.trigger("calculate_taxes_and_totals");
+	frm.refresh_field("taxes");
+	frm.trigger("calculate_taxes_and_totals");
 }
 
 function sync_ppn_to_taxes(frm, skip_recalc = false) {
-    const PPN_MARKER = "__from_ppn__";
+	const PPN_MARKER = "__from_ppn__";
 
-    for (const row of (frm.doc.ppn || [])) {
-        if (!row.amount || !row.type) continue;
+	for (const row of (frm.doc.ppn || [])) {
+		if (!row.amount || !row.type) continue;
 
-        let tax = frm.add_child("taxes");
-        tax.account_head = row.account
-        tax.charge_type = "Actual";
-        tax.add_deduct_tax = "Add";
-        tax.category = "Total";
-        tax.tax_amount = row.amount || 0;
-        tax.description = `${PPN_MARKER}${row.type || ""}`;
-    }
+		let tax = frm.add_child("taxes");
+		tax.account_head = row.account
+		tax.charge_type = "Actual";
+		tax.add_deduct_tax = "Add";
+		tax.category = "Total";
+		tax.tax_amount = row.amount || 0;
+		tax.description = `${PPN_MARKER}${row.type || ""}`;
+	}
 
-    frm.refresh_field("taxes");
-    frm.trigger("calculate_taxes_and_totals");
+	frm.refresh_field("taxes");
+	frm.trigger("calculate_taxes_and_totals");
 }
 
 function sync_diskon_to_taxes(frm, skip_recalc = false) {
 
-    const DISKON_MARKER = "__diskon__"
+	const DISKON_MARKER = "__diskon__"
 
-    // bersihkan row diskon lama dulu
-    frm.doc.taxes = (frm.doc.taxes || []).filter(
-        row => !(row.description || "").startsWith(DISKON_MARKER)
-    )
+	// bersihkan row diskon lama dulu
+	frm.doc.taxes = (frm.doc.taxes || []).filter(
+		row => !(row.description || "").startsWith(DISKON_MARKER)
+	)
 
-    const jumlah_diskon = frm.doc.jumlah_diskon || 0
-    const diskon_account = frm._diskon_account
-    if (jumlah_diskon && diskon_account) {
-        let diskon_row = frm.add_child("taxes")
-        diskon_row.charge_type = "Actual"
-        diskon_row.category = "Total"
-        diskon_row.account_head = diskon_account
-        diskon_row.tax_amount = -jumlah_diskon
-        diskon_row.add_deduct_tax = "Add"
-        diskon_row.description = DISKON_MARKER
-    }
+	const jumlah_diskon = frm.doc.jumlah_diskon || 0
+	const diskon_account = frm._diskon_account
+	if (jumlah_diskon && diskon_account) {
+		let diskon_row = frm.add_child("taxes")
+		diskon_row.charge_type = "Actual"
+		diskon_row.category = "Total"
+		diskon_row.account_head = diskon_account
+		diskon_row.tax_amount = -jumlah_diskon
+		diskon_row.add_deduct_tax = "Add"
+		diskon_row.description = DISKON_MARKER
+	}
 }
 
 function sync_all_to_taxes(frm) {
-    const ref_tax = frappe.refererence.__ref_tax || {}
-    const field_map = [
-        { key: "Ongkos Angkut", value: frm.doc.total_biaya_ongkos_angkut, add_deduct: "Add" },
-        { key: "PPH 22",        value: frm.doc.pph_22,                     add_deduct: "Add" },
-        { key: "PBBKB",         value: frm.doc.pbbkb,                      add_deduct: "Add" },
-        { key: "Cost",          value: frm.doc.cost,                        add_deduct: "Add" },
-    ]
+	const ref_tax = frappe.refererence.__ref_tax || {}
+	const field_map = [
+		{ key: "Ongkos Angkut", value: frm.doc.total_biaya_ongkos_angkut, add_deduct: "Add" },
+		{ key: "PPH 22", value: frm.doc.pph_22, add_deduct: "Add" },
+		{ key: "PBBKB", value: frm.doc.pbbkb, add_deduct: "Add" },
+		{ key: "Cost", value: frm.doc.cost, add_deduct: "Add" },
+	]
 
-    for (const { key, value, add_deduct } of field_map) {
-        const ref = ref_tax[key]
-        if (!ref) continue
+	for (const { key, value, add_deduct } of field_map) {
+		const ref = ref_tax[key]
+		if (!ref) continue
 
-        let tax = (frm.doc.taxes || []).find(r => r.account_head == ref.account)
-        if (!tax) {
-            tax = frm.add_child("taxes")
-            tax.account_head = ref.account
-            tax.charge_type = "Actual"
-            tax.add_deduct_tax = add_deduct
-            tax.category = "Total"
-        }
-        frappe.model.set_value(tax.doctype, tax.name, "tax_amount", value || 0)
-    }
+		let tax = (frm.doc.taxes || []).find(r => r.account_head == ref.account)
+		if (!tax) {
+			tax = frm.add_child("taxes")
+			tax.account_head = ref.account
+			tax.charge_type = "Actual"
+			tax.add_deduct_tax = add_deduct
+			tax.category = "Total"
+		}
+		frappe.model.set_value(tax.doctype, tax.name, "tax_amount", value || 0)
+	}
 }
 
 // Kembarannya di server: sth.buying_sth.custom.purchase_order.set_sub_total,
@@ -1010,8 +1018,8 @@ function sync_all_to_taxes(frm) {
 // Voucher Match, charges, dan pengeluaran barang yang ikut dijumlah versi
 // Purchase Invoice tidak ada tabelnya di Purchase Order, jadi tidak dibawa.
 function calculate_sub_total(frm) {
-    const sub_total = (frm.doc.items || []).reduce((sum, r) => sum + (r.amount || 0), 0);
-    frm.set_value("sub_total", sub_total);
+	const sub_total = (frm.doc.items || []).reduce((sum, r) => sum + (r.amount || 0), 0);
+	frm.set_value("sub_total", sub_total);
 }
 
 
@@ -1177,6 +1185,6 @@ function html_uang_muka(rekap) {
 // handler frappe.ui.form.on lebih dulu, baru refresh milik cscript — punya
 // ERPNext justru yang belakangan. custom_refresh kait bawaan frappe yang
 // dijalankan sesudah keduanya, jadi di situ tempatnya.
-function sembunyikan_supplier_name(frm){
+function sembunyikan_supplier_name(frm) {
 	frm.cscript.custom_refresh = () => frm.toggle_display("supplier_name", false)
 }

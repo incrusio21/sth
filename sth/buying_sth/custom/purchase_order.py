@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, cint, nowdate
+from frappe.utils import flt, cint, nowdate,add_days
     
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
@@ -285,6 +285,9 @@ def get_payment_entry_uang_muka(
 def set_accept_day(doc,method):
     doc.accept_day = cint(doc.syarat_pembayaran.split(' ')[0]) if doc.syarat_pembayaran else 0
 
+def set_default_waktu_penyerahan(doc,method=None):
+    if not doc.waktu_penyerahan:
+        doc.waktu_penyerahan = add_days(doc.transaction_date,7)
 
 def set_sub_total(doc, method=None):
     """Isi Sub Total dari jumlah amount seluruh baris item.
