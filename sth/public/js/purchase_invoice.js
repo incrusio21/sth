@@ -497,12 +497,12 @@ frappe.ui.form.on("Purchase Invoice", {
 
     sub_total(frm) {
         const diskon = frm.doc.persentase_diskon || 0
-        frm.set_value('jumlah_diskon', diskon * frm.doc.sub_total / 100)
+        frm.set_value('jumlah_diskon', flt(diskon * frm.doc.sub_total / 100, precision('jumlah_diskon', frm.doc)))
     },
 
     persentase_diskon(frm) {
         const diskon = frm.doc.persentase_diskon || 0
-        frm.set_value('jumlah_diskon', diskon * frm.doc.sub_total / 100)
+        frm.set_value('jumlah_diskon', flt(diskon * frm.doc.sub_total / 100, precision('jumlah_diskon', frm.doc)))
     },
 
     jumlah_diskon(frm) {
@@ -515,14 +515,14 @@ frappe.ui.form.on("Purchase Invoice", {
 
         for (const row of (frm.doc.pph_lainnya || [])) {
             if (!row.percentage) continue
-            const amount = base_pph * row.percentage / 100
+            const amount = flt(base_pph * row.percentage / 100, precision("amount", row))
             frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
             frappe.model.set_value(row.doctype, row.name, "amount", amount)
         }
 
         for (const row of (frm.doc.ppn || [])) {
             if (!row.percentage) continue
-            const amount = base_ppn * row.percentage / 100
+            const amount = flt(base_ppn * row.percentage / 100, precision("amount", row))
             frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
             frappe.model.set_value(row.doctype, row.name, "amount", amount)
         }
@@ -544,7 +544,7 @@ frappe.ui.form.on("Purchase Invoice", {
         for (const row of frm.doc.pph_lainnya) {
             total += row.amount
         }
-        frm.set_value("total_pph_lainnya", total)
+        frm.set_value("total_pph_lainnya", flt(total, precision("total_pph_lainnya", frm.doc)))
         refresh_base_vat_totals(frm)
     },
 
@@ -553,7 +553,7 @@ frappe.ui.form.on("Purchase Invoice", {
         for (const row of frm.doc.ppn) {
             total += row.amount
         }
-        frm.set_value("total_ppn", total)
+        frm.set_value("total_ppn", flt(total, precision("total_ppn", frm.doc)))
         refresh_base_vat_totals(frm)
     },
 
@@ -785,7 +785,7 @@ frappe.ui.form.on("VAT Detail", {
 
     percentage(frm, dt, dn) {
         let row = locals[dt][dn]
-        const amount = base_vat(frm, row.parentfield) * (row.percentage || 0) / 100
+        const amount = flt(base_vat(frm, row.parentfield) * (row.percentage || 0) / 100, precision("amount", row))
 
         frappe.model.set_value(row.ref_child_doc, row.ref_child_name, "tax_amount", amount)
         frappe.model.set_value(dt, dn, "amount", amount)
@@ -1237,8 +1237,10 @@ function rows_match(existing, incoming, fields) {
         fields.every((f) => {
             const a = row[f];
             const b = incoming[i][f];
+            // Server membulatkan angka taxes ke presisi field (round_floats_in
+            // ERPNext), jadi dibandingkan di presisi itu juga.
             return typeof a === "number" || typeof b === "number"
-                ? flt(a || 0) === flt(b || 0)
+                ? flt(a || 0, precision(f, row)) === flt(b || 0, precision(f, row))
                 : (a || "") === (b || "");
         })
     );
@@ -1292,7 +1294,7 @@ const VAT_TOTAL_BASE_FIELDS = {
 function refresh_base_vat_totals(frm) {
     const rate = flt(frm.doc.conversion_rate) || 1;
     for (const [field, base_field] of Object.entries(VAT_TOTAL_BASE_FIELDS)) {
-        frm.set_value(base_field, flt(frm.doc[field] || 0) * rate);
+        frm.set_value(base_field, flt(flt(frm.doc[field] || 0) * rate, precision(base_field, frm.doc)));
     }
 }
 
@@ -1421,7 +1423,7 @@ function calculate_sub_total(frm) {
         const total_pb = (frm.doc.purchase_invoice_pengeluaran_barang || []).reduce((sum, r) => sum + (r.amount || 0), 0);
         sub_total = total_items + total_charges - total_pb;
     }
-    frm.set_value("sub_total", sub_total);
+    frm.set_value("sub_total", flt(sub_total, precision("sub_total", frm.doc)));
 
     // frm.set_value('jumlah_diskon', ...) di handler sub_total() hanya memicu
     // trigger jumlah_diskon->recalculate_vat_details kalau nilainya berubah.
