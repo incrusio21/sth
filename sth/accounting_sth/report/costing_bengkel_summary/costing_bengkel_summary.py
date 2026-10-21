@@ -153,6 +153,7 @@ def get_data(filters):
 
 	# Total KM/HM VRA — dari semua Buku Kerja Mandor Traksi yang submitted.
 	# Jika filter costing_bengkel diisi, company & periode ikut dari dokumen tersebut.
+	# BKM yang kmhm_akhir-nya 0 (belum diisi) dilewati: selisihnya jadi minus kmhm_awal.
 	company = filters.get("company")
 	from_date = filters.get("from_date")
 	to_date = filters.get("to_date")
@@ -192,6 +193,7 @@ def get_data(filters):
 		WHERE docstatus = 1
 			AND kendaraan IS NOT NULL
 			AND kendaraan != ''
+			AND kmhm_akhir != 0
 			{kmhm_condition_sql}
 		GROUP BY kendaraan
 	""".format(kmhm_condition_sql=kmhm_condition_sql), kmhm_values, as_dict=True)
@@ -206,6 +208,7 @@ def get_data(filters):
 		WHERE docstatus = 1
 			AND kd_kndr IS NOT NULL
 			AND kd_kndr != ''
+			AND kmhm_akhir != 0
 			{kmhm_condition_sql}
 		GROUP BY kd_kndr
 	""".format(kmhm_condition_sql=kmhm_condition_sql), kmhm_values, as_dict=True)
