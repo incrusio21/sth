@@ -2046,3 +2046,149 @@ frappe.ui.form.on("Payment Voucher Kas PDO", {
 		sum_payment_voucher_kas_pdo(frm);
 	}
 });
+
+// PPN dari paid_amount yang diketik user. Setelah paid_amount diisi tangan, user
+// diminta memilih Tax Rate PPN dan Include/Exclude, lalu PPN-nya masuk sebagai baris
+// deductions ke akun PPN Tax Rate itu (Masukan untuk Pay, Keluaran untuk Receive),
+// pola yang sama dengan DP kontrak penjualan di atas. Include memecah nilai yang
+// diketik jadi DPP + PPN; Exclude menganggapnya DPP dan menaikkan paid_amount.
+//
+// Hanya dipicu ketikan: paid_amount juga diisi kode di banyak tempat (PDO, payroll,
+// alokasi invoice) dan dialog tidak boleh muncul di sana. Pembayaran Sales/Purchase
+// Invoice dilewati karena PPN-nya sudah dijurnal di invoice.
+frappe.ui.form.on("Payment Entry", {
+	refresh(frm) {
+		const field = frm.fields_dict.paid_amount;
+		if (!field || !field.$input || field.$input.data("ppn_terpasang")) return;
+
+		field.$input.data("ppn_terpasang", true);
+		field.$input.on("input", () => { frm._paid_amount_diketik = true; });
+	},
+
+	paid_amount(frm) {
+		if (!frm._paid_amount_diketik) return;
+		frm._paid_amount_diketik = false;
+
+		if (frm.doc.docstatus !== 0 || !flt(frm.doc.paid_amount)) return;
+		if (!["Pay", "Receive"].includes(frm.doc.payment_type)) return;
+
+		const ada_invoice = (frm.doc.references || []).some(r =>
+			["Sales Invoice", "Purchase Invoice"].includes(r.reference_doctype)
+		);
+		if (ada_invoice) return;
+
+		tanya_ppn_paid_amount(frm);
+	},
+});
+
+function tanya_ppn_paid_amount(frm) {
+	const nilai = flt(frm.doc.paid_amount);
+	const terakhir = frm._ppn_paid_amount || {};
+
+	const dialog = new frappe.ui.Dialog({
+		title: __("PPN atas {0}", [format_currency(nilai, frm.doc.paid_from_account_currency)]),
+		fields: [
+			{
+				fieldname: "tax_rate",
+				fieldtype: "Link",
+				label: __("Tax Rate PPN"),
+				options: "Tax Rate",
+				reqd: 1,
+				default: terakhir.tax_rate,
+				get_query: () => ({ filters: { type: "PPN", is_group: 0 } }),
+			},
+			{
+				fieldname: "jenis_ppn",
+				fieldtype: "Select",
+				label: __("Jenis PPN"),
+				options: "Include\nExclude",
+				reqd: 1,
+				default: terakhir.jenis_ppn || "Include",
+				description: __("Include: nilai sudah termasuk PPN. Exclude: PPN ditambahkan di atas nilai."),
+			},
+		],
+		primary_action_label: __("Terapkan"),
+		primary_action: async (values) => {
+			dialog.hide();
+			frm._ppn_paid_amount = values;
+			await terapkan_ppn_paid_amount(frm, nilai, values.tax_rate, values.jenis_ppn);
+		},
+		secondary_action_label: __("Tanpa PPN"),
+		secondary_action: () => {
+			dialog.hide();
+			hapus_ppn_paid_amount(frm);
+		},
+	});
+
+	dialog.show();
+}
+
+async function terapkan_ppn_paid_amount(frm, nilai, tax_rate, jenis_ppn) {
+	const tipe = frm.doc.payment_type === "Pay" ? "Masukan" : "Keluaran";
+	const [tr, company] = await Promise.all([
+		frappe.db.get_doc("Tax Rate", tax_rate),
+		frappe.db.get_value("Company", frm.doc.company, "cost_center"),
+	]);
+
+	const rate = flt(tr.rate);
+	const akun = ((tr.tax_rate_account || []).find(r =>
+		r.company === frm.doc.company && r.tipe === tipe
+	) || {}).account;
+
+	if (!akun) {
+		frappe.msgprint(__("Tax Rate {0} belum punya akun PPN {1} untuk company {2}.",
+			[tax_rate, tipe, frm.doc.company]));
+		return;
+	}
+
+	// Sama dengan pecah_dpp_ppn di Nota Piutang: PPN Include diambil sebagai sisa
+	// supaya DPP + PPN tetap persis nilai yang diketik.
+	const presisi = precision("paid_amount");
+	let total, ppn;
+	if (jenis_ppn === "Exclude") {
+		ppn = flt(nilai * rate / 100, presisi);
+		total = flt(nilai + ppn, presisi);
+	} else {
+		ppn = flt(nilai - flt(nilai / (1 + rate / 100), presisi), presisi);
+		total = nilai;
+	}
+
+	hapus_ppn_paid_amount(frm, false);
+
+	// Deduction didebit: Pay mendebit PPN Masukan (positif), Receive mengkredit
+	// PPN Keluaran (negatif). Sisanya yang jatuh ke akun party adalah DPP.
+	frm.add_child("deductions", {
+		account: akun,
+		cost_center: frm.doc.cost_center || (company.message && company.message.cost_center),
+		amount: frm.doc.payment_type === "Pay" ? ppn : -ppn,
+		description: PPN_PAID_AMOUNT_MARKER,
+	});
+	frm.refresh_field("deductions");
+
+	await frm.set_value("paid_amount", total);
+	await frm.set_value("received_amount", total);
+	frm.events.set_unallocated_amount && frm.events.set_unallocated_amount(frm);
+
+	frappe.show_alert({
+		message: __("PPN {0}% {1}: DPP {2}, PPN {3}", [
+			rate, jenis_ppn,
+			format_currency(total - ppn), format_currency(ppn),
+		]),
+		indicator: "green",
+	});
+}
+
+const PPN_PAID_AMOUNT_MARKER = "PPN dari paid_amount";
+
+function hapus_ppn_paid_amount(frm, refresh = true) {
+	const sisa = (frm.doc.deductions || []).filter(r => r.description !== PPN_PAID_AMOUNT_MARKER);
+	if (sisa.length === (frm.doc.deductions || []).length) return;
+
+	frm.doc.deductions = sisa;
+	sisa.forEach((r, i) => { r.idx = i + 1; });
+	frm.dirty();
+	if (refresh) {
+		frm.refresh_field("deductions");
+		frm.events.set_unallocated_amount && frm.events.set_unallocated_amount(frm);
+	}
+}
