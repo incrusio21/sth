@@ -5,10 +5,10 @@ frappe.ui.form.on("CBC Monitoring", {
 	refresh(frm) {
 
 	},
-	starting_hour_meter(frm){
+	starting_hour_meter(frm) {
 		hitung_total(frm)
 	},
-	ending_hour_meter(frm){
+	ending_hour_meter(frm) {
 		hitung_total(frm)
 	},
 	setup(frm) {
@@ -31,8 +31,11 @@ frappe.ui.form.on("CBC Monitoring", {
 	},
 });
 
-function hitung_total(frm){
-	if(frm.doc.starting_hour_meter && frm.doc.ending_hour_meter){
-		frm.set_value("total_hour_meter", frm.doc.ending_hour_meter - frm.doc.starting_hour_meter)
-	}
+function hitung_total(frm) {
+	// console.log("run hitung_total");
+
+	// if (frm.doc.starting_hour_meter && frm.doc.ending_hour_meter) {
+	// console.log("run calculate hitung_total");
+	frm.set_value("total_hour_meter", frm.doc.ending_hour_meter - frm.doc.starting_hour_meter)
+	// }
 }
