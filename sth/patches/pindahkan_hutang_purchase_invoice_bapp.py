@@ -1,6 +1,10 @@
 import frappe
 
-from sth.custom.method_ambil_account import ambil_proposal_hutang_invoice
+from sth.custom.method_ambil_account import (
+	ambil_proposal_hutang_invoice,
+	ambil_proposal_hutang_usaha,
+	ambil_proposal_uang_muka,
+)
 from sth.overrides.purchase_invoice import proposal_bapp_purchase_invoice
 from sth.patches.koreksi_akun_persediaan_purchase_receipt import accounting_period_tertutup
 
@@ -8,29 +12,35 @@ DOCTYPE = "Purchase Invoice"
 
 
 def execute(purchase_invoice=None, company=None, dari=None, sampai=None, dry_run=True):
-	"""Pindahkan hutang Purchase Invoice BAPP ke akun Hutang Invoice Proposal Type.
+	"""Pindahkan akun Purchase Invoice BAPP ke akun Proposal Type-nya.
 
 	BAPP Item tidak membawa link proposal, jadi validate() Purchase Invoice tidak
-	pernah menetapkan credit_to invoice BAPP. Akun dari make_purchase_invoice BAPP
-	tertimpa form begitu supplier terisi, dan yang tersimpan akun party - biasanya
-	default payable Company (mis. 2111091 - HUTANG INVOICE - PEMASOK) - bukan
-	akun Hutang Invoice di Proposal Type (mis. 2111092 - HUTANG INVOICE -
-	KONTRAKTOR).
+	pernah memakai akun proposal untuk invoice BAPP:
+
+	    - credit_to tertimpa akun party begitu supplier terisi di form, biasanya
+	      default payable Company (mis. 2111091 - HUTANG INVOICE - PEMASOK),
+	      bukan Hutang Invoice Proposal Type (mis. 2111092 - HUTANG INVOICE -
+	      KONTRAKTOR)
+	    - expense_account item jatuh ke akun biaya bawaan item. Biaya itu sudah
+	      dijurnal BAPP dengan lawan Hutang Usaha Proposal Type (mis. 2111002 -
+	      HUTANG USAHA - KONTRAKTOR), jadi biayanya tercatat dua kali dan Hutang
+	      Usaha itu tidak pernah tertutup. Termin DP memakai Uang Muka Proposal
+	      Type.
 
 	Yang dipindah untuk invoice submit, semuanya cuma ganti akun - nilai debit
 	dan kredit tidak bergerak:
 
-	    - credit_to di Purchase Invoice
-	    - baris GL dan Payment Ledger Entry hutang invoice itu, termasuk potongan
-	      uang muka PO yang dibukukan di voucher invoice itu sendiri
+	    - credit_to, serta baris GL dan Payment Ledger Entry hutang invoice itu,
+	      termasuk potongan uang muka PO yang dibukukan di voucher invoice itu
+	    - expense_account item, serta baris debit GL item itu (voucher_detail_no)
 
-	Invoice draft cukup diganti credit_to-nya.
+	Invoice draft cukup diganti credit_to dan expense_account-nya.
 
 	Yang dilewati dan cuma dicetak:
 
-	    - invoice yang sudah dibayar atau dikurangi dokumen lain (Payment Entry,
-	      Journal Entry, Debit Note): akun dokumen itu ikut harus dipindah, dan
-	      itu diputuskan tangan
+	    - credit_to invoice yang sudah dibayar atau dikurangi dokumen lain
+	      (Payment Entry, Journal Entry, Debit Note): akun dokumen itu ikut harus
+	      dipindah, dan itu diputuskan tangan. expense_account-nya tetap dipindah.
 	    - Debit Note (is_return): ikut invoice asalnya
 	    - invoice yang tanggalnya masuk Accounting Period yang sudah disubmit
 
@@ -46,7 +56,7 @@ def execute(purchase_invoice=None, company=None, dari=None, sampai=None, dry_run
 	daftar = purchase_invoice or cari_purchase_invoice(company, dari, sampai)
 
 	if not daftar:
-		print("Hutang Purchase Invoice BAPP: tidak ada dokumen yang diproses")
+		print("Akun Purchase Invoice BAPP: tidak ada dokumen yang diproses")
 		return
 
 	berhasil, dilewati = [], []
@@ -106,7 +116,7 @@ def _proses_satu(nama, dry_run):
 		DOCTYPE,
 		nama,
 		["name", "company", "posting_date", "docstatus", "is_return", "credit_to",
-		 "document_type", "document_no"],
+		 "termin", "document_type", "document_no"],
 		as_dict=True,
 	)
 
@@ -120,43 +130,98 @@ def _proses_satu(nama, dry_run):
 	if not proposal:
 		return False, f"BAPP {pi.document_no} tidak punya Proposal"
 
+	ambil_biaya = ambil_proposal_uang_muka if pi.termin == "DP" else ambil_proposal_hutang_usaha
+
 	try:
-		akun_baru = ambil_proposal_hutang_invoice(proposal, pi.company)
+		hutang_baru = ambil_proposal_hutang_invoice(proposal, pi.company)
+		biaya_baru = ambil_biaya(proposal, pi.company)
 	except frappe.ValidationError:
 		frappe.clear_messages()
-		return False, f"Proposal Type {proposal} belum punya Hutang Invoice untuk {pi.company}"
+		return False, f"Proposal Type {proposal} belum lengkap akunnya untuk {pi.company}"
 
-	akun_lama = pi.credit_to
+	items = frappe.get_all(
+		"Purchase Invoice Item",
+		filters={"parent": nama, "parenttype": DOCTYPE},
+		fields=["name", "expense_account"],
+		order_by="idx",
+	)
+	item_salah = [d for d in items if d.expense_account != biaya_baru]
 
-	if akun_lama == akun_baru:
+	hutang_lama = pi.credit_to
+	pindah_hutang = hutang_lama != hutang_baru
+
+	if not pindah_hutang and not item_salah:
 		return False, ""
 
-	pesan = f"{akun_lama} -> {akun_baru}"
-
-	if pi.docstatus == 0:
-		if not dry_run:
-			frappe.db.set_value(DOCTYPE, nama, "credit_to", akun_baru, update_modified=False)
-
-		return True, pesan + " (draft)"
-
-	if pi.is_return:
+	if pi.docstatus == 1 and pi.is_return:
 		return False, "Debit Note, pindahkan bersama invoice asalnya dengan tangan"
 
-	lain = dokumen_lain_terhadap_invoice(nama)
-	if lain:
-		return False, "sudah ada dokumen lain terhadap invoice ini: " + ", ".join(lain)
+	if pi.docstatus == 1:
+		periode = accounting_period_tertutup(pi.posting_date, pi.company)
+		if periode:
+			return False, f"Accounting Period {periode} sudah disubmit"
 
-	periode = accounting_period_tertutup(pi.posting_date, pi.company)
-	if periode:
-		return False, f"Accounting Period {periode} sudah disubmit"
+	pesan = []
+	catatan = ""
+
+	if pindah_hutang and pi.docstatus == 1:
+		lain = dokumen_lain_terhadap_invoice(nama)
+		if lain:
+			pindah_hutang = False
+			catatan = f"; credit_to {hutang_lama} dilewati, sudah ada dokumen lain: " + ", ".join(lain)
+
+	if pindah_hutang:
+		pesan.append(f"credit_to {hutang_lama} -> {hutang_baru}")
+
+	if item_salah:
+		lama = ", ".join(sorted({d.expense_account or "-" for d in item_salah}))
+		pesan.append(f"expense_account {lama} -> {biaya_baru} ({len(item_salah)} baris)")
+
+	if not pesan:
+		return False, catatan.lstrip("; ")
+
+	pesan = "; ".join(pesan) + catatan
+
+	if pi.docstatus == 0:
+		pesan += " (draft)"
 
 	if dry_run:
 		return True, pesan
 
-	frappe.db.set_value(DOCTYPE, nama, "credit_to", akun_baru, update_modified=False)
-	_pindahkan_ledger(nama, akun_lama, akun_baru)
+	if pindah_hutang:
+		frappe.db.set_value(DOCTYPE, nama, "credit_to", hutang_baru, update_modified=False)
+		if pi.docstatus == 1:
+			_pindahkan_ledger_hutang(nama, hutang_lama, hutang_baru)
+
+	if item_salah:
+		against_lama = _gabung_akun(d.expense_account for d in items)
+
+		for d in item_salah:
+			frappe.db.set_value("Purchase Invoice Item", d.name, "expense_account", biaya_baru, update_modified=False)
+
+			if pi.docstatus == 1:
+				_pindahkan_ledger_biaya(nama, d, biaya_baru)
+
+		if pi.docstatus == 1:
+			# Baris hutang mencatat gabungan expense_account semua item sebagai
+			# against-nya (make_item_gl_entries_spk).
+			against_baru = _gabung_akun(
+				biaya_baru if d in item_salah else d.expense_account for d in items
+			)
+			frappe.db.sql(
+				"""
+				update `tabGL Entry`
+				set against = %s
+				where voucher_type = %s and voucher_no = %s and is_cancelled = 0 and against = %s
+				""",
+				(against_baru, DOCTYPE, nama, against_lama),
+			)
 
 	return True, pesan
+
+
+def _gabung_akun(akun):
+	return ", ".join(sorted({a for a in akun if a}))
 
 
 def dokumen_lain_terhadap_invoice(nama):
@@ -172,7 +237,20 @@ def dokumen_lain_terhadap_invoice(nama):
 	)
 
 
-def _pindahkan_ledger(nama, akun_lama, akun_baru):
+def _pindahkan_ledger_biaya(nama, item, akun_baru):
+	"""Baris debit GL satu item invoice ke akun baru, dikenali dari voucher_detail_no."""
+	frappe.db.sql(
+		"""
+		update `tabGL Entry`
+		set account = %s
+		where voucher_type = %s and voucher_no = %s and is_cancelled = 0
+		  and voucher_detail_no = %s and account = %s
+		""",
+		(akun_baru, DOCTYPE, nama, item.name, item.expense_account),
+	)
+
+
+def _pindahkan_ledger_hutang(nama, akun_lama, akun_baru):
 	"""Akun baris hutang GL dan Payment Ledger Entry invoice ini ke akun baru."""
 	frappe.db.sql(
 		"""
@@ -210,7 +288,7 @@ def _cetak_ringkasan(berhasil, dilewati, dry_run):
 	judul = "RENCANA (dry run)" if dry_run else "HASIL"
 
 	print("")
-	print(f"=== Hutang Purchase Invoice BAPP ke akun Proposal Type - {judul} ===")
+	print(f"=== Akun Purchase Invoice BAPP ke akun Proposal Type - {judul} ===")
 
 	print("")
 	print(f"Dipindahkan: {len(berhasil)}")

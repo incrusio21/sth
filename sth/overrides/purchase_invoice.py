@@ -108,6 +108,12 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		ada_po = 0
 		ada_pro = 0
 
+		# BAPP Item tidak punya link proposal (proposal-nya cuma di header BAPP),
+		# jadi proposal invoice BAPP diambil dari BAPP-nya. Tanpa ini item BAPP
+		# jatuh ke akun biaya bawaan item - padahal biayanya sudah dijurnal BAPP -
+		# dan credit_to ikut default payable Company.
+		proposal_bapp = proposal_bapp_purchase_invoice(self)
+
 		for item in self.items:
 			if item.purchase_order:
 				ada_po = 1
@@ -139,9 +145,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					item.expense_account = akun_expense
 					self.credit_amount = method_ambil_account.ambil_hutang_invoice_procurement(po_doc.name,self.company)
 
-			if item.proposal:
+			proposal = item.proposal or proposal_bapp
+			if proposal:
 				ada_pro = 1
-				po_doc = frappe.get_doc("Proposal", item.proposal)
+				po_doc = frappe.get_doc("Proposal", proposal)
 
 				if bukan_dp == 0:
 					item.expense_account = method_ambil_account.ambil_proposal_hutang_usaha(po_doc.name,self.company)
@@ -159,15 +166,6 @@ class SthPurchaseInvoice(PurchaseInvoice):
 					for row_item in doc_item.item_defaults:
 						if self.company == row_item.company:
 							item.expense_account = row_item.expense_account
-
-		# BAPP Item tidak punya link proposal (proposal-nya cuma di header BAPP),
-		# jadi cabang item.proposal di atas tidak pernah jalan untuk invoice BAPP.
-		# Tanpa ini credit_to ikut akun party yang diisi form begitu supplier
-		# terisi, biasanya default payable Company.
-		if not ada_po and not ada_pro:
-			proposal = proposal_bapp_purchase_invoice(self)
-			if proposal:
-				self.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(proposal, self.company)
 
 		if self.voucher_type == "Non Voucher Match":
 			for row in self.non_voucher_match:
