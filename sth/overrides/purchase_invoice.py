@@ -41,6 +41,12 @@ from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update
 form_grid_templates = {"items": "templates/form_grid/custom_item_grid.html","non_voucher_match": "templates/form_grid/non_voucher_grid.html"}
 
 from sth.custom import method_ambil_account
+from sth.legal.custom.pembayaran_retensi import (
+	betulkan_outstanding_retensi,
+	get_gl_entries_pembayaran_retensi,
+	validate_cancel_pi_termin,
+	validate_pembayaran_retensi,
+)
 from sth.custom.purchase_receipt import apply_item_overreceipt_allowance
 from sth.buying_sth.custom.uang_muka_po import (
 	advance_uang_muka_po,
@@ -118,7 +124,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		# dan credit_to ikut default payable Company.
 		proposal_bapp = proposal_bapp_purchase_invoice(self)
 
-		for item in self.items:
+		# PI pembayaran retensi menentukan akun item dan credit_to-nya sendiri.
+		validate_pembayaran_retensi(self)
+
+		for item in ([] if self.get("pembayaran_retensi") else self.items):
 			if item.purchase_order:
 				ada_po = 1
 				po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
@@ -186,7 +195,8 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.set_base_vat_totals()
 		validate_uang_muka_po(self)
 		self.set_grand_total_setelah_dp()
-		self.validate_uang_muka_wajib_diambil()
+		if not self.get("pembayaran_retensi"):
+			self.validate_uang_muka_wajib_diambil()
 
 	def validate_perhitungan_kud(self):
 		"""Satu Perhitungan KUD hanya boleh punya satu Purchase Invoice.
@@ -826,9 +836,15 @@ class SthPurchaseInvoice(PurchaseInvoice):
 	def on_submit(self):
 		super().on_submit()
 		self.update_term_used()
+		betulkan_outstanding_retensi(self)
+
+	def before_cancel(self):
+		validate_cancel_pi_termin(self)
+		super().before_cancel()
 
 	def on_cancel(self):
 		super().on_cancel()
+		betulkan_outstanding_retensi(self, cancel=True)
 		self.update_term_used(cancel=1)
 
 	def update_term_used(self, cancel=0):
@@ -891,7 +907,12 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
 
-		if self.invoice_type == "SPK":
+		if self.get("pembayaran_retensi"):
+			get_gl_entries_pembayaran_retensi(self, gl_entries)
+			gl_entries = merge_similar_entries(gl_entries)
+			self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
+
+		elif self.invoice_type == "SPK":
 			self.make_item_gl_entries_spk(gl_entries)
 			self.make_tax_gl_entries(gl_entries)
 			# self.make_charges_gl_entries(gl_entries)

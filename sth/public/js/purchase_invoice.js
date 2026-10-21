@@ -219,6 +219,19 @@ frappe.ui.form.on("Purchase Invoice", {
                     pilih_do_ongkos_angkut(frm);
                 }, __("Get Items From"));
         }
+
+        if (frm.is_new()) {
+            frm.add_custom_button(
+                __("Retensi Proposal"),
+                function () {
+                    pilih_proposal_retensi(frm);
+                }, __("Get Items From"));
+        }
+
+        // Isi PI pembayaran retensi ditentukan server dari tabel retensi_invoice.
+        if (frm.doc.pembayaran_retensi) {
+            frm.set_df_property("items", "read_only", 1)
+        }
     },
 
     company(frm) {
@@ -1994,4 +2007,46 @@ async function showPPHSelector(frm, selected_training_event, costing_items) {
     pph_dialog.fields_dict.table_pph.refresh();
 
     pph_dialog.show();
+}
+
+// Tombol Get Items From > Retensi Proposal: PI baru yang membayar sisa retensi
+// semua PI termin satu Proposal (lihat legal/custom/pembayaran_retensi.py). Isinya
+// dibuat server, form ini diganti dokumen hasilnya.
+function pilih_proposal_retensi(frm) {
+    const dialog = new frappe.ui.Dialog({
+        title: __("Pembayaran Retensi"),
+        fields: [
+            {
+                label: __("Proposal"),
+                fieldname: "proposal",
+                fieldtype: "Link",
+                options: "Proposal",
+                reqd: 1,
+                get_query: () => ({
+                    filters: Object.assign(
+                        { docstatus: 1 },
+                        frm.doc.company ? { company: frm.doc.company } : {},
+                        frm.doc.supplier ? { supplier: frm.doc.supplier } : {},
+                    ),
+                }),
+            },
+        ],
+        primary_action_label: __("Ambil"),
+        primary_action(values) {
+            dialog.hide()
+
+            frappe.call({
+                method: "sth.legal.custom.pembayaran_retensi.make_pembayaran_retensi",
+                args: { proposal: values.proposal },
+                freeze: true,
+                callback(r) {
+                    if (!r.message) return
+                    const doclist = frappe.model.sync(r.message)
+                    frappe.set_route("Form", doclist[0].doctype, doclist[0].name)
+                },
+            })
+        },
+    })
+
+    dialog.show()
 }
