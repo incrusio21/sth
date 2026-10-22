@@ -2130,11 +2130,12 @@ function ppn_paid_amount_terpasang(frm) {
 }
 
 // Nilai yang diisi user sebelum PPN: Exclude yang terpasang sudah menaikkan
-// paid_amount, jadi dasarnya DPP (paid_amount_after_tax) dan bukan paid_amount.
+// paid_amount, jadi dasarnya paid_amount dikurangi PPN. Bukan paid_amount_after_tax,
+// karena server mengisinya ulang dengan paid_amount saat disimpan.
 function dasar_ppn_paid_amount(frm) {
 	const terpasang = ppn_paid_amount_terpasang(frm);
-	if (terpasang && terpasang.jenis_ppn === "Exclude" && flt(frm.doc.paid_amount_after_tax)) {
-		return flt(frm.doc.paid_amount_after_tax);
+	if (terpasang && terpasang.jenis_ppn === "Exclude") {
+		return flt(flt(frm.doc.paid_amount) - ppn_termasuk_paid_amount(frm), precision("paid_amount"));
 	}
 	return flt(frm.doc.paid_amount);
 }

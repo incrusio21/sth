@@ -148,6 +148,18 @@ class PaymentEntry(EmployeePaymentEntry):
 		self.validate_paid_amount_with_outstanding()
 		self.validate_pengembalian_uang_muka_po()
 		validate_pembayaran_payroll(self)
+		self.hitung_ulang_taxes()
+
+	def hitung_ulang_taxes(self):
+		"""Baris taxes dihitung ulang di server sebelum disimpan.
+
+		validate ini tidak memanggil validate ERPNext, jadi apply_taxes-nya tidak
+		pernah jalan dan tax_amount tetap 0 dari form: form ERPNext hanya mengisi
+		base_tax_amount. Jurnal pajak di add_tax_gl_entries memakai tax_amount,
+		sehingga tanpa ini debit PPN hilang dan jurnalnya tidak balance.
+		"""
+		if self.get("taxes"):
+			self.apply_taxes()
 
 	def set_paid_to_uang_muka_po(self):
 		"""Pembayaran terhadap Purchase Order masuk ke akun Uang Muka.
