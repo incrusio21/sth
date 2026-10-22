@@ -327,9 +327,7 @@ def get_payment_status():
 		payment_entries.extend(
 			frappe.get_all(
 				"Mandiri Kopra Detail",
-				filters={
-					"parent": kcm_name
-				},
+				filters={"parent": kcm_name},
 				fields=["idx", "payment_entry"],
 				order_by="idx asc"
 			)
@@ -338,9 +336,7 @@ def get_payment_status():
 		payment_entries.extend(
 			frappe.get_all(
 				"Mandiri Kopra Cash Bill Detail",
-				filters={
-					"parent": kcm_name
-				},
+				filters={"parent": kcm_name},
 				fields=["idx", "payment_entry"],
 				order_by="idx asc"
 			)
@@ -357,7 +353,6 @@ def get_payment_status():
 				continue
 
 			delimiter = ";" if ";" in line else ","
-
 			parts = [p.strip() for p in line.split(delimiter)]
 
 			if "SUCCESS" in parts:
@@ -367,9 +362,7 @@ def get_payment_status():
 				error_idx = parts.index("ERROR")
 
 				if error_idx + 1 < len(parts) and parts[error_idx + 1]:
-					responses.append(
-						f"ERROR;{parts[error_idx + 1]}"
-					)
+					responses.append(f"ERROR;{parts[error_idx + 1]}")
 				else:
 					responses.append("ERROR")
 
@@ -383,14 +376,21 @@ def get_payment_status():
 			if idx < len(responses):
 				kcm_response = responses[idx]
 
+			# Status internal Payment Entry
+			if val["payment_status"] == "Success":
+				payment_entry_status = "Pending Approval"
+			else:
+				payment_entry_status = val["payment_status"]
+
 			frappe.db.set_value(
 				"Payment Entry",
 				pe.payment_entry,
 				{
-					"payment_status": val["payment_status"],
+					"payment_status": payment_entry_status,
 					"kcm_response": kcm_response
 				}
 			)
+
 
 @frappe.whitelist()
 def get_payment_entry_details(payment_entry):
