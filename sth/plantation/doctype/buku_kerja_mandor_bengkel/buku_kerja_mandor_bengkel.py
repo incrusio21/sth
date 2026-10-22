@@ -3,10 +3,22 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 class BukuKerjaMandorBengkel(Document):
 	def validate(self):
+		self.validate_kmhm()
 		self.update_kendaraan_field()
+
+	def validate_kmhm(self):
+		# KM/HM akhir yang dibiarkan kosong tersimpan 0 dan lewat sync_kmhm_akhir
+		# ikut mengenolkan KM/HM master kendaraan. Kendaraan di bengkel tidak
+		# berjalan, jadi kosong berarti sama dengan awal.
+		if not flt(self.kmhm_akhir):
+			self.kmhm_akhir = flt(self.kmhm_awal)
+
+		if flt(self.kmhm_akhir) < flt(self.kmhm_awal):
+			frappe.throw(f"KM/HM Akhir ({self.kmhm_akhir}) tidak boleh lebih kecil dari KM/HM Awal ({self.kmhm_awal})")
 
 	def on_submit(self):
 		self.make_attendance()
