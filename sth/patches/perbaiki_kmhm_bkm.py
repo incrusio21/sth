@@ -15,13 +15,13 @@ def execute(terapkan=0, kendaraan=None, dari=None, sampai=None):
 	  Bengkel berikutnya mengambil KM/HM awal 0 juga.
 
 	Per kendaraan, BKM Traksi dan Bengkel submitted ditelusuri urut waktu
-	(urutan yang sama dengan get_latest_kmhm), sambil membawa KM/HM akhir valid
-	terakhir:
+	(urutan yang sama dengan get_latest_kmhm), sambil membawa KM/HM akhir BKM
+	Traksi terakhir:
 	- Traksi dengan KM/HM awal 0: header dan kegiatan baris pertama diisi
-	  KM/HM akhir sebelumnya.
-	- Bengkel dengan KM/HM awal 0 diisi KM/HM akhir sebelumnya; KM/HM akhir
-	  yang 0 atau lebih kecil dari awal disamakan dengan awal (kendaraan di
-	  bengkel tidak berjalan).
+	  KM/HM akhir Traksi sebelumnya.
+	- Bengkel: KM/HM awal dan akhir disamakan dengan KM/HM akhir Traksi
+	  sebelumnya (kendaraan di bengkel tidak berjalan). KM/HM Bengkel sendiri
+	  tidak dipakai sebagai acuan, lihat catatan di telusuri_kendaraan.
 	Yang tidak punya riwayat sebelumnya, atau riwayatnya melebihi KM/HM akhir
 	dokumen itu, dilaporkan dan dibiarkan.
 
@@ -168,20 +168,20 @@ def telusuri_kendaraan(kendaraan, dari, sampai, ubah, lewati):
 				terakhir = akhir
 			continue
 
-		# Bengkel
-		awal_baru, akhir_baru = awal, akhir
-		if not awal and terakhir:
-			awal_baru = terakhir
-		if awal_baru and akhir_baru < awal_baru:
-			akhir_baru = awal_baru
+		# Bengkel: template import-nya tidak punya kolom KM/HM, jadi KM/HM awalnya
+		# diambil dari master kendaraan saat diinput, bukan saat tanggal posting.
+		# Untuk BKM yang diinput mundur nilainya bisa melompat melewati BKM Traksi
+		# di tanggal itu. Karena itu Bengkel disamakan dengan KM/HM akhir Traksi
+		# sebelumnya dan tidak dipakai sebagai acuan dokumen berikutnya.
+		if not dalam_rentang:
+			continue
 
-		if dalam_rentang and (awal_baru != awal or akhir_baru != akhir):
-			if awal_baru != awal:
-				catat("kmhm_awal", awal, awal_baru)
-			if akhir_baru != akhir:
-				catat("kmhm_akhir", akhir, akhir_baru)
-		elif dalam_rentang and not awal and not akhir:
-			tolak("KM/HM awal dan akhir 0, tidak ada BKM sebelumnya sebagai acuan")
-
-		if akhir_baru:
-			terakhir = akhir_baru
+		if terakhir:
+			if awal != terakhir:
+				catat("kmhm_awal", awal, terakhir)
+			if akhir != terakhir:
+				catat("kmhm_akhir", akhir, terakhir)
+		elif not awal and not akhir:
+			tolak("KM/HM awal dan akhir 0, tidak ada BKM Traksi sebelumnya sebagai acuan")
+		elif akhir < awal:
+			catat("kmhm_akhir", akhir, awal)
