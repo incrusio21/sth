@@ -1,0 +1,266 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-10-22 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_main",
+  "naming_series",
+  "unit",
+  "divisi",
+  "kemandoran",
+  "kegiatan",
+  "batch",
+  "column_break_main",
+  "company",
+  "posting_date",
+  "trans_no",
+  "trans_code",
+  "perangkat",
+  "amended_from",
+  "section_break_karyawan",
+  "employee",
+  "employee_name",
+  "no_ktp",
+  "column_break_karyawan",
+  "qty",
+  "uom",
+  "material_section",
+  "material",
+  "more_information_tab",
+  "section_break_mandor",
+  "mandor",
+  "kode_mandor",
+  "column_break_mandor",
+  "dibuat_pada",
+  "upload_pada"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_main",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "BKM-BBT-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Estate",
+   "options": "Unit",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "label": "Divisi",
+   "options": "Divisi",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "kemandoran",
+   "fieldtype": "Link",
+   "label": "Kemandoran",
+   "options": "Kemandoran"
+  },
+  {
+   "fieldname": "kegiatan",
+   "fieldtype": "Link",
+   "label": "Kegiatan",
+   "options": "Kegiatan",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "label": "Kode Batch",
+   "options": "Batch Bibit",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "default": "Today",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "trans_no",
+   "fieldtype": "Data",
+   "label": "Trans No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "trans_code",
+   "fieldtype": "Data",
+   "label": "Trans Code",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "perangkat",
+   "fieldtype": "Data",
+   "label": "Perangkat",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "Buku Kerja Mandor Bibitan",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_karyawan",
+   "fieldtype": "Section Break",
+   "label": "Karyawan"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Nama",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Nama Karyawan",
+   "fetch_from": "employee.employee_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "no_ktp",
+   "fieldtype": "Data",
+   "label": "NIK",
+   "fetch_from": "employee.no_ktp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_karyawan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Jumlah Output",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Satuan",
+   "options": "UOM",
+   "fetch_from": "kegiatan.uom",
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "material_section",
+   "fieldtype": "Section Break",
+   "label": "Material"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Table",
+   "label": "Material Detail",
+   "options": "Detail BKM Material"
+  },
+  {
+   "fieldname": "more_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "section_break_mandor",
+   "fieldtype": "Section Break",
+   "label": "Mandor"
+  },
+  {
+   "fieldname": "mandor",
+   "fieldtype": "Data",
+   "label": "Mandor (Kiriman)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kode_mandor",
+   "fieldtype": "Link",
+   "label": "Mandor",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "column_break_mandor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dibuat_pada",
+   "fieldtype": "Datetime",
+   "label": "Dibuat Pada",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upload_pada",
+   "fieldtype": "Datetime",
+   "label": "Upload Pada",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-22 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Plantation",
+ "name": "Buku Kerja Mandor Bibitan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name"
+}
