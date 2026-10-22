@@ -2047,43 +2047,59 @@ frappe.ui.form.on("Payment Voucher Kas PDO", {
 	}
 });
 
-// PPN dari paid_amount yang diketik user. Setelah paid_amount diisi tangan, user
-// diminta memilih Tax Rate PPN dan Include/Exclude, lalu PPN-nya jadi satu baris
-// taxes (Advance Taxes and Charges) On Paid Amount ke akun PPN Tax Rate itu (Masukan
-// untuk Pay, Keluaran untuk Receive). Include mencentang included_in_paid_amount
-// sehingga paid_amount dipecah jadi DPP + PPN; Exclude menambahkan PPN di atasnya.
-// Hitungan dan jurnalnya diserahkan ke ERPNext, paid_amount tidak diubah.
+// PPN atas paid_amount lewat tombol Atur PPN. User memilih Tax Rate PPN dan
+// Include/Exclude, lalu PPN-nya jadi satu baris taxes (Advance Taxes and Charges)
+// On Paid Amount ke akun PPN Tax Rate itu (Masukan untuk Pay, Keluaran untuk Receive).
+// Barisnya selalu included_in_paid_amount, supaya paid_amount = uang yang benar-benar
+// ditransfer: Include memecah paid_amount jadi DPP + PPN, Exclude menaikkan paid_amount
+// jadi DPP + PPN. Bagian party (alokasi + unallocated) adalah DPP-nya, sehingga
+// difference_amount 0.
 //
-// Hanya dipicu ketikan: paid_amount juga diisi kode di banyak tempat (PDO, payroll,
-// alokasi invoice) dan dialog tidak boleh muncul di sana. Pembayaran Sales/Purchase
-// Invoice dilewati karena PPN-nya sudah dijurnal di invoice.
-//
-// Tombol Atur PPN membuka dialog yang sama kapan saja paid_amount terisi, termasuk
-// yang diisi kode atau sesudah dokumen dimuat ulang.
+// Dialog hanya dibuka dari tombol, tidak otomatis saat paid_amount diketik.
+// Pembayaran Sales/Purchase Invoice dilewati karena PPN-nya sudah dijurnal di invoice.
 frappe.ui.form.on("Payment Entry", {
 	refresh(frm) {
 		atur_tombol_ppn_paid_amount(frm);
-
-		const field = frm.fields_dict.paid_amount;
-		if (!field || !field.$input || field.$input.data("ppn_terpasang")) return;
-
-		field.$input.data("ppn_terpasang", true);
-		field.$input.on("input", () => { frm._paid_amount_diketik = true; });
 	},
 
 	paid_amount(frm) {
 		atur_tombol_ppn_paid_amount(frm);
-
-		if (!frm._paid_amount_diketik) return;
-		frm._paid_amount_diketik = false;
-
-		if (bisa_ppn_paid_amount(frm)) tanya_ppn_paid_amount(frm);
 	},
 
 	payment_type(frm) {
 		atur_tombol_ppn_paid_amount(frm);
 	},
+
+	// Form ERPNext menambahkan seluruh taxes ke difference_amount, sedangkan server
+	// mengurangkan taxes yang included_in_paid_amount. Untuk Pay dengan PPN, form jadi
+	// menunjukkan selisih sebesar PPN padahal di server 0, jadi disamakan dengan server.
+	set_difference_amount(frm) {
+		if (!(frm.doc.taxes || []).length) return;
+
+		const kurs = frm.doc.payment_type === "Receive" ? frm.doc.source_exchange_rate : frm.doc.target_exchange_rate;
+		const party = flt(frm.doc.base_total_allocated_amount) + flt(frm.doc.unallocated_amount) * flt(kurs);
+		const pajak = ppn_termasuk_paid_amount(frm);
+
+		let selisih;
+		if (frm.doc.payment_type === "Receive") {
+			selisih = party - flt(frm.doc.base_received_amount) + pajak;
+		} else if (frm.doc.payment_type === "Pay") {
+			selisih = flt(frm.doc.base_paid_amount) - party - pajak;
+		} else {
+			selisih = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount) - pajak;
+		}
+
+		const potongan = (frm.doc.deductions || []).reduce((n, d) => n + flt(d.amount), 0);
+		return frm.set_value("difference_amount", flt(selisih - potongan, precision("difference_amount")));
+	},
 });
+
+function ppn_termasuk_paid_amount(frm) {
+	return (frm.doc.taxes || []).reduce((n, t) => {
+		if (!t.included_in_paid_amount) return n;
+		return n + (t.add_deduct_tax === "Deduct" ? -1 : 1) * flt(t.base_tax_amount);
+	}, 0);
+}
 
 function bisa_ppn_paid_amount(frm) {
 	if (frm.doc.docstatus !== 0 || !flt(frm.doc.paid_amount)) return false;
@@ -2113,11 +2129,22 @@ function ppn_paid_amount_terpasang(frm) {
 	return { jenis_ppn: m[1], tax_rate: m[2] };
 }
 
+// Nilai yang diisi user sebelum PPN: Exclude yang terpasang sudah menaikkan
+// paid_amount, jadi dasarnya DPP (paid_amount_after_tax) dan bukan paid_amount.
+function dasar_ppn_paid_amount(frm) {
+	const terpasang = ppn_paid_amount_terpasang(frm);
+	if (terpasang && terpasang.jenis_ppn === "Exclude" && flt(frm.doc.paid_amount_after_tax)) {
+		return flt(frm.doc.paid_amount_after_tax);
+	}
+	return flt(frm.doc.paid_amount);
+}
+
 function tanya_ppn_paid_amount(frm) {
 	const terakhir = ppn_paid_amount_terpasang(frm) || frm._ppn_paid_amount || {};
+	const dasar = dasar_ppn_paid_amount(frm);
 
 	const dialog = new frappe.ui.Dialog({
-		title: __("Atur PPN atas {0}", [format_currency(frm.doc.paid_amount, frm.doc.paid_from_account_currency)]),
+		title: __("Atur PPN atas {0}", [format_currency(dasar, frm.doc.paid_from_account_currency)]),
 		fields: [
 			{
 				fieldname: "tax_rate",
@@ -2135,14 +2162,14 @@ function tanya_ppn_paid_amount(frm) {
 				options: "Include\nExclude",
 				reqd: 1,
 				default: terakhir.jenis_ppn || "Include",
-				description: __("Include: paid amount sudah termasuk PPN. Exclude: PPN ditambahkan di atas paid amount."),
+				description: __("Include: nilai sudah termasuk PPN. Exclude: PPN ditambahkan ke paid amount."),
 			},
 		],
 		primary_action_label: __("Terapkan"),
 		primary_action: async (values) => {
 			dialog.hide();
 			frm._ppn_paid_amount = values;
-			await terapkan_ppn_paid_amount(frm, values.tax_rate, values.jenis_ppn);
+			await terapkan_ppn_paid_amount(frm, dasar, values.tax_rate, values.jenis_ppn);
 		},
 		secondary_action_label: __("Tanpa PPN"),
 		secondary_action: async () => {
@@ -2150,7 +2177,7 @@ function tanya_ppn_paid_amount(frm) {
 			const tax_rate = dialog.get_value("tax_rate");
 			const akun = tax_rate ? (await akun_ppn_tax_rate(frm, tax_rate)).akun : null;
 			hapus_ppn_paid_amount(frm, akun);
-			hitung_ulang_taxes_payment_entry(frm);
+			await set_paid_amount_ppn(frm, dasar);
 		},
 	});
 
@@ -2167,7 +2194,7 @@ async function akun_ppn_tax_rate(frm, tax_rate) {
 	return { tipe, rate: flt(tr.rate), akun };
 }
 
-async function terapkan_ppn_paid_amount(frm, tax_rate, jenis_ppn) {
+async function terapkan_ppn_paid_amount(frm, dasar, tax_rate, jenis_ppn) {
 	const [{ tipe, rate, akun }, company] = await Promise.all([
 		akun_ppn_tax_rate(frm, tax_rate),
 		frappe.db.get_value("Company", frm.doc.company, "cost_center"),
@@ -2188,20 +2215,63 @@ async function terapkan_ppn_paid_amount(frm, tax_rate, jenis_ppn) {
 		charge_type: "On Paid Amount",
 		account_head: akun,
 		rate: rate,
-		included_in_paid_amount: jenis_ppn === "Include" ? 1 : 0,
+		included_in_paid_amount: 1,
 		cost_center: frm.doc.cost_center || (company.message && company.message.cost_center),
 		currency: frappe.get_doc(":Company", frm.doc.company).default_currency,
 		description: `${PPN_PAID_AMOUNT_MARKER} (${jenis_ppn}, ${tax_rate})`,
 	});
 
-	hitung_ulang_taxes_payment_entry(frm);
+	// Exclude: DPP-nya nilai dasar, paid_amount naik sebesar PPN. Pembulatan ini
+	// kembali tepat ke DPP saat ERPNext membaginya lagi dengan (1 + rate).
+	const total = jenis_ppn === "Exclude"
+		? flt(dasar * (1 + rate / 100), precision("paid_amount"))
+		: dasar;
+	await set_paid_amount_ppn(frm, total);
 
-	// calculate_taxes ERPNext hanya mengisi base_tax_amount untuk On Paid Amount.
 	const row = frm.doc.taxes[frm.doc.taxes.length - 1];
 	frappe.show_alert({
-		message: __("PPN {0}% {1}: {2}", [rate, jenis_ppn, format_currency(row.base_tax_amount)]),
+		message: __("PPN {0}% {1}: DPP {2}, PPN {3}", [
+			rate, jenis_ppn,
+			format_currency(frm.doc.paid_amount_after_tax), format_currency(row.base_tax_amount),
+		]),
 		indicator: "green",
 	});
+}
+
+// Isi paid_amount lalu hitung ulang PPN dan alokasinya. Receive mengalokasikan ulang
+// referensi lewat server saat paid_amount berubah, jadi ditunggu dulu.
+async function set_paid_amount_ppn(frm, nilai) {
+	if (flt(frm.doc.paid_amount) !== flt(nilai)) {
+		await frm.set_value("paid_amount", nilai);
+		await frappe.after_ajax();
+	}
+
+	frm.events.apply_taxes && frm.events.apply_taxes(frm);
+	pas_alokasi_ke_dpp(frm);
+	frm.refresh_fields();
+}
+
+// Alokasi referensi tidak boleh melebihi DPP: PPN sudah jatuh ke akun PPN, jadi yang
+// ke party hanya paid_amount dikurangi PPN dan deductions. Kelebihannya dipotong dari
+// baris paling bawah; sisa kurangnya (pembulatan) masuk unallocated.
+function pas_alokasi_ke_dpp(frm) {
+	const potongan = (frm.doc.deductions || []).reduce((n, d) => n + flt(d.amount), 0);
+	const dibayar = frm.doc.payment_type === "Receive" ? frm.doc.received_amount : frm.doc.paid_amount;
+	const dpp = flt(dibayar) - ppn_termasuk_paid_amount(frm) - potongan;
+
+	let lebih = (frm.doc.references || []).reduce((n, r) => n + flt(r.allocated_amount), 0) - dpp;
+	const presisi = precision("paid_amount");
+
+	for (const r of [...(frm.doc.references || [])].reverse()) {
+		if (flt(lebih, presisi) <= 0) break;
+		const kurang = Math.min(flt(r.allocated_amount), lebih);
+		r.allocated_amount = flt(flt(r.allocated_amount) - kurang, presisi);
+		lebih -= kurang;
+	}
+
+	frm.events.set_total_allocated_amount
+		? frm.events.set_total_allocated_amount(frm)
+		: frm.events.set_unallocated_amount && frm.events.set_unallocated_amount(frm);
 }
 
 const PPN_PAID_AMOUNT_MARKER = "Atur PPN";
@@ -2225,10 +2295,4 @@ function hapus_ppn_paid_amount(frm, akun) {
 
 	frm.doc.taxes = sisa;
 	frm.dirty();
-}
-
-function hitung_ulang_taxes_payment_entry(frm) {
-	frm.events.apply_taxes && frm.events.apply_taxes(frm);
-	frm.events.set_unallocated_amount && frm.events.set_unallocated_amount(frm);
-	frm.refresh_fields();
 }
