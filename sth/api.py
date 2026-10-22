@@ -234,6 +234,7 @@ def get_sq_item_details(names):
 		from `tabSupplier Quotation Item` sqi
 		join `tabSupplier Quotation` sq on sq.name = sqi.parent
 		where sqi.name in %(names)s
+		order by sqi.item_code
 	""",{"names":names},as_dict=True)
 
 @frappe.whitelist()
