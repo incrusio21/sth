@@ -416,9 +416,9 @@ class BAPP(BuyingController):
 		"""
 		Buat GL Entries untuk setiap baris di items:
 
-		  DEBIT  → account dari DocType Kegiatan
-				   (ambil child table Kegiatan.items, cocokan company == self.company,
-					lalu ambil field 'account')
+		  DEBIT  → Is CWIP dicentang: Capital Work In Progress Account dari Asset Category
+				   tidak dicentang: expense account di Item Defaults item code;
+				   baris tanpa item code (atau item global) pakai account Kegiatan
 
 		  CREDIT → expense_account di baris item BAPP
 
@@ -426,20 +426,19 @@ class BAPP(BuyingController):
 		"""
 		gl_entries = []
 		item_global = get_legal_settings("default_item_code")
+		cwip_account = self._get_cwip_account() if self.is_cwip else None
 
 		for item in self.get("items"):
 			amount = flt(item.amount)
 			if not amount:
 				continue
 
-			proposal_doc = frappe.get_doc("Proposal", self.proposal)
-			# Jasa/Capex memakai akun dari Item; baris tanpa item code — atau yang
-			# cuma diisi item global, lihat set_item_global — jatuh ke akun Kegiatan
-			if (
-				item.item_code
-				and item.item_code != item_global
-				and ("Jasa" in proposal_doc.proposal_type or "Capex" in proposal_doc.proposal_type)
-			):
+			if cwip_account:
+				debit_account = cwip_account
+
+			# Baris tanpa item code — atau yang cuma diisi item global, lihat
+			# set_item_global — jatuh ke akun Kegiatan
+			elif item.item_code and item.item_code != item_global:
 				debit_account = self._get_item_code_account(item.item_code, item.idx)
 
 			else:
@@ -498,6 +497,20 @@ class BAPP(BuyingController):
 	# ------------------------------------------------------------------ #
 	#  HELPER                                                              #
 	# ------------------------------------------------------------------ #
+	def _get_cwip_account(self):
+		if not self.asset_category:
+			frappe.throw(_("BAPP Is CWIP: field <b>Asset Category</b> belum diisi."))
+
+		asset_category_doc = frappe.get_cached_doc("Asset Category", self.asset_category)
+		for row in asset_category_doc.accounts:
+			if row.company_name == self.company and row.capital_work_in_progress_account:
+				return row.capital_work_in_progress_account
+
+		frappe.throw(
+			_("Asset Category <b>{0}</b> tidak memiliki <b>Capital Work In Progress Account</b> "
+			  "untuk Company <b>{1}</b>.").format(self.asset_category, self.company)
+		)
+
 	def _get_item_code_account(self,item_code, item_idx):
 		item_doc = frappe.get_doc("Item", item_code)
 		for row in item_doc.get("item_defaults"):
