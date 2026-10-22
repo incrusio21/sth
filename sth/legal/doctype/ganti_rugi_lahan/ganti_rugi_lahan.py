@@ -323,6 +323,9 @@ def make_payment_entry(source_name, target_doc=None):
 		if nama_bank:
 			target.bank_tujuan = nama_bank
 
+		# dipanggil juga dari tombol Pilih Ganti Rugi Lahan di PE yang sudah ada,
+		# satu PE cuma membayar satu termin
+		target.set("references", [])
 		target.append("references", {
 			"reference_doctype": "Ganti Rugi Lahan",
 			"reference_name": source.name,

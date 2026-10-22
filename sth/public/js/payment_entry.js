@@ -153,6 +153,12 @@ frappe.ui.form.on("Payment Entry", {
 			frm.add_custom_button(__("Pilih Nota Piutang"), function () {
 				pick_nota_piutang(frm);
 			}, __("Buat"));
+
+			if (frm.doc.payment_type == "Pay") {
+				frm.add_custom_button(__("Pilih Ganti Rugi Lahan"), function () {
+					pick_ganti_rugi_lahan(frm);
+				}, __("Buat"));
+			}
 		}
 
 		frm.set_query("reference_doctype", "references", function () {
@@ -1033,6 +1039,60 @@ function pick_nota_piutang(frm) {
 		primary_action(values) {
 			dialog.hide();
 			apply_nota_piutang(frm, values.nota_piutang);
+		}
+	});
+
+	dialog.show();
+}
+
+function pick_ganti_rugi_lahan(frm) {
+	const dialog = new frappe.ui.Dialog({
+		title: __("Pilih Ganti Rugi Lahan"),
+		fields: [
+			{
+				fieldtype: "Link",
+				fieldname: "ganti_rugi_lahan",
+				label: "Ganti Rugi Lahan",
+				options: "Ganti Rugi Lahan",
+				reqd: 1,
+				get_query() {
+					return {
+						filters: {
+							company: frm.doc.company,
+							docstatus: 1,
+						}
+					};
+				}
+			}
+		],
+		primary_action_label: __("Terapkan"),
+		primary_action(values) {
+			dialog.hide();
+
+			// mapping yang sama dengan tombol Create > Payment di GRL: party pemilik
+			// lahan, akun GRL, dan termin berikutnya yang sudah diajukan
+			const unit = frm.doc.unit;
+			frappe.call({
+				method: "sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan.make_payment_entry",
+				args: {
+					source_name: values.ganti_rugi_lahan,
+					target_doc: frm.doc,
+				},
+				freeze: true,
+				callback(r) {
+					if (!r.message) return;
+
+					frappe.model.sync(r.message);
+					// unit ikut ter-map dari GRL, padahal paid_from sudah dari unit pilihan user
+					if (unit) {
+						frm.doc.unit = unit;
+					}
+					frm.refresh();
+					if (frm.doc.paid_from) {
+						frm.trigger("paid_from");
+					}
+				}
+			});
 		}
 	});
 
