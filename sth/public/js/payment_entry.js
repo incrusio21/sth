@@ -93,7 +93,8 @@ frappe.ui.form.on("Payment Entry", {
 									frm.set_value("paid_from", r.message.party_account);
 									frm.set_value("paid_from_account_currency", r.message.party_account_currency);
 									frm.set_value("paid_from_account_balance", r.message.account_balance);
-								} else if (frm.doc.payment_type == "Pay") {
+								} else if (frm.doc.payment_type == "Pay" && !is_pembayaran_grl(frm)) {
+									// PE dari Ganti Rugi Lahan tetap di akun GRL, bukan akun hutang Employee
 									frm.set_value("paid_to", r.message.party_account);
 									frm.set_value("paid_to_account_currency", r.message.party_account_currency);
 									frm.set_value("paid_to_account_balance", r.message.account_balance);
@@ -1111,6 +1112,11 @@ async function apply_nota_piutang(frm, nota_piutang_name) {
 			indicator: "red"
 		});
 	}
+}
+
+function is_pembayaran_grl(frm) {
+	const references = (frm.doc.references || []).filter(d => d.reference_name);
+	return references.length > 0 && references.every(d => d.reference_doctype === "Ganti Rugi Lahan");
 }
 
 function pasang_company_account(frm) {

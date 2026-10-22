@@ -261,6 +261,14 @@ def fetch_company_account(company, childrens=None):
 
 	return accounts_dict
 
+def akun_ganti_rugi_lahan(company):
+	"""Akun aset Ganti Rugi Lahan milik company, tujuan pembayaran GRL."""
+	akun = frappe.get_cached_value("Company", company, "ganti_rugi_lahan_account")
+	if not akun:
+		frappe.throw(f"Ganti Rugi Lahan Account belum diisi di Company {company}")
+
+	return akun
+
 @frappe.whitelist()
 def make_payment_entry(source_name, target_doc=None):
 	def post_process(source, target):
@@ -268,8 +276,7 @@ def make_payment_entry(source_name, target_doc=None):
 			frappe.throw("Ganti Rugi Lahan tidak memiliki items")
 
 		schedule = get_next_payment_schedule("Ganti Rugi Lahan", source.name)
-		# expense_account = source.items[0].expense_account
-		expense_account = source.credit_to
+		expense_account = akun_ganti_rugi_lahan(source.company)
 		party_account_currency = frappe.get_cached_value("Account", expense_account, "account_currency")
 
 		target.payment_type = "Pay"
@@ -279,6 +286,7 @@ def make_payment_entry(source_name, target_doc=None):
 		target.party_name = frappe.get_cached_value("Employee", source.employee, "employee_name")
 		target.paid_to = expense_account
 		target.paid_to_account_currency = party_account_currency
+		target.paid_to_account_type = frappe.get_cached_value("Account", expense_account, "account_type")
 		target.paid_amount = schedule.get("allocated_amount")
 		target.received_amount = schedule.get("allocated_amount")
 		if schedule.get("no_rekening"):

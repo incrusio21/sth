@@ -143,6 +143,7 @@ class PaymentEntry(EmployeePaymentEntry):
 				self.paid_to = debit_account
 
 		self.set_paid_to_uang_muka_po()
+		self.set_paid_to_ganti_rugi_lahan()
 		self.set_paid_from_uang_muka_po()
 		self.reset_flag_uang_muka_terpisah()
 		self.validate_paid_amount_with_outstanding()
@@ -186,6 +187,31 @@ class PaymentEntry(EmployeePaymentEntry):
 		self.paid_to = akun_uang_muka_po({d.reference_name for d in references}, self.company)
 		self.paid_to_account_currency = frappe.db.get_value(
 			"Account", self.paid_to, "account_currency"
+		)
+
+	def set_paid_to_ganti_rugi_lahan(self):
+		"""Pembayaran Ganti Rugi Lahan masuk ke akun aset GRL milik Company.
+
+		Dipasang di sini, bukan cuma di tombol Payment pada GRL, karena handler party
+		di form menimpa paid_to dengan akun hutang default Employee setiap kali party
+		di-set ulang (mis. lewat Internal Employee).
+
+		Akun GRL bukan Payable sehingga party-nya tidak ikut ke jurnal;
+		add_party_gl_entries yang mengurusnya lewat use_party. Employee tetap
+		terpasang di dokumen supaya baris referensi ke GRL tetap sah.
+		"""
+		if self.payment_type != "Pay":
+			return
+
+		references = [d for d in self.get("references") if d.reference_name]
+		if not references or any(d.reference_doctype != "Ganti Rugi Lahan" for d in references):
+			return
+
+		from sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan import akun_ganti_rugi_lahan
+
+		self.paid_to = akun_ganti_rugi_lahan(self.company)
+		self.paid_to_account_currency, self.paid_to_account_type = frappe.db.get_value(
+			"Account", self.paid_to, ["account_currency", "account_type"]
 		)
 
 	def pengembalian_uang_muka_po(self):
