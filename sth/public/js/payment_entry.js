@@ -256,6 +256,9 @@ frappe.ui.form.on("Payment Entry", {
 	party_type: function (frm) {
 		frm.set_value("internal_employee", 0);
 		set_no_rekening(frm);
+		// ERPNext mengosongkan paid_from waktu party_type diganti, padahal untuk Pay
+		// field itu read-only dan cuma terisi dari unit + mode of payment
+		filter_bank_accounts(frm);
 	},
 
 	unit: function (frm) {

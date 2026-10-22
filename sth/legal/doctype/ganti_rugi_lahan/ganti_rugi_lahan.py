@@ -274,10 +274,14 @@ def pemilik_lahan_grl(doc):
 	"""Pemilik lahan satu-satunya di GRL, yang jadi party Payment Entry-nya.
 
 	Satu PE cuma punya satu party, jadi GRL yang barisnya menunjuk pemilik
-	berbeda ditolak. Baris tanpa pemilik dilewati.
+	berbeda ditolak. Baris tanpa pemilik dilewati, begitu juga baris perangkat
+	desa: pemilik_lahan di sana orang perangkat desanya, bukan pemilik lahan.
 	"""
 	pemilik = []
 	for row in doc.items:
+		if row.perangkat_desa == "Ya":
+			continue
+
 		if row.pemilik_lahan and row.pemilik_lahan not in pemilik:
 			pemilik.append(row.pemilik_lahan)
 
