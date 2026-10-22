@@ -593,6 +593,7 @@ override_whitelisted_methods = {
 	"lending.loan_management.doctype.loan.loan.make_loan_disbursement": "sth.hr_customize.custom.loan.make_loan_disbursement",
 	"hrms.overrides.employee_payment_entry.get_payment_reference_details": "sth.overrides.payment_entry.get_payment_reference_details",
 	"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry": "sth.legal.custom.payment_entry.get_payment_entry",
+	"erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details": "sth.overrides.payment_entry.get_party_details",
 	"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account": "sth.overrides.sales_invoice.get_bank_cash_account",
 	"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order": "sth.overrides.supplier_quotation.make_purchase_order",
 	"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice": "sth.buying_sth.custom.purchase_receipt.make_purchase_invoice",

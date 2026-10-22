@@ -24,6 +24,7 @@ class GantiRugiLahan(AccountsController):
 			row.expense_account = ""
 		self.set_missing_value()
 		self.validate_duplicate_sppt()
+		pemilik_lahan_grl(self)
 		self.calculate_total()
 		self.set_no_rekening()
 		self.validate_payment_schedule()
@@ -269,21 +270,45 @@ def akun_ganti_rugi_lahan(company):
 
 	return akun
 
+def pemilik_lahan_grl(doc):
+	"""Pemilik lahan satu-satunya di GRL, yang jadi party Payment Entry-nya.
+
+	Satu PE cuma punya satu party, jadi GRL yang barisnya menunjuk pemilik
+	berbeda ditolak. Baris tanpa pemilik dilewati.
+	"""
+	pemilik = []
+	for row in doc.items:
+		if row.pemilik_lahan and row.pemilik_lahan not in pemilik:
+			pemilik.append(row.pemilik_lahan)
+
+	if len(pemilik) > 1:
+		frappe.throw(
+			"Satu Ganti Rugi Lahan hanya boleh untuk satu Pemilik Lahan, "
+			f"sedangkan items menunjuk {', '.join(pemilik)}. Pisahkan per pemilik."
+		)
+
+	return pemilik[0] if pemilik else None
+
 @frappe.whitelist()
 def make_payment_entry(source_name, target_doc=None):
 	def post_process(source, target):
 		if not source.items:
 			frappe.throw("Ganti Rugi Lahan tidak memiliki items")
 
+		pemilik = pemilik_lahan_grl(source)
+		if not pemilik:
+			frappe.throw("Pemilik Lahan belum diisi di items Ganti Rugi Lahan")
+
 		schedule = get_next_payment_schedule("Ganti Rugi Lahan", source.name)
 		expense_account = akun_ganti_rugi_lahan(source.company)
 		party_account_currency = frappe.get_cached_value("Account", expense_account, "account_currency")
+		nama, nama_bank = frappe.db.get_value("Daftar Masyarakat", pemilik, ["nama", "nama_bank"])
 
 		target.payment_type = "Pay"
-		target.party_type = "Employee"
-		target.party = source.employee
+		target.party_type = "Daftar Masyarakat"
+		target.party = pemilik
 		target.naming_series = "ACC-PAY-.YYYY.-"
-		target.party_name = frappe.get_cached_value("Employee", source.employee, "employee_name")
+		target.party_name = nama
 		target.paid_to = expense_account
 		target.paid_to_account_currency = party_account_currency
 		target.paid_to_account_type = frappe.get_cached_value("Account", expense_account, "account_type")
@@ -291,6 +316,8 @@ def make_payment_entry(source_name, target_doc=None):
 		target.received_amount = schedule.get("allocated_amount")
 		if schedule.get("no_rekening"):
 			target.no_rekening_tujuan = schedule.get("no_rekening")
+		if nama_bank:
+			target.bank_tujuan = nama_bank
 
 		target.append("references", {
 			"reference_doctype": "Ganti Rugi Lahan",

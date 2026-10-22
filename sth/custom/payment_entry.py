@@ -604,6 +604,7 @@ def set_no_rekening(doc, method):
 
 	doc.no_rekening = None
 	doc.nama_bank = None
+	doc.nama_pemilik_rekening = result.get("nama_pemilik_rekening")
 
 	# special handling internal employee
 	if (
@@ -699,7 +700,8 @@ def get_no_rekening(party_type=None, party=None,
 		"no_rekening": None,
 		"nama_bank": None,
 		"no_rekening_tujuan": None,
-		"bank_tujuan": None
+		"bank_tujuan": None,
+		"nama_pemilik_rekening": None
 	}
 
 	from sth.overrides.payroll_entry import rekening_unit_payroll
@@ -812,7 +814,7 @@ def get_no_rekening(party_type=None, party=None,
 					"parent": party,
 					"status_bank": "Aktif"
 				},
-				["no_rekening", "nama_bank"],
+				["no_rekening", "nama_bank", "atas_nama"],
 				as_dict=True
 			)
 
@@ -825,6 +827,19 @@ def get_no_rekening(party_type=None, party=None,
 				result["nama_bank"] = (
 					supplier_bank.nama_bank
 				)
+
+				result["nama_pemilik_rekening"] = (
+					supplier_bank.atas_nama
+				)
+
+		elif party_type == "Daftar Masyarakat":
+
+			# pemilik lahan yang dibayar lewat Ganti Rugi Lahan
+			result["nama_pemilik_rekening"] = frappe.db.get_value(
+				"Daftar Masyarakat",
+				party,
+				"npr"
+			)
 
 	return result
 

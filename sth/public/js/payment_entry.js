@@ -996,6 +996,7 @@ function set_no_rekening(frm) {
 			frm.set_value("nama_bank", d.nama_bank || "");
 			frm.set_value("no_rekening_tujuan", d.no_rekening_tujuan || "");
 			frm.set_value("bank_tujuan", d.bank_tujuan || "");
+			frm.set_value("nama_pemilik_rekening", d.nama_pemilik_rekening || "");
 
 			// sama dengan yang dihitung set_no_rekening di server waktu disimpan,
 			// supaya sudah terlihat sebelum save
