@@ -228,13 +228,16 @@ def get_sq_item_details(names):
 	if not names:
 		return []
 
-	return frappe.db.sql("""
+	# frappe.throw(f"{format_names}")
+	format_names = [ f"'{d}'" for d in names ]
+	placeholders = ", ".join(format_names)
+	return frappe.db.sql(f"""
 		select sqi.item_code, sqi.item_name,sqi.custom_merk as merek,sqi.custom_country as country, 
 		sqi.description, sqi.qty, sqi.rate, sqi.amount, sq.name as doc_no,sq.supplier,sq.supplier_name
 		from `tabSupplier Quotation Item` sqi
 		join `tabSupplier Quotation` sq on sq.name = sqi.parent
 		where sqi.name in %(names)s
-		order by sqi.item_code
+		order by FIELD(sqi.name, {placeholders})
 	""",{"names":names},as_dict=True)
 
 @frappe.whitelist()
