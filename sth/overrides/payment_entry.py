@@ -197,8 +197,8 @@ class PaymentEntry(EmployeePaymentEntry):
 		di-set ulang (mis. lewat Internal Employee).
 
 		Akun GRL bukan Payable sehingga party-nya tidak ikut ke jurnal;
-		add_party_gl_entries yang mengurusnya lewat use_party. Employee tetap
-		terpasang di dokumen supaya baris referensi ke GRL tetap sah.
+		add_party_gl_entries yang mengurusnya lewat use_party. Party-nya pemilik
+		lahan dari Daftar Masyarakat; PE lama atas nama Employee tetap sah.
 		"""
 		if self.payment_type != "Pay":
 			return
@@ -470,7 +470,17 @@ class PaymentEntry(EmployeePaymentEntry):
 				# 		)
 				# 	)
 
-				if d.reference_doctype != "Journal Entry":
+				if d.reference_doctype == "Ganti Rugi Lahan" and self.party_type == "Daftar Masyarakat":
+					# GRL tidak punya field daftar_masyarakat; pemiliknya ada di items
+					from sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan import pemilik_lahan_grl
+
+					if self.party != pemilik_lahan_grl(ref_doc):
+						frappe.throw(
+							_("{0} {1} is not associated with {2} {3}").format(
+								_(d.reference_doctype), d.reference_name, _(self.party_type), self.party
+							)
+						)
+				elif d.reference_doctype != "Journal Entry":
 					if self.party != ref_doc.get(scrub(self.party_type)):
 						frappe.throw(
 							_("{0} {1} is not associated with {2} {3}").format(
@@ -1266,6 +1276,36 @@ def get_payment_reference_details(
 		return get_reference_details(
 			reference_doctype, reference_name, party_account_currency, party_type, party
 		)
+
+@frappe.whitelist()
+def get_party_details(company, party_type, party, date, cost_center=None):
+	"""Party Daftar Masyarakat dilayani di sini, sisanya diteruskan ke ERPNext.
+
+	ERPNext mencari nama party di field <party_type>_name, yang tidak ada di
+	Daftar Masyarakat, dan tidak tahu akun default-nya. Pemilik lahan cuma
+	dibayar lewat Ganti Rugi Lahan, jadi akunnya akun GRL milik Company.
+	"""
+	if party_type != "Daftar Masyarakat":
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_details
+
+		return get_party_details(company, party_type, party, date, cost_center=cost_center)
+
+	from sth.legal.doctype.ganti_rugi_lahan.ganti_rugi_lahan import akun_ganti_rugi_lahan
+
+	if not frappe.db.exists(party_type, party):
+		frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
+
+	party_account = akun_ganti_rugi_lahan(company)
+
+	return {
+		"party_account": party_account,
+		"party_name": frappe.db.get_value(party_type, party, "nama"),
+		"party_account_currency": frappe.get_cached_value("Account", party_account, "account_currency"),
+		"party_balance": 0,
+		"account_balance": 0,
+		"bank_account": "",
+		"party_bank_account": "",
+	}
 
 @frappe.whitelist()
 def get_reference_details_by_payment_settings(reference_doctype, reference_name, party_account_currency):
