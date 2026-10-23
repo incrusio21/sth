@@ -638,12 +638,22 @@ class SalarySlip(SalarySlip):
 		super().get_working_days_details(lwp, for_preview)
 
 		self.not_check_out = self._get_not_out_attendance_days()
-		
+		self.set_jumlah_hari_periode()
+
 		self.calculate_holidays()
 		self.calculate_cuti_allocation()
 		emp_doc = frappe.get_cached_doc("Employee", self.employee)
 		if emp_doc.custom_kriteria == "Satuan Hasil":
 			self.calculate_hari_kegiatan()
+
+	def set_jumlah_hari_periode(self):
+		# total hari dalam periode; karyawan yang resign dihitung sampai relieving date
+		end_date = getdate(self.end_date)
+		relieving_date = frappe.get_cached_value("Employee", self.employee, "relieving_date")
+		if relieving_date and getdate(relieving_date) < end_date:
+			end_date = getdate(relieving_date)
+
+		self.jumlah_hari_periode = max(date_diff(end_date, self.start_date) + 1, 0)
 
 	def get_payment_days(self, include_holidays_in_total_working_days):
 		#custom get payment days untuk pesangon
