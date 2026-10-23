@@ -835,11 +835,28 @@ def get_no_rekening(party_type=None, party=None,
 		elif party_type == "Daftar Masyarakat":
 
 			# pemilik lahan yang dibayar lewat Ganti Rugi Lahan
-			result["nama_pemilik_rekening"] = frappe.db.get_value(
+			masyarakat = frappe.db.get_value(
 				"Daftar Masyarakat",
 				party,
-				"npr"
+				["npr", "norek", "nama_bank"],
+				as_dict=True
 			)
+
+			if masyarakat:
+
+				result["nama_pemilik_rekening"] = (
+					masyarakat.npr
+				)
+
+				if masyarakat.norek:
+					result["no_rekening_tujuan"] = (
+						masyarakat.norek
+					)
+
+				if masyarakat.nama_bank:
+					result["bank_tujuan"] = (
+						masyarakat.nama_bank
+					)
 
 	return result
 
