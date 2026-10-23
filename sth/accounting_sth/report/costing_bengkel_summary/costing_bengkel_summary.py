@@ -74,6 +74,15 @@ def get_data(filters):
 
 	condition_sql = ("AND " + " AND ".join(conditions)) if conditions else ""
 
+	# kondisi kendaraan per alias tabel
+	def vra_cond(alias):
+		if filters.get("kode_kendaraan"):
+			return f"AND {alias}.kode_vra = %(kode_kendaraan)s"
+		return ""
+
+	if filters.get("kode_kendaraan"):
+		values["kode_kendaraan"] = filters.get("kode_kendaraan")
+
 	# AGK dan AGO dipisah karena keduanya pakai COA 4111001 — dibedakan dari tabel sumbernya.
 	rows = frappe.db.sql("""
 		SELECT t.kode_vra AS kode_vra, t.no_coa AS no_coa,
@@ -82,45 +91,50 @@ def get_data(filters):
 			SELECT pb.kode_vra AS kode_vra, pb.no_coa AS no_coa, pb.amount AS debit, 0 AS credit
 			FROM `tabCosting Bengkel Pengeluaran Barang` pb
 			JOIN `tabCosting Bengkel` cb ON cb.name = pb.parent
-			WHERE cb.docstatus != 2 {condition_sql}
+			WHERE cb.docstatus != 2 {condition_sql} {vra_pb}
 
 			UNION ALL
 
 			SELECT pbs.kode_vra, pbs.no_coa, pbs.amount, 0
 			FROM `tabCosting Bengkel Pengeluaran Barang Solar` pbs
 			JOIN `tabCosting Bengkel` cb ON cb.name = pbs.parent
-			WHERE cb.docstatus != 2 {condition_sql}
+			WHERE cb.docstatus != 2 {condition_sql} {vra_pbs}
 
 			UNION ALL
 
 			SELECT clb.kode_vra, clb.no_coa, clb.debit, clb.credit
 			FROM `tabCosting Bengkel Closing Bengkel` clb
 			JOIN `tabCosting Bengkel` cb ON cb.name = clb.parent
-			WHERE cb.docstatus != 2 {condition_sql}
+			WHERE cb.docstatus != 2 {condition_sql} {vra_clb}
 
 
 		) t
 		WHERE t.kode_vra IS NOT NULL AND t.kode_vra != ''
 		GROUP BY t.kode_vra, t.no_coa
-	""".format(condition_sql=condition_sql), values, as_dict=True)
+	""".format(
+		condition_sql=condition_sql,
+		vra_pb=vra_cond("pb"),
+		vra_pbs=vra_cond("pbs"),
+		vra_clb=vra_cond("clb"),
+	), values, as_dict=True)
 
 	agk_rows = frappe.db.sql("""
 		SELECT agk.kode_vra, SUM(agk.amount) AS total
 		FROM `tabCosting Bengkel Alokasi Gaji Karyawan Bengkel` agk
 		JOIN `tabCosting Bengkel` cb ON cb.name = agk.parent
-		WHERE cb.docstatus != 2 {condition_sql}
+		WHERE cb.docstatus != 2 {condition_sql} {vra}
 		  AND agk.kode_vra IS NOT NULL AND agk.kode_vra != ''
 		GROUP BY agk.kode_vra
-	""".format(condition_sql=condition_sql), values, as_dict=True)
+	""".format(condition_sql=condition_sql, vra=vra_cond("agk")), values, as_dict=True)
 
 	ago_rows = frappe.db.sql("""
 		SELECT ago.kode_vra, SUM(ago.amount) AS total
 		FROM `tabCosting Bengkel Alokasi Gaji Operator VRA` ago
 		JOIN `tabCosting Bengkel` cb ON cb.name = ago.parent
-		WHERE cb.docstatus != 2 {condition_sql}
+		WHERE cb.docstatus != 2 {condition_sql} {vra}
 		  AND ago.kode_vra IS NOT NULL AND ago.kode_vra != ''
 		GROUP BY ago.kode_vra
-	""".format(condition_sql=condition_sql), values, as_dict=True)
+	""".format(condition_sql=condition_sql, vra=vra_cond("ago")), values, as_dict=True)
 
 	vehicles = {}
 
@@ -186,6 +200,12 @@ def get_data(filters):
 		kmhm_values["to_date"] = to_date
 
 	kmhm_condition_sql = ("AND " + " AND ".join(kmhm_conditions)) if kmhm_conditions else ""
+	kmhm_traksi_sql = kmhm_condition_sql
+	kmhm_bengkel_sql = kmhm_condition_sql
+	if filters.get("kode_kendaraan"):
+		kmhm_values["kode_kendaraan"] = filters.get("kode_kendaraan")
+		kmhm_traksi_sql += " AND kendaraan = %(kode_kendaraan)s"
+		kmhm_bengkel_sql += " AND kd_kndr = %(kode_kendaraan)s"
 
 	kmhm_rows = frappe.db.sql("""
 		SELECT kendaraan, SUM(kmhm_akhir - kmhm_awal) AS total_kmhm
@@ -196,7 +216,7 @@ def get_data(filters):
 			AND kmhm_akhir != 0
 			{kmhm_condition_sql}
 		GROUP BY kendaraan
-	""".format(kmhm_condition_sql=kmhm_condition_sql), kmhm_values, as_dict=True)
+	""".format(kmhm_condition_sql=kmhm_traksi_sql), kmhm_values, as_dict=True)
 
 	for r in kmhm_rows:
 		row = get_row(r.kendaraan)
@@ -211,7 +231,7 @@ def get_data(filters):
 			AND kmhm_akhir != 0
 			{kmhm_condition_sql}
 		GROUP BY kd_kndr
-	""".format(kmhm_condition_sql=kmhm_condition_sql), kmhm_values, as_dict=True)
+	""".format(kmhm_condition_sql=kmhm_bengkel_sql), kmhm_values, as_dict=True)
 
 	for r in kmhm_bkl_rows:
 		row = get_row(r.kendaraan)
