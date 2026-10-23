@@ -6,15 +6,17 @@ from frappe.model.document import Document
 
 
 class BukuKerjaMandorBibitan(Document):
-	def before_insert(self):
+	def _validate_links(self):
 		self.make_batch()
+		super()._validate_links()
 
 	def make_batch(self):
 		"""Kode Batch dari API dibuatkan dulu kalau belum terdaftar di Batch Bibit.
 
-		Dijalankan di before_insert, bukan validate, karena _validate_links() jalan
-		lebih dulu daripada validate: selama batch belum ada di titik itu, insert
-		ditolak "Could not find Kode Batch".
+		Dijalankan dari _validate_links(), bukan before_insert atau validate: di
+		insert() Frappe ini _validate_links() jalan lebih dulu daripada keduanya,
+		jadi selama batch belum ada di titik itu insert ditolak "Could not find
+		Kode Batch".
 		"""
 		if not self.batch or frappe.db.exists("Batch Bibit", self.batch):
 			return
