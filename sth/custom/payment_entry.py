@@ -808,14 +808,21 @@ def get_no_rekening(party_type=None, party=None,
 
 		elif party_type == "Supplier":
 
-			supplier_bank = frappe.db.get_value(
+			supplier_banks = frappe.get_all(
 				"Data Bank Supplier",
-				{
+				filters={
 					"parent": party,
+					"parenttype": "Supplier",
 					"status_bank": "Aktif"
 				},
-				["no_rekening", "nama_bank", "atas_nama"],
-				as_dict=True
+				fields=["no_rekening", "nama_bank", "atas_nama", "default"],
+				order_by="idx asc"
+			)
+
+			# rekening Default = Ya didahulukan kalau supplier punya lebih dari satu
+			supplier_bank = next(
+				(b for b in supplier_banks if b.default == "Ya"),
+				supplier_banks[0] if supplier_banks else None
 			)
 
 			if supplier_bank:
@@ -831,6 +838,17 @@ def get_no_rekening(party_type=None, party=None,
 				result["nama_pemilik_rekening"] = (
 					supplier_bank.atas_nama
 				)
+
+				# yang tampil di form Payment Voucher adalah field *_tujuan
+				if supplier_bank.no_rekening:
+					result["no_rekening_tujuan"] = (
+						supplier_bank.no_rekening
+					)
+
+				if supplier_bank.nama_bank:
+					result["bank_tujuan"] = (
+						supplier_bank.nama_bank
+					)
 
 		elif party_type == "Daftar Masyarakat":
 

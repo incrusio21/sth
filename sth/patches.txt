@@ -79,4 +79,9 @@ sth.patches.tambah_party_type_daftar_masyarakat
 # Ledger Entry-nya, ke akun Hutang Invoice dan Hutang Usaha Proposal Type;
 # credit_to invoice yang sudah dibayar dilewati.
 # Default-nya dry run; tulis dengan --kwargs "{'dry_run': 0}".
+# bangun_ulang_costing_bengkel juga tidak didaftarkan: meng-cancel dan
+# membangun ulang Costing Bengkel yang PB, Alokasi Gaji Operator VRA, atau
+# Closing VRA-nya berbeda dengan hitungan sekarang, termasuk akibat KM/HM BKM
+# yang diganti perbaiki_kmhm_bkm (jalankan sesudahnya). Default-nya laporan
+# saja; tulis dengan --kwargs "{'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
