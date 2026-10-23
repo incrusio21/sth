@@ -103,74 +103,74 @@ frappe.ui.form.on("Payroll Entry", {
 		// 		frm.scroll_to_field("error_message");
 		// 	});
 		// }
-        if (frm.doc.docstatus === 1) {
-            frm.add_custom_button(__("Buat Payment Voucher"), () => {
-                frappe.confirm(
-                    __("Buat Payment Voucher untuk Payroll Entry <b>{0}</b>?", [frm.doc.name]),
-                    () => {
-                        frappe.call({
-                            method: "create_payment_entry",   // jika pakai class method
-                            doc: frm.doc,
-                            freeze: true,
-                            freeze_message: __("Membuat Payment Voucher..."),
-                            callback(r) {
-							    if (r.message) {
-							        frappe.new_doc("Payment Entry", r.message);
-							    }
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Buat Payment Voucher"), () => {
+				frappe.confirm(
+					__("Buat Payment Voucher untuk Payroll Entry <b>{0}</b>?", [frm.doc.name]),
+					() => {
+						frappe.call({
+							method: "create_payment_entry",   // jika pakai class method
+							doc: frm.doc,
+							freeze: true,
+							freeze_message: __("Membuat Payment Voucher..."),
+							callback(r) {
+								if (r.message) {
+									frappe.new_doc("Payment Entry", r.message);
+								}
 							}
-                        });
-                    }
-                );
-            }, __("Keuangan"));
-        }
+						});
+					}
+				);
+			}, __("Keuangan"));
+		}
 
-        if (frm.doc.docstatus === 1) {
-            frm.add_custom_button(__("Lihat GL Entry"), () => {
-                frappe.call({
-                    method: "frappe.client.get_list",
-                    args: {
-                        doctype: "GL Entry",
-                        filters: {
-                            voucher_type: "Payroll Entry",
-                            voucher_no: frm.doc.name,
-                            is_cancelled: 0,
-                        },
-                        fields: [
-                            "name",
-                            "posting_date",
-                            "account",
-                            "debit",
-                            "credit",
-                            "against",
-                            "remarks",
-                            "cost_center",
-                        ],
-                        order_by: "creation asc",
-                        limit: 50,
-                    },
-                    callback(r) {
-                        const entries = r.message || [];
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Lihat GL Entry"), () => {
+				frappe.call({
+					method: "frappe.client.get_list",
+					args: {
+						doctype: "GL Entry",
+						filters: {
+							voucher_type: "Payroll Entry",
+							voucher_no: frm.doc.name,
+							is_cancelled: 0,
+						},
+						fields: [
+							"name",
+							"posting_date",
+							"account",
+							"debit",
+							"credit",
+							"against",
+							"remarks",
+							"cost_center",
+						],
+						order_by: "creation asc",
+						limit: 50,
+					},
+					callback(r) {
+						const entries = r.message || [];
 
-                        if (!entries.length) {
-                            frappe.msgprint({
-                                title: __("GL Entry"),
-                                message: __("Belum ada GL Entry untuk Payroll Entry ini."),
-                                indicator: "orange",
-                            });
-                            return;
-                        }
+						if (!entries.length) {
+							frappe.msgprint({
+								title: __("GL Entry"),
+								message: __("Belum ada GL Entry untuk Payroll Entry ini."),
+								indicator: "orange",
+							});
+							return;
+						}
 
-                        // Hitung total debit & kredit
-                        const totalDebit  = entries.reduce((s, e) => s + (e.debit  || 0), 0);
-                        const totalCredit = entries.reduce((s, e) => s + (e.credit || 0), 0);
+						// Hitung total debit & kredit
+						const totalDebit = entries.reduce((s, e) => s + (e.debit || 0), 0);
+						const totalCredit = entries.reduce((s, e) => s + (e.credit || 0), 0);
 
-                        const fmt = (val) =>
-                            val
-                                ? frappe.format(val, { fieldtype: "Currency" })
-                                : "<span style='color:#aaa'>—</span>";
+						const fmt = (val) =>
+							val
+								? frappe.format(val, { fieldtype: "Currency" })
+								: "<span style='color:#aaa'>—</span>";
 
-                        // Bangun baris tabel
-                        const rows = entries.map(e => `
+						// Bangun baris tabel
+						const rows = entries.map(e => `
                             <tr>
                                 <td>${e.posting_date}</td>
                                 <td>
@@ -188,7 +188,7 @@ frappe.ui.form.on("Payroll Entry", {
                             </tr>
                         `).join("");
 
-                        const html = `
+						const html = `
                             <table class="table table-bordered table-condensed" style="margin-bottom:0">
                                 <thead style="background:#f5f5f5">
                                     <tr>
@@ -215,31 +215,31 @@ frappe.ui.form.on("Payroll Entry", {
                             </table>
                         `;
 
-                        const d = new frappe.ui.Dialog({
-                            title: __("GL Entry — {0}", [frm.doc.name]),
-                            size: "extra-large",
-                        });
+						const d = new frappe.ui.Dialog({
+							title: __("GL Entry — {0}", [frm.doc.name]),
+							size: "extra-large",
+						});
 
-                        d.body.innerHTML = html;
-                        d.show();
+						d.body.innerHTML = html;
+						d.show();
 
-                        // Tombol shortcut ke list GL Entry
-                        d.$wrapper.find(".modal-footer").prepend(`
+						// Tombol shortcut ke list GL Entry
+						d.$wrapper.find(".modal-footer").prepend(`
                             <a href="/app/gl-entry?voucher_type=Payroll Entry&voucher_no=${frm.doc.name}"
                                target="_blank"
                                class="btn btn-sm btn-default">
                                 ${__("Buka di GL Entry List")}
                             </a>
                         `);
-                    },
-                });
-            }, __("Keuangan"));
+					},
+				});
+			}, __("Keuangan"));
 
-            frm.add_custom_button(__("Rincian Pembayaran"), () => {
-                sth.pembayaran_payroll.lihat_rincian(frm);
-            }, __("Keuangan"));
-        }
-    
+			frm.add_custom_button(__("Rincian Pembayaran"), () => {
+				sth.pembayaran_payroll.lihat_rincian(frm);
+			}, __("Keuangan"));
+		}
+
 	},
 
 	get_employee_details: function (frm) {
@@ -342,6 +342,14 @@ frappe.ui.form.on("Payroll Entry", {
 				filters: {
 					account_type: ["in", account_types],
 					is_group: 0,
+					company: frm.doc.company,
+				},
+			};
+		});
+
+		frm.set_query("unit", function () {
+			return {
+				filters: {
 					company: frm.doc.company,
 				},
 			};
