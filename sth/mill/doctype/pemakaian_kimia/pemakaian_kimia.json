@@ -118,21 +118,21 @@
    "fieldname": "ww_108",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "WW 108"
+   "label": "Conditioner/Dispersant"
   },
   {
    "description": "(Satuan Kg)",
    "fieldname": "ww_109",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "WW 109"
+   "label": "Oxygen Scavenger"
   },
   {
    "description": "(Satuan Kg)",
    "fieldname": "ww_112",
    "fieldtype": "Float",
    "in_preview": 1,
-   "label": "WW 112"
+   "label": "pH Adjuster"
   },
   {
    "description": "(Satuan Kg)",
@@ -177,7 +177,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-03 11:35:08.371726",
+ "modified": "2026-10-23 09:58:28.715738",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Pemakaian Kimia",

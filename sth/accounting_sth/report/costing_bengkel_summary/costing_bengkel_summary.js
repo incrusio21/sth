@@ -24,6 +24,12 @@ frappe.query_reports["Costing Bengkel Summary"] = {
             read_only: 1
         },
         {
+            fieldname: "kode_kendaraan",
+            label: __("Kode Kendaraan"),
+            fieldtype: "Link",
+            options: "Alat Berat Dan Kendaraan",
+        },
+        {
             fieldname: "from_date",
             label: __("Periode Dari"),
             fieldtype: "Date",
