@@ -912,11 +912,18 @@ def ambil_plafon_pdo(no_pdo, tipe_pdo, penerima):
 	if not field_config:
 		return None
 
+	# Diimpor di sini supaya tidak terjadi impor melingkar dengan modul PDO.
+	from sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional import cari_employee
+
 	pdo_doc = frappe.get_doc("Permintaan Dana Operasional", no_pdo)
 
 	total = 0
 	for pdo_row in pdo_doc.get(table_name) or []:
-		if pdo_row.employee == penerima:
+		# Kolom Pengguna di PDO bertipe Data dan biasanya berisi nama pegawai,
+		# sedangkan penerima di Payment Entry sudah berupa ID Employee hasil
+		# cari_employee(). Dicocokkan lewat jalur yang sama, kalau tidak plafonnya
+		# selalu terbaca 0 dan setiap realisasi dianggap melebihi batas.
+		if pdo_row.employee == penerima or cari_employee(pdo_row.employee) == penerima:
 			total += (
 				getattr(pdo_row, field_config["revised"], 0)
 				or getattr(pdo_row, field_config["normal"], 0)
