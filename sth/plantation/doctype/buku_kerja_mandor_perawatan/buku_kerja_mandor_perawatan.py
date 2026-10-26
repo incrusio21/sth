@@ -13,6 +13,12 @@ from sth.custom.api import (
 	submit_after_insert,
 )
 
+# Seri nomor BKM Perawatan. Kegiatan bibitan memakai seri yang sama dengan
+# BKM Bibitan, jadi counternya juga bersama: salinan dari BKM Bibitan memakai
+# nomor Bibitan-nya, dan nomor itu tidak akan dipakai lagi oleh input langsung.
+SERIES_PERAWATAN = "BKM-PWT-.#####"
+SERIES_BIBITAN = "BKM-BBT-.#####"
+
 # Isi baris hasil kerja yang diambil dari kiriman API waktu digabung. Sisanya —
 # amount, premi_amount, sub_total, dan dua Link Employee Payment Log — dihitung
 # ulang atau dipasang sistem, jadi tidak pernah ikut disalin.
@@ -198,6 +204,7 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		fix_mandor_from_api(self)
 		fix_kegiatan_from_api(self)
 		fix_item_from_api(self)
+		self.set_naming_series()
 
 		# Data dari API kadang masuk dengan docstatus=1 langsung, sehingga
 		# proses insert tidak pernah melewati siklus submit (on_submit tidak jalan).
@@ -206,6 +213,18 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		if self.docstatus == 1:
 			self.flags.submit_after_insert = True
 			self.docstatus = 0
+
+	def set_naming_series(self):
+		"""Seri nomor mengikuti kategori kegiatan, bukan pilihan di form.
+
+		Dibaca langsung dari Kategori Kegiatan, bukan dari is_bibitan: field itu
+		fetch_from dan dari API bisa belum terisi. Dipanggil di before_insert,
+		yang jalan sebelum nama dibuat.
+		"""
+		is_bibitan = self.kategori_kegiatan and frappe.get_cached_value(
+			"Kategori Kegiatan", self.kategori_kegiatan, "is_bibitan"
+		)
+		self.naming_series = SERIES_BIBITAN if is_bibitan else SERIES_PERAWATAN
 
 	def after_insert(self):
 		if self.flags.get("submit_after_insert"):

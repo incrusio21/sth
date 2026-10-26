@@ -18,6 +18,11 @@ frappe.ui.form.on("Buku Kerja Mandor Perawatan", {
     kategori_kegiatan(frm) {
         frm.set_value({"blok": "", "batch": ""})
     },
+    is_bibitan(frm) {
+        // seri sebenarnya dipasang server saat insert, ini supaya form langsung menunjukkannya
+        if (!frm.is_new()) return
+        frm.set_value("naming_series", frm.doc.is_bibitan ? "BKM-BBT-.#####" : "BKM-PWT-.#####")
+    },
     refresh(frm){
         show_gl_button(frm)
     }
