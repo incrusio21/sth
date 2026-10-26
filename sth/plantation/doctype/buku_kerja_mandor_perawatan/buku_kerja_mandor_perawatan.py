@@ -183,7 +183,8 @@ class BukuKerjaMandorPerawatan(BukuKerjaMandorController):
 		Sengaja dibatasi ke user API. Dari UI dan data import dokumen baru tetap
 		dokumen baru; di sana trans_no memang read-only dan tidak pernah terisi.
 		"""
-		if frappe.session.user != USER_API:
+		# salinan BKM Bibitan selalu jadi dokumen sendiri, lihat buat_bkm_perawatan
+		if frappe.session.user != USER_API or self.flags.dari_bkm_bibitan:
 			return super().insert(*args, **kwargs)
 
 		nama = cari_bkm_setrans_no(self)

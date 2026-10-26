@@ -9,13 +9,9 @@ from sth.custom.api import submit_after_insert
 from sth.mill.doctype.security_check_point.security_check_point import dari_rest_api
 
 # Field header yang namanya sama di BKM Perawatan dan disalin apa adanya.
-# trans_no sengaja tidak ikut: di BKM Perawatan trans_no dipakai insert() untuk
-# menggabungkan kiriman API ke dokumen yang sudah ada, jadi trans_no Bibitan yang
-# kebetulan sama dengan kiriman Perawatan akan tergabung ke dokumen yang salah.
-# Asalnya tetap tertelusuri lewat voucher_type/voucher_no.
 FIELD_HEADER_PERAWATAN = (
 	"company", "posting_date", "unit", "divisi", "kemandoran",
-	"kegiatan", "batch", "mandor", "kode_mandor",
+	"kegiatan", "batch", "mandor", "kode_mandor", "trans_no",
 )
 
 # Isi baris material yang dibawa ke BKM Perawatan. rate, amount dan
@@ -133,6 +129,10 @@ class BukuKerjaMandorBibitan(Document):
 		bkm.kategori_kegiatan = kategori_kegiatan
 		bkm.voucher_type = self.doctype
 		bkm.voucher_no = self.name
+		# insert() BKM Perawatan menggabungkan kiriman API yang trans_no-nya sudah
+		# ada. Salinan ini bukan kiriman API Perawatan, jadi harus tetap jadi
+		# dokumennya sendiri walau trans_no-nya kebetulan sama.
+		bkm.flags.dari_bkm_bibitan = True
 
 		bkm.append("hasil_kerja", {
 			"employee": self.employee,

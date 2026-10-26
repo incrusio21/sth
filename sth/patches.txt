@@ -90,6 +90,7 @@ sth.patches.tambah_party_type_daftar_masyarakat
 # --kwargs "{'simpan': False}".
 # salin_bkm_bibitan_ke_perawatan juga tidak didaftarkan: membuat dan men-submit
 # BKM Perawatan (nomor sama) untuk BKM Bibitan submitted yang belum punya
-# salinan. Default-nya uji coba; tulis dengan --kwargs "{'terapkan': 1}",
-# satu dokumen saja dengan --kwargs "{'nama': 'BKM-BBT-00001'}".
+# salinan, dan mengisi trans_no salinan yang masih kosong. Default-nya uji
+# coba; tulis dengan --kwargs "{'terapkan': 1}", satu dokumen saja dengan
+# --kwargs "{'nama': 'BKM-BBT-00001'}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

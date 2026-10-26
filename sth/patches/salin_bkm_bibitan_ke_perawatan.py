@@ -19,6 +19,7 @@ def execute(terapkan=0, nama=None):
 	diulang — yang sudah punya salinan dilewati.
 	"""
 	terapkan = cint(terapkan)
+	isi_trans_no_salinan(terapkan)
 
 	filters = {"docstatus": 1}
 	if nama:
@@ -66,3 +67,26 @@ def execute(terapkan=0, nama=None):
 
 	if not terapkan:
 		frappe.db.rollback()
+
+
+def isi_trans_no_salinan(terapkan):
+	"""Isi trans_no salinan yang dibuat sebelum trans_no ikut disalin.
+
+	Ditulis lewat SQL langsung, sama untuk draft maupun submitted: trans_no
+	cuma catatan asal kiriman dan tidak ikut hitungan apa pun.
+	"""
+	kosong = frappe.db.sql("""
+		SELECT bkmp.name, bbt.trans_no
+		FROM `tabBuku Kerja Mandor Perawatan` bkmp
+		INNER JOIN `tabBuku Kerja Mandor Bibitan` bbt ON bbt.name = bkmp.voucher_no
+		WHERE bkmp.voucher_type = 'Buku Kerja Mandor Bibitan'
+			AND IFNULL(bkmp.trans_no, '') = ''
+			AND IFNULL(bbt.trans_no, '') != ''
+	""", as_dict=True)
+
+	if terapkan:
+		for d in kosong:
+			frappe.db.set_value("Buku Kerja Mandor Perawatan", d.name, "trans_no", d.trans_no, update_modified=False)
+		frappe.db.commit()
+
+	print("trans_no salinan yang kosong: {} {}".format(len(kosong), "diisi" if terapkan else "akan diisi"))
