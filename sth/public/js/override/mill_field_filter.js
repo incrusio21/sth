@@ -47,4 +47,16 @@ $(document).on("form-refresh", function (event, frm) {
       }
     };
   }
+
+  if (frm.fields_dict.unit && frm.fields_dict.shift_proses) {
+    frm.set_query("shift_proses", function () {
+      return {
+        query: "sth.controllers.queries.monitoring_proses_control_query",
+        filters: {
+          company: frm.doc.company,
+          unit: frm.doc.unit
+        }
+      };
+    });
+  }
 });

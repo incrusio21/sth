@@ -232,6 +232,10 @@ frappe.ui.form.on("Purchase Invoice", {
         if (frm.doc.pembayaran_retensi) {
             frm.set_df_property("items", "read_only", 1)
         }
+
+        setTimeout(() => {
+            frm.remove_custom_button(__("Payment Request"), __("Create"));
+        }, 500);
     },
 
     company(frm) {
@@ -685,13 +689,13 @@ frappe.ui.form.on("Purchase Invoice", {
                     if (exists) continue
 
                     const row = frm.add_child('taxes')
-                    row.account_head   = tax.account_head
-                    row.charge_type    = tax.charge_type
+                    row.account_head = tax.account_head
+                    row.charge_type = tax.charge_type
                     row.add_deduct_tax = tax.add_deduct_tax
-                    row.tax_amount     = tax.tax_amount
-                    row.description    = tax.description
-                    row.tipe_pajak     = tax.tipe_pajak
-                    row.category       = tax.category
+                    row.tax_amount = tax.tax_amount
+                    row.description = tax.description
+                    row.tipe_pajak = tax.tipe_pajak
+                    row.category = tax.category
                 }
             })
         )
@@ -805,17 +809,17 @@ frappe.ui.form.on("VAT Detail", {
         const tipe = row.parentfield == "ppn" ? "Masukan" : "PPh"
         frappe.xcall("sth.custom.supplier_quotation.get_account_tax_rate", { name: row.type, company: frm.doc.company, tipe: tipe }).then((res) => {
             frappe.model.set_value(dt, dn, "account", res)
-            if(tipe == "PPh"){
-                row.tax_type= "PPH"
+            if (tipe == "PPh") {
+                row.tax_type = "PPH"
             }
-            else{
-                row.tax_type="PPN"
+            else {
+                row.tax_type = "PPN"
             }
             frm.refresh_field(row.parentfield)
             sync_to_taxes(frm)
         })
 
-},
+    },
 
     percentage(frm, dt, dn) {
         let row = locals[dt][dn]
@@ -1406,7 +1410,7 @@ async function _get_tax_rate_account(tax_rate_name, tipe) {
         const match = (doc.tax_rate_account || []).find(r.tipe == tipe
         );
         return match?.account || null;
-    } catch(e) {
+    } catch (e) {
         console.warn(`_get_tax_rate_account: gagal fetch Tax Rate "${tax_rate_name}"`, e);
         return null;
     }
@@ -1452,9 +1456,9 @@ function build_ref_tax_rows(frm) {
     const ref_tax = frappe.refererence.__ref_tax || {}
     const field_map = [
         { key: "Ongkos Angkut", value: frm.doc.total_biaya_ongkos_angkut, add_deduct: "Add" },
-        { key: "PPH 22",        value: frm.doc.pph_22,                     add_deduct: "Add" },
-        { key: "PBBKB",         value: frm.doc.pbbkb,                      add_deduct: "Add" },
-        { key: "Cost",          value: frm.doc.cost,                        add_deduct: "Add" },
+        { key: "PPH 22", value: frm.doc.pph_22, add_deduct: "Add" },
+        { key: "PBBKB", value: frm.doc.pbbkb, add_deduct: "Add" },
+        { key: "Cost", value: frm.doc.cost, add_deduct: "Add" },
     ]
 
     const rows = []
@@ -1905,7 +1909,7 @@ async function showTrainingEventSelector(frm) {
 
     const training_events = await frappe.call({
         method: "sth.overrides.purchase_invoice.get_all_training_event",
-        args: {  },
+        args: {},
     });
 
     if (training_events.message) {
@@ -1918,7 +1922,7 @@ async function showTrainingEventSelector(frm) {
 
 async function showPPHSelector(frm, selected_training_event, costing_items) {
 
-    console.log("test "+selected_training_event.name);
+    console.log("test " + selected_training_event.name);
 
     const pph_dialog = new frappe.ui.Dialog({
         title: "Pilih Item PPh",
