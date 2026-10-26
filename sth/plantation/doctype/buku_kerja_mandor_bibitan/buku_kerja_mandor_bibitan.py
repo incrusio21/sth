@@ -5,7 +5,22 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 
+from sth.custom.api import submit_after_insert
 from sth.mill.doctype.security_check_point.security_check_point import dari_rest_api
+
+# Field header yang namanya sama di BKM Perawatan dan disalin apa adanya.
+# trans_no sengaja tidak ikut: di BKM Perawatan trans_no dipakai insert() untuk
+# menggabungkan kiriman API ke dokumen yang sudah ada, jadi trans_no Bibitan yang
+# kebetulan sama dengan kiriman Perawatan akan tergabung ke dokumen yang salah.
+# Asalnya tetap tertelusuri lewat voucher_type/voucher_no.
+FIELD_HEADER_PERAWATAN = (
+	"company", "posting_date", "unit", "divisi", "kemandoran",
+	"kegiatan", "batch", "mandor", "kode_mandor",
+)
+
+# Isi baris material yang dibawa ke BKM Perawatan. rate, amount dan
+# stock_entry_detail diisi Stock Entry milik BKM Perawatan saat submit.
+FIELD_MATERIAL_PERAWATAN = ("item", "nama_barang", "qty", "rencana_jumlah", "warehouse")
 
 
 class BukuKerjaMandorBibitan(Document):
@@ -33,6 +48,23 @@ class BukuKerjaMandorBibitan(Document):
 
 	def before_insert(self):
 		self.validate_trans_no_kembar()
+
+		# Kiriman API datang dengan docstatus=1 langsung. Sama seperti BKM
+		# Perawatan, dokumennya dijadikan draft dulu lalu disubmit di after_insert
+		# supaya on_submit — yang membuat BKM Perawatan — pasti jalan.
+		if self.docstatus == 1:
+			self.flags.submit_after_insert = True
+			self.docstatus = 0
+
+	def after_insert(self):
+		if self.flags.get("submit_after_insert"):
+			submit_after_insert(self)
+
+	def on_submit(self):
+		self.buat_bkm_perawatan()
+
+	def on_cancel(self):
+		self.batalkan_bkm_perawatan()
 
 	def _validate_links(self):
 		self.make_batch()
@@ -68,6 +100,92 @@ class BukuKerjaMandorBibitan(Document):
 		batch_doc.batch_id = self.batch
 		batch_doc.flags.ignore_permissions = True
 		batch_doc.insert()
+
+	def get_bkm_perawatan(self):
+		"""BKM Perawatan salinan dokumen ini yang belum dibatalkan, atau None."""
+		return frappe.db.get_value(
+			"Buku Kerja Mandor Perawatan",
+			{"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": ["<", 2]},
+			"name",
+		)
+
+	def buat_bkm_perawatan(self):
+		"""Salin dokumen ini ke BKM Perawatan dan submit salinannya.
+
+		Upah, premi, Attendance, Stock Entry material dan GL Entry semuanya
+		dikerjakan BKM Perawatan; BKM Bibitan sendiri cuma catatan kiriman per
+		karyawan. Karyawan dan jumlah output-nya jadi satu baris hasil kerja.
+
+		Aman dipanggil ulang: kalau salinannya sudah ada, tidak dibuat lagi.
+		"""
+		if self.get_bkm_perawatan():
+			return
+
+		kategori_kegiatan = frappe.get_cached_value("Kegiatan", self.kegiatan, "kategori_kegiatan")
+		if not kategori_kegiatan:
+			frappe.throw(
+				f"Kegiatan {frappe.bold(self.kegiatan)} belum punya Kategori Kegiatan, "
+				"BKM Perawatan tidak bisa dibuat"
+			)
+
+		bkm = frappe.new_doc("Buku Kerja Mandor Perawatan")
+		bkm.update({field: self.get(field) for field in FIELD_HEADER_PERAWATAN})
+		bkm.kategori_kegiatan = kategori_kegiatan
+		bkm.voucher_type = self.doctype
+		bkm.voucher_no = self.name
+
+		bkm.append("hasil_kerja", {
+			"employee": self.employee,
+			"qty": self.qty,
+			"attendance_status": "Present",
+		})
+
+		for baris in self.material:
+			bkm.append("material", {field: baris.get(field) for field in FIELD_MATERIAL_PERAWATAN})
+
+		# docstatus=1 membuat BKM Perawatan men-submit dirinya di after_insert.
+		# Bukan insert() lalu submit(): di sesi user API hook approve_api sudah
+		# men-submit draft-nya lebih dulu, dan submit() kedua jadi error.
+		bkm.docstatus = 1
+		bkm.flags.ignore_permissions = True
+
+		# Nomornya disamakan dengan BKM Bibitan, bukan dari series BKM-PWT, supaya
+		# satu kiriman bisa dicari dengan nomor yang sama di kedua doctype.
+		# Bentrok cuma mungkin kalau salinan yang dibatalkan di-amend sendiri
+		# (namanya jadi BKM-BBT-xxxxx-1) lalu BKM Bibitan-nya juga di-amend.
+		if frappe.db.exists("Buku Kerja Mandor Perawatan", self.name):
+			frappe.throw(
+				f"BKM Perawatan dengan nomor {frappe.bold(self.name)} sudah ada, "
+				"salinan BKM Bibitan ini tidak bisa dibuat dengan nomor yang sama"
+			)
+
+		bkm.insert(set_name=self.name)
+
+		frappe.msgprint(
+			f"BKM Perawatan {frappe.utils.get_link_to_form(bkm.doctype, bkm.name)} dibuat",
+			alert=True,
+			indicator="green",
+		)
+
+	def batalkan_bkm_perawatan(self):
+		"""Batalkan BKM Perawatan salinan dokumen ini.
+
+		Harus lebih dulu dari pemeriksaan link Frappe yang jalan sesudah
+		on_cancel — selama salinannya masih submitted, BKM Bibitan tidak bisa
+		dibatalkan. Salinan yang masih draft dibiarkan; draft tidak menahan
+		pembatalan.
+		"""
+		nama = frappe.db.get_value(
+			"Buku Kerja Mandor Perawatan",
+			{"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": 1},
+			"name",
+		)
+		if not nama:
+			return
+
+		bkm = frappe.get_doc("Buku Kerja Mandor Perawatan", nama)
+		bkm.flags.ignore_permissions = True
+		bkm.cancel()
 
 
 def get_bkm_bibitan_by_trans_no(trans_no):
