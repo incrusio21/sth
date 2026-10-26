@@ -84,4 +84,8 @@ sth.patches.tambah_party_type_daftar_masyarakat
 # Closing VRA-nya berbeda dengan hitungan sekarang, termasuk akibat KM/HM BKM
 # yang diganti perbaiki_kmhm_bkm (jalankan sesudahnya). Default-nya laporan
 # saja; tulis dengan --kwargs "{'terapkan': 1}".
+# baca_ulang_lori_data_tbs juga tidak didaftarkan: membaca ulang lori/cycle
+# Data TBS yang komanya terpotong dari Monitoring TBS Olah, lalu memposting
+# ulang Stock Entry hariannya. Jalankan sesudah migrate, uji coba dulu dengan
+# --kwargs "{'simpan': False}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

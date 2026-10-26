@@ -188,10 +188,11 @@
   {
    "default": "0",
    "fieldname": "jumlah_lori_mentah",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah Lori/Cycle Mentah",
    "no_copy": 1,
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -227,19 +228,21 @@
   {
    "default": "0",
    "fieldname": "jumlah_lori_olah",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah Lori/Cycle Olah",
    "no_copy": 1,
+   "precision": "2",
    "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "jumlah_lori_masak",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah Lori/Cycle Masak",
    "no_copy": 1,
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -328,7 +331,7 @@
    "link_fieldname": "references"
   }
  ],
- "modified": "2026-10-17 16:09:13.418531",
+ "modified": "2026-10-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Data TBS",

@@ -107,19 +107,9 @@ class DataTBS(Document):
 
 		self.cek_monitoring_dan_cbc()
 
-		data_lori = frappe.db.sql("""
-			select 
-				tbs_olah as jumlah_lori_olah,
-				tbs_mentah as jumlah_lori_mentah,
-				jumlah_restan_tbs_masak as jumlah_lori_masak,
-				jumlah_loading_ramp as lori_estimasi_loading_ramp
-			from `tabMonitoring TBS Olah` mto
-			where mto.docstatus = 1 and tgl = %s and pabrik = %s
-		""",(self.tanggal_produksi,self.pabrik),as_dict=True)
-
 		# Tanpa Monitoring TBS Olah lorinya dinolkan, bukan dibiarkan memakai
 		# angka Get Data sebelumnya yang tanggalnya sudah lain.
-		self.update(data_lori[0] if data_lori else {
+		self.update(get_lori_monitoring(self.tanggal_produksi, self.pabrik) or {
 			"jumlah_lori_olah": 0,
 			"jumlah_lori_mentah": 0,
 			"jumlah_lori_masak": 0,
@@ -190,11 +180,13 @@ class DataTBS(Document):
 
 	def calculate_totals(self):
 		"""Bagi TBS hari ini ke olah, restan, dan loading ramp menurut porsi lorinya."""
+		# Semuanya flt, bukan cint: pabrik bertipe Cycle mencatat lori olah,
+		# mentah, masak, dan loading ramp dalam pecahan, dan cint memotong
+		# komanya sehingga TBS-nya bergeser ke porsi lain.
 		self.grand_total_lori = (
-			cint(self.jumlah_lori_olah)
-			+ cint(self.jumlah_lori_mentah)
-			+ cint(self.jumlah_lori_masak)
-			# Loading ramp diestimasi dari cycle, jadi lorinya bisa pecahan.
+			flt(self.jumlah_lori_olah)
+			+ flt(self.jumlah_lori_mentah)
+			+ flt(self.jumlah_lori_masak)
 			+ flt(self.lori_estimasi_loading_ramp)
 		)
 		self.restan_setelah_adjustment = flt(self.jumlah_tbs_restan) + flt(self.adjustment_stok)
@@ -202,8 +194,8 @@ class DataTBS(Document):
 
 		if self.grand_total_lori:
 			self.berat_rata_rata_tbs = self.grand_total_tbs / self.grand_total_lori
-			self.tbs_olah = self.berat_rata_rata_tbs * cint(self.jumlah_lori_olah)
-			self.tbs_restan = self.berat_rata_rata_tbs * (cint(self.jumlah_lori_mentah) + cint(self.jumlah_lori_masak))
+			self.tbs_olah = self.berat_rata_rata_tbs * flt(self.jumlah_lori_olah)
+			self.tbs_restan = self.berat_rata_rata_tbs * (flt(self.jumlah_lori_mentah) + flt(self.jumlah_lori_masak))
 			self.tbs_loading_ramp = self.berat_rata_rata_tbs * flt(self.lori_estimasi_loading_ramp)
 		else:
 			# Tidak ada lori berarti tidak ada yang diolah, jadi seluruh TBS —
@@ -286,6 +278,20 @@ class DataTBS(Document):
 		doc = get_mapped_doc(self.doctype,self.name,mapper,None,postprocess,True)
 		doc.insert()
 		doc.submit()
+
+def get_lori_monitoring(tanggal, pabrik):
+	"""Lori/cycle Monitoring TBS Olah submitted satu pabrik di satu tanggal, atau None."""
+	data_lori = frappe.db.sql("""
+		select
+			tbs_olah as jumlah_lori_olah,
+			tbs_mentah as jumlah_lori_mentah,
+			jumlah_restan_tbs_masak as jumlah_lori_masak,
+			jumlah_loading_ramp as lori_estimasi_loading_ramp
+		from `tabMonitoring TBS Olah` mto
+		where mto.docstatus = 1 and tgl = %s and pabrik = %s
+	""",(tanggal,pabrik),as_dict=True)
+
+	return data_lori[0] if data_lori else None
 
 def get_total_tbs(tanggal,unit):
 	query = frappe.db.sql("""
