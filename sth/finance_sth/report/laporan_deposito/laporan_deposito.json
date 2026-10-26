@@ -10,7 +10,7 @@
  "idx": 8,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-30 15:24:13.121360",
+ "modified": "2026-10-23 13:40:58.302674",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Deposito",
@@ -31,6 +31,12 @@
   },
   {
    "role": "FINANCE STAFF"
+  },
+  {
+   "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

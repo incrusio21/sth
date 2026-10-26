@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-10-22 10:00:00.000000",
+ "creation": "2026-10-22 10:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -53,20 +53,20 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Estate",
    "options": "Unit",
-   "reqd": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1
+   "reqd": 1
   },
   {
    "fieldname": "divisi",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Divisi",
    "options": "Divisi",
-   "reqd": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1
+   "reqd": 1
   },
   {
    "fieldname": "kemandoran",
@@ -77,17 +77,17 @@
   {
    "fieldname": "kegiatan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Kegiatan",
    "options": "Kegiatan",
-   "reqd": 1,
-   "in_list_view": 1
+   "reqd": 1
   },
   {
    "fieldname": "batch",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Kode Batch",
-   "options": "Batch Bibit",
-   "in_list_view": 1
+   "options": "Batch Bibit"
   },
   {
    "fieldname": "column_break_main",
@@ -101,12 +101,12 @@
    "reqd": 1
   },
   {
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date",
-   "default": "Today",
-   "reqd": 1,
-   "in_list_view": 1
+   "reqd": 1
   },
   {
    "fieldname": "trans_no",
@@ -132,8 +132,8 @@
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
-   "options": "Buku Kerja Mandor Bibitan",
    "no_copy": 1,
+   "options": "Buku Kerja Mandor Bibitan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -146,23 +146,23 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Nama",
    "options": "Employee",
-   "reqd": 1,
-   "in_list_view": 1
+   "reqd": 1
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nama Karyawan",
-   "fetch_from": "employee.employee_name",
    "read_only": 1
   },
   {
+   "fetch_from": "employee.no_ktp",
    "fieldname": "no_ktp",
    "fieldtype": "Data",
    "label": "NIK",
-   "fetch_from": "employee.no_ktp",
    "read_only": 1
   },
   {
@@ -172,16 +172,16 @@
   {
    "fieldname": "qty",
    "fieldtype": "Float",
-   "label": "Jumlah Output",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "label": "Jumlah Output"
   },
   {
+   "fetch_from": "kegiatan.uom",
+   "fetch_if_empty": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "Satuan",
-   "options": "UOM",
-   "fetch_from": "kegiatan.uom",
-   "fetch_if_empty": 1
+   "options": "UOM"
   },
   {
    "fieldname": "material_section",
@@ -237,7 +237,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-22 10:00:00.000000",
+ "modified": "2026-10-26 16:23:28.608876",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Bibitan",
@@ -258,6 +258,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",

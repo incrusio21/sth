@@ -10,7 +10,7 @@
  "idx": 9,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-30 15:10:28.963801",
+ "modified": "2026-10-23 13:42:47.924045",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Angsuran Pinjaman Bank",
@@ -34,6 +34,12 @@
   },
   {
    "role": "FINANCE STAFF"
+  },
+  {
+   "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

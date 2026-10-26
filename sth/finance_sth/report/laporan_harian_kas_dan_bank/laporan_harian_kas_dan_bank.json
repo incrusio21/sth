@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 11,
+ "idx": 12,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-30 15:09:15.618911",
+ "modified": "2026-10-23 13:41:46.725775",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan Harian Kas dan Bank",
@@ -43,6 +43,12 @@
   },
   {
    "role": "FINANCE STAFF"
+  },
+  {
+   "role": "ACCT MANAGER"
+  },
+  {
+   "role": "ACCT SPV"
   }
  ],
  "timeout": 0

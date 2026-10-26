@@ -65,6 +65,57 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Transaksi Lainnya",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengajuan Budget Tambahan",
+   "link_count": 0,
+   "link_to": "Pengajuan Budget Tambahan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Permintaaan Pengeluaran Barang",
+   "link_count": 0,
+   "link_to": "Permintaaan Pengeluaran Barang",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Permintaan Pengeluaran Barang",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengeluaran Barang",
+   "link_count": 0,
+   "link_to": "Pengeluaran Barang",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Pengeluaran Barang",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Permintaan Dana Operasional",
+   "link_count": 0,
+   "link_to": "Permintaan Dana Operasional",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "BKM",
    "link_count": 6,
    "link_type": "DocType",
@@ -130,60 +181,9 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Transaksi Lainnya",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pengajuan Budget Tambahan",
-   "link_count": 0,
-   "link_to": "Pengajuan Budget Tambahan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Permintaaan Pengeluaran Barang",
-   "link_count": 0,
-   "link_to": "Permintaaan Pengeluaran Barang",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Permintaan Pengeluaran Barang",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pengeluaran Barang",
-   "link_count": 0,
-   "link_to": "Pengeluaran Barang",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Pengeluaran Barang",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Permintaan Dana Operasional",
-   "link_count": 0,
-   "link_to": "Permintaan Dana Operasional",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2026-10-02 16:59:42.844668",
+ "modified": "2026-10-26 16:24:33.943598",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "BKM",

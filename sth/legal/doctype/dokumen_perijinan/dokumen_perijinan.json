@@ -45,8 +45,10 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Perusahaan",
    "options": "Company",
    "reqd": 1
@@ -239,7 +241,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-29 17:12:43.476357",
+ "modified": "2026-10-26 11:45:12.047884",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Dokumen Perijinan",
