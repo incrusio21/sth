@@ -88,4 +88,8 @@ sth.patches.tambah_party_type_daftar_masyarakat
 # Data TBS yang komanya terpotong dari Monitoring TBS Olah, lalu memposting
 # ulang Stock Entry hariannya. Jalankan sesudah migrate, uji coba dulu dengan
 # --kwargs "{'simpan': False}".
+# salin_bkm_bibitan_ke_perawatan juga tidak didaftarkan: membuat dan men-submit
+# BKM Perawatan (nomor sama) untuk BKM Bibitan submitted yang belum punya
+# salinan. Default-nya uji coba; tulis dengan --kwargs "{'terapkan': 1}",
+# satu dokumen saja dengan --kwargs "{'nama': 'BKM-BBT-00001'}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
