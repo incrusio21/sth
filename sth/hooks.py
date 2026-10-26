@@ -397,6 +397,7 @@ doc_events = {
 			"sth.custom.payment_entry.set_no_rekening",
 			"sth.custom.payment_entry.validate_payment_voucher_kas_pdo",
 			"sth.custom.payment_entry.set_realisasi_tambahan",
+			"sth.custom.payment_entry.sync_note_nama_barang",
 			"sth.custom.payment_entry.set_reference_no",
 			"sth.custom.payment_entry.validate_ganti_rugi_lahan_term_order"
 		],
