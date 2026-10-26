@@ -35,7 +35,12 @@ frappe.views.ReportView = class CustomReportView extends frappe.views.ReportView
 				this.report_doc = doc;
 				this.report_doc.json = JSON.parse(this.report_doc.json);
 
-				this.filters = this.report_doc.json.filters;
+				// seperti frappe asli: filter dari route (klik Number Card, link
+				// dashboard) digabung, bukan dibuang oleh filter saved report
+				this.filters = [
+					...(Array.isArray(this.report_doc.json.filters) ? this.report_doc.json.filters : []),
+					...this.parse_filters_from_route_options(),
+				];
 				this.order_by = this.report_doc.json.order_by;
 				this.add_totals_row = this.report_doc.json.add_totals_row;
 				this.page_title = __(this.report_name);

@@ -16,7 +16,9 @@ def get_jumlah_perlu_approval(filters=None):
 	return {
 		"value": len(names),
 		"fieldtype": "Int",
-		"route": ["List", doctype],
+		# view ditulis eksplisit: rute dua bagian dialihkan frappe ke last_view
+		# user (mis. Report) tanpa membawa route_options, filternya hilang
+		"route": ["List", doctype, "List"],
 		# list kosong tetap difilter supaya tidak membuka seluruh dokumen
 		"route_options": {"name": ["in", names or [""]]},
 	}
