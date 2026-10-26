@@ -14,6 +14,7 @@
   "kemandoran",
   "kegiatan",
   "batch",
+  "uom",
   "column_break_main",
   "company",
   "posting_date",
@@ -22,12 +23,7 @@
   "perangkat",
   "amended_from",
   "section_break_karyawan",
-  "employee",
-  "employee_name",
-  "no_ktp",
-  "column_break_karyawan",
-  "qty",
-  "uom",
+  "hasil_kerja",
   "material_section",
   "material",
   "more_information_tab",
@@ -144,36 +140,11 @@
    "label": "Karyawan"
   },
   {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Nama",
-   "options": "Employee",
+   "fieldname": "hasil_kerja",
+   "fieldtype": "Table",
+   "label": "Hasil Kerja",
+   "options": "Detail BKM Hasil Kerja Bibitan",
    "reqd": 1
-  },
-  {
-   "fetch_from": "employee.employee_name",
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "label": "Nama Karyawan",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "employee.no_ktp",
-   "fieldname": "no_ktp",
-   "fieldtype": "Data",
-   "label": "NIK",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_karyawan",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Jumlah Output"
   },
   {
    "fetch_from": "kegiatan.uom",
@@ -237,7 +208,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-26 16:23:28.608876",
+ "modified": "2026-10-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Buku Kerja Mandor Bibitan",
@@ -262,6 +233,5 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "title_field": "employee_name"
+ "states": []
 }
