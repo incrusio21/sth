@@ -8,7 +8,7 @@ from frappe.utils import getdate
 
 class SuratMenyurat(Document):
 	def autoname(self):
-		frappe.throw("CUSTOM AUTONAME TERPANGGIL")
+		# frappe.throw("CUSTOM AUTONAME TERPANGGIL")
 
 		if not self.naming_series:
 			frappe.throw("Naming Series wajib diisi.")
