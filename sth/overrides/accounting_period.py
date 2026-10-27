@@ -723,3 +723,29 @@ def validasi_periode_tertutup(doc, method=None):
 			),
 			ClosedAccountingPeriod,
 		)
+
+def remove_submission_queue(doc, method=None):
+	queues = frappe.get_all(
+		"Submission Queue",
+		filters={
+			"ref_doctype": "Accounting Period",
+			"ref_docname": doc.name,
+		},
+		pluck="name",
+	)
+
+	if not queues:
+		return
+
+	frappe.db.delete("Submission Queue", {
+		"ref_doctype": "Accounting Period",
+		"ref_docname": doc.name,
+	})
+
+	frappe.msgprint(
+		_("{0} Submission Queue terkait Accounting Period <b>{1}</b> telah dihapus: {2}").format(
+			len(queues), doc.name, ", ".join(queues)
+		),
+		title=_("Peringatan"),
+		indicator="orange",
+	)
