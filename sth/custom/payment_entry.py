@@ -1065,6 +1065,41 @@ def set_realisasi_tambahan(doc, method=None):
 	doc.realisasi_tambahan = tambahan
 
 
+def sync_note_nama_barang(doc, method=None):
+	"""Nominal per nama barang di Keterangan mengikuti grid yang tersimpan.
+
+	Keterangan "nama barang: nominal" cuma ditulis sekali saat Realisasi PDO
+	Kas ditarik (build_baris_realisasi), jadi nominal yang diubah di grid
+	sesudahnya tidak pernah ikut. Hanya baris yang namanya cocok dengan
+	item_barang di grid yang ditimpa nominalnya; teks lain dibiarkan.
+	"""
+	if doc.tipe_transfer != "Realisasi PDO" or not doc.get("note"):
+		return
+
+	total_per_barang = {}
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if row.tipe_pdo != "Kas" or not row.item_barang:
+			continue
+
+		total_per_barang[row.item_barang] = flt(total_per_barang.get(row.item_barang)) + flt(row.total)
+
+	if not total_per_barang:
+		return
+
+	baris_note = []
+	for baris in doc.note.split("\n"):
+		# rpartition: nama barang boleh memuat ": ", nominalnya tidak
+		nama, pemisah, _nominal = baris.rpartition(": ")
+		if pemisah and nama in total_per_barang:
+			baris = "{0}: {1}".format(
+				nama, frappe.format_value(total_per_barang[nama], {"fieldtype": "Currency"})
+			)
+
+		baris_note.append(baris)
+
+	doc.note = "\n".join(baris_note)
+
+
 def update_payment_voucher_ppd(doc, method=None):
 	if not doc.references:
 		return

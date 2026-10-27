@@ -31,6 +31,7 @@ sth.patches.isi_pengecualian_field_link_title
 sth.patches.hapus_akun_difference_mill
 sth.patches.isi_akun_difference_produksi_mill
 sth.patches.tambah_party_type_daftar_masyarakat
+sth.patches.pindahkan_karyawan_bkm_bibitan_ke_tabel
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).

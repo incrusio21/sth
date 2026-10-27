@@ -21,26 +21,48 @@ FIELD_MATERIAL_PERAWATAN = ("item", "nama_barang", "qty", "rencana_jumlah", "war
 
 class BukuKerjaMandorBibitan(Document):
 	def insert(self, *args, **kwargs):
-		"""Kiriman API dengan trans_no yang sudah tercatat mengembalikan dokumen lama.
+		"""Kiriman API dengan trans_no yang sudah tercatat digabung ke dokumen lama.
 
-		Perangkat mengirim ulang transaksi yang sama kalau koneksinya putus padahal
-		dokumennya sudah masuk. Dokumen yang sudah ada dikembalikan apa adanya —
-		/api/resource membalas isi dokumen ini, jadi pengirim menerima nomor lamanya
-		seperti insert yang berhasil. Isi kiriman ulang tidak ditulis ke dokumen lama.
+		Satu BKM Bibitan memuat semua karyawan satu trans_no, tapi perangkat
+		mengirim satu request per karyawan dengan trans_no yang sama. Karyawan
+		kiriman yang belum ada ditambahkan ke tabel hasil kerja dokumen lama;
+		kiriman ulang karena koneksi putus — karyawannya sudah ada — tidak
+		mengubah apa-apa. Dua-duanya membalas dengan dokumen lama: /api/resource
+		mengirim balik isi dokumen ini, jadi pengirim menerima nomor yang sama
+		seperti insert yang berhasil.
 
 		Hanya untuk kiriman REST (atau test_insert_api). Dari form, save() juga lewat
 		insert() tapi savedocs mengirim balik objek form-nya sendiri, bukan nilai
 		kembalian ini — dokumen baru akan tampak tersimpan padahal tidak. Di sana
 		duplikat tetap ditolak validate_trans_no_kembar.
 		"""
+		self.pindahkan_karyawan_kiriman()
+
 		trans_no = cstr(self.trans_no).strip()
 
 		if trans_no and not self.amended_from and (self.flags.dari_api or dari_rest_api()):
 			kembar = get_bkm_bibitan_by_trans_no(trans_no)
 			if kembar:
-				return frappe.get_doc(self.doctype, kembar)
+				return gabung_ke_bkm_bibitan(kembar, self)
 
 		return super().insert(*args, **kwargs)
+
+	def pindahkan_karyawan_kiriman(self):
+		"""Pindahkan employee dan qty di header kiriman API ke baris hasil kerja.
+
+		Sistem luar tetap mengirim satu karyawan di luar tabel. Header doctype ini
+		sudah tidak punya field itu, jadi nilainya cuma ada sebagai atribut
+		kiriman dan akan hilang begitu saja kalau tidak dipindah di sini.
+		"""
+		employee = self.get("employee")
+		if not employee:
+			return
+
+		if not any(hk.employee == employee for hk in self.hasil_kerja):
+			self.append("hasil_kerja", {"employee": employee, "qty": self.get("qty")})
+
+		self.__dict__.pop("employee", None)
+		self.__dict__.pop("qty", None)
 
 	def before_insert(self):
 		self.validate_trans_no_kembar()
@@ -55,6 +77,16 @@ class BukuKerjaMandorBibitan(Document):
 	def after_insert(self):
 		if self.flags.get("submit_after_insert"):
 			submit_after_insert(self)
+
+	def validate(self):
+		self.validate_karyawan_kembar()
+
+	def validate_karyawan_kembar(self):
+		sudah_ada = set()
+		for hk in self.hasil_kerja:
+			if hk.employee in sudah_ada:
+				frappe.throw(f"Karyawan {frappe.bold(hk.employee)} tercatat lebih dari sekali di Hasil Kerja")
+			sudah_ada.add(hk.employee)
 
 	def on_submit(self):
 		self.buat_bkm_perawatan()
@@ -109,8 +141,8 @@ class BukuKerjaMandorBibitan(Document):
 		"""Salin dokumen ini ke BKM Perawatan dan submit salinannya.
 
 		Upah, premi, Attendance, Stock Entry material dan GL Entry semuanya
-		dikerjakan BKM Perawatan; BKM Bibitan sendiri cuma catatan kiriman per
-		karyawan. Karyawan dan jumlah output-nya jadi satu baris hasil kerja.
+		dikerjakan BKM Perawatan; BKM Bibitan sendiri cuma catatan kiriman.
+		Tiap baris hasil kerja jadi satu baris hasil kerja BKM Perawatan.
 
 		Aman dipanggil ulang: kalau salinannya sudah ada, tidak dibuat lagi.
 		"""
@@ -134,11 +166,8 @@ class BukuKerjaMandorBibitan(Document):
 		# dokumennya sendiri walau trans_no-nya kebetulan sama.
 		bkm.flags.dari_bkm_bibitan = True
 
-		bkm.append("hasil_kerja", {
-			"employee": self.employee,
-			"qty": self.qty,
-			"attendance_status": "Present",
-		})
+		for baris in baris_hasil_kerja_perawatan(self.hasil_kerja):
+			bkm.append("hasil_kerja", baris)
 
 		for baris in self.material:
 			bkm.append("material", {field: baris.get(field) for field in FIELD_MATERIAL_PERAWATAN})
@@ -167,6 +196,45 @@ class BukuKerjaMandorBibitan(Document):
 			indicator="green",
 		)
 
+	def tambah_hasil_kerja_setelah_submit(self, baris_baru):
+		"""Sisipkan karyawan kiriman susulan ke dokumen yang sudah disubmit.
+
+		save() tidak bisa dipakai — hasil_kerja bukan allow_on_submit — jadi
+		barisnya ditulis langsung, dan fetch nama/NIK karyawan yang biasanya jalan
+		saat save diisi sendiri. Karyawan yang sama ikut ditambahkan ke BKM
+		Perawatan salinannya, supaya upah, Attendance dan GL-nya ikut terhitung.
+		"""
+		baris_ditambah = []
+		for baris in baris_baru:
+			karyawan = frappe.db.get_value(
+				"Employee", baris["employee"], ["employee_name", "no_ktp"], as_dict=True
+			)
+			if not karyawan:
+				frappe.throw(
+					f"Karyawan {frappe.bold(baris['employee'])} tidak ditemukan",
+					frappe.LinkValidationError,
+				)
+
+			hk = self.append("hasil_kerja", {**baris, **karyawan})
+			hk.docstatus = self.docstatus
+			hk.db_insert()
+			baris_ditambah.append(hk)
+
+		self.db_set("modified", frappe.utils.now(), update_modified=False)
+
+		nama = self.get_bkm_perawatan()
+		if not nama:
+			# salinannya belum ada — misalnya dokumen lama yang belum tersalin —
+			# jadi dibuat sekarang, sekaligus dengan baris barunya
+			self.buat_bkm_perawatan()
+			return
+
+		from sth.plantation.doctype.buku_kerja_mandor_perawatan.buku_kerja_mandor_perawatan import (
+			gabung_ke_bkm,
+		)
+
+		gabung_ke_bkm(nama, frappe._dict(hasil_kerja=baris_hasil_kerja_perawatan(baris_ditambah)))
+
 	def batalkan_bkm_perawatan(self):
 		"""Batalkan BKM Perawatan salinan dokumen ini.
 
@@ -186,6 +254,54 @@ class BukuKerjaMandorBibitan(Document):
 		bkm = frappe.get_doc("Buku Kerja Mandor Perawatan", nama)
 		bkm.flags.ignore_permissions = True
 		bkm.cancel()
+
+
+def baris_hasil_kerja_perawatan(hasil_kerja):
+	"""Baris hasil kerja BKM Perawatan untuk baris hasil kerja BKM Bibitan.
+
+	Rate dan hari kerja sengaja tidak diisi: BKM Perawatan menghitungnya dari
+	master Kegiatan.
+	"""
+	return [
+		frappe._dict(employee=hk.employee, qty=hk.qty, attendance_status="Present")
+		for hk in hasil_kerja
+	]
+
+
+def gabung_ke_bkm_bibitan(nama, kiriman):
+	"""Tambahkan karyawan kiriman API ke BKM Bibitan yang trans_no-nya sama.
+
+	Tabel material kiriman sengaja tidak ikut, sama seperti gabung_ke_bkm di BKM
+	Perawatan: sistem luar mengulang seluruh isi header — termasuk material — di
+	tiap request, jadi menggabungkannya berarti mengeluarkan barang yang sama
+	berkali-kali.
+	"""
+	doc = frappe.get_doc("Buku Kerja Mandor Bibitan", nama)
+
+	sudah_ada = {hk.employee for hk in doc.hasil_kerja}
+	baris_baru = []
+	for hk in kiriman.hasil_kerja:
+		if not hk.employee or hk.employee in sudah_ada:
+			continue
+
+		sudah_ada.add(hk.employee)
+		baris_baru.append({"employee": hk.employee, "qty": hk.qty})
+
+	if not baris_baru:
+		# kiriman ulang: karyawannya sudah tercatat semua
+		return doc
+
+	if doc.docstatus == 0:
+		# masih draft: BKM Perawatan belum ada, nanti dibuat on_submit dengan
+		# seluruh barisnya
+		for baris in baris_baru:
+			doc.append("hasil_kerja", baris)
+
+		doc.save()
+		return doc
+
+	doc.tambah_hasil_kerja_setelah_submit(baris_baru)
+	return doc
 
 
 def get_bkm_bibitan_by_trans_no(trans_no):
@@ -227,6 +343,7 @@ def test_insert_api(payload, dry_run=1):
 			"docstatus": doc.docstatus,
 			"batch": doc.batch,
 			"trans_no_sudah_ada": bool(kembar),
+			"karyawan": [hk.employee for hk in doc.hasil_kerja],
 			"batch_dibuat_otomatis": not kembar and not batch_sudah_ada and bool(doc.batch),
 		}
 	except Exception as e:
