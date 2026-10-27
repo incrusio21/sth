@@ -277,11 +277,13 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	payment_type: function (frm) {
-		pasang_company_account(frm)
+		pasang_company_account(frm);
+		check_mandiri_kcm(frm);
 	},
 
 	mode_of_payment(frm) {
 		filter_bank_accounts(frm);
+		check_mandiri_kcm(frm);
 	},
 
 	internal_employee(frm) {
@@ -1250,6 +1252,11 @@ function show_pdo_preview(pdoList) {
 }
 
 function check_mandiri_kcm(frm) {
+	if (frm.doc.mode_of_payment !== 'Bank Draft') {
+		frm.set_df_property('mandiri_kcm', 'hidden', 1);
+		return;
+	}
+
 	if (!frm.doc.paid_from) {
 		frm.set_df_property('mandiri_kcm', 'hidden', 1);
 		return;
@@ -1261,6 +1268,12 @@ function check_mandiri_kcm(frm) {
 			account: frm.doc.paid_from
 		},
 		callback: function (r) {
+			// Mode of Payment bisa sudah berganti selama request berjalan
+			if (frm.doc.mode_of_payment !== 'Bank Draft') {
+				frm.set_df_property('mandiri_kcm', 'hidden', 1);
+				return;
+			}
+
 			let is_mandiri_kcm = r.message ? 0 : 1;
 			frm.set_df_property('mandiri_kcm', 'hidden', is_mandiri_kcm);
 		}
