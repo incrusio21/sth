@@ -248,6 +248,8 @@ frappe.ui.form.on("Payment Entry", {
 			filter_paid_to_by_kendaraan(frm);
 		}
 
+		filter_paid_to_dana_cadangan(frm);
+
 		check_mandiri_kcm(frm);
 		toggle_paid_from_readonly(frm);
 		// make_pdo_preview(frm)
@@ -1478,6 +1480,42 @@ function filter_paid_to_by_kendaraan(frm) {
 			indicator: 'blue',
 		});
 	});
+}
+
+// Realisasi PDO tipe Dana Cadangan dibayarkan ke akun biaya kepala 7. Saringannya
+// dibungkus di atas query bawaan, jadi untuk PV lain Paid To tetap seperti biasa.
+// Kondisinya dibaca saat dropdown dibuka, karena baris realisasi bisa ditarik
+// setelah form dimuat.
+function filter_paid_to_dana_cadangan(frm) {
+	let field = frm.fields_dict.paid_to;
+	if (!field) return;
+
+	if (field.get_query !== frm._paid_to_query_dana_cadangan) {
+		frm._paid_to_query_asal = field.get_query || null;
+	}
+
+	frm._paid_to_query_dana_cadangan = function (doc, cdt, cdn) {
+		if (is_realisasi_dana_cadangan(frm)) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					account_number: ['like', '7%'],
+				}
+			};
+		}
+
+		let asal = frm._paid_to_query_asal;
+		return asal ? asal(doc, cdt, cdn) : {};
+	};
+
+	frm.set_query('paid_to', frm._paid_to_query_dana_cadangan);
+}
+
+function is_realisasi_dana_cadangan(frm) {
+	return frm.doc.payment_type === 'Internal Transfer'
+		&& frm.doc.tipe_transfer === 'Realisasi PDO'
+		&& (frm.doc.payment_voucher_kas_pdo || []).some(row => row.tipe_pdo === 'Dana Cadangan');
 }
 
 function apply_account(frm, account) {
