@@ -742,10 +742,10 @@ def remove_submission_queue(doc, method=None):
 		"ref_docname": doc.name,
 	})
 
-	frappe.msgprint(
-		_("{0} Submission Queue terkait Accounting Period <b>{1}</b> telah dihapus: {2}").format(
-			len(queues), doc.name, ", ".join(queues)
-		),
-		title=_("Peringatan"),
-		indicator="orange",
-	)
+	# frappe.msgprint(
+	# 	_("{0} Submission Queue terkait Accounting Period <b>{1}</b> telah dihapus: {2}").format(
+	# 		len(queues), doc.name, ", ".join(queues)
+	# 	),
+	# 	title=_("Peringatan"),
+	# 	indicator="orange",
+	# )
