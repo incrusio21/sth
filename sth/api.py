@@ -128,6 +128,8 @@ def get_table_data(args):
 	where_clause = "WHERE sq.workflow_state NOT IN ('Approved','Closed') AND sqi.material_request = %(pr_sr)s "
 	filters = {"pr_sr":args.pr_sr}
 	
+	pr_sr_items = frappe.db.get_all("Material Request Item",{'parent':args.pr_sr},'item_code',order_by="idx",pluck='item_code')
+
 	if args.item_name:
 		where_clause += " AND sqi.item_name LIKE %(item_name)s"
 		filters["item_name"] = f"%{args.item_name}%"
@@ -143,7 +145,7 @@ def get_table_data(args):
 		JOIN `tabSupplier` s on s.name = sq.supplier
 		JOIN `tabItem` i ON i.`name` = sqi.`item_code`
 		{where_clause}
-		ORDER BY sqi.`item_code`,sq.`supplier`,sq.`name`;
+		ORDER BY FIELD(sqi.`item_code`,{",".join(pr_sr_items)}),sq.`supplier`,sq.`name`;
 	""",filters,as_dict=True)
 
 	static_fields = ["idx","kode_barang","nama_barang","satuan","harga_terakhir"]
