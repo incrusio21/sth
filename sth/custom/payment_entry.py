@@ -1066,8 +1066,9 @@ def set_realisasi_tambahan(doc, method=None):
 	doc.realisasi_tambahan = tambahan
 
 
-# Nominal di Keterangan, mis. "Rp 7,000,000.00" atau "7.000.000" (simbol opsional)
-POLA_NOMINAL_NOTE = re.compile(r"(?:(?:Rp|IDR)\.?\s?)?-?\d(?:[\d.,]*\d)?")
+# Nominal tepat di belakang "nama barang: ", mis. "Rp 7,000,000.00" atau "7.000.000".
+# Dikunci di awal supaya angka di kata-kata tambahan ("coba 1 2 3") tidak ikut diganti.
+POLA_NOMINAL_NOTE = re.compile(r"^\s*(?:(?:Rp|IDR)\.?\s?)?-?\d(?:[\d.,]*\d)?")
 
 
 def sync_note_nama_barang(doc, method=None):
@@ -1098,8 +1099,8 @@ def sync_note_nama_barang(doc, method=None):
 	for baris in doc.note.split("\n"):
 		nama = next((n for n in nama_urut if baris.startswith(n + ": ")), None)
 		if nama:
-			# Cuma angka pertama sesudah "nama: " yang diganti. Kata-kata yang
-			# ditambahkan user di belakang nominal tetap dibiarkan.
+			# Cuma nominal sesudah "nama: " yang diganti. Kata-kata yang ditambahkan
+			# user di belakangnya tetap dibiarkan.
 			nominal = frappe.format_value(total_per_barang[nama], {"fieldtype": "Currency"})
 			sisa = baris[len(nama) + 2:]
 			sisa_baru, diganti = POLA_NOMINAL_NOTE.subn(lambda m: nominal, sisa, count=1)
