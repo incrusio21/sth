@@ -5,7 +5,7 @@
 {% set bank_account_pengirim = frappe.db.get_value("Bank Account", {"account": doc.paid_from}, ["name", "bank",
 "bank_account_no", "account_name"], as_dict=True) if doc.paid_from else None %}
 {% set bank_account_penerima = frappe.db.get_value("Bank Account", {"account": doc.paid_to}, ["name", "bank",
-"bank_account_no", "account_name"], as_dict=True) if doc.paid_to else None %}
+"bank_account_no", "account_name", "company", "unit"], as_dict=True) if doc.paid_to else None %}
 
 {% set submit_time = frappe.db.sql("""
 SELECT creation
@@ -79,9 +79,15 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">NAMA PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
+        {% if doc.tipe_transfer == "Realisasi PDO" %}
         {% set penerima = frappe.get_doc("Employee", doc.payment_voucher_kas_pdo[0].penerima) if
         doc.payment_voucher_kas_pdo[0] else None %}
         {{ penerima.first_name or '' }}
+        {% endif %}
+
+        {% if doc.tipe_transfer == "Penerimaan Dana PDO" %}
+        {{ bank_account_penerima.company }} - {{ bank_account_penerima.unit }}
+        {% endif %}
       </td>
       {% endif %}
     </tr>
