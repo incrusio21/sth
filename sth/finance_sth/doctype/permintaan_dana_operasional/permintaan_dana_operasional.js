@@ -258,6 +258,65 @@ frappe.ui.form.on("PDO Dana Cadangan Table", {
 
 
 
+// Nilai revisi default-nya ikut nilai pengajuan, jadi approver cukup mengubah yang
+// memang direvisi. Revisi yang sudah diubah sendiri tidak ditimpa lagi.
+const REVISI_IKUT_PENGAJUAN = {
+	"PDO Bahan Bakar Table": { plafon: "revised_plafon", unit_price: "revised_unit_price" },
+	"PDO Perjalanan Dinas Table": { plafon: "revised_plafon", hari_dinas: "revised_duty_day" },
+	"PDO Kas Table": { qty: "revised_qty", price: "revised_price" },
+	"PDO NON PDO Table": { qty: "revised_qty", price: "revised_price" },
+	"PDO Dana Cadangan Table": { amount: "revised_amount" },
+};
+
+for (const [child_doctype, pasangan] of Object.entries(REVISI_IKUT_PENGAJUAN)) {
+	const handlers = {};
+
+	for (const [field, revised_field] of Object.entries(pasangan)) {
+		handlers[field] = function (frm, cdt, cdn) {
+			isi_revisi_dari_pengajuan(frm, cdt, cdn, field, revised_field);
+		};
+	}
+
+	frappe.ui.form.on(child_doctype, handlers);
+}
+
+frappe.ui.form.on("Permintaan Dana Operasional", {
+	refresh(frm) {
+		catat_nilai_pengajuan(frm);
+	}
+});
+
+// Nilai pengajuan terakhir per baris, untuk tahu apakah revisinya masih mengikuti
+// pengajuan (sama dengan nilai sebelumnya) atau sudah diubah sendiri.
+function catat_nilai_pengajuan(frm) {
+	frm._nilai_pengajuan = {};
+
+	for (const df of frm.meta.fields) {
+		const pasangan = df.fieldtype === "Table" && REVISI_IKUT_PENGAJUAN[df.options];
+		if (!pasangan) continue;
+
+		for (const row of frm.doc[df.fieldname] || []) {
+			for (const field of Object.keys(pasangan)) {
+				frm._nilai_pengajuan[`${row.name}:${field}`] = row[field];
+			}
+		}
+	}
+}
+
+function isi_revisi_dari_pengajuan(frm, cdt, cdn, field, revised_field) {
+	const row = locals[cdt][cdn];
+	frm._nilai_pengajuan = frm._nilai_pengajuan || {};
+
+	const key = `${cdn}:${field}`;
+	const sebelumnya = frm._nilai_pengajuan[key];
+	frm._nilai_pengajuan[key] = row[field];
+
+	const revisi = flt(row[revised_field]);
+	if (revisi && (sebelumnya === undefined || revisi !== flt(sebelumnya))) return;
+
+	frappe.model.set_value(cdt, cdn, revised_field, row[field]);
+}
+
 function get_plafon_pdo(frm, cdt, cdn) {
 	let row = locals[cdt][cdn];
 

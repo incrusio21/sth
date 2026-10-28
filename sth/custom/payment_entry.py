@@ -1,5 +1,6 @@
 import frappe
 import json
+import re
 
 from frappe import _, qb
 from frappe.utils import flt, getdate, nowdate
@@ -1065,6 +1066,11 @@ def set_realisasi_tambahan(doc, method=None):
 	doc.realisasi_tambahan = tambahan
 
 
+# Nominal tepat di belakang "nama barang: ", mis. "Rp 7,000,000.00" atau "7.000.000".
+# Dikunci di awal supaya angka di kata-kata tambahan ("coba 1 2 3") tidak ikut diganti.
+POLA_NOMINAL_NOTE = re.compile(r"^\s*(?:(?:Rp|IDR)\.?\s?)?-?\d(?:[\d.,]*\d)?")
+
+
 def sync_note_nama_barang(doc, method=None):
 	"""Nominal per nama barang di Keterangan mengikuti grid yang tersimpan.
 
@@ -1086,14 +1092,22 @@ def sync_note_nama_barang(doc, method=None):
 	if not total_per_barang:
 		return
 
+	# Nama terpanjang dicocokkan dulu supaya "Token" tidak memakan "Token Listrik: ..."
+	nama_urut = sorted(total_per_barang, key=len, reverse=True)
+
 	baris_note = []
 	for baris in doc.note.split("\n"):
-		# rpartition: nama barang boleh memuat ": ", nominalnya tidak
-		nama, pemisah, _nominal = baris.rpartition(": ")
-		if pemisah and nama in total_per_barang:
-			baris = "{0}: {1}".format(
-				nama, frappe.format_value(total_per_barang[nama], {"fieldtype": "Currency"})
-			)
+		nama = next((n for n in nama_urut if baris.startswith(n + ": ")), None)
+		if nama:
+			# Cuma nominal sesudah "nama: " yang diganti. Kata-kata yang ditambahkan
+			# user di belakangnya tetap dibiarkan.
+			nominal = frappe.format_value(total_per_barang[nama], {"fieldtype": "Currency"})
+			sisa = baris[len(nama) + 2:]
+			sisa_baru, diganti = POLA_NOMINAL_NOTE.subn(lambda m: nominal, sisa, count=1)
+			if not diganti:
+				sisa_baru = "{0} {1}".format(nominal, sisa).rstrip()
+
+			baris = "{0}: {1}".format(nama, sisa_baru)
 
 		baris_note.append(baris)
 

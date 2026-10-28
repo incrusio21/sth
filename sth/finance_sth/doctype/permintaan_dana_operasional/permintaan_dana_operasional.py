@@ -29,6 +29,7 @@ class PermintaanDanaOperasional(Document):
 		self.update_pdo_default_account()
 		self.validate_child_tables()
 		if self.docstatus == 0:
+			self.isi_revisi_dari_pengajuan()
 			self.hitung_total()
 
 		self.check_duplicate()
@@ -172,6 +173,32 @@ class PermintaanDanaOperasional(Document):
 						msg = f"Pada Tabel {pdo} baris ke {row.idx} field currency atau angka harus lebih besar dari 0"
 						frappe.throw(msg)
 	
+	def isi_revisi_dari_pengajuan(self):
+		"""Revisi yang masih kosong diisi nilai pengajuannya.
+
+		Sama dengan yang dilakukan form saat nilai pengajuan diketik, untuk baris
+		yang masuk tanpa lewat form. Total revisi baris itu ikut dihitung ulang.
+		"""
+		revisi_map = {
+			"pdo_bahan_bakar": ({"plafon": "revised_plafon", "unit_price": "revised_unit_price"}, "revised_price_total"),
+			"pdo_perjalanan_dinas": ({"plafon": "revised_plafon", "hari_dinas": "revised_duty_day"}, "revised_total"),
+			"pdo_kas": ({"qty": "revised_qty", "price": "revised_price"}, "revised_total"),
+			"pdo_non_pdo": ({"qty": "revised_qty", "price": "revised_price"}, "revised_total"),
+			"pdo_dana_cadangan": ({"amount": "revised_amount"}, None),
+		}
+
+		for table, (pasangan, total_field) in revisi_map.items():
+			for row in self.get(table) or []:
+				diisi = False
+				for field, revised_field in pasangan.items():
+					if not flt(row.get(revised_field)) and flt(row.get(field)):
+						row.set(revised_field, row.get(field))
+						diisi = True
+
+				if diisi and total_field:
+					a, b = (flt(row.get(f)) for f in pasangan.values())
+					row.set(total_field, a * b if b else a)
+
 	def hitung_total(self):
 		list_pdo = ["Bahan Bakar","Perjalanan Dinas", "Kas", "Dana Cadangan"]
 
