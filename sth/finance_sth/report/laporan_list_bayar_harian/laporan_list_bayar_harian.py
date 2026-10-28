@@ -145,17 +145,18 @@ def get_data(filters=None):
 	for pe in payment_entries:
 		ref_type = pe.reference_doctype or ""
   
-		party_doc = frappe.get_doc(pe.party_type, pe.party)
+		uraian = ""
+		if pe.party_type and pe.party:
+			if pe.party_type == "Supplier":
+				uraian = frappe.db.get_value("Supplier", pe.party, "supplier_name") or pe.party
+			elif pe.party_type == "Employee":
+				uraian = frappe.db.get_value("Employee", pe.party, "first_name") or pe.party
+			else:
+				uraian = pe.party
 
 		row = {
 			"pt": pe.company,
-			"uraian": (
-				party_doc.supplier_name
-				if pe.party_type == "Supplier"
-				else party_doc.first_name
-				if pe.party_type == "Employee"
-				else pe.party
-			),
+			"uraian": uraian,
 			"no_payment_voucher": pe.name,
 			"no_reff_mcm": pe.reference_no,
 			"nilai_tagihan": flt(pe.outstanding_amount),
@@ -194,7 +195,7 @@ def get_data(filters=None):
 			row["jenis_transaksi"] = "PENGAJUAN PERJALANAN DINAS"
 			row["payment_status"] = ""
 			hrd_rows.append(row)
-		elif ref_type in ["Pertanggungjawaban Perjalanan Dinas", "Employee Potongan"]:
+		elif ref_type in ["Pertanggungjawaban Perjalanan Dinas", "Employee Potongan", "Expense Claim"]:
 			row["jenis_transaksi"] = "TAGIHAN HRD"
 			row["payment_status"] = ""
 			hrd_rows.append(row)
