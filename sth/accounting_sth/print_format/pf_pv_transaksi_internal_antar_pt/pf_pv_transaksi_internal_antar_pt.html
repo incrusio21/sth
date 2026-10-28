@@ -56,6 +56,7 @@ LIMIT 1
       {% endif %}
     </tr>
     <tr>
+      {% if doc.payment_type == "Internal Transfer" and doc.mode_of_payment == "Bank Draft" %}
       <td style="padding-bottom: 0!important;">NAMA BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
@@ -66,8 +67,10 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">BANK PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">BANK MANDIRI</td>
+      {% endif %}
     </tr>
     <tr>
+      {% if doc.payment_type == "Internal Transfer" and doc.mode_of_payment == "Bank Draft" %}
       <td style="padding-bottom: 0!important;">NO REK</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
@@ -75,6 +78,8 @@ LIMIT 1
         {{ bank_account_pengirim.bank_account_no or '' }}
         {% endif %}
       </td>
+      {% endif %}
+
       {% if doc.payment_type == "Internal Transfer" %}
       <td style="padding-bottom: 0!important;">NAMA PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
@@ -92,6 +97,7 @@ LIMIT 1
       {% endif %}
     </tr>
     <tr>
+      {% if doc.payment_type == "Internal Transfer" and doc.mode_of_payment == "Bank Draft" %}
       <td style="padding-bottom: 0!important;">ATAS NAMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
@@ -100,6 +106,7 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">NO REF BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">{{ doc.reference_no or '' }}</td>
+      {% endif %}
     </tr>
   </table>
 
