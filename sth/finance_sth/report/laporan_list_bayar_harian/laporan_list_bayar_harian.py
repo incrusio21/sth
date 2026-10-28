@@ -84,51 +84,107 @@ def get_columns():
 def get_data(filters=None):
 	# Fetch all Draft Payment Entries with their references
 	conditions = get_condition(filters)
+	# payment_entries = frappe.db.sql(
+	# 	f"""
+	# 	SELECT
+	# 		pe.name,
+	# 		pe.payment_type,
+	# 		pe.tipe_transfer,
+	# 		uf.name as unit_from,
+	# 		ut.name as unit_to,
+	# 		cf.abbr as company_from,
+	# 		ct.abbr as company_to,
+	# 		pe.company,
+	# 		pe.party_type,
+	# 		pe.party,
+	# 		pe.reference_no,
+	# 		pi.invoice_type,
+	# 		per.reference_doctype,
+	# 		per.outstanding_amount,
+	# 		pe.paid_amount,
+	# 		pe.request_release_date,
+	# 		pe.workflow_state as workflow_state
+	# 	FROM
+	# 		`tabPayment Entry` pe
+	# 	LEFT JOIN
+	# 		`tabPayment Entry Reference` per ON per.parent = pe.name
+	# 	LEFT JOIN
+	# 		`tabPurchase Invoice` pi ON pi.name = per.reference_name
+	# 	LEFT JOIN
+	# 		`tabUnit` uf ON uf.bank_account = pe.paid_from
+	# 	LEFT JOIN
+	# 		`tabUnit` ut ON ut.bank_account = pe.paid_to
+	# 	LEFT JOIN
+	# 		`tabAccount` af ON af.name = pe.paid_from
+	# 	LEFT JOIN
+	# 		`tabAccount` at ON at.name = pe.paid_to
+	# 	LEFT JOIN
+	# 		`tabCompany` cf ON cf.name = af.company
+	# 	LEFT JOIN
+	# 		`tabCompany` ct ON ct.name = at.company
+	# 	WHERE
+	# 		pe.workflow_state IN ('Butuh Persetujuan 3', 'Approved') AND pe.permintaan_dana_operasional IS NULL
+	# 		{conditions}
+	# 	ORDER BY
+	# 		FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
+	# 		pe.company,
+	# 		pe.name
+	# 	""",
+	# 	filters,
+	# 	as_dict=True,
+	# )
 	payment_entries = frappe.db.sql(
 		f"""
-		SELECT
-			pe.name,
-			pe.payment_type,
-			pe.tipe_transfer,
-			uf.name as unit_from,
-			ut.name as unit_to,
-			cf.abbr as company_from,
-			ct.abbr as company_to,
-			pe.company,
-			pe.party_type,
-			pe.party,
-			pe.reference_no,
-			pi.invoice_type,
-			per.reference_doctype,
-			per.outstanding_amount,
-			pe.paid_amount,
-			pe.request_release_date,
-			pe.workflow_state as workflow_state
-		FROM
-			`tabPayment Entry` pe
-		LEFT JOIN
-			`tabPayment Entry Reference` per ON per.parent = pe.name
-		LEFT JOIN
-			`tabPurchase Invoice` pi ON pi.name = per.reference_name
-		LEFT JOIN
-			`tabUnit` uf ON uf.bank_account = pe.paid_from
-		LEFT JOIN
-			`tabUnit` ut ON ut.bank_account = pe.paid_to
-		LEFT JOIN
-			`tabAccount` af ON af.name = pe.paid_from
-		LEFT JOIN
-			`tabAccount` at ON at.name = pe.paid_to
-		LEFT JOIN
-			`tabCompany` cf ON cf.name = af.company
-		LEFT JOIN
-			`tabCompany` ct ON ct.name = at.company
-		WHERE
-			pe.workflow_state IN ('Butuh Persetujuan 3', 'Approved') AND pe.permintaan_dana_operasional IS NULL
-			{conditions}
-		ORDER BY
-			FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
-			pe.company,
-			pe.name
+			SELECT
+				pe.name,
+				pe.party_type,
+				pe.payment_type,
+				pe.tipe_transfer,
+				uf.name as unit_from,
+				ut.name as unit_to,
+				cf.abbr as company_from,
+				ct.abbr as company_to,
+				pe.company,
+				pe.party_type,
+				pe.party,
+				pe.reference_no,
+				pi.invoice_type,
+				per.reference_doctype,
+				per.outstanding_amount,
+				pe.paid_amount,
+				pe.request_release_date,
+				pe.workflow_state as workflow_state
+			FROM
+				`tabPayment Entry` pe
+			LEFT JOIN
+				`tabPayment Entry Reference` per ON per.parent = pe.name
+			LEFT JOIN
+				`tabPurchase Invoice` pi ON pi.name = per.reference_name
+			LEFT JOIN
+				`tabAccount` af ON af.name = pe.paid_from
+			LEFT JOIN
+				`tabAccount` at ON at.name = pe.paid_to
+			LEFT JOIN
+				`tabUnit` uf ON (
+					(af.account_type = 'Bank' AND uf.bank_account = pe.paid_from)
+					OR (af.account_type = 'Cash' AND uf.account_for_cash = pe.paid_from)
+				)
+			LEFT JOIN
+				`tabUnit` ut ON (
+					(at.account_type = 'Bank' AND ut.bank_account = pe.paid_to)
+					OR (at.account_type = 'Cash' AND ut.account_for_cash = pe.paid_to)
+				)
+			LEFT JOIN
+				`tabCompany` cf ON cf.name = af.company
+			LEFT JOIN
+				`tabCompany` ct ON ct.name = at.company
+			WHERE
+				pe.workflow_state IN ('Butuh Persetujuan 3', 'Approved') AND pe.permintaan_dana_operasional IS NULL
+				{conditions}
+			ORDER BY
+				FIELD(per.reference_doctype, 'BPJS KES', 'Employee Advance', 'Purchase Invoice'),
+				pe.company,
+				pe.name
 		""",
 		filters,
 		as_dict=True,
