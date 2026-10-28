@@ -36,23 +36,23 @@ class SuratMenyurat(Document):
 
 		self.name = make_autoname(series, doc=self)
 
-	def validate(self):
-		self.update_status_document()
+	# def validate(self):
+	# 	self.update_status_document()
 
-	def update_status_document(self):
-		kriteria_name = frappe.db.get_value(
-			"Kriteria Upload Document",
-			{"voucher_no": self.name},
-			"name",
-		)
+	# def update_status_document(self):
+	# 	kriteria_name = frappe.db.get_value(
+	# 		"Kriteria Upload Document",
+	# 		{"voucher_no": self.name},
+	# 		"name",
+	# 	)
 
-		sudah_upload = False
+	# 	sudah_upload = False
 
-		if kriteria_name:
-			kriteria_doc = frappe.get_doc("Kriteria Upload Document", kriteria_name)
-			sudah_upload = any(row.upload_file for row in kriteria_doc.get("file_upload") or [])
+	# 	if kriteria_name:
+	# 		kriteria_doc = frappe.get_doc("Kriteria Upload Document", kriteria_name)
+	# 		sudah_upload = any(row.upload_file for row in kriteria_doc.get("file_upload") or [])
 
-		self.status = "Sudah Upload" if sudah_upload else "Belum Upload"
+	# 	self.status = "Sudah Upload" if sudah_upload else "Belum Upload"
 
 	# def update_status_document(self):
 	# 	file_uploaded = "Belum" if not self.file_surat else "Sudah"

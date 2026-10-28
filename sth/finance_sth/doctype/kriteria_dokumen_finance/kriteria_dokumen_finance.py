@@ -237,6 +237,9 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 
 	frappe.msgprint(_("Kriteria Document created"), alert=True)
 
+	if doc.doctype == "Surat Menyurat":
+		frappe.set_value("Surat Menyurat", doc.name, "status", "Sudah Upload" if any(row.upload_file for row in doc.get("file_upload") or []) else "Belum Upload")
+
 	return doc
 
 @frappe.whitelist()
