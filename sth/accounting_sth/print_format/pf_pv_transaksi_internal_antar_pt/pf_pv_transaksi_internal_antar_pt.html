@@ -1,6 +1,10 @@
 {% set gl_entries = get_payment_entry_ledger_preview(doc.name) %}
 
 {% set bank_account = frappe.get_doc("Bank Account", doc.bank_account) if doc.bank_account else None %}
+{% set bank_account_pengirim = frappe.db.get_value("Bank Account", {"account": doc.paid_from}, ["name", "bank",
+"bank_account_no", "account_name"], as_dict=True) if doc.paid_from else None %}
+{% set bank_account_penerima = frappe.db.get_value("Bank Account", {"account": doc.paid_to}, ["name", "bank",
+"bank_account_no", "account_name"], as_dict=True) if doc.paid_to else None %}
 
 {% set submit_time = frappe.db.sql("""
 SELECT creation
@@ -40,10 +44,14 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">TGL. BAYAR</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">{{ doc.get_formatted("reference_date") }}</td>
-      {% if doc.payment_type != "Internal Transfer" and doc.mode_of_payment != "Cash" %}
+      {% if doc.payment_type == "Internal Transfer" and doc.mode_of_payment == "Cash" %}
       <td style="padding-bottom: 0!important;">NO. REKENING PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
-      <td style="padding-bottom: 0!important;">168-00-0106770-9</td>
+      <td style="padding-bottom: 0!important;">
+        {% if bank_account_penerima %}
+        {{ bank_account_penerima.bank_account_no or '' }}
+        {% endif %}
+      </td>
       {% endif %}
     </tr>
     <tr>
@@ -62,11 +70,11 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">NO REK</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
-        {% if bank_account %}
-        {{ bank_account.bank_account_no or '' }}
+        {% if bank_account_pengirim %}
+        {{ bank_account_pengirim.bank_account_no or '' }}
         {% endif %}
       </td>
-      {% if doc.payment_type != "Internal Transfer" and doc.mode_of_payment != "Cash" %}
+      {% if doc.payment_type == "Internal Transfer" and doc.mode_of_payment == "Cash" %}
       <td style="padding-bottom: 0!important;">NAMA PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
