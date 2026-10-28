@@ -542,7 +542,10 @@ doc_events = {
 	"Warehouse": {
 		"autoname": "sth.custom.warehouse.autoname_warehouse",
 		"before_validate": "sth.custom.warehouse.kosongkan_divisi_jadi_null",
-	}
+	},
+	"Kriteria Upload Document": {
+		"on_update": "sth.custom.kriteria_upload_document.update_status_surat_menyurat",
+	},
 }
 
 

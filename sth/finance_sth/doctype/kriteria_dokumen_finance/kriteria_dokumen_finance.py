@@ -210,7 +210,7 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 	if not doc.doctype:
 		return
 
-	kriteria = frappe.get_doc(
+	doc = frappe.get_doc(
 		{
 			"doctype": "Kriteria Upload Document",
 			"voucher_type": doc.doctype,
@@ -220,56 +220,24 @@ def create_kriteria_document(entries, doc, do_not_save=False):
 
 	for row in entries:
 		row = frappe._dict(row)
-
-		kriteria.append(
+		
+		doc.append(
 			"file_upload",
 			{
 				"rincian_dokumen_finance": row.rincian_dokumen_finance,
 				"upload_file": row.upload_file,
-				"mandatory": row.mandatory,
+				"mandatory": row.mandatory
 			},
 		)
 
-	kriteria.save()
-
-	# doc = frappe.get_doc(
-	# 	{
-	# 		"doctype": "Kriteria Upload Document",
-	# 		"voucher_type": doc.doctype,
-	# 		"voucher_no": doc.name,
-	# 	}
-	# )
-
-	# for row in entries:
-	# 	row = frappe._dict(row)
-		
-	# 	doc.append(
-	# 		"file_upload",
-	# 		{
-	# 			"rincian_dokumen_finance": row.rincian_dokumen_finance,
-	# 			"upload_file": row.upload_file,
-	# 			"mandatory": row.mandatory
-	# 		},
-	# 	)
-
-	# doc.save()
+	doc.save()
 
 	# if do_not_save:
 	# 	frappe.db.set_value(child_row.doctype, child_row.name, "serial_and_batch_bundle", doc.name)
 
 	frappe.msgprint(_("Kriteria Document created"), alert=True)
 
-	if doc.doctype == "Surat Menyurat":
-		sudah_upload = any(row.upload_file for row in kriteria.get("file_upload") or [])
-		frappe.db.set_value(
-			"Surat Menyurat",
-			doc.name,
-			"status",
-			"Sudah Upload" if sudah_upload else "Belum Upload",
-		)
-
-	# return doc
-	return kriteria
+	return doc
 
 @frappe.whitelist()
 def get_criteria(voucher_type, voucher_no, doucment_type=None, only_kriteria=False):
