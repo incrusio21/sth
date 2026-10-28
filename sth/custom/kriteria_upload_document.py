@@ -1,3 +1,5 @@
+import frappe
+
 def update_status_surat_menyurat(doc, method=None):
 	if doc.voucher_type != "Surat Menyurat" or not doc.voucher_no:
 		return
