@@ -176,7 +176,8 @@ def get_data(filters=None):
 			row["jenis_transaksi"] = "PINDAH DANA"
 			row["payment_status"] = ""
 			row["pt"] = f"{pe.get('company_from')} -> {pe.get('company_to')}"
-			row["uraian"] = f"{pe.get('unit_from')} -> {pe.get('unit_to')}"
+			if pe.party_type and pe.party:
+				row["uraian"] = f"{pe.get('unit_from')} -> {pe.get('unit_to')} - {uraian}"
 			row["nilai_tagihan"] = pe.get("paid_amount")
 			pindah_dana_rows.append(row)	
 		elif ref_type == "Purchase Invoice" and pe.get("invoice_type") == "Pengakuan Pembelian TBS":
