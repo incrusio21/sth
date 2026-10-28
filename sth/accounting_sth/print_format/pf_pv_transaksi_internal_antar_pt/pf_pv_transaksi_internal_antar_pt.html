@@ -3,7 +3,7 @@
 {% set bank_account = frappe.get_doc("Bank Account", doc.bank_account) if doc.bank_account else None %}
 
 {% set bank_account_pengirim = frappe.db.get_value("Bank Account", {"account": doc.paid_from}, ["name", "bank",
-"bank_account_no", "account_name"], as_dict=True) if doc.paid_from else None %}
+"bank_account_no", "account_name", "company", "unit"], as_dict=True) if doc.paid_from else None %}
 {% set bank_account_penerima = frappe.db.get_value("Bank Account", {"account": doc.paid_to}, ["name", "bank",
 "bank_account_no", "account_name", "company", "unit"], as_dict=True) if doc.paid_to else None %}
 
@@ -95,9 +95,7 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">ATAS NAMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
-        {% if bank_account %}
-        {{ bank_account.account_name or '' }}
-        {% endif %}
+        {{ bank_account_pengirim.company }} - {{ bank_account_pengirim.unit }}
       </td>
       <td style="padding-bottom: 0!important;">NO REF BANK</td>
       <td style="padding-bottom: 0!important;">:</td>
