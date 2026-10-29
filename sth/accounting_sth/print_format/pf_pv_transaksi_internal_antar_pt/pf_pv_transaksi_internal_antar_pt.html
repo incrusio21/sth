@@ -49,7 +49,9 @@ LIMIT 1
       <td style="padding-bottom: 0!important;">NO. REKENING PENERIMA</td>
       <td style="padding-bottom: 0!important;">:</td>
       <td style="padding-bottom: 0!important;">
-        {% if bank_account_penerima %}
+        {% if doc.tipe_transfer == "PDO" %}
+        {{ doc.beneficary_account or '' }}
+        {% elif bank_account_penerima %}
         {{ bank_account_penerima.bank_account_no or '' }}
         {% endif %}
       </td>

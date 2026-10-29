@@ -30,6 +30,10 @@ frappe.ui.form.on("Material Request", {
             frm.trigger('set_default_reqdate')
         }
 
+        if (frm.doc.workflow_state == 'Butuh Persetujuan 1') {
+            frm.trigger('make_item_management')
+        }
+
         sth.form.override_class_function(frm.cscript, "onload", () => {
             frm.set_query("item_code", "items", sth.queries.item_by_subtype)
         })
@@ -41,6 +45,49 @@ frappe.ui.form.on("Material Request", {
             // frm.page.inner_toolbar.find(`div[data-label="${encodeURIComponent("Create")}"]`).remove()
         }
 
+    },
+
+    make_item_management(frm) {
+        list_buttons = ["Reject / Unreject Item", "Edit Qty"]
+        for (const button of list_buttons) {
+            frm.add_custom_button(button, function () {
+                frm.events.show_management_items(frm, button)
+            }, "Item Actions")
+        }
+    },
+
+    show_management_items(frm, type) {
+        const data = [{ item_code: '4160329' }]
+
+        const d = new frappe.ui.Dialog({
+            title: type,
+            size: 'large',
+            fields: [
+                {
+                    label: 'Items',
+                    fieldname: 'items',
+                    fieldtype: 'Table',
+                    data: frm.doc.items,
+                    cannot_add_rows: true,
+                    fields: [
+                        {
+                            label: "Kode Barang",
+                            fieldname: 'item_code',
+                            fieldtype: 'Link',
+                            options: 'Item',
+                            in_list_view: 1,
+                            read_only: 1
+                        },
+                    ]
+                },
+            ],
+            primary_action_label: 'Save',
+            primary_action(values) {
+
+                d.hide();
+            }
+        })
+        d.show()
     },
 
     // make_request_for_quotation: function (frm) {
