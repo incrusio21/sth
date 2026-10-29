@@ -603,6 +603,15 @@ def set_no_rekening(doc, method):
 		no_payroll_entry=doc.get("no_payroll_entry")
 	)
 
+	# tagihan Potongan / BPJS dibayar ke rekening dokumen asalnya, bukan rekening unit
+	from sth.hr_customize.pembayaran_payroll import tujuan_transfer
+
+	bank_tujuan, no_rekening_tujuan = tujuan_transfer(doc)
+	if no_rekening_tujuan:
+		result["no_rekening_tujuan"] = no_rekening_tujuan
+		result["bank_tujuan"] = bank_tujuan
+		doc.bank_tujuan = bank_tujuan
+
 	doc.no_rekening = None
 	doc.nama_bank = None
 	doc.nama_pemilik_rekening = result.get("nama_pemilik_rekening")

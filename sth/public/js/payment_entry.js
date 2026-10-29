@@ -1015,6 +1015,8 @@ function set_no_rekening(frm) {
 			// supaya sudah terlihat sebelum save
 			frm.set_value("beneficary_account", d.no_rekening || d.no_rekening_tujuan || "");
 			frm.set_value("beneficary_bank", d.nama_bank || d.bank_tujuan || "");
+
+			sth.pembayaran_payroll.pakai_tujuan(frm);
 		}
 	});
 }
