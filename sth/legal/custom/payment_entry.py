@@ -214,6 +214,46 @@ def get_payment_entry(
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_nota_piutang_belum_lunas(doctype, txt, searchfield, start, page_len, filters):
+    """Nota Piutang Pemenuhan Kontrak yang masih punya Sales Invoice belum lunas.
+
+    Sales Invoice-nya dibaca dari dua tabel yang sama dengan apply_nota_piutang di
+    form: List Pengakuan Penjualan dan Reclass Pengakuan Penjualan.
+    """
+    filters = filters or {}
+
+    return frappe.db.sql("""
+        SELECT np.name, np.bulan, np.no_kontrak
+        FROM `tabNota Piutang` np
+        WHERE np.docstatus = 1
+          AND np.tipe = 'Pemenuhan Kontrak'
+          AND (%(company)s = '' OR np.company = %(company)s)
+          AND (np.name LIKE %(txt)s OR np.no_kontrak LIKE %(txt)s OR np.bulan LIKE %(txt)s)
+          AND EXISTS (
+            SELECT 1
+            FROM `tabSales Invoice` si
+            WHERE si.docstatus = 1
+              AND si.outstanding_amount > 0
+              AND si.name IN (
+                SELECT t.pengakuan_penjualan FROM `tabNota Piutang Pemenuhan Kontrak Table` t
+                WHERE t.parent = np.name AND t.parenttype = 'Nota Piutang'
+                UNION
+                SELECT r.pengakuan_penjualan_ppn FROM `tabNota Piutang Reclass Table` r
+                WHERE r.parent = np.name AND r.parenttype = 'Nota Piutang'
+              )
+          )
+        ORDER BY np.date DESC, np.name DESC
+        LIMIT %(start)s, %(page_len)s
+    """, {
+        "company": filters.get("company") or "",
+        "txt": f"%{txt}%",
+        "start": start,
+        "page_len": page_len,
+    })
+
+
+@frappe.whitelist()
 def get_je_ppn_nota_piutang(sales_invoice, party, account, payment_entry=None):
     """Journal Entry PPN Nota Piutang Jual Asset yang masih menggantung untuk invoice ini.
 

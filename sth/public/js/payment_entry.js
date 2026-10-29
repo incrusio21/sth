@@ -1036,12 +1036,11 @@ function pick_nota_piutang(frm) {
 				label: "Nota Piutang",
 				options: "Nota Piutang",
 				reqd: 1,
+				// hanya yang Sales Invoice-nya masih ada outstanding
 				get_query() {
 					return {
-						filters: {
-							tipe: "Pemenuhan Kontrak",
-							docstatus: 1,
-						}
+						query: "sth.legal.custom.payment_entry.get_nota_piutang_belum_lunas",
+						filters: { company: frm.doc.company || "" }
 					};
 				}
 			}
@@ -1168,12 +1167,30 @@ async function apply_nota_piutang(frm, nota_piutang_name) {
 			row.total_amount = flt(si.grand_total);
 			row.outstanding_amount = flt(si.outstanding_amount);
 			row.allocated_amount = flt(si.outstanding_amount);
+			row.account = si.debit_to;
+			// tanpa kurs invoice ERPNext menghitung selisih kurs dari 0
+			row.exchange_rate = flt(si.conversion_rate) || 1;
 		}
 
 		frm.refresh_field("references");
 
-		frm.set_value("paid_amount", total_outstanding);
-		frm.set_value("received_amount", total_outstanding);
+		// Diisi langsung, bukan set_value satu per satu: di antara paid_amount dan
+		// received_amount keduanya sempat berbeda, ERPNext membacanya sebagai
+		// selisih kurs lalu meminta Exchange Gain Loss Account default company.
+		const doc = frm.doc;
+		doc.paid_amount = doc.received_amount = total_outstanding;
+		doc.base_paid_amount = flt(total_outstanding * flt(doc.source_exchange_rate || 1), precision("base_paid_amount"));
+		doc.base_received_amount = flt(total_outstanding * flt(doc.target_exchange_rate || 1), precision("base_received_amount"));
+
+		(doc.deductions || [])
+			.filter((d) => d.is_exchange_gain_loss)
+			.forEach((d) => frappe.model.clear_doc(d.doctype, d.name));
+		doc.deductions = (doc.deductions || []).filter((d) => !d.is_exchange_gain_loss);
+		doc.deductions.forEach((d, i) => (d.idx = i + 1));
+
+		frm.refresh_fields(["paid_amount", "received_amount", "base_paid_amount", "base_received_amount", "deductions"]);
+		frm.events.set_total_allocated_amount(frm);
+		frm.dirty();
 
 		frappe.show_alert({
 			message: __(`Nota Piutang <b>${np.name}</b> berhasil diterapkan.`),
