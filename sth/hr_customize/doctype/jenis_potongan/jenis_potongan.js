@@ -13,7 +13,14 @@ frappe.ui.form.on("Jenis Potongan Accounts", {
       let row = locals[cdt][cdn];
 
       return {
-        filters: { company: row.company },
+        filters: {
+          company: row.company,
+          account_type: ["in", [
+            "Expense Account",
+            "Indirect Expense",
+            "Direct Expense"
+          ]]
+        }
       };
     });
 
@@ -32,7 +39,14 @@ frappe.ui.form.on("Jenis Potongan Accounts", {
       let row = locals[cdt][cdn];
 
       return {
-        filters: { company: row.company },
+        filters: {
+          company: row.company,
+          account_type: ["in", [
+            "Expense Account",
+            "Indirect Expense",
+            "Direct Expense"
+          ]]
+        }
       };
     });
 
