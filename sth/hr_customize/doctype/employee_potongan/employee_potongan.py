@@ -173,9 +173,6 @@ def make_payment_entry(source_name, target_doc=None):
 		target.party_name = employee.employee_name
 		target.paid_amount = source.outstanding_amount
 		target.no_rekening_tujuan = source.no_rekening
-		target.bank_tujuan = (
-			frappe.db.get_value("Bank Account", source.bank_account, "bank") or source.bank_account
-		) if source.bank_account else None
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
 		target.append("references", {

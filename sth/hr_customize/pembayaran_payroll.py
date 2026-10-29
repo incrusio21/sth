@@ -21,7 +21,7 @@ satu akun - ditandai belum diaccrual dan tidak bisa dibayar.
 Satu Payment Entry boleh membayar beberapa tipe sekaligus lewat tabel
 rincian_payroll; tiap baris mendebit akunnya sendiri.
 
-Tiap tagihan membawa tujuan transfernya: Potongan memakai Bank dan No Rekening
+Tiap tagihan membawa tujuan transfernya: Potongan memakai No Rekening
 Employee Potongan, BPJS memakai NPP / No BU dan No Rekening Tujuan Daftar
 BPJS. Kalau satu tagihan berasal dari beberapa dokumen dengan nilai berbeda,
 semuanya ditampilkan dipisah koma.
@@ -96,7 +96,7 @@ def rincian_baris(payroll_entry):
 		if sumber := potongan.get(r.additional_salary):
 			baris.update(tipe=TIPE_POTONGAN, sub_tipe=sumber.jenis_potongan,
 				sumber_doctype="Employee Potongan", sumber=sumber.name,
-				bank=sumber.bank, no_rekening=sumber.no_rekening)
+				no_rekening=sumber.no_rekening)
 		elif sumber := bpjs.get((r.salary_slip, r.salary_component)):
 			baris.update(tipe=TIPE_BPJS, sub_tipe=sumber.jenis_bpjs,
 				sumber_doctype="Daftar BPJS", sumber=sumber.name,
@@ -118,12 +118,10 @@ def rincian_baris(payroll_entry):
 
 def employee_potongan_per_additional_salary(nama_slip):
 	rows = frappe.db.sql("""
-		SELECT DISTINCT sd.additional_salary, ep.name, ep.jenis_potongan, ep.no_rekening,
-			COALESCE(ba.bank, ep.bank_account) AS bank
+		SELECT DISTINCT sd.additional_salary, ep.name, ep.jenis_potongan, ep.no_rekening
 		FROM `tabSalary Detail` sd
 		JOIN `tabEmployee Potongan Details` epd ON epd.additional_salary = sd.additional_salary
 		JOIN `tabEmployee Potongan` ep ON ep.name = epd.parent
-		LEFT JOIN `tabBank Account` ba ON ba.name = ep.bank_account
 		WHERE sd.parent IN %(slips)s
 		  AND sd.parenttype = 'Salary Slip'
 		  AND IFNULL(sd.additional_salary, '') != ''
@@ -169,13 +167,12 @@ def get_tagihan(payroll_entry, kecuali=None):
 			"tagihan": 0,
 			"karyawan": set(),
 			"npp": {},
-			"bank": {},
 			"no_rekening": {},
 		}))
 		row.tagihan += r.amount
 		row.karyawan.add(r.employee)
 		# dict, bukan set, supaya urutannya ikut urutan dokumen
-		for f in ("npp", "bank", "no_rekening"):
+		for f in ("npp", "no_rekening"):
 			if nilai := (r.get(f) or "").strip():
 				row[f][nilai] = None
 
@@ -192,7 +189,6 @@ def get_tagihan(payroll_entry, kecuali=None):
 		row.tagihan = flt(row.tagihan, 2)
 		row.karyawan = len(row.karyawan)
 		row.npp = ", ".join(row.npp)
-		row.bank = ", ".join(row.bank)
 		row.no_rekening = ", ".join(row.no_rekening)
 		row.party_type, row.party = party.get(row.account, (None, None))
 		row.belum_diakrual = int(kredit.get(row.account, 0) < total_per_akun[row.account] - TOLERANSI)
@@ -205,7 +201,7 @@ def get_tagihan(payroll_entry, kecuali=None):
 	for (tipe, sub_tipe, account), amount in dibayar.items():
 		hasil.append(frappe._dict({
 			"tipe": tipe, "sub_tipe": sub_tipe, "account": account,
-			"tagihan": 0, "karyawan": 0, "party_type": None, "party": None, "npp": "", "bank": "", "no_rekening": "",
+			"tagihan": 0, "karyawan": 0, "party_type": None, "party": None, "npp": "", "no_rekening": "",
 			"belum_diakrual": 0, "dibayar": flt(amount, 2), "sisa": flt(-amount, 2),
 		}))
 
@@ -413,7 +409,6 @@ def validate_pembayaran_payroll(pe):
 		row.party_type = t.party_type
 		row.party = t.party
 		row.npp = t.npp
-		row.bank = t.bank
 		row.no_rekening = t.no_rekening
 		row.tagihan = t.tagihan
 		row.sisa = t.sisa
@@ -442,24 +437,6 @@ def validate_pembayaran_payroll(pe):
 	pe.paid_amount = pe.received_amount = total
 	pe.base_paid_amount = flt(total * flt(pe.source_exchange_rate or 1), pe.precision("base_paid_amount"))
 	pe.base_received_amount = flt(total * flt(pe.target_exchange_rate or 1), pe.precision("base_received_amount"))
-
-
-def tujuan_transfer(pe):
-	"""Bank dan rekening tujuan dari baris rincian yang membawanya (Potongan / BPJS).
-
-	Kosong kalau tidak ada; rekening unit payroll yang dipakai.
-	"""
-	if pe.get("tipe_transfer") != "Payroll Entry":
-		return "", ""
-
-	bank, rekening = {}, {}
-	for row in pe.get(TABEL_RINCIAN) or []:
-		if nilai := (row.get("bank") or "").strip():
-			bank[nilai] = None
-		if nilai := (row.get("no_rekening") or "").strip():
-			rekening[nilai] = None
-
-	return ", ".join(bank), ", ".join(rekening)
 
 
 def gl_pembayaran_payroll(pe):
