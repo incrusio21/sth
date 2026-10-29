@@ -27,11 +27,12 @@ $.extend(sth.pembayaran_payroll, {
 		return esc(d.tipe) + (d.sub_tipe ? ` <span class="text-muted">— ${esc(d.sub_tipe)}</span>` : "");
 	},
 
-	// NPP dan rekening tujuan tagihan BPJS / Potongan.
+	// NPP, bank, dan rekening tujuan tagihan BPJS / Potongan.
 	tujuan(d) {
 		const esc = frappe.utils.escape_html;
 		const isi = [
 			d.npp ? `${__("NPP")}: ${esc(d.npp)}` : "",
+			d.bank ? `${__("Bank")}: ${esc(d.bank)}` : "",
 			d.no_rekening ? `${__("Rek")}: ${esc(d.no_rekening)}` : "",
 		].filter(Boolean);
 		return isi.length ? `<br><small class="text-muted">${isi.join(" · ")}</small>` : "";
@@ -180,6 +181,7 @@ $.extend(sth.pembayaran_payroll, {
 							party_type: t.party_type,
 							party: t.party,
 							npp: t.npp,
+							bank: t.bank,
 							no_rekening: t.no_rekening,
 							tagihan: t.tagihan,
 							sisa: t.sisa,
@@ -187,6 +189,7 @@ $.extend(sth.pembayaran_payroll, {
 						});
 					});
 					frm.set_value("paid_to", dipilih[0].account);
+					me.pakai_tujuan(frm);
 					me.hitung_total(frm);
 					frm.refresh_field("rincian_payroll");
 					d.hide();
@@ -207,6 +210,23 @@ $.extend(sth.pembayaran_payroll, {
 			});
 			d.show();
 		});
+	},
+
+	// Tagihan Potongan / BPJS dibayar ke rekening dokumen asalnya, bukan
+	// rekening unit; sama dengan tujuan_transfer di server.
+	pakai_tujuan(frm) {
+		if (frm.doc.tipe_transfer !== "Payroll Entry") return;
+
+		const unik = (f) =>
+			[...new Set((frm.doc.rincian_payroll || []).map((d) => (d[f] || "").trim()).filter(Boolean))].join(", ");
+		const no_rekening = unik("no_rekening");
+		if (!no_rekening) return;
+
+		const bank = unik("bank");
+		frm.set_value("no_rekening_tujuan", no_rekening);
+		frm.set_value("bank_tujuan", bank);
+		frm.set_value("beneficary_account", frm.doc.no_rekening || no_rekening);
+		frm.set_value("beneficary_bank", frm.doc.nama_bank || bank);
 	},
 
 	// Keempat nilai diisi langsung, bukan lewat set_value satu per satu. Tiap
