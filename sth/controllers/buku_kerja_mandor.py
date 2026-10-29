@@ -208,6 +208,7 @@ class BukuKerjaMandorController(PlantationController):
             kunci = {
                 "employee": mandor,
                 "mandor_type": mandor_type,
+                "employee_field": d["fieldname"],
                 "company": self.company,
                 "posting_date": date,
                 "buku_kerja_mandor": self._bkm_name
@@ -236,7 +237,7 @@ class BukuKerjaMandorController(PlantationController):
                 bkm_obj = frappe.get_doc(
                     doctype="Buku Kerja Mandor Premi",
                     employee=mandor, buku_kerja_mandor=self._bkm_name, company=self.company, posting_date=date,
-                    mandor_type=mandor_type
+                    mandor_type=mandor_type, employee_field=d["fieldname"],
                 )
                 bkm_obj.flags.ignore_permissions = 1
                 bkm_obj.flags.transaction_employee = 1

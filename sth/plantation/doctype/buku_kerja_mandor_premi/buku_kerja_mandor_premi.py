@@ -27,7 +27,7 @@ class BukuKerjaMandorPremi(Document):
 		have_premi = False
 		voucher_type = f"Buku Kerja Mandor {self.buku_kerja_mandor}"
 		for p in mandor_premi:
-			if p.voucher_type != voucher_type or p.employee_field != self.mandor_type:
+			if p.voucher_type != voucher_type or p.employee_field != self.employee_field:
 				continue
 			
 			have_premi = True
