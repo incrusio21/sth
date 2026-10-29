@@ -309,6 +309,11 @@ frappe.ui.form.on("Payment Entry", {
 		set_no_rekening(frm);
 	},
 
+	// bank tujuan tagihan Potongan / BPJS menentukan InHouse atau Online
+	bank_tujuan: function (frm) {
+		set_ft_service(frm);
+	},
+
 	ft_service: function (frm) {
 		if (frm.doc.ft_service === "UBP") {
 			frm.set_value("path", "MCM_BillPaymentSingle");
@@ -1319,6 +1324,7 @@ async function set_ft_service(frm) {
 		});
 
 		let to_bank =
+			sth.pembayaran_payroll.tujuan_transfer(frm).bank ||
 			rekening.message?.bank_tujuan ||
 			rekening.message?.nama_bank;
 

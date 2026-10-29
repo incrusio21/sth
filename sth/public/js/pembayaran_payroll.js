@@ -215,18 +215,23 @@ $.extend(sth.pembayaran_payroll, {
 	// Tagihan Potongan / BPJS dibayar ke rekening dokumen asalnya, bukan
 	// rekening unit; sama dengan tujuan_transfer di server.
 	pakai_tujuan(frm) {
-		if (frm.doc.tipe_transfer !== "Payroll Entry") return;
-
-		const unik = (f) =>
-			[...new Set((frm.doc.rincian_payroll || []).map((d) => (d[f] || "").trim()).filter(Boolean))].join(", ");
-		const no_rekening = unik("no_rekening");
+		const { bank, no_rekening } = this.tujuan_transfer(frm);
 		if (!no_rekening) return;
 
-		const bank = unik("bank");
 		frm.set_value("no_rekening_tujuan", no_rekening);
 		frm.set_value("bank_tujuan", bank);
 		frm.set_value("beneficary_account", frm.doc.no_rekening || no_rekening);
 		frm.set_value("beneficary_bank", frm.doc.nama_bank || bank);
+	},
+
+	// Bank dan rekening dari baris rincian; kosong kalau tidak ada.
+	tujuan_transfer(frm) {
+		if (frm.doc.tipe_transfer !== "Payroll Entry") return { bank: "", no_rekening: "" };
+
+		const unik = (f) =>
+			[...new Set((frm.doc.rincian_payroll || []).map((d) => (d[f] || "").trim()).filter(Boolean))].join(", ");
+		const no_rekening = unik("no_rekening");
+		return { bank: no_rekening ? unik("bank") : "", no_rekening };
 	},
 
 	// Keempat nilai diisi langsung, bukan lewat set_value satu per satu. Tiap
