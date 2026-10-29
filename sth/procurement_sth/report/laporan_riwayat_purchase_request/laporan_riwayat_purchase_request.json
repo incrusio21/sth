@@ -7,10 +7,10 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 10,
+ "idx": 11,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-28 17:30:42.481410",
+ "modified": "2026-10-29 17:38:48.696586",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Riwayat Purchase Request",
@@ -37,6 +37,9 @@
   },
   {
    "role": "PROCUREMENT SPV"
+  },
+  {
+   "role": "PROCUREMENT STAFF"
   }
  ],
  "timeout": 0

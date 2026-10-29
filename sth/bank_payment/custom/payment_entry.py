@@ -19,29 +19,36 @@ from datetime import datetime, timedelta
 #     mkcm.flags.notify_update = False
 #     mkcm.submit()
 
+
 def is_mandiri_kcm(account):
 
-	if not account:
-		return False
+    if not account:
+        return False
 
-	bank = frappe.db.get_value(
-		"Bank Account",
-		{
-			"account": account
-		},
-		"bank"
-	)
+    bank_account = frappe.db.get_value(
+        "Bank Account",
+        {"account": account},
+        ["bank", "intergrated_bank"],
+        as_dict=True
+    )
 
-	if not bank:
-		return False
+    if not bank_account:
+        return False
 
-	return bool(
-		frappe.db.get_value(
-			"Bank",
-			bank,
-			"is_mandiri_kca"
-		)
-	)
+    if not bank_account.intergrated_bank:
+        return False
+
+    if not bank_account.bank:
+        return False
+
+    return bool(
+        frappe.db.get_value(
+            "Bank",
+            bank_account.bank,
+            "is_mandiri_kca"
+        )
+    )
+
 
 def get_mandiri_kcm_data(doc):
 
@@ -220,6 +227,10 @@ def get_mandiri_kcm_warnings(payment_entry):
     }
 
 def create_kcm_from_pe(doc, method=None):
+
+    # Hanya proses Bank Draft
+    if doc.mode_of_payment != "Bank Draft":
+        return
 
     if doc.payment_type not in [
         "Pay",

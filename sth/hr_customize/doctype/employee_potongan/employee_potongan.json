@@ -18,8 +18,8 @@
   "company",
   "posting_date",
   "salary_component",
+  "bank",
   "no_rekening",
-  "bank_account",
   "amended_from",
   "section_break_jkoh",
   "status",
@@ -33,8 +33,8 @@
   "accounting_dimension_section",
   "cost_center",
   "section_break_frfu",
-  "credit_to",
-  "expense_account"
+  "expense_account",
+  "credit_to"
  ],
  "fields": [
   {
@@ -116,14 +116,6 @@
    "options": "POTKAR-"
   },
   {
-   "fieldname": "bank_account",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "in_preview": 1,
-   "label": "Bank Account",
-   "options": "Bank Account"
-  },
-  {
    "fieldname": "employee_grade",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -135,7 +127,8 @@
    "fieldname": "no_rekening",
    "fieldtype": "Data",
    "in_preview": 1,
-   "label": "No Rekening"
+   "label": "No Rekening",
+   "reqd": 1
   },
   {
    "fieldname": "persetujuan_1",
@@ -154,6 +147,7 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Person in Charge",
    "options": "Employee",
    "read_only": 1
@@ -200,21 +194,20 @@
   {
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "More Info"
   },
   {
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
-   "label": "Expense Account",
-   "options": "Account",
-   "reqd": 1
+   "label": "Debit To",
+   "options": "Account"
   },
   {
    "fieldname": "detail_karyawan_tab",
@@ -224,13 +217,22 @@
   {
    "fieldname": "section_break_frfu",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-10 09:25:26.397183",
+ "modified": "2026-10-29 14:02:05.685527",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Potongan",

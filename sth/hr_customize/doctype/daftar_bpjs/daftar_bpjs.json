@@ -15,6 +15,7 @@
   "npp__no_bu",
   "golongan",
   "no_rekening_tujuan",
+  "bank",
   "amended_from",
   "section_break_ngrj",
   "start_periode",
@@ -121,19 +122,30 @@
   {
    "fieldname": "no_rekening_tujuan",
    "fieldtype": "Data",
-   "label": "No Rekening Atau Kode Billing Tujuan"
+   "in_list_view": 1,
+   "label": "No Rekening Atau Kode Billing Tujuan",
+   "reqd": 1
   },
   {
    "fieldname": "header_section",
    "fieldtype": "Section Break",
    "label": "Header"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-11 11:21:35.426816",
+ "modified": "2026-10-29 11:20:11.165210",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Daftar BPJS",

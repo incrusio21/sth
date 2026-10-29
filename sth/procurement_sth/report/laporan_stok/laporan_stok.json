@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-28 17:30:16.717490",
+ "modified": "2026-10-29 17:38:21.180654",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Stok",
@@ -28,6 +28,9 @@
   },
   {
    "role": "PROCUREMENT SPV"
+  },
+  {
+   "role": "PROCUREMENT STAFF"
   }
  ],
  "timeout": 0

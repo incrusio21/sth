@@ -10,7 +10,7 @@
  "idx": 8,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-28 17:31:18.315314",
+ "modified": "2026-10-29 17:39:14.553428",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Transaksi Gudang",
@@ -43,6 +43,9 @@
   },
   {
    "role": "PROCUREMENT SPV"
+  },
+  {
+   "role": "PROCUREMENT STAFF"
   }
  ],
  "timeout": 0

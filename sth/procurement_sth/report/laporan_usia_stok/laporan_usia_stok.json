@@ -10,7 +10,7 @@
  "idx": 9,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-09-28 17:29:43.461376",
+ "modified": "2026-10-29 17:37:59.407294",
  "modified_by": "Administrator",
  "module": "Procurement STH",
  "name": "Laporan Usia Stok",
@@ -46,6 +46,9 @@
   },
   {
    "role": "PROCUREMENT SPV"
+  },
+  {
+   "role": "PROCUREMENT STAFF"
   }
  ],
  "timeout": 0

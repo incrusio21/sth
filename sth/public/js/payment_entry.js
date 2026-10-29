@@ -1391,9 +1391,14 @@ async function check_mandiri_kcm_warning(frm) {
 	});
 }
 
+// function toggle_paid_from_readonly(frm) {
+// 	let is_readonly = ["Internal Transfer", "Pay"].includes(frm.doc.payment_type) ? 1 : 0;
+// 	frm.set_df_property('paid_from', 'read_only', is_readonly);
+// }
+
+// tidak read only
 function toggle_paid_from_readonly(frm) {
-	let is_readonly = ["Internal Transfer", "Pay"].includes(frm.doc.payment_type) ? 1 : 0;
-	frm.set_df_property('paid_from', 'read_only', is_readonly);
+    frm.set_df_property("paid_from", "read_only", 0);
 }
 
 function filter_bank_accounts(frm) {
@@ -1531,24 +1536,80 @@ function is_realisasi_dana_cadangan(frm) {
 		&& (frm.doc.payment_voucher_kas_pdo || []).some(row => row.tipe_pdo === 'Dana Cadangan');
 }
 
+// function apply_account(frm, account) {
+// 	if (frm.doc.payment_type == 'Receive' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Penerimaan Dana PDO" || frm.doc.tipe_transfer == "Dividen Receive"))) {
+
+// 		frm.set_query('paid_to', function () {
+// 			return account ? { filters: { name: account } } : {};
+// 		});
+
+// 		frm.set_value('paid_to', account || "");
+
+// 	} else if (frm.doc.payment_type == 'Pay' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Payroll Entry" || frm.doc.tipe_transfer == "Realisasi PDO" || frm.doc.tipe_transfer == "PDO" || frm.doc.tipe_transfer == "Dividen Sent" || frm.doc.tipe_transfer == "Leasing"))) {
+
+// 		frm.set_query('paid_from', function () {
+// 			return account ? { filters: { name: account } } : {};
+// 		});
+
+// 		frm.set_value('paid_from', account || "");
+// 	}
+// }
+
 function apply_account(frm, account) {
-	if (frm.doc.payment_type == 'Receive' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Penerimaan Dana PDO" || frm.doc.tipe_transfer == "Dividen Receive"))) {
+    const is_internal_transfer =
+        frm.doc.payment_type === "Internal Transfer";
 
-		frm.set_query('paid_to', function () {
-			return account ? { filters: { name: account } } : {};
-		});
+    const transfer_type = frm.doc.tipe_transfer;
+    const is_paid_to_transfer = [
+        "Penerimaan Dana PDO",
+        "Dividen Receive"
+    ].includes(transfer_type);
 
-		frm.set_value('paid_to', account || "");
+    const is_paid_from_transfer = [
+        "Payroll Entry",
+        "Realisasi PDO",
+        "PDO",
+        "Dividen Sent",
+        "Leasing"
+    ].includes(transfer_type);
 
-	} else if (frm.doc.payment_type == 'Pay' || (frm.doc.payment_type == 'Internal Transfer' && (frm.doc.tipe_transfer == "Payroll Entry" || frm.doc.tipe_transfer == "Realisasi PDO" || frm.doc.tipe_transfer == "PDO" || frm.doc.tipe_transfer == "Dividen Sent" || frm.doc.tipe_transfer == "Leasing"))) {
+    const is_cash_or_bank_draft =
+        ["Cash", "Bank Draft"].includes(frm.doc.mode_of_payment);
 
-		frm.set_query('paid_from', function () {
-			return account ? { filters: { name: account } } : {};
-		});
+    // Pertahankan alur Receive dan transfer khusus yang menggunakan Paid To.
+    if (
+        frm.doc.payment_type === "Receive" ||
+        (is_internal_transfer && is_paid_to_transfer)
+    ) {
+        frm.set_query("paid_to", function () {
+            return account ? { filters: { name: account } } : {};
+        });
 
-		frm.set_value('paid_from', account || "");
-	}
+        frm.set_value("paid_to", account || "");
+
+    } else if (
+        frm.doc.payment_type === "Pay" ||
+        (
+            is_internal_transfer &&
+            (is_paid_from_transfer || is_cash_or_bank_draft)
+        )
+    ) {
+        if (is_internal_transfer) {
+            // Isi akun otomatis, tetapi jangan batasi pilihan manual.
+            frm.set_query("paid_from", function () {
+                return {};
+            });
+        } else {
+            // Perilaku Pay tetap seperti sebelumnya.
+            frm.set_query("paid_from", function () {
+                return account ? { filters: { name: account } } : {};
+            });
+        }
+
+        frm.set_value("paid_from", account || "");
+    }
 }
+
 
 function show_pdo_selector(frm) {
 	frappe.call({
