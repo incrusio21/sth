@@ -27,6 +27,16 @@ $.extend(sth.pembayaran_payroll, {
 		return esc(d.tipe) + (d.sub_tipe ? ` <span class="text-muted">— ${esc(d.sub_tipe)}</span>` : "");
 	},
 
+	// NPP dan rekening tujuan tagihan BPJS / Potongan.
+	tujuan(d) {
+		const esc = frappe.utils.escape_html;
+		const isi = [
+			d.npp ? `${__("NPP")}: ${esc(d.npp)}` : "",
+			d.no_rekening ? `${__("Rek")}: ${esc(d.no_rekening)}` : "",
+		].filter(Boolean);
+		return isi.length ? `<br><small class="text-muted">${isi.join(" · ")}</small>` : "";
+	},
+
 	ambil_tagihan(payroll_entry) {
 		return frappe
 			.call({
@@ -75,7 +85,7 @@ $.extend(sth.pembayaran_payroll, {
 
 			return `${kepala}<tr>
 				${centang}
-				<td>${me.label_tipe(d)}</td>
+				<td>${me.label_tipe(d)}${me.tujuan(d)}</td>
 				<td>${esc(d.account || "")}${d.party ? `<br><small class="text-muted">${esc(d.party)}</small>` : ""}</td>
 				<td style="text-align:right">${d.karyawan || ""}</td>
 				<td style="text-align:right">${me.uang(d.tagihan)}</td>
@@ -169,6 +179,8 @@ $.extend(sth.pembayaran_payroll, {
 							account: t.account,
 							party_type: t.party_type,
 							party: t.party,
+							npp: t.npp,
+							no_rekening: t.no_rekening,
 							tagihan: t.tagihan,
 							sisa: t.sisa,
 							amount: t.sisa,

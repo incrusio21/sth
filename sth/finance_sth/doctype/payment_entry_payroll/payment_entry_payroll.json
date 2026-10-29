@@ -11,6 +11,8 @@
   "account",
   "party_type",
   "party",
+  "npp",
+  "no_rekening",
   "column_break_nilai",
   "tagihan",
   "sisa",
@@ -18,7 +20,7 @@
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "tipe",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -60,6 +62,22 @@
    "read_only": 1
   },
   {
+   "columns": 1,
+   "fieldname": "npp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "NPP / No BU",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "no_rekening",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No Rekening Tujuan",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_nilai",
    "fieldtype": "Column Break"
   },
@@ -95,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-30 16:00:00.000000",
+ "modified": "2026-10-28 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Payment Entry Payroll",
