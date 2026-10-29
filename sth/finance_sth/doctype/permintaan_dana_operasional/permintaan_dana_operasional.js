@@ -317,6 +317,26 @@ function isi_revisi_dari_pengajuan(frm, cdt, cdn, field, revised_field) {
 	frappe.model.set_value(cdt, cdn, revised_field, row[field]);
 }
 
+// Baris dari dialog (Bahan Bakar, Kas) diisi langsung tanpa memicu event field,
+// jadi revisinya disalin di sini.
+const TOTAL_REVISI_IKUT_PENGAJUAN = {
+	"PDO Bahan Bakar Table": { price_total: "revised_price_total" },
+	"PDO Kas Table": { total: "revised_total" },
+};
+
+function isi_revisi_baris_baru(frm, row) {
+	const pasangan = {
+		...REVISI_IKUT_PENGAJUAN[row.doctype],
+		...TOTAL_REVISI_IKUT_PENGAJUAN[row.doctype],
+	};
+	frm._nilai_pengajuan = frm._nilai_pengajuan || {};
+
+	for (const [field, revised_field] of Object.entries(pasangan)) {
+		if (!flt(row[revised_field])) row[revised_field] = row[field];
+		frm._nilai_pengajuan[`${row.name}:${field}`] = row[field];
+	}
+}
+
 function get_plafon_pdo(frm, cdt, cdn) {
 	let row = locals[cdt][cdn];
 
@@ -1209,6 +1229,7 @@ function show_popup(frm, employee_atau_barang) {
 					child.needs = values.needs;
 					child.total = values.total;
 				}
+				isi_revisi_baris_baru(frm, child);
 
 				// Clear jenis_kas and refresh
 				frm.refresh_field('pdo_kas');
@@ -1464,6 +1485,7 @@ function show_popup(frm, employee_atau_barang) {
 					child.needs = values.needs;
 					child.total = values.total;
 				}
+				isi_revisi_baris_baru(frm, child);
 
 				// Clear jenis_kas and refresh
 				frm.refresh_field('pdo_kas');
@@ -1668,6 +1690,7 @@ function show_bahan_bakar_detail_dialog(frm, kategori) {
 			child.unit_price = values.unit_price;
 			child.price_total = values.price_total;
 			child.needs = values.needs;
+			isi_revisi_baris_baru(frm, child);
 
 			frm.refresh_field('pdo_bahan_bakar');
 
