@@ -1036,7 +1036,7 @@ function pick_nota_piutang(frm) {
 				label: "Nota Piutang",
 				options: "Nota Piutang",
 				reqd: 1,
-				// hanya yang Sales Invoice-nya masih ada outstanding
+				// semua tipe yang tagihannya masih bersisa, lihat get_tagihan_nota_piutang
 				get_query() {
 					return {
 						query: "sth.legal.custom.payment_entry.get_nota_piutang_belum_lunas",
@@ -1111,65 +1111,58 @@ function pick_ganti_rugi_lahan(frm) {
 
 async function apply_nota_piutang(frm, nota_piutang_name) {
 	try {
-		const np = await frappe.db.get_doc("Nota Piutang", nota_piutang_name);
-		frm.set_value("unit", np.unit);
+		// tagihan semua tipe (Sales Invoice dan Journal Entry) disusun di server
+		const r = await frappe.call({
+			method: "sth.legal.custom.payment_entry.get_tagihan_nota_piutang",
+			args: { nota_piutang: nota_piutang_name, payment_entry: frm.doc.name },
+		});
+		const tagihan = r.message || {};
+		const rows = tagihan.rows || [];
 
-		const si_from_main = (np.nota_hutang_pemenuhan_kontrak_table || [])
-			.filter(row => row.pengakuan_penjualan)
-			.map(row => row.pengakuan_penjualan);
-
-		const si_from_reclass = (np.reclass_pengakuan_penjualan || [])
-			.filter(row => row.pengakuan_penjualan_ppn)
-			.map(row => row.pengakuan_penjualan_ppn);
-
-		const all_si_names = [...new Set([...si_from_main, ...si_from_reclass])];
-
-		if (all_si_names.length === 0) {
-			frappe.throw(__("Nota Piutang ini tidak memiliki Sales Invoice."));
+		if (rows.length === 0) {
+			frappe.throw(__("Tidak ada tagihan yang belum lunas pada Nota Piutang ini."));
 		}
 
-		const si_docs = await Promise.all(
-			all_si_names.map(name => frappe.db.get_doc("Sales Invoice", name))
-		);
+		const total_outstanding = rows.reduce((sum, d) => sum + flt(d.outstanding_amount), 0);
 
-		const payable_si = si_docs.filter(si => flt(si.outstanding_amount) > 0);
+		frm.set_value("unit", tagihan.unit);
+		frm.set_value("nota_piutang_pemenuhan_kontrak", nota_piutang_name);
 
-		if (payable_si.length === 0) {
-			frappe.throw(__("Semua Sales Invoice pada Nota Piutang ini sudah lunas."));
-		}
-
-		const total_outstanding = payable_si.reduce(
-			(sum, si) => sum + flt(si.outstanding_amount), 0
-		);
-
-		frm.set_value("nota_piutang_pemenuhan_kontrak", np.name);
-
-		if (!frm.doc.party) {
+		if (frm.doc.party_type !== "Customer" || frm.doc.party !== tagihan.customer) {
 			await frm.set_value("party_type", "Customer");
-			await frm.set_value("party", payable_si[0].customer);
+			await frm.set_value("party", tagihan.customer);
 		}
 
-		if (np.unit) {
-			const unit_doc = await frappe.db.get_doc("Unit", np.unit);
+		if (tagihan.unit) {
+			const unit_doc = await frappe.db.get_doc("Unit", tagihan.unit);
 			if (unit_doc.bank_account) {
 				await frm.set_value("paid_to", unit_doc.bank_account);
 			}
 		}
 
+		// ERPNext mengisi akun default customer lewat panggilan party yang masih
+		// berjalan; piutang Others memakai akun lain, jadi ditimpa setelahnya
+		await new Promise((resolve) => frappe.after_ajax(resolve));
+		if (tagihan.paid_from && tagihan.paid_from !== frm.doc.paid_from) {
+			frm.set_party_account_based_on_party = true;
+			await frm.set_value("paid_from", tagihan.paid_from);
+			frm.set_party_account_based_on_party = false;
+		}
+
 		frm.clear_table("references");
 
-		for (const si of payable_si) {
+		for (const d of rows) {
 			const row = frm.add_child("references");
-			row.reference_doctype = "Sales Invoice";
-			row.reference_name = si.name;
-			row.bill_no = si.bill_no || "";
-			row.due_date = si.due_date;
-			row.total_amount = flt(si.grand_total);
-			row.outstanding_amount = flt(si.outstanding_amount);
-			row.allocated_amount = flt(si.outstanding_amount);
-			row.account = si.debit_to;
+			row.reference_doctype = d.reference_doctype;
+			row.reference_name = d.reference_name;
+			row.bill_no = d.bill_no || "";
+			row.due_date = d.due_date;
+			row.total_amount = flt(d.total_amount);
+			row.outstanding_amount = flt(d.outstanding_amount);
+			row.allocated_amount = flt(d.outstanding_amount);
+			row.account = d.account;
 			// tanpa kurs invoice ERPNext menghitung selisih kurs dari 0
-			row.exchange_rate = flt(si.conversion_rate) || 1;
+			row.exchange_rate = flt(d.exchange_rate) || 1;
 		}
 
 		frm.refresh_field("references");
@@ -1193,7 +1186,7 @@ async function apply_nota_piutang(frm, nota_piutang_name) {
 		frm.dirty();
 
 		frappe.show_alert({
-			message: __(`Nota Piutang <b>${np.name}</b> berhasil diterapkan.`),
+			message: __(`Nota Piutang <b>${nota_piutang_name}</b> berhasil diterapkan.`),
 			indicator: "green"
 		}, 4);
 

@@ -213,44 +213,161 @@ def get_payment_entry(
     return pe
 
 
+# Sub tipe Others yang menagih customer. Management Fee KUD justru mengkredit
+# piutangnya, dan Nota DP sudah dibayar Payment Entry-nya sendiri.
+OTHERS_DITAGIH = ("Asset", "Barang Non Stok", "Jual Asset")
+
+SQL_SI_NOTA_PIUTANG = """
+    SELECT t.pengakuan_penjualan FROM `tabNota Piutang Pemenuhan Kontrak Table` t
+    WHERE t.parent = np.name AND t.parenttype = 'Nota Piutang'
+    UNION
+    SELECT r.pengakuan_penjualan_ppn FROM `tabNota Piutang Reclass Table` r
+    WHERE r.parent = np.name AND r.parenttype = 'Nota Piutang'
+"""
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_nota_piutang_belum_lunas(doctype, txt, searchfield, start, page_len, filters):
-    """Nota Piutang Pemenuhan Kontrak yang masih punya Sales Invoice belum lunas.
+    """Nota Piutang yang masih punya tagihan belum lunas, lihat get_tagihan_nota_piutang.
 
-    Sales Invoice-nya dibaca dari dua tabel yang sama dengan apply_nota_piutang di
-    form: List Pengakuan Penjualan dan Reclass Pengakuan Penjualan.
+    Sisa jurnal dihitung dari Payment Entry tersubmit, sama dengan outstanding Sales
+    Invoice yang baru berkurang waktu pembayarannya disubmit.
     """
     filters = filters or {}
 
     return frappe.db.sql("""
-        SELECT np.name, np.bulan, np.no_kontrak
+        SELECT np.name, np.tipe, IFNULL(np.sub_tipe_others, ''), IFNULL(np.no_kontrak, '')
         FROM `tabNota Piutang` np
         WHERE np.docstatus = 1
-          AND np.tipe = 'Pemenuhan Kontrak'
+          AND (np.tipe = 'Pemenuhan Kontrak' OR (np.tipe = 'Others' AND np.sub_tipe_others IN %(others)s))
           AND (%(company)s = '' OR np.company = %(company)s)
           AND (np.name LIKE %(txt)s OR np.no_kontrak LIKE %(txt)s OR np.bulan LIKE %(txt)s)
-          AND EXISTS (
-            SELECT 1
-            FROM `tabSales Invoice` si
-            WHERE si.docstatus = 1
-              AND si.outstanding_amount > 0
-              AND si.name IN (
-                SELECT t.pengakuan_penjualan FROM `tabNota Piutang Pemenuhan Kontrak Table` t
-                WHERE t.parent = np.name AND t.parenttype = 'Nota Piutang'
-                UNION
-                SELECT r.pengakuan_penjualan_ppn FROM `tabNota Piutang Reclass Table` r
-                WHERE r.parent = np.name AND r.parenttype = 'Nota Piutang'
-              )
+          AND (
+            EXISTS (
+              SELECT 1 FROM `tabSales Invoice` si
+              WHERE si.docstatus = 1
+                AND si.outstanding_amount > 0
+                AND (si.name = np.sales_invoice OR si.name IN ({si}))
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM `tabJournal Entry` je
+              JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
+              WHERE je.nota_piutang = np.name
+                AND je.docstatus = 1
+                AND jea.party_type = 'Customer'
+                AND jea.debit_in_account_currency > IFNULL((
+                  SELECT SUM(per.allocated_amount)
+                  FROM `tabPayment Entry Reference` per
+                  JOIN `tabPayment Entry` pe ON pe.name = per.parent
+                  WHERE per.reference_doctype = 'Journal Entry'
+                    AND per.reference_name = je.name
+                    AND pe.docstatus = 1
+                ), 0)
+            )
           )
         ORDER BY np.date DESC, np.name DESC
         LIMIT %(start)s, %(page_len)s
-    """, {
+    """.format(si=SQL_SI_NOTA_PIUTANG), {
+        "others": OTHERS_DITAGIH,
         "company": filters.get("company") or "",
         "txt": f"%{txt}%",
         "start": start,
         "page_len": page_len,
     })
+
+
+@frappe.whitelist()
+def get_tagihan_nota_piutang(nota_piutang, payment_entry=None):
+    """Baris references Payment Entry untuk tagihan Nota Piutang yang belum lunas.
+
+    - Pemenuhan Kontrak: Sales Invoice di List Pengakuan Penjualan dan Reclass.
+    - Others Jual Asset: Sales Invoice-nya, ditambah Journal Entry PPN-nya.
+    - Others Asset / Barang Non Stok: Journal Entry piutang customer dari nota ini.
+
+    paid_from ikut akun piutang baris pertama: piutang Others memakai akun piutang
+    lain-lain, bukan akun default customer.
+    """
+    np = frappe.get_doc("Nota Piutang", nota_piutang)
+    np.check_permission("read")
+
+    if np.docstatus != 1:
+        frappe.throw(_("Nota Piutang {0} belum di-submit").format(np.name))
+
+    rows = []
+
+    si_names = []
+    if np.tipe == "Pemenuhan Kontrak":
+        si_names = [d.pengakuan_penjualan for d in np.nota_hutang_pemenuhan_kontrak_table if d.pengakuan_penjualan]
+        si_names += [d.pengakuan_penjualan_ppn for d in np.reclass_pengakuan_penjualan if d.pengakuan_penjualan_ppn]
+    elif np.tipe == "Others" and np.sub_tipe_others == "Jual Asset" and np.sales_invoice:
+        si_names = [np.sales_invoice]
+
+    for name in dict.fromkeys(si_names):
+        si = frappe.get_doc("Sales Invoice", name)
+        if si.docstatus != 1 or flt(si.outstanding_amount) <= 0:
+            continue
+
+        rows.append({
+            "reference_doctype": "Sales Invoice",
+            "reference_name": si.name,
+            "party": si.customer,
+            "account": si.debit_to,
+            "bill_no": si.get("bill_no") or "",
+            "due_date": si.due_date,
+            "total_amount": flt(si.grand_total),
+            "outstanding_amount": flt(si.outstanding_amount),
+            "exchange_rate": flt(si.conversion_rate) or 1,
+        })
+
+    if np.tipe == "Others" and np.sub_tipe_others in OTHERS_DITAGIH:
+        sudah = {r["reference_name"] for r in rows}
+        for je in frappe.db.sql("""
+            SELECT je.name, jea.party, jea.account, SUM(jea.debit_in_account_currency) AS total
+            FROM `tabJournal Entry` je
+            JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
+            WHERE je.nota_piutang = %(np)s
+              AND je.docstatus = 1
+              AND jea.party_type = 'Customer'
+              AND jea.debit_in_account_currency > 0
+            GROUP BY je.name, jea.party, jea.account
+        """, {"np": np.name}, as_dict=True):
+            if je.name in sudah:
+                continue
+
+            # Payment Entry yang sedang dibuka tidak dihitung, supaya barisnya bisa
+            # ditarik ulang setelah sempat dihapus
+            dialokasikan = frappe.db.sql("""
+                SELECT COALESCE(SUM(per.allocated_amount), 0)
+                FROM `tabPayment Entry Reference` per
+                JOIN `tabPayment Entry` pe ON pe.name = per.parent
+                WHERE per.reference_doctype = 'Journal Entry'
+                  AND per.reference_name = %(je)s
+                  AND pe.docstatus = 1
+                  AND pe.name != %(payment_entry)s
+            """, {"je": je.name, "payment_entry": payment_entry or ""})[0][0]
+
+            sisa = flt(je.total) - flt(dialokasikan)
+            if sisa <= 0:
+                continue
+
+            rows.append({
+                "reference_doctype": "Journal Entry",
+                "reference_name": je.name,
+                "party": je.party,
+                "account": je.account,
+                "total_amount": flt(je.total),
+                "outstanding_amount": sisa,
+                "exchange_rate": 1,
+            })
+
+    return {
+        "unit": np.unit,
+        "customer": rows[0]["party"] if rows else np.get("customer"),
+        "paid_from": rows[0]["account"] if rows else None,
+        "rows": rows,
+    }
 
 
 @frappe.whitelist()
