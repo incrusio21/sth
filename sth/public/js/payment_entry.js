@@ -1125,7 +1125,11 @@ async function apply_nota_piutang(frm, nota_piutang_name) {
 
 		const total_outstanding = rows.reduce((sum, d) => sum + flt(d.outstanding_amount), 0);
 
-		frm.set_value("unit", tagihan.unit);
+		// company dulu: pilihan unit difilter per company
+		if (tagihan.company && frm.doc.company !== tagihan.company) {
+			await frm.set_value("company", tagihan.company);
+		}
+		await frm.set_value("unit", tagihan.unit);
 		frm.set_value("nota_piutang_pemenuhan_kontrak", nota_piutang_name);
 
 		if (frm.doc.party_type !== "Customer" || frm.doc.party !== tagihan.customer) {

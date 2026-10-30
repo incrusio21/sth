@@ -362,8 +362,22 @@ def get_tagihan_nota_piutang(nota_piutang, payment_entry=None):
                 "exchange_rate": 1,
             })
 
+    # Unit Nota Piutang cuma diisi form-nya dari Sales Order, jadi bisa kosong;
+    # ambil dari Sales Order atau Sales Invoice tagihannya
+    company, unit = np.company, np.unit
+    if not (company and unit) and np.get("no_kontrak"):
+        so = frappe.db.get_value("Sales Order", np.no_kontrak, ["company", "unit"], as_dict=True) or {}
+        company, unit = company or so.get("company"), unit or so.get("unit")
+    for r in rows:
+        if company and unit:
+            break
+        si = frappe.db.get_value(r["reference_doctype"], r["reference_name"],
+            ["company", "unit"] if r["reference_doctype"] == "Sales Invoice" else ["company"], as_dict=True) or {}
+        company, unit = company or si.get("company"), unit or si.get("unit")
+
     return {
-        "unit": np.unit,
+        "company": company,
+        "unit": unit,
         "customer": rows[0]["party"] if rows else np.get("customer"),
         "paid_from": rows[0]["account"] if rows else None,
         "rows": rows,
