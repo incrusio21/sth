@@ -220,9 +220,6 @@ OTHERS_DITAGIH = ("Asset", "Barang Non Stok", "Jual Asset")
 SQL_SI_NOTA_PIUTANG = """
     SELECT t.pengakuan_penjualan FROM `tabNota Piutang Pemenuhan Kontrak Table` t
     WHERE t.parent = np.name AND t.parenttype = 'Nota Piutang'
-    UNION
-    SELECT r.pengakuan_penjualan_ppn FROM `tabNota Piutang Reclass Table` r
-    WHERE r.parent = np.name AND r.parenttype = 'Nota Piutang'
 """
 
 
@@ -282,7 +279,8 @@ def get_nota_piutang_belum_lunas(doctype, txt, searchfield, start, page_len, fil
 def get_tagihan_nota_piutang(nota_piutang, payment_entry=None):
     """Baris references Payment Entry untuk tagihan Nota Piutang yang belum lunas.
 
-    - Pemenuhan Kontrak: Sales Invoice di List Pengakuan Penjualan dan Reclass.
+    - Pemenuhan Kontrak: Sales Invoice di List Pengakuan Penjualan, ditambah Journal
+      Entry PPN + Reclass-nya (pengakuan_penjualan_ppn berisi nama Journal Entry).
     - Others Jual Asset: Sales Invoice-nya, ditambah Journal Entry PPN-nya.
     - Others Asset / Barang Non Stok: Journal Entry piutang customer dari nota ini.
 
@@ -300,7 +298,6 @@ def get_tagihan_nota_piutang(nota_piutang, payment_entry=None):
     si_names = []
     if np.tipe == "Pemenuhan Kontrak":
         si_names = [d.pengakuan_penjualan for d in np.nota_hutang_pemenuhan_kontrak_table if d.pengakuan_penjualan]
-        si_names += [d.pengakuan_penjualan_ppn for d in np.reclass_pengakuan_penjualan if d.pengakuan_penjualan_ppn]
     elif np.tipe == "Others" and np.sub_tipe_others == "Jual Asset" and np.sales_invoice:
         si_names = [np.sales_invoice]
 
@@ -321,17 +318,20 @@ def get_tagihan_nota_piutang(nota_piutang, payment_entry=None):
             "exchange_rate": flt(si.conversion_rate) or 1,
         })
 
-    if np.tipe == "Others" and np.sub_tipe_others in OTHERS_DITAGIH:
+    if np.tipe == "Pemenuhan Kontrak" or (np.tipe == "Others" and np.sub_tipe_others in OTHERS_DITAGIH):
         sudah = {r["reference_name"] for r in rows}
+        # Neto debit - kredit: JE Reclass bernilai minus mengkredit piutang customer
+        # di jurnal yang sama dengan debit PPN-nya
         for je in frappe.db.sql("""
-            SELECT je.name, jea.party, jea.account, SUM(jea.debit_in_account_currency) AS total
+            SELECT je.name, jea.party, jea.account,
+                SUM(jea.debit_in_account_currency - jea.credit_in_account_currency) AS total
             FROM `tabJournal Entry` je
             JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
             WHERE je.nota_piutang = %(np)s
               AND je.docstatus = 1
               AND jea.party_type = 'Customer'
-              AND jea.debit_in_account_currency > 0
             GROUP BY je.name, jea.party, jea.account
+            HAVING total > 0
         """, {"np": np.name}, as_dict=True):
             if je.name in sudah:
                 continue
