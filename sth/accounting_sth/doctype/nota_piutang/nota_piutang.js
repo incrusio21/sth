@@ -277,8 +277,11 @@ function calculate_sisa(frm) {
 		return sum + (row.reclass || 0);
 	}, 0);
 
+	// Rate PPN dari kontrak (ppn / dpp), fallback 11% kalau data kontrak belum ada
+	let tax_rate = flt(frm.doc.dpp) ? flt(frm.doc.ppn) / flt(frm.doc.dpp) : 0.11;
+
 	let sisa_dpp = table_total + total_reclass;
-	let sisa_ppn = sisa_dpp * 11 / 100;
+	let sisa_ppn = sisa_dpp * tax_rate;
 
 	frm.set_value('sisa_dpp', sisa_dpp < 0 ? 0 : sisa_dpp);
 	frm.set_value('sisa_ppn', sisa_ppn < 0 ? 0 : sisa_ppn);

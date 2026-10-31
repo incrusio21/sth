@@ -1272,8 +1272,12 @@ def get_nilai_kontrak(no_kontrak):
 		if t.included_in_print_rate:
 			divisor *= (1 + t.rate / 100)
 
-	# Hitung tax rate total dari SO (untuk sisa_ppn)
-	tax_rate_total = divisor - 1  # misal 1.11 - 1 = 0.11
+	# Hitung tax rate total dari SO (untuk sisa_ppn & PPN baris reclass)
+	if tax_included:
+		tax_rate_total = divisor - 1  # misal 1.11 - 1 = 0.11
+	else:
+		# Tax excluding: divisor tetap 1, jadi ambil langsung dari rate tax SO
+		tax_rate_total = sum(flt(t.rate) for t in so.get("taxes", [])) / 100
 
 	# nilai_kontrak
 	nilai_kontrak = so.grand_total
@@ -1303,6 +1307,11 @@ def get_nilai_kontrak(no_kontrak):
 
 	# ppn
 	ppn = nilai_kontrak - dpp
+
+	# Rate di baris tax SO bisa 0 (mis. PPN lewat Item Tax Template / charge type Actual),
+	# fallback ke rasio ppn / dpp supaya PPN baris reclass tidak jadi 0
+	if not tax_rate_total and flt(dpp) and flt(ppn) > 0:
+		tax_rate_total = flt(ppn) / flt(dpp)
 
 	# dp_ppn
 	dp_ppn = dp_dpp_raw - dp_dpp  # selisih gross dan net dp
