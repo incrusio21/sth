@@ -229,9 +229,23 @@ class NotaPiutang(Document):
 		if self.tipe == "Others":
 			self.validate_others()
 
+		if self.tipe == "Pemenuhan Kontrak":
+			self.hitung_ppn_reclass()
+
 		# flt(): keduanya diisi sisi client, jadi masih None di nota yang dibuat
 		# dari kode — seperti Management Fee KUD yang ditarik dari Perhitungan KUD
 		self.grandtotal = flt(self.sisa_dpp) + flt(self.sisa_ppn)
+
+	def hitung_ppn_reclass(self):
+		# Tabel reclass diisi client, tapi ikut tersalin apa adanya saat amend —
+		# hitung ulang PPN di sini supaya tidak tertinggal 0
+		if not self.no_kontrak or not self.get("reclass_pengakuan_penjualan"):
+			return
+
+		tax_rate_total = flt(get_nilai_kontrak(self.no_kontrak).get("tax_rate_total"))
+		for row in self.reclass_pengakuan_penjualan:
+			row.ppn = flt(row.subtotal) * tax_rate_total
+			row.grand_total = flt(row.subtotal) + row.ppn
 
 	def validate_others(self):
 		if not self.sub_tipe_others:
