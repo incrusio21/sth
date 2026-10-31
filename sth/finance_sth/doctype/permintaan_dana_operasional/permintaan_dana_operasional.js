@@ -8,7 +8,11 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		frm.ignore_doctypes_on_cancel_all = ["PDO Bahan Bakar Vtwo", "PDO Perjalanan Dinas Vtwo", "PDO Kas Vtwo", "PDO Dana Cadangan Vtwo", "PDO NON PDO Vtwo"];
 	},
 	onload(frm) {
-		recalculateOutstandingAmount(frm);
+		// Setelah submit outstanding_amount diatur server (payment/realisasi) —
+		// menghitung ulang di sini bikin dokumen submitted jadi "Not Saved"
+		if (frm.doc.docstatus === 0) {
+			recalculateOutstandingAmount(frm);
+		}
 	},
 	refresh(frm) {
 		make_pdo_kas_readonly(frm);
@@ -541,7 +545,7 @@ function processNonPdo(frm, cdt, cdn) {
 		revised1: "revised_qty",
 		revised2: "revised_price",
 		revisedTarget: "revised_total",
-		childtable: "pdo_kas"
+		childtable: "pdo_non_pdo"
 	});
 }
 
