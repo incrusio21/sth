@@ -128,7 +128,7 @@ def get_table_data(args):
 	active_items = frappe.db.get_all("Material Request Item",{"parent": args.pr_sr, "item_status": ["!=","Rejected"] }, ["item_code"], pluck="item_code")
 
 	where_clause = "WHERE sq.workflow_state NOT IN ('Approved','Closed') AND sqi.material_request = %(pr_sr)s AND sqi.item_code in %(items)%"
-	filters = {"pr_sr":args.pr_sr, items: active_items}
+	filters = {"pr_sr":args.pr_sr, "items": active_items}
 	
 	pr_sr_items = frappe.db.get_all("Material Request Item",{'parent':args.pr_sr},'item_code',order_by="idx",pluck='item_code')
 
