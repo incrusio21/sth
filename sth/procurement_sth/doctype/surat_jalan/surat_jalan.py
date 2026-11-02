@@ -93,7 +93,8 @@ class SuratJalan(Document):
 
         def postprocess(source, target):
             target.stock_entry_type = "Material Issue"
-
+            target.set_posting_time = 1
+            
             update_fields = (
                 "item_name", "stock_uom", "description",
                 "expense_account", "cost_center",
@@ -178,6 +179,7 @@ class SuratJalan(Document):
         receipt.posting_date      = tanggal_terima
         receipt.company           = issue.company
         receipt.project           = issue.project
+        receipt.set_posting_time  = 1
 
         for issue_item in issue.items:
             receipt.append("items", {
