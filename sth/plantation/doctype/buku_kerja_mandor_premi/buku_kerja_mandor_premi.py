@@ -36,7 +36,7 @@ class BukuKerjaMandorPremi(Document):
 			self.salary_component = p.salary_component
 		
 		if not have_premi:
-			frappe.throw(f"Please set Mandor Premi Setting for {self.buku_kerja_mandor} in Plantation Settings")
+			frappe.throw(f"Please set Mandor Premi Setting for {self.buku_kerja_mandor} in Plantation Settings {p.voucher_type} - {voucher_type} - {p.employee_field} - {self.employee_field}")
 	
 	def validate(self):
 		self.set_amount_employee()

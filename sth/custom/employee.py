@@ -1,6 +1,9 @@
 import frappe
 from frappe.utils import cint
 
+def set_nip(self, method):
+	self.custom_nip = self.no_ktp
+
 def autoname_employee(self,method):
 	self.finger_id = self.no_ktp[:14]
 	self.name = self.no_ktp

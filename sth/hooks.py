@@ -342,6 +342,7 @@ doc_events = {
 	"Employee": {
 		"autoname": "sth.custom.employee.autoname_employee",
 		"validate": [
+			"sth.custom.employee.set_nip",
 			"sth.custom.employee.validasi_stasiun_mill",
 			"sth.custom.employee.set_coa_stasiun",
 		],
