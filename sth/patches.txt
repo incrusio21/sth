@@ -95,4 +95,8 @@ sth.patches.perbaiki_unique_index_bkm_premi
 # salinan, dan mengisi trans_no salinan yang masih kosong. Default-nya uji
 # coba; tulis dengan --kwargs "{'terapkan': 1}", satu dokumen saja dengan
 # --kwargs "{'nama': 'BKM-BBT-00001'}".
+# kirim_ulang_bkm_panen_api juga tidak didaftarkan: memasukkan ulang
+# request_payload BKM Panen dari CSV log gagal sync sistem luar, satu per satu
+# sebagai api@sth.com. Default-nya uji coba; tulis dengan
+# --kwargs "{'path': '/path/log.csv', 'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
