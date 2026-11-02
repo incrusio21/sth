@@ -361,4 +361,14 @@ def update_quotation(doc,method=None):
         # reopen_status_another_sq(pr_sr)
 
 
-
+@frappe.whitelist()
+def get_supplier_identity(supplier):
+    doc = frappe.get_doc("Supplier",supplier)
+    
+    return {
+        "nama_npwp": doc.npwp_dan_sppkp_supplier[0].nama_npwp if doc.npwp_dan_sppkp_supplier else "",
+        "no_npwp": doc.npwp_dan_sppkp_supplier[0].no_npwp if doc.npwp_dan_sppkp_supplier else "",
+        "alamat_npwp": doc.npwp_dan_sppkp_supplier[0].alamat_npwp if doc.npwp_dan_sppkp_supplier else "",
+        "alamat_supplier": doc.alamat_dan_pic_supplier[0].alamat_pic if doc.alamat_dan_pic_supplier else "",
+        "no_rekening": doc.data_bank_supplier[0].no_rekening if doc.data_bank_supplier else ""
+    }

@@ -719,6 +719,18 @@ frappe.ui.form.on("Purchase Order", {
 		}
 	},
 
+	supplier(frm) {
+		if (!frm.doc.supplier) return
+		frappe
+			.xcall("sth.buying_sth.custom.purchase_order.get_supplier_identity", { supplier: frm.doc.supplier })
+			.then((res) => {
+				const fields = ["no_rekening", "alamat_supplier", "no_npwp", "alamat_npwp", "nama_npwp"]
+				fields.forEach((field) => {
+					frm.set_value(field, res[field])
+				})
+			})
+	},
+
 	company(frm) {
 		frm.trigger('get_tax_template')
 	},
