@@ -530,7 +530,9 @@ frappe.ui.form.on("Purchase Invoice", {
     },
 
     retensi(frm) {
-        sync_to_taxes(frm)
+        // Retensi mengubah dasar ppn/pph_lainnya; recalculate_vat_details juga
+        // menjalankan sync_to_taxes untuk baris retensinya.
+        frm.trigger('recalculate_vat_details')
     },
 
     sub_total(frm) {
@@ -920,13 +922,27 @@ const TAX_ROW_FIELDS = ["account_head", "charge_type", "add_deduct_tax", "catego
 // recalculate_vat_details (jalan saat refresh dan before_save), supaya angka
 // sebelum dan sesudah simpan sama. PPh hanya dikenakan pada baris item yang
 // dicentang pph; kalau tidak ada yang dicentang, seluruh sub total.
+// Retensi (%) ikut mengurangi dasarnya: sub total dikurangi retensi, untuk item
+// yang dicentang pph dikurangi retensi bagiannya sendiri.
 function base_vat(frm, parentfield) {
+    const retensi = flt(frm.doc.retensi) / 100;
     if (parentfield === "pph_lainnya") {
         const dicentang = (frm.doc.items || []).filter((r) => r.pph);
-        if (dicentang.length) return dicentang.reduce((total, r) => total + flt(r.amount), 0);
-        return flt(frm.doc.sub_total);
+        if (dicentang.length) {
+            const total = dicentang.reduce((total, r) => total + flt(r.amount), 0);
+            return total - total * retensi;
+        }
+        return flt(frm.doc.sub_total) - retensi_dasar_pajak(frm);
     }
-    return flt(frm.doc.sub_total) - flt(frm.doc.jumlah_diskon);
+    return flt(frm.doc.sub_total) - flt(frm.doc.jumlah_diskon) - retensi_dasar_pajak(frm);
+}
+
+// Retensi (%) dari total item, sama dengan net_total * retensi di
+// build_retensi_tax_rows. Diambil dari items karena net_total belum tentu sudah
+// dihitung ulang erpnext waktu amount item berubah.
+function retensi_dasar_pajak(frm) {
+    const total_items = (frm.doc.items || []).reduce((sum, r) => sum + flt(r.amount), 0);
+    return flt(total_items * flt(frm.doc.retensi) / 100, precision("retensi_amount", frm.doc));
 }
 
 function sync_to_taxes(frm) {
