@@ -168,7 +168,21 @@ frappe.ui.form.on("Supplier Quotation Item", {
 })
 
 
-frappe.ui.form.on("VAT Detail", {
+// Handler child table disimpan per child doctype, bukan per parent. VAT Detail
+// juga dipakai Purchase Invoice, Purchase Order, BAPP dan Proposal, jadi begitu
+// salah satunya dibuka handlernya ikut jalan di form lain. Kembarannya ada di
+// script doctype-doctype itu.
+function hanya_untuk_doctype(doctypes, handlers) {
+    doctypes = [].concat(doctypes)
+    return Object.fromEntries(Object.entries(handlers).map(([event, handler]) => [
+        event,
+        function (frm, ...args) {
+            if (doctypes.includes(frm.doctype)) return handler.call(this, frm, ...args)
+        },
+    ]))
+}
+
+frappe.ui.form.on("VAT Detail", hanya_untuk_doctype("Supplier Quotation", {
     pph_lainnya_add(frm, dt, dn) {
         let row = locals[dt][dn]
         const tax = frm.add_child("taxes")
@@ -208,7 +222,7 @@ frappe.ui.form.on("VAT Detail", {
         frm.trigger('calculate_total_pph_lainnya')
         frm.trigger('calculate_taxes_and_totals')
     }
-})
+}))
 
 
 // ─── Sync Taxes ──────────────────────────────────────────────────────────────

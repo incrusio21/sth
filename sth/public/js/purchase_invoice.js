@@ -771,7 +771,21 @@ function peringatan_uang_muka(frm) {
 
 // ─── VAT Detail ───────────────────────────────────────────────────────────────
 
-frappe.ui.form.on("VAT Detail", {
+// Handler child table disimpan per child doctype, bukan per parent. VAT Detail
+// juga dipakai Purchase Order, Supplier Quotation, BAPP dan Proposal, jadi
+// begitu salah satunya dibuka handlernya ikut jalan di form lain. Kembarannya
+// ada di script doctype-doctype itu.
+function hanya_untuk_doctype(doctypes, handlers) {
+    doctypes = [].concat(doctypes);
+    return Object.fromEntries(Object.entries(handlers).map(([event, handler]) => [
+        event,
+        function (frm, ...args) {
+            if (doctypes.includes(frm.doctype)) return handler.call(this, frm, ...args);
+        },
+    ]));
+}
+
+frappe.ui.form.on("VAT Detail", hanya_untuk_doctype("Purchase Invoice", {
     pph_lainnya_add(frm, dt, dn) {
         sync_to_taxes(frm)
     },
@@ -833,7 +847,7 @@ frappe.ui.form.on("VAT Detail", {
         frm.trigger('calculate_total_ppn')
         sync_to_taxes(frm)
     }
-});
+}));
 
 
 // ─── Purchase Invoice Item ────────────────────────────────────────────────────

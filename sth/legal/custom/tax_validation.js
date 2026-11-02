@@ -1,7 +1,21 @@
 // Copyright (c) 2026, DAS and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("VAT Detail", {
+// Handler child table disimpan per child doctype, bukan per parent. VAT Detail
+// juga dipakai Purchase Invoice, Purchase Order dan Supplier Quotation, jadi
+// begitu salah satunya dibuka handlernya ikut jalan di form lain. Kembarannya
+// ada di script doctype-doctype itu.
+function hanya_untuk_doctype(doctypes, handlers) {
+    doctypes = [].concat(doctypes)
+    return Object.fromEntries(Object.entries(handlers).map(([event, handler]) => [
+        event,
+        function (frm, ...args) {
+            if (doctypes.includes(frm.doctype)) return handler.call(this, frm, ...args)
+        },
+    ]))
+}
+
+frappe.ui.form.on("VAT Detail", hanya_untuk_doctype(["BAPP", "Proposal"], {
     type(frm, cdt, cdn){
         let item = locals[cdt][cdn]
         frappe.call({
@@ -22,7 +36,7 @@ frappe.ui.form.on("VAT Detail", {
 			}
 		})
     }
-});
+}));
 
 function recreate_tax_table(frm){
 	frm.clear_table("taxes")
