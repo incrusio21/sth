@@ -62,6 +62,7 @@ frappe.ui.form.on("Material Request", {
                 doctype: d.doctype,
                 docname: d.name,
                 item_code: d.item_code,
+                item_name: d.item_name,
                 status: d.item_status,
                 qty: d.qty
             }
@@ -118,7 +119,7 @@ frappe.ui.form.on("Material Request", {
 
         const d = new frappe.ui.Dialog({
             title: type,
-            size: 'large',
+            size: 'extra-large',
             fields: [
                 {
                     label: 'Items',
@@ -144,7 +145,15 @@ frappe.ui.form.on("Material Request", {
                             options: 'Item',
                             in_list_view: 1,
                             read_only: 1,
-                            columns: 7
+                            columns: 3
+                        },
+                        {
+                            label: "Nama Barang",
+                            fieldname: 'item_name',
+                            fieldtype: 'Data',
+                            in_list_view: 1,
+                            read_only: 1,
+                            columns: 3
                         },
                         {
                             label: "Status",
