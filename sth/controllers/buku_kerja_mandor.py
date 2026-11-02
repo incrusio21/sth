@@ -204,11 +204,13 @@ class BukuKerjaMandorController(PlantationController):
             mandor_type = d.get("mandor_type") or d["fieldname"]
 
             # kunci ini harus sama persis dengan unique index yang dibentuk
-            # on_doctype_update milik Buku Kerja Mandor Premi
+            # on_doctype_update milik Buku Kerja Mandor Premi. employee_field
+            # sengaja tidak ikut: bukan bagian index, dan baris lama ada yang
+            # kosong atau masih berisi "mandor" sebelum pindah ke kode_mandor,
+            # sehingga barisnya tidak ketemu tapi insert-nya tetap ditolak index
             kunci = {
                 "employee": mandor,
                 "mandor_type": mandor_type,
-                "employee_field": d["fieldname"],
                 "company": self.company,
                 "posting_date": date,
                 "buku_kerja_mandor": self._bkm_name
