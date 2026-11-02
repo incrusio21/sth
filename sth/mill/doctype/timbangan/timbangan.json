@@ -38,6 +38,7 @@
   "no_do_2",
   "delivery_note",
   "delivery_note_2",
+  "delivery_note_asal",
   "sales_invoice",
   "sales_invoice_2",
   "purchase_order",
@@ -362,6 +363,15 @@
    "in_preview": 1,
    "label": "Delivery Note 2",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.type == \"Return\"",
+   "description": "DN Dispatch yang barangnya dikembalikan. Kosongkan untuk dicocokkan otomatis dari DO, barang, dan No Polisi / License Number.",
+   "fieldname": "delivery_note_asal",
+   "fieldtype": "Link",
+   "label": "Delivery Note Asal",
+   "no_copy": 1,
+   "options": "Delivery Note"
   },
   {
    "default": "0",
@@ -845,7 +855,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-13 11:00:00.000000",
+ "modified": "2026-11-03 01:35:33.022718",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

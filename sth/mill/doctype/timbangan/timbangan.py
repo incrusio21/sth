@@ -50,6 +50,7 @@ class Timbangan(Document):
 		self.hitung_netto()
 		self.hitung_netto_eksternal()
 		self.validate_qty_do()
+		self.isi_delivery_note_asal()
 
 		if self.do_no and not self.storage:
 			self.storage = frappe.get_doc("Delivery Order", self.do_no).items[0].warehouse
@@ -312,6 +313,7 @@ class Timbangan(Document):
 
 	def before_submit(self):
 		self.validate_berat()
+		self.validate_delivery_note_asal()
 
 	def validate_berat(self):
 		"""Bruto dan tara dua-duanya harus sudah ditimbang sebelum disubmit.
@@ -351,6 +353,8 @@ class Timbangan(Document):
 				self.create_sales_invoices()
 			else:
 				self.create_delivery_notes()
+		elif self.perlu_dn_retur():
+			self.create_delivery_note_retur()
 		if self.receive_type == "TBS Internal" or self.type == "Dispatch":
 			self.update_spb_weight()
 
@@ -541,6 +545,8 @@ class Timbangan(Document):
 
 		if self.type == "Dispatch":
 			self.cancel_sales_invoices()
+		elif self.type == "Return":
+			self.cancel_delivery_note_retur()
 
 		hitung_ulang_setelah_timbangan(self)
 		hitung_ulang_sounding_setelah_timbangan(self)
@@ -721,6 +727,107 @@ class Timbangan(Document):
 				title=_("Sales Invoice Dibatalkan"),
 				indicator="orange"
 			)
+
+	def perlu_dn_retur(self):
+		"""Timbangan Return atas DO mengembalikan barang dari Delivery Note asalnya.
+
+		Tanpa DN Return, delivered_qty DO dan Sales Order tidak turun dan stoknya
+		tidak masuk lagi, padahal get_sisa_do_available sudah menghitung netto
+		minus timbangan Return sebagai sisa DO. Timbangan Dispatch berikutnya lalu
+		membuat DN atas sisa itu dan ditolak status updater ERPNext ("Limit
+		Crossed") karena Sales Order Item-nya sudah terkirim penuh.
+
+		Company Manual Timbangan dilewati: kirimannya lewat Sales Invoice, bukan
+		Delivery Note.
+		"""
+		return (
+			self.type == "Return"
+			and bool(self.do_no)
+			and not cint(self.manual_timbangan)
+			and self.qty_retur() > 0
+		)
+
+	def qty_retur(self):
+		return abs(flt(self.berat_kirim()))
+
+	def isi_delivery_note_asal(self):
+		if not self.perlu_dn_retur():
+			self.delivery_note_asal = None
+			return
+
+		if not self.delivery_note_asal:
+			self.delivery_note_asal = cari_delivery_note_asal(self)
+			return
+
+		if not get_baris_dn_asal(self, self.delivery_note_asal):
+			frappe.throw(
+				_("Delivery Note {0} bukan kiriman {1} dari DO {2} yang sisa returnya cukup untuk {3}.").format(
+					frappe.bold(self.delivery_note_asal),
+					frappe.bold(self.kode_barang),
+					frappe.bold(self.do_no),
+					format_sisa(self.qty_retur()),
+				)
+			)
+
+	def validate_delivery_note_asal(self):
+		if self.perlu_dn_retur() and not self.delivery_note_asal:
+			frappe.throw(
+				_("Tidak ada Delivery Note dari DO {0} dengan No Polisi atau License Number yang sama. Pilih Delivery Note Asal secara manual.").format(
+					frappe.bold(self.do_no)
+				)
+			)
+
+	def create_delivery_note_retur(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		baris_asal = get_baris_dn_asal(self, self.delivery_note_asal)
+		dn = make_sales_return(self.delivery_note_asal)
+
+		# Yang dikembalikan hanya barang dan DO timbangan ini, sebanyak netto
+		# timbangannya. delivery_order_item no_copy di DN Item, jadi disalin
+		# sendiri: update_delivered_do memakainya untuk menurunkan delivered_qty DO.
+		dn.items = [d for d in dn.items if d.dn_detail == baris_asal.name]
+		for d in dn.items:
+			d.qty = -self.qty_retur()
+			d.stock_qty = d.qty * flt(d.conversion_factor or 1)
+			d.delivery_order_item = baris_asal.delivery_order_item
+			d.timbangan = self.name
+
+		dn.timbangan_ref = self.name
+		dn.set_posting_time = 1
+		dn.posting_date = self.posting_date
+		if self.get("posting_time"):
+			dn.posting_time = self.posting_time
+
+		dn.run_method("calculate_taxes_and_totals")
+		dn.insert()
+
+		# Status updater returned_qty (Sales Order Item dan DN asal) dipasang
+		# DeliveryNote.__init__ hanya kalau is_return sudah terisi, sedangkan
+		# make_sales_return mengisinya sesudah dokumennya dibuat. Dimuat ulang
+		# supaya submit-nya ikut menulis returned_qty.
+		dn = frappe.get_doc("Delivery Note", dn.name)
+		dn.submit()
+		self.db_set("delivery_note", dn.name)
+
+		frappe.msgprint(
+			msg=_("Delivery Note Return {0} atas {1} has been created and submitted").format(dn.name, self.delivery_note_asal),
+			title=_("Delivery Note Return Created"),
+			indicator="green"
+		)
+
+	def cancel_delivery_note_retur(self):
+		"""Field delivery_note bertipe Data, jadi seperti cancel_sales_invoices DN
+		Return-nya dibatalkan sendiri supaya delivered_qty DO dan stoknya kembali."""
+		if not self.delivery_note or frappe.db.get_value("Delivery Note", self.delivery_note, "docstatus") != 1:
+			return
+
+		frappe.get_doc("Delivery Note", self.delivery_note).cancel()
+		frappe.msgprint(
+			msg=_("Delivery Note Return {0} ikut dibatalkan").format(self.delivery_note),
+			title=_("Delivery Note Dibatalkan"),
+			indicator="orange"
+		)
 
 	def make_tbs_ledger(self):
 		create_tbs_ledger(frappe._dict({
@@ -1238,6 +1345,83 @@ def get_do_2_available(doctype, txt, searchfield, start, page_len, filters):
 		group by do.name
 		limit %(start)s, %(page_len)s
 	""", params)
+
+def get_dn_asal_tersedia(do_no, item_code, sampai=None, nama_dn=None, txt=None):
+	"""Baris Delivery Note Dispatch atas DO dan barang ini yang masih bisa diretur,
+	terbaru dulu, beserta No Polisi dan License Number timbangannya. Dicari lewat
+	delivery_order_item, bukan delivery_order DN, supaya DN untuk DO 2 ikut."""
+	conditions = [
+		"dn.docstatus = 1",
+		"dn.is_return = 0",
+		"doi.parent = %(do_no)s",
+		"dni.item_code = %(item_code)s",
+	]
+	params = {"do_no": do_no, "item_code": item_code}
+
+	if sampai:
+		conditions.append("dn.posting_date <= %(sampai)s")
+		params["sampai"] = sampai
+	if nama_dn:
+		conditions.append("dn.name = %(nama_dn)s")
+		params["nama_dn"] = nama_dn
+	if txt:
+		conditions.append("(dn.name LIKE %(txt)s OR t.no_polisi LIKE %(txt)s OR t.driver_name LIKE %(txt)s)")
+		params["txt"] = f"%{txt}%"
+
+	return frappe.db.sql(f"""
+		SELECT dn.name AS delivery_note, dni.name, dni.delivery_order_item, dn.posting_date,
+			dni.qty - dni.returned_qty / IFNULL(NULLIF(dni.conversion_factor, 0), 1) AS sisa_retur,
+			t.no_polisi, t.license_number, t.driver_name
+		FROM `tabDelivery Note` dn
+		JOIN `tabDelivery Note Item` dni ON dni.parent = dn.name
+		JOIN `tabDelivery Order Item` doi ON doi.name = dni.delivery_order_item
+		LEFT JOIN `tabTimbangan` t ON t.name = dn.timbangan_ref
+		WHERE {" AND ".join(conditions)}
+		ORDER BY dn.posting_date DESC, dn.creation DESC
+	""", params, as_dict=True)
+
+
+def get_baris_dn_asal(timbangan, nama_dn):
+	"""Baris DN asal yang menampung retur timbangan ini, atau None kalau DN-nya
+	bukan dari DO dan barang yang sama atau sisa returnya kurang."""
+	for row in get_dn_asal_tersedia(timbangan.do_no, timbangan.kode_barang, nama_dn=nama_dn):
+		if flt(row.sisa_retur) >= timbangan.qty_retur():
+			return row
+
+
+def cari_delivery_note_asal(timbangan):
+	"""DN Dispatch terbaru yang truknya sama dengan timbangan Return ini: No
+	Polisi atau License Number sama, sebelum atau pada tanggal returnya, dan sisa
+	returnya cukup. None kalau tidak ada; operator yang memilih."""
+	def kunci(nilai):
+		return cstr(nilai).replace(" ", "").upper()
+
+	no_polisi = kunci(timbangan.no_polisi)
+	license_number = kunci(timbangan.license_number)
+	if not no_polisi and not license_number:
+		return None
+
+	for row in get_dn_asal_tersedia(timbangan.do_no, timbangan.kode_barang, sampai=timbangan.posting_date):
+		if flt(row.sisa_retur) < timbangan.qty_retur():
+			continue
+		if (no_polisi and kunci(row.no_polisi) == no_polisi) or (
+			license_number and kunci(row.license_number) == license_number
+		):
+			return row.delivery_note
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_delivery_note_asal(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("do_no") or not filters.get("kode_barang"):
+		return []
+
+	rows = get_dn_asal_tersedia(filters.get("do_no"), filters.get("kode_barang"), txt=txt)
+	rows = [r for r in rows if flt(r.sisa_retur) > 0][cint(start):cint(start) + cint(page_len)]
+	return [
+		(r.delivery_note, f"{r.posting_date} · {r.no_polisi or r.license_number or '-'} · sisa {format_sisa(r.sisa_retur)}")
+		for r in rows
+	]
 
 @frappe.whitelist()
 def get_sisa_do_2(do_no, item_code):
