@@ -640,6 +640,7 @@ ignore_links_on_delete = ["TBS Ledger Entry","Workflow Action"]
 # ----------------
 # before_request = ["sth.utils.before_request"]
 # after_request = ["sth.utils.after_request"]
+after_request = ["sth.plantation.doctype.log_api_masuk.log_api_masuk.catat_request_api"]
 
 # Job Events
 # ----------
@@ -683,4 +684,7 @@ ignore_links_on_delete = ["TBS Ledger Entry","Workflow Action"]
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
+default_log_clearing_doctypes = {
+	"Log API Masuk": 30
+}
 
