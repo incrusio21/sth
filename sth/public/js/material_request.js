@@ -57,7 +57,64 @@ frappe.ui.form.on("Material Request", {
     },
 
     show_management_items(frm, type) {
-        const data = [{ item_code: '4160329' }]
+        const data = frm.doc.items.map((d) => {
+            return {
+                doctype: d.doctype,
+                docname: d.name,
+                item_code: d.item_code,
+                status: d.item_status,
+                qty: d.qty
+            }
+        })
+
+        const actions = () => {
+            let default_action = {
+                primary_action_label: 'Rejected',
+                secondary_action_label: 'Unrejected',
+                primary_action(values) {
+                    for (const item of values.items) {
+                        if (item.__checked) {
+                            frappe.model.set_value(item.doctype, item.docname, 'item_status', 'Rejected')
+                        }
+                    }
+                    frm.dirty()
+                    frm.save()
+                    d.hide();
+                },
+
+                secondary_action() {
+                    const items = d.get_value('items')
+
+                    for (const item of items) {
+                        if (item.__checked) {
+                            frappe.model.set_value(item.doctype, item.docname, 'item_status', 'Active')
+                        }
+                    }
+
+                    frm.dirty()
+                    frm.save()
+                    d.hide();
+                },
+            }
+
+            if (type == "Edit Qty") {
+                default_action = {
+                    primary_action_label: 'Save',
+                    primary_action(values) {
+                        for (const item of values.items) {
+                            frappe.model.set_value(item.doctype, item.docname, 'qty', item.qty)
+                        }
+
+                        frm.dirty()
+                        frm.save()
+                        d.hide();
+                    }
+                }
+            }
+
+            return default_action
+        }
+
 
         const d = new frappe.ui.Dialog({
             title: type,
@@ -67,26 +124,53 @@ frappe.ui.form.on("Material Request", {
                     label: 'Items',
                     fieldname: 'items',
                     fieldtype: 'Table',
-                    data: frm.doc.items,
+                    data,
                     cannot_add_rows: true,
                     fields: [
+                        {
+                            fieldname: 'doctype',
+                            fieldtype: 'Data',
+                            hidden: 1
+                        },
+                        {
+                            fieldname: 'docname',
+                            fieldtype: 'Data',
+                            hidden: 1
+                        },
                         {
                             label: "Kode Barang",
                             fieldname: 'item_code',
                             fieldtype: 'Link',
                             options: 'Item',
                             in_list_view: 1,
-                            read_only: 1
+                            read_only: 1,
+                            columns: 7
+                        },
+                        {
+                            label: "Status",
+                            fieldname: 'status',
+                            fieldtype: 'Data',
+                            in_list_view: 1,
+                            read_only: 1,
+                            hidden: type == "Edit Qty" ? 1 : 0
+                        },
+
+                        {
+                            label: "Qty",
+                            fieldname: 'qty',
+                            fieldtype: 'Float',
+                            in_list_view: 1,
+                            hidden: type == "Edit Qty" ? 0 : 1,
+                            read_only: 0,
                         },
                     ]
                 },
             ],
-            primary_action_label: 'Save',
-            primary_action(values) {
 
-                d.hide();
-            }
+            ...actions()
         })
+
+        d.get_field('items').$wrapper.find('.grid-remove-rows').hide()
         d.show()
     },
 
@@ -251,7 +335,7 @@ function get_stock_for_item(frm, cdt, cdn, silent) {
             fields: ['name']
         },
         callback: function (r) {
-            console.log(r);
+            // console.log(r);
 
             if (r.message && r.message.length > 0) {
                 let warehouses = r.message.map(w => w.name);
