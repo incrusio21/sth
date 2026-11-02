@@ -10,7 +10,7 @@
  "idx": 7,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2026-10-23 13:43:19.627299",
+ "modified": "2026-10-30 16:30:16.608339",
  "modified_by": "Administrator",
  "module": "Finance STH",
  "name": "Laporan List Bayar Harian",
@@ -43,6 +43,12 @@
   },
   {
    "role": "ACCT SPV"
+  },
+  {
+   "role": "STH DCDS"
+  },
+  {
+   "role": "STH.FATTA"
   }
  ],
  "timeout": 0
