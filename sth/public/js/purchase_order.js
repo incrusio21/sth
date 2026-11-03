@@ -649,7 +649,8 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_query("type", "ppn", function (doc) {
 			return {
 				filters: {
-					name: ["like", "%PPN%"]
+					name: ["like", "%PPN%"],
+					is_group: 0
 				}
 			}
 		})
