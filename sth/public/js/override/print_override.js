@@ -32,7 +32,8 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
     "Sales Order",
     "Delivery Order",
     "Payment Entry",
-    "Timbangan"
+    "Timbangan",
+    "Employee Grievance"
   ];
 
   if (!doctypesNeedServer.includes(doctype)) {
@@ -53,6 +54,21 @@ frappe.ui.form.PrintView.prototype.set_default_print_format = function () {
       let format = "";
 
       switch (doctype) {
+        case "Employee Grievance":
+          const suratPeringatan = [
+            "Surat Peringatan 1",
+            "Surat Peringatan 2",
+            "Surat Peringatan 3"
+          ];
+
+          if (suratPeringatan.includes(doc.tipe_peringatan)) {
+            format = "PF Surat Peringatan 1";
+          } else if (doc.tipe_peringatan == "Surat Teguran") {
+            format = "PF Surat Peringatan Teguran";
+          } else if (doc.tipe_peringatan == "Skorsing") {
+            format = "PF Surat Peringatan Skorsing";
+          }
+          break;
 
         case "Quotation":
           format = doc.jenis_berikat == "Ya"
