@@ -99,4 +99,8 @@ sth.patches.perbaiki_unique_index_bkm_premi
 # request_payload BKM Panen dari CSV log gagal sync sistem luar, satu per satu
 # sebagai api@sth.com. Default-nya uji coba; tulis dengan
 # --kwargs "{'path': '/path/log.csv', 'terapkan': 1}".
+# buat_dn_retur_timbangan juga tidak didaftarkan: membuat dan men-submit DN
+# Return untuk Timbangan Return submitted yang belum punya, DN asalnya
+# dicocokkan seperti saat submit. Default-nya uji coba; tulis dengan
+# --kwargs "{'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

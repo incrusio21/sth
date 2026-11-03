@@ -39,6 +39,18 @@ frappe.ui.form.on("Timbangan", {
 			}
 		})
 
+		// Retur hanya bisa ke DN Dispatch dari DO dan barang yang sama yang masih
+		// punya sisa retur. Kosong berarti dicocokkan otomatis saat disimpan.
+		frm.set_query("delivery_note_asal", (doc) => {
+			return {
+				query: frappe.model.get_server_module_name(doc.doctype) + ".get_delivery_note_asal",
+				filters: {
+					do_no: doc.do_no,
+					kode_barang: doc.kode_barang
+				}
+			}
+		})
+
 		// Receive "Lain - Lain" tidak lewat SPB maupun DO, jadi barangnya hanya
 		// bisa dipertanggungjawabkan lewat PO-nya. Tanpa penyaringan ini operator
 		// bisa memilih barang yang tidak ada di PO, dan Purchase Receipt-nya nanti
