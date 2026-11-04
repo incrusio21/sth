@@ -103,4 +103,10 @@ sth.patches.perbaiki_unique_index_bkm_premi
 # Return untuk Timbangan Return submitted yang belum punya, DN asalnya
 # dicocokkan seperti saat submit. Default-nya uji coba; tulis dengan
 # --kwargs "{'terapkan': 1}".
+# bulatkan_rantai_data_tbs juga tidak didaftarkan: memposting ulang Stock Entry
+# Data TBS yang meleset 0,01 kg karena pembulatan selisih restan (kasus
+# DTBS-0189), per unit sejak STE meleset pertama di Oktober 2026 (ganti dengan
+# 'dari'/'sampai'), periode yang sudah tutup dilewati. Default-nya uji coba; tulis
+# dengan --kwargs "{'terapkan': 1}", sebagian unit dengan
+# --kwargs "{'terapkan': 1, 'units': ['TPRM']}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
