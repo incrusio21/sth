@@ -86,6 +86,8 @@ def get_bkm_panen(unit, divisi, posting_date):
 			spb_timbangan.total_janjang.as_("jumlah_janjang"),
 			spb_timbangan.total_weight,
 			spb_timbangan.recap_panen,
+			spb_timbangan.is_restan,
+			spb_timbangan.recap_panen_new,
 			spb.bjr,
 		)
 		.where(
@@ -104,6 +106,9 @@ def get_bkm_panen(unit, divisi, posting_date):
 		if rt.status != "Weighed":
 			frappe.throw(f"{get_url_to_form('Surat Pengantar Buah', rt.surat_pengantar_buah)} weight not verified")
 
+		if rt.is_restan:
+			rt.recap_panen = rt.recap_panen_new
+			
 		# Jaring pengaman untuk baris SPB yang tautannya tidak pernah terpasang:
 		# recap-nya lahir sesudah SPB tersimpan, dan sebelum BKM Panen ikut
 		# menyusulkan tautannya tidak ada yang mengisi kolom itu. Dicari lagi di
