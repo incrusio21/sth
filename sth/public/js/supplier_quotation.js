@@ -315,6 +315,9 @@ function btn_get_material_request(frm) {
                     per_ordered: ["<", 100],
                     company: frm.doc.company,
                 },
+                filter_child: [
+                    ["item_status", "!=", "Rejected"]
+                ]
             }, (doc) => {
                 frm.trigger('calculate_totals')
                 frm.doc.__after_get_data = 1

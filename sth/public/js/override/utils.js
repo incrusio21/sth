@@ -136,6 +136,7 @@ erpnext.utils.map_current_doc = function (opts, opts_callback = null) {
             child_fieldname: opts.child_fieldname,
             child_columns: opts.child_columns,
             size: opts.size,
+            filter_child: opts.filter_child, // ini tambahan
             action: function (selections, args) {
                 let values = selections;
                 if (values.length === 0) {

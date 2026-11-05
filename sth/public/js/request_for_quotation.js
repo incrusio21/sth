@@ -30,6 +30,9 @@ frappe.ui.form.on('Request for Quotation', {
                             per_ordered: ["<", 100],
                             company: frm.doc.company,
                         },
+                        filter_child: [
+                            ["item_status", "!=", "Rejected"]
+                        ]
                     }, (res) => {
                         console.log(res);
                         res.items = res.items.map(d => {
