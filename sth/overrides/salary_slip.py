@@ -1712,11 +1712,8 @@ class SalarySlip(SalarySlip):
 		base_total_hari = default_data.total_hari = days_diff(self.end_date, self.start_date) + 1 \
 			if employment_type.hari_ump_ikut_jumlah_hari_1_bulan else \
 			employment_type.hari_ump
-
-		# Potong hari sebelum join hanya jika total_hari = hari kalender periode.
-		# hari_ump tetap (mis. KHL 25) adalah hari kerja; dikurangi hari kalender bisa 0/negatif.
-		if employment_type.hari_ump_ikut_jumlah_hari_1_bulan and \
-			getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
+		
+		if getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
 			days_before_joining = days_diff(date_of_joining, self.start_date)
 			data.total_hari = default_data.total_hari = base_total_hari - days_before_joining
 		else:
