@@ -978,6 +978,8 @@ class SalarySlip(SalarySlip):
 		return query.run()[0][0]
 
 	def _get_7th_day_off_attendance_days(self) -> float:
+		from frappe.query_builder.functions import Count
+
 		Attendance = frappe.qb.DocType("Attendance")
 		query = (
 			frappe.qb.from_(Attendance)
@@ -986,7 +988,10 @@ class SalarySlip(SalarySlip):
 				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
 				& (Attendance.employee == self.employee)
 				& (Attendance.docstatus == 1)
-				& (Attendance.status == "7th Day Off")
+				& (
+					(Attendance.status.isin(["7th Day Off", "OFF Hari Ke 7"]))
+					| (Attendance.leave_type == "OFF Hari Ke 7")
+				)
 			)
 		)
 
@@ -1883,73 +1888,73 @@ def debug():
 
 @frappe.whitelist()
 def make_payment_entry(source_name, target_doc=None):
-    def set_missing_values(source, target):
-        payroll_entry = frappe.db.get_value(
-            "Salary Slip",
-            source_name,
-            "payroll_entry"
-        )
-        
-        if payroll_entry:
-            payroll_payable_account = frappe.db.get_value(
-                "Payroll Entry",
-                payroll_entry,
-                "payroll_payable_account"
-            )
-            target.paid_to = payroll_payable_account
-        else:
-            company = frappe.db.get_value("Salary Slip", source_name, "company")
-            default_payroll_payable_account = frappe.db.get_value(
-                "Company",
-                company,
-                "default_payroll_payable_account"
-            )
-            target.paid_to = default_payroll_payable_account
+	def set_missing_values(source, target):
+		payroll_entry = frappe.db.get_value(
+			"Salary Slip",
+			source_name,
+			"payroll_entry"
+		)
+		
+		if payroll_entry:
+			payroll_payable_account = frappe.db.get_value(
+				"Payroll Entry",
+				payroll_entry,
+				"payroll_payable_account"
+			)
+			target.paid_to = payroll_payable_account
+		else:
+			company = frappe.db.get_value("Salary Slip", source_name, "company")
+			default_payroll_payable_account = frappe.db.get_value(
+				"Company",
+				company,
+				"default_payroll_payable_account"
+			)
+			target.paid_to = default_payroll_payable_account
 
-        unit = frappe.db.get_value("Salary Slip", source_name, "unit")
-        if unit:
-            bank_account = frappe.db.get_value("Unit", unit, "bank_account")
-            target.paid_from = bank_account
-        else:
-            target.paid_from = None  
+		unit = frappe.db.get_value("Salary Slip", source_name, "unit")
+		if unit:
+			bank_account = frappe.db.get_value("Unit", unit, "bank_account")
+			target.paid_from = bank_account
+		else:
+			target.paid_from = None  
 
-        target.payment_type = "Internal Transfer"
-        target.source_exchange_rate = 1
-        target.paid_amount = source.net_pay
-        target.received_amount = source.net_pay
-        target.reference_no = source.name
-        target.reference_date = source.posting_date
-        target.paid_from_account_currency = "IDR"
-        target.paid_to_account_currency = "IDR"
+		target.payment_type = "Internal Transfer"
+		target.source_exchange_rate = 1
+		target.paid_amount = source.net_pay
+		target.received_amount = source.net_pay
+		target.reference_no = source.name
+		target.reference_date = source.posting_date
+		target.paid_from_account_currency = "IDR"
+		target.paid_to_account_currency = "IDR"
 
-        target.append("payment_voucher_salary_slip", {
-            "salary_slip": source.name,
-            "employee": source.employee,
-            "employee_name": source.employee_name,
-            "net_pay": source.net_pay
-        })
-    
-    doclist = get_mapped_doc(
-        "Salary Slip",
-        source_name,
-        {
-            "Salary Slip": {
-                "doctype": "Payment Entry",
-                "field_map": {
-                    "name": "reference_no",
-                    "posting_date": "posting_date",
-                    "company": "company",
-                    "net_pay": "paid_amount"
-                },
-            }
-        },
-        target_doc,
-        set_missing_values,
-    )
+		target.append("payment_voucher_salary_slip", {
+			"salary_slip": source.name,
+			"employee": source.employee,
+			"employee_name": source.employee_name,
+			"net_pay": source.net_pay
+		})
+	
+	doclist = get_mapped_doc(
+		"Salary Slip",
+		source_name,
+		{
+			"Salary Slip": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"name": "reference_no",
+					"posting_date": "posting_date",
+					"company": "company",
+					"net_pay": "paid_amount"
+				},
+			}
+		},
+		target_doc,
+		set_missing_values,
+	)
 
-    doclist.tipe_transfer = "Salary Slip"
-    
-    return doclist
+	doclist.tipe_transfer = "Salary Slip"
+	
+	return doclist
 
 def test():
 	doc = frappe.get_doc("Salary Slip", "Sal Slip/HR-EMP-00061/00004")
