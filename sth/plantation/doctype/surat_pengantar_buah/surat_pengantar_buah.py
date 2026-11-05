@@ -20,6 +20,7 @@ class SuratPengantarBuah(Document):
 		self.remove_input_pks()
 		self.set_missing_value()
 		self.validate_recap_panen()
+		self.validate_recap_restan_new()
 		self.calculate_janjang()
 		self.hitung_persentase_dari_janjang()
 
@@ -40,6 +41,40 @@ class SuratPengantarBuah(Document):
 			self.no_polisi = frappe.get_value("Alat Berat Dan Kendaraan", self.kendaraan, "no_pol")
 
 		set_recap_panen_in_details(self.details)
+
+	def validate_recap_restan_new(self):
+		posting = getdate(self.posting_date)
+		spb_period = (posting.year, posting.month)
+
+		def get_period(row):
+			if not row.panen_date:
+				frappe.throw(
+					_("Row #{0}: Harvest Date is required.").format(row.idx),
+					title=_("Missing Harvest Date")
+				)
+			d = getdate(row.panen_date)
+			return (d.year, d.month)
+
+		non_restan_rows = [d for d in self.details if get_period(d) == spb_period]
+		non_restan = {d.blok: d.recap_panen for d in non_restan_rows}
+		first_recap = non_restan_rows[0].recap_panen if non_restan_rows else None
+
+		for r in self.details:
+			if get_period(r) == spb_period:
+				r.is_restan = 0
+				r.recap_panen_new = None
+				continue
+
+			r.is_restan = 1
+			new_recap = non_restan.get(r.blok) or first_recap
+			if not new_recap:
+				frappe.throw(
+					_("Row #{0}: No non-restan Harvest Recap found. "
+					"Please add at least one non-restan entry first.").format(r.idx),
+					title=_("Missing Harvest Recap")
+				)
+
+			r.recap_panen_new = new_recap
 
 	def on_update(self):
 		turunkan_kendaraan_eksternal(self)

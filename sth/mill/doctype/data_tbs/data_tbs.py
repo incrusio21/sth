@@ -832,9 +832,12 @@ def ste_sudah_benar(doc):
 
 	qty = frappe.db.get_value("Stock Entry Detail", {"parent": ste.name}, "sum(qty)")
 
-	# Toleransi sekilo per seratus, di bawah presisi qty Stock Entry, supaya STE
-	# yang cuma beda pembulatan tidak ikut diposting ulang.
-	return abs(flt(qty) - abs(selisih)) < 0.01
+	# Dibandingkan di presisi qty Stock Entry. pergerakan_stok sudah membulatkan
+	# kedua ujung rantainya, jadi beda 0,01 berarti STE lama dibuat dengan
+	# selisih yang dibulatkan belakangan dan harus diposting ulang supaya saldo
+	# gudang kembali sama dengan restannya.
+	presisi = frappe.get_precision("Stock Entry Detail", "qty") or 2
+	return flt(qty, presisi) == flt(abs(selisih), presisi)
 
 
 def pergerakan_stok(doc):
@@ -846,10 +849,23 @@ def pergerakan_stok(doc):
 
 	Sengaja tidak dibulatkan ke presisi field — total_tbs_restan presisinya 0
 	supaya tampil bulat di form, dan memakainya di sini bikin stok meleset
-	sampai setengah kilo tiap hari. Pembulatannya diserahkan ke presisi qty
-	Stock Entry.
+	sampai setengah kilo tiap hari.
+
+	Tapi kedua ujungnya dibulatkan dulu ke presisi qty Stock Entry, baru
+	dikurangkan. Rantai restan menyimpan angka tanpa pembulatan (60934.8408…),
+	sedangkan STE cuma membawa dua desimal; membulatkan selisihnya saja tidak
+	menjumlah dengan pas, jadi gudang meleset 0,01 kg sesekali dan lama-lama
+	stoknya kurang dari restan — Material Issue hari yang TBS-nya habis diolah
+	lalu gagal, kasus DTBS-0189. Selisih dua angka yang sudah dibulatkan
+	menjumlah persis, jadi saldo gudang selalu sama dengan restan yang
+	dibulatkan.
 	"""
-	return flt(doc.total_tbs_restan) - flt(doc.jumlah_tbs_restan) - flt(doc.adjustment_stok)
+	presisi = frappe.get_precision("Stock Entry Detail", "qty") or 2
+	return (
+		flt(doc.total_tbs_restan, presisi)
+		- flt(doc.jumlah_tbs_restan, presisi)
+		- flt(doc.adjustment_stok, presisi)
+	)
 
 
 def hitung_ulang_setelah_adjustment(doc, method=None):

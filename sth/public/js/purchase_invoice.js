@@ -43,7 +43,7 @@ frappe.ui.form.on("Purchase Invoice", {
             }
         }
 
-        frm.trigger('get_tax_template')
+        // frm.trigger('get_tax_template')
         frm.page.sidebar.hide()
 
         toggle_pakai_ppn(frm)

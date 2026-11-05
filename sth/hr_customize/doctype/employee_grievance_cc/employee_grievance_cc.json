@@ -6,23 +6,31 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "user"
+  "kd_jbtn",
+  "jabatan"
  ],
  "fields": [
   {
-   "fieldname": "user",
+   "fieldname": "kd_jbtn",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "User",
-   "options": "User"
+   "label": "Kode Jabatan",
+   "options": "Role"
+  },
+  {
+   "fetch_from": "kd_jbtn.role_name",
+   "fieldname": "jabatan",
+   "fieldtype": "Data",
+   "label": "Jabatan",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-02 10:29:11.832421",
+ "modified": "2026-11-03 13:30:11.108267",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Employee Grievance CC",
