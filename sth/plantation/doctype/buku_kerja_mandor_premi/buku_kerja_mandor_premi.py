@@ -59,7 +59,7 @@ class BukuKerjaMandorPremi(Document):
 			)
 			.where(
 				(bkm.docstatus == 1) & 
-				(bkm[self.mandor_type] == self.employee) & 
+				(bkm[self.employee_field] == self.employee) & 
 				(bkm.company == self.company) & 
 				(bkm.posting_date.between(self.posting_date, get_last_day(self.posting_date)))
 			)
@@ -76,6 +76,8 @@ class BukuKerjaMandorPremi(Document):
 			)
 		)
 
+		print(self.employee_list)
+		
 	def calculate_grand_total(self):
 		employee = json.loads(self.employee_list)
 		
