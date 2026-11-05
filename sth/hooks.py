@@ -141,7 +141,7 @@ jinja = {
 		"sth.jinja.terbilang",
 		# "sth.jinja.format_item_values",
 	],
-	# "filters": "sth.utils.jinja_filters"
+	"filters": ["sth.jinja.strip_html"]
 }
 
 # Installation
