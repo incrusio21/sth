@@ -620,7 +620,7 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# if not self.get("manual_hk"):
 		# 	item.hari_kerja = min(flt(item.qty / (item.volume_basis or 1)), 1)
 
-		item.amount = (item.amount or amount) if is_basic_salary else amount			
+		item.amount = amount			
 
 	def set_premi_non_heavy_equipment(self, item, kegiatan):
 		fields =  "holiday" if item.is_holiday else "workday"

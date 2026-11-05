@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-07-19 21:17:07.101282",
+ "creation": "2026-10-08 13:31:16.421884",
  "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -75,6 +75,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -283,7 +284,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-08 13:30:34.529058",
+ "modified": "2026-11-05 14:44:32.507476",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Ganti Rugi Lahan",

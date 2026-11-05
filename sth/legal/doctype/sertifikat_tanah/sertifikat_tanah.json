@@ -86,6 +86,8 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
    "label": "Perusahaan",
    "options": "Company",
    "reqd": 1
@@ -169,8 +171,6 @@
   {
    "fieldname": "last_updt",
    "fieldtype": "Read Only",
-   "in_filter": 1,
-   "in_standard_filter": 1,
    "label": "Last Update"
   },
   {
@@ -230,7 +230,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-19 13:54:19.958136",
+ "modified": "2026-11-05 14:45:40.601106",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Sertifikat Tanah",
