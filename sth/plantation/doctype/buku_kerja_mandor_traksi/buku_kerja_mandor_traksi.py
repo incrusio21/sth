@@ -93,23 +93,10 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 	def validate_used_task(self):
 		# cek apakah butuh perhitungan ulang krn ada kegiatan yang belum terhitung
 		re_calculate = False
-		for d in self.task:
-			if d.name in self._used_task:
-				continue
-			
-			# kegiatan tidak masuk dalam hasil kerja dan hanya ada 1 hasil kerja
-			# maka otomatis masuk ke hasil kerja tersebut dan lalukan
-			# kalkulasi ulang
-			if len(self.hasil_kerja) == 1:
-				self.hasil_kerja[0].kegiatan_list += f"\n{d.name}"
-				if hasattr(self.hasil_kerja[0], "_kegiatan_list"):
-					del self.hasil_kerja[0]._kegiatan_list
+		for hk in self.hasil_kerja:
+			if not hk.kegiatan_list:
+				hk.kegiatan_list = "\n".join(tk.name for tk in self.task)
 				re_calculate = True
-				continue
-			else:
-				continue
-
-			frappe.throw(f"Please include {d.kegiatan} in Row#{d.idx} for Employee")
 
 		if re_calculate:
 			self.calculate()
@@ -196,11 +183,14 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 		# Buat mapping local name ke task name
 		task_name = {tk.last_name or tk.get("localname") or tk.name: tk.name for tk in self.task}
 		for hk in self.hasil_kerja:
-			# Parse kegiatan list
-			old_kegiatan = [s.strip() for s in cstr(hk.kegiatan_list).replace(",", "\n").split("\n") if s.strip()]
-			
-			# Filter dan convert ke actual task names
-			new_kegiatan = [task_name[k] for k in old_kegiatan if k in task_name]
+			if not hk.kegiatan_list:
+				new_kegiatan = list(task_name.values())
+			else:
+				# Parse kegiatan list
+				old_kegiatan = [s.strip() for s in cstr(hk.kegiatan_list).replace(",", "\n").split("\n") if s.strip()]
+				
+				# Filter dan convert ke actual task names
+				new_kegiatan = [task_name[k] for k in old_kegiatan if k in task_name]
 			
 			hk.kegiatan_list = "\n".join(new_kegiatan)
 
