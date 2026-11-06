@@ -115,6 +115,7 @@ class SoundingStockCPOdiBST(Document):
 			from `tabTimbangan` t
 			join `tabItem` i on t.kode_barang = i.name
 			where i.tipe_barang = "CPO" and t.docstatus = 1 and unit  = %s and t.posting_date = %s
+				and coalesce(t.type, '') != 'Return'
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 		return data[0].qty if data else 0
