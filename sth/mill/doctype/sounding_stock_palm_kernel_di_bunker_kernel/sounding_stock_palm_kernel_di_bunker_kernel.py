@@ -180,6 +180,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			from `tabTimbangan` t
 			join `tabItem` i on t.kode_barang = i.name
 			where i.tipe_barang = 'Palm Kernel' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
+				and coalesce(t.type, '') != 'Return'
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 		self.stock_awal = self.get_stock_awal()
