@@ -11,6 +11,7 @@ from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulan
 from sth.mill.utils import (
 	get_adjustment_stock,
 	get_potongan_sortasi,
+	get_qty_retur_timbangan,
 	get_saldo_tanggal_proses,
 	get_tbs_olah,
 	set_rata_rata_rendemen_bulanan,
@@ -186,7 +187,9 @@ class SoundingStockCPOdiBST(Document):
 		# NaN sebagai null, jadi yang sampai di sini None - bukan nol. Tanpa flt,
 		# penjumlahannya meledak sebelum sempat divalidasi.
 		total_stock = flt(self.tonase_sebenarnya) + flt(self.tonase_sebenarnya_2)
-		total_produksi = (total_stock + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
+		# qty Timbangan Return mengurangi produksi, bukan dihitung pengiriman
+		total_produksi = (total_stock + flt(self.pengiriman_cpo)) - flt(self.stock_awal) \
+			- get_qty_retur_timbangan("CPO", self.unit, self.tanggal_proses)
 		self.stock_bst = total_stock
 		# Dua desimal, sama dengan qty di Stock Ledger. stock_awal dibaca dari
 		# ledger yang sudah dibulatkan, sedangkan tonase hasil kali belum; tangki
