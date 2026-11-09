@@ -228,10 +228,10 @@ def hitung_ulang_setelah_timbangan(doc, method=None):
 	Tidak berhenti di hari itu: produksi jadi Stock Entry, dan Stock Entry itu
 	yang membentuk stock awal sounding hari berikutnya.
 
-	Tipe timbangannya tidak disaring, cuma jenis barangnya. Query pengiriman di
-	kedua sounding juga tidak menyaring tipe — yang dijumlahkan seluruh Timbangan
-	submitted hari itu untuk barang bertipe CPO atau Palm Kernel — jadi
-	pemicunya harus melihat rentang yang sama persis dengan yang dibaca.
+	Tipe timbangannya tidak disaring, cuma jenis barangnya. Sounding membaca
+	Timbangan Return juga — di CPO lewat adjustment stock awal, di Palm Kernel
+	sebagai pengurang produksi — jadi pemicunya harus melihat seluruh Timbangan
+	submitted hari itu untuk barang bertipe CPO atau Palm Kernel.
 
 	Selama tidak ada sounding submitted di tanggal itu atau sesudahnya, tidak
 	ada yang diantrikan: angkanya akan terbaca sendiri waktu Get Data ditekan

@@ -1080,6 +1080,52 @@ def set_realisasi_tambahan(doc, method=None):
 POLA_NOMINAL_NOTE = re.compile(r"^\s*(?:(?:Rp|IDR)\.?\s?)?-?\d(?:[\d.,]*\d)?")
 
 
+def set_note_from_purchase_invoice(doc, method=None):
+	"""Keterangan berisi nama barang tiap Purchase Invoice di references, diisi saat save.
+
+	Pengisian di form (reference_name) dan di get_payment_entry tidak jalan untuk PE
+	yang references-nya diisi lewat Get Outstanding Invoices, upload, atau API.
+	Formatnya sama, satu baris per invoice "PINV: barang, barang". Baris milik invoice
+	yang sudah ada ditimpa, invoice yang belum ada ditambahkan di bawah, dan teks lain
+	yang diketik user dibiarkan.
+	"""
+	invoices = []
+	for ref in doc.get("references") or []:
+		if ref.reference_doctype == "Purchase Invoice" and ref.reference_name and ref.reference_name not in invoices:
+			invoices.append(ref.reference_name)
+
+	if not invoices:
+		return
+
+	nama_barang = {}
+	for item in frappe.get_all(
+		"Purchase Invoice Item",
+		filters={"parenttype": "Purchase Invoice", "parent": ["in", invoices]},
+		fields=["parent", "item_name", "item_code"],
+		order_by="parent, idx",
+	):
+		nama = item.item_name or item.item_code
+		daftar = nama_barang.setdefault(item.parent, [])
+
+		# barang yang sama di beberapa baris invoice cukup ditulis sekali
+		if nama and nama not in daftar:
+			daftar.append(nama)
+
+	baris_invoice = {
+		inv: "{0}: {1}".format(inv, ", ".join(nama_barang[inv])) for inv in invoices if nama_barang.get(inv)
+	}
+	if not baris_invoice:
+		return
+
+	baris_note = []
+	for baris in doc.note.split("\n") if doc.get("note") else []:
+		inv = next((i for i in baris_invoice if baris.startswith(i + ": ")), None)
+		baris_note.append(baris_invoice.pop(inv) if inv else baris)
+
+	baris_note.extend(baris_invoice.values())
+	doc.note = "\n".join(baris_note)
+
+
 def sync_note_nama_barang(doc, method=None):
 	"""Nominal per nama barang di Keterangan mengikuti grid yang tersimpan.
 

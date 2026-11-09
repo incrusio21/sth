@@ -111,7 +111,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Parent Kegiatan",
-   "link_filters": "[]",
+   "link_filters": "[[\"Kegiatan\",\"is_group\",\"=\",1]]",
    "options": "Kegiatan"
   },
   {
@@ -243,7 +243,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-11-09 10:04:47.245529",
+ "modified": "2026-11-09 10:04:54.823588",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan",

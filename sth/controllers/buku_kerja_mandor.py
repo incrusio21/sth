@@ -228,7 +228,7 @@ class BukuKerjaMandorController(PlantationController):
             # gagal dengan TimestampMismatchError.
             nama_premi = frappe.db.get_value("Buku Kerja Mandor Premi", kunci)
             if nama_premi:
-                self.simpan_mandor_premi(nama_premi)
+                self.simpan_mandor_premi(nama_premi, d["fieldname"])
                 continue
 
             # savepoint dinamai per peran supaya rollback satu peran tidak
@@ -265,10 +265,20 @@ class BukuKerjaMandorController(PlantationController):
                         + _("Periksa unique index tabel Buku Kerja Mandor Premi.")
                     )
 
-                self.simpan_mandor_premi(nama_premi)
+                self.simpan_mandor_premi(nama_premi, d["fieldname"])
 
-    def simpan_mandor_premi(self, nama_premi):
+    def simpan_mandor_premi(self, nama_premi, employee_field):
         bkm_obj = frappe.get_doc("Buku Kerja Mandor Premi", nama_premi)
+
+        # baris lama bisa punya employee_field kosong atau masih "mandor"
+        # (lihat kunci di create_or_update_mandor_premi). Tanpa ini validate
+        # membentuk kolom bkm[None] dan query-nya ditolak database.
+        if bkm_obj.employee_field != employee_field:
+            bkm_obj.employee_field = employee_field
+            bkm_obj.set_missing_values()
+        elif not (bkm_obj.salary_component and bkm_obj.method and bkm_obj.multiplier):
+            bkm_obj.set_missing_values()
+
         bkm_obj.flags.transaction_employee = 1
         bkm_obj.save()
 

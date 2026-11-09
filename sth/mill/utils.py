@@ -299,6 +299,24 @@ RENDEMEN_BULANAN = {
 }
 
 
+def get_qty_retur_timbangan(tipe_barang, unit, tanggal_proses):
+	"""Netto Timbangan Return pada tanggal proses, untuk mengurangi produksi sounding.
+
+	Return tidak dihitung sebagai pengiriman; qty-nya mengurangi produksi.
+	Diambil nilai mutlaknya per baris supaya arah timbang Return (netto bisa
+	minus) tidak membalik tandanya, sama seperti Timbangan.qty_retur.
+	"""
+	data = frappe.db.sql("""
+		select sum(abs(coalesce(t.netto_2, 0)))
+		from `tabTimbangan` t
+		join `tabItem` i on t.kode_barang = i.name
+		where i.tipe_barang = %s and t.docstatus = 1 and t.unit = %s
+			and t.posting_date = %s and t.type = 'Return'
+	""", (tipe_barang, unit, tanggal_proses))
+
+	return flt(data[0][0]) if data else 0
+
+
 def set_rata_rata_rendemen_bulanan(doc):
 	"""Isi field informasi rata-rata rendemen dan total produksi sebulan.
 

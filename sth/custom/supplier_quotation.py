@@ -1,4 +1,5 @@
 import frappe,json
+from collections import defaultdict
 
 def create_po_draft(doc,method):
     from sth.overrides.supplier_quotation import make_purchase_order
@@ -33,6 +34,92 @@ def validate_duplicate_supplier(doc,method=None):
 
     if exists:
         frappe.throw("Quotation dengan supplier {0} sudah ada: {1}".format(doc.supplier_name, ",".join(name)))
+
+def validate_duplicate_supplier2(doc,method=None):
+    material_requests = [ d.material_request for d in doc.items ]
+    if not material_requests or getattr(doc,"from_comparasion",None): return
+    
+    map_by_pr_sr = defaultdict(lambda: {
+        suppliers: [],
+        items: []
+    })
+
+
+    fields = "di.item_code ,di.material_request"
+
+    args = {
+        "company": doc.company,
+        "name": doc.name,
+        "pr_sr": material_requests
+    }
+
+    ccond = ""
+    cjoin = ""
+
+    if doc.doctype == "Supplier Quotation":
+        ccond += "AND d.from_comparasion = 0"
+        fields += ", di.supplier"
+    elif doc.doctype == "Request for Quotation":
+        cjoin += "join `tabRequest for Quotation Supplier` qs on qs.parent = d.name"
+        fields += ", qs.supplier"
+
+    data = frappe.db.sql(f"""
+        select {fields}
+        from `tab{doc.doctype}` d
+        join `tab{doc.doctype} Item` di on di.parent = d.name
+        {cjoin}
+        where 
+            d.company = %(company)s 
+            AND d.name <> %(name)s 
+            AND d.docstatus = 0 
+            AND di.material_request in %(pr_sr)s 
+            {ccond}
+        order by d.name
+    """,args,as_dict=1)
+
+
+    for row in data:
+        pr_sr = map_by_pr_sr.get('material_request')
+
+        if row.supplier not in pr_sr.get("suppliers"):
+            suppliers.append(row.supplier)
+
+        if row.item_code not in pr_sr.get("items"):
+            items.append(row.item_code)
+    
+
+    for item in doc.items:
+        exists_items = map_by_pr_sr.get(item.material_request).get('items')
+        exists_supplier = map_by_pr_sr.get(item.material_request).get('suppliers')
+
+        # if item.item_code in exists_items and (doc.supplier )
+
+    return map_by_pr_sr
+    # args = {
+    #     "pr_sr": material_requests,
+    #     "supplier": doc.supplier,
+    #     "name": doc.name,
+    #     "company": doc.company
+    # }
+
+    # exists = frappe.db.sql("""
+    #     select sq.name from `tabSupplier Quotation` sq
+    #     join `tabSupplier Quotation Item` sqi on sq.name = sqi.parent
+    #     where 
+    #         sqi.material_request in %(pr_sr)s 
+    #         and sq.supplier = %(supplier)s 
+    #         and sq.company = %(company)s
+    #         and sq.name <> %(name)s 
+    #         and sq.docstatus = 0 
+    #         and sq.from_comparasion = 0
+    #     group by sq.name
+    # """,args,as_dict=True)
+
+    # name = [ r.name for r in exists ]
+
+    # if exists:
+    #     frappe.throw("Quotation dengan supplier {0} sudah ada: {1}".format(doc.supplier_name, ",".join(name)))
+
 
 
 @frappe.whitelist()

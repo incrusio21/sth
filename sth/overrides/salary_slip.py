@@ -1713,11 +1713,11 @@ class SalarySlip(SalarySlip):
 			if employment_type.hari_ump_ikut_jumlah_hari_1_bulan else \
 			employment_type.hari_ump
 		
-		if getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
-			days_before_joining = days_diff(date_of_joining, self.start_date)
-			data.total_hari = default_data.total_hari = base_total_hari - days_before_joining
-		else:
-			data.total_hari = default_data.total_hari = base_total_hari
+		# if getdate(self.start_date) <= getdate(date_of_joining) <= getdate(self.end_date):
+		# 	days_before_joining = days_diff(date_of_joining, self.start_date)
+		# 	data.total_hari = default_data.total_hari = base_total_hari - days_before_joining
+		# else:
+		data.total_hari = default_data.total_hari = base_total_hari
 
 	
 		current_date = getdate(self.start_date)
@@ -1730,7 +1730,7 @@ class SalarySlip(SalarySlip):
 		# ubah ump_harian ke gaji pokok dibagi hari
 		# print(data.base)
 		# print(data.total_hari)
-		data.ump_harian = default_data.ump_harian = flt(data.base) / data.total_hari
+		data.ump_harian = default_data.ump_harian = flt(data.base) / (data.total_hari / 1)
 
 		# data.bpjs_amount = default_data.bpjs_amount = flt(company.ump_bulanan) \
 		data.custom_kriteria = default_data.custom_kriteria = emp_doc.custom_kriteria

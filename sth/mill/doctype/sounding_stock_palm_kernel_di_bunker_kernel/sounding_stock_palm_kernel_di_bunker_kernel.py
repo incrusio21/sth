@@ -11,6 +11,7 @@ from sth.mill.rekap_sounding import hitung_ulang_dokumen_sesudahnya, hitung_ulan
 from sth.mill.utils import (
 	get_adjustment_stock,
 	get_potongan_sortasi,
+	get_qty_retur_timbangan,
 	get_saldo_tanggal_proses,
 	get_tbs_olah,
 	set_rata_rata_rendemen_bulanan,
@@ -45,7 +46,9 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 
 	def hitung_produksi(self):
 		self.stock_akhir = self.volume_sounding
-		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman)
+		# qty Timbangan Return mengurangi produksi, bukan dihitung pengiriman
+		self.produksi = flt(self.stock_akhir) - flt(self.stock_awal) + flt(self.pengiriman) \
+			- get_qty_retur_timbangan("Palm Kernel", self.unit, self.tanggal_proses)
 		self.hitung_ker_netto()
 
 	def hitung_ker_netto(self):
@@ -180,6 +183,7 @@ class SoundingStockPalmKerneldiBunkerKernel(Document):
 			from `tabTimbangan` t
 			join `tabItem` i on t.kode_barang = i.name
 			where i.tipe_barang = 'Palm Kernel' and t.docstatus = 1 and unit  = %s and t.posting_date = %s
+				and coalesce(t.type, '') != 'Return'
 		""",(self.unit,self.tanggal_proses),as_dict=True)
 
 		self.stock_awal = self.get_stock_awal()

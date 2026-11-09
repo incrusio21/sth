@@ -109,4 +109,12 @@ sth.patches.perbaiki_unique_index_bkm_premi
 # 'dari'/'sampai'), periode yang sudah tutup dilewati. Default-nya uji coba; tulis
 # dengan --kwargs "{'terapkan': 1}", sebagian unit dengan
 # --kwargs "{'terapkan': 1, 'units': ['TPRM']}".
+# samakan_gudang_baris_po juga tidak didaftarkan: menyamakan gudang baris PO
+# hasil Supplier Quotation (dan baris PREC draft-nya) dengan Set Target Warehouse,
+# karena dulu baris masih membawa gudang Material Request. Default-nya uji coba;
+# tulis dengan --kwargs "{'terapkan': 1}".
+# pindah_gudang_prec_po juga tidak didaftarkan: memposting ulang PREC submitted
+# yang masuk gudang Material Request ke Set Target Warehouse PO-nya (SLE, GL, dan
+# Repost Item Valuation). Jalankan sesudah samakan_gudang_baris_po. Default-nya
+# uji coba; tulis dengan --kwargs "{'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
