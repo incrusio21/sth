@@ -6,13 +6,13 @@ def update_unit_in_table(self,method):
 
 
 @frappe.whitelist()
-def check_created_rfq(pr_sr):
+def check_created_rfq(pr_sr,name):
     data = frappe.db.sql("""
         select rfq.name 
         from `tabRequest for Quotation` rfq
         join `tabRequest for Quotation Item` rfqi on rfq.name = rfqi.parent
-        where rfqi.material_request = %s
+        where rfqi.material_request = %s and rfq.name <> %s
         group by rfq.name
-    """,(pr_sr),as_dict=True)
+    """,(pr_sr,name),as_dict=True)
 
     return [r.name for r in data]

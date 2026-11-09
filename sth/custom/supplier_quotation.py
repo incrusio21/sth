@@ -6,7 +6,7 @@ def create_po_draft(doc,method):
     po = make_purchase_order(doc.name)
     po.insert(ignore_mandatory=True)
 
-def validate_duplicate_supplier(doc,method=None):
+def validate_duplicate_supplier2(doc,method=None):
     material_requests = [ d.material_request for d in doc.items ]
     if not material_requests or doc.from_comparasion: return
 
@@ -35,13 +35,13 @@ def validate_duplicate_supplier(doc,method=None):
     if exists:
         frappe.throw("Quotation dengan supplier {0} sudah ada: {1}".format(doc.supplier_name, ",".join(name)))
 
-def validate_duplicate_supplier2(doc,method=None):
+def validate_duplicate_supplier(doc,method=None):
     material_requests = [ d.material_request for d in doc.items ]
     if not material_requests or getattr(doc,"from_comparasion",None): return
     
     map_by_pr_sr = defaultdict(lambda: {
-        suppliers: [],
-        items: []
+        "suppliers": [],
+        "items": []
     })
 
 
@@ -79,47 +79,33 @@ def validate_duplicate_supplier2(doc,method=None):
 
 
     for row in data:
-        pr_sr = map_by_pr_sr.get('material_request')
+        if row.supplier not in map_by_pr_sr[row.material_request]["suppliers"]:
+            map_by_pr_sr[row.material_request]["suppliers"].append(row.supplier)
 
-        if row.supplier not in pr_sr.get("suppliers"):
-            suppliers.append(row.supplier)
+        if row.item_code not in map_by_pr_sr[row.material_request]["items"]:
+            map_by_pr_sr[row.material_request]["items"].append(row.item_code)
 
-        if row.item_code not in pr_sr.get("items"):
-            items.append(row.item_code)
+
     
+    print(map_by_pr_sr)    
 
-    for item in doc.items:
-        exists_items = map_by_pr_sr.get(item.material_request).get('items')
-        exists_supplier = map_by_pr_sr.get(item.material_request).get('suppliers')
+    for row in doc.items:
+        exists_suppliers = set()
 
-        # if item.item_code in exists_items and (doc.supplier )
+        if doc.doctype == "Supplier Quotation":
+            if doc.supplier in map_by_pr_sr[row.material_request]["suppliers"]: 
+                exists_suppliers.add(doc.supplier)
+        elif doc.doctype == "Request for Quotation":
+            for d in doc.suppliers:
+                if d.supplier in map_by_pr_sr[row.material_request]["suppliers"]: 
+                    exists_suppliers.add(d.supplier)
 
-    return map_by_pr_sr
-    # args = {
-    #     "pr_sr": material_requests,
-    #     "supplier": doc.supplier,
-    #     "name": doc.name,
-    #     "company": doc.company
-    # }
+        if row.item_code in map_by_pr_sr[row.material_request]["items"] and exists_suppliers:
+            frappe.throw(f"Items {','.join(exists_suppliers)} duplicate suppliers")
 
-    # exists = frappe.db.sql("""
-    #     select sq.name from `tabSupplier Quotation` sq
-    #     join `tabSupplier Quotation Item` sqi on sq.name = sqi.parent
-    #     where 
-    #         sqi.material_request in %(pr_sr)s 
-    #         and sq.supplier = %(supplier)s 
-    #         and sq.company = %(company)s
-    #         and sq.name <> %(name)s 
-    #         and sq.docstatus = 0 
-    #         and sq.from_comparasion = 0
-    #     group by sq.name
-    # """,args,as_dict=True)
 
-    # name = [ r.name for r in exists ]
-
-    # if exists:
-    #     frappe.throw("Quotation dengan supplier {0} sudah ada: {1}".format(doc.supplier_name, ",".join(name)))
-
+    # if exists_items and exists_suppliers:
+    #     frappe.throw(f"Items {','.join(exists_items)} duplicate suppliers")
 
 
 @frappe.whitelist()
