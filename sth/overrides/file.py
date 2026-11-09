@@ -85,7 +85,7 @@ class File(FrappeFile):
 		if not self.is_folder and not self.is_remote_file:
 			if self.get("content"):
 				self.flags.unggahan_baru = True
-			elif self.file_url and self.exists_on_disk():
+			elif self.file_url and self.file_name and self.exists_on_disk():
 				self.flags.pakai_berkas_url = True
 
 		super().before_insert()
