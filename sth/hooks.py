@@ -321,6 +321,10 @@ doc_events = {
 		"on_cancel": "sth.hr_customize.custom.attendance.Attendance",
 		"repair_employee_payment_log": "sth.hr_customize.custom.attendance.Attendance"
 	},
+	# doctype milik app iclock — Attendance otomatis dari absen sidik jari
+	"Fingerprint Operation Log": {
+		"after_insert": "sth.hr_customize.custom.fingerprint_operation_log.enqueue_attendance"
+	},
 	"Delivery Note": {
 		"validate": [
 			"sth.sales_sth.custom.quotation.calculate_ongkos_angkut",
