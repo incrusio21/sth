@@ -83,6 +83,12 @@ def make_purchase_order(source_name, target_doc=None):
 		for row in target.items:
 			row.schedule_date = source.custom_required_by or add_days(today(),7)
 
+			# set_warehouse yang diisi di server tidak turun ke baris seperti di form,
+			# padahal Purchase Receipt mengambil gudang dari baris PO. Tanpa ini baris
+			# masih membawa gudang dari Material Request.
+			if target.set_warehouse:
+				row.warehouse = target.set_warehouse
+
 			if row.material_request and not row.material_request_item:
 				row.material_request_item = frappe.db.get_value("Material Request Item",{"parent":row.material_request,"item_code": row.item_code})
 
