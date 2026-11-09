@@ -165,6 +165,13 @@ class SoundingStockCPOdiBST(Document):
 		terhitung padahal belum masuk stock awal, sementara koreksi tepat di
 		tanggal sounding sebelumnya — yang justru ada di dalam stock awal — tidak
 		pernah terhitung sama sekali.
+
+		Timbangan Return di tanggal proses ikut jadi adjustment dan menambah
+		stock awal. Delivery Note return-nya masuk gudang BST hari itu juga, jadi
+		belum ada di saldo sebelum tanggal proses, padahal CPO-nya sudah kembali
+		ke tangki dan terbaca di sounding. Bagian sebelum adjustment tidak ikut
+		berubah karena retur memang tidak ada di saldo ledger itu. Contohnya
+		SSCPODB-0172 (TPRM, 31 Oktober): 758.041,1 + retur 10.770 = 768.811,1.
 		"""
 		self.adjustment = get_adjustment_stock(
 			frappe.db.get_value("Item", {"tipe_barang": "CPO"}),
@@ -181,15 +188,19 @@ class SoundingStockCPOdiBST(Document):
 		else:
 			self.stock_awal = flt(self.stock_awal_sebelum_adjustment) + flt(self.adjustment)
 
+		retur = get_qty_retur_timbangan("CPO", self.unit, self.tanggal_proses)
+		self.adjustment = flt(self.adjustment) + retur
+		self.stock_awal = flt(self.stock_awal) + retur
+
 	def calculate_totals(self) :
 		# Dua tonase ini dihitung di sisi JS dari hasil sounding dikali berat jenis.
 		# Kalau salah satu bahannya belum ada, hasil kalinya NaN dan JSON menuliskan
 		# NaN sebagai null, jadi yang sampai di sini None - bukan nol. Tanpa flt,
 		# penjumlahannya meledak sebelum sempat divalidasi.
 		total_stock = flt(self.tonase_sebenarnya) + flt(self.tonase_sebenarnya_2)
-		# qty Timbangan Return mengurangi produksi, bukan dihitung pengiriman
-		total_produksi = (total_stock + flt(self.pengiriman_cpo)) - flt(self.stock_awal) \
-			- get_qty_retur_timbangan("CPO", self.unit, self.tanggal_proses)
+		# Timbangan Return sudah masuk stock_awal lewat set_adjustment, jadi
+		# tidak dikurangkan lagi di sini.
+		total_produksi = (total_stock + flt(self.pengiriman_cpo)) - flt(self.stock_awal)
 		self.stock_bst = total_stock
 		# Dua desimal, sama dengan qty di Stock Ledger. stock_awal dibaca dari
 		# ledger yang sudah dibulatkan, sedangkan tonase hasil kali belum; tangki
