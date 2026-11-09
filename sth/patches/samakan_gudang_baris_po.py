@@ -1,4 +1,5 @@
 import frappe
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from frappe.utils import cint
 
 
@@ -81,6 +82,14 @@ def execute(terapkan=0, nama=None):
 			frappe.db.set_value(
 				"Purchase Receipt Item", prec.name, "warehouse", row.set_warehouse, update_modified=False
 			)
+
+	if terapkan:
+		# ordered_qty di Bin dihitung dari gudang baris PO submitted; set_value tidak
+		# menyentuh Bin, jadi gudang lama dan baru dihitung ulang.
+		for item_code, gudang in {
+			(row.item_code, wh) for row in baris_po for wh in (row.warehouse, row.set_warehouse) if wh
+		}:
+			update_bin_qty(item_code, gudang, {"ordered_qty": get_ordered_qty(item_code, gudang)})
 
 	print("\n{0} baris PO, {1} baris PREC draft{2}.".format(
 		len(baris_po), jumlah_prec, " diperbaiki" if terapkan else " akan diperbaiki"
