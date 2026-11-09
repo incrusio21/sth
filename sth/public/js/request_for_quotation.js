@@ -102,7 +102,10 @@ frappe.ui.form.on('Request for Quotation', {
 
     set_reminder(frm) {
         frappe
-            .xcall("sth.custom.request_for_quotation.check_created_rfq", { pr_sr: frm.doc.items[0].material_request || "" })
+            .xcall("sth.custom.request_for_quotation.check_created_rfq", {
+                pr_sr: frm.doc.items[0].material_request || "",
+                name: frm.doc.name
+            })
             .then((res) => {
                 console.log(res);
                 const others = res.map((row) => frappe.utils.get_form_link("Request for Quotation", row, true))
@@ -178,6 +181,16 @@ frappe.ui.form.on('Request for Quotation Item', {
     items_add: function (frm, dt, dn) {
         let row = locals[dt][dn]
         frappe.model.set_value(dt, dn, "country", "")
+    },
+
+    qty(frm, dt, dn) {
+        let row = locals[dt][dn]
+        frappe.model.set_value(dt, dn, "total", row.qty * row.harga)
+    },
+
+    harga(frm, dt, dn) {
+        let row = locals[dt][dn]
+        frappe.model.set_value(dt, dn, "total", row.qty * row.harga)
     }
 })
 
