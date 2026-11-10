@@ -243,7 +243,7 @@ def map_from_po(source_name, target_doc=None, args=None):
 
     def postprocess(source,target):
         
-        for item in target.items
+        for item in target.items:
             item.jumlah_saat_ini = frappe.db.get_value("Bin",{"warehouse":target.gudang_asal,"item_code":item.kode_barang},"actual_qty")
 
     def update_item(source,target,source_parent):
