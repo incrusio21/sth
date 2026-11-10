@@ -237,42 +237,42 @@ def get_stock_item(item_code,warehouse):
 @frappe.whitelist()
 def map_from_po(source_name, target_doc=None, args=None):
 
-	def select_item(d):
-		filtered_items = args.get("filtered_children",[])
-		return d.name in filtered_items
+    def select_item(d):
+        filtered_items = args.get("filtered_children",[])
+        return d.name in filtered_items
 
-	def postprocess(source,target):
-		pass
-	
-	def update_item(source,target,source_parent):
+    def postprocess(source,target):
+        pass
+
+    def update_item(source,target,source_parent):
         target.no_po = source_parent.name
         target.no_penerimaan = frappe.db.get_value("Purchase Receipt",{"purchase_order": source_parent.name})
         target.jumlah_saat_ini = frappe.db.get_value("Bin",{"warehouse":source_parent.gudang_asal,"item_code":target.kode_barang},"actual_qty")
 
-	doclist = get_mapped_doc(
-		"Purchase Order",
-		source_name,
-		{
-			"Purchase Order": {
-				"doctype": "Surat Jalan",
-			},
-			"Purchase Order Item": {
-				"doctype": "Surat Jalan Item",
-				"field_map": [
-					["item_code", "kode_barang"],
-					["item_name", "nama_barang"],
-					["qty", "jumlah"],
-					["uom", "satuan"],
-					["material_request","no_purchase_request"]
-				],
-				"condition": select_item,
-				"postprocess": update_item
-			},
-		},
-		target_doc,postprocess=postprocess
-	)
+    doclist = get_mapped_doc(
+        "Purchase Order",
+        source_name,
+        {
+            "Purchase Order": {
+                "doctype": "Surat Jalan",
+            },
+            "Purchase Order Item": {
+                "doctype": "Surat Jalan Item",
+                "field_map": [
+                    ["item_code", "kode_barang"],
+                    ["item_name", "nama_barang"],
+                    ["qty", "jumlah"],
+                    ["uom", "satuan"],
+                    ["material_request","no_purchase_request"]
+                ],
+                "condition": select_item,
+                "postprocess": update_item
+            },
+        },
+        target_doc,postprocess=postprocess
+    )
 
-	return doclist
+    return doclist
 
 
 @frappe.whitelist()
