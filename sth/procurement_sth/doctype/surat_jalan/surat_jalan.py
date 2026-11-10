@@ -242,12 +242,13 @@ def map_from_po(source_name, target_doc=None, args=None):
         return d.name in filtered_items
 
     def postprocess(source,target):
-        pass
+        
+        for item in target.items
+            item.jumlah_saat_ini = frappe.db.get_value("Bin",{"warehouse":target.gudang_asal,"item_code":item.kode_barang},"actual_qty")
 
     def update_item(source,target,source_parent):
         target.no_po = source_parent.name
         target.no_penerimaan = frappe.db.get_value("Purchase Receipt",{"purchase_order": source_parent.name})
-        target.jumlah_saat_ini = frappe.db.get_value("Bin",{"warehouse":source_parent.gudang_asal,"item_code":target.kode_barang},"actual_qty")
 
     doclist = get_mapped_doc(
         "Purchase Order",
