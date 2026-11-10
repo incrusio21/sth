@@ -6,11 +6,6 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 
-import frappe
-from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-
-
 class SuratJalan(Document):
     def validate(self):
         self.set_user_from_penerima()
@@ -252,7 +247,7 @@ def map_from_po(source_name, target_doc=None, args=None):
 	def update_item(source,target,source_parent):
 		target.no_po = source_parent.name
 		target.no_penerimaan = frappe.db.get_value("Purchase Receipt",{"purchase_order": source_parent.name})
-
+        target.jumlah_saat_ini = frappe.db.get_value("Bin",{"warehouse":source_parent.gudang_asal,"item_code":target.kode_barang},"actual_qty")
 	doclist = get_mapped_doc(
 		"Purchase Order",
 		source_name,
