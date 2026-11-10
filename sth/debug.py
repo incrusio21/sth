@@ -1,5 +1,7 @@
 import frappe
 from frappe import _
+import json
+
 
 def rename_wh():
 	lis = frappe.db.sql(""" SELECT name FROM `tabWarehouse` WHERE unit LIKE "WMNE%" """)
@@ -179,3 +181,279 @@ def debug_payment_reference():
         'payment_entry': pe,
         'references': refs
     }
+
+
+
+def debug_approval_payment_voucher():
+    workflow_name = "Approval Payment Voucher"
+
+    print("\n" + "=" * 100)
+    print("DEBUG WORKFLOW:", workflow_name)
+    print("=" * 100)
+
+    if not frappe.db.exists("Workflow", workflow_name):
+        print("WORKFLOW TIDAK DITEMUKAN")
+        return
+
+    workflow = frappe.get_doc("Workflow", workflow_name)
+
+    def serialize(value):
+        if hasattr(value, "as_dict"):
+            return value.as_dict()
+        return value
+
+    # =====================================================
+    # 1. WORKFLOW CONFIGURATION
+    # =====================================================
+
+    workflow_data = {
+        "name": workflow.name,
+        "document_type": workflow.document_type,
+        "is_active": workflow.is_active,
+        "workflow_state_field": workflow.workflow_state_field,
+        "override_status": workflow.override_status,
+        "send_email_alert": workflow.send_email_alert,
+        "states": [],
+        "transitions": []
+    }
+
+    # =====================================================
+    # 2. WORKFLOW STATES
+    # =====================================================
+
+    for row in workflow.states:
+        workflow_data["states"].append({
+            "state": row.state,
+            "doc_status": row.doc_status,
+            "update_field": row.update_field,
+            "update_value": row.update_value,
+            "allow_edit": row.allow_edit
+        })
+
+    # =====================================================
+    # 3. WORKFLOW TRANSITIONS
+    # =====================================================
+
+    for row in workflow.transitions:
+        workflow_data["transitions"].append({
+            "state": row.state,
+            "action": row.action,
+            "next_state": row.next_state,
+            "allowed": row.allowed,
+            "allow_self_approval": row.allow_self_approval,
+            "condition": row.condition
+        })
+
+    print("\n### WORKFLOW CONFIGURATION ###")
+    print(json.dumps(workflow_data, indent=4, ensure_ascii=False, default=str))
+
+    # =====================================================
+    # 4. DOCUMENT TYPE INFORMATION
+    # =====================================================
+
+    doctype = workflow.document_type
+
+    print("\n### DOCUMENT TYPE ###")
+    print("Doctype:", doctype)
+
+    meta = frappe.get_meta(doctype)
+
+    print("Is Submittable:", meta.is_submittable)
+    print("Has Workflow State Field:", workflow.workflow_state_field)
+
+    print("\n### RELEVANT FIELDS ###")
+
+    for field in meta.fields:
+        if (
+            field.fieldname == workflow.workflow_state_field
+            or field.fieldtype in ("Link", "Dynamic Link")
+            or field.fieldname in (
+                "docstatus",
+                "owner",
+                "modified",
+                "modified_by",
+                "company",
+                "party",
+                "party_type",
+                "paid_amount",
+                "posting_date",
+                "workflow_state"
+            )
+        ):
+            print({
+                "fieldname": field.fieldname,
+                "label": field.label,
+                "fieldtype": field.fieldtype,
+                "options": field.options,
+                "read_only": field.read_only,
+                "reqd": field.reqd
+            })
+
+    # =====================================================
+    # 5. WORKFLOW ACTIONS
+    # =====================================================
+
+    print("\n### WORKFLOW ACTION RECORDS ###")
+
+    if frappe.db.exists("DocType", "Workflow Action"):
+        action_meta = frappe.get_meta("Workflow Action")
+
+        available_fields = [
+            f.fieldname for f in action_meta.fields
+        ]
+
+        fields = [
+            f for f in [
+                "name",
+                "reference_doctype",
+                "reference_name",
+                "workflow_state",
+                "status",
+                "completed_by",
+                "completed_by_role",
+                "assigned_by",
+                "creation",
+                "modified"
+            ]
+            if f in available_fields
+        ]
+
+        actions = frappe.get_all(
+            "Workflow Action",
+            filters={
+                "reference_doctype": doctype
+            },
+            fields=fields,
+            order_by="creation desc",
+            limit_page_length=50
+        )
+
+        print(json.dumps(actions, indent=4, ensure_ascii=False, default=str))
+
+    # =====================================================
+    # 6. PERMISSION INFORMATION
+    # =====================================================
+
+    print("\n### DOCTYPE PERMISSIONS ###")
+
+    for permission in meta.permissions:
+        print({
+            "role": permission.role,
+            "read": permission.read,
+            "write": permission.write,
+            "create": permission.create,
+            "submit": permission.submit,
+            "cancel": permission.cancel,
+            "amend": permission.amend
+        })
+
+    # =====================================================
+    # 7. WORKFLOW RELATED CUSTOM FIELDS
+    # =====================================================
+
+    print("\n### CUSTOM FIELDS ###")
+
+    custom_fields = frappe.get_all(
+        "Custom Field",
+        filters={"dt": doctype},
+        fields=[
+            "fieldname",
+            "label",
+            "fieldtype",
+            "options",
+            "insert_after",
+            "read_only",
+            "hidden"
+        ],
+        order_by="creation asc"
+    )
+
+    print(json.dumps(
+        custom_fields,
+        indent=4,
+        ensure_ascii=False,
+        default=str
+    ))
+
+    print("\n" + "=" * 100)
+    print("DEBUG WORKFLOW SELESAI")
+    print("=" * 100)
+
+
+
+def debug_payment_entry_workflow():
+
+    workflows = frappe.get_all(
+        "Workflow",
+        filters={
+            "document_type": "Payment Entry"
+        },
+        fields=[
+            "name",
+            "is_active",
+            "workflow_state_field"
+        ]
+    )
+
+    result = {
+        "workflows": [],
+        "payment_entry_fields": [],
+    }
+
+    for wf in workflows:
+
+        doc = frappe.get_doc(
+            "Workflow",
+            wf.name
+        )
+
+        result["workflows"].append({
+            "name": doc.name,
+            "is_active": doc.is_active,
+            "workflow_state_field": doc.workflow_state_field,
+
+            "states": [
+                {
+                    "state": row.state,
+                    "doc_status": row.doc_status,
+                    "allow_edit": row.allow_edit
+                }
+                for row in doc.states
+            ],
+
+            "transitions": [
+                {
+                    "state": row.state,
+                    "action": row.action,
+                    "next_state": row.next_state,
+                    "allowed": row.allowed,
+                    "condition": row.condition
+                }
+                for row in doc.transitions
+            ]
+        })
+
+    meta = frappe.get_meta("Payment Entry")
+
+    fields = [
+        "workflow_state",
+        "payment_status",
+        "kcm_reference",
+        "kcm_response",
+        "mode_of_payment",
+        "payment_type",
+        "docstatus"
+    ]
+
+    for fieldname in fields:
+
+        if meta.has_field(fieldname):
+            field = meta.get_field(fieldname)
+
+            result["payment_entry_fields"].append({
+                "fieldname": field.fieldname,
+                "fieldtype": field.fieldtype,
+                "options": field.options
+            })
+
+    print(frappe.as_json(result, indent=2))
