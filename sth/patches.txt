@@ -33,6 +33,7 @@ sth.patches.isi_akun_difference_produksi_mill
 sth.patches.tambah_party_type_daftar_masyarakat
 sth.patches.pindahkan_karyawan_bkm_bibitan_ke_tabel
 sth.patches.perbaiki_unique_index_bkm_premi
+sth.patches.isi_department_name_hr
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
@@ -117,4 +118,8 @@ sth.patches.perbaiki_unique_index_bkm_premi
 # yang masuk gudang Material Request ke Set Target Warehouse PO-nya (SLE, GL, dan
 # Repost Item Valuation). Jalankan sesudah samakan_gudang_baris_po. Default-nya
 # uji coba; tulis dengan --kwargs "{'terapkan': 1}".
+# ganti_finger_id_acak juga tidak didaftarkan: mengganti finger_id semua Employee
+# dengan 9 digit acak dan menyimpan yang lama di old_finger_id. Sekali jalan, ID
+# baru harus didaftarkan ulang di mesin. Jalankan sesudah migrate. Default-nya uji
+# coba; tulis dengan --kwargs "{'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

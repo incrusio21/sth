@@ -127,11 +127,17 @@ def catat_absen(finger_id, tanggal, waktu, serial_number):
 
 
 def cari_employee(finger_id):
-	employees = frappe.get_all(
-		"Employee",
-		filters={"finger_id": finger_id, "status": "Active"},
-		fields=["name", "company"],
-	)
+	# old_finger_id: mesin yang belum didaftarkan ulang masih mengirim ID lama.
+	# Aman karena ID baru dijamin tidak bertabrakan dengan ID lama mana pun.
+	for field in ("finger_id", "old_finger_id"):
+		employees = frappe.get_all(
+			"Employee",
+			filters={field: finger_id, "status": "Active"},
+			fields=["name", "company"],
+		)
+		if employees:
+			break
+
 	# finger_id diambil dari 14 digit pertama no_ktp, jadi bisa kembar. Lebih
 	# aman tidak mencatat daripada mencatat ke orang yang salah.
 	if len(employees) > 1:

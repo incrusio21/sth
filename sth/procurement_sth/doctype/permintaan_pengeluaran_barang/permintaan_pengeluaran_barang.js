@@ -7,6 +7,9 @@ const _row_account_filters = {};
 // Cache filter kendaraan per baris, diisi berdasarkan Divisi dari sub_unit
 const _row_kendaraan_filters = {};
 
+// Cache filter kegiatan per baris: Divisi bercentang Kantor → hanya kegiatan berawalan 8
+const _row_kegiatan_filters = {};
+
 frappe.ui.form.on("Permintaan Pengeluaran Barang", {
     setup(frm) {
         frm.set_query("gudang", function (doc) {
@@ -62,6 +65,11 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
                     divisi: child.sub_unit,
                 }
             }
+        })
+
+        frm.set_query("kegiatan", "items", function (doc, cdt, cdn) {
+            const cached = _row_kegiatan_filters[cdn];
+            return { filters: cached ? cached.filters : {} };
         })
 
         frm.set_query("kendaraan", "items", function (doc, cdt, cdn) {
@@ -126,6 +134,7 @@ frappe.ui.form.on("Permintaan Pengeluaran Barang", {
     onload(frm) {
         (frm.doc.items || []).forEach((row) => {
             resolve_account_filter(frm, row.doctype, row.name);
+            load_kegiatan_filter(row.doctype, row.name);
         });
 
         if (!frm.is_new()) {
@@ -309,6 +318,7 @@ function apply_divisi_rules(frm, cdt, cdn) {
     const row = locals[cdt][cdn];
 
     delete _row_kendaraan_filters[cdn];
+    delete _row_kegiatan_filters[cdn];
     toggle_kendaraan_readonly(frm, cdn, false);
 
     if (!row.sub_unit) return;
@@ -317,6 +327,8 @@ function apply_divisi_rules(frm, cdt, cdn) {
         .then(({ message }) => {
             if (!message) return;
             const { mill, kantor, traksi, bengkel } = message;
+
+            set_kegiatan_filter_kantor(cdt, cdn, kantor, true);
 
             if (mill && kantor) {
                 frappe.model.set_value(cdt, cdn, 'tipe_asset', 'Asset');
@@ -332,6 +344,31 @@ function apply_divisi_rules(frm, cdt, cdn) {
         });
 
     apply_cost_center_from_divisi(frm, cdt, cdn);
+}
+
+// ─── Helper: filter kegiatan dari Divisi.kantor ──────────────────────────────
+// Divisi bercentang Kantor → kegiatan yang bisa dipilih hanya yang kodenya
+// (name = kd_kgt) berawalan 8. clear_invalid mengosongkan kegiatan yang
+// sudah terisi tapi tidak berawalan 8 (dipakai saat sub_unit diganti).
+function set_kegiatan_filter_kantor(cdt, cdn, kantor, clear_invalid) {
+    if (!kantor) {
+        delete _row_kegiatan_filters[cdn];
+        return;
+    }
+    _row_kegiatan_filters[cdn] = { filters: { name: ["like", "8%"] } };
+
+    const row = locals[cdt][cdn];
+    if (clear_invalid && row.kegiatan && !String(row.kegiatan).startsWith("8")) {
+        frappe.model.set_value(cdt, cdn, 'kegiatan', '');
+    }
+}
+
+// Dipakai saat form dibuka: isi cache filter kegiatan tanpa mengubah data baris
+function load_kegiatan_filter(cdt, cdn) {
+    const row = locals[cdt][cdn];
+    if (!row.sub_unit) return;
+    frappe.db.get_value('Divisi', row.sub_unit, 'kantor')
+        .then(({ message }) => set_kegiatan_filter_kantor(cdt, cdn, message && message.kantor, false));
 }
 
 // ─── Helper: isi KM/HM sesuai doctype target dari kendaraan (Dynamic Link) ───
