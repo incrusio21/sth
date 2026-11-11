@@ -15,9 +15,10 @@ class ReturKeGudang(Document):
 		self.update_items_return(method="submit")
 	
 	def on_cancel(self):
-		ste = frappe.get_doc("Stock Entry",{"references": self.name})
+		if exist := frappe.db.get_value("Stock Entry",{"references": self.name},"name"):
+			ste = frappe.get_doc("Stock Entry",exist)
+			ste.cancel()
 		self.update_items_return(method="cancel")
-		ste.cancel()
 
 
 	def validate_qty(self):
@@ -103,7 +104,7 @@ class ReturKeGudang(Document):
 			"Retur Ke Gudang": {
 				"doctype": "Stock Entry",
 				"field_map": {
-					"name":"retur_ke_gudang",
+					"name":"references",
 					"doctype": "reference_doctype",
 					"pemilik":"company",
 					"tanggal": "posting_date"
