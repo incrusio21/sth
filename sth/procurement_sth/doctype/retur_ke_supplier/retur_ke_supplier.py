@@ -54,7 +54,8 @@ class ReturKeSupplier(Document):
 			# for testing_purpose, bisa dihapus
 			# item.expense_account = frappe.get_value("Company",doc.company,"stock_adjustment_account")
 
-			if hasattr(mapping_qty_items,item.item_code):
+			if getattr(mapping_qty_items,item.item_code,None):
+				print("masuk")
 				item.qty = getattr(mapping_qty_items,item.item_code,0) * -1
 				item.received_qty = item.qty
 				item.received_stock_qty = item.qty
@@ -62,14 +63,11 @@ class ReturKeSupplier(Document):
 				deleted_items.append(item.name)
 		
 		# sync item prec
-		doc.items = [ r for r in doc.items if r not in deleted_items ]
+		doc.items = [ r for r in doc.items if r.name not in deleted_items ]
 		frappe.flags.skip_validate_file = 1
 		doc.save()
 		doc.submit()
 		self.prec_reference = doc.name if not self.prec_reference else self.prec_reference + f",{doc.name}"
-
-		# for test purpose
-		return doc
 	
 	def cancel_all_prec_return(self):
 		if not self.prec_reference:
