@@ -117,4 +117,8 @@ sth.patches.perbaiki_unique_index_bkm_premi
 # yang masuk gudang Material Request ke Set Target Warehouse PO-nya (SLE, GL, dan
 # Repost Item Valuation). Jalankan sesudah samakan_gudang_baris_po. Default-nya
 # uji coba; tulis dengan --kwargs "{'terapkan': 1}".
+# ganti_finger_id_acak juga tidak didaftarkan: mengganti finger_id semua Employee
+# dengan 9 digit acak dan menyimpan yang lama di old_finger_id. Sekali jalan, ID
+# baru harus didaftarkan ulang di mesin. Jalankan sesudah migrate. Default-nya uji
+# coba; tulis dengan --kwargs "{'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.

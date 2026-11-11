@@ -1,3 +1,5 @@
+import random
+
 import frappe
 from frappe.utils import cint
 
@@ -5,8 +7,31 @@ def set_nip(self, method):
 	self.custom_nip = self.no_ktp
 
 def autoname_employee(self,method):
-	self.finger_id = self.no_ktp[:14]
+	self.finger_id = buat_finger_id()
 	self.name = self.no_ktp
+
+def buat_finger_id(sudah_dipakai=None):
+	"""Finger ID baru: 9 digit acak, tidak diawali 0.
+
+	Dulu diambil dari 14 digit pertama no_ktp, sehingga bisa kembar antar employee
+	dan terlalu panjang untuk PIN mesin. Dicek terhadap finger_id dan old_finger_id
+	sekaligus, supaya log mesin yang masih membawa ID lama tidak nyasar ke orang
+	lain. sudah_dipakai menampung ID yang dibagikan dalam satu proses massal dan
+	belum tersimpan.
+	"""
+	sudah_dipakai = sudah_dipakai if sudah_dipakai is not None else set()
+	while True:
+		finger_id = str(random.randint(100000000, 999999999))
+		if finger_id in sudah_dipakai:
+			continue
+
+		if frappe.db.exists("Employee", {"finger_id": finger_id}) or frappe.db.exists(
+			"Employee", {"old_finger_id": finger_id}
+		):
+			continue
+
+		sudah_dipakai.add(finger_id)
+		return finger_id
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
