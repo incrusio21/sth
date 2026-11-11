@@ -54,9 +54,8 @@ class ReturKeSupplier(Document):
 			# for testing_purpose, bisa dihapus
 			# item.expense_account = frappe.get_value("Company",doc.company,"stock_adjustment_account")
 
-			if getattr(mapping_qty_items,item.item_code,None):
-				print("masuk")
-				item.qty = getattr(mapping_qty_items,item.item_code,0) * -1
+			if mapping_qty_items.get(item.item_code,None):
+				item.qty = mapping_qty_items.get(item.item_code,None) * -1
 				item.received_qty = item.qty
 				item.received_stock_qty = item.qty
 			else:
