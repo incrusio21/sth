@@ -67,6 +67,9 @@ class ReturKeSupplier(Document):
 		doc.save()
 		doc.submit()
 		self.prec_reference = doc.name if not self.prec_reference else self.prec_reference + f",{doc.name}"
+
+		# for test purpose
+		return doc
 	
 	def cancel_all_prec_return(self):
 		if not self.prec_reference:
