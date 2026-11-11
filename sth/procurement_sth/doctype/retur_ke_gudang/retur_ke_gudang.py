@@ -15,9 +15,15 @@ class ReturKeGudang(Document):
 		self.update_items_return(method="submit")
 	
 	def on_cancel(self):
-		if exist := frappe.db.get_value("Stock Entry",{"references": self.name},"name"):
-			ste = frappe.get_doc("Stock Entry",exist)
-			ste.cancel()
+		# Retur sebelum 278b0bd4 menyimpan nomornya di retur_ke_gudang, bukan references.
+		ste_list = frappe.get_all(
+			"Stock Entry",
+			filters={"docstatus": 1},
+			or_filters={"references": self.name, "retur_ke_gudang": self.name},
+			pluck="name",
+		)
+		for name in ste_list:
+			frappe.get_doc("Stock Entry", name).cancel()
 		self.update_items_return(method="cancel")
 
 
