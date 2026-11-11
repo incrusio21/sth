@@ -22,7 +22,7 @@ def boot_session(bootinfo):
 
 		
 	if frappe.session.user == "Administrator":
-		frappe.session.data.unit = "TJHO"
+		frappe.session.data.unit = "TPRE"
 		# sudah berupa department_name, jadi tidak dicari lagi ke Department
 		frappe.session.data.department = "TRAKSI"
 		return
