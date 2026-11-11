@@ -7,6 +7,9 @@ const _row_account_filters = {};
 // Cache filter kendaraan per baris, diisi berdasarkan Divisi dari sub_unit
 const _row_kendaraan_filters = {};
 
+// Cache filter kegiatan per baris: Divisi bercentang Kantor → hanya kegiatan berawalan 8
+const _row_kegiatan_filters = {};
+
 frappe.ui.form.on("Pengeluaran Barang", {
 
 	setup(frm) {
@@ -36,6 +39,11 @@ frappe.ui.form.on("Pengeluaran Barang", {
 					company: doc.pt_pemilik_barang
 				}
 			}
+		})
+
+		frm.set_query("kegiatan", "items", function (doc, cdt, cdn) {
+			const cached = _row_kegiatan_filters[cdn];
+			return { filters: cached ? cached.filters : {} };
 		})
 
 		frm.set_query("kendaraan", "items", function (doc, cdt, cdn) {
@@ -77,7 +85,7 @@ frappe.ui.form.on("Pengeluaran Barang", {
 	onload(frm) {
 		(frm.doc.items || []).forEach((row) => {
 			resolve_account_filter(frm, row.doctype, row.name);
-			apply_divisi_rules(frm, row.doctype, row.name);
+			apply_divisi_rules(frm, row.doctype, row.name, true);
 		});
 	},
 
@@ -340,10 +348,13 @@ function toggle_kendaraan_readonly(frm, cdn, read_only) {
 // mill=1 & kantor=1 → tipe_asset "Asset", kendaraan difilter asset_category = MESIN-MESIN
 // traksi=1          → tipe_asset "Alat Berat Dan Kendaraan"
 // bengkel=1         → kendaraan read only, account hanya 4111003 / 4111004
-function apply_divisi_rules(frm, cdt, cdn) {
+// kantor=1          → kegiatan hanya yang berawalan 8
+// is_onload: dipanggil saat form dibuka, kegiatan yang sudah terisi tidak dikosongkan
+function apply_divisi_rules(frm, cdt, cdn, is_onload) {
 	const row = locals[cdt][cdn];
 
 	delete _row_kendaraan_filters[cdn];
+	delete _row_kegiatan_filters[cdn];
 	toggle_kendaraan_readonly(frm, cdn, false);
 
 	if (!row.sub_unit) return;
@@ -352,6 +363,8 @@ function apply_divisi_rules(frm, cdt, cdn) {
 		.then(({ message }) => {
 			if (!message) return;
 			const { mill, kantor, traksi, bengkel } = message;
+
+			set_kegiatan_filter_kantor(cdt, cdn, kantor, !is_onload);
 
 			if (mill && kantor) {
 				frappe.model.set_value(cdt, cdn, 'tipe_asset', 'Asset');
@@ -369,6 +382,23 @@ function apply_divisi_rules(frm, cdt, cdn) {
 		});
 
 	apply_cost_center_from_divisi(frm, cdt, cdn);
+}
+
+// ─── Helper: filter kegiatan dari Divisi.kantor ──────────────────────────────
+// Divisi bercentang Kantor → kegiatan yang bisa dipilih hanya yang kodenya
+// (name = kd_kgt) berawalan 8. clear_invalid mengosongkan kegiatan yang
+// sudah terisi tapi tidak berawalan 8 (dipakai saat sub_unit diganti).
+function set_kegiatan_filter_kantor(cdt, cdn, kantor, clear_invalid) {
+	if (!kantor) {
+		delete _row_kegiatan_filters[cdn];
+		return;
+	}
+	_row_kegiatan_filters[cdn] = { filters: { name: ["like", "8%"] } };
+
+	const row = locals[cdt][cdn];
+	if (clear_invalid && row.kegiatan && !String(row.kegiatan).startsWith("8")) {
+		frappe.model.set_value(cdt, cdn, 'kegiatan', '');
+	}
 }
 
 // ─── Helper: isi KM/HM sesuai doctype target dari kendaraan (Dynamic Link) ───
