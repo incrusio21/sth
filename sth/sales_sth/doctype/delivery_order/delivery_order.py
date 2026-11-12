@@ -153,7 +153,9 @@ def qty_terpakai_do(delivery_order, item_code, delivered_qty=0):
 	"""
 	qty_timbangan = frappe.db.sql(
 		"""
-		SELECT COALESCE(SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN COALESCE(netto_2, 0)
+		SELECT COALESCE(SUM(CASE WHEN type = 'Return' THEN
+							(CASE WHEN docstatus = 1 THEN -COALESCE(netto_2, 0) ELSE 0 END)
+						WHEN COALESCE(no_do_2, '') = '' THEN COALESCE(netto_2, 0)
 					   ELSE COALESCE(qty_do, 0) END), 0)
 		FROM `tabTimbangan`
 		WHERE do_no = %(do)s AND kode_barang = %(item)s AND docstatus != 2
