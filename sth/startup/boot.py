@@ -21,17 +21,19 @@ def boot_session(bootinfo):
 
 
 		
-	department = employee.department if employee else None
-
 	if frappe.session.user == "Administrator":
-		frappe.session.data.unit = "TJHO"
-		department = "KANTOR - TML"
-	else:
-		frappe.session.data.unit = str(employee.unit) if employee else None
+		frappe.session.data.unit = "TPRE"
+		# sudah berupa department_name, jadi tidak dicari lagi ke Department
+		frappe.session.data.department = "TRAKSI"
+		return
+
+	frappe.session.data.unit = str(employee.unit) if employee else None
 
 	# yang dipakai nama tampilan Department, bukan name-nya yang berakhiran singkatan company
 	frappe.session.data.department = (
-		frappe.db.get_value("Department", department, "department_name") if department else None
+		frappe.db.get_value("Department", employee.department, "department_name")
+		if employee and employee.department
+		else None
 	)
 
 def update_page_info(bootinfo):

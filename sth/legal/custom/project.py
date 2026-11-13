@@ -218,17 +218,19 @@ def get_proposal_data(doctype, docname=None):
         if doctype == "Proposal":
             fieldname.extend(["spesifikasi_kerja", "keperluan", "jangka_waktu", "denda"])
 
-        detail_proposal.update(
-            frappe.get_value(doctype, docname, fieldname, as_dict=1)
-        )
-
         if doctype == "Proposal":
             detail_proposal["identifications"] = frappe.get_all(f"{doctype} Identification Detail", 
                 filters={"parent": docname, "parenttype": "Proposal"}, 
                 fields=["identification", "available", "not_available"],
                 order_by="idx"
             ) or {}
+        elif doctype == "Purchase Order":
+            fieldname.append("project_name")
 
+        detail_proposal.update(
+            frappe.get_value(doctype, docname, fieldname, as_dict=1)
+        )
+        
     return detail_proposal
 
 

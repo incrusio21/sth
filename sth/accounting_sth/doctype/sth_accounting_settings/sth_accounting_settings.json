@@ -17,7 +17,8 @@
   "sth_accounting_settings_kud",
   "sth_accounting_settings_kud_mitra",
   "sth_accounting_settings_kud_kepala_akun",
-  "sth_accounting_settings_retensi"
+  "sth_accounting_settings_retensi",
+  "bank_admin_charges_accounts"
  ],
  "fields": [
   {
@@ -99,13 +100,19 @@
    "fieldtype": "Table",
    "label": "Retensi Purchase Invoice",
    "options": "STH Accounting Settings Retensi"
+  },
+  {
+   "fieldname": "bank_admin_charges_accounts",
+   "fieldtype": "Table",
+   "label": "Bank Admin Charges Accounts",
+   "options": "Bank Admin Charges Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-21 12:00:00.000000",
+ "modified": "2026-11-12 14:33:31.756520",
  "modified_by": "Administrator",
  "module": "Accounting STH",
  "name": "STH Accounting Settings",

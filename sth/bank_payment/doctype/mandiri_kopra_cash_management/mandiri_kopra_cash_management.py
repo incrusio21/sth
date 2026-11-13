@@ -164,22 +164,147 @@ class MandiriKopraCashManagement(Document):
 		finally:
 			ssh.close()
 
-def ssh_connect(sftp_server):
+# def ssh_connect(sftp_server):
+# 	ssh = paramiko.SSHClient()
+# 	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+# 	connect_kwargs = frappe.get_value("Mandiri MFT", sftp_server, 
+# 		["hostname", "port", "username", "password"], 
+# 		as_dict=1
+# 	)
+
+# 	# return ssh.connect(**connect_kwargs)
+# 	ssh.connect(**connect_kwargs)
+
+# 	return ssh
+
+
+def ssh_connect(sftp_server, hostname_override=None):
 	ssh = paramiko.SSHClient()
 	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-	connect_kwargs = frappe.get_value("Mandiri MFT", sftp_server, 
-		["hostname", "port", "username", "password"], 
-		as_dict=1
+	connect_kwargs = frappe.get_value(
+			"Mandiri MFT", sftp_server,
+			["hostname", "port", "username", "password"],
+			as_dict=1
 	)
 
-	# return ssh.connect(**connect_kwargs)
+	if hostname_override:
+			connect_kwargs.hostname = hostname_override
+
 	ssh.connect(**connect_kwargs)
 
 	return ssh
 
+
+
+@frappe.whitelist()
+def process_mt940_pending_release():
+    payment_entries = frappe.get_all(
+        "Payment Entry",
+        filters={
+            "docstatus": 0,
+            "workflow_state": "Pending Release",
+            "payment_status": "Pending Approval",
+        },
+        fields=["name", "kcm_reference"]
+    )
+
+    results = []
+
+    for row in payment_entries:
+        try:
+            if not row.kcm_reference:
+                continue
+
+            kcm_status = frappe.db.get_value(
+                "Mandiri Kopra Cash Management",
+                row.kcm_reference,
+                "payment_status"
+            )
+
+            if kcm_status != "Success":
+                continue
+
+            pe = frappe.get_doc("Payment Entry", row.name)
+
+            preview = preview_mt940_payment_entry(pe.name)
+
+            if not preview.get("bank_payment"):
+                continue
+
+            if abs(preview["difference"]) > 0.01:
+                continue
+
+            account = frappe.db.get_value(
+                "Bank Admin Charges Account",
+                {"company": pe.company},
+                "account"
+            )
+
+            if not account:
+                continue
+
+            cost_center = frappe.db.get_value(
+                "Company", pe.company, "cost_center"
+            )
+
+            for fee in preview.get("bank_fees", []):
+                description = fee["narrative"].strip()
+
+                exists = any(
+                    tax.account_head == account
+                    and tax.description == description
+                    and abs((tax.tax_amount or 0) - fee["amount"]) < 0.01
+                    for tax in pe.taxes
+                )
+
+                if exists:
+                    continue
+
+                pe.append("taxes", {
+                    "charge_type": "Actual",
+                    "add_deduct_tax": "Add",
+                    "account_head": account,
+                    "description": description,
+                    "cost_center": cost_center,
+                    "tax_amount": fee["amount"],
+                    "included_in_paid_amount": 0
+                })
+
+            if preview.get("bank_fees"):
+                pe.calculate_taxes()
+
+            # pe.workflow_state = "Approved"
+            pe.submit()
+
+            frappe.db.set_value(
+                "Payment Entry",
+                pe.name,
+                "payment_status",
+                "Success"
+            )
+
+            results.append({
+                "payment_entry": pe.name,
+                "status": "Success"
+            })
+
+        except Exception as e:
+            results.append({
+                "payment_entry": row.name,
+                "status": "Failed",
+                "error": str(e)
+            })
+
+    return results
+
+
+
 @frappe.whitelist()
 def get_payment_status():
+
+	process_mt940_pending_release()
 	
 	progress_payment = frappe.get_all(
 		"Mandiri Kopra Cash Management",
@@ -377,18 +502,46 @@ def get_payment_status():
 				kcm_response = responses[idx]
 
 			# Status internal Payment Entry
+			# if val["payment_status"] == "Success":
+			# 	payment_entry_status = "Pending Approval"
+			# else:
+			# 	payment_entry_status = val["payment_status"]
+
+			# frappe.db.set_value(
+			# 	"Payment Entry",
+			# 	pe.payment_entry,
+			# 	{
+			# 		"payment_status": payment_entry_status,
+			# 		"kcm_response": kcm_response
+			# 	}
+			# )
+
+			# Status internal Payment Entry
 			if val["payment_status"] == "Success":
 				payment_entry_status = "Pending Approval"
 			else:
-				payment_entry_status = val["payment_status"]
+				payment_entry_status = "Failed"
+
+			update_values = {
+				"payment_status": payment_entry_status,
+				"kcm_response": kcm_response
+			}
+
+			# Jika NACK atau Timeout, kembalikan workflow ke state sebelumnya
+			if val["payment_status"] == "Failed":
+				previous_workflow_state = frappe.db.get_value(
+					"Payment Entry",
+					pe.payment_entry,
+					"kcm_previous_workflow_state"
+				)
+
+				if previous_workflow_state:
+					update_values["workflow_state"] = previous_workflow_state
 
 			frappe.db.set_value(
 				"Payment Entry",
 				pe.payment_entry,
-				{
-					"payment_status": payment_entry_status,
-					"kcm_response": kcm_response
-				}
+				update_values
 			)
 
 
@@ -495,3 +648,330 @@ def generate_mft_file(kcm_name):
 		"txt": txt_path,
 		"pgp": pgp_path
 	}
+
+
+
+@frappe.whitelist()
+def get_mandiri_mt940_files():
+    server = "TMTL001"
+    remote_dir = "/My Subscriptions/TMTL001#AccountStatement"
+    cutoff = time.time() - (7 * 24 * 60 * 60)
+
+    ssh = None
+    result = []
+
+    try:
+        ssh = ssh_connect(server)
+
+        with ssh.open_sftp() as sftp:
+            files = sftp.listdir_attr(remote_dir)
+
+            for file in files:
+                if file.st_mtime < cutoff:
+                    continue
+
+                if not file.st_mode or not __import__("stat").S_ISREG(file.st_mode):
+                    continue
+
+                result.append({
+                    "file_name": file.filename,
+                    "size": file.st_size,
+                    "modified": time.strftime(
+                        "%Y-%m-%d %H:%M:%S",
+                        time.localtime(file.st_mtime)
+                    )
+                })
+
+        result.sort(key=lambda x: x["modified"], reverse=True)
+
+        return {
+            "server": server,
+            "folder": remote_dir,
+            "total_files": len(result),
+            "files": result
+        }
+
+    finally:
+        if ssh:
+            ssh.close()
+
+
+
+@frappe.whitelist()
+def read_mandiri_mt940_files():
+    server = "TMTL001"
+    remote_dir = "/My Subscriptions/TMTL001#AccountStatement"
+    cutoff = time.time() - (7 * 24 * 60 * 60)
+
+    ssh = None
+    result = []
+
+    try:
+        ssh = ssh_connect(server, "103.139.82.26")
+
+        with ssh.open_sftp() as sftp:
+            files = sftp.listdir_attr(remote_dir)
+
+            for file in files:
+                if file.st_mtime < cutoff:
+                    continue
+
+                if not file.st_mode or not __import__("stat").S_ISREG(file.st_mode):
+                    continue
+
+                remote_path = f"{remote_dir}/{file.filename}"
+
+                with sftp.open(remote_path, "rb") as remote_file:
+                    content = remote_file.read().decode("utf-8", errors="replace")
+
+                result.append({
+                    "file_name": file.filename,
+                    "modified": time.strftime(
+                        "%Y-%m-%d %H:%M:%S",
+                        time.localtime(file.st_mtime)
+                    ),
+                    "content": content
+                })
+
+        result.sort(key=lambda x: x["modified"], reverse=True)
+
+        return {
+            "total_files": len(result),
+            "files": result
+        }
+
+    finally:
+        if ssh:
+            ssh.close()
+
+
+def parse_mandiri_mt940_files():
+    data = read_mandiri_mt940_files()
+    transactions = []
+
+    for file_data in data.get("files", []):
+        current = None
+
+        for line in file_data.get("content", "").splitlines():
+            line = line.strip()
+
+            if line.startswith(":61:"):
+                if current:
+                    transactions.append(current)
+
+                raw = line[4:]
+                match = __import__("re").match(
+                    r"^(\d{6})(?:\d{4})?([DC])([\d,]+)([A-Z]{4})?",
+                    raw
+                )
+
+                if not match:
+                    current = None
+                    continue
+
+                date, direction, amount, transaction_type = match.groups()
+
+                current = {
+                    "file_name": file_data["file_name"],
+                    "date": "20" + date[:2] + "-" + date[2:4] + "-" + date[4:6],
+                    "direction": direction,
+                    "amount": float(amount.replace(",", ".")),
+                    "transaction_type": transaction_type or "",
+                    "narrative": "",
+                    "raw_61": line,
+                }
+
+            elif line.startswith(":86:") and current:
+                current["narrative"] = line[4:].strip()
+
+            elif current and line and not line.startswith(":"):
+                current["narrative"] += " " + line
+
+        if current:
+            transactions.append(current)
+
+    return transactions
+
+
+@frappe.whitelist()
+def preview_mt940_payment_entry(payment_entry):
+    pe = frappe.get_doc("Payment Entry", payment_entry)
+
+    transactions = parse_mandiri_mt940_files()
+    matched = []
+
+    for tx in transactions:
+        if tx["direction"] != "D":
+            continue
+
+        if payment_entry not in tx["narrative"]:
+            continue
+
+        matched.append(tx)
+
+    payment = next(
+        (
+            tx for tx in matched
+            if "Fee" not in tx["narrative"]
+            and "Charge" not in tx["narrative"]
+        ),
+        None
+    )
+
+    fees = [
+        tx for tx in matched
+        if any(
+            keyword in tx["narrative"].lower()
+            for keyword in ("fee", "charge")
+        )
+    ]
+
+    return {
+        "payment_entry": payment_entry,
+        "company": pe.company,
+        "paid_amount": pe.paid_amount,
+        "bank_payment": payment,
+        "difference": (
+            round(pe.paid_amount - payment["amount"], 2)
+            if payment else None
+        ),
+        "bank_fees": fees,
+        "total_bank_fees": sum(tx["amount"] for tx in fees),
+    }
+
+
+@frappe.whitelist()
+def apply_mt940_bank_fees(payment_entry):
+    pe = frappe.get_doc("Payment Entry", payment_entry)
+
+    if pe.docstatus != 0:
+        frappe.throw("Payment Entry harus berstatus Draft.")
+
+    preview = preview_mt940_payment_entry(payment_entry)
+
+    if not preview.get("bank_payment"):
+        frappe.throw("Transaksi pembayaran tidak ditemukan.")
+
+    if abs(preview["difference"]) > 0.01:
+        frappe.throw("Nominal rekening koran tidak cocok.")
+
+    if not preview.get("bank_fees"):
+        frappe.throw("Biaya bank tidak ditemukan.")
+
+    account = frappe.db.get_value(
+        "Bank Admin Charges Account",
+        {"company": pe.company},
+        "account"
+    )
+
+    if not account:
+        frappe.throw("Akun Bank Admin Charges belum dikonfigurasi.")
+
+    cost_center = frappe.db.get_value(
+        "Company", pe.company, "cost_center"
+    )
+
+    for fee in preview["bank_fees"]:
+        description = fee["narrative"].strip()
+
+        exists = any(
+            row.account_head == account
+            and row.description == description
+            and abs((row.tax_amount or 0) - fee["amount"]) < 0.01
+            for row in pe.taxes
+        )
+
+        if exists:
+            continue
+
+        pe.append("taxes", {
+            "charge_type": "Actual",
+            "add_deduct_tax": "Add",
+            "account_head": account,
+            "description": description,
+            "cost_center": cost_center,
+            "tax_amount": fee["amount"],
+            "included_in_paid_amount": 0
+        })
+
+    pe.calculate_taxes()
+    pe.save()
+
+    return {
+        "payment_entry": pe.name,
+        "taxes": [
+            {
+                "description": row.description,
+                "account_head": row.account_head,
+                "tax_amount": row.tax_amount,
+                "cost_center": row.cost_center
+            }
+            for row in pe.taxes
+        ],
+        "paid_amount": pe.paid_amount,
+        "docstatus": pe.docstatus
+    }
+
+
+
+def reset_pe_for_mt940_test():
+    pe_name = "ACC-PAY-2026-00341"
+    kcm_name = "TMTL0011509112026000001"
+
+    pe = frappe.get_doc("Payment Entry", pe_name)
+
+    if pe.docstatus != 1:
+        frappe.throw("Payment Entry harus berstatus Submitted.")
+
+    if pe.kcm_reference != kcm_name:
+        frappe.throw("Referensi KCM tidak sesuai.")
+
+    kcm_status = frappe.db.get_value(
+        "Mandiri Kopra Cash Management",
+        kcm_name,
+        "payment_status",
+    )
+
+    if kcm_status != "Success":
+        frappe.throw("KCM harus berstatus Success.")
+
+    frappe.db.savepoint("before_pe_repair")
+
+    try:
+        # Hapus GL Entry
+        frappe.db.sql("""
+            DELETE FROM `tabGL Entry`
+            WHERE voucher_type = 'Payment Entry'
+              AND voucher_no = %s
+        """, pe_name)
+
+        # Hapus Payment Ledger Entry
+        frappe.db.sql("""
+            DELETE FROM `tabPayment Ledger Entry`
+            WHERE voucher_type = 'Payment Entry'
+              AND voucher_no = %s
+        """, pe_name)
+
+        # Kembalikan PE menjadi Draft
+        frappe.db.sql("""
+            UPDATE `tabPayment Entry`
+            SET docstatus = 0,
+                status = 'Draft',
+                workflow_state = 'Pending Release'
+            WHERE name = %s
+        """, pe_name)
+
+        frappe.clear_document_cache("Payment Entry", pe_name)
+
+        return {
+            "payment_entry": pe_name,
+            "docstatus": 0,
+            "workflow_state": "Pending Release",
+            "gl_deleted": True,
+            "payment_ledger_deleted": True,
+            "kcm_status": kcm_status,
+        }
+
+    except Exception:
+        frappe.db.rollback(save_point="before_pe_repair")
+        raise

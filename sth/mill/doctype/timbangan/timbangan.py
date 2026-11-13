@@ -586,6 +586,15 @@ class Timbangan(Document):
 		else:
 			self.sisa_do_2 = 0
 
+		# Return mengembalikan barang ke DO, bukan memakannya, jadi tidak dibatasi
+		# sisa DO. Dulu ikut dicek seperti Dispatch: DO yang sudah terkirim penuh
+		# bersisa 0, dan Return-nya ditolak "Jumlah Netto melebihi qty DO".
+		# Batas Return adalah sisa retur Delivery Note asalnya (get_baris_dn_asal).
+		if self.type == "Return":
+			self.qty_do = 0
+			self.qty_do_2 = 0
+			return
+
 		# dilantai di 0: sisa DO 1 bisa minus kalau timbangan lain sudah memakannya
 		# lebih dari qty DO-nya. Tanpa ini qty_do ikut minus, dan DN DO 1 dibuat
 		# dengan qty negatif sehingga submit-nya ditolak.
@@ -621,8 +630,15 @@ class Timbangan(Document):
 		# Timbangan dihitung senetto 2 eksternalnya, seperti di berat_kirim —
 		# dirumuskan dari netto eksternal karena timbangan dari sebelum ada
 		# sortasi eksternal belum punya netto_2_eksternal.
+		#
+		# Return justru mengembalikan qty ke DO, jadi dihitung minus — tapi hanya
+		# yang sudah submit, karena baru saat itu DN Return-nya dibuat. Draft
+		# Return yang belum tentu jadi tidak boleh membuka jatah DO lebih dulu.
+		# Dulu Return ikut dijumlahkan sebagai pemakaian, jadi sisa DO malah turun.
 		qty_timbangan = frappe.db.sql("""
-			SELECT SUM(CASE WHEN COALESCE(no_do_2, '') = '' THEN
+			SELECT SUM(CASE WHEN type = 'Return' THEN
+								(CASE WHEN docstatus = 1 THEN -COALESCE(netto_2, 0) ELSE 0 END)
+							WHEN COALESCE(no_do_2, '') = '' THEN
 								(CASE WHEN type = 'Dispatch' AND manual_timbangan = 1
 										AND COALESCE(netto_eksternal, 0) > 0
 									  THEN netto_eksternal * (1 - COALESCE(sortasi_eksternal, 0) / 100)

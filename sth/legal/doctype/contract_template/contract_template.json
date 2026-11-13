@@ -100,7 +100,7 @@
  "grid_page_length": 50,
  "is_tree": 1,
  "links": [],
- "modified": "2026-01-23 10:11:09.675049",
+ "modified": "2026-11-11 15:05:24.977470",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Contract Template",
@@ -161,5 +161,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "title",
  "track_changes": 1
 }

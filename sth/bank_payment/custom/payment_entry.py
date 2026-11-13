@@ -19,6 +19,12 @@ from datetime import datetime, timedelta
 #     mkcm.flags.notify_update = False
 #     mkcm.submit()
 
+def set_requires_mandiri_kcm(doc, method=None):
+    doc.requires_mandiri_kcm = int(
+        doc.mode_of_payment == "Bank Draft"
+        and doc.payment_type in ["Pay", "Internal Transfer"]
+        and is_mandiri_kcm(doc.paid_from)
+    )
 
 def is_mandiri_kcm(account):
 
@@ -250,22 +256,18 @@ def create_kcm_from_pe(doc, method=None):
     ):
         return
 
-    existing = frappe.db.sql("""
-        SELECT kcm.name
-        FROM `tabMandiri Kopra Detail` d
-        INNER JOIN `tabMandiri Kopra Cash Management` kcm
-            ON kcm.name = d.parent
-        WHERE
-            d.payment_entry = %s
-            AND kcm.payment_status = 'Success'
-            AND kcm.docstatus = 1
-        LIMIT 1
-    """, doc.name, as_dict=True)
+    if doc.kcm_reference:
+        previous_status = frappe.db.get_value(
+            "Mandiri Kopra Cash Management",
+            doc.kcm_reference,
+            "payment_status"
+        )
 
-    # if existing:
-    #     frappe.throw(
-    #         f"Payment Entry {doc.name} sudah pernah berhasil dikirim ke bank melalui KCM {existing[0].name}"
-    #     )
+        if previous_status in ("In Progress", "Success"):
+            frappe.throw(
+                f"KCM {doc.kcm_reference} masih berstatus {previous_status}. "
+                "Pengiriman ulang tidak diizinkan."
+            )
 
     data = get_mandiri_kcm_data(
         doc
@@ -451,13 +453,79 @@ def create_kcm_ubp(doc, data):
     return kcm.name
 
 
+def reset_kcm_fields_before_insert(doc, method=None):
+    doc.kcm_reference = None
+    doc.payment_status = None
+    doc.kcm_response = None
+
+
+def validate_bank_admin_charges_account(doc, method=None):
+    if doc.workflow_state != "Pending Release":
+        return
+
+    if not doc.requires_mandiri_kcm:
+        return
+
+    account = frappe.db.get_value(
+        "Bank Admin Charges Account",
+        {
+            "parent": "STH Accounting Settings",
+            "parentfield": "bank_admin_charges_accounts",
+            "company": doc.company
+        },
+        "account"
+    )
+
+    if not account:
+        frappe.throw(
+            f"Bank Admin Charges Account untuk Company {doc.company} "
+            "belum dikonfigurasi. Silakan isi terlebih dahulu di STH Accounting Settings."
+        )
+
+    if not frappe.db.exists(
+        "Account",
+        {"name": account, "company": doc.company, "is_group": 0}
+    ):
+        frappe.throw(
+            f"Akun Bank Admin Charges untuk Company {doc.company} "
+            "tidak valid. Periksa STH Accounting Settings."
+        )
+
+
+def create_kcm_when_pending_release(doc, method=None):
+    if doc.workflow_state != "Pending Release":
+        return
+
+    if not doc.requires_mandiri_kcm:
+        return
+
+    previous = doc.get_doc_before_save()
+
+    # Jangan buat KCM ulang jika masih di Pending Release
+    if previous and previous.workflow_state == "Pending Release":
+        return
+
+    # Simpan workflow state sebelum masuk Pending Release
+    if previous and previous.workflow_state:
+        doc.kcm_previous_workflow_state = previous.workflow_state
+
+        frappe.db.set_value(
+            "Payment Entry",
+            doc.name,
+            "kcm_previous_workflow_state",
+            previous.workflow_state,
+            update_modified=False
+        )
+
+    create_kcm_from_pe(doc)
+
+
 def get_next_day():
 
     return (
         datetime.now() +
         timedelta(days=1)
     ).strftime("%Y%m%d")
-
 
 def debug_requires_mandiri_kcm(payment_entry):
     doc = frappe.get_doc("Payment Entry", payment_entry)
@@ -468,5 +536,5 @@ def debug_requires_mandiri_kcm(payment_entry):
         "payment_type": doc.payment_type,
         "paid_from": doc.paid_from,
         "is_mandiri_kcm": is_mandiri_kcm(doc.paid_from),
-        "custom_requires_mandiri_kcm": doc.custom_requires_mandiri_kcm,
+        "requires_mandiri_kcm": doc.requires_mandiri_kcm,
     }

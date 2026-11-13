@@ -21,6 +21,7 @@ from frappe.utils.pdf import (
 	prepare_options,
 )
 from frappe.model.document import Document
+from frappe.utils.nestedset import NestedSet
 from frappe.website.serve import get_response_without_exception_handling
 
 from frappe.www.printview import get_print_format, get_print_style
@@ -40,7 +41,7 @@ from pypdf import PdfReader, PdfWriter
 # from reportlab.lib import colors
 # from reportlab.lib.colors import HexColor
 
-class ContractTemplate(Document):
+class ContractTemplate(NestedSet):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
