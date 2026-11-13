@@ -230,6 +230,7 @@ def get_proposal_data(doctype, docname=None):
         detail_proposal.update(
             frappe.get_value(doctype, docname, fieldname, as_dict=1)
         )
+        
     return detail_proposal
 
 
