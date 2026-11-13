@@ -94,6 +94,7 @@ doctype_js = {
 	"Travel Request": "public/js/travel_request.js",
 	"Task": "public/js/task.js",
 	"Expense Claim Type": "public/js/expense_claim_type.js",
+	"Employee Grievance": "public/js/employee_grievance.js",
 }
 
 doctype_list_js = {
@@ -399,6 +400,7 @@ doc_events = {
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
 		],
 		"validate": [
+            # "sth.bank_payment.custom.payment_entry.set_requires_mandiri_kcm",
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
 			"sth.custom.payment_entry.update_check_book",

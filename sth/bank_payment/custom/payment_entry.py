@@ -49,6 +49,13 @@ def is_mandiri_kcm(account):
         )
     )
 
+def set_requires_mandiri_kcm(doc, method=None):
+    doc.custom_requires_mandiri_kcm = int(
+        doc.mode_of_payment == "Bank Draft"
+        and doc.payment_type in ["Pay", "Internal Transfer"]
+        and is_mandiri_kcm(doc.paid_from)
+    )
+
 
 def get_mandiri_kcm_data(doc):
 
@@ -450,3 +457,16 @@ def get_next_day():
         datetime.now() +
         timedelta(days=1)
     ).strftime("%Y%m%d")
+
+
+def debug_requires_mandiri_kcm(payment_entry):
+    doc = frappe.get_doc("Payment Entry", payment_entry)
+
+    return {
+        "name": doc.name,
+        "mode_of_payment": doc.mode_of_payment,
+        "payment_type": doc.payment_type,
+        "paid_from": doc.paid_from,
+        "is_mandiri_kcm": is_mandiri_kcm(doc.paid_from),
+        "custom_requires_mandiri_kcm": doc.custom_requires_mandiri_kcm,
+    }
