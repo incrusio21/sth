@@ -268,13 +268,14 @@ def validate_ktp_name(doc, method):
 
 
 def cek_upload(self, method):
-	"""Supplier baru boleh diajukan kalau semua dokumennya sudah diupload.
+	"""Supplier hanya boleh diajukan dan disetujui kalau semua dokumennya sudah diupload.
 
-	Diperiksa saat dokumen meninggalkan state awal workflow (Draft ke Butuh
-	Persetujuan 1), bukan saat Approved, supaya approver tidak menerima supplier
-	yang berkasnya belum lengkap. Semua baris dicek, bukan hanya yang mandatory.
-	Menolak ke Rejected tidak dicek. Revisi supplier yang sudah Approved masuk
-	lewat persetujuan_ulang.kembali_ke_persetujuan_1, tidak lewat Draft.
+	Diperiksa di setiap aksi workflow yang memajukan dokumen: pengajuan dari
+	Draft, tiap tahap persetujuan, sampai Approved. Dengan begitu berkas yang
+	dihapus di tengah persetujuan menahan aksi berikutnya. Semua baris dicek,
+	bukan hanya yang mandatory. Menolak ke Rejected dan aksi yang mundur
+	(Revision, kembali ke Draft) tidak dicek. Save tanpa perubahan state juga tidak, termasuk
+	persetujuan_ulang.kembali_ke_persetujuan_1 yang jalan sesudah fungsi ini.
 
 	Tanpa workflow, pemeriksaannya saat status_supplier meninggalkan Calon
 	Supplier.
@@ -291,10 +292,15 @@ def cek_upload(self, method):
 		field_state = workflow.workflow_state_field
 		lama = old_doc.get(field_state)
 		baru = self.get(field_state)
+		# Maju atau mundur dibaca dari urutan state di workflow, supaya aksi
+		# Revision yang mengembalikan ke tahap sebelumnya tetap bisa dipakai
+		# untuk meminta berkas yang kurang.
+		urutan = [row.state for row in workflow.states]
 		diajukan = (
 			lama != baru
-			and lama == workflow.states[0].state
-			and not (baru or "").startswith("Reject")
+			and baru in urutan
+			and not baru.startswith("Reject")
+			and urutan.index(baru) > (urutan.index(lama) if lama in urutan else -1)
 		)
 	else:
 		old_status = old_doc.get("status_supplier")
@@ -309,7 +315,7 @@ def cek_upload(self, method):
 	kosong = [row.get("rincian_dokumen_finance") for row in kriteria if not row.get("upload_file")]
 	if kosong:
 		frappe.throw(
-			_("Upload File harus lengkap sebelum Supplier diajukan: <br> {0}").format("<br>".join(kosong)),
+			_("Upload File harus lengkap sebelum Supplier diajukan atau disetujui: <br> {0}").format("<br>".join(kosong)),
 			title=_("Upload File Belum Lengkap"),
 		)
 
