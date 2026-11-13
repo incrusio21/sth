@@ -11,5 +11,6 @@ frappe.ui.form.on("Employee Grievance", {
     frm.set_value("department", employee.department);
     frm.set_value("unit", employee.unit);
     frm.set_value("divisi", employee.nama_divisi);
+    frm.set_value("golongan", employee.grade);
   }
 });
