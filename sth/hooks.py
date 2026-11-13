@@ -394,11 +394,19 @@ doc_events = {
 		"on_cancel": "sth.custom.material_request.update_ba_reference",
 	},
 	"Payment Entry":{
+        "on_update": [
+			"sth.bank_payment.custom.payment_entry.create_kcm_when_pending_release"
+		],
+        "before_insert": [
+			"sth.bank_payment.custom.payment_entry.reset_kcm_fields_before_insert"
+		],
 		"after_insert": [
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
 		],
 		"validate": [
+            "sth.bank_payment.custom.payment_entry.set_requires_mandiri_kcm",
+            "sth.bank_payment.custom.payment_entry.validate_bank_admin_charges_account",
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment", 
 			"sth.finance_sth.custom.cek_kriteria_upload_pe.generate_kriteria_upload_payment_pdo", 
 			"sth.custom.payment_entry.update_check_book",
@@ -419,7 +427,7 @@ doc_events = {
 			"sth.custom.payment_entry.payment_entry_notification",
 			"sth.custom.payment_entry.update_pesangon_from_payment",
 			"sth.custom.payment_entry.pasang_nota_piutang",
-			"sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
+			# "sth.bank_payment.custom.payment_entry.create_kcm_from_pe",
 			"sth.custom.payment_entry_leasing.on_payment_entry_submit",
 			"sth.custom.payment_entry.update_ganti_rugi_lahan_term",
 			"sth.custom.payment_entry.update_uang_muka_employee_advance"
@@ -435,7 +443,8 @@ doc_events = {
 				"sth.custom.payment_entry.update_ganti_rugi_lahan_term",
 				"sth.custom.payment_entry.update_uang_muka_employee_advance"
 				],
-		"on_trash": "sth.custom.payment_entry.update_check_book"
+        "before_cancel": "sth.overrides.payment_entry.prevent_cancel_success_mandiri_kcm",
+		"on_trash": "sth.custom.payment_entry.update_check_book",
 	},
 	"Journal Entry": {
 		"before_submit": ["sth.custom.journal_entry.cegah_penyusutan_ganda"],

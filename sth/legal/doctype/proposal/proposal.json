@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-01-03 11:09:11.718944",
+ "creation": "2026-10-08 13:14:31.037553",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -1466,8 +1466,7 @@
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
-   "label": "Project Name",
-   "read_only": 1
+   "label": "Project Name"
   },
   {
    "fieldname": "column_break_murt",
@@ -1528,7 +1527,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-08 11:45:45.497925",
+ "modified": "2026-11-13 09:04:07.922334",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
