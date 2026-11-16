@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "PPD-.#####",
- "creation": "2026-01-28 13:13:15.359795",
+ "creation": "2026-07-27 03:18:05.637326",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -19,12 +19,6 @@
   "department",
   "company",
   "posting_date",
-  "section_break_revf",
-  "persetujuan_1",
-  "persetujuan_2",
-  "column_break_guuu",
-  "persetujuan_3",
-  "persetujuan_4",
   "guest_detail_section",
   "guests",
   "travel_itinerary_section",
@@ -172,39 +166,6 @@
    "fieldname": "upload_file_section",
    "fieldtype": "Section Break",
    "label": "Upload File"
-  },
-  {
-   "fieldname": "section_break_revf",
-   "fieldtype": "Section Break",
-   "hidden": 1
-  },
-  {
-   "fieldname": "persetujuan_1",
-   "fieldtype": "Link",
-   "label": "Persetujuan 1",
-   "options": "User"
-  },
-  {
-   "fieldname": "persetujuan_2",
-   "fieldtype": "Link",
-   "label": "Persetujuan 2",
-   "options": "User"
-  },
-  {
-   "fieldname": "column_break_guuu",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "persetujuan_3",
-   "fieldtype": "Link",
-   "label": "Persetujuan 3",
-   "options": "User"
-  },
-  {
-   "fieldname": "persetujuan_4",
-   "fieldtype": "Link",
-   "label": "Persetujuan 4",
-   "options": "User"
   },
   {
    "fieldname": "section_break_pqjx",
@@ -383,7 +344,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-05 13:31:40.550158",
+ "modified": "2026-11-16 15:27:16.572678",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Pertanggungjawaban Perjalanan Dinas",
