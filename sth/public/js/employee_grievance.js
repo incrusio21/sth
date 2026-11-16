@@ -20,7 +20,8 @@ frappe.ui.form.on("Employee Grievance", {
       department_name = department.message?.department_name || "";
     }
 
-    await frm.set_value("department", department_name);
+    await frm.set_value("department", employee.department);
+    await frm.set_value("department_name", department_name);
     await frm.set_value("unit", employee.unit);
     await frm.set_value("divisi", employee.nama_divisi);
     await frm.set_value("golongan", employee.grade);
