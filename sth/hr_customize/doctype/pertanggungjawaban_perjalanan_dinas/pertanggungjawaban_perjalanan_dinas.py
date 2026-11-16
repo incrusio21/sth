@@ -268,6 +268,7 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 	def get_data_employee(self, travel):
 		employee = frappe.get_doc("Employee", travel.get("employee"))
 		designation = frappe.get_doc("Designation", employee.designation)
+		department = frappe.get_doc("Department", employee.department)
 
 		self.travel_for = travel.get("tf")
 		self.employee = employee.get("name")
@@ -276,6 +277,7 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 		self.grade = employee.get("grade")
 		self.designation = designation.get("designation_name")
 		self.department = employee.get("department")
+		self.department_name = department.get("department_name")
 		self.company = employee.get("company")
   
 @frappe.whitelist()
