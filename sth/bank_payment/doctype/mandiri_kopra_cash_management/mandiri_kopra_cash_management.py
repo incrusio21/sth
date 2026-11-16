@@ -282,7 +282,7 @@ def process_mt940_pending_release():
                 "Payment Entry",
                 pe.name,
                 "payment_status",
-                "Success"
+                "Released"
             )
 
             results.append({

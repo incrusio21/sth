@@ -33,7 +33,7 @@ class Project:
     
     def set_capex_serial_no(self):
         
-        if not self.doc.for_proposal:
+        if not self.doc.for_proposal or self.doc.spk_type not in ["Transaction", "Non Transaction"]:
             return
         
         if not self.doc.proposal:
