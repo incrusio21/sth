@@ -1,6 +1,8 @@
 # Copyright (c) 2025, DAS and contributors
 # For license information, please see license.txt
 
+import hashlib
+
 import frappe
 from frappe.utils import cint, flt, format_date, get_link_to_form, getdate
 from frappe.query_builder.functions import Coalesce, Sum
@@ -36,6 +38,51 @@ FIELD_HASIL_KERJA_API = (
 # menjumlahkan qty seluruh baris BKM sebulan yang kolom perannya menunjuk orang
 # itu, jadi dokumen dengan pemegang peran berbeda tidak boleh disatukan.
 FIELD_PEMEGANG_PREMI = ("kode_mandor", "mandor1", "kerani_panen")
+
+
+BATAS_TUNGGU_KUNCI = 60
+
+
+def kunci_trans_no(trans_no):
+	"""Antrekan kiriman API ber-trans_no sama, sampai transaksinya selesai.
+
+	Sistem luar mengirim satu request per pemanen untuk trans_no yang sama, dan
+	request-request itu datang hampir bersamaan. Tanpa antrean, dua request
+	membaca BKM yang sama lalu sama-sama menyimpannya: yang kalah gagal dengan
+	TimestampMismatchError, atau -- lewat db_update_all di dokumen yang sudah
+	submit -- baris dari request lain terhapus diam-diam.
+
+	Sengaja GET_LOCK, bukan filelock seperti di RKH. filelock lepas di akhir
+	blok `with`, sedangkan transaksinya baru di-commit sesudah request selesai,
+	jadi request berikutnya masih membaca data sebelum commit. Kunci ini baru
+	dilepas setelah commit atau rollback.
+
+	Sesudah kunci didapat, transaksinya dimulai ulang kalau belum ada yang
+	ditulis. Snapshot REPEATABLE READ sudah terbentuk sejak bacaan pertama
+	request (autentikasi), sebelum request pendahulunya commit; tanpa dimulai
+	ulang, kiriman ini tetap tidak melihat baris yang baru saja masuk.
+	"""
+	if not trans_no or frappe.db.db_type != "mariadb":
+		return
+
+	nama = "bkm-panen-" + hashlib.md5(trans_no.encode()).hexdigest()
+	if not frappe.db.sql("SELECT GET_LOCK(%s, %s)", (nama, BATAS_TUNGGU_KUNCI))[0][0]:
+		frappe.throw(
+			_("Kiriman lain untuk Trans No {0} masih diproses. Kirim ulang sebentar lagi.").format(
+				frappe.bold(trans_no)
+			),
+			title=_("Trans No Sedang Diproses"),
+		)
+
+	if not frappe.db.transaction_writes:
+		frappe.db.rollback()
+
+	def lepas():
+		frappe.db.sql("SELECT RELEASE_LOCK(%s)", nama)
+
+	# didaftarkan sesudah rollback di atas, yang ikut menjalankan after_rollback
+	frappe.db.after_commit.add(lepas)
+	frappe.db.after_rollback.add(lepas)
 
 
 def kunci_baris(hk):
@@ -190,7 +237,7 @@ def gabung_ke_bkm(nama, kiriman):
 
 	Balikan None berarti kirimannya harus jadi dokumen baru.
 	"""
-	doc = frappe.get_doc("Buku Kerja Mandor Panen", nama)
+	doc = frappe.get_doc("Buku Kerja Mandor Panen", nama, for_update=True)
 
 	baris_baru = baris_hasil_kerja_baru(doc, kiriman)
 	if not baris_baru:
@@ -288,6 +335,8 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 		"""
 		if frappe.session.user != USER_API:
 			return super().insert(*args, **kwargs)
+
+		kunci_trans_no(self.trans_no)
 
 		# kode_mandor baru diisi dari `mandor` di before_insert, dan before_insert
 		# jalan di dalam super().insert() — sesudah pencarian di bawah. Tanpa ini
@@ -489,7 +538,20 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 					frappe.message_log.pop()
 
 				frappe.db.rollback(save_point=rekap_panen)  # preserve transaction in postgres
-				rpb = frappe.get_last_doc("Recap Panen by Blok", {"company": self.company, "posting_date": self.posting_date, "blok": b})
+				# Recap yang sama dipakai semua BKM di blok dan tanggal itu, apa pun
+				# trans_no-nya, jadi kunci_trans_no tidak menolong di sini. Dibaca
+				# dengan FOR UPDATE: bacaan biasa memakai snapshot lama dan bisa
+				# tidak melihat recap yang baru di-commit BKM lain -- dan yang
+				# disimpan dari snapshot itu ditolak TimestampMismatchError. Kunci
+				# barisnya juga membuat BKM lain menunggu sampai yang ini commit.
+				nama_rpb = frappe.db.get_value(
+					"Recap Panen by Blok",
+					{"company": self.company, "posting_date": self.posting_date, "blok": b},
+					"name",
+					order_by="creation desc",
+					for_update=True,
+				)
+				rpb = frappe.get_doc("Recap Panen by Blok", nama_rpb, for_update=True)
 				for vc in rpb.voucher_recap:
 					if vc.voucher_type == self.doctype and vc.voucher_no == self.name:
 						vc.update(value)
@@ -604,7 +666,7 @@ class BukuKerjaMandorPanen(BukuKerjaMandorController):
 			filters={"voucher_type": self.doctype, "voucher_no": self.name},
 			pluck="parent"
 		)):
-			rpb = frappe.get_doc("Recap Panen by Blok", epl)
+			rpb = frappe.get_doc("Recap Panen by Blok", epl, for_update=True)
 			if (rpb.blok, rpb.company, getdate(rpb.posting_date)) in keep:
 				continue
 

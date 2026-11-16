@@ -45,7 +45,7 @@ def catat_request_api(request, response):
 	"""
 	try:
 		if (
-			frappe.session.user != USER_API
+			not dari_sistem_luar(request)
 			or request.method not in METHOD_DICATAT
 			or not request.path.startswith("/api/")
 		):
@@ -81,6 +81,18 @@ def catat_request_api(request, response):
 	except Exception:
 		frappe.db.rollback()
 		frappe.logger("log_api_masuk").error("Gagal mencatat request API", exc_info=True)
+
+
+def dari_sistem_luar(request):
+	"""Request ini datang dari luar Desk, bukan dari orang yang sedang membuka form.
+
+	Dulu cuma USER_API yang dicatat. Kiriman yang sama dari Postman atau integrasi
+	lain memakai API key user sendiri lalu tidak meninggalkan jejak sama sekali,
+	padahal endpoint dan payload-nya persis sama. Desk login lewat cookie sid,
+	tidak pernah mengirim header Authorization, jadi header itu cukup untuk
+	memisahkan keduanya tanpa ikut mencatat tiap simpan dari form.
+	"""
+	return frappe.session.user == USER_API or bool(request.headers.get("Authorization"))
 
 
 def baca_body(response):
