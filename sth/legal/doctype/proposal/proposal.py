@@ -119,7 +119,8 @@ class Proposal(BuyingController):
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
-		self.set_project_name()
+		if self.proposal_type == "Capex" and self.is_cwip:
+			self.set_project_name() 
 		self.set_retensi_or_term_value()
 	
 	def validate_terms(self):
