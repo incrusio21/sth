@@ -113,32 +113,87 @@ def get_employees_with_attendance(filters, month_num, year):
 	# If employee filter is provided, use only that employee
 	if filters.get("employee"):
 		employee_doc = frappe.get_doc("Employee", filters.get("employee"))
+
 		if employee_doc.custom_kriteria == "Satuan Hasil":
-			frappe.throw(""" Employee dengan kriteria Satuan Hasil tidak boleh muncul di Laporan ini. """)
+			frappe.throw("""
+				Employee dengan kriteria Satuan Hasil tidak boleh muncul di Laporan ini.
+			""")
+
+		# Validasi filter tambahan
+		if filters.get("unit") and employee_doc.unit != filters.get("unit"):
+			return []
+
+		if filters.get("employment_type") and employee_doc.employment_type != filters.get("employment_type"):
+			return []
+
+		if filters.get("divisi") and employee_doc.custom_divisi != filters.get("divisi"):
+			return []
 
 		return [filters.get("employee")]
+	# if filters.get("employee"):
+	# 	employee_doc = frappe.get_doc("Employee", filters.get("employee"))
+	# 	if employee_doc.custom_kriteria == "Satuan Hasil":
+	# 		frappe.throw(""" Employee dengan kriteria Satuan Hasil tidak boleh muncul di Laporan ini. """)
+
+	# 	return [filters.get("employee")]
 	
 	# Otherwise, get all employees with attendance in that month
 	query = """
-		SELECT DISTINCT 
+		SELECT DISTINCT
 			a.employee
-		FROM 
+		FROM
 			`tabAttendance` a
 		JOIN `tabEmployee` b
-			ON a.employee = b.name AND b.custom_kriteria = "Non Satuan Hasil"
-		WHERE 
+			ON a.employee = b.name
+			AND b.custom_kriteria = "Non Satuan Hasil"
+		WHERE
 			a.docstatus = 1
 			AND MONTH(a.attendance_date) = %(month)s
 			AND YEAR(a.attendance_date) = %(year)s
-			
-		ORDER BY 
+			AND (
+				%(unit)s IS NULL
+				OR b.unit = %(unit)s
+			)
+			AND (
+				%(employment_type)s IS NULL
+				OR b.employment_type = %(employment_type)s
+			)
+			AND (
+				%(divisi)s IS NULL
+				OR b.custom_divisi = %(divisi)s
+			)
+
+		ORDER BY
 			a.employee
 	"""
-	
+
 	employees = frappe.db.sql(query, {
 		"month": month_num,
-		"year": year
+		"year": year,
+		"unit": filters.get("unit"),
+		"employment_type": filters.get("employment_type"),
+		"divisi": filters.get("divisi")
 	}, as_dict=1)
+	# query = """
+	# 	SELECT DISTINCT 
+	# 		a.employee
+	# 	FROM 
+	# 		`tabAttendance` a
+	# 	JOIN `tabEmployee` b
+	# 		ON a.employee = b.name AND b.custom_kriteria = "Non Satuan Hasil"
+	# 	WHERE 
+	# 		a.docstatus = 1
+	# 		AND MONTH(a.attendance_date) = %(month)s
+	# 		AND YEAR(a.attendance_date) = %(year)s
+			
+	# 	ORDER BY 
+	# 		a.employee
+	# """
+	
+	# employees = frappe.db.sql(query, {
+	# 	"month": month_num,
+	# 	"year": year
+	# }, as_dict=1)
 	
 	return [emp.employee for emp in employees]
 

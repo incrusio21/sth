@@ -30,18 +30,36 @@ frappe.query_reports["Laporan Gaji Kantor"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname": "unit",
+			"label": __("Unit"),
+			"fieldtype": "Link",
+			"options": "Unit",
+		},
+		{
+			"fieldname": "employment_type",
+			"label": __("Tipe Karyawan"),
+			"fieldtype": "Link",
+			"options": "Employment Type",
+		},
+		{
+			"fieldname": "divisi",
+			"label": __("Divisi"),
+			"fieldtype": "Link",
+			"options": "Divisi",
+		},
+		{
 			"fieldname": "employee",
 			"label": __("Karyawan"),
 			"fieldtype": "Link",
 			"options": "Employee",
 			"default": "",
-			"get_query": function() {
-                return {
-                    "filters": {
-                        "custom_kriteria": "Non Satuan Hasil"
-                    }
-                };
-            }
+			"get_query": function () {
+				return {
+					"filters": {
+						"custom_kriteria": "Non Satuan Hasil"
+					}
+				};
+			}
 		}
 	]
 };
