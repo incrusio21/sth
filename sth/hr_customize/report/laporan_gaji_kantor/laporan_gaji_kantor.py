@@ -327,15 +327,15 @@ def process_employee(employee_id, filters, month_num, year):
 						pembagi = employment_type.hari_ump
 
 					if pembagi:
-						gaji_pokok = month_num
+						gaji_pokok = ssa.base / pembagi
 
-						# # Jika hari Minggu/libur, absensi Hadir, dan pengaturan dicentang
-						# if (
-						# 	is_hari_libur
-						# 	and (absensi or "").strip().lower() in ["h"]
-						# 	and ikut_jumlah_hari
-						# ):
-						# 	gaji_pokok *= 2
+						# Jika hari Minggu/libur, absensi Hadir, dan pengaturan dicentang
+						if (
+							is_hari_libur
+							and (absensi or "").strip().lower() in ["h"]
+							and ikut_jumlah_hari
+						):
+							gaji_pokok *= 2
 		# if absensi != "":
 		# 	gaji_pokok = ump_bulanan / hari_ump 
 
