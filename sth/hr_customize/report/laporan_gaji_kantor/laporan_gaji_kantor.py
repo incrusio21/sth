@@ -155,13 +155,13 @@ def process_employee(employee_id, filters, month_num, year):
 	# Get Employee Payment Log for Premi Kehadiran
 	epl = frappe.qb.DocType("Employee Payment Log")
 	emp_pl = (
-		frappe.qb.from_(epl)
-		.select(epl.posting_date, epl.amount)
-		.where(
-			(epl.employee == employee_id)
-			& (epl.salary_component == "Premi Kehadiran Kebun")
-			& (epl.posting_date.isin(all_dates))
-		)
+			frappe.qb.from_(epl)
+			.select(epl.posting_date, epl.amount)
+			.where(
+					(epl.employee == employee_id)
+					& (epl.salary_component.like("%Premi Kehadiran%"))
+					& (epl.posting_date.isin(all_dates))
+			)
 	).run(as_dict=1)
 
 	# Get holidays for the employee
@@ -235,8 +235,8 @@ def process_employee(employee_id, filters, month_num, year):
 				absensi = ""
 
 		gaji_pokok = 0
-		if absensi != "":
-			gaji_pokok = ump_bulanan / hari_ump 
+		# if absensi != "":
+		# 	gaji_pokok = ump_bulanan / hari_ump 
 
 		premi_kehadiran = 0
 		for check_premi in emp_pl:
