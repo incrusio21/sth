@@ -232,8 +232,8 @@ def debug_bpjs():
 # Indeks kolom hasil query di pasang_bpjs. Query-nya mengembalikan tuple, bukan
 # dict, jadi urutan select di sana dan angka-angka di sini harus bergerak bersama.
 KOLOM_EMPLOYEE = 0
-KOLOM_SSA_FROM_DATE = 13
-KOLOM_SSA_CREATION = 14
+KOLOM_SSA_FROM_DATE = 12
+KOLOM_SSA_CREATION = 13
 
 
 def ssa_terakhir_per_employee(rows):
@@ -298,6 +298,20 @@ def employee_dengan_attendance(employees, from_date, to_date):
 	)
 
 
+def validasi_satu_program_kes(susunan_bpjs):
+	if susunan_bpjs.jenis_bpjs != "BPJS KES" or len(susunan_bpjs.set_up_bpjs_pt_table) <= 1:
+		return
+
+	frappe.throw(
+		_("Set Up BPJS PT {0} jenis BPJS KES hanya boleh berisi satu program, sekarang ada {1}: {2}").format(
+			susunan_bpjs.name,
+			len(susunan_bpjs.set_up_bpjs_pt_table),
+			", ".join(row.nama_program or "" for row in susunan_bpjs.set_up_bpjs_pt_table),
+		),
+		title=_("Program BPJS KES Lebih dari Satu"),
+	)
+
+
 def pasang_bpjs(doc):
 	# doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
 
@@ -318,7 +332,6 @@ def pasang_bpjs(doc):
 				
 				Employee.custom_nama_ibu_kandung,
 				Employee.blood_group,
-				Employee.kelas_bpjs_kesehatan,
 				SSAssignment.custom_tunjangan_komunikasi + SSAssignment.custom_tunjangan_daerah + SSAssignment.custom_tunjangan_perumahan,
 				Employee.grade,
 
@@ -365,29 +378,33 @@ def pasang_bpjs(doc):
 
 	list_program_employee = {}
 	susunan_bpjs = frappe.get_doc("Set Up BPJS PT", doc.set_up_bpjs)
+	# BPJS KES dulu memilih program yang namanya sama dengan kelas BPJS karyawan.
+	# Kelasnya sudah dihapus dari Employee, jadi semua program di Set Up ikut
+	# dibebankan. Lebih dari satu program berarti karyawan ditagih dua kelas.
+	validasi_satu_program_kes(susunan_bpjs)
 	for satu_employee in list_employee:
 		list_program_employee[satu_employee[0]] = []
 		for row in susunan_bpjs.set_up_bpjs_pt_table:
 			program_doc = frappe.get_doc("Program BPJS", row.nama_program)
 			batas = 0
 			for baris_program in program_doc.program_bpjs_staff:
-				if baris_program.golongan == "Non Staff" and satu_employee[10] == "NON STAFF":
-					if baris_program.kriteria == "Satuan Hasil" and satu_employee[11] == "Satuan Hasil":
+				if baris_program.golongan == "Non Staff" and satu_employee[9] == "NON STAFF":
+					if baris_program.kriteria == "Satuan Hasil" and satu_employee[10] == "Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
-					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[11] == "Non Satuan Hasil":
+					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[10] == "Non Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
 
-				elif baris_program.golongan == "Staf Up" and satu_employee[10] == "STAFF":
-					if baris_program.kriteria == "Satuan Hasil" and satu_employee[11] == "Satuan Hasil":
+				elif baris_program.golongan == "Staf Up" and satu_employee[9] == "STAFF":
+					if baris_program.kriteria == "Satuan Hasil" and satu_employee[10] == "Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
-					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[11] == "Non Satuan Hasil":
+					elif baris_program.kriteria == "Non Satuan Hasil" and satu_employee[10] == "Non Satuan Hasil":
 						batas = frappe.utils.flt(baris_program.batas_maksimum)
 
 
 
 			gp_satu = satu_employee[1]
-			# if satu_employee[10] != "NON STAF":
-			# 	gp_satu = satu_employee[1] + satu_employee[9]
+			# if satu_employee[9] != "NON STAF":
+			# 	gp_satu = satu_employee[1] + satu_employee[8]
 
 			if batas > 0:
 				if gp_satu > batas:
@@ -405,8 +422,8 @@ def pasang_bpjs(doc):
 
 	for row in list_employee:
 		gp_satu = row[1]
-		# if row[10] != "NON STAF":
-		# 	gp_satu = row[1] + row[9]
+		# if row[9] != "NON STAF":
+		# 	gp_satu = row[1] + row[8]
 
 		satu_employee = row[0]
 		gp = gp_satu
@@ -416,43 +433,21 @@ def pasang_bpjs(doc):
 		no_bpjs = row[5]
 		nama_ibu = row[6]
 		gol_darah = row[7]
-		kelas_bpjs_kesehatan = row[8]
-		nama_jabatan = row[12]
+		nama_jabatan = row[11]
 		beban_karyawan = 0
 		beban_perusahaan = 0
 		# masukkan semua detil ke table detail
 		for satu_beban in list_program_employee[satu_employee]:
-			if doc.jenis_bpjs == "BPJS KES":
-				cek_kes = 0
-				# perlu cek kelas nya
-				if satu_beban.get("program") == kelas_bpjs_kesehatan:
-					cek_kes = 1
+			satu_row = doc.append("set_up_bpjs_detail_table")
 
-				if cek_kes == 1:
-					satu_row = doc.append("set_up_bpjs_detail_table")
-				
-					satu_row.employee = satu_employee
+			satu_row.employee = satu_employee
+			satu_row.nama_employee = nama_employee
+			satu_row.program = satu_beban.get("program")
+			satu_row.beban_karyawan = satu_beban.get("beban_karyawan")
+			satu_row.beban_perusahaan = satu_beban.get("beban_perusahaan")
 
-					satu_row.nama_employee = nama_employee
-					satu_row.program = satu_beban.get("program")
-					satu_row.beban_karyawan = satu_beban.get("beban_karyawan")
-					satu_row.beban_perusahaan = satu_beban.get("beban_perusahaan")
-					satu_row.nama_employee = nama_employee
-
-					beban_karyawan += frappe.utils.flt(satu_row.beban_karyawan)
-					beban_perusahaan += frappe.utils.flt(satu_row.beban_perusahaan)
-
-			else:
-				satu_row = doc.append("set_up_bpjs_detail_table")
-				
-				satu_row.employee = satu_employee
-				satu_row.nama_employee = nama_employee
-				satu_row.program = satu_beban.get("program")
-				satu_row.beban_karyawan = satu_beban.get("beban_karyawan")
-				satu_row.beban_perusahaan = satu_beban.get("beban_perusahaan")
-
-				beban_karyawan += frappe.utils.flt(satu_row.beban_karyawan)
-				beban_perusahaan += frappe.utils.flt(satu_row.beban_perusahaan)
+			beban_karyawan += frappe.utils.flt(satu_row.beban_karyawan)
+			beban_perusahaan += frappe.utils.flt(satu_row.beban_perusahaan)
 
 
 		# masuk ke daftar bpjs employee
