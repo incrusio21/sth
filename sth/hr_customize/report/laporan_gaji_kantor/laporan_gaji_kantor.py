@@ -220,6 +220,8 @@ def process_employee(employee_id, filters, month_num, year):
 	
 	# Process each date in the month
 	for date in all_dates:
+		# Cek apakah tanggal merupakan hari Minggu atau hari libur nasional
+		is_hari_libur = date.weekday() == 6 or date in holiday_dates
 		attendance_row = attendance_dict.get(date)
 		
 		if attendance_row:
@@ -235,12 +237,13 @@ def process_employee(employee_id, filters, month_num, year):
 				absensi = ""
 
 		gaji_pokok = 0
+
 		if absensi != "":
 			ssa_list = frappe.get_all(
 				"Salary Structure Assignment",
 				filters={
-					"employee": employee_id,
-					"docstatus": 1
+						"employee": employee_id,
+						"docstatus": 1
 				},
 				fields=["name", "employment_type", "base"],
 				order_by="from_date desc",
@@ -252,8 +255,6 @@ def process_employee(employee_id, filters, month_num, year):
 				ssa_list[0].name
 			) if ssa_list else None
 
-			gaji_pokok = 0
-
 			if ssa:
 				employment_type = frappe.db.get_value(
 					"Employment Type",
@@ -263,16 +264,23 @@ def process_employee(employee_id, filters, month_num, year):
 				)
 
 				if employment_type:
-					if employment_type.hari_ump_ikut_jumlah_hari_1_bulan:
-						pembagi = calendar.monthrange(
-							year,
-							month_num
-						)[1]
+					ikut_jumlah_hari = employment_type.hari_ump_ikut_jumlah_hari_1_bulan
+
+					if ikut_jumlah_hari:
+						pembagi = calendar.monthrange(year, month_num)[1]
 					else:
 						pembagi = employment_type.hari_ump
 
 					if pembagi:
 						gaji_pokok = ssa.base / pembagi
+
+						# Jika hari Minggu/libur, absensi Hadir, dan pengaturan dicentang
+						if (
+							is_hari_libur
+							and (absensi or "").strip().lower() in ["h", "hadir"]
+							and ikut_jumlah_hari
+						):
+							gaji_pokok *= 2
 		# if absensi != "":
 		# 	gaji_pokok = ump_bulanan / hari_ump 
 
