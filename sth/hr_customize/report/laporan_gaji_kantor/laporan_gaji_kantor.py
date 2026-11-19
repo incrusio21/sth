@@ -159,7 +159,7 @@ def process_employee(employee_id, filters, month_num, year):
 		.select(epl.posting_date, epl.amount)
 		.where(
 			(epl.employee == employee_id)
-			& (epl.salary_component == "Premi Kehadiran")
+			& (epl.salary_component == "Premi Kehadiran Kebun")
 			& (epl.posting_date.isin(all_dates))
 		)
 	).run(as_dict=1)
