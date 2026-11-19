@@ -234,7 +234,44 @@ def get_cover(html):
 	if wrapper:
 		wrapper.unwrap()   # HAPUS TAG, ISI TETAP
 
+	style = """
+		.ql-ui { display: none; }
+	
+		ol, ul { list-style: none; padding-left: 0; counter-reset: l0; }
+
+		li[data-list] {
+		list-style: none;
+		position: relative;
+		padding-left: 1.5em;
+		/* item level 0 me-reset counter level di bawahnya */
+		counter-reset: l1 l2;
+		}
+		li[data-list].ql-indent-1 { padding-left: 3.5em; counter-reset: l2; }
+		li[data-list].ql-indent-2 { padding-left: 5.5em; counter-reset: none; }
+
+		li[data-list]::before {
+		position: absolute;
+		width: 1.4em;
+		margin-left: -1.6em;
+		text-align: right;
+		}
+
+		/* angka hanya dihitung untuk data-list="ordered" */
+		li[data-list="ordered"]                { counter-increment: l0; }
+		li[data-list="ordered"].ql-indent-1    { counter-increment: l1; }
+		li[data-list="ordered"].ql-indent-2    { counter-increment: l2; }
+
+		li[data-list="ordered"]::before             { content: counter(l0, decimal) "."; }
+		li[data-list="ordered"].ql-indent-1::before { content: counter(l1, lower-alpha) "."; }
+		li[data-list="ordered"].ql-indent-2::before { content: counter(l2, lower-roman) "."; }
+
+		li[data-list="bullet"]::before { content: "\2022"; }
+	"""
+
 	html = f"""<html>
+			<style>
+				{style}
+			</style>
 			<body>
 				{soup}
 			</div>

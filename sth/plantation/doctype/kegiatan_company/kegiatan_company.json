@@ -7,9 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "column_break_zxke",
+  "blok",
+  "divisi",
   "unit",
-  "account",
   "column_break_rlow",
+  "account",
   "position",
   "use_basic_salary",
   "section_break_noeb",
@@ -162,13 +165,31 @@
    "in_list_view": 1,
    "label": "Unit",
    "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_zxke",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "divisi",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Divisi",
+   "options": "Divisi"
+  },
+  {
+   "fieldname": "blok",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Blok",
+   "options": "Blok"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-05 10:58:33.071529",
+ "modified": "2026-11-19 14:31:05.151245",
  "modified_by": "Administrator",
  "module": "Plantation",
  "name": "Kegiatan Company",
