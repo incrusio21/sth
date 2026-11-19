@@ -56,6 +56,12 @@ frappe.ui.form.on("Project", {
             })
         }
 
+        frm.set_query("contract_template", function () {
+            return {
+                query: "sth.controllers.queries.contract_template_query",
+            };
+        });
+
         frm.trigger("set_dynamic_labels")
     },
     onload(frm) {
