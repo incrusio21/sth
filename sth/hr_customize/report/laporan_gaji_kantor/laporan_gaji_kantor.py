@@ -242,14 +242,37 @@ def process_employee(employee_id, filters, month_num, year):
 					"employee": employee_id,
 					"docstatus": 1
 				},
-				fields=["name"],
+				fields=["name", "employment_type", "base"],
 				order_by="from_date desc",
 				limit=1
 			)
 
-			ssa = frappe.get_doc("Salary Structure Assignment", ssa_list[0].name) if ssa_list else None
-			gaji_pokok = ssa.base if ssa else 0
-			# gaji_pokok = ump_bulanan / hari_ump 
+			ssa = frappe.get_doc(
+				"Salary Structure Assignment",
+				ssa_list[0].name
+			) if ssa_list else None
+
+			gaji_pokok = 0
+
+			if ssa:
+				employment_type = frappe.db.get_value(
+					"Employment Type",
+					ssa.employment_type,
+					["hari_ump_ikut_jumlah_hari_1_bulan", "hari_ump"],
+					as_dict=True
+				)
+
+				if employment_type:
+					if employment_type.hari_ump_ikut_jumlah_hari_1_bulan:
+						pembagi = calendar.monthrange(
+							year,
+							month_num
+						)[1]
+					else:
+						pembagi = employment_type.hari_ump
+
+					if pembagi:
+						gaji_pokok = ssa.base / pembagi
 		# if absensi != "":
 		# 	gaji_pokok = ump_bulanan / hari_ump 
 
