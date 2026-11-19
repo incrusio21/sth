@@ -327,7 +327,7 @@ def process_employee(employee_id, filters, month_num, year):
 						pembagi = employment_type.hari_ump
 
 					if pembagi:
-						gaji_pokok = ssa.base
+						gaji_pokok = pembagi
 
 						# # Jika hari Minggu/libur, absensi Hadir, dan pengaturan dicentang
 						# if (
