@@ -575,8 +575,134 @@ def buat_nota_piutang(doc, method):
 		np.insert(ignore_permissions=True)
 		np.submit()
 
-	
 		
+# def set_no_rekening(doc, method):
+
+# 	bank_account = frappe.db.get_value(
+# 		"Bank Account",
+# 		{
+# 			"account": doc.paid_from
+# 		},
+# 		["bank_account_no", "bank"],
+# 		as_dict=True
+# 	)
+
+# 	if bank_account:
+# 		doc.no_rekening_asal = (
+# 			bank_account.bank_account_no
+# 		)
+
+# 	result = get_no_rekening(
+# 		party_type=doc.party_type,
+# 		party=doc.party,
+# 		paid_to=doc.paid_to,
+# 		tipe_transfer=doc.tipe_transfer,
+# 		permintaan_dana_operasional=doc.permintaan_dana_operasional,
+# 		payment_type=doc.payment_type,
+# 		no_payroll_entry=doc.get("no_payroll_entry")
+# 	)
+
+# 	# tagihan Potongan / BPJS dibayar ke rekening dokumen asalnya, bukan rekening unit
+# 	from sth.hr_customize.pembayaran_payroll import tujuan_transfer
+
+# 	bank_tujuan, no_rekening_tujuan = tujuan_transfer(doc)
+# 	if no_rekening_tujuan:
+# 		result["no_rekening_tujuan"] = no_rekening_tujuan
+# 		result["bank_tujuan"] = bank_tujuan
+# 		doc.bank_tujuan = bank_tujuan
+
+# 	doc.no_rekening = None
+# 	doc.nama_bank = None
+# 	doc.nama_pemilik_rekening = result.get("nama_pemilik_rekening")
+
+# 	# special handling internal employee
+# 	if (
+# 		doc.party_type == "Employee"
+# 		and doc.internal_employee
+# 	):
+
+# 		reference = None
+
+# 		if doc.references:
+# 			reference = doc.references[0]
+
+# 		if (
+# 			reference
+# 			and reference.reference_doctype
+# 			and reference.reference_name
+# 		):
+
+# 			no_rekening_tujuan = ""
+
+# 			if frappe.get_meta(reference.reference_doctype).has_field("no_rekening_tujuan"):
+# 				no_rekening_tujuan = frappe.db.get_value(
+# 					reference.reference_doctype,
+# 					reference.reference_name,
+# 					"no_rekening_tujuan"
+# 				) or ""
+
+# 			if no_rekening_tujuan:
+
+# 				bank_account = frappe.db.get_value(
+# 					"Bank Account",
+# 					no_rekening_tujuan,
+# 					[
+# 						"bank_account_no",
+# 						"bank"
+# 					],
+# 					as_dict=True
+# 				)
+
+# 				if bank_account:
+
+# 					doc.no_rekening_tujuan = (
+# 						bank_account.bank_account_no
+# 					)
+
+# 					doc.bank_tujuan = (
+# 						bank_account.bank
+# 					)
+
+# 				if not doc.bill_no: 
+# 					doc.bill_no = (
+# 						no_rekening_tujuan
+# 					)
+
+# 	else:
+
+# 		if result.get("no_rekening"):
+# 			doc.no_rekening = (
+# 				result["no_rekening"]
+# 			)
+
+# 		if result.get("nama_bank"):
+# 			doc.nama_bank = (
+# 				result["nama_bank"]
+# 			)
+
+# 	if result.get("no_rekening_tujuan"):
+# 		doc.no_rekening_tujuan = (
+# 			result["no_rekening_tujuan"]
+# 		)
+
+# 		if not doc.bill_no: 
+# 			doc.bill_no = (
+# 				result["no_rekening_tujuan"]
+# 			)
+
+# 	if result.get("bank_tujuan"):
+# 		doc.bank_tujuan = (
+# 			result["bank_tujuan"]
+# 		)
+
+# 	doc.beneficary_account = (doc.no_rekening) or (doc.no_rekening_tujuan)
+
+# 	doc.beneficary_bank = (doc.nama_bank) or (doc.bank_tujuan)
+
+def normalize_rekening(value):
+	return "".join(c for c in (value or "") if c.isdigit())
+
+
 def set_no_rekening(doc, method):
 
 	bank_account = frappe.db.get_value(
@@ -589,7 +715,7 @@ def set_no_rekening(doc, method):
 	)
 
 	if bank_account:
-		doc.no_rekening_asal = (
+		doc.no_rekening_asal = normalize_rekening(
 			bank_account.bank_account_no
 		)
 
@@ -607,6 +733,7 @@ def set_no_rekening(doc, method):
 	from sth.hr_customize.pembayaran_payroll import tujuan_transfer
 
 	bank_tujuan, no_rekening_tujuan = tujuan_transfer(doc)
+
 	if no_rekening_tujuan:
 		result["no_rekening_tujuan"] = no_rekening_tujuan
 		result["bank_tujuan"] = bank_tujuan
@@ -635,7 +762,9 @@ def set_no_rekening(doc, method):
 
 			no_rekening_tujuan = ""
 
-			if frappe.get_meta(reference.reference_doctype).has_field("no_rekening_tujuan"):
+			if frappe.get_meta(reference.reference_doctype).has_field(
+				"no_rekening_tujuan"
+			):
 				no_rekening_tujuan = frappe.db.get_value(
 					reference.reference_doctype,
 					reference.reference_name,
@@ -656,7 +785,7 @@ def set_no_rekening(doc, method):
 
 				if bank_account:
 
-					doc.no_rekening_tujuan = (
+					doc.no_rekening_tujuan = normalize_rekening(
 						bank_account.bank_account_no
 					)
 
@@ -664,7 +793,7 @@ def set_no_rekening(doc, method):
 						bank_account.bank
 					)
 
-				if not doc.bill_no: 
+				if not doc.bill_no:
 					doc.bill_no = (
 						no_rekening_tujuan
 					)
@@ -672,7 +801,7 @@ def set_no_rekening(doc, method):
 	else:
 
 		if result.get("no_rekening"):
-			doc.no_rekening = (
+			doc.no_rekening = normalize_rekening(
 				result["no_rekening"]
 			)
 
@@ -682,11 +811,11 @@ def set_no_rekening(doc, method):
 			)
 
 	if result.get("no_rekening_tujuan"):
-		doc.no_rekening_tujuan = (
+		doc.no_rekening_tujuan = normalize_rekening(
 			result["no_rekening_tujuan"]
 		)
 
-		if not doc.bill_no: 
+		if not doc.bill_no:
 			doc.bill_no = (
 				result["no_rekening_tujuan"]
 			)
@@ -696,9 +825,14 @@ def set_no_rekening(doc, method):
 			result["bank_tujuan"]
 		)
 
-	doc.beneficary_account = (doc.no_rekening) or (doc.no_rekening_tujuan)
+	doc.beneficary_account = normalize_rekening(
+		doc.no_rekening or doc.no_rekening_tujuan
+	)
 
-	doc.beneficary_bank = (doc.nama_bank) or (doc.bank_tujuan)
+	doc.beneficary_bank = (
+		doc.nama_bank
+		or doc.bank_tujuan
+	)
 
 @frappe.whitelist()
 def get_no_rekening(party_type=None, party=None, 

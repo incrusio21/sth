@@ -1,0 +1,32 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Contract Template",
+ "links": [],
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2026-11-19 09:33:53.844447",
+   "default_value": null,
+   "doc_type": "Contract Template",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2026-11-19 09:33:53.844447",
+   "modified_by": "Administrator",
+   "module": "HR Customize",
+   "name": "Contract Template-main-sort_field",
+   "owner": "Administrator",
+   "property": "sort_field",
+   "property_type": "Data",
+   "row_name": null,
+   "value": "name"
+  }
+ ],
+ "sync_on_migrate": 1
+}

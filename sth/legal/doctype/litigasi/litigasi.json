@@ -27,7 +27,11 @@
   "amar_putusan",
   "file_dokumen",
   "task_tab",
-  "litigasi_task"
+  "litigasi_task",
+  "upload_file_tab",
+  "upload",
+  "kriteria_upload_html",
+  "kriteria_upload_sebelumnya"
  ],
  "fields": [
   {
@@ -53,6 +57,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Perusahaan",
    "options": "Company",
    "reqd": 1
@@ -122,6 +127,7 @@
   {
    "fieldname": "file_dokumen",
    "fieldtype": "Attach",
+   "hidden": 1,
    "label": "File Dokumen"
   },
   {
@@ -151,12 +157,37 @@
    "fieldtype": "Table",
    "label": "Litigasi Task",
    "options": "Litigasi Task"
+  },
+  {
+   "fieldname": "upload_file_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Upload File"
+  },
+  {
+   "fieldname": "upload",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Upload",
+   "options": "Kriteria Upload Dokumen Finance"
+  },
+  {
+   "fieldname": "kriteria_upload_html",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload HTML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kriteria_upload_sebelumnya",
+   "fieldtype": "HTML",
+   "label": "Kriteria Upload Sebelumnya",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-04 15:29:59.505144",
+ "modified": "2026-11-17 15:46:20.250330",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Litigasi",
