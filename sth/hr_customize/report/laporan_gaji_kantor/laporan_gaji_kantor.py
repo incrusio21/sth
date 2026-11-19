@@ -332,7 +332,7 @@ def process_employee(employee_id, filters, month_num, year):
 						# Jika hari Minggu/libur, absensi Hadir, dan pengaturan dicentang
 						if (
 							is_hari_libur
-							and (absensi or "").strip().lower() in ["h", "hadir"]
+							and (absensi or "").strip().lower() in ["h", "hadir", "mg", "ln"]
 							and ikut_jumlah_hari
 						):
 							gaji_pokok *= 2
