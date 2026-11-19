@@ -293,7 +293,7 @@ def process_employee(employee_id, filters, month_num, year):
 
 		gaji_pokok = 0
 
-		if absensi != "":
+		if attendance_row and absensi == "H":
 			ssa_list = frappe.get_all(
 				"Salary Structure Assignment",
 				filters={
