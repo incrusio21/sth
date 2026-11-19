@@ -235,6 +235,21 @@ def process_employee(employee_id, filters, month_num, year):
 				absensi = ""
 
 		gaji_pokok = 0
+		if absensi != "":
+			ssa_list = frappe.get_all(
+				"Salary Structure Assignment",
+				filters={
+					"employee": employee_id,
+					"docstatus": 1
+				},
+				fields=["name"],
+				order_by="from_date desc",
+				limit=1
+			)
+
+			ssa = frappe.get_doc("Salary Structure Assignment", ssa_list[0].name) if ssa_list else None
+			gaji_pokok = ssa.base
+			# gaji_pokok = ump_bulanan / hari_ump 
 		# if absensi != "":
 		# 	gaji_pokok = ump_bulanan / hari_ump 
 
