@@ -100,8 +100,8 @@ class Project:
                 "parent": self.doc.supplier, "status_supplier": "Aktif"}, "user_email") or""
 
     def set_note(self):
-        if not self.doc.is_new():
-            return
+        # if not self.doc.is_new():
+        #     return
         
         from frappe.utils.formatters import format_value
 
@@ -112,28 +112,41 @@ class Project:
         po_i = frappe.qb.DocType(f"{doctype_name} Item")
         
         fields = [
-            po_i.kegiatan_name if doctype_name == "Proposal" else po_i.item_name,
+            po_i.item_name,
             po_i.qty,
             po_i.uom,
             po_i.rate,
+            po_i.amount,
         ]
+
+        if doctype_name == "Proposal":
+            fields.append(po_i.kegiatan_name)
 
         query = (
             frappe.qb.from_(po_i)
             .select(
                 *fields
             ).where(po_i.parent == document_name)
-        ).run()
+        ).run(as_dict=1)
 
-        data = "<div class='ql-editor' contenteditable='true'><ol>"
+        # data = "<div class='ql-editor' contenteditable='true'><ol>"
+        self.doc.note_items = []
         for d in query:
-            data += '<li data-list="ordered">'
-            data += f'<span class="ql-ui" contenteditable="false"></span>{d[0]} {format_value(d[1])} {d[2]} {format_value(d[3])}'
-            data += '</li>'
+            self.doc.append("note_items", {
+                "item_name": d.item_name or d.kegiatan_name,
+                "qty": d.qty,
+                "uom": d.uom,
+                "rate": d.rate,
+                "amount": d.amount,
+            })
 
-        data += "</ol></div>"
+        #     data += '<li data-list="ordered">'
+        #     data += f'<span class="ql-ui" contenteditable="false"></span>{d[0]} {format_value(d[1])} {d[2]} {format_value(d[3])}'
+        #     data += '</li>'
 
-        self.doc.notes = data
+        # data += "</ol></div>"
+
+        # self.doc.notes = data
 
     def validate_and_update_project(self, delete=0):
         # paksa status selalu menjadi cancelled ketika sudah ada yang adendum
