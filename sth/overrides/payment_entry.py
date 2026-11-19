@@ -1939,3 +1939,13 @@ def calculate_total_usage(self, designation, unit, month, year, exclude_realisas
 	
 	return total
 
+
+import frappe
+from frappe import _
+
+def prevent_cancel_success_mandiri_kcm(doc, method=None):
+    if doc.payment_status == "Released":
+        frappe.throw(
+            _("Payment Entry {0} tidak dapat dibatalkan karena Payment Status sudah Released.")
+            .format(doc.name)
+        )

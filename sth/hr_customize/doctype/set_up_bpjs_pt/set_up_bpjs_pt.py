@@ -5,10 +5,16 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from sth.hr_customize.doctype.daftar_bpjs.daftar_bpjs import samakan_komponen_dengan_master
+from sth.hr_customize.doctype.daftar_bpjs.daftar_bpjs import (
+	samakan_komponen_dengan_master,
+	validasi_satu_program_kes,
+)
 
 
 class SetUpBPJSPT(Document):
+	def validate(self):
+		validasi_satu_program_kes(self)
+
 	def on_update(self):
 		"""Jalarkan perbaikan komponen ke dokumen yang sudah membekukan salinannya.
 

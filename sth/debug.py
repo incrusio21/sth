@@ -457,3 +457,34 @@ def debug_payment_entry_workflow():
             })
 
     print(frappe.as_json(result, indent=2))
+
+
+
+import frappe
+
+def test_payment_entry_before_cancel(name):
+    doc = frappe.get_doc("Payment Entry", name)
+
+    fn = frappe.get_attr(
+        "sth.overrides.payment_entry.prevent_cancel_success_mandiri_kcm"
+    )
+
+    try:
+        fn(doc, "before_cancel")
+
+        return {
+            "payment_entry": name,
+            "hook": "before_cancel",
+            "result": "LOLOS",
+            "message": "Fungsi selesai tanpa exception. Dokumen tidak dibatalkan."
+        }
+
+    except Exception as e:
+        return {
+            "payment_entry": name,
+            "hook": "before_cancel",
+            "result": "DITOLAK",
+            "exception": type(e).__name__,
+            "message": str(e),
+            "document_status": doc.docstatus
+        }

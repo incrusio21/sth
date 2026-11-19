@@ -1527,7 +1527,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-13 09:04:07.922334",
+ "modified": "2026-11-17 17:02:10.021296",
  "modified_by": "Administrator",
  "module": "Legal",
  "name": "Proposal",
@@ -1575,7 +1575,7 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "status, transaction_date, supplier, grand_total",
+ "search_fields": "status, transaction_date, supplier, grand_total,project_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

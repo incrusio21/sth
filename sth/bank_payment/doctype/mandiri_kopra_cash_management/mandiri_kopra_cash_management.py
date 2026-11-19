@@ -236,6 +236,8 @@ def process_mt940_pending_release():
             if abs(preview["difference"]) > 0.01:
                 continue
 
+            pe.posting_date = preview["bank_payment"]["date"]
+
             account = frappe.db.get_value(
                 "Bank Admin Charges Account",
                 {"company": pe.company},
@@ -282,7 +284,7 @@ def process_mt940_pending_release():
                 "Payment Entry",
                 pe.name,
                 "payment_status",
-                "Success"
+                "Released"
             )
 
             results.append({
