@@ -35,14 +35,14 @@ class Project:
         
         if not self.doc.for_proposal or self.doc.spk_type not in ["Transaction", "Non Transaction"]:
             return
-        
+
         if not self.doc.proposal:
             frappe.throw("Please create Proposal first.")
 
         if not self.doc.proposal_type:
             frappe.throw("Please setup Proposal Type.")
 
-        if self.doc.proposal_type in ("Capex"):
+        if self.doc.proposal_type in ["Capex"]:
             proposal_series = frappe.get_value("Proposal", self.doc.proposal, "project_name")
             series = NamingSeries(proposal_series + "_.#####")
             self.doc.project_name = series.generate_next_name(self.doc, ignore_validate=True)
@@ -133,7 +133,7 @@ class Project:
         self.doc.note_items = []
         for d in query:
             self.doc.append("note_items", {
-                "item_name": d.item_name or d.kegiatan_name,
+                "item_name": d.get("kegiatan_name") or d.item_name,
                 "qty": d.qty,
                 "uom": d.uom,
                 "rate": d.rate,

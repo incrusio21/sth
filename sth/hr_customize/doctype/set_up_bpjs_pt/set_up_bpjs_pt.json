@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:kode",
+ "autoname": "format:{npp__no_bu}",
  "creation": "2025-12-12 21:20:38.969089",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -22,13 +22,13 @@
   {
    "fieldname": "kode",
    "fieldtype": "Data",
-   "label": "Kode",
+   "label": "Header",
    "unique": 1
   },
   {
    "fieldname": "pt",
    "fieldtype": "Link",
-   "label": "PT",
+   "label": "Perusahaan",
    "options": "Company"
   },
   {
@@ -44,9 +44,9 @@
    "options": "\nBPJS KES\nBPJS TK"
   },
   {
-   "fetch_from": "pt.npp",
    "fieldname": "npp__no_bu",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "NPP / No BU"
   },
   {
@@ -79,11 +79,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-11 11:01:07.996981",
+ "modified": "2026-11-20 14:41:39.039449",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Set Up BPJS PT",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

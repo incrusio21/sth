@@ -45,7 +45,7 @@ class Timbangan(Document):
 		self.set_kebun_dan_divisi_dari_spb()
 		self.set_kendaraan_eksternal()
 		self.set_janjang_brondolan_kebun()
-		self.validate_janjang_brondolan_wajib()
+		# self.validate_janjang_brondolan_wajib()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
 		# netto dihitung dulu: validate_qty_do membagi netto itu ke DO 1 dan DO 2
