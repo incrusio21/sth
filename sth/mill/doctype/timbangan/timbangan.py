@@ -45,7 +45,6 @@ class Timbangan(Document):
 		self.set_kebun_dan_divisi_dari_spb()
 		self.set_kendaraan_eksternal()
 		self.set_janjang_brondolan_kebun()
-		# self.validate_janjang_brondolan_wajib()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
 		# netto dihitung dulu: validate_qty_do membagi netto itu ke DO 1 dan DO 2
@@ -194,12 +193,12 @@ class Timbangan(Document):
 		if not flt(self.total_brondolan):
 			self.total_brondolan = flt(spb.total_brondolan) or flt(pos.total_brd)
 
-	def validate_janjang_brondolan_wajib(self):
-		"""Tiket TBS Internal wajib punya total janjang dan brondolan.
+	def validate_janjang_wajib(self):
+		"""Tiket TBS Internal wajib punya total janjang sebelum disubmit.
 
-		Dicek sesudah pengisian otomatis, bukan lewat mandatory_depends_on di
-		form: form akan menolak simpan sebelum server sempat mengambilkannya
-		dari SPB atau pos.
+		Dicek di before_submit, sesudah validate mengisi yang kosong dari SPB
+		atau pos, jadi draft tetap bisa disimpan selama angkanya belum ada.
+		Brondolan tidak diwajibkan: truk bisa datang tanpa brondolan.
 
 		Kiriman API dilewati. SPB stub-nya memang bisa baru berisi janjang
 		sesudah truknya ditimbang, dan tiket yang ditolak tidak dikirim ulang.
@@ -207,17 +206,10 @@ class Timbangan(Document):
 		if self.receive_type != "TBS Internal" or timbangan_dari_api(self):
 			return
 
-		kosong = [
-			label
-			for fieldname, label in (("total_janjang", _("Total Janjang")), ("total_brondolan", _("Total Brondolan")))
-			if not flt(self.get(fieldname))
-		]
-		if kosong:
+		if not flt(self.total_janjang):
 			frappe.throw(
-				_("{0} wajib diisi untuk TBS Internal. SPB dan Security Check Point-nya juga belum mencatatnya.").format(
-					_(" dan ").join(kosong)
-				),
-				title=_("Janjang / Brondolan Kosong"),
+				_("Total Janjang wajib diisi untuk TBS Internal. SPB dan Security Check Point-nya juga belum mencatatnya."),
+				title=_("Janjang Kosong"),
 			)
 
 	def isi_spb_detail(self):
@@ -403,6 +395,7 @@ class Timbangan(Document):
 	def before_submit(self):
 		self.validate_berat()
 		self.validate_delivery_note_asal()
+		self.validate_janjang_wajib()
 
 	def validate_berat(self):
 		"""Bruto dan tara dua-duanya harus sudah ditimbang sebelum disubmit.
