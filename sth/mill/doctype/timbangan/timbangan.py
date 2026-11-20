@@ -44,6 +44,8 @@ class Timbangan(Document):
 		self.validate_spb_pos()
 		self.set_kebun_dan_divisi_dari_spb()
 		self.set_kendaraan_eksternal()
+		self.set_janjang_brondolan_kebun()
+		self.validate_janjang_brondolan_wajib()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
 		# netto dihitung dulu: validate_qty_do membagi netto itu ke DO 1 dan DO 2
@@ -155,6 +157,69 @@ class Timbangan(Document):
 		if data.transporter:
 			self.transportir = data.transporter
 
+	def set_janjang_brondolan_kebun(self):
+		"""Isi total janjang dan brondolan kendaraan inti kebun yang masih kosong.
+
+		Kedua field ini dulu cuma terisi kalau pengirim API membawanya sendiri;
+		timbangan dari form dan kiriman yang tidak membawanya tetap nol, jadi
+		Sortasi yang mengambil dari sini juga kosong. Sumbernya SPB, yang selama
+		rincian bloknya belum datang sudah memegang catatan pos (lihat
+		get_or_create_spb di Security Check Point). Catatan pos dipakai langsung
+		kalau SPB-nya pun masih nol.
+
+		Yang sudah terisi tidak ditimpa, supaya angka kiriman API dan isian
+		operator tetap.
+		"""
+		if self.receive_type != "TBS Internal":
+			return
+
+		if flt(self.total_janjang) and flt(self.total_brondolan):
+			return
+
+		spb = (
+			frappe.db.get_value("Surat Pengantar Buah", self.spb, ["total_janjang", "total_brondolan"], as_dict=True)
+			if self.spb
+			else None
+		) or frappe._dict()
+
+		pos = (
+			frappe.db.get_value("Security Check Point", self.ticket_number, ["total_jjg", "total_brd"], as_dict=True)
+			if self.ticket_number
+			else None
+		) or frappe._dict()
+
+		if not flt(self.total_janjang):
+			self.total_janjang = flt(spb.total_janjang) or flt(pos.total_jjg)
+
+		if not flt(self.total_brondolan):
+			self.total_brondolan = flt(spb.total_brondolan) or flt(pos.total_brd)
+
+	def validate_janjang_brondolan_wajib(self):
+		"""Tiket TBS Internal wajib punya total janjang dan brondolan.
+
+		Dicek sesudah pengisian otomatis, bukan lewat mandatory_depends_on di
+		form: form akan menolak simpan sebelum server sempat mengambilkannya
+		dari SPB atau pos.
+
+		Kiriman API dilewati. SPB stub-nya memang bisa baru berisi janjang
+		sesudah truknya ditimbang, dan tiket yang ditolak tidak dikirim ulang.
+		"""
+		if self.receive_type != "TBS Internal" or timbangan_dari_api(self):
+			return
+
+		kosong = [
+			label
+			for fieldname, label in (("total_janjang", _("Total Janjang")), ("total_brondolan", _("Total Brondolan")))
+			if not flt(self.get(fieldname))
+		]
+		if kosong:
+			frappe.throw(
+				_("{0} wajib diisi untuk TBS Internal. SPB dan Security Check Point-nya juga belum mencatatnya.").format(
+					_(" dan ").join(kosong)
+				),
+				title=_("Janjang / Brondolan Kosong"),
+			)
+
 	def isi_spb_detail(self):
 		"""Isi rincian blok dari SPB kalau tabelnya masih kosong.
 
@@ -241,6 +306,30 @@ class Timbangan(Document):
 	def before_update_after_submit(self):
 		self.hitung_netto_eksternal()
 		self.validate_netto_eksternal_setelah_dn()
+		# Janjang & brondolan boleh dilengkapi sesudah submit untuk data lama.
+		# Yang kosong tetap diambilkan dari SPB/pos, tapi tidak diwajibkan di
+		# sini: tiket lama yang memang tidak punya catatannya jangan sampai
+		# terkunci untuk perubahan field lain.
+		self.set_janjang_brondolan_kebun()
+
+	def on_update_after_submit(self):
+		self.sinkronkan_janjang_brondolan_sortasi()
+
+	def sinkronkan_janjang_brondolan_sortasi(self):
+		"""Bawa total janjang & brondolan ke Sortasi yang menunjuk tiket ini.
+
+		Sortasi mengambilnya sendiri tiap disimpan, tapi Sortasi yang sudah
+		submit tidak disimpan lagi, jadi koreksi di Timbangan diteruskan dari sini.
+		"""
+		if not (self.has_value_changed("total_janjang") or self.has_value_changed("total_brondolan")):
+			return
+
+		for name in frappe.get_all("Sortasi", filters={"no_timbangan": self.name, "docstatus": ["<", 2]}, pluck="name"):
+			frappe.db.set_value(
+				"Sortasi",
+				name,
+				{"total_janjang": flt(self.total_janjang), "total_brondolan": flt(self.total_brondolan)},
+			)
 
 	def validate_netto_eksternal_setelah_dn(self):
 		"""Netto eksternal Dispatch tidak boleh berubah sesudah dokumen jualnya dibuat.

@@ -9,7 +9,24 @@ from frappe.utils import flt
 class Sortasi(Document):
 	def validate(self):
 		self.validate_duplicate()
+		self.set_janjang_brondolan()
 		self.validate_rules()
+
+	def set_janjang_brondolan(self):
+		"""Ambil total janjang dan brondolan dari Timbangan tiap simpan.
+
+		fetch_from hanya jalan waktu no_timbangan dipilih di form, sedangkan
+		angka di Timbangan bisa baru terisi sesudahnya.
+		"""
+		if not self.no_timbangan:
+			return
+
+		data = frappe.db.get_value(
+			"Timbangan", self.no_timbangan, ["total_janjang", "total_brondolan"], as_dict=True
+		)
+		if data:
+			self.total_janjang = flt(data.total_janjang)
+			self.total_brondolan = flt(data.total_brondolan)
 
 	def before_submit(self):
 		tim_doc = frappe.get_doc("Timbangan", self.no_timbangan)

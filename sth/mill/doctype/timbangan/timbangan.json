@@ -560,15 +560,18 @@
    "label": "Tujuan PKS"
   },
   {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fieldname": "total_janjang",
    "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Total Janjang"
+   "label": "Total Janjang",
+   "precision": "0"
   },
   {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fieldname": "total_brondolan",
    "fieldtype": "Float",
-   "hidden": 1,
    "label": "Total Brondolan"
   },
   {
@@ -855,7 +858,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-03 01:35:33.022718",
+ "modified": "2026-11-20 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

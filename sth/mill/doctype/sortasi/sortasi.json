@@ -36,6 +36,8 @@
   "no_polisi",
   "nama_supir",
   "netto",
+  "total_janjang",
+  "total_brondolan",
   "nama_penyortir",
   "section_break_pbuz",
   "mentah",
@@ -892,6 +894,25 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
+   "fetch_from": "no_timbangan.total_janjang",
+   "fieldname": "total_janjang",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Janjang",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tipe == \"Internal\"",
+   "fetch_from": "no_timbangan.total_brondolan",
+   "fieldname": "total_brondolan",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Total Brondolan",
+   "read_only": 1
+  },
+  {
    "fetch_from": "no_timbangan.netto",
    "fieldname": "netto",
    "fieldtype": "Float",
@@ -1200,7 +1221,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-17 11:07:52.582656",
+ "modified": "2026-11-20 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Sortasi",
