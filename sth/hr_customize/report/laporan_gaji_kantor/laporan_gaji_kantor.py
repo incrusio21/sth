@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, today
 from datetime import datetime, timedelta
 import calendar
 
@@ -267,6 +267,7 @@ def process_employee(employee_id, filters, month_num, year):
 	}, as_dict=1)
 
 	attendance_dict = {getdate(row.tanggal): row for row in attendance_data}
+	today_date = getdate(today())
 	
 	result = []
 	total_gaji_pokok = 0
@@ -346,10 +347,12 @@ def process_employee(employee_id, filters, month_num, year):
 
 				# Identifikasi tipe karyawan
 				is_pkwt_pkwtt = ssa.employment_type in ["PKWT", "PKWTT"]
+				# Tanggal yang belum dijalani tidak mendapat gaji pokok
+				sudah_dijalani = date <= today_date
 
 				# Karyawan PKWT/PKWTT tetap mendapatkan gaji
 				# pada hari Minggu/libur meskipun tidak masuk
-				boleh_dapat_gaji = (
+				boleh_dapat_gaji = sudah_dijalani and (
 					is_hadir
 					or (is_hari_libur and is_pkwt_pkwtt)
 				)
