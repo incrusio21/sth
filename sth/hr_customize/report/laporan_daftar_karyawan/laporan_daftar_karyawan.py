@@ -53,7 +53,10 @@ def execute(filters=None):
 		e.custom_aplikasi_form as aplikasi_form,
 		e.custom_fotocopy_ijasah as ijazah,
 		e.custom_surat_keterangan_kerja as surat_ket_kerja,
-		e.custom_pelatihan_lainnya as pelatihan_lainnya
+		e.custom_pelatihan_lainnya as pelatihan_lainnya,
+		e.status as status,
+		e.custom_kriteria as kriteria,
+		e.relieving_date as relieving_date
 		FROM `tabEmployee` as e
 		JOIN `tabDesignation` as d ON d.name = e.designation
   	WHERE e.company IS NOT NULL {};
@@ -388,6 +391,21 @@ def get_columns(filters):
 			"label": _("Pelatihan Lainnya"),
 			"fieldtype": "Attach Image",
 			"fieldname": "pelatihan_lainnya",
+		},
+		{
+			"label": _("Status"),
+			"fieldtype": "Data",
+			"fieldname": "status",
+		},
+		{
+			"label": _("Kriteria"),
+			"fieldtype": "Data",
+			"fieldname": "kriteria",
+		},
+		{
+			"label": _("Relieving Date"),
+			"fieldtype": "Date",
+			"fieldname": "relieving_date",
 		},
 	]
 

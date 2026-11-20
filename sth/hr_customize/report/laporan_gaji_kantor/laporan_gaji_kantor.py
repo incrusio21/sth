@@ -294,11 +294,12 @@ def process_employee(employee_id, filters, month_num, year):
 		gaji_pokok = 0
 
 		if attendance_row and absensi == "H":
+			# Ambil SSA terbaru
 			ssa_list = frappe.get_all(
 				"Salary Structure Assignment",
 				filters={
-						"employee": employee_id,
-						"docstatus": 1
+					"employee": employee_id,
+					"docstatus": 1
 				},
 				fields=["name", "employment_type", "base"],
 				order_by="from_date desc",
@@ -312,30 +313,43 @@ def process_employee(employee_id, filters, month_num, year):
 
 			if ssa:
 				employment_type = frappe.db.get_value(
-					"Employment Type",
-					ssa.employment_type,
-					["hari_ump_ikut_jumlah_hari_1_bulan", "hari_ump"],
-					as_dict=True
+						"Employment Type",
+						ssa.employment_type,
+						["hari_ump_ikut_jumlah_hari_1_bulan", "hari_ump"],
+						as_dict=True
 				)
 
 				if employment_type:
-					ikut_jumlah_hari = employment_type.hari_ump_ikut_jumlah_hari_1_bulan
+						ikut_jumlah_hari = employment_type.hari_ump_ikut_jumlah_hari_1_bulan
 
-					if ikut_jumlah_hari:
-						pembagi = calendar.monthrange(year, month_num)[1]
-					else:
-						pembagi = employment_type.hari_ump
+						if ikut_jumlah_hari:
+							pembagi = calendar.monthrange(year, month_num)[1]
+						else:
+							pembagi = employment_type.hari_ump
 
-					if pembagi:
-						gaji_pokok = ssa.base / pembagi
+						# Identifikasi tipe karyawan
+						is_pkwt_pkwtt = ssa.employment_type in ["PKWT", "PKWTT"]
 
-						# Jika hari Minggu/libur, absensi Hadir, dan pengaturan dicentang
-						if (
-							is_hari_libur
-							and (absensi or "").strip().lower() in ["h"]
-							and ikut_jumlah_hari
-						):
-							gaji_pokok *= 2
+						# Identifikasi kehadiran
+						is_hadir = (
+							attendance_row
+							and (absensi or "").strip().upper() == "H"
+						)
+
+						# Karyawan PKWT/PKWTT tetap mendapatkan gaji
+						# pada hari Minggu/libur meskipun tidak masuk
+						boleh_dapat_gaji = (
+							is_hadir
+							or (is_hari_libur and is_pkwt_pkwtt)
+						)
+
+						if pembagi and boleh_dapat_gaji:
+							gaji_pokok = ssa.base / pembagi
+
+							# Jika PKWT/PKWTT masuk pada hari Minggu/libur,
+							# mendapatkan gaji pokok 2x
+							if is_hari_libur and is_hadir and is_pkwt_pkwtt:
+								gaji_pokok *= 2
 		# if absensi != "":
 		# 	gaji_pokok = ump_bulanan / hari_ump 
 
