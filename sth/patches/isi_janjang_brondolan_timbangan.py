@@ -1,10 +1,10 @@
-"""Isi total janjang dan brondolan Timbangan TBS Internal lama, lalu Sortasi-nya.
+"""Isi jumlah janjang dan brondolan Timbangan TBS Internal lama, lalu Sortasi-nya.
 
-Sebelum set_janjang_brondolan_kebun, kedua field itu cuma terisi kalau
-pengirim API membawanya sendiri, jadi banyak tiket kendaraan inti kebun yang
-nol dan Sortasi-nya ikut kosong. Sumbernya sama dengan validate Timbangan:
-SPB dulu, catatan pos (Security Check Point) kalau SPB-nya pun nol. Angka yang
-sudah ada tidak ditimpa.
+Sumbernya sama dengan set_janjang_brondolan_kebun di Timbangan:
+total_janjang/total_brondolan (data sebelumnya kiriman API) dulu, lalu SPB,
+lalu catatan pos (Security Check Point). Angka yang sudah ada tidak ditimpa.
+total_janjang/total_brondolan tidak disentuh karena total_janjang jadi
+pembagi netto di Perhitungan KUD.
 
 Ditulis lewat db.set_value tanpa menaikkan modified: dokumennya banyak yang
 sudah submit, dan cuma field informasi yang berubah.
@@ -23,7 +23,8 @@ def execute(terapkan=0):
 
 	rows = frappe.db.sql(
 		"""
-		select t.name, t.total_janjang, t.total_brondolan,
+		select t.name, t.jumlah_janjang, t.jumlah_brondolan,
+			t.total_janjang, t.total_brondolan,
 			spb.total_janjang as spb_jjg, spb.total_brondolan as spb_brd,
 			scp.total_jjg as pos_jjg, scp.total_brd as pos_brd
 		from `tabTimbangan` t
@@ -31,7 +32,7 @@ def execute(terapkan=0):
 		left join `tabSecurity Check Point` scp on scp.name = t.ticket_number
 		where t.receive_type = 'TBS Internal'
 			and t.docstatus < 2
-			and (ifnull(t.total_janjang, 0) = 0 or ifnull(t.total_brondolan, 0) = 0)
+			and (ifnull(t.jumlah_janjang, 0) = 0 or ifnull(t.jumlah_brondolan, 0) = 0)
 		""",
 		as_dict=True,
 	)
@@ -39,14 +40,14 @@ def execute(terapkan=0):
 	timbangan_berubah = 0
 	for r in rows:
 		values = {}
-		if not flt(r.total_janjang):
-			jjg = flt(r.spb_jjg) or flt(r.pos_jjg)
+		if not flt(r.jumlah_janjang):
+			jjg = flt(r.total_janjang) or flt(r.spb_jjg) or flt(r.pos_jjg)
 			if jjg:
-				values["total_janjang"] = jjg
-		if not flt(r.total_brondolan):
-			brd = flt(r.spb_brd) or flt(r.pos_brd)
+				values["jumlah_janjang"] = jjg
+		if not flt(r.jumlah_brondolan):
+			brd = flt(r.total_brondolan) or flt(r.spb_brd) or flt(r.pos_brd)
 			if brd:
-				values["total_brondolan"] = brd
+				values["jumlah_brondolan"] = brd
 
 		if not values:
 			continue
@@ -55,17 +56,17 @@ def execute(terapkan=0):
 		if terapkan:
 			frappe.db.set_value("Timbangan", r.name, values, update_modified=False)
 
-	# Sortasi selalu disamakan dengan Timbangan-nya, termasuk yang Timbangan-nya
-	# sudah benar sejak awal tapi Sortasi-nya dibuat sebelum field ini ada.
+	# Sortasi disamakan dengan Timbangan-nya. Nama field Sortasi-nya
+	# total_janjang/total_brondolan, isinya jumlah_* Timbangan.
 	sortasi = frappe.db.sql(
 		"""
-		select s.name, t.total_janjang, t.total_brondolan
+		select s.name
 		from `tabSortasi` s
 		join `tabTimbangan` t on t.name = s.no_timbangan
 		where s.docstatus < 2
 			and t.receive_type = 'TBS Internal'
-			and (ifnull(s.total_janjang, 0) != ifnull(t.total_janjang, 0)
-				or ifnull(s.total_brondolan, 0) != ifnull(t.total_brondolan, 0))
+			and (ifnull(s.total_janjang, 0) != ifnull(t.jumlah_janjang, 0)
+				or ifnull(s.total_brondolan, 0) != ifnull(t.jumlah_brondolan, 0))
 		""",
 		as_dict=True,
 	)
@@ -76,8 +77,8 @@ def execute(terapkan=0):
 			"""
 			update `tabSortasi` s
 			join `tabTimbangan` t on t.name = s.no_timbangan
-			set s.total_janjang = ifnull(t.total_janjang, 0),
-				s.total_brondolan = ifnull(t.total_brondolan, 0)
+			set s.total_janjang = ifnull(t.jumlah_janjang, 0),
+				s.total_brondolan = ifnull(t.jumlah_brondolan, 0)
 			where s.docstatus < 2
 				and t.receive_type = 'TBS Internal'
 			"""

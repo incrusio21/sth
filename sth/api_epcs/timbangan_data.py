@@ -20,8 +20,8 @@ TIMBANGAN_FIELDS = [
 	"owner",
 	"spb",
 	"ticket_number",
-	"total_janjang",
-	"total_brondolan",
+	"jumlah_janjang",
+	"jumlah_brondolan",
 	"bruto",
 	"tara",
 	"netto",
@@ -373,19 +373,18 @@ def _build_data(timbangan_rows):
 			"driver_code": driver_code,
 			"driver_name": driver_name,
 			# Keduanya Float di doctype Timbangan, tapi EPCS menunggunya bulat.
-			# cint memotong pecahannya, bukan membulatkan; total_janjang memang
+			# cint memotong pecahannya, bukan membulatkan; jumlah_janjang memang
 			# sudah berpresisi 0, jadi yang bisa kehilangan pecahan cuma
-			# total_brondolan.
+			# jumlah_brondolan.
 			#
-			# Janjang dibaca dari total_janjang, angka yang diisi operator atau
-			# diambilkan dari SPB/pos (set_janjang_brondolan_kebun). Dulu dari
-			# jumlah_janjang, taksiran netto / BJR yang baru ada sesudah Sortasi.
+			# Keduanya isian operator, atau data sebelumnya / SPB / pos kalau
+			# dibiarkan kosong (set_janjang_brondolan_kebun).
 			
 			# "total_jjg": cint(row.get("jumlah_janjang")),
 			# "total_brd": cint(row.get("total_brondolan")),
 
-			"total_jjg_tbg": cint(row.get("total_janjang")),
-			"total_brd_tbg": cint(row.get("total_brondolan")),
+			"total_jjg_tbg": cint(row.get("jumlah_janjang")),
+			"total_brd_tbg": cint(row.get("jumlah_brondolan")),
 
 			# Angka yang dicatat pos sendiri, sebagai pembanding hitungan
 			# rincian SPB di atas. Dibulatkan ke bawah dengan alasan yang sama.

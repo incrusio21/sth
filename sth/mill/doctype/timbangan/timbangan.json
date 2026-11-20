@@ -45,9 +45,12 @@
   "trans_no",
   "rkh_no",
   "section_break_mnhe",
-  "isi_komidel",
   "jumlah_janjang",
+  "isi_komidel",
+  "column_break_jjbr",
+  "jumlah_brondolan",
   "potongan_sortasi",
+  "section_break_spbd",
   "spb_detail",
   "delivery_section",
   "delivery_order",
@@ -560,28 +563,43 @@
    "label": "Tujuan PKS"
   },
   {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fieldname": "total_janjang",
    "fieldtype": "Float",
-   "label": "Total Janjang",
+   "hidden": 1,
+   "label": "Total Janjang dari Data Sebelumnya",
    "precision": "0"
   },
   {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.receive_type == \"TBS Internal\"",
    "fieldname": "total_brondolan",
    "fieldtype": "Float",
-   "label": "Total Brondolan"
+   "hidden": 1,
+   "label": "Total Brondolan dari Data Sebelumnya"
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "jumlah_janjang",
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Jumlah Janjang",
-   "precision": "0",
-   "read_only": 1
+   "precision": "0"
+  },
+  {
+   "fieldname": "column_break_jjbr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "jumlah_brondolan",
+   "fieldtype": "Float",
+   "in_preview": 1,
+   "label": "Jumlah Brondolan"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Receive'",
+   "fieldname": "section_break_spbd",
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -858,7 +876,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-20 11:30:00.000000",
+ "modified": "2026-11-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Mill",
  "name": "Timbangan",

@@ -13,7 +13,11 @@ class Sortasi(Document):
 		self.validate_rules()
 
 	def set_janjang_brondolan(self):
-		"""Ambil total janjang dan brondolan dari Timbangan tiap simpan.
+		"""Ambil jumlah janjang dan brondolan dari Timbangan tiap simpan.
+
+		Field Sortasi-nya bernama total_janjang/total_brondolan, tapi isinya
+		jumlah_janjang/jumlah_brondolan Timbangan: total_* di Timbangan cuma
+		data sebelumnya kiriman API dan tidak lagi diisi.
 
 		fetch_from hanya jalan waktu no_timbangan dipilih di form, sedangkan
 		angka di Timbangan bisa baru terisi sesudahnya.
@@ -22,11 +26,11 @@ class Sortasi(Document):
 			return
 
 		data = frappe.db.get_value(
-			"Timbangan", self.no_timbangan, ["total_janjang", "total_brondolan"], as_dict=True
+			"Timbangan", self.no_timbangan, ["jumlah_janjang", "jumlah_brondolan"], as_dict=True
 		)
 		if data:
-			self.total_janjang = flt(data.total_janjang)
-			self.total_brondolan = flt(data.total_brondolan)
+			self.total_janjang = flt(data.jumlah_janjang)
+			self.total_brondolan = flt(data.jumlah_brondolan)
 
 	def before_submit(self):
 		tim_doc = frappe.get_doc("Timbangan", self.no_timbangan)

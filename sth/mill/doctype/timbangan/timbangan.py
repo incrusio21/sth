@@ -157,22 +157,23 @@ class Timbangan(Document):
 			self.transportir = data.transporter
 
 	def set_janjang_brondolan_kebun(self):
-		"""Isi total janjang dan brondolan kendaraan inti kebun yang masih kosong.
+		"""Isi jumlah janjang dan brondolan kendaraan inti kebun yang masih kosong.
 
-		Kedua field ini dulu cuma terisi kalau pengirim API membawanya sendiri;
-		timbangan dari form dan kiriman yang tidak membawanya tetap nol, jadi
-		Sortasi yang mengambil dari sini juga kosong. Sumbernya SPB, yang selama
-		rincian bloknya belum datang sudah memegang catatan pos (lihat
-		get_or_create_spb di Security Check Point). Catatan pos dipakai langsung
-		kalau SPB-nya pun masih nol.
+		Keduanya diisi operator. Yang dibiarkan kosong diambil dari data
+		sebelumnya: total_janjang/total_brondolan kiriman API dulu, lalu SPB
+		(yang selama rincian bloknya belum datang sudah memegang catatan pos,
+		lihat get_or_create_spb di Security Check Point), lalu catatan pos itu
+		sendiri.
 
-		Yang sudah terisi tidak ditimpa, supaya angka kiriman API dan isian
-		operator tetap.
+		total_janjang/total_brondolan sendiri tidak ditulis di sini. Perhitungan
+		KUD memakai total_janjang sebagai pembagi netto ke baris rincian, dan
+		total SPB ikut menghitung restan yang tidak ada di rincian; mengisinya
+		membuat netto tiket tidak terbagi penuh.
 		"""
 		if self.receive_type != "TBS Internal":
 			return
 
-		if flt(self.total_janjang) and flt(self.total_brondolan):
+		if flt(self.jumlah_janjang) and flt(self.jumlah_brondolan):
 			return
 
 		spb = (
@@ -187,14 +188,14 @@ class Timbangan(Document):
 			else None
 		) or frappe._dict()
 
-		if not flt(self.total_janjang):
-			self.total_janjang = flt(spb.total_janjang) or flt(pos.total_jjg)
+		if not flt(self.jumlah_janjang):
+			self.jumlah_janjang = flt(self.total_janjang) or flt(spb.total_janjang) or flt(pos.total_jjg)
 
-		if not flt(self.total_brondolan):
-			self.total_brondolan = flt(spb.total_brondolan) or flt(pos.total_brd)
+		if not flt(self.jumlah_brondolan):
+			self.jumlah_brondolan = flt(self.total_brondolan) or flt(spb.total_brondolan) or flt(pos.total_brd)
 
 	def validate_janjang_wajib(self):
-		"""Tiket TBS Internal wajib punya total janjang sebelum disubmit.
+		"""Tiket TBS Internal wajib punya jumlah janjang sebelum disubmit.
 
 		Dicek di before_submit, sesudah validate mengisi yang kosong dari SPB
 		atau pos, jadi draft tetap bisa disimpan selama angkanya belum ada.
@@ -206,9 +207,9 @@ class Timbangan(Document):
 		if self.receive_type != "TBS Internal" or timbangan_dari_api(self):
 			return
 
-		if not flt(self.total_janjang):
+		if not flt(self.jumlah_janjang):
 			frappe.throw(
-				_("Total Janjang wajib diisi untuk TBS Internal. SPB dan Security Check Point-nya juga belum mencatatnya."),
+				_("Jumlah Janjang wajib diisi untuk TBS Internal. SPB dan Security Check Point-nya juga belum mencatatnya."),
 				title=_("Janjang Kosong"),
 			)
 
@@ -308,19 +309,19 @@ class Timbangan(Document):
 		self.sinkronkan_janjang_brondolan_sortasi()
 
 	def sinkronkan_janjang_brondolan_sortasi(self):
-		"""Bawa total janjang & brondolan ke Sortasi yang menunjuk tiket ini.
+		"""Bawa jumlah janjang & brondolan ke Sortasi yang menunjuk tiket ini.
 
 		Sortasi mengambilnya sendiri tiap disimpan, tapi Sortasi yang sudah
 		submit tidak disimpan lagi, jadi koreksi di Timbangan diteruskan dari sini.
 		"""
-		if not (self.has_value_changed("total_janjang") or self.has_value_changed("total_brondolan")):
+		if not (self.has_value_changed("jumlah_janjang") or self.has_value_changed("jumlah_brondolan")):
 			return
 
 		for name in frappe.get_all("Sortasi", filters={"no_timbangan": self.name, "docstatus": ["<", 2]}, pluck="name"):
 			frappe.db.set_value(
 				"Sortasi",
 				name,
-				{"total_janjang": flt(self.total_janjang), "total_brondolan": flt(self.total_brondolan)},
+				{"total_janjang": flt(self.jumlah_janjang), "total_brondolan": flt(self.jumlah_brondolan)},
 			)
 
 	def validate_netto_eksternal_setelah_dn(self):

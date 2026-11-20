@@ -124,6 +124,6 @@ sth.patches.hapus_kelas_bpjs_kesehatan_employee
 # baru harus didaftarkan ulang di mesin. Jalankan sesudah migrate. Default-nya uji
 # coba; tulis dengan --kwargs "{'terapkan': 1}".
 # Jalankan dengan `bench --site <site> execute sth.patches.<nama>.execute`.
-# isi_janjang_brondolan_timbangan juga tidak didaftarkan: mengisi total janjang &
-# brondolan Timbangan TBS Internal lama dari SPB/pos, lalu menyamakan Sortasi-nya.
+# isi_janjang_brondolan_timbangan juga tidak didaftarkan: mengisi jumlah janjang &
+# brondolan Timbangan TBS Internal lama dari data sebelumnya/SPB/pos, lalu menyamakan Sortasi-nya.
 # Jalankan sesudah migrate. Default-nya uji coba; tulis dengan --kwargs "{'terapkan': 1}".
