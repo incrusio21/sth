@@ -128,44 +128,39 @@ frappe.ui.form.on("Purchase Invoice", {
                             const bapp_name = (opts.args?.source_names || [])[0];
                             if (!bapp_name) return _orig(opts, ...rest);
 
-                            frappe.db.get_value("BAPP", bapp_name, "proposal").then(({ message }) => {
-                                const proposal = message?.proposal;
-                                if (!proposal) {
+                            // Kontraktor diambil lewat BAPP di server: user PINV
+                            // (mis. Accounts User) belum tentu boleh membaca Proposal,
+                            // dan dulu get_doc Proposal yang gagal menghentikan tarikan diam-diam.
+                            frappe.xcall("sth.legal.doctype.bapp.bapp.get_kontraktor_bapp", { bapp: bapp_name }).then(contractors => {
+                                contractors = contractors || [];
+                                if (contractors.length <= 1) {
                                     return _do_map(opts, bapp_name, null);
                                 }
 
-                                frappe.db.get_doc("Proposal", proposal).then(proposal_doc => {
-                                    const rows = proposal_doc.kontraktor_proposal || [];
-                                    const contractors = rows.map(r => r.kontraktor);
-                                    if (contractors.length <= 1) {
-                                        return _do_map(opts, bapp_name, null);
-                                    }
-
-                                    const dialog = new frappe.ui.Dialog({
-                                        title: __("Pilih Supplier untuk Purchase Invoice"),
-                                        fields: [
-                                            {
-                                                label: __("Supplier"),
-                                                fieldname: "selected_supplier",
-                                                fieldtype: "Link",
-                                                options: "Supplier",
-                                                reqd: 1,
-                                                get_query: () => ({
-                                                    filters: { name: ["in", contractors] }
-                                                }),
-                                                description: `${contractors.length} kontraktor tersedia. Qty akan dibagi rata (1/${contractors.length} per PI).`
-                                            }
-                                        ],
-                                        primary_action_label: __("Lanjut"),
-                                        primary_action(values) {
-                                            dialog.hide();
-                                            opts.args.args = opts.args.args || {};
-                                            opts.args.args.selected_supplier = values.selected_supplier;
-                                            _do_map(opts, bapp_name, values.selected_supplier);
+                                const dialog = new frappe.ui.Dialog({
+                                    title: __("Pilih Supplier untuk Purchase Invoice"),
+                                    fields: [
+                                        {
+                                            label: __("Supplier"),
+                                            fieldname: "selected_supplier",
+                                            fieldtype: "Link",
+                                            options: "Supplier",
+                                            reqd: 1,
+                                            get_query: () => ({
+                                                filters: { name: ["in", contractors] }
+                                            }),
+                                            description: `${contractors.length} kontraktor tersedia. Qty akan dibagi rata (1/${contractors.length} per PI).`
                                         }
-                                    });
-                                    dialog.show();
+                                    ],
+                                    primary_action_label: __("Lanjut"),
+                                    primary_action(values) {
+                                        dialog.hide();
+                                        opts.args.args = opts.args.args || {};
+                                        opts.args.args.selected_supplier = values.selected_supplier;
+                                        _do_map(opts, bapp_name, values.selected_supplier);
+                                    }
                                 });
+                                dialog.show();
                             });
 
                             return;
@@ -1483,7 +1478,8 @@ const REF_TAX_MARKER = "__from_ref_tax__";
 // dipakai (sama dengan retensi), kalau tidak baris ref_tax dibuang lalu dibangun
 // ulang dan form langsung dirty.
 function build_ref_tax_rows(frm) {
-    const ref_tax = frappe.refererence.__ref_tax || {}
+    // frappe.refererence baru di-provide get_tax_template; sync_to_taxes bisa jalan duluan.
+    const ref_tax = frappe.refererence?.__ref_tax || {}
     const field_map = [
         { key: "Ongkos Angkut", value: frm.doc.total_biaya_ongkos_angkut, add_deduct: "Add" },
         { key: "PPH 22", value: frm.doc.pph_22, add_deduct: "Add" },

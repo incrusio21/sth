@@ -1265,13 +1265,34 @@ def make_purchase_invoice(source_name, target_doc=None, args=None, selected_item
 		doclist.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(doc.proposal, doc.company)				
 		return doclist
 	else:
-		from sth.legal.doctype.proposal.proposal import make_purchase_invoice
+		from sth.legal.doctype.proposal.proposal import get_mapped_purchase_invoice
 
-		doclist = make_purchase_invoice(doc.proposal, target_doc, {"term": doc.term_detail})
+		# BAPP termin tanpa item (mis. DP) ditagih dari Proposal sebesar porsi
+		# termin. Izin dicek di BAPP; user PINV tidak wajib bisa baca Proposal.
+		doc.check_permission("read")
+		frappe.flags.args = frappe._dict({"term": doc.term_detail})
+		doclist = get_mapped_purchase_invoice(doc.proposal, target_doc, lewati_izin_sumber=True)
 		doclist.document_no = source_name
 
 		doclist.credit_to = method_ambil_account.ambil_proposal_hutang_invoice(doc.proposal, doc.company)							
 		return doclist
+
+@frappe.whitelist()
+def get_kontraktor_bapp(bapp: str) -> list[str]:
+	"""Kontraktor Proposal milik BAPP untuk dialog pilih supplier di PINV. Izin
+	dicek di BAPP supaya user PINV tidak wajib punya hak baca Proposal."""
+	doc = frappe.get_doc("BAPP", bapp)
+	doc.check_permission("read")
+	if not doc.proposal:
+		return []
+
+	return frappe.get_all(
+		"Kontraktor Proposal",
+		filters={"parent": doc.proposal, "parenttype": "Proposal", "parentfield": "kontraktor_proposal"},
+		pluck="kontraktor",
+		order_by="idx",
+	)
+
 
 def get_invoiced_qty_map(bapp):
 	"""returns a map: {bapp_detail: invoiced_qty}"""
