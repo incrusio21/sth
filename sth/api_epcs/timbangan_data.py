@@ -21,7 +21,7 @@ TIMBANGAN_FIELDS = [
 	"spb",
 	"ticket_number",
 	"jumlah_janjang",
-	"total_brondolan",
+	"jumlah_brondolan",
 	"bruto",
 	"tara",
 	"netto",
@@ -375,13 +375,16 @@ def _build_data(timbangan_rows):
 			# Keduanya Float di doctype Timbangan, tapi EPCS menunggunya bulat.
 			# cint memotong pecahannya, bukan membulatkan; jumlah_janjang memang
 			# sudah berpresisi 0, jadi yang bisa kehilangan pecahan cuma
-			# total_brondolan.
+			# jumlah_brondolan.
+			#
+			# Keduanya isian operator, atau data sebelumnya / SPB / pos kalau
+			# dibiarkan kosong (set_janjang_brondolan_kebun).
 			
 			# "total_jjg": cint(row.get("jumlah_janjang")),
 			# "total_brd": cint(row.get("total_brondolan")),
 
 			"total_jjg_tbg": cint(row.get("jumlah_janjang")),
-			"total_brd_tbg": cint(row.get("total_brondolan")),
+			"total_brd_tbg": cint(row.get("jumlah_brondolan")),
 
 			# Angka yang dicatat pos sendiri, sebagai pembanding hitungan
 			# rincian SPB di atas. Dibulatkan ke bawah dengan alasan yang sama.

@@ -242,10 +242,10 @@ frappe.ui.form.on("Timbangan", {
 	},
 
 	tara(frm) {
-		frappe.run_serially([
-			() => frm.trigger('calculate_weight'),
-			() => frm.set_value("jumlah_janjang", frm.doc.netto / frm.doc.isi_komidel)
-		])
+		// jumlah_janjang tidak lagi dihitung netto / BJR di sini: sekarang diisi
+		// operator (atau dari data sebelumnya di server), dan BJR baru ada
+		// sesudah Sortasi, jadi pembagiannya dulu cuma menimpa isian dengan nol.
+		frm.trigger('calculate_weight')
 	},
 
 	type(frm) {

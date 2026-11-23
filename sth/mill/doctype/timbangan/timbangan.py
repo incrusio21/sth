@@ -44,6 +44,7 @@ class Timbangan(Document):
 		self.validate_spb_pos()
 		self.set_kebun_dan_divisi_dari_spb()
 		self.set_kendaraan_eksternal()
+		self.set_janjang_brondolan_kebun()
 		self.isi_spb_detail()
 		self.set_data_dari_po()
 		# netto dihitung dulu: validate_qty_do membagi netto itu ke DO 1 dan DO 2
@@ -155,6 +156,63 @@ class Timbangan(Document):
 		if data.transporter:
 			self.transportir = data.transporter
 
+	def set_janjang_brondolan_kebun(self):
+		"""Isi jumlah janjang dan brondolan kendaraan inti kebun yang masih kosong.
+
+		Keduanya diisi operator. Yang dibiarkan kosong diambil dari data
+		sebelumnya: total_janjang/total_brondolan kiriman API dulu, lalu SPB
+		(yang selama rincian bloknya belum datang sudah memegang catatan pos,
+		lihat get_or_create_spb di Security Check Point), lalu catatan pos itu
+		sendiri.
+
+		total_janjang/total_brondolan sendiri tidak ditulis di sini. Perhitungan
+		KUD memakai total_janjang sebagai pembagi netto ke baris rincian, dan
+		total SPB ikut menghitung restan yang tidak ada di rincian; mengisinya
+		membuat netto tiket tidak terbagi penuh.
+		"""
+		if self.receive_type != "TBS Internal":
+			return
+
+		if flt(self.jumlah_janjang) and flt(self.jumlah_brondolan):
+			return
+
+		spb = (
+			frappe.db.get_value("Surat Pengantar Buah", self.spb, ["total_janjang", "total_brondolan"], as_dict=True)
+			if self.spb
+			else None
+		) or frappe._dict()
+
+		pos = (
+			frappe.db.get_value("Security Check Point", self.ticket_number, ["total_jjg", "total_brd"], as_dict=True)
+			if self.ticket_number
+			else None
+		) or frappe._dict()
+
+		if not flt(self.jumlah_janjang):
+			self.jumlah_janjang = flt(self.total_janjang) or flt(spb.total_janjang) or flt(pos.total_jjg)
+
+		if not flt(self.jumlah_brondolan):
+			self.jumlah_brondolan = flt(self.total_brondolan) or flt(spb.total_brondolan) or flt(pos.total_brd)
+
+	def validate_janjang_wajib(self):
+		"""Tiket TBS Internal wajib punya jumlah janjang sebelum disubmit.
+
+		Dicek di before_submit, sesudah validate mengisi yang kosong dari SPB
+		atau pos, jadi draft tetap bisa disimpan selama angkanya belum ada.
+		Brondolan tidak diwajibkan: truk bisa datang tanpa brondolan.
+
+		Kiriman API dilewati. SPB stub-nya memang bisa baru berisi janjang
+		sesudah truknya ditimbang, dan tiket yang ditolak tidak dikirim ulang.
+		"""
+		if self.receive_type != "TBS Internal" or timbangan_dari_api(self):
+			return
+
+		if not flt(self.jumlah_janjang):
+			frappe.throw(
+				_("Jumlah Janjang wajib diisi untuk TBS Internal. SPB dan Security Check Point-nya juga belum mencatatnya."),
+				title=_("Janjang Kosong"),
+			)
+
 	def isi_spb_detail(self):
 		"""Isi rincian blok dari SPB kalau tabelnya masih kosong.
 
@@ -241,6 +299,30 @@ class Timbangan(Document):
 	def before_update_after_submit(self):
 		self.hitung_netto_eksternal()
 		self.validate_netto_eksternal_setelah_dn()
+		# Janjang & brondolan boleh dilengkapi sesudah submit untuk data lama.
+		# Yang kosong tetap diambilkan dari SPB/pos, tapi tidak diwajibkan di
+		# sini: tiket lama yang memang tidak punya catatannya jangan sampai
+		# terkunci untuk perubahan field lain.
+		self.set_janjang_brondolan_kebun()
+
+	def on_update_after_submit(self):
+		self.sinkronkan_janjang_brondolan_sortasi()
+
+	def sinkronkan_janjang_brondolan_sortasi(self):
+		"""Bawa jumlah janjang & brondolan ke Sortasi yang menunjuk tiket ini.
+
+		Sortasi mengambilnya sendiri tiap disimpan, tapi Sortasi yang sudah
+		submit tidak disimpan lagi, jadi koreksi di Timbangan diteruskan dari sini.
+		"""
+		if not (self.has_value_changed("jumlah_janjang") or self.has_value_changed("jumlah_brondolan")):
+			return
+
+		for name in frappe.get_all("Sortasi", filters={"no_timbangan": self.name, "docstatus": ["<", 2]}, pluck="name"):
+			frappe.db.set_value(
+				"Sortasi",
+				name,
+				{"total_janjang": flt(self.jumlah_janjang), "total_brondolan": flt(self.jumlah_brondolan)},
+			)
 
 	def validate_netto_eksternal_setelah_dn(self):
 		"""Netto eksternal Dispatch tidak boleh berubah sesudah dokumen jualnya dibuat.
@@ -314,6 +396,7 @@ class Timbangan(Document):
 	def before_submit(self):
 		self.validate_berat()
 		self.validate_delivery_note_asal()
+		self.validate_janjang_wajib()
 
 	def validate_berat(self):
 		"""Bruto dan tara dua-duanya harus sudah ditimbang sebelum disubmit.
