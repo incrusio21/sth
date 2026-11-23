@@ -43,6 +43,9 @@ class ReturKeSupplier(Document):
 
 			if row.jumlah_penerimaan < row.jumlah:
 				frappe.throw(f"Jumlah return barang {row.kode_barang} melebihi penerimaan")
+			
+			if row.stock_saat_ini < row.jumlah:
+				frappe.throw(f"Jumlah return barang {row.kode_barang} melebihi stock")
 
 	def create_purchase_return(self):
 		mapping_qty_items = { r.kode_barang: r.jumlah for r in self.items }
