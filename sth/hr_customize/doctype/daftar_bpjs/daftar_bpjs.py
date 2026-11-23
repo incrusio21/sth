@@ -367,6 +367,16 @@ def pasang_bpjs(doc):
 	tanpa_attendance = [row for row in list_employee if row[KOLOM_EMPLOYEE] not in hadir]
 	list_employee = [row for row in list_employee if row[KOLOM_EMPLOYEE] in hadir]
 
+        # GP tidak boleh di bawah UMR unit, hanya untuk Staf Up dengan kriteria
+        # Non Satuan Hasil. Karyawan lain tetap memakai GP aslinya.
+        umr = frappe.utils.flt(frappe.db.get_value("Unit", doc.unit, "umr_unit"))
+        list_employee = [
+                (row[0], max(frappe.utils.flt(row[1]), umr), *row[2:])
+                if row[9] == "STAFF" and row[10] == "Non Satuan Hasil"
+                else row
+                for row in list_employee
+        ]
+
 	if tanpa_attendance:
 		frappe.msgprint(
 			_("{0} karyawan dilewati karena belum punya Attendance di periode ini: {1}").format(

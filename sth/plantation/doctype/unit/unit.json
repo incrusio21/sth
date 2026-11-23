@@ -14,6 +14,7 @@
   "default_bank_account",
   "bank_account",
   "api_status",
+  "umr_unit",
   "column_break_fyry",
   "company",
   "cost_center",
@@ -173,13 +174,18 @@
    "fieldname": "plasma",
    "fieldtype": "Check",
    "label": "Plasma"
+  },
+  {
+   "fieldname": "umr_unit",
+   "fieldtype": "Currency",
+   "label": "UMR"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-13 03:34:06.334742",
- "modified_by": "Administrator",
+ "modified": "2026-11-23 14:58:29.763805",
+ "modified_by": "awiriant@sthgroup.com",
  "module": "Plantation",
  "name": "Unit",
  "naming_rule": "By fieldname",
