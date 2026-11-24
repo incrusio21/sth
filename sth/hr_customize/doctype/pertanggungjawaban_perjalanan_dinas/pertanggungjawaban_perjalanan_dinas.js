@@ -4,11 +4,19 @@
 frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
   refresh(frm) {
     if (frm.doc.docstatus === 0 || frm.is_new()) {
+      // frm.set_query("no_spd", function () {
+      //   return {
+      //     filters: {
+      //       custom_employee_advance: ["is", "set"]
+      //     }
+      //   };
+      // });
       frm.set_query("no_spd", function () {
         return {
+          query: "sth.hr_customize.doctype.pertanggungjawaban_perjalanan_dinas.pertanggungjawaban_perjalanan_dinas.get_available_spd",
           filters: {
-            custom_employee_advance: ["is", "set"]
-          }
+            current: frm.doc.name || "",
+          },
         };
       });
       frm.set_query("no_pdo", function () {

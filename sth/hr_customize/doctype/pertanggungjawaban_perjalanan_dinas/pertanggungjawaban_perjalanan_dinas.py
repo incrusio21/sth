@@ -350,3 +350,31 @@ def make_payment_entry(source_name, target_doc=None):
 	)
  
 	return doclist
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_available_spd(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql(
+		"""
+		SELECT tr.name
+		FROM `tabTravel Request` tr
+		WHERE tr.custom_employee_advance IS NOT NULL
+			AND tr.custom_employee_advance != ''
+			AND tr.name LIKE %(txt)s
+			AND NOT EXISTS (
+				SELECT 1
+				FROM `tabPertanggungjawaban Perjalanan Dinas` p
+				WHERE p.no_spd = tr.name
+					AND p.docstatus = 1
+					AND p.name != %(current)s
+			)
+		ORDER BY tr.name DESC
+		LIMIT %(start)s, %(page_len)s
+		""",
+		{
+			"txt": f"%{txt}%",
+			"current": (filters or {}).get("current") or "",
+			"start": start,
+			"page_len": page_len,
+		},
+	)
