@@ -52,6 +52,13 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       boleh_isi ? 0 : 1
     );
 
+    // sanctioned_amount dikunci saat tahap verifikasi, sebaliknya dari jumlah_verifikasi_hrd
+    frm.fields_dict["costings"].grid.update_docfield_property(
+      "sanctioned_amount",
+      "read_only",
+      state_boleh_isi.includes(frm.doc.workflow_state) ? 1 : 0
+    );
+
     frm.refresh_field("costings");
 
     if (frm.is_new() && frm.is_new() != undefined) {
