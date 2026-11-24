@@ -11,14 +11,14 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       //     }
       //   };
       // });
-      frm.set_query("no_spd", function () {
-        return {
-          query: "sth.hr_customize.doctype.pertanggungjawaban_perjalanan_dinas.pertanggungjawaban_perjalanan_dinas.get_available_spd",
-          filters: {
-            current: frm.doc.name || "",
-          },
-        };
-      });
+      // frm.set_query("no_spd", function () {
+      //   return {
+      //     query: "sth.hr_customize.doctype.pertanggungjawaban_perjalanan_dinas.pertanggungjawaban_perjalanan_dinas.get_available_spd",
+      //     filters: {
+      //       current: frm.doc.name || "",
+      //     },
+      //   };
+      // });
       frm.set_query("no_pdo", function () {
         return {
           filters: {
