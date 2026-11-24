@@ -356,7 +356,7 @@ def make_payment_entry(source_name, target_doc=None):
 def get_available_spd(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(
 		"""
-		SELECT tr.name
+		SELECT tr.name, tr.employee_name
 		FROM `tabTravel Request` tr
 		WHERE tr.custom_employee_advance IS NOT NULL
 			AND tr.custom_employee_advance != ''
