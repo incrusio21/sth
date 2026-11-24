@@ -48,20 +48,21 @@
    "label": "GP"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "beban_karyawan",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Beban Karyawan"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "beban_perusahaan",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Beban Perusahaan"
   },
   {
+   "columns": 2,
    "fieldname": "jumlah",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -110,7 +111,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-21 11:31:36.235025",
+ "modified": "2026-11-23 11:35:51.666621",
  "modified_by": "Administrator",
  "module": "HR Customize",
  "name": "Daftar BPJS Employee",

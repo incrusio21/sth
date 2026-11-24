@@ -311,6 +311,9 @@ def validasi_satu_program_kes(susunan_bpjs):
 		title=_("Program BPJS KES Lebih dari Satu"),
 	)
 
+def bulatkan_100(nilai):
+	"""Bulatkan ke 100 rupiah terdekat (50 ke atas naik)."""
+	return int(frappe.utils.flt(nilai) / 100 + 0.5) * 100
 
 def pasang_bpjs(doc):
 	# doc = frappe.get_doc("Daftar BPJS","BPJS TK-PT. TRIMITRA LESTARI-00162")
@@ -367,6 +370,16 @@ def pasang_bpjs(doc):
 	tanpa_attendance = [row for row in list_employee if row[KOLOM_EMPLOYEE] not in hadir]
 	list_employee = [row for row in list_employee if row[KOLOM_EMPLOYEE] in hadir]
 
+	# GP tidak boleh di bawah UMR unit, hanya untuk Staf Up dengan kriteria
+	# Non Satuan Hasil. Karyawan lain tetap memakai GP aslinya.
+	umr = frappe.utils.flt(frappe.db.get_value("Unit", doc.unit, "umr_unit"))
+	list_employee = [
+		(row[0], max(frappe.utils.flt(row[1]), umr), *row[2:])
+		if row[9] == "STAFF" and row[10] == "Non Satuan Hasil"
+		else row
+		for row in list_employee
+	]
+
 	if tanpa_attendance:
 		frappe.msgprint(
 			_("{0} karyawan dilewati karena belum punya Attendance di periode ini: {1}").format(
@@ -412,8 +425,8 @@ def pasang_bpjs(doc):
 
 			list_program_employee[satu_employee[0]].append({
 				"program" : row.nama_program,
-				"beban_karyawan": row.beban_karyawan / 100 * gp_satu,
-				"beban_perusahaan": row.beban_perusahaan / 100 * gp_satu
+				"beban_karyawan": bulatkan_100(row.beban_karyawan / 100 * gp_satu),
+				"beban_perusahaan": bulatkan_100(row.beban_perusahaan / 100 * gp_satu)
 			})
 	print(list_program_employee)
 

@@ -493,8 +493,14 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 	frappe.response.location = "/purchase-invoices/" + doc.name
 
 
-def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
+def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False, lewati_izin_sumber=False):
+	"""lewati_izin_sumber: dipanggil dari BAPP yang izin bacanya sudah dicek,
+	jadi user PINV tidak wajib punya hak baca Proposal. Hak buat PINV tetap dicek
+	dan PINV hasilnya tetap disimpan dengan permission biasa."""
 	from sth.legal.custom.tax_validation import set_pajak_purchase_invoice
+
+	if lewati_izin_sumber:
+		frappe.has_permission("Purchase Invoice", "create", throw=True)
 
 	term = frappe.flags.args.term
 	portion = frappe.db.get_value("Proposal Schedule", term, "invoice_portion")
@@ -518,9 +524,23 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty * portion / 100)
-		target.amount = flt(obj.rate) * flt(target.qty)
+		# Nilai termin = amount Proposal x porsi. Qty x porsi dibulatkan ke presisi
+		# qty (13,1% dari 1 jadi 0,13) sehingga nilainya meleset, jadi qty tetap
+		# qty Proposal dan rate-nya yang dikali porsi. Rate jadi beda dari
+		# Proposal, maka ditandai pecah_amount supaya lolos cek maintain_same_rate;
+		# penagihan Proposal tetap dihitung dari amount.
+		target.qty = flt(obj.qty)
+		amount = flt(flt(obj.amount) * flt(portion) / 100, target.precision("amount"))
+		target.rate = flt(amount / target.qty, target.precision("rate")) if target.qty else amount
+		target.amount = amount
+		# Rate Proposal sudah netto diskon; price list disamakan supaya
+		# calculate_taxes_and_totals tidak menghitung ulang rate dari price list.
+		target.price_list_rate = target.rate
+		target.discount_percentage = 0
+		target.discount_amount = 0
+		target.margin_rate_or_amount = 0
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
+		target.pecah_amount = 1
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -565,7 +585,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		fields,
 		target_doc,
 		postprocess,
-		ignore_permissions=ignore_permissions,
+		ignore_permissions=ignore_permissions or lewati_izin_sumber,
 	)
 
 	return doc
