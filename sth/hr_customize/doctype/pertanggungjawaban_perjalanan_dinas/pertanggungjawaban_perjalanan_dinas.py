@@ -14,6 +14,28 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 		super().validate()
 		if self.sumber_pertanggungjawaban == "PDO":
 			self.validate_pdo()
+		else:
+			self.validate_spd()
+
+	def validate_spd(self):
+		if not self.no_spd:
+			return
+
+		# hanya dokumen Submitted yang memblokir; Cancelled (2) dan Draft (0) diabaikan
+		duplikat = frappe.db.get_value(
+			"Pertanggungjawaban Perjalanan Dinas",
+			{
+				"no_spd": self.no_spd,
+				"docstatus": 1,
+				"name": ["!=", self.name],
+			},
+			"name",
+		)
+		if duplikat:
+			frappe.throw(
+				_("SPD {0} sudah dipertanggungjawabkan pada {1}.").format(self.no_spd, duplikat),
+				title=_("Duplikasi Pertanggungjawaban"),
+			)
 
 	def validate_pdo(self):
 		if not self.no_pdo:
