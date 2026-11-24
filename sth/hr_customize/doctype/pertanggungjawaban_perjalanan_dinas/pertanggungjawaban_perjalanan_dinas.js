@@ -32,11 +32,27 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       }
     }
 
+    // frm.fields_dict["costings"].grid.update_docfield_property(
+    //   "jumlah_verifikasi_hrd",
+    //   "read_only",
+    //   0
+    // );
+
+    // state di mana HRD boleh mengisi Jumlah Verifikasi HRD
+    const state_boleh_isi = ["Butuh Persetujuan 1", "Butuh Persetujuan 2"];
+
+    const boleh_isi =
+      !frm.is_new() &&
+      frm.doc.docstatus === 0 &&
+      state_boleh_isi.includes(frm.doc.workflow_state);
+
     frm.fields_dict["costings"].grid.update_docfield_property(
       "jumlah_verifikasi_hrd",
       "read_only",
-      0
+      boleh_isi ? 0 : 1
     );
+
+    frm.refresh_field("costings");
 
     if (frm.is_new() && frm.is_new() != undefined) {
       // console.log("render is_new");
