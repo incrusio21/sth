@@ -46,10 +46,20 @@ frappe.ui.form.on("Retur Items", {
 })
 
 
+// frappe.form.formatters.Link itu global untuk seluruh desk. Dulu pembungkus ini
+// cuma memeriksa `if (doc)`, padahal doc terisi untuk hampir semua link yang
+// digambar di form, grid maupun Report Builder doctype lain, sehingga Link Title
+// di sana ikut hilang sampai halaman dimuat ulang. Sekarang hanya berlaku untuk
+// dokumen Retur ke Gudang dan baris tabel anaknya, dan cuma dipasang sekali per sesi.
+let formatter_link_retur_terpasang = false;
+
 function link_for(frm) {
+	if (formatter_link_retur_terpasang) return;
+	formatter_link_retur_terpasang = true;
+
 	const original_link_formatter = frappe.form.formatters.Link;
 	frappe.form.formatters.Link = function (value, docfield, options, doc) {
-		if (doc) {
+		if (doc && (doc.doctype === "Retur ke Gudang" || doc.parenttype === "Retur ke Gudang")) {
 			if (!value) return "";
 
 			// doctype tujuan diambil dari options field Link
