@@ -58,7 +58,7 @@ def validate_duplicate_supplier(doc,method=None):
 
     if doc.doctype == "Supplier Quotation":
         ccond += "AND d.from_comparasion = 0"
-        fields += ", di.supplier"
+        fields += ", d.supplier"
     elif doc.doctype == "Request for Quotation":
         cjoin += "join `tabRequest for Quotation Supplier` qs on qs.parent = d.name"
         fields += ", qs.supplier"
