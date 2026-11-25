@@ -336,6 +336,21 @@ def filter_fund_type(doctype, txt, searchfield, start, page_len, filters):
 
 	return query.run()
 
+def is_unit_ho(unit):
+	return bool(unit and frappe.db.get_value("Unit", unit, "ho"))
+
+
+def get_kas_ho_account(company):
+	account = frappe.db.get_value(
+		"PDO Account Settings Table",
+		{"parent": "PDO Account Settings", "company": company},
+		"kas_ho_account",
+	)
+	if not account:
+		frappe.throw(_("Kas HO Account not set in PDO Account Settings for company {0}").format(company))
+	return account
+
+
 @frappe.whitelist()
 def create_payment_voucher(source_name, target_doc=None):
 	
@@ -364,6 +379,18 @@ def create_payment_voucher(source_name, target_doc=None):
 		target.mode_of_payment = "Cash"
 		# target.paid_from = account_row.kas_ho_account
 		target.paid_to = account_row.kas_dan_bank_dalam_perjalanan
+
+		# Unit HO tidak lewat kirim (HO -> dalam perjalanan) dan terima (dalam
+		# perjalanan -> unit). Cukup satu PV: dari akun unit ke kas HO, lalu
+		# langsung bisa direalisasi.
+		ho = is_unit_ho(source.unit)
+		if ho:
+			if not unit_doc.bank_account:
+				frappe.throw(_("Bank Account not set for Unit: {0}").format(source.unit))
+			if not account_row or not account_row.kas_ho_account:
+				frappe.throw(_("Kas HO Account not set in PDO Account Settings for company {0}").format(target.company))
+			target.paid_from = unit_doc.bank_account
+			target.paid_to = account_row.kas_ho_account
 		
 		
 		total_amount = (
@@ -384,7 +411,7 @@ def create_payment_voucher(source_name, target_doc=None):
 		target.paid_from_account_currency = "IDR"
 		target.paid_to_account_currency = "IDR"
 		target.remarks = _("Payment HO for Permintaan Dana Operasional {0}").format(source.name)
-		target.unit = ""
+		target.unit = source.unit if ho else ""
 		target.naming_series = "ACC-PAY-.YYYY.-"
 	
 	source_doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
@@ -415,6 +442,8 @@ def create_payment_voucher_kebun(source_name, target_doc=None):
 	def validate_source(source):
 		if source.payment_voucher_kebun:
 			frappe.throw(_("Payment Voucher already created: {0}").format(source.payment_voucher_kebun))
+		if is_unit_ho(source.unit):
+			frappe.throw(_("Unit {0} adalah HO, tidak perlu PV Penerimaan Dana PDO. Realisasi bisa langsung setelah PV PDO disubmit.").format(source.unit))
 
 	
 	def set_missing_values(source, target):
@@ -1301,6 +1330,9 @@ def create_payment_voucher_alokasi(source_name, tipe_pdo, target_doc=None, ppd=N
 			# Kas keluar dari akun kas Mode of Payment-nya, bukan rekening bank Unit:
 			# realisasi Kas dibayar tunai dari kas yang dipegang unit, bukan transfer.
 			target.paid_from = get_akun_mode_of_payment(mode_of_payment, source.company)
+		elif is_unit_ho(source.unit):
+			# Unit HO: dana PDO sudah dipindah ke Kas HO oleh PV PDO-nya.
+			target.paid_from = get_kas_ho_account(source.company)
 		else:
 			unit_doc = frappe.get_doc("Unit", source.unit)
 			if not unit_doc.bank_account:

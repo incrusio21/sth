@@ -22,9 +22,7 @@ frappe.ui.form.on("Permintaan Dana Operasional", {
 		processFilterSubDetail(frm)
 		filterFundType(frm)
 		frm.fields_dict['pdo_dana_cadangan'].grid.refresh();
-		make_payment_voucher(frm)
-		make_payment_voucher_kebun(frm)
-		make_realisasi_pdo(frm)
+		make_pdo_buttons(frm)
 		hide_revisi_field(frm)
 		make_jenis_filter(frm)
 
@@ -754,9 +752,23 @@ function set_field_properties_kas(frm, cdt, cdn, jenis) {
 }
 
 
-function make_payment_voucher(frm) {
+// Unit HO: tidak ada PV penerimaan kebun; realisasi cukup menunggu PV PDO.
+function make_pdo_buttons(frm) {
+	if (frm.doc.docstatus != 1) return;
+	const unit = frm.doc.unit;
+	const lanjut = (ho) => {
+		if (frm.doc.unit !== unit) return;
+		make_payment_voucher(frm, ho)
+		if (!ho) make_payment_voucher_kebun(frm)
+		make_realisasi_pdo(frm, ho)
+	};
+	if (!unit) return lanjut(false);
+	frappe.db.get_value('Unit', unit, 'ho').then((r) => lanjut(!!(r.message && r.message.ho)));
+}
+
+function make_payment_voucher(frm, ho) {
 	if (frm.doc.docstatus == 1 && !frm.doc.payment_voucher) {
-		frm.add_custom_button(__('Create PV Pengiriman Dana Kebun'), function () {
+		frm.add_custom_button(ho ? __('Create PV PDO') : __('Create PV Pengiriman Dana Kebun'), function () {
 			frappe.model.open_mapped_doc({
 				method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher',
 				frm: frm
@@ -777,8 +789,8 @@ function make_payment_voucher_kebun(frm) {
 	}
 }
 
-function make_realisasi_pdo(frm) {
-	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher && frm.doc.payment_voucher_kebun && frm.doc.outstanding_amount > 0) {
+function make_realisasi_pdo(frm, ho) {
+	if (frm.doc.docstatus == 1 && frm.doc.payment_voucher && (ho || frm.doc.payment_voucher_kebun) && frm.doc.outstanding_amount > 0) {
 		frm.add_custom_button(__('Realisasi PDO'), function () {
 			show_realisasi_dialog(frm);
 		});

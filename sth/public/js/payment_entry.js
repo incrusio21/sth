@@ -1737,15 +1737,20 @@ function show_pdo_selector(frm) {
 // punya PV penerimaan kebun. Pilihan dibuat lewat create_payment_voucher_kebun,
 // sama dengan tombol "Create RV Penerimaan Dana PDO Kebun" di form PDO.
 function show_penerimaan_pdo_selector(frm) {
+	get_ho_units().then((ho_units) => {
+	let filters = [
+		['docstatus', '=', 1],
+		['payment_voucher', '!=', ''],
+		['payment_voucher_kebun', '=', ''],
+	];
+	// Unit HO tidak punya PV penerimaan; realisasinya langsung dari PV PDO.
+	if (ho_units.length) filters.push(['unit', 'not in', ho_units]);
+
 	frappe.call({
 		method: 'frappe.client.get_list',
 		args: {
 			doctype: 'Permintaan Dana Operasional',
-			filters: [
-				['docstatus', '=', 1],
-				['payment_voucher', '!=', ''],
-				['payment_voucher_kebun', '=', ''],
-			],
+			filters: filters,
 			fields: ['name', 'posting_date', 'unit', 'payment_voucher',
 				'grand_total_bahan_bakar',
 				'grand_total_perjalanan_dinas',
@@ -1833,6 +1838,7 @@ function show_penerimaan_pdo_selector(frm) {
 				});
 			});
 		}
+	});
 	});
 }
 
@@ -1941,15 +1947,27 @@ function format_currency(value) {
 	return frappe.format(value, { fieldtype: 'Currency' });
 }
 
+// Unit yang dicentang HO/RO. Dipakai popup Penerimaan dan Realisasi PDO.
+function get_ho_units() {
+	return frappe.db.get_list('Unit', { filters: { ho: 1 }, pluck: 'name', limit: 0 });
+}
+
 function show_realisasi_pdo_selector(frm) {
+	get_ho_units().then((ho_units) => {
+	// Unit biasa siap direalisasi setelah PV penerimaan kebun; unit HO cukup
+	// setelah PV PDO-nya disubmit.
+	let or_filters = [['payment_voucher_kebun', '!=', '']];
+	if (ho_units.length) or_filters.push(['unit', 'in', ho_units]);
+
 	frappe.call({
 		method: 'frappe.client.get_list',
 		args: {
 			doctype: 'Permintaan Dana Operasional',
 			filters: [
 				['docstatus', '=', 1],
-				['payment_voucher_kebun', '!=', ''],
+				['payment_voucher', '!=', ''],
 			],
+			or_filters: or_filters,
 			fields: [
 				'name', 'posting_date', 'unit',
 				'grand_total_bahan_bakar',
@@ -2078,6 +2096,7 @@ function show_realisasi_pdo_selector(frm) {
 				});
 			});
 		}
+	});
 	});
 }
 
