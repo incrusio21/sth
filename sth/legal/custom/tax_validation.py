@@ -83,17 +83,19 @@ def set_pajak_purchase_invoice(source, target):
 
 	# Dasar pengenaan sama dengan base_vat di purchase_invoice.js: sub total
 	# dikurangi retensi (%) dari total item.
+	# PPN dan PPh tidak dikenakan pada charges (materai dsb.).
 	total_items = sum(flt(d.amount) for d in target.get("items"))
+	total_charges = sum(flt(d.total) for d in target.get("charges_purchase_invoice"))
 	sub_total = (
 		total_items
-		+ sum(flt(d.total) for d in target.get("charges_purchase_invoice"))
+		+ total_charges
 		- sum(flt(d.amount) for d in target.get("purchase_invoice_pengeluaran_barang"))
 	)
 	retensi = flt(total_items * flt(target.get("retensi")) / 100, target.precision("retensi_amount"))
 	for d in target.get("ppn"):
-		d.amount = flt((sub_total - flt(target.jumlah_diskon) - retensi) * flt(d.percentage) / 100, d.precision("amount"))
+		d.amount = flt((sub_total - total_charges - flt(target.jumlah_diskon) - retensi) * flt(d.percentage) / 100, d.precision("amount"))
 	for d in target.get("pph_lainnya"):
-		d.amount = flt((sub_total - retensi) * flt(d.percentage) / 100, d.precision("amount"))
+		d.amount = flt((sub_total - total_charges - retensi) * flt(d.percentage) / 100, d.precision("amount"))
 
 	target.total_ppn = sum(flt(d.amount) for d in target.get("ppn"))
 	target.total_pph_lainnya = sum(flt(d.amount) for d in target.get("pph_lainnya"))
