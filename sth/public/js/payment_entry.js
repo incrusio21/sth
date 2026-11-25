@@ -31,6 +31,11 @@ frappe.ui.form.on("Payment Entry", {
 			show_pdo_selector(frm);
 		} else if (frm.doc.tipe_transfer == 'Realisasi PDO') {
 			show_realisasi_pdo_selector(frm);
+		} else if (frm.doc.tipe_transfer == 'Penerimaan Dana PDO') {
+			// PV yang dibuat dari tombol di PDO sudah membawa PDO-nya; jangan tanya lagi.
+			if (!frm.doc.permintaan_dana_operasional) {
+				show_penerimaan_pdo_selector(frm);
+			}
 		} else {
 			frm.set_value('permintaan_dana_operasional', '');
 		}
@@ -1710,6 +1715,109 @@ function show_pdo_selector(frm) {
 
 				frappe.call({
 					method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher',
+					args: {
+						source_name: selected_name
+					},
+					freeze: true,
+					freeze_message: __('Creating Payment Voucher...'),
+					callback: function (r) {
+						if (r.message) {
+							var doc = r.message;
+							frappe.model.sync(doc);
+							frappe.set_route('Form', 'Payment Entry', doc.name);
+						}
+					}
+				});
+			});
+		}
+	});
+}
+
+// Penerimaan Dana PDO (RV kebun): PDO yang PV HO-nya sudah ada tapi belum
+// punya PV penerimaan kebun. Pilihan dibuat lewat create_payment_voucher_kebun,
+// sama dengan tombol "Create RV Penerimaan Dana PDO Kebun" di form PDO.
+function show_penerimaan_pdo_selector(frm) {
+	frappe.call({
+		method: 'frappe.client.get_list',
+		args: {
+			doctype: 'Permintaan Dana Operasional',
+			filters: [
+				['docstatus', '=', 1],
+				['payment_voucher', '!=', ''],
+				['payment_voucher_kebun', '=', ''],
+			],
+			fields: ['name', 'posting_date', 'unit', 'payment_voucher',
+				'grand_total_bahan_bakar',
+				'grand_total_perjalanan_dinas',
+				'grand_total_kas',
+				'grand_total_dana_cadangan',
+				'grand_total_non_pdo'],
+			order_by: 'posting_date desc',
+			limit: 50
+		},
+		callback: function (r) {
+			if (!r.message || r.message.length === 0) {
+				frappe.msgprint({
+					title: __('No PDO Available'),
+					message: __('There are no submitted PDO with payment voucher that have not been received.'),
+					indicator: 'orange'
+				});
+				frm.set_value('tipe_transfer', '');
+				return;
+			}
+
+			let rows = r.message.map(d => {
+				let total = (d.grand_total_bahan_bakar || 0) +
+					(d.grand_total_perjalanan_dinas || 0) +
+					(d.grand_total_kas || 0) +
+					(d.grand_total_dana_cadangan || 0) +
+					(d.grand_total_non_pdo || 0);
+				return `
+					<tr class="pdo-row"
+						data-name="${frappe.utils.escape_html(d.name)}"
+						style="cursor:pointer;">
+						<td style="padding:8px; border-bottom:1px solid #eee;">${frappe.utils.escape_html(d.name)}</td>
+						<td style="padding:8px; border-bottom:1px solid #eee;">${frappe.utils.escape_html(d.unit || '-')}</td>
+						<td style="padding:8px; border-bottom:1px solid #eee;">${frappe.datetime.str_to_user(d.posting_date)}</td>
+						<td style="padding:8px; border-bottom:1px solid #eee;">${frappe.utils.escape_html(d.payment_voucher)}</td>
+						<td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">
+							${frappe.format(total, { fieldtype: 'Currency' })}
+						</td>
+					</tr>
+				`;
+			}).join('');
+
+			let dialog = new frappe.ui.Dialog({
+				title: __('Select PDO'),
+				size: 'large',
+				fields: [{
+					fieldtype: 'HTML',
+					fieldname: 'pdo_table',
+					options: `
+						<table style="width:100%; border-collapse:collapse;">
+							<thead>
+								<tr style="background:#f5f5f5; font-weight:bold;">
+									<th style="padding:8px; text-align:left;">PDO</th>
+									<th style="padding:8px; text-align:left;">Unit</th>
+									<th style="padding:8px; text-align:left;">Date</th>
+									<th style="padding:8px; text-align:left;">PV HO</th>
+									<th style="padding:8px; text-align:right;">Grand Total</th>
+								</tr>
+							</thead>
+							<tbody>${rows}</tbody>
+						</table>
+					`
+				}]
+			});
+
+			dialog.show();
+
+			dialog.$wrapper.find('.pdo-row').on('click', function () {
+				let selected_name = $(this).data('name');
+				dialog.hide();
+
+				frappe.call({
+					method: 'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.create_payment_voucher_kebun',
 					args: {
 						source_name: selected_name
 					},
