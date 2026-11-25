@@ -54,7 +54,7 @@ frappe.ui.form.on("Purchase Invoice", {
         // dan form langsung ditandai dirty -> indicator "Not Saved" yang tidak bisa
         // dihilangkan karena dokumen sudah tidak boleh disimpan.
         if (frm.doc.docstatus === 0 && (frm.doc.items || []).length) {
-            calculate_sub_total(frm)
+            // calculate_sub_total(frm)
 
             // "Get Items From" (Purchase Receipt / Pengakuan Pembelian TBS) uses
             // erpnext.utils.map_current_doc, which replaces frm.doc in bulk via

@@ -3,8 +3,15 @@
 
 sth.plantation.setup_bkm_controller()
 
+let formatter_link_bkm_terpasang = false;
+
 frappe.ui.form.on("Buku Kerja Mandor Perawatan", {
     onload(frm) {
+        // onload jalan tiap kali form dibuka; tanpa penjaga ini pembungkusnya
+        // menumpuk sepanjang sesi.
+        if (formatter_link_bkm_terpasang) return;
+        formatter_link_bkm_terpasang = true;
+
         const original_link_formatter = frappe.form.formatters.Link;
         frappe.form.formatters.Link = function(value, docfield, options, doc) {
             // Hanya berlaku untuk child doctype "Detail BKM Material"

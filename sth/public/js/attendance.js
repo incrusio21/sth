@@ -13,13 +13,7 @@ frappe.ui.form.on('Attendance', {
             '7th Day Off'
         ].join('\n'));
 
-        frappe.form.formatters.Link = function(value, docfield, options, doc) {
-            if (doc) {
-                return value || "";
-            }
-            // Doctype lain tetap pakai formatter asli
-            return original_link_formatter(value, docfield, options, doc);
-        };
+        pasang_formatter_link_attendance();
 
     },
     
@@ -49,4 +43,25 @@ function check_and_set_leave_type(frm) {
     } else {
         frm.set_df_property('leave_type', 'read_only', 0);
     }
+}
+
+// Link di form Attendance ditampilkan apa adanya (ID), bukan judulnya.
+// frappe.form.formatters.Link itu global untuk seluruh desk; dulu pembungkus ini
+// cuma memeriksa `if (doc)` sehingga begitu Attendance dibuka, Link Title di form,
+// grid dan Report Builder doctype lain ikut hilang sampai halaman dimuat ulang.
+// Sekarang hanya untuk dokumen Attendance, dan cuma dipasang sekali per sesi.
+let formatter_link_attendance_terpasang = false;
+
+function pasang_formatter_link_attendance() {
+    if (formatter_link_attendance_terpasang) return;
+    formatter_link_attendance_terpasang = true;
+
+    const original_link_formatter = frappe.form.formatters.Link;
+    frappe.form.formatters.Link = function (value, docfield, options, doc) {
+        if (doc && (doc.doctype === "Attendance" || doc.parenttype === "Attendance")) {
+            return value || "";
+        }
+        // Doctype lain tetap pakai formatter asli
+        return original_link_formatter(value, docfield, options, doc);
+    };
 }
