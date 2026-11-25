@@ -391,6 +391,7 @@ def create_payment_voucher(source_name, target_doc=None):
 				frappe.throw(_("Kas HO Account not set in PDO Account Settings for company {0}").format(target.company))
 			target.paid_from = unit_doc.bank_account
 			target.paid_to = account_row.kas_ho_account
+			target.mode_of_payment = "Cheque"
 		
 		
 		total_amount = (
