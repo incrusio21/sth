@@ -1289,7 +1289,12 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		# invoice rupiah kursnya 1 sehingga hasilnya tidak berubah.
 		conversion_rate = flt(self.conversion_rate) or 1.0
 
+		# Charges (materai dsb.) menambah hutang seperti PPN: barisnya Add dan
+		# ikut grand_total, lalu make_tax_gl_entries mendebit akunnya. Dulu
+		# charges di sini dibalik tandanya sehingga credit_to kurang 2x total
+		# charges dari debitnya dan jurnal tidak seimbang.
 		total_charges_pp = 0
+		total_charges_txn = 0
 		for tax in self.taxes:
 			if ("__from_pph_lainnya__" in (tax.description or "")
 				or "__from_ppn__" in (tax.description or "")
@@ -1297,12 +1302,9 @@ class SthPurchaseInvoice(PurchaseInvoice):
 				or "__from_pb__" in (tax.description or "")
 				or tax.description == RETENSI_MARKER):
 
-				if "__from_charges__" in (tax.description or ""):
-					total_charges_pp += flt(tax.tax_amount) * conversion_rate * -1
-				else:
-					total_charges_pp += flt(tax.tax_amount) * conversion_rate
+				total_charges_pp += flt(tax.tax_amount) * conversion_rate
+				total_charges_txn += flt(tax.tax_amount)
 
-		# Kurangi credit_to dengan total charges (charges punya GL entry sendiri via make_charges_gl_entries)
 		credit_amount = flt(total_debit + total_charges_pp, self.precision("base_grand_total"))
 
 		# ── CREDIT : credit_to (hutang ke supplier) ──────────────────────────── #
@@ -1315,10 +1317,10 @@ class SthPurchaseInvoice(PurchaseInvoice):
 		if self.party_account_currency == self.company_currency:
 			credit_in_party_currency = credit_amount
 		else:
-			# Hitung ulang dari item.amount (mata uang transaksi) dikurangi charges
+			# Hitung ulang dari item.amount dan baris pajak bertanda dalam mata uang transaksi
 			credit_in_party_currency = flt(
 				sum(flt(item.amount) for item in self.get("items") if flt(item.amount))
-			) - flt(self.total_charges)
+			) + total_charges_txn
 
 		gl_entries.append(
 			self.get_gl_dict(
