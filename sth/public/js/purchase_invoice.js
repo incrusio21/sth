@@ -933,6 +933,8 @@ const TAX_ROW_FIELDS = ["account_head", "charge_type", "add_deduct_tax", "catego
 // dicentang pph; kalau tidak ada yang dicentang, seluruh sub total.
 // Retensi (%) ikut mengurangi dasarnya: sub total dikurangi retensi, untuk item
 // yang dicentang pph dikurangi retensi bagiannya sendiri.
+// PPN dan PPh tidak dikenakan pada charges (materai dsb.), jadi total charges
+// dikeluarkan dari dasar pajak walau ikut di sub total.
 function base_vat(frm, parentfield) {
     const retensi = flt(frm.doc.retensi) / 100;
     if (parentfield === "pph_lainnya") {
@@ -941,9 +943,14 @@ function base_vat(frm, parentfield) {
             const total = dicentang.reduce((total, r) => total + flt(r.amount), 0);
             return total - total * retensi;
         }
-        return flt(frm.doc.sub_total) - retensi_dasar_pajak(frm);
+        return flt(frm.doc.sub_total) - total_charges_dasar_pajak(frm) - retensi_dasar_pajak(frm);
     }
-    return flt(frm.doc.sub_total) - flt(frm.doc.jumlah_diskon) - retensi_dasar_pajak(frm);
+    return flt(frm.doc.sub_total) - total_charges_dasar_pajak(frm) - flt(frm.doc.jumlah_diskon) - retensi_dasar_pajak(frm);
+}
+
+function total_charges_dasar_pajak(frm) {
+    if (frm.doc.voucher_type === "Non Voucher Match") return 0;
+    return (frm.doc.charges_purchase_invoice || []).reduce((sum, r) => sum + flt(r.total), 0);
 }
 
 // Retensi (%) dari total item, sama dengan net_total * retensi di
