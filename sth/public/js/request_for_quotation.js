@@ -31,7 +31,8 @@ frappe.ui.form.on('Request for Quotation', {
                             company: frm.doc.company,
                         },
                         filter_child: [
-                            ["item_status", "!=", "Rejected"]
+                            ["item_status", "!=", "Rejected"],
+                            ["ordered_qty", "=", 0]
                         ]
                     }, (res) => {
                         console.log(res);
