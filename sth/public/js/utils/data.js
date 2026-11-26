@@ -142,15 +142,22 @@ sth.form = {
             title: __("Re-calculate Premi"),
             fields: [
                 {
+                    label: __("Company"),
+                    fieldtype: "Link",
+                    fieldname: "company",
+                    options: "Company",
+                    default: frappe.defaults.get_user_default("Company"),
+                },
+                {
+                    fieldtype: "Column Break",
+                    fieldname: "time_period_column",
+                },
+                {
                     label: __("Start"),
                     fieldtype: "Date",
                     fieldname: "from_date",
                     reqd: 1,
                     default: first_day_of_month.toDate(),
-                },
-                {
-                    fieldtype: "Column Break",
-                    fieldname: "time_period_column",
                 },
                 {
                     label: __("End"),
@@ -167,6 +174,7 @@ sth.form = {
                         voucher_type: doctype,
                         filters: {
                             [field_date]: ["between", [data.from_date, data.to_date]],
+                            "company": data.company,
                             ["docstatus"]: ["in", [0, 1]]
                         }
                     },

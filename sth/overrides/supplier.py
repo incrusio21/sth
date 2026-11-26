@@ -5,8 +5,11 @@ from frappe import _
 from frappe.model.workflow import get_workflow
 
 from sth.finance_sth.doctype.kriteria_dokumen_finance.kriteria_dokumen_finance import get_criteria
+from sth.overrides.rename_kode import RenameKodeMixin
 
-class Supplier(Supplier):    
+class Supplier(RenameKodeMixin, Supplier):
+	kode_field = "kode_supplier"
+
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -57,6 +60,14 @@ class Supplier(Supplier):
 		warn_rfqs: DF.Check
 		website: DF.Data | None
 	# end: auto-generated types
+
+	def validate(self):
+		super().validate()
+		self.validate_kode_baru()
+
+	def on_update(self):
+		super().on_update()
+		self.rename_ke_kode()
 
 	def validate_workflow(self):
 		# Approved -> Butuh Persetujuan 1 dari persetujuan_ulang.kembali_ke_persetujuan_1

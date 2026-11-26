@@ -43,6 +43,17 @@ frappe.ui.form.on('Supplier', {
 			frm.set_value('status_bank', 'Tidak Aktif');
 		}
 	},
+	after_save: function (frm) {
+		// Server me-rename Supplier kalau kode_supplier diubah, jadi form
+		// dipindah ke nama baru dan salinan lama dibuang dari locals.
+		const lama = frm.docname;
+		const baru = frm.doc.kode_supplier;
+		if (baru && baru !== lama) {
+			frappe.set_route("Form", "Supplier", baru).then(() => {
+				frappe.model.remove_from_locals("Supplier", lama);
+			});
+		}
+	},
 	status_pkp: function (frm) {
 		check_status_pkp(frm)
 	},
@@ -112,9 +123,8 @@ function hide_details(frm) {
 	frm.set_df_property('section_break_vrfr5', 'hidden', 1);
 	frm.set_df_property('pajak_label', 'hidden', 1);
 	frm.set_df_property('section_break_6doas', 'hidden', 1);
-
-	frm.set_df_property('kode_supplier', 'read_only', 1);
-
+	// kode_supplier sengaja bisa diubah: mengubahnya me-rename Supplier
+	// (RenameKodeMixin di sth/overrides/rename_kode.py).
 }
 
 frappe.ui.form.on('Struktur Supplier', {

@@ -516,7 +516,7 @@ doc_events = {
 	},
 	"Supplier Quotation": {
 		# "before_submit": "sth.custom.supplier_quotation.update_status_rfq",
-		# "validate": "sth.custom.supplier_quotation.validate_duplicate_supplier",
+		"validate": "sth.custom.supplier_quotation.validate_duplicate_supplier",
 		"on_submit": ["sth.custom.supplier_quotation.create_po_draft","sth.custom.material_request.calculate_percent_quoted"]
 	},
 	
@@ -531,7 +531,8 @@ doc_events = {
 	
 	"Request for Quotation": {
 		"before_save": "sth.custom.request_for_quotation.update_unit_in_table",
-		"on_submit": "sth.custom.material_request.calculate_percent_quoted"
+		"on_submit": "sth.custom.material_request.calculate_percent_quoted",
+		"validate": "sth.custom.supplier_quotation.validate_duplicate_supplier",
 	},
 	("Proposal", "BAPP"): {
 		"before_validate": "sth.legal.custom.tax_validation.validate_custom_tax",

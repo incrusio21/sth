@@ -4,11 +4,19 @@
 frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
   refresh(frm) {
     if (frm.doc.docstatus === 0 || frm.is_new()) {
+      // frm.set_query("no_spd", function () {
+      //   return {
+      //     filters: {
+      //       custom_employee_advance: ["is", "set"]
+      //     }
+      //   };
+      // });
       frm.set_query("no_spd", function () {
         return {
+          query: "sth.hr_customize.doctype.pertanggungjawaban_perjalanan_dinas.pertanggungjawaban_perjalanan_dinas.get_available_spd",
           filters: {
-            custom_employee_advance: ["is", "set"]
-          }
+            current: frm.doc.name || "",
+          },
         };
       });
       frm.set_query("no_pdo", function () {
@@ -24,11 +32,34 @@ frappe.ui.form.on("Pertanggungjawaban Perjalanan Dinas", {
       }
     }
 
+    // frm.fields_dict["costings"].grid.update_docfield_property(
+    //   "jumlah_verifikasi_hrd",
+    //   "read_only",
+    //   0
+    // );
+
+    // state di mana HRD boleh mengisi Jumlah Verifikasi HRD
+    const state_boleh_isi = ["Butuh Persetujuan 1", "Butuh Persetujuan 2"];
+
+    const boleh_isi =
+      !frm.is_new() &&
+      frm.doc.docstatus === 0 &&
+      state_boleh_isi.includes(frm.doc.workflow_state);
+
     frm.fields_dict["costings"].grid.update_docfield_property(
       "jumlah_verifikasi_hrd",
       "read_only",
-      0
+      boleh_isi ? 0 : 1
     );
+
+    // sanctioned_amount dikunci saat tahap verifikasi, sebaliknya dari jumlah_verifikasi_hrd
+    frm.fields_dict["costings"].grid.update_docfield_property(
+      "sanctioned_amount",
+      "read_only",
+      state_boleh_isi.includes(frm.doc.workflow_state) ? 1 : 0
+    );
+
+    frm.refresh_field("costings");
 
     if (frm.is_new() && frm.is_new() != undefined) {
       // console.log("render is_new");

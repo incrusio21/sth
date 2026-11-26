@@ -248,7 +248,8 @@ class PayrollEntry(PayrollEntry):
 			payroll_payable_account=self.payroll_payable_account,
 			salary_slip_based_on_timesheet=self.salary_slip_based_on_timesheet,
 			unit=self.unit,
-			tipe_salary=self.tipe_salary
+			tipe_salary=self.tipe_salary,
+			payroll_kategori=self.payroll_kategori
 		)
 
 		if not self.salary_slip_based_on_timesheet:
@@ -982,7 +983,6 @@ def get_filtered_employees_custom(
 		ExistsCriterion(ada_attendance)
 		& (SalaryStructureAssignment.docstatus == 1)
 		& (Employee.company == filters.company)
-		& (Employee.unit == filters.unit)
 		& ((Employee.date_of_joining <= filters.end_date) | (Employee.date_of_joining.isnull()))
 		& (SalaryStructureAssignment.salary_structure.isin(sal_struct))
 		& (SalaryStructureAssignment.payroll_payable_account == filters.payroll_payable_account)
@@ -1004,6 +1004,9 @@ def get_filtered_employees_custom(
 		.on(Employee.name == SalaryStructureAssignment.employee)
 		.where(conditions)
 	)
+
+	if filters.get("payroll_kategori"):
+		query = query.where(Employee.payroll_kategori == filters.payroll_kategori)
 
 	if filters.tipe_salary == "Pesangon":
 		Pesangon = frappe.qb.DocType("Pesangon")

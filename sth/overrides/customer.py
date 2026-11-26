@@ -2,14 +2,26 @@
 import frappe
 from erpnext.selling.doctype.customer.customer import Customer
 
-class Customer(Customer):    
+from sth.overrides.rename_kode import RenameKodeMixin
+
+class Customer(RenameKodeMixin, Customer):
+	kode_field = "kode_pelanggan"
+
 	def autoname(self):
 		if not self.kode_pelanggan:
 			self.kode_pelanggan = self.generate_customer_code()
 			self.name = self.kode_pelanggan
 		else:
 			self.name = self.kode_pelanggan
-	
+
+	def validate(self):
+		super().validate()
+		self.validate_kode_baru()
+
+	def on_update(self):
+		super().on_update()
+		self.rename_ke_kode()
+
 	def generate_customer_code(self):
 		from datetime import datetime
 		

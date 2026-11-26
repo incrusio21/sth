@@ -737,6 +737,37 @@ class Timbangan(Document):
 		qty_timbangan_2 = frappe.db.get_value("Timbangan",filters={"no_do_2":do_no,"name":["!=",self.name],"kode_barang": self.kode_barang,"docstatus":["!=",2]},fieldname=["sum(qty_do_2) as qty"])
 		return flt(qty_do) - flt(qty_timbangan) - flt(qty_timbangan_2)
 
+	def catatan_dua_do(self, urutan):
+		"""Keterangan pembagian netto ke DO 1 dan DO 2 untuk DN/SI timbangan ini.
+
+		Ditulis ke instructions Delivery Note dan remarks Sales Invoice, yang
+		tidak dicetak, supaya dari DN atau SI DO 2 terbaca bahwa ia menampung
+		kekurangan DO 1, dan berapa Kg yang diambil dari masing-masing DO.
+		Kosong kalau timbangan ini cuma memakai satu DO.
+		"""
+		if not self.no_do_2 or flt(self.qty_do_2) <= 0:
+			return None
+
+		berat = fmt_kg(flt(self.qty_do) + flt(self.qty_do_2))
+		qty_1, qty_2 = fmt_kg(self.qty_do), fmt_kg(self.qty_do_2)
+
+		if urutan == 1:
+			return _(
+				"Timbangan {0} netto {1} Kg dibagi dua DO: {2} Kg dari DO ini ({3}), "
+				"kekurangan {4} Kg dilanjutkan ke DO 2 {5}."
+			).format(self.name, berat, qty_1, self.do_no, qty_2, self.no_do_2)
+
+		if flt(self.qty_do) > 0:
+			return _(
+				"Pelengkap DO 1 {0}: DO 1 hanya tersisa {1} Kg, jadi {2} Kg dari netto {3} Kg "
+				"Timbangan {4} ditampung DO 2 ini ({5})."
+			).format(self.do_no, qty_1, qty_2, berat, self.name, self.no_do_2)
+
+		return _(
+			"Pengganti DO 1 {0} yang sudah habis: seluruh netto {1} Kg Timbangan {2} "
+			"ditampung DO 2 ini ({3})."
+		).format(self.do_no, qty_2, self.name, self.no_do_2)
+
 	def create_delivery_notes(self):
 		dn_names = []
 
@@ -745,6 +776,7 @@ class Timbangan(Document):
 		# untuk timbangan yang tidak memakai DO 2.
 		if flt(self.qty_do) > 0 or not self.no_do_2:
 			dn1 = make_delivery_note(self.name, do_no=self.do_no, qty=self.qty_do or self.berat_kirim())
+			dn1.instructions = self.catatan_dua_do(1)
 			dn1.insert()
 			dn1.submit()
 			self.db_set('delivery_note', dn1.name)
@@ -752,6 +784,7 @@ class Timbangan(Document):
 
 		if self.no_do_2 and flt(self.qty_do_2) > 0:
 			dn2 = make_delivery_note(self.name, do_no=self.no_do_2, qty=self.qty_do_2)
+			dn2.instructions = self.catatan_dua_do(2)
 			dn2.insert()
 			dn2.submit()
 			self.db_set('delivery_note_2', dn2.name)
@@ -774,6 +807,7 @@ class Timbangan(Document):
 
 		if flt(self.qty_do) > 0 or not self.no_do_2:
 			si1 = make_sales_invoice(self.name, do_no=self.do_no, qty=self.qty_do or self.berat_kirim())
+			si1.remarks = self.catatan_dua_do(1) or si1.remarks
 			si1.insert()
 			si1.submit()
 			self.db_set("sales_invoice", si1.name)
@@ -781,6 +815,7 @@ class Timbangan(Document):
 
 		if self.no_do_2 and flt(self.qty_do_2) > 0:
 			si2 = make_sales_invoice(self.name, do_no=self.no_do_2, qty=self.qty_do_2)
+			si2.remarks = self.catatan_dua_do(2) or si2.remarks
 			si2.insert()
 			si2.submit()
 			self.db_set("sales_invoice_2", si2.name)
@@ -1390,6 +1425,11 @@ def format_sisa(nilai):
 	ini ditulis JS."""
 	nilai = flt(nilai)
 	return int(nilai) if nilai == int(nilai) else nilai
+
+
+def fmt_kg(nilai):
+	"""Angka Kg untuk teks keterangan, pemisah ribuannya ikut Number Format sistem."""
+	return frappe.format_value(flt(nilai), {"fieldtype": "Float", "precision": 0}).strip()
 
 
 def perbarui_sisa_do_timbangan(do_no, item_code):

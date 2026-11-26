@@ -14,6 +14,28 @@ class PertanggungjawabanPerjalananDinas(AccountsController):
 		super().validate()
 		if self.sumber_pertanggungjawaban == "PDO":
 			self.validate_pdo()
+		else:
+			self.validate_spd()
+
+	def validate_spd(self):
+		if not self.no_spd:
+			return
+
+		# hanya dokumen Submitted yang memblokir; Cancelled (2) dan Draft (0) diabaikan
+		duplikat = frappe.db.get_value(
+			"Pertanggungjawaban Perjalanan Dinas",
+			{
+				"no_spd": self.no_spd,
+				"docstatus": 1,
+				"name": ["!=", self.name],
+			},
+			"name",
+		)
+		if duplikat:
+			frappe.throw(
+				_("SPD {0} sudah dipertanggungjawabkan pada {1}.").format(self.no_spd, duplikat),
+				title=_("Duplikasi Pertanggungjawaban"),
+			)
 
 	def validate_pdo(self):
 		if not self.no_pdo:
@@ -328,3 +350,31 @@ def make_payment_entry(source_name, target_doc=None):
 	)
  
 	return doclist
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_available_spd(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql(
+		"""
+		SELECT tr.name, tr.employee_name
+		FROM `tabTravel Request` tr
+		WHERE tr.custom_employee_advance IS NOT NULL
+			AND tr.custom_employee_advance != ''
+			AND tr.name LIKE %(txt)s
+			AND NOT EXISTS (
+				SELECT 1
+				FROM `tabPertanggungjawaban Perjalanan Dinas` p
+				WHERE p.no_spd = tr.name
+					AND p.docstatus = 1
+					AND p.name != %(current)s
+			)
+		ORDER BY tr.name DESC
+		LIMIT %(start)s, %(page_len)s
+		""",
+		{
+			"txt": f"%{txt}%",
+			"current": (filters or {}).get("current") or "",
+			"start": start,
+			"page_len": page_len,
+		},
+	)

@@ -34,6 +34,18 @@ frappe.ui.form.on("Customer", {
 		}
 	},
 
+	after_save: function (frm) {
+		// Server me-rename Customer kalau kode_pelanggan diubah, jadi form
+		// dipindah ke nama baru dan salinan lama dibuang dari locals.
+		const lama = frm.docname;
+		const baru = frm.doc.kode_pelanggan;
+		if (baru && baru !== lama) {
+			frappe.set_route("Form", "Customer", baru).then(() => {
+				frappe.model.remove_from_locals("Customer", lama);
+			});
+		}
+	},
+
 	validate: function (frm) {
 		if (frm.komoditi_editor) {
 			frm.komoditi_editor.set_komoditi_in_table();

@@ -316,7 +316,8 @@ function btn_get_material_request(frm) {
                     company: frm.doc.company,
                 },
                 filter_child: [
-                    ["item_status", "!=", "Rejected"]
+                    ["item_status", "!=", "Rejected"],
+                    ["ordered_qty", "=", 0]
                 ]
             }, (doc) => {
                 frm.trigger('calculate_totals')
