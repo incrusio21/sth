@@ -834,6 +834,8 @@ def set_no_rekening(doc, method):
 		or doc.bank_tujuan
 	)
 
+	sync_no_rekening_tujuan_2(doc)
+
 @frappe.whitelist()
 def get_no_rekening(party_type=None, party=None, 
 					paid_to=None, tipe_transfer=None, 
@@ -1506,3 +1508,10 @@ def _uang_muka_terpakai(doc):
 			terpakai[nama] = flt(terpakai.get(nama)) + flt(item.get("amount"))
 
 	return terpakai
+
+
+def sync_no_rekening_tujuan_2(doc, method=None):
+	doc.no_rekening_tujuan_2 = doc.beneficary_account
+	doc.nama_pemilik_rekening_2 = doc.nama_pemilik_rekening
+	doc.unit_tujuan_2 = doc.unit_tujuan
+
