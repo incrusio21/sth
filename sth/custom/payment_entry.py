@@ -1170,6 +1170,60 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 		)
 
 
+def hitung_total_sudah_realisasi(rows, exclude_pe=None):
+	"""Total PV lain (tersubmit) untuk PDO + Tipe PDO + Item Barang yang sama.
+
+	Baris tanpa Item Barang (tipe selain Kas/Bahan Bakar) dicocokkan per PDO +
+	Tipe PDO saja. Baris PV dijumlahkan sekali walau cocok dengan beberapa kunci.
+	"""
+	kunci = set()
+	for row in rows or []:
+		no_pdo = row.get("no_pdo")
+		tipe_pdo = row.get("tipe_pdo")
+		if no_pdo and tipe_pdo:
+			kunci.add((no_pdo, tipe_pdo, row.get("item_barang") or None))
+
+	terhitung = {}
+	for no_pdo, tipe_pdo, item_barang in kunci:
+		kondisi_item = "and baris.item_barang = %(item)s" if item_barang else ""
+		for nama, total in frappe.db.sql(
+			"""
+			select baris.name, baris.total
+			from `tabPayment Voucher Kas PDO` baris
+			inner join `tabPayment Entry` pe on pe.name = baris.parent
+			where baris.parenttype = 'Payment Entry'
+				and baris.no_pdo = %(no_pdo)s
+				and baris.tipe_pdo = %(tipe)s
+				{0}
+				and pe.docstatus = 1
+				and pe.name != %(exclude)s
+			""".format(kondisi_item),
+			{"no_pdo": no_pdo, "tipe": tipe_pdo, "item": item_barang, "exclude": exclude_pe or ""},
+		):
+			terhitung[nama] = flt(total)
+
+	return flt(sum(terhitung.values()))
+
+
+@frappe.whitelist()
+def get_total_sudah_realisasi(rows, payment_entry=None):
+	"""Untuk form: angka yang sama dengan set_total_sudah_realisasi, sebelum disimpan."""
+	return hitung_total_sudah_realisasi(frappe.parse_json(rows) or [], payment_entry)
+
+
+def set_total_sudah_realisasi(doc, method=None):
+	if not doc.meta.has_field("total_sudah_realisasi"):
+		return
+
+	if doc.tipe_transfer != "Realisasi PDO":
+		doc.total_sudah_realisasi = 0
+		return
+
+	doc.total_sudah_realisasi = hitung_total_sudah_realisasi(
+		doc.get("payment_voucher_kas_pdo") or [], doc.name
+	)
+
+
 def baris_kas_melebihi_sisa(doc):
 	"""Baris PV tipe Kas yang nilainya melewati sisa baris List Kas-nya.
 

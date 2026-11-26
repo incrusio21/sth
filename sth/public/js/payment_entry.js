@@ -2378,6 +2378,7 @@ function isi_baris_realisasi(frm, selected_name, args) {
 			// kalau cuma sebagian barang yang dicentang, sisanya belum dibayar.
 			frm.set_value('paid_amount', flt(r.message.total));
 			frm.set_value('received_amount', flt(r.message.total));
+			muat_total_sudah_realisasi(frm);
 		}
 	});
 }
@@ -2389,12 +2390,47 @@ function sum_payment_voucher_kas_pdo(frm) {
 	frm.set_value("received_amount", sum);
 }
 
+// Total PV lain yang sudah tersubmit untuk PDO + Tipe PDO + Item Barang yang sama
+// dengan baris di PV ini. Disimpan juga di server saat validate; di sini supaya
+// angkanya sudah terlihat sebelum disimpan.
+function muat_total_sudah_realisasi(frm) {
+	if (frm.doc.docstatus !== 0 || !frm.fields_dict.total_sudah_realisasi) return;
+
+	if (frm.doc.tipe_transfer !== 'Realisasi PDO') {
+		if (flt(frm.doc.total_sudah_realisasi)) frm.set_value('total_sudah_realisasi', 0);
+		return;
+	}
+
+	let rows = (frm.doc.payment_voucher_kas_pdo || [])
+		.filter(r => r.no_pdo && r.tipe_pdo)
+		.map(r => ({ no_pdo: r.no_pdo, tipe_pdo: r.tipe_pdo, item_barang: r.item_barang || null }));
+
+	frappe.xcall('sth.custom.payment_entry.get_total_sudah_realisasi', {
+		rows: rows,
+		payment_entry: frm.doc.__islocal ? null : frm.doc.name
+	}).then(total => {
+		if (flt(total) !== flt(frm.doc.total_sudah_realisasi)) {
+			frm.set_value('total_sudah_realisasi', flt(total));
+		}
+	});
+}
+
 frappe.ui.form.on("Payment Voucher Kas PDO", {
 	total(frm, cdt, cdn) {
 		sum_payment_voucher_kas_pdo(frm);
 	},
+	no_pdo(frm) {
+		muat_total_sudah_realisasi(frm);
+	},
+	tipe_pdo(frm) {
+		muat_total_sudah_realisasi(frm);
+	},
+	item_barang(frm) {
+		muat_total_sudah_realisasi(frm);
+	},
 	payment_voucher_kas_pdo_remove(frm) {
 		sum_payment_voucher_kas_pdo(frm);
+		muat_total_sudah_realisasi(frm);
 	}
 });
 
@@ -2411,6 +2447,11 @@ frappe.ui.form.on("Payment Voucher Kas PDO", {
 frappe.ui.form.on("Payment Entry", {
 	refresh(frm) {
 		atur_tombol_ppn_paid_amount(frm);
+		muat_total_sudah_realisasi(frm);
+	},
+
+	tipe_transfer(frm) {
+		muat_total_sudah_realisasi(frm);
 	},
 
 	paid_amount(frm) {
