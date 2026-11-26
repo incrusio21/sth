@@ -124,13 +124,15 @@ frappe.ui.form.on("Payment Entry", {
 		});
 
 		frm.set_query('custom_cheque_number', () => {
-			return {
-				filters: {
-					reference_doc: ["=", null],
-					reference_name: ["=", null],
-					bank_account: ["=", frm.doc.bank_account]
-				}
+			const filters = {
+				reference_doc: ["=", null],
+				reference_name: ["=", null],
+			};
+			// PDO HO bayar pakai cek tanpa bank account, jadi filter rekening hanya kalau terisi
+			if (frm.doc.bank_account) {
+				filters.bank_account = ["=", frm.doc.bank_account];
 			}
+			return { filters };
 		})
 
 		frm.set_query('unit', (doc) => {
