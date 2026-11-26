@@ -2095,7 +2095,7 @@ function show_realisasi_pdo_selector(frm) {
 				Promise.all([
 					frappe.xcall(
 						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_pdo_type',
-						{ source_name: selected_name }
+						{ source_name: selected_name, payment_entry: pe_tersimpan(frm) }
 					),
 					frappe.xcall(
 						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_bahan_bakar_pengguna',
@@ -2143,7 +2143,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_
 				return { label: item.label, value: item.value };
 			})),
 			onchange: function () {
-				muat_kas_nama_barang_pdo(selected_name, tipe_dialog);
+				muat_kas_nama_barang_pdo(selected_name, tipe_dialog, pe_tersimpan(frm));
 			}
 		});
 
@@ -2261,7 +2261,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_
 
 			// Kalau PE sudah tersimpan, isi langsung — jangan buat PE baru
 			if (!frm.doc.__islocal) {
-				isi_baris_realisasi(frm, selected_name, args);
+				isi_baris_realisasi(frm, selected_name, Object.assign({ payment_entry: frm.doc.name }, args));
 				return;
 			}
 
@@ -2284,11 +2284,17 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_
 	tipe_dialog.show();
 }
 
+// Nama PE kalau sudah tersimpan. Barisnya sendiri akan diganti, jadi server tidak
+// boleh menghitungnya sebagai bagian List Kas yang sudah terbayar.
+function pe_tersimpan(frm) {
+	return frm.doc.__islocal ? null : frm.doc.name;
+}
+
 // Kembaran muat_uang_muka() di form PDO: uang muka baru bisa dicari setelah namanya
 // dicentang, karena dokumennya dicocokkan lewat Employee milik nama tersebut.
 // Jenis di List Kas baru dimunculkan setelah PDO Type dipilih: Jenis yang sama bisa
 // dipakai beberapa PDO Type, jadi tanpa saringan ini centangannya ambigu.
-function muat_kas_nama_barang_pdo(selected_name, tipe_dialog) {
+function muat_kas_nama_barang_pdo(selected_name, tipe_dialog, payment_entry) {
 	let field = tipe_dialog.fields_dict.nama_barang;
 	if (!field) return;
 
@@ -2308,7 +2314,7 @@ function muat_kas_nama_barang_pdo(selected_name, tipe_dialog) {
 
 	frappe.xcall(
 		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
-		{ source_name: selected_name, pdo_type: pdo_type }
+		{ source_name: selected_name, pdo_type: pdo_type, payment_entry: payment_entry }
 	).then(selesai);
 }
 

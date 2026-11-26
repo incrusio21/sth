@@ -1117,6 +1117,13 @@ def kelompokkan_baris_pdo(doc, hanya_dari_pdo=False):
 			# Dana cadangan memang tidak berplafon.
 			continue
 
+		if row.tipe_pdo == "Kas" and row.pdo_child_name:
+			# Plafon Kas melekat ke baris List Kas, bukan ke orang: penerimanya
+			# bisa saja kebetulan tercatat di baris lain (mis. Tunjangan Pembantu),
+			# sehingga plafon orang itu yang terbaca. Batas baris Kas dijaga
+			# validate_sisa_baris_kas.
+			continue
+
 		if hanya_dari_pdo and not row.pdo_child_name:
 			continue
 
@@ -1161,6 +1168,60 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 			f"Akan dibayar sekarang: <b>Rp {frappe.format(total_doc_ini, 'Currency')}</b><br>"
 			f"Akan masuk ke non PDO sejumlah: <b>Rp {frappe.format(total_keseluruhan - total_harga_pdo, 'Currency')}</b><br>"
 		)
+
+
+def validate_sisa_baris_kas(doc, method=None):
+	"""Baris PV tipe Kas tidak boleh menarik lebih dari sisa baris List Kas-nya.
+
+	Baris List Kas boleh dibayar bertahap lewat beberapa PV, jadi batasnya sisa
+	plafon setelah PV lain (draft maupun submit). Kelebihan yang memang perlu
+	dibayar ditaruh di baris manual tanpa tautan PDO, yang saat submit masuk NON PDO.
+	"""
+	from sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional import (
+		bagikan_total_kas,
+		get_terbayar_kas_per_baris,
+		plafon_kas_per_baris,
+	)
+
+	cache = {}
+
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if row.tipe_pdo != "Kas" or not (row.no_pdo and row.pdo_child_name):
+			continue
+
+		if row.no_pdo not in cache:
+			pdo_doc = frappe.get_doc("Permintaan Dana Operasional", row.no_pdo)
+			cache[row.no_pdo] = (
+				plafon_kas_per_baris(pdo_doc),
+				get_terbayar_kas_per_baris(pdo_doc, exclude_pe=doc.name),
+			)
+
+		plafon, terbayar = cache[row.no_pdo]
+		anak = [n.strip() for n in row.pdo_child_name.split(",") if n.strip() in plafon]
+		if not anak:
+			continue
+
+		sisa = flt(sum(plafon[n] - flt(terbayar.get(n)) for n in anak), 2)
+
+		if flt(row.total, 2) > sisa:
+			frappe.throw(
+				_(
+					"Baris #{0} ({1}) melebihi sisa List Kas di PDO {2}.<br>"
+					"Plafon: <b>{3}</b><br>Sudah ditarik PV lain: <b>{4}</b><br>"
+					"Sisa: <b>{5}</b>, diisi: <b>{6}</b>.<br>"
+					"Kelebihannya taruh di baris baru tanpa tarik dari PDO (masuk NON PDO)."
+				).format(
+					row.idx,
+					row.item_barang or "",
+					row.no_pdo,
+					frappe.format_value(sum(plafon[n] for n in anak), {"fieldtype": "Currency"}),
+					frappe.format_value(sum(flt(terbayar.get(n)) for n in anak), {"fieldtype": "Currency"}),
+					frappe.format_value(max(sisa, 0), {"fieldtype": "Currency"}),
+					frappe.format_value(row.total, {"fieldtype": "Currency"}),
+				)
+			)
+
+		bagikan_total_kas(row.pdo_child_name, row.total, plafon, terbayar)
 
 
 def ada_baris_melebihi_plafon(doc):
