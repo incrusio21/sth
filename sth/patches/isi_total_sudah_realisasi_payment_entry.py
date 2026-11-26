@@ -23,8 +23,31 @@ def pastikan_field_total_sudah_realisasi_ada():
 
 	frappe.db.commit()
 
+	# Di bench migrate produksi sinkronisasi di atas tidak selalu sampai ke
+	# ALTER TABLE (26 Nov 2026: "Unknown column total_sudah_realisasi"), padahal
+	# lewat run-patch berhasil. Kolomnya dipastikan langsung dari
+	# information_schema, bukan dari cache daftar kolom.
+	if not kolom_ada("total_sudah_realisasi"):
+		frappe.db.sql_ddl(
+			"alter table `tabPayment Entry` add column if not exists "
+			"`total_sudah_realisasi` decimal(21,9) not null default 0"
+		)
+		print("Kolom total_sudah_realisasi ditambahkan langsung ke tabPayment Entry.")
+
 	cache = frappe.cache() if callable(frappe.cache) else frappe.cache
 	cache.hdel("table_columns", "tabPayment Entry")
+
+
+def kolom_ada(fieldname):
+	return bool(frappe.db.sql(
+		"""
+		select 1 from information_schema.columns
+		where table_schema = database()
+			and table_name = 'tabPayment Entry'
+			and column_name = %s
+		""",
+		fieldname,
+	))
 
 
 def execute():
