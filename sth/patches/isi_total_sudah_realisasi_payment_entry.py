@@ -1,7 +1,30 @@
+import json
+import os
+
 import frappe
 from frappe.utils import flt
 
 DOCTYPE = "Payment Entry"
+
+
+def pastikan_field_total_sudah_realisasi_ada():
+	"""Pasang Custom Field total_sudah_realisasi lebih dulu.
+
+	bench migrate menyinkronkan folder custom/ sesudah semua patch, sedangkan
+	field ini lahir bareng patch-nya. Tanpa ini langkah 1 selalu dilewati di
+	migrate pertama dan patch tercatat selesai. Tidak dijaga has_column():
+	daftar kolom dibaca dari cache.
+	"""
+	from frappe.modules.utils import sync_customizations_for_doctype
+
+	folder = frappe.get_app_path("sth", "finance_sth", "custom")
+	with open(os.path.join(folder, "payment_entry.json")) as f:
+		sync_customizations_for_doctype(json.load(f), folder)
+
+	frappe.db.commit()
+
+	cache = frappe.cache() if callable(frappe.cache) else frappe.cache
+	cache.hdel("table_columns", "tabPayment Entry")
 
 
 def execute():
@@ -18,10 +41,8 @@ def execute():
 	   Kas-nya melewati sisa List Kas, supaya approval-nya pindah ke jalur
 	   tambahan. PV tersubmit dibiarkan.
 	"""
-	if frappe.db.has_column(DOCTYPE, "total_sudah_realisasi"):
-		isi_total_sudah_realisasi()
-	else:
-		print("Kolom total_sudah_realisasi belum ada, langkah 1 dilewati.")
+	pastikan_field_total_sudah_realisasi_ada()
+	isi_total_sudah_realisasi()
 
 	if frappe.db.has_column(DOCTYPE, "realisasi_tambahan"):
 		tandai_draft_melebihi_sisa_kas()
