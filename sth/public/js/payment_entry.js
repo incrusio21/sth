@@ -1278,12 +1278,12 @@ function show_pdo_preview(pdoList) {
 
 function check_mandiri_kcm(frm) {
 	if (frm.doc.mode_of_payment !== 'Bank Draft') {
-		frm.set_df_property('mandiri_kcm', 'hidden', 1);
+		toggle_kcm_fields(frm, false);
 		return;
 	}
 
 	if (!frm.doc.paid_from) {
-		frm.set_df_property('mandiri_kcm', 'hidden', 1);
+		toggle_kcm_fields(frm, false);
 		return;
 	}
 
@@ -1295,13 +1295,28 @@ function check_mandiri_kcm(frm) {
 		callback: function (r) {
 			// Mode of Payment bisa sudah berganti selama request berjalan
 			if (frm.doc.mode_of_payment !== 'Bank Draft') {
-				frm.set_df_property('mandiri_kcm', 'hidden', 1);
+				toggle_kcm_fields(frm, false);
 				return;
 			}
 
-			let is_mandiri_kcm = r.message ? 0 : 1;
-			frm.set_df_property('mandiri_kcm', 'hidden', is_mandiri_kcm);
+			toggle_kcm_fields(frm, !!r.message);
 		}
+	});
+}
+
+function toggle_kcm_fields(frm, show_kcm) {
+	// Section KCM
+	frm.set_df_property('mandiri_kcm', 'hidden', show_kcm ? 0 : 1);
+
+	// Field alternatif rekening tujuan
+	const fields = [
+		'no_rekening_tujuan_2',
+		'nama_pemilik_rekening_2',
+		'unit_tujuan_2'
+	];
+
+	fields.forEach(field => {
+		frm.set_df_property(field, 'hidden', show_kcm ? 1 : 0);
 	});
 }
 
