@@ -721,13 +721,13 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, peng
 
 	sisa_kas = None
 	if nama_terpilih:
-		# Baris List Kas boleh direalisasi bertahap: yang ikut hanya baris yang
-		# masih punya sisa, dan nilainya sebesar sisa itu.
+		# Baris List Kas boleh direalisasi bertahap, nilainya sebesar sisa plafon.
+		# Yang sisanya habis tetap ikut dengan nilai 0, diisi manual.
 		terbayar_kas = get_terbayar_kas_per_baris(source_doc, exclude_pe)
 		sisa_kas = {row.name: sisa_baris_kas(row, terbayar_kas) for row in child_data}
 		child_data = [
 			row for row in child_data
-			if row.get(detail_field) in nama_terpilih and sisa_kas[row.name] > 0
+			if row.get(detail_field) in nama_terpilih
 		]
 
 		if not child_data:
@@ -772,7 +772,9 @@ def build_baris_realisasi(source_doc, tipe_pdo, ppd=None, nama_barang=None, peng
 			# realisasi bahan bakar jarang sama persis dengan plafonnya.
 			amount = 0
 		elif sisa_kas is not None:
-			amount = sisa_kas[row.name]
+			# Sisa yang sudah habis ditarik sebagai 0 — nominalnya diketik manual
+			# dan PV-nya ditandai Realisasi Tambahan.
+			amount = max(sisa_kas[row.name], 0)
 		else:
 			amount = getattr(row, amount_field, 0) or getattr(row, before_amount_field, 0)
 
@@ -1543,21 +1545,21 @@ def sisa_baris_kas(row, terbayar):
 
 @frappe.whitelist()
 def get_kas_pdo_type(source_name, payment_entry=None):
-	"""PDO Type di List Kas yang masih punya baris belum direalisasi.
+	"""PDO Type di List Kas yang punya baris berplafon.
 
 	Dipakai sebagai saringan pertama di dialog realisasi: Jenis-nya (Expense Claim
 	Type) baru muncul setelah PDO Type dipilih, karena Jenis yang sama bisa dipakai
-	oleh lebih dari satu PDO Type.
+	oleh lebih dari satu PDO Type. Baris yang sisanya sudah habis tetap ikut —
+	realisasi di atas plafon tetap boleh, ditandai Realisasi Tambahan.
 	"""
 	doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
-	terbayar = get_terbayar_kas_per_baris(doc, payment_entry)
 
 	urutan = []
 	for row in doc.pdo_kas:
 		if not row.type:
 			continue
 
-		if sisa_baris_kas(row, terbayar) > 0:
+		if plafon_baris_kas(row) > 0:
 			nilai = pdo_type_baris_kas(row) or KAS_TANPA_PDO_TYPE
 			if nilai not in urutan:
 				urutan.append(nilai)
@@ -1573,10 +1575,10 @@ def get_kas_pdo_type(source_name, payment_entry=None):
 
 @frappe.whitelist()
 def get_kas_nama_barang(source_name, pdo_type=None, payment_entry=None):
-	"""Jenis di List Kas yang belum direalisasi, disaring per PDO Type.
+	"""Jenis di List Kas, disaring per PDO Type, beserta sisa plafonnya.
 
-	Nilai rupiah tidak ikut ditampilkan di label — yang dipilih di sini Jenis-nya,
-	nominalnya sudah terbaca di List Kas.
+	Jenis yang sisanya sudah habis tetap ditampilkan (diberi keterangan) supaya
+	realisasi lanjutan di atas plafon masih bisa ditarik.
 	"""
 	doc = frappe.get_doc("Permintaan Dana Operasional", source_name)
 	terbayar = get_terbayar_kas_per_baris(doc, payment_entry)
@@ -1589,17 +1591,15 @@ def get_kas_nama_barang(source_name, pdo_type=None, payment_entry=None):
 		if not cocok_pdo_type(row, pdo_type):
 			continue
 
-		# Yang tersisa saja: baris yang baru dibayar sebagian tetap bisa dipilih.
-		amount = sisa_baris_kas(row, terbayar)
-		if amount <= 0:
+		if plafon_baris_kas(row) <= 0:
 			continue
 
-		rincian[row.type] = flt(rincian.get(row.type)) + amount
+		rincian[row.type] = flt(rincian.get(row.type)) + max(sisa_baris_kas(row, terbayar), 0)
 
 	return [
 		{
 			"value": nama,
-			"label": nama,
+			"label": nama if total > 0 else _("{0} (sisa habis)").format(nama),
 			"amount": total
 		}
 		for nama, total in rincian.items()
