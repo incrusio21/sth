@@ -8,6 +8,7 @@ import "./controllers/komoditi_editor";
 import "./controllers/queries";
 import "./lib/scale_connection";
 import "./override/utils";
+import "./override/add_to_locals";
 // import "./override/multi_select_dialog_override";
 import "./override/multi_select_override2";
 import "./override/multi_select_dialog_checkmap";
