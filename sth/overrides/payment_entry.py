@@ -1375,17 +1375,11 @@ def recalculate_pdo_outstanding(no_pdo):
 	if not pdo_amount:
 		return
 
-	# Sum all submitted Payment Entry amounts linked to this PDO
-	# via the Payment Voucher Kas PDO child table
-	result = frappe.db.sql("""
-		SELECT SUM(pe.paid_amount)
-		FROM `tabPayment Entry` pe
-		JOIN `tabPayment Voucher Kas PDO` pvk ON pvk.parent = pe.name
-		WHERE pvk.no_pdo = %s
-		AND pe.docstatus = 1
-	""", (no_pdo,), as_dict=False)
+	# Setiap PV dihitung sekali. Dulu JOIN ke tabel baris menjumlahkan paid_amount
+	# sekali per baris, sehingga PV berbaris banyak membuat outstanding minus.
+	from sth.custom.payment_entry import total_pv_lain_pdo
 
-	total_realisasi = result[0][0] or 0
+	total_realisasi = total_pv_lain_pdo(no_pdo)
 
 	outstanding = pdo_amount - total_realisasi
 

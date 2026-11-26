@@ -1300,6 +1300,67 @@ def validate_sisa_baris_kas(doc, method=None):
 		)
 
 
+def total_pv_lain_pdo(no_pdo, exclude_pe=None):
+	"""Jumlah paid_amount PV lain yang tersubmit dan menarik PDO ini.
+
+	Setiap PV dihitung sekali walau barisnya ke PDO yang sama lebih dari satu.
+	Dasarnya sama dengan outstanding_amount di PDO (recalculate_pdo_outstanding).
+	"""
+	return flt(frappe.db.sql(
+		"""
+		select sum(pe.paid_amount)
+		from `tabPayment Entry` pe
+		where pe.docstatus = 1
+			and pe.name != %(exclude)s
+			and exists (
+				select 1 from `tabPayment Voucher Kas PDO` baris
+				where baris.parent = pe.name
+					and baris.parenttype = 'Payment Entry'
+					and baris.no_pdo = %(no_pdo)s
+			)
+		""",
+		{"no_pdo": no_pdo, "exclude": exclude_pe or ""},
+	)[0][0])
+
+
+def validate_total_tidak_melebihi_outstanding_pdo(doc, method=None):
+	"""Tolak PV yang membuat realisasi PDO melewati Grand Total PDO.
+
+	Berbeda dengan plafon per penerima atau per baris List Kas (yang cukup
+	diperingatkan dan ditandai Realisasi Tambahan), batas ini keras: seluruh PV
+	yang menarik satu PDO tidak boleh melebihi Grand Total PDO-nya.
+	"""
+	pdo_list = []
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if row.no_pdo and row.no_pdo not in pdo_list:
+			pdo_list.append(row.no_pdo)
+
+	for no_pdo in pdo_list:
+		grand_total = flt(frappe.db.get_value("Permintaan Dana Operasional", no_pdo, "grand_total_pdo"))
+		sudah = total_pv_lain_pdo(no_pdo, doc.name)
+		sisa = flt(grand_total - sudah, 2)
+
+		if flt(doc.paid_amount, 2) <= sisa:
+			continue
+
+		frappe.throw(
+			_(
+				"Total PV melebihi outstanding PDO <b>{0}</b>.<br>"
+				"Grand Total PDO: <b>{1}</b><br>"
+				"Sudah ditarik PV lain: <b>{2}</b><br>"
+				"Outstanding: <b>{3}</b><br>"
+				"Paid Amount PV ini: <b>{4}</b>"
+			).format(
+				no_pdo,
+				frappe.format_value(grand_total, {"fieldtype": "Currency"}),
+				frappe.format_value(sudah, {"fieldtype": "Currency"}),
+				frappe.format_value(max(sisa, 0), {"fieldtype": "Currency"}),
+				frappe.format_value(doc.paid_amount, {"fieldtype": "Currency"}),
+			),
+			title=_("Melebihi Outstanding PDO"),
+		)
+
+
 def ada_baris_melebihi_plafon(doc):
 	"""True kalau ada penerima, atau baris List Kas, yang realisasinya melewati plafon di PDO."""
 	if baris_kas_melebihi_sisa(doc):
