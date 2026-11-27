@@ -137,19 +137,25 @@
 
     <tr>
       <td style="width: 85%;">Timbangan Bruto</td>
-      <td>{{ doc.get_formatted("bruto") }}</td>
+      <td>
+        {{ "{:,.2f}".format(doc.bruto * (doc.qty_do / doc.netto)) }}
+        <!-- {{ doc.get_formatted("bruto") }} -->
+      </td>
       <td>Kg</td>
     </tr>
 
     <tr>
       <td style="width: 85%;">Timbangan Tarra</td>
-      <td>{{ doc.get_formatted("tara") }}</td>
+      <td>
+        {{ "{:,.2f}".format(doc.tarra * (doc.qty_do / doc.netto)) }}
+        {{ doc.get_formatted("tara") }}
+      </td>
       <td>Kg</td>
     </tr>
 
     <tr style="border-top: 1px solid #000;">
       <td style="width: 85%;">Netto</td>
-      <td>{{ doc.get_formatted("netto") }}</td>
+      <td>{{ doc.get_formatted("qty_do") }}</td>
       <td>Kg</td>
     </tr>
   </table>
@@ -308,19 +314,25 @@
 
     <tr>
       <td style="width: 85%;">Timbangan Bruto</td>
-      <td>{{ doc.get_formatted("bruto") }}</td>
+      <td>
+        {{ "{:,.2f}".format(doc.bruto * (doc.qty_do / doc.netto)) }}
+        <!-- {{ doc.get_formatted("bruto") }} -->
+      </td>
       <td>Kg</td>
     </tr>
 
     <tr>
       <td style="width: 85%;">Timbangan Tarra</td>
-      <td>{{ doc.get_formatted("tara") }}</td>
+      <td>
+        {{ "{:,.2f}".format(doc.tarra * (doc.qty_do / doc.netto)) }}
+        <!-- {{ doc.get_formatted("tara") }} -->
+      </td>
       <td>Kg</td>
     </tr>
 
     <tr style="border-top: 1px solid #000;">
       <td style="width: 85%;">Netto</td>
-      <td>{{ doc.get_formatted("netto") }}</td>
+      <td>{{ doc.get_formatted("qty_do_2") }}</td>
       <td>Kg</td>
     </tr>
   </table>
