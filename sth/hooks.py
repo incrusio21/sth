@@ -416,6 +416,7 @@ doc_events = {
 			"sth.custom.payment_entry.validate_sisa_baris_kas",
 			"sth.custom.payment_entry.validate_total_tidak_melebihi_outstanding_pdo",
 			"sth.custom.payment_entry.set_total_sudah_realisasi",
+			"sth.custom.payment_entry.set_total_plafon_pdo",
 			"sth.custom.payment_entry.set_realisasi_tambahan",
 			"sth.custom.payment_entry.set_note_from_purchase_invoice",
 			"sth.custom.payment_entry.sync_note_nama_barang",

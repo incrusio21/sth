@@ -1224,6 +1224,74 @@ def set_total_sudah_realisasi(doc, method=None):
 	)
 
 
+def baris_pdo_cocok(tipe_pdo, pdo_row, item_barang):
+	"""Apakah baris PDO masuk ke kunci item_barang baris PV.
+
+	item_barang di PV berisi nama barang (Jenis) untuk Kas, atau isi kolom
+	Pengguna kalau ditarik per pengguna. Tanpa item_barang semua baris tipe itu
+	ikut, sama dengan hitung_total_sudah_realisasi.
+	"""
+	if not item_barang:
+		return True
+
+	if pdo_row.get("employee") == item_barang:
+		return True
+
+	return tipe_pdo == "Kas" and pdo_row.get("type") == item_barang
+
+
+def hitung_total_plafon_pdo(rows):
+	"""Total plafon di PDO untuk PDO + Tipe PDO + Item Barang yang ada di baris PV.
+
+	Pasangan dari Total Sudah Direalisasi: kuncinya sama, hanya sumbernya baris
+	PDO, bukan baris PV lain. Nilai revisi yang menang. Baris PDO dihitung sekali
+	walau cocok dengan beberapa kunci.
+	"""
+	from sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional import (
+		TIPE_MAPPING,
+	)
+
+	kunci = set()
+	for row in rows or []:
+		no_pdo = row.get("no_pdo")
+		tipe_pdo = row.get("tipe_pdo")
+		if no_pdo and tipe_pdo in TIPE_MAPPING:
+			kunci.add((no_pdo, tipe_pdo, row.get("item_barang") or None))
+
+	pdo_docs = {}
+	terhitung = {}
+	for no_pdo, tipe_pdo, item_barang in kunci:
+		if no_pdo not in pdo_docs:
+			pdo_docs[no_pdo] = frappe.get_doc("Permintaan Dana Operasional", no_pdo)
+
+		mapping = TIPE_MAPPING[tipe_pdo]
+		for pdo_row in pdo_docs[no_pdo].get(mapping["child_table"]) or []:
+			if not baris_pdo_cocok(tipe_pdo, pdo_row, item_barang):
+				continue
+			terhitung[pdo_row.name] = flt(pdo_row.get(mapping["amount_field"])) or flt(
+				pdo_row.get(mapping["before_amount_field"])
+			)
+
+	return flt(sum(terhitung.values()))
+
+
+@frappe.whitelist()
+def get_total_plafon_pdo(rows):
+	"""Untuk form: angka yang sama dengan set_total_plafon_pdo, sebelum disimpan."""
+	return hitung_total_plafon_pdo(frappe.parse_json(rows) or [])
+
+
+def set_total_plafon_pdo(doc, method=None):
+	if not doc.meta.has_field("total_plafon_pdo"):
+		return
+
+	if doc.tipe_transfer != "Realisasi PDO":
+		doc.total_plafon_pdo = 0
+		return
+
+	doc.total_plafon_pdo = hitung_total_plafon_pdo(doc.get("payment_voucher_kas_pdo") or [])
+
+
 def baris_kas_melebihi_sisa(doc):
 	"""Baris PV tipe Kas yang nilainya melewati sisa baris List Kas-nya.
 

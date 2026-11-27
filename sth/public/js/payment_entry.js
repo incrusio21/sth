@@ -2398,6 +2398,7 @@ function muat_total_sudah_realisasi(frm) {
 
 	if (frm.doc.tipe_transfer !== 'Realisasi PDO') {
 		if (flt(frm.doc.total_sudah_realisasi)) frm.set_value('total_sudah_realisasi', 0);
+		if (flt(frm.doc.total_plafon_pdo)) frm.set_value('total_plafon_pdo', 0);
 		return;
 	}
 
@@ -2411,6 +2412,20 @@ function muat_total_sudah_realisasi(frm) {
 	}).then(total => {
 		if (flt(total) !== flt(frm.doc.total_sudah_realisasi)) {
 			frm.set_value('total_sudah_realisasi', flt(total));
+		}
+	});
+
+	muat_total_plafon_pdo(frm, rows);
+}
+
+// Total plafon di PDO untuk PDO + Tipe PDO + Item Barang yang sama dengan baris
+// di PV ini, pasangan dari Total Sudah Direalisasi.
+function muat_total_plafon_pdo(frm, rows) {
+	if (!frm.fields_dict.total_plafon_pdo) return;
+
+	frappe.xcall('sth.custom.payment_entry.get_total_plafon_pdo', { rows: rows }).then(total => {
+		if (flt(total) !== flt(frm.doc.total_plafon_pdo)) {
+			frm.set_value('total_plafon_pdo', flt(total));
 		}
 	});
 }
