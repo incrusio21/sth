@@ -834,6 +834,8 @@ def set_no_rekening(doc, method):
 		or doc.bank_tujuan
 	)
 
+	sync_no_rekening_tujuan_2(doc)
+
 @frappe.whitelist()
 def get_no_rekening(party_type=None, party=None, 
 					paid_to=None, tipe_transfer=None, 
@@ -1115,6 +1117,13 @@ def kelompokkan_baris_pdo(doc, hanya_dari_pdo=False):
 			# Dana cadangan memang tidak berplafon.
 			continue
 
+		if row.tipe_pdo == "Kas" and row.pdo_child_name:
+			# Plafon Kas melekat ke baris List Kas, bukan ke orang: penerimanya
+			# bisa saja kebetulan tercatat di baris lain (mis. Tunjangan Pembantu),
+			# sehingga plafon orang itu yang terbaca. Batas baris Kas dijaga
+			# validate_sisa_baris_kas.
+			continue
+
 		if hanya_dari_pdo and not row.pdo_child_name:
 			continue
 
@@ -1161,8 +1170,202 @@ def validate_payment_voucher_kas_pdo(doc, method=None):
 		)
 
 
+def hitung_total_sudah_realisasi(rows, exclude_pe=None):
+	"""Total PV lain (tersubmit) untuk PDO + Tipe PDO + Item Barang yang sama.
+
+	Baris tanpa Item Barang (tipe selain Kas/Bahan Bakar) dicocokkan per PDO +
+	Tipe PDO saja. Baris PV dijumlahkan sekali walau cocok dengan beberapa kunci.
+	"""
+	kunci = set()
+	for row in rows or []:
+		no_pdo = row.get("no_pdo")
+		tipe_pdo = row.get("tipe_pdo")
+		if no_pdo and tipe_pdo:
+			kunci.add((no_pdo, tipe_pdo, row.get("item_barang") or None))
+
+	terhitung = {}
+	for no_pdo, tipe_pdo, item_barang in kunci:
+		kondisi_item = "and baris.item_barang = %(item)s" if item_barang else ""
+		for nama, total in frappe.db.sql(
+			"""
+			select baris.name, baris.total
+			from `tabPayment Voucher Kas PDO` baris
+			inner join `tabPayment Entry` pe on pe.name = baris.parent
+			where baris.parenttype = 'Payment Entry'
+				and baris.no_pdo = %(no_pdo)s
+				and baris.tipe_pdo = %(tipe)s
+				{0}
+				and pe.docstatus = 1
+				and pe.name != %(exclude)s
+			""".format(kondisi_item),
+			{"no_pdo": no_pdo, "tipe": tipe_pdo, "item": item_barang, "exclude": exclude_pe or ""},
+		):
+			terhitung[nama] = flt(total)
+
+	return flt(sum(terhitung.values()))
+
+
+@frappe.whitelist()
+def get_total_sudah_realisasi(rows, payment_entry=None):
+	"""Untuk form: angka yang sama dengan set_total_sudah_realisasi, sebelum disimpan."""
+	return hitung_total_sudah_realisasi(frappe.parse_json(rows) or [], payment_entry)
+
+
+def set_total_sudah_realisasi(doc, method=None):
+	if not doc.meta.has_field("total_sudah_realisasi"):
+		return
+
+	if doc.tipe_transfer != "Realisasi PDO":
+		doc.total_sudah_realisasi = 0
+		return
+
+	doc.total_sudah_realisasi = hitung_total_sudah_realisasi(
+		doc.get("payment_voucher_kas_pdo") or [], doc.name
+	)
+
+
+def baris_kas_melebihi_sisa(doc):
+	"""Baris PV tipe Kas yang nilainya melewati sisa baris List Kas-nya.
+
+	Baris List Kas boleh dibayar bertahap lewat beberapa PV; sisanya dihitung
+	setelah PV lain (draft maupun submit). Balikan: daftar dict per baris yang lewat.
+	"""
+	from sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional import (
+		bagikan_total_kas,
+		get_terbayar_kas_per_baris,
+		plafon_kas_per_baris,
+	)
+
+	cache = {}
+	hasil = []
+
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if row.tipe_pdo != "Kas" or not (row.no_pdo and row.pdo_child_name):
+			continue
+
+		if row.no_pdo not in cache:
+			pdo_doc = frappe.get_doc("Permintaan Dana Operasional", row.no_pdo)
+			cache[row.no_pdo] = (
+				plafon_kas_per_baris(pdo_doc),
+				get_terbayar_kas_per_baris(pdo_doc, exclude_pe=doc.name),
+			)
+
+		plafon, terbayar = cache[row.no_pdo]
+		anak = [n.strip() for n in row.pdo_child_name.split(",") if n.strip() in plafon]
+		if not anak:
+			continue
+
+		total_plafon = sum(plafon[n] for n in anak)
+		sudah = sum(flt(terbayar.get(n)) for n in anak)
+		sisa = flt(total_plafon - sudah, 2)
+
+		if flt(row.total, 2) > sisa:
+			hasil.append({
+				"row": row,
+				"plafon": total_plafon,
+				"sudah": sudah,
+				"sisa": max(sisa, 0),
+			})
+
+		bagikan_total_kas(row.pdo_child_name, row.total, plafon, terbayar)
+
+	return hasil
+
+
+def validate_sisa_baris_kas(doc, method=None):
+	"""Peringatkan baris PV Kas yang melewati sisa List Kas.
+
+	Tidak diblok: realisasi di atas plafon tetap boleh, tapi PV-nya ditandai
+	Realisasi Tambahan (lihat set_realisasi_tambahan) supaya lewat jalur approval
+	tambahan.
+	"""
+	for lewat in baris_kas_melebihi_sisa(doc):
+		row = lewat["row"]
+		frappe.msgprint(
+			_(
+				"Baris #{0} ({1}) melebihi sisa List Kas di PDO {2}.<br>"
+				"Plafon: <b>{3}</b><br>Sudah ditarik PV lain: <b>{4}</b><br>"
+				"Sisa: <b>{5}</b>, diisi: <b>{6}</b>.<br>"
+				"PV ini ditandai Realisasi Tambahan."
+			).format(
+				row.idx,
+				row.item_barang or "",
+				row.no_pdo,
+				frappe.format_value(lewat["plafon"], {"fieldtype": "Currency"}),
+				frappe.format_value(lewat["sudah"], {"fieldtype": "Currency"}),
+				frappe.format_value(lewat["sisa"], {"fieldtype": "Currency"}),
+				frappe.format_value(row.total, {"fieldtype": "Currency"}),
+			),
+			indicator="orange",
+		)
+
+
+def total_pv_lain_pdo(no_pdo, exclude_pe=None):
+	"""Jumlah paid_amount PV lain yang tersubmit dan menarik PDO ini.
+
+	Setiap PV dihitung sekali walau barisnya ke PDO yang sama lebih dari satu.
+	Dasarnya sama dengan outstanding_amount di PDO (recalculate_pdo_outstanding).
+	"""
+	return flt(frappe.db.sql(
+		"""
+		select sum(pe.paid_amount)
+		from `tabPayment Entry` pe
+		where pe.docstatus = 1
+			and pe.name != %(exclude)s
+			and exists (
+				select 1 from `tabPayment Voucher Kas PDO` baris
+				where baris.parent = pe.name
+					and baris.parenttype = 'Payment Entry'
+					and baris.no_pdo = %(no_pdo)s
+			)
+		""",
+		{"no_pdo": no_pdo, "exclude": exclude_pe or ""},
+	)[0][0])
+
+
+def validate_total_tidak_melebihi_outstanding_pdo(doc, method=None):
+	"""Tolak PV yang membuat realisasi PDO melewati Grand Total PDO.
+
+	Berbeda dengan plafon per penerima atau per baris List Kas (yang cukup
+	diperingatkan dan ditandai Realisasi Tambahan), batas ini keras: seluruh PV
+	yang menarik satu PDO tidak boleh melebihi Grand Total PDO-nya.
+	"""
+	pdo_list = []
+	for row in doc.get("payment_voucher_kas_pdo") or []:
+		if row.no_pdo and row.no_pdo not in pdo_list:
+			pdo_list.append(row.no_pdo)
+
+	for no_pdo in pdo_list:
+		grand_total = flt(frappe.db.get_value("Permintaan Dana Operasional", no_pdo, "grand_total_pdo"))
+		sudah = total_pv_lain_pdo(no_pdo, doc.name)
+		sisa = flt(grand_total - sudah, 2)
+
+		if flt(doc.paid_amount, 2) <= sisa:
+			continue
+
+		frappe.throw(
+			_(
+				"Total PV melebihi outstanding PDO <b>{0}</b>.<br>"
+				"Grand Total PDO: <b>{1}</b><br>"
+				"Sudah ditarik PV lain: <b>{2}</b><br>"
+				"Outstanding: <b>{3}</b><br>"
+				"Paid Amount PV ini: <b>{4}</b>"
+			).format(
+				no_pdo,
+				frappe.format_value(grand_total, {"fieldtype": "Currency"}),
+				frappe.format_value(sudah, {"fieldtype": "Currency"}),
+				frappe.format_value(max(sisa, 0), {"fieldtype": "Currency"}),
+				frappe.format_value(doc.paid_amount, {"fieldtype": "Currency"}),
+			),
+			title=_("Melebihi Outstanding PDO"),
+		)
+
+
 def ada_baris_melebihi_plafon(doc):
-	"""True kalau ada penerima yang realisasinya melewati plafon di PDO."""
+	"""True kalau ada penerima, atau baris List Kas, yang realisasinya melewati plafon di PDO."""
+	if baris_kas_melebihi_sisa(doc):
+		return True
+
 	for (no_pdo, tipe_pdo, penerima), total_doc_ini in kelompokkan_baris_pdo(doc, hanya_dari_pdo=True).items():
 		plafon = ambil_plafon_pdo(no_pdo, tipe_pdo, penerima)
 		if plafon is None:
@@ -1506,3 +1709,10 @@ def _uang_muka_terpakai(doc):
 			terpakai[nama] = flt(terpakai.get(nama)) + flt(item.get("amount"))
 
 	return terpakai
+
+
+def sync_no_rekening_tujuan_2(doc, method=None):
+	doc.no_rekening_tujuan_2 = doc.beneficary_account
+	doc.nama_pemilik_rekening_2 = doc.nama_pemilik_rekening
+	doc.unit_tujuan_2 = doc.unit_tujuan
+

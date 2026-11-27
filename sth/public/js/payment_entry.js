@@ -180,7 +180,6 @@ frappe.ui.form.on("Payment Entry", {
 				filters: {
 					reference_doc: ["=", null],
 					reference_name: ["=", null],
-					bank_account: ["=", frm.doc.bank_account]
 				}
 			};
 		});
@@ -1279,12 +1278,12 @@ function show_pdo_preview(pdoList) {
 
 function check_mandiri_kcm(frm) {
 	if (frm.doc.mode_of_payment !== 'Bank Draft') {
-		frm.set_df_property('mandiri_kcm', 'hidden', 1);
+		toggle_kcm_fields(frm, false);
 		return;
 	}
 
 	if (!frm.doc.paid_from) {
-		frm.set_df_property('mandiri_kcm', 'hidden', 1);
+		toggle_kcm_fields(frm, false);
 		return;
 	}
 
@@ -1296,13 +1295,28 @@ function check_mandiri_kcm(frm) {
 		callback: function (r) {
 			// Mode of Payment bisa sudah berganti selama request berjalan
 			if (frm.doc.mode_of_payment !== 'Bank Draft') {
-				frm.set_df_property('mandiri_kcm', 'hidden', 1);
+				toggle_kcm_fields(frm, false);
 				return;
 			}
 
-			let is_mandiri_kcm = r.message ? 0 : 1;
-			frm.set_df_property('mandiri_kcm', 'hidden', is_mandiri_kcm);
+			toggle_kcm_fields(frm, !!r.message);
 		}
+	});
+}
+
+function toggle_kcm_fields(frm, show_kcm) {
+	// Section KCM
+	frm.set_df_property('mandiri_kcm', 'hidden', show_kcm ? 0 : 1);
+
+	// Field alternatif rekening tujuan
+	const fields = [
+		'no_rekening_tujuan_2',
+		'nama_pemilik_rekening_2',
+		'unit_tujuan_2'
+	];
+
+	fields.forEach(field => {
+		frm.set_df_property(field, 'hidden', show_kcm ? 1 : 0);
 	});
 }
 
@@ -2081,7 +2095,7 @@ function show_realisasi_pdo_selector(frm) {
 				Promise.all([
 					frappe.xcall(
 						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_pdo_type',
-						{ source_name: selected_name }
+						{ source_name: selected_name, payment_entry: pe_tersimpan(frm) }
 					),
 					frappe.xcall(
 						'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_bahan_bakar_pengguna',
@@ -2129,7 +2143,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_
 				return { label: item.label, value: item.value };
 			})),
 			onchange: function () {
-				muat_kas_nama_barang_pdo(selected_name, tipe_dialog);
+				muat_kas_nama_barang_pdo(selected_name, tipe_dialog, pe_tersimpan(frm));
 			}
 		});
 
@@ -2247,7 +2261,7 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_
 
 			// Kalau PE sudah tersimpan, isi langsung — jangan buat PE baru
 			if (!frm.doc.__islocal) {
-				isi_baris_realisasi(frm, selected_name, args);
+				isi_baris_realisasi(frm, selected_name, Object.assign({ payment_entry: frm.doc.name }, args));
 				return;
 			}
 
@@ -2270,11 +2284,17 @@ function show_tipe_dialog(frm, selected_name, tipe_options, kas_pdo_type, bahan_
 	tipe_dialog.show();
 }
 
+// Nama PE kalau sudah tersimpan. Barisnya sendiri akan diganti, jadi server tidak
+// boleh menghitungnya sebagai bagian List Kas yang sudah terbayar.
+function pe_tersimpan(frm) {
+	return frm.doc.__islocal ? null : frm.doc.name;
+}
+
 // Kembaran muat_uang_muka() di form PDO: uang muka baru bisa dicari setelah namanya
 // dicentang, karena dokumennya dicocokkan lewat Employee milik nama tersebut.
 // Jenis di List Kas baru dimunculkan setelah PDO Type dipilih: Jenis yang sama bisa
 // dipakai beberapa PDO Type, jadi tanpa saringan ini centangannya ambigu.
-function muat_kas_nama_barang_pdo(selected_name, tipe_dialog) {
+function muat_kas_nama_barang_pdo(selected_name, tipe_dialog, payment_entry) {
 	let field = tipe_dialog.fields_dict.nama_barang;
 	if (!field) return;
 
@@ -2294,7 +2314,7 @@ function muat_kas_nama_barang_pdo(selected_name, tipe_dialog) {
 
 	frappe.xcall(
 		'sth.finance_sth.doctype.permintaan_dana_operasional.permintaan_dana_operasional.get_kas_nama_barang',
-		{ source_name: selected_name, pdo_type: pdo_type }
+		{ source_name: selected_name, pdo_type: pdo_type, payment_entry: payment_entry }
 	).then(selesai);
 }
 
@@ -2358,6 +2378,7 @@ function isi_baris_realisasi(frm, selected_name, args) {
 			// kalau cuma sebagian barang yang dicentang, sisanya belum dibayar.
 			frm.set_value('paid_amount', flt(r.message.total));
 			frm.set_value('received_amount', flt(r.message.total));
+			muat_total_sudah_realisasi(frm);
 		}
 	});
 }
@@ -2369,12 +2390,47 @@ function sum_payment_voucher_kas_pdo(frm) {
 	frm.set_value("received_amount", sum);
 }
 
+// Total PV lain yang sudah tersubmit untuk PDO + Tipe PDO + Item Barang yang sama
+// dengan baris di PV ini. Disimpan juga di server saat validate; di sini supaya
+// angkanya sudah terlihat sebelum disimpan.
+function muat_total_sudah_realisasi(frm) {
+	if (frm.doc.docstatus !== 0 || !frm.fields_dict.total_sudah_realisasi) return;
+
+	if (frm.doc.tipe_transfer !== 'Realisasi PDO') {
+		if (flt(frm.doc.total_sudah_realisasi)) frm.set_value('total_sudah_realisasi', 0);
+		return;
+	}
+
+	let rows = (frm.doc.payment_voucher_kas_pdo || [])
+		.filter(r => r.no_pdo && r.tipe_pdo)
+		.map(r => ({ no_pdo: r.no_pdo, tipe_pdo: r.tipe_pdo, item_barang: r.item_barang || null }));
+
+	frappe.xcall('sth.custom.payment_entry.get_total_sudah_realisasi', {
+		rows: rows,
+		payment_entry: frm.doc.__islocal ? null : frm.doc.name
+	}).then(total => {
+		if (flt(total) !== flt(frm.doc.total_sudah_realisasi)) {
+			frm.set_value('total_sudah_realisasi', flt(total));
+		}
+	});
+}
+
 frappe.ui.form.on("Payment Voucher Kas PDO", {
 	total(frm, cdt, cdn) {
 		sum_payment_voucher_kas_pdo(frm);
 	},
+	no_pdo(frm) {
+		muat_total_sudah_realisasi(frm);
+	},
+	tipe_pdo(frm) {
+		muat_total_sudah_realisasi(frm);
+	},
+	item_barang(frm) {
+		muat_total_sudah_realisasi(frm);
+	},
 	payment_voucher_kas_pdo_remove(frm) {
 		sum_payment_voucher_kas_pdo(frm);
+		muat_total_sudah_realisasi(frm);
 	}
 });
 
@@ -2391,6 +2447,11 @@ frappe.ui.form.on("Payment Voucher Kas PDO", {
 frappe.ui.form.on("Payment Entry", {
 	refresh(frm) {
 		atur_tombol_ppn_paid_amount(frm);
+		muat_total_sudah_realisasi(frm);
+	},
+
+	tipe_transfer(frm) {
+		muat_total_sudah_realisasi(frm);
 	},
 
 	paid_amount(frm) {
