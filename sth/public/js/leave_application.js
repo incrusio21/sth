@@ -5,6 +5,7 @@ frappe.ui.form.on("Leave Application", {
 	make_dashboard: function (frm) {
 		let leave_details;
 		let lwps;
+		let tanpa_allocation;
 
 		if (frm.doc.employee) {
 			frappe.call({
@@ -19,6 +20,7 @@ frappe.ui.form.on("Leave Application", {
 						leave_details = r.message["leave_allocation"];
 					}
 					lwps = r.message["lwps"];
+					tanpa_allocation = r.message["tanpa_allocation"];
 				},
 			});
 
@@ -32,9 +34,13 @@ frappe.ui.form.on("Leave Application", {
 			);
 			frm.dashboard.show();
 
-			let allowed_leave_types = Object.keys(leave_details);
+			// Employee tanpa alokasi sama sekali: leave_details kosong, jangan sampai
+			// Object.keys gagal dan filter leave_type tidak terpasang.
+			let allowed_leave_types = Object.keys(leave_details || {});
 			// lwps should be allowed for selection as they don't have any allocation
-			allowed_leave_types = allowed_leave_types.concat(lwps);
+			allowed_leave_types = allowed_leave_types.concat(lwps || []);
+			// Leave Type bercentang Tanpa Allocation selalu muncul.
+			allowed_leave_types = allowed_leave_types.concat(tanpa_allocation || []);
 
 			frm.set_query("leave_type", function () {
 				return {

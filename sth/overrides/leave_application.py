@@ -21,6 +21,48 @@ class LeaveApplication(LeaveApplication):
 		# frappe.throw(str(frappe.session))
 		pass
 
+	def validate_dates_across_allocation(self):
+		# Tipe Tanpa Allocation memang tidak punya Leave Allocation, jadi tidak
+		# ada periode alokasi yang perlu dicocokkan.
+		if is_tanpa_allocation(self.leave_type):
+			return
+
+		super().validate_dates_across_allocation()
+
+	def validate_balance_leaves(self):
+		if not is_tanpa_allocation(self.leave_type):
+			return super().validate_balance_leaves()
+
+		# Sama dengan HRMS minus cek saldo: total hari tetap dihitung, dan
+		# pengajuan yang seluruhnya jatuh di hari libur tetap ditolak.
+		if not (self.from_date and self.to_date):
+			return
+
+		from hrms.hr.doctype.leave_application.leave_application import get_number_of_leave_days
+
+		self.total_leave_days = get_number_of_leave_days(
+			self.employee,
+			self.leave_type,
+			self.from_date,
+			self.to_date,
+			self.half_day,
+			self.half_day_date,
+		)
+
+		if self.total_leave_days <= 0:
+			frappe.throw(
+				frappe._(
+					"The day(s) on which you are applying for leave are holidays. You need not apply for leave."
+				)
+			)
+
+
+def is_tanpa_allocation(leave_type):
+	if not leave_type or not frappe.get_meta("Leave Type").has_field("tanpa_allocation"):
+		return False
+
+	return bool(frappe.db.get_value("Leave Type", leave_type, "tanpa_allocation"))
+
 @frappe.whitelist()
 def get_leave_balance_on_custom(
 	employee: str,
@@ -113,8 +155,14 @@ def get_leave_details_custom(employee, date, for_salary_slip=False):
 	# is used in set query
 	lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
 
+	# Tipe Tanpa Allocation selalu bisa dipilih walau Employee tidak punya alokasinya.
+	tanpa_allocation = []
+	if frappe.get_meta("Leave Type").has_field("tanpa_allocation"):
+		tanpa_allocation = frappe.get_list("Leave Type", filters={"tanpa_allocation": 1}, pluck="name")
+
 	return {
 		"leave_allocation": leave_allocation,
 		"leave_approver": get_leave_approver(employee),
 		"lwps": lwp,
+		"tanpa_allocation": tanpa_allocation,
 	}
