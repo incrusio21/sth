@@ -58,7 +58,6 @@ def execute(filters=None):
 		WHERE
 			t.docstatus = 1
 			AND t.`type` = 'Dispatch'
-			AND t.name = 'TBG-20775'
 			{conditions}
 
 		UNION ALL
@@ -88,7 +87,6 @@ def execute(filters=None):
 		WHERE
 			t.docstatus = 1
 			AND t.`type` = 'Dispatch'
-			AND t.name = 'TBG-20775'
 			AND t.no_do_2 IS NOT NULL
 			AND t.no_do_2 != ''
 			{conditions}
