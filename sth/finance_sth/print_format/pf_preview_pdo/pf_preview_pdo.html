@@ -181,15 +181,6 @@ Kalau fiscal_year/months kosong, fallback ke bulan posting_date. #}
 
 {# ========================= BULAN DINAMIS ========================= #}
 
-{% set month_set = namespace(months=[]) %}
-{% for row in kas_data %}
-{% set m = row.period %}
-{% if m not in month_set.months %}
-{% set month_set.months = month_set.months + [m] %}
-{% endif %}
-{% endfor %}
-{% set months = month_set.months | sort %}
-
 {# [DIUBAH] current_month sekarang dari doc.fiscal_year + doc.months
 (sebelumnya dari doc.posting_date). Fallback ke posting_date kalau kosong. #}
 {% if doc.fiscal_year and doc.months in bulan_map %}
@@ -197,6 +188,25 @@ Kalau fiscal_year/months kosong, fallback ke bulan posting_date. #}
 {% else %}
 {% set current_month = frappe.utils.getdate(doc.posting_date).strftime('%Y-%m') %}
 {% endif %}
+
+{# [BARU] previous_month = 1 bulan sebelum current_month (aman untuk pergantian tahun) #}
+{% set cm_year = current_month[:4] | int %}
+{% set cm_num = current_month[5:7] | int %}
+{% if cm_num == 1 %}
+{% set previous_month = (cm_year - 1) ~ '-12' %}
+{% else %}
+{% set previous_month = cm_year ~ '-' ~ ('%02d' | format(cm_num - 1)) %}
+{% endif %}
+
+{# [DIUBAH] Hanya tampilkan current_month dan 1 bulan sebelumnya #}
+{% set month_set = namespace(months=[]) %}
+{% for row in kas_data %}
+{% set m = row.period %}
+{% if m in [previous_month, current_month] and m not in month_set.months %}
+{% set month_set.months = month_set.months + [m] %}
+{% endif %}
+{% endfor %}
+{% set months = month_set.months | sort %}
 
 {# ========================= MACRO HELPERS ========================= #}
 
