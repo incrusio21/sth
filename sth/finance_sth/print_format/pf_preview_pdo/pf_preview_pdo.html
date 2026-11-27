@@ -1,16 +1,11 @@
 {% set pdo_name = doc.name %}
 
 {# ========================= FETCH ALL DATA ========================= #}
-{# [DIUBAH] Semua query sekarang juga mengambil pdo.fiscal_year dan pdo.months
-(periode PDO) supaya kolom bulan bisa dikelompokkan berdasarkan periode,
-bukan tanggal posting. #}
 
 {% set balance_data = frappe.db.sql("""
 SELECT
 pdo.name,
 pdo.posting_date,
-pdo.fiscal_year,
-pdo.months,
 u.bank_account,
 u.account_for_cash
 FROM `tabPermintaan Dana Operasional` pdo
@@ -28,8 +23,6 @@ ORDER BY pdo.posting_date, pdo.name
 SELECT
 pdo.name,
 pdo.posting_date,
-pdo.fiscal_year,
-pdo.months,
 pdct.jenis,
 pdct.cash_bank_balance_adjustment as estimate_unit,
 pdct.revised_amount as estimate_revise
@@ -49,8 +42,6 @@ ORDER BY pdo.posting_date, pdo.name
 SELECT
 pdo.name,
 pdo.posting_date,
-pdo.fiscal_year,
-pdo.months,
 ect.custom_pdo_type as jenis_kas,
 e.employee_name as pengguna,
 d.designation_name as jabatan,
@@ -81,8 +72,6 @@ ORDER BY pdo.posting_date, pdo.name
 SELECT
 pdo.name,
 pdo.posting_date,
-pdo.fiscal_year,
-pdo.months,
 pdct.jenis,
 pdct.amount as estimate_unit,
 pdct.revised_amount as estimate_revise
@@ -102,8 +91,6 @@ ORDER BY pdo.posting_date, pdo.name
 SELECT
 pdo.name,
 pdo.posting_date,
-pdo.fiscal_year,
-pdo.months,
 pbbt.employee as pengguna,
 d.designation_name as jabatan,
 pbbt.plafon as plafon,
@@ -130,8 +117,6 @@ ORDER BY pdo.posting_date, pdo.name
 SELECT
 pdo.name,
 pdo.posting_date,
-pdo.fiscal_year,
-pdo.months,
 CASE
 WHEN ect.pengguna = 'Link' THEN e.first_name
 ELSE ppdt.employee
@@ -158,55 +143,17 @@ AND pdo.unit = ref.unit
 ORDER BY pdo.posting_date, pdo.name
 """, (pdo_name,), as_dict=1) %}
 
-{# ========================= PERIODE (FISCAL YEAR + MONTHS) ========================= #}
-{# [BARU] Peta nama bulan -> angka, dan kunci periode "YYYY-MM" untuk tiap baris.
-Kunci periode diambil dari fiscal_year + months milik PDO tersebut.
-Kalau fiscal_year/months kosong, fallback ke bulan posting_date. #}
-
-{% set bulan_map = {
-'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4,
-'Mei': 5, 'Juni': 6, 'Juli': 7, 'Agustus': 8,
-'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
-} %}
-
-{% for dataset in [balance_data, dc_saldo_data, kas_data, dc_data, bbm_data, pd_data] %}
-{% for row in dataset %}
-{% if row.fiscal_year and row.months in bulan_map %}
-{% set _ = row.update({'period': (row.fiscal_year | string)[:4] ~ '-' ~ ('%02d' | format(bulan_map[row.months]))}) %}
-{% else %}
-{% set _ = row.update({'period': row.posting_date.strftime('%Y-%m')}) %}
-{% endif %}
-{% endfor %}
-{% endfor %}
-
 {# ========================= BULAN DINAMIS ========================= #}
 
-{# [DIUBAH] current_month sekarang dari doc.fiscal_year + doc.months
-(sebelumnya dari doc.posting_date). Fallback ke posting_date kalau kosong. #}
-{% if doc.fiscal_year and doc.months in bulan_map %}
-{% set current_month = (doc.fiscal_year | string)[:4] ~ '-' ~ ('%02d' | format(bulan_map[doc.months])) %}
-{% else %}
-{% set current_month = frappe.utils.getdate(doc.posting_date).strftime('%Y-%m') %}
-{% endif %}
-
-{# [BARU] previous_month = 1 bulan sebelum current_month (aman untuk pergantian tahun) #}
-{% set cm_year = current_month[:4] | int %}
-{% set cm_num = current_month[5:7] | int %}
-{% if cm_num == 1 %}
-{% set previous_month = (cm_year - 1) ~ '-12' %}
-{% else %}
-{% set previous_month = cm_year ~ '-' ~ ('%02d' | format(cm_num - 1)) %}
-{% endif %}
-
-{# [DIUBAH] Hanya tampilkan current_month dan 1 bulan sebelumnya #}
 {% set month_set = namespace(months=[]) %}
 {% for row in kas_data %}
-{% set m = row.period %}
-{% if m in [previous_month, current_month] and m not in month_set.months %}
+{% set m = row.posting_date.strftime('%Y-%m') %}
+{% if m not in month_set.months %}
 {% set month_set.months = month_set.months + [m] %}
 {% endif %}
 {% endfor %}
 {% set months = month_set.months | sort %}
+{% set current_month = frappe.utils.getdate(doc.posting_date).strftime('%Y-%m') %}
 
 {# ========================= MACRO HELPERS ========================= #}
 
@@ -229,7 +176,7 @@ Dipakai untuk: dc_saldo_data, group_rows, bbm, pd
 {% for m in months %}
 {% set ns = namespace(est=0, rev=0) %}
 {% for row in rows %}
-{% if row.period == m %}
+{% if row.posting_date.strftime('%Y-%m') == m %}
 {% set ns.est = ns.est + (row[estimate_field] or 0) %}
 {% set ns.rev = ns.rev + (row[revise_field] or 0) %}
 {% endif %}
@@ -249,7 +196,7 @@ Dipakai untuk: Kas, Bank (dc_data)
 {% for m in months %}
 {% set ns = namespace(est=0, rev=0) %}
 {% for row in rows %}
-{% if row.jenis == jenis_value and row.period == m %}
+{% if row.jenis == jenis_value and row.posting_date.strftime('%Y-%m') == m %}
 {% set ns.est = ns.est + (row[estimate_field] or 0) %}
 {% set ns.rev = ns.rev + (row[revise_field] or 0) %}
 {% endif %}
@@ -284,8 +231,8 @@ Dipakai untuk: Kas, Bank (dc_data)
 {% set grouped = {} %}
 {% for row in group_rows %}
 {% if (row.pengguna or '') == pengguna and (row.jabatan or '') == jabatan %}
-{% if row.period %}
-{% set mk = row.period %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
 {% set cur_est = grouped.get(mk, {}).get('est', 0) %}
 {% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
 {% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
@@ -344,8 +291,8 @@ and (row.kebutuhan or '') == kebutuhan %}
 {% if (row.item_barang or '') == item_barang
 and (row.satuan or '') == satuan
 and (row.kebutuhan or '') == kebutuhan %}
-{% if row.period %}
-{% set mk = row.period %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
 {% set cur_est = grouped.get(mk, {}).get('est', 0) %}
 {% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
 {% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
@@ -413,8 +360,8 @@ and (row.keperluan or '') == keperluan %}
 {% if (row.pengguna or '') == pengguna
 and (row.jabatan or '') == jabatan
 and (row.keperluan or '') == keperluan %}
-{% if row.period %}
-{% set mk = row.period %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
 {% set cur_est = grouped.get(mk, {}).get('est', 0) %}
 {% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
 {% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
@@ -480,8 +427,8 @@ and (row.keperluan or '') == keperluan %}
 {% if (row.pengguna or '') == pengguna
 and (row.jenis or '') == jenis
 and (row.keperluan or '') == keperluan %}
-{% if row.period %}
-{% set mk = row.period %}
+{% if row.posting_date %}
+{% set mk = row.posting_date.strftime('%Y-%m') %}
 {% set cur_est = grouped.get(mk, {}).get('est', 0) %}
 {% set cur_rev = grouped.get(mk, {}).get('rev', 0) %}
 {% set _ = grouped.update({mk: {'est': cur_est + (row.estimate_unit or 0), 'rev': cur_rev + (row.estimate_revise or
@@ -522,7 +469,7 @@ and (row.keperluan or '') == keperluan %}
 {% for m in months %}
 {% set ns = namespace(est=0, rev=0) %}
 {% for row in dataset %}
-{% if row.period == m %}
+{% if row.posting_date and row.posting_date.strftime('%Y-%m') == m %}
 {% set ns.est = ns.est + (row.estimate_unit or 0) %}
 {% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
 {% endif %}
@@ -609,12 +556,12 @@ and (row.keperluan or '') == keperluan %}
     <p>PERMINTAAN DANA OPERASIONAL (PDO)</p>
     <table class="table_info">
       <tr>
-        <td style="padding-left: 0!important;">UNIT</td>
+        <td>UNIT</td>
         <td>:</td>
         <td>{{ doc.unit or '' }}</td>
       </tr>
       <tr>
-        <td style="padding-left: 0!important;">PERIODE</td>
+        <td>PERIODE</td>
         <td>:</td>
         <td>{{ doc.fiscal_year or '' }} - {{ doc.months or '' }}</td>
       </tr>
@@ -645,10 +592,9 @@ and (row.keperluan or '') == keperluan %}
       {% endfor %}
     </tr>
 
-    {# [DIUBAH] balance_map sekarang berkunci periode (row.period), bukan bulan posting_date #}
     {% set balance_map = {} %}
     {% for row in balance_data %}
-    {% set m = row.period %}
+    {% set m = row.posting_date.strftime('%Y-%m') %}
     {% if m not in balance_map %}
     {% set coh = get_account_balance(row.account_for_cash, row.posting_date) %}
     {% set cib = get_account_balance(row.bank_account, row.posting_date) %}
@@ -703,7 +649,7 @@ and (row.keperluan or '') == keperluan %}
       {# Ambil nilai penyesuaian saldo untuk bulan ini #}
       {% set ns_saldo = namespace(est=0, rev=0) %}
       {% for row in dc_saldo_data %}
-      {% if row.period == m %}
+      {% if row.posting_date.strftime('%Y-%m') == m %}
       {% set ns_saldo.est = ns_saldo.est + (row.estimate_unit or 0) %}
       {% set ns_saldo.rev = ns_saldo.rev + (row.estimate_revise or 0) %}
       {% endif %}
@@ -744,7 +690,7 @@ and (row.keperluan or '') == keperluan %}
       {% for m in months %}
       {% set ns = namespace(est=0, rev=0) %}
       {% for row in dc_data %}
-      {% if row.period == m %}
+      {% if row.posting_date.strftime('%Y-%m') == m %}
       {% set ns.est = ns.est + (row.estimate_unit or 0) %}
       {% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
       {% endif %}
@@ -876,7 +822,7 @@ and (row.keperluan or '') == keperluan %}
     {% set ns = namespace(est=0, rev=0) %}
     {% for dataset in [kas_data, dc_data, bbm_data, pd_data] %}
     {% for row in dataset %}
-    {% if row.period == m %}
+    {% if row.posting_date.strftime('%Y-%m') == m %}
     {% set ns.est = ns.est + (row.estimate_unit or 0) %}
     {% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
     {% endif %}
@@ -888,7 +834,7 @@ and (row.keperluan or '') == keperluan %}
     {% for m in months %}
     {% set ns = namespace(est=0, rev=0) %}
     {% for row in dc_data %}
-    {% if row.period == m %}
+    {% if row.posting_date.strftime('%Y-%m') == m %}
     {% set ns.est = ns.est + (row.estimate_unit or 0) %}
     {% set ns.rev = ns.rev + (row.estimate_revise or 0) %}
     {% endif %}
@@ -920,7 +866,7 @@ and (row.keperluan or '') == keperluan %}
 
       {% set ns_saldo = namespace(est=0, rev=0) %}
       {% for row in dc_saldo_data %}
-      {% if row.period == m %}
+      {% if row.posting_date.strftime('%Y-%m') == m %}
       {% set ns_saldo.est = ns_saldo.est + (row.estimate_unit or 0) %}
       {% set ns_saldo.rev = ns_saldo.rev + (row.estimate_revise or 0) %}
       {% endif %}
