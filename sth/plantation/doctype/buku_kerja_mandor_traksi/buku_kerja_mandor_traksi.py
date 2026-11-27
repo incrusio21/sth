@@ -134,7 +134,11 @@ class BukuKerjaMandorTraksi(BukuKerjaMandorController):
 			tk.last_name = tk.name
 
 			tk.premi_heavy_equipment = 0
-			if kategori_alat.get("premi"):
+			premi = kategori_alat.get("premi", {"unit": self.unit})
+			if not premi:
+				premi = kategori_alat.get("premi", {"unit": False})
+
+			if premi:
 				selisih_kmhm = tk.kmhm_akhir - kmhm_akhir
 				last_end = 0
 				for premi in kategori_alat.premi:
