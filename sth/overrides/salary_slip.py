@@ -829,6 +829,7 @@ class SalarySlip(SalarySlip):
 			self._get_7th_day_off_attendance_days() if emp_doc.designation == "NS30" else 0
 		)
 		self.total_hari_dinas = self._get_dinas_days()
+		self.attendance_tidak_present_include_gaji_pokok = self._get_tanpa_allocation_attendance_days()
 
 		end_date = getdate(self.actual_end_date)
 		last_day_of_month = monthrange(end_date.year, end_date.month)[1]
@@ -996,6 +997,33 @@ class SalarySlip(SalarySlip):
 		)
 
 		return query.run()[0][0]
+
+	def _get_tanpa_allocation_attendance_days(self) -> float:
+		"""Jumlah Attendance yang Leave Type-nya bercentang Tanpa Allocation.
+
+		Tidak masuk (mis. Sakit R Jalan / R Inap) tapi gaji pokoknya tetap
+		dibayar. Status sengaja tidak disaring: Attendance lama yang status-nya
+		masih berisi nama Leave Type tetap terhitung lewat leave_type-nya.
+		"""
+		if not frappe.get_meta("Leave Type").has_field("tanpa_allocation"):
+			return 0
+
+		Attendance = frappe.qb.DocType("Attendance")
+		LeaveType = frappe.qb.DocType("Leave Type")
+		query = (
+			frappe.qb.from_(Attendance)
+			.inner_join(LeaveType)
+			.on(Attendance.leave_type == LeaveType.name)
+			.select(Count("*"))
+			.where(
+				(Attendance.attendance_date.between(self.actual_start_date, self.actual_end_date))
+				& (Attendance.employee == self.employee)
+				& (Attendance.docstatus == 1)
+				& (LeaveType.tanpa_allocation == 1)
+			)
+		)
+
+		return query.run()[0][0] or 0
 
 	def _get_dinas_days(self) -> float:
 		PDinas = frappe.qb.DocType("Travel Request")

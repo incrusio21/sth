@@ -35,6 +35,29 @@ COMPANY_DARI_SINGKATAN = {
 }
 
 
+STATUS_ATTENDANCE = ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"]
+
+
+def normalisasi_status(doc):
+	"""Status berisi nama Leave Type diubah jadi On Leave + leave_type.
+
+	EPCS mengambil daftar statusnya dari return_status_absensi, yang memuat nama
+	Leave Type, lalu kadang mengirim nama itu sebagai `status`. Kalau dibiarkan,
+	Attendance tersimpan dengan status di luar pilihan dan leave_type-nya bisa
+	tidak sama dengan yang dimaksud.
+
+	Nama di status yang menang atas leave_type kiriman: itulah status yang
+	dipilih di EPCS. Status yang bukan Leave Type dibiarkan, supaya
+	validate_status yang menolaknya.
+	"""
+	if doc.status in STATUS_ATTENDANCE or not doc.status:
+		return
+
+	if frappe.db.exists("Leave Type", doc.status):
+		doc.leave_type = doc.status
+		doc.status = "On Leave"
+
+
 def normalisasi_company(nilai):
 	"""Ubah singkatan company kiriman API jadi nama Company yang sebenarnya."""
 	if isinstance(nilai, str):
@@ -193,8 +216,16 @@ def hapus_catatan_bkm(bkm):
 
 def perbarui_attendance(nama, kiriman):
 	"""Perbarui Attendance yang sudah ada dengan isi kiriman API."""
+	from erpnext.controllers.status_updater import validate_status
+
 	doc = frappe.get_doc("Attendance", nama)
 	timpa_field_dari_api(doc, kiriman)
+
+	# Jalur Attendance tersubmit di bawah memakai db_update(), tanpa validate().
+	# Tanpa ini status kiriman ulang yang berisi nama Leave Type tersimpan apa
+	# adanya (HR-ATT-2026-86259: status "Sakit R Inap").
+	normalisasi_status(doc)
+	validate_status(doc.status, STATUS_ATTENDANCE)
 
 	if doc.docstatus == 0:
 		# masih draft: lewat submit biasa, validate-nya ikut jalan seperti
@@ -247,12 +278,9 @@ class Attendance(Attendance):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 
-		if self.status not in ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"]:
-			leave_type = self.status
-			self.status = "On Leave"
-			self.leave_type = leave_type
+		normalisasi_status(self)
 
-		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "7th Day Off"])
+		validate_status(self.status, STATUS_ATTENDANCE)
 		# validate_active_employee(self.employee)
 		self.validate_attendance_date()
 		# Dulu Montir, Danru, dan Satpam (NS08, NS29, NS30) dikecualikan di sini,

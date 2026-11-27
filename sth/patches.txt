@@ -38,6 +38,9 @@ sth.patches.hapus_kelas_bpjs_kesehatan_employee
 sth.patches.isi_total_sudah_realisasi_payment_entry #2026-11-26 pasang field dulu
 sth.patches.isi_total_plafon_pdo_payment_entry
 sth.patches.centang_tanpa_allocation_sakit
+sth.patches.perbaiki_status_attendance_leave_type
+sth.patches.gaji_pokok_tanpa_allocation_pkwt
+sth.patches.resave_salary_slip_draft_pkwt
 # bersihkan_coa_stasiun_grup belum didaftarkan: akun penggantinya masih dipastikan
 # user, karena fallback COA Stasiun jatuh ke 7211001 GAJI (STAF) sedangkan yang
 # dipakai selama ini 7211002 UPAH (NON-STAF).
