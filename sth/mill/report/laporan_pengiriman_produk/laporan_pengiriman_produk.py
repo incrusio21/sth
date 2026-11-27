@@ -9,28 +9,91 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = []
 
+	# query = frappe.db.sql(f"""
+	# 	SELECT 
+	# 	t.ticket_number as no_tiket,
+	# 	do.sales_order as no_kontrak,
+	# 	so.no_kontrak_external as no_kontrak_external,
+	# 	t.do_no as no_do,
+	# 	t.nama_barang as produk,
+	# 	t.driver_name as supir,
+	# 	t.no_polisi as no_pol,
+	# 	s.supplier_name as transportir,
+	# 	t.posting_date as tanggal,
+	# 	t.weight_in_time as jam_masuk,
+	# 	t.weight_out_time as jam_keluar,
+	# 	t.tara as first_weight,
+	# 	t.bruto as second_weight,
+	# 	t.netto as netto
+	# 	FROM `tabTimbangan` as t
+	# 	LEFT JOIN `tabDelivery Order` as do ON do.name = t.do_no
+	# 	LEFT JOIN `tabSales Order` as so ON so.name = do.sales_order
+	# 	LEFT JOIN `tabSupplier` as s ON s.kode_supplier = t.transportir
+	# 	WHERE t.docstatus = 1 AND t.`type` = 'Dispatch' {conditions}
+	# 	ORDER BY t.nama_barang, t.posting_date;
+	# """, filters, as_dict=True)
 	query = frappe.db.sql(f"""
-		SELECT 
-		t.ticket_number as no_tiket,
-		do.sales_order as no_kontrak,
-		so.no_kontrak_external as no_kontrak_external,
-		t.do_no as no_do,
-		t.nama_barang as produk,
-		t.driver_name as supir,
-		t.no_polisi as no_pol,
-		s.supplier_name as transportir,
-		t.posting_date as tanggal,
-		t.weight_in_time as jam_masuk,
-		t.weight_out_time as jam_keluar,
-		t.tara as first_weight,
-		t.bruto as second_weight,
-		t.netto as netto
-		FROM `tabTimbangan` as t
-		LEFT JOIN `tabDelivery Order` as do ON do.name = t.do_no
-		LEFT JOIN `tabSales Order` as so ON so.name = do.sales_order
-		LEFT JOIN `tabSupplier` as s ON s.kode_supplier = t.transportir
-		WHERE t.docstatus = 1 AND t.`type` = 'Dispatch' {conditions}
-		ORDER BY t.nama_barang, t.posting_date;
+		SELECT
+			t.ticket_number AS no_tiket,
+			do.sales_order AS no_kontrak,
+			so.no_kontrak_external AS no_kontrak_external,
+			t.do_no AS no_do,
+			t.nama_barang AS produk,
+			t.driver_name AS supir,
+			t.no_polisi AS no_pol,
+			s.supplier_name AS transportir,
+			t.posting_date AS tanggal,
+			t.weight_in_time AS jam_masuk,
+			t.weight_out_time AS jam_keluar,
+			t.tara * (t.qty_do/t.netto) AS first_weight,
+			t.bruto * (t.qty_do/t.netto) AS second_weight,
+			t.qty_do AS netto
+		FROM `tabTimbangan` AS t
+		LEFT JOIN `tabDelivery Order` AS do
+			ON do.name = t.do_no
+		LEFT JOIN `tabSales Order` AS so
+			ON so.name = do.sales_order
+		LEFT JOIN `tabSupplier` AS s
+			ON s.kode_supplier = t.transportir
+		WHERE
+			t.docstatus = 1
+			AND t.`type` = 'Dispatch'
+			AND t.name = 'TBG-20775'
+			{conditions}
+
+		UNION ALL
+
+		SELECT
+			t.ticket_number AS no_tiket,
+			do2.sales_order AS no_kontrak,
+			so2.no_kontrak_external AS no_kontrak_external,
+			t.no_do_2 AS no_do,
+			t.nama_barang AS produk,
+			t.driver_name AS supir,
+			t.no_polisi AS no_pol,
+			s.supplier_name AS transportir,
+			t.posting_date AS tanggal,
+			t.weight_in_time AS jam_masuk,
+			t.weight_out_time AS jam_keluar,
+			t.tara * (t.qty_do_2/t.netto) AS first_weight,
+			t.bruto * (t.qty_do_2/t.netto) AS second_weight,
+			t.qty_do_2 AS netto
+		FROM `tabTimbangan` AS t
+		LEFT JOIN `tabDelivery Order` AS do2
+			ON do2.name = t.no_do_2
+		LEFT JOIN `tabSales Order` AS so2
+			ON so2.name = do2.sales_order
+		LEFT JOIN `tabSupplier` AS s
+			ON s.kode_supplier = t.transportir
+		WHERE
+			t.docstatus = 1
+			AND t.`type` = 'Dispatch'
+			AND t.name = 'TBG-20775'
+			AND t.no_do_2 IS NOT NULL
+			AND t.no_do_2 != ''
+			{conditions}
+
+		ORDER BY produk, tanggal;
 	""", filters, as_dict=True)
 
 	current_produk = None
