@@ -1,73 +1,130 @@
-{% set unit = frappe.get_doc("Unit", doc.unit) %}
-{% set do = frappe.get_doc("Delivery Order", doc.do_no) %}
-{% set user = frappe.db.get_value("Employee", {"user_id": doc.owner}, "*") or frappe.get_doc("User", doc.owner) %}
+<style>
+  .page-1 {
+    page-break-after: {
+      % if doc.no_do_2 %
+    }
 
-<div>
+    always {
+      % else %
+    }
+
+    auto {
+      % endif %
+    }
+
+    ;
+  }
+
+  .page-2 {
+    page-break-before: always;
+    page-break-after: auto;
+  }
+
+  .table_referensi td {
+    padding: 3px 5px;
+  }
+
+  .table_timbangan td {
+    padding: 5px;
+  }
+</style>
+
+<!-- ==================== HALAMAN 1 ==================== -->
+
+<div class="page-1">
+
   <table>
     <tr>
       <td>
-        <p style="font-weight: bold;margin-top: 0!important;">{{ doc.company or '' }}</p>
-        <p style="margin-top: 0!important;">{{ unit.address or '' }}</p>
+        <p style="font-weight: bold; margin-top: 0!important;">
+          {{ doc.company or '' }}
+        </p>
+
+        <p style="margin-top: 0!important;">
+          {{ frappe.db.get_value("Unit", doc.unit, "address") or '' }}
+        </p>
       </td>
+
       <td>
         <p style="text-align: left;">
-          Kepada YTH <br>
-          {{ do.customer_name or '' }} <br>
+          Kepada YTH<br>
+          {{ frappe.db.get_value("Delivery Order", doc.do_no, "customer_name") or '' }}<br>
           di Tempat
         </p>
       </td>
-    <tr>
+    </tr>
   </table>
 
   <div style="text-align: center;">
-    <p style="text-decoration: underline;">Surat Pengantar Crude Palm Oil [CPO]</p>
+    <p style="text-decoration: underline;">
+      Surat Pengantar Crude Palm Oil [CPO]
+    </p>
+
     <p>{{ doc.name or '' }}</p>
   </div>
 
   <p>Referensi Kami:</p>
+
   <table class="table_referensi">
     <tr>
       <td>No. Kontrak</td>
-      <td>{{ do.sales_order or '' }}</td>
+      <td>
+        {{ frappe.db.get_value("Delivery Order", doc.do_no, "sales_order") or '' }}
+      </td>
       <td>No.Polisi</td>
       <td>{{ doc.no_polisi or '' }}</td>
     </tr>
+
     <tr>
       <td>No. DO</td>
       <td>{{ doc.do_no or '' }}</td>
       <td>Driver</td>
       <td>{{ doc.driver_name or '' }}</td>
     </tr>
+
     <tr>
       <td>No. SP</td>
       <td>-</td>
       <td>No. SIM</td>
       <td>{{ doc.license_number or '' }}</td>
     </tr>
+
     <tr>
       <td></td>
       <td></td>
       <td>Tujuan</td>
-      <td>{{ do.customer_name or '' }}</td>
+      <td>
+        {{ frappe.db.get_value("Delivery Order", doc.do_no, "customer_name") or '' }}
+      </td>
     </tr>
+
     <tr>
       <td>No.Segel</td>
       <td>-</td>
       <td>Transportir</td>
       <td>{{ doc.transportir or '' }}</td>
     </tr>
+
     <tr>
       <td></td>
       <td></td>
       <td>Masuk</td>
-      <td>{{ doc.get_formatted("posting_date") }} {{ doc.get_formatted("weight_in_time") }}</td>
+      <td>
+        {{ doc.get_formatted("posting_date") }}
+        {{ doc.get_formatted("weight_in_time") }}
+      </td>
     </tr>
+
     <tr>
       <td>Moisture</td>
       <td>6.96%</td>
       <td>Keluar</td>
-      <td>{{ doc.get_formatted("posting_date") }} {{ doc.get_formatted("weight_out_time") }}</td>
+      <td>
+        {{ doc.get_formatted("posting_date") }}
+        {{ doc.get_formatted("weight_out_time") }}
+      </td>
     </tr>
+
     <tr>
       <td>Dirt</td>
       <td>7.02%</td>
@@ -77,16 +134,19 @@
   </table>
 
   <table class="table_timbangan" style="border-top: 1px solid #000; border-bottom: 1px solid #000;">
+
     <tr>
       <td style="width: 85%;">Timbangan Bruto</td>
       <td>{{ doc.get_formatted("bruto") }}</td>
       <td>Kg</td>
     </tr>
+
     <tr>
       <td style="width: 85%;">Timbangan Tarra</td>
       <td>{{ doc.get_formatted("tara") }}</td>
       <td>Kg</td>
     </tr>
+
     <tr style="border-top: 1px solid #000;">
       <td style="width: 85%;">Netto</td>
       <td>{{ doc.get_formatted("netto") }}</td>
@@ -98,22 +158,214 @@
     <tr>
       <td style="text-align: center;">
         <p>Dikirim Oleh</p>
-        <p style="margin-top: 2rem;">{{ user.first_name or user.full_name }}</p>
+
+        <p style="margin-top: 2rem;">
+          {{ frappe.db.get_value("Employee", {"user_id": doc.owner}, "first_name") or frappe.get_doc("User",
+          doc.owner).full_name }}
+        </p>
+
         <hr style="width: 10rem; border-top: 1px solid #000!important;">
-        <p>{{ user.designation or '' }}</p>
+
+        <p>
+          {{ frappe.db.get_value("Employee", {"user_id": doc.owner}, "designation") or '' }}
+        </p>
       </td>
+
       <td style="text-align: center;">
         <p>Disetujui Oleh</p>
+
         <p style="margin-top: 2rem;">-</p>
+
         <hr style="width: 10rem; border-top: 1px solid #000!important;">
+
         <p>-</p>
       </td>
+
       <td style="text-align: center;">
         <p>Diterima Oleh</p>
-        <p style="margin-top: 2rem;">{{ doc.driver_name or '' }}</p>
+
+        <p style="margin-top: 2rem;">
+          {{ doc.driver_name or '' }}
+        </p>
+
         <hr style="width: 10rem; border-top: 1px solid #000!important;">
+
         <p>Driver</p>
       </td>
     </tr>
   </table>
+
 </div>
+
+
+<!-- ==================== HALAMAN 2 ==================== -->
+
+{% if doc.no_do_2 %}
+
+<div class="page-2">
+
+  <table>
+    <tr>
+      <td>
+        <p style="font-weight: bold; margin-top: 0!important;">
+          {{ doc.company or '' }}
+        </p>
+
+        <p style="margin-top: 0!important;">
+          {{ frappe.db.get_value("Unit", doc.unit, "address") or '' }}
+        </p>
+      </td>
+
+      <td>
+        <p style="text-align: left;">
+          Kepada YTH<br>
+          {{ frappe.db.get_value("Delivery Order", doc.no_do_2, "customer_name") or '' }}<br>
+          di Tempat
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <div style="text-align: center;">
+    <p style="text-decoration: underline;">
+      Surat Pengantar Crude Palm Oil [CPO]
+    </p>
+
+    <p>{{ doc.name or '' }}</p>
+  </div>
+
+  <p>Referensi Kami:</p>
+
+  <table class="table_referensi">
+    <tr>
+      <td>No. Kontrak</td>
+      <td>
+        {{ frappe.db.get_value("Delivery Order", doc.no_do_2, "sales_order") or '' }}
+      </td>
+      <td>No.Polisi</td>
+      <td>{{ doc.no_polisi or '' }}</td>
+    </tr>
+
+    <tr>
+      <td>No. DO</td>
+      <td>{{ doc.no_do_2 or '' }}</td>
+      <td>Driver</td>
+      <td>{{ doc.driver_name or '' }}</td>
+    </tr>
+
+    <tr>
+      <td>No. SP</td>
+      <td>-</td>
+      <td>No. SIM</td>
+      <td>{{ doc.license_number or '' }}</td>
+    </tr>
+
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Tujuan</td>
+      <td>
+        {{ frappe.db.get_value("Delivery Order", doc.no_do_2, "customer_name") or '' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>No.Segel</td>
+      <td>-</td>
+      <td>Transportir</td>
+      <td>{{ doc.transportir or '' }}</td>
+    </tr>
+
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Masuk</td>
+      <td>
+        {{ doc.get_formatted("posting_date") }}
+        {{ doc.get_formatted("weight_in_time") }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>Moisture</td>
+      <td>6.96%</td>
+      <td>Keluar</td>
+      <td>
+        {{ doc.get_formatted("posting_date") }}
+        {{ doc.get_formatted("weight_out_time") }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>Dirt</td>
+      <td>7.02%</td>
+      <td>Sisa DO</td>
+      <td>{{ doc.sisa_do or '' }} Kg</td>
+    </tr>
+  </table>
+
+  <table class="table_timbangan" style="border-top: 1px solid #000; border-bottom: 1px solid #000;">
+
+    <tr>
+      <td style="width: 85%;">Timbangan Bruto</td>
+      <td>{{ doc.get_formatted("bruto") }}</td>
+      <td>Kg</td>
+    </tr>
+
+    <tr>
+      <td style="width: 85%;">Timbangan Tarra</td>
+      <td>{{ doc.get_formatted("tara") }}</td>
+      <td>Kg</td>
+    </tr>
+
+    <tr style="border-top: 1px solid #000;">
+      <td style="width: 85%;">Netto</td>
+      <td>{{ doc.get_formatted("netto") }}</td>
+      <td>Kg</td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <td style="text-align: center;">
+        <p>Dikirim Oleh</p>
+
+        <p style="margin-top: 2rem;">
+          {{ frappe.db.get_value("Employee", {"user_id": doc.owner}, "first_name") or frappe.get_doc("User",
+          doc.owner).full_name }}
+        </p>
+
+        <hr style="width: 10rem; border-top: 1px solid #000!important;">
+
+        <p>
+          {{ frappe.db.get_value("Employee", {"user_id": doc.owner}, "designation") or '' }}
+        </p>
+      </td>
+
+      <td style="text-align: center;">
+        <p>Disetujui Oleh</p>
+
+        <p style="margin-top: 2rem;">-</p>
+
+        <hr style="width: 10rem; border-top: 1px solid #000!important;">
+
+        <p>-</p>
+      </td>
+
+      <td style="text-align: center;">
+        <p>Diterima Oleh</p>
+
+        <p style="margin-top: 2rem;">
+          {{ doc.driver_name or '' }}
+        </p>
+
+        <hr style="width: 10rem; border-top: 1px solid #000!important;">
+
+        <p>Driver</p>
+      </td>
+    </tr>
+  </table>
+
+</div>
+
+{% endif %}
